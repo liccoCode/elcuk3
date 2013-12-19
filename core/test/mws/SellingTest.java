@@ -24,7 +24,7 @@ public class SellingTest extends UnitTest {
         try {
             List<Selling> sellings = new ArrayList<Selling>();
             Selling s = Selling.findById("10HTCEVO3D-1900S|A_DE|1");
-            s.aps.feedProductType = "ComputerDriveOrStorage";//ConsumerElectronics
+            s.aps.feedProductType = "ConsumerElectronics";//ConsumerElectronics
             s.aps.standerPrice = (float)999.99;
             String [] keyFetures = StringUtils.splitByWholeSeparator(s.aps.keyFetures, Webs.SPLIT);
             for(String str : keyFetures) {
@@ -35,7 +35,7 @@ public class SellingTest extends UnitTest {
                 s.aps.rbns.add(str);
             }
             sellings.add(s);
-            File file = new File("/Users/mac/computers.txt");
+            File file = new File("/Users/mac/consumerElectronics.txt");
             BufferedWriter bwriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "ISO8859-1"));
             String temp = Selling.generateFeedTemplateFile(sellings);
             bwriter.write(temp);
