@@ -1,5 +1,6 @@
 package jobs.perform;
 
+import com.google.common.collect.Maps;
 import helper.Constant;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
@@ -12,7 +13,6 @@ import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public class SubmitFeedJob extends BaseJob {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void doit() {
         /**
@@ -47,11 +48,9 @@ public class SubmitFeedJob extends BaseJob {
             feed.feedId = mwsFeedRequest.submitFeed(file, MWSFeeds.T.UPLOAD_PRODUCT);
             feed.save();
 
-            Map<String, Object> args = new HashMap<String, Object>();
-            args.put("account.id", account.id);
-            args.put("feed.id", feed.id);
-            args.put("feedId", feed.feedId);
-            GJob.perform(GetFeedJob.class, args);
+            Map nextContext = Maps.newHashMap(getContext());
+            nextContext.put("feedId", feed.feedId);
+            GJob.perform(GetFeedJob.class, nextContext);
         } finally {
             FileUtils.deleteQuietly(file);
         }

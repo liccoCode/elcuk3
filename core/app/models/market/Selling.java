@@ -393,6 +393,7 @@ public class Selling extends GenericModel {
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("account.id", this.account.id);
         args.put("feed.id", feed.id);
+        args.put("sellingId", this.sellingId);
         GJob.perform(SubmitFeedJob.class, args);
         return this;
     }

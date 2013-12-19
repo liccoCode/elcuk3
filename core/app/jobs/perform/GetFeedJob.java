@@ -56,6 +56,7 @@ public class GetFeedJob extends BaseJob {
                 for(String line : reportLines) {
                     if(!StringUtils.containsIgnoreCase(line, "error")) {
                         //TODO Report 处理成功后需要处理.
+                        GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
                     }
                 }
             } catch(IOException e) {
