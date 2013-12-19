@@ -88,17 +88,6 @@ public class Products extends Controller {
         render(product, s);
     }
 
-<<<<<<< HEAD
-    // TODO 删除权限
-//    @Check("products.saleamazonlisting")
-    public static void saleAmazonListing(Selling s, Product pro) {
-        if(s != null) {
-            List<Selling> sellings = new ArrayList<Selling>();
-            sellings.add(s);
-            renderText(Selling.generateFeedTemplateFile(sellings));
-        }
-    }
-=======
     @Check("products.saleamazonlisting")
     public static void saleAmazonListing(Selling s) {
         try {
@@ -109,8 +98,6 @@ public class Products extends Controller {
             renderJSON(new Ret(e.getMessage()));
         }
     }
-
->>>>>>> wyatt/market
 
     /**
      * ========== Product ===============
