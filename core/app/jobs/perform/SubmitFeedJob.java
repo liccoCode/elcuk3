@@ -1,10 +1,19 @@
 package jobs.perform;
 
+import helper.Constant;
 import jobs.driver.BaseJob;
+import jobs.driver.GJob;
 import models.market.Account;
+import models.market.Feed;
 import mws.v2.MWSFeeds;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import play.utils.FastRuntimeException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 用来提交 MWS 的 Feed 的任务
@@ -16,11 +25,34 @@ public class SubmitFeedJob extends BaseJob {
 
     @Override
     public void doit() {
-        Account acc = Account.findById(NumberUtils.toLong(getContext().get("accountId").toString()));
+        /**
+         * 1. 获取账户和提交的 Feed
+         * 2. 向 MWS 提交 Feed
+         */
+        if(getContext().get("account.id") == null)
+            throw new FastRuntimeException("没有提交 account.id 信息, 不知道是哪个销售账户上架.");
+        if(getContext().get("feed.id") == null)
+            throw new FastRuntimeException("没有提交 feed.id 信息, 没有提交的 Feed 数据");
 
-        MWSFeeds feedRequest = new MWSFeeds(acc);
-        String feedId = feedRequest.submitFeed(null, MWSFeeds.T.UPLOAD_PRODUCT);
-        if(StringUtils.isNotBlank(feedId)) {
+        Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
+        Feed feed = Feed.findById(NumberUtils.toLong(getContext().get("feed.id").toString()));
+        File file = new File(String.format("%s/%s", Constant.TMP, "feed_" + feed.id));
+        try {
+            try {
+                FileUtils.write(file, feed.content, "ISO8859-1");
+            } catch(IOException e) {
+                throw new FastRuntimeException(e.getMessage());
+            }
+            MWSFeeds mwsFeedRequest = new MWSFeeds(account);
+            feed.feedId = mwsFeedRequest.submitFeed(file, MWSFeeds.T.UPLOAD_PRODUCT);
+            feed.save();
+
+            Map<String, Object> args = new HashMap<String, Object>();
+            args.put("account.id", account.id);
+            args.put("feed.id", feed.id);
+            GJob.perform(GetFeedJob.class, args);
+        } finally {
+            FileUtils.deleteQuietly(file);
         }
     }
 }

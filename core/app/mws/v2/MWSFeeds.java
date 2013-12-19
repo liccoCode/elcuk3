@@ -26,7 +26,7 @@ public class MWSFeeds {
         UPLOAD_PRODUCT {
             @Override
             public String toString() {
-                return "_POST_PRODUCT_DATA_";
+                return "_POST_FLAT_FILE_LISTINGS_DATA_";
             }
         }
     }
