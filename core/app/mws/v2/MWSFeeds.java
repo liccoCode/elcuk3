@@ -1,6 +1,7 @@
 package mws.v2;
 
 import com.amazonaws.mws.MarketplaceWebService;
+import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.GetFeedSubmissionResultRequest;
 import com.amazonaws.mws.model.GetFeedSubmissionResultResponse;
 import com.amazonaws.mws.model.SubmitFeedRequest;
@@ -61,20 +62,22 @@ public class MWSFeeds {
     /**
      * 通过 FeedId 获取下载好的 Feed 结果
      */
-    public File getFeedResult(String feedId) {
+    public File getFeedResult(String feedId) throws MarketplaceWebServiceException {
         MarketplaceWebService service = mws.MWSReports.client(account);
         GetFeedSubmissionResultRequest req = new GetFeedSubmissionResultRequest()
                 .withMerchant(account.merchantId)
                 .withFeedSubmissionId(feedId);
         try {
-            GetFeedSubmissionResultResponse resp = service.getFeedSubmissionResult(req);
             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
             req.setFeedSubmissionResultOutputStream(byteBuffer);
+            GetFeedSubmissionResultResponse resp = service.getFeedSubmissionResult(req);
 
             String path = String.format(Constant.E_DATE + "/%s", feedId);
             File file = new File(path);
-            FileUtils.write(file, byteBuffer.toString("UTF-8"));
+            FileUtils.writeByteArrayToFile(file, byteBuffer.toByteArray());
             return file;
+        } catch(MarketplaceWebServiceException e) {
+            throw e;
         } catch(Exception e) {
             throw new RuntimeException(e);
         }

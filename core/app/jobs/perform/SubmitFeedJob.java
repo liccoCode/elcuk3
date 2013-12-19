@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 用来提交 MWS 的 Feed 的任务
+ * 用来提交 MWS 的 Feed 的任务                                                                                            {}
  * User: wyatt
  * Date: 12/17/13
  * Time: 3:50 PM
@@ -50,6 +50,7 @@ public class SubmitFeedJob extends BaseJob {
             Map<String, Object> args = new HashMap<String, Object>();
             args.put("account.id", account.id);
             args.put("feed.id", feed.id);
+            args.put("feedId", feed.feedId);
             GJob.perform(GetFeedJob.class, args);
         } finally {
             FileUtils.deleteQuietly(file);
