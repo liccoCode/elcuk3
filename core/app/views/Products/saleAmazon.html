@@ -1,0 +1,100 @@
+#{extends 'main_full.html'/}
+#{set 'moreStyles'}
+    #{stylesheet 'market.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'component/amazon.coffee'/}
+    #{script 'products/saleAmazon.coffee'/}
+#{/set}
+<div id='check_modal' class="modal hide fade">
+  <div class="modal-header">
+    <h3>使用 <span id="upc_num"></span> 上架的 Selling</h3>
+  </div>
+  <div class="modal-body">
+    <p class="text-error">当前 SKU 为: ${product.sku}</p>
+
+    <div class="innder-modal"></div>
+  </div>
+  <div class="modal-footer">
+    <a href="#" id='check_cancel' data-dismiss='modal' class="btn">取消</a>
+    <a href="#" id="check_apply" class="btn btn-primary">应用</a>
+  </div>
+  <blockquote class="template">
+    <p class='check_title'></p>
+    <small class='check_id'></small>
+  </blockquote>
+</div>
+
+
+<div class="row-fluid">
+  <div class="btn-toolbar" id="btns">
+    <div class="btn-group">
+      <button class="btn btn-success" id="submitSale" data-disable-with='提交请求中...'>提交 Feed 创建 Selling</button>
+    </div>
+  </div>
+
+#{form @Products.saleAmazonListing(), class: 'form-horizontal', id: 'saleAmazonForm'}
+  <div class="span10">
+      #{text_field id:'title', name: 's.aps.title', label: '标题', value: '' /}
+  </div>
+  <div class="span5">
+      #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku/}
+      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: '' /}
+      #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: 'EasyAcc' /}
+      #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: 'EasyAcc'/}
+      #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: '' /}
+      #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期',  value: '2013-12-01' /}
+      #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes', value: '' /}
+
+      #{checkbox_wrap id:'giftwrap', label: '附加选项'}
+        <label class="checkbox">
+          <input type="checkbox" id='giftwrap' checked name="s.aps.isGiftWrap" value="true">
+          GiftWrap
+        </label>
+      #{/checkbox_wrap}
+  </div>
+  <div class="span5">
+      #{select_field id:'account', name: 's.account.id', label: '上架账户', items: accs /}
+      #{select_field id:'market', name: 's.market', label:'市场', items: models.market.M.values() /}
+      #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
+      #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: '0' /}
+      #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优化销售价格(DE 没有)', value: '' /}
+      #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
+      #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+  </div>
+
+  <div class="span10">
+      #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: ''/}
+      #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: '' /}
+      #{text_field id:'bulletPoint3', name: 's.aps.keyFeturess[2]', label: '', value: ''/}
+      #{text_field id:'bulletPoint4', name: 's.aps.keyFeturess[3]', label: '', value: ''/}
+      #{text_field id:'bulletPoint5', name: 's.aps.keyFeturess[4]', label: '', value: ''/}
+
+      #{text_field id:'searchTerms1', name: 's.aps.searchTermss[0]', label: 'SearchTerms 1~5', value: ''/}
+      #{text_field id:'searchTerms2', name: 's.aps.searchTermss[1]', label: '', value: ''/}
+      #{text_field id:'searchTerms3', name: 's.aps.searchTermss[2]', label: '', value: ''/}
+      #{text_field id:'searchTerms4', name: 's.aps.searchTermss[3]', label: '', value: ''/}
+      #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: ''/}
+
+      #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: '' /}
+  </div>
+  <div class="offset1 span9" id="previewDesc"></div>
+#{/form}
+</div>
+
+
+<script type="text/template" id="tsp-show-template">
+  <h3>Product Desc</h3>
+
+  <p><%= tsp['p'][0] %></p>
+
+  <h3>Technical</h3>
+
+  <p><%= tsp['t'].join('<br>') %></p>
+
+  <h3>Search Terms</h3>
+
+  <p><%= tsp['s'].join('<br>') %></p>
+
+  <p>点击关闭, 点击 "放大镜" 重复查看</p>
+</script>

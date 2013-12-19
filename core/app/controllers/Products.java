@@ -88,7 +88,6 @@ public class Products extends Controller {
         render(product, s);
     }
 
-
     @Check("products.saleamazonlisting")
     public static void saleAmazonListing(Selling s) {
         try {
