@@ -32,9 +32,9 @@ public class GTs {
     public static String render(String name, Map<String, Object> args) {
         VirtualFile file = null;
         file = VirtualFile.fromRelativePath(String.format(BASE_PATH, name + ".html"));
-        if( ! file.exists()) {
+        if(!file.exists()) {
             file = VirtualFile.fromRelativePath(String.format(BASE_PATH, name + ".txt"));
-            if( ! file.exists()) {
+            if(!file.exists()) {
                 throw new TemplateNotFoundException("模板未找到，请检查模板文件名正确性");
             }
         }
