@@ -1,6 +1,5 @@
 package jobs.perform;
 
-import com.google.common.collect.Maps;
 import helper.Constant;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
@@ -16,7 +15,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * 用来提交 MWS 的 Feed 的任务                                                                                            {}
+ * 用来提交 MWS 的 Feed 的任务
  * User: wyatt
  * Date: 12/17/13
  * Time: 3:50 PM
@@ -48,7 +47,7 @@ public class SubmitFeedJob extends BaseJob {
             feed.feedId = mwsFeedRequest.submitFeed(file, MWSFeeds.T.UPLOAD_PRODUCT);
             feed.save();
 
-            Map nextContext = Maps.newHashMap(getContext());
+            Map nextContext = getContext();
             nextContext.put("feedId", feed.feedId);
             GJob.perform(GetFeedJob.class, nextContext);
         } finally {
