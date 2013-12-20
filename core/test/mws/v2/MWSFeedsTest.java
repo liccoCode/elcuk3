@@ -4,6 +4,7 @@ import com.amazonaws.mws.MarketplaceWebServiceException;
 import factory.FactoryBoy;
 import models.market.Account;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -21,6 +22,7 @@ public class MWSFeedsTest extends UnitTest {
         FactoryBoy.deleteAll();
     }
 
+    @Ignore
     @Test
     public void testGetFeedResult() throws MarketplaceWebServiceException {
         Account account = FactoryBoy.build(Account.class, "de");
