@@ -145,7 +145,12 @@ public class Sellings extends Controller {
                 s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
                 s.save();
             } else { // 远程更新
-                s.deploy();
+                //10SMI9300-2200S|A_UK|1
+                if(StringUtils.contains(s.sellingId, "|A_DE|2")) {
+                    s.deploy();
+                } else {
+                    throw new FastRuntimeException("DE 市场之外的通过 Feed 更新 Listing 功能即将到来...");
+                }
             }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

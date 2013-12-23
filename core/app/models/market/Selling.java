@@ -287,6 +287,8 @@ public class Selling extends GenericModel {
      * 9. quantity
      * 10. 等待添加
      * </pre>
+     * <p/>
+     * TODO: Selling 的 deploy 更新方法, 需要修改为通过 Feed 的方式去处理, 手动模拟上架的方式需要取消.
      *
      * @throws play.utils.FastRuntimeException
      *          deploy 方法失败会抛出异常
