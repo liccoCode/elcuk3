@@ -1,10 +1,13 @@
 package jobs.perform;
 
+import ext.LinkHelper;
+import helper.DBUtils;
+import helper.HTTP;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
-import models.market.Listing;
 import models.market.Selling;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.common.joda.time.DateTime;
@@ -51,11 +54,10 @@ public class GetAsinJob extends BaseJob {
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         String sellingId = getContext().get("sellingId").toString();
         Selling selling = Selling.findById(sellingId);
-        //Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
-        File file = new File("/Users/mac/Desktop/AllListings.html");
-        Document doc = null;
+        Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
+        File file = new File(String.format("%s/%s", "/Users/mac/Desktop", "url" + System.currentTimeMillis()));
         try {
-            doc = Jsoup.parse(file, "UTF-8", "https://sellercentral.amazon.de/myi/search/ProductSummary?keyword=0609132508257");
+            FileUtils.write(file, doc.outerHtml(), "ISO8859-1");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,11 +77,11 @@ public class GetAsinJob extends BaseJob {
                      */
                     if (StringUtils.containsIgnoreCase(selling.merchantSKU, merchantSKU)) {
                         selling.asin = asin;
-                        Listing lst = Listing.findById(Listing.lid(selling.asin, selling.market));
-                        if (lst != null) {
-                            lst.asin = asin;
-                            lst.save();
-                        }
+                        DBUtils.execute(String.format("update Listing set listingId='%s' , asin='%s' where listingId='%s'",
+                                String.format("%s_%s", asin, selling.market.toString()),
+                                asin,
+                                String.format("%s_%s", selling.aps.upc, selling.market.toString())
+                        ));
                         selling.save();
                     }
                 }
