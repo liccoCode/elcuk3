@@ -1,12 +1,11 @@
 package jobs.perform;
 
-import ext.LinkHelper;
-import helper.HTTP;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
 import models.market.Listing;
 import models.market.Selling;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.common.joda.time.DateTime;
 import org.jsoup.Jsoup;
@@ -14,6 +13,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.utils.FastRuntimeException;
+
+import java.io.File;
 import java.util.Map;
 
 
@@ -50,25 +51,37 @@ public class GetAsinJob extends BaseJob {
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         String sellingId = getContext().get("sellingId").toString();
         Selling selling = Selling.findById(sellingId);
-        Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
+        //Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
+        File file = new File("/Users/mac/Desktop/AllListings.html");
+        Document doc = null;
+        try {
+            doc = Jsoup.parse(file, "UTF-8", "https://sellercentral.amazon.de/myi/search/ProductSummary?keyword=0609132508257");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Map nextContext = getContext();
         String asin = null;
         try {
-            Elements trResults = doc.select(".data-display manageTable").select("tr");
-            for (Element tr : trResults) {
-                asin = tr.select("td.content > a").first().text();
+            Elements tables = doc.select("table.manageTable");
+            Elements trs = tables.select("tr");
+            for (Element tr : trs) {
+                String merchantSKU = tr.select("td:eq(4)").text();
+                asin = tr.select("td:eq(5)").select("a").text();
                 if (asin.length() == 10) {
                     /**
-                     * 1. 更新 Listing 的Id (更改为 [asin]_[market])
-                     * 2. 更新 Selling 的 ASIN 值
+                     * 1. 验证抓取的 SKU 与数据库内的 Selling 对象的 SKU 是否匹配
+                     * 2. 更新 Listing 的Id (更改为 [asin]_[market])
+                     * 3. 更新 Selling 的 ASIN 值
                      */
-                    selling.asin = asin;
-                    Listing lst = Listing.findById(Listing.lid(selling.asin, selling.market));
-                    if (lst != null) {
-                        lst.asin = asin;
-                        lst.save();
+                    if (StringUtils.containsIgnoreCase(selling.merchantSKU, merchantSKU)) {
+                        selling.asin = asin;
+                        Listing lst = Listing.findById(Listing.lid(selling.asin, selling.market));
+                        if (lst != null) {
+                            lst.asin = asin;
+                            lst.save();
+                        }
+                        selling.save();
                     }
-                    selling.save();
                 }
             }
         } catch (Exception e) {
