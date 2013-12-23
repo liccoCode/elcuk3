@@ -327,7 +327,7 @@ public class Selling extends GenericModel {
      *
      * @return
      */
-    public Selling patchSkuToListing(String productType) {
+    public Selling patchSkuToListing() {
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
@@ -337,7 +337,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
         if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
         if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
-        if(StringUtils.isBlank(productType)) Webs.error("所属模板的 Product Type 必须填写");
+        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("所属模板的 Product Type 必须填写");
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
