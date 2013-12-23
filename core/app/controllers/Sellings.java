@@ -141,7 +141,7 @@ public class Sellings extends Controller {
             if(!remote) { // 非远程, 本地更新
                 s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
                 s.save();
-                renderJSON(J.G(s));
+                renderJSON(new Ret(true, s.sellingId));
             } else { // 远程更新
                 //10SMI9300-2200S|A_UK|1
                 if(StringUtils.contains(s.sellingId, "|A_DE|2")) {

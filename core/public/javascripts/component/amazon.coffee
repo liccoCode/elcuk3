@@ -23,7 +23,6 @@ $ ->
     noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
 
   valid_length = (element) ->
-    console.log(element.getAttribute('id'))
     if element.getAttribute('id').indexOf('bulletPoint') > -1
         2000
       else if element.getAttribute('id').indexOf('searchTerms') > -1
