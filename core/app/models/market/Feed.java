@@ -49,4 +49,8 @@ public class Feed extends Model {
         return feed.save();
     }
 
+    public static Feed updateSellingFeed(String content, Selling selling) {
+        return newSellingFeed(content, selling);
+    }
+
 }

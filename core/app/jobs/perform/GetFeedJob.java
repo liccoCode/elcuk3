@@ -38,6 +38,10 @@ public class GetFeedJob extends BaseJob {
         if(getContext().get("feed.id") == null)
             throw new FastRuntimeException("没有提交 feed.id 信息");
 
+        String action = "create";
+        if(getContext().get("action") != null)
+            action = "update";
+
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         String feedId = getContext().get("feedId").toString();
 
@@ -55,7 +59,8 @@ public class GetFeedJob extends BaseJob {
                 feed.save();
                 for(String line : reportLines) {
                     if(!StringUtils.containsIgnoreCase(line, "error")) {
-                        //TODO Report 处理成功后需要处理.
+                        // TODO Report 处理成功后需要处理.
+                        // TODO 如果 action 为 update 则完成 Feed 获取就结束
                         GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
                     }
                 }

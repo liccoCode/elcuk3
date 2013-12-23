@@ -5,10 +5,7 @@ import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.embedded.AmazonProps;
-import models.market.Account;
-import models.market.Listing;
-import models.market.M;
-import models.market.Selling;
+import models.market.*;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -144,10 +141,12 @@ public class Sellings extends Controller {
             if(!remote) { // 非远程, 本地更新
                 s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
                 s.save();
+                renderJSON(J.G(s));
             } else { // 远程更新
                 //10SMI9300-2200S|A_UK|1
                 if(StringUtils.contains(s.sellingId, "|A_DE|2")) {
-                    s.deploy();
+                    Feed feed = s.deploy();
+                    renderJSON(feed);
                 } else {
                     throw new FastRuntimeException("DE 市场之外的通过 Feed 更新 Listing 功能即将到来...");
                 }
@@ -155,7 +154,6 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(J.G(s));
     }
 
     /**
