@@ -2,13 +2,12 @@ package mws.v2;
 
 import com.amazonaws.mws.MarketplaceWebService;
 import com.amazonaws.mws.MarketplaceWebServiceException;
-import com.amazonaws.mws.model.GetFeedSubmissionResultRequest;
-import com.amazonaws.mws.model.GetFeedSubmissionResultResponse;
-import com.amazonaws.mws.model.SubmitFeedRequest;
-import com.amazonaws.mws.model.SubmitFeedResponse;
+import com.amazonaws.mws.model.*;
+import com.google.common.collect.Lists;
 import helper.Constant;
 import models.market.Account;
 import models.market.JobRequest;
+import models.market.M;
 import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -45,10 +44,21 @@ public class MWSFeeds {
      * 直接通过 Account 来提交 Feed
      */
     public String submitFeed(File feed, T feedType) {
+        return submitFeed(feed, feedType, null);
+    }
+
+    /**
+     * 直接通过 Account 来提交 Feed, 指定哪一个市场
+     */
+    public String submitFeed(File feed, T feedType, M.MID marketId) {
         MarketplaceWebService service = mws.MWSReports.client(account);
         SubmitFeedRequest req = new SubmitFeedRequest()
                 .withMerchant(account.merchantId)
                 .withFeedType(feedType.toString());
+        // 如果为空, 默认为账户注册的市场
+        if(marketId != null) {
+            req.withMarketplaceIdList(new IdList(Lists.newArrayList(marketId.name())));
+        }
 
         try {
             req.setFeedContent(new FileInputStream(feed));

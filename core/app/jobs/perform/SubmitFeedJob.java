@@ -5,6 +5,7 @@ import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
 import models.market.Feed;
+import models.market.M;
 import mws.v2.MWSFeeds;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -15,7 +16,13 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * 用来提交 MWS 的 Feed 的任务
+ * 用来提交 MWS 的 Feed 的任务                                                                                            {}
+ * <pre>
+ * 1. account.id 哪个销售账户
+ * 2. feed.id 提交哪一个 Feed
+ * 3. marketId 提交给哪一个 Amazon 市场
+ * 4. action 代表是 update 还是 create (传递给 GetFeedJob 使用)
+ * </pre>
  * User: wyatt
  * Date: 12/17/13
  * Time: 3:50 PM
@@ -29,10 +36,14 @@ public class SubmitFeedJob extends BaseJob {
          * 1. 获取账户和提交的 Feed
          * 2. 向 MWS 提交 Feed
          */
-        if(getContext().get("account.id") == null)
+        if (getContext().get("account.id") == null)
             throw new FastRuntimeException("没有提交 account.id 信息, 不知道是哪个销售账户上架.");
-        if(getContext().get("feed.id") == null)
+        if (getContext().get("feed.id") == null)
             throw new FastRuntimeException("没有提交 feed.id 信息, 没有提交的 Feed 数据");
+
+        M.MID marketId = null;
+        if (getContext().get("marketId") != null)
+            marketId = M.MID.valueOf(getContext().get("marketId").toString());
 
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         Feed feed = Feed.findById(NumberUtils.toLong(getContext().get("feed.id").toString()));
@@ -40,11 +51,11 @@ public class SubmitFeedJob extends BaseJob {
         try {
             try {
                 FileUtils.write(file, feed.content, "ISO8859-1");
-            } catch(IOException e) {
+            } catch (IOException e) {
                 throw new FastRuntimeException(e.getMessage());
             }
             MWSFeeds mwsFeedRequest = new MWSFeeds(account);
-            feed.feedId = mwsFeedRequest.submitFeed(file, MWSFeeds.T.UPLOAD_PRODUCT);
+            feed.feedId = mwsFeedRequest.submitFeed(file, MWSFeeds.T.UPLOAD_PRODUCT, marketId);
             feed.save();
 
             Map nextContext = getContext();

@@ -9,15 +9,15 @@
 #{else }
   <div class="btn-toolbar" id='btns'>
     <div class="btn-group">
-      <button class="btn btn-warning"
+      <button class="btn btn-warning" id="amz-update"
               content="直接更新到数据库" placement='bottom' rel="popover" title="Local Update Button">
         Update
       </button>
-      <button class="btn btn-warning"
+      <button class="btn btn-warning" id="amz-deploy"
               content="更新到 Amazon 同时更新到数据库" placement='bottom' rel="popover" title="Sync To Amazon Button">
         Deploy
       </button>
-      <button class="btn btn-warning"
+      <button class="btn btn-warning" id="amz-sync"
               content="从 Amazon 同步回来更新到数据库" placement='bottom' rel="popover" title="Sync From Amazon Button">
         Sync
       </button>
@@ -52,8 +52,9 @@
       #{text_field id:'title', name: 's.aps.title', label: '标题', value: s.aps.title /}
   </div>
   <div class="span5">
-      #{text_field id:'msku', name: 's.merchantSKU', label: 'Merchant SKU', value: s.merchantSKU/}
-      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: s.aps.upc /}
+    <input type="hidden" name="s.sellingId" value="${s.sellingId}">
+      #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: s.merchantSKU/}
+      #{text_field id:'upc', name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
       #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: s.aps.standerPrice /}
@@ -92,6 +93,7 @@
       #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: s.aps.searchTermss[4]/}
 
       #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: s.aps.productDesc /}
+    <input type="hidden" id="remote" name="remote" value="false">
   </div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}

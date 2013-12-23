@@ -22,26 +22,28 @@ $ ->
   # 初始化图片
   imageInit()
 
-  # update/deploy 按钮的基础方法
-  updateAndDeployBaseBtn = (btn, remote) ->
-    btnGroup = $(btn).parent()
-    $.params = remote: remote
-    $('#container :input').map($.varClosure)
-    btnGroup.mask('更新中...')
-    $.post('/sellings/update', $.params, (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        alert("Selling: " + r['sellingId'] + " 更新成功!")
-      btnGroup.unmask()
-    )
-
   # Update 按钮
-  $('button:contains("Update")').click ->
-    updateAndDeployBaseBtn(@, no)
+  $('#amz-update').click ->
+    $('#remote').val('false')
+    $form = $('#saleAmazonForm')
+    LoadMask.mask()
+    $.ajax($form.attr('action'), {method: 'POST', data: $form.serialize()})
+      .done((r) ->
+        msg = if r.flag is true
+            {text: "#{r.message} Selling 更新成功", type: 'success'}
+          else
+            {text: r.message, type: 'error'}
+        noty(msg)
+        LoadMask.unmask()
+      )
+      .fail((r) ->
+        noty({text: r.responseText, type: 'error'})
+        LoadMask.unmask()
+      )
+    false
 
   # Deploy 按钮
-  $('button:contains("Deploy")').click ->
+  $('#amz-deploy').click ->
     # check account 与 market 不一样, 要提醒
     switch $('[name=s\\.account\\.id]').val()
       when 1
@@ -54,10 +56,25 @@ $ ->
         if $('[name=s\\.market]').val() != 'AMAZON_US'
           return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
       else
-    updateAndDeployBaseBtn(@, yes)
+    $('#remote').val('true')
+    $form = $('#saleAmazonForm')
+    LoadMask.mask()
+    $.ajax($form.attr('action'), {method: 'POST', data: $form.serialize()})
+      .done((feed) ->
+        if feed.flag is false
+          noty({text: feed.message, type: 'error'})
+        else
+          noty({text: "成功创建 Feed(#{feed.id}), Amazon FeedId 为 #{feed.feedId}"}, type: 'success')
+        LoadMask.unmask()
+      )
+      .fail((r) ->
+        noty({text: r.responseText, type: 'error'})
+        LoadMask.unmask()
+      )
+    false
 
   # Sync 按钮
-  $('button:contains("Sync")').click ->
+  $('#amz-sync').click ->
     return false if !confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")
     btnGroup = $(@).parent()
     btnGroup.mask('同步中...')

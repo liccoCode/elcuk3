@@ -17,8 +17,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -229,6 +227,7 @@ public class Selling extends GenericModel {
 
     /**
      * 从 amazon 将数据同步回来
+     * TODO 这个功能期望取消, 因为通过 MWS API 后应该要消除上架成功但系统却脱离管理的问题.
      */
     public void syncFromAmazon() {
         String html = "";
@@ -266,63 +265,17 @@ public class Selling extends GenericModel {
         }
     }
 
-    /**
-     * <pre>
-     * 将传入的 Selling 的数据更新到 渠道上并且更新数据库;
-     * PS:
-     *  - 请确保 Selling 中的信息是正确的, 这个方法仅仅根据对应的参数做提交操作, 不再验证数据!
-     *  - 此方法进行了 synchronized, 因为更新的时候需要将其使用的 Cookie 给锁住, 不能进行更换
-     * 更新:
-     * 1. price
-     * 2. salePrice, startDate, endDate
-     *  --- price, salePrice 会根据 Amazon 检查, 仅保留小数点后两位
-     * 3. productDescription
-     *  --- 检查字符串最多 2000 个
-     * 4. searchTerms[1~5]
-     *  --- 检查每一行最多 50 个
-     * 5. browse_nodes[2]
-     * 6. manufacturer: manufact
-     * 7. item_name: title
-     * 8. part_number: manufactuerPartNumber
-     * 9. quantity
-     * 10. 等待添加
-     * </pre>
-     *
-     * @throws play.utils.FastRuntimeException
-     *          deploy 方法失败会抛出异常
-     */
-    public void deploy() {
-        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);//将数组参数转换成字符串再进行处理
-        synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
-            if(!this.market.isAmazon()) return;
-            // 1. 切换 Selling 所在区域
-            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
-
-            // 2. 设置需要提交的值
-            String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-            F.T2<Collection<NameValuePair>, String> paramDocTuple = this.aps.generateDeployProps(html, this);
-
-            // 3. 提交
-            String[] args = StringUtils.split(paramDocTuple._2, ";");
-            html = HTTP.post(this.account.cookieStore(),
-                    // 更新的链接需要账号所在地的 URL
-                    M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
-                    paramDocTuple._1
-            );
-            if(StringUtils.isBlank(html)) // 这个最先检查
-                throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
-
-            Document doc = Jsoup.parse(html);
-            Elements error = doc.select(".messageboxerror li");
-            if(error.size() > 0)
-                throw new FastRuntimeException("Error:" + error.text());
-
-            // 4. 更新回数据库
-            this.save();
-
-            // 还原
-            this.account.changeRegion(this.account.type);
-        }
+    public Feed deploy() {
+        this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
+        String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this));
+        Feed feed = Feed.updateSellingFeed(content, this);
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("account.id", this.account.id);
+        args.put("feed.id", feed.id);
+        args.put("marketId", this.market.amid().name());
+        args.put("action", "update");
+        GJob.perform(SubmitFeedJob.class, args);
+        return feed;
     }
 
     /**
