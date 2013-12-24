@@ -56,18 +56,20 @@ public class GetAsinJob extends BaseJob {
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         String sellingId = getContext().get("sellingId").toString();
         Selling selling = Selling.findById(sellingId);
-        Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
-        if(Play.mode.isDev()) {
-            try {
-                File file = new File(String.format("%s/deploy/%s", Constant.E_LOGS, "url" + System.currentTimeMillis()));
-                FileUtils.write(file, doc.outerHtml(), "ISO8859-1");
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
+
         Map nextContext = getContext();
         String asin = null;
         try {
+            Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
+            if(Play.mode.isDev()) {
+                try {
+                    File file = new File(
+                            String.format("%s/deploy/%s", Constant.E_LOGS, "url" + System.currentTimeMillis()));
+                    FileUtils.write(file, doc.outerHtml(), "ISO8859-1");
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
             Elements tables = doc.select("table.manageTable");
             Elements trs = tables.select("tr");
             for(Element tr : trs) {
@@ -107,7 +109,7 @@ public class GetAsinJob extends BaseJob {
             GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
             throw new FastRuntimeException("解析html文档时发生异常");
         }
-        if(asin == null || "".contains(asin.trim())) {
+        if(StringUtils.isBlank(asin)) {
             ++excuteCount;
             nextContext.put("excuteCount", excuteCount);
             GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
