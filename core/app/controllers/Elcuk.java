@@ -1,5 +1,6 @@
 package controllers;
 
+import jobs.driver.DriverJob;
 import models.ElcukConfig;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -68,5 +69,9 @@ public class Elcuk extends Controller {
             }
         }
         return parts.toArray(new String[parts.size()]);
+    }
+
+    public static void startJob() {
+        new DriverJob().now();
     }
 }

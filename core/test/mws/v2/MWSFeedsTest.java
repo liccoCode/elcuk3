@@ -26,7 +26,6 @@ public class MWSFeedsTest extends UnitTest {
     @Test
     public void testGetFeedResult() throws MarketplaceWebServiceException {
         Account account = FactoryBoy.build(Account.class, "de");
-
         MWSFeeds mwsFeedRequest = new MWSFeeds(account);
         File file = mwsFeedRequest.getFeedResult("7190370138");
         System.out.println(file.getAbsolutePath());

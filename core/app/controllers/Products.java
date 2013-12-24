@@ -92,7 +92,7 @@ public class Products extends Controller {
     public static void saleAmazonListing(Selling s) {
         try {
             checkAuthenticity();
-            s.patchSkuToListing("productType");
+            s.patchSkuToListing();
             renderJSON(new Ret(true, s.sellingId));
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(e.getMessage()));
