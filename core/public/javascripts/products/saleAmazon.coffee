@@ -76,4 +76,8 @@ $ ->
       .fail((r) ->
         noty({text: r.responseText, type: 'error'})
         LoadMask.unmask()
+
       )
+
+  $('#rbnToolTip').popover('hide')
+  $('#templateType').change()

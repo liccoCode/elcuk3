@@ -267,7 +267,7 @@ public class Selling extends GenericModel {
 
     public Feed deploy() {
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
-        String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this));
+        String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString());
         Feed feed = Feed.updateSellingFeed(content, this);
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("account.id", this.account.id);
@@ -342,7 +342,7 @@ public class Selling extends GenericModel {
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
         patchToListing();
-        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this)), this);
+        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString()), this);
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("account.id", this.account.id);
         args.put("feed.id", feed.id);
@@ -463,7 +463,7 @@ public class Selling extends GenericModel {
      * @param sellingList Selling对象的List集合
      * @return String 生成的模板文件
      */
-    public static String generateFeedTemplateFile(List<Selling> sellingList) {
-        return GTs.render("feed_template_computers_de", GTs.newMap("sellingList", sellingList).build());
+    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
+        return GTs.render(String.format("feed_template_%s_%s", templateType, market), GTs.newMap("sellingList", sellingList).build());
     }
 }
