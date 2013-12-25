@@ -14,6 +14,7 @@ import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Play;
@@ -190,19 +191,74 @@ public class Selling extends GenericModel {
         }
     }
 
+    public Map<String, Object> submitJobParams(Feed feed) {
+        Validate.notNull(feed);
+        Validate.notNull(this.account);
+        Validate.notNull(this.market);
+        Validate.notEmpty(this.sellingId);
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("account.id", this.account.id); // 使用哪一个账号
+        args.put("marketId", this.market.amid().name()); // 向哪一个市场
+        args.put("feed.id", feed.id); // 提交哪一个 Feed ?
+        args.put("selling.id", this.sellingId); // 作用与哪一个 Selling
+        return args;
+    }
+
     public Feed deploy() {
         if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 3 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this));
         Feed feed = Feed.updateSellingFeed(content, this);
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("account.id", this.account.id);
-        args.put("feed.id", feed.id);
-        args.put("marketId", this.market.amid().name());
+        Map<String, Object> args = this.submitJobParams(feed);
         args.put("action", "update");
         GJob.perform(SubmitFeedJob.class, args);
         return feed;
     }
+
+    /**
+     * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值
+     *
+     * @return
+     */
+    public Selling buildFromProduct() {
+        // 以 Amazon 的 Template File 所必须要的值为准
+        if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
+        if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
+        if(!isMSkuValid()) Webs.error("Merchant SKU 不合法. [SKU],[UPC]");
+        if(StringUtils.isBlank(this.aps.title)) Webs.error("Selling Title 必须存在");
+        if(StringUtils.isBlank(this.aps.brand)) Webs.error("品牌必须填写");
+        if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
+        if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
+        if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
+        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("所属模板的 Product Type 必须填写");
+        if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
+        if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
+        this.asin = this.aps.upc;
+        patchToListing();
+        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this)), this);
+        GJob.perform(SubmitFeedJob.class, this.submitJobParams(feed));
+        return this;
+    }
+
+    /**
+     * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
+     */
+    public Selling patchToListing() {
+        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
+        Product product = Product.findByMerchantSKU(this.merchantSKU);
+        if(product == null) Webs.error("SKU 产品不存在");
+
+        List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
+        if(images == null || images.size() == 0) Webs.error("请添加 " + product.sku + " 并上传其图片后再处理 Selling.");
+        this.aps.imageName = images.get(0).fileName;
+
+        Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
+        if(lst == null) lst = Listing.blankListing(asin, market, product).save();
+        this.listing = lst;
+        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+        return this.save();
+    }
+
 
     /**
      * 更新数据库, 同时还需要更新缓存
@@ -246,54 +302,6 @@ public class Selling extends GenericModel {
         List<String> sids = new ArrayList<String>();
         for(Selling s : sellings) sids.add(s.sellingId);
         return new F.T2<List<Selling>, List<String>>(sellings, sids);
-    }
-
-    /**
-     * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值
-     *
-     * @return
-     */
-    public Selling buildFromProduct() {
-        // 以 Amazon 的 Template File 所必须要的值为准
-        if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
-        if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
-        if(!isMSkuValid()) Webs.error("Merchant SKU 不合法. [SKU],[UPC]");
-        if(StringUtils.isBlank(this.aps.title)) Webs.error("Selling Title 必须存在");
-        if(StringUtils.isBlank(this.aps.brand)) Webs.error("品牌必须填写");
-        if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
-        if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
-        if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
-        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("所属模板的 Product Type 必须填写");
-        if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
-        if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
-        this.asin = this.aps.upc;
-        patchToListing();
-        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this)), this);
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("account.id", this.account.id);
-        args.put("feed.id", feed.id);
-        args.put("sellingId", this.sellingId);
-        GJob.perform(SubmitFeedJob.class, args);
-        return this;
-    }
-
-    /**
-     * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
-     */
-    public Selling patchToListing() {
-        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
-        Product product = Product.findByMerchantSKU(this.merchantSKU);
-        if(product == null) Webs.error("SKU 产品不存在");
-
-        List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
-        if(images == null || images.size() == 0) Webs.error("请添加 " + product.sku + " 并上传其图片后再处理 Selling.");
-        this.aps.imageName = images.get(0).fileName;
-
-        Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
-        if(lst == null) lst = Listing.blankListing(asin, market, product).save();
-        this.listing = lst;
-        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-        return this.save();
     }
 
     /**

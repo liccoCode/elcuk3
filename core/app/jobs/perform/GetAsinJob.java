@@ -44,7 +44,7 @@ public class GetAsinJob extends BaseJob {
          */
         if(getContext().get("account.id") == null)
             throw new FastRuntimeException("没有提交 account.id 信息, 不知道使用哪个销售账户去登陆.");
-        if(getContext().get("sellingId") == null)
+        if(getContext().get("selling.id") == null)
             throw new FastRuntimeException("没有提交 sellingId 信息");
         if(getContext().get("excuteCount") != null) {
             excuteCount = NumberUtils.toInt(getContext().get("excuteCount").toString());
@@ -54,7 +54,7 @@ public class GetAsinJob extends BaseJob {
         }
 
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
-        String sellingId = getContext().get("sellingId").toString();
+        String sellingId = getContext().get("selling.id").toString();
         Selling selling = Selling.findById(sellingId);
 
         Map nextContext = getContext();
