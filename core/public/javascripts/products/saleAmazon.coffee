@@ -84,24 +84,24 @@ $ ->
       )
 
   #初始化弹出提示框
-  $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/btg/uk_computers_browse_tree_guide.xls' target='download'>下載</a>", title: "小提示^_^"}).popover('hide')
+  $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/btg/uk_computers_browse_tree_guide.xls' target='download'>下载</a>", title: "小提示^_^"}).popover('hide')
 
-  # 账户下拉项变化RBN下载链接跟着改变
+  # 账户下拉项变化 RBN 下载链接跟着改变
   $('#templateType').change ->
-    #修改RBN下载地址
+    #修改 RBN 下载地址
     updateRBNLink($('#market').val(), $('#templateType').val())
     uodateFeedProductType($('#market').val(), $('#templateType').val())
 
 
-  # 更新RBN的提示信息
+  # 更新 RBN 的提示信息
   updateRBNLink = (market, templateType) ->
     $.getJSON('/products/showRBNLink', {market: market, templateType: templateType})
     .done((r) ->
         $('#RBN').popover('destroy')
-        $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='#{r.message}' target='download'>下載</a>", title: "小提示^_^"}).popover('hide')
+        $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='#{r.message}' target='download'>下载</a>", title: "小提示^_^"}).popover('hide')
       )
 
-  # 更新FeedProductType信息
+  # 更新 FeedProductType 信息
   uodateFeedProductType = (market, templateType) ->
     # 首先清空下拉项的数据
     jQuery("#feedProductType").empty()
@@ -123,6 +123,6 @@ $ ->
     for feedType in arr
       jQuery("#feedProductType").append("<option value='#{feedType}'>#{feedType}</option>")
 
-  # 默认加载英国市场Computer模板的FeedProductType
+  # 默认加载 UK 英国市场 Computer 模板的 FeedProductType
   uodateFeedProductType("AMAZON_UK", "Computers")
 
