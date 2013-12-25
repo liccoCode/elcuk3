@@ -460,10 +460,13 @@ public class Selling extends GenericModel {
     /**
      * 生成Selling对象的Feed文件
      *
-     * @param sellingList Selling对象的List集合
-     * @return String 生成的模板文件
+     * @param sellingList List
+     * @param templateType String
+     * @param market String
+     * @return String 生成的模板数据
+     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
     public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
-        return GTs.render(String.format("feed_template_%s_%s", templateType, market), GTs.newMap("sellingList", sellingList).build());
+        return GTs.render(String.format("Flat.File.%s.%s", templateType, market), GTs.newMap("sellingList", sellingList).build());
     }
 }
