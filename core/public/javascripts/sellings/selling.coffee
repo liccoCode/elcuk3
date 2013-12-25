@@ -24,11 +24,9 @@ $ ->
 
   # Update 按钮
   $('#amz-update').click ->
-    $('#remote').val('false')
     return false unless imageIndexCal()
-    $form = $('#saleAmazonForm')
     LoadMask.mask()
-    $.ajax($form.attr('action'), {type: 'POST', data: $form.serialize()})
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
       .done((r) ->
         msg = if r.flag is true
             {text: "#{r.message} Selling 更新成功", type: 'success'}
@@ -57,15 +55,13 @@ $ ->
         if $('[name=s\\.market]').val() != 'AMAZON_US'
           return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
       else
-    $('#remote').val('true')
-    $form = $('#saleAmazonForm')
     LoadMask.mask()
-    $.ajax($form.attr('action'), {method: 'POST', data: $form.serialize()})
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
       .done((feed) ->
         if feed.flag is false
           noty({text: feed.message, type: 'error'})
         else
-          noty({text: "成功创建 Feed(#{feed.id}), Amazon FeedId 为 #{feed.feedId}"}, type: 'success')
+          noty({text: "成功创建 Feed(#{feed.id})"}, type: 'success')
         LoadMask.unmask()
       )
       .fail((r) ->
@@ -125,4 +121,5 @@ $ ->
 
   # hints...
   $('#productType').popover({trigger: 'focus', content: '修改这个值请非常注意, Amazon 对大类别下的产品的 Product Type 有严格的规定, 请参考 Amazon 文档进行处理'})
+  $('#templateType').popover({trigger: 'focus', content: '为上传给 Amazon 的模板选择, 与 Amazon 的市场有关, 不可以随意修改'})
   $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})

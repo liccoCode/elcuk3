@@ -188,6 +188,7 @@ public class Selling extends GenericModel {
     }
 
     public Feed deploy() {
+        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 3 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this));
         Feed feed = Feed.updateSellingFeed(content, this);
@@ -314,7 +315,7 @@ public class Selling extends GenericModel {
      * 提交的与此 Selling 有关的 Feed
      */
     public List<Feed> feeds() {
-        return Feed.find("fid=?", this.sellingId).fetch();
+        return Feed.find("fid=? ORDER BY createdAt DESC", this.sellingId).fetch();
     }
 
 

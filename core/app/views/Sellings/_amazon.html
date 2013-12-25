@@ -9,11 +9,11 @@
 #{else }
   <div class="btn-toolbar" id='btns'>
     <div class="btn-group">
-      <button class="btn btn-warning" id="amz-update"
+      <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}"
               content="直接更新到数据库" placement='bottom' rel="popover" title="Local Update Button">
         Update
       </button>
-      <button class="btn btn-warning" id="amz-deploy"
+      <button class="btn btn-warning" id="amz-deploy" data-url="@{Sellings.deploy(s.sellingId)}"
               content="更新到 Amazon 同时更新到数据库" placement='bottom' rel="popover" title="Sync To Amazon Button">
         Deploy
       </button>
@@ -43,7 +43,7 @@
     </div>
   </div>
 
-#{form @Sellings.update(), class: 'form-horizontal', id: 'saleAmazonForm'}
+#{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
       #{text_field id:'title', name: 's.aps.title', label: '标题', value: s.aps.title /}
   </div>
@@ -92,7 +92,6 @@
       #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: s.aps.searchTermss[4]/}
 
       #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: s.aps.productDesc /}
-    <input type="hidden" id="remote" name="remote" value="false">
   </div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}
