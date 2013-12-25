@@ -61,7 +61,9 @@ public class GetAsinJob extends BaseJob {
         String asin = null;
         try {
             account.changeRegion(marketId.market()); // 模拟登陆去抓取, 需要使用这个支持同账户多市场
-            Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
+            Document doc = Jsoup.parse(HTTP
+                    // 需要登陆到账户所在的后台, 不是 Selling 所在的后台
+                    .get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(account.type, selling.aps.upc)));
             if(Play.mode.isDev()) {
                 try {
                     File file = new File(
@@ -110,7 +112,7 @@ public class GetAsinJob extends BaseJob {
              * 2. 将计数器加 1
              */
             GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
-            throw new FastRuntimeException("解析html文档时发生异常");
+            throw new FastRuntimeException(e.getMessage());
         } finally {
             setExecuteCount(++executeCount);
 

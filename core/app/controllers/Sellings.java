@@ -126,13 +126,8 @@ public class Sellings extends Controller {
         //10SMI9300-2200S|A_UK|1
         Selling s = Selling.findById(id);
         try {
-
-            if(StringUtils.contains(s.sellingId, "|A_DE|2")) {
-                Feed feed = s.deploy();
-                renderJSON(feed);
-            } else {
-                throw new FastRuntimeException("DE 市场之外的通过 Feed 更新 Listing 功能即将到来...");
-            }
+            Feed feed = s.deploy();
+            renderJSON(feed);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

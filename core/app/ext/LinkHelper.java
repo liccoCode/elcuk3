@@ -72,20 +72,9 @@ public class LinkHelper extends JavaExtensions {
         return "#";
     }
 
-    public static String searchAsinByUPCLink(Selling selling) {
+    public static String searchAsinByUPCLink(M market, String upc) {
         String baseAmazon = "https://sellercentral.%s/myi/search/ProductSummary?keyword=%s";
-        switch(selling.market) {
-            // TODO 注意后台德国账号多市场
-            case AMAZON_US:
-            case AMAZON_UK:
-                return String.format(baseAmazon, selling.market.toString(), selling.aps.upc);
-            case AMAZON_DE:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return String.format(baseAmazon, M.AMAZON_DE.toString(), selling.aps.upc);
-        }
-        return "#";
+        return String.format(baseAmazon, market.toString(), upc);
     }
 
     public static String asinLink(Selling selling) {
