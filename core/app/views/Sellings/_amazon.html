@@ -64,6 +64,7 @@
           GiftWrap
         </label>
       #{/checkbox_wrap}
+      #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
   </div>
   <div class="span5">
       #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}

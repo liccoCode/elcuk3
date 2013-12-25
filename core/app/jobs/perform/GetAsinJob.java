@@ -92,10 +92,11 @@ public class GetAsinJob extends BaseJob {
                         // TODO: 因为 Listing 可能会涉及到很多其他的外键关联, 是否考虑将 listingId 更换为 UPC_Market?
                         DBUtils.execute("SET foreign_key_checks=0");
                         String listingId = String.format("%s_%s", asin, selling.market.toString());
-                        DBUtils.execute(String.format("UPDATE Selling SET listing_listingId='%s' WHERE sellingId='%s'",
-                                listingId, selling.sellingId));
+                        DBUtils.execute(String.format(
+                                "UPDATE Selling SET listing_listingId='%s', state='%s' WHERE sellingId='%s'",
+                                listingId, Selling.S.SELLING.name(), selling.sellingId));
                         DBUtils.execute(
-                                String.format("UPDATE Listing SET listingId='%s' , asin='%s' WHERE listingId='%s'",
+                                String.format("UPDATE Listing SET listingId='%s', asin='%s' WHERE listingId='%s'",
                                         listingId, asin,
                                         String.format("%s_%s", selling.aps.upc, selling.market.toString())));
                         DBUtils.execute("SET foreign_key_checks=1");
