@@ -55,7 +55,7 @@ public class Feed extends Model {
             feed.createdAt = new Date();
             feed.save();
         }
-        return Math.abs(System.currentTimeMillis() - feed.createdAt.getTime()) >= TimeUnit.MINUTES.toMillis(3);
+        return Math.abs(System.currentTimeMillis() - feed.createdAt.getTime()) >= TimeUnit.MINUTES.toMillis(2);
     }
 
     /**

@@ -205,7 +205,7 @@ public class Selling extends GenericModel {
     }
 
     public Feed deploy() {
-        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 3 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this));
         Feed feed = Feed.updateSellingFeed(content, this);
@@ -221,6 +221,7 @@ public class Selling extends GenericModel {
      * @return
      */
     public Selling buildFromProduct() {
+        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");

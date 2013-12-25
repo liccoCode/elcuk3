@@ -7,6 +7,7 @@ import helper.HTTP;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,13 +31,12 @@ import java.util.Map;
  * Time: 5:31 PM
  */
 public class GetAsinJob extends BaseJob {
+    // 计数器，记录该Job被执行了多少次
+    private int executeCount = 0;
 
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
-        // 计数器，记录该Job被执行了多少次
-        int excuteCount = 0;
-
         /**
          * 1. 获取账户模拟登陆到 Amazon 的后台
          * 2. 获取 UPS 去搜索对应的Listing, 并获取返回的 html 页面
@@ -46,28 +46,29 @@ public class GetAsinJob extends BaseJob {
             throw new FastRuntimeException("没有提交 account.id 信息, 不知道使用哪个销售账户去登陆.");
         if(getContext().get("selling.id") == null)
             throw new FastRuntimeException("没有提交 sellingId 信息");
-        if(getContext().get("excuteCount") != null) {
-            excuteCount = NumberUtils.toInt(getContext().get("excuteCount").toString());
-            if("3".contains(getContext().get("excuteCount").toString())) {
-                throw new FastRuntimeException("未找到合适的 ASIN 数据！");
-            }
-        }
+        if(getContext().get("executeCount") != null)
+            executeCount = getExecuteCount();
+        if(!isExecuteble())
+            throw new FastRuntimeException("未找到合适的 ASIN 数据！");
 
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
-        String sellingId = getContext().get("selling.id").toString();
-        Selling selling = Selling.findById(sellingId);
+        Selling selling = Selling.findById(getContext().get("selling.id").toString());
+        M.MID marketId = account.type.amid();
+        if(getContext().get("marketId") != null)
+            marketId = M.MID.valueOf(getContext().get("marketId").toString());
 
         Map nextContext = getContext();
         String asin = null;
         try {
+            account.changeRegion(marketId.market()); // 模拟登陆去抓取, 需要使用这个支持同账户多市场
             Document doc = Jsoup.parse(HTTP.get(account.cookieStore(), LinkHelper.searchAsinByUPCLink(selling)));
             if(Play.mode.isDev()) {
                 try {
                     File file = new File(
-                            String.format("%s/deploy/%s", Constant.E_LOGS, "url" + System.currentTimeMillis()));
+                            String.format("%s/deploy/%s", Constant.E_LOGS, marketId + "_" + System.currentTimeMillis()));
                     FileUtils.write(file, doc.outerHtml(), "ISO8859-1");
                 } catch(Exception e) {
-                    e.printStackTrace();
+                    throw new FastRuntimeException(e);
                 }
             }
             Elements tables = doc.select("table.manageTable");
@@ -99,20 +100,35 @@ public class GetAsinJob extends BaseJob {
                     }
                 }
             }
+
+            if(StringUtils.isBlank(asin)) {
+                GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
+            }
         } catch(Exception e) {
             /**
              * 1. 出现异常，重新添加一个新的job任务
-             * 2. 将计数器加1
+             * 2. 将计数器加 1
              */
-            ++excuteCount;
-            nextContext.put("excuteCount", excuteCount);
             GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
             throw new FastRuntimeException("解析html文档时发生异常");
+        } finally {
+            setExecuteCount(++executeCount);
+
+            // 还原账户 Region
+            account.changeRegion(account.type);
         }
-        if(StringUtils.isBlank(asin)) {
-            ++excuteCount;
-            nextContext.put("excuteCount", excuteCount);
-            GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
-        }
+    }
+
+    public boolean isExecuteble() {
+        return this.executeCount <= 3;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setExecuteCount(int count) {
+        getContext().put("executeCount", count);
+    }
+
+    public int getExecuteCount() {
+        return NumberUtils.toInt(getContext().get("executeCount").toString());
     }
 }
