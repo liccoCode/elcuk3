@@ -208,30 +208,4 @@ public class Products extends Controller {
         }
         renderJSON("#");
     }
-
-    /**
-     * 根据市场和模板类型来确定FeedProductType
-     *
-     * @param market       市场
-     * @param templateType 模板类型
-     */
-    public static void getFeedProductType(String market, String templateType) {
-        StringBuffer feedProductType = new StringBuffer();
-        if(StringUtils.equalsIgnoreCase(templateType, "ConsumerElectronics")) {
-            if(StringUtils.contains(market, "AMAZON_DE") || StringUtils.contains(market, "AMAZON_UK")) {
-                feedProductType.append("AVFurniture_AccessoryOrPartOrSupply_AudioOrVideo_Battery_Binocular_CableOrAdapter_CameraFlash_CameraLenses_CameraOtherAccessories_CameraPowerSupply_CarElectronics_ConsumerElectronics_DigitalCamera_DigitalPictureFrame_FilmCamera_GpsOrNavigationSystem_Headphones_Phone_PhoneAccessory_PhotographicStudioItems_PortableAvDevice_PowerSuppliesOrProtection_Radio_RemoteControl_Speakers_Telescope_Television_VideoProjector_camerabagsandcases");
-            }
-            if(StringUtils.contains(market, "AMAZON_US")) {
-                feedProductType.append("AVFurniture_Antenna_AudioVideoAccessory_BarCodeReader_Battery_BlankMedia_CableOrAdapter_CarAlarm_CarAudioOrTheater_CarElectronics_DVDPlayerOrRecorder_DigitalVideoRecorder_GPSOrNavigationAccessory_GPSOrNavigationSystem_HandheldOrPDA_Headphones_HomeTheaterSystemOrHTIB_MediaPlayer_MediaPlayerOrEReaderAccessory_MediaStorage_MiscAudioComponents_Phone_PortableAudio_PowerSuppliesOrProtection_RadarDetector_RadioOrClockRadio_ReceiverOrAmplifier_RemoteControl_Speakers_StereoShelfSystem_TVCombos_Television_Tuner_TwoWayRadio_VCR_VideoProjector");
-            }
-        } else if(StringUtils.equalsIgnoreCase(templateType, "Computers")) {
-            if(StringUtils.contains(market, "AMAZON_DE") || StringUtils.contains(market, "AMAZON_UK")) {
-                feedProductType.append("ComputerComponent_ComputerDriveOrStorage_Monitor_NotebookComputer_PersonalComputer_Printer_Scanner_VideoProjector");
-            }
-            if(StringUtils.contains(market, "AMAZON_US")) {
-                feedProductType.append("CarryingCaseOrBag_Computer_ComputerAddOn_ComputerComponent_ComputerCoolingDevice_ComputerDriveOrStorage_ComputerInputDevice_ComputerProcessor_ComputerSpeaker_FlashMemory_Keyboards_MemoryReader_Monitor_Motherboard_NetworkingDevice_NotebookComputer_PersonalComputer_RAMMemory_SoundCard_SystemCabinet_SystemPowerDevice_TabletComputer_VideoCard_VideoProjector_Webcam");
-            }
-        }
-        renderJSON(new Ret(feedProductType.toString()));
-    }
 }

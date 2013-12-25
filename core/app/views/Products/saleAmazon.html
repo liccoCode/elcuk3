@@ -44,12 +44,8 @@
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: 'EasyAcc'/}
       #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: '' /}
       #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期',  value: '2013-12-01' /}
-      <div class="control-group">
-        <label class="control-label" for="RBN">Recommanded Browser Nodes</label>
-        <div class="controls">
-          <input type="text" id="RBN"class="span10" name="s.aps.rbns[]"value="">
-        </div>
-      </div>
+      #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes',  value: '' /}
+
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
       #{checkbox_wrap id:'giftwrap', label: '附加选项'}
         <label class="checkbox">
