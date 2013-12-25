@@ -38,10 +38,6 @@
               content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值.">
         <i class="icon-eye-open"></i>
       </button>
-      <button class="btn" placement='right' rel="popover" title="Image Upload Button"
-              content="图片按照 0~8 设置好编号以后,点击此按钮会直接更新到 Selling 并保存, 与其他信息的更新分开.<span style='color:red'>提交 Amazon 只保留拥有编号的图片</span>">
-        <i class="icon-picture"></i>
-      </button>
       <input type="text" class="span10" name="s.aps.imageName" readonly value="${s.aps.imageName}">
 
     </div>
@@ -53,6 +49,7 @@
   </div>
   <div class="span5">
     <input type="hidden" name="s.sellingId" value="${s.sellingId}">
+    <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
       #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: s.merchantSKU/}
       #{text_field id:'upc', name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}

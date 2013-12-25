@@ -25,9 +25,10 @@ $ ->
   # Update 按钮
   $('#amz-update').click ->
     $('#remote').val('false')
+    return false unless imageIndexCal()
     $form = $('#saleAmazonForm')
     LoadMask.mask()
-    $.ajax($form.attr('action'), {method: 'POST', data: $form.serialize()})
+    $.ajax($form.attr('action'), {type: 'POST', data: $form.serialize()})
       .done((r) ->
         msg = if r.flag is true
             {text: "#{r.message} Selling 更新成功", type: 'success'}
@@ -98,7 +99,7 @@ $ ->
       index = $(imgLi).find('input').val().trim()
       continue if !index or index is ''
       if !$.isNumeric(index)
-        alert('只能输入数字编号, 代表图片的位置')
+        noty({text: "只能输入数字编号, 代表图片的位置", type: 'warning'})
         goon = no
       else
         fNames[index] = $(imgLi).attr('filename')
@@ -107,34 +108,17 @@ $ ->
     names = []
     for i in [0...9]
       if !(i of fNames) and i < fNames.size
-        alert("期待的索引应该是 " + i)
+        noty({text: "期待的图片索引应该是 #{i}", type: 'warning'})
         return false
       names.push(fNames[i]) if fNames[i]
 
     if names.length <= 0
-      alert("请填写索引!")
-      return false
+      noty({text: '请填写图片索引', type: 'warning'})
+      false
     else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
-      return true
-
+      true
 
   # 图片上传的按钮
-  $('#img_cal').click(imageIndexCal).find("\~ button").click ->
-    return false if !imageIndexCal()
-    return false if !confirm("确定要更新到 " + $("select[name=s\\.market]").val() + " ?")
-    imgDiv = $(@).parent()
-    imgDiv.mask("上传图片中...")
-    params =
-      'sid': $('#s_sellingId').val()
-      imgs: $('[name=s\\.aps\\.imageName]').val()
-    $.post('/sellings/imageUpload', params, (r) ->
-      if r.flag is true
-        alertDiv = $(ALERT_TEMPLATE)
-        alertDiv.find('#replace_it').replaceWith("<p>更新成功!</p>")
-        alertDiv.prependTo('#container')
-      else
-        alert(r.message)
-      imgDiv.unmask()
-    )
+  $('#img_cal').click(imageIndexCal)
 
