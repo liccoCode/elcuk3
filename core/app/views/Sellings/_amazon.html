@@ -74,6 +74,8 @@
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优化销售价格(DE 没有)', value: s.aps.salePrice /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+      #{text_field id:'productType', name: 's.aps.feedProductType', label: 'Feed Product Type', value: s.aps.feedProductType /}
+      #{text_field id:'templateType', name: 's.aps.templateType', readonly: true, label: 'Feed Template Type', value: s.aps.templateType /}
   </div>
 
   <div class="span10">

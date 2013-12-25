@@ -1,10 +1,11 @@
 package models.market;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
-import helper.*;
+import helper.Constant;
+import helper.GTs;
+import helper.HTTP;
+import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.driver.GJob;
 import jobs.perform.SubmitFeedJob;
@@ -13,16 +14,12 @@ import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.jsoup.Jsoup;
-import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
-import play.libs.Codec;
 import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
@@ -30,7 +27,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -140,80 +136,6 @@ public class Selling extends GenericModel {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     public Account account;
-
-    /**
-     * 这个 Selling 向 Amazon 上传图片.;
-     * 将所有图片都上传一遍;
-     */
-    public void uploadAmazonImg(String imageName) {
-        // 用来处理最后删除图片时使用的名称
-        Map<String, AtomicBoolean> usedAmazonFileName = GTs.MapBuilder
-                .map("MAIN", new AtomicBoolean(false))
-                .put("PT01", new AtomicBoolean(false))
-                .put("PT02", new AtomicBoolean(false))
-                .put("PT03", new AtomicBoolean(false))
-                .put("PT04", new AtomicBoolean(false))
-                .put("PT05", new AtomicBoolean(false))
-                .put("PT06", new AtomicBoolean(false))
-                .put("PT07", new AtomicBoolean(false))
-                .put("PT08", new AtomicBoolean(false))
-                .build();
-
-        String dealImageNames = imageName;
-        if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
-        if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
-        String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
-        if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
-            images = Arrays.copyOfRange(images, 0, 9);
-        this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
-        /**
-         * MAIN   主图
-         * PT01~08  , 2~9 号图片.
-         */
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("asin", this.asin));
-        params.add(new BasicNameValuePair("sku", Codec.encodeBASE64(this.merchantSKU)));
-        Map<String, File> uploadImages = new HashMap<String, File>();
-        for(int i = 0; i < images.length; i++) {
-            String fileParamName;
-            if(i == 0) fileParamName = "MAIN";
-            else fileParamName = "PT0" + i;
-            Attach attch = Attach.findByFileName(images[i]);
-            if(attch == null)
-                throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
-            uploadImages.put(fileParamName, new File(attch.location));
-            usedAmazonFileName.get(fileParamName).set(true);
-        }
-        synchronized(this.account.cookieStore()) {
-            this.account.changeRegion(this.market); // 切换到这个 Selling 的市场
-            Logger.info("Upload Picture to Amazon AND Synchronized[%s].", this.account.prettyName());
-            String body = HTTP
-                    .upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params, uploadImages);
-            if(Play.mode.isDev())
-                FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, FLog.T.IMGUPLOAD);
-            JsonObject imgRsp = new JsonParser().parse(Jsoup.parse(body).select("#jsontransport").text())
-                    .getAsJsonObject();
-            //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
-            //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
-            if("failure".equals(imgRsp.get("status").getAsString())) {
-                Logger.info("Upload Picture to Amazon Failed.(%s)", imgRsp.get("errorMessage").getAsString());
-                throw new FastRuntimeException(imgRsp.get("errorMessage").getAsString());
-            } else {
-                Logger.info("Upload Picture to Amazon Success.(%s)", imgRsp.get("imageUrl").getAsString());
-            }
-            //https://catalog-sc.amazon.de/abis/image/RemoveImage.ajax?asin=B0083QX8AW&variant=MAIN/PT01/...
-            for(String fileName : usedAmazonFileName.keySet()) {
-                if(usedAmazonFileName.get(fileName).get()) continue; // 使用过了就不处理
-                HTTP.post(this.account.cookieStore(), this.account.type.removeImageLink(),
-                        Arrays.asList(
-                                new BasicNameValuePair("asin", this.asin),
-                                new BasicNameValuePair("variant", fileName)
-                        ));
-            }
-            this.account.changeRegion(this.account.type);
-        }
-        this.save();
-    }
 
     public Selling changeListing(Listing listing) {
         String sku = Product.merchantSKUtoSKU(this.merchantSKU);

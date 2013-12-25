@@ -10,7 +10,6 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
-import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
@@ -20,7 +19,6 @@ import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,28 +69,6 @@ public class Sellings extends Controller {
                 .put("s", s.aps.searchTermss)
                 .put("p", Arrays.asList(s.aps.productDesc))
                 .build()));
-    }
-
-    public static void imageUpload(final String sid, final String imgs) {
-        if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
-            @Override
-            public List<Error> doJobWithResult() {
-                List<Error> errors = new ArrayList<Error>();
-                Selling s = Selling.findById(sid);
-                try {
-                    s.uploadAmazonImg(imgs);
-                } catch(Exception e) {
-                    errors.add(new Error("", Webs.E(e), new String[]{}));
-                }
-                return errors;
-            }
-        }.now());
-        if(errors.size() > 0) {
-            renderJSON(new Ret(false, errors.toString()));
-        } else {
-            renderJSON(new Ret(true));
-        }
     }
 
     /**

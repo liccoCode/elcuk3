@@ -122,3 +122,7 @@ $ ->
   # 图片上传的按钮
   $('#img_cal').click(imageIndexCal)
 
+
+  # hints...
+  $('#productType').popover({trigger: 'focus', content: '修改这个值请非常注意, Amazon 对大类别下的产品的 Product Type 有严格的规定, 请参考 Amazon 文档进行处理'})
+  $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})
