@@ -93,7 +93,7 @@ public class SellingTest extends UnitTest {
             }
         });
 
-        selling.patchSkuToListing("ProductType");
+        selling.buildFromProduct();
         // 1. Selling/Listing 要保存
         // 2. 产生一个 Feed
         // 3. 产生一个 GJob

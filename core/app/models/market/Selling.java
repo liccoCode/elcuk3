@@ -137,6 +137,9 @@ public class Selling extends GenericModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public Account account;
 
+    /**
+     * 用来修复 Selling 关联的 Listing 错误的问题.
+     */
     public Selling changeListing(Listing listing) {
         String sku = Product.merchantSKUtoSKU(this.merchantSKU);
         if(listing.listingId.equals(this.listing.listingId)) Webs.error("Listing 是一样的, 不需要更改");
@@ -250,7 +253,7 @@ public class Selling extends GenericModel {
      *
      * @return
      */
-    public Selling patchSkuToListing() {
+    public Selling buildFromProduct() {
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");

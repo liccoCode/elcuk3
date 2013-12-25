@@ -3,6 +3,7 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
+import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
@@ -149,10 +150,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          * 7. 长宽高一定需要填写
          * 8. 申报价不为空
          */
-        if(StringUtils.isBlank(this.sku)) {
-            Validation.addError("", "Sku 必须存在!");
-            return;
-        }
+        if(StringUtils.isBlank(this.sku)) Webs.error("SKU 必须存在");
+
         if(!Product.validSKU(this.sku))
             Validation.addError("", "SKU[ " + this.sku + " ] 不合法!");
         if(Product.unUsedSKU(this.sku))
@@ -206,8 +205,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 获取拥有这个 SKU 的所有供应商
-     *
-     * @return
      */
     public List<Cooperator> cooperators() {
         return Cooperator
@@ -217,13 +214,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 此产品拥有的图片的数量
-     *
-     * @return
      */
     public long pictureCount() {
         return Attach.count("fid=?", this.sku);
     }
 
+    /**
+     * 找出当前 SKU 在某个(所有)市场上的 Selling
+     */
     public List<Selling> sellingCountWithMarket(M market) {
         if(market == null)
             return Selling.find("sellingId LIKE ?", this.sku + "%").fetch();
@@ -240,9 +238,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 验证这个 SKU 是否合法
-     *
-     * @param sku
-     * @return
      */
     public static boolean validSKU(String sku) {
         //71SNS1-B2PE, 71-SNS1-B2PE
@@ -260,9 +255,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 根据 Amazon 输入的 MerchantSKU 来查找 Product, 会自动将 MerchantSKU 转换成系统内使用的 SKU;
      * 这里面拥有两个兼容性判断.
-     *
-     * @param msku
-     * @return
      */
     public static Product findByMerchantSKU(String msku) {
         return Product.findById(merchantSKUtoSKU(msku));
