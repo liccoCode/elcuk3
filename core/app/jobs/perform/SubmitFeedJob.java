@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * 用来提交 MWS 的 Feed 的任务                                                                                            {}
+ * 用来提交 MWS 的 Feed 的任务
  * <pre>
  * 1. account.id 哪个销售账户
  * 2. feed.id 提交哪一个 Feed
@@ -36,13 +36,13 @@ public class SubmitFeedJob extends BaseJob {
          * 1. 获取账户和提交的 Feed
          * 2. 向 MWS 提交 Feed
          */
-        if (getContext().get("account.id") == null)
+        if(getContext().get("account.id") == null)
             throw new FastRuntimeException("没有提交 account.id 信息, 不知道是哪个销售账户上架.");
-        if (getContext().get("feed.id") == null)
+        if(getContext().get("feed.id") == null)
             throw new FastRuntimeException("没有提交 feed.id 信息, 没有提交的 Feed 数据");
 
         M.MID marketId = null;
-        if (getContext().get("marketId") != null)
+        if(getContext().get("marketId") != null)
             marketId = M.MID.valueOf(getContext().get("marketId").toString());
 
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
@@ -51,7 +51,7 @@ public class SubmitFeedJob extends BaseJob {
         try {
             try {
                 FileUtils.write(file, feed.content, "ISO8859-1");
-            } catch (IOException e) {
+            } catch(IOException e) {
                 throw new FastRuntimeException(e.getMessage());
             }
             MWSFeeds mwsFeedRequest = new MWSFeeds(account);
