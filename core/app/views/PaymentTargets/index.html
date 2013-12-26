@@ -21,6 +21,7 @@
         <th>名称</th>
         <th>账户</th>
         <th>账号</th>
+        <th>银行地址</th>
         <th>创建时间</th>
         <th class="ten"></th>
       </tr>
@@ -30,10 +31,11 @@
         <td copId=${tgt.cooper.id}>${tgt.name}</td>
         <td>${tgt.accountUser}</td>
         <td>${tgt.accountNumber}</td>
+        <td>${tgt.accountAddress}</td>
         <td>${tgt.createdAt}</td>
         <td>
             #{power.ck 'paymenttargets.update'}
-              <a href="javascript:void(0);" data-method='update' class="btn btn-success">
+              <a href="javascript:void(0);" id="updateBtn" data-url='@{PaymentTargets.showJson(tgt.id)}' class="btn btn-success">
                 <i class="icon-refresh"></i> 编辑
               </a>
             #{/power.ck}
@@ -71,9 +73,19 @@
         <input type="text" name="t.accountNumber" value="${t.accountNumber}">
       </dd>
 
+      <dt>银行地址</dt>
+      <dd>
+        <input type="text" name="t.accountAddress" value="${t.accountAddress}">
+      </dd>
+
       <dt>合作伙伴</dt>
       <dd>
-          #{select 'c.id', items:copers, valueProperty:'id', labelProperty:'name'}#{/select}
+          #{select 'c.id', items:copers, valueProperty:'id', labelProperty:'name', style:"margin-bottom:10px"}#{/select}
+      </dd>
+
+      <dt>备注</dt>
+      <dd>
+        <textarea name="t.memo">${t.memo}</textarea>
       </dd>
     </dl>
   </div>
@@ -85,7 +97,6 @@
 </div>
 #{/form}
 
-#{form @PaymentTargets.update(1), id:'update_form'}
 <div id="update_modal" class="modal hide fade">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -93,30 +104,40 @@
   </div>
 
   <div class="modal-body">
-      #{errorMsgs /}
-      #{flash_alert /}
+  #{form @PaymentTargets.update(), id:'update_form'}
     <dl class="dl-horizontal">
       <dt>名称</dt>
       <dd>
+        <input type="hidden" id="target_id" name="t.id" value="">
         <input type="text" id="target_name" name="t.name" value="">
       </dd>
 
       <dt>账户</dt>
       <dd>
-        <input type="text" id="target_accountUser" name="t.accountUser" value="${t.accountUser}">
+        <input type="text" id="target_accountUser" name="t.accountUser" value="">
       </dd>
 
       <dt>账号</dt>
       <dd>
-        <input type="text" id="target_accountNum" name="t.accountNumber" value="">
+        <input type="text" id="target_accountNumber" name="t.accountNumber" value="">
+      </dd>
+
+      <dt>银行地址</dt>
+      <dd>
+        <input type="text" id="target_accountAddress" name="t.accountAddress">
       </dd>
 
       <dt>合作伙伴</dt>
       <dd>
-          #{select 'c.id', id:'target_cooper', items:copers, valueProperty:'id',
-                labelProperty:'name'}#{/select}
+          #{select 'c.id', id:'target_cooperId', items:copers, valueProperty:'id', labelProperty:'name', style:"margin-bottom:10px"}#{/select}
+      </dd>
+
+      <dt>备注</dt>
+      <dd>
+        <textarea id="target_memo" name="t.memo"></textarea>
       </dd>
     </dl>
+  #{/form}
   </div>
 
   <div class="modal-footer">
@@ -124,4 +145,3 @@
     <input type="submit" value="修改" class="btn btn-primary">
   </div>
 </div>
-#{/form}
