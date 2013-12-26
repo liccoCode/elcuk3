@@ -9,12 +9,12 @@
 #{else }
   <div class="btn-toolbar" id='btns'>
     <div class="btn-group">
-      <button class="btn btn-warning" id="amz-update"
+      <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}"
               content="直接更新到数据库" placement='bottom' rel="popover" title="Local Update Button">
         Update
       </button>
-      <button class="btn btn-warning" id="amz-deploy"
-              content="更新到 Amazon 同时更新到数据库" placement='bottom' rel="popover" title="Sync To Amazon Button">
+      <button class="btn btn-warning" id="amz-deploy" data-url="@{Sellings.deploy(s.sellingId)}"
+              content="从数据库中加载最新保存的内容向 Amazon 提交更新" placement='bottom' rel="popover" title="Sync To Amazon Button">
         Deploy
       </button>
       <button class="btn btn-warning" id="amz-sync"
@@ -38,21 +38,18 @@
               content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值.">
         <i class="icon-eye-open"></i>
       </button>
-      <button class="btn" placement='right' rel="popover" title="Image Upload Button"
-              content="图片按照 0~8 设置好编号以后,点击此按钮会直接更新到 Selling 并保存, 与其他信息的更新分开.<span style='color:red'>提交 Amazon 只保留拥有编号的图片</span>">
-        <i class="icon-picture"></i>
-      </button>
       <input type="text" class="span10" name="s.aps.imageName" readonly value="${s.aps.imageName}">
 
     </div>
   </div>
 
-#{form @Sellings.update(), class: 'form-horizontal', id: 'saleAmazonForm'}
+#{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
       #{text_field id:'title', name: 's.aps.title', label: '标题', value: s.aps.title /}
   </div>
   <div class="span5">
     <input type="hidden" name="s.sellingId" value="${s.sellingId}">
+    <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
       #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: s.merchantSKU/}
       #{text_field id:'upc', name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
@@ -67,6 +64,7 @@
           GiftWrap
         </label>
       #{/checkbox_wrap}
+      #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
   </div>
   <div class="span5">
       #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}
@@ -77,6 +75,8 @@
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优化销售价格(DE 没有)', value: s.aps.salePrice /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+      #{text_field id:'productType', name: 's.aps.feedProductType', label: 'Feed Product Type', value: s.aps.feedProductType /}
+      #{text_field id:'templateType', name: 's.aps.templateType', readonly: true, label: 'Feed Template Type', value: s.aps.templateType /}
   </div>
 
   <div class="span10">
@@ -93,7 +93,6 @@
       #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: s.aps.searchTermss[4]/}
 
       #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: s.aps.productDesc /}
-    <input type="hidden" id="remote" name="remote" value="false">
   </div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}

@@ -26,6 +26,8 @@ public class SellingFactory extends ModelFactory<Selling> {
         aps.standerPrice = 19.99f;
         aps.salePrice = 9.99f;
         aps.upc = "609132508240";
+        aps.feedProductType = "ProductType";
+        aps.templateType = "templateType";
 
         selling.aps = aps;
         selling.asin = "ASIN";

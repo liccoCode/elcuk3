@@ -20,8 +20,6 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -89,7 +87,7 @@ public class Products extends Controller {
     public static void saleAmazonListing(Selling s) {
         try {
             checkAuthenticity();
-            s.patchSkuToListing();
+            s.buildFromProduct();
             renderJSON(new Ret(true, s.sellingId));
         } catch (FastRuntimeException e) {
             renderJSON(new Ret(e.getMessage()));
@@ -148,12 +146,10 @@ public class Products extends Controller {
         renderJSON(new Ret(true));
     }
 
+    /**
+     * 检查 UPC 上架情况
+     */
     public static void upcCheck(String upc) {
-        /**
-         * UPC 的检查;
-         * 1. 在哪一些 Selling 身上使用过?
-         * 2. 通过 UPC 与
-         */
         try {
             List<Selling> upcSellings = Selling.find("aps.upc=?", upc).fetch();
             renderJSON(J.G(upcSellings));
@@ -162,13 +158,16 @@ public class Products extends Controller {
         }
     }
 
+    /**
+     * 检查 SKU 是否上架情况
+     */
     public static void skuMarketCheck(String sku, String market) {
         Product product = Product.findById(StringUtils.split(sku, ",")[0]);
         M mkt = M.AMAZON_DE;
         try {
             mkt = M.val(market);
-        } catch (Exception e) {
-            //ignore.. default to DE market
+        } catch(Exception e) {
+            mkt = M.AMAZON_DE;
         }
         if(product != null) {
             renderJSON(J.G(product.sellingCountWithMarket(mkt)));
@@ -190,7 +189,7 @@ public class Products extends Controller {
                 renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "de", "ce")));
             }
             if(StringUtils.contains(market, "AMAZON_UK")) {
-                renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "uk", "ce")));
+                renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "uk", "electronics")));
             }
             if(StringUtils.contains(market, "AMAZON_US")) {
                 renderJSON(new Ret(String.format("%s%s_browse_tree_guide.xls", returnStr, "electronics")));

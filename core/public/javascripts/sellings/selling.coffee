@@ -24,10 +24,9 @@ $ ->
 
   # Update 按钮
   $('#amz-update').click ->
-    $('#remote').val('false')
-    $form = $('#saleAmazonForm')
+    return false unless imageIndexCal()
     LoadMask.mask()
-    $.ajax($form.attr('action'), {method: 'POST', data: $form.serialize()})
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
       .done((r) ->
         msg = if r.flag is true
             {text: "#{r.message} Selling 更新成功", type: 'success'}
@@ -56,15 +55,13 @@ $ ->
         if $('[name=s\\.market]').val() != 'AMAZON_US'
           return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
       else
-    $('#remote').val('true')
-    $form = $('#saleAmazonForm')
     LoadMask.mask()
-    $.ajax($form.attr('action'), {method: 'POST', data: $form.serialize()})
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
       .done((feed) ->
         if feed.flag is false
           noty({text: feed.message, type: 'error'})
         else
-          noty({text: "成功创建 Feed(#{feed.id}), Amazon FeedId 为 #{feed.feedId}"}, type: 'success')
+          noty({text: "成功创建 Feed(#{feed.id})"}, type: 'success')
         LoadMask.unmask()
       )
       .fail((r) ->
@@ -98,7 +95,7 @@ $ ->
       index = $(imgLi).find('input').val().trim()
       continue if !index or index is ''
       if !$.isNumeric(index)
-        alert('只能输入数字编号, 代表图片的位置')
+        noty({text: "只能输入数字编号, 代表图片的位置", type: 'warning'})
         goon = no
       else
         fNames[index] = $(imgLi).attr('filename')
@@ -107,34 +104,23 @@ $ ->
     names = []
     for i in [0...9]
       if !(i of fNames) and i < fNames.size
-        alert("期待的索引应该是 " + i)
+        noty({text: "期待的图片索引应该是 #{i}", type: 'warning'})
         return false
       names.push(fNames[i]) if fNames[i]
 
     if names.length <= 0
-      alert("请填写索引!")
-      return false
+      noty({text: '请填写图片索引', type: 'warning'})
+      false
     else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
-      return true
-
+      true
 
   # 图片上传的按钮
-  $('#img_cal').click(imageIndexCal).find("\~ button").click ->
-    return false if !imageIndexCal()
-    return false if !confirm("确定要更新到 " + $("select[name=s\\.market]").val() + " ?")
-    imgDiv = $(@).parent()
-    imgDiv.mask("上传图片中...")
-    params =
-      'sid': $('#s_sellingId').val()
-      imgs: $('[name=s\\.aps\\.imageName]').val()
-    $.post('/sellings/imageUpload', params, (r) ->
-      if r.flag is true
-        alertDiv = $(ALERT_TEMPLATE)
-        alertDiv.find('#replace_it').replaceWith("<p>更新成功!</p>")
-        alertDiv.prependTo('#container')
-      else
-        alert(r.message)
-      imgDiv.unmask()
-    )
+  $('#img_cal').click(imageIndexCal)
 
+
+  # hints...
+  $('#productType').popover({trigger: 'focus', content: '修改这个值请非常注意, Amazon 对大类别下的产品的 Product Type 有严格的规定, 请参考 Amazon 文档进行处理'})
+  $('#templateType').popover({trigger: 'focus', content: '为上传给 Amazon 的模板选择, 与 Amazon 的市场有关, 不可以随意修改'})
+  $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})
+  $('#state').popover({trigger: 'focus', content: 'NEW 状态 Selling 还没有同步回 ASIN, SELLING 状态为正常销售'})

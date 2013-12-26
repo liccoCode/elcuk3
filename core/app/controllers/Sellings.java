@@ -10,7 +10,6 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
-import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
@@ -20,7 +19,6 @@ import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -73,28 +71,6 @@ public class Sellings extends Controller {
                 .build()));
     }
 
-    public static void imageUpload(final String sid, final String imgs) {
-        if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
-            @Override
-            public List<Error> doJobWithResult() {
-                List<Error> errors = new ArrayList<Error>();
-                Selling s = Selling.findById(sid);
-                try {
-                    s.uploadAmazonImg(imgs);
-                } catch(Exception e) {
-                    errors.add(new Error("", Webs.E(e), new String[]{}));
-                }
-                return errors;
-            }
-        }.now());
-        if(errors.size() > 0) {
-            renderJSON(new Ret(false, errors.toString()));
-        } else {
-            renderJSON(new Ret(true));
-        }
-    }
-
     /**
      * 添加 selling 页面
      */
@@ -135,22 +111,23 @@ public class Sellings extends Controller {
     }
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
-    public static void update(Selling s, boolean remote) {
+    public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {
-            if(!remote) { // 非远程, 本地更新
-                s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-                s.save();
-                renderJSON(new Ret(true, s.sellingId));
-            } else { // 远程更新
-                //10SMI9300-2200S|A_UK|1
-                if(StringUtils.contains(s.sellingId, "|A_DE|2")) {
-                    Feed feed = s.deploy();
-                    renderJSON(feed);
-                } else {
-                    throw new FastRuntimeException("DE 市场之外的通过 Feed 更新 Listing 功能即将到来...");
-                }
-            }
+            s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+            s.save();
+            renderJSON(new Ret(true, s.sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void deploy(String id) {
+        //10SMI9300-2200S|A_UK|1
+        Selling s = Selling.findById(id);
+        try {
+            Feed feed = s.deploy();
+            renderJSON(feed);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

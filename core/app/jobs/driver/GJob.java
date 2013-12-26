@@ -18,6 +18,7 @@ import java.util.Map;
  * Time: 10:54 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class GJob extends Model {
 
     public enum S {

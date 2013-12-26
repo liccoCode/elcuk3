@@ -30,16 +30,14 @@ public class GetFeedJob extends BaseJob {
          * 1. 获取账户和提交的 Feed
          * 2. 向MWS 请求查询处理结果
          */
-        if (getContext().get("account.id") == null)
+        if(getContext().get("account.id") == null)
             throw new FastRuntimeException("没有提交 account.id 信息, 不知道是哪个销售账户.");
-        if (getContext().get("feedId") == null)
+        if(getContext().get("feedId") == null)
             throw new FastRuntimeException("没有提交 feedId 信息");
-        if (getContext().get("feed.id") == null)
+        if(getContext().get("feed.id") == null)
             throw new FastRuntimeException("没有提交 feed.id 信息");
 
-        String action = "create";
-        if (getContext().get("action") != null)
-            action = "update";
+        String action = getContext().get("action") == null ? "create" : getContext().get("action").toString();
 
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         String feedId = getContext().get("feedId").toString();
@@ -53,26 +51,26 @@ public class GetFeedJob extends BaseJob {
                 Feed feed = Feed.findById(NumberUtils.toLong(getContext().get("feed.id").toString()));
                 feed.result = StringUtils.join(reportLines, "\r\n");
                 feed.save();
-                for (String line : reportLines) {
-                    if (StringUtils.containsIgnoreCase(line, "error")) {
-                        // TODO Report 处理成功后需要处理.
-                        // TODO 如果 action 为 update 则完成 Feed 获取就结束
+                for(String line : reportLines) {
+                    if(StringUtils.containsIgnoreCase(line, "error")) {
                         throw new FastRuntimeException("提交的 Feed 文件有错误，请检查");
                     }
                 }
-                GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
-            } catch (IOException e) {
+                if("create".equals(action)) {
+                    GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
+                }
+            } catch(IOException e) {
                 throw new FastRuntimeException(e);
             }
-        } catch (MarketplaceWebServiceException e) {
+        } catch(MarketplaceWebServiceException e) {
             /**
              * 如果发生异常( Amazon 未处理好数据就会返回一个错误 ),重新发起请求(两分钟之后)
              */
-            if ((e.getMessage()).contains("Feed Submission Result is not ready for Feed")) {
+            if((e.getMessage()).contains("Feed Submission Result is not ready for Feed")) {
                 GJob.perform(GetFeedJob.class.getName(), getContext(), DateTime.now().plusMinutes(3).toDate());
             }
         } finally {
-            if (file != null) FileUtils.deleteQuietly(file);
+            if(file != null) FileUtils.deleteQuietly(file);
         }
 
     }

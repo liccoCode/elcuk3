@@ -93,9 +93,7 @@ public class SellingTest extends UnitTest {
                 target.merchantSKU = String.format("%s,%s", product.sku, target.aps.upc);
             }
         });
-
-        selling.patchSkuToListing();
-        new DriverJob().now();
+        selling.buildFromProduct();
         // 1. Selling/Listing 要保存
         // 2. 产生一个 Feed
         // 3. 产生一个 GJob
