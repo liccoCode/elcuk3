@@ -178,7 +178,7 @@ public class Products extends Controller {
     }
 
     /**
-     * 获取用来提示用户的 RBN 文件的下载地址
+     * 获取用来提示用户的 RBN 信息的查阅地址
      *
      * @param market 市场
      */
