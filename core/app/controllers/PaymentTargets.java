@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Webs;
 import models.finance.PaymentTarget;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -38,6 +39,7 @@ public class PaymentTargets extends Controller {
     public static void save(PaymentTarget t, Cooperator c) {
         Validation.required("账号", t.accountNumber);
         Validation.required("账户", t.accountUser);
+        Validation.required("银行地址", t.accountAddress);
 
         if(Validation.hasErrors())
             render("PaymentTargets/index.html", t);
@@ -51,24 +53,25 @@ public class PaymentTargets extends Controller {
         index();
     }
 
+    public static void showJson(Long id) {
+        PaymentTarget target = PaymentTarget.findById(id);
+        render(target);
+    }
+
     @Check("paymenttargets.update")
-    public static void update(Long targetId, PaymentTarget t, Cooperator c) {
+    public static void update(PaymentTarget t, Cooperator c) {
         Validation.required("账号", t.accountNumber);
         Validation.required("账户", t.accountUser);
 
         if(Validation.hasErrors())
-            render("PaymentTargets/index.html", t);
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
 
         t.cooper = c;
-
-        PaymentTarget target = PaymentTarget.findById(targetId);
-        target.updateAttr(t);
+        t.save();
 
         if(Validation.hasErrors())
-            render("PaymentTargets/index.html", t);
-
-        flash.success("更新成功.");
-        index();
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        renderJSON(new Ret(true, t.cooper.name + "的账户更新成功"));
     }
 
     @Check("paymenttargets.destroy")

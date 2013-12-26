@@ -21,135 +21,136 @@
   #{records_ul records: payment.includesItemsRecords(), nobr:true /}
   </div>
 
-  <div class="span8">
-    <div class="row-fluid">
-      <div class="span5">
-        <dl class="dl-horizontal" id='mainInfo'>
-          <dt>请款币种</dt>
-          <dd id="request_currency">${payment.currency}</dd>
-          <dt>批准后总金额(不含驳回)</dt>
-          <dd>${payment.currency.symbol()}<span id='finalAppied'>${payment.approvalAmount()}</span></dd>
-          <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> ?</span></dt>
-          <dd id='ratioTo'>0</dd>
-          <dt>汇率 <span id='currencyToFrom'>? -> ${payment.currency}</span></dt>
-          <dd id='reverRatioTo'>0</dd>
-          <dt>需要支付的 <span id='paidCurrency'>CNY</span></dt>
-          <dd><span id='paidCurrencyAmount'>0</span></dd>
-          <dt>汇率时间</dt>
-          <dd id="ratioTime">&nbsp;</dd>
-        </dl>
+  <div class="span3">
+    <dl class="dl-horizontal" id='mainInfo'>
+      <dt>请款币种</dt>
+      <dd id="request_currency">${payment.currency}</dd>
+      <dt>批准后总金额(不含驳回)</dt>
+      <dd>${payment.currency.symbol()}<span id='finalAppied'>${payment.approvalAmount()}</span></dd>
+      <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> ?</span></dt>
+      <dd id='ratioTo'>0</dd>
+      <dt>汇率 <span id='currencyToFrom'>? -> ${payment.currency}</span></dt>
+      <dd id='reverRatioTo'>0</dd>
+      <dt>需要支付的 <span id='paidCurrency'>CNY</span></dt>
+      <dd><span id='paidCurrencyAmount'>0</span></dd>
+      <dt>汇率时间</dt>
+      <dd id="ratioTime">&nbsp;</dd>
+    </dl>
 
-        <dl class="dl-horizontal">
-          <dt>编号</dt>
-          <dd><a href="@{Payments.show(payment.id)}">${payment.paymentNumber}</a></dd>
-          <dt>系统 ID</dt>
-          <dd>${payment.id}</dd>
-          <dt>请款单</dt>
-        #{if payment.pApply}
-          <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
-        #{/if}
-        #{elseif payment.tApply}
-          <dd><a href="@{Applys.transport(payment.tApply.id)}">${payment.tApply.serialNumber}</a></dd>
-        #{/elseif}
-          <dt>最后更新时间</dt>
-          <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
-          <dt>创建时间</dt>
-          <dd>#{time_tooltip time: payment.createdAt, datetime:true/}</dd>
-        </dl>
-      </div>
+    <dl class="dl-horizontal">
+      <dt>编号</dt>
+      <dd><a href="@{Payments.show(payment.id)}">${payment.paymentNumber}</a></dd>
+      <dt>系统 ID</dt>
+      <dd>${payment.id}</dd>
+      <dt>请款单</dt>
+    #{if payment.pApply}
+      <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
+    #{/if}
+    #{elseif payment.tApply}
+      <dd><a href="@{Applys.transport(payment.tApply.id)}">${payment.tApply.serialNumber}</a></dd>
+    #{/elseif}
+      <dt>最后更新时间</dt>
+      <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
+      <dt>创建时间</dt>
+      <dd>#{time_tooltip time: payment.createdAt, datetime:true/}</dd>
+    </dl>
+  </div>
 
-      <div class="span5">
-      #{if payment.state == models.finance.Payment.S.PAID}
-        <dl class="dl-horizontal">
-          <dt>支付状态</dt>
-          <dd style="color:${payment.stateColor()}">${payment.state.label()}</dd>
-          <dt>支付时间</dt>
-          <dd>${payment.paymentDate}</dd>
-          <dt>汇率</dt>
-          <dd>${payment.rate}</dd>
-          <dt>汇率时间</dt>
-          <dd>${payment.ratePublishDate}</dd>
-          <dt>支付人</dt>
-          <dd>${payment.payer?.username}</dd>
-          <dt>(计算)应该支付</dt>
-          <dd>${payment.actualCurrency.symbol()} ${payment.shouldPaid}</dd>
-          <dt>&nbsp;</dt>
-          <dd>&nbsp;</dd>
-          <dt>实际支付金额</dt>
-          <dd>${payment.actualCurrency.symbol()} ${payment.actualPaid}</dd>
-          <dt>实际支付对方账号</dt>
-          <dd>${payment.actualUser}</dd>
-          <dt>实际支付对方账户</dt>
-          <dd>${payment.actualAccountNumber}</dd>
-        </dl>
-      #{/if}
-      #{else }
-          #{power.ck 'payments.payforit'}
-              #{form @Payments.payForIt(payment.id), method:'POST', class:'form-horizontal', id:'pay_form'}
-                <div class="control-group">
-                  <label class="control-label">供应商</label>
+  <div class="span2" id='paymentTargetInfo'>
+    <dl class="dl-horizontal">
+      <dt>账户</dt>
+      <dd>${payment.target.accountUser}</dd>
+      <dt>账号</dt>
+      <dd>${payment.target.accountNumber}</dd>
+      <dt>名称</dt>
+      <dd>${payment.target.name}</dd>
+      <dt>银行地址</dt>
+      <dd>${payment.target.accountAddress}</dd>
+    </dl>
+  </div>
 
-                  <div class="controls">
-                    <input type="text" placeholder="供应商" value="${payment.cooperator.fullName}" readonly="">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label">账号</label>
+  <div class="span3">
+  #{if payment.state == models.finance.Payment.S.PAID}
+    <dl class="dl-horizontal">
+      <dt>支付状态</dt>
+      <dd style="color:${payment.stateColor()}">${payment.state.label()}</dd>
+      <dt>支付时间</dt>
+      <dd>${payment.paymentDate}</dd>
+      <dt>汇率</dt>
+      <dd>${payment.rate}</dd>
+      <dt>汇率时间</dt>
+      <dd>${payment.ratePublishDate}</dd>
+      <dt>支付人</dt>
+      <dd>${payment.payer?.username}</dd>
+      <dt>(计算)应该支付</dt>
+      <dd>${payment.actualCurrency.symbol()} ${payment.shouldPaid}</dd>
+      <dt>&nbsp;</dt>
+      <dd>&nbsp;</dd>
+      <dt>实际支付金额</dt>
+      <dd>${payment.actualCurrency.symbol()} ${payment.actualPaid}</dd>
+      <dt>实际支付对方账号</dt>
+      <dd>${payment.actualUser}</dd>
+      <dt>实际支付对方账户</dt>
+      <dd>${payment.actualAccountNumber}</dd>
+    </dl>
+  #{/if}
+  #{else }
+      #{power.ck 'payments.payforit'}
+          #{form @Payments.payForIt(payment.id), method:'POST', class:'form-horizontal', id:'pay_form'}
+            <div class="control-group">
+              <label class="control-label">供应商</label>
 
-                  <div class="controls">
-                      #{select 'paymentTargetId', items: payment.cooperator.paymentMethods, valueProperty:id}#{/select}
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label">支付币种</label>
-
-                  <div class="controls">
-                      #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD], value:payment.currency}
-                          #{option ''}选择币种#{/option}
-                      #{/select}
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label">金额</label>
-                  <input type="hidden" id="ratioInput" name="ratio" value="-1">
-                  <input type="hidden" id="ratioDateTimeInput" name="ratio_publish_date">
-
-                  <div class="controls">
-                    <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <div class="controls">
-                    <input type="submit" value="付款" class="btn btn-primary"
-                           data-confirm='请再次确认信息后付款'>
-                  </div>
-                </div>
-              #{/form}
-            <form action="#" class="form-horizontal" onsubmit="return false;">
-              <div class="control-group">
-                <label class="control-label">应付金额</label>
-
-                <div class="controls">
-                  <div class="input-append">
-                    <input type="text" class="input-small" data-url='@{Payments.shouldPaidUpdate (payment.id)}'
-                           placeholder="手动输入确认" name="shouldPaid" id="shouldPaid">
-                    <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
-                  </div>
-                </div>
+              <div class="controls">
+                <input type="text" placeholder="供应商" value="${payment.cooperator.fullName}" readonly="">
               </div>
-            </form>
-          #{/power.ck}
-      #{/else}
-      </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">账号</label>
 
-      <div class="span2" id='paymentTargetInfo'>
-        账户: ${payment.target.accountUser}
-        <br>
-        账号: ${payment.target.accountNumber}
-        <br>
-        名称: ${payment.target.name}
-      </div>
-    </div>
+              <div class="controls">
+                  #{select 'paymentTargetId', items: payment.cooperator.paymentMethods, valueProperty:id}#{/select}
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">支付币种</label>
+
+              <div class="controls">
+                  #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD], value:payment.currency}
+                      #{option ''}选择币种#{/option}
+                  #{/select}
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">金额</label>
+              <input type="hidden" id="ratioInput" name="ratio" value="-1">
+              <input type="hidden" id="ratioDateTimeInput" name="ratio_publish_date">
+
+              <div class="controls">
+                <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <input type="submit" value="付款" class="btn btn-primary"
+                       data-confirm='请再次确认信息后付款'>
+              </div>
+            </div>
+          #{/form}
+        <form action="#" class="form-horizontal" onsubmit="return false;">
+          <div class="control-group">
+            <label class="control-label">应付金额</label>
+
+            <div class="controls">
+              <div class="input-append">
+                <input type="text" class="input-small" data-url='@{Payments.shouldPaidUpdate (payment.id)}'
+                       placeholder="手动输入确认" name="shouldPaid" id="shouldPaid">
+                <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
+              </div>
+            </div>
+          </div>
+        </form>
+      #{/power.ck}
+  #{/else}
   </div>
 </div>
 

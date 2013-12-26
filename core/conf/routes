@@ -112,8 +112,9 @@ POST    /paymentunit/{id}/deny                              PaymentUnits.deny
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index
+GET     /paymenttarget/{id}.json                            PaymentTargets.showJson(format: 'json')
 POST    /paymenttarget                                      PaymentTargets.save
-POST    /paymenttarget/{targetId}                           PaymentTargets.update
+POST    /paymenttarget/update                               PaymentTargets.update
 DELETE  /paymenttarget/{targetId}                           PaymentTargets.destroy
 
 # Products
