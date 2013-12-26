@@ -23,7 +23,7 @@ public abstract class BaseJob extends Job {
 
     public void setContext(Map context) {
         this.context = context;
-        Logger.info("Driver Job(%s) Context: %s", this.hashCode(), getContext());
+        Logger.debug("Driver Job(%s) Context: %s", this.hashCode(), getContext());
     }
 
     public void end(String msg) {

@@ -87,7 +87,6 @@ public class Sellings extends Controller {
 
             String msku = String.format("%s,%s", sku.trim(), upc.trim());
             Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
-            if(Selling.exist(selling.sid())) Webs.error(String.format("Selling[%s] 已经存在", selling.sellingId));
             selling.patchToListing();
             flash.success("手动添加 Selling 成功.");
             Sellings.selling(selling.sellingId);
