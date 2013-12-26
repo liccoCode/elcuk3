@@ -58,7 +58,7 @@ $ ->
       return false
 
     $.ajax('/products/upcCheck', {type: 'GET', data: {upc: upc}, dataType: 'json'})
-    .done((r) ->
+      .done((r) ->
         if r.flag is false
           noty({text: r.message, type: 'error', layout: 'topCenter'})
         else
@@ -83,9 +83,6 @@ $ ->
 
       )
 
-  #初始化弹出提示框
-  $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/btg/uk_computers_browse_tree_guide.xls' target='download'>下载</a>", title: "小提示^_^"}).popover('hide')
-
   # 账户下拉项变化 RBN 下载链接跟着改变
   $('#templateType').change ->
     #修改 RBN 下载地址
@@ -104,25 +101,30 @@ $ ->
   # 更新 FeedProductType 信息
   uodateFeedProductType = (market, templateType) ->
     # 首先清空下拉项的数据
-    jQuery("#feedProductType").empty()
-    if templateType == "ConsumerElectronics"
+    $feedProductType = $("#feedProductType").empty()
+
+    feedTypes = if templateType == "ConsumerElectronics"
       if market == "AMAZON_DE" or "AMAZON_UK"
-        feedTypes = "AVFurniture_AccessoryOrPartOrSupply_AudioOrVideo_Battery_Binocular_CableOrAdapter_CameraFlash_CameraLenses_CameraOtherAccessories_CameraPowerSupply_CarElectronics_ConsumerElectronics_DigitalCamera_DigitalPictureFrame_FilmCamera_GpsOrNavigationSystem_Headphones_Phone_PhoneAccessory_PhotographicStudioItems_PortableAvDevice_PowerSuppliesOrProtection_Radio_RemoteControl_Speakers_Telescope_Television_VideoProjector_camerabagsandcases"
-      if market == "AMAZON_US"
-        feedTypes = "AVFurniture_Antenna_AudioVideoAccessory_BarCodeReader_Battery_BlankMedia_CableOrAdapter_CarAlarm_CarAudioOrTheater_CarElectronics_DVDPlayerOrRecorder_DigitalVideoRecorder_GPSOrNavigationAccessory_GPSOrNavigationSystem_HandheldOrPDA_Headphones_HomeTheaterSystemOrHTIB_MediaPlayer_MediaPlayerOrEReaderAccessory_MediaStorage_MiscAudioComponents_Phone_PortableAudio_PowerSuppliesOrProtection_RadarDetector_RadioOrClockRadio_ReceiverOrAmplifier_RemoteControl_Speakers_StereoShelfSystem_TVCombos_Television_Tuner_TwoWayRadio_VCR_VideoProjector"
-      false
-    if templateType == "Computers"
+        ["AVFurniture", "AccessoryOrPartOrSupply", "AudioOrVideo", "Battery", "Binocular", "CableOrAdapter", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalCamera", "DigitalPictureFrame", "FilmCamera", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector", "camerabagsandcases"]
+      else if market ==  "AMAZON_US"
+        ["AVFurniture", "Antenna", "AudioVideoAccessory", "BarCodeReader", "Battery", "BlankMedia", "CableOrAdapter", "CarAlarm", "CarAudioOrTheater", "CarElectronics", "DVDPlayerOrRecorder", "DigitalVideoRecorder", "GPSOrNavigationAccessory", "GPSOrNavigationSystem", "HandheldOrPDA", "Headphones", "HomeTheaterSystemOrHTIB", "MediaPlayer", "MediaPlayerOrEReaderAccessory", "MediaStorage", "MiscAudioComponents", "Phone", "PortableAudio", "PowerSuppliesOrProtection", "RadarDetector", "RadioOrClockRadio", "ReceiverOrAmplifier", "RemoteControl", "Speakers", "StereoShelfSystem", "TVCombos", "Television", "Tuner", "TwoWayRadio", "VCR", "VideoProjector"]
+      else
+        []
+    else if templateType == "Computers"
       if market == "AMAZON_DE" or "AMAZON_UK"
-        feedTypes = "ComputerComponent_ComputerDriveOrStorage_Monitor_NotebookComputer_PersonalComputer_Printer_Scanner_VideoProjector"
-      if market == "AMAZON_US"
-        feedTypes = "CarryingCaseOrBag_Computer_ComputerAddOn_ComputerComponent_ComputerCoolingDevice_ComputerDriveOrStorage_ComputerInputDevice_ComputerProcessor_ComputerSpeaker_FlashMemory_Keyboards_MemoryReader_Monitor_Motherboard_NetworkingDevice_NotebookComputer_PersonalComputer_RAMMemory_SoundCard_SystemCabinet_SystemPowerDevice_TabletComputer_VideoCard_VideoProjector_Webcam"
-      false
-    arr = null
-    arr = feedTypes.split("_")
+        ["ComputerComponent", "ComputerDriveOrStorage", "Monitor", "NotebookComputer", "PersonalComputer", "Printer", "Scanner", "VideoProjector"]
+      else if market == "AMAZON_US"
+        ["CarryingCaseOrBag", "Computer", "ComputerAddOn", "ComputerComponent", "ComputerCoolingDevice", "ComputerDriveOrStorage", "ComputerInputDevice", "ComputerProcessor", "ComputerSpeaker", "FlashMemory", "Keyboards", "MemoryReader", "Monitor", "Motherboard", "NetworkingDevice", "NotebookComputer", "PersonalComputer", "RAMMemory", "SoundCard", "SystemCabinet", "SystemPowerDevice", "TabletComputer", "VideoCard", "VideoProjector", "Webcam"]
+      else
+        []
+
     #循环数组，给selectd的option赋值
-    for feedType in arr
-      jQuery("#feedProductType").append("<option value='#{feedType}'>#{feedType}</option>")
+    _.each(feedTypes, (value) ->
+      $feedProductType.append("<option value='#{value}'>#{value}</option>")
+    )
 
   # 默认加载 UK 英国市场 Computer 模板的 FeedProductType
   uodateFeedProductType("AMAZON_UK", "Computers")
 
+  # hints
+  $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/btg/uk_computers_browse_tree_guide.xls' target='download'>下载</a>", title: "小提示^_^"}).popover('hide')
