@@ -302,3 +302,8 @@ input.logged{
     overflow-y:auto;
     margin:10px 0;
 }
+
+/* payment.show */
+#boc_rate, #ex_rate{
+    overflow:auto;
+}
