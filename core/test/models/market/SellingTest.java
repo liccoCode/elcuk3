@@ -3,6 +3,7 @@ package models.market;
 import factory.FactoryBoy;
 import factory.callback.BuildCallback;
 import helper.Webs;
+import jobs.driver.DriverJob;
 import jobs.driver.GJob;
 import models.embedded.AmazonProps;
 import models.product.Attach;
@@ -28,8 +29,8 @@ public class SellingTest extends UnitTest {
         FactoryBoy.deleteAll();
     }
 
-    @Ignore
-    @Test
+    //@Ignore
+    //@Test
     public void testSyncFromAmazon() throws IOException, ClassNotFoundException {
         Selling selling = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
             @Override
@@ -62,7 +63,7 @@ public class SellingTest extends UnitTest {
         assertThat(aps.searchTermss.get(4), is("cover protezione e supporto rotazione Nexus 7 2013"));
     }
 
-    @Test
+    //@Test
     public void testIsMSkuValid() {
         Selling s = FactoryBoy.build(Selling.class, new BuildCallback<Selling>() {
             @Override
@@ -92,7 +93,6 @@ public class SellingTest extends UnitTest {
                 target.merchantSKU = String.format("%s,%s", product.sku, target.aps.upc);
             }
         });
-
         selling.buildFromProduct();
         // 1. Selling/Listing 要保存
         // 2. 产生一个 Feed

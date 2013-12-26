@@ -207,7 +207,7 @@ public class Selling extends GenericModel {
     public Feed deploy() {
         if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
-        String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this));
+        String content = Selling.generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString());
         Feed feed = Feed.updateSellingFeed(content, this);
         Map<String, Object> args = this.submitJobParams(feed);
         args.put("action", "update");
@@ -236,7 +236,7 @@ public class Selling extends GenericModel {
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
         patchToListing();
-        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this)), this);
+        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString()), this);
         GJob.perform(SubmitFeedJob.class, this.submitJobParams(feed));
         return this;
     }
@@ -395,10 +395,13 @@ public class Selling extends GenericModel {
     /**
      * 生成Selling对象的Feed文件
      *
-     * @param sellingList Selling对象的List集合
-     * @return String 生成的模板文件
+     * @param sellingList List
+     * @param templateType String
+     * @param market String
+     * @return String 生成的模板数据
+     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
-    public static String generateFeedTemplateFile(List<Selling> sellingList) {
-        return GTs.render("feed_template_computers_de", GTs.newMap("sellingList", sellingList).build());
+    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
+        return GTs.render(String.format("Flat.File.%s.%s", templateType, market), GTs.newMap("sellingList", sellingList).build());
     }
 }

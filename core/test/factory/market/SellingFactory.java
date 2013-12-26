@@ -66,7 +66,7 @@ public class SellingFactory extends ModelFactory<Selling> {
 
     @Factory(name = "withListing")
     public Selling withListing() {
-        Selling selling = de();
+        Selling selling = uk();
         selling.aps.manufacturer = "EasyAcc";
         selling.aps.brand = "EasyAcc";
         selling.aps.manufacturerPartNumber = "Part Number";

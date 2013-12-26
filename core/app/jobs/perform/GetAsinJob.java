@@ -105,6 +105,7 @@ public class GetAsinJob extends BaseJob {
             }
 
             if(StringUtils.isBlank(asin)) {
+                setExecuteCount(++executeCount);
                 GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
             }
         } catch(Exception e) {
@@ -115,15 +116,13 @@ public class GetAsinJob extends BaseJob {
             GJob.perform(GetAsinJob.class.getName(), nextContext, DateTime.now().plusMinutes(2).toDate());
             throw new FastRuntimeException(e.getMessage());
         } finally {
-            setExecuteCount(++executeCount);
-
             // 还原账户 Region
             account.changeRegion(account.type);
         }
     }
 
     public boolean isExecuteble() {
-        return this.executeCount <= 3;
+        return this.executeCount < 3;
     }
 
     @SuppressWarnings("unchecked")
