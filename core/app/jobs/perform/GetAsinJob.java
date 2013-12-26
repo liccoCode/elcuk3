@@ -53,6 +53,9 @@ public class GetAsinJob extends BaseJob {
 
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         Selling selling = Selling.findById(getContext().get("selling.id").toString());
+        // ASIN 的长度为 10, UPC 的长度为 16, 当已经是 ASIN 则不再继续去获取一次 ASIN
+        if(selling.asin.length() == 10) return;
+
         M.MID marketId = account.type.amid();
         if(getContext().get("marketId") != null)
             marketId = M.MID.valueOf(getContext().get("marketId").toString());

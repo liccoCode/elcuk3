@@ -245,7 +245,6 @@ public class Selling extends GenericModel {
      * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
      */
     public Selling patchToListing() {
-        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
         Product product = Product.findByMerchantSKU(this.merchantSKU);
         if(product == null) Webs.error("SKU 产品不存在");
 

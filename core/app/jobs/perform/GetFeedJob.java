@@ -52,9 +52,9 @@ public class GetFeedJob extends BaseJob {
                 feed.result = StringUtils.join(reportLines, "\r\n");
                 feed.save();
                 for(String line : reportLines) {
-                    if(StringUtils.containsIgnoreCase(line, "error")) {
+                    String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+                    if(args.length == 5 && "Error".equals(args[3]))
                         throw new FastRuntimeException("提交的 Feed 文件有错误，请检查");
-                    }
                 }
                 if("create".equals(action)) {
                     GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
