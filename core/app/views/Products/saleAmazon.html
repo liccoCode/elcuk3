@@ -56,7 +56,7 @@
   </div>
   <div class="span5">
       #{select_field id:'account', name: 's.account.id', label: '上架账户', blank: true, items: accs /}
-      #{select_field id:'market', name: 's.market', label:'市场', items: models.market.M.values() /}
+      #{select_field id:'market', name: 's.market', label:'市场', blank: true, items: models.market.M.values() /}
       <div class="control-group">
         <label class="control-label" for="templateType">模板类型</label>
         <div class="controls">

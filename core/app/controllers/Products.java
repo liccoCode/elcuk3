@@ -20,6 +20,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+
 import java.util.List;
 
 /**
@@ -89,7 +90,7 @@ public class Products extends Controller {
             checkAuthenticity();
             s.buildFromProduct();
             renderJSON(new Ret(true, s.sellingId));
-        } catch (FastRuntimeException e) {
+        } catch(FastRuntimeException e) {
             renderJSON(new Ret(e.getMessage()));
         }
     }
@@ -140,7 +141,7 @@ public class Products extends Controller {
     public static void p_sqty_u(SellingQTY q) {
         try {
             if(q.isPersistent()) q.save();
-        } catch (Exception e) {
+        } catch(Exception e) {
             renderJSON(new Ret(false, Webs.E(e)));
         }
         renderJSON(new Ret(true));
@@ -153,7 +154,7 @@ public class Products extends Controller {
         try {
             List<Selling> upcSellings = Selling.find("aps.upc=?", upc).fetch();
             renderJSON(J.G(upcSellings));
-        } catch (Exception e) {
+        } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
@@ -179,32 +180,18 @@ public class Products extends Controller {
     /**
      * 获取用来提示用户的 RBN 文件的下载地址
      *
-     * @param market       市场
-     * @param templateType 模板类型
+     * @param market 市场
      */
-    public static void showRBNLink(String market, String templateType) {
-        String returnStr = "https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/btg/";
-        if(StringUtils.equalsIgnoreCase(templateType, "ConsumerElectronics")) {
-            if(StringUtils.contains(market, "AMAZON_DE")) {
-                renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "de", "ce")));
-            }
-            if(StringUtils.contains(market, "AMAZON_UK")) {
-                renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "uk", "electronics")));
-            }
-            if(StringUtils.contains(market, "AMAZON_US")) {
-                renderJSON(new Ret(String.format("%s%s_browse_tree_guide.xls", returnStr, "electronics")));
-            }
-        } else if(StringUtils.equalsIgnoreCase(templateType, "Computers")) {
-            if(StringUtils.contains(market, "AMAZON_DE")) {
-                renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "de", "computers")));
-            }
-            if(StringUtils.contains(market, "AMAZON_UK")) {
-                renderJSON(new Ret(String.format("%s%s_%s_browse_tree_guide.xls", returnStr, "uk", "computers")));
-            }
-            if(StringUtils.contains(market, "AMAZON_US")) {
-                renderJSON(new Ret(String.format("%s%s_browse_tree_guide.xls", returnStr, "electronics")));
-            }
+    public static void showRBNLink(String market) {
+        String suffix = "/catm/classifier/ProductClassifier.amzncatm/classifier/ProductClassifier.amzn?ref=ag_pclasshm_cont_invfile";
+        Ret ret = new Ret("#");
+        if(StringUtils.contains(market, "AMAZON_DE")) {
+            ret = new Ret("https://catalog-mapper-de.amazon.de" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_UK")) {
+            ret = new Ret("https://catalog-mapper-uk.amazon.co.uk" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_US")) {
+            ret = new Ret("https://catalog-mapper-na.amazon.com" + suffix);
         }
-        renderJSON("#");
+        renderJSON(ret);
     }
 }

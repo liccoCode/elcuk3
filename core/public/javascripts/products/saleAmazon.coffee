@@ -28,7 +28,7 @@ $ ->
         )
     modal.modal('show')
 
-  $('#market').change ->
+  $('#market').change( ->
     market = $(@).val()
     $.getJSON('/products/skuMarketCheck', {sku: $('#msku').val(), market: market})
     .done((r) ->
@@ -38,9 +38,11 @@ $ ->
           showSellingModal("#{$('#msku').val()} (#{r.length})", r)
       )
     false
+    $('#RBN').val('')
     #市场下拉项变化 RBN下载地址跟着变化
-    updateRBNLink(market, $('#templateType').val())
+    updateRBNLink(market)
     uodateFeedProductType($('#market').val(), $('#templateType').val())
+  )
 
   # 账号对应的市场切换
   $('#account').change ->
@@ -86,16 +88,15 @@ $ ->
   # 账户下拉项变化 RBN 下载链接跟着改变
   $('#templateType').change ->
     #修改 RBN 下载地址
-    updateRBNLink($('#market').val(), $('#templateType').val())
     uodateFeedProductType($('#market').val(), $('#templateType').val())
 
 
   # 更新 RBN 的提示信息
-  updateRBNLink = (market, templateType) ->
-    $.getJSON('/products/showRBNLink', {market: market, templateType: templateType})
+  updateRBNLink = (market) ->
+    $.getJSON('/products/showRBNLink', {market: market})
     .done((r) ->
         $('#RBN').popover('destroy')
-        $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='#{r.message}' target='download'>下载</a>", title: "小提示^_^"}).popover('hide')
+        $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "使用 <a href='#{r.message}' target='download'>Amazon Product Classifier</a> 查询 RBN", title: "小提示^_^"}).popover('hide')
       )
 
   # 更新 FeedProductType 信息
@@ -125,6 +126,3 @@ $ ->
 
   # 默认加载 UK 英国市场 Computer 模板的 FeedProductType
   uodateFeedProductType("AMAZON_UK", "Computers")
-
-  # hints
-  $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "具体值请下载后查阅该文件：<a href='https://images-na.ssl-images-amazon.com/images/G/01/rainier/help/btg/uk_computers_browse_tree_guide.xls' target='download'>下载</a>", title: "小提示^_^"}).popover('hide')
