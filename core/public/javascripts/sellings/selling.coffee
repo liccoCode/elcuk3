@@ -117,4 +117,5 @@ $ ->
 
   # 图片上传的按钮
   $('#img_cal').click(imageIndexCal)
+  $("#feedProductType").trigger('adjust')
 

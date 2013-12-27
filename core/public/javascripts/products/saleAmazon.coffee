@@ -41,7 +41,7 @@ $ ->
     $('#RBN').val('')
     #市场下拉项变化 RBN下载地址跟着变化
     updateRBNLink(market)
-    uodateFeedProductType($('#market').val(), $('#templateType').val())
+    $("#productType").trigger('adjust')
   )
 
   # 账号对应的市场切换
@@ -85,12 +85,6 @@ $ ->
 
       )
 
-  # 账户下拉项变化 RBN 下载链接跟着改变
-  $('#templateType').change ->
-    #修改 RBN 下载地址
-    uodateFeedProductType($('#market').val(), $('#templateType').val())
-
-
   # 更新 RBN 的提示信息
   updateRBNLink = (market) ->
     $.getJSON('/products/showRBNLink', {market: market})
@@ -99,30 +93,5 @@ $ ->
         $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "使用 <a href='#{r.message}' target='download'>Amazon Product Classifier</a> 查询 RBN", title: "小提示^_^"}).popover('hide')
       )
 
-  # 更新 FeedProductType 信息
-  uodateFeedProductType = (market, templateType) ->
-    # 首先清空下拉项的数据
-    $feedProductType = $("#feedProductType").empty()
-
-    feedTypes = if templateType == "ConsumerElectronics"
-      if market == "AMAZON_DE" or "AMAZON_UK"
-        ["AVFurniture", "AccessoryOrPartOrSupply", "AudioOrVideo", "Battery", "Binocular", "CableOrAdapter", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalCamera", "DigitalPictureFrame", "FilmCamera", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector", "camerabagsandcases"]
-      else if market ==  "AMAZON_US"
-        ["AVFurniture", "Antenna", "AudioVideoAccessory", "BarCodeReader", "Battery", "BlankMedia", "CableOrAdapter", "CarAlarm", "CarAudioOrTheater", "CarElectronics", "DVDPlayerOrRecorder", "DigitalVideoRecorder", "GPSOrNavigationAccessory", "GPSOrNavigationSystem", "HandheldOrPDA", "Headphones", "HomeTheaterSystemOrHTIB", "MediaPlayer", "MediaPlayerOrEReaderAccessory", "MediaStorage", "MiscAudioComponents", "Phone", "PortableAudio", "PowerSuppliesOrProtection", "RadarDetector", "RadioOrClockRadio", "ReceiverOrAmplifier", "RemoteControl", "Speakers", "StereoShelfSystem", "TVCombos", "Television", "Tuner", "TwoWayRadio", "VCR", "VideoProjector"]
-      else
-        []
-    else if templateType == "Computers"
-      if market == "AMAZON_DE" or "AMAZON_UK"
-        ["ComputerComponent", "ComputerDriveOrStorage", "Monitor", "NotebookComputer", "PersonalComputer", "Printer", "Scanner", "VideoProjector"]
-      else if market == "AMAZON_US"
-        ["CarryingCaseOrBag", "Computer", "ComputerAddOn", "ComputerComponent", "ComputerCoolingDevice", "ComputerDriveOrStorage", "ComputerInputDevice", "ComputerProcessor", "ComputerSpeaker", "FlashMemory", "Keyboards", "MemoryReader", "Monitor", "Motherboard", "NetworkingDevice", "NotebookComputer", "PersonalComputer", "RAMMemory", "SoundCard", "SystemCabinet", "SystemPowerDevice", "TabletComputer", "VideoCard", "VideoProjector", "Webcam"]
-      else
-        []
-
-    #循环数组，给selectd的option赋值
-    _.each(feedTypes, (value) ->
-      $feedProductType.append("<option value='#{value}'>#{value}</option>")
-    )
-
   # 默认加载 UK 英国市场 Computer 模板的 FeedProductType
-  uodateFeedProductType("AMAZON_UK", "Computers")
+  $("#feedProductType").trigger('adjust')

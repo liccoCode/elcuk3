@@ -10,6 +10,9 @@
         #{if _.getClass().toString().indexOf("models.market.M") > -1}
           <option ${_value ? (_ == _value ? 'selected' : '') : ''} value="${_.name()}">${_}</option>
         #{/if}
+        #{elseif _.getClass().toString().contains("lang.String")}
+          <option ${_value ? (_ == _value ? 'selected' : '') : ''} value="${_}">${_}</option>
+        #{/elseif}
         #{else }
           <option ${_value ? (_ == _value ? 'selected' : '') : ''} value="${_propertyVal ? _[_propertyVal] : _['id']}">${_}</option>
         #{/else}

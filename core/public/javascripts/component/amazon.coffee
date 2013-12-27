@@ -87,6 +87,41 @@ $ ->
     false
   )
 
+  # 模板类型与 Feed Product Type 的组合使用
+  $(document).on('adjust', '#feedProductType', (r) ->
+    $feedProductType = $("#feedProductType")
+    value = $feedProductType.val()
+    $feedProductType.empty()
+    templateType = $('#templateType').val()
+    market = $('#market').val()
+
+    feedTypes = if templateType == "ConsumerElectronics"
+      if market == "AMAZON_DE" or "AMAZON_UK"
+        ["AVFurniture", "AccessoryOrPartOrSupply", "AudioOrVideo", "Battery", "Binocular", "CableOrAdapter", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalCamera", "DigitalPictureFrame", "FilmCamera", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector", "camerabagsandcases"]
+      else if market ==  "AMAZON_US"
+        ["AVFurniture", "Antenna", "AudioVideoAccessory", "BarCodeReader", "Battery", "BlankMedia", "CableOrAdapter", "CarAlarm", "CarAudioOrTheater", "CarElectronics", "DVDPlayerOrRecorder", "DigitalVideoRecorder", "GPSOrNavigationAccessory", "GPSOrNavigationSystem", "HandheldOrPDA", "Headphones", "HomeTheaterSystemOrHTIB", "MediaPlayer", "MediaPlayerOrEReaderAccessory", "MediaStorage", "MiscAudioComponents", "Phone", "PortableAudio", "PowerSuppliesOrProtection", "RadarDetector", "RadioOrClockRadio", "ReceiverOrAmplifier", "RemoteControl", "Speakers", "StereoShelfSystem", "TVCombos", "Television", "Tuner", "TwoWayRadio", "VCR", "VideoProjector"]
+      else
+        []
+    else if templateType == "Computers"
+      if market == "AMAZON_DE" or "AMAZON_UK"
+        ["ComputerComponent", "ComputerDriveOrStorage", "Monitor", "NotebookComputer", "PersonalComputer", "Printer", "Scanner", "VideoProjector"]
+      else if market == "AMAZON_US"
+        ["CarryingCaseOrBag", "Computer", "ComputerAddOn", "ComputerComponent", "ComputerCoolingDevice", "ComputerDriveOrStorage", "ComputerInputDevice", "ComputerProcessor", "ComputerSpeaker", "FlashMemory", "Keyboards", "MemoryReader", "Monitor", "Motherboard", "NetworkingDevice", "NotebookComputer", "PersonalComputer", "RAMMemory", "SoundCard", "SystemCabinet", "SystemPowerDevice", "TabletComputer", "VideoCard", "VideoProjector", "Webcam"]
+      else
+        []
+
+    #循环数组，给selectd的option赋值
+    _.each(feedTypes, (value) ->
+      $feedProductType.append("<option value='#{value}'>#{value}</option>")
+    )
+    $feedProductType.val(value) if value
+  )
+
+  # 账户下拉项变化 RBN 下载链接跟着改变
+  $(document).on('change', '#templateType', (r) ->
+    $("#feedProductType").trigger('adjust')
+  )
+
   # hints...
   $('#productType').popover({trigger: 'focus', content: '修改这个值请非常注意, Amazon 对大类别下的产品的 Product Type 有严格的规定, 请参考 Amazon 文档进行处理'})
   $('#templateType').popover({trigger: 'focus', content: '为上传给 Amazon 的模板选择, 与 Amazon 的市场有关, 不可以随意修改'})

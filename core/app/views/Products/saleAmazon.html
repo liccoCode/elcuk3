@@ -57,16 +57,8 @@
   <div class="span5">
       #{select_field id:'account', name: 's.account.id', label: '上架账户', blank: true, items: accs /}
       #{select_field id:'market', name: 's.market', label:'市场', blank: true, items: models.market.M.values() /}
-      <div class="control-group">
-        <label class="control-label" for="templateType">模板类型</label>
-        <div class="controls">
-          <select id="templateType" name="s.aps.templateType" class="span10">
-            <option value="Computers" selected>Computers</option>
-            <option value="ConsumerElectronics">ConsumerElectronics</option>
-          </select>
-        </div>
-      </div>
-      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'FeedProductType', items:null /}
+      #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers', 'ConsumerElectronics']/}
+      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格(DE 没有)', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
