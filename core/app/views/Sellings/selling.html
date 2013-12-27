@@ -16,6 +16,9 @@
   <li>
     <a href="#selling" data-toggle='tab'>Selling</a>
   </li>
+  <li>
+    <a href="#feed" data-toggle='tab'>Feed</a>
+  </li>
 </ul>
 
 <div id="selling_tabs" class="tab-content">
@@ -32,6 +35,33 @@
               #{text_field id:'listing', name: 'listingId', label: 'Listing', value: s.listing?.listingId /}
             <button type="submit" class="btn">更换</button>
           #{/form}
+      </div>
+    </div>
+  </div>
+  <div class="tab-pane fade" id='feed'>
+    <div class="row-fluid">
+      <div class="offset2 span8">
+          #{if feeds.size() == 0}
+              <p class="muted text-center">等待创建新的 Feed.</p>
+          #{/if}
+          #{else }
+              <table class="table table-condensed table-bordered">
+                <tr>
+                  <th>FeedId</th>
+                  <th>Fid</th>
+                  <th>CreateAt</th>
+                  <th>UpdateAt</th>
+                </tr>
+              #{list items:feeds, as:'feed'}
+                <tr>
+                  <td><a target="_blank" href="@{Feeds.show(feed.id)}">${feed.feedId}</a></td>
+                  <td>${feed.fid}</td>
+                  <td>${feed.createdAt}</td>
+                  <td>${feed.updatedAt}</td>
+                </tr>
+              #{/list}
+              </table>
+          #{/else}
       </div>
     </div>
   </div>
