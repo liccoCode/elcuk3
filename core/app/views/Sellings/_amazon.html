@@ -45,7 +45,7 @@
 
 #{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
-      #{text_field id:'title', name: 's.aps.title', label: '标题', value: s.aps.title /}
+      #{textarea_field id:'title', name: 's.aps.title', rows: 3, label: '标题', value: s.aps.title /}
   </div>
   <div class="span5">
     <input type="hidden" name="s.sellingId" value="${s.sellingId}">
