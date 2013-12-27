@@ -140,6 +140,10 @@ public class Selling extends GenericModel {
             this.aps.productDesc = StringUtils.replaceEach(this.aps.productDesc,
                     new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
         }
+        if(StringUtils.isNotBlank(this.aps.title)) {
+            this.aps.title = StringUtils.replaceEach(this.aps.title,
+                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+        }
     }
 
     /**
