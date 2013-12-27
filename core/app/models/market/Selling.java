@@ -266,7 +266,6 @@ public class Selling extends GenericModel {
         if(product == null) Webs.error("SKU 产品不存在");
 
         List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
-        if(images == null || images.size() == 0) Webs.error("请添加 " + product.sku + " 并上传其图片后再处理 Selling.");
         this.aps.imageName = images.get(0).fileName;
 
         Listing lst = Listing.findById(Listing.lid(this.asin, this.market));

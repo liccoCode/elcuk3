@@ -18,6 +18,8 @@ public class ImageUrls extends JavaExtensions {
 
     /**
      * 生成该Selling对象全部图片的URL集合
+     * 注：上架的时候, 如果系统中的 Product 没有图片, main_image 使用 Amazon 笑脸图, 其他的不考虑
+     *
      * @param selling
      * @return 图片URL，顺序为(如果有的话)main,1,2,3,4,5...
      */
@@ -30,6 +32,8 @@ public class ImageUrls extends JavaExtensions {
             if(imageNames.length > 0 && imageNames.length > target) {
                 returnStr = imageUrl + imageNames[target];
             }
+        } else if(target == 0) {
+            returnStr = "http://g-ecx.images-amazon.com/images/G/01/x-site/icons/no-img-sm._V192198896_.gif";
         }
         return returnStr;
     }
