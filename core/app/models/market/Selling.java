@@ -132,6 +132,20 @@ public class Selling extends GenericModel {
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
 
 
+    @PreUpdate
+    @PrePersist
+    public void preUpdate() {
+        if(StringUtils.isNotBlank(this.aps.productDesc)) {
+            // 不能够存在换行符号, 不然会生成上架失败的 Feed 文件
+            this.aps.productDesc = StringUtils.replaceEach(this.aps.productDesc,
+                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+        }
+        if(StringUtils.isNotBlank(this.aps.title)) {
+            this.aps.title = StringUtils.replaceEach(this.aps.title,
+                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+        }
+    }
+
     /**
      * 这个 Selling 所属的哪一个用户
      */

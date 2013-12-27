@@ -26,7 +26,7 @@ public class DriverJob extends Job {
         try {
             SqlSelect sql = new SqlSelect()
                     .select("id", "className", "jsonArgs", "scheduleAt", "state")
-                    .from("Gjob")
+                    .from("GJob")
                     .where("state=?").param(GJob.S.DB.name())
                     .where("scheduleAt<=?").param(new Date())
                     .limit(10);

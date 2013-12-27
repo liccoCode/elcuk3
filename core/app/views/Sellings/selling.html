@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:s.sellingId/}
 #{set 'moreScripts'}
-    #{script 'sellings/selling.coffee'/}
     #{script 'component/amazon.coffee'/}
+    #{script 'sellings/selling.coffee'/}
 #{/set}
 #{set 'moreStyles'}
     #{stylesheet 'market.css'/}
@@ -41,7 +41,7 @@
   <div class="tab-pane fade" id='feed'>
     <div class="row-fluid">
       <div class="offset2 span8">
-          #{render 'Feeds/index.html', feeds:feeds /}
+          #{include 'Feeds/index.html' /}
       </div>
     </div>
   </div>
