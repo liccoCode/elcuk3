@@ -13,9 +13,9 @@
         #{elseif _.getClass().toString().contains("lang.String")}
           <option ${_value ? (_ == _value ? 'selected' : '') : ''} value="${_}">${_}</option>
         #{/elseif}
-        #{else }
+        #{elseif _ != null }
           <option ${_value ? (_ == _value ? 'selected' : '') : ''} value="${_propertyVal ? _[_propertyVal] : _['id']}">${_}</option>
-        #{/else}
+        #{/elseif}
     #{/list}
     </select>
     <span class="help-inline" id="${_id}_hint"></span>
