@@ -70,7 +70,7 @@
       #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}
       #{hidden_field id: 'accountId', name: 's.account.id', value: s.account.id /}
       #{text_field id:'market', name: 's.market', readonly: true, label:'市场', value: s.market.name() /}
-      #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers', 'ConsumerElectronics'], value: s.aps.templateType/}
+      #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers', 'ConsumerElectronics', 'CellPhones&Accessories', 'HomeImprovement','Home&Garden'], value: s.aps.templateType/}
       #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps.feedProductType], value: s.aps.feedProductType /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优化销售价格(DE 没有)', value: s.aps.salePrice /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
