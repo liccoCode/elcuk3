@@ -246,7 +246,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
         if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
         if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
-        if(StringUtils.isBlank(this.aps.feedProductType) && !StringUtils.contains("CellPhones&Accessories", this.aps.templateType)) Webs.error("所属模板的 Product Type 必须填写");
+        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("所属模板的 Product Type 必须填写");
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
