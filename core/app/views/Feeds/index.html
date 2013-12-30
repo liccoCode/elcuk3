@@ -1,27 +1,2 @@
 #{extends 'main_full.html' /}
-
-<div id="prod_list">
-#{if feeds.size() == 0}
-    <p class="muted text-center">等待创建新的 Feed.</p>
-#{/if}
-#{else }
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th>Id</th>
-        <th>FeedId</th>
-        <th>Fid</th>
-        <th>CreateAt</th>
-        <th>UpdateAt</th>
-      </tr>
-    #{list items:feeds, as:'feed'}
-      <tr>
-        <td><a href='javascript:window.open("@{Feeds.show(feed.id)}", "newwindow", "height=800, width=1000, top=0, left=0, toolbar=no, menubar=no");'>${feed.id}</a></td>
-        <td>${feed.feedId}</td>
-        <td>${feed.fid}</td>
-        <td>${feed.createdAt}</td>
-        <td>${feed.updatedAt}</td>
-      </tr>
-    #{/list}
-    </table>
-#{/else}
-</div>
+#{include 'Feeds/_feed.html'/}
