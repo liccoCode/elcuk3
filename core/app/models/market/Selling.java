@@ -222,7 +222,7 @@ public class Selling extends GenericModel {
         if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         String content = Selling
-                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString());
+                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(), "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
         Map<String, Object> args = this.submitJobParams(feed);
         args.put("action", "update");
@@ -246,12 +246,12 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
         if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
         if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
-        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("所属模板的 Product Type 必须填写");
+        if(StringUtils.isBlank(this.aps.feedProductType) && !StringUtils.contains("CellPhones&Accessories", this.aps.templateType)) Webs.error("所属模板的 Product Type 必须填写");
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
         patchToListing();
-        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this),
+        Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
                 this.aps.templateType, this.market.toString()), this);
         GJob.perform(SubmitFeedJob.class, this.submitJobParams(feed));
         return this;
@@ -415,11 +415,19 @@ public class Selling extends GenericModel {
      * @param sellingList  List
      * @param templateType String
      * @param market       String
+     * @param action       String
      * @return String 生成的模板数据
      *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
-    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
-        return GTs.render(String.format("Flat.File.%s.%s", templateType, market),
-                GTs.newMap("sellingList", sellingList).build());
+    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market, String action) {
+        Map args = GTs.newMap("sellingList", sellingList).build();
+        args.put("action", action);
+        return GTs.render(String.format("Flat.File.%s.%s", templateType, market), args);
+    }
+
+
+    public static String generateUpdateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
+        // update
+        return generateFeedTemplateFile(sellingList, templateType, market, "update");
     }
 }
