@@ -171,7 +171,7 @@ public class Selling extends GenericModel {
      */
     public void syncFromAmazon() {
         String html = "";
-        synchronized(this.account.cookieStore()) {
+        synchronized (this.account.cookieStore()) {
             // 1. 切换 Selling 所在区域
             this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
@@ -194,7 +194,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
 
-        synchronized(this.account.cookieStore()) {
+        synchronized (this.account.cookieStore()) {
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(
                             new BasicNameValuePair("qty.0", "27"), // 一页打 44 个
@@ -266,8 +266,9 @@ public class Selling extends GenericModel {
         if(product == null) Webs.error("SKU 产品不存在");
 
         List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
-        if(images == null || images.size() == 0) Webs.error("请添加 " + product.sku + " 并上传其图片后再处理 Selling.");
-        this.aps.imageName = images.get(0).fileName;
+        if(images != null && images.size() != 0) {
+            this.aps.imageName = images.get(0).fileName;
+        }
 
         Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
         if(lst == null) lst = Listing.blankListing(asin, market, product).save();
@@ -291,7 +292,7 @@ public class Selling extends GenericModel {
         List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
         if(dtos != null) {
             boolean find = false;
-            for(AnalyzeDTO dto : dtos) {
+            for (AnalyzeDTO dto : dtos) {
                 if(!dto.fid.equals(this.sellingId)) continue;
                 dto.ps = ps;
                 find = true;
@@ -317,7 +318,7 @@ public class Selling extends GenericModel {
         List<Selling> sellings = Selling
                 .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
         List<String> sids = new ArrayList<String>();
-        for(Selling s : sellings) sids.add(s.sellingId);
+        for (Selling s : sellings) sids.add(s.sellingId);
         return new F.T2<List<Selling>, List<String>>(sellings, sids);
     }
 
