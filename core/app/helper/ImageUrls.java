@@ -26,13 +26,12 @@ public class ImageUrls extends JavaExtensions {
     public static String generateSellingImageURL(Selling selling, int target) {
         String returnStr = "";
         String imageUrl = Play.configuration.getProperty("application.baseUrl") + "attachs/image?a.fileName=";
-        String imageName = selling.aps.imageName;
-        String[] imageNames = StringUtils.splitByWholeSeparator(imageName, Webs.SPLIT);
+        String[] imageNames = StringUtils.splitByWholeSeparator(selling.aps.imageName, Webs.SPLIT);
         if(imageNames != null) {
             if(imageNames.length > 0 && imageNames.length > target) {
                 returnStr = imageUrl + imageNames[target];
             }
-        } else if(target == 0) {
+        } else if(imageNames == null && target == 0) {
             returnStr = "http://g-ecx.images-amazon.com/images/G/01/x-site/icons/no-img-sm._V192198896_.gif";
         }
         return returnStr;
