@@ -32,7 +32,7 @@ public class ImageUrls extends JavaExtensions {
                 returnStr = imageUrl + imageNames[target];
             }
         } else if(imageNames == null && target == 0) {
-            returnStr = "https://raw.github.com/duanhongbing/elcuk2/master/amazon-logo-10-300x300.png";
+            returnStr = Play.configuration.getProperty("application.baseUrl")+"images/amazon-logo.png";
         }
         return returnStr;
     }
