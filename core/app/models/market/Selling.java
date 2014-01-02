@@ -221,6 +221,7 @@ public class Selling extends GenericModel {
     public Feed deploy() {
         if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
+        this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
         String content = Selling
                 .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(), "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
