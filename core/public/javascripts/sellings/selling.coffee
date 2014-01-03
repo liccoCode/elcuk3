@@ -108,12 +108,16 @@ $ ->
         return false
       names.push(fNames[i]) if fNames[i]
 
-    if names.length <= 0
-      noty({text: '请填写图片索引', type: 'warning'})
-      false
-    else
+    if names.length > 0
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
       true
+
+  $('#showFeedsButton').on('shown',(e) ->
+    sellingId=$('input[name="s.sellingId"]').val()
+    LoadMask.mask()
+    $("#feedsHome").load("/Sellings/feeds?sellingId="+sellingId+"")
+    LoadMask.unmask()
+  )
 
   # 图片上传的按钮
   $('#img_cal').click(imageIndexCal)

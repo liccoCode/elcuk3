@@ -23,8 +23,9 @@
       </button>
     </div>
     <div class="btn-group">
-      <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">${s.listing.listingId}</a>
-      <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">${s.merchantSKU.split(",")[0]}</a>
+      <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">Listing : ${s.listing.listingId}</a>
+      <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">Product : ${s.merchantSKU.split(",")[0]}</a>
+      <a class="btn btn-success" href="${s.showListingLink()}" target="_blank">Amazon : ${s.asin}</a>
     </div>
   </div>
 #{/else}
