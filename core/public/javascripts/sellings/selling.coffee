@@ -108,7 +108,10 @@ $ ->
         return false
       names.push(fNames[i]) if fNames[i]
 
-    if names.length > 0
+    if names.length <= 0
+      noty({text: '图片索引为空', type: 'alert'})
+      true
+    else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
       true
 
