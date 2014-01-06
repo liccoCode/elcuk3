@@ -13,6 +13,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class Users extends Controller {
         User user = User.findById(id);
         try {
             user.addPrivileges(privilegeId);
-        } catch(Exception e) {
+        } catch (Exception e) {
             renderJSON(new Ret(false, Webs.E(e)));
         }
         int size = user.privileges.size();
@@ -68,7 +69,7 @@ public class Users extends Controller {
             user.update();
             if(StringUtils.isNotBlank(newPassword))
                 user.changePasswd(newPassword);
-        } catch(Exception e) {
+        } catch (Exception e) {
             Validation.addError("", Webs.E(e));
             render("Users/home.html", user);
         }
@@ -82,7 +83,7 @@ public class Users extends Controller {
             render("Users/index.html", user);
         try {
             user.update();
-        } catch(Exception e) {
+        } catch (Exception e) {
             Validation.addError("", Webs.E(e));
             render("Users/index.html", user);
         }
@@ -114,12 +115,58 @@ public class Users extends Controller {
         try {
             User user = User.findById(id);
             renderJSON(J.G(user));
-        } catch(Exception e) {
+        } catch (Exception e) {
             renderJSON(new Ret(false, Webs.E(e)));
         }
     }
 
     public static void pass(String p) {
         renderText(Crypto.encryptAES(p));
+    }
+
+    public static void create() {
+        render();
+    }
+
+    /**
+     * 添加新的用户
+     * @param user
+     */
+    public static void addUser(User user) {
+        validation.required(user.password);
+        validation.required(user.confirm);
+        validation.required(user.username);
+        validation.required(user.password);
+        if(validation.hasErrors()) {
+            render("Users/create.html", user);
+        }
+        try {
+            user.save();
+        } catch (Exception e) {
+            Validation.addError("", Webs.E(e));
+            render("Users/create.html", user);
+        }
+        flash.success("用户添加成功");
+        redirect("/users/index");
+    }
+
+    /**
+     * 关闭用户
+     * 1. 用户相关的历史权限的清理
+     * 2. 修改用户的密码
+     * @param id
+     */
+    public static void closeUser(long id) {
+        User user = User.findById(id);
+        if(user == null)
+            renderJSON(new Ret("用户不存在，无法删除"));
+        try {
+            Privilege.clearUserPrivilegesCache(user);
+            user.privileges = new HashSet<Privilege>();
+            user.save();
+        }catch(Exception e){
+            renderJSON(new Ret(e.getMessage()));
+        }
+        renderJSON(new Ret(true, "删除成功."));
     }
 }
