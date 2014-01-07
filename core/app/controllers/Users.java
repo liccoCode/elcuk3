@@ -167,6 +167,7 @@ public class Users extends Controller {
             Privilege.clearUserPrivilegesCache(user);
             user.privileges = new HashSet<Privilege>();
             user.password = "easyacc" + System.currentTimeMillis();
+            user.closed = true;
             user.save();
         }catch(Exception e){
             renderJSON(new Ret(e.getMessage()));

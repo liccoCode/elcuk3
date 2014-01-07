@@ -69,6 +69,7 @@ public class User extends Model {
     @Password
     public String passwordDigest;
 
+    @Transient
     public String password;
 
     @Transient
