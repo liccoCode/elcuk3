@@ -13,9 +13,9 @@ $ ->
       $.post("/users/#{id}/closeUser", (r) ->
         try
           if r.flag
-            Notify.ok("关闭账户", r.message)
+            noty({text: '关闭账户'+r.message, type: 'success', timeout: 3000})
           else
-            Notify.alarm("关闭账户失败", r.message)
+            noty({text: '关闭账户失败 : '+r.message, type: 'error', timeout: 3000})
         finally
           LoadMask.unmask()
       )

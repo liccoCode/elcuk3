@@ -56,6 +56,7 @@ public class Users extends Controller {
     }
 
     public static void updates(User user, String newPassword, String newPasswordConfirm) {
+        user.confirm = user.password;
         validation.valid(user);
 
         // 如果填写了新密码, 那么则需要修改密码
@@ -132,6 +133,7 @@ public class Users extends Controller {
      * 添加新的用户
      * @param user
      */
+    @Check("users.index")
     public static void addUser(User user) {
         validation.required(user.password);
         validation.required(user.confirm);
@@ -146,7 +148,7 @@ public class Users extends Controller {
             Validation.addError("", Webs.E(e));
             render("Users/create.html", user);
         }
-        flash.success("用户添加成功");
+        flash.success("添加用户成功");
         redirect("/users/index");
     }
 
@@ -156,17 +158,19 @@ public class Users extends Controller {
      * 2. 修改用户的密码
      * @param id
      */
+    @Check("users.index")
     public static void closeUser(long id) {
         User user = User.findById(id);
         if(user == null)
-            renderJSON(new Ret("用户不存在，无法删除"));
+            renderJSON(new Ret("用户不存在，无法关闭"));
         try {
             Privilege.clearUserPrivilegesCache(user);
             user.privileges = new HashSet<Privilege>();
+            user.password = "easyacc" + System.currentTimeMillis();
             user.save();
         }catch(Exception e){
             renderJSON(new Ret(e.getMessage()));
         }
-        renderJSON(new Ret(true, "删除成功."));
+        renderJSON(new Ret(true, "成功."));
     }
 }
