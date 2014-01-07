@@ -156,6 +156,7 @@ public class Users extends Controller {
      * 关闭用户
      * 1. 用户相关的历史权限的清理
      * 2. 修改用户的密码
+     * 3. 将用户的状态改变为已关闭
      * @param id
      */
     @Check("users.index")
