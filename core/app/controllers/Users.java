@@ -13,6 +13,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -55,6 +56,7 @@ public class Users extends Controller {
     }
 
     public static void updates(User user, String newPassword, String newPasswordConfirm) {
+        user.confirm = user.password;
         validation.valid(user);
 
         // 如果填写了新密码, 那么则需要修改密码
@@ -121,5 +123,58 @@ public class Users extends Controller {
 
     public static void pass(String p) {
         renderText(Crypto.encryptAES(p));
+    }
+
+    public static void create() {
+        render();
+    }
+
+    /**
+     * 添加新的用户
+     *
+     * @param user
+     */
+    @Check("users.index")
+    public static void addUser(User user) {
+        validation.required(user.password);
+        validation.required(user.confirm);
+        validation.required(user.username);
+        validation.required(user.password);
+        if(validation.hasErrors()) {
+            render("Users/create.html", user);
+        }
+        try {
+            user.save();
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+            render("Users/create.html", user);
+        }
+        flash.success("添加用户成功");
+        redirect("/users/index");
+    }
+
+    /**
+     * 关闭用户
+     * 1. 用户相关的历史权限的清理
+     * 2. 修改用户的密码
+     * 3. 将用户的状态改变为已关闭
+     *
+     * @param id
+     */
+    @Check("users.index")
+    public static void closeUser(long id) {
+        User user = User.findById(id);
+        if(user == null)
+            renderJSON(new Ret("用户不存在，无法关闭"));
+        try {
+            Privilege.clearUserPrivilegesCache(user);
+            user.privileges = new HashSet<Privilege>();
+            user.password = "easyacc" + System.currentTimeMillis();
+            user.closed = true;
+            user.save();
+        } catch(Exception e) {
+            renderJSON(new Ret(e.getMessage()));
+        }
+        renderJSON(new Ret(true, "成功."));
     }
 }

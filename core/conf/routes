@@ -125,6 +125,12 @@ GET     /product/{id}/amazon                                Products.saleAmazon
 GET     /selling/{id}                                       Sellings.selling
 GET     /selling/{id}/label                                 Sellings.sellingLabel
 
+# Users
+POST    /users/{id}/closeUser                               Users.closeUser
+
+# Feeds
+GET     /feed/{id}/show                                     Feeds.show
+
 # Shipments
 GET     /shipments                                          Shipments.index
 POST    /shipments                                          Shipments.index
