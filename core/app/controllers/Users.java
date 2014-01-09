@@ -15,6 +15,7 @@ import play.mvc.With;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User 相关的操作
@@ -173,8 +174,25 @@ public class Users extends Controller {
             user.closed = true;
             user.save();
         } catch(Exception e) {
-            renderJSON(new Ret(e.getMessage()));
+            renderJSON(new Ret("oOh~出现了一个错误: " + e.getMessage()));
         }
-        renderJSON(new Ret(true, "成功."));
+        renderJSON(new Ret(true, "关闭用户成功"));
+    }
+
+    @Check("users.index")
+    public static void openUser(long id) {
+        User user = User.findById(id);
+        if(user == null)
+            renderJSON(new Ret("用户不存在，无法打开"));
+        try {
+            Set<Privilege> privileges = Privilege.privileges(user.username);
+            Privilege.updatePrivileges(user.username, privileges);
+            user.password = "123";
+            user.closed = false;
+            user.save();
+        } catch(Exception e) {
+            renderJSON(new Ret("oOh~出现了一个错误: " + e.getMessage()));
+        }
+        renderJSON(new Ret(true, "打开用户成功,初始密码为123,请联系管理员添加权限"));
     }
 }

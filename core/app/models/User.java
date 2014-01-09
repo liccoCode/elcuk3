@@ -103,28 +103,10 @@ public class User extends Model {
     @Expose
     public String wangwang;
 
-    //TODO 这里的四个 isXX 为暂时解决办法, 如果人数多起来, 需要重构为 Role
     /**
-     * 是否为售后支持部门
+     * 该用户是否被关闭
      */
-    public boolean isService = false;
-
-    /**
-     * 是否为采购部门
-     */
-    public boolean isProcure = false;
-
-    /**
-     * 是否为运输部门
-     */
-    public boolean isShipper = false;
-
-    /**
-     * PM
-     */
-    public boolean isPM = false;
-
-
+    @Expose
     public boolean closed = false;
 
     public User() {
