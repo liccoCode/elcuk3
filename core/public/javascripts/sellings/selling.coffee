@@ -112,13 +112,13 @@ $ ->
       noty({text: '图片索引为空', type: 'warning'})
       true
     else
-      $('input[name = s\\.aps\\.imageName]').val(names.join('|-|'))
+      $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
       true
 
   $('#showFeedsButton').on('shown',(e) ->
-    sellingId = $('input[name = "s.sellingId"]').val()
+    sellingId = $('input[name="s.sellingId"]').val()
     LoadMask.mask()
-    $("#feedsHome").load("/Sellings/feeds?sellingId = #{sellingId}")
+    $("#feedsHome").load("/Sellings/feeds?sellingId=#{sellingId}")
     LoadMask.unmask()
   )
 
