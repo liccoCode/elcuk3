@@ -14,10 +14,10 @@
     <a href="#amazon" data-toggle='tab'>Amazon</a>
   </li>
   <li>
-    <a href="#selling" data-toggle='tab'>Selling</a>
+    <a href="#selling" data-toggle='tab' id="showFeeds">Selling</a>
   </li>
   <li>
-    <a href="#feed" data-toggle='tab'>Feed</a>
+    <a href="#feed" data-toggle='tab' id="showFeedsButton">Feed</a>
   </li>
 </ul>
 
@@ -40,7 +40,7 @@
   </div>
   <div class="tab-pane fade" id='feed'>
     <div class="row-fluid">
-      <div class="offset2 span8">
+      <div class="offset2 span8" id="feedsHome">
           #{include 'Feeds/_feed.html'/}
       </div>
     </div>

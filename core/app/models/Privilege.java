@@ -112,6 +112,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("jobs.index", "任务管理 页面"));
         privileges.add(new Privilege("servers.index", "服务器管理 页面"));
         privileges.add(new Privilege("accounts.index", "账户管理 页面"));
+
         privileges.add(new Privilege("users.index", "用户管理 页面"));
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
 

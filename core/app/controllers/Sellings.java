@@ -176,4 +176,13 @@ public class Sellings extends Controller {
         renderBinary(file, id + ".pdf");
     }
 
+    /**
+     * 加载 Selling 所拥有的全部 Feed
+     *
+     * @param sellingId String
+     */
+    public static void feeds(String sellingId) {
+        renderArgs.put("feeds", Feed.find("fid=? ORDER BY createdAt DESC", sellingId).fetch());
+        render("Feeds/_feed.html");
+    }
 }

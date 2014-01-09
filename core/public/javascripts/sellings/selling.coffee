@@ -75,7 +75,7 @@ $ ->
     return false if !confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")
     btnGroup = $(@).parent()
     btnGroup.mask('同步中...')
-    $.post('/sellings/syncAmazon', sid: $('#s_sellingId').val(),
+    $.post('/sellings/syncAmazon', sid: $('input[name="s.sellingId"]').val(),
       (r) ->
         if r.flag is true
           alert('同步成功, 请刷新页面查看最新数据')
@@ -109,11 +109,18 @@ $ ->
       names.push(fNames[i]) if fNames[i]
 
     if names.length <= 0
-      noty({text: '请填写图片索引', type: 'warning'})
-      false
+      noty({text: '图片索引为空', type: 'warning'})
+      true
     else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
       true
+
+  $('#showFeedsButton').on('shown',(e) ->
+    sellingId = $('input[name="s.sellingId"]').val()
+    LoadMask.mask()
+    $("#feedsHome").load("/Sellings/feeds?sellingId=#{sellingId}")
+    LoadMask.unmask()
+  )
 
   # 图片上传的按钮
   $('#img_cal').click(imageIndexCal)
