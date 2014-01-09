@@ -91,7 +91,7 @@ public class Sellings extends Controller {
             selling.patchToListing();
             flash.success("手动添加 Selling 成功.");
             Sellings.selling(selling.sellingId);
-        } catch (FastRuntimeException e) {
+        } catch(FastRuntimeException e) {
             Validation.addError("", e.getMessage());
             render("Sellings/blank.html");
         }
@@ -105,7 +105,7 @@ public class Sellings extends Controller {
             s.changeListing(lst);
             flash.success("成功将 Selling %s 从 %s 转移到 %s", s.sellingId, oldListingId, listingId);
             Sellings.selling(s.sellingId);
-        } catch (FastRuntimeException e) {
+        } catch(FastRuntimeException e) {
             flash.error(e.getMessage());
             Sellings.selling(s.sellingId);
         }
@@ -118,7 +118,7 @@ public class Sellings extends Controller {
             s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
             s.save();
             renderJSON(new Ret(true, s.sellingId));
-        } catch (Exception e) {
+        } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
@@ -129,7 +129,7 @@ public class Sellings extends Controller {
         try {
             Feed feed = s.deploy();
             renderJSON(feed);
-        } catch (Exception e) {
+        } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
@@ -167,7 +167,7 @@ public class Sellings extends Controller {
                 file.delete(); // 删除原来的, 再写新的
                 try {
                     FileUtils.writeByteArrayToFile(file, bytes);
-                } catch (IOException e) {
+                } catch(IOException e) {
                     // ignore
                 }
                 return file;
