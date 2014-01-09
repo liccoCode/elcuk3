@@ -48,7 +48,7 @@ public class Users extends Controller {
         User user = User.findById(id);
         try {
             user.addPrivileges(privilegeId);
-        } catch (Exception e) {
+        } catch(Exception e) {
             renderJSON(new Ret(false, Webs.E(e)));
         }
         int size = user.privileges.size();
@@ -70,7 +70,7 @@ public class Users extends Controller {
             user.update();
             if(StringUtils.isNotBlank(newPassword))
                 user.changePasswd(newPassword);
-        } catch (Exception e) {
+        } catch(Exception e) {
             Validation.addError("", Webs.E(e));
             render("Users/home.html", user);
         }
@@ -84,7 +84,7 @@ public class Users extends Controller {
             render("Users/index.html", user);
         try {
             user.update();
-        } catch (Exception e) {
+        } catch(Exception e) {
             Validation.addError("", Webs.E(e));
             render("Users/index.html", user);
         }
@@ -116,7 +116,7 @@ public class Users extends Controller {
         try {
             User user = User.findById(id);
             renderJSON(J.G(user));
-        } catch (Exception e) {
+        } catch(Exception e) {
             renderJSON(new Ret(false, Webs.E(e)));
         }
     }
@@ -131,6 +131,7 @@ public class Users extends Controller {
 
     /**
      * 添加新的用户
+     *
      * @param user
      */
     @Check("users.index")
@@ -144,7 +145,7 @@ public class Users extends Controller {
         }
         try {
             user.save();
-        } catch (Exception e) {
+        } catch(Exception e) {
             Validation.addError("", Webs.E(e));
             render("Users/create.html", user);
         }
@@ -157,6 +158,7 @@ public class Users extends Controller {
      * 1. 用户相关的历史权限的清理
      * 2. 修改用户的密码
      * 3. 将用户的状态改变为已关闭
+     *
      * @param id
      */
     @Check("users.index")
@@ -170,7 +172,7 @@ public class Users extends Controller {
             user.password = "easyacc" + System.currentTimeMillis();
             user.closed = true;
             user.save();
-        }catch(Exception e){
+        } catch(Exception e) {
             renderJSON(new Ret(e.getMessage()));
         }
         renderJSON(new Ret(true, "成功."));
