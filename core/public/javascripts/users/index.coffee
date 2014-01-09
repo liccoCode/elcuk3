@@ -9,14 +9,14 @@ $ ->
   setCloseOrOpen = (flag, id, a) ->
     if flag is "open"
       $("##{id}").attr("src", "/img/red.png")
-      a.attr("title", "打开此账户")
-      a.attr("id", "openUser")
-      a.text("Open")
+      $(a).attr("data-original-title", "打开此账户")
+      $(a).attr("id", "openUser")
+      $(a).text("Open")
     else
       $("##{id}").attr("src", "/img/green.png")
-      a.attr("title", "关闭此账户")
-      a.attr("id", "closeUser")
-      a.text("Close")
+      $(a).attr("data-original-title", "关闭此账户")
+      $(a).attr("id", "closeUser")
+      $(a).text("Close")
 
   # 关闭用户
   $(document).on('click', '#closeUser', (r)  ->
