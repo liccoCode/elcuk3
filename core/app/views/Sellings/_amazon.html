@@ -79,7 +79,9 @@
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: "0" /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
   </div>
-
+  <div class="span12">
+     #{input_append /}
+  </div>
   <div class="span10">
       #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: s.aps.keyFeturess[0]/}
       #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: s.aps.keyFeturess[1] /}

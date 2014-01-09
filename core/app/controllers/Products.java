@@ -15,6 +15,7 @@ import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -79,7 +80,9 @@ public class Products extends Controller {
 
     public static void saleAmazon(String id) {
         Product product = Product.findByMerchantSKU(id);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(product.sku);
         Selling s = new Selling();
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("accs", Account.openedSaleAcc());
         render(product, s);
     }
