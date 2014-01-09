@@ -127,6 +127,7 @@ GET     /selling/{id}/label                                 Sellings.sellingLabe
 
 # Users
 POST    /users/{id}/closeUser                               Users.closeUser
+POST    /users/{id}/openUser                                Users.openUser
 
 # Feeds
 GET     /feed/{id}/show                                     Feeds.show
