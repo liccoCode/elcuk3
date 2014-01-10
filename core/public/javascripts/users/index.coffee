@@ -45,7 +45,18 @@ $ ->
         $.post("/users/#{id}/openUser", (r) ->
           try
             if r.flag
-              noty({text: r.message, type: 'success', timeout: 3000})
+              noty({
+                text: r.message,
+                type: 'success',
+                timeout: false,
+                closeWith: 'button',
+                buttons: [{
+                  addClass: 'btn btn-link',
+                  text: 'close',
+                  onClick: ($noty) ->
+                    $noty.close()
+                }]
+              })
               setCloseOrOpen("close", id, $a)
             else
               noty({text: r.message, type: 'error', timeout: 3000})

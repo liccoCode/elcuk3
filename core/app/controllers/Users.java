@@ -7,6 +7,7 @@ import models.User;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import play.data.validation.Validation;
 import play.libs.Crypto;
 import play.mvc.Before;
@@ -157,7 +158,7 @@ public class Users extends Controller {
     /**
      * 关闭用户
      * 1. 用户相关的历史权限的清理
-     * 2. 修改用户的密码
+     * 2. 修改用户的密码为随机
      * 3. 将用户的状态改变为已关闭
      *
      * @param id
@@ -170,15 +171,22 @@ public class Users extends Controller {
         try {
             Privilege.clearUserPrivilegesCache(user);
             user.privileges = new HashSet<Privilege>();
-            user.password = "easyacc" + System.currentTimeMillis();
+            user.password = RandomStringUtils.randomAlphanumeric(15);
             user.closed = true;
             user.save();
         } catch(Exception e) {
-            renderJSON(new Ret("oOh~出现了一个错误: " + e.getMessage()));
+            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.E(e)));
         }
         renderJSON(new Ret(true, "关闭用户成功"));
     }
 
+    /**
+     * 打开用户
+     * 1. 打开用户相关的权限信息
+     * 2. 修改用户的密码为随机生成的15位的字母和数字的组合
+     * 3.将用户的状态改为未关闭
+     * @param id
+     */
     @Check("users.index")
     public static void openUser(long id) {
         User user = User.findById(id);
@@ -187,12 +195,12 @@ public class Users extends Controller {
         try {
             Set<Privilege> privileges = Privilege.privileges(user.username);
             Privilege.updatePrivileges(user.username, privileges);
-            user.password = "123";
+            user.password = RandomStringUtils.randomAlphanumeric(15);
             user.closed = false;
             user.save();
         } catch(Exception e) {
-            renderJSON(new Ret("oOh~出现了一个错误: " + e.getMessage()));
+            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.E(e)));
         }
-        renderJSON(new Ret(true, "打开用户成功,初始密码为123,请联系管理员添加权限"));
+        renderJSON(new Ret(true, String.format("打开用户成功,初始密码为 %s ,请联系管理员添加权限", user.password)));
     }
 }
