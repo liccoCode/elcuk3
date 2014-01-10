@@ -581,18 +581,20 @@ public class Account extends Model {
 
     /**
      * 所有打开的 Review 账号
-     *
+     * 1. 规则为欧洲市场的账号可以通用
+     * 2. 美国市场单独区分
      * @param market 需要哪一个市场的可点击 Review Account, 如果设置为 null, 则返回全部
      * @return
      */
     public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
         switch(market) {
-            case AMAZON_UK:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false,
-                        false, true).fetch();
             case AMAZON_DE:
-                return Account.find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false,
-                        false, true).fetch();
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+            case AMAZON_UK:
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
+                        false, false).fetch();
             case AMAZON_US:
                 return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
                         false, true).fetch();
