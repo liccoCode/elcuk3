@@ -10,7 +10,7 @@ $ ->
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
-      # 预览 Desc 的方法
+  # 预览 Desc 的方法
   previewBtn = (e) ->
     invalidTag = false
     for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
@@ -76,12 +76,12 @@ $ ->
     $("[name='s.aps.productDesc']").val(json['p'][0]).blur()
     # technical
     tech = json['t']
-    $("[name='s.aps.keyFeturess']").each((i) ->
+    $("[name*='s.aps.keyFeturess']").each((i) ->
       $(@).val(if tech[i] then tech[i] else '').blur()
     )
     # searchTerms
     search = json['s']
-    $("[name='s.aps.searchTermss']").each((i) ->
+    $("[name*='s.aps.searchTermss']").each((i) ->
       $(@).val(if search[i] then search[i] else '').blur()
     )
     false
