@@ -170,7 +170,7 @@ public class Account extends Model {
     }
 
     public String cookie(String name, M market) {
-        for (Cookie cookie : this.cookieStore(market).getCookies()) {
+        for(Cookie cookie : this.cookieStore(market).getCookies()) {
             if(name.equalsIgnoreCase(cookie.getName()))
                 return cookie.getValue();
         }
@@ -193,7 +193,7 @@ public class Account extends Model {
      * 销售账号需要登陆的后台系统
      */
     public void loginAmazonSellerCenter() {
-        switch (this.type) {
+        switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_US:
@@ -267,7 +267,7 @@ public class Account extends Model {
             return new F.T2<List<NameValuePair>, String>(params, "");
         }
 
-        for (Element el : inputs) {
+        for(Element el : inputs) {
             String att = el.attr("name");
             if("username".equals(att))
                 params.add(new BasicNameValuePair(att, this.username));
@@ -285,7 +285,7 @@ public class Account extends Model {
      * 支持同账户登陆多个市场, 例如: 一个账户登陆 Uk/DE
      */
     public boolean loginAmazonSite(M market) {
-        switch (this.type) {
+        switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_FR:
@@ -310,7 +310,7 @@ public class Account extends Model {
                 }
 
                 Set<NameValuePair> params = new HashSet<NameValuePair>();
-                for (Element el : inputs) {
+                for(Element el : inputs) {
                     String att = el.attr("name");
                     if("email".equals(att)) params.add(new BasicNameValuePair(att, this.username));
                     else if("password".equals(att))
@@ -367,7 +367,7 @@ public class Account extends Model {
      * @return
      */
     public M.MID marketplaceId() {
-        switch (this.type) {
+        switch(this.type) {
             case AMAZON_UK:
                 return M.MID.A1F83G8C2ARO7P;
             case AMAZON_DE:
@@ -448,7 +448,7 @@ public class Account extends Model {
         Document doc = Jsoup.parse(listing_body);
         Elements inputs = doc.select("#handleBuy input");
         Set<NameValuePair> params = new HashSet<NameValuePair>();
-        for (Element el : inputs) {
+        for(Element el : inputs) {
             if(StringUtils.isNotBlank(el.val())) {
                 params.add(new BasicNameValuePair(el.attr("name"), el.val()));
             }
@@ -488,7 +488,7 @@ public class Account extends Model {
          */
         F.T3<Boolean, String, String> loginAndClicks = checkLoginAndFetchClickLinks(review);
         if(!loginAndClicks._1) { // 没有登陆则登陆, 只尝试一次登陆!
-            synchronized (this.cookieStore(review.listing.market)) {
+            synchronized(this.cookieStore(review.listing.market)) {
                 this.loginAmazonSite(review.listing.market);
             }
             loginAndClicks = checkLoginAndFetchClickLinks(review);
@@ -521,7 +521,7 @@ public class Account extends Model {
         // 账号登陆以后, 链接中才会有 sign-out 字符串
         Elements els = doc.select(".votingButtonReviews");
         String[] upAndDownLink = new String[2];
-        for (Element el : els) {
+        for(Element el : els) {
             String link = el.attr("href");
             if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm")))
                 upAndDownLink[0] = link;
@@ -588,7 +588,7 @@ public class Account extends Model {
      * @return
      */
     public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
-        switch (market) {
+        switch(market) {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
@@ -623,7 +623,7 @@ public class Account extends Model {
      * 通过账户获取 FBA 的发货地址
      */
     public static Address address(M type) {
-        switch (type) {
+        switch(type) {
             case AMAZON_UK:
             case AMAZON_DE:
                 return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
@@ -642,9 +642,9 @@ public class Account extends Model {
      * 2. 登陆 Account 账户
      */
     public static void initLogin() {
-        synchronized (Account.class) {
+        synchronized(Account.class) {
             List<Account> accs = Account.openedSaleAcc();
-            for (Account ac : accs) {
+            for(Account ac : accs) {
                 Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
                 ac.loginAmazonSellerCenter();
             }
@@ -656,7 +656,7 @@ public class Account extends Model {
      */
     public static void initOfferIds() {
         List<Account> accs = Account.openedSaleAcc();
-        for (Account ac : accs) {
+        for(Account ac : accs) {
             if(ac.isSaleAcc)
                 OFFER_IDS.put(ac.merchantId, ac.uniqueName);
         }
