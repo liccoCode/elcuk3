@@ -15,7 +15,6 @@ public class UserFactory extends ModelFactory<User> {
         user.email = "wyatt@easya.cc";
         user.password = "123456";
         user.username = "wyatt";
-        user.isService = false;
         return user;
     }
 }
