@@ -24,6 +24,6 @@ public class TestFeedTrmplate extends UnitTest {
         s.aps.standerPrice = (float) 999.8;
         s.aps.feedProductType = "ComputerComponent";
         s.aps.templateType = "Computers";
-        FileUtils.write(new File("/Users/mac/Desktop/Computers.txt"), Selling.generateFeedTemplateFile(Lists.newArrayList(s), s.aps.templateType, s.market.toString()));
+        FileUtils.write(new File("/Users/mac/Desktop/Computers.txt"), Selling.generateFeedTemplateFile(Lists.newArrayList(s), s.aps.templateType, s.market.toString(), "update"));
     }
 }
