@@ -7,7 +7,7 @@ $ ->
 
   # 设置关闭和打开用户后页面相关的展示
   $(document).on('setCloseOrOpen','#openUser,#closeUser', (r) ->
-    $a =$(@)
+    $a = $(@)
     imgid = $a.data("userid")
     $img = $("##{imgid}")
     if $a.attr("id") is "openUser"
