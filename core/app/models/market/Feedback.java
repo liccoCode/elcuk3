@@ -169,9 +169,13 @@ public class Feedback extends GenericModel {
 
         if(this.orderr != null)
             name = String.format("%s - %s", this.orderr.buyer, this.market.toString());
-        if(StringUtils.isBlank(subject))
-            subject = "We would like to address your feedback!";
-
+        if(StringUtils.isBlank(subject)) {
+            if(this.market == M.AMAZON_DE) {
+                subject = "Sie haben einen neutralen/negativen Kommentar bei Amazon hinterlassen. Dürfen wir Ihnen helfen?";
+            } else {
+                subject = "We would like to address your feedback!";
+            }
+        }
         this.osTicketId = Jitbit.addTicket(email, name, subject, content, Jitbit.Category.FEEDBACK);
         return this.osTicketId;
     }
