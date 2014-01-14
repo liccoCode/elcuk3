@@ -142,6 +142,7 @@ public class Users extends Controller {
         validation.required(user.confirm);
         validation.required(user.username);
         validation.required(user.password);
+        validation.equals(user.password, user.confirm);
         if(validation.hasErrors()) {
             render("Users/create.html", user);
         }
