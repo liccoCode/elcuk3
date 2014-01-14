@@ -5,21 +5,20 @@ import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.embedded.AmazonProps;
-import models.market.Listing;
-import models.market.Selling;
+import models.market.*;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
-import play.data.validation.Error;
+import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,6 +55,7 @@ public class Sellings extends Controller {
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
+        renderArgs.put("feeds", s.feeds());
         render(s);
     }
 
@@ -72,42 +72,66 @@ public class Sellings extends Controller {
                 .build()));
     }
 
-    public static void imageUpload(final String sid, final String imgs) {
-        if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
-            @Override
-            public List<Error> doJobWithResult() {
-                List<Error> errors = new ArrayList<Error>();
-                Selling s = Selling.findById(sid);
-                try {
-                    s.uploadAmazonImg(imgs);
-                } catch(Exception e) {
-                    errors.add(new Error("", Webs.E(e), new String[]{}));
-                }
-                return errors;
-            }
-        }.now());
-        if(errors.size() > 0) {
-            renderJSON(new Ret(false, errors.toString()));
-        } else {
-            renderJSON(new Ret(true));
+    /**
+     * 添加 selling 页面
+     */
+    public static void blank() {
+        render();
+    }
+
+    public static void create(String sku, String upc, String asin, String market, Account acc) {
+        try {
+            if(StringUtils.isBlank(sku)) Webs.error("SKU 必须存在");
+            if(StringUtils.isBlank(upc)) Webs.error("UPC 必须存在");
+            if(StringUtils.isBlank(asin)) Webs.error("ASIN 必须存在");
+            if(StringUtils.isBlank(market)) Webs.error("Market 必须存在");
+
+            String msku = String.format("%s,%s", sku.trim(), upc.trim());
+            Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
+            selling.patchToListing();
+            flash.success("手动添加 Selling 成功.");
+            Sellings.selling(selling.sellingId);
+        } catch(FastRuntimeException e) {
+            Validation.addError("", e.getMessage());
+            render("Sellings/blank.html");
+        }
+    }
+
+    public static void changeListing(Selling s, String listingId) {
+        try {
+            Listing lst = Listing.findById(listingId);
+            if(lst == null) Webs.error("Listing " + listingId + "不存在");
+            String oldListingId = s.listing.listingId;
+            s.changeListing(lst);
+            flash.success("成功将 Selling %s 从 %s 转移到 %s", s.sellingId, oldListingId, listingId);
+            Sellings.selling(s.sellingId);
+        } catch(FastRuntimeException e) {
+            flash.error(e.getMessage());
+            Sellings.selling(s.sellingId);
         }
     }
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
-    public static void update(Selling s, boolean remote) {
+    public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {
-            if(!remote) { // 非远程, 本地更新
-                s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-                s.save();
-            } else { // 远程更新
-                s.deploy();
-            }
+            s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+            s.save();
+            renderJSON(new Ret(true, s.sellingId));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(J.G(s));
+    }
+
+    public static void deploy(String id) {
+        //10SMI9300-2200S|A_UK|1
+        Selling s = Selling.findById(id);
+        try {
+            Feed feed = s.deploy();
+            renderJSON(feed);
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     /**
@@ -152,4 +176,13 @@ public class Sellings extends Controller {
         renderBinary(file, id + ".pdf");
     }
 
+    /**
+     * 加载 Selling 所拥有的全部 Feed
+     *
+     * @param sellingId String
+     */
+    public static void feeds(String sellingId) {
+        renderArgs.put("feeds", Feed.find("fid=? ORDER BY createdAt DESC", sellingId).fetch());
+        render("Feeds/_feed.html");
+    }
 }

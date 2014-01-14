@@ -1,0 +1,26 @@
+#{extends 'main.html'/}
+#{set title:'添加 Selling'/}
+#{set 'moreStyles'}
+    #{stylesheet 'market.css'/}
+#{/set}
+
+#{errorMsgs /}
+<div class="row">
+  <form action="@{Sellings.create()}" class="form-horizontal" id='new_selling'>
+    <h4 class="text-center">手动添加 Selling</h4>
+
+  #{text_field id: 'sku', name: 'sku', label: 'SKU' /}
+  #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code" /}
+  #{text_field id: 'asin', name: 'asin', label: 'ASIN', placeholder: "Amazon Standard Identification Number" /}
+  #{select_field id:'market', name: 'market', items: models.market.M.values(), label: 'Market' /}
+  #{select_field id:'acc.id', name: 'acc.id', items: models.market.Account.openedSaleAcc(), label: 'Account' /}
+
+    <div class="control-group">
+      <div class="controls">
+        <a href="@{Listings.index()}" class="btn btn-success">返回</a>
+        <button type="submit" class="btn" data-disable-with='提交中..'>提交</button>
+      </div>
+    </div>
+
+  </form>
+</div>

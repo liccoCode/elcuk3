@@ -1,9 +1,8 @@
 package jobs;
 
-import models.Jobex;
+import jobs.driver.BaseJob;
 import models.market.Account;
 import play.Logger;
-import play.jobs.Job;
 
 import java.util.List;
 
@@ -18,11 +17,10 @@ import java.util.List;
  * Date: 3/14/12
  * Time: 4:38 PM
  */
-public class KeepSessionJob extends Job {
+public class KeepSessionJob extends BaseJob {
 
     @Override
-    public void doJob() {
-        if(!Jobex.findByClassName(KeepSessionJob.class.getName()).isExcute()) return;
+    public void doit() {
         List<Account> accs = Account.openedSaleAcc();
         for(Account ac : accs) {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));

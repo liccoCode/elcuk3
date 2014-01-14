@@ -112,7 +112,7 @@ public class Account extends Model {
     public String accessKey;
 
     /**
-     * Amazon MerchantID
+     * Amazon MerchantID/SellerId
      */
     @Expose
     public String merchantId;
@@ -158,13 +158,14 @@ public class Account extends Model {
      */
     public CookieStore cookieStore(M market) {
         if(market == null) market = this.type;
-        String key = cookieKey(this.id, market);
+        String key = cookieKey(this.uniqueName, market);
         if(!cookieMap().containsKey(key))
             cookieMap().put(key, new BasicCookieStore());
         return cookieMap().get(key);
     }
 
     public String cookie(String name) {
+
         return cookie(name, null);
     }
 
@@ -207,7 +208,8 @@ public class Account extends Model {
                     body = HTTP.post(this.cookieStore(), params._2, params._1);
                     if(Play.mode.isDev()) {
                         FileUtils.writeStringToFile(
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
+                                        this.id +
                                         ".afterLogin.html"),
                                 body
                         );
@@ -225,7 +227,8 @@ public class Account extends Model {
                 } catch(Exception e) {
                     try {
                         FileUtils.writeStringToFile(
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html"),
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
+                                        this.id + ".error.html"),
                                 body
                         );
                     } catch(IOException e1) {
@@ -236,7 +239,8 @@ public class Account extends Model {
                 break;
             default:
                 Logger.warn(
-                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type + " is not support!");
+                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
+                                " is not support!");
         }
     }
 
@@ -247,7 +251,8 @@ public class Account extends Model {
 
         if(Play.mode.isDev()) {
             FileUtils.writeStringToFile(new File(
-                    Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+                    Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
+                            ".homepage.html"),
                     body
             );
         }
@@ -271,7 +276,8 @@ public class Account extends Model {
             else
                 params.add(new BasicNameValuePair(att, el.val()));
         }
-        return new F.T2<List<NameValuePair>, String>(params, doc.select("form:eq(0)").attr("action"));
+        return new F.T2<List<NameValuePair>, String>(params,
+                doc.select("form:eq(0)").attr("action"));
     }
 
     /**
@@ -349,7 +355,8 @@ public class Account extends Model {
             url = this.type.changeRegion(m.amid().name());
             HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
-            throw new FastRuntimeException(String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
+            throw new FastRuntimeException(
+                    String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
         }
     }
 
@@ -417,7 +424,8 @@ public class Account extends Model {
             sessionId = this.cookie("session-id", listing.market);
         }
 
-        String wishlistBody = HTTP.get(this.cookieStore(listing.market), listing.market.amazonWishList());
+        String wishlistBody = HTTP.get(this.cookieStore(listing.market),
+                listing.market.amazonWishList());
         //判断是否存在WishList
         if(!wishlistBody.contains("listActions")) {
             HTTP.post(this.cookieStore(listing.market), listing.market.amazonNewWishList(),
@@ -435,7 +443,8 @@ public class Account extends Model {
 
         }
 
-        String listing_body = HTTP.get(this.cookieStore(listing.market), listing.market.amazonAsinLink(listing.asin));
+        String listing_body = HTTP.get(this.cookieStore(listing.market),
+                listing.market.amazonAsinLink(listing.asin));
         Document doc = Jsoup.parse(listing_body);
         Elements inputs = doc.select("#handleBuy input");
         Set<NameValuePair> params = new HashSet<NameValuePair>();
@@ -451,7 +460,8 @@ public class Account extends Model {
         params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.x", "-1710"));
         params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.y", "-357"));
         String result = HTTP
-                .post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
+                .post(this.cookieStore(listing.market),
+                        doc.select("#handleBuy").first().attr("action"), params);
 
         //如果添加成功,或者是账户已经添加该Listing但是系统中无记录.
         if(result.contains("hucSuccessMsg") | result.contains("appMessageBoxInfo")) {
@@ -571,27 +581,32 @@ public class Account extends Model {
 
     /**
      * 所有打开的 Review 账号
+     * 1. 规则为欧洲市场的账号可以通用
+     * 2. 美国市场单独区分
      *
      * @param market 需要哪一个市场的可点击 Review Account, 如果设置为 null, 则返回全部
      * @return
      */
     public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
         switch(market) {
-            case AMAZON_UK:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false, true).fetch();
             case AMAZON_DE:
-                return Account.find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false, false, true).fetch();
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+            case AMAZON_UK:
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
+                        false, false).fetch();
             case AMAZON_US:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false, false, true).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
+                        false, true).fetch();
             default:
-                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
+                        .fetch();
         }
     }
 
     /**
      * 所有打开的销售账号
-     *
-     * @return
      */
     public static List<Account> openedSaleAcc() {
         return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, true).fetch();
@@ -599,20 +614,13 @@ public class Account extends Model {
 
     /**
      * 构造放在 Account Cookie_Store_Map 中的 KEY
-     *
-     * @param aid
-     * @param market
-     * @return
      */
-    public static String cookieKey(long aid, M market) {
-        return String.format("ACC_COOKIE_%s_%s", aid, market);
+    public static String cookieKey(String uniq, M market) {
+        return String.format("ACC_COOKIE_%s_%s", uniq, market);
     }
 
     /**
      * 通过账户获取 FBA 的发货地址
-     *
-     * @param type
-     * @return
      */
     public static Address address(M type) {
         switch(type) {

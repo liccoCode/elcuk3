@@ -22,26 +22,27 @@ $ ->
   # 初始化图片
   imageInit()
 
-  # update/deploy 按钮的基础方法
-  updateAndDeployBaseBtn = (btn, remote) ->
-    btnGroup = $(btn).parent()
-    $.params = remote: remote
-    $('#container :input').map($.varClosure)
-    btnGroup.mask('更新中...')
-    $.post('/sellings/update', $.params, (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        alert("Selling: " + r['sellingId'] + " 更新成功!")
-      btnGroup.unmask()
-    )
-
   # Update 按钮
-  $('button:contains("Update")').click ->
-    updateAndDeployBaseBtn(@, no)
+  $('#amz-update').click ->
+    return false unless imageIndexCal()
+    LoadMask.mask()
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+      .done((r) ->
+        msg = if r.flag is true
+            {text: "#{r.message} Selling 更新成功", type: 'success'}
+          else
+            {text: r.message, type: 'error'}
+        noty(msg)
+        LoadMask.unmask()
+      )
+      .fail((r) ->
+        noty({text: r.responseText, type: 'error'})
+        LoadMask.unmask()
+      )
+    false
 
   # Deploy 按钮
-  $('button:contains("Deploy")').click ->
+  $('#amz-deploy').click ->
     # check account 与 market 不一样, 要提醒
     switch $('[name=s\\.account\\.id]').val()
       when 1
@@ -54,14 +55,27 @@ $ ->
         if $('[name=s\\.market]').val() != 'AMAZON_US'
           return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
       else
-    updateAndDeployBaseBtn(@, yes)
+    LoadMask.mask()
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+      .done((feed) ->
+        if feed.flag is false
+          noty({text: feed.message, type: 'error'})
+        else
+          noty({text: "成功创建 Feed(#{feed.id})"}, type: 'success')
+        LoadMask.unmask()
+      )
+      .fail((r) ->
+        noty({text: r.responseText, type: 'error'})
+        LoadMask.unmask()
+      )
+    false
 
   # Sync 按钮
-  $('button:contains("Sync")').click ->
+  $('#amz-sync').click ->
     return false if !confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")
     btnGroup = $(@).parent()
     btnGroup.mask('同步中...')
-    $.post('/sellings/syncAmazon', sid: $('#s_sellingId').val(),
+    $.post('/sellings/syncAmazon', sid: $('input[name="s.sellingId"]').val(),
       (r) ->
         if r.flag is true
           alert('同步成功, 请刷新页面查看最新数据')
@@ -81,7 +95,7 @@ $ ->
       index = $(imgLi).find('input').val().trim()
       continue if !index or index is ''
       if !$.isNumeric(index)
-        alert('只能输入数字编号, 代表图片的位置')
+        noty({text: "只能输入数字编号, 代表图片的位置", type: 'warning'})
         goon = no
       else
         fNames[index] = $(imgLi).attr('filename')
@@ -90,34 +104,25 @@ $ ->
     names = []
     for i in [0...9]
       if !(i of fNames) and i < fNames.size
-        alert("期待的索引应该是 " + i)
+        noty({text: "期待的图片索引应该是 #{i}", type: 'warning'})
         return false
       names.push(fNames[i]) if fNames[i]
 
     if names.length <= 0
-      alert("请填写索引!")
-      return false
+      noty({text: '图片索引为空', type: 'warning'})
+      true
     else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
-      return true
+      true
 
+  $('#showFeedsButton').on('shown',(e) ->
+    sellingId = $('input[name="s.sellingId"]').val()
+    LoadMask.mask()
+    $("#feedsHome").load("/Sellings/feeds?sellingId=#{sellingId}")
+    LoadMask.unmask()
+  )
 
   # 图片上传的按钮
-  $('#img_cal').click(imageIndexCal).find("\~ button").click ->
-    return false if !imageIndexCal()
-    return false if !confirm("确定要更新到 " + $("select[name=s\\.market]").val() + " ?")
-    imgDiv = $(@).parent()
-    imgDiv.mask("上传图片中...")
-    params =
-      'sid': $('#s_sellingId').val()
-      imgs: $('[name=s\\.aps\\.imageName]').val()
-    $.post('/sellings/imageUpload', params, (r) ->
-      if r.flag is true
-        alertDiv = $(ALERT_TEMPLATE)
-        alertDiv.find('#replace_it').replaceWith("<p>更新成功!</p>")
-        alertDiv.prependTo('#container')
-      else
-        alert(r.message)
-      imgDiv.unmask()
-    )
+  $('#img_cal').click(imageIndexCal)
+  $("#feedProductType").trigger('adjust')
 

@@ -15,6 +15,7 @@ import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -77,40 +78,25 @@ public class Products extends Controller {
         redirect("/Products/show/" + pro.sku);
     }
 
-    @Before(only = {"saleAmazon", "saleAmazonListing"})
-    public static void beforeSaleAmazon() {
-        String sku = Products.extarSku();
-        if(StringUtils.isNotBlank(sku))
-            renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
-        renderArgs.put("accs", Account.openedSaleAcc());
-    }
-
     public static void saleAmazon(String id) {
-        Product pro = Product.findByMerchantSKU(id);
+        Product product = Product.findByMerchantSKU(id);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(product.sku);
         Selling s = new Selling();
-        render(pro, s);
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
+        renderArgs.put("accs", Account.openedSaleAcc());
+        render(product, s);
     }
 
     @Check("products.saleamazonlisting")
-    public static void saleAmazonListing(Selling s, Product pro) {
-        /**
-         * 从前台上传来的一系列的值检查
-         */
+    public static void saleAmazonListing(Selling s) {
         try {
-            Selling se = pro.saleAmazon(s);
-            if(Validation.hasErrors()) {
-                Webs.errorToFlash(flash);
-                render("Products/saleAmazon.html", s, pro);
-            } else {
-                flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
-                redirect("/Sellings/selling/" + se.sellingId);
-            }
+            checkAuthenticity();
+            s.buildFromProduct();
+            renderJSON(new Ret(true, s.sellingId));
         } catch(FastRuntimeException e) {
-            flash.error(e.getMessage());
-            render("Products/saleAmazon.html", s, pro);
+            renderJSON(new Ret(e.getMessage()));
         }
     }
-
 
     /**
      * ========== Product ===============
@@ -164,32 +150,51 @@ public class Products extends Controller {
         renderJSON(new Ret(true));
     }
 
+    /**
+     * 检查 UPC 上架情况
+     */
     public static void upcCheck(String upc) {
-        /**
-         * UPC 的检查;
-         * 1. 在哪一些 Selling 身上使用过?
-         * 2. 通过 UPC 与
-         */
         try {
-            List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
+            List<Selling> upcSellings = Selling.find("aps.upc=?", upc).fetch();
             renderJSON(J.G(upcSellings));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
 
+    /**
+     * 检查 SKU 是否上架情况
+     */
     public static void skuMarketCheck(String sku, String market) {
-        Product product = Product.findById(sku);
+        Product product = Product.findById(StringUtils.split(sku, ",")[0]);
         M mkt = M.AMAZON_DE;
         try {
             mkt = M.val(market);
         } catch(Exception e) {
-            //ignore.. default to DE market
+            mkt = M.AMAZON_DE;
         }
         if(product != null) {
             renderJSON(J.G(product.sellingCountWithMarket(mkt)));
         } else {
             renderJSON(new Ret("SKU: [" + sku + "] 不存在!"));
         }
+    }
+
+    /**
+     * 获取用来提示用户的 RBN 信息的查阅地址
+     *
+     * @param market 市场
+     */
+    public static void showRBNLink(String market) {
+        String suffix = "/catm/classifier/ProductClassifier.amzncatm/classifier/ProductClassifier.amzn?ref=ag_pclasshm_cont_invfile";
+        Ret ret = new Ret("#");
+        if(StringUtils.contains(market, "AMAZON_DE")) {
+            ret = new Ret("https://catalog-mapper-de.amazon.de" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_UK")) {
+            ret = new Ret("https://catalog-mapper-uk.amazon.co.uk" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_US")) {
+            ret = new Ret("https://catalog-mapper-na.amazon.com" + suffix);
+        }
+        renderJSON(ret);
     }
 }

@@ -1,0 +1,14 @@
+{
+    "id": "${target.id}",
+    "name": "${target.name}",
+    "accountNumber": "${target.accountNumber}",
+    "accountUser": "${target.accountUser}",
+    "accountAddress": "${target.accountAddress}",
+    "memo": "${target.memo}",
+    "createdAt": "${target.createdAt}",
+    "cooper": {
+        "id": "${target.cooper.id}",
+        "name": "${target.cooper.name}",
+        "fullName": "${target.cooper.fullName}"
+    }
+}

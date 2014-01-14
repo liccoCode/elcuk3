@@ -170,7 +170,7 @@ public class Feedback extends GenericModel {
         if(this.orderr != null)
             name = String.format("%s - %s", this.orderr.buyer, this.market.toString());
         if(StringUtils.isBlank(subject))
-            subject = "You left a negative feedback, Please give us a chance to make up!";
+            subject = "We would like to address your feedback!";
 
         this.osTicketId = Jitbit.addTicket(email, name, subject, content, Jitbit.Category.FEEDBACK);
         return this.osTicketId;

@@ -72,6 +72,11 @@ public class LinkHelper extends JavaExtensions {
         return "#";
     }
 
+    public static String searchAsinByUPCLink(M market, String upc) {
+        String baseAmazon = "https://sellercentral.%s/myi/search/ProductSummary?keyword=%s";
+        return String.format(baseAmazon, market.toString(), upc);
+    }
+
     public static String asinLink(Selling selling) {
         //http://www.amazon.co.uk/dp/B005UNXHC0
         String baseAmazon = "http://www.%s/dp/%s";

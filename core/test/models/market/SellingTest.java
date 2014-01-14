@@ -3,7 +3,12 @@ package models.market;
 import factory.FactoryBoy;
 import factory.callback.BuildCallback;
 import helper.Webs;
+import jobs.driver.DriverJob;
+import jobs.driver.GJob;
 import models.embedded.AmazonProps;
+import models.product.Attach;
+import models.product.Product;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -19,8 +24,13 @@ import static org.hamcrest.core.Is.is;
  * Time: 8:23 PM
  */
 public class SellingTest extends UnitTest {
-    @Ignore
-    @Test
+    @Before
+    public void setUp() {
+        FactoryBoy.deleteAll();
+    }
+
+    //@Ignore
+    //@Test
     public void testSyncFromAmazon() throws IOException, ClassNotFoundException {
         Selling selling = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
             @Override
@@ -53,7 +63,7 @@ public class SellingTest extends UnitTest {
         assertThat(aps.searchTermss.get(4), is("cover protezione e supporto rotazione Nexus 7 2013"));
     }
 
-    @Test
+    //@Test
     public void testIsMSkuValid() {
         Selling s = FactoryBoy.build(Selling.class, new BuildCallback<Selling>() {
             @Override
@@ -65,5 +75,31 @@ public class SellingTest extends UnitTest {
         boolean flag = s.isMSkuValid();
 
         assertThat(flag, is(true));
+    }
+
+    @Test
+    public void testPatchSkuToListing() {
+        final Product product = FactoryBoy.create(Product.class);
+        FactoryBoy.create(Attach.class, new BuildCallback<Attach>() {
+            @Override
+            public void build(Attach target) {
+                target.fid = product.sku;
+                target.p = Attach.P.SKU;
+            }
+        });
+        final Selling selling = FactoryBoy.build(Selling.class, "withListing", new BuildCallback<Selling>() {
+            @Override
+            public void build(Selling target) {
+                target.merchantSKU = String.format("%s,%s", product.sku, target.aps.upc);
+            }
+        });
+        selling.buildFromProduct();
+        // 1. Selling/Listing 要保存
+        // 2. 产生一个 Feed
+        // 3. 产生一个 GJob
+        assertThat(Selling.count(), is(1l));
+        assertThat(Listing.count(), is(1l));
+        assertThat(Feed.count(), is(1l));
+        assertThat(GJob.count(), is(1l));
     }
 }

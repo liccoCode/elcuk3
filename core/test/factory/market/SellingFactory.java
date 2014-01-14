@@ -25,6 +25,9 @@ public class SellingFactory extends ModelFactory<Selling> {
         aps.searchTerms = "searchTerms";
         aps.standerPrice = 19.99f;
         aps.salePrice = 9.99f;
+        aps.upc = "609132508240";
+        aps.feedProductType = "ProductType";
+        aps.templateType = "templateType";
 
         selling.aps = aps;
         selling.asin = "ASIN";
@@ -58,6 +61,17 @@ public class SellingFactory extends ModelFactory<Selling> {
         selling.market = M.AMAZON_US;
         selling.account = FactoryBoy.lastOrCreate(Account.class, "us");
         selling.sid();
+        return selling;
+    }
+
+    @Factory(name = "withListing")
+    public Selling withListing() {
+        Selling selling = uk();
+        selling.aps.manufacturer = "EasyAcc";
+        selling.aps.brand = "EasyAcc";
+        selling.aps.manufacturerPartNumber = "Part Number";
+        selling.aps.rbns.add("1234");
+        selling.aps.imageName = "123";
         return selling;
     }
 

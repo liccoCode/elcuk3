@@ -37,7 +37,8 @@ public class Application extends Controller {
         if(Validation.hasErrors())
             renderJSON(new Ret(false));
         String json = J.json(OrderItem
-                .categoryPie(type, Dates.morning(date), Dates.morning(new DateTime(date).plusDays(1).toDate()), market));
+                .categoryPie(type, Dates.morning(date),
+                        Dates.morning(new DateTime(date).plusDays(1).toDate()), market));
         renderJSON(json);
     }
 
@@ -88,7 +89,7 @@ public class Application extends Controller {
         } catch(Exception e) {
             throw new FastRuntimeException(e);
         }
-        renderJSON(Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)));
+        renderJSON(Account.cookieMap().get(Account.cookieKey(acc.uniqueName, acc.type)));
     }
 
     public static void o() {

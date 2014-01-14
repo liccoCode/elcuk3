@@ -51,6 +51,15 @@ public class PaymentTarget extends Model {
     @Column(nullable = false)
     public String accountUser;
 
+    /**
+     * 银行地址
+     */
+    @Required
+    @Column(nullable = false)
+    public String accountAddress;
+
+    public String memo;
+
     public Date createdAt;
 
     @PrePersist

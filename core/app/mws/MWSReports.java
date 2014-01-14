@@ -6,7 +6,9 @@ import com.amazonaws.mws.MarketplaceWebServiceConfig;
 import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
 import helper.Constant;
+import models.market.Account;
 import models.market.JobRequest;
+import models.market.M;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -210,16 +212,25 @@ public class MWSReports {
      * @param job
      * @return
      */
-    private static MarketplaceWebService client(JobRequest job) {
-        String key = String.format("client_%s_%s", job.account.id, job.account.type.name());
+    public static MarketplaceWebService client(JobRequest job) {
+        return client(job.account);
+    }
+
+    public static MarketplaceWebService client(Account account) {
+        return client(account, account.type);
+    }
+
+    public static MarketplaceWebService client(Account account, M market) {
+        String key = String.format("client_%s_%s", account.id, market.name());
         MarketplaceWebService client;
+        if(cached.containsKey(key)) return cached.get(key);
         if(cached.containsKey(key)) return cached.get(key);
         else {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
 
                 MarketplaceWebServiceConfig config = new MarketplaceWebServiceConfig();
-                switch(job.account.type) {
+                switch(market) {
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
@@ -241,8 +252,7 @@ public class MWSReports {
                         break;
                 }
 
-                client = new MarketplaceWebServiceClient(
-                        job.account.accessKey, job.account.token, "elcuk2", "1.0", config);
+                client = new MarketplaceWebServiceClient(account.accessKey, account.token, "elcuk2", "1.0", config);
                 cached.put(key, client);
             }
         }

@@ -1,5 +1,6 @@
 package jobs;
 
+import jobs.driver.DriverJob;
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -26,6 +27,8 @@ public class JobsSetup {
                 (Play.mode.isDev() && "true".equals(Play.configuration.getProperty("jobs.dev")))) {
             // 手动的将所有的需要的 Job 启动
 
+            //TODO 所有的 Job 全部转移到 Crontab 中, 通过页面给予生成 crontab 然后泵更新 crontab 配置文件
+
             // Order Deal 5 step
             every(AmazonOrderDiscover.class, "1mn");
             every(AmazonOrderItemDiscover.class, "30s");
@@ -50,13 +53,14 @@ public class JobsSetup {
             every(CheckerProductCheckJob.class, "1d");
             every(FAndRNotificationJob.class, "1h");
             every(AmazonFinanceCheckJob.class, "1mn");
-            every(KeepSessionJob.class, "5mn");
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
 
+            every(KeepSessionJob.class, "29mn");
+            new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
     }

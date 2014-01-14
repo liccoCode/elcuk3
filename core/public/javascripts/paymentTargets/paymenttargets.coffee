@@ -1,21 +1,39 @@
 $ ->
-  $('a[data-method=update]').click ->
-    self = $(@)
-    # 收集参数
-    trParent = self.parents('tr')
-    targetId = trParent.find('td:eq(0)').text()
-    targetName = trParent.find('td:eq(1)').text()
-    accountUser = trParent.find('td:eq(2)').text()
-    accountNum = trParent.find('td:eq(3)').text()
-    coperId = trParent.find('td[copId]').attr('copId')
+  $(document).on('click', '#updateBtn', ->
+    $self = $(@)
+    LoadMask.mask()
+    $.ajax($self.data('url'), {dataType: 'json'})
+      .done((r) ->
+        LoadMask.unmask()
+        # 填充参数
+        _.each(["accountAddress", "accountNumber", "accountUser", "name", "id", "cooper.id"], (field) ->
+          if field == "cooper.id"
+            $("#target_cooperId").val(r["cooper"]["id"])
+          else
+            $("#target_#{field}").val(r[field])
+        )
+        $('#update_modal').modal('show')
+      )
+      .fail((r) ->
+        noty({text: r.responseType, type: 'error'})
+        LoadMask.unmask()
+      )
+  )
 
-    # 填充参数
-    $('#target_accountNum').val(accountNum)
-    $('#target_accountUser').val(accountUser)
-    $('#target_cooper').val(coperId)
-    $('#target_name').val(targetName)
-    $('#update_modal').modal('show')
-    $('#update_form').attr('action', "/paymenttarget/#{targetId}")
+  $('#update_modal').on('click', '[type=submit]', (r) ->
+    $form = $('#update_form')
+    LoadMask.mask()
+    $.ajax($form.attr('action'), {type: 'POST', data: $form.serialize()})
+      .done((r) ->
+        type = if r.flag is false then 'error' else 'success'
+        noty({text: r.message, type: type})
+        LoadMask.unmask()
+      )
+      .fail((r) ->
+        noty({text: r.responseType, type: 'error'})
+        LoadMask.unmask()
+      )
+  )
 
   $('a[data-method=delete]').click ->
     id = @getAttribute('data-id')

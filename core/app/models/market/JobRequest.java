@@ -1,6 +1,7 @@
 package models.market;
 
 import mws.MWSReports;
+import mws.v2.MWSFeeds;
 import play.Logger;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
@@ -137,11 +138,17 @@ public class JobRequest extends Model {
     public T type;
 
     @Enumerated(EnumType.STRING)
+    public MWSFeeds.T feedType;
+
+    @Enumerated(EnumType.STRING)
     public S state = S.NEW;
 
     // ----- logic relate ----
     public String requestId;
 
+    /**
+     * 既是 reportId 也是 FeedId
+     */
     public String reportId;
 
     public String procressState;
@@ -155,6 +162,40 @@ public class JobRequest extends Model {
     public Date startDate;
     public Date endDate;
 
+    /*---- feed 的信息 ----*/
+    public String content;
+    public String result;
+
+    public JobRequest() {
+    }
+
+    public JobRequest(Account account, T type, Date startDate) {
+        this.account = account;
+        this.type = type;
+        this.startDate = startDate;
+    }
+
+    /**
+     * 提交 Feed 的 Job
+     */
+    public JobRequest(Account account, MWSFeeds.T feedType, String content) {
+        this.account = account;
+        this.feedType = feedType;
+        this.content = content;
+    }
+
+    public JobRequest(Account account, T type, Date startDate, Date endDate) {
+        this(account, type, startDate);
+        this.endDate = endDate;
+    }
+
+    public String getFeedId() {
+        return this.reportId;
+    }
+
+    public String getReportId() {
+        return this.reportId;
+    }
 
     /**
      * 根据 Account 检查是否需要有不同类型的 Job 创建;
@@ -169,17 +210,6 @@ public class JobRequest extends Model {
     }
 
     /**
-     * 找到最新的指定类型的 JobRequest
-     *
-     * @param type
-     * @param acc
-     * @return
-     */
-    public static JobRequest newEstJobRequest(T type, Account acc, S state) {
-        return JobRequest.find("account=? AND type=? AND state=? ORDER BY id DESC", acc, type, state).first();
-    }
-
-    /**
      * 具体的检查某个类型的 JobRequest 是否需要进行创建.
      *
      * @param interval 创建下一个 JobRequest 的时间间隔.
@@ -190,7 +220,8 @@ public class JobRequest extends Model {
     private static JobRequest newJob(int interval, T type, Account acc, M.MID mid) {
         if(!acc.type.name().startsWith("AMAZON"))
             throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
-        JobRequest job = JobRequest.find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();
+        JobRequest job = JobRequest
+                .find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();
 
         //先判断 Job 不为空的情况
         if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
@@ -259,7 +290,8 @@ public class JobRequest extends Model {
      * 获取 ReportId
      */
     public static void updateReportId(T type) {
-        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_' AND type=?", JobRequest.S.DONE, type).fetch();
+        List<JobRequest> tobeFetchReportId = JobRequest
+                .find("state=? AND procressState!='_CANCELLED_' AND type=?", JobRequest.S.DONE, type).fetch();
         for(JobRequest job : tobeFetchReportId) {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " UPDATE_REPORTID Job.");
@@ -304,5 +336,23 @@ public class JobRequest extends Model {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "JobRequest{" +
+                "account=" + account +
+                ", requestDate=" + requestDate +
+                ", lastUpdateDate=" + lastUpdateDate +
+                ", type=" + type +
+                ", state=" + state +
+                ", requestId='" + requestId + '\'' +
+                ", reportId='" + reportId + '\'' +
+                ", procressState='" + procressState + '\'' +
+                ", marketplaceId=" + marketplaceId +
+                ", path='" + path + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
     }
 }

@@ -102,16 +102,16 @@ public class Listing extends GenericModel {
      * title xxxx by [??]
      */
     @Expose
-    public String byWho;
+    public String byWho = "EasyAcc";
 
     @Expose
-    public Integer reviews;
+    public Integer reviews = 0;
 
     @Expose
-    public Float rating;
+    public Float rating = 0f;
 
     @Expose
-    public Integer likes;
+    public Integer likes = 0;
 
     @Lob
     @Expose
@@ -201,22 +201,6 @@ public class Listing extends GenericModel {
         this.save();
     }
 
-
-    /**
-     * 从所有 ListingOffer 中查找自己
-     *
-     * @return
-     */
-    public ListingOffer easyacceu() {
-        if(this.offers == null) return null;
-        for(ListingOffer offer : this.offers) {
-            if("AJUR3R8UN71M4".equalsIgnoreCase(offer.offerId) ||
-                    "A22H6OV6Q7XBYK".equalsIgnoreCase(offer.offerId)) {
-                return offer;
-            }
-        }
-        return null;
-    }
 
     /**
      * 根据 Listing 的状态, 进行 Listing 的检查并更新;
@@ -486,17 +470,24 @@ public class Listing extends GenericModel {
 
     /**
      * 获得被跟踪的Listing
-     *
-     * @return
      */
     public static List<Listing> trackedListings() {
         return Listing.find("isTracked = true").fetch();
     }
 
+    public static Listing blankListing(String asin, M market, Product sku) {
+        Listing lst = new Listing();
+        lst.asin = asin;
+        lst.market = market;
+        lst.listingId = lid(asin, market);
+        lst.product = sku;
+        lst.title = "空 Listing, 请手动调用一次抓取";
+        return lst;
+    }
+
+
     /**
      * 关闭Listing被跟的警告
-     *
-     * @param
      */
     public void closeWarnning() {
         if(!Listing.isSelfBuildListing(this.title))

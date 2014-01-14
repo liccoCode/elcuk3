@@ -7,13 +7,16 @@ import models.User;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import play.data.validation.Validation;
 import play.libs.Crypto;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User 相关的操作
@@ -55,6 +58,7 @@ public class Users extends Controller {
     }
 
     public static void updates(User user, String newPassword, String newPasswordConfirm) {
+        user.confirm = user.password;
         validation.valid(user);
 
         // 如果填写了新密码, 那么则需要修改密码
@@ -121,5 +125,82 @@ public class Users extends Controller {
 
     public static void pass(String p) {
         renderText(Crypto.encryptAES(p));
+    }
+
+    public static void create() {
+        render();
+    }
+
+    /**
+     * 添加新的用户
+     *
+     * @param user
+     */
+    @Check("users.index")
+    public static void addUser(User user) {
+        validation.required(user.password);
+        validation.required(user.confirm);
+        validation.required(user.username);
+        validation.required(user.password);
+        if(validation.hasErrors()) {
+            render("Users/create.html", user);
+        }
+        try {
+            user.save();
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+            render("Users/create.html", user);
+        }
+        flash.success("添加用户成功");
+        redirect("/users/index");
+    }
+
+    /**
+     * 关闭用户
+     * 1. 用户相关的历史权限的清理
+     * 2. 修改用户的密码为随机
+     * 3. 将用户的状态改变为已关闭
+     *
+     * @param id
+     */
+    @Check("users.index")
+    public static void closeUser(long id) {
+        User user = User.findById(id);
+        if(user == null)
+            renderJSON(new Ret("用户不存在，无法关闭"));
+        try {
+            Privilege.clearUserPrivilegesCache(user);
+            user.privileges = new HashSet<Privilege>();
+            user.password = RandomStringUtils.randomAlphanumeric(15);
+            user.closed = true;
+            user.save();
+        } catch(Exception e) {
+            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.E(e)));
+        }
+        renderJSON(new Ret(true, "关闭用户成功"));
+    }
+
+    /**
+     * 打开用户
+     * 1. 打开用户相关的权限信息
+     * 2. 修改用户的密码为随机生成的15位的字母和数字的组合
+     * 3.将用户的状态改为未关闭
+     * @param id
+     */
+    @Check("users.index")
+    public static void openUser(long id) {
+        User user = User.findById(id);
+        if(user == null)
+            renderJSON(new Ret("用户不存在，无法打开"));
+        try {
+            Set<Privilege> privileges = Privilege.privileges(user.username);
+            Privilege.updatePrivileges(user.username, privileges);
+            user.password = RandomStringUtils.randomAlphanumeric(15);
+            user.closed = false;
+            user.save();
+        } catch(Exception e) {
+            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.E(e)));
+        }
+        renderJSON(new Ret(true, String.format("打开用户成功,初始密码为 %s ,请联系管理员添加权限", user.password)));
     }
 }

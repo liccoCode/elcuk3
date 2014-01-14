@@ -49,25 +49,6 @@ public class Webs {
     public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     /**
-     * <pre>
-     * 用来对 Pager 与 pageSize 的值进行修正;
-     * page: 1~N
-     * size: 1~100 (-> 20)
-     * </pre>
-     *
-     * @param p
-     * @param s
-     * @return ._1: page, ._2: perSize
-     */
-    public static F.T2<Integer, Integer> fixPage(Integer p, Integer s) {
-        int page = 1;
-        int size = 20;
-        if(p != null && p >= 1) page = p; // 判断在页码
-        if(s != null && s >= 1 && s <= 100) size = s; // 判断显示的条数控制
-        return new F.T2<Integer, Integer>(page, size);
-    }
-
-    /**
      * 保留小数点后面两位, 并且向上取整
      *
      * @param val
@@ -79,12 +60,6 @@ public class Webs {
 
     public static Float scalePointUp(int scala, Float val) {
         return new BigDecimal(val).setScale(scala, RoundingMode.HALF_UP).floatValue();
-    }
-
-    public static String link(String listingId) {
-        String[] args = listingId.split("_");
-        M market = M.val(args[1]);
-        return String.format("http://www.%s/dp/%s", market.toString(), args[0]);
     }
 
     /**
@@ -111,9 +86,9 @@ public class Webs {
             ObjectInputStream ois = new ObjectInputStream(fis);
             CookieStore cookieStore = (CookieStore) ois.readObject();
             ois.close();
-            Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
+            Account.cookieMap().put(Account.cookieKey(acc.uniqueName, acc.type), cookieStore);
         }
-        Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
+        Account.cookieMap().get(Account.cookieKey(acc.uniqueName, acc.type)).clearExpired(new Date());
     }
 
     /**
@@ -307,6 +282,15 @@ public class Webs {
     }
 
     /**
+     * 添加错误, 调用则抛出 FastRuntimeException
+     */
+    public static void error(String errorMsg) {
+        Validation.addError("", errorMsg);
+        if(Validation.hasErrors())
+            throw new FastRuntimeException(errorMsg);
+    }
+
+    /**
      * 直接把 Exception 的堆栈信息全部打印出来
      *
      * @param e
@@ -360,69 +344,5 @@ public class Webs {
             intList.add(i + "");
         }
         return StringUtils.join(intList, ", ");
-    }
-
-    /**
-     * 支持 DE 与 FR 语言中的月份字符串转换成 英语 月份的字符串
-     *
-     * @param m
-     * @return
-     */
-    public static String dateMap(String m) {
-        return StringUtils.replaceEach(m, new String[]{
-                // de -> uk
-                "Januar",
-                "Februar",
-                "März",
-                "April",
-                "Mai",
-                "Juni",
-                "Juli",
-                "August",
-                "September",
-                "Oktober",
-                "November",
-                "Dezember",
-
-                // fr -> uk
-                "janvier",
-                "février",
-                "mars",
-                "avril",
-                "mai",
-                "juin",
-                "juillet",
-                "août",
-                "septembre",
-                "octobre",
-                "novembre",
-                "décembre"
-        }, new String[]{
-                "January",
-                "February",
-                "March",
-                "April",
-                "May",
-                "June",
-                "July",
-                "August",
-                "September",
-                "October",
-                "November",
-                "December",
-
-                "January",
-                "February",
-                "March",
-                "April",
-                "May",
-                "June",
-                "July",
-                "August",
-                "September",
-                "October",
-                "November",
-                "December",
-        });
     }
 }
