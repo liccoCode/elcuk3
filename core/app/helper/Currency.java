@@ -505,7 +505,7 @@ public enum Currency {
      */
     public static String bocRatesHtml() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
-        Elements trs = doc.select("table table table:eq(0) tr");
+        Elements trs = doc.select("div.BOC_main div.publish div:eq(2) table tr");
         String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元"};
         for(Element tr : trs.subList(1, trs.size() - 1)) {
             boolean find = false;
@@ -515,7 +515,7 @@ public enum Currency {
             }
             if(!find) tr.remove();
         }
-        return doc.select("table table table").get(0).outerHtml();
+        return doc.select("div.BOC_main div.publish div:eq(2) table").get(1).outerHtml();
     }
 
     /**
