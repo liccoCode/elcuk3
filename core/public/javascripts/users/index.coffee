@@ -6,17 +6,17 @@ $ ->
   })
 
   # 设置关闭和打开用户后页面相关的展示
-  setCloseOrOpen = (flag, id, a) ->
-    if flag is "open"
-      $("##{id}").attr("src", "/img/red.png")
-      $(a).attr("data-original-title", "打开此账户")
-      $(a).attr("id", "openUser")
-      $(a).text("Open")
-    else
-      $("##{id}").attr("src", "/img/green.png")
-      $(a).attr("data-original-title", "关闭此账户")
-      $(a).attr("id", "closeUser")
-      $(a).text("Close")
+  $(document).on('setCloseOrOpen','#openUser,#closeUser', (r) ->
+    $a =$(@)
+    imgid = $a.data("userid")
+    $img = $("##{imgid}")
+    if $a.attr("id") is "openUser"
+      $a.attr("id", "closeUser").text("Close").attr("data-original-title", "关闭此账户")
+      $img.attr("src", "/img/green.png")
+    else if $a.attr("id") is "closeUser"
+      $img.attr("src", "/img/red.png")
+      $a.attr("id", "openUser").text("Open").attr("data-original-title", "打开此账户")
+  )
 
   # 关闭用户
   $(document).on('click', '#closeUser', (r)  ->
@@ -28,7 +28,7 @@ $ ->
         try
           if r.flag
             noty({text: r.message, type: 'success', timeout: 3000})
-            setCloseOrOpen("open", id, $a)
+            $a.trigger("setCloseOrOpen")
           else
             noty({text: r.message, type: 'error', timeout: 3000})
         finally
@@ -57,7 +57,7 @@ $ ->
                     $noty.close()
                 }]
               })
-              setCloseOrOpen("close", id, $a)
+              $a.trigger("setCloseOrOpen")
             else
               noty({text: r.message, type: 'error', timeout: 3000})
           finally
