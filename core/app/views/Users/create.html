@@ -1,12 +1,12 @@
 #{extends 'main.html'/}
 #{set title:'添加用户'/}
 
-#{errorMsgs /}
 #{flash_alert /}
 #{info_row title:'添加新用户'/}
+
 <div class="row">
   <div class="span12">
-    <form method="post" action="@{Users.addUser()}">
+    #{form @Users.addUser(), class: 'form-horizontal'}
       <table class="table table-bordered table-condensed">
         <tr>
           <th>用户名</th>
@@ -42,10 +42,10 @@
 
         <tr>
           <td colspan="4">
-            <button class="btn btn-primary">创建</button>
+            <button class="btn btn-success" data-disable-with='提交请求中...'>创建</button>
           </td>
         </tr>
       </table>
-    </form>
+    #{/form}
   </div>
 </div>
