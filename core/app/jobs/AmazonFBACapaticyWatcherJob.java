@@ -56,16 +56,14 @@ public class AmazonFBACapaticyWatcherJob extends Job {
         Element standardSizeEl = doc.select("#fba-capacity-widget-type-sortable").first();
         Element overSizeEl = doc.select("#fba-capacity-widget-type-non-sortable").first();
 
-        int standardSizeLimit = NumberUtils.toInt(StringUtils
-                .split(standardSizeEl.select(".fba-capacity-widget-limit").text().trim())[0]);
-        int standardSize = NumberUtils
-                .toInt(standardSizeEl.select(".fba-capacity-widget-utilization-integer").text()
-                        .trim());
+        int standardSizeLimit = NumberUtils
+                .toInt(StringUtils.split(standardSizeEl.select(".fba-capacity-widget-bar span").get(2).text().trim())[0]);
+        int standardSize = NumberUtils.toInt(
+                standardSizeEl.select(".fba-capacity-widget-bar .fba-capacity-widget-utilization-integer").text().trim());
+        int overSizeLimit = NumberUtils
+                .toInt(StringUtils.split(overSizeEl.select(".fba-capacity-widget-bar span").get(2).text().trim())[0]);
+        int overSize = NumberUtils.toInt(overSizeEl.select(".fba-capacity-widget-bar .fba-capacity-widget-utilization-integer").text().trim());
 
-        int overSizeLimit = NumberUtils.toInt(StringUtils
-                .split(overSizeEl.select(".fba-capacity-widget-limit").text().trim())[0]);
-        int overSize = NumberUtils
-                .toInt(overSizeEl.select(".fba-capacity-widget-utilization-integer").text().trim());
         return GTs.render("fbaCapacity", GTs.newMap("standardSize", standardSize)
                 .put("standardSizeLimit", standardSizeLimit)
                 .put("overSize", overSize)
