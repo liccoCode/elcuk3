@@ -567,7 +567,7 @@ public class Account extends Model {
      * @return
      */
     public static boolean isLoginEnd(Document doc) {
-        return doc.select("#sc_quicklinks_top").first() != null;
+        return doc.select("#sc-quicklinks-top").first() != null;
     }
 
     @Override
