@@ -38,7 +38,7 @@ public class Deliveryments extends Controller {
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
         renderArgs.put("shippers", Cooperator.shippers());
-        renderArgs.put("buyers", User.procurers());
+        renderArgs.put("buyers", User.openUsers());
     }
 
     @Before(only = {"index", "deliverymentToApply"})

@@ -300,6 +300,12 @@ public class User extends Model {
         return User.find("closed=?", false).fetch();
     }
 
+    /**
+     * TODO: @duan 这里你删除了 isProcure 但是没有搜索到这个地方使用了他, 致使采购页面无法访问, 请思考如何处理.
+     * 思考：考虑采用角色 对用户分配角色 对角色分配属性
+     *
+     * @return
+     */
     public static List<User> procurers() {
         return User.find("isProcure=?", true).fetch();
     }

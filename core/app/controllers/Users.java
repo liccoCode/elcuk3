@@ -13,6 +13,7 @@ import play.libs.Crypto;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -138,22 +139,19 @@ public class Users extends Controller {
      */
     @Check("users.index")
     public static void addUser(User user) {
-        validation.required(user.password);
-        validation.required(user.confirm);
-        validation.required(user.username);
-        validation.required(user.password);
-        validation.equals(user.password, user.confirm);
-        if(validation.hasErrors()) {
-            render("Users/create.html", user);
-        }
         try {
+            if(StringUtils.isBlank(user.username)) Webs.error("用户名不能为空");
+            if(StringUtils.isBlank(user.email)) Webs.error("Email不能为空");
+            if(StringUtils.isBlank(user.password)) Webs.error("密码不能为空");
+            if(StringUtils.isBlank(user.confirm)) Webs.error("确认密码不能为空");
+            if(!StringUtils.equals(user.password, user.confirm)) Webs.error("密码和确认密码填写不一致");
             user.save();
-        } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
+            flash.success("创建用户成功");
+            redirect("/users/index");
+        } catch(FastRuntimeException e) {
+            flash.error(e.getMessage());
             render("Users/create.html", user);
         }
-        flash.success("添加用户成功");
-        redirect("/users/index");
     }
 
     /**
@@ -186,6 +184,7 @@ public class Users extends Controller {
      * 1. 打开用户相关的权限信息
      * 2. 修改用户的密码为随机生成的15位的字母和数字的组合
      * 3.将用户的状态改为未关闭
+     *
      * @param id
      */
     @Check("users.index")
