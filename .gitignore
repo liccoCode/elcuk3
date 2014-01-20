@@ -23,5 +23,5 @@ server.pid
 *.ipr
 *.iws
 *.ids
-
+/out
 core/test/*.json
