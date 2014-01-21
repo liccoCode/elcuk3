@@ -126,6 +126,9 @@ $ ->
       $feedProductType.append("<option value='#{value}'>#{value}</option>")
     )
     $feedProductType.val(value) if value
+    #显示和隐藏hardwarePlatformHome
+    if templateType is "Games" then $("#hardwarePlatformHome").show("slow")
+    else $("#hardwarePlatformHome").hide("slow")
   )
 
   # 市场 下拉项变化 feedProductType 跟着变化

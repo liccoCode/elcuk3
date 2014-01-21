@@ -196,6 +196,17 @@ public class AmazonProps implements Serializable {
      */
     public String itemType;
 
+    /**
+     * 使用 Webs.SPLIT 进行分割, 5 行
+     * Games模板特有字段，硬件相关
+     */
+    @Lob
+    @Expose
+    public String hardwarePlatforms;
+
+    @Transient
+    public List<String> hardwarePlatformss = new ArrayList<String>();
+
     public void validate() {
         if(StringUtils.isBlank(this.title))
             Validation.addError("", "Title 必须填写");
@@ -228,11 +239,12 @@ public class AmazonProps implements Serializable {
             this.keyFetures = StringUtils.join(this.keyFeturess, Webs.SPLIT);
             this.searchTerms = StringUtils.join(this.searchTermss, Webs.SPLIT);
             this.RBN = StringUtils.join(this.rbns, ",");
+            this.hardwarePlatforms = StringUtils.join(this.hardwarePlatformss, Webs.SPLIT);
         } else if(flag == T.STR_TO_ARRAY) {
             this.keyFeturess = new ArrayList<String>();
             this.searchTermss = new ArrayList<String>();
             this.rbns = new ArrayList<String>();
-
+            this.hardwarePlatformss = new ArrayList<String>();
             String[] tmp = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
             if(tmp != null) Collections.addAll(this.keyFeturess, tmp);
 
@@ -241,6 +253,9 @@ public class AmazonProps implements Serializable {
 
             tmp = StringUtils.split(this.RBN, ",");
             if(tmp != null) Collections.addAll(this.rbns, tmp);
+
+            tmp = StringUtils.split(this.hardwarePlatforms, Webs.SPLIT);
+            if(tmp != null) Collections.addAll(this.hardwarePlatformss, tmp);
         }
 
         /**
