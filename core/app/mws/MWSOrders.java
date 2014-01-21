@@ -186,6 +186,7 @@ public class MWSOrders {
                 String likeSellingId = Product.merchantSKUtoSKU(amzItem.getSellerSKU()) +
                         "%|" + item.order.market.nickName() +
                         "|" + acc.id;
+                likeSellingId = Selling.getMappingSellingId(likeSellingId);
                 item.selling = Selling.find("sellingId like ?", likeSellingId).first();
             } else {
                 item.selling = Selling.findById(

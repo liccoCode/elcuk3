@@ -147,6 +147,41 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 临时解决 Amazon 同步时 OrderItem 无法存入数据库， 手动添加 新旧 Selling 映射关系
+     * TODO: 此代码性质为临时代码， 等到 Amazon 那边不再产生旧 Selling 的订单时可移除此代码
+     */
+    private static final Map<String, String> SELLING_MAPPING = new HashMap<String, String>();
+
+    /**
+     * 初始化 映射 Selling 映射关系
+     */
+    static {
+        SELLING_MAPPING.put("72GMSTL-B6L,880626118187|A_DE|2", "91GMSTL-B6L,880626118187|A_DE|2");
+        SELLING_MAPPING.put("72GMSTL-B6L,880626118187|A_US|131", "91GMSTL-B6L,880626118187|A_US|131");
+        SELLING_MAPPING.put("72GMSTL-B6L,880626118187|A_UK|1", "91GMSTL-B6L,880626118187|A_UK|1");
+        SELLING_MAPPING.put("72KBCG1-W,886460876924|A_DE|2", "88KBCG1-WDE,886460876924|A_DE|2");
+        SELLING_MAPPING.put("72KBDC1-W,887275533668|A_DE|2", "88KBDC1-WDE,887275533668|A_DE|2");
+        SELLING_MAPPING.put("72DBSG1-WEU,880283954425|A_DE|2", "88DBSG1-WEU,880283954425|A_DE|2");
+        SELLING_MAPPING.put("72DBSG1-WUK,881331233905|A_UK|1", "88DBSG1-WUK,881331233905|A_UK|1");
+        SELLING_MAPPING.put("72DBSG1-WUS,882608617985|A_US|131", "88DBSG1-WUS,882608617985|A_US|131");
+        SELLING_MAPPING.put("72FLMINI-BF,889280822799|A_DE|2", "92FLMINI-BF,889280822799|A_DE|2");
+        SELLING_MAPPING.put("72FLMINI-BF,889280822799|A_UK|1", "92FLMINI-BF,889280822799|A_UK|1");
+        SELLING_MAPPING.put("72FLMINI-BF,889280822799|A_US|131", "92FLMINI-BF,889280822799|A_US|131");
+    }
+
+    /**
+     * 如果在 SELLING_MAPPING 找到 key 返回映射好的新的 sellingID
+     * 如果没有则直接返回原有的 sellingId
+     *
+     * @param sellingId
+     * @return
+     */
+    public static String getMappingSellingId(String sellingId) {
+        if(!SELLING_MAPPING.containsKey(sellingId)) return sellingId;
+        return SELLING_MAPPING.get(sellingId);
+    }
+
+    /**
      * 这个 Selling 所属的哪一个用户
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -171,7 +206,7 @@ public class Selling extends GenericModel {
      */
     public void syncFromAmazon() {
         String html = "";
-        synchronized (this.account.cookieStore()) {
+        synchronized(this.account.cookieStore()) {
             // 1. 切换 Selling 所在区域
             this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
@@ -194,7 +229,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
 
-        synchronized (this.account.cookieStore()) {
+        synchronized(this.account.cookieStore()) {
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(
                             new BasicNameValuePair("qty.0", "27"), // 一页打 44 个
@@ -293,7 +328,7 @@ public class Selling extends GenericModel {
         List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
         if(dtos != null) {
             boolean find = false;
-            for (AnalyzeDTO dto : dtos) {
+            for(AnalyzeDTO dto : dtos) {
                 if(!dto.fid.equals(this.sellingId)) continue;
                 dto.ps = ps;
                 find = true;
@@ -319,7 +354,7 @@ public class Selling extends GenericModel {
         List<Selling> sellings = Selling
                 .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
         List<String> sids = new ArrayList<String>();
-        for (Selling s : sellings) sids.add(s.sellingId);
+        for(Selling s : sellings) sids.add(s.sellingId);
         return new F.T2<List<Selling>, List<String>>(sellings, sids);
     }
 
