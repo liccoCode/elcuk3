@@ -191,6 +191,11 @@ public class AmazonProps implements Serializable {
      */
     public String templateType;
 
+    /**
+     * 英国Games模板特有的字段，此字段为rbns字段所对应的类别名称
+     */
+    public String itemType;
+
     public void validate() {
         if(StringUtils.isBlank(this.title))
             Validation.addError("", "Title 必须填写");
