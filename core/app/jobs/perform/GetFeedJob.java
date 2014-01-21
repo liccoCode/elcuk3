@@ -46,32 +46,32 @@ public class GetFeedJob extends BaseJob {
         try {
             MWSFeeds mwsFeedRequest = new MWSFeeds(account);
             file = mwsFeedRequest.getFeedResult(feedId);
-            try {
-                List<String> reportLines = FileUtils.readLines(file, "ISO8859-1");
-                Feed feed = Feed.findById(NumberUtils.toLong(getContext().get("feed.id").toString()));
-                feed.result = StringUtils.join(reportLines, "\r\n");
-                feed.save();
-                for(String line : reportLines) {
-                    String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
-                    if(args.length == 5 && "Error".equals(args[3]))
-                        throw new FastRuntimeException("提交的 Feed 文件有错误，请检查");
-                }
-                if("create".equals(action)) {
-                    GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
-                }
-            } catch(IOException e) {
-                throw new FastRuntimeException(e);
+
+            List<String> reportLines = FileUtils.readLines(file, "ISO8859-1");
+            Feed feed = Feed.findById(NumberUtils.toLong(getContext().get("feed.id").toString()));
+            feed.result = StringUtils.join(reportLines, "\r\n");
+            feed.save();
+            for(String line : reportLines) {
+                String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+                if(args.length == 5 && "Error".equals(args[3]))
+                    throw new FastRuntimeException("提交的 Feed 文件有错误，请检查");
             }
+            if("create".equals(action)) {
+                GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
+            }
+        } catch(IOException e) {
+            throw new FastRuntimeException(e);
         } catch(MarketplaceWebServiceException e) {
             /**
              * 如果发生异常( Amazon 未处理好数据就会返回一个错误 ),重新发起请求(两分钟之后)
              */
             if((e.getMessage()).contains("Feed Submission Result is not ready for Feed")) {
                 GJob.perform(GetFeedJob.class.getName(), getContext(), DateTime.now().plusMinutes(3).toDate());
+            } else {
+                throw new FastRuntimeException(e);
             }
         } finally {
             if(file != null) FileUtils.deleteQuietly(file);
         }
-
     }
 }
