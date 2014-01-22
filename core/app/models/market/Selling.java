@@ -464,6 +464,6 @@ public class Selling extends GenericModel {
 
     public static String generateUpdateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
         // update
-        return generateFeedTemplateFile(sellingList, templateType, market, "update");
+        return generateFeedTemplateFile(sellingList, templateType, market, "Update");
     }
 }
