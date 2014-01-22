@@ -112,7 +112,7 @@ public class OrderInfoFetchJob extends Job {
             // Email
             if(StringUtils.isBlank(order.email)) {
                 try {
-                    String email = StringUtils.substringBetween(html, "buyerEmail:", "\",");
+                    String email = doc.select("[buyeremail]").attr("buyeremail");
                     if(StringUtils.isNotBlank(email)) order.email = email.replace("\"", "").trim();
                 } catch(NullPointerException e) {
                     // 避免 email 解析出现 null point
