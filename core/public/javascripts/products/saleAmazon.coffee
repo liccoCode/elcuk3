@@ -74,7 +74,7 @@ $ ->
     $.ajax($form.attr('action'), {data: $form.serialize(), type: 'POST'})
     .done((r) ->
         if r.flag
-          noty({text: "成功创建 Selling #{r.message}, Amazon 与系统正在处理中, 请等待 5~10 分钟后再查看", layout: 'top', timeout: false})
+          noty({text: "成功创建 Selling #{r.message}, Amazon 与系统正在处理中, 请等待 5~10 分钟后再查看", layout: 'top',type: 'success',timeout: false})
         else
           noty({text: r.message, type: 'error'})
         LoadMask.unmask()
