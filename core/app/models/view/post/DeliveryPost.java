@@ -60,7 +60,7 @@ public class DeliveryPost extends Post<Deliveryment> {
     /**
      * 解析 Id 的正则表达式
      */
-    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{*})$");
+    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d*)$");
 
     /**
      * 解析 +N 这样的数字, 解析出含有 N 个 ProcureUnit 的 Deliveryment
