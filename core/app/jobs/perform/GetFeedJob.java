@@ -67,7 +67,11 @@ public class GetFeedJob extends BaseJob {
              */
             if((e.getMessage()).contains("Feed Submission Result is not ready for Feed")) {
                 GJob.perform(GetFeedJob.class.getName(), getContext(), DateTime.now().plusMinutes(3).toDate());
-            } else {
+            } else if(e.getMessage().contains("Content-MD5 HTTP header transmitted by MWS")) {
+                /**
+                 * 临时性质代码，上架时如果出现 Amazon 报告 MD5 校验出错，则直接进行 Asin 抓取,并保存异常信息到该 getFeedJob 的msg 字段内。
+                 */
+                GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
                 throw new FastRuntimeException(e);
             }
         } finally {
