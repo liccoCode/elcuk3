@@ -594,11 +594,9 @@ public class Account extends Model {
             case AMAZON_ES:
             case AMAZON_IT:
             case AMAZON_UK:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
-                        false, false).fetch();
             case AMAZON_US:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
-                        false, true).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
+                        .fetch();
             default:
                 return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
                         .fetch();
