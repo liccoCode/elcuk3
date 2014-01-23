@@ -556,7 +556,8 @@ public class Account extends Model {
             String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
             return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
                     StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
+                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out")||
+                    !StringUtils.contains(doc.outerHtml(), "Sign in");
         }
     }
 
