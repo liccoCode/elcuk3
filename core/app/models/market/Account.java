@@ -556,7 +556,8 @@ public class Account extends Model {
             String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
             return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
                     StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
+                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out")||
+                    !StringUtils.contains(doc.outerHtml(), "Sign in");
         }
     }
 
@@ -594,11 +595,9 @@ public class Account extends Model {
             case AMAZON_ES:
             case AMAZON_IT:
             case AMAZON_UK:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
-                        false, false).fetch();
             case AMAZON_US:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false,
-                        false, true).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
+                        .fetch();
             default:
                 return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
                         .fetch();
