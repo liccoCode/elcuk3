@@ -165,24 +165,23 @@ public class Selling extends GenericModel {
         SELLING_MAPPING.put("72DBSG1-WUK", "88DBSG1-WUK");
         SELLING_MAPPING.put("72DBSG1-WUS", "88DBSG1-WUS");
         SELLING_MAPPING.put("72FLMINI-BF", "92FLMINI-BF");
-        SELLING_MAPPING.put("72FLMINI-BF", "92FLMINI-BF");
-        SELLING_MAPPING.put("72FLMINI-BF", "92FLMINI-BF");
     }
 
     /**
      * 如果在 SELLING_MAPPING 找到 key 返回映射好的新的 sellingID
-     * 如果没有则直接返回原有的 sellingId
+     * 如果没有则直接返回原有的 sku
      *
-     * @param sellingId
+     * @param sku
      * @return
      */
     public static String getMappingSKU(String sku) {
-        String mappingKey = sku;
-        if (mappingKey.contains(",2")) {
-            mappingKey = Product.merchantSKUtoSKU(sku);
+        String mappingKey = "";
+        for(String key : SELLING_MAPPING.keySet()) {
+            if(StringUtils.contains(sku, key)) {
+                mappingKey = StringUtils.replace(sku, key, SELLING_MAPPING.get(key));
+            }
         }
-        if(!SELLING_MAPPING.containsKey(mappingKey)) return sku;
-        return SELLING_MAPPING.get(mappingKey);
+        return mappingKey;
     }
 
     /**

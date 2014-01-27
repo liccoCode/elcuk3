@@ -183,15 +183,14 @@ public class MWSOrders {
             item.order = Orderr.findById(orderId);
             item.market = item.order.market;
             String mappingSku = Selling.getMappingSKU(amzItem.getSellerSKU());
-            amzItem.setSellerSKU(mappingSku);
             if(amzItem.getSellerSKU().contains(",2")) { // 如果包含 ,2 尝试寻找正确的 Selling
-                String likeSellingId = Product.merchantSKUtoSKU(amzItem.getSellerSKU()) +
+                String likeSellingId = Product.merchantSKUtoSKU(mappingSku) +
                         "%|" + item.order.market.nickName() +
                         "|" + acc.id;
                 item.selling = Selling.find("sellingId like ?", likeSellingId).first();
             } else {
                 item.selling = Selling.findById(Selling.sid(
-                        amzItem.getSellerSKU(),
+                        mappingSku,
                         item.order.market, acc
                 ));
 
