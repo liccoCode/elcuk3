@@ -156,17 +156,17 @@ public class Selling extends GenericModel {
      * 初始化 映射 Selling 映射关系
      */
     static {
-        SELLING_MAPPING.put("72GMSTL-B6L,880626118187|A_DE|2", "91GMSTL-B6L,880626118187|A_DE|2");
-        SELLING_MAPPING.put("72GMSTL-B6L,880626118187|A_US|131", "91GMSTL-B6L,880626118187|A_US|131");
-        SELLING_MAPPING.put("72GMSTL-B6L,880626118187|A_UK|1", "91GMSTL-B6L,880626118187|A_UK|1");
-        SELLING_MAPPING.put("72KBCG1-W,886460876924|A_DE|2", "88KBCG1-WDE,886460876924|A_DE|2");
-        SELLING_MAPPING.put("72KBDC1-W,887275533668|A_DE|2", "88KBDC1-WDE,887275533668|A_DE|2");
-        SELLING_MAPPING.put("72DBSG1-WEU,880283954425|A_DE|2", "88DBSG1-WEU,880283954425|A_DE|2");
-        SELLING_MAPPING.put("72DBSG1-WUK,881331233905|A_UK|1", "88DBSG1-WUK,881331233905|A_UK|1");
-        SELLING_MAPPING.put("72DBSG1-WUS,882608617985|A_US|131", "88DBSG1-WUS,882608617985|A_US|131");
-        SELLING_MAPPING.put("72FLMINI-BF,889280822799|A_DE|2", "92FLMINI-BF,889280822799|A_DE|2");
-        SELLING_MAPPING.put("72FLMINI-BF,889280822799|A_UK|1", "92FLMINI-BF,889280822799|A_UK|1");
-        SELLING_MAPPING.put("72FLMINI-BF,889280822799|A_US|131", "92FLMINI-BF,889280822799|A_US|131");
+        SELLING_MAPPING.put("72GMSTL-B6L", "91GMSTL-B6L");
+        SELLING_MAPPING.put("72GMSTL-B6L", "91GMSTL-B6L");
+        SELLING_MAPPING.put("72GMSTL-B6L", "91GMSTL-B6L");
+        SELLING_MAPPING.put("72KBCG1-W", "88KBCG1-WDE");
+        SELLING_MAPPING.put("72KBDC1-W", "88KBDC1-WDE");
+        SELLING_MAPPING.put("72DBSG1-WEU", "88DBSG1-WEU");
+        SELLING_MAPPING.put("72DBSG1-WUK", "88DBSG1-WUK");
+        SELLING_MAPPING.put("72DBSG1-WUS", "88DBSG1-WUS");
+        SELLING_MAPPING.put("72FLMINI-BF", "92FLMINI-BF");
+        SELLING_MAPPING.put("72FLMINI-BF", "92FLMINI-BF");
+        SELLING_MAPPING.put("72FLMINI-BF", "92FLMINI-BF");
     }
 
     /**
@@ -176,9 +176,13 @@ public class Selling extends GenericModel {
      * @param sellingId
      * @return
      */
-    public static String getMappingSellingId(String sellingId) {
-        if(!SELLING_MAPPING.containsKey(sellingId)) return sellingId;
-        return SELLING_MAPPING.get(sellingId);
+    public static String getMappingSKU(String sku) {
+        String mappingKey = sku;
+        if (mappingKey.contains(",2")) {
+            mappingKey = Product.merchantSKUtoSKU(sku);
+        }
+        if(!SELLING_MAPPING.containsKey(mappingKey)) return sku;
+        return SELLING_MAPPING.get(mappingKey);
     }
 
     /**
