@@ -170,18 +170,19 @@ public class Selling extends GenericModel {
     /**
      * 如果在 SELLING_MAPPING 找到 key 返回映射好的新的 sellingID
      * 如果没有则直接返回原有的 sku
+     * 1. 查找到则替换
+     * 2. 找不到则返回原有值
      *
      * @param sku
      * @return
      */
     public static String getMappingSKU(String sku) {
-        String mappingKey = "";
-        for(String key : SELLING_MAPPING.keySet()) {
-            if(StringUtils.contains(sku, key)) {
-                mappingKey = StringUtils.replace(sku, key, SELLING_MAPPING.get(key));
+        if((SELLING_MAPPING.containsKey(sku))) {
+            for(String key : SELLING_MAPPING.keySet()) {
+                StringUtils.replace(sku, key, SELLING_MAPPING.get(key));
             }
         }
-        return mappingKey;
+        return sku;
     }
 
     /**
