@@ -71,7 +71,7 @@ public class GetFeedJob extends BaseJob {
                 /**
                  * 临时性质代码，上架时如果出现 Amazon 报告 MD5 校验出错，则直接进行 Asin 抓取,并保存异常信息到该 getFeedJob 的msg 字段内。
                  */
-                GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(5).toDate());
+                GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
                 throw new FastRuntimeException(e);
             }
         } finally {
