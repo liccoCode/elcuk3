@@ -157,8 +157,6 @@ public class Selling extends GenericModel {
      */
     static {
         SELLING_MAPPING.put("72GMSTL-B6L", "91GMSTL-B6L");
-        SELLING_MAPPING.put("72GMSTL-B6L", "91GMSTL-B6L");
-        SELLING_MAPPING.put("72GMSTL-B6L", "91GMSTL-B6L");
         SELLING_MAPPING.put("72KBCG1-W", "88KBCG1-WDE");
         SELLING_MAPPING.put("72KBDC1-W", "88KBDC1-WDE");
         SELLING_MAPPING.put("72DBSG1-WEU", "88DBSG1-WEU");
@@ -178,7 +176,7 @@ public class Selling extends GenericModel {
      */
     public static String getMappingSKU(String sku) {
         for(String key : SELLING_MAPPING.keySet()) {
-            if(sku.contains(key)) {
+            if(StringUtils.contains(sku, key)) {
                 return StringUtils.replace(sku, key, SELLING_MAPPING.get(key));
             }
         }
