@@ -182,19 +182,18 @@ public class MWSOrders {
             // use first-level cache
             item.order = Orderr.findById(orderId);
             item.market = item.order.market;
+            String mappingSku = Selling.getMappingSKU(amzItem.getSellerSKU());
             if(amzItem.getSellerSKU().contains(",2")) { // 如果包含 ,2 尝试寻找正确的 Selling
-                String likeSellingId = Product.merchantSKUtoSKU(amzItem.getSellerSKU()) +
+                String likeSellingId = Product.merchantSKUtoSKU(mappingSku) +
                         "%|" + item.order.market.nickName() +
                         "|" + acc.id;
-                likeSellingId = Selling.getMappingSellingId(likeSellingId);
                 item.selling = Selling.find("sellingId like ?", likeSellingId).first();
             } else {
-                item.selling = Selling.findById(
-                        Selling.sid(
-                                amzItem.getSellerSKU(),
-                                item.order.market, acc
-                        )
-                );
+                item.selling = Selling.findById(Selling.sid(
+                        mappingSku,
+                        item.order.market, acc
+                ));
+
             }
             item.id = String.format("%s_%s", orderId,
                     Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
