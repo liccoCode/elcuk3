@@ -177,8 +177,8 @@ public class Selling extends GenericModel {
      * @return
      */
     public static String getMappingSKU(String sku) {
-        if((SELLING_MAPPING.containsKey(sku))) {
-            for(String key : SELLING_MAPPING.keySet()) {
+        for(String key : SELLING_MAPPING.keySet()) {
+            if(sku.contains(key)) {
                 return StringUtils.replace(sku, key, SELLING_MAPPING.get(key));
             }
         }
