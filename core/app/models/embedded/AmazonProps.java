@@ -52,6 +52,7 @@ public class AmazonProps implements Serializable {
         this.productDesc = " ";
         this.searchTerms = " ";
         this.platinumKeywords = " ";
+        this.hardwarePlatforms = " ";
     }
 
     @Lob
@@ -270,6 +271,7 @@ public class AmazonProps implements Serializable {
         if(StringUtils.isBlank(this.productDesc)) this.productDesc = " ";
         if(StringUtils.isBlank(this.searchTerms)) this.searchTerms = " ";
         if(StringUtils.isBlank(this.platinumKeywords)) this.platinumKeywords = " ";
+        if(StringUtils.isBlank(this.hardwarePlatforms)) this.hardwarePlatforms = " ";
     }
 
     /**
