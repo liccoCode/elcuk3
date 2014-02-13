@@ -52,6 +52,7 @@ public class AmazonProps implements Serializable {
         this.productDesc = " ";
         this.searchTerms = " ";
         this.platinumKeywords = " ";
+        this.hardwarePlatforms = " ";
     }
 
     @Lob
