@@ -90,7 +90,7 @@ $ ->
     $.getJSON('/products/showRBNLink', {market: market})
     .done((r) ->
         $('#RBN').popover('destroy')
-        $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "使用 <a href='#{r.message}' target='download'>Amazon Product Classifier</a> 查询 RBN", title: "小提示^_^"}).popover('hide')
+        $('#RBN').popover({html: true, trigger: "focus", placement: "right", content: "使用 <a href='#{r.message}' target='download'>Amazon Product Classifier</a> 查询  （注意：US市场请填写Valid Values，其他市场请填写Node ID）)", title: "小提示^_^"}).popover('hide')
       )
 
   # 触发 document 绑定的事件（默认去加载了 UK 英国市场 Computer 模板的 FeedProductType）
