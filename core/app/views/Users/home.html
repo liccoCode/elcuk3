@@ -83,27 +83,3 @@
   </div>
 </div>
 #{/power.ck}
-
-#{info_row title:"Notifications (最新 80 条)"/}
-<div class="row">
-  <div class="span12">
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <th class="span1">#</th>
-        <th class="span3">标题</th>
-        <th class="span6">内容</th>
-        <th>创建时间</th>
-        <th>来源</th>
-      </tr>
-    #{list items:notifications, as:'noty'}
-      <tr class=''>
-        <td>${noty.id}</td>
-        <td>${noty.title}</td>
-        <td>${noty.content}</td>
-        <td>#{time_tooltip time:noty.createAt, datetime:true/}</td>
-        <td><a href="${noty.sourceURL}">${noty.sourceURL}</a></td>
-      </tr>
-    #{/list}
-    </table>
-  </div>
-</div>
