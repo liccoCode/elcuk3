@@ -23,4 +23,7 @@ CREATE INDEX ticket_type_state_createAt ON Ticket (type, state, createAt);
 CREATE INDEX sellingrecord_date ON SellingRecord(date);
 
 # SaleFee 变大了, 这个很需要
-CREATE INDEX salefee_date ON SaleFee (date)
+CREATE INDEX salefee_date ON SaleFee (date);
+
+# 给 Notification 的二列索引 (userId, state)
+CREATE INDEX noty_userid_state ON Notification(user_id, state);

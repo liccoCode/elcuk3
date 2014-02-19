@@ -3,6 +3,8 @@ package models;
 import com.google.gson.annotations.Expose;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
+import play.db.DB;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -18,6 +20,7 @@ import java.util.List;
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Notification extends GenericModel {
+    public static final String INDEX = "http://e.easya.cc/Notifications/index";
 
     private static final long serialVersionUID = -3890283395796257638L;
 
@@ -25,11 +28,12 @@ public class Notification extends GenericModel {
         this.createAt = new Date();
     }
 
-    public Notification(User user, String title, String content) {
+    public Notification(User user, String title, String content, String sourceURL) {
         this();
         this.user = user;
         this.title = title;
         this.content = content;
+        this.sourceURL = sourceURL;
     }
 
     @Id
@@ -53,15 +57,15 @@ public class Notification extends GenericModel {
     public String content;
 
     /**
+     * 触发消息的源头 URL
+     */
+    public String sourceURL;
+
+    /**
      * 创建时间
      */
     @Expose
     public Date createAt;
-
-    /**
-     * 什么是否被通知了
-     */
-    public Date notifyAt;
 
     /**
      * 是否阅读 通知
@@ -94,46 +98,47 @@ public class Notification extends GenericModel {
     }
 
     /**
-     * 返回当前实例的简单内容
-     *
-     * @return
+     * 通知所有用户. 为每一个打开的用户添加一条 Notification 记录
      */
-    public Notification note() {
-        Notification note = new Notification();
-        note.id = this.id;
-        note.title = this.title;
-        note.content = this.content;
-        note.createAt = this.createAt;
-        note.notifyAt = this.notifyAt;
-        return note;
-    }
-
-    public static void notificationAll(String title, String content) {
+    public void notifiAll() {
         List<User> users = User.openUsers();
-        for(User u : users) {
-            new Notification(u, title, content).save();
-        }
+        notifySomeone(users.toArray(new User[users.size()]));
     }
 
     /**
-     * 创建一个 Notification
+     * 通知某些人. 为指定用户添加 Notification 记录
      *
-     * @param user
-     * @return
+     * @param users
      */
-    public static Notification notifies(User user, String content) {
-        return new Notification(user, null, content);
-    }
-
-    /**
-     * 向某些用户 通知信息
-     */
-    public static void notifiesToUsers(String title, String content, User... users) {
-        for(User u : users) {
-            new Notification(u, title, content).save();
+    public void notifySomeone(User... users) {
+        for(User user : users) {
+            if(user.equals(this.user)) continue;
+            Notification.newNotyDiffUser(this, user).save();
         }
     }
 
+    /**
+     * Copy 出一个新的 Notification 对象
+     */
+    public static Notification newNotyDiffUser(Notification oldNoty, User user) {
+        return new Notification(user, oldNoty.title, oldNoty.content, oldNoty.sourceURL);
+    }
+
+    public static Notification newNoty(String title, String content, String sourceURL, User user) {
+        return new Notification(user, title, content, sourceURL);
+    }
+
+    public static Notification newNoty(String title, String content, String sourceURL) {
+        return newNoty(title, content, sourceURL, null);
+    }
+
+    public static Notification newSystemNoty(String content, String sourceURL, User user) {
+        return newNoty("系统消息", content, sourceURL, user);
+    }
+
+    public static Notification newNotyMe(String title, String content, String sourceURL) {
+        return newNoty(title, content, sourceURL, User.current());
+    }
 
     /**
      * 更改 通知的状态
@@ -151,9 +156,7 @@ public class Notification extends GenericModel {
      * @param ids
      */
     public static void markAsRead(List<Long> ids) {
-        for(Long id : ids) {
-            Notification notification = Notification.findById(id);
-            notification.changState(Notification.S.CHECKED);
-        }
+        DB.execute(String.format("UPDATE Notification set state='%s' WHERE %s",
+                Notification.S.CHECKED.name(), SqlSelect.whereIn("id", ids)));
     }
 }
