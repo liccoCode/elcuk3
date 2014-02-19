@@ -1,12 +1,15 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.PDFs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
+import models.market.Account;
 import models.product.Category;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -15,8 +18,10 @@ import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.F;
+import play.modules.pdf.PDF;
 
 import javax.persistence.*;
+import java.io.File;
 import java.util.*;
 
 /**

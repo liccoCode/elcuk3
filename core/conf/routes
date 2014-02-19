@@ -45,7 +45,6 @@ POST   /deliveryment                                         Deliveryments.creat
 DELETE /deliveryment/{id}/units                              Deliveryments.delunits
 POST   /deliveryment/{id}/units                              Deliveryments.addunits
 
-
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
 POST    /feetype                                             FeeTypes.create
