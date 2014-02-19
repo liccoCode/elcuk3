@@ -40,6 +40,7 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_FILENAME,
                     String.format("%s-%s采购单.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
             render(deliverymentList);
         } else {
             renderText("没有数据无法生成Excel文件！");
