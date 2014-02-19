@@ -70,6 +70,11 @@ public class ProcureUnits extends Controller {
                 Files.delete(dirfile);
                 dirfile.mkdir();
                 for(ProcureUnit procureUnit : procureUnitsList) {
+                    if(!StringUtils.isBlank(p.unitIds)) {
+                        if(!StringUtils.contains(p.unitIds, procureUnit.id.toString())) {
+                            continue;
+                        }
+                    }
                     String name = procureUnit.cooperator.name;
                     String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
 
