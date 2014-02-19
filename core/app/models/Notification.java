@@ -7,9 +7,7 @@ import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 用户的提醒消息(push)
@@ -20,10 +18,8 @@ import java.util.Set;
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Notification extends GenericModel {
-    public static final int SERVICE = 1;
-    public static final int PROCURE = 2;
-    public static final int SHIPPER = 3;
-    public static final int PM = 4;
+
+    private static final long serialVersionUID = -3890283395796257638L;
 
     public Notification() {
         this.createAt = new Date();
@@ -126,8 +122,7 @@ public class Notification extends GenericModel {
      * @return
      */
     public static Notification notifies(User user, String content) {
-        Notification notify = new Notification(user, null, content);
-        return notify;
+        return new Notification(user, null, content);
     }
 
     /**
@@ -137,42 +132,6 @@ public class Notification extends GenericModel {
         for(User u : users) {
             new Notification(u, title, content).save();
         }
-    }
-
-    /**
-     * 通知某一个组(1: service group, 2: procure group, 3: shipper group, 4: PM group)
-     *
-     * @param group   1: service group, 2: procure group, 3: shipper group, 4: PM group
-     * @param title
-     * @param content
-     * @return
-     */
-    public static void notifies(String title, String content, int... group) {
-        Set<User> users = new HashSet<User>();
-        for(int i : group) {
-            if(i == SERVICE)
-                users.addAll(User.find("isService=?", true).<User>fetch());
-            else if(i == PROCURE)
-                users.addAll(User.find("isProcure=?", true).<User>fetch());
-            else if(i == SHIPPER)
-                users.addAll(User.find("isShipper=?", true).<User>fetch());
-            else if(i == PM)
-                users.addAll(User.find("isPM=?", true).<User>fetch());
-        }
-
-        for(User u : users) {
-            Notification notify = new Notification(u, title, content).save();
-        }
-    }
-
-    /**
-     * 系统消息
-     *
-     * @param group   1: service group, 2: procure group, 3: shipper group, 4: PM group
-     * @param content
-     */
-    public static void notifies(String content, int... group) {
-        notifies(null, content, group);
     }
 
 
