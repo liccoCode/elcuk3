@@ -94,7 +94,7 @@ public class SellingQTY extends GenericModel implements ElcukRecord.Log {
     public void attach2Selling(String merchantSKU, Whouse whouse) {
         Validate.notNull(merchantSKU);
         Validate.notNull(whouse);
-        this.selling = Selling.findById(Selling.sid(merchantSKU, whouse.account.type, whouse.account));
+        this.selling = Selling.findById(Selling.sid(Selling.getMappingSKU(merchantSKU), whouse.account.type, whouse.account));
         this.product = Product.findByMerchantSKU(merchantSKU);
         if(this.selling == null || this.product == null) throw new SellingQTYAttachNoWhouseException();
         // 虽然可以通过 Whouse.find("account=?", sell.account).first(); 找到 Whouse, 但是这是此 Selling 对应的 FBA 仓库, 此方法除了能够绑定 FBA 库存还需要能够绑定其他的库存
