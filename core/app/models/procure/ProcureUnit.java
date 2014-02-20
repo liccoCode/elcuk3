@@ -2,10 +2,7 @@ package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import helper.Dates;
-import helper.PDFs;
-import helper.Reflects;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
@@ -441,7 +438,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Set<User> notyUsers = this.editToUsers();
         if(content.contains("日期") || content.contains("时间"))
             notyUsers.addAll(User.operations());
-        Notification.newSystemNoty(content, "url").notifySomeone(notyUsers.toArray(new User[notyUsers.size()]));
+        Notification.newSystemNoty(content, String.format("%s/procureunits?p.search=id:%s", Constant.ROOT_PATH, this.id))
+                .notifySomeone(notyUsers.toArray(new User[notyUsers.size()]));
     }
 
     /**

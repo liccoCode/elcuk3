@@ -227,19 +227,6 @@ public class ProcureUnits extends Controller {
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
-        new ElcukRecord(Messages.get("procureunit.update"),
-                Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
-        //通知采购单 和采购计划创建人，运输人员
-        Set<User> users = managedUnit.editToUsers();
-        Notification.newNoty(
-                String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
-                String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
-                        oldPlanQty, managedUnit.attrs.planQty,
-                        Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
-                String.format("%s/", Constant.ROOT_PATH),
-                users.iterator().next()
-        ).notifySomeone(users.toArray(new User[users.size()]));
-
         flash.success("成功修改采购计划!", id);
         edit(id);
     }

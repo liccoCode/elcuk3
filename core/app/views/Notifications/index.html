@@ -53,10 +53,10 @@
           <tr>
             <th><label><input type="checkbox" class="checkall"></label></th>
             <th class="span1">#</th>
-            <th class="span3">标题</th>
-            <th class="span5">内容</th>
-            <th>创建时间</th>
-            <th>源地址</th>
+            <th>标题</th>
+            <th>内容</th>
+            <th class="span2">创建时间</th>
+            <th class="span2">源地址</th>
           </tr>
             #{list items:notifications, as:'noty'}
               <tr>
@@ -70,7 +70,7 @@
                 <td><a name="${noty.createAt}">${noty.id}</a></td>
                 <td>${noty.title}</td>
                 <td>${noty.content}</td>
-                <td>#{time_tooltip time:noty.createAt, datetime:true/}</td>
+                <td>#{time_tooltip time:noty.createAt, datetime:true, short:true/}</td>
                 <td><a href="${noty.sourceURL}">${noty.sourceURL}</a></td>
               </tr>
             #{/list}
