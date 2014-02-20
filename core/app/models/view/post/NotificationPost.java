@@ -3,7 +3,6 @@ package models.view.post;
 import controllers.Login;
 import helper.Dates;
 import models.Notification;
-import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -19,8 +18,6 @@ import java.util.List;
  * Time: 5:56 PM
  */
 public class NotificationPost extends Post<Notification> {
-
-    public DateType dateType;
 
     public Notification.S state;
 
@@ -60,33 +57,21 @@ public class NotificationPost extends Post<Notification> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-
-        StringBuilder sbd = new StringBuilder(" 1=1 AND user=?");
+        StringBuilder jpql = new StringBuilder("user=?");
         List<Object> params = new ArrayList<Object>();
         params.add(Login.current());
 
-        if(this.dateType != null) {
-            if(this.dateType == DateType.NOTIFICATION) {
-                sbd.append("AND notifyAt >=? AND notifyAt <=?");
-            } else {
-                sbd.append("AND createAt>=? AND createAt <=?");
-            }
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
-        }
+        jpql.append("AND createAt>=? AND createAt<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
 
         if(this.state != null) {
-            sbd.append("AND state = ?");
+            jpql.append("AND state=?");
             params.add(this.state);
         }
 
-        if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND title like ?");
-            params.add(this.word());
-        }
-
-        sbd.append(" ORDER BY createAt DESC");
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        jpql.append(" ORDER BY createAt DESC");
+        return new F.T2<String, List<Object>>(jpql.toString(), params);
     }
 
     @Override
