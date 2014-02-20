@@ -322,6 +322,20 @@ public class User extends Model {
         return users;
     }
 
+    /**
+     * 物流人员
+     *
+     * @return
+     */
+    public static Set<User> shipoperations() {
+        Set<User> users = new HashSet<User>();
+        for(String name : new String[]{"wendy"}) {
+            User user = User.findByUserName(name);
+            if(user != null) users.add(user);
+        }
+        return users;
+    }
+
     public boolean getClosed() {
         return closed;
     }
