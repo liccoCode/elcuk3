@@ -1,7 +1,8 @@
 package controllers;
 
-import helper.J;
+import helper.GTs;
 import models.Notification;
+import models.User;
 import models.view.Ret;
 import models.view.post.NotificationPost;
 import org.apache.commons.lang.StringUtils;
@@ -19,15 +20,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Notifications extends Controller {
 
-    @Check("notifications.notifys")
-    public static void notifys(String content) {
-        /**
-         * 1. 将 content 中的内容根据 @xxx 解析出需要通知的人
-         * 2. 对每一个人创建一个 Notification
-         */
-        Notification.notifies(Login.current(), content);
-        renderJSON(new Ret(true));
-    }
+    // TODO 取消这个 @Check("notifications.notifys")
 
     @Check("notifications.notifysall")
     public static void notifysAll(String t, String c) {
@@ -35,7 +28,7 @@ public class Notifications extends Controller {
             flash.error("请填写 Notification 内容!");
             redirect("/users/home");
         }
-        Notification.notificationAll(t, c);
+        Notification.newNoty(t, c, Notification.INDEX).notifiAll();
         flash.success("发送成功");
         redirect("/users/home");
     }
@@ -52,20 +45,17 @@ public class Notifications extends Controller {
     }
 
     /**
-     * 显示 当前用户 八条最新通知
-     */
-    public static void latest() {
-        List<Notification> notifications = Notification.find("user=? and state = ? ORDER BY createAt DESC",
-                Login.current(),
-                Notification.S.UNCHECKED).fetch(8);
-        renderJSON(J.G(notifications));
-    }
-
-    /**
      * 计算当前用户的通知信息的数量
      */
     public static void amount() {
-        renderText(Notification.count("user=? and state = ? ", Login.current(), Notification.S.UNCHECKED));
+        long count = Notification.count("user=? and state=?", User.current(),
+                Notification.S.UNCHECKED);
+        renderJSON(GTs.MapBuilder
+                .map("user", User.username())
+                .put("count", count + "")
+                .build()
+        );
+
     }
 
     /**
@@ -80,6 +70,17 @@ public class Notifications extends Controller {
         }
 
         renderJSON(new Ret(true, "通知已标记为已读"));
+    }
+
+    /**
+     * 查看源链接并且标记已读
+     *
+     * @param id
+     */
+    public static void viewSource(Long id) {
+        Notification noty = Notification.findById(id);
+        noty.changState(Notification.S.CHECKED);
+        redirect(noty.sourceURL);
     }
 
 }

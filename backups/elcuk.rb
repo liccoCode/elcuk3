@@ -42,7 +42,7 @@ Backup::Model.new(:elcuk, 'Description for elcuk') do
   #
   store_with Local do |local|
     local.path       = "~/backups/"
-    local.keep       = 5
+    local.keep       = 2
   end
 
   # TODO 增加备份到 S3
