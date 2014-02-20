@@ -72,4 +72,15 @@ public class Notifications extends Controller {
         renderJSON(new Ret(true, "通知已标记为已读"));
     }
 
+    /**
+     * 查看源链接并且标记已读
+     *
+     * @param id
+     */
+    public static void viewSource(Long id) {
+        Notification noty = Notification.findById(id);
+        noty.changState(Notification.S.CHECKED);
+        redirect(noty.sourceURL);
+    }
+
 }

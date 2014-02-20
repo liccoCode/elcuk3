@@ -136,6 +136,10 @@ public class Notification extends GenericModel {
         return newNoty("系统消息", content, sourceURL, user);
     }
 
+    public static Notification newSystemNoty(String content, String sourceURL) {
+        return newSystemNoty(content, sourceURL, null);
+    }
+
     public static Notification newNotyMe(String title, String content, String sourceURL) {
         return newNoty(title, content, sourceURL, User.current());
     }
