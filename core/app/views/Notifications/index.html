@@ -68,10 +68,22 @@
                   </label>
                 </td>
                 <td><a name="${noty.createAt}">${noty.id}</a></td>
-                <td>${noty.title}</td>
-                <td>${noty.content}</td>
-                <td>#{time_tooltip time:noty.createAt, datetime:true, short:true/}</td>
-                <td><a href="${noty.sourceURL}">${noty.sourceURL}</a></td>
+                  #{if noty?.state == models.Notification.S.UNCHECKED}
+                     <td>
+                       <a href="@{Notifications.viewSource(noty.id)}"><font style="font-weight:bold;font-style:italic;" color="red">
+                       ${noty.title}</font></a></td>
+                     <td>${noty.content}</td>
+                     <td>#{time_tooltip time:noty.createAt, datetime:true, short:true/}</td>
+                     <td>
+                       <a href="@{Notifications.viewSource(noty.id)}"><font style="font-weight:bold;font-style:italic;" color="red">
+                       ${noty.sourceURL}</font></a></td>
+                   #{/if}
+                   #{else }
+                     <td><a href="@{Notifications.viewSource(noty.id)}">${noty.title}</a></td>
+                     <td>${noty.content}</td>
+                     <td>#{time_tooltip time:noty.createAt, datetime:true, short:true/}</td>
+                     <td><a href="@{Notifications.viewSource(noty.id)}">${noty.sourceURL}</a></td>
+                   #{/else}
               </tr>
             #{/list}
         </table>

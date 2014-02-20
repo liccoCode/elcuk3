@@ -140,12 +140,10 @@
             <a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
           </li>
           <li>
-            <a href="#" class="dropdown-toggle" id="notificationBtn" data-toggle="dropdown">
-              Notify(<b id="notifyNumber"></b>) <b class="caret"></b>
+            <a href="@{Notifications.index()}"  target="_blank">
+              <b id="notifyimg"></b>
+              Notify(<b id="notifyNumber"></b>)
             </a>
-            <ul class="dropdown-menu" id="notifications">
-              <li>Loading....</li>
-            </ul>
           </li>
         </ul>
       </div>
