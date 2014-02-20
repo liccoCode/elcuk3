@@ -79,7 +79,9 @@ public class Notifications extends Controller {
      */
     public static void viewSource(Long id) {
         Notification noty = Notification.findById(id);
-        noty.changState(Notification.S.CHECKED);
+        if(noty.state != Notification.S.CHECKED) {
+            noty.changState(Notification.S.CHECKED);
+        }
         redirect(noty.sourceURL);
     }
 
