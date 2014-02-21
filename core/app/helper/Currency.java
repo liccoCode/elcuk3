@@ -505,17 +505,19 @@ public enum Currency {
      */
     public static String bocRatesHtml() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
-        Elements trs = doc.select("div.BOC_main div.publish div:eq(2) table tr");
+        Element table = doc.select(".BOC_main .publish table").last();
         String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元"};
-        for(Element tr : trs.subList(1, trs.size() - 1)) {
+        for(Element tr : table.select("tr")) {
             boolean find = false;
             for(String c : currencies) {
-                if(!tr.select("td:eq(0):contains(" + c + ")").isEmpty())
+                if(tr.text().contains(c)) {
                     find = true;
+                    break;
+                }
             }
             if(!find) tr.remove();
         }
-        return doc.select("div.BOC_main div.publish div:eq(2) table").get(1).outerHtml();
+        return table.outerHtml();
     }
 
     /**
