@@ -50,6 +50,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public Shipment.T shipType;
 
+    public String unitIds;
     /**
      * 选择过滤的日期类型
      */
