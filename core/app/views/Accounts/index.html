@@ -14,6 +14,9 @@
     <li><a href="#unsale_uk" data-toggle="tab">UnSale UK</a></li>
     <li><a href="#unsale_de" data-toggle="tab">UnSale DE</a></li>
     <li><a href="#unsale_us" data-toggle="tab">UnSale US</a></li>
+    <li><a href="#unsale_fr" data-toggle="tab">UnSale FR</a></li>
+    <li><a href="#unsale_it" data-toggle="tab">UnSale IT</a></li>
+    <li><a href="#unsale_jp" data-toggle="tab">UnSale JP</a></li>
   </ul>
 
   <div class="tab-content">
@@ -30,6 +33,9 @@
           <th>IsAUK</th>
           <th>IsADE</th>
           <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
           <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
           </th>
         </tr>
@@ -54,6 +60,9 @@
           <th>IsAUK</th>
           <th>IsADE</th>
           <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
           <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
           </th>
         </tr>
@@ -78,6 +87,9 @@
           <th>IsAUK</th>
           <th>IsADE</th>
           <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
           <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
           </th>
         </tr>
@@ -102,6 +114,9 @@
           <th>IsAUK</th>
           <th>IsADE</th>
           <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
           <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
           </th>
         </tr>
@@ -112,5 +127,90 @@
       #{/list}
       </table>
     </div>
+
+
+    <!-- 非销售账号, FR -->
+    <div id="unsale_fr" class="tab-pane fade in">
+      <table class="table table-bordered table-striped account_list">
+        <tr>
+          <th>#</th>
+          <th>UniqueName</th>
+          <th>Type</th>
+          <th>MerchantId</th>
+          <th>AccessKey</th>
+          <th>IsSaleAcc</th>
+          <th>IsAUK</th>
+          <th>IsADE</th>
+          <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
+          <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
+          </th>
+        </tr>
+      #{list items:accs, as:'acc'}
+          #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_FR}
+              #{render 'Accounts/acctr.html', acc:acc/}
+          #{/if}
+      #{/list}
+      </table>
+    </div>
+
+
+    <!-- 非销售账号, IT -->
+    <div id="unsale_it" class="tab-pane fade in">
+      <table class="table table-bordered table-striped account_list">
+        <tr>
+          <th>#</th>
+          <th>UniqueName</th>
+          <th>Type</th>
+          <th>MerchantId</th>
+          <th>AccessKey</th>
+          <th>IsSaleAcc</th>
+          <th>IsAUK</th>
+          <th>IsADE</th>
+          <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
+          <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
+          </th>
+        </tr>
+      #{list items:accs, as:'acc'}
+          #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_IT}
+              #{render 'Accounts/acctr.html', acc:acc/}
+          #{/if}
+      #{/list}
+      </table>
+    </div>
+
+    <!-- 非销售账号, JP -->
+    <div id="unsale_jp" class="tab-pane fade in">
+      <table class="table table-bordered table-striped account_list">
+        <tr>
+          <th>#</th>
+          <th>UniqueName</th>
+          <th>Type</th>
+          <th>MerchantId</th>
+          <th>AccessKey</th>
+          <th>IsSaleAcc</th>
+          <th>IsAUK</th>
+          <th>IsADE</th>
+          <th>IsAUS</th>
+          <th>IsAFR</th>
+          <th>IsAIT</th>
+          <th>IsAJP</th>
+          <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
+          </th>
+        </tr>
+      #{list items:accs, as:'acc'}
+          #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_JP}
+              #{render 'Accounts/acctr.html', acc:acc/}
+          #{/if}
+      #{/list}
+      </table>
+    </div>
+
+
   </div>
 </div>

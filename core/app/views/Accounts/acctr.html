@@ -8,6 +8,9 @@
     <td>#{yesOrNo f:acc.isAUK/}</td>
     <td>#{yesOrNo f:acc.isADE/}</td>
     <td>#{yesOrNo f:acc.isAUS/}</td>
+    <td>#{yesOrNo f:acc.isAFR/}</td>
+  <td>#{yesOrNo f:acc.isAIT/}</td>
+  <td>#{yesOrNo f:acc.isAJP/}</td>
     <td>#{yesOrNo f:acc.closeable/}</td>
 </tr>
 <tr id="toogle_${acc.id}" style="display:none;">
@@ -53,6 +56,21 @@
                             <input type="checkbox" name="a.isAUS" ${acc.isAUS ? 'checked' : ''} value="${acc.isAUS}">
                             isAUS
                         </label>
+                      <label class="checkbox inline">
+                           <input type="checkbox" name="a.isAFR" ${acc.isAFR ? 'checked' : ''}
+                                                         value="${acc.isAFR}">
+                            isAFR
+                       </label>
+                      <label class="checkbox inline">
+                             <input type="checkbox" name="a.isAIT" ${acc.isAIT ? 'checked' : ''}
+                                                            value="${acc.isAIT}">
+                            isAIT
+                      </label>
+                      <label class="checkbox inline">
+                              <input type="checkbox" name="a.isAJP" ${acc.isAJP ? 'checked' : ''}
+                                                            value="${acc.isAJP}">
+                            isAJP
+                      </label>
                     </td>
                 </tr>
 

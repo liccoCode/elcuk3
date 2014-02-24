@@ -140,6 +140,15 @@ public class Account extends Model {
     @Expose
     public boolean isAUS = false;
 
+    @Expose
+    public boolean isAFR = false;
+
+    @Expose
+    public boolean isAIT = false;
+
+    @Expose
+    public boolean isAJP = false;
+
     /**
      * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆 , 他们的 Cookie 各不影响
      * 添加 Market 参数, 同一个账号可以再不同市场登陆
@@ -556,7 +565,7 @@ public class Account extends Model {
             String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
             return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
                     StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out")||
+                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out") ||
                     !StringUtils.contains(doc.outerHtml(), "Sign in");
         }
     }
