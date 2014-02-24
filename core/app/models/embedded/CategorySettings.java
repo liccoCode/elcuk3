@@ -77,7 +77,7 @@ public class CategorySettings implements Serializable {
             return amazonESCategory;
         } else if(market == M.AMAZON_IT) {
             return amazonITCategory;
-        }else {
+        } else {
             return "";
         }
     }
