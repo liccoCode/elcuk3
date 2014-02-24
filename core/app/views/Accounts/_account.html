@@ -16,12 +16,12 @@
     <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
     </th>
   </tr>
-#{list items:_accs, as:'acc'}
-    #{if _amazontype==null && acc.isSaleAcc}
+#{list items:accs, as:'acc'}
+    #{if amazontype==null && acc.isSaleAcc}
         #{render 'Accounts/acctr.html', acc:acc/}
     #{/if}
     #{else}
-        #{if _amazontype!=null && !acc.isSaleAcc && acc.type == _amazontype}
+        #{if amazontype!=null && !acc.isSaleAcc && acc.type == amazontype}
             #{render 'Accounts/acctr.html', acc:acc/}
         #{/if}
     #{/else}
