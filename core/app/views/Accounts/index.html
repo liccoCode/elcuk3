@@ -20,25 +20,25 @@
   </ul>
   <div class="tab-content">
     <div id="sales" class="tab-pane fade in">
-    #{account_field  accs:accs, amazontype:null/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:null/}
     </div>
     <div id="unsale_uk" class="tab-pane fade in">
-    #{account_field unsaletype:"unsale_uk",accs:accs, amazontype:models.market.M.AMAZON_UK/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_UK/}
     </div>
     <div id="unsale_de" class="tab-pane fade in">
-    #{account_field unsaletype:"unsale_de",accs:accs, amazontype:models.market.M.AMAZON_DE/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_DE/}
     </div>
     <div id="unsale_us" class="tab-pane fade in">
-    #{account_field unsaletype:"unsale_us",accs:accs, amazontype:models.market.M.AMAZON_US/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_US/}
     </div>
     <div id="unsale_fr" class="tab-pane fade in">
-    #{account_field unsaletype:"unsale_fr",accs:accs, amazontype:models.market.M.AMAZON_FR/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_FR/}
     </div>
     <div id="unsale_it" class="tab-pane fade in">
-    #{account_field unsaletype:"unsale_it",accs:accs, amazontype:models.market.M.AMAZON_IT/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_IT/}
     </div>
     <div id="unsale_jp" class="tab-pane fade in">
-    #{account_field unsaletype:"unsale_jp",accs:accs, amazontype:models.market.M.AMAZON_JP/}
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_JP/}
     </div>
   </div>
 </div>
