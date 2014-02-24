@@ -227,6 +227,31 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public String comment = " ";
 
+
+    /**
+     * 采购单元类型，用来区分手动单和非手动单
+     */
+    public enum PROCUREUNITTYPE {
+        /**
+         * 正常单
+         */
+        NORMAL,
+
+        /**
+         * 手动单
+         */
+        MANUAL
+    }
+
+    /**
+     * 采购单元类型
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public PROCUREUNITTYPE procureUnitTypet;
+
+
     /**
      * ProcureUnit 的检查
      */
@@ -248,6 +273,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
     }
+
+    /**
+     * 手动单数据验证
+     */
+    public void validateManualProcureUnit() {
+        Validation.required("运输方式",this.shipType);
+        Validation.current().valid(this.attrs);
+        Validation.required("procureunit.whouse", this.whouse);
+        Validation.required("procureunit.handler", this.handler);
+        Validation.required("procureunit.product", this.product);
+        if(this.product != null) this.sku = this.product.sku;
+        Validation.required("procureunit.createDate", this.createDate);
+        if(this.attrs != null) this.attrs.validate();
+    }
+
 
     /**
      * 分拆采购计划: 工厂在原有采购计划基础上全部交货, 只能够部分交货的情况下进行的操作;

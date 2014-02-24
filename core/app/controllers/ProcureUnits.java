@@ -3,6 +3,7 @@ package controllers;
 import exception.PaymentException;
 import helper.Constant;
 import helper.Dates;
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
@@ -13,12 +14,14 @@ import models.market.Selling;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Product;
 import models.product.Whouse;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -130,6 +133,15 @@ public class ProcureUnits extends Controller {
         render(unit, whouses);
     }
 
+    @Check("procures.createmanualprocureunit")
+    public static void manualProcureUnit() {
+        ProcureUnit unit = new ProcureUnit();
+        List<Whouse> whouses = Whouse.findAll();
+        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
+        renderArgs.put("skus", J.json(skusToJson._2));
+        render("../views/ProcureUnits/blank.html", unit, whouses);
+    }
+
     /**
      * 某一个 ProcureUnit 交货
      */
@@ -209,6 +221,26 @@ public class ProcureUnits extends Controller {
                 Messages.get("action.base", unit.to_log()), unit.id + "").save();
 
         Analyzes.index();
+    }
+
+    /**
+     * @param unit
+     */
+    public static void createManualProcureUnit(ProcureUnit unit) {
+        unit.handler = User.findByUserName(Secure.Security.connected());
+        unit.validateManualProcureUnit();
+        if(Validation.hasErrors()) {
+            List<Whouse> whouses = Whouse.findAll();
+            F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
+            renderArgs.put("skus", J.json(skusToJson._2));
+            render("ProcureUnits/blank.html", unit, whouses);
+        }
+        unit.procureUnitTypet = ProcureUnit.PROCUREUNITTYPE.MANUAL;
+        unit.save();
+        flash.success("手动单创建成功");
+        new ElcukRecord(Messages.get("procureunit.save"),
+                Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        index(null);
     }
 
     public static void edit(long id) {
