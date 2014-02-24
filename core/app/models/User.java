@@ -1,5 +1,6 @@
 package models;
 
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import models.finance.Payment;
@@ -14,6 +15,7 @@ import play.mvc.Scope;
 import play.utils.FastRuntimeException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import java.util.Map.Entry;
 import java.util.Iterator;
 
@@ -114,7 +116,7 @@ public class User extends Model {
     public boolean closed = false;
 
     @Transient
-    public static JsonObject usercategory;
+    public static JsonObject USER_CATEGORY;
 
     public User() {
     }
@@ -321,14 +323,14 @@ public class User extends Model {
      * @return
      */
     public static JsonObject getUsercategor() {
-        if(User.usercategory == null || User.usercategory.isJsonNull()) {
+        if(User.USER_CATEGORY == null || User.USER_CATEGORY.isJsonNull()) {
             //初始化运营人员权限
-            User.usercategory = new JsonObject();
-            usercategory.addProperty("80,11,82", "andy");
-            usercategory.addProperty("70,71,73", "vera");
-            usercategory.addProperty("50,72,88,89,90,91,92", "sherry");
+            User.USER_CATEGORY = new JsonObject();
+            USER_CATEGORY.addProperty("80,11,82", "andy");
+            USER_CATEGORY.addProperty("70,71,73", "vera");
+            USER_CATEGORY.addProperty("50,72,88,89,90,91,92", "sherry");
         }
-        return User.usercategory;
+        return User.USER_CATEGORY;
     }
 
     /**
@@ -340,12 +342,11 @@ public class User extends Model {
         String userids = "";
         if(!StringUtils.isBlank(sku)) {
             String category = sku.substring(0, 2);
-            Iterator it = getUsercategor().entrySet().iterator();
             //查找相应的产品线人员
-            while(it.hasNext()) {
-                Entry<String, JsonPrimitive> entry = (Entry<String, JsonPrimitive>) it.next();
-                if(entry.getKey().contains(category)) {
-                    userids = entry.getValue().toString();
+            for(Entry<String, JsonElement> stringJsonElementEntry : getUsercategor().entrySet()) {
+                String key = stringJsonElementEntry.getKey();
+                if(key.contains(category)) {
+                    userids = stringJsonElementEntry.getValue().toString();
                     break;
                 }
             }
