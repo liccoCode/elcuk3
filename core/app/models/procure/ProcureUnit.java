@@ -428,17 +428,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
-            noty(StringUtils.join(logs, ","));
+            noty(this.sku,StringUtils.join(logs, ","));
         }
         this.shipItemQty(this.qty());
         this.save();
     }
 
-    public void noty(String content) {
+    public void noty(String sku,String content) {
         content = User.username() + "修改," + content;
         Set<User> notyUsers = this.editToUsers();
         if(content.contains("日期") || content.contains("时间"))
-            notyUsers.addAll(User.operations());
+            notyUsers.addAll(User.operations(sku));
         /**
          * 因为运输单上没有制单人，需要特定发给运输人员
          */

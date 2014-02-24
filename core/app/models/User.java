@@ -12,6 +12,10 @@ import play.db.jpa.Model;
 import play.libs.Crypto;
 import play.mvc.Scope;
 import play.utils.FastRuntimeException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import java.util.Map.Entry;
+import java.util.Iterator;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -108,6 +112,9 @@ public class User extends Model {
      */
     @Expose
     public boolean closed = false;
+
+    @Transient
+    public static JsonObject usercategory;
 
     public User() {
     }
@@ -309,18 +316,49 @@ public class User extends Model {
     }
 
     /**
+     * 初始化产品线人员
+     *
+     * @return
+     */
+    public static JsonObject getUsercategor() {
+        if(User.usercategory == null || User.usercategory.isJsonNull()) {
+            //初始化运营人员权限
+            User.usercategory = new JsonObject();
+            usercategory.addProperty("80,11,82", "andy");
+            usercategory.addProperty("70,71,73", "vera");
+            usercategory.addProperty("50,72,88,89,90,91,92", "sherry");
+        }
+        return User.usercategory;
+    }
+
+    /**
      * 运营人员
      *
      * @return
      */
-    public static Set<User> operations() {
+    public static Set<User> operations(String sku) {
+        String userids = "";
+        if(!StringUtils.isBlank(sku)) {
+            String category = sku.substring(0, 2);
+            Iterator it = getUsercategor().entrySet().iterator();
+            //查找相应的产品线人员
+            while(it.hasNext()) {
+                Entry<String, JsonPrimitive> entry = (Entry<String, JsonPrimitive>) it.next();
+                if(entry.getKey().contains(category)) {
+                    userids = entry.getValue().toString();
+                    break;
+                }
+            }
+        }
+
         Set<User> users = new HashSet<User>();
-        for(String name : new String[]{"andy", "sherry", "vera"}) {
+        for(String name : new String[]{userids}) {
             User user = User.findByUserName(name);
             if(user != null) users.add(user);
         }
         return users;
     }
+
 
     /**
      * 物流人员
