@@ -206,6 +206,9 @@ public class Account extends Model {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_US:
+            case AMAZON_IT:
+            case AMAZON_FR:
+            case AMAZON_JP:
                 String body = "";
                 try {
                     /**
@@ -225,9 +228,10 @@ public class Account extends Model {
                     }
 
 
-                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE
+                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE, IT
                             StringUtils.isNotBlank(this.cookie("at-main")) || //US
-                            StringUtils.isNotBlank(this.cookie("at-acbuk"))) { //UK
+                            StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
+                            StringUtils.isNotBlank(this.cookie("at-acbjp"))) { //JP
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
                         HTTP.clearExpiredCookie();
                     } else {
