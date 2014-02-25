@@ -99,6 +99,18 @@ public enum M {
         public String countryName() {
             return "英国";
         }
+    },
+    AMAZON_JP {
+        @Override
+        public String label() {
+            return "日本亚马逊";
+        }
+
+
+        @Override
+        public String countryName() {
+            return "日本";
+        }
     };
 
     public abstract String label();
@@ -133,7 +145,11 @@ public enum M {
          * ES
          */
         A1RKKUPIHCS9HS,
-        EBAY_UK;
+        EBAY_UK,
+        /**
+         * JP
+         */
+        A1VC38T7YXB528,;
 
         public M market() {
             switch(this) {
@@ -149,6 +165,8 @@ public enum M {
                     return AMAZON_IT;
                 case A1RKKUPIHCS9HS:
                     return AMAZON_ES;
+                case A1VC38T7YXB528:
+                    return AMAZON_JP;
                 case EBAY_UK:
                 default:
                     return M.EBAY_UK;
@@ -177,6 +195,8 @@ public enum M {
                 return MID.A1RKKUPIHCS9HS;
             case AMAZON_US:
                 return MID.ATVPDKIKX0DER;
+            case AMAZON_JP:
+                return MID.A1VC38T7YXB528;
             case EBAY_UK:
             default:
                 return MID.EBAY_UK;
@@ -244,6 +264,8 @@ public enum M {
                 return "amazon.com";
             case EBAY_UK:
                 return "ebay.co.uk";
+            case AMAZON_JP:
+                return "amazon.jp";
             default:
                 return "amazon.co.uk";
         }
@@ -259,6 +281,8 @@ public enum M {
                 return "A_FR";
             case AMAZON_IT:
                 return "A_IT";
+            case AMAZON_JP:
+                return "A_JP";
             case AMAZON_ES:
                 return "A_ES";
             case AMAZON_US:
@@ -327,6 +351,8 @@ public enum M {
                 return String.format(baseUrl, this.toString(), "es");
             case AMAZON_FR:
                 return String.format(baseUrl, this.toString(), "fr");
+            case AMAZON_JP:
+                return String.format(baseUrl, this.toString(), "jp");
             case AMAZON_IT:
                 return String.format(baseUrl, this.toString(), "it");
             case AMAZON_US:
@@ -955,6 +981,9 @@ public enum M {
         } else if(s.equals("ait") || s.equals("amazon_it") || s.equals("amazon.it") ||
                 s.equals("www.amazon.it")) {
             return AMAZON_IT;
+        } else if(s.equals("ajp") || s.equals("amazon_jp") || s.equals("amazon.jp") ||
+                s.equals("www.amazon.jp")) {
+            return AMAZON_JP;
         } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") ||
                 s.equals("www.amazon.com")) {
             return AMAZON_US;
