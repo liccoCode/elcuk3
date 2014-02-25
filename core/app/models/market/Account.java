@@ -303,6 +303,8 @@ public class Account extends Model {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_US:
+            case AMAZON_IT:
+            case AMAZON_JP:
                 /**
                  * 0. clear old cookies
                  * 1. Visit the website, fetch the new Cookie.
@@ -392,34 +394,6 @@ public class Account extends Model {
             default:
                 return M.MID.A1F83G8C2ARO7P;
         }
-    }
-
-    /**
-     * 此 Account 点击此 Listing 的 like 按钮
-     *
-     * @param listing
-     */
-    public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
-        String sessionId = this.cookie("session-id", listing.market);
-        if(sessionId == null) {// 没有 session-id, 即没有登陆, 则尝试登陆一次..
-            this.loginAmazonSite(listing.market);
-            sessionId = this.cookie("session-id", listing.market);
-        }
-        String body = HTTP.post(this.cookieStore(listing.market), listing.market.amazonLikeLink(),
-                Arrays.asList(
-                        new BasicNameValuePair("action", "like"),
-                        new BasicNameValuePair("itemId", listing.asin),
-                        new BasicNameValuePair("context", "dp"),
-                        new BasicNameValuePair("itemType", "asin"),
-                        new BasicNameValuePair("sessionId", sessionId)
-
-                ));
-        boolean success = StringUtils.contains(body, "\"success\":true");
-        AmazonLikeRecord likeRecord = new AmazonLikeRecord(listing, this);
-        if(success) likeRecord.save();
-        else Logger.warn("%s Click %s %s Like Failed.", this.prettyName(), listing.market,
-                listing.asin);
-        return new F.T2<AmazonLikeRecord, String>(likeRecord, body);
     }
 
     public boolean addToWishList(Listing listing) {
@@ -527,7 +501,7 @@ public class Account extends Model {
      * @param review
      * @return
      */
-    private F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
+    public F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
         String html = HTTP
                 .get(this.cookieStore(review.listing.market), LinkHelper.reviewLink(review));
         Document doc = Jsoup.parse(html);
@@ -569,8 +543,7 @@ public class Account extends Model {
             String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
             return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
                     StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out") ||
-                    !StringUtils.contains(doc.outerHtml(), "Sign in");
+                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
         }
     }
 
