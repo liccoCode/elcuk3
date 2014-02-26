@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+#{set title:'手动单' /}
+#{set 'moreScripts'}
+    #{script 'procureunits/blank.coffee'/}
+    #{script 'procureunits/manual.coffee'/}
+#{/set}
+#{errorMsgs /}
+#{flash_alert/}
+#{form unit.procureUnitType == models.procure.ProcureUnit.PROCUREUNITTYPE.MANUAL? @ProcureUnits.updateManual(unit.id) : @ProcureUnits.createManualProcureUnit(), method: 'POST',id: 'new_procureunit'}
+<table class="table table-condensed table-bordered">
+    #{render './_manual_unit_table_trs.html', unit: unit, skus: skus/}
+  <tr>
+    <td colspan="4">
+      <button class="btn btn-primary">保存</button>
+    </td>
+  </tr>
+</table>
+#{/form}

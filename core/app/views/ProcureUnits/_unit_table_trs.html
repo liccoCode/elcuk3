@@ -2,23 +2,20 @@
 * ProcueUnit: unit
 * Whouse: whouses
 }*
-#{set product: unit.selling?.listing?.product/}
-
+#{set product: unit.selling.listing.product/}
 <tr>
   <th>SellingId</th>
   <td>
-  #{text_input id:'sellingId', name: 'unit.selling.sellingId', value: unit.selling?.sellingId,
-    readonly: unit.selling?.sellingId?true:''/}
+    <input readonly="" type="text" name="unit.selling.sellingId" value="${unit.selling.sellingId}">
   </td>
   <th>SKU</th>
   <td>
-  #{text_input id:'unit_sku', name: 'unit.product.sku', value: product?.sku,
-      readonly: product?.sku?true:'', datasource: skus/}
+    <input readonly="" type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}">
   </td>
 </tr>
 
 <tr>
-#{set copers:product?.cooperators() /}
+#{set copers:product.cooperators() /}
   <th>供应商</th>
   <td>
   #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}

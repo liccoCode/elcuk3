@@ -10,7 +10,7 @@ $ ->
       noty({text: '请选择需要下载的采购单', type: 'error'})
       LoadMask.unmask()
       return false
-    # ajax模拟提交完成文件下载
+    # ajax 模拟提交完成文件下载
     inputs = '';
     #formData = $form.serialize() + ""
     for pair in ($form.serialize() + "").split('&')

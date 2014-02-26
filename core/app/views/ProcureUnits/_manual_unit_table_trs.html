@@ -1,0 +1,43 @@
+#{set copers:unit.product?.cooperators() /}
+<tr>
+  <th>SKU</th>
+  <td>
+  #{text_input id: "unit_sku", name: "unit.product.sku", value: unit.product?.sku,
+      readonly: unit.product?.sku?true:'', datasource: "${skus}" /}
+  </td>
+  <th>供应商</th>
+
+  <td>
+  #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}
+      #{option ''}请选择#{/option}
+  #{/select}
+  </td>
+</tr>
+
+<tr>
+  <th>价格</th>
+  <td>
+    <div class="input-append">
+      <input type="text" class="span1" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+    #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
+    </div>
+  </td>
+
+  <th>采购数量</th>
+  <td>
+    <div class="input-append">
+      <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
+      <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+      <span class="add-on">箱</span>
+    </div>
+    <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+  </td>
+</tr>
+
+<tr>
+  <th>预计交货日期</th>
+  <td colspan="4">
+    <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+    <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
+  </td>
+</tr>

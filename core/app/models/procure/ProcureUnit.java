@@ -249,7 +249,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    public PROCUREUNITTYPE procureUnitTypet;
+    public PROCUREUNITTYPE procureUnitType;
 
 
     /**
@@ -278,9 +278,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 手动单数据验证
      */
     public void validateManualProcureUnit() {
-        Validation.required("运输方式",this.shipType);
-        Validation.current().valid(this.attrs);
-        Validation.required("procureunit.whouse", this.whouse);
+        Validation.required("交货日期", this.attrs.planDeliveryDate);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
         if(this.product != null) this.sku = this.product.sku;
@@ -472,6 +470,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         this.shipItemQty(this.qty());
         this.save();
+    }
+
+    /**
+     * 修改手动单数据
+     */
+    public void updateManualData(ProcureUnit unit) {
+        this.attrs.price = unit.attrs.price;
+        this.attrs.planQty = unit.attrs.planQty;
+        this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
     }
 
     public void noty(String content) {
