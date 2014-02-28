@@ -6,7 +6,7 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form unit.selling == null ? @ProcureUnits.createManualProcureUnit() : @ProcureUnits.create(), method: 'POST',
+#{form @ProcureUnits.create(), method: 'POST',
 id: 'new_procureunit'}
 <table class="table table-condensed table-bordered">
     #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus/}

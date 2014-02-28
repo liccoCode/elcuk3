@@ -229,30 +229,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     /**
-     * 采购单元类型，用来区分手动单和非手动单
-     */
-    public enum PROCUREUNITTYPE {
-        /**
-         * 正常单
-         */
-        NORMAL,
-
-        /**
-         * 手动单
-         */
-        MANUAL
-    }
-
-    /**
-     * 采购单元类型
-     */
-    @Expose
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    public PROCUREUNITTYPE procureUnitType;
-
-
-    /**
      * ProcureUnit 的检查
      */
     public void validate() {
@@ -275,9 +251,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 手动单数据验证
+     * 手动单采购计划数据验证
      */
-    public void validateManualProcureUnit() {
+    public void validateManual() {
         Validation.required("交货日期", this.attrs.planDeliveryDate);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
@@ -292,19 +268,31 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 1. 原有的采购计划仅仅数量变化.
      * 2. 新创建采购计划, 处理数量, FBA, Shipment 相关信息变化, 其他保持不变.
      *
+     * 由于新增手动单渠道，所以分拆的时候需要区分三种情况
+     * 1、Selling、sku 都不需要填写，数据都来自已经存在的 采购计划
+     * 2、需要填写Selling ，sku 来自已经存在的采购计划
+     * 3、Selling、sku 都需要填写，只有采购单编号来自已经存在的采购计划
+     * 由于第二种和第三张情况类似，所以统一做处理
+     *
      * @param unit
      */
     public ProcureUnit split(ProcureUnit unit) {
         int originQty = this.qty();
-        if(unit.attrs.planQty >= originQty)
+        if(unit.attrs.planQty > originQty)
             Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
         if(unit.attrs.planQty <= 0)
             Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
-
-        ProcureUnit newUnit = new ProcureUnit(this);
-        newUnit.attrs.planQty = unit.attrs.planQty;
+        ProcureUnit newUnit = null;
+        if(this.selling == null) {
+            //手动单拆分时将 拆分的采购计划 归属到 此采购计划 的采购单身上
+            newUnit = unit;
+            newUnit.deliveryment = this.deliveryment;
+        } else {
+            newUnit = new ProcureUnit(this);
+            newUnit.attrs.planQty = unit.attrs.planQty;
+        }
         newUnit.stage = STAGE.DELIVERY;
         newUnit.validate();
 

@@ -12,6 +12,7 @@ import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.market.Selling;
 import models.procure.Cooperator;
+import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
@@ -28,7 +29,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -195,7 +195,6 @@ public class ProcureUnits extends Controller {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             render("ProcureUnits/blank.html", unit, whouses);
         }
-        unit.procureUnitType = ProcureUnit.PROCUREUNITTYPE.NORMAL;
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
@@ -270,6 +269,11 @@ public class ProcureUnits extends Controller {
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
         newUnit.attrs.qty = 0;
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(unit.sku);
+        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
+        renderArgs.put("skus", J.json(skusToJson._2));
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
+        renderArgs.put("whouses", Whouse.findAll());
         render(unit, newUnit);
     }
 
@@ -285,8 +289,10 @@ public class ProcureUnits extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
         ProcureUnit nUnit = unit.split(newUnit);
-        if(Validation.hasErrors())
-            render("ProcureUnits/splitUnit.html", unit, newUnit);
+        if(Validation.hasErrors()) {
+            List<Whouse> whouses = Whouse.findAll();
+            render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
+        }
 
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
         Deliveryments.show(unit.deliveryment.id);
@@ -349,80 +355,52 @@ public class ProcureUnits extends Controller {
         Applys.procure(applyId);
     }
 
-
-    @Check("procures.createmanualprocureunit")
-    public static void manual() {
+    public static void manualProcureUnit(String id) {
         ProcureUnit unit = new ProcureUnit();
+        unit.deliveryment = Deliveryment.findById(id);
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
         render(unit);
     }
 
     /**
-     * 创建手动单
+     * 从原有采购计划中分拆出新的 SKU 的采购计划
      */
-    @Check("procures.createmanualprocureunit")
     public static void createManualProcureUnit(ProcureUnit unit) {
         unit.handler = User.findByUserName(Secure.Security.connected());
-        unit.validateManualProcureUnit();
+        unit.stage = ProcureUnit.STAGE.DELIVERY;
+        unit.validateManual();
         if(Validation.hasErrors()) {
             render("ProcureUnits/manual.html", unit);
         }
-        unit.procureUnitType = ProcureUnit.PROCUREUNITTYPE.MANUAL;
         unit.save();
-        flash.success("手动单创建成功!");
+        flash.success("新增采购计划成功!");
         new ElcukRecord(Messages.get("procureunit.save"),
                 Messages.get("action.base", String.format("[sku:%s] [供应商:%s] [计划数量:%s] [交货日期:%s]", unit.product.sku,
                         unit.cooperator.fullName, unit.attrs.planQty, unit.attrs.planDeliveryDate)),
                 unit.id + "").save();
-        manual();
+        manualProcureUnit(unit.deliveryment.id);
     }
 
 
     public static void editManual(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("ProcureUnits/manual.html", unit);
+        render("ProcureUnits/manualProcureUnit.html", unit);
     }
 
     /**
-     * 修改手动单
+     * 修改手动单采购计划
      */
     public static void updateManual(Long id, ProcureUnit unit) {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.updateManualData(unit);
-        managedUnit.validateManualProcureUnit();
+        managedUnit.validateManual();
         if(Validation.hasErrors()) {
-            render("ProcureUnits/manual.html", unit);
+            render("ProcureUnits/manualProcureUnit.html", unit);
         }
         managedUnit.save();
         flash.success("成功修改采购计划!", id);
         renderArgs.put("unit", managedUnit);
-        render("ProcureUnits/manual.html");
-    }
-
-    public static void sellingBlank(Long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(unit.sku);
-        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
-        render(unit);
-    }
-
-    /**
-     * 手动单关联 Selling
-     */
-    public static void relevanceSelling(ProcureUnit unit) {
-        Validation.required("SellingId", unit.sid);
-        Selling selling = Selling.findById(unit.sid);
-        if(selling == null) {
-            Validation.addError("", "SellingId 错误！请检查 SellingId 或新增 Selling");
-        }
-        if(Validation.hasErrors()) {
-            render("ProcureUnits/sellingBlank.html", unit, unit);
-        }
-        unit.selling = selling;
-        unit.procureUnitType = ProcureUnit.PROCUREUNITTYPE.NORMAL;
-        unit.save();
-        flash.success("关联 Selling 成功！");
-        sellingBlank(unit.id);
+        render("ProcureUnits/manualProcureUnit.html");
     }
 }

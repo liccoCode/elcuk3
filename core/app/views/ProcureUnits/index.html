@@ -78,22 +78,16 @@
         <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-primary" rel="popover"
            content="第三天需要交货的采购计划" data-disable-with="loading">大后天计划</a>
         <a href="@{ProcureUnits.noPlaced()}" class="btn btn-primary" rel="popover" content="发货时间为当天,
-        同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
+              同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
       </div>
 
       <a target="_blank" class="btn btn-primary" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 "
          id="downloadFBAZIP">
         <i class="icon-download-alt"></i>下载ZIP包
       </a>
-      #{power.ck "procures.createmanualprocureunit"}
-        <a target="_blank" class="btn btn-primary" href="@{ProcureUnits.manual()}">
-          <i class="icon-plus"></i>新增手动单
-        </a>
-      #{/power.ck}
     </div>
   </form>
 </div>
-
 
 <form method="post" id="create_deliveryment" action="@{Deliveryments.create()}">
   <div class="row-fluid">
