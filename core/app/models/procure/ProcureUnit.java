@@ -267,7 +267,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 分拆采购计划: 工厂在原有采购计划基础上全部交货, 只能够部分交货的情况下进行的操作;
      * 1. 原有的采购计划仅仅数量变化.
      * 2. 新创建采购计划, 处理数量, FBA, Shipment 相关信息变化, 其他保持不变.
-     *
+     * <p/>
      * 由于新增手动单渠道，所以分拆的时候需要区分三种情况
      * 1、Selling、sku 都不需要填写，数据都来自已经存在的 采购计划
      * 2、需要填写Selling ，sku 来自已经存在的采购计划
@@ -278,10 +278,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public ProcureUnit split(ProcureUnit unit) {
         int originQty = this.qty();
-        if(unit.attrs.planQty > originQty)
-            Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
-        if(unit.attrs.planQty <= 0)
-            Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
+        if(unit.attrs.planQty != null) {
+            if(unit.attrs.planQty > originQty)
+                Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
+            if(unit.attrs.planQty <= 0)
+                Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
+        }
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
         ProcureUnit newUnit = null;

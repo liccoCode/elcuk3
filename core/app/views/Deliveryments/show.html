@@ -122,7 +122,12 @@
       <a data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST" id="downloadFBAZIP"
         class="btn btn-success" rel="popover"
         content="将选定的采购单元的 出货FBA 进行压缩打包 " data-disable-with='正在处理中...'>
-        <i class="icon-download-alt"></i>下载ZIP包
+        <i class="icon-download-alt"></i>下载FBA ZIP 包
+      </a>
+      <a data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST" id="downloadProcureunitsOrder"
+         class="btn btn-success" rel="popover"
+        content="下载选定的采购单元的出货单" data-disable-with='正在处理中...'>
+        <i class="icon-download-alt"></i>下载出货单
       </a>
     </div>
   </div>
