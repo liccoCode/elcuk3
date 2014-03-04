@@ -356,17 +356,9 @@ public class ProcureUnits extends Controller {
         Applys.procure(applyId);
     }
 
-    public static void manualProcureUnit(String id) {
-        ProcureUnit unit = new ProcureUnit();
-        unit.deliveryment = Deliveryment.findById(id);
-        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
-        renderArgs.put("skus", J.json(skusToJson._2));
-        render(unit);
-    }
-
     public static void editManual(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("ProcureUnits/manualProcureUnit.html", unit);
+        render("ProcureUnits/editManualProcureUnit.html", unit);
     }
 
     /**
@@ -377,11 +369,11 @@ public class ProcureUnits extends Controller {
         managedUnit.updateManualData(unit);
         managedUnit.validateManual();
         if(Validation.hasErrors()) {
-            render("ProcureUnits/manualProcureUnit.html", unit);
+            render("ProcureUnits/editManualProcureUnit.html", unit);
         }
         managedUnit.save();
         flash.success("成功修改采购计划!", id);
         renderArgs.put("unit", managedUnit);
-        render("ProcureUnits/manualProcureUnit.html");
+        render("ProcureUnits/editManualProcureUnit.html");
     }
 }

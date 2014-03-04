@@ -7,14 +7,14 @@
 #{flash_alert/}
 #{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
 
-#{set copers:unit.product?.cooperators() /}
+#{set copers:unit.product.cooperators() /}
 <h4>手动单采购计划</h4>
 <table class="table table-condensed table-bordered">
   <tr>
     <th>SKU</th>
     <td>
-        #{text_input id: "unit_sku", name: "unit.product.sku", value: unit.product?.sku,
-          readonly: unit.product?.sku?true:'', datasource: "${skus}" /}
+      <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}"
+                 value="${unit.product.sku}" id="unit_sku" readonly= true>
     </td>
 
     <th>供应商</th>

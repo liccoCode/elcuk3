@@ -20,8 +20,8 @@
 
     <th>SKU</th>
     <td>
-        #{text_input id: "unit_sku", name: "unit.product.sku", value: unit.product?.sku,
-          readonly: unit.product?.sku?true:'', datasource: "${skus}" /}
+      <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${skus}"
+        value="${unit.product?.sku}" id="unit_sku">
     </td>
   </tr>
 
