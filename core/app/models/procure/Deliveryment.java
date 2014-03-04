@@ -437,5 +437,4 @@ public class Deliveryment extends GenericModel {
         }
         return cooperItems;
     }
-
 }

@@ -267,12 +267,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 分拆采购计划: 工厂在原有采购计划基础上全部交货, 只能够部分交货的情况下进行的操作;
      * 1. 原有的采购计划仅仅数量变化.
      * 2. 新创建采购计划, 处理数量, FBA, Shipment 相关信息变化, 其他保持不变.
-     * <p/>
-     * 由于新增手动单渠道，所以分拆的时候需要区分三种情况
-     * 1、Selling、sku 都不需要填写，数据都来自已经存在的 采购计划
-     * 2、需要填写Selling ，sku 来自已经存在的采购计划
-     * 3、Selling、sku 都需要填写，只有采购单编号来自已经存在的采购计划
-     * 由于第二种和第三张情况类似，所以统一做处理
      *
      * @param unit
      */
@@ -456,7 +450,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
-            noty(StringUtils.join(logs, ","));
+            noty(this.sku, StringUtils.join(logs, ","));
         }
         this.shipItemQty(this.qty());
         this.save();
@@ -471,11 +465,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
     }
 
-    public void noty(String content) {
+    public void noty(String sku, String content) {
         content = User.username() + "修改," + content;
         Set<User> notyUsers = this.editToUsers();
         if(content.contains("日期") || content.contains("时间"))
-            notyUsers.addAll(User.operations());
+            notyUsers.addAll(User.operations(sku));
         /**
          * 因为运输单上没有制单人，需要特定发给运输人员
          */

@@ -195,6 +195,7 @@ public class ProcureUnits extends Controller {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             render("ProcureUnits/blank.html", unit, whouses);
         }
+
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
@@ -230,7 +231,7 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
-        List<Whouse> whouses = Whouse.findAll();
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.update(unit, shipmentId);
         if(Validation.hasErrors()) {
@@ -362,26 +363,6 @@ public class ProcureUnits extends Controller {
         renderArgs.put("skus", J.json(skusToJson._2));
         render(unit);
     }
-
-    /**
-     * 从原有采购计划中分拆出新的 SKU 的采购计划
-     */
-    public static void createManualProcureUnit(ProcureUnit unit) {
-        unit.handler = User.findByUserName(Secure.Security.connected());
-        unit.stage = ProcureUnit.STAGE.DELIVERY;
-        unit.validateManual();
-        if(Validation.hasErrors()) {
-            render("ProcureUnits/manual.html", unit);
-        }
-        unit.save();
-        flash.success("新增采购计划成功!");
-        new ElcukRecord(Messages.get("procureunit.save"),
-                Messages.get("action.base", String.format("[sku:%s] [供应商:%s] [计划数量:%s] [交货日期:%s]", unit.product.sku,
-                        unit.cooperator.fullName, unit.attrs.planQty, unit.attrs.planDeliveryDate)),
-                unit.id + "").save();
-        manualProcureUnit(unit.deliveryment.id);
-    }
-
 
     public static void editManual(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
