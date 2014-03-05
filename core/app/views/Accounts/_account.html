@@ -1,0 +1,29 @@
+<!-- 非销售账号, IT -->
+<table class="table table-bordered table-striped account_list">
+  <tr>
+    <th>#</th>
+    <th>UniqueName</th>
+    <th>Type</th>
+    <th>MerchantId</th>
+    <th>AccessKey</th>
+    <th>IsSaleAcc</th>
+    <th>IsAUK</th>
+    <th>IsADE</th>
+    <th>IsAUS</th>
+    <th>IsAFR</th>
+    <th>IsAIT</th>
+    <th>IsAJP</th>
+    <th><a href="#" rel="tooltip" placement="top" title="关闭使用此账户">Closeable</a>
+    </th>
+  </tr>
+#{list items:accs, as:'acc'}
+    #{if amazontype==null && acc.isSaleAcc}
+        #{render 'Accounts/acctr.html', acc:acc/}
+    #{/if}
+    #{else}
+        #{if amazontype!=null && !acc.isSaleAcc && acc.type == amazontype}
+            #{render 'Accounts/acctr.html', acc:acc/}
+        #{/if}
+    #{/else}
+#{/list}
+</table>

@@ -18,6 +18,7 @@ class OrderItemES
   select p.category_categoryId cat, s.merchantSKU msku, oi.product_sku sku, oi.id, oi.createDate, oi.quantity, oi.order_orderId, oi.selling_sellingId, oi.usdCost, oi.market, oi.promotionIDs from OrderItem oi
   left join Selling s ON s.sellingId=oi.selling_sellingId
   left join Product p ON p.sku=oi.product_sku
+  where oi.createDate>='2014-01-01'
   """
 
   INDEX = "elcuk2"
