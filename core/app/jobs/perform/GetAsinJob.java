@@ -106,8 +106,8 @@ public class GetAsinJob extends BaseJob {
                                         String.format("%s_%s", selling.aps.upc, selling.market.toString())));
                         DBUtils.execute("SET foreign_key_checks=1");
                         //提示操作人员任务已经处理完成
-                        User user = User.findById(getContext().get("user.id"));
-                        noty("您提交的上架请求已经处理完成", user);
+                        User user = User.findById(NumberUtils.toLong(getContext().get("user.id").toString()));
+                        noty("您提交的上架请求已经处理完成,请检查 ^_^", user);
                     }
                 }
             }
@@ -150,6 +150,6 @@ public class GetAsinJob extends BaseJob {
      */
     public void noty(String content, User user) {
         Notification.newSystemNoty(content, String.format("%s/feed/%s/show", Constant.ROOT_PATH,
-                getContext().get("feed.id")), user);
+                getContext().get("feed.id"))).notifySomeone(user);
     }
 }
