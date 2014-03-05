@@ -99,6 +99,18 @@ public enum M {
         public String countryName() {
             return "英国";
         }
+    },
+    AMAZON_JP {
+        @Override
+        public String label() {
+            return "日本亚马逊";
+        }
+
+
+        @Override
+        public String countryName() {
+            return "日本";
+        }
     };
 
     public abstract String label();
@@ -133,7 +145,11 @@ public enum M {
          * ES
          */
         A1RKKUPIHCS9HS,
-        EBAY_UK;
+        EBAY_UK,
+        /**
+         * JP
+         */
+        A1VC38T7YXB528,;
 
         public M market() {
             switch(this) {
@@ -149,6 +165,8 @@ public enum M {
                     return AMAZON_IT;
                 case A1RKKUPIHCS9HS:
                     return AMAZON_ES;
+                case A1VC38T7YXB528:
+                    return AMAZON_JP;
                 case EBAY_UK:
                 default:
                     return M.EBAY_UK;
@@ -177,6 +195,8 @@ public enum M {
                 return MID.A1RKKUPIHCS9HS;
             case AMAZON_US:
                 return MID.ATVPDKIKX0DER;
+            case AMAZON_JP:
+                return MID.A1VC38T7YXB528;
             case EBAY_UK:
             default:
                 return MID.EBAY_UK;
@@ -244,6 +264,8 @@ public enum M {
                 return "amazon.com";
             case EBAY_UK:
                 return "ebay.co.uk";
+            case AMAZON_JP:
+                return "amazon.co.jp";
             default:
                 return "amazon.co.uk";
         }
@@ -259,6 +281,8 @@ public enum M {
                 return "A_FR";
             case AMAZON_IT:
                 return "A_IT";
+            case AMAZON_JP:
+                return "A_JP";
             case AMAZON_ES:
                 return "A_ES";
             case AMAZON_US:
@@ -283,6 +307,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return "https://sellercentral." + this.toString();
             case EBAY_UK:
                 return "unknow..";
@@ -327,6 +352,8 @@ public enum M {
                 return String.format(baseUrl, this.toString(), "es");
             case AMAZON_FR:
                 return String.format(baseUrl, this.toString(), "fr");
+            case AMAZON_JP:
+                return String.format(baseUrl, this.toString(), "jp");
             case AMAZON_IT:
                 return String.format(baseUrl, this.toString(), "it");
             case AMAZON_US:
@@ -347,6 +374,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 /*最后的 _cachebust 为随即生成的值*/
                 return String
                         .format("http://www.%s/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513",
@@ -371,6 +399,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return String.format("http://www.%s/gp/registry/wishlist", this.toString());
             case EBAY_UK:
                 return "unknow..";
@@ -387,6 +416,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return String.format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list",
                         this.toString());
             case EBAY_UK:
@@ -404,6 +434,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return String.format("http://www.%s/dp/%s", this.toString(), asin);
             case EBAY_UK:
                 return "unknow..";
@@ -427,6 +458,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return "https://sellercentral." + this.toString() +
                         "/gp/feedback-manager/view-all-feedback.html?ie=UTF8&sortType=sortByDate&pageSize=50&dateRange=&descendingOrder=1&currentPage=" +
                         page;
@@ -472,11 +504,12 @@ public enum M {
         switch(this) {
             case AMAZON_UK:
             case AMAZON_US:
+            case AMAZON_JP:
+            case AMAZON_IT: // TODO IT 与 FR 会有过渡阶段
+            case AMAZON_FR:
                 return "https://sellercentral." + this.toString() + "/gp/orders-v2/details?orderID=" + oid;
             case AMAZON_DE:
             case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
                 return "https://sellercentral.amazon.de/gp/orders-v2/details?orderID=" + oid;
             case EBAY_UK:
             default:
@@ -501,152 +534,13 @@ public enum M {
         switch(this) {
             case AMAZON_UK:
             case AMAZON_US:
+            case AMAZON_JP:
+            case AMAZON_IT: // TODO IT 与 FR 会有过渡阶段
+            case AMAZON_FR:
                 return "https://sellercentral." + this.toString() + "/gp/orders-v2/remote-actions/action.html";
             case AMAZON_DE:
             case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
                 return "https://sellercentral." + AMAZON_DE.toString() + "/gp/orders-v2/remote-actions/action.html";
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    /**
-     * 模拟人工上架使用的链接.
-     * - Amazon: 由于 Amazon 上架方式, 其需要访问两次这个页面, 一次 CLASSIFY 一次 IDENTIFY
-     *
-     * @return
-     */
-    public String saleSellingLink() {
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/Classify/SelectCategory", this.toString());
-            case AMAZON_US:
-                return "https://catalog.amazon.com/abis/Classify/SelectCategory";
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    /**
-     * 模拟人工上架使用的链接.
-     * - Amazon: 创建 Listing 的提交地址
-     *
-     * @return
-     */
-    public String saleSellingPostLink() {
-        //https://catalog-sc.amazon.co.uk/abis/product/ProcessCreateProduct
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/product/ProcessCreateProduct", this.toString());
-            case AMAZON_US:
-                return String.format("https://catalog.%s/abis/product/ProcessCreateProduct", this.toString());
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    public String browseCategoryAmzn() {
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/Classify/BrowseCategory.amzn", this.toString());
-            case AMAZON_US:
-                return "https://catalog.amazon.com/abis/Classify/BrowseCategory.amzn";
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-
-    /**
-     * 模拟人工上架使用的链接.
-     * - Amazon: 创建全新的 Listing 的时候, 最后需要回掉方法寻找 New UPC 对应的 ASIN
-     *
-     * @return
-     */
-    public String productCreateStatusLink() {
-        // https://sellercentral.amazon.de/myi/search/ajax/ProductCreateStatus
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return String.format("https://sellercentral.%s/myi/search/ajax/ProductCreateStatus", this.toString());
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-
-    public String matchAsinAjaxLink() {
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/product/ajax/Match.ajax", this.toString());
-            case AMAZON_US:
-                return String
-                        .format("https://catalog.%s/abis/product/ajax/Match.ajax", this.toString());
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    public String uploadImageLink() {
-        //https://catalog-sc.amazon.co.uk/abis/image/AddImage.ajax
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String
-                        .format("https://catalog-sc.%s/abis/image/AddImage.ajax", this.toString());
-            case AMAZON_US:
-                return String
-                        .format("https://catalog.%s/abis/image/AddImage.ajax", this.toString());
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    public String removeImageLink() {
-        //https://catalog-sc.amazon.co.uk/abis/image/RemoveImage.ajax
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/image/RemoveImage.ajax",
-                        this.toString());
-            case AMAZON_US:
-                return String
-                        .format("https://catalog.%s/abis/image/RemoveImage.ajax", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -717,6 +611,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return String
                         .format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU",
                                 this.toString());
@@ -740,6 +635,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
+            case AMAZON_JP:
                 return String
                         .format("https://sellercentral.%s/gp/ssof/knights/items-list.html/ref=ag_fbalist_cont_fbamnginv",
                                 this.toString());
@@ -760,42 +656,17 @@ public enum M {
         switch(this) {
             case AMAZON_UK:
             case AMAZON_US:
+            case AMAZON_JP:
+            case AMAZON_IT:
+            case AMAZON_FR:
                 return String.format(
                         "https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
                         this.toString(), orderId);
             case AMAZON_DE:
             case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
                 return String.format(
                         "https://sellercentral.amazon.de/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
                         orderId);
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    /**
-     * 下载 14days Payments 数据的链接
-     *
-     * @return
-     */
-    public String pastSettlementsUrl() {
-        //https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_US:
-                return String.format(
-                        "https://sellercentral.%s/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
-                        this.toString());
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return String.format(
-                        "https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
-                        this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -916,27 +787,6 @@ public enum M {
     }
 
 
-    public static String listingPostPage(M market, String jsessionId) {
-        //EU: https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
-        //US: https://catalog.amazon.co.uk/abis/product/ProcessEditProduct
-        switch(market) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-                return "https://catalog-sc." + market.toString() +
-                        "/abis/product/ProcessEditProduct" +
-                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
-            case AMAZON_US:
-                return "https://catalog." + market.toString() + "/abis/product/ProcessEditProduct" +
-                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
     public static M val(String str) {
         if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();
@@ -955,6 +805,9 @@ public enum M {
         } else if(s.equals("ait") || s.equals("amazon_it") || s.equals("amazon.it") ||
                 s.equals("www.amazon.it")) {
             return AMAZON_IT;
+        } else if(s.equals("ajp") || s.equals("amazon_jp") || s.equals("amazon.jp") || s.equals("amazon.co.jp") ||
+                s.equals("www.amazon.co.jp")) {
+            return AMAZON_JP;
         } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") ||
                 s.equals("www.amazon.com")) {
             return AMAZON_US;

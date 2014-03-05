@@ -101,24 +101,6 @@ $ ->
       mask.unmask()
     )
 
-  # 绑定点击 Like 按钮
-  $('#click_like').click (e) ->
-    if $('#search_form [name=asin]').val().length isnt 10
-      alert('请先输入正确的 ASIN')
-      $("#search_form [name=asin]").focus()
-      return false
-    mask = $('#container')
-    mask.mask('点击 Like 中...')
-    $.post('/amazonOperations/like', $('#search_form :input').fieldSerialize(),
-    (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        alert(JSON.stringify(r))
-      mask.unmask()
-    )
-    e.preventDefault()
-
   # 检查每个 Review 的可点击数
   $("#check_left_clicks").click (e) ->
     o = $(@)

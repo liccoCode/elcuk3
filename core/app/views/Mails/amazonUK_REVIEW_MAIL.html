@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${title}</title>
+<title>${title}</title>
 </head>
 <body>
-Dear ${order.buyer == null ? 'Customer' : order.buyer}:
+Dear ${order.buyer == null ? 'Customer' : order.buyer},
 <br/><br/>
-It has been a period of time since you purchased the<br/>
+It has been a period of time since you purchased your<br/>
 #{list items:order.items, as:'oi'}
 <a target="_blank" title="${oi.selling.aps.title}" href="${oi.selling.asinLink()}">${oi.selling.aps.title.size() > 75 ? oi.selling.aps.title.substring(0, 74) + "..." : oi.selling.aps.title}</a><br/>
 ${oi.selling.asinLink()}
 <br/>
 <br/>
 #{/list}
-from EasyAcc on Amazon.co.uk. We want to check back and see how it is doing.
+from EasyAcc on Amazon.co.uk. We want to check back and see how you are finding things.
 <br/><br/>
-If for any reason you are not completely satisfied with our products and services, please just hit reply and drop us an
-email, we will take your matter very seriously and do our best to solve the issue. Your comments will help us to improve
-our products and services.
+If you are not completely satisfied with our products and service for any reason, please just hit reply and drop us an
+email. We take all customer feedback seriously and will do our best to resolve the issue. Your comments will help us improve our products and service.
 <br/><br/>
 Meanwhile, we invite you to create a product review via the link below:<br/>
 #{list items:order.items, as:'oi'}
 <a target="_blank" href="${oi.selling.makeReviewLink()}">${oi.selling.makeReviewLink()}</a><br/>
 #{/list}
 <br/><br/>
-Your review would benefit other customers and our business.<br/>
-Thanks for your support to our business.
+Your review would benefit other customers as well as help us improve our products.<br/><br/>
+Thank you very much for your time and support!
 <br/><br/>
-Warmest regards
+Kind regards
 <br/>
-EasyAcc Customer Satifaction Team
+The EasyAcc Team
+<br/>
+(support@easyacceu.com)
 </body>
 </html>
