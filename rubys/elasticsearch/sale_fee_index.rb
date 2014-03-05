@@ -17,6 +17,7 @@ class ESWorker < Thread
 	end
 end
 
+# SQL 语句没有处理一个订单有多个不同 SKU 产品的问题
 SQL = %q(SELECT s.id salefeeId, s.`date`, s.market, s.account_id, s.usdCost costInUSD, s.type_name, oi.selling_sellingId, oi.product_sku FROM SaleFee s
  left join OrderItem oi ON oi.order_orderId=s.order_orderId where s.date>='2013-12-30')
 
