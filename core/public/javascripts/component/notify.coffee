@@ -11,28 +11,14 @@ window.Notify =
 $ ->
   #统计当前用户的 新通知记录的条数
   newsCount = ->
-    htmlobj = $.ajax({url: "/Notifications/amount", async: false})
-    $("#notifyNumber").html(htmlobj.responseText);
-
+    htmlobj = $.ajax({url: "/Notifications/amount", async: false},{type: 'POST', dataType: 'json'})
+          .done((r) ->
+            if r.count>0
+              $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
+            $("#notifyNumber").html(r.count)
+          )
   newsCount()
 
-  #加载当前用户最新的八条信息
-  $("#notificationBtn").on("click", (e) ->
-    e.preventDefault()
-    $.ajax("/Notifications/latest", {type: 'POST', dataType: 'json'}).done((r) ->
-      param = if r
-        r
-      else
-        [{title: 'See Notifications'}]
-      #清空数据
-      $("#notifications").find("li").remove()
-      _.each(param, (element,index)->
-        $("#notifications").append(_.template($('#news-notifications-model-template').html(), {noty: element}))
-      )
-      $("#notifications").append("<li><a href='/Notifications/index' class='label' >See more</a></li>")
-    )
-
-  )
 
   #将选中的通知状态更改成已读
   $("#updateState").on("click", (e) ->

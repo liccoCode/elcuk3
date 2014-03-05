@@ -43,7 +43,7 @@
       <a href="@{Sellings.selling(unit.selling.sellingId)}" target="_blank">${unit.selling.sellingId}</a>
     </td>
     <td>
-      <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+      <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${unit.cooperator?.cooperItem(unit.sku)?.memo}">${unit.sku}</a>
     </td>
     <td>
        ${unit.fba?.shipmentId}

@@ -71,4 +71,6 @@ public class Constant {
 
     public static final String TMP = System.getProperty("java.io.tmpdir");
 
+    public static final String ROOT_PATH = "http://e.easya.cc";
+
 }

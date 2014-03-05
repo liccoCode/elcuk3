@@ -1,8 +1,8 @@
 package models;
 
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
-import helper.DBUtils;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import org.apache.commons.collections.Predicate;
@@ -11,12 +11,19 @@ import play.data.validation.*;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
-import play.libs.F;
 import play.mvc.Scope;
 import play.utils.FastRuntimeException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
+import java.util.Map.Entry;
+import java.util.Iterator;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 系统中的用户
@@ -107,6 +114,9 @@ public class User extends Model {
      */
     @Expose
     public boolean closed = false;
+
+    @Transient
+    public static JsonObject USER_CATEGORY;
 
     public User() {
     }
@@ -234,15 +244,6 @@ public class User extends Model {
         Privilege.clearUserPrivilegesCache(this);
     }
 
-    /**
-     * 还没有通知的消息
-     *
-     * @return
-     */
-    public List<Notification> unNotifiedNotification() {
-        return Notification.find("user=? AND notifyAt IS NULL ORDER BY createAt", this).fetch();
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -278,16 +279,6 @@ public class User extends Model {
 
     public static User current() {
         return User.findByUserName(username());
-    }
-
-    /**
-     * 解析出 @xx 的用户
-     *
-     * @param content
-     * @return
-     */
-    public static List<User> parseAtUsers(String content) {
-        throw new UnsupportedOperationException();
     }
 
 
@@ -326,20 +317,62 @@ public class User extends Model {
         return User.find("username=?", username).first();
     }
 
-    public static List<F.T2<String, Long>> userIds() {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT username, id FROM User");
-        List<F.T2<String, Long>> userIds = new ArrayList<F.T2<String, Long>>();
-        for(Map<String, Object> row : rows) {
-            if("root".equals(row.get("username").toString())) continue;
-            userIds.add(new F.T2<String, Long>(
-                    row.get("username").toString(), (Long) row.get("id"))
-            );
+    /**
+     * 初始化产品线人员
+     *
+     * @return
+     */
+    public static JsonObject getUsercategor() {
+        if(User.USER_CATEGORY == null || User.USER_CATEGORY.isJsonNull()) {
+            //初始化运营人员权限
+            User.USER_CATEGORY = new JsonObject();
+            USER_CATEGORY.addProperty("80,11,82", "andy");
+            USER_CATEGORY.addProperty("70,71,73", "vera");
+            USER_CATEGORY.addProperty("50,72,88,89,90,91,92", "sherry");
         }
-        return userIds;
+        return User.USER_CATEGORY;
     }
 
-    public static List<User> serviceUsers() {
-        return User.find("isService=? AND closed=?", true, false).fetch();
+    /**
+     * 运营人员
+     *
+     * @return
+     */
+    public static Set<User> operations(String sku) {
+        String userids = "";
+        if(!StringUtils.isBlank(sku)) {
+            String category = sku.substring(0, 2);
+            //查找相应的产品线人员
+            for(Entry<String, JsonElement> stringJsonElementEntry : getUsercategor().entrySet()) {
+                String key = stringJsonElementEntry.getKey();
+                if(key.contains(category)) {
+                    userids = stringJsonElementEntry.getValue().toString();
+                    break;
+                }
+            }
+        }
+
+        Set<User> users = new HashSet<User>();
+        for(String name : new String[]{userids}) {
+            User user = User.findByUserName(name);
+            if(user != null) users.add(user);
+        }
+        return users;
+    }
+
+
+    /**
+     * 物流人员
+     *
+     * @return
+     */
+    public static Set<User> shipoperations() {
+        Set<User> users = new HashSet<User>();
+        for(String name : new String[]{"wendy"}) {
+            User user = User.findByUserName(name);
+            if(user != null) users.add(user);
+        }
+        return users;
     }
 
     public boolean getClosed() {

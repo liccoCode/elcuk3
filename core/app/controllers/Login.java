@@ -78,8 +78,7 @@ public class Login extends Secure.Security {
     public static User current() {
         /**
          * 初始化:
-         * 1. 将用户信息缓存到 User Cache.
-         * 2. 初始化 Notification Queue
+         * 将用户信息缓存到 User Cache.
          */
         // 初始化用户缓存中的用户;
         if(USER_CACHE.get(Secure.Security.connected()) == null) {
