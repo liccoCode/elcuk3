@@ -61,16 +61,29 @@ $ ->
       )
   )
 
+  # Ajax 加载供应商列表
   $('#splitUnitForm').on('change', "[name='newUnit.product.sku']", ->
     $cooperators = $("select[name='newUnit.cooperator.id']")
+    msku = this.value
     # 当输入的 sku 长度大于5才发起 Ajax 请求获取供应商列表
-    if this.value.length > 5
-      # Ajax 加载供应商列表
-      $.get('/products/cooperators', {sku: this.value})
+    if msku.length > 5
+      LoadMask.mask()
+      $.get('/products/cooperators', {sku: msku})
       .done((r) ->
           $cooperators.empty()
-          $cooperators.append("<option value=''>请选择</option>")
           r.forEach (value) ->
             $cooperators.append("<option value='#{value.id}'>#{value.name}</option>")
         )
+      LoadMask.unmask()
   )
+
+  # Ajax 加载 Sellingid
+  $sellingId = $("input[name='newUnit.selling.sellingId']")
+  $sellingId.typeahead({
+    source: (query, process) ->
+      msku = $("#unit_sku").val()
+      $.get('/sellings/sameFamilySellings', {msku: msku})
+      .done((c) ->
+          process(c)
+        )
+  })
