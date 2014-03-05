@@ -71,6 +71,7 @@ $ ->
       $.get('/products/cooperators', {sku: msku})
       .done((r) ->
           $cooperators.empty()
+          $cooperators.append("<option value=''>请选择</option>")
           r.forEach (value) ->
             $cooperators.append("<option value='#{value.id}'>#{value.name}</option>")
         )
