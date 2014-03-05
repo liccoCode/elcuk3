@@ -9,6 +9,7 @@ import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.driver.GJob;
 import jobs.perform.SubmitFeedJob;
+import models.User;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
@@ -252,6 +253,7 @@ public class Selling extends GenericModel {
         args.put("marketId", this.market.amid().name()); // 向哪一个市场
         args.put("feed.id", feed.id); // 提交哪一个 Feed ?
         args.put("selling.id", this.sellingId); // 作用与哪一个 Selling
+        args.put("user.id", User.current().id);
         return args;
     }
 
