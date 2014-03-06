@@ -1,8 +1,12 @@
 package controllers;
 
+import helper.Webs;
 import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.view.dto.DeliveryExcel;
 import models.view.post.DeliveryPost;
+import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -45,5 +49,34 @@ public class Excels extends Controller {
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
+    }
+
+    /**
+     * 下载选定的采购计划的出货单
+     *
+     * @param id   采购单 id
+     * @param pids 选定的采购计划的 id 集合
+     * @throws Exception
+     */
+    public static synchronized void procureunitsOrder(String id, List<Long> pids) throws Exception {
+        if(pids == null || pids.size() == 0)
+            Validation.addError("", "必须选择需要下载的采购计划");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Deliveryments.show(id);
+        }
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        StringBuffer pidstr = new StringBuffer();
+        for(Long pid : pids) {
+            pidstr.append(pid.toString()).append("，");
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("%s出货计划.xls", pidstr.toString()));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        renderArgs.put("dateFormat", formatter);
+        renderArgs.put("dmt", Deliveryment.findById(id));
+        render(units);
     }
 }

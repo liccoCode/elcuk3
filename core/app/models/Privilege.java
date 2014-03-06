@@ -125,6 +125,7 @@ public class Privilege extends Model {
 
         // 采购单页面
         privileges.add(new Privilege("deliveryments.cancel", "取消采购单"));
+        privileges.add(new Privilege("deliveryments.manual", "增加手动单"));
         privileges.add(new Privilege("procures.dosplitunit", "分拆采购计划"));
         privileges.add(new Privilege("procures.delivery", "采购计划交货"));
         privileges.add(new Privilege("procures.createdeliveryment", "通过采购计划创建采购单"));
