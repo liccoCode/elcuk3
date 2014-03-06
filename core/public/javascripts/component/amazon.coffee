@@ -102,6 +102,7 @@ $ ->
     "AMAZON_US_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware', 'MajorHomeAppliances', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_US_Wireless":["US市场下Wireless模板不包含该字段"],
     "AMAZON_US_Home":['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants'],
+    "AMAZON_UK_Home":['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_US_Games":["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
     "AMAZON_FR_Computers":['ComputerComponent', 'ComputerDriveOrStorage', 'Monitor', 'NotebookComputer', 'PersonalComputer', 'Printer', 'Scanner', 'VideoProjector'],
     "AMAZON_FR_ConsumerElectronics":['AVFurniture', 'AccessoryOrPartOrSupply', 'AudioOrVideo', 'Battery', 'Binocular', 'CableOrAdapter', 'Camcorder', 'CameraFlash', 'CameraLenses', 'CameraOtherAccessories', 'CameraPowerSupply', 'CarElectronics', 'ConsumerElectronics', 'DigitalCamera', 'DigitalPictureFrame', 'FilmCamera', 'GpsOrNavigationSystem', 'Headphones', 'Phone', 'PhoneAccessory', 'PhotographicStudioItems', 'PortableAvDevice', 'PowerSuppliesOrProtection', 'Radio', 'RemoteControl', 'Speakers', 'Telescope', 'Television', 'VideoProjector', 'camerabagsandcases'],
