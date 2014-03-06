@@ -234,7 +234,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 销售等级
+     * 销售等级(手动调整)
      */
     @Enumerated(EnumType.STRING)
     @Required
