@@ -9,6 +9,7 @@ import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.driver.GJob;
 import jobs.perform.SubmitFeedJob;
+import models.User;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
@@ -252,11 +253,12 @@ public class Selling extends GenericModel {
         args.put("marketId", this.market.amid().name()); // 向哪一个市场
         args.put("feed.id", feed.id); // 提交哪一个 Feed ?
         args.put("selling.id", this.sellingId); // 作用与哪一个 Selling
+        args.put("user.id", User.current().id);
         return args;
     }
 
     public Feed deploy() {
-        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
         String content = Selling
@@ -274,7 +276,7 @@ public class Selling extends GenericModel {
      * @return
      */
     public Selling buildFromProduct() {
-        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
