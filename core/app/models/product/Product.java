@@ -116,7 +116,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public Date marketTime;
 
-    public enum T{
+    public enum T {
         /**
          * 未上架
          */
@@ -130,13 +130,116 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         /**
          * 下架
          */
-        MARKETDOWN
+        DOWN
     }
 
     /**
-     * 上架状态
+     * 上架状态(手动调整)
      */
-    public T marketType;
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Expose
+    public T marketState;
+
+    public enum P {
+        /**
+         * 未采购
+         */
+        NONE,
+
+        /**
+         * 正常采购
+         */
+        NORMAL,
+
+        /**
+         * 停止采购
+         */
+        STOP
+    }
+
+    /**
+     * 采购状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Expose
+    public P procureState;
+
+    public enum L {
+        /**
+         * 开发期
+         */
+        DEVELOP,
+
+        /**
+         * 引进期
+         */
+        INTRODUCE,
+
+        /**
+         * 成长期
+         */
+        GROWTH,
+
+        /**
+         * 成熟期
+         */
+        MATURE,
+
+        /**
+         * 衰退期
+         */
+        DOWNTURN,
+
+        /**
+         * 退市
+         */
+        EXIT
+    }
+
+    /**
+     * 产品的生命周期(所处状态)
+     */
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Expose
+    public L productState;
+
+    public enum E {
+        /**
+         * 销量最好
+         */
+        A,
+
+        /**
+         * 销量较好
+         */
+        B,
+
+        /**
+         * 销量低迷
+         */
+        C,
+
+        /**
+         * 销量较差
+         */
+        D,
+
+        /**
+         * 销量极差
+         */
+        E
+    }
+
+    /**
+     * 销售等级
+     */
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Expose
+    public E salesLevel;
 
     public Product() {
     }
