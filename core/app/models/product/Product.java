@@ -20,10 +20,7 @@ import play.utils.FastRuntimeException;
 import query.ProductQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -113,6 +110,33 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     @Required
     public String abbreviation;
+
+    /**
+     * 上市时间
+     */
+    public Date marketTime;
+
+    public enum T{
+        /**
+         * 未上架
+         */
+        NOMARKET,
+
+        /**
+         * 上架
+         */
+        MARKETING,
+
+        /**
+         * 下架
+         */
+        MARKETDOWN
+    }
+
+    /**
+     * 上架状态
+     */
+    public T marketType;
 
     public Product() {
     }
