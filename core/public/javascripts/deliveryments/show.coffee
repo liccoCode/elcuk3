@@ -1,5 +1,5 @@
 $ ->
-  $('#bulkpost').on('click', "#delunit_form_submit, #deployFBAs, #downloadFBAZIP", (e) ->
+  $('#bulkpost').on('click', "#delunit_form_submit, #deployFBAs, #downloadFBAZIP, #downloadProcureunitsOrder", (e) ->
     $btn = $(@)
     return false unless confirm("确认 #{$btn.text().trim()} ?")
     $('#form_method').val($btn.data('method'))
