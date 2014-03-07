@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Constant;
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -8,12 +9,14 @@ import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.product.Product;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -241,4 +244,43 @@ public class Deliveryments extends Controller {
         }
     }
 
+    @Check("deliveryments.manual")
+    public static void manual() {
+        Deliveryment dmt = new Deliveryment(Deliveryment.id());
+        ProcureUnit unit = new ProcureUnit();
+        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
+        renderArgs.put("skus", J.json(skusToJson._2));
+        render(dmt, unit);
+    }
+
+    /**
+     * 创建手动单
+     *
+     * @param dmt  Deliveryment
+     * @param unit ProcureUnit
+     */
+    @Check("deliveryments.manual")
+    public static void createManual(Deliveryment dmt, ProcureUnit unit) {
+        Validation.required("供应商", dmt.cooperator);
+        Validation.required("采购单别名", dmt.name);
+
+        User user = User.findByUserName(Secure.Security.connected());
+        unit.cooperator = dmt.cooperator;
+        unit.handler = user;
+        unit.deliveryment = dmt;
+        unit.stage = ProcureUnit.STAGE.DELIVERY;
+
+        dmt.handler = user;
+        dmt.state = Deliveryment.S.PENDING;
+        dmt.name = dmt.name.trim();
+        dmt.units.add(unit);
+        unit.validateManual();
+        if(Validation.hasErrors()) {
+            render("Deliveryments/manual.html", dmt, unit);
+        }
+        unit.save();
+        dmt.save();
+        flash.success("Deliveryment %s 创建成功.", dmt.id);
+        Deliveryments.show(dmt.id);
+    }
 }

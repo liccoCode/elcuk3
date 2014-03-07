@@ -6,6 +6,7 @@ import helper.J;
 import helper.Webs;
 import models.embedded.AmazonProps;
 import models.market.*;
+import models.product.Product;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +20,7 @@ import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,6 +59,19 @@ public class Sellings extends Controller {
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("feeds", s.feeds());
         render(s);
+    }
+
+    /**
+     * 加载指定 Product 所属的 Family 下的所有的 SellingId
+     *
+     * @param msku
+     */
+    public static void sameFamilySellings(String msku) {
+        List<Selling> sellings = Selling
+                .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
+        List<String> sids = new ArrayList<String>();
+        for(Selling s : sellings) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
     }
 
     /**
