@@ -462,12 +462,7 @@ public class Selling extends GenericModel {
         if(size > 0) Webs.error("拥有 " + size + " 个销售数据, 无法删除");
         SellingRecord.delete("selling=?", this);
         SellingQTY.delete("selling=?", this);
-        for(AmazonListingReview review : this.listing.listingReviews) {
-            review.reviewRecords.clear();
-            review.delete();
-        }
-        this.listing.delete();
-        ListingOffer.delete("listing=?", this.listing);
+        this.delete();
     }
 
     /**

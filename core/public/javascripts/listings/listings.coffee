@@ -62,9 +62,12 @@ $ ->
 
   $('#l_list').on('click', 'a[action=remove]', (li) ->
     LoadMask.mask()
-    $.ajax($(@).data('url'))
+    $li = $(@)
+    $.ajax($li.data('url'))
       .done((r) ->
         type = if r.flag
+          # 只删除最近的一个 tr 父元素
+          $li.parents('tr')[0].remove()
           'success'
         else
           'error'
