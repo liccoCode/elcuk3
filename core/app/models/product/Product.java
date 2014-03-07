@@ -137,8 +137,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 上架状态(手动调整)
      */
     @Enumerated(EnumType.STRING)
-    @Required
-    @Expose
     public T marketState;
 
     public enum P {
@@ -162,8 +160,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 采购状态
      */
     @Enumerated(EnumType.STRING)
-    @Required
-    @Expose
     public P procureState;
 
     public enum L {
@@ -202,8 +198,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 产品的生命周期(所处状态)
      */
     @Enumerated(EnumType.STRING)
-    @Required
-    @Expose
     public L productState;
 
     public enum E {
@@ -237,9 +231,17 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 销售等级(手动调整)
      */
     @Enumerated(EnumType.STRING)
-    @Required
-    @Expose
     public E salesLevel;
+
+    /**
+     * 产品定位
+     */
+    public String locate;
+
+    /**
+     * 产品卖点
+     */
+    public String sellingPoints;
 
     public Product() {
     }
