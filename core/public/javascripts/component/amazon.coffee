@@ -102,6 +102,7 @@ $ ->
     "AMAZON_US_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware', 'MajorHomeAppliances', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_US_Wireless":["US市场下Wireless模板不包含该字段"],
     "AMAZON_US_Home":['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants'],
+    "AMAZON_UK_Home":['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_US_Games":["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
     "AMAZON_FR_Computers":['ComputerComponent', 'ComputerDriveOrStorage', 'Monitor', 'NotebookComputer', 'PersonalComputer', 'Printer', 'Scanner', 'VideoProjector'],
     "AMAZON_FR_ConsumerElectronics":['AVFurniture', 'AccessoryOrPartOrSupply', 'AudioOrVideo', 'Battery', 'Binocular', 'CableOrAdapter', 'Camcorder', 'CameraFlash', 'CameraLenses', 'CameraOtherAccessories', 'CameraPowerSupply', 'CarElectronics', 'ConsumerElectronics', 'DigitalCamera', 'DigitalPictureFrame', 'FilmCamera', 'GpsOrNavigationSystem', 'Headphones', 'Phone', 'PhoneAccessory', 'PhotographicStudioItems', 'PortableAvDevice', 'PowerSuppliesOrProtection', 'Radio', 'RemoteControl', 'Speakers', 'Telescope', 'Television', 'VideoProjector', 'camerabagsandcases'],
@@ -146,3 +147,4 @@ $ ->
   $('#templateType').popover({trigger: 'focus', content: '为上传给 Amazon 的模板选择, 与 Amazon 的市场有关, 不可以随意修改'})
   $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})
   $('#state').popover({trigger: 'focus', content: 'NEW 状态 Selling 还没有同步回 ASIN, SELLING 状态为正常销售'})
+  $('#itemType').popover({trigger: 'focus', content: '此属性字段为 UK 的 Games 模板独有，请填写 RBN 所对应的类别名称'})
