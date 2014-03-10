@@ -138,11 +138,11 @@ public class Selling extends GenericModel {
         if(StringUtils.isNotBlank(this.aps.productDesc)) {
             // 不能够存在换行符号, 不然会生成上架失败的 Feed 文件
             this.aps.productDesc = StringUtils.replaceEach(this.aps.productDesc,
-                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+                    new String[]{"\r", "\n", "\r\n", "\t"}, new String[]{"", "", "", ""});
         }
         if(StringUtils.isNotBlank(this.aps.title)) {
             this.aps.title = StringUtils.replaceEach(this.aps.title,
-                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+                    new String[]{"\r", "\n", "\r\n", "\t"}, new String[]{"", "", "", ""});
         }
     }
 
@@ -260,7 +260,8 @@ public class Selling extends GenericModel {
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
         String content = Selling
-                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(), "PartialUpdate");
+                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(),
+                        "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
         Map<String, Object> args = this.submitJobParams(feed);
         args.put("action", "update");
@@ -457,7 +458,8 @@ public class Selling extends GenericModel {
      * @return String 生成的模板数据
      *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
-    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market, String action) {
+    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
+                                                  String action) {
         Map args = GTs.newMap("sellingList", sellingList).build();
         args.put("action", action);
         return GTs.render(String.format("Flat.File.%s.%s", templateType, market), args);
