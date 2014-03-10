@@ -11,6 +11,7 @@ import jobs.driver.GJob;
 import jobs.perform.SubmitFeedJob;
 import models.User;
 import models.embedded.AmazonProps;
+import models.procure.ProcureUnit;
 import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
@@ -262,7 +263,8 @@ public class Selling extends GenericModel {
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
         String content = Selling
-                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(), "PartialUpdate");
+                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(),
+                        "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
         Map<String, Object> args = this.submitJobParams(feed);
         args.put("action", "update");
@@ -450,6 +452,22 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 删除这个 Selling
+     */
+    public void remove() {
+        /**
+         * 1. 检查是否有采购计划, 有则不允许删除
+         */
+        long size = ProcureUnit.count("selling=?", this);
+        if(size > 0) Webs.error("此 Selling 拥有过 " + size + " 个采购计划, 无法删除");
+        size = OrderItem.count("selling=?", this);
+        if(size > 0) Webs.error("拥有 " + size + " 个销售数据, 无法删除");
+        SellingRecord.delete("selling=?", this);
+        SellingQTY.delete("selling=?", this);
+        this.delete();
+    }
+
+    /**
      * 生成Selling对象的Feed文件
      *
      * @param sellingList  List
@@ -459,7 +477,8 @@ public class Selling extends GenericModel {
      * @return String 生成的模板数据
      *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
-    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market, String action) {
+    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
+                                                  String action) {
         Map args = GTs.newMap("sellingList", sellingList).build();
         args.put("action", action);
         return GTs.render(String.format("Flat.File.%s.%s", templateType, market), args);

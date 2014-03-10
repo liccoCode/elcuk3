@@ -96,6 +96,7 @@ public class AmazonProps implements Serializable {
     public Integer quantity;
     /**
      * 如果这个 Condition 不为空, 那么则覆盖掉 Listing 中的 Condition
+     * TODO 删除这个字段
      */
     @Expose
     public String condition_;

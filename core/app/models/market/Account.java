@@ -598,6 +598,13 @@ public class Account extends Model {
     }
 
     /**
+     * 根据市场找出销售账号
+     */
+    public static Account saleAccount(M market) {
+        return Account.find("isSaleAcc=? AND type=?", true, market).first();
+    }
+
+    /**
      * 构造放在 Account Cookie_Store_Map 中的 KEY
      */
     public static String cookieKey(String uniq, M market) {

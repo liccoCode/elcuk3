@@ -149,6 +149,16 @@ public class Sellings extends Controller {
         }
     }
 
+    public static void destroy(String id) {
+        try {
+            Selling s = Selling.findById(id);
+            s.remove();
+            renderJSON(new Ret(true, "成功删除"));
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
     /**
      * 从 Amazon 上将 Selling 信息同步回来
      */
