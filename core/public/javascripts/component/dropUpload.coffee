@@ -4,7 +4,9 @@ window.dropUpload =
   '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
   '<div class="progress"><div class="bar"></div></div>' +
   '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
-  '<div class="title" style="position:relative;top:-15px;word-break:break-all;"></div>' +
+  '<div class="title" style="position:relative;top:-15px;word-break:break-all;font-weight:bold"></div>' +
+  '<div class="title2" style="position:relative;top:-17px;word-break:break-all;" ></div>' +
+  '<div class="title3" style="position:relative;top:-20px;word-break:break-all;" ></div>' +
   '</li>'
 
   xlsImg: '/images/uploads/xls.jpg'
@@ -135,6 +137,7 @@ window.dropUpload =
     dropbox = $('#dropbox')
     $.getJSON('/attachs/images', {fid: fid, p: p},
     (imgs) ->
+      versionConut = 0
       for img, i in imgs
         type = img.attachType
         # 图片 DIV
@@ -163,6 +166,14 @@ window.dropUpload =
         attachEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
         attachEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
         attachEl.find('div.progress').remove()
-        attachEl.find('div.title').text(img['originName'])
+        if i - 1 >=0
+          # 如果文件名和上一个相同并且文件类型也相同，版本号 +1 （查询出来时已经按照文件名分好组，文件名相同的在一块）
+          if(img['originName'] == imgs[i - 1]['originName'] && type == imgs[i - 1].attachType)
+            ++versionConut
+          else
+            versionConut = 0
+        attachEl.find('div.title').text("Version#{versionConut + 1}")
+        attachEl.find('div.title2').text("文件名: " + img['originName'])
+        attachEl.find('div.title3').text('创建日期: ' + img['createDate'])
         attachEl.appendTo(uploaded)
     )

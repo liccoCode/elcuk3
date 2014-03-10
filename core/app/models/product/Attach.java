@@ -180,7 +180,8 @@ public class Attach extends Model {
     /**
      * 创建时间
      */
-    public Date creatDate = new Date();
+    @Expose
+    public Date createDate = new Date();
 
     public void setFid(String fid) {
         this.fid = fid.toUpperCase();
@@ -225,7 +226,7 @@ public class Attach extends Model {
         this.fileName = String.format("%s_%s%s", this.fid, subfix,
                 this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
         this.location = this.location();
-        this.creatDate = new Date();
+        this.createDate = new Date();
         return this;
     }
 
@@ -247,11 +248,19 @@ public class Attach extends Model {
         return Attach.find("outName=?", outName).first();
     }
 
-
+    /**
+     * 根据外键查出所有的附件并进行分组和排序
+     *
+     * @param fid
+     * @param p
+     * @return
+     */
     public static List<Attach> attaches(String fid, String p) {
         if(StringUtils.isNotBlank(p))
-            return Attach.find("fid=? AND p=? AND remove=false", fid, Attach.P.valueOf(p)).fetch();
+            return Attach
+                    .find("fid=? AND p=? AND remove=false ORDER BY originName,createDate ASC", fid, Attach.P.valueOf(p))
+                    .fetch();
         else
-            return Attach.find("fid=? AND remove=false", fid).fetch();
+            return Attach.find("fid=? AND remove=false ORDER BY originName,createDate ASC", fid).fetch();
     }
 }
