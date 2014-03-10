@@ -227,6 +227,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public String comment = " ";
 
+
     /**
      * ProcureUnit 的检查
      */
@@ -250,6 +251,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 手动单采购计划数据验证
+     */
+    public void validateManual() {
+        Validation.required("交货日期", this.attrs.planDeliveryDate);
+        Validation.required("procureunit.handler", this.handler);
+        Validation.required("procureunit.product", this.product);
+        Validation.required("价格", this.attrs.price);
+        if(this.product != null) this.sku = this.product.sku;
+        Validation.required("procureunit.createDate", this.createDate);
+        if(this.attrs != null) this.attrs.validate();
+    }
+
+
+    /**
      * 分拆采购计划: 工厂在原有采购计划基础上全部交货, 只能够部分交货的情况下进行的操作;
      * 1. 原有的采购计划仅仅数量变化.
      * 2. 新创建采购计划, 处理数量, FBA, Shipment 相关信息变化, 其他保持不变.
@@ -258,15 +273,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public ProcureUnit split(ProcureUnit unit) {
         int originQty = this.qty();
-        if(unit.attrs.planQty >= originQty)
-            Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
-        if(unit.attrs.planQty <= 0)
-            Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
+        if(unit.attrs.planQty != null) {
+            if(unit.attrs.planQty > originQty)
+                Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
+            if(unit.attrs.planQty <= 0)
+                Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
+        }
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
-
-        ProcureUnit newUnit = new ProcureUnit(this);
-        newUnit.attrs.planQty = unit.attrs.planQty;
+        ProcureUnit newUnit = null;
+        if(this.selling == null) {
+            //手动单拆分时将 拆分的采购计划 归属到 此采购计划 的采购单身上
+            newUnit = unit;
+            newUnit.deliveryment = this.deliveryment;
+        } else {
+            newUnit = new ProcureUnit(this);
+            newUnit.attrs.planQty = unit.attrs.planQty;
+        }
         newUnit.stage = STAGE.DELIVERY;
         newUnit.validate();
 
@@ -428,13 +451,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
-            noty(this.sku,StringUtils.join(logs, ","));
+            noty(this.sku, StringUtils.join(logs, ","));
         }
         this.shipItemQty(this.qty());
         this.save();
     }
 
-    public void noty(String sku,String content) {
+    /**
+     * 修改手动单数据
+     */
+    public void updateManualData(ProcureUnit unit) {
+        this.attrs.price = unit.attrs.price;
+        this.attrs.planQty = unit.attrs.planQty;
+        this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+    }
+
+    public void noty(String sku, String content) {
         content = User.username() + "修改," + content;
         Set<User> notyUsers = this.editToUsers();
         if(content.contains("日期") || content.contains("时间"))
