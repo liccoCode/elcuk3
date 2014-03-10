@@ -117,20 +117,38 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public Date marketTime;
 
     public enum T {
+
         /**
          * 未上架
          */
-        NOMARKET,
+        NOMARKET {
+            @Override
+            public String label() {
+                return "未上架";
+            }
+        },
 
         /**
          * 上架
          */
-        MARKETING,
+        MARKETING {
+            @Override
+            public String label() {
+                return "上架";
+            }
+        },
 
         /**
          * 下架
          */
-        DOWN
+        DOWN {
+            @Override
+            public String label() {
+                return "下架";
+            }
+        };
+
+        public abstract String label();
     }
 
     /**
@@ -143,17 +161,34 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         /**
          * 未采购
          */
-        NONE,
+        NONE {
+            @Override
+            public String label() {
+                return "未采购";
+            }
+        },
 
         /**
          * 正常采购
          */
-        NORMAL,
+        NORMAL {
+            @Override
+            public String label() {
+                return "正常采购";
+            }
+        },
 
         /**
          * 停止采购
          */
-        STOP
+        STOP {
+            @Override
+            public String label() {
+                return "停止采购";
+            }
+        };
+
+        public abstract String label();
     }
 
     /**
@@ -166,32 +201,64 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         /**
          * 开发期
          */
-        DEVELOP,
+        DEVELOP {
+            @Override
+            public String label() {
+                return "开发期";
+            }
+        },
 
         /**
          * 引进期
          */
-        INTRODUCE,
+        INTRODUCE {
+            @Override
+            public String label() {
+                return "引进期";
+            }
+        },
 
         /**
          * 成长期
          */
-        GROWTH,
+        GROWTH {
+            @Override
+            public String label() {
+                return "成长期";
+            }
+        },
 
         /**
          * 成熟期
          */
-        MATURE,
+        MATURE {
+            @Override
+            public String label() {
+                return "成熟期";
+            }
+        },
 
         /**
          * 衰退期
          */
-        DOWNTURN,
+        DOWNTURN {
+            @Override
+            public String label() {
+                return "衰退期";
+            }
+        },
 
         /**
          * 退市
          */
-        EXIT
+        EXIT {
+            @Override
+            public String label() {
+                return "退市";
+            }
+        };
+
+        public abstract String label();
     }
 
     /**

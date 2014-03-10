@@ -85,6 +85,15 @@ window.dropUpload =
         args = fidAndAttachPFunc()
         this.data['a.fid'] = args['fid']
         this.data['a.p'] = args['p']
+        # 这里判断是在哪个 DIV 上传的文件，设定相对应的 attachType 参数值
+        if dropbox.attr("id") == "dropbox"
+           this.data['a.attachType'] = "IMAGE"
+        if dropbox.attr("id") == "packageDropbox"
+           this.data['a.attachType'] = "PACKAGE"
+        if dropbox.attr("id") == "instructionsDropbox"
+           this.data['a.attachType'] = "INSTRUCTION"
+        if dropbox.attr("id") == "silkscreenDropbox"
+           this.data['a.attachType'] = "SILKSCREEN"
         return false if this.data['a.fid'] is false
       uploadStarted: (i, file, len) ->
         #???
@@ -120,22 +129,40 @@ window.dropUpload =
             alert("File is too Large!")
     )
 
-  # 初始化页面的时候加载此 Product 对应的图片; dropbox 图片展示的 div
-  loadImages: (fid, dropbox, p = '', cls = 'span2') ->
-    uploaded = dropbox.find('.uploaded')
-    message = dropbox.find('.message')
+  # 初始化页面的时候加载此 Product 对应的附件; 根据 attachType 展示到对应的 div 内
+  loadAttachs: (fid, p = '', cls = 'span2') ->
+    # 图片 DIV
+    dropbox = $('#dropbox')
     $.getJSON('/attachs/images', {fid: fid, p: p},
     (imgs) ->
-      message.remove() if(imgs.length > 0)
       for img, i in imgs
-        imgEl = $(window.dropUpload.template)
-        imgEl.addClass(cls)
-        imgUrl = "/attachs/image?a.fileName=" + img['fileName']
-        window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl + "&w=140&h=100")
-        imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
-        imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
-        imgEl.find('div.progress').remove()
-        imgEl.find('div.title').text(img['originName'])
-        imgEl.appendTo(uploaded)
-    )
+        type = img.attachType
+        # 图片 DIV
+        if type == "IMAGE"
+          dropbox = $('#dropbox')
 
+        # 包装 DIV
+        else if type == "PACKAGE"
+          dropbox = $('#packageDropbox')
+
+        # 说明书 DIV
+        else if type == "INSTRUCTION"
+          dropbox = $('#instructionsDropbox')
+
+        # 丝印文件 DIV
+        else if type == "SILKSCREEN"
+          dropbox = $('#silkscreenDropbox')
+
+        uploaded = dropbox.find('.uploaded')
+        message = dropbox.find('.message')
+        message.remove() if(imgs.length > 0)
+        attachEl = $(window.dropUpload.template)
+        attachEl.addClass(cls)
+        imgUrl = "/attachs/image?a.fileName=" + img['fileName']
+        window.dropUpload.imgSrc(img['fileName'], attachEl.find("img"), imgUrl + "&w=140&h=100")
+        attachEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
+        attachEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
+        attachEl.find('div.progress').remove()
+        attachEl.find('div.title').text(img['originName'])
+        attachEl.appendTo(uploaded)
+    )

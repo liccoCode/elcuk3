@@ -13,13 +13,11 @@ import play.db.jpa.Model;
 import play.libs.Codec;
 import play.utils.FastRuntimeException;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -150,6 +148,40 @@ public class Attach extends Model {
     @Column(nullable = false)
     public String location;
 
+    public enum T {
+        /**
+         * 图片
+         */
+        IMAGE,
+
+        /**
+         * 包装
+         */
+        PACKAGE,
+
+        /**
+         * 说明书
+         */
+        INSTRUCTION,
+
+        /**
+         * 丝印文件
+         */
+        SILKSCREEN
+    }
+
+    /**
+     * 附件类型(这个文件是用来干什么的)
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public T attachType;
+
+    /**
+     * 创建时间
+     */
+    public Date creatDate = new Date();
+
     public void setFid(String fid) {
         this.fid = fid.toUpperCase();
     }
@@ -193,6 +225,7 @@ public class Attach extends Model {
         this.fileName = String.format("%s_%s%s", this.fid, subfix,
                 this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
         this.location = this.location();
+        this.creatDate = new Date();
         return this;
     }
 
@@ -213,6 +246,7 @@ public class Attach extends Model {
     public static Attach findByOutName(String outName) {
         return Attach.find("outName=?", outName).first();
     }
+
 
     public static List<Attach> attaches(String fid, String p) {
         if(StringUtils.isNotBlank(p))
