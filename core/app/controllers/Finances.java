@@ -1,6 +1,5 @@
 package controllers;
 
-import jobs.AmazonFinancePatchJob;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
 import jobs.promise.FinanceShippedPromise;
@@ -8,17 +7,13 @@ import models.finance.SaleFee;
 import models.market.Account;
 import models.market.JobRequest;
 import models.market.M;
-import models.view.Ret;
 import org.apache.commons.lang3.StringUtils;
-import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 与财务有关的操作
@@ -37,28 +32,7 @@ public class Finances extends Controller {
         render(accs);
     }
 
-    @Check("finances.fixfinance")
-    public static void fixFinance(File file, long accId) {
-        Account acc = Account.findById(accId);
-        if(acc == null)
-            error("Error Account Id");
-
-        AmazonFinancePatchJob worker = new AmazonFinancePatchJob(acc, new Date());
-        Map<String, List<SaleFee>> feeMap = SaleFee.flatFileFinanceParse(file, acc);
-        worker.parseToDB(feeMap);
-        renderText("Deals %s Orders.", feeMap.keySet().size());
-    }
-
-    public static void settlement(long accId) {
-        Account acc = Account.findById(accId);
-        AmazonFinancePatchJob worker = new AmazonFinancePatchJob(acc, new Date());
-        List<Error> errors = await(worker.now());
-        if(errors.size() > 0) {
-            renderJSON(new Ret(false, errors.toString()));
-        } else {
-            renderJSON(new Ret(true, "成功处理"));
-        }
-    }
+//    @Check("finances.fixfinance")
 
     @Check("finances.reparseorder")
     public static void reParseOrder(File file, Account acc) {

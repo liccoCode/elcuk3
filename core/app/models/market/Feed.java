@@ -45,11 +45,11 @@ public class Feed extends Model {
     /**
      * 因 API 的限制, 所以每一个 Selling 不可以无限制的上传 Feed.
      * 每个 Feed 间隔 3 分钟以上
-     *
+     * 更新：由于 Amazon 使用账户区分，所以系统也更新采用区分账户来做提交限制。
      * @return
      */
-    public static boolean isFeedAvalible() {
-        Feed feed = Feed.newest();
+    public static boolean isFeedAvalible(Long accountId) {
+        Feed feed = Feed.newest(accountId);
         if(feed == null) return true;
         if(feed.createdAt == null) {
             feed.createdAt = new Date();
@@ -59,12 +59,12 @@ public class Feed extends Model {
     }
 
     /**
-     * 最新的一个 Feed
+     * 拿到该账户提交的最新的一个 Feed
      *
      * @return
      */
-    public static Feed newest() {
-        return Feed.find("ORDER BY createdAt DESC").first();
+    public static Feed newest(Long id) {
+        return Feed.find("SUBSTRING_INDEX(fid,'|','-1') LIKE ? ORDER BY createdAt DESC", id).first();
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {
