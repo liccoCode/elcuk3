@@ -68,6 +68,8 @@
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
+      <input type="hidden" name="p.unitIds" id="unitIds"/>
+
       <div class="input-prepend input-append inline">
         <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-primary" rel="popover"
            content="明天需要交货的采购计划" data-disable-with="loading">明天计划</a>
@@ -76,12 +78,13 @@
         <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-primary" rel="popover"
            content="第三天需要交货的采购计划" data-disable-with="loading">大后天计划</a>
         <a href="@{ProcureUnits.noPlaced()}" class="btn btn-primary" rel="popover" content="发货时间为当天,
-        同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
-        <input type="hidden" name="p.unitIds" id="unitIds"/>
-        <a target="_blank" class="btn btn-success"rel="popover" content="将搜索出来的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
-          <i class="icon-download-alt"></i>下载ZIP包
-        </a>
+              同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
       </div>
+
+      <a target="_blank" class="btn btn-primary" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 "
+         id="downloadFBAZIP">
+        <i class="icon-download-alt"></i>下载ZIP包
+      </a>
     </div>
   </form>
 </div>
