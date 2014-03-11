@@ -6,7 +6,6 @@ import jobs.works.ListingReviewsWork;
 import models.market.*;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -80,20 +79,6 @@ public class AmazonOperations extends Controller {
             throw new FastRuntimeException(Webs.S(e));
         }
         renderJSON(new Ret(true, AmazonListingReview.countListingReview(Listing.lid(asin, market)) + ""));
-    }
-
-    /**
-     * 点击 Amazon Listing 的 Like 按钮
-     */
-    public static void like(String asin, String m) {
-        M market = M.val(m);
-        String lid = Listing.lid(asin, market);
-        Listing listing = Listing.findById(lid);
-        if(listing == null)
-            throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
-        F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToClikeLike();
-        F.T2<AmazonLikeRecord, String> t2 = accT2._1.clickLike(listing);
-        renderJSON(t2._2.trim());
     }
 
     /**

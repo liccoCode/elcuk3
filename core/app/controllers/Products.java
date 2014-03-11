@@ -7,6 +7,7 @@ import models.market.Account;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
+import models.procure.Cooperator;
 import models.product.Category;
 import models.product.Family;
 import models.product.Product;
@@ -196,5 +197,22 @@ public class Products extends Controller {
             ret = new Ret("https://catalog-mapper-na.amazon.com" + suffix);
         }
         renderJSON(ret);
+    }
+
+    /**
+     * 获取拥有这个 SKU 的所有供应商
+     */
+    public static void cooperators(String sku) {
+        List<Cooperator> cooperatorList = Cooperator
+                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id", sku)
+                .fetch();
+        StringBuffer buff = new StringBuffer();
+        buff.append("[");
+        for(Cooperator co : cooperatorList) {
+            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
+                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name).append("\"").append("}");
+        }
+        buff.append("]");
+        renderJSON(buff.toString());
     }
 }

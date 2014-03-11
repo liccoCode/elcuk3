@@ -96,6 +96,7 @@ public class AmazonProps implements Serializable {
     public Integer quantity;
     /**
      * 如果这个 Condition 不为空, 那么则覆盖掉 Listing 中的 Condition
+     * TODO 删除这个字段
      */
     @Expose
     public String condition_;
@@ -123,8 +124,10 @@ public class AmazonProps implements Serializable {
     @Lob
     @Expose
     public String legalDisclaimerDesc;
+
     @Expose
     public Date launchDate;
+
     @Lob
     @Expose
     public String sellerWarrantyDesc;
@@ -185,16 +188,19 @@ public class AmazonProps implements Serializable {
     /**
      * 亚马逊上架的时候需要提供的product的type
      */
+    @Expose
     public String feedProductType;
 
     /**
      * 模板的类型
      */
+    @Expose
     public String templateType;
 
     /**
      * 英国Games模板特有的字段，此字段为rbns字段所对应的类别名称
      */
+    @Expose
     public String itemType;
 
     /**
