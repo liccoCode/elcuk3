@@ -100,6 +100,7 @@ $ ->
     "AMAZON_US_Computers":["CarryingCaseOrBag", "Computer", "ComputerAddOn", "ComputerComponent", "ComputerCoolingDevice", "ComputerDriveOrStorage", "ComputerInputDevice", "ComputerProcessor", "ComputerSpeaker", "FlashMemory", "Keyboards", "MemoryReader", "Monitor", "Motherboard", "NetworkingDevice", "NotebookComputer", "PersonalComputer", "RAMMemory", "SoundCard", "SystemCabinet", "SystemPowerDevice", "TabletComputer", "VideoCard", "VideoProjector", "Webcam"],
     "AMAZON_US_ConsumerElectronics":["AVFurniture", "Antenna", "AudioVideoAccessory", "BarCodeReader", "Battery", "BlankMedia", "CableOrAdapter", "CarAlarm", "CarAudioOrTheater", "CarElectronics", "DVDPlayerOrRecorder", "DigitalVideoRecorder", "GPSOrNavigationAccessory", "GPSOrNavigationSystem", "HandheldOrPDA", "Headphones", "HomeTheaterSystemOrHTIB", "MediaPlayer", "MediaPlayerOrEReaderAccessory", "MediaStorage", "MiscAudioComponents", "Phone", "PortableAudio", "PowerSuppliesOrProtection", "RadarDetector", "RadioOrClockRadio", "ReceiverOrAmplifier", "RemoteControl", "Speakers", "StereoShelfSystem", "TVCombos", "Television", "Tuner", "TwoWayRadio", "VCR", "VideoProjector"],
     "AMAZON_US_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware', 'MajorHomeAppliances', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
+    "AMAZON_UK_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_US_Wireless":["US市场下Wireless模板不包含该字段"],
     "AMAZON_US_Home":['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants'],
     "AMAZON_US_Games":["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
@@ -146,3 +147,4 @@ $ ->
   $('#templateType').popover({trigger: 'focus', content: '为上传给 Amazon 的模板选择, 与 Amazon 的市场有关, 不可以随意修改'})
   $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})
   $('#state').popover({trigger: 'focus', content: 'NEW 状态 Selling 还没有同步回 ASIN, SELLING 状态为正常销售'})
+  $('#itemType').popover({trigger: 'focus', content: '此属性字段为 UK 的 Games 模板独有，请填写 RBN 所对应的类别名称'})

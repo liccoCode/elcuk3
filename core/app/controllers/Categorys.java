@@ -1,6 +1,7 @@
 package controllers;
 
 import models.product.Category;
+import models.product.Team;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -28,7 +29,8 @@ public class Categorys extends Controller {
     public static void show(String id) {
         Category cat = (Category) renderArgs.get("cates", List.class).get(0);
         if(StringUtils.isNotBlank(id)) cat = Category.findById(id);
-        render(cat);
+        List<Team> teams = Team.Teams();
+        render(cat,teams);
     }
 
     public static void update(Category cat) {
@@ -72,7 +74,8 @@ public class Categorys extends Controller {
 
     public static void blank() {
         Category cat = new Category();
-        render(cat);
+        List<Team> teams = Team.Teams();
+        render(cat,teams);
     }
 
     public static void create(Category cat) {

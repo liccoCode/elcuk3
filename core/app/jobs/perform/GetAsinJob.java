@@ -6,6 +6,8 @@ import helper.DBUtils;
 import helper.HTTP;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
+import models.Notification;
+import models.User;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
@@ -103,6 +105,9 @@ public class GetAsinJob extends BaseJob {
                                         listingId, asin,
                                         String.format("%s_%s", selling.aps.upc, selling.market.toString())));
                         DBUtils.execute("SET foreign_key_checks=1");
+                        //提示操作人员任务已经处理完成
+                        User user = User.findById(NumberUtils.toLong(getContext().get("user.id").toString()));
+                        noty("您提交的上架请求已经处理完成,请检查 ^_^", user);
                     }
                 }
             }
@@ -135,5 +140,16 @@ public class GetAsinJob extends BaseJob {
 
     public int getExecuteCount() {
         return NumberUtils.toInt(getContext().get("executeCount").toString());
+    }
+
+    /**
+     * 用于上架成功后提示用户处理完成
+     *
+     * @param content 内容
+     * @param user    提示对象
+     */
+    public void noty(String content, User user) {
+        Notification.newSystemNoty(content, String.format("%s/feed/%s/show", Constant.ROOT_PATH,
+                getContext().get("feed.id"))).notifySomeone(user);
     }
 }

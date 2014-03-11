@@ -272,6 +272,8 @@ public class MWSOrders {
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com/Orders/2011-01-01");
                         break;
+                    case AMAZON_IT:
+                        config.setServiceURL("https://mws.amazonservices.it/Orders/2011-01-01");
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
