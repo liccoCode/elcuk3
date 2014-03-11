@@ -65,7 +65,7 @@ DB = Sequel.mysql2('elcuk2', host: DB_HOST, user: 'root', password: 'crater10lak
 # select oi.createDate date, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, oi.quantity, oi.order_orderId order_id from OrderItem oi limit 10;
 orderitem = DB["SELECT oi.createDate date, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, oi.quantity, oi.order_orderId order_id FROM OrderItem oi LIMIT 10"].stream
 
-orderitem.where("createDate>=#{Time.now - (30 * 24 * 3600)}").each do |row|
+orderitem.where("createDate>=#{Time.now - (30 * 24 * 3600)}").each_with_index do |row, i|
   # deal rows....
 end
 
