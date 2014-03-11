@@ -5,16 +5,14 @@ $ ->
   ACCOUNT = $('#account')
   MARKET = $('#market')
 
-
   # 添加重新加载 Tree
   $('#reload_tree').click ->
     return false if !confirm("确认需要重新加载 Listing 树, 可能会很慢? 成功后会自动刷新页面.")
-    $.get('/listings/reload',
-      (r) ->
-        if r.flag is true
-          window.location.reload()
-        else
-          alert("刷新缓存失败... 请联系 IT -> #{r.message}")
+    $.get('/listings/reload', (r) ->
+      if r.flag is true
+        window.location.reload()
+      else
+        alert("刷新缓存失败... 请联系 IT -> #{r.message}")
     )
 
   # 返回所需要的本地值
@@ -54,12 +52,27 @@ $ ->
     o = $(@)
     lid = o.attr('lid').split('_')
     o.button('loading').addClass('disabled')
-    $.post('/listings/reCrawl', {asin: lid[0], m: lid[1]},
-      (r) ->
-        if r.flag is true
-          o.after("<span><a style='background-color:#DFF0D8;margin-left:10px;padding:8px;' href='/listings/listing?lid=" + o.attr('lid') + "'>更新成功</a></span>")
-        else
-          alert(r.message)
-        o.button('reset').removeClass('disabled')
+    $.post('/listings/reCrawl', {asin: lid[0], m: lid[1]}, (r) ->
+      if r.flag is true
+        o.after("<span><a style='background-color:#DFF0D8;margin-left:10px;padding:8px;' href='/listings/listing?lid=" + o.attr('lid') + "'>更新成功</a></span>")
+      else
+        alert(r.message)
+      o.button('reset').removeClass('disabled')
     )
+
+  $('#l_list').on('click', 'a[action=remove]', (li) ->
+    LoadMask.mask()
+    $li = $(@)
+    $.ajax($li.data('url'))
+      .done((r) ->
+        type = if r.flag
+          # 只删除最近的一个 tr 父元素
+          $li.parents('tr')[0].remove()
+          'success'
+        else
+          'error'
+        noty({text: r.message, type: type})
+        LoadMask.unmask()
+      )
+  )
 

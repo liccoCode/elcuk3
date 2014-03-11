@@ -34,6 +34,9 @@ public class Category extends GenericModel {
     @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Brand> brands;
 
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public Team team;
+
     @Id
     @Expose
     public String categoryId;

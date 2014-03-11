@@ -40,7 +40,14 @@
       <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
-    <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank">下载采购单Excel</a>
+
+    #{power.ck "deliveryments.manual"}
+      <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
+        <i class="icon-plus"></i>新增手动单
+      </a>
+    #{/power.ck}
+
+    <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
   </div>
 </div>
 

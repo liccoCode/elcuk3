@@ -1,0 +1,34 @@
+#{extends 'main.html'/}
+#{set title:'创建新 Team' /}
+#{set 'moreScripts'}
+#{/set}
+
+#{info_row title:'创建新的 Team', row:true/}
+<div class="row">
+#{flash_alert row:true/}
+  <div class="span12">
+  #{errorMsgs /}
+    <form action="@{Teams.create()}" method="post">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <input type="hidden" name="team.id" value="${team.id}">
+          <td>TeamId:</td>
+          <td><input type="text" name="team.teamId" value="${team.teamId}"></td>
+          <td>Name:</td>
+          <td><input class="input-medium" type="text" name="team.name" value="${team.name}"></td>
+        </tr>
+        <tr>
+          <td>Memo:</td>
+          <td colspan="3">
+            <textarea name="team.memo" class="span12" rows="10">${team.memo}</textarea>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <button class="btn btn-primary" data-loading>保存</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
