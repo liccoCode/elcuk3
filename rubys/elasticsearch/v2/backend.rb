@@ -31,12 +31,10 @@ class MoniActor
 
   def begin
     @backlog += 1
-    puts "@backlog #{@backlog}"
   end
 
   def done
     @backlog -= 1
-    puts "@backlog #{@backlog}"
   end
 
   def complete?
@@ -44,10 +42,10 @@ class MoniActor
   end
 
   def wait_for_complete
-    puts "Init Wait for complete, left #{@backlog} jobs."
     @close = true
     while(!complete?) do
-      puts "Wait for complete, left #{@backlog} jobs."
+      print ""
+      print "Wait for complete, left #{@backlog} jobs.\r"
       sleep(0.5)
     end
     puts "All Task Complete."
