@@ -8,7 +8,6 @@ class OrderItemActor
 
   def initialize
     init_attrs
-    @http = Request.new
     @es_index = "elcuk2"
     @es_type = "orderitem"
   end
@@ -53,5 +52,5 @@ SQL = "SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, oi.pro
 # 3. Actor 内部使用异步 HTTP 来完成请求
 # 4. 最后处理不满足 % 2000 数量剩下的数据
 # =============================================================================================================
-process(actor: OrderItemActor.new)
+process(actor: OrderItemActor.pool(size: 6))
 #OrderItemActor.new.init_mapping

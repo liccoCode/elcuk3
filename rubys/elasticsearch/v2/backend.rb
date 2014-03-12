@@ -19,23 +19,44 @@ DB = Sequel.mysql2(DB_NAME, host: DB_HOST, user: 'root', password: 'crater10lake
 
 # ============================================================================
 
-
-
-
-
-
-
-# 让 HTTP 请求变为异步处理
-class Request
+class MoniActor
   include Celluloid
 
-  def post(url, params)
-    HTTParty.post(url, params)
+  attr_accessor :close, :backlog
+
+  def initialize
+    @close = false
+    @backlog = 0
+  end
+
+  def begin
+    @backlog += 1
+    puts "@backlog #{@backlog}"
+  end
+
+  def done
+    @backlog -= 1
+    puts "@backlog #{@backlog}"
+  end
+
+  def complete?
+    @close && @backlog == 0
+  end
+
+  def wait_for_complete
+    puts "Init Wait for complete, left #{@backlog} jobs."
+    @close = true
+    while(!complete?) do
+      puts "Wait for complete, left #{@backlog} jobs."
+      sleep(0.5)
+    end
+    puts "All Task Complete."
   end
 end
 
-module ActorBase 
 
+
+module ActorBase 
   def es_url
     "#{ES_HOST}/#{@es_index}/#{@es_type}"
   end
@@ -54,6 +75,8 @@ module ActorBase
 
   # 用来处理 bulk_submit, 变化的动态特性使用传入 block 完成
   def submit(rows, &block)
+    # 需要保证获取任务的时候一定在 done 前面, 所以用同步方法
+    Celluloid::Actor[:monit].begin
     post_body = ""
     if block_given?
       rows.each { |row| block.call(row, post_body) }
@@ -65,27 +88,10 @@ module ActorBase
       end
     end
     # refer: https://github.com/celluloid/celluloid/wiki/Futures
-    future = @http.future.post("#{ES_HOST}/_bulk", body: post_body)
-    loop_check(future, rows.size)
-  end
-
-  # 循环检查是否执行完成
-  def loop_check(future, size)
-    loop do
-      # refer: http://rubydoc.info/gems/celluloid/Celluloid/Future
-      if future.ready? 
-        resp = future.value
-        if resp.code == 200
-          self.class.doc_size += size
-          print "Submit Response Code is #{resp.code} and Deals #{self.class.doc_size} docs...\r"
-        else
-          puts resp.body
-        end
-        break
-      else
-        sleep(1)
-      end
-    end
+    resp = HTTParty.post("#{ES_HOST}/_bulk", body: post_body)
+    self.class.doc_size += rows.size
+    print "Http Code: #{resp.code}; Handled: #{self.class.doc_size} docs #{self.current_actor}\r"
+    Celluloid::Actor[:monit].async.done
   end
 
   # refer: http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/
@@ -116,12 +122,14 @@ end
 
 
 # dataset: 传入处理好的 Sequel DataSet. 会尝试动态获取当前环境下的 DB[SQL].stream API
-# actor: 用于处理数据的 Celluloid Actor. require
+# actor: 用于处理数据的 Celluloid Actor/PoolManager. require
 # docs: 可选的文档数量. default: []
 # interval: 提交 actor 任务的时间间隔. default: 0.4
-def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
+def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.1)
   check_es_server(actor)
   if actor.respond_to?(:bulk_submit)
+    MoniActor.supervise_as(:monit)
+
     dataset.each_with_index do |row, i|
       # deal rows....
       # row[id, date, selling_id, sku, market, quantity, order_id,]
@@ -134,11 +142,11 @@ def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
     end
 
     if docs.size > 0
-      actor.bulk_submit(docs.slice!(0..-1))
-    else
-      # 如果无法调用一次 bulk_submit 则暂停 6 秒
-      sleep(6)
+      puts "Last #{docs.size} rows from DB."
+      actor.async.bulk_submit(docs.slice!(0..-1))
     end
+
+    Celluloid::Actor[:monit].wait_for_complete
   else
     raise "#{actor.class} must have [bulk_submit] method"
   end
