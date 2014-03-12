@@ -7,9 +7,52 @@ class SaleFeeActor
   def initialize
     init_attrs
     @http = Request.new
+    @es_index = "elcuk2"
+    @es_type = "salefee"
   end
 
-  MAPPING = %q()
+  MAPPING = %q({
+   "salefee": {
+      "properties": {
+         "date": {
+            "type": "date",
+            "format": "date_optional_time"
+         },
+         "selling_id": {
+            "type": "string"
+         },
+         "sku": {
+            "type": "string"
+         },
+         "market": {
+            "type": "string"
+         },
+         "fee_type": {
+             "type": "string"
+         },
+         "cost_in_usd": {
+             "type": "float"
+         },
+         "currency": {
+             "type": "string"
+         },
+         "quantity": {
+             "type": "string"
+         },
+         "order_id": {
+             "type": "string"
+         }
+      }
+   }
+})
 
+  def bulk_submit(rows)
+    async.submit(rows)
+  end
 
 end
+
+SQL = "SELECT fee.id, fee.date `date`, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId FROM SaleFee fee LEFT JOIN OrderItem oi ON fee.order_orderId=oi.order_orderId WHERE oi.product_sku IS NOT NULL and oi.market IS NOT NULL"
+SQL << " LIMIT 100000"
+process(actor: SaleFeeActor.new)
+#SaleFeeActor.new.init_mapping

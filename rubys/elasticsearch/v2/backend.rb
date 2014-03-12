@@ -3,6 +3,28 @@ require "bundler/setup"
 # 让所有引入了 backend 的文件, 正常使用 Gemfile 里面的依赖, 不用再手动调用 require
 Bundler.require(:default)
 
+
+
+
+# =============================== setup const ================================
+#ES_HOST = "http://gengar.easya.cc:9200"
+ES_HOST = "http://192.168.1.99:9200"
+
+#DB_HOST = "http://aggron.easya.cc"
+DB_HOST = "localhost"
+#DB_NAME = "elcuk2"
+DB_NAME = "elcuk2_t"
+
+DB = Sequel.mysql2(DB_NAME, host: DB_HOST, user: 'root', password: 'crater10lake')
+
+# ============================================================================
+
+
+
+
+
+
+
 # 让 HTTP 请求变为异步处理
 class Request
   include Celluloid
@@ -32,7 +54,6 @@ module ActorBase
 
   # 用来处理 bulk_submit, 变化的动态特性使用传入 block 完成
   def submit(rows, &block)
-    self.class.doc_size += rows.size
     post_body = ""
     if block_given?
       rows.each { |row| block.call(row, post_body) }
@@ -45,16 +66,17 @@ module ActorBase
     end
     # refer: https://github.com/celluloid/celluloid/wiki/Futures
     future = @http.future.post("#{ES_HOST}/_bulk", body: post_body)
-    loop_check(future)
+    loop_check(future, rows.size)
   end
 
   # 循环检查是否执行完成
-  def loop_check(future)
+  def loop_check(future, size)
     loop do
       # refer: http://rubydoc.info/gems/celluloid/Celluloid/Future
       if future.ready? 
         resp = future.value
         if resp.code == 200
+          self.class.doc_size += size
           print "Submit Response Code is #{resp.code} and Deals #{self.class.doc_size} docs...\r"
         else
           puts resp.body
