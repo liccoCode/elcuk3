@@ -1,3 +1,8 @@
+require "bundler/setup"
+
+# 让所有引入了 backend 的文件, 正常使用 Gemfile 里面的依赖, 不用再手动调用 require
+Bundler.require(:default)
+
 # 让 HTTP 请求变为异步处理
 class Request
   include Celluloid

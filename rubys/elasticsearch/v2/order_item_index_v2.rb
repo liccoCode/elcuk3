@@ -1,7 +1,3 @@
-require "celluloid/autostart"
-require "multi_json"
-require "httparty"
-require "sequel"
 require "./backend"
 
 #ES_HOST = "http://gengar.easya.cc:9200"
