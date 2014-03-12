@@ -29,11 +29,11 @@ end
 
 
 
-# dataset: 传入处理好的 Sequel DataSet. require
+# dataset: 传入处理好的 Sequel DataSet. 会尝试动态获取当前环境下的 DB[SQL].stream API
 # actor: 用于处理数据的 Celluloid Actor. require
 # docs: 可选的文档数量. default: []
 # interval: 提交 actor 任务的时间间隔. default: 0.4
-def process(dataset: nil, actor: nil, docs: [], interval: 0.4)
+def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
   dataset.each_with_index do |row, i|
     # deal rows....
     # row[id, date, selling_id, sku, market, quantity, order_id,]

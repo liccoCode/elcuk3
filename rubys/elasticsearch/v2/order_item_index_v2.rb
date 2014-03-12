@@ -92,4 +92,4 @@ SQL = "SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, oi.pro
 # 3. Actor 内部使用异步 HTTP 来完成请求
 # 4. 最后处理不满足 % 2000 数量剩下的数据
 # =============================================================================================================
-process(dataset: DB[SQL].stream, actor: OrderItemActor.new)
+process(actor: OrderItemActor.new)
