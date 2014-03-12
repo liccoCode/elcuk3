@@ -18,6 +18,18 @@ module ActorBase
     "#{ES_HOST}/#{@es_index}/#{@es_type}"
   end
 
+
+  # 初始化 orderitem type 的 mapping
+  def init_mapping
+    resp = HTTParty.put("#{es_url}/_mapping", body: self.class.const_get('MAPPING'))
+    if resp.code != 200
+      puts resp.body
+    else
+      true
+    end
+  end
+
+
   # 用来处理 bulk_submit, 变化的动态特性使用传入 block 完成
   def submit(rows, &block)
     self.class.doc_size += rows.size

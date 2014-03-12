@@ -47,13 +47,6 @@ class OrderItemActor
     }
 })
 
-  # 初始化 orderitem type 的 mapping
-  def init_mapping
-    resp = HTTParty.put("#{es_url}/_mapping", body: OrderItemActor::MAPPING)
-    puts resp.code
-    resp.code == 200
-  end
-
   # 固定方法, 必须存在
   def bulk_submit(rows)
     submit(rows)
@@ -70,4 +63,5 @@ SQL = "SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, oi.pro
 # 3. Actor 内部使用异步 HTTP 来完成请求
 # 4. 最后处理不满足 % 2000 数量剩下的数据
 # =============================================================================================================
-process(actor: OrderItemActor.new)
+#process(actor: OrderItemActor.new)
+OrderItemActor.new.init_mapping
