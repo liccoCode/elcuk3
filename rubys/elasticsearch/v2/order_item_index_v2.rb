@@ -2,9 +2,6 @@ require "./backend"
 
 #ES_HOST = "http://gengar.easya.cc:9200"
 ES_HOST = "http://192.168.1.99:9200"
-ES_INDEX = "elcuk2"
-ES_TYPE = "orderitem"
-ES_URL = "#{ES_HOST}/#{ES_INDEX}/#{ES_TYPE}"
 
 #DB_HOST = "http://aggron.easya.cc"
 DB_HOST = "localhost"
@@ -20,6 +17,8 @@ class OrderItemActor
   def initialize
     init_attrs
     @http = Request.new
+    @es_index = "elcuk2"
+    @es_type = "orderitem"
   end
 
   MAPPING = %q({
@@ -50,23 +49,14 @@ class OrderItemActor
 
   # 初始化 orderitem type 的 mapping
   def init_mapping
-    resp = HTTParty.put("#{ES_URL}/_mapping", body: OrderItemActor::MAPPING)
+    resp = HTTParty.put("#{es_url}/_mapping", body: OrderItemActor::MAPPING)
     puts resp.code
     resp.code == 200
   end
 
   # 固定方法, 必须存在
   def bulk_submit(rows)
-    OrderItemActor.doc_size += rows.size
-    post_body = ""
-    rows.each do |row|
-      row[:date] = row[:date].utc.iso8601
-      post_body << MultiJson.dump({ index: { "_index" => "elcuk2", "_type" => "orderitem", "_id" => row.delete(:id)} }) << "\n"
-      post_body << MultiJson.dump(row) << "\n"
-    end
-    # refer: https://github.com/celluloid/celluloid/wiki/Futures
-    future = @http.future.post("#{ES_HOST}/_bulk", body: post_body)
-    loop_check(future)
+    submit(rows)
   end
 end
 

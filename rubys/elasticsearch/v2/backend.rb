@@ -13,6 +13,29 @@ class Request
 end
 
 module ActorBase 
+
+  def es_url
+    "#{ES_HOST}/#{@es_index}/#{@es_type}"
+  end
+
+  # 用来处理 bulk_submit, 变化的动态特性使用传入 block 完成
+  def submit(rows, &block)
+    self.class.doc_size += rows.size
+    post_body = ""
+    if block_given?
+      rows.each { |row| block.call(row, post_body) }
+    else
+      rows.each do |row|
+        row[:date] = row[:date].utc.iso8601
+        post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
+        post_body << MultiJson.dump(row) << "\n"
+      end
+    end
+    # refer: https://github.com/celluloid/celluloid/wiki/Futures
+    future = @http.future.post("#{ES_HOST}/_bulk", body: post_body)
+    loop_check(future)
+  end
+
   # 循环检查是否执行完成
   def loop_check(future)
     loop do
@@ -33,6 +56,12 @@ module ActorBase
 
   # refer: http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/
   def self.included(mod)
+    # 动态添加 es 相关的两个参数
+    mod.instance_eval do
+      attr_reader :es_index
+      attr_reader :es_type
+    end
+
     # Ruby 中定义 OrderItemActor 的 class instance variable. 类级别的实例变量, 类似与 Java 的 Class Variable
     # refer: http://www.railstips.org/blog/archives/2006/11/18/class-and-instance-variables-in-ruby/
     class << mod
@@ -57,7 +86,7 @@ end
 # docs: 可选的文档数量. default: []
 # interval: 提交 actor 任务的时间间隔. default: 0.4
 def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
-  check_es_server
+  check_es_server(actor)
   if actor.respond_to?(:bulk_submit)
     dataset.each_with_index do |row, i|
       # deal rows....
@@ -81,6 +110,6 @@ def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
   end
 end
 
-def check_es_server
-  HTTParty.get(ES_HOST)
+def check_es_server(actor)
+  HTTParty.get(actor.es_url)
 end
