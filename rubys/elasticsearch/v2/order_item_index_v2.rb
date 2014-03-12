@@ -18,8 +18,6 @@ class OrderItemActor
   include ActorBase
 
   def initialize
-    OrderItemActor.doc_size = 0
-    OrderItemActor.wait_seconds = 0
     init_attrs
     @http = Request.new
   end
