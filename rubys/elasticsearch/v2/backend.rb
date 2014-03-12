@@ -7,7 +7,7 @@ class Request
   end
 end
 
-module LoopCheck
+module ActorBase 
   # 循环检查是否执行完成
   def loop_check(future)
     loop do
@@ -25,6 +25,24 @@ module LoopCheck
       end
     end
   end
+
+  # refer: http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/
+  def self.included(mod)
+    # Ruby 中定义 OrderItemActor 的 class instance variable. 类级别的实例变量, 类似与 Java 的 Class Variable
+    # refer: http://www.railstips.org/blog/archives/2006/11/18/class-and-instance-variables-in-ruby/
+    class << mod
+      attr_accessor :doc_size
+      attr_accessor :wait_seconds
+    end
+
+    def init_attrs
+      [:doc_size, :wait_seconds].each do |att|
+        # 这里使用 self.class 而非 self 是因为, 当真正调用 init_attrs 方法的时候, self 已经为 include 这个 module 的 actor 实例了
+        # 所以需要使用其 class 去设置 class instance variable
+        self.class.send("#{att}=", 0)
+      end
+    end
+  end
 end
 
 
@@ -34,6 +52,7 @@ end
 # docs: 可选的文档数量. default: []
 # interval: 提交 actor 任务的时间间隔. default: 0.4
 def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
+  check_es_server
   if actor.respond_to?(:bulk_submit)
     dataset.each_with_index do |row, i|
       # deal rows....
@@ -55,4 +74,8 @@ def process(dataset: DB[SQL].stream, actor: nil, docs: [], interval: 0.4)
   else
     raise "#{actor.class} must have [bulk_submit] method"
   end
+end
+
+def check_es_server
+  HTTParty.get(ES_HOST)
 end

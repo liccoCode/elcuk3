@@ -18,20 +18,13 @@ DB_NAME = "elcuk2_t"
 class OrderItemActor
   include Celluloid
 
-  # 引入公用的 loop_check 方法
-  include LoopCheck
-
-  # Ruby 中定义 OrderItemActor 的 class instance variable. 类级别的实例变量, 类似与 Java 的 Class Variable
-  # refer: http://www.railstips.org/blog/archives/2006/11/18/class-and-instance-variables-in-ruby/
-  class << self
-    attr_accessor :doc_size
-    attr_accessor :wait_seconds
-  end
-
+  # 引入 Actor 的公用方法
+  include ActorBase
 
   def initialize
     OrderItemActor.doc_size = 0
     OrderItemActor.wait_seconds = 0
+    init_attrs
     @http = Request.new
   end
 
