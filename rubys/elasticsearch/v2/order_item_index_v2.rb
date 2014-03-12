@@ -18,6 +18,9 @@ DB_NAME = "elcuk2_t"
 class OrderItemActor
   include Celluloid
 
+  # 引入公用的 loop_check 方法
+  include LoopCheck
+
   # Ruby 中定义 OrderItemActor 的 class instance variable. 类级别的实例变量, 类似与 Java 的 Class Variable
   # refer: http://www.railstips.org/blog/archives/2006/11/18/class-and-instance-variables-in-ruby/
   class << self
@@ -76,24 +79,6 @@ class OrderItemActor
     # refer: https://github.com/celluloid/celluloid/wiki/Futures
     future = @http.future.post("#{ES_HOST}/_bulk", body: post_body)
     loop_check(future)
-  end
-
-  # 循环检查是否执行完成
-  def loop_check(future)
-    loop do
-      # refer: http://rubydoc.info/gems/celluloid/Celluloid/Future
-      if future.ready? 
-        resp = future.value
-        if resp.code == 200
-          print "Submit Response Code is #{resp.code} and Deals #{OrderItemActor.doc_size} docs...\r"
-        else
-          puts resp.body
-        end
-        break
-      else
-        sleep(1)
-      end
-    end
   end
 end
 

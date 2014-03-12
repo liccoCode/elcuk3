@@ -7,6 +7,27 @@ class Request
   end
 end
 
+module LoopCheck
+  # 循环检查是否执行完成
+  def loop_check(future)
+    loop do
+      # refer: http://rubydoc.info/gems/celluloid/Celluloid/Future
+      if future.ready? 
+        resp = future.value
+        if resp.code == 200
+          print "Submit Response Code is #{resp.code} and Deals #{self.class.doc_size} docs...\r"
+        else
+          puts resp.body
+        end
+        break
+      else
+        sleep(1)
+      end
+    end
+  end
+end
+
+
 
 # dataset: 传入处理好的 Sequel DataSet. require
 # actor: 用于处理数据的 Celluloid Actor. require
