@@ -1,5 +1,6 @@
 # A sample Gemfile
 source "https://rubygems.org"
+ruby '2.1.1'
 
 gem 'celluloid', '~> 0.15'
 gem 'multi_json', '~> 1.9'

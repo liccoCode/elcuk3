@@ -68,6 +68,7 @@ class OrderItemActor
     resp.code == 200
   end
 
+  # 固定方法, 必须存在
   def bulk_submit(rows)
     OrderItemActor.doc_size += rows.size
     post_body = ""
