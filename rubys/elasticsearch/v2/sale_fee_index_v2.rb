@@ -36,7 +36,7 @@ class SaleFeeActor
              "type": "string"
          },
          "quantity": {
-             "type": "string"
+             "type": "integer"
          },
          "order_id": {
              "type": "string"

@@ -22,7 +22,7 @@ DB = Sequel.mysql2(DB_NAME, host: DB_HOST, user: 'root', password: 'crater10lake
 class MoniActor
   include Celluloid
 
-  attr_accessor :close, :backlog
+  attr_reader :close, :backlog
 
   def initialize
     @close = false
@@ -42,13 +42,18 @@ class MoniActor
   end
 
   def wait_for_complete
-    @close = true
-    while(!complete?) do
-      print ""
-      print "Wait for complete, left #{@backlog} jobs.\r"
-      sleep(0.5)
+    if @close
+      puts "已经在等待关闭中, 无需重复关闭"
+    else
+      while(!complete?) do
+        @close = true unless @close
+        print ""
+        print "Wait for complete, left #{@backlog} jobs.\r"
+        # sleep 为的是 1. 流出一小片 CPU 时间片给其他方法运行, 2. 不至于让 CPU 空跑满
+        sleep(0.5)
+      end
+      puts "All Task Complete."
     end
-    puts "All Task Complete."
   end
 end
 
@@ -76,14 +81,12 @@ module ActorBase
     # 需要保证获取任务的时候一定在 done 前面, 所以用同步方法
     Celluloid::Actor[:monit].begin
     post_body = ""
-    if block_given?
-      rows.each { |row| block.call(row, post_body) }
-    else
-      rows.each do |row|
-        row[:date] = row[:date].utc.iso8601
-        post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
-        post_body << MultiJson.dump(row) << "\n"
-      end
+    # 如果有闭包, 则调用闭包的方法处理一次 rows
+    rows.map! { |row| block.call(row) } if block_given?
+    rows.each do |row|
+      row[:date] = row[:date].utc.iso8601
+      post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
+      post_body << MultiJson.dump(row) << "\n"
     end
     # refer: https://github.com/celluloid/celluloid/wiki/Futures
     resp = HTTParty.post("#{ES_HOST}/_bulk", body: post_body)
