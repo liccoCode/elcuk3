@@ -14,6 +14,22 @@ module ActorBase
     end
   end
 
+  def routine_sku(skus)
+    if skus.is_a?(Array)
+      skus.map { |sku| routine_sku(sku) }
+    elsif skus.is_a?(String)
+      skus.split("-").join("")
+    end
+  end
+
+  def routine_selling_id(selling_ids)
+    if selling_ids.is_a?(Array)
+      selling_ids.map { |selling_id| routine_selling_id(selling_id) }
+    elsif selling_ids.is_a?(String)
+      selling_ids.delete('-').delete(',').delete('|')
+    end
+  end
+
 
   # 用来处理 bulk_submit, 变化的动态特性使用传入 block 完成
   def submit(rows, &block)
@@ -24,8 +40,8 @@ module ActorBase
     rows.map! { |row| block.call(row) } if block_given?
     rows.each do |row|
       row[:date] = row[:date].utc.iso8601
-      row[:sku] = row[:sku].split("-").join("") if row[:sku]
-      row[:selling_id] = row[:selling_id].delete('-').delete(',').delete('|') if row[:selling_id]
+      row[:sku] = routine_sku(row[:sku]) if row[:sku]
+      row[:selling_id] = routine_selling_id(row[:selling_id]) if row[:selling_id]
       post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
       post_body << MultiJson.dump(row) << "\n"
     end
