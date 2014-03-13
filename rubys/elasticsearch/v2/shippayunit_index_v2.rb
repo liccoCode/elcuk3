@@ -4,6 +4,8 @@ class ShipPayUnitActor
   include Celluloid
   include ActorBase
   include HTTParty
+  include Rates
+
 
   def initialize
     init_attrs

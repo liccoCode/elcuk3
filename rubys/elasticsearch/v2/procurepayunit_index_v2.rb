@@ -4,6 +4,7 @@ class ProcurePayUnitActor
   include Celluloid
   include ActorBase
   include HTTParty
+  include Rates
 
   headers "Accept-Encoding" => "gzip", "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.117 Safari/537.36"
 
@@ -75,12 +76,6 @@ class ProcurePayUnitActor
 
   def cny_to_usd(n = 1)
     @rate ||= google_rate(n)
-  end
-
-  def google_rate(n = 1)
-    resp = self.class.get("https://www.google.com/finance/converter?a=#{n}&from=CNY&to=USD")
-    doc = Nokogiri::HTML(resp.body)
-    doc.at_css('#currency_converter_result span').text.split(" ")[0].strip.to_f
   end
 end
 

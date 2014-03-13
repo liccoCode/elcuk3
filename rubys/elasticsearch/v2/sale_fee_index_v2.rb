@@ -29,6 +29,9 @@ class SaleFeeActor
          "fee_type": {
              "type": "string"
          },
+         "cost": {
+             "type": "float",
+         },
          "cost_in_usd": {
              "type": "float"
          },
