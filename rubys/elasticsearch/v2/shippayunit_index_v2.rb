@@ -77,7 +77,10 @@ class ShipPayUnitActor
   end
 
   def bulk_submit(rows)
-    submit(rows)
+    submit(rows) do |row|
+      row[:cost_in_usd] = routine_cost_in_usd(row)
+      row
+    end
   end
 end
 
@@ -95,6 +98,7 @@ ds = DB[SQL].stream.map do |row, i|
   else
     row.merge(pool.shipment(row[:shipment_id]))
   end
+  row
 end
 
 process(dataset: ds, actor: pool)

@@ -60,22 +60,9 @@ class ProcurePayUnitActor
 
   def bulk_submit(rows)
     submit(rows) do |row|
-      # cost_in_usd 需要根据付款单状态处理
-      payment_state = row.delete(:state)
-      payment_rate = row.delete(:rate)
-      row[:cost_in_usd] = if row[:currency] == 'CNY'
-        rate = (payment_state == 'PAID' ? payment_rate : cny_to_usd)
-        # DB 里面的数据需要调整
-        row[:cost] * (rate > 1 ? (1 / rate) : rate)
-      else
-        row[:cost]
-      end
+      row[:cost_in_usd] = routine_cost_in_usd(row)
       row
     end
-  end
-
-  def cny_to_usd(n = 1)
-    @rate ||= google_rate(n)
   end
 end
 
