@@ -84,8 +84,6 @@ class ShipPayUnitActor
   end
 end
 
-#DB.loggers << Logger.new($stdout)
-
 pool = ShipPayUnitActor.pool(size: 6)
 # 1. 找出需要的 PaymentUnit
 # 2. 补全这些 PaymentUnit 中的 sku 与 selling_id
@@ -98,7 +96,6 @@ ds = DB[SQL].stream.map do |row, i|
   else
     row.merge(pool.shipment(row[:shipment_id]))
   end
-  row
 end
 
 process(dataset: ds, actor: pool)
