@@ -59,7 +59,7 @@ class ProcurePayUnitActor
 
   def bulk_submit(rows)
     submit(rows) do |row|
-      # 1. cost_in_usd 需要根据付款单状态处理
+      # cost_in_usd 需要根据付款单状态处理
       payment_state = row.delete(:state)
       payment_rate = row.delete(:rate)
       row[:cost_in_usd] = if row[:currency] == 'CNY'

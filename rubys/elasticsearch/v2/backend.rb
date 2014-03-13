@@ -85,6 +85,8 @@ module ActorBase
     rows.map! { |row| block.call(row) } if block_given?
     rows.each do |row|
       row[:date] = row[:date].utc.iso8601
+      row[:sku] = row[:sku].split("-").join("") if row[:sku]
+      row[:selling_id] = row[:selling_id].delete('-').delete(',').delete('|') if row[:selling_id]
       post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
       post_body << MultiJson.dump(row) << "\n"
     end
