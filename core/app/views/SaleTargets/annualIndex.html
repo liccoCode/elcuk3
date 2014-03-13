@@ -1,0 +1,43 @@
+#{extends 'main_full.html'/}
+#{set title:"年度销售目标 (${salesTargets.size()})"/}
+#{set 'moreScripts'}
+#{/set}
+<div class="btn-toolbar" id="btns">
+  <div class="btn-group">
+    <a href="@{SaleTargets.createAnnual()}" class="btn btn-success" target="_blank">Add New</a>
+  </div>
+</div>
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>#</th>
+        <th>主题</th>
+        <th>日期</th>
+        <th>制单人</th>
+        <th>制单时间</th>
+        <th>State</th>
+      </tr>
+    #{list items:salesTargets, as:'st'}
+      <tr>
+        <td>
+          <a target="_blank" href="@{SaleTargets.showAnnual(st.id)}">${st.id}</a>
+        </td>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#st_${st_index}">
+          <span><i class="icon-reorder"></i></span>
+          ${st.theme}
+        </td>
+        <td>${st.targetDate}</td>
+        <td>${st.createuser.username}</td>
+        <td>${st.createDate}</td>
+        <td>${st.state.label()}</td>
+      </tr>
+      <tr id="st_${st_index}" style="display:none;">
+        <td colspan="6" style="padding:0;border:none">
+            #{render 'SaleTargets/_st_table_list.html', salesTargets: st.getChild()/}
+        </td>
+      </tr>
+    #{/list}
+    </table>
+  </div>
+</div>

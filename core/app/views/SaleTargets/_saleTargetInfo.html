@@ -1,0 +1,26 @@
+<tr>
+  <th>主题</th>
+  <td colspan="4">
+    <input type="hidden" name="st.id" value="${st.id}">
+    <input type="text" class="span10" name="st.theme" value="${st.theme}">
+  </td>
+</tr>
+
+<tr>
+  <th>日期</th>
+  <td>
+    <select name="targetDate" value="${st.targetDate.format("yyyy")}"></select>
+  </td>
+
+  <th>单据状态</th>
+  <td>
+    <input type="text" value="${st.state.label()}" readonly>
+  </td>
+</tr>
+
+<tr>
+  <th>备注</th>
+  <td colspan="4">
+    <input type="text" class="span10" name="st.memo" value="${st.memo}">
+  </td>
+</tr>

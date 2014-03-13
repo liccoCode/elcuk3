@@ -108,6 +108,17 @@
           </li>
         #{/power.ck}
 
+        #{power.ck 'finances'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{SaleTargets.annualIndex()}">年度销售目标</a></li>
+              <li><a href="@{SaleTargets.annualIndex()}">Team 销售目标</a></li>
+              <li><a href="@{SaleTargets.annualIndex()}">Category 销售目标</a></li>
+            </ul>
+          </li>
+        #{/power.ck}
+
         #{power.ck 'system'}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>

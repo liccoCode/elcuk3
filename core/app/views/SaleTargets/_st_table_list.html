@@ -1,0 +1,32 @@
+<table class="table table-hover table-condensed table-bordered">
+  <tr>
+    <th>#</th>
+    <th>主题</th>
+    <th>日期</th>
+    <th>类型</th>
+    <th>销售额</th>
+    <th>利润率</th>
+    <th>制单人</th>
+    <th>制单时间</th>
+    <th>State</th>
+  </tr>
+#{list items:salesTargets, as:'st'}
+  <tr>
+    <td>
+      <a target="_blank" href="@{SaleTargets.showCategory(st.id)}">${st.id}</a>
+    </td>
+    <td>
+      ${st.theme}
+    </td>
+    <td>${st.targetDate}</td>
+    <td>
+      ${st.saleTargetType}
+    </td>
+    <td>${st.saleAmounts}</td>
+    <td>${st.profitMargin}</td>
+    <td>${st.createuser.username}</td>
+    <td>${st.createDate}</td>
+    <td>${st.state.label()}</td>
+  </tr>
+#{/list}
+</table>

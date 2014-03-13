@@ -1,0 +1,47 @@
+#{extends 'main.html' /}
+#{set title:"新增年度目标"/}
+#{set 'moreScripts'}
+    #{script 'saleTargets/createAnnual.coffee'/}
+#{/set}
+
+#{errorMsgs /}
+#{info_row title:'新增年度目标'/}
+<div class="row">
+  <div class="span12">
+  #{form @SaleTargets.doCreateAnnual(), method: 'POST'}
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>主题</th>
+        <td colspan="4">
+          <input type="text" class="span10" name="st.theme" value="${st.theme}">
+        </td>
+      </tr>
+
+      <tr>
+        <th>日期</th>
+        <td>
+          <select name="targetDate" value="${st.targetDate.format("yyyy")}"></select>
+        </td>
+
+        <th>单据状态</th>
+        <td>
+          <input type="text" value="${st.state.label()}" readonly>
+        </td>
+      </tr>
+
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea rows="2" class="span10" name="st.memo" value="${st.memo}"></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-success">保存以设置明细</button>
+        </td>
+      </tr>
+    </table>
+  #{/form}
+  </div>
+</div>
