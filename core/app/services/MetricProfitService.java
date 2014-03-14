@@ -77,8 +77,7 @@ public class MetricProfitService {
                                 //FBA亚马逊项目
                                 .must(FilterBuilders.termFilter("fee_type", "commission")))
                 ).size(0);
-        float x = getEsTermsTotal(search, "salefee");
-        return x;
+        return getEsTermsTotal(search, "salefee");
     }
 
     /**
@@ -166,10 +165,10 @@ public class MetricProfitService {
                         ).must(FilterBuilders.termFilter("sku", this.sku.toLowerCase()))
                         ));
         //总运费
-        F.T2<JSONArray, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
-        JSONArray feearray = esresult._1;
-        if(feearray == null)
+        F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
+        if(esresult._1 == null)
             return 0f;
+        JSONArray feearray = esresult._1.getJSONArray("terms");
         float seatotalfee = 0f;
         float airtotalfee = 0f;
         float expresstotalfee = 0f;
@@ -221,6 +220,8 @@ public class MetricProfitService {
     public Float vatPrice() {
         //关税
         SearchSourceBuilder search = new SearchSourceBuilder()
+                .filter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
+                        this.sku.toLowerCase()))).size(Integer.MAX_VALUE / 10 - 100000000)
                 .facet(FacetBuilders.statisticalFacet("units")
                         .field("cost_in_usd")
                         .facetFilter(this.filterbuilder(false).must(
@@ -229,11 +230,14 @@ public class MetricProfitService {
                                         .add(FilterBuilders.termFilter("fee_type", "air")
                                         ).add(FilterBuilders.termFilter("skus", this.sku.toLowerCase()))
                         )
-                        )).size(0);
+                        ));
         //总关税和VAT
-        float fee = getEsTermsTotal(search, "shippayunit");
+        F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
+        if(esresult._1 == null)
+            return 0f;
+        float fee = esresult._1.getFloat("total");
         //获取与关税相关的运输单
-        Set<String> mentids = getVatMentIds();
+        Set<String> mentids = getVatMentIds(esresult._2);
 
         /**
          * 获取VAT的系数 所有涉及SKU的运输单总关税 / (sku1数量*申报价格1+sku2数量*申报价格2+....)
@@ -267,22 +271,10 @@ public class MetricProfitService {
      *
      * @return
      */
-    private Set<String> getVatMentIds() {
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
-        //包含SKU
-        boolFilter.must(FilterBuilders.termFilter("sku", this.sku.toLowerCase()));
-        boolFilter.must(FilterBuilders.termFilter("fee_type", "sea"));
-        builder.query(QueryBuilders
-                .queryString("")
-                .field("shipment_id").field("fee_type")
-        ).filter(boolFilter);
-
-        JSONObject result = ES.search("elcuk2", "shippayunit", builder);
-        JSONObject hits = result.getJSONObject("hits");
+    private Set<String> getVatMentIds(JSONArray hits) {
         Set<String> vatMentIds = new HashSet<String>();
         if(hits != null) {
-            for(Object obj : hits.getJSONArray("hits")) {
+            for(Object obj : hits) {
                 JSONObject hit = (JSONObject) obj;
                 JSONObject source = hit.getJSONObject("_source");
                 if(source.getString("fee_type").equals("sea")) {
@@ -434,23 +426,24 @@ public class MetricProfitService {
      * @param estype
      * @return
      */
-    private F.T2<JSONArray, JSONArray> getEsShipTerms(SearchSourceBuilder search, String estype) {
+    private F.T2<JSONObject, JSONArray> getEsShipTerms(SearchSourceBuilder search, String estype) {
         JSONObject result = ES.search("elcuk2", estype, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
         JSONObject facets = result.getJSONObject("facets");
-        JSONArray terms = null;
+
+        JSONObject units = null;
+
         if(facets != null) {
-            JSONObject units = facets.getJSONObject("units");
-            terms = units.getJSONArray("terms");
+            units = facets.getJSONObject("units");
         }
         JSONObject hits = result.getJSONObject("hits");
         JSONArray hitmentids = null;
         if(facets != null) {
             hitmentids = hits.getJSONArray("hits");
         }
-        return new F.T2<JSONArray, JSONArray>(terms, hitmentids);
+        return new F.T2<JSONObject, JSONArray>(units, hitmentids);
     }
 
 
