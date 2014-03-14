@@ -13,7 +13,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ES_HOST = "http://gengar.easya.cc:9200";
+    public static final String ES_HOST = "http://localhost:9200";
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
         return HTTP.postJson(ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
@@ -21,5 +21,18 @@ public class ES {
 
     public static JSONObject get(String index, String type, String id) {
         return HTTP.getJson(ES_HOST + "/" + index + "/" + type + "/" + id);
+    }
+
+    /**
+     * ES中存在特殊字符-,|符号的，作转义处理
+     *
+     * @param esfield
+     * @return
+     */
+    public static String parseEsString(String esfield) {
+        if(esfield == null)
+            return null;
+        esfield = esfield.replace("-", "").replace(",", "").replace("|", "");
+        return esfield;
     }
 }
