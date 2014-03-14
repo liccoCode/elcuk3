@@ -1,0 +1,7 @@
+<select name="${_name}" id="${_id}" value="${_value}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''}>
+
+#{list items:1..12, as:'i'}
+  <option ${_value ? (i == _value ? 'selected' : '') : ''} value="${i}" >${i}</option>
+#{/list}
+</select>
+

@@ -1,0 +1,25 @@
+#{extends 'main_full.html'/}
+#{set title:"销售目标#" + st.id /}
+#{set 'moreScripts'}
+    #{script 'saleTargets/showAnnual.coffee'/}
+#{/set}
+
+<div class="row">
+  <div class="span12" style="margin-left:385px;">
+  #{errorMsgs /}
+  #{flash_alert /}
+
+  #{if st.saleTargetType == models.SaleTarget.T.YEAR}
+      #{include 'SaleTargets/_year.html'/}
+  #{/if}
+  #{elseif st.saleTargetType == models.SaleTarget.T.TEAM}
+      #{include 'SaleTargets/_team.html'/}
+  #{/elseif}
+  #{elseif st.saleTargetType == models.SaleTarget.T.CATEGORY}
+      #{include 'SaleTargets/_year.html'/}
+  #{/elseif}
+  #{elseif st.saleTargetType == models.SaleTarget.T.SKU}
+      #{include 'SaleTargets/_year.html'/}
+  #{/elseif}
+  </div>
+</div>

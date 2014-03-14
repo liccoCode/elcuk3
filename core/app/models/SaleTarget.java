@@ -5,7 +5,6 @@ import models.product.Category;
 import models.product.Product;
 import models.product.Team;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.lucene.util.NumericUtils;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -25,17 +24,23 @@ import java.util.List;
 @Entity
 public class SaleTarget extends Model {
     /**
-     * 销售时间
+     * 销售目标年份
      */
-    @Temporal(TemporalType.DATE)
     @Expose
     @Required
-    public Date targetDate;
+    public Integer targetYear;
+
+    /**
+     * 销售目标月份
+     */
+    @Expose
+    public Integer targetMonth;
 
     /**
      * 主题
      */
     @Lob
+    @Required
     @Expose
     public String theme;
 
@@ -136,11 +141,13 @@ public class SaleTarget extends Model {
     /**
      * 销售金额
      */
+    @Expose
     public Float saleAmounts = 0f;
 
     /**
      * 利润率
      */
+    @Expose
     public Float profitMargin = 0f;
 
     public SaleTarget() {
@@ -183,61 +190,45 @@ public class SaleTarget extends Model {
     }
 
     /**
-     * 该销售目标的明细数据
+     * 准备该销售目标的明细数据
      *
      * @return List<SaleTarget>
      */
-    public List<SaleTarget> beforeDetails(List<SaleTarget> oldSaleTargets) {
-        //该销售目标所有的外键集合
-        List<String> oldFids = new ArrayList<String>();
-        for(SaleTarget s : oldSaleTargets) {
-            oldFids.add(s.fid);
-        }
-
+    public List<SaleTarget> beforeDetails() {
         List<SaleTarget> saleTargetList = new ArrayList<SaleTarget>();
         switch(this.saleTargetType) {
             case YEAR:
                 //所有的应该包含的 TEAM类型 的子销售目标
                 List<Team> teams = Team.findAll();
                 for(Team t : teams) {
-                    //数据库不存在 该 Team 的销售目标记录
-                    if(!oldFids.contains(t.id.toString())) {
-                        SaleTarget sa = new SaleTarget(t.id.toString());
-                        sa.parentId = this.id;
-                        sa.saleTargetType = SaleTarget.T.TEAM;
-                        saleTargetList.add(sa);
-                    }
+                    SaleTarget sa = new SaleTarget(t.id.toString());
+                    sa.parentId = this.id;
+                    sa.saleTargetType = SaleTarget.T.TEAM;
+                    saleTargetList.add(sa);
                 }
                 break;
             case TEAM:
                 List<Category> categorys = Category.find("team_id=?", this.fid).fetch();
                 for(Category t : categorys) {
-                    if(!oldFids.contains(t.categoryId)) {
-                        SaleTarget sa = new SaleTarget(t.categoryId);
-                        sa.parentId = this.id;
-                        sa.saleTargetType = SaleTarget.T.CATEGORY;
-                        saleTargetList.add(sa);
-                    }
-
+                    SaleTarget sa = new SaleTarget(t.categoryId);
+                    sa.parentId = this.id;
+                    sa.saleTargetType = SaleTarget.T.CATEGORY;
+                    saleTargetList.add(sa);
                 }
                 break;
             case CATEGORY:
                 List<Product> products = Product.find("category_categoryId=?", this.fid).fetch();
                 for(Product t : products) {
-                    if(!oldFids.contains(t.sku)) {
-                        SaleTarget sa = new SaleTarget(t.sku);
-                        sa.parentId = this.id;
-                        sa.saleTargetType = SaleTarget.T.SKU;
-                        saleTargetList.add(sa);
-                    }
+                    SaleTarget sa = new SaleTarget(t.sku);
+                    sa.parentId = this.id;
+                    sa.saleTargetType = SaleTarget.T.SKU;
+                    saleTargetList.add(sa);
                 }
                 break;
             case SKU:
                 //SKU 类型的销售目标已经是最小的，不允许再拥有子 销售目标
                 saleTargetList = null;
         }
-        //将所有已经存在的都添加到集合内
-        saleTargetList.addAll(oldSaleTargets);
         return saleTargetList;
     }
 
@@ -274,6 +265,7 @@ public class SaleTarget extends Model {
         child.theme = this.theme;
         child.saleTargetType = this.getChlidType();
         child.createuser = createuser;
+        child.targetYear = this.targetYear;
         return child;
     }
 }
