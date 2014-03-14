@@ -98,7 +98,7 @@ ds = DB[SQL].stream.map do |row, i|
   end
 end
 
-process(dataset: ds, actor: pool)
 #ShipPayUnitActor.new.init_mapping
+process(dataset: ds, actor: pool)
 
 

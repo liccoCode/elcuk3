@@ -30,6 +30,10 @@ module ActorBase
     end
   end
 
+  def routine_date_format(date)
+    date.utc.iso8601 if date
+  end
+
 
   # 用来处理 bulk_submit, 变化的动态特性使用传入 block 完成
   def submit(rows, &block)
@@ -39,7 +43,8 @@ module ActorBase
     # 如果有闭包, 则调用闭包的方法处理一次 rows
     rows.map! { |row| block.call(row) } if block_given?
     rows.each do |row|
-      row[:date] = row[:date].utc.iso8601
+      raise "索引的元素必须拥有 id field" unless row.key?(:id)
+      row[:date] = routine_date_format(row[:date])
       row[:sku] = routine_sku(row[:sku]) if row[:sku]
       row[:selling_id] = routine_selling_id(row[:selling_id]) if row[:selling_id]
       post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
