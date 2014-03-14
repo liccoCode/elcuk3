@@ -41,6 +41,8 @@ public class Caches {
 
     public static final String FAMILYS = "caches.familys";
 
+    public static final String CATEGORYS = "caches.categorys";
+
     public static final String ORDERITEM_AJAXUNITRUNNING = "ajaxHighChartUnitOrder.running";
 
     /**

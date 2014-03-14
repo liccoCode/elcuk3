@@ -28,7 +28,6 @@ public abstract class Post<T> implements Serializable, Cloneable {
     public Date from = DateTime.now().minusMonths(2).toDate();
     public Date to = new Date();
     public String search;
-
     public int page = 1;
     public int perSize = 50;
     public long count = 1;
