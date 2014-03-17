@@ -112,17 +112,6 @@ public enum M {
             return "日本";
         }
 
-    },
-    AMAZON_TOTAL {
-        @Override
-        public String label() {
-            return "汇总";
-        }
-
-        @Override
-        public String countryName() {
-            return "汇总";
-        }
     };
 
     public abstract String label();

@@ -2,7 +2,6 @@ package controllers;
 
 
 import helper.J;
-import models.product.Brand;
 import models.product.Product;
 import models.view.post.ProfitPost;
 import org.apache.commons.lang.StringUtils;
