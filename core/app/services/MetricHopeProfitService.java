@@ -26,12 +26,13 @@ public class MetricHopeProfitService {
     public MetricProfitService profit;
 
     public MetricHopeProfitService(
-            String sku, M market) {
+            String sku, M market, T shiptype) {
         this.sku = sku;
         this.market = market;
         Date begin = DateTime.now().withDayOfYear(1).toDate();
         Date end = DateTime.now().withTimeAtStartOfDay().toDate();
         profit = new MetricProfitService(begin, end, this.market, this.sku, null);
+        this.shiptype = shiptype;
     }
 
     /**
