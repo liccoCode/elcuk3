@@ -397,9 +397,12 @@ public class MetricProfitService {
                 .where(insql);
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
         for(Map<String, Object> row : rows) {
-            int rowqty = ((Number) row.get("qty")).intValue();
-            float declaredValue = ((Number) row.get("declaredValue")).floatValue();
-            totalprice = totalprice + rowqty * declaredValue;
+            Object rowobject = row.get("qty");
+            if(rowobject != null) {
+                int rowqty = ((Number) rowobject).intValue();
+                float declaredValue = ((Number) row.get("declaredValue")).floatValue();
+                totalprice = totalprice + rowqty * declaredValue;
+            }
         }
         return totalprice;
     }
@@ -468,26 +471,33 @@ public class MetricProfitService {
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
         List<OrderrVO> vos = new ArrayList<OrderrVO>();
         for(Map<String, Object> row : rows) {
-            String rowsku = row.get("sku").toString();
-            int rowqty = ((Number) row.get("qty")).intValue();
-            float rowlengths = ((Number) row.get("lengths")).floatValue();
-            float rowwidth = ((Number) row.get("width")).floatValue();
-            float rowheigh = ((Number) row.get("heigh")).floatValue();
+            Object rowobject = row.get("sku");
+            if(rowobject != null) {
+                String rowsku = "";
+                rowsku = rowobject.toString();
+                rowobject = row.get("qty");
+                if(rowobject != null) {
+                    int rowqty = ((Number) rowobject).intValue();
+                    float rowlengths = ((Number) row.get("lengths")).floatValue();
+                    float rowwidth = ((Number) row.get("width")).floatValue();
+                    float rowheigh = ((Number) row.get("heigh")).floatValue();
 
-            float siglevolume = 0f;
-            //快递用重量计算比例
-            if(shiptype.equals("express")) {
-                //重量
-                siglevolume = rowheigh * rowqty;
-            } else {
-                //体积
-                siglevolume = rowlengths * rowwidth * rowheigh * rowqty;
-            }
-            totalvolume = totalvolume + siglevolume;
-            if(this.sku.equals(rowsku)) {
-                //SKU的数量
-                qty = qty + rowqty;
-                volume = volume + siglevolume;
+                    float siglevolume = 0f;
+                    //快递用重量计算比例
+                    if(shiptype.equals("express")) {
+                        //重量
+                        siglevolume = rowheigh * rowqty;
+                    } else {
+                        //体积
+                        siglevolume = rowlengths * rowwidth * rowheigh * rowqty;
+                    }
+                    totalvolume = totalvolume + siglevolume;
+                    if(this.sku.equals(rowsku)) {
+                        //SKU的数量
+                        qty = qty + rowqty;
+                        volume = volume + siglevolume;
+                    }
+                }
             }
         }
 

@@ -65,7 +65,7 @@
         <th>平均运费单价(USD)</th>
         <th>关税和VAT单价(USD)</th>
       </tr>
-        #{list items:Profits, as:'pro'}
+        #{list items:profits, as:'pro'}
           <tr>
             <td>${pro.sku}</td>
             <td>${pro.market?pro.market.label():"汇总"}</td>
