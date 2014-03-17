@@ -72,5 +72,5 @@ SQL = %q(SELECT pau.id, pau.createdAt `date`, pu.product_sku sku, pu.selling_sel
  LEFT JOIN Selling s ON pu.selling_sellingId=s.sellingId
  WHERE pau.procureUnit_id IS NOT NULL)
 #SQL << " LIMIT 100"
+ProcurePayUnitActor.new.init_mapping
 process(actor: ProcurePayUnitActor.pool(size: 6))
-#ProcurePayUnitActor.new.init_mapping

@@ -52,5 +52,5 @@ SQL = "SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, oi.pro
 # 3. Actor 内部使用异步 HTTP 来完成请求
 # 4. 最后处理不满足 % 2000 数量剩下的数据
 # =============================================================================================================
+OrderItemActor.new.init_mapping
 process(actor: OrderItemActor.pool(size: 6))
-#OrderItemActor.new.init_mapping

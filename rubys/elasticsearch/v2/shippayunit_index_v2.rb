@@ -12,6 +12,11 @@ class ShipPayUnitActor
     @es_index = "elcuk2"
     @es_type = "shippayunit"
     @shipment_hash = {}
+    @wname_market_mapping = {
+      "FBA_DE" => "AMAZON_DE",
+      "FBA_US" => "AMAZON_US",
+      "FBA_UK" => "AMAZON_UK"
+    }
   end
 
   MAPPING = %q({
@@ -76,9 +81,14 @@ class ShipPayUnitActor
     @shipment_hash[shipment_id]
   end
 
+  def wname_to_market(wname)
+    @wname_market_mapping[wname]
+  end
+
   def bulk_submit(rows)
     submit(rows) do |row|
       row[:cost_in_usd] = routine_cost_in_usd(row)
+      row[:market] = wname_to_market(row.delete(:wname))
       row
     end
   end
@@ -87,9 +97,10 @@ end
 pool = ShipPayUnitActor.pool(size: 6)
 # 1. 找出需要的 PaymentUnit
 # 2. 补全这些 PaymentUnit 中的 sku 与 selling_id
-SQL = %q(SELECT pau.id, pau.createdAt `date`, s.id shipment_id, pau.shipItem_id shipitem_id, s.type ship_type, pau.amount - pau.fixValue cost, pau.currency, pau.feeType_name fee_type  FROM PaymentUnit pau
- left join Shipment s ON pau.shipment_id=s.id
- where pau.shipment_id IS NOT NULL)
+SQL = %q(SELECT pau.id, pau.createdAt `date`, s.id shipment_id, pau.shipItem_id shipitem_id, s.type ship_type, pau.amount - pau.fixValue cost, pau.currency, pau.feeType_name fee_type, w.name wname  FROM PaymentUnit pau
+ LEFT JOIN Shipment s ON pau.shipment_id=s.id
+ LEFT JOIN Whouse w ON w.id=s.whouse_id
+ WHERE pau.shipment_id IS NOT NULL;)
 ds = DB[SQL].stream.map do |row, i|
   if row[:shipitem_id]
     row.merge(pool.shipitem_relate(row[:shipitem_id]))
@@ -98,7 +109,7 @@ ds = DB[SQL].stream.map do |row, i|
   end
 end
 
-#ShipPayUnitActor.new.init_mapping
+ShipPayUnitActor.new.init_mapping
 process(dataset: ds, actor: pool)
 
 
