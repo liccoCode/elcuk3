@@ -10,13 +10,13 @@
   #{flash_alert /}
 
   #{if st.saleTargetType == models.SaleTarget.T.YEAR}
-      #{include 'SaleTargets/_year.html'/}
+      #{render 'SaleTargets/_year.html', st: st, saleTargets: saleTargets/}
   #{/if}
   #{elseif st.saleTargetType == models.SaleTarget.T.TEAM}
-      #{include 'SaleTargets/_team.html'/}
+      #{render 'SaleTargets/_team.html', st: st, saleTargets: saleTargets/}
   #{/elseif}
   #{elseif st.saleTargetType == models.SaleTarget.T.CATEGORY}
-      #{include 'SaleTargets/_year.html'/}
+      #{include 'SaleTargets/_category.html'/}
   #{/elseif}
   #{elseif st.saleTargetType == models.SaleTarget.T.SKU}
       #{include 'SaleTargets/_year.html'/}

@@ -16,13 +16,13 @@
     <td>
       <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.id}</a>
     </td>
-    <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st_index}">
+    <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st.id}">
       <span><i class="icon-reorder"></i></span>
     ${st.theme}
     </td>
     <td>${st.targetYear}</td>
     <td>${st.targetMonth}</td>
-    <td>
+    <td style="background-color:${st.saleTargetType.typeColor()}">
     ${st.saleTargetType}
     </td>
     <td>${st.saleAmounts}</td>
@@ -31,7 +31,7 @@
     <td>${st.createDate}</td>
     <td>${st.state.label()}</td>
   </tr>
-  <tr id="${st_index}" style="display:none;">
+  <tr id="${st.id}" style="display:none;">
     <td colspan="10" style="padding:0;border:none">
         #{render 'SaleTargets/_st_table_list.html', salesTargets: st.getChild()/}
     </td>

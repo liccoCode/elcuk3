@@ -3,8 +3,12 @@
 <table class="table table-condensed table-bordered">
   <tr>
     <th>主题</th>
-    <td colspan="4">
-      <input type="text" class="span10" name="st.theme" value="${st.theme}">
+    <td>
+      <input type="text" name="st.theme" value="${st.theme}">
+    </td>
+    <th>类型</th>
+    <td>
+    ${st.saleTargetType}
     </td>
   </tr>
 
@@ -44,7 +48,7 @@
     ${sa.fidToName()}
     </td>
     <td>
-        #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: st.targetMonth, class: "span1"/}
+        #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1"/}
     </td>
     <td>
       <div class="input-prepend">

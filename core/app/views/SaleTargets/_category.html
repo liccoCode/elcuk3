@@ -1,0 +1,96 @@
+#{info_row title:'基本信息'/}
+#{form @SaleTargets.updateAnnual(), method: 'POST', id: "updateAnnualForm"}
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>主题</th>
+    <td>
+      <input type="text" name="st.theme" value="${st.theme}">
+    </td>
+    <th>类型</th>
+    <td>
+    ${st.saleTargetType}
+    </td>
+  </tr>
+
+  <tr>
+    <th>年份</th>
+    <td>
+        #{select_year  name: "st.targetYear", value: st.targetYear, disabled: true/}
+    </td>
+
+    <th>月份</th>
+    <td>
+        #{select_month name: "st.targetMonth", value: st.targetMonth, disabled: true/}
+    </td>
+  </tr>
+
+  <tr>
+    <th>单据状态</th>
+    <td colspan="4">
+      <input type="text" value="${st.state.label()}" readonly>
+    </td>
+  </tr>
+
+  <tr>
+    <th>备注</th>
+    <td colspan="4">
+      <input type="text" class="span10" name="st.memo" value="${st.memo}">
+      <input type="hidden" name="st.id" value="${st.id}">
+    </td>
+  </tr>
+</table>
+#{/form}
+
+#{info_row title:'目标明细'/}
+#{if saleTargets.size == 0}
+该 Category 下未找到合适的 Product!
+#{/if}
+#{else }
+<table class="table table-hover table-bordered table-condensed">
+  <tr>
+    <th>SKU</th>
+    <th>日期</th>
+    <th>销售额</th>
+    <th>利润率</th>
+  </tr>
+
+    #{list items:saleTargets, as:'sa'}
+      <tr>
+        <td>
+        ${sa.fidToName()}
+        </td>
+        <td>
+            #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1"/}
+        </td>
+        <td>
+          <div class="input-prepend">
+            <span class="add-on">$</span>
+          *{ 主键 ID }*
+            <input type="hidden" name="sa.id" id="${sa_index}_Id" value="${sa.id}">
+          *{ 销售额 }*
+            <input type="hidden" name="sa.fid" id="${sa_index}_fid" value="${sa.fid}">
+          *{ 利润率 }*
+            <input type="text" name="sa.saleAmounts" id="${sa_index}_saleAmounts" value="${sa.saleAmounts}">
+          *{ 父销售目标 id }*
+            <input type="hidden" name="sa.parentId" id="${sa_index}_parentId" value="${sa.parentId}">
+          *{ 索引id }*
+            <input type="hidden" name="indexId" value="${sa_index}">
+          </div>
+        </td>
+
+        <td>
+          <div class="input-append">
+            <input type="text" name="sa.profitMargin" id="${sa_index}_profitMargin" value="${sa.profitMargin}">
+            <span class="add-on">%</span>
+          </div>
+        </td>
+      </tr>
+    #{/list}
+</table>
+<div class="btn-toolbar" id="btns">
+  <div class="btn-group">
+    <a class="btn btn-success" id="updateAnnual">保存</a>
+  </div>
+</div>
+</div>
+#{/else}
