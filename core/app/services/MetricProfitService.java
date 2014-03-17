@@ -2,11 +2,15 @@ package services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import helper.DBUtils;
 import helper.ES;
+import helper.Promises;
 import models.market.M;
+import models.market.Orderr;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Product;
+import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -17,6 +21,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
+import query.vo.OrderrVO;
 
 import java.util.*;
 
@@ -33,26 +38,58 @@ public class MetricProfitService {
     public M market;
     public String sku;
     public String sellingId;
-    public String breoreSku;
 
     public MetricProfitService(Date begin, Date end, M market,
                                String sku, String sellingId) {
         this.begin = begin;
         this.end = end;
         this.market = market;
-        //计算中需要查询SKU的MODEL
-        this.breoreSku = sku;
-        //特殊字符需要转换
-        this.sku = ES.parseEsString(sku);
+        this.sku = sku;
         this.sellingId = ES.parseEsString(sellingId);
         checkParam();
     }
 
+    public String parseEsSku() {
+        return ES.parseEsString(sku).toLowerCase();
+    }
+
+    public String parseEsSellingId() {
+        return ES.parseEsString(sellingId).toLowerCase();
+    }
+
+    /**
+     * 获得利润对象
+     */
+    public Profit calProfit() {
+        Profit profit = new Profit();
+        profit.sku = this.sku;
+        profit.sellingId = sellingId;
+        profit.market = market;
+        //总销售额
+        profit.totalfee = this.esSaleFee();
+        //亚马逊费用
+        profit.amazonfee = this.esAmazonFee();
+        //fba费用
+        profit.fbafee = this.esFBAFee();
+        //总销量
+        profit.quantity = this.esSaleQty();
+        //采购价格
+        profit.procureprice = this.esProcurePrice();
+        //运输价格
+        profit.shipprice = this.esShipPrice();
+        //vat价格
+        profit.vatprice = this.esVatPrice();
+        //利润
+        profit.totalprofit = this.totalProfit(profit);
+        //利润率
+        profit.profitrate = this.profitRate(profit);
+        return profit;
+    }
 
     /**
      * SKU总销售额
      */
-    public Float sellingAmazonTotalFee() {
+    public Float esSaleFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
@@ -62,13 +99,14 @@ public class MetricProfitService {
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
 
+        System.out.println("xxx::::::::::::::::" + search.toString());
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * SKU亚马逊费用
      */
-    public Float sellingAmazonFee() {
+    public Float esAmazonFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
@@ -83,7 +121,7 @@ public class MetricProfitService {
     /**
      * SKUFBA费用
      */
-    public Float sellingAmazonFBAFee() {
+    public Float esFBAFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
@@ -98,7 +136,7 @@ public class MetricProfitService {
     /**
      * 总销量
      */
-    public Float sellingAmazonQty() {
+    public Float esSaleQty() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
@@ -111,7 +149,7 @@ public class MetricProfitService {
     /**
      * 平均采购价
      */
-    public Float payPrice() {
+    public Float esProcurePrice() {
         /*cashpledge 采购的预付款, 一般为 30%
           procurement 采购货物的货款
         */
@@ -139,7 +177,6 @@ public class MetricProfitService {
          * 采购总数量
          */
         float qty = getEsTermsTotal(search, "procurepayunit");
-
         float avgprice = 0f;
         if(qty != 0f) {
             avgprice = fee / qty;
@@ -150,19 +187,19 @@ public class MetricProfitService {
     /**
      * 平均运价
      */
-    public Float shipPrice() {
+    public Float esShipPrice() {
         /**
          * 从ES同时查出符合sku条件的列表，以及按照ship_type分组的求和
          */
         TermsFilterBuilder orfilter = FilterBuilders.termsFilter("ship_type", "sea", "express", "air");
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .filter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
-                        this.sku.toLowerCase()))).size(Integer.MAX_VALUE / 10 - 100000000)
+                .postFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
+                        this.parseEsSku().toLowerCase()))).size(100000)
                 .facet(FacetBuilders.termsStatsFacet("units")
                         .keyField("ship_type")
                         .valueField("cost_in_usd")
                         .facetFilter(this.filterbuilder(false).must(orfilter
-                        ).must(FilterBuilders.termFilter("sku", this.sku.toLowerCase()))
+                        ).must(FilterBuilders.termFilter("sku", this.parseEsSku().toLowerCase()))
                         ));
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
@@ -202,7 +239,7 @@ public class MetricProfitService {
         float airfee = getshipfee(airvolume, airtotalfee);
 
         F.T3<Float, Float, Integer> expressvolume = getShipmentInfo(expressMentIds, "express");
-        //海运总运费乘以重量比例
+        //快递总运费乘以重量比例
         float expressfee = getshipfee(expressvolume, expresstotalfee);
 
         //运费的平均单价=运费/SKu的数量
@@ -217,18 +254,16 @@ public class MetricProfitService {
     /**
      * 关税和VAT单价
      */
-    public Float vatPrice() {
+    public Float esVatPrice() {
         //关税
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .filter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
-                        this.sku.toLowerCase()))).size(Integer.MAX_VALUE / 10 - 100000000)
+                .postFilter(FilterBuilders.boolFilter().must(FilterBuilders.termsFilter("fee_type",
+                        "banlancedutyandvat", "dutyandvat"))).size(100000)
                 .facet(FacetBuilders.statisticalFacet("units")
                         .field("cost_in_usd")
                         .facetFilter(this.filterbuilder(false).must(
-                                FilterBuilders.orFilter().add(FilterBuilders.termFilter("fee_type", "sea"))
-                                        .add(FilterBuilders.termFilter("fee_type", "express"))
-                                        .add(FilterBuilders.termFilter("fee_type", "air")
-                                        ).add(FilterBuilders.termFilter("skus", this.sku.toLowerCase()))
+                                FilterBuilders.termsFilter("fee_type",
+                                        "banlancedutyandvat", "dutyandvat")
                         )
                         ));
         //总关税和VAT
@@ -238,7 +273,6 @@ public class MetricProfitService {
         float fee = esresult._1.getFloat("total");
         //获取与关税相关的运输单
         Set<String> mentids = getVatMentIds(esresult._2);
-
         /**
          * 获取VAT的系数 所有涉及SKU的运输单总关税 / (sku1数量*申报价格1+sku2数量*申报价格2+....)
          */
@@ -247,9 +281,34 @@ public class MetricProfitService {
         if(totalprice != 0f) {
             param = fee / totalprice;
         }
-        Product product = Product.findById(this.breoreSku);
+        Product product = Product.findById(this.sku);
         float vatprice = product.declaredValue * param;
         return vatprice;
+    }
+
+    /**
+     * 总利润
+     */
+    public Float totalProfit(Profit profit) {
+        /**
+         *  SKU总实际利润[A] = SKU总销售额[B] - SKU总亚马逊费用[C] - SKU总FBA费用[D]
+         *  - SKU总销量[E] * (SKU平均采购单价[F] + SKU平均运费单价[G] + 关税和VAT单价[H])
+         *  amazonfee,fbafee 数据为负数,所以用加
+         */
+        return profit.totalfee + profit.amazonfee + profit.fbafee
+                - profit.quantity * (profit.procureprice + profit.shipprice + profit.vatprice);
+    }
+
+    /**
+     * 利润率
+     */
+    public Float profitRate(Profit profit) {
+        if(profit.totalfee != 0f) {
+            //利润率
+            return profit.totalprofit / profit.totalfee * 100;
+        } else {
+            return 0f;
+        }
     }
 
     /**
@@ -277,9 +336,7 @@ public class MetricProfitService {
             for(Object obj : hits) {
                 JSONObject hit = (JSONObject) obj;
                 JSONObject source = hit.getJSONObject("_source");
-                if(source.getString("fee_type").equals("sea")) {
-                    vatMentIds.add(hit.getJSONObject("_source").getString("shipment_id"));
-                }
+                vatMentIds.add(source.getString("shipment_id"));
             }
         }
         return vatMentIds;
@@ -289,29 +346,33 @@ public class MetricProfitService {
      * 计算Vat的 sku1数量*申报价格1+sku2数量*申报价格2+....
      *
      * @param mentIds
-     * @param shiptype
      * @return
      */
     private Float getVatTotalPrice(Set<String> mentIds) {
-        /**
-         * 获取所有运输单
-         */
-        List<Shipment> shipment = Shipment.find(SqlSelect.whereIn("id", mentIds)).fetch();
+        String insql = SqlSelect.whereIn("sm.id", mentIds);
+        if(insql == null || insql.length() <= 0) {
+            return 0f;
+        }
         //所有SKU的申报价格总和
         float totalprice = 0f;
-        for(Shipment ment : shipment) {
-            List<ShipItem> items = ment.items;
-            for(ShipItem item : items) {
-                //单个SKU数量
-                Integer itemqty = item.unit.attrs.qty;
-                if(itemqty == null)
-                    itemqty = 0;
-                totalprice = totalprice + itemqty * item.unit.product.declaredValue;
-            }
+        /**
+         * sql查询符合条件的shipmentid
+         */
+        SqlSelect itemsql = new SqlSelect()
+                .select("pu.qty", "pd.declaredValue")
+                .from("Shipment sm")
+                .leftJoin(" shipitem si on si.shipment_id=sm.id ")
+                .leftJoin(" procureunit pu on si.unit_id=pu.id ")
+                .leftJoin(" Product pd on pd.sku=pu.product_sku")
+                .where(insql);
+        List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
+        for(Map<String, Object> row : rows) {
+            int rowqty = ((Number) row.get("qty")).intValue();
+            float declaredValue = ((Number) row.get("declaredValue")).floatValue();
+            totalprice = totalprice + rowqty * declaredValue;
         }
         return totalprice;
     }
-
 
     /**
      * 获取海运，空运，快递的运输单ID
@@ -352,14 +413,10 @@ public class MetricProfitService {
         if(mentIds.size() <= 0) {
             return new F.T3<Float, Float, Integer>(0f, 0f, 0);
         }
-        String sql = SqlSelect.whereIn("id", mentIds);
-        if(sql == null || sql.length() <= 0) {
+        String insql = SqlSelect.whereIn("sm.id", mentIds);
+        if(insql == null || insql.length() <= 0) {
             return new F.T3<Float, Float, Integer>(0f, 0f, 0);
         }
-        /**
-         * 获取所有运输单
-         */
-        List<Shipment> shipment = Shipment.find(sql).fetch();
 
         //单个SKU的数量
         Integer qty = 0;
@@ -367,33 +424,45 @@ public class MetricProfitService {
         float totalvolume = 0f;
         //单个SKU的体积
         float volume = 0f;
-        for(Shipment ment : shipment) {
-            List<ShipItem> items = ment.items;
-            for(ShipItem item : items) {
-                Integer unitqty = item.unit.attrs.qty;
-                if(unitqty == null)
-                    unitqty = 0;
-                Product p = item.unit.product;
-                float siglevolume = 0f;
-                //快递用重量计算比例
-                if(shiptype.equals("express")) {
-                    //重量
-                    siglevolume = p.weight * unitqty;
-                } else {
-                    //体积
-                    siglevolume = p.lengths * p.width * p.heigh * unitqty;
-                }
-                totalvolume = totalvolume + siglevolume;
-                if(this.breoreSku.equals(p.sku)) {
-                    //SKU的数量
-                    qty = qty + unitqty;
-                    volume = volume + siglevolume;
-                }
+        /**
+         * sql查询符合条件的shipmentid
+         */
+        SqlSelect itemsql = new SqlSelect()
+                .select("pu.sku", "pu.qty", "pd.lengths",
+                        "pd.width", "pd.heigh", "pd.weight")
+                .from("Shipment sm")
+                .leftJoin(" shipitem si on si.shipment_id=sm.id ")
+                .leftJoin(" procureunit pu on si.unit_id=pu.id ")
+                .leftJoin(" Product pd on pd.sku=pu.product_sku")
+                .where(insql);
+        List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
+        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        for(Map<String, Object> row : rows) {
+            String rowsku = row.get("sku").toString();
+            int rowqty = ((Number) row.get("qty")).intValue();
+            float rowlengths = ((Number) row.get("lengths")).floatValue();
+            float rowwidth = ((Number) row.get("width")).floatValue();
+            float rowheigh = ((Number) row.get("heigh")).floatValue();
+
+            float siglevolume = 0f;
+            //快递用重量计算比例
+            if(shiptype.equals("express")) {
+                //重量
+                siglevolume = rowheigh * rowqty;
+            } else {
+                //体积
+                siglevolume = rowlengths * rowwidth * rowheigh * rowqty;
+            }
+            totalvolume = totalvolume + siglevolume;
+            if(this.sku.equals(rowsku)) {
+                //SKU的数量
+                qty = qty + rowqty;
+                volume = volume + siglevolume;
             }
         }
+
         return new F.T3<Float, Float, Integer>(volume, totalvolume, qty);
     }
-
 
     /**
      * 查询ES的结果
@@ -415,9 +484,7 @@ public class MetricProfitService {
             totalcost = units.getFloat("total");
         }
         return totalcost;
-
     }
-
 
     /**
      * 查询ES运费的结果
@@ -432,9 +499,7 @@ public class MetricProfitService {
             throw new FastRuntimeException("ES连接异常!");
         }
         JSONObject facets = result.getJSONObject("facets");
-
         JSONObject units = null;
-
         if(facets != null) {
             units = facets.getJSONObject("units");
         }
@@ -446,7 +511,6 @@ public class MetricProfitService {
         return new F.T2<JSONObject, JSONArray>(units, hitmentids);
     }
 
-
     /**
      * 检查参数
      */
@@ -456,7 +520,6 @@ public class MetricProfitService {
         if(this.sku == null) throw new FastRuntimeException("此方法 sku 必须指定");
     }
 
-
     /**
      * query
      *
@@ -465,12 +528,11 @@ public class MetricProfitService {
     private QueryBuilder querybuilder() {
 
         BoolQueryBuilder qb = QueryBuilders
-                .boolQuery().must(QueryBuilders.fieldQuery("sku", this.sku));
+                .boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
 
         if(!StringUtils.isBlank(this.sellingId)) {
-            qb.must(QueryBuilders.fieldQuery("sellingid", this.sellingId));
+            qb.must(QueryBuilders.termQuery("sellingid", this.parseEsSellingId()));
         }
-
         return qb;
     }
 
@@ -481,8 +543,15 @@ public class MetricProfitService {
      * @return
      */
     private BoolFilterBuilder filterbuilder(boolean dateFilter) {
-        DateTime fromD = M.AMAZON_US.withTimeZone(begin);
-        DateTime toD = M.AMAZON_US.withTimeZone(end);
+        DateTime fromD = null;
+        DateTime toD = null;
+        if(this.market == null) {
+            fromD = new DateTime(begin);
+            toD = new DateTime(end);
+        } else {
+            fromD = this.market.withTimeZone(begin);
+            toD = this.market.withTimeZone(end);
+        }
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
         BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
@@ -494,7 +563,6 @@ public class MetricProfitService {
             boolFilter.must(FilterBuilders.rangeFilter("date").gte(fromD.toString(isoFormat))
                     .lt(toD.toString(isoFormat)));
         }
-
         return boolFilter;
     }
 
