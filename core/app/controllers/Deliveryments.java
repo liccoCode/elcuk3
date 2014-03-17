@@ -274,6 +274,7 @@ public class Deliveryments extends Controller {
         dmt.state = Deliveryment.S.PENDING;
         dmt.name = dmt.name.trim();
         dmt.units.add(unit);
+        dmt.deliveryType = Deliveryment.T.MANUAL;
         unit.validateManual();
         if(Validation.hasErrors()) {
             render("Deliveryments/manual.html", dmt, unit);
