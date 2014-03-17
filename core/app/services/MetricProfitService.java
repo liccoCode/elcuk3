@@ -188,6 +188,24 @@ public class MetricProfitService {
      * 平均运价
      */
     public Float esShipPrice() {
+        F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> feeinfo = shipTypePrice();
+        F.T2<Float, Integer> seainfo = feeinfo._1;
+        F.T2<Float, Integer> airinfo = feeinfo._2;
+        F.T2<Float, Integer> expressinfo = feeinfo._3;
+        //运费的平均单价=运费/SKu的数量
+        Integer skuqty = seainfo._2 + airinfo._2 + expressinfo._2;
+        float price = 0;
+        if(skuqty != 0) {
+            price = (seainfo._1 + airinfo._1 + expressinfo._1) / skuqty;
+        }
+        return price;
+    }
+
+
+    /**
+     * 不用运输方式运价
+     */
+    public F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> shipTypePrice() {
         /**
          * 从ES同时查出符合sku条件的列表，以及按照ship_type分组的求和
          */
@@ -203,8 +221,12 @@ public class MetricProfitService {
                         ));
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
-        if(esresult._1 == null)
-            return 0f;
+        if(esresult._1 == null) {
+            return new F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>>
+                    (new F.T2<Float, Integer>(0f, 0),
+                            new F.T2<Float, Integer>(0f, 0),
+                            new F.T2<Float, Integer>(0f, 0));
+        }
         JSONArray feearray = esresult._1.getJSONArray("terms");
         float seatotalfee = 0f;
         float airtotalfee = 0f;
@@ -244,11 +266,15 @@ public class MetricProfitService {
 
         //运费的平均单价=运费/SKu的数量
         Integer skuqty = seavolume._3 + airvolume._3 + expressvolume._3;
-        float price = 0;
-        if(skuqty != 0) {
-            price = (seafee + airfee + expressfee) / skuqty;
-        }
-        return price;
+
+        /**
+         * 返回三种运输方式的运费和数量
+         */
+        F.T2<Float, Integer> seainfo = new F.T2<Float, Integer>(seafee, seavolume._3);
+        F.T2<Float, Integer> airinfo = new F.T2<Float, Integer>(airfee, airvolume._3);
+        F.T2<Float, Integer> expressinfo = new F.T2<Float, Integer>(expressfee, expressvolume._3);
+        return new F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>>
+                (seainfo, airinfo, expressinfo);
     }
 
     /**
@@ -282,8 +308,12 @@ public class MetricProfitService {
             param = fee / totalprice;
         }
         Product product = Product.findById(this.sku);
-        float vatprice = product.declaredValue * param;
-        return vatprice;
+        if(product == null) {
+            return 0f;
+        } else {
+            float vatprice = product.declaredValue * param;
+            return vatprice;
+        }
     }
 
     /**
@@ -367,9 +397,12 @@ public class MetricProfitService {
                 .where(insql);
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
         for(Map<String, Object> row : rows) {
-            int rowqty = ((Number) row.get("qty")).intValue();
-            float declaredValue = ((Number) row.get("declaredValue")).floatValue();
-            totalprice = totalprice + rowqty * declaredValue;
+            Object rowobject = row.get("qty");
+            if(rowobject != null) {
+                int rowqty = ((Number) rowobject).intValue();
+                float declaredValue = ((Number) row.get("declaredValue")).floatValue();
+                totalprice = totalprice + rowqty * declaredValue;
+            }
         }
         return totalprice;
     }
@@ -438,26 +471,33 @@ public class MetricProfitService {
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
         List<OrderrVO> vos = new ArrayList<OrderrVO>();
         for(Map<String, Object> row : rows) {
-            String rowsku = row.get("sku").toString();
-            int rowqty = ((Number) row.get("qty")).intValue();
-            float rowlengths = ((Number) row.get("lengths")).floatValue();
-            float rowwidth = ((Number) row.get("width")).floatValue();
-            float rowheigh = ((Number) row.get("heigh")).floatValue();
+            Object rowobject = row.get("sku");
+            if(rowobject != null) {
+                String rowsku = "";
+                rowsku = rowobject.toString();
+                rowobject = row.get("qty");
+                if(rowobject != null) {
+                    int rowqty = ((Number) rowobject).intValue();
+                    float rowlengths = ((Number) row.get("lengths")).floatValue();
+                    float rowwidth = ((Number) row.get("width")).floatValue();
+                    float rowheigh = ((Number) row.get("heigh")).floatValue();
 
-            float siglevolume = 0f;
-            //快递用重量计算比例
-            if(shiptype.equals("express")) {
-                //重量
-                siglevolume = rowheigh * rowqty;
-            } else {
-                //体积
-                siglevolume = rowlengths * rowwidth * rowheigh * rowqty;
-            }
-            totalvolume = totalvolume + siglevolume;
-            if(this.sku.equals(rowsku)) {
-                //SKU的数量
-                qty = qty + rowqty;
-                volume = volume + siglevolume;
+                    float siglevolume = 0f;
+                    //快递用重量计算比例
+                    if(shiptype.equals("express")) {
+                        //重量
+                        siglevolume = rowheigh * rowqty;
+                    } else {
+                        //体积
+                        siglevolume = rowlengths * rowwidth * rowheigh * rowqty;
+                    }
+                    totalvolume = totalvolume + siglevolume;
+                    if(this.sku.equals(rowsku)) {
+                        //SKU的数量
+                        qty = qty + rowqty;
+                        volume = volume + siglevolume;
+                    }
+                }
             }
         }
 
