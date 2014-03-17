@@ -188,6 +188,24 @@ public class MetricProfitService {
      * 平均运价
      */
     public Float esShipPrice() {
+        F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> feeinfo = shipTypePrice();
+        F.T2<Float, Integer> seainfo = feeinfo._1;
+        F.T2<Float, Integer> airinfo = feeinfo._2;
+        F.T2<Float, Integer> expressinfo = feeinfo._3;
+        //运费的平均单价=运费/SKu的数量
+        Integer skuqty = seainfo._2 + airinfo._2 + expressinfo._2;
+        float price = 0;
+        if(skuqty != 0) {
+            price = (seainfo._1 + airinfo._1 + expressinfo._1) / skuqty;
+        }
+        return price;
+    }
+
+
+    /**
+     * 不用运输方式运价
+     */
+    public F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> shipTypePrice() {
         /**
          * 从ES同时查出符合sku条件的列表，以及按照ship_type分组的求和
          */
@@ -203,8 +221,12 @@ public class MetricProfitService {
                         ));
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
-        if(esresult._1 == null)
-            return 0f;
+        if(esresult._1 == null) {
+            return new F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>>
+                    (new F.T2<Float, Integer>(0f, 0),
+                            new F.T2<Float, Integer>(0f, 0),
+                            new F.T2<Float, Integer>(0f, 0));
+        }
         JSONArray feearray = esresult._1.getJSONArray("terms");
         float seatotalfee = 0f;
         float airtotalfee = 0f;
@@ -244,11 +266,15 @@ public class MetricProfitService {
 
         //运费的平均单价=运费/SKu的数量
         Integer skuqty = seavolume._3 + airvolume._3 + expressvolume._3;
-        float price = 0;
-        if(skuqty != 0) {
-            price = (seafee + airfee + expressfee) / skuqty;
-        }
-        return price;
+
+        /**
+         * 返回三种运输方式的运费和数量
+         */
+        F.T2<Float, Integer> seainfo = new F.T2<Float, Integer>(seafee, seavolume._3);
+        F.T2<Float, Integer> airinfo = new F.T2<Float, Integer>(airfee, airvolume._3);
+        F.T2<Float, Integer> expressinfo = new F.T2<Float, Integer>(expressfee, expressvolume._3);
+        return new F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>>
+                (seainfo, airinfo, expressinfo);
     }
 
     /**
@@ -282,8 +308,12 @@ public class MetricProfitService {
             param = fee / totalprice;
         }
         Product product = Product.findById(this.sku);
-        float vatprice = product.declaredValue * param;
-        return vatprice;
+        if(product == null) {
+            return 0f;
+        } else {
+            float vatprice = product.declaredValue * param;
+            return vatprice;
+        }
     }
 
     /**
