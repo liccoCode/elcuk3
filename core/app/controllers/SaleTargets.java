@@ -7,8 +7,7 @@ import helper.Webs;
 import models.SaleTarget;
 import models.User;
 import models.view.Ret;
-import org.apache.commons.lang.NumberUtils;
-import org.apache.commons.lang.StringUtils;
+import models.view.post.SaleTargetPost;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -33,13 +32,20 @@ public class SaleTargets extends Controller {
         render(salesTargets);
     }
 
-    public static void show(Long id) {
+    public static void monthIndex() {
+        List<SaleTarget> salesTargets = SaleTarget.find("saleTargetType=?", SaleTarget.T.YEAR).fetch();
+        render(salesTargets);
+    }
+
+    public static void show(Long id, SaleTargetPost p) {
+        if(p == null) p = new SaleTargetPost();
         SaleTarget st = SaleTarget.findById(id);
+
         List<SaleTarget> saleTargets = SaleTarget.find("parentId=?", id).fetch();
         if(saleTargets.size() == 0) {
-            saleTargets = st.beforeDetails();
+            saleTargets = st.beforeDetails(p);
         }
-        render(st, saleTargets);
+        render(st, saleTargets, p);
     }
 
     public static void createAnnual() {
@@ -58,7 +64,7 @@ public class SaleTargets extends Controller {
         if(st.isNotExist()) {
             st.save();
             flash.success("保存成功.");
-            show(st.id);
+            show(st.id, new SaleTargetPost());
         } else {
             flash.error(String.format("已经存在 %s 年度的销售目标！", st.targetYear));
             render("SaleTargets/createAnnual.html", st);

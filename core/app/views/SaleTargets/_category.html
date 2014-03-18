@@ -51,85 +51,105 @@
 该 Category 下未找到合适的 Product!
 #{/if}
 #{else }
-<table class="table table-hover table-bordered table-condensed">
-  <tr>
-    <th>SKU</th>
-    <th>PS</th>
-    <th>当月天数</th>
-    <th>期望售价</th>
-    <th>期望采购价</th>
-    <th>SKU运费单价</th>
-    <th>关税和VAT单价</th>
-    <th>预计亚马逊费用</th>
-    <th>预计FBA费用</th>
-    <th>销售额</th>
-    <th>利润率</th>
-  </tr>
 
-    #{list items:saleTargets, as:'sa'}
-      <tr>
-        <td>
-          <a href="@{Products.show(sa.fid)}" target="_blank">${sa.fid}</a>
-        </td>
+<div style="margin-bottom:10px">
+  <select name="p.market" class="inline">
+    <option value="">市场</option>
+      #{list items:models.market.M.values(), as:'market'}
+        <option ${market == p.market ? 'selected' : ''} value="${market.name()}">${market.label()}</option>
+      #{/list}
+  </select>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+  <select name="p.shipmentType" class="inline">
+    <option value="">货运方式</option>
+      #{list items:models.procure.Shipment.T.values(), as:'shipmentType'}
+        <option ${shipmentType == p.shipmentType ? 'selected' : ''} value="${shipmentType.name()}">${shipmentType.label()}</option>
+      #{/list}
+  </select>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+  <button class="btn btn-primary" data-loading>搜索</button>
+</div>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+<div class="row-fluid">
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <th>SKU</th>
+      <th>PS</th>
+      <th>当月天数</th>
+      <th>期望售价</th>
+      <th>期望采购价</th>
+      <th>SKU运费单价</th>
+      <th>关税和VAT单价</th>
+      <th>预计亚马逊费用</th>
+      <th>预计FBA费用</th>
+      <th>销售额</th>
+      <th>利润率</th>
+    </tr>
+      #{list items:saleTargets, as:'sa'}
+        <tr>
+          <td>
+            <a href="@{Products.show(sa.fid)}" target="_blank">${sa.fid}</a>
+          </td>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.ps}">
+          </td>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.days}">
+          </td>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.expectPrice}">
+          </td>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.expectDeliveryPrice}">
+          </td>
 
-        <td>
-          <input type="text" style="width:50px" name="" id="" value="">
-        </td>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.shipmentUnit}">
+          </td>
 
-        <td>
-          <div class="input-prepend">
-            <span class="add-on">$</span>
-          *{ 主键 ID }*
-            <input type="hidden" name="sa.id" id="${sa_index}_Id" value="${sa.id}">
-          *{ 销售额 }*
-            <input type="hidden" name="sa.fid" id="${sa_index}_fid" value="${sa.fid}">
-          *{ 利润率 }*
-            <input type="text" style="width:70px" name="sa.saleAmounts" id="${sa_index}_saleAmounts" value="${sa
-            .saleAmounts}">
-          *{ 父销售目标 id }*
-            <input type="hidden" name="sa.parentId" id="${sa_index}_parentId" value="${sa.parentId}">
-          *{ 索引id }*
-            <input type="hidden" name="indexId" value="${sa_index}">
-          </div>
-        </td>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.tariffAndVAT}">
+          </td>
 
-        <td>
-          <div class="input-append">
-            <input type="text" name="sa.profitMargin" style="width:70px" id="${sa_index}_profitMargin" value="${sa.profitMargin}">
-            <span class="add-on">%</span>
-          </div>
-        </td>
-      </tr>
-    #{/list}
-</table>
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.expectAmazonPrice}">
+          </td>
+
+          <td>
+            <input type="text" style="width:50px" name="" id="" value="${sa.expectFBAPrice}">
+          </td>
+
+          <td>
+            <div class="input-prepend">
+              <span class="add-on">$</span>
+            *{ 主键 ID }*
+              <input type="hidden" name="sa.id" id="${sa_index}_Id" value="${sa.id}">
+            *{ 销售额 }*
+              <input type="hidden" name="sa.fid" id="${sa_index}_fid" value="${sa.fid}">
+            *{ 利润率 }*
+              <input type="text" style="width:70px" name="sa.saleAmounts" id="${sa_index}_saleAmounts" value="${sa
+              .saleAmounts}">
+            *{ 父销售目标 id }*
+              <input type="hidden" name="sa.parentId" id="${sa_index}_parentId" value="${sa.parentId}">
+            *{ 索引id }*
+              <input type="hidden" name="indexId" value="${sa_index}">
+            </div>
+          </td>
+
+          <td>
+            <div class="input-append">
+              <input type="text" name="sa.profitMargin" style="width:70px" id="${sa_index}_profitMargin" value="${sa.profitMargin}">
+              <span class="add-on">%</span>
+            </div>
+          </td>
+        </tr>
+      #{/list}
+  </table>
+</div>
 #{/else}
 
 <div class="btn-toolbar" id="btns">

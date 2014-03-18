@@ -1,12 +1,16 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import models.market.M;
+import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.product.Team;
+import models.view.post.SaleTargetPost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import services.MetricHopeProfitService;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -96,6 +100,11 @@ public class SaleTarget extends Model {
         YEAR,
 
         /**
+         * 月度销售目标
+         */
+        MONTH,
+
+        /**
          * TEAM销售目标
          */
         TEAM,
@@ -150,6 +159,54 @@ public class SaleTarget extends Model {
     @Expose
     public Float profitMargin = 0f;
 
+    /**
+     * SKU PS
+     */
+    @Expose
+    public Float ps = 0f;
+
+    /**
+     * 当月天数
+     */
+    @Expose
+    public Integer days;
+
+    /**
+     * 期望售价
+     */
+    @Expose
+    public Float expectPrice = 0f;
+
+    /**
+     * 期望采购价
+     */
+    @Expose
+    public Float expectDeliveryPrice = 0f;
+
+    /**
+     * SKU运费单价
+     */
+    @Expose
+    public Float shipmentUnit = 0f;
+
+    /**
+     * 关税和VAT单价
+     */
+    @Expose
+    public Float tariffAndVAT = 0f;
+
+    /**
+     * 预计亚马逊费用
+     */
+    @Expose
+    public Float expectAmazonPrice = 0f;
+
+    /**
+     * 预计FBA费用
+     */
+    @Expose
+    public Float expectFBAPrice = 0f;
+
     public SaleTarget() {
     }
 
@@ -194,7 +251,7 @@ public class SaleTarget extends Model {
      *
      * @return List<SaleTarget>
      */
-    public List<SaleTarget> beforeDetails() {
+    public List<SaleTarget> beforeDetails(SaleTargetPost p) {
         List<SaleTarget> saleTargetList = new ArrayList<SaleTarget>();
         switch(this.saleTargetType) {
             case YEAR:
@@ -203,30 +260,57 @@ public class SaleTarget extends Model {
                 for(Team t : teams) {
                     SaleTarget sa = new SaleTarget(t.id.toString());
                     sa.parentId = this.id;
-                    sa.saleTargetType = SaleTarget.T.TEAM;
+                    sa.saleTargetType = this.getChlidType();
                     saleTargetList.add(sa);
                 }
                 break;
+
+            case MONTH:
+                for(int temp = 1; temp <= 12; temp++) {
+                    SaleTarget sa = new SaleTarget();
+                    sa.parentId = this.id;
+                    sa.saleTargetType = this.getChlidType();
+                    saleTargetList.add(sa);
+                }
+                break;
+
             case TEAM:
                 List<Category> categorys = Category.find("team_id=?", this.fid).fetch();
                 for(Category t : categorys) {
                     SaleTarget sa = new SaleTarget(t.categoryId);
                     sa.parentId = this.id;
-                    sa.saleTargetType = SaleTarget.T.CATEGORY;
+                    sa.saleTargetType = this.getChlidType();
                     saleTargetList.add(sa);
                 }
                 break;
+
             case CATEGORY:
                 List<Product> products = Product.find("category_categoryId=?", this.fid).fetch();
-                for(Product t : products) {
-                    SaleTarget sa = new SaleTarget(t.sku);
-                    sa.parentId = this.id;
-                    sa.saleTargetType = SaleTarget.T.SKU;
-                    saleTargetList.add(sa);
+                //这里需要循环出 区分市场、货运方式的销售目标
+                if(p == null) {
+                    for(Product pro : products) {
+                        SaleTarget sa = new SaleTarget(pro.sku);
+                        sa.parentId = this.id;
+                        sa.saleTargetType = this.getChlidType();
+                        //准备获取计算利润的数据
+                        saleTargetList.add(sa);
+                    }
+                } else {
+                    for(M m : M.values()) {
+                        for(Product pro : products) {
+                            //pro.sellingCountWithMarket(m);
+                            SaleTarget sa = new SaleTarget(pro.sku);
+                            sa.parentId = this.id;
+                            sa.saleTargetType = T.SKU;
+                            //准备获取计算利润的数据
+                            saleTargetList.add(sa);
+                        }
+                    }
                 }
                 break;
+
             case SKU:
-                //SKU 类型的销售目标已经是最小的，不允许再拥有子 销售目标
+                //SKU 类型的销售目标已经是最小的销售目标
                 saleTargetList = null;
         }
         return saleTargetList;
@@ -248,8 +332,9 @@ public class SaleTarget extends Model {
             case SKU:
                 //SKU 类型的 销售目标 是不允许再拥有 子对象的
                 return null;
+            default:
+                return null;
         }
-        return null;
     }
 
     /**
@@ -304,5 +389,13 @@ public class SaleTarget extends Model {
             default:
                 return false;
         }
+    }
+
+
+    /**
+     * 为 SKU 类型的销售目标加载所需数据，方便进行 利润 和 利润率 计算
+     */
+    public void loadData() {
+        //MetricHopeProfitService metricHopeProfitServic = new MetricHopeProfitService(this.fid, );
     }
 }
