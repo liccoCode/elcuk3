@@ -266,6 +266,43 @@ public class SaleTarget extends Model {
         child.saleTargetType = this.getChlidType();
         child.createuser = createuser;
         child.targetYear = this.targetYear;
+        child.targetMonth = child.targetMonth == null ? this.targetMonth : child.targetMonth;
         return child;
+    }
+
+    /**
+     * 将数据更新到数据库内
+     * 采用这种方式是由于存在一个Hibernate 的 detached entity passed to persist问题
+     */
+    public void updateOld(SaleTarget old) {
+        old.targetYear = this.targetYear;
+        old.profitMargin = this.profitMargin;
+        old.saleAmounts = this.saleAmounts;
+        old.targetMonth = this.targetMonth;
+        old.save();
+    }
+
+    /**
+     * 判断对象是否已经存在
+     *
+     * @return
+     */
+    public boolean isNotExist() {
+        switch(this.saleTargetType) {
+            case YEAR:
+                return SaleTarget.find("targetYear=? AND saleTargetType=?", this.targetYear,
+                        this.saleTargetType).fetch().size() == 0;
+            case TEAM:
+                return SaleTarget.find("targetYear=? AND saleTargetType=?", this.targetYear,
+                        this.saleTargetType).fetch().size() == 0;
+            case CATEGORY:
+                return SaleTarget.find("targetYear=? AND targetMonth=? AND saleTargetType=?", this.targetYear,
+                        this.targetMonth, this.saleTargetType).fetch().size() == 0;
+            case SKU:
+                return SaleTarget.find("targetYear=? AND targetMonth=? AND saleTargetType=?", this.targetYear,
+                        this.targetMonth, this.saleTargetType).fetch().size() == 0;
+            default:
+                return false;
+        }
     }
 }

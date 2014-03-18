@@ -7,7 +7,7 @@
       <input type="text" name="st.theme" value="${st.theme}">
     </td>
     <th>类型</th>
-    <td>
+    <td style="color:${st.saleTargetType.typeColor()}">
     ${st.saleTargetType}
     </td>
   </tr>
@@ -25,8 +25,13 @@
   </tr>
 
   <tr>
+    <th>Category</th>
+    <td>
+      <a href="@{Categorys.show(st.fid)}" target="_blank">${st.fidToName()}</a>
+    </td>
+
     <th>单据状态</th>
-    <td colspan="4">
+    <td>
       <input type="text" value="${st.state.label()}" readonly>
     </td>
   </tr>
@@ -49,7 +54,14 @@
 <table class="table table-hover table-bordered table-condensed">
   <tr>
     <th>SKU</th>
-    <th>日期</th>
+    <th>PS</th>
+    <th>当月天数</th>
+    <th>期望售价</th>
+    <th>期望采购价</th>
+    <th>SKU运费单价</th>
+    <th>关税和VAT单价</th>
+    <th>预计亚马逊费用</th>
+    <th>预计FBA费用</th>
     <th>销售额</th>
     <th>利润率</th>
   </tr>
@@ -57,11 +69,41 @@
     #{list items:saleTargets, as:'sa'}
       <tr>
         <td>
-        ${sa.fidToName()}
+          <a href="@{Products.show(sa.fid)}" target="_blank">${sa.fid}</a>
         </td>
+
         <td>
-            #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1"/}
+          <input type="text" style="width:50px" name="" id="" value="">
         </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
+        <td>
+          <input type="text" style="width:50px" name="" id="" value="">
+        </td>
+
         <td>
           <div class="input-prepend">
             <span class="add-on">$</span>
@@ -70,7 +112,8 @@
           *{ 销售额 }*
             <input type="hidden" name="sa.fid" id="${sa_index}_fid" value="${sa.fid}">
           *{ 利润率 }*
-            <input type="text" name="sa.saleAmounts" id="${sa_index}_saleAmounts" value="${sa.saleAmounts}">
+            <input type="text" style="width:70px" name="sa.saleAmounts" id="${sa_index}_saleAmounts" value="${sa
+            .saleAmounts}">
           *{ 父销售目标 id }*
             <input type="hidden" name="sa.parentId" id="${sa_index}_parentId" value="${sa.parentId}">
           *{ 索引id }*
@@ -80,17 +123,18 @@
 
         <td>
           <div class="input-append">
-            <input type="text" name="sa.profitMargin" id="${sa_index}_profitMargin" value="${sa.profitMargin}">
+            <input type="text" name="sa.profitMargin" style="width:70px" id="${sa_index}_profitMargin" value="${sa.profitMargin}">
             <span class="add-on">%</span>
           </div>
         </td>
       </tr>
     #{/list}
 </table>
+#{/else}
+
 <div class="btn-toolbar" id="btns">
   <div class="btn-group">
     <a class="btn btn-success" id="updateAnnual">保存</a>
   </div>
 </div>
 </div>
-#{/else}

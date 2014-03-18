@@ -4,6 +4,8 @@
 #{/set}
 
 #{errorMsgs /}
+#{flash_alert /}
+
 #{info_row title:'新增年度目标'/}
 <div class="row">
   <div class="span12">
@@ -19,7 +21,7 @@
       <tr>
         <th>年份</th>
         <td>
-          <select name="st.targetYear" value="${st.targetYear}"></select>
+          #{select_year  name: "st.targetYear", value: st.targetYear/}
         </td>
 
         <th>单据状态</th>

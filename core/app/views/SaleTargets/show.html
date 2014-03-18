@@ -5,7 +5,7 @@
 #{/set}
 
 <div class="row">
-  <div class="span12" style="margin-left:385px;">
+  <div class="span12" style="margin-left:385px;">  *{ 销售额 }*
   #{errorMsgs /}
   #{flash_alert /}
 
@@ -19,7 +19,7 @@
       #{include 'SaleTargets/_category.html'/}
   #{/elseif}
   #{elseif st.saleTargetType == models.SaleTarget.T.SKU}
-      #{include 'SaleTargets/_year.html'/}
+      #{include 'SaleTargets/_sku.html'/}
   #{/elseif}
   </div>
 </div>

@@ -14,13 +14,13 @@ public class SaleTargetHelper extends JavaExtensions {
     public static String typeColor(SaleTarget.T saleTargetType) {
         switch(saleTargetType) {
             case YEAR:
-                return "#B0BFD6";
+                return "#5CB85C";
             case TEAM:
-                return "#006ACC";
+                return "#FAA52C";
             case CATEGORY:
-                return "#3DA4C2";
+                return "#4DB2D0";
             case SKU:
-                return "#108080";
+                return "#D14741";
             default:
                 return "#5BB75B";
         }

@@ -7,7 +7,7 @@
       <input type="text" name="st.theme" value="${st.theme}">
     </td>
     <th>类型</th>
-    <td>
+    <td style="color:${st.saleTargetType.typeColor()}">
     ${st.saleTargetType}
     </td>
   </tr>
@@ -21,6 +21,13 @@
     <th>单据状态</th>
     <td>
       <input type="text" value="${st.state.label()}" readonly>
+    </td>
+  </tr>
+
+  <tr>
+    <th>Team</th>
+    <td colspan="4">
+      <a href="@{Teams.show(st.fid)}" target="_blank">${st.fidToName()}</a>
     </td>
   </tr>
 
@@ -45,7 +52,7 @@
 #{list items:saleTargets, as:'sa'}
   <tr>
     <td>
-    ${sa.fidToName()}
+      <a href="@{Categorys.show(sa.fid)}" target="_blank">${sa.fidToName()}</a>
     </td>
     <td>
         #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1"/}

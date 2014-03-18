@@ -28,17 +28,20 @@ $ ->
       jsons.push(data)
 
     #准备发起 Ajax 请求将数据传送到服务器  jsonstr: JSON.stringify(jsons), targetDate: targetDate}
-    $.ajax("/saletargets/updateAnnual", {type: 'GET', data: $updateform.serialize()}, dataType: 'json')
+    $.ajax("/saletargets/updateAnnual", {type: 'POST', data: $updateform.serialize()}, dataType: 'json')
     .done((r) ->
         if r.flag
-          # 更新成功后再次发起 Ajax 请求去 创建 或 更新 子销售目标
-          $.ajax("/saletargets/saleTarget", {type: 'GET', data: {jsonstr: JSON.stringify(jsons)}, dataType: 'json'})
-          .done((r) ->
-              if r.flag
-                noty({text: r.message, type: 'success', timeout: 3000})
-              else
-                noty({text: r.message, type: 'error', timeout: 3000})
-            )
+          if jsons.length > 0
+            # 更新成功后再次发起 Ajax 请求去 创建 或 更新 子销售目标
+            $.ajax("/saletargets/saleTarget", {type: 'POST', data: {jsonstr: JSON.stringify(jsons)}, dataType: 'json'})
+            .done((r) ->
+                if r.flag
+                  noty({text: r.message, type: 'success', timeout: 3000})
+                else
+                  noty({text: r.message, type: 'error', timeout: 3000})
+              )
+          else
+            noty({text: r.message, type: 'success', timeout: 3000})
         else
           noty({text: r.message, type: 'error', timeout: 3000})
       )

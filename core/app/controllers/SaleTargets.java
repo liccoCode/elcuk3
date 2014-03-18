@@ -1,16 +1,20 @@
 package controllers;
 
 import com.alibaba.fastjson.TypeReference;
+import helper.DBUtils;
 import helper.J;
 import helper.Webs;
 import models.SaleTarget;
 import models.User;
 import models.view.Ret;
+import org.apache.commons.lang.NumberUtils;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 销售目标基本操作
@@ -43,29 +47,39 @@ public class SaleTargets extends Controller {
         render(st);
     }
 
-    /**
-     * 创建年度目标
-     */
     public static void doCreateAnnual(SaleTarget st) {
-        Validation.required("主题", st.theme.trim());
-        Validation.required("目标时间", st.targetYear);
+        validation.valid(st);
         st.createuser = User.findByUserName(Secure.Security.connected());
         st.saleTargetType = SaleTarget.T.YEAR;
         if(Validation.hasErrors()) {
             render("SaleTargets/createAnnual.html", st);
         }
-        st.save();
-        flash.success("保存成功.");
-        show(st.id);
+        //判断对象是否已经存在
+        if(st.isNotExist()) {
+            st.save();
+            flash.success("保存成功.");
+            show(st.id);
+        } else {
+            flash.error(String.format("已经存在 %s 年度的销售目标！", st.targetYear));
+            render("SaleTargets/createAnnual.html", st);
+        }
     }
 
     public static void updateAnnual(SaleTarget st) {
         validation.valid(st);
-        if(!Validation.hasErrors()) {
+        if(Validation.hasErrors()) {
+            renderJSON(new Ret(Webs.V(Validation.errors())));
+        }
+        //这里采用SQL查询而不采用Model.findById是因为该方法查询出来的数据总是从前端表单发送过来的新数据而不是数据库内储存的旧数据
+        //TODO 搞清楚Play 使用findById查询原理
+        Map<String, Object> rows = DBUtils.row("SELECT targetYear FROM SaleTarget WHERE id=?", st.id);
+        Integer oldTargetYear = (Integer) rows.get("targetYear");
+        if(!st.isNotExist() && !st.targetYear.equals(oldTargetYear)) {
+            renderJSON(new Ret(String.format("已经存在 %s 年度的销售目标！", st.targetYear)));
+        } else {
             st.save();
             renderJSON(new Ret(true, "更新成功."));
         }
-        renderJSON(new Ret(Webs.V(Validation.errors())));
     }
 
 
@@ -76,34 +90,29 @@ public class SaleTargets extends Controller {
      */
     public static void saleTarget(String jsonstr) {
         List<SaleTarget> saleTargetList = J.from(jsonstr, new TypeReference<List<SaleTarget>>() {});
+        if(saleTargetList.size() == 0) renderJSON(new Ret(true, "保存成功"));
+
         SaleTarget father = SaleTarget.findById(saleTargetList.get(0).parentId);
         for(SaleTarget child : saleTargetList) {
             father.copySaleTarget(child, User.findByUserName(Secure.Security.connected()));
-
             validation.valid(child);
             if(Validation.hasErrors()) {
-                continue;
+                renderJSON(Webs.V(Validation.errors()));
             }
             if(child.id == null) {
                 child.save();
             } else {
-                /**
-                 * 这里存在一个detached entity passed to persist问题，是由于 update 的时候hibernate还是去为对象会生成id
-                 * 而id已经存在，所以需要将新的属性赋值给旧的对象再保存到数据库内
-                 */
-                SaleTarget old = SaleTarget.findById(child.id);
-                old.targetYear = child.targetYear;
-                old.profitMargin = child.profitMargin;
-                old.saleAmounts = child.saleAmounts;
-                old.targetMonth = child.targetMonth;
-                old.save();
+                child.updateOld((SaleTarget) SaleTarget.findById(child.id));
             }
+        }
+        renderJSON(new Ret(true, "保存成功."));
+    }
 
-        }
-        if(Validation.hasErrors()) {
-            renderJSON(new Ret(Webs.V(Validation.errors())));
-        } else {
-            renderJSON(new Ret(true, "保存成功."));
-        }
+    public static void sales(List<SaleTarget> saleTargets) {
+        /**
+         * saleTargets[0].id
+         * saleTargets[1].id
+         * saleTargets[2].id
+         */
     }
 }
