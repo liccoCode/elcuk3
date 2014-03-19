@@ -33,6 +33,9 @@
         #{select 'p.cooperId', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.cooperId}
             #{option ''}供应商#{/option}
         #{/select}
+        #{select_enum name: "p.deliveryType", items: models.procure.Deliveryment.T.values(), value: p.deliveryType}
+          <option value="">类型</option>
+        #{/select_enum}
     </div>
 
     <div class="input-prepend input-append inline">
@@ -60,6 +63,7 @@
         <th>请款单</th>
         <th>Name</th>
         <th>State</th>
+        <th>单据类型</th>
         <th>供应商</th>
         <th>最先交货时间</th>
         <th>最后交货时间</th>
@@ -97,6 +101,7 @@
               <span class="badge badge-info">${dmt.units.size()}</span>
             </td>
             <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
+            <td>${dmt.deliveryType?.label()}</td>
             <td>${dmt.supplier()?.fullName}</td>
             <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
             <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
@@ -113,7 +118,7 @@
             <td>#{time_tooltip time:dmt.createDate/}</td>
           </tr>
           <tr id="dmt_${dmt_index}" style="display:none;">
-            <td colspan="11" style="padding:0;border:none">
+            <td colspan="12" style="padding:0;border:none">
                 #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
             </td>
           </tr>
