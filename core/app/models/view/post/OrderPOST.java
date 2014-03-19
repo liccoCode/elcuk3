@@ -97,37 +97,37 @@ public class OrderPOST extends ESPost<Orderr> {
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.query(QueryBuilders
                 .queryString(this.search())
-                .field("sids")
+                .field("selling_ids")
                 .field("buyer")
                 .field("email")
                 .field("address")
-                .field("orderId")
+                .field("order_id")
                 .field("userid")
-                .field("trackNo")
+                .field("track_no")
                 .field("upc")
                 .field("asin")
-                .field("promotionIDs")
-        ).filter(boolFilter)
+                .field("promotion_ids")
+        ).postFilter(boolFilter)
                 .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
         if(this.promotion != null) {
             FilterBuilder boolBuilder;
             if(this.promotion) {
-                boolBuilder = FilterBuilders.missingFilter("promotionIDs").nullValue(true);
+                boolBuilder = FilterBuilders.missingFilter("promotion_ids").nullValue(true);
             } else {
-                boolBuilder = FilterBuilders.existsFilter("promotionIDs");
+                boolBuilder = FilterBuilders.existsFilter("promotion_ids");
             }
             boolFilter.mustNot(boolBuilder);
         }
 
         if(this.market != null) {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
-                    .must(FilterBuilders.rangeFilter("createDate")
+                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
                             .from(this.market.withTimeZone(this.begin).toDate())
                             .to(this.market.withTimeZone(this.end).toDate()));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("createDate").from(this.begin).to(this.end));
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
         }
 
 

@@ -13,13 +13,11 @@ import play.db.jpa.Model;
 import play.libs.Codec;
 import play.utils.FastRuntimeException;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -150,6 +148,41 @@ public class Attach extends Model {
     @Column(nullable = false)
     public String location;
 
+    public enum T {
+        /**
+         * 图片
+         */
+        IMAGE,
+
+        /**
+         * 包装
+         */
+        PACKAGE,
+
+        /**
+         * 说明书
+         */
+        INSTRUCTION,
+
+        /**
+         * 丝印文件
+         */
+        SILKSCREEN
+    }
+
+    /**
+     * 附件类型(这个文件是用来干什么的)
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public T attachType;
+
+    /**
+     * 创建时间
+     */
+    @Expose
+    public Date createDate = new Date();
+
     public void setFid(String fid) {
         this.fid = fid.toUpperCase();
     }
@@ -193,6 +226,7 @@ public class Attach extends Model {
         this.fileName = String.format("%s_%s%s", this.fid, subfix,
                 this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
         this.location = this.location();
+        this.createDate = new Date();
         return this;
     }
 
@@ -214,10 +248,19 @@ public class Attach extends Model {
         return Attach.find("outName=?", outName).first();
     }
 
+    /**
+     * 根据外键查出所有的附件并进行分组和排序
+     *
+     * @param fid
+     * @param p
+     * @return
+     */
     public static List<Attach> attaches(String fid, String p) {
         if(StringUtils.isNotBlank(p))
-            return Attach.find("fid=? AND p=? AND remove=false", fid, Attach.P.valueOf(p)).fetch();
+            return Attach
+                    .find("fid=? AND p=? AND remove=false ORDER BY originName,createDate ASC", fid, Attach.P.valueOf(p))
+                    .fetch();
         else
-            return Attach.find("fid=? AND remove=false", fid).fetch();
+            return Attach.find("fid=? AND remove=false ORDER BY originName,createDate ASC", fid).fetch();
     }
 }

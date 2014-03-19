@@ -111,6 +111,7 @@ public enum M {
         public String countryName() {
             return "日本";
         }
+
     };
 
     public abstract String label();
