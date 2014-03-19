@@ -6,7 +6,6 @@
     <td>
       <input type="text" name="st.theme" value="${st.theme}">
     </td>
-
     <th>类型</th>
     <td style="color:${st.saleTargetType.typeColor()}">
     ${st.saleTargetType}
@@ -16,11 +15,18 @@
   <tr>
     <th>年份</th>
     <td>
-        #{select_year  name: "st.targetYear", value: st.targetYear/}
+        #{select_year  name: "st.targetYear", value: st.targetYear, disabled: true/}
     </td>
 
-    <th>单据状态</th>
+    <th>月份</th>
     <td>
+        #{select_month  name: "st.targetMonth", value: st.targetMonth, disabled: true/}
+    </td>
+  </tr>
+
+  <tr>
+    <th>单据状态</th>
+    <td colspan="4">
       <input type="text" value="${st.state.label()}" readonly>
     </td>
   </tr>
@@ -34,33 +40,26 @@
   </tr>
 </table>
 
+
     #{info_row title:'目标明细'/}
 <table class="table table-hover table-bordered table-condensed">
   <tr>
-    <th>Team Name</th>
-    <th>年销售额</th>
-    <th>年利润率</th>
+    <th>Category</th>
+    <th>销售额</th>
+    <th>利润率</th>
   </tr>
     #{list items:saleTargets, as:'sa'}
       <tr>
         <td>
-        ${sa.fidToName()}
+          <a href="@{Categorys.show(sa.fid)}" target="_blank">${sa.fidToName()}</a>
         </td>
-
         <td>
           <div class="input-prepend">
             <span class="add-on">$</span>
+
           *{ 利润率 }*
             <input type="text" name="childs[${sa_index - 1}].saleAmounts" value="${sa.saleAmounts}">
           </div>
-        </td>
-        <td>
-          <div class="input-append">
-            <input type="text" name="childs[${sa_index - 1}].profitMargin" value="${sa
-            .profitMargin}">
-            <span class="add-on">%</span>
-          </div>
-
         *{ 主键 ID }*
           <input type="hidden" name="childs[${sa_index - 1}].id" value="${sa.id}">
         *{ 销售额 }*
@@ -68,10 +67,16 @@
         *{ 父销售目标 id }*
           <input type="hidden" name="childs[${sa_index - 1}].parentId" value="${sa.parentId}">
         </td>
+
+        <td>
+          <div class="input-append">
+            <input type="text" name="childs[${sa_index - 1}].profitMargin" value="${sa.profitMargin}">
+            <span class="add-on">%</span>
+          </div>
+        </td>
       </tr>
     #{/list}
 </table>
-
- <button type="submit" class="btn btn-success">保存</button>
+<button type="submit" class="btn btn-success">保存</button>
 </div>
 #{/form}

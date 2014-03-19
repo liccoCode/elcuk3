@@ -39,52 +39,45 @@
     </td>
   </tr>
 </table>
-#{/form}
 
-#{info_row title:'目标明细'/}
+
+    #{info_row title:'目标明细'/}
 <table class="table table-hover table-bordered table-condensed">
   <tr>
-    <th>Category</th>
-    <th>日期</th>
+    <th>月份</th>
     <th>销售额</th>
     <th>利润率</th>
   </tr>
-#{list items:saleTargets, as:'sa'}
-  <tr>
-    <td>
-      <a href="@{Categorys.show(sa.fid)}" target="_blank">${sa.fidToName()}</a>
-    </td>
-    <td>
-        #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1"/}
-    </td>
-    <td>
-      <div class="input-prepend">
-        <span class="add-on">$</span>
-      *{ 主键 ID }*
-        <input type="hidden" name="sa.id" id="${sa_index}_Id" value="${sa.id}">
-      *{ 销售额 }*
-        <input type="hidden" name="sa.fid" id="${sa_index}_fid" value="${sa.fid}">
-      *{ 利润率 }*
-        <input type="text" name="sa.saleAmounts" id="${sa_index}_saleAmounts" value="${sa.saleAmounts}">
-      *{ 父销售目标 id }*
-        <input type="hidden" name="sa.parentId" id="${sa_index}_parentId" value="${sa.parentId}">
-      *{ 索引id }*
-        <input type="hidden" name="indexId" value="${sa_index}">
-      </div>
-    </td>
+    #{list items:saleTargets, as:'sa'}
+      <tr>
+        <td>
+            #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1",
+        disabled: true/}
+        </td>
+        <td>
+          <div class="input-prepend">
+            <span class="add-on">$</span>
+          *{ 利润率 }*
+            <input type="text" name="childs[${sa_index - 1}].saleAmounts" value="${sa.saleAmounts}">
+          </div>
+        *{ 主键 ID }*
+          <input type="hidden" name="childs[${sa_index - 1}].id" value="${sa.id}">
+        *{ 销售额 }*
+          <input type="hidden" name="childs[${sa_index - 1}].fid" value="${sa.fid}">
+        *{ 父销售目标 id }*
+          <input type="hidden" name="childs[${sa_index - 1}].parentId" value="${sa.parentId}">
+        </td>
 
-    <td>
-      <div class="input-append">
-        <input type="text" name="sa.profitMargin" id="${sa_index}_profitMargin" value="${sa.profitMargin}">
-        <span class="add-on">%</span>
-      </div>
-    </td>
-  </tr>
-#{/list}
+        <td>
+          <div class="input-append">
+            <input type="text" name="childs[${sa_index - 1}].profitMargin" value="${sa.profitMargin}">
+            <span class="add-on">%</span>
+          </div>
+        </td>
+      </tr>
+    #{/list}
 </table>
-<div class="btn-toolbar" id="btns">
-  <div class="btn-group">
-    <a class="btn btn-success" id="updateAnnual">保存</a>
-  </div>
+
+<button type="submit" class="btn btn-success">保存</button>
 </div>
-</div>
+#{/form}

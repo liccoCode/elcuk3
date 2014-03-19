@@ -1,16 +1,12 @@
 package models;
 
 import com.google.gson.annotations.Expose;
-import models.market.M;
-import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.product.Team;
-import models.view.post.SaleTargetPost;
 import org.apache.commons.lang.math.NumberUtils;
-import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
-import services.MetricHopeProfitService;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -31,7 +27,6 @@ public class SaleTarget extends Model {
      * 销售目标年份
      */
     @Expose
-    @Required
     public Integer targetYear;
 
     /**
@@ -44,7 +39,6 @@ public class SaleTarget extends Model {
      * 主题
      */
     @Lob
-    @Required
     @Expose
     public String theme;
 
@@ -215,6 +209,19 @@ public class SaleTarget extends Model {
     }
 
     /**
+     * 数据校验
+     */
+    public void validate() {
+        Validation.required("目标年份", this.targetYear);
+        Validation.required("主题", this.theme);
+        if(!this.saleTargetType.equals(T.YEAR) && !this.saleTargetType.equals(T.TEAM)) {
+            Validation.required("", this.targetMonth);
+        }
+        Validation.required("目标年份", this.targetYear);
+
+    }
+
+    /**
      * 返回销售目标 所属对象 的名称用于展示
      * 例: 属于 TeamA 则返回 Team 的名称
      *
@@ -227,14 +234,17 @@ public class SaleTarget extends Model {
             case TEAM:
                 Team team = Team.findById(NumberUtils.toLong(this.fid));
                 return team.name;
+            case MONTH:
+                return "";
             case CATEGORY:
                 Category category = Category.findById(this.fid);
                 return category.name;
             case SKU:
                 Product product = Product.findById(this.fid);
-                return product.productName;
+                return product.sku;
+            default:
+                return "";
         }
-        return "";
     }
 
     /**
@@ -251,11 +261,10 @@ public class SaleTarget extends Model {
      *
      * @return List<SaleTarget>
      */
-    public List<SaleTarget> beforeDetails(SaleTargetPost p) {
+    public List<SaleTarget> beforeDetails() {
         List<SaleTarget> saleTargetList = new ArrayList<SaleTarget>();
         switch(this.saleTargetType) {
             case YEAR:
-                //所有的应该包含的 TEAM类型 的子销售目标
                 List<Team> teams = Team.findAll();
                 for(Team t : teams) {
                     SaleTarget sa = new SaleTarget(t.id.toString());
@@ -265,16 +274,18 @@ public class SaleTarget extends Model {
                 }
                 break;
 
-            case MONTH:
+            case TEAM:
+                //一年十二个月，每个TEAM 每个月有一个销售目标
                 for(int temp = 1; temp <= 12; temp++) {
-                    SaleTarget sa = new SaleTarget();
+                    SaleTarget sa = new SaleTarget(this.fid);
                     sa.parentId = this.id;
+                    sa.targetMonth = temp;
                     sa.saleTargetType = this.getChlidType();
                     saleTargetList.add(sa);
                 }
                 break;
 
-            case TEAM:
+            case MONTH:
                 List<Category> categorys = Category.find("team_id=?", this.fid).fetch();
                 for(Category t : categorys) {
                     SaleTarget sa = new SaleTarget(t.categoryId);
@@ -286,26 +297,11 @@ public class SaleTarget extends Model {
 
             case CATEGORY:
                 List<Product> products = Product.find("category_categoryId=?", this.fid).fetch();
-                //这里需要循环出 区分市场、货运方式的销售目标
-                if(p == null) {
-                    for(Product pro : products) {
-                        SaleTarget sa = new SaleTarget(pro.sku);
-                        sa.parentId = this.id;
-                        sa.saleTargetType = this.getChlidType();
-                        //准备获取计算利润的数据
-                        saleTargetList.add(sa);
-                    }
-                } else {
-                    for(M m : M.values()) {
-                        for(Product pro : products) {
-                            //pro.sellingCountWithMarket(m);
-                            SaleTarget sa = new SaleTarget(pro.sku);
-                            sa.parentId = this.id;
-                            sa.saleTargetType = T.SKU;
-                            //准备获取计算利润的数据
-                            saleTargetList.add(sa);
-                        }
-                    }
+                for(Product pro : products) {
+                    SaleTarget sa = new SaleTarget(pro.sku);
+                    sa.parentId = this.id;
+                    sa.saleTargetType = this.getChlidType();
+                    saleTargetList.add(sa);
                 }
                 break;
 
@@ -326,6 +322,8 @@ public class SaleTarget extends Model {
             case YEAR:
                 return T.TEAM;
             case TEAM:
+                return T.MONTH;
+            case MONTH:
                 return T.CATEGORY;
             case CATEGORY:
                 return T.SKU;
@@ -356,19 +354,7 @@ public class SaleTarget extends Model {
     }
 
     /**
-     * 将数据更新到数据库内
-     * 采用这种方式是由于存在一个Hibernate 的 detached entity passed to persist问题
-     */
-    public void updateOld(SaleTarget old) {
-        old.targetYear = this.targetYear;
-        old.profitMargin = this.profitMargin;
-        old.saleAmounts = this.saleAmounts;
-        old.targetMonth = this.targetMonth;
-        old.save();
-    }
-
-    /**
-     * 判断对象是否已经存在
+     * 唯一性验证
      *
      * @return
      */
@@ -391,11 +377,36 @@ public class SaleTarget extends Model {
         }
     }
 
+    /**
+     * 保存或者更新子销售目标
+     *
+     * @param childs
+     * @param user
+     */
+    public void saveOrUpdateChild(List<SaleTarget> childs, User user) {
+        for(SaleTarget child : childs) {
+            this.copySaleTarget(child, user);
+            child.validate();
+            if(Validation.hasErrors()) {
+                break;
+            }
+            if(child.id == null) {
+                child.save();
+            } else {
+                child.updateOld((SaleTarget) SaleTarget.findById(child.id));
+            }
+        }
+    }
 
     /**
-     * 为 SKU 类型的销售目标加载所需数据，方便进行 利润 和 利润率 计算
+     * 将数据更新到数据库内
+     * 采用这种方式是由于直接保存会存在一个Hibernate 的 detached entity passed to persist问题
      */
-    public void loadData() {
-        //MetricHopeProfitService metricHopeProfitServic = new MetricHopeProfitService(this.fid, );
+    public void updateOld(SaleTarget old) {
+        old.targetYear = this.targetYear;
+        old.profitMargin = this.profitMargin;
+        old.saleAmounts = this.saleAmounts;
+        old.targetMonth = this.targetMonth;
+        old.save();
     }
 }

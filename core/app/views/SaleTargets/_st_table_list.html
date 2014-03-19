@@ -32,12 +32,6 @@
     <td>${st.createDate}</td>
     <td>${st.state.label()}</td>
   </tr>
-  <tr id="${st.id}" style="display:none;">
-    <td colspan="10" style="padding:0;border:none">
-        #{if st.saleTargetType != models.SaleTarget.T.SKU}
-          #{render 'SaleTargets/_st_table_list.html', salesTargets: st.getChild()/}
-        #{/if}
-    </td>
-  </tr>
+
 #{/list}
 </table>

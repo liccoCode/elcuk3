@@ -1,7 +1,6 @@
 #{extends 'main_full.html'/}
 #{set title:"销售目标#" + st.id /}
 #{set 'moreScripts'}
-    #{script 'saleTargets/showAnnual.coffee'/}
 #{/set}
 
 <div class="row">
@@ -12,12 +11,19 @@
   #{if st.saleTargetType == models.SaleTarget.T.YEAR}
       #{render 'SaleTargets/_year.html', st: st, saleTargets: saleTargets/}
   #{/if}
+
   #{elseif st.saleTargetType == models.SaleTarget.T.TEAM}
       #{render 'SaleTargets/_team.html', st: st, saleTargets: saleTargets/}
   #{/elseif}
+
+  #{elseif st.saleTargetType == models.SaleTarget.T.MONTH}
+      #{render 'SaleTargets/_month.html', st: st, saleTargets: saleTargets/}
+  #{/elseif}
+
   #{elseif st.saleTargetType == models.SaleTarget.T.CATEGORY}
       #{include 'SaleTargets/_category.html'/}
   #{/elseif}
+
   #{elseif st.saleTargetType == models.SaleTarget.T.SKU}
       #{include 'SaleTargets/_sku.html'/}
   #{/elseif}
