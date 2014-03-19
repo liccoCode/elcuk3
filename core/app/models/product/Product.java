@@ -16,6 +16,7 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.ProductQuery;
 
@@ -331,6 +332,16 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         }
 
         return skus;
+    }
+
+    /**
+     * 将获取的sku集合 转换成JSON，便于页面展示
+     *
+     * @return
+     */
+    public static F.T2<List<String>, List<String>> fetchSkusJson() {
+        List<String> skus = Product.skus(true);
+        return new F.T2<List<String>, List<String>>(skus,skus);
     }
 
     public static boolean exist(String sku) {

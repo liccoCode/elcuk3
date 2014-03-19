@@ -9,7 +9,9 @@ import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.driver.GJob;
 import jobs.perform.SubmitFeedJob;
+import models.User;
 import models.embedded.AmazonProps;
+import models.procure.ProcureUnit;
 import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
@@ -138,11 +140,11 @@ public class Selling extends GenericModel {
         if(StringUtils.isNotBlank(this.aps.productDesc)) {
             // 不能够存在换行符号, 不然会生成上架失败的 Feed 文件
             this.aps.productDesc = StringUtils.replaceEach(this.aps.productDesc,
-                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+                    new String[]{"\r", "\n", "\r\n", "\t"}, new String[]{"", "", "", ""});
         }
         if(StringUtils.isNotBlank(this.aps.title)) {
             this.aps.title = StringUtils.replaceEach(this.aps.title,
-                    new String[]{"\r", "\n", "\r\n"}, new String[]{"", "", ""});
+                    new String[]{"\r", "\n", "\r\n", "\t"}, new String[]{"", "", "", ""});
         }
     }
 
@@ -252,15 +254,17 @@ public class Selling extends GenericModel {
         args.put("marketId", this.market.amid().name()); // 向哪一个市场
         args.put("feed.id", feed.id); // 提交哪一个 Feed ?
         args.put("selling.id", this.sellingId); // 作用与哪一个 Selling
+        args.put("user.id", User.current().id);
         return args;
     }
 
     public Feed deploy() {
-        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
         String content = Selling
-                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(), "PartialUpdate");
+                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(),
+                        "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
         Map<String, Object> args = this.submitJobParams(feed);
         args.put("action", "update");
@@ -274,7 +278,7 @@ public class Selling extends GenericModel {
      * @return
      */
     public Selling buildFromProduct() {
-        if(!Feed.isFeedAvalible()) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
@@ -448,6 +452,22 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 删除这个 Selling
+     */
+    public void remove() {
+        /**
+         * 1. 检查是否有采购计划, 有则不允许删除
+         */
+        long size = ProcureUnit.count("selling=?", this);
+        if(size > 0) Webs.error("此 Selling 拥有过 " + size + " 个采购计划, 无法删除");
+        size = OrderItem.count("selling=?", this);
+        if(size > 0) Webs.error("拥有 " + size + " 个销售数据, 无法删除");
+        SellingRecord.delete("selling=?", this);
+        SellingQTY.delete("selling=?", this);
+        this.delete();
+    }
+
+    /**
      * 生成Selling对象的Feed文件
      *
      * @param sellingList  List
@@ -457,7 +477,8 @@ public class Selling extends GenericModel {
      * @return String 生成的模板数据
      *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
-    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market, String action) {
+    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
+                                                  String action) {
         Map args = GTs.newMap("sellingList", sellingList).build();
         args.put("action", action);
         return GTs.render(String.format("Flat.File.%s.%s", templateType, market), args);

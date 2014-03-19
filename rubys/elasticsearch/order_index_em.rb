@@ -10,6 +10,7 @@ select s.asin, s.upc, o.orderId, o.account_id, group_concat(distinct(oi.promotio
 from Orderr o
 left join OrderItem oi ON o.orderId=oi.order_orderId
 left join Selling s ON oi.selling_sellingId=s.sellingId
+where createDate>='2014-01-01'
 group by o.orderId
 SQL
 

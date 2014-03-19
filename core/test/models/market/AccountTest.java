@@ -28,7 +28,7 @@ public class AccountTest extends UnitTest {
         FactoryBoy.deleteAll();
     }
 
-    @Test
+    //    @Test
     public void testLoginAmazonSellerCenterStep1DE() throws IOException {
         Account acc = FactoryBoy.create(Account.class, "de");
         acc.cookieStore().clear();
@@ -46,7 +46,7 @@ public class AccountTest extends UnitTest {
         assertThat(pairs.get("password"), is(acc.password));
     }
 
-    @Test
+    //    @Test
     public void testLoginAmazonSellerCenter() {
         Account acc = FactoryBoy.create(Account.class, "de");
         acc.cookieStore().clear();
@@ -56,7 +56,7 @@ public class AccountTest extends UnitTest {
     }
 
 
-    @Test
+    //    @Test
     public void testLoginAmazonSellerCenterUS() {
         Account acc = FactoryBoy.create(Account.class, "us");
         acc.cookieStore().clear();
@@ -65,12 +65,38 @@ public class AccountTest extends UnitTest {
         assertThat(acc.cookie("at-main"), is(notNullValue()));
     }
 
-    @Test
+    //    @Test
     public void testLoginAmazonSellerCenterUK() {
         Account acc = FactoryBoy.create(Account.class, "uk");
         acc.cookieStore().clear();
         acc.loginAmazonSellerCenter();
 
         assertThat(acc.cookie("at-acbuk"), is(notNullValue()));
+    }
+
+    //    @Test
+    public void testLoginAmazonSellerCenterIT() {
+        Account acc = FactoryBoy.create(Account.class, "it");
+        acc.cookieStore().clear();
+        acc.loginAmazonSellerCenter();
+
+        assertThat(acc.cookie("at-acbde"), is(notNullValue()));
+    }
+
+    //    @Test
+    public void testLoginAmazonSellerCenterJP() {
+        Account acc = FactoryBoy.create(Account.class, "jp");
+        acc.cookieStore().clear();
+        acc.loginAmazonSellerCenter();
+
+        assertThat(acc.cookie("at-acbjp"), is(notNullValue()));
+    }
+
+    @Test
+    public void testClickReview() {
+        Account acc = FactoryBoy.create(Account.class, "it");
+        AmazonListingReview review = FactoryBoy.create(AmazonListingReview.class);
+        review.reviewId = "R9Q4PFVIMG4Q7";
+        acc.clickReview(review, true);
     }
 }

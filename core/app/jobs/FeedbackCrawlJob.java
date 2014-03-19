@@ -54,7 +54,7 @@ public class FeedbackCrawlJob extends Job {
         List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
             if(acc.type == M.AMAZON_DE) {
-                for(M market : Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_IT, M.AMAZON_FR)) {
+                for(M market : Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR)) {
                     FeedbackCrawlJob.fetchAccountFeedback(acc, market, 5);
                 }
             } else {
