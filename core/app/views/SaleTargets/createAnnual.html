@@ -19,9 +19,21 @@
       </tr>
 
       <tr>
+        <th>销售额</th>
+        <td>
+          <input type="text" name="st.saleAmounts" value="${st.saleAmounts}">
+        </td>
+
+        <th>利润率</th>
+        <td>
+          <input type="text" name="st.profitMargin" value="${st.profitMargin}">
+        </td>
+      </tr>
+
+      <tr>
         <th>年份</th>
         <td>
-          #{select_year  name: "st.targetYear", value: st.targetYear/}
+            #{select_year  name: "st.targetYear", value: st.targetYear/}
         </td>
 
         <th>单据状态</th>

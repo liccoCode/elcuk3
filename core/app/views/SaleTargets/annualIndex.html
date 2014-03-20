@@ -17,6 +17,8 @@
         <th>主题</th>
         <th>类型</th>
         <th>年份</th>
+        <th>销售额</th>
+        <th>利润率</th>
         <th>制单人</th>
         <th>制单时间</th>
         <th>State</th>
@@ -32,12 +34,14 @@
         </td>
         <td style="color:${st.saleTargetType.typeColor()}">${st.saleTargetType}</td>
         <td>${st.targetYear}</td>
+        <td>${st.saleAmounts}</td>
+        <td>${st.profitMargin}</td>
         <td>${st.createuser.username}</td>
         <td>${st.createDate}</td>
         <td>${st.state.label()}</td>
       </tr>
       <tr id="${st.id}" style="display:none;">
-        <td colspan="7" style="padding:0;border:none">
+        <td colspan="10" style="padding:0;border:none">
           <table class="table  table-condensed table-bordered">
             <tr style="background-color:#DCDCDC">
               <th>#</th>

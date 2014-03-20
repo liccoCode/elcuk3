@@ -346,7 +346,7 @@ public class SaleTarget extends Model {
         child.saleTargetType = this.getChlidType();
         child.createuser = createuser;
         child.targetYear = this.targetYear;
-        child.targetMonth = child.targetMonth == null ? this.targetMonth : child.targetMonth;
+        if(child.targetMonth == null) child.targetMonth = this.targetMonth;
         return child;
     }
 

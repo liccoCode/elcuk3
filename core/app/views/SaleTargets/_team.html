@@ -13,6 +13,18 @@
   </tr>
 
   <tr>
+    <th>销售额</th>
+    <td>
+      <input type="text" name="st.saleAmounts" value="${st.saleAmounts}">
+    </td>
+
+    <th>利润率</th>
+    <td>
+      <input type="text" name="st.profitMargin" value="${st.profitMargin}">
+    </td>
+  </tr>
+
+  <tr>
     <th>年份</th>
     <td>
         #{select_year  name: "st.targetYear", value: st.targetYear, disabled: true/}
@@ -51,8 +63,8 @@
     #{list items:saleTargets, as:'sa'}
       <tr>
         <td>
-            #{select_month name: "st.targetMonth",id:"${sa_index}_targetMonth", value: sa.targetMonth, class: "span1",
-        disabled: true/}
+            #{select_month name: "childs[${sa_index - 1}].targetMonth", value: sa.targetMonth, class: "span1",
+            disabled: true/}
         </td>
         <td>
           <div class="input-prepend">
@@ -62,10 +74,11 @@
           </div>
         *{ 主键 ID }*
           <input type="hidden" name="childs[${sa_index - 1}].id" value="${sa.id}">
-        *{ 销售额 }*
           <input type="hidden" name="childs[${sa_index - 1}].fid" value="${sa.fid}">
         *{ 父销售目标 id }*
           <input type="hidden" name="childs[${sa_index - 1}].parentId" value="${sa.parentId}">
+          <input type="hidden" name="childs[${sa_index - 1}].targetYear" value="${sa.targetYear}">
+          <input type="hidden" name="childs[${sa_index - 1}].targetMonth" value="${sa.targetMonth}">
         </td>
 
         <td>
@@ -78,6 +91,6 @@
     #{/list}
 </table>
 
- #{include 'SaleTargets/_verify.html'/}
+    #{include 'SaleTargets/_verify.html'/}
 </div>
 #{/form}

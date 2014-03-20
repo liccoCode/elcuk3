@@ -97,11 +97,15 @@ public class SaleTargets extends Controller {
             flash.error(String.format("已经存在 %s 年度的销售目标！", st.targetYear));
             show(st.id);
         }
-        if(!Validation.hasErrors()) {
-            st.save();
-            if(childs != null) st.saveOrUpdateChild(childs, User.findByUserName(Secure.Security.connected()));
+        st.save();
+        if(childs != null) st.saveOrUpdateChild(childs, User.findByUserName(Secure.Security.connected()));
+        if(Validation.hasErrors()) {
+            List<SaleTarget> saleTargets = SaleTarget.find("parentId=?", st.id).fetch();
+            if(saleTargets.size() == 0) saleTargets = st.beforeDetails();
+            render("SaleTargets/show.html", st, saleTargets);
+        } else {
+            flash.success("更新成功");
         }
-        flash.success("更新成功");
         show(st.id);
     }
 
