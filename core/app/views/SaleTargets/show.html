@@ -1,10 +1,15 @@
 #{extends 'main_full.html'/}
 #{set title:"销售目标#" + st.id /}
-#{set 'moreScripts'}
-#{/set}
 
 <div class="row">
-  <div class="span12" style="margin-left:385px;">  *{ 销售额 }*
+  <div class="span12" style="margin-left:385px;">
+  #{if st.state == models.SaleTarget.S.AUDITED}
+    <div class="alert alert-error">
+      <p style="text-align:center;">销售目标 ${st.id} 已经被审核，所以不能再对销售目标做修改
+      </p>
+    </div>
+  #{/if}
+
   #{errorMsgs /}
   #{flash_alert /}
 

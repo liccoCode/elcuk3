@@ -1,8 +1,6 @@
 package controllers;
 
-import com.alibaba.fastjson.TypeReference;
 import helper.DBUtils;
-import helper.J;
 import helper.Webs;
 import models.SaleTarget;
 import models.User;
@@ -105,5 +103,22 @@ public class SaleTargets extends Controller {
         }
         flash.success("更新成功");
         show(st.id);
+    }
+
+    /**
+     * 审核销售目标
+     *
+     * @param id
+     */
+    public static void verify(Long id) {
+        SaleTarget st = SaleTarget.findById(id);
+        if(st != null) {
+            st.state = SaleTarget.S.AUDITED;
+            st.save();
+            flash.success("审核成功");
+        } else {
+            flash.error("审核失败");
+        }
+        show(id);
     }
 }
