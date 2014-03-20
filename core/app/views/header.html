@@ -115,8 +115,12 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="@{SaleTargets.annualIndex()}">年度销售目标</a></li>
-              <li><a href="@{SaleTargets.monthIndex()}">月度销售目标</a></li>
+              #{power.ck "saletargets.annualindex"}
+                <li><a href="@{SaleTargets.annualIndex()}">年度销售目标</a></li>
+              #{/power.ck}
+              #{power.ck "saletargets.monthindex"}
+                <li><a href="@{SaleTargets.monthIndex()}">月度销售目标</a></li>
+              #{/power.ck}
             </ul>
           </li>
         #{/power.ck}

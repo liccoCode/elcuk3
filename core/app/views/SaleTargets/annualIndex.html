@@ -3,11 +3,12 @@
 #{set 'moreScripts'}
 #{/set}
 
-<div class="btn-toolbar" id="btns">
-  <div class="btn-group">
-    <a href="@{SaleTargets.createAnnual()}" class="btn btn-success" target="_blank">Add New</a>
-  </div>
+#{power.ck "saletargets.createannual"}
+<div class="btn-toolbar">
+  <a href="@{SaleTargets.createAnnual()}" class="btn btn-success" target="_blank">新增年度目标</a>
 </div>
+#{/power.ck}
+
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-bordered">
@@ -27,7 +28,7 @@
         </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st.id}">
           <span><i class="icon-reorder"></i></span>
-          ${st.theme}
+        ${st.theme}
         </td>
         <td style="color:${st.saleTargetType.typeColor()}">${st.saleTargetType}</td>
         <td>${st.targetYear}</td>
@@ -59,7 +60,7 @@
                   ${st.theme}
                   </td>
                   <td style="color:${st.saleTargetType.typeColor()}">
-                    ${st.saleTargetType}
+                  ${st.saleTargetType}
                   </td>
                   <td>${st.targetYear}</td>
                   <td>${st.saleAmounts}</td>

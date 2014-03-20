@@ -30,11 +30,13 @@ import java.util.Set;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class SaleTargets extends Controller {
 
+    @Check("saletargets.annualindex")
     public static void annualIndex() {
         List<SaleTarget> salesTargets = SaleTarget.find("saleTargetType=?", SaleTarget.T.YEAR).fetch();
         render(salesTargets);
     }
 
+    @Check("saletargets.monthindex")
     public static void monthIndex() {
         Set<Team> teams = User.findByUserName(Secure
                 .Security.connected()).teams;
@@ -57,11 +59,13 @@ public class SaleTargets extends Controller {
         render(st, saleTargets);
     }
 
+    @Check("saletargets.createannual")
     public static void createAnnual() {
         SaleTarget st = new SaleTarget();
         render(st);
     }
 
+    @Check("saletargets.createannual")
     public static void doCreateAnnual(SaleTarget st) {
         validation.valid(st);
         st.createuser = User.findByUserName(Secure.Security.connected());
