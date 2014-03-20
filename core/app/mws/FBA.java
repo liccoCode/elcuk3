@@ -339,6 +339,9 @@ public class FBA {
                     case AMAZON_US:
                         config.setServiceURL(MWSEndpoint.US.toString());
                         break;
+                    case AMAZON_IT:
+                        config.setServiceURL(MWSEndpoint.IT.toString());
+                        break;
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
