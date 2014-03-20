@@ -212,13 +212,11 @@ public class SaleTarget extends Model {
      * 数据校验
      */
     public void validate() {
-        Validation.required("目标年份", this.targetYear);
+        Validation.required("年份", this.targetYear);
         Validation.required("主题", this.theme);
         if(!this.saleTargetType.equals(T.YEAR) && !this.saleTargetType.equals(T.TEAM)) {
-            Validation.required("", this.targetMonth);
+            Validation.required("月份", this.targetMonth);
         }
-        Validation.required("目标年份", this.targetYear);
-
     }
 
     /**
@@ -337,7 +335,6 @@ public class SaleTarget extends Model {
 
     /**
      * 从父对象 copy 出 主题、备注 属性赋值给子对象
-     * 同时根据父对象的 saleTargetType 来推导设置子对象的 saleTargetType
      *
      * @param child      子销售对象
      * @param createUser 创建人

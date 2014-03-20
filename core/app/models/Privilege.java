@@ -176,6 +176,7 @@ public class Privilege extends Model {
 
 
         //销售目标控制器
+        privileges.add(new Privilege("saletarget", "目标模块"));
         privileges.add(new Privilege("saletargets.annualindex", "年度目标页面"));
         privileges.add(new Privilege("saletargets.monthindex", "月度目标页面"));
         privileges.add(new Privilege("saletargets.createannual", "创建年度目标"));
