@@ -446,7 +446,7 @@ public class User extends Model {
         Iterator<Team> iterator = user.teams.iterator();
         while(iterator.hasNext()) {
             Team team = iterator.next();
-            List<Category> categoryList = team.getCategorys();
+            List<Category> categoryList = team.categorys;
             categories.addAll(categoryList);
         }
         return categories;

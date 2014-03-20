@@ -49,6 +49,9 @@ public class Team extends Model {
     @Expose
     public String memo;
 
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public List<Category> categorys;
+
 
     @Override
     public String toString() {
@@ -62,8 +65,7 @@ public class Team extends Model {
         /**
          * 1. Category上有没有绑定的 Team
          */
-        List<Category> categorys = getCategorys();
-        if(categorys != null && categorys.size() > 0) {
+        if(this.categorys != null && this.categorys.size() > 0) {
             Validation.addError("", String.format("拥有 %s categorys 关联, 无法删除.", categorys.size()));
 
         }
@@ -127,16 +129,6 @@ public class Team extends Model {
      */
     public static void clearUserTeamsCache(User user) {
         TEAM_CACHE.remove(user.username);
-    }
-
-    /**
-     * Team的所有Category
-     *
-     * @return
-     */
-    public List<Category> getCategorys() {
-        List<Category> categorys = Category.find("team_id=?", this.id).fetch();
-        return categorys;
     }
 
 
