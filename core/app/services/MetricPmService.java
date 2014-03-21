@@ -1,6 +1,8 @@
 package services;
 
+import com.alibaba.fastjson.JSONObject;
 import helper.Caches;
+import helper.Dates;
 import models.product.Category;
 import models.product.Product;
 import models.view.highchart.HighChart;
@@ -15,6 +17,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Calendar;
 
+import com.alibaba.fastjson.JSONArray;
+
 /**
  * PM首页显示图形需要的数据
  * User: cary
@@ -22,6 +26,69 @@ import java.util.Calendar;
  * Time: 下午6:20
  */
 public class MetricPmService {
+
+    /**
+     * 饼状图
+     * @param type
+     * @param year
+     * @param team
+     * @return
+     */
+    public static Series.Pie saleCategoryPie(String type, int year, Team team) {
+        if(type.equals("sale")) {
+            return saleCategoryPie(year, team);
+        } else if(type.equals("profit")) {
+            return profitCategoryPie(year, team);
+        } else if(type.equals("teamsale")) {
+            return teamSalePie(year);
+        } else if(type.equals("teamprofit")) {
+            return teamProfitPie(year);
+        } else
+            return null;
+    }
+
+    /**
+     * 曲线图计算
+     *
+     * @param type
+     * @param year
+     * @param team
+     * @return
+     */
+    public static HighChart categoryLine(final String type, final int year, final Team team) {
+        if(type.equals("profitrateline")) {
+            return profitrateline(type, year, team);
+        } else if(type.equals("salefeeline")) {
+            return salefeeline(type, year, team);
+        }
+        return null;
+    }
+
+
+    /**
+     * 柱状图计算
+     *
+     * @param type
+     * @param year
+     * @param team
+     * @return
+     */
+    public static HighChart categoryColumn(final String type, final int year, final Team team) {
+        String key = Caches.Q.cacheKey(type, year, team.name);
+        HighChart columnChart = Cache.get(key, HighChart.class);
+        if(columnChart != null) return columnChart;
+        synchronized(key.intern()) {
+            columnChart = Cache.get(key, HighChart.class);
+            if(columnChart != null) return columnChart;
+            columnChart = new HighChart(Series.COLUMN);
+            columnChart.series(saleCategoryColumn(type, year, team));
+            columnChart.series(saleTaskCategoryColumn(type, year, team));
+            Cache.add(key, columnChart, "8h");
+        }
+        return columnChart;
+    }
+
+
     /**
      * 饼状图
      *
@@ -31,7 +98,6 @@ public class MetricPmService {
      * @return
      */
     public static HighChart categoryPie(final String type, final int year, final Team team) {
-        System.out.println(":::::::::::::::::" + type);
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
@@ -45,14 +111,6 @@ public class MetricPmService {
         return pieChart;
     }
 
-    public static Series.Pie saleCategoryPie(String type, int year, Team team) {
-        if(type.equals("sale")) {
-            return saleCategoryPie(year, team);
-        } else if(type.equals("profit")) {
-            return profitCategoryPie(year, team);
-        } else
-            return null;
-    }
 
     /**
      * 销售额百分比
@@ -63,27 +121,51 @@ public class MetricPmService {
      */
     public static Series.Pie saleCategoryPie(int year, Team team) {
         if(team == null) throw new FastRuntimeException("此方法 Team 必须指定");
-        Date begin = DateTime.now().withYear(year).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
+        //年的第一天
+        Date begin = Dates.startDayYear(year);
+        Date end = Dates.endDayYear(year);
         List<Category> categorys = team.categorys;
         float totalsalefee = 0f;
         for(Category category : categorys) {
-            List<Product> products = category.products;
-            for(Product product : products) {
-                MetricProfitService service = new MetricProfitService(begin, end, null,
-                        product.sku, null);
-                totalsalefee = totalsalefee + service.esSaleFee();
-            }
+            MetricProfitService service = new MetricProfitService(begin, end, null,
+                    null, null, category.categoryId);
+            totalsalefee = totalsalefee + service.esSaleFee();
         }
-        System.out.println("sdf" + team.name);
         Series.Pie pie = new Series.Pie(team.name + " " + year + "销售额目标百分比");
-        pie.add(233f, "销售额");
-        pie.add(43f, "销售额2");
-        float task = 10000f - 233f - 43f;
+        if(totalsalefee == 0f)
+            totalsalefee = 1;
+        pie.add(totalsalefee, "销售额");
+        float task = 10000f - totalsalefee;
         if(task < 0)
             task = 0;
         pie.add(task, "未完成目标");
-        int a = 0;
+        return pie;
+    }
+
+    /**
+     * 销售额百分比
+     *
+     * @param year
+     * @return
+     */
+    public static Series.Pie teamSalePie(int year) {
+        //年的第一天
+        Date begin = Dates.startDayYear(year);
+        Date end = Dates.endDayYear(year);
+        List<Team> teams = Team.findAll();
+        Series.Pie pie = new Series.Pie(year + "TEAM销售额百分比");
+        for(Team team : teams) {
+            List<Category> categorys = team.categorys;
+            float totalsalefee = 0f;
+            for(Category category : categorys) {
+                MetricProfitService service = new MetricProfitService(begin, end, null,
+                        null, null, category.categoryId);
+                totalsalefee = totalsalefee + service.esSaleFee();
+            }
+            if(totalsalefee == 0f)
+                totalsalefee = 1;
+            pie.add(totalsalefee, team.name + "销售额");
+        }
         return pie;
     }
 
@@ -96,11 +178,15 @@ public class MetricPmService {
      */
     public static Series.Pie profitCategoryPie(int year, Team team) {
         if(team == null) throw new FastRuntimeException("此方法 Team 必须指定");
-        Date begin = DateTime.now().withYear(year).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
+        //年的第一天
+        Date begin = Dates.startDayYear(year);
+        Date end = Dates.endDayYear(year);
         List<Category> categorys = team.categorys;
         float totalsaleprofit = 0f;
         for(Category category : categorys) {
+            /**
+             * 利润必须指定SKU计算
+             */
             List<Product> products = category.products;
             for(Product product : products) {
                 MetricProfitService service = new MetricProfitService(begin, end, null,
@@ -108,40 +194,49 @@ public class MetricPmService {
                 totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
             }
         }
-        System.out.println("sdf" + team.name);
         Series.Pie pie = new Series.Pie(team.name + " " + year + "利润目标百分比");
-        pie.add(233f, "利润");
-        pie.add(43f, "利润2");
-        float task = 10000f - 233f - 43f;
+        if(totalsaleprofit == 0) {
+            totalsaleprofit = 1;
+        }
+        pie.add(totalsaleprofit, "利润");
+        float task = 10000f - totalsaleprofit;
         if(task < 0)
             task = 0;
         pie.add(task, "未完成目标");
-        int a = 0;
         return pie;
     }
 
+
     /**
-     * 柱状图计算
+     * 利润百分比
      *
-     * @param type
      * @param year
-     * @param team
      * @return
      */
-    public static HighChart categoryColumn(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
-        HighChart columnChart = Cache.get(key, HighChart.class);
-        //if(columnChart != null) return columnChart;
-        synchronized(key.intern()) {
-            columnChart = Cache.get(key, HighChart.class);
-            if(columnChart != null) return columnChart;
-            columnChart = new HighChart(Series.COLUMN);
-            columnChart.series(saleCategoryColumn(type, year, team));
-            columnChart.series(saleTaskCategoryColumn(type, year, team));
-            Cache.add(key, columnChart, "8h");
+    public static Series.Pie teamProfitPie(int year) {
+        //年的第一天
+        Date begin = Dates.startDayYear(year);
+        Date end = Dates.endDayYear(year);
+        List<Team> teams = Team.findAll();
+        Series.Pie pie = new Series.Pie(year + "TEAM利润百分比");
+        for(Team team : teams) {
+            List<Category> categorys = team.categorys;
+            float totalsaleprofit = 0f;
+            for(Category category : categorys) {
+                List<Product> products = category.products;
+                for(Product product : products) {
+                    MetricProfitService service = new MetricProfitService(begin, end, null,
+                            product.sku, null);
+                    totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
+                }
+            }
+            if(totalsaleprofit == 0f)
+                totalsaleprofit = 1;
+            pie.add(totalsaleprofit, team.name + "利润");
         }
-        return columnChart;
+        return pie;
     }
+
 
     /**
      * 销售额柱状图
@@ -161,14 +256,11 @@ public class MetricPmService {
             List<Category> categorys = team.categorys;
             float totalsale = 0f;
             for(Category category : categorys) {
-                List<Product> products = category.products;
-                for(Product product : products) {
-                    MetricProfitService service = new MetricProfitService(begin, end, null,
-                            product.sku, null);
-                    totalsale = totalsale + service.esSaleFee();
-                }
+                MetricProfitService service = new MetricProfitService(begin, end, null,
+                        null, null, category.categoryId);
+                totalsale = totalsale + service.esSaleFee();
             }
-            column.add(100f, i);
+            column.add(totalsale, i);
         }
 
         return column;
@@ -205,24 +297,87 @@ public class MetricPmService {
 
 
     /**
-     * 曲线图计算
+     * TEAM每个Category销售额曲线图
      *
      * @param type
      * @param year
      * @param team
      * @return
      */
-    public static HighChart categoryLine(final String type, final int year, final Team team) {
+    public static HighChart salefeeline(final String type, final int year, final Team team) {
+
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart lineChart = Cache.get(key, HighChart.class);
         //if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
-            lineChart = Cache.get(key, HighChart.class);
-            if(lineChart != null) return lineChart;
+            lineChart = new HighChart(Series.LINE);
+            lineChart.title = "销售额";
+            List<Category> categorys = team.getCategorys();
+            for(Category category : categorys) {
+                lineChart.series(esSaleFeeLine(category, year));
+            }
+            Cache.add(key, lineChart, "8h");
+        }
+        return lineChart;
+    }
+
+
+    /**
+     * 每个Category销售额
+     *
+     * @param category
+     * @param year
+     * @return
+     */
+    public static Series.Line esSaleFeeLine(Category category, int year) {
+        Series.Line line = new Series.Line(category.name);
+
+        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-30).toDate();
+        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
+
+        //   Date end = DateTime.now().withTimeAtStartOfDay().withYear(2013).toDate();
+        //  Date begin = DateTime.now().withTimeAtStartOfDay().withYear(2013).plusDays(-30).toDate();
+
+
+        //按照category计算每天的销量
+        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+                null, null, category.categoryId);
+        JSONArray entries = profitservice.dashboarSaleFee();
+        for(Object o : entries) {
+            JSONObject entry = (JSONObject) o;
+
+            line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+        }
+
+//        DateTime datePointer = new DateTime(begin);
+//        while(datePointer.getMillis() <= end.getTime()) {
+//            line.add(0f, Dates.date2JDate(begin));
+//            datePointer = datePointer.plusDays(1);
+//        }
+        //line.add(Dates.date2JDate(begin),100f);
+        //line.add(Dates.date2JDate(end),1000f);
+        line.sort();
+
+        return line;
+    }
+
+
+    /**
+     * TEAM每月利润率曲线图
+     *
+     * @param type
+     * @param year
+     * @param team
+     * @return
+     */
+    public static HighChart profitrateline(final String type, final int year, final Team team) {
+        String key = Caches.Q.cacheKey(type, year, team.name);
+        HighChart lineChart = Cache.get(key, HighChart.class);
+        if(lineChart != null) return lineChart;
+        synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
             lineChart.series(profitCategoryLine(type, year, team));
             lineChart.series(profitTaskCategoryLine(type, year, team));
-
             Cache.add(key, lineChart, "8h");
         }
         return lineChart;

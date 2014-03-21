@@ -30,12 +30,17 @@ $ ->
         LoadMask.unmask(mask_selector)
       )
 
+
+
   # 重新绘制所有的 Pie 图
   drawPies = (year,team) ->
     new PieChart("sale_percent").percent('sale', year,team)
     new PieChart("profit_percent").percent('profit', year,team)
     new PieChart("sale_column").percent('salecolumn', year,team)
-    new PieChart("profitrate_column").percent('profitratecolumn', year,team)
+    new PieChart("profitrate_line").percent('profitrateline', year,team)
+    new PieChart("teamsale_percent").percent('teamsale', year,team)
+    new PieChart("teamprofit_percent").percent('teamprofit', year,team)
+    new PieChart("salefee_line").percent('salefeeline', year,team)
 
 
   $('#orders button[name="search"]').click ->

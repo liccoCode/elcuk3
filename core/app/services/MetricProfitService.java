@@ -2,14 +2,13 @@ package services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import helper.DBUtils;
-import helper.ES;
-import helper.Promises;
+import helper.*;
 import models.market.M;
 import models.market.Orderr;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Product;
+import models.view.highchart.Series;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
@@ -39,6 +38,8 @@ public class MetricProfitService {
     public String sku;
     public String sellingId;
 
+    public String category;
+
     public MetricProfitService(Date begin, Date end, M market,
                                String sku, String sellingId) {
         this.begin = begin;
@@ -48,6 +49,17 @@ public class MetricProfitService {
         this.sellingId = ES.parseEsString(sellingId);
         checkParam();
     }
+
+    public MetricProfitService(Date begin, Date end, M market,
+                               String sku, String sellingId, String category) {
+        this.begin = begin;
+        this.end = end;
+        this.market = market;
+        this.sku = sku;
+        this.sellingId = ES.parseEsString(sellingId);
+        this.category = category;
+    }
+
 
     public String parseEsSku() {
         return ES.parseEsString(sku).toLowerCase();
@@ -98,8 +110,6 @@ public class MetricProfitService {
                                 //销售费用项目
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
-
-        System.out.println("xxx::::::::::::::::" + search.toString());
         return getEsTermsTotal(search, "salefee");
     }
 
@@ -181,6 +191,21 @@ public class MetricProfitService {
         if(qty != 0f) {
             avgprice = fee / qty;
         }
+
+        //如果运价为0，则直接从采购计划中获取
+        if(avgprice == 0) {
+            String sql = "select price From procureunit "
+                    + " where sku='" + this.sku + "' "
+                    + " order by createDate desc limit 1 ";
+            List<Map<String, Object>> rows = DBUtils.rows(sql);
+            if(rows != null && rows.size() > 0) {
+                String price = (String) rows.get(0).get("price");
+                if(StringUtils.isBlank(price)) {
+                    price = "0";
+                }
+                avgprice = helper.Currency.CNY.toUSD(new Float(price));
+            }
+        }
         return avgprice;
     }
 
@@ -203,7 +228,7 @@ public class MetricProfitService {
 
 
     /**
-     * 不用运输方式运价
+     * 不同运输方式运价
      */
     public F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> shipTypePrice() {
         /**
@@ -568,9 +593,16 @@ public class MetricProfitService {
     private QueryBuilder querybuilder() {
 
         BoolQueryBuilder qb = QueryBuilders
-                .boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
+                .boolQuery();
+        if(StringUtils.isNotBlank(this.sku)) {
+            qb.must(QueryBuilders.termQuery("sku", this.parseEsSku()));
+        }
 
-        if(!StringUtils.isBlank(this.sellingId)) {
+        if(StringUtils.isNotBlank(this.category)) {
+            qb.must(QueryBuilders.prefixQuery("sku", this.category));
+        }
+
+        if(StringUtils.isNotBlank(this.sellingId)) {
             qb.must(QueryBuilders.termQuery("sellingid", this.parseEsSellingId()));
         }
         return qb;
@@ -606,4 +638,38 @@ public class MetricProfitService {
         return boolFilter;
     }
 
+
+    /**
+     * 计算PM的DASHBoard的每日的所有Category的日销量
+     */
+    public JSONArray dashboarSaleFee() {
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(FacetBuilders.dateHistogramFacet("units")
+                        .keyField("date")
+                        .valueField("cost_in_usd")
+                        .interval("day")
+                        .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
+                        .facetFilter(this.filterbuilder(true)
+                                //销售费用项目
+                                .must(FilterBuilders.termFilter("fee_type", "productcharges"))
+                                .must(FilterBuilders.prefixFilter("sku",
+                                        this.category.toLowerCase()))
+                        )
+                ).size(0);
+        System.out.println(":::" + search.toString());
+        JSONObject result = ES.search("elcuk2", "salefee", search);
+        if(result == null) {
+            throw new FastRuntimeException("ES连接异常!");
+        }
+        JSONObject facets = result.getJSONObject("facets");
+        JSONObject units = null;
+        JSONArray entries = null;
+        if(facets != null) {
+            units = facets.getJSONObject("units");
+            entries = units.getJSONArray("entries");
+        }
+
+        return entries;
+
+    }
 }

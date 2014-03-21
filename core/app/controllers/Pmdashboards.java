@@ -44,13 +44,26 @@ public class Pmdashboards extends Controller {
         if(Validation.hasErrors())
             renderJSON(new Ret(false));
         String json = "";
-        if(type.equals("profitratecolumn")) {
+        /**
+         * 曲线
+         */
+        if(type.equals("profitrateline") ||
+                type.equals("salefeeline")
+                ) {
             json = J.json(MetricPmService
                     .categoryLine(type, year, teamobject));
-        } else if(type.equals("salecolumn")) {
+        }
+        /**
+         * 柱状
+         */
+        else if(type.equals("salecolumn")) {
             json = J.json(MetricPmService
                     .categoryColumn(type, year, teamobject));
-        } else {
+        }
+        /**
+         * 饼状
+         */
+        else {
             json = J.json(MetricPmService
                     .categoryPie(type, year, teamobject));
         }
