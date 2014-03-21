@@ -1,24 +1,20 @@
 package controllers;
 
-import helper.Dates;
 import helper.J;
-import models.market.M;
-import models.market.OrderItem;
-import models.market.Orderr;
-import models.product.Whouse;
+import models.User;
+import models.product.Category;
+import models.product.Product;
+import models.product.Team;
 import models.view.Ret;
-import models.view.dto.DashBoard;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import models.product.Team;
 import services.MetricPmService;
+import services.MetricProfitService;
 
-import java.util.List;
+import java.util.Date;
 import java.util.Set;
-
-import models.User;
 
 /**
  * Created by IntelliJ IDEA.
@@ -57,4 +53,33 @@ public class Pmdashboards extends Controller {
         renderJSON(json);
     }
 
+    /**
+     * 异常信息
+     */
+    public static void abnormal() {
+        User user = User.findByUserName(Secure.Security.connected());
+        Set<Team> teams = user.teams;
+
+        for(Team t : teams) {
+            //获取每个Team的异常信息
+            /**
+             * 1 获取每个Team所拥有的全部的Product
+             *
+             * 2 SKU的当天销售额对比同期(过去四周当天平均值）突然下降，默认下降20%
+             * 过去四周当天 将当前时间往后分别推四次每次一周得到同期当天的销售额除以4
+             * 如果当天的销售额小于平均值 >=20% 则此 SKU 为销量异常 SKU
+             *
+             */
+            for(Category c : t.categorys) {
+                //获得所有的 SKU
+                c.categorys(false);
+                //查询出所有 SKU 当天的利润率
+                for(Product p : c.products) {
+                    MetricProfitService met = new MetricProfitService(new Date(), new Date(), null, p.sku, null);
+                    Float nowSaleAmount = met.esSaleFee();
+
+                }
+            }
+        }
+    }
 }
