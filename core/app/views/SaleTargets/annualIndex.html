@@ -1,0 +1,88 @@
+#{extends 'main_full.html'/}
+#{set title:"年度目标 (${salesTargets.size()})"/}
+#{set 'moreScripts'}
+#{/set}
+
+#{power.ck "saletargets.createannual"}
+<div class="btn-toolbar">
+  <a href="@{SaleTargets.createAnnual()}" class="btn btn-success" target="_blank">新增年度目标</a>
+</div>
+#{/power.ck}
+
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-bordered">
+      <tr style="background-color:#DCDCDC">
+        <th>#</th>
+        <th>主题</th>
+        <th>类型</th>
+        <th>年份</th>
+        <th>销售额</th>
+        <th>利润率</th>
+        <th>制单人</th>
+        <th>制单时间</th>
+        <th>State</th>
+      </tr>
+    #{list items:salesTargets, as:'st'}
+      <tr>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st.id}">
+          <span><i class="icon-reorder"></i></span>
+          ${st.id}
+        </td>
+        <td>
+          <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.theme}</a>
+        </td>
+        <td style="color:${st.saleTargetType.typeColor()}">${st.saleTargetType}</td>
+        <td>${st.targetYear}</td>
+        <td>${st.saleAmounts}</td>
+        <td>${st.profitMargin}</td>
+        <td>${st.createuser.username}</td>
+        <td>${st.createDate}</td>
+        <td>${st.state.label()}</td>
+      </tr>
+      <tr id="${st.id}" style="display:none;">
+        <td colspan="10" style="padding:0;border:none">
+          <table class="table  table-condensed table-bordered">
+            <tr style="background-color:#DCDCDC">
+              <th>#</th>
+              <th>主题</th>
+              <th>类型</th>
+              <th>年份</th>
+              <th>销售额</th>
+              <th>利润率</th>
+              <th>制单人</th>
+              <th>制单时间</th>
+              <th>State</th>
+            </tr>
+              #{list items:st.getChild(), as:'st'}
+                <tr>
+                  <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st.id}">
+                    <span><i class="icon-reorder"></i></span>
+                    ${st.id}
+                  </td>
+                  <td>
+                    <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.theme}</a>
+                  </td>
+                  <td style="color:${st.saleTargetType.typeColor()}">
+                  ${st.saleTargetType}
+                  </td>
+                  <td>${st.targetYear}</td>
+                  <td>${st.saleAmounts}</td>
+                  <td>${st.profitMargin}</td>
+                  <td>${st.createuser.username}</td>
+                  <td>${st.createDate}</td>
+                  <td>${st.state.label()}</td>
+                </tr>
+                <tr id="${st.id}" style="display:none;">
+                  <td colspan="10" style="padding:0;border:none">
+                      #{render 'SaleTargets/_st_table_list.html', salesTargets: st.getChild()/}
+                  </td>
+                </tr>
+              #{/list}
+          </table>
+        </td>
+      </tr>
+    #{/list}
+    </table>
+  </div>
+</div>

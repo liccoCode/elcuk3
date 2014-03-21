@@ -1,0 +1,164 @@
+#{info_row title:'基本信息'/}
+#{form @SaleTargets.updateAnnual(), method: 'POST', id: "updateAnnualForm"}
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>主题</th>
+    <td>
+      <input type="text" name="st.theme" value="${st.theme}">
+    </td>
+    <th>类型</th>
+    <td style="color:${st.saleTargetType.typeColor()}">
+    ${st.saleTargetType}
+    </td>
+  </tr>
+
+  <tr>
+    <th>销售额</th>
+    <td>
+      <input type="text" name="st.saleAmounts" value="${st.saleAmounts}">
+    </td>
+
+    <th>利润率</th>
+    <td>
+      <input type="text" name="st.profitMargin" value="${st.profitMargin}">
+    </td>
+  </tr>
+
+  <tr>
+    <th>年份</th>
+    <td>
+        #{select_year  name: "st.targetYear", value: st.targetYear, disabled: true/}
+    </td>
+
+    <th>月份</th>
+    <td>
+        #{select_month name: "st.targetMonth", value: st.targetMonth, disabled: true/}
+    </td>
+  </tr>
+
+  <tr>
+    <th>Category</th>
+    <td>
+      <a href="@{Categorys.show(st.fid)}" target="_blank">${st.fidToName()}</a>
+    </td>
+
+    <th>单据状态</th>
+    <td>
+      <input type="text" value="${st.state.label()}" readonly>
+    </td>
+  </tr>
+
+  <tr>
+    <th>备注</th>
+    <td colspan="4">
+      <input type="text" class="span10" name="st.memo" value="${st.memo}">
+      <input type="hidden" name="st.id" value="${st.id}">
+    </td>
+  </tr>
+</table>
+
+    #{info_row title:'目标明细'/}
+    #{if saleTargets.size == 0}
+    该 Category 下未找到合适的 Product!
+    #{/if}
+    #{else }
+
+    <div style="margin-bottom:10px">
+      <select name="p.market" class="inline">
+        <option value="">市场</option>
+          #{list items:models.market.M.values(), as:'market'}
+            <option value="${market.name()}">${market.label()}</option>
+          #{/list}
+      </select>
+
+      <select name="p.shipmentType" class="inline">
+        <option value="">货运方式</option>
+          #{list items:models.procure.Shipment.T.values(), as:'shipmentType'}
+            <option value="${shipmentType.name()}">${shipmentType.label()}</option>
+          #{/list}
+      </select>
+
+      <button class="btn btn-primary" data-loading>搜索</button>
+    </div>
+
+    <div class="row-fluid">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>SKU</th>
+          <th>PS</th>
+          <th>当月天数</th>
+          <th>期望售价</th>
+          <th>期望采购价</th>
+          <th>SKU运费单价</th>
+          <th>关税和VAT单价</th>
+          <th>预计亚马逊费用</th>
+          <th>预计FBA费用</th>
+          <th>销售额</th>
+          <th>利润率</th>
+        </tr>
+          #{list items:saleTargets, as:'sa'}
+            <tr>
+              <td>
+                <a href="@{Products.show(sa.fid)}" target="_blank">${sa.fid}</a>
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.ps}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.days}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.expectPrice}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.expectDeliveryPrice}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.shipmentUnit}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.tariffAndVAT}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.expectAmazonPrice}">
+              </td>
+
+              <td>
+                <input type="text" style="width:50px" name="" id="" value="${sa.expectFBAPrice}">
+              </td>
+
+              <td>
+                <div class="input-prepend">
+                  <span class="add-on">$</span>
+                *{ 利润率 }*
+                  <input type="text" style="width:70px" name="childs[${sa_index - 1}].saleAmounts" value="${sa.saleAmounts}">
+                </div>
+
+              *{ 主键 ID }*
+                <input type="hidden" name="childs[${sa_index - 1}].id" value="${sa.id}">
+              *{ 外键 }*
+                <input type="hidden" name="childs[${sa_index - 1}].fid" value="${sa.fid}">
+              *{ 父销售目标 id }*
+                <input type="hidden" name="childs[${sa_index - 1}].parentId" value="${sa.parentId}">
+              </td>
+
+              <td>
+                <div class="input-append">
+                  <input type="text" name="childs[${sa_index - 1}].profitMargin" style="width:70px" value="${sa.profitMargin}">
+                  <span class="add-on">%</span>
+                </div>
+              </td>
+            </tr>
+          #{/list}
+      </table>
+    </div>
+        #{include 'SaleTargets/_verify.html'/}
+    #{/else}
+#{/form}

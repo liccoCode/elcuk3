@@ -1,0 +1,9 @@
+<select name="${_name}" value="${_value}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''}>
+#{set year: Integer.parseInt(new Date().format("yyyy"))/}
+
+#{list items:0..9, as:'i'}
+  <option ${_value ? (year + i == _value ? 'selected' : '') : ''} value="${year + i}" >${year +
+  i}</option>
+#{/list}
+</select>
+
