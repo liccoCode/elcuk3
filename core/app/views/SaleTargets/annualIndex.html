@@ -25,12 +25,12 @@
       </tr>
     #{list items:salesTargets, as:'st'}
       <tr>
-        <td>
-          <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.id}</a>
-        </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st.id}">
           <span><i class="icon-reorder"></i></span>
-        ${st.theme}
+          ${st.id}
+        </td>
+        <td>
+          <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.theme}</a>
         </td>
         <td style="color:${st.saleTargetType.typeColor()}">${st.saleTargetType}</td>
         <td>${st.targetYear}</td>
@@ -56,12 +56,12 @@
             </tr>
               #{list items:st.getChild(), as:'st'}
                 <tr>
-                  <td>
-                    <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.id}</a>
-                  </td>
                   <td style="cursor:pointer;" data-toggle="toggle" data-target="#${st.id}">
                     <span><i class="icon-reorder"></i></span>
-                  ${st.theme}
+                    ${st.id}
+                  </td>
+                  <td>
+                    <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.theme}</a>
                   </td>
                   <td style="color:${st.saleTargetType.typeColor()}">
                   ${st.saleTargetType}
