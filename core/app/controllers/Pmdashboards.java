@@ -70,14 +70,31 @@ public class Pmdashboards extends Controller {
              * 如果当天的销售额小于平均值 >=20% 则此 SKU 为销量异常 SKU
              *
              */
+            MetricProfitService met;
+            Float nowSaleAmount;
+            Float lastSaleAmount;
+            DateTime now = new DateTime();
+            DateTime last = null;
             for(Category c : t.categorys) {
-                //获得所有的 SKU
-                c.categorys(false);
-                //查询出所有 SKU 当天的利润率
+                //查询出所有 SKU
                 for(Product p : c.products) {
-                    MetricProfitService met = new MetricProfitService(new Date(), new Date(), null, p.sku, null);
-                    Float nowSaleAmount = met.esSaleFee();
+                    met = new MetricProfitService(now.toDate(), now.toDate(), null, p.sku, null);
+                    //获得当天销售额
+                    nowSaleAmount = met.esSaleFee();
+                    //同期销售额
+                    //分别拿到 过去四周 当天 销售额 的平均值
 
+                    for(int i = 0; i <= 4; i++) {
+                        //每次都减去7天
+                        last = now.plus(i * (-7));
+                        met.begin = last.toDate();
+                        met.end = last.toDate();
+                        lastSaleAmount = met.esSaleFee();
+                        if(nowSaleAmount <= (lastSaleAmount * 0.8)) {
+                            //此 SKU 销量异常
+
+                        }
+                    }
                 }
             }
         }
