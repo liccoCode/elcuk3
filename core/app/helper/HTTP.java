@@ -275,6 +275,8 @@ public class HTTP {
                                   Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
+            Logger.info("=============" + new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8") +
+                    "=============");
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toByteArray(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
