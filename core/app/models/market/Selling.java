@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
@@ -237,11 +238,9 @@ public class Selling extends GenericModel {
                     .put("mSku.0", this.merchantSKU)
                     .put("qty.0", "27") // 一页打 44 个
                     .put("fnSku.0", this.fnSku).build();
+            Logger.info("==================================== " + J.json(params) + " =========================");
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
-                    Arrays.asList(
-                            new BasicNameValuePair("model", J.json(params)),
-                            new BasicNameValuePair("labelType", "ItemLabel_A4_27")
-                    ));
+                    Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
     }
 
