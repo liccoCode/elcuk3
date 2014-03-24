@@ -14,7 +14,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -276,7 +275,6 @@ public class HTTP {
                                   Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
-            Logger.info("=============" + URLEncodedUtils.format(params, Charset.forName("UTF-8")) + "=============");
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toByteArray(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {

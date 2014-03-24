@@ -14,6 +14,7 @@ import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
@@ -238,7 +239,9 @@ public class Selling extends GenericModel {
                     .put("mSku.0", this.merchantSKU)
                     .put("qty.0", "27") // 一页打 44 个
                     .put("fnSku.0", this.fnSku).build();
-            Logger.info("==================================== " + J.json(params) + " =========================");
+            for(Cookie coo : this.account.cookieStore().getCookies()) {
+                Logger.info(" ===========" + coo.getName() + "=" + coo.getValue() + "============");
+            }
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
