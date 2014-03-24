@@ -625,11 +625,9 @@ public class Account extends Model {
         switch(type) {
             case AMAZON_UK:
             case AMAZON_DE:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
-                        "London", "LONDON", "UK", "NW6 7HY");
+            case AMAZON_IT:
             case AMAZON_US:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
-                        "London", "LONDON", "UK", "NW6 7HY");
+                return new Address("EasyAcc", "26 Furley Road", null, null, "London", "LONDON", "GB", "SE15 5UQ");
         }
         return null;
     }
