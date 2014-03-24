@@ -228,11 +228,7 @@ public class Account extends Model {
                         );
                     }
 
-
-                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE, IT
-                            StringUtils.isNotBlank(this.cookie("at-main")) || //US
-                            StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
-                            StringUtils.isNotBlank(this.cookie("at-acbjp"))) { //JP
+                    if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
                         HTTP.clearExpiredCookie();
                     } else {
@@ -256,6 +252,14 @@ public class Account extends Model {
                         "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
                                 " is not support!");
         }
+    }
+
+    private boolean haveCorrectCookie() {
+        return StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE
+                StringUtils.isNotBlank(this.cookie("at-acbit")) || //IT
+                StringUtils.isNotBlank(this.cookie("at-main")) || //US
+                StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
+                StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
     public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
