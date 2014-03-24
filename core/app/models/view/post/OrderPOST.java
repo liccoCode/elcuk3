@@ -107,7 +107,7 @@ public class OrderPOST extends ESPost<Orderr> {
                 .field("upc")
                 .field("asin")
                 .field("promotion_ids")
-        ).filter(boolFilter)
+        ).postFilter(boolFilter)
                 .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
         if(this.promotion != null) {

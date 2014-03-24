@@ -8,6 +8,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
             <ul class="dropdown-menu">
+              #{power.ck "pmdashboards.index"}
+              <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
+              #{/power.ck}
               <li><a href="@{Application.index()}">DashBoard</a></li>
               <li><a href="@{Users.home()}">Home</a></li>
               <li><a href="@{Notifications.index()}">Notys</a></li>
@@ -107,6 +110,20 @@
                 #{power.ck "feetypes.index"}
                   <li><a href="@{FeeTypes.index()}">费用类型</a></li>
                 #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
+
+        #{power.ck 'saletarget'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              #{power.ck "saletargets.annualindex"}
+                <li><a href="@{SaleTargets.annualIndex()}">年度销售目标</a></li>
+              #{/power.ck}
+              #{power.ck "saletargets.monthindex"}
+                <li><a href="@{SaleTargets.monthIndex()}">月度销售目标</a></li>
+              #{/power.ck}
             </ul>
           </li>
         #{/power.ck}

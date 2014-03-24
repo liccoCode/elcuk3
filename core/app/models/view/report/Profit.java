@@ -15,6 +15,11 @@ public class Profit {
      */
     public String sku;
     /**
+     * sellingId
+     */
+    public String sellingId;
+
+    /**
      * 市场
      */
     public M market;

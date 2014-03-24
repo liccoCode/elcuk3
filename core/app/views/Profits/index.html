@@ -24,7 +24,8 @@
 
     <div class="inline">
         #{select_enum name:'p.market', items:models.market.M.values(), value:p.market}
-          <option value="">Market</option>
+          <option value="market">Market</option>
+          <option value="total">汇总</option>
         #{/select_enum}
 
       <th>Category:</th>
@@ -67,7 +68,7 @@
         #{list items:profits, as:'pro'}
           <tr>
             <td>${pro.sku}</td>
-            <td>${pro.market.label()}</td>
+            <td>${pro.market?pro.market.label():"汇总"}</td>
             <td>${pro.totalprofit}</td>
             <td>${pro.profitrate}</td>
             <td>${pro.totalfee}</td>
