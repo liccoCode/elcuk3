@@ -619,17 +619,11 @@ public class Account extends Model {
     }
 
     /**
-     * 通过账户获取 FBA 的发货地址
+     * 通过账户获取 FBA 的发货地址;
      */
     public static Address address(M type) {
-        switch(type) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return new Address("EasyAcc", "26 Furley Road", null, null, "London", "LONDON", "GB", "SE15 5UQ");
-        }
-        return null;
+        // 统一为一个地址, 但接口参数预留
+        return new Address("EasyAcc", "26 Furley Road", null, null, "London", "LONDON", "GB", "SE15 5UQ");
     }
 
 
