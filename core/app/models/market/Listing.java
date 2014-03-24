@@ -16,6 +16,7 @@ import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -477,5 +478,21 @@ public class Listing extends GenericModel {
         //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
         this.closeWarnningTime = new Date();
         this.save();
+    }
+
+    /**
+     * 根据 sku 获取listingId 集合
+     *
+     * @param sku
+     * @return
+     */
+    public static List<String> getAllListingBySKU(String sku) {
+        List<String> listingIds = new ArrayList<String>();
+        SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku = ?").param(sku);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        for(Map<String, Object> row : rows) {
+            listingIds.add(row.get("listingId").toString());
+        }
+        return listingIds;
     }
 }
