@@ -50,7 +50,6 @@ module ActorBase
       post_body << MultiJson.dump({ index: { "_index" => @es_index, "_type" => @es_type, "_id" => row.delete(:id)} }) << "\n"
       post_body << MultiJson.dump(row) << "\n"
     end
-    # refer: https://github.com/celluloid/celluloid/wiki/Futures
     resp = HTTParty.post("#{ES_HOST}/_bulk", body: post_body)
     self.class.doc_size += rows.size
     print "Http Code: #{resp.code}; Handled: #{self.class.doc_size} docs #{self.current_actor}\r"
