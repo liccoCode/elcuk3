@@ -406,4 +406,16 @@ public class SaleTarget extends Model {
         old.targetMonth = this.targetMonth;
         old.save();
     }
+
+    public String getFidName() {
+        if(saleTargetType == T.TEAM) {
+            Team team = Team.findById(new Long(this.fid));
+            return team.name;
+        }
+        if(saleTargetType == T.MONTH) {
+            Team team = Team.findById(new Long(this.fid));
+            return team.name + targetMonth + "月";
+        }
+        return "";
+    }
 }

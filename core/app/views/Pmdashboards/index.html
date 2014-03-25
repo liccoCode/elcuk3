@@ -2,7 +2,9 @@
 #{set title:'Home' /}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
-    #{script 'Pmdashboards/pm.coffee'/}
+    #{script 'Pmdashboards/pmpie.coffee'/}
+    #{script 'Pmdashboards/pmdateline.coffee'/}
+    #{script 'Pmdashboards/pmcolumn.coffee'/}
 #{/set}
 
 <div class="row-fluid" id="orders" xmlns="http://www.w3.org/1999/html">
@@ -21,6 +23,8 @@
       <select year="${year}" name="year" style="width:130px;margin-left:20px;">
         <option value="${year}">${year}</option>
         <option value="${year-1}">${year-1}</option>
+        <option value="${year-2}">${year-2}</option>
+        <option value="${year-3}">${year-3}</option>
       </select>
     </div>
 
@@ -45,18 +49,28 @@
   #{info_row title:'每月销售额和利润'/}
     <div class="row-fluid">
       <div class="span6" style="height:450px;" id='sale_column'></div>
-      <div class="span6" style="height:450px;" id='profitrate_column'></div>
+      <div class="span6" style="height:450px;" id='profitrate_line'></div>
     </div>
   #{info_row title:'全年销售额和利润'/}
-
     <div class="row-fluid">
       <div class="span6" style="height:450px;" id='sale_percent'></div>
       <div class="span6" style="height:450px;" id='profit_percent'></div>
+    </div>
+
+  #{info_row title:'TEAM所占比重'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='teamsale_percent'></div>
+      <div class="span6" style="height:450px;" id='teamprofit_percent'></div>
     </div>
   </div>
 
   <div class="tab-pane fade active" id='product'>
   #{info_row title:'产品线状态'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='salefee_line'></div>
+      <div class="span6" style="height:450px;" id='saleqty_line'></div>
+    </div>
+
   </div>
 </div>
 

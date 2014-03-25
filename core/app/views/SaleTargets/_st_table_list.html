@@ -18,7 +18,7 @@
     ${st.id}
     </td>
     <td>
-      <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.theme}</a>
+      <a target="_blank" href="@{SaleTargets.show(st.id)}">${st.getFidName()}</a>
     </td>
     <td style="color:${st.saleTargetType.typeColor()}">
     ${st.saleTargetType}

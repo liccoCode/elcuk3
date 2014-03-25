@@ -7,6 +7,7 @@ import org.joda.time.format.DateTimeFormat;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -240,4 +241,30 @@ public class Dates {
         return cn(Dates.date2DateTime(time));
     }
 
+
+    /**
+     * 返回年的第一天
+     *
+     * @param year
+     * @return
+     */
+    public static Date startDayYear(int year) {
+        return DateTime.now().withYear(year).withDayOfYear(1).toDate();
+
+    }
+
+    /**
+     * 返回年的最后一天
+     *
+     * @param year
+     * @return
+     */
+    public static Date endDayYear(int year) {
+        DateTime date = DateTime.now().withYear(year);
+        //年的最后一天
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date.toDate());
+        return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate
+                ();
+    }
 }
