@@ -8,6 +8,7 @@ import models.product.Product;
 import models.product.Team;
 import models.view.Ret;
 import models.view.dto.AbnormalDTO;
+import models.view.post.AbnormalPost;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.data.validation.Validation;
@@ -61,16 +62,57 @@ public class Pmdashboards extends Controller {
     /**
      * 昨天销售额异常信息
      */
-    public static void day1SalesAmount() {
+    public static void day1SalesAmount(AbnormalPost p) {
         try {
-            List<AbnormalDTO> dtos = Cache.get(AbnormalFetchJob.AbnormalDTO_DAY1SALEASMOUNT_CACHE, List.class);
-            if(dtos == null) {
-                new AbnormalFetchJob().now();
-                throw new FastRuntimeException("正在后台计算中, 请稍后在尝试");
-            }
-            render("Pmdashboards/day1.html", dtos);
+            if(p == null) p = new AbnormalPost(AbnormalPost.T.DAY1);
+            List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
+            render("Pmdashboards/_day1SalesAmount.html", dtos, dtos, p);
         } catch(FastRuntimeException e) {
-            renderHtml("<h3>" + e.getMessage() + "</h3>");
+            renderHtml("<p>" + e.getMessage() + "</p>");
         }
     }
+
+    /**
+     * 历史销售额异常信息
+     * <p/>
+     * 历史销售额指的是：
+     * 上上周六 到 上周五 的销售额 对比 上个周期的销售额
+     */
+    public static void beforeSalesAmount(AbnormalPost p) {
+        try {
+            if(p == null) p = new AbnormalPost(AbnormalPost.T.BEFOREAMOUNT);
+            List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
+            render("Pmdashboards/_beforeSalesAmount.html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<p>" + e.getMessage() + "</p>");
+        }
+    }
+
+    /**
+     * 历史利润率异常信息
+     */
+    public static void beforeSalesProfit(AbnormalPost p) {
+        try {
+            if(p == null) p = new AbnormalPost(AbnormalPost.T.BEFOREPROFIT);
+            List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
+            render("Pmdashboards/_beforeSalesProfit.html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<p>" + e.getMessage() + "</p>");
+        }
+    }
+
+    /**
+     * review异常信息
+     */
+    public static void review(AbnormalPost p) {
+        try {
+            if(p == null) p = new AbnormalPost(AbnormalPost.T.REVIEW);
+            List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
+            render("Pmdashboards/_review.html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<p>" + e.getMessage() + "</p>");
+        }
+    }
+
+
 }

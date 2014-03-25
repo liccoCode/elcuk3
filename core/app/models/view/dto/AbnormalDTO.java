@@ -1,6 +1,13 @@
 package models.view.dto;
 
+import models.market.AmazonListingReview;
+import models.market.Listing;
+import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PM 首页异常信息
@@ -18,17 +25,17 @@ public class AbnormalDTO implements Serializable {
     /**
      * 上个周期的数据
      */
-    public float last = 0;
+    public float before = 0;
 
     /**
-     * 当前数据与上个周期内的数据的差值
+     * 当前数据与上个周期内的数据的差值百分比
      */
     public float difference = 0;
 
     /**
-     * 该属于哪个 对象
+     * sku
      */
-    public String fid;
+    public String sku;
 
     public enum T {
         /**
@@ -44,7 +51,12 @@ public class AbnormalDTO implements Serializable {
         /**
          * 上周销售额与上上周对比
          */
-        LAST
+        BEFOREAMOUNT,
+
+        /**
+         * 上周利润率与上上周对比
+         */
+        BEFOREPROFIT
     }
 
     /**
@@ -55,15 +67,32 @@ public class AbnormalDTO implements Serializable {
     public AbnormalDTO() {
     }
 
-    public AbnormalDTO(float today, float last, String fid, T abnormalType) {
+    /**
+     * 获取昨天新增的 AmazonListingReview
+     *
+     * @return
+     */
+    public List<AmazonListingReview> reviews() {
+        List<String> listingIds = Listing.getAllListingBySKU(this.sku);
+        List<AmazonListingReview> reviews = new ArrayList<AmazonListingReview>();
+        reviews.add((AmazonListingReview) AmazonListingReview.findById("B005K7192G_AMAZON.COM_R2RTPVR0DN4FYX"));
+        reviews.add((AmazonListingReview) AmazonListingReview.findById("B009HJQ2J8_AMAZON.COM_R1MXY7VLI0PYA"));
+        DateTime yesterday = DateTime.now().plusDays(-1);
+        //return AmazonListingReview.find("rating <= 3 AND listingId IN" + SqlSelect.inlineParam(listingIds) + "AND " +
+        //        "reviewDate >=?", yesterday).fetch();
+        return reviews;
+    }
+
+    public AbnormalDTO(float today, float before, float difference, String sku, T abnormalType) {
         this.today = today;
-        this.last = last;
-        this.fid = fid;
+        this.before = before;
+        this.difference = difference;
+        this.sku = sku;
         this.abnormalType = abnormalType;
     }
 
-    public AbnormalDTO(String fid, T abnormalType) {
-        this.fid = fid;
+    public AbnormalDTO(String sku, T abnormalType) {
+        this.sku = sku;
         this.abnormalType = abnormalType;
     }
 }

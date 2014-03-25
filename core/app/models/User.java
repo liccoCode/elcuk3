@@ -3,6 +3,7 @@ package models;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.DBUtils;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.product.Category;
@@ -10,6 +11,7 @@ import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
 import play.mvc.Scope;
@@ -17,14 +19,10 @@ import play.utils.FastRuntimeException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Iterator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import models.product.Team;
 

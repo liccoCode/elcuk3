@@ -488,8 +488,8 @@ public class Listing extends GenericModel {
      */
     public static List<String> getAllListingBySKU(String sku) {
         List<String> listingIds = new ArrayList<String>();
-        SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku = ?").param(sku);
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku=?").param(sku);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {
             listingIds.add(row.get("listingId").toString());
         }

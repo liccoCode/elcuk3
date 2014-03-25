@@ -64,14 +64,29 @@
   </div>
 
   <div class="tab-pane fade active" id='abnormalInfo'>
-  #{info_row title:'Review 异常'/}
-    <div id="review"></div>
-  #{info_row title:'SKU 销售额异常'/}
+    #{info_row title:'SKU 销售额异常'}
+      <ul>
+        <li>SKU的昨日销售额对比同期(过去四周当天平均值）突然下降下降20%</li>
+      </ul>
+    #{/info_row}
     <div id="day1SalesAmount"></div>
-  #{info_row title:'SKU 历史销售额异常'/}
+
+    #{info_row title:'SKU 历史销售额异常'}
+      <ul>
+        <li>上上周六 到 上周五 的销售额 对比 上个周期的销售额（默认差异5%）</li>
+      </ul>
+    #{/info_row}
     <div id="beforeSalesAmount"></div>
-  #{info_row title:'SKU 利润率异常'/}
-    <div id="beforeProfit"></div>
+
+    #{info_row title:'SKU 利润率异常'}
+      <ul>
+      <li>上上周六 到 上周五 的利润率 对比 上个周期的利润率（默认差异5%）</li>
+    </ul>
+    #{/info_row}
+    <div id="beforeSalesProfit"></div>
+
+    #{info_row title:'Review 异常'/}
+    <div id="review"></div>
   </div>
 </div>
 
