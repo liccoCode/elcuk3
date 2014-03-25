@@ -1,21 +1,14 @@
 package controllers;
 
-import helper.Dates;
 import helper.J;
-import models.market.M;
-import models.market.OrderItem;
-import models.market.Orderr;
-import models.product.Whouse;
 import models.view.Ret;
-import models.view.dto.DashBoard;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import models.product.Team;
-import services.MetricPmService;
+import query.PmDashboardESQuery;
 
-import java.util.List;
 import java.util.Set;
 
 import models.User;
@@ -47,24 +40,38 @@ public class Pmdashboards extends Controller {
         /**
          * 曲线
          */
-        if(type.equals("profitrateline") ||
-                type.equals("salefeeline")
-                ) {
-            json = J.json(MetricPmService
-                    .categoryLine(type, year, teamobject));
+        if(type.equals("profitrateline")) {
+            /**
+             * 月利润率
+             */
+            json = J.json(PmDashboardESQuery
+                    .profitrateline(type, year, teamobject));
+        } else if(type.equals("salefeeline")) {
+            /**
+             * 销售额曲线
+             */
+            json = J.json(PmDashboardESQuery
+                    .salefeeline(type, year, teamobject));
+
+        } else if(type.equals("saleqtyline")) {
+            /**
+             * 销量曲线
+             */
+            json = J.json(PmDashboardESQuery
+                    .saleqtyline(type, year, teamobject));
         }
         /**
          * 柱状
          */
         else if(type.equals("salecolumn")) {
-            json = J.json(MetricPmService
+            json = J.json(PmDashboardESQuery
                     .categoryColumn(type, year, teamobject));
         }
         /**
          * 饼状
          */
         else {
-            json = J.json(MetricPmService
+            json = J.json(PmDashboardESQuery
                     .categoryPie(type, year, teamobject));
         }
         renderJSON(json);

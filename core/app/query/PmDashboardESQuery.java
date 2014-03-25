@@ -1,7 +1,8 @@
-package services;
+package query;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.Caches;
+import helper.DBUtils;
 import helper.Dates;
 import models.product.Category;
 import models.product.Product;
@@ -16,8 +17,11 @@ import models.product.Team;
 import java.util.Date;
 import java.util.List;
 import java.util.Calendar;
+import java.util.Map;
 
+import models.SaleTarget;
 import com.alibaba.fastjson.JSONArray;
+import services.MetricProfitService;
 
 /**
  * PM首页显示图形需要的数据
@@ -25,10 +29,10 @@ import com.alibaba.fastjson.JSONArray;
  * Date: 14-3-17
  * Time: 下午6:20
  */
-public class MetricPmService {
-
+public class PmDashboardESQuery {
     /**
      * 饼状图
+     *
      * @param type
      * @param year
      * @param team
@@ -47,23 +51,6 @@ public class MetricPmService {
             return null;
     }
 
-    /**
-     * 曲线图计算
-     *
-     * @param type
-     * @param year
-     * @param team
-     * @return
-     */
-    public static HighChart categoryLine(final String type, final int year, final Team team) {
-        if(type.equals("profitrateline")) {
-            return profitrateline(type, year, team);
-        } else if(type.equals("salefeeline")) {
-            return salefeeline(type, year, team);
-        }
-        return null;
-    }
-
 
     /**
      * 柱状图计算
@@ -76,18 +63,16 @@ public class MetricPmService {
     public static HighChart categoryColumn(final String type, final int year, final Team team) {
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart columnChart = Cache.get(key, HighChart.class);
-        if(columnChart != null) return columnChart;
+        //if(columnChart != null) return columnChart;
         synchronized(key.intern()) {
-            columnChart = Cache.get(key, HighChart.class);
-            if(columnChart != null) return columnChart;
             columnChart = new HighChart(Series.COLUMN);
+            columnChart.title = year + "年月度销售额";
             columnChart.series(saleCategoryColumn(type, year, team));
             columnChart.series(saleTaskCategoryColumn(type, year, team));
             Cache.add(key, columnChart, "8h");
         }
         return columnChart;
     }
-
 
     /**
      * 饼状图
@@ -110,7 +95,6 @@ public class MetricPmService {
         }
         return pieChart;
     }
-
 
     /**
      * 销售额百分比
@@ -135,7 +119,15 @@ public class MetricPmService {
         if(totalsalefee == 0f)
             totalsalefee = 1;
         pie.add(totalsalefee, "销售额");
-        float task = 10000f - totalsalefee;
+        /**
+         * 获取TEAM的年度任务
+         */
+        SaleTarget target = SaleTarget.find(" targetYear=? and saleTargetType=? and fid=?", year,
+                SaleTarget.T.YEAR, String.valueOf(team.id)).first();
+        float task = 0;
+        if(target != null) {
+            task = target.saleAmounts - totalsalefee;
+        }
         if(task < 0)
             task = 0;
         pie.add(task, "未完成目标");
@@ -143,7 +135,7 @@ public class MetricPmService {
     }
 
     /**
-     * 销售额百分比
+     * TEAM的销售额百分比
      *
      * @param year
      * @return
@@ -199,13 +191,20 @@ public class MetricPmService {
             totalsaleprofit = 1;
         }
         pie.add(totalsaleprofit, "利润");
-        float task = 10000f - totalsaleprofit;
+        /**
+         * 获取TEAM的年度利润
+         */
+        SaleTarget target = SaleTarget.find(" targetYear=? and saleTargetType=? and fid=?", year,
+                SaleTarget.T.YEAR, String.valueOf(team.id)).first();
+        float task = 0;
+        if(target != null) {
+            task = target.saleAmounts * target.profitMargin / 100 - totalsaleprofit;
+        }
         if(task < 0)
             task = 0;
         pie.add(task, "未完成目标");
         return pie;
     }
-
 
     /**
      * 利润百分比
@@ -219,15 +218,25 @@ public class MetricPmService {
         Date end = Dates.endDayYear(year);
         List<Team> teams = Team.findAll();
         Series.Pie pie = new Series.Pie(year + "TEAM利润百分比");
+        String sql = "";
         for(Team team : teams) {
-            List<Category> categorys = team.categorys;
+            sql = "select categoryid From Category "
+                    + " where team_id=" + team.id;
+            List<Map<String, Object>> categorys = DBUtils.rows(sql);
             float totalsaleprofit = 0f;
-            for(Category category : categorys) {
-                List<Product> products = category.products;
-                for(Product product : products) {
-                    MetricProfitService service = new MetricProfitService(begin, end, null,
-                            product.sku, null);
-                    totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
+            for(Map<String, Object> category : categorys) {
+                String categoryid = (String) category.get("categoryid");
+                sql = "select sku From Product "
+                        + " where category_categoryid='" + categoryid + "' ";
+                List<Map<String, Object>> rows = DBUtils.rows(sql);
+                if(rows != null && rows.size() > 0) {
+                    for(Map<String, Object> product : rows) {
+                        String sku = (String) product.get("sku");
+                        MetricProfitService service = new MetricProfitService(begin, end, null,
+                                sku, null);
+                        totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
+                    }
+
                 }
             }
             if(totalsaleprofit == 0f)
@@ -236,7 +245,6 @@ public class MetricPmService {
         }
         return pie;
     }
-
 
     /**
      * 销售额柱状图
@@ -247,11 +255,17 @@ public class MetricPmService {
      */
     public static Series.Column saleCategoryColumn(String type, int year, Team team) {
         if(team == null) throw new FastRuntimeException("此方法 Team 必须指定");
-
         Series.Column column = new Series.Column(team.name + year + "年月度销售额");
+        DateTime time = DateTime.now().withYear(year);
+        column.color = "#FFA500";
         for(int i = 1; i <= 12; i++) {
-            Date begin = DateTime.now().withDayOfMonth(i).toDate();
-            Date end = DateTime.now().withDayOfMonth(i).toDate();
+            Date begin = time.withMonthOfYear(i).withDayOfMonth(1).toDate();
+            DateTime date = time.withMonthOfYear(i);
+            //月的最后一天
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date.toDate());
+            Date end = date.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate
+                    ();
 
             List<Category> categorys = team.categorys;
             float totalsale = 0f;
@@ -262,10 +276,8 @@ public class MetricPmService {
             }
             column.add(totalsale, i);
         }
-
         return column;
     }
-
 
     /**
      * 目标柱状图
@@ -277,24 +289,21 @@ public class MetricPmService {
     public static Series.Column saleTaskCategoryColumn(String type, int year, Team team) {
         if(team == null) throw new FastRuntimeException("此方法 Team 必须指定");
         Series.Column column = new Series.Column(team.name + year + "年月度目标");
+        column.color = "#0000ff";
         for(int i = 1; i <= 12; i++) {
             /**
-             * 每月第一天为开始时间
+             * 获取TEAM的CATEGORY销售额
              */
-            DateTime month = DateTime.now().withMonthOfYear(i);
-            Date begin = month.withDayOfMonth(1).toDate();
-            /**
-             * 每月最后一天为结束时间
-             */
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(begin);
-            Date end = month.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate();
-
-            column.add(200f, i);
+            SaleTarget target = SaleTarget.find(" targetYear=? and "
+                    + " saleTargetType=? and fid=?"
+                    + " and targetMonth=?", year,
+                    SaleTarget.T.MONTH, String.valueOf(team.id), i).first();
+            float task = 0f;
+            if(target != null) task = target.saleAmounts;
+            column.add(task, i);
         }
         return column;
     }
-
 
     /**
      * TEAM每个Category销售额曲线图
@@ -305,7 +314,6 @@ public class MetricPmService {
      * @return
      */
     public static HighChart salefeeline(final String type, final int year, final Team team) {
-
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart lineChart = Cache.get(key, HighChart.class);
         //if(lineChart != null) return lineChart;
@@ -321,6 +329,30 @@ public class MetricPmService {
         return lineChart;
     }
 
+    /**
+     * TEAM每个Category销售额曲线图
+     *
+     * @param type
+     * @param year
+     * @param team
+     * @return
+     */
+    public static HighChart saleqtyline(final String type, final int year, final Team team) {
+
+        String key = Caches.Q.cacheKey(type, year, team.name);
+        HighChart lineChart = Cache.get(key, HighChart.class);
+        //if(lineChart != null) return lineChart;
+        synchronized(key.intern()) {
+            lineChart = new HighChart(Series.LINE);
+            lineChart.title = "销量";
+            List<Category> categorys = team.getCategorys();
+            for(Category category : categorys) {
+                lineChart.series(esSaleQtyLine(category, year));
+            }
+            Cache.add(key, lineChart, "8h");
+        }
+        return lineChart;
+    }
 
     /**
      * 每个Category销售额
@@ -330,34 +362,41 @@ public class MetricPmService {
      * @return
      */
     public static Series.Line esSaleFeeLine(Category category, int year) {
-        Series.Line line = new Series.Line(category.name);
-
-        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-30).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
-
-        //   Date end = DateTime.now().withTimeAtStartOfDay().withYear(2013).toDate();
-        //  Date begin = DateTime.now().withTimeAtStartOfDay().withYear(2013).plusDays(-30).toDate();
-
-
+        Series.Line line = new Series.Line(category.name + "销售额");
+        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-365).toDate();
+        Date end = DateTime.now().withTimeAtStartOfDay().plusDays(-270).toDate();
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
-        JSONArray entries = profitservice.dashboarSaleFee();
+        JSONArray entries = profitservice.dashboardSaleFee();
         for(Object o : entries) {
             JSONObject entry = (JSONObject) o;
-
             line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
         }
-
-//        DateTime datePointer = new DateTime(begin);
-//        while(datePointer.getMillis() <= end.getTime()) {
-//            line.add(0f, Dates.date2JDate(begin));
-//            datePointer = datePointer.plusDays(1);
-//        }
-        //line.add(Dates.date2JDate(begin),100f);
-        //line.add(Dates.date2JDate(end),1000f);
         line.sort();
+        return line;
+    }
 
+    /**
+     * 每个Category销售额
+     *
+     * @param category
+     * @param year
+     * @return
+     */
+    public static Series.Line esSaleQtyLine(Category category, int year) {
+        Series.Line line = new Series.Line(category.name + "销量");
+        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-365).toDate();
+        Date end = DateTime.now().withTimeAtStartOfDay().plusDays(-270).toDate();
+        //按照category计算每天的销量
+        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+                null, null, category.categoryId);
+        JSONArray entries = profitservice.dashboardSaleQty();
+        for(Object o : entries) {
+            JSONObject entry = (JSONObject) o;
+            line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+        }
+        line.sort();
         return line;
     }
 
@@ -376,13 +415,13 @@ public class MetricPmService {
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
+            lineChart.title = year + "年月度利润率";
             lineChart.series(profitCategoryLine(type, year, team));
             lineChart.series(profitTaskCategoryLine(type, year, team));
             Cache.add(key, lineChart, "8h");
         }
         return lineChart;
     }
-
 
     /**
      * 利润率曲线图
@@ -393,38 +432,49 @@ public class MetricPmService {
      */
     public static Series.Line profitCategoryLine(String type, int year, Team team) {
         if(team == null) throw new FastRuntimeException("此方法 Team 必须指定");
-
         Series.Line line = new Series.Line(team.name + year + "年月度利润率");
+        line.color = "#FFA500";
+        DateTime time = DateTime.now().withYear(year);
         for(int i = 1; i <= 12; i++) {
-            Date begin = DateTime.now().withDayOfMonth(i).toDate();
-            Date end = DateTime.now().withDayOfMonth(i).toDate();
-
-            List<Category> categorys = team.categorys;
+            Date begin = time.withMonthOfYear(i).withDayOfMonth(1).toDate();
+            DateTime date = time.withMonthOfYear(i);
+            //月的最后一天
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date.toDate());
+            Date end = date.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate
+                    ();
+            String sql = "select categoryid From Category "
+                    + " where team_id=" + team.id;
+            List<Map<String, Object>> categorys = DBUtils.rows(sql);
             float totalsaleprofit = 0f;
             float totalsalefee = 0f;
-            for(Category category : categorys) {
-                List<Product> products = category.products;
-                for(Product product : products) {
-                    MetricProfitService profitservice = new MetricProfitService(begin, end, null,
-                            product.sku, null);
-                    Profit profit = profitservice.calProfit();
-                    totalsaleprofit = totalsaleprofit + profit.totalprofit;
-                    totalsalefee = totalsalefee + profit.totalfee;
+            for(Map<String, Object> category : categorys) {
+                String categoryid = (String) category.get("categoryid");
+                sql = "select sku From Product "
+                        + " where category_categoryid='" + categoryid + "' ";
+                List<Map<String, Object>> rows = DBUtils.rows(sql);
+                if(rows != null && rows.size() > 0) {
+                    for(Map<String, Object> product : rows) {
+                        String sku = (String) product.get("sku");
+                        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+                                sku, null);
+                        Profit profit = profitservice.calProfit();
+                        totalsaleprofit = totalsaleprofit + profit.totalprofit;
+                        totalsalefee = totalsalefee + profit.totalfee;
+                    }
                 }
             }
             float rate = 0;
             if(totalsalefee != 0) {
-                rate = totalsaleprofit / totalsalefee;
+                rate = totalsaleprofit / totalsalefee * 100;
             }
-            line.add(100f, i);
+            line.add(rate, i);
         }
-
         return line;
     }
 
-
     /**
-     * 利润曲线图
+     * 目标利润率曲线图
      *
      * @param year
      * @param team
@@ -432,24 +482,20 @@ public class MetricPmService {
      */
     public static Series.Line profitTaskCategoryLine(String type, int year, Team team) {
         if(team == null) throw new FastRuntimeException("此方法 Team 必须指定");
-        Series.Line line = new Series.Line(team.name + year + "年月度目标");
+        Series.Line line = new Series.Line(team.name + year + "年月度利润率目标");
+        line.color = "#0000ff";
         for(int i = 1; i <= 12; i++) {
             /**
-             * 每月第一天为开始时间
+             * 获取TEAM的CATEGORY销售额
              */
-            DateTime month = DateTime.now().withMonthOfYear(i);
-            Date begin = month.withDayOfMonth(1).toDate();
-            /**
-             * 每月最后一天为结束时间
-             */
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(begin);
-            Date end = month.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate();
-
-            line.add(200f, i);
+            SaleTarget target = SaleTarget.find(" targetYear=? and "
+                    + " saleTargetType=? and fid=?"
+                    + " and targetMonth=?", year,
+                    SaleTarget.T.MONTH, String.valueOf(team.id), i).first();
+            float task = 0f;
+            if(target != null) task = target.profitMargin;
+            line.add(task, i);
         }
         return line;
     }
-
-
 }

@@ -34,6 +34,11 @@ public abstract class AbstractSeries implements Serializable {
     public String name;
 
     /**
+     * Series 的颜色
+     */
+    public String color;
+
+    /**
      * Series 的类型;
      * 常用: line, pie, bar, column
      */

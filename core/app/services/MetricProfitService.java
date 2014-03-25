@@ -110,6 +110,7 @@ public class MetricProfitService {
                                 //销售费用项目
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
+        System.out.println(":::" + search.toString());
         return getEsTermsTotal(search, "salefee");
     }
 
@@ -199,11 +200,8 @@ public class MetricProfitService {
                     + " order by createDate desc limit 1 ";
             List<Map<String, Object>> rows = DBUtils.rows(sql);
             if(rows != null && rows.size() > 0) {
-                String price = (String) rows.get(0).get("price");
-                if(StringUtils.isBlank(price)) {
-                    price = "0";
-                }
-                avgprice = helper.Currency.CNY.toUSD(new Float(price));
+                Float price = (Float) rows.get(0).get("price");
+                avgprice = helper.Currency.CNY.toUSD(price);
             }
         }
         return avgprice;
@@ -358,7 +356,7 @@ public class MetricProfitService {
      * 利润率
      */
     public Float profitRate(Profit profit) {
-        if(profit.totalfee != 0f) {
+        if(profit.totalfee > 0f) {
             //利润率
             return profit.totalprofit / profit.totalfee * 100;
         } else {
@@ -541,7 +539,6 @@ public class MetricProfitService {
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
-
         JSONObject facets = result.getJSONObject("facets");
         float totalcost = 0;
         if(facets != null) {
@@ -640,14 +637,14 @@ public class MetricProfitService {
 
 
     /**
-     * 计算PM的DASHBoard的每日的所有Category的日销量
+     * 计算PM的DASHBoard的每日的所有Category的日销售额
      */
-    public JSONArray dashboarSaleFee() {
+    public JSONArray dashboardSaleFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
                         .valueField("cost_in_usd")
-                        .interval("day")
+                        .interval("week")
                         .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
                         .facetFilter(this.filterbuilder(true)
                                 //销售费用项目
@@ -669,6 +666,36 @@ public class MetricProfitService {
             entries = units.getJSONArray("entries");
         }
 
+        return entries;
+
+    }
+
+    /**
+     * 计算PM的DASHBoard的每日的所有Category的日销量
+     */
+    public JSONArray dashboardSaleQty() {
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(FacetBuilders.dateHistogramFacet("units")
+                        .keyField("date")
+                        .valueField("quantity")
+                        .interval("week")
+                        .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
+                        .facetFilter(this.filterbuilder(true)
+                                .must(FilterBuilders.prefixFilter("sku",
+                                        this.category.toLowerCase()))
+                        )
+                ).size(0);
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        if(result == null) {
+            throw new FastRuntimeException("ES连接异常!");
+        }
+        JSONObject facets = result.getJSONObject("facets");
+        JSONObject units = null;
+        JSONArray entries = null;
+        if(facets != null) {
+            units = facets.getJSONObject("units");
+            entries = units.getJSONArray("entries");
+        }
         return entries;
 
     }
