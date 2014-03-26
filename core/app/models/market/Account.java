@@ -52,6 +52,7 @@ public class Account extends Model {
         OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
         OFFER_IDS.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
         OFFER_IDS.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
+
     }
 
     /**
@@ -227,11 +228,7 @@ public class Account extends Model {
                         );
                     }
 
-
-                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE, IT
-                            StringUtils.isNotBlank(this.cookie("at-main")) || //US
-                            StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
-                            StringUtils.isNotBlank(this.cookie("at-acbjp"))) { //JP
+                    if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
                         HTTP.clearExpiredCookie();
                     } else {
@@ -255,6 +252,14 @@ public class Account extends Model {
                         "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
                                 " is not support!");
         }
+    }
+
+    private boolean haveCorrectCookie() {
+        return StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE
+                StringUtils.isNotBlank(this.cookie("at-acbit")) || //IT
+                StringUtils.isNotBlank(this.cookie("at-main")) || //US
+                StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
+                StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
     public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
@@ -391,6 +396,8 @@ public class Account extends Model {
                 return M.MID.A13V1IB3VIYZZH;
             case AMAZON_US:
                 return M.MID.ATVPDKIKX0DER;
+            case AMAZON_IT:
+                return M.MID.APJ6JRA9NG5V4;
             default:
                 return M.MID.A1F83G8C2ARO7P;
         }
@@ -612,19 +619,11 @@ public class Account extends Model {
     }
 
     /**
-     * 通过账户获取 FBA 的发货地址
+     * 通过账户获取 FBA 的发货地址;
      */
     public static Address address(M type) {
-        switch(type) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
-                        "London", "LONDON", "UK", "NW6 7HY");
-            case AMAZON_US:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
-                        "London", "LONDON", "UK", "NW6 7HY");
-        }
-        return null;
+        // 统一为一个地址, 但接口参数预留
+        return new Address("EasyAcc", "26 Furley Road", null, null, "London", "LONDON", "GB", "SE15 5UQ");
     }
 
 

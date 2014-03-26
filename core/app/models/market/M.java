@@ -613,8 +613,9 @@ public enum M {
             case AMAZON_US:
             case AMAZON_JP:
                 return String
-                        .format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU",
-                                this.toString());
+                        .format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_xx", this.toString());
+            //https://sellercentral.amazon.it/gp/ssof/product-label.pdf/ref=ag_xx_cont_xx
+            //https://sellercentral.amazon.it/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
