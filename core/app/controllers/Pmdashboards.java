@@ -113,6 +113,4 @@ public class Pmdashboards extends Controller {
             renderHtml("<p>" + e.getMessage() + "</p>");
         }
     }
-
-
 }

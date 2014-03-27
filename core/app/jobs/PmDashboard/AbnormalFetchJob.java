@@ -12,6 +12,7 @@ import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
+import play.jobs.On;
 import query.ProductQuery;
 import services.MetricProfitService;
 
@@ -22,11 +23,14 @@ import java.util.*;
  * <p/>
  * 会将所有的异常的数据计算出来缓存到 Redis
  * 然后在controller内根据条件去缓存获取对应的即可
+ *
+ * 轮询: 7 13 22 三个时间点执行三次
  * <p/>
  * User: mac
  * Date: 14-3-21
  * Time: PM2:03
  */
+@On("0 0 0,7,13,22 * * ?")
 public class AbnormalFetchJob extends Job {
     public static final String RUNNING = "anormal_running";
     public static final String AbnormalDTO_CACHE = "abnormal_info";
