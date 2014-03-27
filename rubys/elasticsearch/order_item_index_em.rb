@@ -69,7 +69,7 @@ class OrderItemES
         end
         OrderItemES.bulk_index
 
-        HTTParty.get("http://e.easya.cc/api/APICache/esCacheClear", headers: { "AUTH_TOKEN" => "baef851cab745d3441d4bc7ff6f27b28"} )
+        HTTParty.get("http://e.easya.cc/api/CacheClear/esCacheClear", headers: { "AUTH_TOKEN" => "baef851cab745d3441d4bc7ff6f27b28"} )
         EM.stop
       end
     end
