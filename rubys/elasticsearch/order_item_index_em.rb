@@ -1,11 +1,13 @@
 require "em-synchrony"
 require "em-synchrony/em-http"
 require "em-synchrony/mysql2"
+require "httparty"
 require "time"
 require "multi_json"
 require "pp"
 
-ES_HOST = "http://gengar.easya.cc:9200"
+#ES_HOST = "http://gengar.easya.cc:9200"
+ES_HOST = "http://192.168.1.99:9000"
 DB_HOST = "localhost"
 
 MAPPING = <<E
@@ -67,6 +69,7 @@ class OrderItemES
         end
         OrderItemES.bulk_index
 
+        HTTParty.get("http://e.easya.cc/api/APICache/esCacheClear", headers: { "AUTH_TOKEN" => "baef851cab745d3441d4bc7ff6f27b28"} )
         EM.stop
       end
     end
