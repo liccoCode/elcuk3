@@ -15,7 +15,7 @@ import java.util.List;
  * Time: 上午10:12
  */
 @With({APIChecker.class})
-public class APICache extends Controller {
+public class CacheClear extends Controller {
     /**
      * es执行完后清理缓存
      */
