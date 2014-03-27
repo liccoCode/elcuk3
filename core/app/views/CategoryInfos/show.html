@@ -1,7 +1,11 @@
-#{extends 'main_full.html'/}
-#{set title:'Category' /}
+#{extends 'main_full.html' /}
+#{set title:'Category 信息' /}
 #{set 'moreScripts'}
+    #{script 'highstock.js'/}
+    #{script 'CategoryInfos/column.coffee'/}
+    #{script 'CategoryInfos/dateline.coffee'/}
 #{/set}
+
 <div class="row-fluid">
 #{if cates.size() == 0}
   <div>
@@ -16,18 +20,20 @@
           <th class="span1">CategoryId</th>
           <th>Name</th>
         </tr>
-          #{list items:cates, as:'cat_left'}
+          #{list items:cates, as:'cat'}
             <tr>
-              <td>${cat_left.categoryId}</td>
               <td>
-                <a href="@{CategoryInfos.show()}/${cat_left.categoryId}">${cat_left.name}</a>
+                ${cat.categoryId}
+              </td>
+              <td>
+                <a href="@{CategoryInfos.show()}/${cat.categoryId}">${cat.name}</a>
               </td>
             </tr>
           #{/list}
       </table>
     </div>
 
-    <div class="span8 well well-small" id="cat_detail">
+    <div class="span8 well well-small">
 
       <ul class="nav nav-tabs">
         <li class="active">
@@ -40,18 +46,15 @@
 
       <div class="tab-content">
         <div class="tab-pane fade active in" id='categoryInfo'>
-            #{info_row title:'Basic Info'}
-              <ul>
-                <li>产品要求: 每一个条款占据一行, 不要换行</li>
-                <li>不需要填写前缀 1. 2. 之类的, 系统会自行处理</li>
-              </ul>
-            #{/info_row}
+          <div class="row-fluid">
+            <div class="span6" style="height:450px;" data-method="ajaxCategorySalesAmount" id='c_column'></div>
+            <div class="span6" style="height:450px;" data-method="ajaxCategorySalesProfit" id='c_line'></div>
+            <input type="hidden" value="${ca.categoryId}" id="cateId">
+          </div>
         </div>
 
         <div class="tab-pane fade" id='SKUInfo'>
-            #{info_row title:'Relate Brand'/}
         </div>
-
       </div>
     </div>
   </div>

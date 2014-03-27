@@ -1,17 +1,25 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import helper.Cached;
+import helper.Caches;
+import helper.DBUtils;
 import models.product.Category;
 import models.product.Product;
 import models.product.Team;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
+import models.view.report.Profit;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
+import play.cache.*;
+import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import services.MetricProfitService;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 销售目标
@@ -417,5 +425,175 @@ public class SaleTarget extends Model {
             return team.name + targetMonth + "月";
         }
         return "";
+    }
+
+    /**
+     * 返回 Category 全年每个月的销售额和销售额目标
+     * 和已经完成的销售额目标, 并组装成 HightChart 使用的格式返回
+     *
+     * @return
+     */
+    @Cached("2h")
+    public static HighChart ajaxHighChartCategorySalesAmount(String categoryId) {
+        String cacked_key = Caches.Q.cacheKey("categoryinfo_salesamount", categoryId);
+        HighChart columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
+        if(columnChart != null) return columnChart;
+        synchronized(cacked_key.intern()) {
+            columnChart = new HighChart(Series.COLUMN);
+            columnChart.title = categoryId + "产品线销售额";
+            //已完成的柱状图
+            columnChart.series(salesAmountColom(categoryId));
+            //目标柱状图
+            columnChart.series(salesAmountTargetColom(categoryId));
+            Cache.add(cacked_key, columnChart, "2h");
+        }
+        return columnChart;
+    }
+
+    /**
+     * 销售额目标的柱状图
+     *
+     * @return
+     */
+    public static Series.Column salesAmountTargetColom(String categoryId) {
+        DateTime now = new DateTime().now();
+        List<SaleTarget> saleTargetList = SaleTarget.find("fid=? AND targetYear=? AND saleTargetType=?", categoryId,
+                now.getYear(), T.CATEGORY).fetch();
+
+        Series.Column column = new Series.Column("月度销售额目标");
+        column.color = "#0000ff";
+        for(int i = 0; i < saleTargetList.size(); i++) {
+            float target = saleTargetList.get(i).saleAmounts;
+            column.add(target, i + 1);
+        }
+        return column;
+    }
+
+    /**
+     * 已经完成的销售额的柱状图
+     *
+     * @return
+     */
+    public static Series.Column salesAmountColom(String categoryId) {
+        DateTime now = new DateTime().now();
+        Series.Column column = new Series.Column("月度销售额");
+        column.color = "#FFA500";
+        float totalsale = 0f;
+        for(int i = 1; i <= 12; i++) {
+            DateTime month = now.withMonthOfYear(1);
+            //获得每个月份的完整的开始日期
+            DateTime begin = month.withDayOfMonth(1);
+            //获得每个月份的完整的结束日期
+            DateTime end = getMonthEndDate(month);
+
+            MetricProfitService service = new MetricProfitService(begin.toDate(), end.toDate(), null,
+                    null, null, categoryId);
+            totalsale = service.esSaleFee();
+            column.add(totalsale, i);
+        }
+        return column;
+    }
+
+    /**
+     * 返回 Category 全年每个月的利润率目标和利润率
+     * 和已经完成的销售额目标, 并组装成 HightChart 使用的格式返回
+     *
+     * @return
+     */
+    @Cached("2h")
+    public static HighChart ajaxHighChartCategorySalesProfit(String categoryId) {
+        String cacked_key = Caches.Q.cacheKey("categoryinfo_salesprofit", categoryId);
+        HighChart lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
+        if(lineChart != null) return lineChart;
+        synchronized(cacked_key.intern()) {
+            lineChart = new HighChart(Series.LINE);
+            lineChart.title = categoryId + "产品线利润率";
+            //已完成曲线图
+            lineChart.series(salesProfitLine(categoryId));
+            //目标曲线图
+            lineChart.series(salesProfitTargetLine(categoryId));
+            Cache.add(cacked_key, lineChart, "2h");
+        }
+        return lineChart;
+    }
+
+    /**
+     * 利润率
+     *
+     * @param categoryId
+     * @return
+     */
+    public static Series.Line salesProfitLine(String categoryId) {
+        DateTime now = new DateTime().now();
+        Series.Line line = new Series.Line(categoryId + "月度利润率");
+        line.color = "#FFA500";
+
+        String sql = "select sku From Product "
+                + " where category_categoryid='" + categoryId + "' ";
+        List<Map<String, Object>> rows = DBUtils.rows(sql);
+
+        float totalsaleprofit = 0f;
+        float totalsalefee = 0f;
+        for(int i = 1; i <= 12; i++) {
+            DateTime month = now.withMonthOfYear(1);
+            //获得每个月份的完整的开始日期
+            DateTime begin = month.withDayOfMonth(1);
+            //获得每个月份的完整的结束日期
+            DateTime end = getMonthEndDate(month);
+
+            if(rows != null && rows.size() > 0) {
+                for(Map<String, Object> product : rows) {
+                    String sku = (String) product.get("sku");
+                    MetricProfitService profitservice = new MetricProfitService(begin.toDate(), end.toDate(), null,
+                            sku, null);
+                    Profit profit = profitservice.calProfit();
+                    totalsaleprofit = totalsaleprofit + profit.totalprofit;
+                    totalsalefee = totalsalefee + profit.totalfee;
+                }
+            }
+            MetricProfitService service = new MetricProfitService(begin.toDate(), end.toDate(), null,
+                    null, null, categoryId);
+            float rate = 0;
+            if(totalsalefee != 0) {
+                rate = totalsaleprofit / totalsalefee * 100;
+            }
+            line.add(rate, i);
+        }
+        return line;
+    }
+
+    /**
+     * 利润率目标
+     *
+     * @param categoryId
+     * @return
+     */
+    public static Series.Line salesProfitTargetLine(String categoryId) {
+        DateTime now = new DateTime().now();
+        Series.Line line = new Series.Line(categoryId + "月度利润率目标");
+        List<SaleTarget> saleTargetList = SaleTarget.find("fid=? AND targetYear=? AND saleTargetType=?", categoryId,
+                now.getYear(), SaleTarget.T.CATEGORY).fetch();
+
+        line.color = "#0000ff";
+        for(int i = 0; i < saleTargetList.size(); i++) {
+
+            float target = saleTargetList.get(i).profitMargin;
+
+            line.add(target, i + 1);
+        }
+        return line;
+    }
+
+    /**
+     * 获取月份的最后一天
+     *
+     * @param month
+     * @return
+     */
+    public static DateTime getMonthEndDate(DateTime month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(month.toDate());
+        int maxDayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        return month.withDayOfMonth(maxDayOfMonth);
     }
 }

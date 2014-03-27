@@ -13,7 +13,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ES_HOST = "192.168.1.99:9200";
+    public static final String ES_HOST = "http://192.168.1.99:9200";
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
         return HTTP.postJson(ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
