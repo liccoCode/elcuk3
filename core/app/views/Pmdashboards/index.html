@@ -1,0 +1,76 @@
+#{extends 'main_full.html' /}
+#{set title:'Home' /}
+#{set 'moreScripts'}
+    #{script 'highstock.js'/}
+    #{script 'Pmdashboards/pmpie.coffee'/}
+    #{script 'Pmdashboards/pmdateline.coffee'/}
+    #{script 'Pmdashboards/pmcolumn.coffee'/}
+#{/set}
+
+<div class="row-fluid" id="orders" xmlns="http://www.w3.org/1999/html">
+  <div class="span12">
+    <div class="input-prepend input-append inline">
+      <select name="team" style="width:130px;margin-left:20px;">
+      #{list items:teams, as:'t'}
+        <option value="${t.teamId}">${t.name}</option>
+      #{/list}
+      </select>
+    </div>
+
+    <div class="input-prepend input-append inline">
+      <span class="add-on">年份:</span>
+
+      <select year="${year}" name="year" style="width:130px;margin-left:20px;">
+        <option value="${year}">${year}</option>
+        <option value="${year-1}">${year-1}</option>
+        <option value="${year-2}">${year-2}</option>
+        <option value="${year-3}">${year-3}</option>
+      </select>
+    </div>
+
+    <div class="input-prepend input-append inline">
+      <span class="add-on"><i class="icon-search"></i></span>
+      <button class="btn btn-primary" name="search">搜索</button>
+    </div>
+  </div>
+</div>
+
+<ul class="nav nav-tabs">
+  <li class="active">
+    <a href="#task" data-toggle='tab'>年度目标</a>
+  </li>
+  <li>
+    <a href="#product" data-toggle='tab' id="showFeeds">产品线状态</a>
+  </li>
+</ul>
+
+<div id="selling_tabs" class="tab-content">
+  <div class="tab-pane fade active in" id='task'>
+  #{info_row title:'每月销售额和利润'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='sale_column'></div>
+      <div class="span6" style="height:450px;" id='profitrate_line'></div>
+    </div>
+  #{info_row title:'全年销售额和利润'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='sale_percent'></div>
+      <div class="span6" style="height:450px;" id='profit_percent'></div>
+    </div>
+
+  #{info_row title:'TEAM所占比重'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='teamsale_percent'></div>
+      <div class="span6" style="height:450px;" id='teamprofit_percent'></div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade active" id='product'>
+  #{info_row title:'产品线状态'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='salefee_line'></div>
+      <div class="span6" style="height:450px;" id='saleqty_line'></div>
+    </div>
+
+  </div>
+</div>
+

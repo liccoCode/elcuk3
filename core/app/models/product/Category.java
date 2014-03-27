@@ -1,17 +1,24 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.Cached;
+import helper.Caches;
 import helper.DBUtils;
 import models.embedded.CategorySettings;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import play.cache.*;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.libs.F;
+import query.ProductQuery;
 
 import javax.persistence.*;
+import javax.persistence.Cache;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +40,9 @@ public class Category extends GenericModel {
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Brand> brands;
+
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public Team team;
 
     @Id
     @Expose
@@ -178,5 +188,58 @@ public class Category extends GenericModel {
             Brand brand = (Brand) o;
             return !existBrands.contains(brand);
         }
+    }
+
+    /**
+     * 将获取的Category集合 转换成JSON，便于页面展示
+     *
+     * @return
+     */
+    public static F.T2<List<String>, List<String>> fetchCategorysJson() {
+        List<String> categorys = Category.categorys(true);
+        return new F.T2<List<String>, List<String>>(categorys, categorys);
+    }
+
+
+    /**
+     * 返回所有的 SKU
+     *
+     * @param forceClearCache 是否清除缓存
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @Cached("lifetime")
+    public static List<String> categorys(boolean forceClearCache) {
+        List<String> categorys = null;
+        if(forceClearCache) {
+            categorys = Category.allcategorys();
+            play.cache.Cache.delete(Caches.CATEGORYS);
+            play.cache.Cache.add(Caches.CATEGORYS, categorys, "10h");
+        } else {
+            categorys = play.cache.Cache.get(Caches.CATEGORYS, List.class);
+            if(categorys != null) return categorys;
+            categorys = Category.allcategorys();
+            play.cache.Cache.add(Caches.CATEGORYS, categorys, "10h");
+        }
+
+        return categorys;
+    }
+
+
+    /**
+     * 加载 Category 的所有
+     *
+     * @return
+     */
+    public static List<String> allcategorys() {
+        SqlSelect sql = new SqlSelect().select("categoryid").from("Category");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        List<String> categorys = new ArrayList<String>();
+
+        for(Map<String, Object> row : rows) {
+            categorys.add(row.get("categoryid").toString());
+        }
+
+        return categorys;
     }
 }

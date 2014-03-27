@@ -1,0 +1,37 @@
+#{extends 'main_full.html'/}
+#{set title:"销售目标#" + st.id /}
+
+<div class="row">
+
+
+  <div class="span12" style="margin-left:385px;">
+  #{errorMsgs /}
+  #{flash_alert /}
+  #{if st.state == models.SaleTarget.S.AUDITED}
+    <div class="alert alert-error">
+      <p style="text-align:center;">销售目标 ${st.id} 已经被审核，所以不能再对销售目标做修改
+      </p>
+    </div>
+  #{/if}
+
+  #{if st.saleTargetType == models.SaleTarget.T.YEAR}
+      #{render 'SaleTargets/_year.html', st: st, saleTargets: saleTargets/}
+  #{/if}
+
+  #{elseif st.saleTargetType == models.SaleTarget.T.TEAM}
+      #{render 'SaleTargets/_team.html', st: st, saleTargets: saleTargets/}
+  #{/elseif}
+
+  #{elseif st.saleTargetType == models.SaleTarget.T.MONTH}
+      #{render 'SaleTargets/_month.html', st: st, saleTargets: saleTargets/}
+  #{/elseif}
+
+  #{elseif st.saleTargetType == models.SaleTarget.T.CATEGORY}
+      #{include 'SaleTargets/_category.html'/}
+  #{/elseif}
+
+  #{elseif st.saleTargetType == models.SaleTarget.T.SKU}
+      #{include 'SaleTargets/_sku.html'/}
+  #{/elseif}
+  </div>
+</div>
