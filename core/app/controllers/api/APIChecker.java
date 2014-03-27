@@ -16,18 +16,13 @@ import play.mvc.Http.Header;
 public class APIChecker extends Controller {
     @Before
     public static void checkServer() {
-        Header head = request.headers.get("auth_token");
-        if(head == null) {
-            Logger.info("head is null");
-            forbidden("head is null!");
-        }
-        String token = head.toString();
+        String token = request.params.get("auth_token");
         if(token == null) {
             Logger.info("token is null");
             forbidden("token is null!");
         }
 
-        String md5 = "[baef851cab745d3441d4bc7ff6f27b28]";
+        String md5 = "baef851cab745d3441d4bc7ff6f27b28";
         if(!token.equals(md5)) {
             Logger.info("token is invalid!");
             forbidden("token is invalid!");
