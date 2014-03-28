@@ -1,0 +1,66 @@
+#{extends 'main.html' /}
+#{set title:"新增年度目标"/}
+#{set 'moreScripts'}
+#{/set}
+
+#{errorMsgs /}
+#{flash_alert /}
+
+#{info_row title:'新增年度目标'/}
+<div class="row">
+  <div class="span12">
+  #{form @SaleTargets.doCreateAnnual(), method: 'POST'}
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>主题</th>
+        <td colspan="4">
+          <input type="text" class="span10" name="st.theme" value="${st.theme}">
+        </td>
+      </tr>
+
+      <tr>
+        <th>销售额(USD)</th>
+        <td>
+          <div class="input-prepend">
+            <span class="add-on">$</span>
+            <input type="text" name="st.saleAmounts" value="${st.saleAmounts}">
+          </div>
+        </td>
+
+        <th>利润率%</th>
+        <td>
+          <div class="input-prepend">
+          <input type="text" name="st.profitMargin" value="${st.profitMargin}">
+            <span class="add-on">%</span>
+            </div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>年份</th>
+        <td>
+            #{select_year  name: "st.targetYear", value: st.targetYear/}
+        </td>
+
+        <th>单据状态</th>
+        <td>
+          <input type="text" value="${st.state.label()}" readonly>
+        </td>
+      </tr>
+
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea rows="2" class="span10" name="st.memo" value="${st.memo}"></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-success">保存以设置明细</button>
+        </td>
+      </tr>
+    </table>
+  #{/form}
+  </div>
+</div>

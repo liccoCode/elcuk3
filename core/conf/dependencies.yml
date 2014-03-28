@@ -55,16 +55,6 @@ repositories:
         artifact: "https://raw.github.com/wppurking/play-redis/master/dist/[module]-[revision].zip"
         contains:
             - redis -> *
-    - alibaba Snapshots:
-        type: iBiblio
-        root: "http://code.alibabatech.com/mvn/releases/"
-        contains:
-            - com.alibaba -> *
-    - alibaba:
-        type: iBiblio
-        root: "http://code.alibabatech.com/mvn/snapshots/"
-        contains:
-            - com.alibaba -> *
     - My Local Repo Mac:
         type: iBiblio
         root: "file:///${user.home}/.m2/repository/"

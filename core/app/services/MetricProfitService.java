@@ -2,14 +2,13 @@ package services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import helper.DBUtils;
-import helper.ES;
-import helper.Promises;
+import helper.*;
 import models.market.M;
 import models.market.Orderr;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Product;
+import models.view.highchart.Series;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
@@ -39,6 +38,8 @@ public class MetricProfitService {
     public String sku;
     public String sellingId;
 
+    public String category;
+
     public MetricProfitService(Date begin, Date end, M market,
                                String sku, String sellingId) {
         this.begin = begin;
@@ -48,6 +49,17 @@ public class MetricProfitService {
         this.sellingId = ES.parseEsString(sellingId);
         checkParam();
     }
+
+    public MetricProfitService(Date begin, Date end, M market,
+                               String sku, String sellingId, String category) {
+        this.begin = begin;
+        this.end = end;
+        this.market = market;
+        this.sku = sku;
+        this.sellingId = ES.parseEsString(sellingId);
+        this.category = category;
+    }
+
 
     public String parseEsSku() {
         return ES.parseEsString(sku).toLowerCase();
@@ -98,8 +110,7 @@ public class MetricProfitService {
                                 //销售费用项目
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
-
-        System.out.println("xxx::::::::::::::::" + search.toString());
+        System.out.println(":::" + search.toString());
         return getEsTermsTotal(search, "salefee");
     }
 
@@ -181,6 +192,18 @@ public class MetricProfitService {
         if(qty != 0f) {
             avgprice = fee / qty;
         }
+
+        //如果运价为0，则直接从采购计划中获取
+        if(avgprice == 0) {
+            String sql = "select price From procureunit "
+                    + " where sku='" + this.sku + "' "
+                    + " order by createDate desc limit 1 ";
+            List<Map<String, Object>> rows = DBUtils.rows(sql);
+            if(rows != null && rows.size() > 0) {
+                Float price = (Float) rows.get(0).get("price");
+                avgprice = helper.Currency.CNY.toUSD(price);
+            }
+        }
         return avgprice;
     }
 
@@ -198,12 +221,59 @@ public class MetricProfitService {
         if(skuqty != 0) {
             price = (seainfo._1 + airinfo._1 + expressinfo._1) / skuqty;
         }
+        /**计算标准运价**/
+        if(price == 0) {
+            return calDefaultPrice();
+        }
         return price;
     }
 
+    /**
+     * 默认的运价
+     *
+     * @return
+     */
+    public Float calDefaultPrice() {
+        Map<String, Float> pricemap = new HashMap<String, Float>();
+        //默认快递价格urrent
+        pricemap.put(M.AMAZON_US.toString(), helper.Currency.CNY.toUSD(32f));
+        pricemap.put(M.AMAZON_UK.toString(), helper.Currency.CNY.toUSD(33f));
+        pricemap.put(M.AMAZON_DE.toString(), helper.Currency.CNY.toUSD(34f));
+
+        SqlSelect itemsql = new SqlSelect()
+                .select("pd.lengths", "pd.width",
+                        "pd.heigh", "pd.weight")
+                .from("Product pd")
+                .where("pd.sku='" + this.sku + "'");
+        List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
+        float weight = 0;
+        float price = 0;
+        if(rows.size() > 0) {
+            //（长*宽*高）厘米/5000 与重量相比，哪个大取哪个
+            weight = (Float) rows.get(0).get("weight");
+            float lengths = (Float) rows.get(0).get("lengths");
+            float width = (Float) rows.get(0).get("width");
+            float heigh = (Float) rows.get(0).get("heigh");
+            float volume = lengths * width * heigh / 5000 / 1000;
+            if(volume > weight) {
+                weight = volume;
+            }
+            if(this.market == null) {
+                price = pricemap.get(M.AMAZON_US.toString());
+            } else {
+                Object shipobject = pricemap.get(this.market.toString());
+                if(shipobject != null) {
+                    price = (Float) shipobject;
+                } else
+                    price = 0;
+            }
+
+        }
+        return weight * price;
+    }
 
     /**
-     * 不用运输方式运价
+     * 不同运输方式运价
      */
     public F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> shipTypePrice() {
         /**
@@ -307,13 +377,16 @@ public class MetricProfitService {
         if(totalprice != 0f) {
             param = fee / totalprice;
         }
-        Product product = Product.findById(this.sku);
-        if(product == null) {
-            return 0f;
-        } else {
-            float vatprice = product.declaredValue * param;
-            return vatprice;
+
+        String sql = "select declaredvalue From Product "
+                + " where sku='" + this.sku + "' ";
+        List<Map<String, Object>> rows = DBUtils.rows(sql);
+        Float price = 0f;
+        if(rows != null && rows.size() > 0) {
+            price = (Float) rows.get(0).get("declaredvalue");
         }
+
+        return price * param;
     }
 
     /**
@@ -333,7 +406,7 @@ public class MetricProfitService {
      * 利润率
      */
     public Float profitRate(Profit profit) {
-        if(profit.totalfee != 0f) {
+        if(profit.totalfee > 0f) {
             //利润率
             return profit.totalprofit / profit.totalfee * 100;
         } else {
@@ -516,7 +589,6 @@ public class MetricProfitService {
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
-
         JSONObject facets = result.getJSONObject("facets");
         float totalcost = 0;
         if(facets != null) {
@@ -568,9 +640,16 @@ public class MetricProfitService {
     private QueryBuilder querybuilder() {
 
         BoolQueryBuilder qb = QueryBuilders
-                .boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
+                .boolQuery();
+        if(StringUtils.isNotBlank(this.sku)) {
+            qb.must(QueryBuilders.termQuery("sku", this.parseEsSku()));
+        }
 
-        if(!StringUtils.isBlank(this.sellingId)) {
+        if(StringUtils.isNotBlank(this.category)) {
+            qb.must(QueryBuilders.prefixQuery("sku", this.category));
+        }
+
+        if(StringUtils.isNotBlank(this.sellingId)) {
             qb.must(QueryBuilders.termQuery("sellingid", this.parseEsSellingId()));
         }
         return qb;
@@ -606,4 +685,68 @@ public class MetricProfitService {
         return boolFilter;
     }
 
+
+    /**
+     * 计算PM的DASHBoard的每日的所有Category的日销售额
+     */
+    public JSONArray dashboardSaleFee() {
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(FacetBuilders.dateHistogramFacet("units")
+                        .keyField("date")
+                        .valueField("cost_in_usd")
+                        .interval("week")
+                        .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
+                        .facetFilter(this.filterbuilder(true)
+                                //销售费用项目
+                                .must(FilterBuilders.termFilter("fee_type", "productcharges"))
+                                .must(FilterBuilders.prefixFilter("sku",
+                                        this.category.toLowerCase()))
+                        )
+                ).size(0);
+        System.out.println(":::" + search.toString());
+        JSONObject result = ES.search("elcuk2", "salefee", search);
+        if(result == null) {
+            throw new FastRuntimeException("ES连接异常!");
+        }
+        JSONObject facets = result.getJSONObject("facets");
+        JSONObject units = null;
+        JSONArray entries = null;
+        if(facets != null) {
+            units = facets.getJSONObject("units");
+            entries = units.getJSONArray("entries");
+        }
+
+        return entries;
+
+    }
+
+    /**
+     * 计算PM的DASHBoard的每日的所有Category的日销量
+     */
+    public JSONArray dashboardSaleQty() {
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(FacetBuilders.dateHistogramFacet("units")
+                        .keyField("date")
+                        .valueField("quantity")
+                        .interval("week")
+                        .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
+                        .facetFilter(this.filterbuilder(true)
+                                .must(FilterBuilders.prefixFilter("sku",
+                                        this.category.toLowerCase()))
+                        )
+                ).size(0);
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        if(result == null) {
+            throw new FastRuntimeException("ES连接异常!");
+        }
+        JSONObject facets = result.getJSONObject("facets");
+        JSONObject units = null;
+        JSONArray entries = null;
+        if(facets != null) {
+            units = facets.getJSONObject("units");
+            entries = units.getJSONArray("entries");
+        }
+        return entries;
+
+    }
 }

@@ -8,34 +8,30 @@ $ ->
       self = @
       LoadMask.mask(mask_selector)
       $.get('/pmdashboards/percent', {type: type, year: @year,team: @team}, (r) ->
-        title = r['series'][0]['name']
+        title = r['title']
         console.log(r['series'][0]['name'])
         $("##{self.container}").highcharts({
           title: {
             text: title
-          },
+          }
+          legend:
+           enabled: true
+          xAxis:
+            type: 'category'
+          yAxis: { min: 0 }
           tooltip:
-            formatter: ->
-              "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>销量: #{@y} / #{@total}"
-          plotOptions:
-            pie:
-              #cursor: 'point'
-              dataLabels:
-                enabled: true
-                #color: '#000'
-                formatter: ->
-                  "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
+            shared: true
           series: r['series']
         })
         LoadMask.unmask(mask_selector)
       )
 
+
+
   # 重新绘制所有的 Pie 图
   drawPies = (year,team) ->
-    new PieChart("sale_percent").percent('sale', year,team)
-    new PieChart("profit_percent").percent('profit', year,team)
     new PieChart("sale_column").percent('salecolumn', year,team)
-    new PieChart("profitrate_column").percent('profitratecolumn', year,team)
+    new PieChart("profitrate_line").percent('profitrateline', year,team)
 
 
   $('#orders button[name="search"]').click ->

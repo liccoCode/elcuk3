@@ -42,6 +42,10 @@ class OrderItemActor
   def bulk_submit(rows)
     submit(rows)
   end
+
+  def clear_cache 
+    HTTParty.get("http://e.easya.cc/api/APICache/esCacheClear", headers: { 'AUTH_TOKEN' => 'baef851cab745d3441d4bc7ff6f27b28' } ).body
+  end
 end
 
 # select oi.createDate date, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, oi.quantity, oi.order_orderId order_id from OrderItem oi limit 10;
@@ -52,5 +56,7 @@ SQL = "SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, oi.pro
 # 3. Actor 内部使用异步 HTTP 来完成请求
 # 4. 最后处理不满足 % 2000 数量剩下的数据
 # =============================================================================================================
-OrderItemActor.new.init_mapping
-process(actor: OrderItemActor.pool(size: 6))
+pool = OrderItemActor.pool(size: 6)
+pool.init_mapping
+process(actor: pool)
+puts pool.clear_cache

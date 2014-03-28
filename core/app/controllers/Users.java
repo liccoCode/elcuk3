@@ -61,7 +61,7 @@ public class Users extends Controller {
     }
 
     public static void teams(Long id, List<Long> teamId) {
-        if(teamId == null || teamId.size() == 0) renderJSON(new Ret(false, "必须选择Team"));
+        //if(teamId == null || teamId.size() == 0) renderJSON(new Ret(false, "必须选择Team"));
         User user = User.findById(id);
         try {
             user.addTeams(teamId);
