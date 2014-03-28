@@ -19,14 +19,20 @@
       </tr>
 
       <tr>
-        <th>销售额</th>
+        <th>销售额(USD)</th>
         <td>
-          <input type="text" name="st.saleAmounts" value="${st.saleAmounts}">
+          <div class="input-prepend">
+            <span class="add-on">$</span>
+            <input type="text" name="st.saleAmounts" value="${st.saleAmounts}">
+          </div>
         </td>
 
-        <th>利润率</th>
+        <th>利润率%</th>
         <td>
+          <div class="input-prepend">
           <input type="text" name="st.profitMargin" value="${st.profitMargin}">
+            <span class="add-on">%</span>
+            </div>
         </td>
       </tr>
 

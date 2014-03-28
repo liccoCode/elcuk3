@@ -16,8 +16,7 @@ $ ->
           },
           tooltip:
             formatter: ->
-
-              s = "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>销量: #{@y} / #{@total}"
+              s = "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>#{@y} / #{@total}"
               s
           plotOptions:
             pie:

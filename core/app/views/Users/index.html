@@ -88,7 +88,7 @@
                       <td colspan="${teams.size() == up_index ? (teams.size() - (up_index % 8)) : '1'}">
                         <label class="checkbox">
                           <input type="checkbox" name="teamId" value="${up.id}" ${user.isHaveTeam(up) ? 'checked' : ''}>
-                          <a href="javascript:;" rel="tooltip" title="${up.name}">${up.memo}</a>
+                          <a href="javascript:;" rel="tooltip" title="${up.name}">${up.name}</a>
                         </label>
                       </td>
                         #{if up_index % 8 == 0}

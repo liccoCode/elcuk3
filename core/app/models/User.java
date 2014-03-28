@@ -217,15 +217,21 @@ public class User extends Model {
      * @param teamId
      */
     public void addTeams(List<Long> teamId) {
-        List<Team> teams = Team.find("id IN " + JpqlSelect.inlineParam(teamId))
-                .fetch();
-        if(teamId.size() != teams.size())
-            throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-        this.teams = new HashSet<Team>();
-        this.save();
-        this.teams.addAll(teams);
-        Team.updateTeams(this.username, this.teams);
-        this.save();
+        if(teamId == null || teamId.size() == 0) {
+            this.teams = new HashSet<Team>();
+            this.save();
+            Team.updateTeams(this.username, this.teams);
+        } else {
+            List<Team> teams = Team.find("id IN " + JpqlSelect.inlineParam(teamId))
+                    .fetch();
+            if(teamId.size() != teams.size())
+                throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.teams = new HashSet<Team>();
+            this.save();
+            this.teams.addAll(teams);
+            Team.updateTeams(this.username, this.teams);
+            this.save();
+        }
     }
 
     /**
