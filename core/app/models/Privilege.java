@@ -115,6 +115,7 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("users.index", "用户管理 页面"));
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
+        privileges.add(new Privilege("categoryinfos.show", "Category 信息"));
 
         // 首页
         // TODO delete
