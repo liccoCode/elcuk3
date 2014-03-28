@@ -221,9 +221,56 @@ public class MetricProfitService {
         if(skuqty != 0) {
             price = (seainfo._1 + airinfo._1 + expressinfo._1) / skuqty;
         }
+        /**计算标准运价**/
+        if(price == 0) {
+            return calDefaultPrice();
+        }
         return price;
     }
 
+    /**
+     * 默认的运价
+     *
+     * @return
+     */
+    public Float calDefaultPrice() {
+        Map<String, Float> pricemap = new HashMap<String, Float>();
+        //默认快递价格urrent
+        pricemap.put(M.AMAZON_US.toString(), helper.Currency.CNY.toUSD(32f));
+        pricemap.put(M.AMAZON_UK.toString(), helper.Currency.CNY.toUSD(33f));
+        pricemap.put(M.AMAZON_DE.toString(), helper.Currency.CNY.toUSD(34f));
+
+        SqlSelect itemsql = new SqlSelect()
+                .select("pd.lengths", "pd.width",
+                        "pd.heigh", "pd.weight")
+                .from("Product pd")
+                .where("pd.sku='" + this.sku + "'");
+        List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
+        float weight = 0;
+        float price = 0;
+        if(rows.size() > 0) {
+            //（长*宽*高）厘米/5000 与重量相比，哪个大取哪个
+            weight = (Float) rows.get(0).get("weight");
+            float lengths = (Float) rows.get(0).get("lengths");
+            float width = (Float) rows.get(0).get("width");
+            float heigh = (Float) rows.get(0).get("heigh");
+            float volume = lengths * width * heigh / 5000 / 1000;
+            if(volume > weight) {
+                weight = volume;
+            }
+            if(this.market == null) {
+                price = pricemap.get(M.AMAZON_US.toString());
+            } else {
+                Object shipobject = pricemap.get(this.market.toString());
+                if(shipobject != null) {
+                    price = (Float) shipobject;
+                } else
+                    price = 0;
+            }
+
+        }
+        return weight * price;
+    }
 
     /**
      * 不同运输方式运价
@@ -330,13 +377,16 @@ public class MetricProfitService {
         if(totalprice != 0f) {
             param = fee / totalprice;
         }
-        Product product = Product.findById(this.sku);
-        if(product == null) {
-            return 0f;
-        } else {
-            float vatprice = product.declaredValue * param;
-            return vatprice;
+
+        String sql = "select declaredvalue From Product "
+                + " where sku='" + this.sku + "' ";
+        List<Map<String, Object>> rows = DBUtils.rows(sql);
+        Float price = 0f;
+        if(rows != null && rows.size() > 0) {
+            price = (Float) rows.get(0).get("declaredvalue");
         }
+
+        return price * param;
     }
 
     /**

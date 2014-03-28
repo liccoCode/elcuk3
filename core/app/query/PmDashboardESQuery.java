@@ -63,7 +63,7 @@ public class PmDashboardESQuery {
     public static HighChart categoryColumn(final String type, final int year, final Team team) {
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart columnChart = Cache.get(key, HighChart.class);
-        //if(columnChart != null) return columnChart;
+        if(columnChart != null) return columnChart;
         synchronized(key.intern()) {
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = year + "年月度销售额";
@@ -173,17 +173,24 @@ public class PmDashboardESQuery {
         //年的第一天
         Date begin = Dates.startDayYear(year);
         Date end = Dates.endDayYear(year);
-        List<Category> categorys = team.categorys;
+
+        String sql = "select categoryid From Category "
+                + " where team_id=" + team.id;
+        List<Map<String, Object>> categorys = DBUtils.rows(sql);
         float totalsaleprofit = 0f;
-        for(Category category : categorys) {
-            /**
-             * 利润必须指定SKU计算
-             */
-            List<Product> products = category.products;
-            for(Product product : products) {
-                MetricProfitService service = new MetricProfitService(begin, end, null,
-                        product.sku, null);
-                totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
+        for(Map<String, Object> category : categorys) {
+            String categoryid = (String) category.get("categoryid");
+            sql = "select sku From Product "
+                    + " where category_categoryid='" + categoryid + "' ";
+            List<Map<String, Object>> rows = DBUtils.rows(sql);
+            if(rows != null && rows.size() > 0) {
+                for(Map<String, Object> product : rows) {
+                    String sku = (String) product.get("sku");
+
+                    MetricProfitService service = new MetricProfitService(begin, end, null,
+                            sku, null);
+                    totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
+                }
             }
         }
         Series.Pie pie = new Series.Pie(team.name + " " + year + "利润目标百分比");
@@ -274,7 +281,7 @@ public class PmDashboardESQuery {
                         null, null, category.categoryId);
                 totalsale = totalsale + service.esSaleFee();
             }
-            column.add(totalsale, i);
+            column.add(totalsale, i + "月");
         }
         return column;
     }
@@ -300,7 +307,7 @@ public class PmDashboardESQuery {
                     SaleTarget.T.MONTH, String.valueOf(team.id), i).first();
             float task = 0f;
             if(target != null) task = target.saleAmounts;
-            column.add(task, i);
+            column.add(task, i + "月");
         }
         return column;
     }
@@ -316,10 +323,10 @@ public class PmDashboardESQuery {
     public static HighChart salefeeline(final String type, final int year, final Team team) {
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart lineChart = Cache.get(key, HighChart.class);
-        //if(lineChart != null) return lineChart;
+        if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
-            lineChart.title = "销售额";
+            lineChart.title = "最近六个月周销售额";
             List<Category> categorys = team.getCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleFeeLine(category, year));
@@ -341,10 +348,10 @@ public class PmDashboardESQuery {
 
         String key = Caches.Q.cacheKey(type, year, team.name);
         HighChart lineChart = Cache.get(key, HighChart.class);
-        //if(lineChart != null) return lineChart;
+        if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
-            lineChart.title = "销量";
+            lineChart.title = "最近六个月周销量";
             List<Category> categorys = team.getCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleQtyLine(category, year));
@@ -468,7 +475,7 @@ public class PmDashboardESQuery {
             if(totalsalefee != 0) {
                 rate = totalsaleprofit / totalsalefee * 100;
             }
-            line.add(rate, i);
+            line.add(rate, i + "月");
         }
         return line;
     }
@@ -494,7 +501,7 @@ public class PmDashboardESQuery {
                     SaleTarget.T.MONTH, String.valueOf(team.id), i).first();
             float task = 0f;
             if(target != null) task = target.profitMargin;
-            line.add(task, i);
+            line.add(task, i + "月");
         }
         return line;
     }

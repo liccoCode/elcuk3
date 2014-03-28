@@ -8,25 +8,19 @@ $ ->
       self = @
       LoadMask.mask(mask_selector)
       $.get('/pmdashboards/percent', {type: type, year: @year,team: @team}, (r) ->
-        title = r['series'][0]['name']
+        title = r['title']
         console.log(r['series'][0]['name'])
         $("##{self.container}").highcharts({
           title: {
             text: title
-          },
+          }
           legend:
            enabled: true
+          xAxis:
+            type: 'category'
           yAxis: { min: 0 }
           tooltip:
-            formatter: ->
-              s = "<span style=\"color:#{@point.series.color}\">#{@point.series.name}:<b>#{@point.y}</b></span><br/>"
-              s
-          plotOptions:
-              pie:
-                  #cursor: 'point'
-                  dataLabels:
-                    enabled: true
-                    #color: '#000'
+            shared: true
           series: r['series']
         })
         LoadMask.unmask(mask_selector)

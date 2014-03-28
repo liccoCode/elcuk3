@@ -133,9 +133,12 @@ public class Team extends Model {
 
 
     public List<Category> getCategorys() {
-        System.out.println("asd::"+this.teamId);
         List<Category> categorys = Category.find("team_id=?", this.id).fetch();
         return categorys;
+    }
+
+    public boolean existUser(User user){
+        return user.teams.contains(this);
     }
 
 }

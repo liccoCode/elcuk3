@@ -9,9 +9,12 @@ import play.mvc.With;
 import models.product.Team;
 import query.PmDashboardESQuery;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import models.User;
+import models.product.Category;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,12 +31,25 @@ public class Pmdashboards extends Controller {
         int year = DateTime.now().getYear();
         User user = User.findByUserName(Secure.Security.connected());
         Set<Team> teams = user.teams;
-        render(year, teams);
+        List<Category> cates =new ArrayList<Category>();
+        for (Team team:teams){
+            List<Category> teamcates = team.categorys;
+            if (teamcates!=null){
+                cates.addAll(teamcates);
+            }
+        }
+        render(year, teams,cates);
     }
 
 
     public static void percent(String type, int year, String team) {
+        User user = User.findByUserName(Secure.Security.connected());
         Team teamobject = Team.find("teamId=?", team).first();
+
+        if (!teamobject.existUser(user)){
+            Validation.addError("","没有TEAM"+teamobject.name+"权限");
+        }
+
         if(Validation.hasErrors())
             renderJSON(new Ret(false));
         String json = "";

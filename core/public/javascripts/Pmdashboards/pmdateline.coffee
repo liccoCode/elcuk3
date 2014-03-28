@@ -8,7 +8,7 @@ $ ->
       self = @
       LoadMask.mask(mask_selector)
       $.get('/pmdashboards/percent', {type: type, year: @year,team: @team}, (r) ->
-        title = r['series'][0]['name']
+        title = r['title']
         console.log(r['series'][0]['name'])
         $("##{self.container}").highcharts({
           title: {
@@ -20,10 +20,7 @@ $ ->
            type: 'datetime'
           yAxis: { min: 0 }
           tooltip:
-            formatter: ->
-              s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
-              s += "<span style=\"color:#{@point.series.color}\">#{@point.series.name}:</span><b>#{@point.y}</b><br/>"
-              s
+            shared: true
             crosshairs: true
             xDateFormat: '%Y-%m-%d'
           plotOptions:
