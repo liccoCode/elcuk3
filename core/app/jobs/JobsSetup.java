@@ -61,7 +61,6 @@ public class JobsSetup {
             every(ShipmentSyncJob.class, "5mn");
 
             every(KeepSessionJob.class, "29mn");
-            every(AbnormalFetchJob.class, "10h");
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
