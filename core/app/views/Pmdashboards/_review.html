@@ -19,8 +19,12 @@
         </td>
       </tr>
     #{/list}
+  <tr>
+    <td colspan="3">
+      <a class="btn btn-primary" target="_blank" href="@{Pmdashboards.skuReviews()}">查看所有</a>
+    </td>
+  </tr>
 </table>
-<a class="btn btn-primary" href="@{Reviews.showReviews()}">查看所有</a>
 #{/if}
 #{else }
 <p>暂无 Review 异常信息</p>

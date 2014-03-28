@@ -74,13 +74,13 @@ public class AbnormalDTO implements Serializable {
      */
     public List<AmazonListingReview> reviews() {
         List<String> listingIds = Listing.getAllListingBySKU(this.sku);
-        List<AmazonListingReview> reviews = new ArrayList<AmazonListingReview>();
-        reviews.add((AmazonListingReview) AmazonListingReview.findById("B005K7192G_AMAZON.COM_R2RTPVR0DN4FYX"));
-        reviews.add((AmazonListingReview) AmazonListingReview.findById("B009HJQ2J8_AMAZON.COM_R1MXY7VLI0PYA"));
         DateTime yesterday = DateTime.now().plusDays(-1);
-        //return AmazonListingReview.find("rating <= 3 AND listingId IN" + SqlSelect.inlineParam(listingIds) + "AND " +
-        //        "reviewDate >=?", yesterday).fetch();
-        return reviews;
+        List<AmazonListingReview> listingReviews = new ArrayList<AmazonListingReview>();
+        if(listingIds.size() > 0) {
+            listingReviews = AmazonListingReview.find("rating <= 3 AND listingId IN" + SqlSelect.inlineParam
+                    (listingIds)).fetch();// + "AND " + "reviewDate >=?", yesterday.toDate()
+        }
+        return listingReviews;
     }
 
     public AbnormalDTO(float today, float before, float difference, String sku, T abnormalType) {

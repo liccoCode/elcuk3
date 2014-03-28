@@ -109,7 +109,7 @@ public class AbnormalFetchJob extends Job {
         List<String> listingIds = Listing.getAllListingBySKU(sku);
 
         SqlSelect sql = new SqlSelect().select("count(*) as count").from("AmazonListingReview").where(
-                SqlSelect.whereIn("listingId", listingIds)).where("rating <= 3");
+                SqlSelect.whereIn("listingId", listingIds)).where("rating <= 3");//.where("reviewDate >=?").param(DateTime.now().plusDays(-1).toDate())
 
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {

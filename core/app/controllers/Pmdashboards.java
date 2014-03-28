@@ -1,24 +1,23 @@
 package controllers;
 
 import helper.J;
-import jobs.PmDashboard.AbnormalFetchJob;
 import models.User;
+import models.market.AmazonListingReview;
+import models.market.Listing;
 import models.product.Category;
-import models.product.Product;
 import models.product.Team;
 import models.view.Ret;
 import models.view.dto.AbnormalDTO;
 import models.view.post.AbnormalPost;
 import org.joda.time.DateTime;
-import play.cache.Cache;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 import services.MetricPmService;
-import services.MetricProfitService;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -108,9 +107,20 @@ public class Pmdashboards extends Controller {
         try {
             if(p == null) p = new AbnormalPost(AbnormalPost.T.REVIEW);
             List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
+            if(dtos.size() > 0) dtos = dtos.subList(1, 10);
             render("Pmdashboards/_review.html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<p>" + e.getMessage() + "</p>");
         }
+    }
+
+
+    /**
+     * 用户所有的 sku 的负评 review
+     */
+    public static void skuReviews(AbnormalPost p) {
+        if(p == null) p = new AbnormalPost(AbnormalPost.T.REVIEW);
+        List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
+        render(dtos);
     }
 }
