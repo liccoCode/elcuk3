@@ -1,7 +1,7 @@
 package jobs.PmDashboard;
 
 import helper.DBUtils;
-import models.market.AmazonListingReview;
+import jobs.driver.BaseJob;
 import models.market.Listing;
 import models.view.dto.AbnormalDTO;
 import models.view.post.AbnormalPost;
@@ -11,8 +11,6 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
-import play.jobs.Job;
-import play.jobs.On;
 import query.ProductQuery;
 import services.MetricProfitService;
 
@@ -23,21 +21,20 @@ import java.util.*;
  * <p/>
  * 会将所有的异常的数据计算出来缓存到 Redis
  * 然后在controller内根据条件去缓存获取对应的即可
- *
+ * <p/>
  * 轮询: 7 13 22 三个时间点执行三次
  * <p/>
  * User: mac
  * Date: 14-3-21
  * Time: PM2:03
  */
-@On("0 0 0,7,13,22 * * ?")
-public class AbnormalFetchJob extends Job {
+public class AbnormalFetchJob extends BaseJob {
     public static final String RUNNING = "anormal_running";
     public static final String AbnormalDTO_CACHE = "abnormal_info";
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void doJob() {
-        if(isRnning()) return;
+    public void doit() {
         long begin = System.currentTimeMillis();
         abnormal();
         Logger.info("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
@@ -53,7 +50,6 @@ public class AbnormalFetchJob extends Job {
      * @return
      */
     public void abnormal() {
-        Cache.add(RUNNING, RUNNING);
         //获取所有的 sku
         List<String> skus = new ProductQuery().skus();
 
@@ -109,7 +105,8 @@ public class AbnormalFetchJob extends Job {
         List<String> listingIds = Listing.getAllListingBySKU(sku);
 
         SqlSelect sql = new SqlSelect().select("count(*) as count").from("AmazonListingReview").where(
-                SqlSelect.whereIn("listingId", listingIds)).where("rating <= 3");//.where("reviewDate >=?").param(DateTime.now().plusDays(-1).toDate())
+                SqlSelect.whereIn("listingId", listingIds))
+                .where("rating <= 3");//.where("reviewDate >=?").param(DateTime.now().plusDays(-1).toDate())
 
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {

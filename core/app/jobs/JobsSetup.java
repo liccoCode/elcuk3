@@ -1,5 +1,6 @@
 package jobs;
 
+import jobs.PmDashboard.AbnormalFetchJob;
 import jobs.driver.DriverJob;
 import play.Logger;
 import play.Play;
@@ -60,6 +61,7 @@ public class JobsSetup {
             every(ShipmentSyncJob.class, "5mn");
 
             every(KeepSessionJob.class, "29mn");
+            every(AbnormalFetchJob.class, "10h");
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }

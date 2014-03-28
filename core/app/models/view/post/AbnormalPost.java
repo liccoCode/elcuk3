@@ -2,14 +2,17 @@ package models.view.post;
 
 import controllers.Secure;
 import jobs.PmDashboard.AbnormalFetchJob;
+import jobs.driver.GJob;
 import models.User;
 import models.product.Category;
 import models.view.dto.AbnormalDTO;
+import org.elasticsearch.common.joda.time.DateTime;
 import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +60,11 @@ public class AbnormalPost {
     public List<AbnormalDTO> abnormal(User user) {
         Map<String, List<AbnormalDTO>> dtoMap = Cache.get(AbnormalFetchJob.AbnormalDTO_CACHE, Map.class);
         if(dtoMap == null || dtoMap.size() == 0) {
-            new AbnormalFetchJob().now();
+            if(!AbnormalFetchJob.isRnning()) {
+                GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<String, Object>());
+                Cache.add(AbnormalFetchJob.RUNNING, AbnormalFetchJob.RUNNING);
+            }
+
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
         List<String> categoryIds = new ArrayList<String>();

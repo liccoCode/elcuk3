@@ -107,7 +107,7 @@ public class Pmdashboards extends Controller {
         try {
             if(p == null) p = new AbnormalPost(AbnormalPost.T.REVIEW);
             List<AbnormalDTO> dtos = p.abnormal(User.findByUserName(Secure.Security.connected()));
-            if(dtos.size() > 0) dtos = dtos.subList(1, 10);
+            if(dtos.size() > 10) dtos = dtos.subList(1, 10);
             render("Pmdashboards/_review.html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<p>" + e.getMessage() + "</p>");
