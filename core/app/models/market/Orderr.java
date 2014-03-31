@@ -259,12 +259,15 @@ public class Orderr extends GenericModel {
          */
         switch(this.market) {
             case AMAZON_UK:
+                return "Thanks for purchasing from EasyAcc on " +
+                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
+                        this.orderId + ")";
             case AMAZON_US:
-                return "Thanks for purchasing EasyAcc Product on " +
+                return "Thanks for purchasing from EasyAcc on " +
                         JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
                         this.orderId + ")";
             case AMAZON_DE:
-                return "Vielen Dank für den Kauf EasyAcc Produkte auf Amazon.de (Bestellung: " +
+                return "Vielen Dank für den Kauf unseres EasyAcc Produkts auf Amazon.de (Bestellung: " +
                         this.orderId + ")";
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
