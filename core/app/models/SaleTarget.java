@@ -434,17 +434,17 @@ public class SaleTarget extends Model {
      * @return
      */
     @Cached("2h")
-    public static HighChart ajaxHighChartCategorySalesAmount(String categoryId) {
-        String cacked_key = Caches.Q.cacheKey("categoryinfo_salesamount", categoryId);
+    public static HighChart ajaxHighChartCategorySalesAmount(String categoryId, int year) {
+        String cacked_key = String.format("%s_%s_categoryinfo_salesamount", year, categoryId);
         HighChart columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(cacked_key.intern()) {
             columnChart = new HighChart(Series.COLUMN);
-            columnChart.title = categoryId + "产品线销售额";
+            columnChart.title = String.format("%s年度%s产品线销售额", year, categoryId);
             //已完成的柱状图
-            columnChart.series(salesAmountColom(categoryId));
+            columnChart.series(salesAmountColom(categoryId, year));
             //目标柱状图
-            columnChart.series(salesAmountTargetColom(categoryId));
+            columnChart.series(salesAmountTargetColom(categoryId, year));
             Cache.add(cacked_key, columnChart, "2h");
         }
         return columnChart;
@@ -455,8 +455,8 @@ public class SaleTarget extends Model {
      *
      * @return
      */
-    public static Series.Column salesAmountTargetColom(String categoryId) {
-        DateTime now = new DateTime().now();
+    public static Series.Column salesAmountTargetColom(String categoryId, int year) {
+        DateTime now = new DateTime().now().withYear(year);
         List<SaleTarget> saleTargetList = SaleTarget.find("fid=? AND targetYear=? AND saleTargetType=?", categoryId,
                 now.getYear(), T.CATEGORY).fetch();
 
@@ -464,7 +464,7 @@ public class SaleTarget extends Model {
         column.color = "#0000ff";
         for(int i = 0; i < saleTargetList.size(); i++) {
             float target = saleTargetList.get(i).saleAmounts;
-            column.add(target, i + 1);
+            column.add(target, i + 1 + "月");
         }
         return column;
     }
@@ -474,8 +474,8 @@ public class SaleTarget extends Model {
      *
      * @return
      */
-    public static Series.Column salesAmountColom(String categoryId) {
-        DateTime now = new DateTime().now();
+    public static Series.Column salesAmountColom(String categoryId, int year) {
+        DateTime now = new DateTime().now().withYear(year);
         Series.Column column = new Series.Column("月度销售额");
         column.color = "#FFA500";
         float totalsale = 0f;
@@ -489,7 +489,7 @@ public class SaleTarget extends Model {
             MetricProfitService service = new MetricProfitService(begin.toDate(), end.toDate(), null,
                     null, null, categoryId);
             totalsale = service.esSaleFee();
-            column.add(totalsale, i);
+            column.add(totalsale, i + "月");
         }
         return column;
     }
@@ -501,17 +501,17 @@ public class SaleTarget extends Model {
      * @return
      */
     @Cached("2h")
-    public static HighChart ajaxHighChartCategorySalesProfit(String categoryId) {
-        String cacked_key = Caches.Q.cacheKey("categoryinfo_salesprofit", categoryId);
+    public static HighChart ajaxHighChartCategorySalesProfit(String categoryId, int year) {
+        String cacked_key = String.format("%s_%s_categoryinfo_salesprofit", year, categoryId);
         HighChart lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(cacked_key.intern()) {
             lineChart = new HighChart(Series.LINE);
-            lineChart.title = categoryId + "产品线利润率";
+            lineChart.title = String.format("%s年度%s产品线利润率", year, categoryId);
             //已完成曲线图
-            lineChart.series(salesProfitLine(categoryId));
+            lineChart.series(salesProfitLine(categoryId, year));
             //目标曲线图
-            lineChart.series(salesProfitTargetLine(categoryId));
+            lineChart.series(salesProfitTargetLine(categoryId, year));
             Cache.add(cacked_key, lineChart, "2h");
         }
         return lineChart;
@@ -523,9 +523,9 @@ public class SaleTarget extends Model {
      * @param categoryId
      * @return
      */
-    public static Series.Line salesProfitLine(String categoryId) {
-        DateTime now = new DateTime().now();
-        Series.Line line = new Series.Line(categoryId + "月度利润率");
+    public static Series.Line salesProfitLine(String categoryId, int year) {
+        DateTime now = new DateTime().now().withYear(year);
+        Series.Line line = new Series.Line("月度利润率");
         line.color = "#FFA500";
 
         String sql = "select sku From Product "
@@ -557,7 +557,7 @@ public class SaleTarget extends Model {
             if(totalsalefee != 0) {
                 rate = totalsaleprofit / totalsalefee * 100;
             }
-            line.add(rate, i);
+            line.add(rate, i + "月");
         }
         return line;
     }
@@ -568,9 +568,9 @@ public class SaleTarget extends Model {
      * @param categoryId
      * @return
      */
-    public static Series.Line salesProfitTargetLine(String categoryId) {
-        DateTime now = new DateTime().now();
-        Series.Line line = new Series.Line(categoryId + "月度利润率目标");
+    public static Series.Line salesProfitTargetLine(String categoryId, int year) {
+        DateTime now = new DateTime().now().withYear(year);
+        Series.Line line = new Series.Line("月度利润率目标");
         List<SaleTarget> saleTargetList = SaleTarget.find("fid=? AND targetYear=? AND saleTargetType=?", categoryId,
                 now.getYear(), SaleTarget.T.CATEGORY).fetch();
 
@@ -579,7 +579,7 @@ public class SaleTarget extends Model {
 
             float target = saleTargetList.get(i).profitMargin;
 
-            line.add(target, i + 1);
+            line.add(target, i + 1 + "月");
         }
         return line;
     }

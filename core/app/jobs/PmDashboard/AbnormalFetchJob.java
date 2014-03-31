@@ -4,7 +4,6 @@ import helper.DBUtils;
 import jobs.driver.BaseJob;
 import models.market.Listing;
 import models.view.dto.AbnormalDTO;
-import models.view.post.AbnormalPost;
 import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -55,44 +54,40 @@ public class AbnormalFetchJob extends BaseJob {
 
         Map<String, List<AbnormalDTO>> dtoMap = new HashMap<String, List<AbnormalDTO>>();
         //准备数据容器
-        List<AbnormalDTO> day1s = new ArrayList<AbnormalDTO>();
+        List<AbnormalDTO> salesQty = new ArrayList<AbnormalDTO>();
         List<AbnormalDTO> reviews = new ArrayList<AbnormalDTO>();
-        List<AbnormalDTO> befores = new ArrayList<AbnormalDTO>();
-        List<AbnormalDTO> profits = new ArrayList<AbnormalDTO>();
+        List<AbnormalDTO> salesAmount = new ArrayList<AbnormalDTO>();
+        List<AbnormalDTO> salesProfits = new ArrayList<AbnormalDTO>();
         for(String sku : skus) {
-            //昨天销量异常
-            fetchDay1SalesAmount(sku, day1s);
-            //review异常
+            fetchSalesQty(sku, salesQty);
             fetchReview(sku, reviews);
-            //历史销量异常
-            fetchBeforeSalesAmount(sku, befores);
-            //历史利润率异常
-            fetchBeforeSalesProfit(sku, profits);
+            fetchSalesAmount(sku, salesAmount);
+            fetchSalesProfit(sku, salesProfits);
         }
 
-        dtoMap.put(AbnormalPost.T.DAY1.toString(), day1s);
-        dtoMap.put(AbnormalPost.T.REVIEW.toString(), reviews);
-        dtoMap.put(AbnormalPost.T.BEFOREAMOUNT.toString(), befores);
-        dtoMap.put(AbnormalPost.T.BEFOREPROFIT.toString(), profits);
+        dtoMap.put(AbnormalDTO.T.SALESQTY.toString(), salesQty);
+        dtoMap.put(AbnormalDTO.T.REVIEW.toString(), reviews);
+        dtoMap.put(AbnormalDTO.T.SALESAMOUNT.toString(), salesAmount);
+        dtoMap.put(AbnormalDTO.T.SALESPROFIT.toString(), salesProfits);
         //将数据添加到缓存内
         Cache.add(AbnormalDTO_CACHE, dtoMap);
         Cache.delete(RUNNING);
     }
 
     /**
-     * 计算出所有 昨天销售额异常的sku
+     * 计算出所有销量异常的sku
      */
-    private void fetchDay1SalesAmount(String sku, List<AbnormalDTO> dtos) {
+    private void fetchSalesQty(String sku, List<AbnormalDTO> dtos) {
         DateTime day1 = new DateTime().now().plusDays(-1);
         MetricProfitService met = new MetricProfitService(day1.toDate(), day1.toDate(), null, sku, null);
-        //昨天的销售额
-        float day1Sales = met.esSaleFee();
+        //昨天的销量
+        float day1Sales = met.esSaleQty();
         //过去四周同期平均值
         float mean = this.beforeMean(sku, met);
-        //如果昨天销售额 小于 过去四周同期 销售额的平均值 20%或者以上，则视为异常 sku
+        //如果昨天销量 小于 过去四周同期 销量的平均值 20%或者以上，则视为异常 sku
         if(day1Sales > 0 && mean > 0 && day1Sales <= (mean * 0.8)) {
             float difference = (mean - day1Sales) / mean * 100;
-            dtos.add(new AbnormalDTO(day1Sales, mean, difference, sku, AbnormalDTO.T.DAY1));
+            dtos.add(new AbnormalDTO(day1Sales, mean, difference, sku, AbnormalDTO.T.SALESQTY));
         }
     }
 
@@ -117,14 +112,14 @@ public class AbnormalFetchJob extends BaseJob {
     }
 
     /**
-     * 计算出所有 历史销售额异常的sku
+     * 销售额异常的sku
      * <p/>
      * 历史销售额指的是：
      * 上上周六 到 上周五 的销售额 对比 上个周期的销售额
      *
      * @param sku
      */
-    private void fetchBeforeSalesAmount(String sku, List<AbnormalDTO> dtos) {
+    private void fetchSalesAmount(String sku, List<AbnormalDTO> dtos) {
         DateTime monday = new DateTime(getMondayOfWeek());
         Float[] beforeSales = new Float[2];
         for(int i = 1; i <= 2; i++) {
@@ -137,7 +132,7 @@ public class AbnormalFetchJob extends BaseJob {
         }
         if(beforeSales[0] > 0 && beforeSales[1] > 0 && beforeSales[0] <= (beforeSales[1] * 0.95)) {
             float difference = (beforeSales[1] - beforeSales[0]) / beforeSales[1] * 100;
-            dtos.add(new AbnormalDTO(beforeSales[0], beforeSales[1], difference, sku, AbnormalDTO.T.BEFOREAMOUNT));
+            dtos.add(new AbnormalDTO(beforeSales[0], beforeSales[1], difference, sku, AbnormalDTO.T.SALESAMOUNT));
         }
     }
 
@@ -149,7 +144,7 @@ public class AbnormalFetchJob extends BaseJob {
      *
      * @param sku
      */
-    private void fetchBeforeSalesProfit(String sku, List<AbnormalDTO> dtos) {
+    private void fetchSalesProfit(String sku, List<AbnormalDTO> dtos) {
         DateTime monday = new DateTime(getMondayOfWeek());
         Float[] beforeProfit = new Float[2];
         for(int i = 1; i <= 2; i++) {
@@ -162,7 +157,7 @@ public class AbnormalFetchJob extends BaseJob {
         }
         if(beforeProfit[0] > 0 && beforeProfit[1] > 0 && beforeProfit[0] <= (beforeProfit[1] * 0.95)) {
             float difference = (beforeProfit[1] - beforeProfit[0]) / beforeProfit[1] * 100;
-            dtos.add(new AbnormalDTO(beforeProfit[0], beforeProfit[1], difference, sku, AbnormalDTO.T.BEFOREPROFIT));
+            dtos.add(new AbnormalDTO(beforeProfit[0], beforeProfit[1], difference, sku, AbnormalDTO.T.SALESPROFIT));
         }
     }
 
@@ -179,7 +174,7 @@ public class AbnormalFetchJob extends BaseJob {
             met.begin = now.plusDays(i * (-7)).toDate();
             met.end = now.plusDays(i * (-7)).toDate();
             met.sku = sku;
-            beforeSales += met.esSaleFee();
+            beforeSales += met.esSaleQty();
         }
         return beforeSales / 4;
     }

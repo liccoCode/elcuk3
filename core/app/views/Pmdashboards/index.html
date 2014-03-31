@@ -2,15 +2,12 @@
 #{set title:'Home' /}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
-    #{script 'Pmdashboards/pmpie.coffee'/}
-    #{script 'Pmdashboards/pmdateline.coffee'/}
-    #{script 'Pmdashboards/pmcolumn.coffee'/}
-    #{script 'Pmdashboards/abnormal.coffee'/}
+    #{script 'Pmdashboards/pmdashboards.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}
 
-<div class="row-fluid" id="orders" xmlns="http://www.w3.org/1999/html">
+<div class="row-fluid" id="orders">
   <div class="span12">
     <div class="input-prepend input-append inline">
       <select name="team" style="width:130px;margin-left:20px;">
@@ -48,77 +45,89 @@
 </div>
 
 <ul class="nav nav-tabs" id="below_tab">
-  <li>
+  <li class="active">
     <a href="#product" data-toggle='tab'>产品线状态</a>
   </li>
+
   <li>
     <a href="#abnormalInfo" data-toggle='tab'>异常信息</a>
   </li>
+
   <li>
     <a href="#category" data-toggle='tab'>Category目标</a>
   </li>
+
   <li>
     <a href="#task" data-toggle='tab'>年度目标</a>
   </li>
 </ul>
 
 <div id="below_tabContent" class="tab-content">
-
-      <div class="tab-pane fade active in" id='product'>
-      #{info_row title:'产品线状态'/}
-        <div class="row-fluid">
-          <div class="span6" style="height:450px;" id='salefee_line'></div>
-          <div class="span6" style="height:450px;" id='saleqty_line'></div>
-        </div>
-      </div>
-
-      <div class="tab-pane fade" id='category'>
-      #{info_row title:'Category每月销售额和利润率'/}
-      </div>
-
-
-      <div class="tab-pane fade" id='task'>
-        #{info_row title:'每月销售额和利润率'/}
-          <div class="row-fluid">
-            <div class="span6" style="height:450px;" id='sale_column'></div>
-            <div class="span6" style="height:450px;" id='profitrate_line'></div>
-          </div>
-        #{info_row title:'全年销售额和利润'/}
-          <div class="row-fluid">
-            <div class="span6" style="height:450px;" id='sale_percent'></div>
-            <div class="span6" style="height:450px;" id='profit_percent'></div>
-          </div>
-
-        #{info_row title:'TEAM所占比重'/}
-          <div class="row-fluid">
-            <div class="span6" style="height:450px;" id='teamsale_percent'></div>
-            <div class="span6" style="height:450px;" id='teamprofit_percent'></div>
-          </div>
-      </div>
-
-    <div class="tab-pane fade" id='abnormalInfo'>
-        #{info_row title:'SKU 销售额异常'}
-          <ul>
-            <li>SKU的昨日销售额对比同期(过去四周当天平均值）突然下降下降20%</li>
-          </ul>
-        #{/info_row}
-          <div id="day1SalesAmount"></div>
-
-        #{info_row title:'SKU 历史销售额异常'}
-          <ul>
-            <li>上上周六 到 上周五 的销售额 对比 上个周期的销售额（默认差异5%）</li>
-          </ul>
-        #{/info_row}
-          <div id="beforeSalesAmount"></div>
-
-        #{info_row title:'SKU 利润率异常'}
-          <ul>
-            <li>上上周六 到 上周五 的利润率 对比 上个周期的利润率（默认差异5%）</li>
-          </ul>
-        #{/info_row}
-          <div id="beforeSalesProfit"></div>
-
-        #{info_row title:'Review 异常'/}
-          <div id="review"></div>
+  <div class="tab-pane fade active in" id='product' data-method="ajaxFetchProductInfos">
+  #{info_row title:'产品线状态'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='salefee_line' data-url="/pmdashboards/percent"></div>
+      <div class="span6" style="height:450px;" id='saleqty_line' data-url="/pmdashboards/percent"></div>
     </div>
+  </div>
+
+  <div class="tab-pane fade" id='category' data-method="ajaxFetchCategorySaleTargets">
+  #{info_row title:'Category每月销售额和利润率'/}
+    <div class="span6" style="height:450px;width:47%" id='category_column' data-url="/pmdashboards/ajaxCategorySalesAmount"></div>
+    <div class="span6" style="height:450px;width:47%" id='category_line' data-url="/pmdashboards/ajaxCategorySalesProfit"></div>
+  </div>
+
+
+  <div class="tab-pane fade" id='task' data-method="ajaxFetchAnnualTargets">
+  #{info_row title:'每月销售额和利润率'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='sale_column' data-url="/pmdashboards/percent"></div>
+      <div class="span6" style="height:450px;" id='profitrate_line' data-url="/pmdashboards/percent"></div>
+    </div>
+  #{info_row title:'全年销售额和利润'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='sale_percent' data-url="/pmdashboards/percent"></div>
+      <div class="span6" style="height:450px;" id='profit_percent' data-url="/pmdashboards/percent"></div>
+    </div>
+
+  #{info_row title:'TEAM所占比重'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='teamsale_percent' data-url="/pmdashboards/percent"></div>
+      <div class="span6" style="height:450px;" id='teamprofit_percent' data-url="/pmdashboards/percent"></div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id='abnormalInfo' data-method="ajaxFetchAbnormals">
+    <div class="row-fluid">
+    #{info_row title:'SKU 销量异常'}
+      <ul>
+        <li>SKU的昨日销售额对比同期(过去四周当天平均值）突然下降下降20%</li>
+      </ul>
+    #{/info_row}
+      <div id="day1SalesAmount"></div>
+    </div>
+
+    <div class="row-fluid">
+    #{info_row title:'SKU 销售额异常'}
+      <ul>
+        <li>上上周六 到 上周五 的销售额 对比 上个周期的销售额（默认差异5%）</li>
+      </ul>
+    #{/info_row}
+      <div id="beforeSalesAmount"></div>
+    </div>
+
+    <div class="row-fluid">
+    #{info_row title:'SKU 利润率异常'}
+      <ul>
+        <li>上上周六 到 上周五 的利润率 对比 上个周期的利润率（默认差异5%）</li>
+      </ul>
+    #{/info_row}
+      <div id="beforeSalesProfit"></div>
+    </div>
+
+    <div class="row-fluid">
+    #{info_row title:'Review 异常'/}
+      <div id="review"></div>
+    </div>
+  </div>
 </div>

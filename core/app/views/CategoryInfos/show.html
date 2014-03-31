@@ -1,9 +1,6 @@
 #{extends 'main_full.html' /}
 #{set title:'Category 信息' /}
 #{set 'moreScripts'}
-    #{script 'highstock.js'/}
-    #{script 'CategoryInfos/column.coffee'/}
-    #{script 'CategoryInfos/dateline.coffee'/}
 #{/set}
 
 <div class="row-fluid">
@@ -34,28 +31,8 @@
     </div>
 
     <div class="span8 well well-small">
+      #{info_row title: "SKU 列表信息"/}
 
-      <ul class="nav nav-tabs">
-        <li class="active">
-          <a href="#categoryInfo" data-toggle='tab'>Category 状态</a>
-        </li>
-        <li>
-          <a href="#SKUInfo" data-toggle='tab'>SKU 列表信息</a>
-        </li>
-      </ul>
-
-      <div class="tab-content">
-        <div class="tab-pane fade active in" id='categoryInfo'>
-          <div class="row-fluid">
-            <div class="span6" style="height:450px;" data-method="ajaxCategorySalesAmount" id='c_column'></div>
-            <div class="span6" style="height:450px;" data-method="ajaxCategorySalesProfit" id='c_line'></div>
-            <input type="hidden" value="${ca.categoryId}" id="cateId">
-          </div>
-        </div>
-
-        <div class="tab-pane fade" id='SKUInfo'>
-        </div>
-      </div>
     </div>
   </div>
 #{/else}
