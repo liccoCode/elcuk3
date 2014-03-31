@@ -480,7 +480,7 @@ public class SaleTarget extends Model {
         column.color = "#FFA500";
         float totalsale = 0f;
         for(int i = 1; i <= 12; i++) {
-            DateTime month = now.withMonthOfYear(1);
+            DateTime month = now.withMonthOfYear(i);
             //获得每个月份的完整的开始日期
             DateTime begin = month.withDayOfMonth(1);
             //获得每个月份的完整的结束日期
@@ -535,7 +535,7 @@ public class SaleTarget extends Model {
         float totalsaleprofit = 0f;
         float totalsalefee = 0f;
         for(int i = 1; i <= 12; i++) {
-            DateTime month = now.withMonthOfYear(1);
+            DateTime month = now.withMonthOfYear(i);
             //获得每个月份的完整的开始日期
             DateTime begin = month.withDayOfMonth(1);
             //获得每个月份的完整的结束日期
