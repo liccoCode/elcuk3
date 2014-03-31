@@ -370,8 +370,8 @@ public class PmDashboardESQuery {
      */
     public static Series.Line esSaleFeeLine(Category category, int year) {
         Series.Line line = new Series.Line(category.name + "销售额");
-        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-365).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().plusDays(-270).toDate();
+        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-180).toDate();
+        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
@@ -393,8 +393,8 @@ public class PmDashboardESQuery {
      */
     public static Series.Line esSaleQtyLine(Category category, int year) {
         Series.Line line = new Series.Line(category.name + "销量");
-        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-365).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().plusDays(-270).toDate();
+        Date begin = DateTime.now().withTimeAtStartOfDay().plusDays(-180).toDate();
+        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
