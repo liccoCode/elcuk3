@@ -99,7 +99,6 @@ public class AbnormalDTO implements Serializable {
                 GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<String, Object>());
                 Cache.add(AbnormalFetchJob.RUNNING, AbnormalFetchJob.RUNNING);
             }
-
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
         List<String> categoryIds = new ArrayList<String>();
@@ -123,13 +122,10 @@ public class AbnormalDTO implements Serializable {
     public List<AbnormalDTO> abnormalFilter(List<String> skus, List<AbnormalDTO> dtos) {
         List<AbnormalDTO> filterResult = new ArrayList<AbnormalDTO>();
         for(AbnormalDTO dto : dtos) {
-            if(skus.contains(dto.sku)) {
-                filterResult.add(dto);
-            }
+            if(skus.contains(dto.sku) && dto.difference >= this.difference) filterResult.add(dto);
         }
         return filterResult;
     }
-
 
     /**
      * 获取昨天新增的 AmazonListingReview

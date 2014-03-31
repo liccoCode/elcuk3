@@ -100,11 +100,11 @@ public class Pmdashboards extends Controller {
     /**
      * 销量异常
      */
-    public static void day1SalesAmount(AbnormalDTO p) {
+    public static void salesQty(AbnormalDTO p) {
         try {
             if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESQTY);
             List<AbnormalDTO> dtos = p.query(User.findByUserName(Secure.Security.connected()));
-            render("Pmdashboards/_day1SalesAmount.html", dtos, dtos, p);
+            render("Pmdashboards/_salesQty.html", dtos, dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<p>" + e.getMessage() + "</p>");
         }
@@ -117,11 +117,11 @@ public class Pmdashboards extends Controller {
      * 销售额周期指的是：
      * 上上周六 到 上周五 的销售额 对比 上个周期的销售额
      */
-    public static void beforeSalesAmount(AbnormalDTO p) {
+    public static void salesAmount(AbnormalDTO p) {
         try {
             if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESAMOUNT);
             List<AbnormalDTO> dtos = p.query(User.findByUserName(Secure.Security.connected()));
-            render("Pmdashboards/_beforeSalesAmount.html", dtos, p);
+            render("Pmdashboards/_salesAmount.html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<p>" + e.getMessage() + "</p>");
         }
@@ -134,11 +134,11 @@ public class Pmdashboards extends Controller {
      * 周期为：
      * 上上周六 到 上周五 的利润率 对比 上个周期的利润率
      */
-    public static void beforeSalesProfit(AbnormalDTO p) {
+    public static void salesProfit(AbnormalDTO p) {
         try {
             if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESPROFIT);
             List<AbnormalDTO> dtos = p.query(User.findByUserName(Secure.Security.connected()));
-            render("Pmdashboards/_beforeSalesProfit.html", dtos, p);
+            render("Pmdashboards/_salesProfit.html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<p>" + e.getMessage() + "</p>");
         }
