@@ -398,7 +398,6 @@ public class SaleTarget extends Model {
             if(child.id == null) {
                 child.save();
             } else {
-                child.refresh();
                 child.updateOld((SaleTarget) SaleTarget.findById(child.id));
             }
         }
