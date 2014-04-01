@@ -1,6 +1,5 @@
 package jobs;
 
-import jobs.PmDashboard.AbnormalFetchJob;
 import jobs.driver.DriverJob;
 import play.Logger;
 import play.Play;
