@@ -8,6 +8,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
             <ul class="dropdown-menu">
+              #{power.ck "pmdashboards.index"}
+              <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
+              #{/power.ck}
               <li><a href="@{Application.index()}">DashBoard</a></li>
               <li><a href="@{Users.home()}">Home</a></li>
               <li><a href="@{Notifications.index()}">Notys</a></li>
@@ -30,6 +33,9 @@
                 #{/power.ck}
                 #{power.ck "analyzes.index"}
                   <li><a href="@{Analyzes.index()}">销量分析</a></li>
+                #{/power.ck}
+                #{power.ck "profits.index"}
+                   <li><a href="@{Profits.index()}">利润分析</a></li>
                 #{/power.ck}
                 #{power.ck "sellingrecords.index"}
                   <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
@@ -108,6 +114,20 @@
           </li>
         #{/power.ck}
 
+        #{power.ck 'saletarget'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              #{power.ck "saletargets.annualindex"}
+                <li><a href="@{SaleTargets.annualIndex()}">年度销售目标</a></li>
+              #{/power.ck}
+              #{power.ck "saletargets.monthindex"}
+                <li><a href="@{SaleTargets.monthIndex()}">月度销售目标</a></li>
+              #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
+
         #{power.ck 'system'}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
@@ -127,6 +147,9 @@
                 #{/power.ck}
                 #{power.ck "mailsrecords.index"}
                   <li><a href="@{MailsRecords.index()}">邮件管理</a></li>
+                #{/power.ck}
+                #{power.ck "teams.show"}
+                  <li><a href="@{Teams.show()}">TEAM管理</a></li>
                 #{/power.ck}
               <li><a href="@{Elcuk.index()}">系统状态</a></li>
             </ul>

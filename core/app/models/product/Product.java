@@ -21,10 +21,7 @@ import play.utils.FastRuntimeException;
 import query.ProductQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -114,6 +111,205 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     @Required
     public String abbreviation;
+
+    /**
+     * 上市时间
+     */
+    public Date marketTime;
+
+    public enum T {
+
+        /**
+         * 未上架
+         */
+        NOMARKET {
+            @Override
+            public String label() {
+                return "未上架";
+            }
+        },
+
+        /**
+         * 上架
+         */
+        MARKETING {
+            @Override
+            public String label() {
+                return "上架";
+            }
+        },
+
+        /**
+         * 下架
+         */
+        DOWN {
+            @Override
+            public String label() {
+                return "下架";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 上架状态(手动调整)
+     */
+    @Enumerated(EnumType.STRING)
+    public T marketState;
+
+    public enum P {
+        /**
+         * 未采购
+         */
+        NONE {
+            @Override
+            public String label() {
+                return "未采购";
+            }
+        },
+
+        /**
+         * 正常采购
+         */
+        NORMAL {
+            @Override
+            public String label() {
+                return "正常采购";
+            }
+        },
+
+        /**
+         * 停止采购
+         */
+        STOP {
+            @Override
+            public String label() {
+                return "停止采购";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 采购状态
+     */
+    @Enumerated(EnumType.STRING)
+    public P procureState;
+
+    public enum L {
+        /**
+         * 开发期
+         */
+        DEVELOP {
+            @Override
+            public String label() {
+                return "开发期";
+            }
+        },
+
+        /**
+         * 引进期
+         */
+        INTRODUCE {
+            @Override
+            public String label() {
+                return "引进期";
+            }
+        },
+
+        /**
+         * 成长期
+         */
+        GROWTH {
+            @Override
+            public String label() {
+                return "成长期";
+            }
+        },
+
+        /**
+         * 成熟期
+         */
+        MATURE {
+            @Override
+            public String label() {
+                return "成熟期";
+            }
+        },
+
+        /**
+         * 衰退期
+         */
+        DOWNTURN {
+            @Override
+            public String label() {
+                return "衰退期";
+            }
+        },
+
+        /**
+         * 退市
+         */
+        EXIT {
+            @Override
+            public String label() {
+                return "退市";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 产品的生命周期(所处状态)
+     */
+    @Enumerated(EnumType.STRING)
+    public L productState;
+
+    public enum E {
+        /**
+         * 销量最好
+         */
+        A,
+
+        /**
+         * 销量较好
+         */
+        B,
+
+        /**
+         * 销量低迷
+         */
+        C,
+
+        /**
+         * 销量较差
+         */
+        D,
+
+        /**
+         * 销量极差
+         */
+        E
+    }
+
+    /**
+     * 销售等级(手动调整)
+     */
+    @Enumerated(EnumType.STRING)
+    public E salesLevel;
+
+    /**
+     * 产品定位
+     */
+    public String locate;
+
+    /**
+     * 产品卖点
+     */
+    public String sellingPoints;
 
     public Product() {
     }

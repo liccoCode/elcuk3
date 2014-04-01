@@ -1,6 +1,15 @@
 $ ->
+  # 图片
   dropbox = $('#dropbox')
-  window.dropUpload.loadImages($('#p_sku').val(), dropbox)
+  # 包装
+  packageDropbox = $('#packageDropbox')
+  # 说明书
+  instructionsDropbox = $('#instructionsDropbox')
+  # 丝印文件
+  silkscreenDropbox = $('#silkscreenDropbox')
+
+  # 加载此 SKU 所拥有的全部附件
+  window.dropUpload.loadAttachs($('#p_sku').val())
 
   fidCallBack = ->
     sku = $('#p_sku').val()
@@ -9,4 +18,8 @@ $ ->
       return false
     {fid: sku, p: 'SKU'}
 
+  # 初始化 上传 div
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
+  window.dropUpload.iniDropbox(fidCallBack, packageDropbox)
+  window.dropUpload.iniDropbox(fidCallBack, instructionsDropbox)
+  window.dropUpload.iniDropbox(fidCallBack, silkscreenDropbox)

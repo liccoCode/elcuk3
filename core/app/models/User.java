@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import controllers.Login;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.product.Category;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import models.product.Team;
 
 /**
  * 系统中的用户
@@ -48,6 +51,12 @@ public class User extends Model {
      */
     @ManyToMany
     public Set<Privilege> privileges = new HashSet<Privilege>();
+
+    /**
+     * 用户所拥有的TEAM
+     */
+    @ManyToMany
+    public Set<Team> teams = new HashSet<Team>();
 
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
     public List<Payment> paymentPaied = new ArrayList<Payment>();
@@ -190,6 +199,39 @@ public class User extends Model {
         this.privileges.addAll(privileges);
         Privilege.updatePrivileges(this.username, this.privileges);
         this.save();
+    }
+
+
+    /**
+     * 当前用户还没有的权限
+     *
+     * @return
+     */
+    public boolean isHaveTeam(Team team) {
+        return this.teams.contains(team);
+    }
+
+    /**
+     * 增加Team;(删除原来的, 重新添加现在的)
+     *
+     * @param teamId
+     */
+    public void addTeams(List<Long> teamId) {
+        if(teamId == null || teamId.size() == 0) {
+            this.teams = new HashSet<Team>();
+            this.save();
+            Team.updateTeams(this.username, this.teams);
+        } else {
+            List<Team> teams = Team.find("id IN " + JpqlSelect.inlineParam(teamId))
+                    .fetch();
+            if(teamId.size() != teams.size())
+                throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.teams = new HashSet<Team>();
+            this.save();
+            this.teams.addAll(teams);
+            Team.updateTeams(this.username, this.teams);
+            this.save();
+        }
     }
 
     /**
@@ -400,4 +442,19 @@ public class User extends Model {
         }
     }
 
+    /**
+     * User的所有Category
+     *
+     * @return
+     */
+    public static List<Category> getTeamCategorys(User user) {
+        List<Category> categories = new ArrayList<Category>();
+        Iterator<Team> iterator = user.teams.iterator();
+        while(iterator.hasNext()) {
+            Team team = iterator.next();
+            List<Category> categoryList = team.categorys;
+            categories.addAll(categoryList);
+        }
+        return categories;
+    }
 }
