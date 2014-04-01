@@ -24,7 +24,7 @@ import java.util.List;
  * - 轮询周期: 1h
  * - Duration: 2h
  * - Job Interval: 24h
- * User: Wyatt
+ * User: Wyatt                   Shipment Plan
  * Date: 12-1-8
  * Time: 上午5:59
  */

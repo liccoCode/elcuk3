@@ -4,6 +4,7 @@ import helper.J;
 import helper.Webs;
 import models.Privilege;
 import models.User;
+import models.product.Team;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -32,7 +33,8 @@ public class Users extends Controller {
     public static void index() {
         List<User> users = User.findAll();
         List<Privilege> privileges = Privilege.findAll();
-        render(users, privileges);
+        List<Team> teams = Team.findAll();
+        render(users, privileges, teams);
     }
 
     @Before(only = {"home", "updates"})
@@ -56,6 +58,18 @@ public class Users extends Controller {
         }
         int size = user.privileges.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
+    }
+
+    public static void teams(Long id, List<Long> teamId) {
+        //if(teamId == null || teamId.size() == 0) renderJSON(new Ret(false, "必须选择Team"));
+        User user = User.findById(id);
+        try {
+            user.addTeams(teamId);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.E(e)));
+        }
+        int size = user.teams.size();
+        renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Team", size)));
     }
 
     public static void updates(User user, String newPassword, String newPasswordConfirm) {
@@ -169,6 +183,10 @@ public class Users extends Controller {
             renderJSON(new Ret("用户不存在，无法关闭"));
         try {
             Privilege.clearUserPrivilegesCache(user);
+            /**
+             * 清理TEAM的信息
+             */
+            Team.clearUserTeamsCache(user);
             user.privileges = new HashSet<Privilege>();
             user.password = RandomStringUtils.randomAlphanumeric(15);
             user.closed = true;
@@ -195,6 +213,10 @@ public class Users extends Controller {
         try {
             Set<Privilege> privileges = Privilege.privileges(user.username);
             Privilege.updatePrivileges(user.username, privileges);
+
+            Set<Team> teams = Team.teams(user.username);
+            Team.updateTeams(user.username, teams);
+
             user.password = RandomStringUtils.randomAlphanumeric(15);
             user.closed = false;
             user.save();

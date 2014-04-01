@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import play.db.helper.SqlSelect;
+
 /**
  * 直接使用 SQL 的工具方法
  * User: wyattpan
@@ -124,5 +126,29 @@ public class DBUtils {
 
     public static boolean execute(String sql) {
         return DB.execute(sql);
+    }
+
+    public static String whereOr(String column, Object param) {
+        String value = orlineParam(column, param);
+        if(value.length() == 0) return value;
+        return value;
+    }
+
+    public static String orlineParam(String column, Object param) {
+        if(param == null) return "NULL";
+        String str;
+        if(param instanceof String) str = column + "=" + SqlSelect.quote(param.toString());
+        else if(param instanceof Iterable<?>) {
+            SqlSelect.Concat list = new SqlSelect.Concat("(", " or ", ")");
+            for(Object p : (Iterable<?>) param) list.append(orlineParam(column, p));
+            str = list.toString();
+        } else if(param instanceof Object[]) {
+            SqlSelect.Concat list = new SqlSelect.Concat("(", " or ", ")");
+            for(Object p : (Object[]) param) list.append(orlineParam(column, p));
+            str = list.toString();
+        } else if(param instanceof Enum<?>) {
+            str = column + "=" + SqlSelect.quote(param.toString());
+        } else str = column + "=" + param.toString();
+        return str;
     }
 }
