@@ -173,7 +173,7 @@ public class Pmdashboards extends Controller {
      */
     public static void ajaxCategorySalesAmount(String cateid, int year) {
         try {
-            HighChart chart = SaleTarget.ajaxHighChartCategorySalesAmount(cateid, year);
+            HighChart chart = PmDashboardESQuery.ajaxHighChartCategorySalesAmount(cateid, year);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -185,7 +185,7 @@ public class Pmdashboards extends Controller {
      */
     public static void ajaxCategorySalesProfit(String cateid, int year) {
         try {
-            HighChart chart = SaleTarget.ajaxHighChartCategorySalesProfit(cateid, year);
+            HighChart chart = PmDashboardESQuery.ajaxHighChartCategorySalesProfit(cateid, year);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
