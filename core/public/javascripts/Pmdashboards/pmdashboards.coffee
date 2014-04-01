@@ -138,6 +138,13 @@ $ ->
         LoadMask.unmask(mask_selector)
       )
 
+   # 点击搜索按钮
+  $('#orders button[name="search"]').click ->
+    year = $('select[name="year"]').val()
+    team = $('select[name="team"]').val()
+    cateid = $('select[name="cate"]').val()
+    triggerTabMethod()
+
   $("#abnormalInfo").on("click", "#salesQtySearch, #salesAmountSearch, #salesProfitSearch", () ->
     # 触发 Ajax 事件
     LoadMask.mask()
