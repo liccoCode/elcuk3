@@ -22,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import query.SkuESQuery;
 
 import java.util.List;
 
@@ -210,9 +211,46 @@ public class Products extends Controller {
         buff.append("[");
         for(Cooperator co : cooperatorList) {
             buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name).append("\"").append("}");
+                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+                    .append("\"").append("}");
         }
         buff.append("]");
         renderJSON(buff.toString());
+    }
+
+
+    /**
+     * SKU的销售曲线
+     *
+     * @param type
+     * @param sku
+     */
+    public static void linechart(String type, String sku) {
+
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false));
+        String json = "";
+
+        if(type.equals("skusalefee")) {
+            /**
+             * 销售额曲线
+             */
+            json = J.json(SkuESQuery
+                    .salefeeline(type, sku));
+
+        } else if(type.equals("skusaleqty")) {
+            /**
+             * 销量曲线
+             */
+            json = J.json(SkuESQuery
+                    .saleqtyline(type, sku));
+        } else if(type.equals("skuprofit")) {
+            /**
+             * 利润曲线
+             */
+            json = J.json(SkuESQuery
+                    .skuprofitline(type, sku));
+        }
+        renderJSON(json);
     }
 }

@@ -375,7 +375,7 @@ public class PmDashboardESQuery {
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
-        JSONArray entries = profitservice.dashboardSaleFee();
+        JSONArray entries = profitservice.dashboardSaleFee(1);
         for(Object o : entries) {
             JSONObject entry = (JSONObject) o;
             line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
@@ -398,7 +398,7 @@ public class PmDashboardESQuery {
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
-        JSONArray entries = profitservice.dashboardSaleQty();
+        JSONArray entries = profitservice.dashboardSaleQty(1);
         for(Object o : entries) {
             JSONObject entry = (JSONObject) o;
             line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));

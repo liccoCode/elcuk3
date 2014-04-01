@@ -4,11 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import models.market.M;
-import models.market.Orderr;
-import models.procure.ShipItem;
-import models.procure.Shipment;
-import models.product.Product;
-import models.view.highchart.Series;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
@@ -21,6 +16,7 @@ import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.vo.OrderrVO;
+import org.elasticsearch.index.query.PrefixFilterBuilder;
 
 import java.util.*;
 
@@ -689,7 +685,16 @@ public class MetricProfitService {
     /**
      * 计算PM的DASHBoard的每日的所有Category的日销售额
      */
-    public JSONArray dashboardSaleFee() {
+    public JSONArray dashboardSaleFee(int esType) {
+        FilterBuilder filter = null;
+        if(esType == 1) {
+            filter = FilterBuilders.prefixFilter("sku",
+                    this.category.toLowerCase());
+        }
+        if(esType == 2) {
+            filter = FilterBuilders.termsFilter("sku", parseEsSku());
+        }
+
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
@@ -699,11 +704,9 @@ public class MetricProfitService {
                         .facetFilter(this.filterbuilder(true)
                                 //销售费用项目
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges"))
-                                .must(FilterBuilders.prefixFilter("sku",
-                                        this.category.toLowerCase()))
+                                .must(filter)
                         )
                 ).size(0);
-        System.out.println(":::" + search.toString());
         JSONObject result = ES.search("elcuk2", "salefee", search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
@@ -723,7 +726,16 @@ public class MetricProfitService {
     /**
      * 计算PM的DASHBoard的每日的所有Category的日销量
      */
-    public JSONArray dashboardSaleQty() {
+    public JSONArray dashboardSaleQty(int esType) {
+        FilterBuilder filter = null;
+        if(esType == 1) {
+            filter = FilterBuilders.prefixFilter("sku",
+                    this.category.toLowerCase());
+        }
+        if(esType == 2) {
+            filter = FilterBuilders.termsFilter("sku", parseEsSku());
+        }
+
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
@@ -731,8 +743,7 @@ public class MetricProfitService {
                         .interval("week")
                         .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
                         .facetFilter(this.filterbuilder(true)
-                                .must(FilterBuilders.prefixFilter("sku",
-                                        this.category.toLowerCase()))
+                                .must(filter)
                         )
                 ).size(0);
         JSONObject result = ES.search("elcuk2", "orderitem", search);
