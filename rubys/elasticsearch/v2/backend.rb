@@ -9,7 +9,7 @@ Dir['lib/*.rb'].each { |file| require File.expand_path(file) }
 ES_HOST = "http://192.168.1.99:9200"
 
 #DB_HOST = "http://aggron.easya.cc"
-DB_HOST = "127.0.0.1"
+DB_HOST = "localhost"
 #DB_NAME = "elcuk2"
 DB_NAME = "elcuk2_t"
 
