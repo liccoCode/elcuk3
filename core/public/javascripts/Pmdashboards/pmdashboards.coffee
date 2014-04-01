@@ -4,10 +4,8 @@ $ ->
   $("#below_tabContent").on("ajaxFetchAbnormals", "#abnormalInfo", () ->
     divs = ["review", "salesQty", "salesAmount", "salesProfit"]
     _.each(divs, (value) ->
-      LoadMask.mask()
       $div = $("##{value}")
       $div.load("/Pmdashboards/#{$div.attr("id")}", (r)->
-        LoadMask.unmask()
       )
     )
   )

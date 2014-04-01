@@ -85,7 +85,7 @@ public class AbnormalFetchJob extends BaseJob {
         //过去四周同期平均值
         float mean = this.beforeMean(sku, met);
         //如果昨天销量 小于 过去四周同期 销量的平均值 20%或者以上，则视为异常 sku
-        if(day1Sales > 0 && mean > 0 && day1Sales <= (mean * 0.8)) {
+        if(day1Sales > 0 && mean > 0 && day1Sales <= (mean * 0.98)) {
             float difference = (mean - day1Sales) / mean * 100;
             dtos.add(new AbnormalDTO(day1Sales, mean, difference, sku, AbnormalDTO.T.SALESQTY));
         }
@@ -130,7 +130,7 @@ public class AbnormalFetchJob extends BaseJob {
             MetricProfitService met = new MetricProfitService(day3.toDate(), day9.toDate(), null, sku, null);
             beforeSales[i - 1] = met.esSaleFee();
         }
-        if(beforeSales[0] > 0 && beforeSales[1] > 0 && beforeSales[0] <= (beforeSales[1] * 0.95)) {
+        if(beforeSales[0] > 0 && beforeSales[1] > 0 && beforeSales[0] <= (beforeSales[1] * 0.98)) {
             float difference = (beforeSales[1] - beforeSales[0]) / beforeSales[1] * 100;
             dtos.add(new AbnormalDTO(beforeSales[0], beforeSales[1], difference, sku, AbnormalDTO.T.SALESAMOUNT));
         }
@@ -155,7 +155,7 @@ public class AbnormalFetchJob extends BaseJob {
             MetricProfitService met = new MetricProfitService(day3.toDate(), day9.toDate(), null, sku, null);
             beforeProfit[i - 1] = met.calProfit().profitrate;
         }
-        if(beforeProfit[0] > 0 && beforeProfit[1] > 0 && beforeProfit[0] <= (beforeProfit[1] * 0.95)) {
+        if(beforeProfit[0] > 0 && beforeProfit[1] > 0 && beforeProfit[0] <= (beforeProfit[1] * 0.98)) {
             float difference = (beforeProfit[1] - beforeProfit[0]) / beforeProfit[1] * 100;
             dtos.add(new AbnormalDTO(beforeProfit[0], beforeProfit[1], difference, sku, AbnormalDTO.T.SALESPROFIT));
         }
