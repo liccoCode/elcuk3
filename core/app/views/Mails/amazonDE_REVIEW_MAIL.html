@@ -1,35 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>${title}</title>
+    <title>${title}</title>
 </head>
 <body>
-Sehr geehrte/r ${order.buyer == null ? 'Customer' : order.buyer}，
+Guten Tag ${order.buyer == null ? 'Kunden' : order.buyer}:
 <br/><br/>
-Sie haben vor einiger Zeit Ihre/n<br/>
+es war eine Zeit, da Sie die<br/>
 #{list items:order.items, as:'oi'}
-<a target="_blank" title="${oi.selling.aps.title}" href="${oi.selling.asinLink()}">${oi.selling.aps.title.omis(75)}</a><br/>
+<a target="_blank" title="${oi.selling.aps.title}" href="${oi.selling.asinLink()}">${oi.selling.aps.title.size() > 75 ? oi.selling.aps.title.substring(0, 74) + "..." : oi.selling.aps.title}</a><br/>
 ${oi.selling.asinLink()}
 <br/>
 <br/>
 #{/list}
-von EasyAcc auf Amazon.de gekauft. Wir möchten gerne Erfahren wie Sie mit dem Produkt zufrieden sind.
+von EasyAcc über Amazon gekauft haben. Wir würden uns gerne vergewissern, ob mit der Lieferung alles in Ordnung war.
 <br/><br/>
-Sollten Sie aus irgendeinem Grund nicht komplett zufrieden sein, drücken Sie bitte den "Antworten" Button in Ihrem eMail Programm und melden Sie sich bei uns.
-Wir nehmen jedes Feedback von Ihnen ernst und werden unser bestes versuchen Ihr Problem zu lösen. Außerdem helfen Sie mit Ihren Kommentaren dabei unsere Produkte und unseren Service zu verbessen.
+Sollte es einen Anlass zur Unzufriedenheit mit dem Produkt oder unserem Service gegeben haben, antworten Sie doch bitte
+auf diese Mail und schreiben Sie uns den Grund für Ihre Beanstandung. Wir werden Ihre Angelegenheit dann sogleich prüfen
+und alles tun, um das Problem zu lösen. Ihre Rückmeldung hilft uns dabei, Service und Produktangebot zu
+verbessern.
 <br/><br/>
-In der Zwischenzeit würden wir uns sehr freuen wenn Sie eine Rezension für unser Produkt hinterlassen würden. Den Link dazu finden Sie hier:<br/>
+Falls Sie zufrieden waren, freuen wir uns über Ihr Feedback unter:
+<br/>
 #{list items:order.items, as:'oi'}
 <a target="_blank" href="${oi.selling.makeReviewLink()}">${oi.selling.makeReviewLink()}</a><br/>
 #{/list}
 <br/><br/>
-Ihre Rezension hilft auch anderen Kunden bei einer Einschätzung des Produkts und hilft uns unsere Produkte und unseren Service zu verbessern.
-<br/><br/>
-Vielen herzlichen Dank für Ihre Zeit und für Ihre Hilfe.
-<br/><br/>
-Mit freundlichen Grüßen
+Ihre Hinweise kommen sowohl unseren Kunden als auch unserem Unternehmen zugute.
 <br/>
-Ihr EasyAcc Team
-(support@easyacc.com)
+Vielen Dank für Ihre Unterstützung!
+<br/><br/>
+EasyAcc Team Kundenzufriedenheit
+(support#easyacceu.com)
+<br/>
+<br/>
+<br/>
+
+-----------------------------------------------------------------------------------------
+
+<br/>
+<br/>
+<br/>
+Dear ${order.buyer == null ? 'Customer' : order.buyer}:
+<br/><br/>
+It has been a period of time since you purchased the<br/>
+#{list items:order.items, as:'oi'}
+<a target="_blank" title="${oi.selling.aps.title}" href="${oi.selling.asinLink()}">${oi.selling.aps.title.size() > 75 ? oi.selling.aps.title.substring(0, 74) + "..." : oi.selling.aps.title}</a><br/>
+${oi.selling.asinLink()}
+<br/>
+<br/>
+#{/list}
+from EasyAcc on Amazon.co.uk. We want to check back and see how it is doing.
+<br/><br/>
+If for any reason you are not completely satisfied with our products and services, please just hit reply and drop us an
+email, we will take your matter very seriously and do our best to solve the issue. Your comments will help us to improve
+our products and services.
+<br/><br/>
+Meanwhile, we invite you to create a product review via the link below:<br/>
+#{list items:order.items, as:'oi'}
+<a target="_blank" href="${oi.selling.makeReviewLink()}">${oi.selling.makeReviewLink()}</a><br/>
+#{/list}
+<br/><br/>
+Your review would benefit other customers and our business.<br/>
+Thanks for your support to our business.
+<br/><br/>
+Warmest regards
+<br/>
+EasyAcc Customer Satifaction Team
+(support#easyacceu.com)
 </body>
 </html>

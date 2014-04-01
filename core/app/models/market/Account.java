@@ -52,7 +52,6 @@ public class Account extends Model {
         OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
         OFFER_IDS.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
         OFFER_IDS.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
-
     }
 
     /**
@@ -392,8 +391,6 @@ public class Account extends Model {
                 return M.MID.A13V1IB3VIYZZH;
             case AMAZON_US:
                 return M.MID.ATVPDKIKX0DER;
-            case AMAZON_IT:
-                return M.MID.APJ6JRA9NG5V4;
             default:
                 return M.MID.A1F83G8C2ARO7P;
         }
