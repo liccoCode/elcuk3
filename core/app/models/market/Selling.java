@@ -2,10 +2,7 @@ package models.market;
 
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
-import helper.Constant;
-import helper.GTs;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.driver.GJob;
 import jobs.perform.SubmitFeedJob;
@@ -17,8 +14,10 @@ import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
@@ -232,15 +231,19 @@ public class Selling extends GenericModel {
     public byte[] downloadFnSkuLabel() {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
-
         synchronized(this.account.cookieStore()) {
+            // model: {"labelType":"ItemLabel_A4_27","mSku.0":"73SNZ2-BHSPU,700686512919","qty.0":"501","fnSku.0":"X0007XNAFZ"}
+            // labelType: ItemLabel_A4_27
+            Map<String, String> params = GTs.MapBuilder
+                    .map("labelType", "ItemLabel_A4_27")
+                    .put("mSku.0", this.merchantSKU)
+                    .put("qty.0", "27") // 一页打 44 个
+                    .put("fnSku.0", this.fnSku).build();
+            for(Cookie coo : this.account.cookieStore().getCookies()) {
+                Logger.info(" ===========" + coo.getName() + "=" + coo.getValue() + "============");
+            }
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
-                    Arrays.asList(
-                            new BasicNameValuePair("qty.0", "27"), // 一页打 44 个
-                            new BasicNameValuePair("fnSku.0", this.fnSku),
-                            new BasicNameValuePair("mSku.0", this.merchantSKU),
-                            new BasicNameValuePair("labelType", "ItemLabel_A4_27")
-                    ));
+                    Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
     }
 
