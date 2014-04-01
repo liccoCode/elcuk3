@@ -21,8 +21,6 @@ import java.util.*;
  * 会将所有的异常的数据计算出来缓存到 Redis
  * 然后在controller内根据条件去缓存获取对应的即可
  * <p/>
- * 轮询: 7 13 22 三个时间点执行三次
- * <p/>
  * User: mac
  * Date: 14-3-21
  * Time: PM2:03
