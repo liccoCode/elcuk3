@@ -3,7 +3,8 @@ namespace :play do
 
   desc "Push Code"
   task :push do
-    `git push bit`
+    `git push origin`
+
   end
 
   desc "部署 Play 代码到服务器"
@@ -16,7 +17,7 @@ namespace :play do
     puts '---- push to unfuddle ----'
     `git push ufd`
     puts '---- push to bitbucket ----'
-    `git push bit`
+    `git push origin`
     # 最后多查看两次 logs
     look = "sleep 3;tail logs/elcuk2.log;"
     run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;sleep 2;#{play_start};#{look * 3}"
