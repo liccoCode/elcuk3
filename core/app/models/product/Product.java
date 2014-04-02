@@ -3,6 +3,7 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
+import helper.DBUtils;
 import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
@@ -15,6 +16,7 @@ import play.cache.Cache;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -537,7 +539,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public static F.T2<List<String>, List<String>> fetchSkusJson() {
         List<String> skus = Product.skus(true);
-        return new F.T2<List<String>, List<String>>(skus,skus);
+        return new F.T2<List<String>, List<String>>(skus, skus);
     }
 
     public static boolean exist(String sku) {

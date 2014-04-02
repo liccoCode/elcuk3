@@ -126,7 +126,7 @@ public class Deliveryment extends GenericModel {
     @Lob
     public String memo = " ";
 
-    public enum T{
+    public enum T {
         /**
          * 普通单
          */

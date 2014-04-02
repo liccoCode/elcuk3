@@ -52,7 +52,6 @@ public class Account extends Model {
         OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
         OFFER_IDS.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
         OFFER_IDS.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
-
     }
 
     /**
