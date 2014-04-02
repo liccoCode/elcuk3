@@ -6,10 +6,10 @@ require "time"
 require "multi_json"
 require "pp"
 
-#ES_HOST = "http://gengar.easya.cc:9200"
-ES_HOST = "http://192.168.1.99:9000"
-#DB_HOST = "aggron.easya.cc"
-DB_HOST = "localhost"
+ES_HOST = "http://gengar.easya.cc:9200"
+#ES_HOST = "http://192.168.1.99:9000"
+DB_HOST = "aggron.easya.cc"
+#DB_HOST = "localhost"
 
 MAPPING = <<E
 { "orderitem": { "properties": { "createDate": { "type": "date", "format": "dateOptionalTime" }, "cat": { "type": "string" }, "sku": { "type": "string" }, "msku": { "type": "string" }, "id": { "type": "string" }, "market": { "type": "string" }, "order_orderId": { "type": "string" }, "quantity": { "type": "integer" }, "selling_sellingId": { "type": "string" }, "usdCost": { "type": "double" } } } }
