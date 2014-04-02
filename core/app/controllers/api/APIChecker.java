@@ -5,6 +5,7 @@ import play.Logger;
 import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Http.Header;
 
 /**
  * 对 API 调用的检查
@@ -15,10 +16,16 @@ import play.mvc.Controller;
 public class APIChecker extends Controller {
     @Before
     public static void checkServer() {
-        Logger.info("%s requrst API.", request.remoteAddress);
-        Server server = Server.find("ipAddress=?", request.remoteAddress).first();
-        if(Play.mode.isProd()) {
-            if(server == null) forbidden();
+        String token = request.params.get("auth_token");
+        if(token == null) {
+            Logger.info("token is null");
+            forbidden("token is null!");
+        }
+
+        String md5 = "baef851cab745d3441d4bc7ff6f27b28";
+        if(!token.equals(md5)) {
+            Logger.info("token is invalid!");
+            forbidden("token is invalid!");
         }
     }
 }

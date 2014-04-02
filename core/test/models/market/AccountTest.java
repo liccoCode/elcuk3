@@ -74,13 +74,13 @@ public class AccountTest extends UnitTest {
         assertThat(acc.cookie("at-acbuk"), is(notNullValue()));
     }
 
-    //    @Test
+    @Test
     public void testLoginAmazonSellerCenterIT() {
         Account acc = FactoryBoy.create(Account.class, "it");
         acc.cookieStore().clear();
         acc.loginAmazonSellerCenter();
 
-        assertThat(acc.cookie("at-acbde"), is(notNullValue()));
+        assertThat(acc.cookie("at-acbit"), is(notNullValue()));
     }
 
     //    @Test
@@ -92,7 +92,7 @@ public class AccountTest extends UnitTest {
         assertThat(acc.cookie("at-acbjp"), is(notNullValue()));
     }
 
-    @Test
+    //    @Test
     public void testClickReview() {
         Account acc = FactoryBoy.create(Account.class, "it");
         AmazonListingReview review = FactoryBoy.create(AmazonListingReview.class);

@@ -1,11 +1,14 @@
 require "em-synchrony"
 require "em-synchrony/em-http"
 require "em-synchrony/mysql2"
+require "httparty"
 require "time"
 require "multi_json"
 require "pp"
 
-ES_HOST = "http://gengar.easya.cc:9200"
+#ES_HOST = "http://gengar.easya.cc:9200"
+ES_HOST = "http://192.168.1.99:9000"
+#DB_HOST = "aggron.easya.cc"
 DB_HOST = "localhost"
 
 MAPPING = <<E
@@ -63,10 +66,12 @@ class OrderItemES
           OrderItemES.bulk_index if i % 1000 == 0
 
           # us: 68989,  uk: 112474,  de: 482057 -> 10.22
-          print "Index orders ...  #{i} / 700000\r"
+          # print "Index orders ...  #{i} / 700000\r"
         end
         OrderItemES.bulk_index
 
+        puts "#{Time.now}: #{i} orderitems"
+        puts HTTParty.get("http://e.easya.cc/api/CacheClear/esCacheClear", query: { "auth_token" => "baef851cab745d3441d4bc7ff6f27b28"} ).body
         EM.stop
       end
     end
