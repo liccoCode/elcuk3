@@ -395,6 +395,8 @@ public class Account extends Model {
                 return M.MID.A13V1IB3VIYZZH;
             case AMAZON_US:
                 return M.MID.ATVPDKIKX0DER;
+            case AMAZON_IT:
+                return M.MID.APJ6JRA9NG5V4;
             default:
                 return M.MID.A1F83G8C2ARO7P;
         }
