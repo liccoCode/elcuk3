@@ -20,7 +20,7 @@
           #{list items:cates, as:'cat'}
             <tr>
               <td>
-                ${cat.categoryId}
+              ${cat.categoryId}
               </td>
               <td>
                 <a href="@{CategoryInfos.show()}/${cat.categoryId}">${cat.name}</a>
@@ -31,8 +31,49 @@
     </div>
 
     <div class="span8 well well-small">
-      #{info_row title: "SKU 列表信息"/}
+        #{info_row title: "SKU 列表信息"/}
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <th class="span1">SKU</th>
+          <th>总销量</th>
+          <th>生命周期</th>
+          <th>本月DAY(30)销量</th>
+          <th>销售等级</th>
+          <th>类别贡献比重</th>
+          <th>利润率</th>
+          <th>销售额趋势</th>
+          <th>销量趋势</th>
+        </tr>
+          #{list items:dtos, as: 'dto'}
+            <tr>
+              <td>${dto.sku}</td>
+              <td>
 
+              </td>
+              <td>
+
+              </td>
+              <td>
+
+              </td>
+              <td>
+
+              </td>
+              <td>
+
+              </td>
+              <td>
+
+              </td>
+              <td style="color:${dto.difference.rgb()}">
+
+              </td>
+              <td style="color:${dto.difference.rgb()}">
+
+              </td>
+            </tr>
+          #{/list}
+      </table>
     </div>
   </div>
 #{/else}
