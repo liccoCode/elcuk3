@@ -242,4 +242,25 @@ public class Category extends GenericModel {
 
         return categorys;
     }
+
+    /**
+     * 根据 categoryIds 获取对应所有的 sku 集合
+     *
+     * @param categoryIds
+     * @return
+     */
+    public static List<String> getSKUs(List<String> categoryIds) {
+        List<String> skus = new ArrayList<String>();
+
+        List<Map<String, Object>> rows = null;
+        if(categoryIds != null && categoryIds.size() > 0) {
+            SqlSelect sql = new SqlSelect().select("sku").from("Product")
+                    .where(SqlSelect.whereIn("category_categoryId", categoryIds));
+            rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        }
+        for(Map<String, Object> row : rows) {
+            skus.add(row.get("sku").toString());
+        }
+        return skus;
+    }
 }
