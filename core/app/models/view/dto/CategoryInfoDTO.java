@@ -17,7 +17,7 @@ public class CategoryInfoDTO implements Serializable {
     /**
      * 总销量
      */
-    public int total = 0;
+    public long total = 0;
 
     /**
      * 生命周期
@@ -41,6 +41,7 @@ public class CategoryInfoDTO implements Serializable {
 
     /**
      * 产品线总利润
+     * 计算 Category 总利润(今年)
      */
     public float categoryProfit;
 
@@ -68,4 +69,11 @@ public class CategoryInfoDTO implements Serializable {
      * 上上周销量
      */
     public int last2WeekVolume = 0;
+
+    public CategoryInfoDTO() {
+    }
+
+    public CategoryInfoDTO(String sku) {
+        this.sku = sku;
+    }
 }

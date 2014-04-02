@@ -36,6 +36,9 @@ public class MetricProfitService {
 
     public String category;
 
+    public MetricProfitService() {
+    }
+
     public MetricProfitService(Date begin, Date end, M market,
                                String sku, String sellingId) {
         this.begin = begin;
