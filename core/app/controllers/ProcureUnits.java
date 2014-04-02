@@ -18,6 +18,7 @@ import models.procure.Shipment;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.post.ProcurePost;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
@@ -81,13 +82,14 @@ public class ProcureUnits extends Controller {
                     }
                     String name = procureUnit.cooperator.name;
                     String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
-
-                    //生成工厂的文件夹. 格式：预计交货日期-工厂名称
+                    //生成工厂的文件夹. 格式：采购单ID-预计交货日期-工厂名称
                     File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
                     factoryDir.mkdir();
                     //生成 PDF
                     procureUnit.fbaAsPDF(factoryDir);
                 }
+                FileUtils.writeStringToFile(new File(dirfile, "采购计划ID列表.txt"),
+                        java.net.URLDecoder.decode(p.unitIds, "UTF-8"), "UTF-8");
             } finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");
                 Files.zip(dirfile, zip);
