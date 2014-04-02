@@ -96,7 +96,9 @@
         </tr>
         <tr>
           <td colspan="10">
-            <button class="btn btn-primary" data-loading>保存</button>
+              #{power.ck "products.edit"}
+                <button class="btn btn-primary" data-loading>保存</button>
+              #{/power.ck}
               #{power.ck "products.saleamazonlisting"}
                 <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
               #{/power.ck}

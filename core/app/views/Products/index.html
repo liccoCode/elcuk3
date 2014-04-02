@@ -5,7 +5,9 @@
 #{/set}
 
 <div style="margin:5px 0 0;" class="row">
+  #{power.ck "products.edit"}
     <a href="@{Products.blank()}" class="btn btn-primary" target="_blank">添加新产品</a>
+  #{/power.ck}
 
     <div class="span3 pull-right input-prepend input-append">
         <form action="@{Products.index()}" method="post">
