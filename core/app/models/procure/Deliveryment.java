@@ -126,6 +126,36 @@ public class Deliveryment extends GenericModel {
     @Lob
     public String memo = " ";
 
+    public enum T {
+        /**
+         * 普通单
+         */
+        NORMAL {
+            @Override
+            public String label() {
+                return "普通单";
+            }
+        },
+
+        /**
+         * 手动单
+         */
+        MANUAL {
+            @Override
+            public String label() {
+                return "手动单";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 采购单类型
+     */
+    @Enumerated(EnumType.STRING)
+    public T deliveryType;
+
     /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
      *
@@ -397,6 +427,7 @@ public class Deliveryment extends GenericModel {
         deliveryment.state = S.PENDING;
         deliveryment.name = name.trim();
         deliveryment.units.addAll(units);
+        deliveryment.deliveryType = T.NORMAL;
         for(ProcureUnit unit : deliveryment.units) {
             // 将 ProcureUnit 添加进入 Deliveryment , ProcureUnit 进入 DELIVERY 阶段
             unit.toggleAssignTodeliveryment(deliveryment, true);

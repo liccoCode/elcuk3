@@ -73,6 +73,7 @@ public class DeliveryPost extends Post<Deliveryment> {
 
     public Long cooperId;
 
+    public Deliveryment.T deliveryType;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -121,6 +122,11 @@ public class DeliveryPost extends Post<Deliveryment> {
                     .append(" OR d.name LIKE ?")
                     .append(")");
             for(int i = 0; i < 2; i++) params.add(word);
+        }
+
+        if(this.deliveryType != null) {
+            sbd.append("And d.deliveryType=?");
+            params.add(this.deliveryType);
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
