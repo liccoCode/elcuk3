@@ -7,6 +7,8 @@ import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.joda.time.DateTime;
@@ -16,7 +18,7 @@ import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.vo.OrderrVO;
-import org.elasticsearch.index.query.PrefixFilterBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 
 import java.util.*;
 
@@ -106,7 +108,6 @@ public class MetricProfitService {
                                 //销售费用项目
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
-        System.out.println(":::" + search.toString());
         return getEsTermsTotal(search, "salefee");
     }
 
@@ -758,6 +759,58 @@ public class MetricProfitService {
             entries = units.getJSONArray("entries");
         }
         return entries;
-
     }
+
+
+    /**
+     * 计算SKU的采购价格和数量
+     * 采用Aggregation方式查询
+     */
+    public JSONArray skuProcureDate(String tablename, String fieldname, String caltype) {
+        BoolQueryBuilder qb = QueryBuilders
+                .boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
+
+        DateHistogramBuilder builder = AggregationBuilders.
+                dateHistogram("units")
+                .field("date")
+                .interval(DateHistogram.Interval.DAY)
+                .subAggregation(AggregationBuilders.avg("price").field(fieldname));
+        if(caltype.equals("avg")) {
+            builder.subAggregation(AggregationBuilders.avg("fieldvalue").field(fieldname));
+        }
+        if(caltype.equals("sum")) {
+            builder.subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname));
+        }
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(qb)
+                .aggregation(builder
+                ).size(0);
+        JSONObject result = ES.search("elcuk2", tablename, search);
+        if(result == null) {
+            throw new FastRuntimeException("ES连接异常!");
+        }
+        JSONObject aggregations = result.getJSONObject("aggregations");
+        JSONObject units = null;
+        JSONArray buckets = null;
+        if(aggregations != null) {
+            units = aggregations.getJSONObject("units");
+            buckets = units.getJSONArray("buckets");
+        }
+        return buckets;
+    }
+
+
+    /**
+     * SKU总采购数量
+     */
+    public Float esProcureQty() {
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(querybuilder())
+                .facet(FacetBuilders.statisticalFacet("units")
+                        .field("quantity")
+                ).size(0);
+        return getEsTermsTotal(search, "procurepayunit");
+    }
+
+
 }

@@ -14,6 +14,7 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
@@ -23,7 +24,9 @@ import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
+import services.MetricProfitService;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -66,7 +69,14 @@ public class Products extends Controller {
 
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
-        render(pro);
+
+        Date begin = DateTime.now().withYear(2011).toDate();
+        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
+        //按照sku统计所有采购数量
+        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+                pro.sku, null);
+        float procureqty = profitservice.esProcureQty();
+        render(pro, procureqty);
     }
 
     public static void update(Product pro) {
@@ -236,20 +246,32 @@ public class Products extends Controller {
              * 销售额曲线
              */
             json = J.json(SkuESQuery
-                    .salefeeline(type, sku));
+                    .esSaleLine(type, sku, "fee"));
 
         } else if(type.equals("skusaleqty")) {
             /**
              * 销量曲线
              */
             json = J.json(SkuESQuery
-                    .saleqtyline(type, sku));
+                    .esSaleLine(type, sku, "qty"));
         } else if(type.equals("skuprofit")) {
             /**
              * 利润曲线
              */
             json = J.json(SkuESQuery
-                    .skuprofitline(type, sku));
+                    .esSaleLine(type, sku, "profit"));
+        } else if(type.equals("skuprocureprice")) {
+            /**
+             * 采购价格曲线
+             */
+            json = J.json(SkuESQuery
+                    .esProcureLine(type, sku, "price"));
+        } else if(type.equals("skuprocureqty")) {
+            /**
+             * 采购数量曲线
+             */
+            json = J.json(SkuESQuery
+                    .esProcureLine(type, sku, "qty"));
         }
         renderJSON(json);
     }

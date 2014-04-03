@@ -37,7 +37,7 @@ public class Pmdashboards extends Controller {
         Set<Team> teams = user.teams;
         List<Category> cates = new ArrayList<Category>();
         for(Team team : teams) {
-            List<Category> teamcates = team.categorys;
+            List<Category> teamcates = team.getObjCategorys();
             if(teamcates != null) {
                 cates.addAll(teamcates);
             }
