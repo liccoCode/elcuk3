@@ -1,10 +1,10 @@
-<form method="post" action="@{Pmdashboards.salesQty()}" id="salesQtyform" class="search_form">
+<form id="salesQtyform" class="search_form">
   <div class="input-prepend input-append inline">
     <span class="add-on">差异 >=</span>
-    <input type="hidden" name="p.abnormalType" value="${p.abnormalType}">
     <input type="text" class="input-medium" name="p.difference" value="${p.difference}">
     <a class="btn btn-primary" id="salesQtySearch" data-form="salesQtyform" data-div="salesQty">搜索</a>
   </div>
+  <input type="text" style="display:none" name="p.abnormalType" value="${p.abnormalType}">
 </form>
 
 <table class="table table-condensed table-bordered">

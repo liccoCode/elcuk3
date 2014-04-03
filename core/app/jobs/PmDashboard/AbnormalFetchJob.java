@@ -33,6 +33,7 @@ public class AbnormalFetchJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        if(isRnning()) return;
         long begin = System.currentTimeMillis();
         abnormal();
         Logger.info("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
@@ -48,9 +49,9 @@ public class AbnormalFetchJob extends BaseJob {
      * @return
      */
     public void abnormal() {
+        Cache.add(RUNNING, RUNNING);
         //获取所有的 sku
         List<String> skus = new ProductQuery().skus();
-
         Map<String, List<AbnormalDTO>> dtoMap = new HashMap<String, List<AbnormalDTO>>();
         //准备数据容器
         List<AbnormalDTO> salesQty = new ArrayList<AbnormalDTO>();
@@ -69,6 +70,7 @@ public class AbnormalFetchJob extends BaseJob {
         dtoMap.put(AbnormalDTO.T.SALESAMOUNT.toString(), salesAmount);
         dtoMap.put(AbnormalDTO.T.SALESPROFIT.toString(), salesProfits);
         //将数据添加到缓存内
+        Cache.delete(AbnormalDTO_CACHE);
         Cache.add(AbnormalDTO_CACHE, dtoMap);
         Cache.delete(RUNNING);
     }
