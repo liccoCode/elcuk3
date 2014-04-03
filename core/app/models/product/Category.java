@@ -137,7 +137,6 @@ public class Category extends GenericModel {
 
         if(categoryId != null ? !categoryId.equals(category.categoryId) :
                 category.categoryId != null) return false;
-
         return true;
     }
 
@@ -200,7 +199,6 @@ public class Category extends GenericModel {
         return new F.T2<List<String>, List<String>>(categorys, categorys);
     }
 
-
     /**
      * 返回所有的 SKU
      *
@@ -221,7 +219,6 @@ public class Category extends GenericModel {
             categorys = Category.allcategorys();
             play.cache.Cache.add(Caches.CATEGORYS, categorys, "10h");
         }
-
         return categorys;
     }
 

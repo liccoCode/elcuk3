@@ -20,7 +20,7 @@ public class CategoryInfos extends Controller {
     @Check("categoryinfos.show")
     public static void show(String id) {
         User user = User.findByUserName(Secure.Security.connected());
-        List<Category> cates = User.getTeamCategorys(user);
+        List<Category> cates = User.getObjCategorys(user);
         Category ca = cates.get(0);
         if(StringUtils.isNotBlank(id)) ca = Category.findById(id);
         render(cates, ca);

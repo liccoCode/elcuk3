@@ -31,7 +31,7 @@
       <span class="add-on">Category:</span>
       <select name="cate" style="width:130px;margin-left:20px;">
       #{list items:cates, as:'cate'}
-        <option value="${cate.categoryId}">${cate.name}</option>
+        <option value="${cate.categoryId}">${cate.categoryId}</option>
       #{/list}
       </select>
     </div>
@@ -40,6 +40,12 @@
       <span class="add-on"><i class="icon-search"></i></span>
       <button class="btn btn-primary" name="search">搜索</button>
     </div>
+
+    <input type="hidden" name="productvalue" value="0">
+    <input type="hidden" name="abnormalInfovalue" value="0">
+    <input type="hidden" name="categoryvalue" value="0">
+    <input type="hidden" name="taskvalue" value="0">
+
   </div>
 </div>
 

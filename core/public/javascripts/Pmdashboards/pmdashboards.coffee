@@ -2,12 +2,14 @@ $ ->
 
   # 异常信息
   $("#below_tabContent").on("ajaxFetchAbnormals", "#abnormalInfo", () ->
-    divs = ["review", "salesQty", "salesAmount", "salesProfit"]
-    _.each(divs, (value) ->
-      $div = $("##{value}")
-      $div.load("/Pmdashboards/#{$div.attr("id")}", (r)->
+    if $('input[name="abnormalInfovalue"]').val() isnt "1"
+      divs = ["review", "salesQty", "salesAmount", "salesProfit"]
+      _.each(divs, (value) ->
+        $div = $("##{value}")
+        $div.load("/Pmdashboards/#{$div.attr("id")}", (r)->
+        )
       )
-    )
+      $('input[name="abnormalInfovalue"]').val("1")
   )
 
   # 年份
@@ -19,24 +21,31 @@ $ ->
 
   # Category 目标
   $("#below_tabContent").on("ajaxFetchCategorySaleTargets", "#category", () ->
-    new PieChart("category_column").percent(null, year, team, cateid)
-    new LineChart("category_line").percent(null, year, team, cateid)
+    if $('input[name="categoryvalue"]').val() isnt "1"
+      new PieChart("category_column").percent(null, year, team, cateid)
+      new LineChart("category_line").percent(null, year, team, cateid)
+      $('input[name="categoryvalue"]').val("1")
   )
 
   # 产品线状态
   $("#below_tabContent").on("ajaxFetchProductInfos", "#product", () ->
-    new ProductInfoLineChart("salefee_line").percent('salefeeline', year, team)
-    new ProductInfoLineChart("saleqty_line").percent('saleqtyline', year, team)
+    if $('input[name="productvalue"]').val() isnt "1"
+      new ProductInfoLineChart("salefee_line").percent('salefeeline', year, team)
+      new ProductInfoLineChart("saleqty_line").percent('saleqtyline', year, team)
+      $('input[name="productvalue"]').val("1")
   )
 
   # 年度目标
   $("#below_tabContent").on("ajaxFetchAnnualTargets", "#task", () ->
-    new PieChart("sale_column").percent('salecolumn', year, team)
-    new PieChart("profitrate_line").percent('profitrateline', year, team)
-    new PieChart("sale_percent").percent('sale', year, team)
-    new PieChart("profit_percent").percent('profit', year, team)
-    new PieChart("teamsale_percent").percent('teamsale', year, team)
-    new PieChart("teamprofit_percent").percent('teamprofit', year, team)
+    if $('input[name="taskvalue"]').val() isnt "1"
+      new PieChart("sale_column").percent('salecolumn', year, team)
+      new PieChart("profitrate_line").percent('profitrateline', year, team)
+      new PieChart("sale_percent").percent('sale', year, team)
+      new PieChart("profit_percent").percent('profit', year, team)
+      new PieChart("teamsale_percent").percent('teamsale', year, team)
+      new PieChart("teamprofit_percent").percent('teamprofit', year, team)
+      $('input[name="taskvalue"]').val("1")
+
   )
 
   #  Tab 切换添加事件 bootstrap  shown 事件：点击后触发
@@ -141,6 +150,10 @@ $ ->
     year = $('select[name="year"]').val()
     team = $('select[name="team"]').val()
     cateid = $('select[name="cate"]').val()
+    $('input[name="productvalue"]').val("0")
+    $('input[name="abnormalInfovalue"]').val("0")
+    $('input[name="categoryvalue"]').val("0")
+    $('input[name="taskvalue"]').val("0")
     triggerTabMethod()
 
   $("#abnormalInfo").on("click", "#salesQtySearch, #salesAmountSearch, #salesProfitSearch", () ->

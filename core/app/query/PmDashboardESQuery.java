@@ -5,6 +5,7 @@ import helper.Cached;
 import helper.Caches;
 import helper.DBUtils;
 import helper.Dates;
+import models.User;
 import models.product.Category;
 import models.product.Product;
 import models.view.highchart.HighChart;
@@ -109,11 +110,11 @@ public class PmDashboardESQuery {
         //年的第一天
         Date begin = Dates.startDayYear(year);
         Date end = Dates.endDayYear(year);
-        List<Category> categorys = team.categorys;
+        List<String> categorys = team.getStrCategorys();
         float totalsalefee = 0f;
-        for(Category category : categorys) {
+        for(String categoryid : categorys) {
             MetricProfitService service = new MetricProfitService(begin, end, null,
-                    null, null, category.categoryId);
+                    null, null, categoryid);
             totalsalefee = totalsalefee + service.esSaleFee();
         }
         Series.Pie pie = new Series.Pie(team.name + " " + year + "销售额目标百分比");
@@ -137,7 +138,6 @@ public class PmDashboardESQuery {
 
     /**
      * TEAM的销售额百分比
-     *
      * @param year
      * @return
      */
@@ -148,11 +148,11 @@ public class PmDashboardESQuery {
         List<Team> teams = Team.findAll();
         Series.Pie pie = new Series.Pie(year + "TEAM销售额百分比");
         for(Team team : teams) {
-            List<Category> categorys = team.categorys;
+            List<String> categorys = team.getStrCategorys();
             float totalsalefee = 0f;
-            for(Category category : categorys) {
+            for(String categoryid : categorys) {
                 MetricProfitService service = new MetricProfitService(begin, end, null,
-                        null, null, category.categoryId);
+                        null, null, categoryid);
                 totalsalefee = totalsalefee + service.esSaleFee();
             }
             if(totalsalefee == 0f)
@@ -164,7 +164,6 @@ public class PmDashboardESQuery {
 
     /**
      * 利润百分比
-     *
      * @param year
      * @param team
      * @return
@@ -175,24 +174,14 @@ public class PmDashboardESQuery {
         Date begin = Dates.startDayYear(year);
         Date end = Dates.endDayYear(year);
 
-        String sql = "select categoryid From Category "
-                + " where team_id=" + team.id;
-        List<Map<String, Object>> categorys = DBUtils.rows(sql);
+        List<String> categoryIds = team.getStrCategorys();
+        //skus 集合
+        List<String> skus = Category.getSKUs(categoryIds);
         float totalsaleprofit = 0f;
-        for(Map<String, Object> category : categorys) {
-            String categoryid = (String) category.get("categoryid");
-            sql = "select sku From Product "
-                    + " where category_categoryid='" + categoryid + "' ";
-            List<Map<String, Object>> rows = DBUtils.rows(sql);
-            if(rows != null && rows.size() > 0) {
-                for(Map<String, Object> product : rows) {
-                    String sku = (String) product.get("sku");
-
-                    MetricProfitService service = new MetricProfitService(begin, end, null,
-                            sku, null);
-                    totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
-                }
-            }
+        for(String sku : skus) {
+            MetricProfitService service = new MetricProfitService(begin, end, null,
+                    sku, null);
+            totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
         }
         Series.Pie pie = new Series.Pie(team.name + " " + year + "利润目标百分比");
         if(totalsaleprofit == 0) {
@@ -214,6 +203,7 @@ public class PmDashboardESQuery {
         return pie;
     }
 
+
     /**
      * 利润百分比
      *
@@ -228,24 +218,14 @@ public class PmDashboardESQuery {
         Series.Pie pie = new Series.Pie(year + "TEAM利润百分比");
         String sql = "";
         for(Team team : teams) {
-            sql = "select categoryid From Category "
-                    + " where team_id=" + team.id;
-            List<Map<String, Object>> categorys = DBUtils.rows(sql);
+            List<String> categoryIds = team.getStrCategorys();
+            //skus 集合
+            List<String> skus = Category.getSKUs(categoryIds);
             float totalsaleprofit = 0f;
-            for(Map<String, Object> category : categorys) {
-                String categoryid = (String) category.get("categoryid");
-                sql = "select sku From Product "
-                        + " where category_categoryid='" + categoryid + "' ";
-                List<Map<String, Object>> rows = DBUtils.rows(sql);
-                if(rows != null && rows.size() > 0) {
-                    for(Map<String, Object> product : rows) {
-                        String sku = (String) product.get("sku");
-                        MetricProfitService service = new MetricProfitService(begin, end, null,
-                                sku, null);
-                        totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
-                    }
-
-                }
+            for(String sku : skus) {
+                MetricProfitService service = new MetricProfitService(begin, end, null,
+                        sku, null);
+                totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
             }
             if(totalsaleprofit == 0f)
                 totalsaleprofit = 1;
@@ -275,11 +255,11 @@ public class PmDashboardESQuery {
             Date end = date.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate
                     ();
 
-            List<Category> categorys = team.categorys;
+            List<String> categorys = team.getStrCategorys();
             float totalsale = 0f;
-            for(Category category : categorys) {
+            for(String categoryid : categorys) {
                 MetricProfitService service = new MetricProfitService(begin, end, null,
-                        null, null, category.categoryId);
+                        null, null, categoryid);
                 totalsale = totalsale + service.esSaleFee();
             }
             column.add(totalsale, i + "月");
@@ -315,7 +295,6 @@ public class PmDashboardESQuery {
 
     /**
      * TEAM每个Category销售额曲线图
-     *
      * @param type
      * @param year
      * @param team
@@ -328,7 +307,7 @@ public class PmDashboardESQuery {
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "最近六个月周销售额";
-            List<Category> categorys = team.getCategorys();
+            List<Category> categorys = team.getObjCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleFeeLine(category, year));
             }
@@ -353,7 +332,7 @@ public class PmDashboardESQuery {
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "最近六个月周销量";
-            List<Category> categorys = team.getCategorys();
+            List<Category> categorys = team.getObjCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleQtyLine(category, year));
             }
@@ -451,26 +430,18 @@ public class PmDashboardESQuery {
             calendar.setTime(date.toDate());
             Date end = date.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate
                     ();
-            String sql = "select categoryid From Category "
-                    + " where team_id=" + team.id;
-            List<Map<String, Object>> categorys = DBUtils.rows(sql);
+            List<String> categoryIds = team.getStrCategorys();
+            //skus 集合
+            List<String> skus = Category.getSKUs(categoryIds);
+
             float totalsaleprofit = 0f;
             float totalsalefee = 0f;
-            for(Map<String, Object> category : categorys) {
-                String categoryid = (String) category.get("categoryid");
-                sql = "select sku From Product "
-                        + " where category_categoryid='" + categoryid + "' ";
-                List<Map<String, Object>> rows = DBUtils.rows(sql);
-                if(rows != null && rows.size() > 0) {
-                    for(Map<String, Object> product : rows) {
-                        String sku = (String) product.get("sku");
-                        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
-                                sku, null);
-                        Profit profit = profitservice.calProfit();
-                        totalsaleprofit = totalsaleprofit + profit.totalprofit;
-                        totalsalefee = totalsalefee + profit.totalfee;
-                    }
-                }
+            for(String sku : skus) {
+                MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+                        sku, null);
+                Profit profit = profitservice.calProfit();
+                totalsaleprofit = totalsaleprofit + profit.totalprofit;
+                totalsalefee = totalsalefee + profit.totalfee;
             }
             float rate = 0;
             if(totalsalefee != 0) {

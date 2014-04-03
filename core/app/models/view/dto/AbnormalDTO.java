@@ -101,10 +101,7 @@ public class AbnormalDTO implements Serializable {
             }
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
-        List<String> categoryIds = new ArrayList<String>();
-        for(Category category : User.getTeamCategorys(user)) {
-            categoryIds.add(category.categoryId);
-        }
+        List<String> categoryIds = User.getTeamCategorys(user);
         //skus 集合
         List<String> skus = Category.getSKUs(categoryIds);
 
