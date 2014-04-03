@@ -1,12 +1,18 @@
 package controllers;
 
+import jobs.PmDashboard.AbnormalFetchJob;
+import jobs.categoryInfo.CategoryInfoFetchJob;
 import models.User;
 import models.product.Category;
+import models.view.dto.CategoryInfoDTO;
 import org.apache.commons.lang.StringUtils;
+import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,8 +27,8 @@ public class CategoryInfos extends Controller {
     public static void show(String id) {
         User user = User.findByUserName(Secure.Security.connected());
         List<Category> cates = User.getTeamCategorys(user);
-        Category ca = cates.get(0);
-        if(StringUtils.isNotBlank(id)) ca = Category.findById(id);
-        render(cates, ca);
+        if(StringUtils.isBlank(id) && cates.size() > 0) id = cates.get(0).categoryId;
+        List<CategoryInfoDTO> dtos = CategoryInfoDTO.query(id);
+        render(cates, dtos);
     }
 }

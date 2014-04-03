@@ -1,16 +1,18 @@
 package jobs.categoryInfo;
 
-import com.sun.javafx.tools.packager.Log;
 import helper.DBUtils;
+import helper.Dates;
 import jobs.driver.BaseJob;
 import models.product.Category;
 import models.product.Product;
 import models.view.dto.CategoryInfoDTO;
-import org.apache.commons.lang.NumberUtils;
+import models.view.report.Profit;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.cache.Cache;
 import play.db.helper.SqlSelect;
-import query.ProductQuery;
 import services.MetricProfitService;
 
 import java.util.*;
@@ -23,7 +25,8 @@ import java.util.*;
  * Time: PM2:56
  */
 public class CategoryInfoFetchJob extends BaseJob {
-    public static final String CategoryInfo_Cache = "categoryinfo";
+    public static final String CategoryInfo_Cache = "categoryinfo_cache";
+    public static final String RUNNING = "categoryinfofetchjob_running";
 
     @SuppressWarnings("unchecked")
     @Override
@@ -33,40 +36,42 @@ public class CategoryInfoFetchJob extends BaseJob {
         Logger.info("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
     }
 
+    public static boolean isRnning() {
+        return StringUtils.isNotBlank(Cache.get(RUNNING, String.class));
+    }
+
     /**
      * Category信息数据计算
      */
     public void categoryinfo() {
-        List<CategoryInfoDTO> dtoList = new ArrayList<CategoryInfoDTO>();
-        //所有的 Category
+        Map<String, List<CategoryInfoDTO>> dtoMap = new HashMap<String, List<CategoryInfoDTO>>();
         List<Category> categorys = Category.findAll();
-        DateTime now = new DateTime().now();
-        MetricProfitService me = new MetricProfitService(now.toDate(), now.toDate(), null, null, null);
-
         for(Category category : categorys) {
-
+            List<CategoryInfoDTO> categoryDtos = new ArrayList<CategoryInfoDTO>();
             for(Product product : category.products) {
-                //计算单个sku：
-                CategoryInfoDTO dto = new CategoryInfoDTO(product.sku);
-                //1、总销量(从ERP上线到今日)
+                CategoryInfoDTO dto = new CategoryInfoDTO(product);
+                //1、sku总销量(从ERP上线到今日)
                 dto.total = total(product.sku);
-                //2、本月销量(月初到月底)
+                //2、sku本月销量(月初到月底)
                 dto.day30 = day30(product.sku);
-                //3、利润(今年)
-
-                //4、利润率(今年)
-
-                //5、上周销售额(上上周六到上周五)
-
-                //6、上上周销售额(往上同期)
-
-                //7、上周销量(上上周六到上周五)
-
-                //8、上上周销量(往上同期)
-
+                //3、sku利润(今年)
+                dto.profit = profitAndProfitMargins(product.sku, "profit");
+                //4、sku利润率(今年)
+                dto.profitMargins = profitAndProfitMargins(product.sku, "profitmargin");
+                //5、sku上周销售额(上上周六到上周五)
+                dto.lastWeekSales = lastWeekSales(product.sku);
+                //6、sku上上周销售额(往上同期)
+                dto.last2WeekSales = last2WeekSales(product.sku);
+                //7、sku上周销量(上上周六到上周五)
+                dto.lastWeekVolume = lastWeekVolume(product.sku);
+                //8、sku上上周销量(往上同期)
+                dto.last2WeekVolume = last2WeekVolume(product.sku);
+                categoryDtos.add(dto);
             }
+            dtoMap.put(category.categoryId, categoryDtos);
         }
-
+        Cache.add(CategoryInfo_Cache, dtoMap);
+        Cache.delete(RUNNING);
     }
 
     /**
@@ -79,10 +84,10 @@ public class CategoryInfoFetchJob extends BaseJob {
         SqlSelect sql = new SqlSelect().select("max(createDate) as max, min(createDate) as min").from("OrderItem");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         for(Map<String, Object> row : rows) {
-            DateTime begin = DateTime.parse(row.get("max").toString());
-            DateTime end = DateTime.parse(row.get("min").toString());
-            MetricProfitService me = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
-            return NumberUtils.createLong(me.esSaleQty().toString());
+            Date begin = (Date) row.get("min");
+            Date end = (Date) row.get("max");
+            MetricProfitService me = new MetricProfitService(begin, end, null, sku, null);
+            return NumberUtils.toLong(me.esSaleQty().toString());
         }
         return (long) 0;
     }
@@ -94,37 +99,104 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public int day30(String sku) {
-        DateTime time = new DateTime().now();
-        MetricProfitService me = new MetricProfitService(getFirstDayOfMonth(), getLastDayOfMonth(), null, sku, null);
-        return NumberUtils.createInteger(me.esSaleQty().toString());
-    }
-
-    public float profit(String sku) {
-
-    }
-
-
-    /**
-     * 获取本月第一天
-     *
-     * @return
-     */
-    public Date getFirstDayOfMonth() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DATE, 1);
-        return calendar.getTime();
+        MetricProfitService me = new MetricProfitService(Dates.getCurrMonthFirst(), Dates.getCurrMonthLast(), null, sku,
+                null);
+        return NumberUtils.toInt(me.esSaleQty().toString());
     }
 
     /**
-     * 获取本月最后一天
+     * 利润(今年)和利润率(今年)
+     *
+     * @param sku
+     * @return
+     */
+    public float profitAndProfitMargins(String sku, String type) {
+        DateTime now = new DateTime().now();
+        //获取本年第一天
+        Date startDay = Dates.startDayYear(now.getYear());
+        //获取本年最后一天
+        Date endDay = Dates.endDayYear(now.getYear());
+        MetricProfitService me = new MetricProfitService(startDay, endDay, null, sku, null);
+        Profit profit = me.calProfit();
+        if(type.equalsIgnoreCase("profit")) return profit.totalprofit;
+        return profit.profitrate;
+    }
+
+    /**
+     * 上周销售额(上上周六 到 上周五)
      *
      * @return
      */
-    public Date getLastDayOfMonth() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DATE, 1);//设置为当前月1号
-        calendar.add(Calendar.MONTH, 1);//加一个月变成下一月的1号
-        calendar.add(Calendar.DATE, -1);//减去一天，变成当月最后一天
-        return calendar.getTime();
+    public float lastWeekSales(String sku) {
+        //上上周六
+        DateTime begin = lastSaturday(1);
+        //上周五
+        DateTime end = lastFriday(1);
+        MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
+        return met.esSaleFee();
+    }
+
+    /**
+     * 上上周销售额
+     *
+     * @return
+     */
+    public float last2WeekSales(String sku) {
+        //上上上周六
+        DateTime begin = lastSaturday(2);
+        //上上周五
+        DateTime end = lastFriday(2);
+        MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
+        return met.esSaleFee();
+    }
+
+    /**
+     * 上周销量
+     *
+     * @return
+     */
+    public int lastWeekVolume(String sku) {
+        //上上周六
+        DateTime begin = lastSaturday(1);
+        //上周五
+        DateTime end = lastFriday(1);
+        MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
+        return NumberUtils.toInt(met.esSaleQty().toString());
+    }
+
+    /**
+     * 上上周销量
+     *
+     * @return
+     */
+    public int last2WeekVolume(String sku) {
+        //上上上周六
+        DateTime begin = lastSaturday(2);
+        //上上周五
+        DateTime end = lastFriday(2);
+        MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
+        return NumberUtils.toInt(met.esSaleQty().toString());
+    }
+
+    /**
+     * 获得周五
+     *
+     * @param plusWeekNumber 往前几周
+     * @return
+     */
+    public DateTime lastFriday(int plusWeekNumber) {
+        DateTime monday = new DateTime(Dates.getMondayOfWeek());
+        return monday.plusDays(plusWeekNumber * (-3));
+    }
+
+    /**
+     * 获得周六
+     *
+     * @param plusWeekNumber 往前几周
+     * @return
+     */
+    public DateTime lastSaturday(int plusWeekNumber) {
+        DateTime monday = new DateTime(Dates.getMondayOfWeek());
+        return monday.plusDays(plusWeekNumber * (-9));
     }
 }

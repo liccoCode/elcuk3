@@ -1,8 +1,16 @@
 package models.view.dto;
 
+import jobs.PmDashboard.AbnormalFetchJob;
+import jobs.categoryInfo.CategoryInfoFetchJob;
+import jobs.driver.GJob;
 import models.product.Product;
+import play.cache.Cache;
+import play.utils.FastRuntimeException;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -40,12 +48,6 @@ public class CategoryInfoDTO implements Serializable {
     public float profit = 0;
 
     /**
-     * 产品线总利润
-     * 计算 Category 总利润(今年)
-     */
-    public float categoryProfit;
-
-    /**
      * 利润率
      */
     public float profitMargins = 0;
@@ -58,7 +60,7 @@ public class CategoryInfoDTO implements Serializable {
     /**
      * 上上周销售额
      */
-    public float last2weekSales = 0;
+    public float last2WeekSales = 0;
 
     /**
      * 上周销量
@@ -73,7 +75,27 @@ public class CategoryInfoDTO implements Serializable {
     public CategoryInfoDTO() {
     }
 
-    public CategoryInfoDTO(String sku) {
-        this.sku = sku;
+    public CategoryInfoDTO(Product product) {
+        this.sku = product.sku;
+        this.productState = product.productState;
+        this.salesLevel = product.salesLevel;
+    }
+
+    /**
+     * 数据查询
+     *
+     * @param categoryId
+     * @return
+     */
+    public static List<CategoryInfoDTO> query(String categoryId) {
+        Map<String, List<CategoryInfoDTO>> dtoMap = Cache.get(CategoryInfoFetchJob.CategoryInfo_Cache, Map.class);
+        if(dtoMap == null || dtoMap.size() == 0) {
+            if(!CategoryInfoFetchJob.isRnning()) {
+                GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<String, Object>());
+                Cache.add(CategoryInfoFetchJob.RUNNING, CategoryInfoFetchJob.RUNNING);
+            }
+            return null;
+        }
+        return dtoMap.get(categoryId);
     }
 }
