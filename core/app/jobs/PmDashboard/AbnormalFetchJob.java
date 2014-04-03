@@ -77,7 +77,7 @@ public class AbnormalFetchJob extends BaseJob {
      * 计算出所有销量异常的sku
      */
     private void fetchSalesQty(String sku, List<AbnormalDTO> dtos) {
-        DateTime day1 = new DateTime().now().plusDays(-1).plusYears(-1);
+        DateTime day1 = new DateTime().now().plusDays(-1);
         Date day1begin = Dates.morning(day1.toDate());
         Date day1end = Dates.night(day1.toDate());
         MetricProfitService met = new MetricProfitService(day1begin, day1end, null, sku, null);
@@ -146,7 +146,7 @@ public class AbnormalFetchJob extends BaseJob {
      * @param sku
      */
     private void fetchSalesProfit(String sku, List<AbnormalDTO> dtos) {
-        DateTime monday = new DateTime(getMondayOfWeek()).plusYears(-1);
+        DateTime monday = new DateTime(getMondayOfWeek());
         Float[] beforeProfit = new Float[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
@@ -168,7 +168,7 @@ public class AbnormalFetchJob extends BaseJob {
      * @return
      */
     private float beforeMean(String sku, MetricProfitService met) {
-        DateTime now = new DateTime().now().plusYears(-1);
+        DateTime now = new DateTime().now();
         float beforeSales = 0;
         for(int i = 1; i <= 4; i++) {
             //每次都减去7天
