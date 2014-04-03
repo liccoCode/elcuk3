@@ -8,13 +8,16 @@ import models.Jobex;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
 
+import javax.print.attribute.DateTimeSyntax;
 import javax.xml.bind.JAXB;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -102,6 +105,10 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 partOrders = orders.subList(0, (orders.size() > 1000 ? 1000 : orders.size()));
                 Logger.info("Deal %s orders....", partOrders.size());
             }
+
+            jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(0).withSecondOfMinute(0).toDate();
+            jobRequest.save();
+
         } catch(Exception e) {
             Logger.warn("AmazonOrderFetchJob.callback error. %s", Webs.S(e));
         }
