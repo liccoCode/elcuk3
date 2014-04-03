@@ -1,6 +1,7 @@
 package jobs.PmDashboard;
 
 import helper.DBUtils;
+import helper.Dates;
 import jobs.driver.BaseJob;
 import models.market.Listing;
 import models.view.dto.AbnormalDTO;
@@ -76,15 +77,17 @@ public class AbnormalFetchJob extends BaseJob {
      * 计算出所有销量异常的sku
      */
     private void fetchSalesQty(String sku, List<AbnormalDTO> dtos) {
-        DateTime day1 = new DateTime().now().plusDays(-1);
-        MetricProfitService met = new MetricProfitService(day1.toDate(), day1.toDate(), null, sku, null);
+        DateTime day1 = new DateTime().now().plusDays(-1).plusYears(-1);
+        Date day1begin = Dates.morning(day1.toDate());
+        Date day1end = Dates.night(day1.toDate());
+        MetricProfitService met = new MetricProfitService(day1begin, day1end, null, sku, null);
         //昨天的销量
         float day1Sales = met.esSaleQty();
         //过去四周同期平均值
         float mean = this.beforeMean(sku, met);
-        //如果昨天销量 小于 过去四周同期 销量的平均值 20%或者以上，则视为异常 sku
-        if(day1Sales > 0 && mean > 0 && day1Sales <= (mean * 0.98)) {
-            float difference = (mean - day1Sales) / mean * 100;
+        //如果昨天销量 小于 过去四周同期 销量的平均值 10%或者以上，则视为异常 sku
+        if(day1Sales > 0 && mean > 0 && day1Sales <= (mean * 0.99)) {
+            float difference = (mean - day1Sales) / mean;
             dtos.add(new AbnormalDTO(day1Sales, mean, difference, sku, AbnormalDTO.T.SALESQTY));
         }
     }
@@ -118,18 +121,18 @@ public class AbnormalFetchJob extends BaseJob {
      * @param sku
      */
     private void fetchSalesAmount(String sku, List<AbnormalDTO> dtos) {
-        DateTime monday = new DateTime(getMondayOfWeek());
+        DateTime monday = new DateTime(getMondayOfWeek()).plusYears(-1);
         Float[] beforeSales = new Float[2];
         for(int i = 1; i <= 2; i++) {
-            //上周五 以及 往前同期（上上周五）
-            DateTime day3 = monday.plusDays(i * (-3));
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
-            DateTime day9 = monday.plusDays(i * (-9));
-            MetricProfitService met = new MetricProfitService(day3.toDate(), day9.toDate(), null, sku, null);
+            DateTime begin = monday.plusDays(i * (-9));
+            //上周五 以及 往前同期（上上周五）
+            DateTime end = monday.plusDays(i * (-3));
+            MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeSales[i - 1] = met.esSaleFee();
         }
-        if(beforeSales[0] > 0 && beforeSales[1] > 0 && beforeSales[0] <= (beforeSales[1] * 0.98)) {
-            float difference = (beforeSales[1] - beforeSales[0]) / beforeSales[1] * 100;
+        if(beforeSales[0] > 0 && beforeSales[1] > 0 && beforeSales[0] <= (beforeSales[1] * 0.99)) {
+            float difference = (beforeSales[1] - beforeSales[0]) / beforeSales[1];
             dtos.add(new AbnormalDTO(beforeSales[0], beforeSales[1], difference, sku, AbnormalDTO.T.SALESAMOUNT));
         }
     }
@@ -143,18 +146,18 @@ public class AbnormalFetchJob extends BaseJob {
      * @param sku
      */
     private void fetchSalesProfit(String sku, List<AbnormalDTO> dtos) {
-        DateTime monday = new DateTime(getMondayOfWeek());
+        DateTime monday = new DateTime(getMondayOfWeek()).plusYears(-1);
         Float[] beforeProfit = new Float[2];
         for(int i = 1; i <= 2; i++) {
-            //上周五 以及 往前同期（上上周五）
-            DateTime day3 = monday.plusDays(i * (-3));
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
-            DateTime day9 = monday.plusDays(i * (-9));
-            MetricProfitService met = new MetricProfitService(day3.toDate(), day9.toDate(), null, sku, null);
+            DateTime begin = monday.plusDays(i * (-9));
+            //上周五 以及 往前同期（上上周五）
+            DateTime end = monday.plusDays(i * (-3));
+            MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeProfit[i - 1] = met.calProfit().profitrate;
         }
-        if(beforeProfit[0] > 0 && beforeProfit[1] > 0 && beforeProfit[0] <= (beforeProfit[1] * 0.98)) {
-            float difference = (beforeProfit[1] - beforeProfit[0]) / beforeProfit[1] * 100;
+        if(beforeProfit[0] > 0 && beforeProfit[1] > 0 && beforeProfit[0] <= (beforeProfit[1] * 0.99)) {
+            float difference = (beforeProfit[1] - beforeProfit[0]) / beforeProfit[1];
             dtos.add(new AbnormalDTO(beforeProfit[0], beforeProfit[1], difference, sku, AbnormalDTO.T.SALESPROFIT));
         }
     }
@@ -165,12 +168,13 @@ public class AbnormalFetchJob extends BaseJob {
      * @return
      */
     private float beforeMean(String sku, MetricProfitService met) {
-        DateTime now = new DateTime().now();
+        DateTime now = new DateTime().now().plusYears(-1);
         float beforeSales = 0;
         for(int i = 1; i <= 4; i++) {
             //每次都减去7天
-            met.begin = now.plusDays(i * (-7)).toDate();
-            met.end = now.plusDays(i * (-7)).toDate();
+            DateTime day7 = now.plusDays(i * (-7));
+            met.begin = Dates.morning(day7.toDate());
+            met.end = Dates.night(day7.toDate());
             met.sku = sku;
             beforeSales += met.esSaleQty();
         }
