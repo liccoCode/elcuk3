@@ -126,7 +126,7 @@ public class AbnormalFetchJob extends BaseJob {
      * @param sku
      */
     private void fetchSalesAmount(String sku, List<AbnormalDTO> dtos) {
-        DateTime monday = new DateTime(getMondayOfWeek()).plusYears(-1);
+        DateTime monday = new DateTime(getMondayOfWeek());
         Float[] beforeSales = new Float[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
