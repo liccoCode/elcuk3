@@ -2,7 +2,6 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
-import models.SaleTarget;
 import models.User;
 import models.product.Category;
 import models.product.Team;
@@ -112,7 +111,7 @@ public class Pmdashboards extends Controller {
 
     /**
      * 销售额异常
-     *
+     * <p/>
      * <p/>
      * 销售额周期指的是：
      * 上上周六 到 上周五 的销售额 对比 上个周期的销售额
@@ -129,7 +128,7 @@ public class Pmdashboards extends Controller {
 
     /**
      * 利润率异常
-     *
+     * <p/>
      * <p/>
      * 周期为：
      * 上上周六 到 上周五 的利润率 对比 上个周期的利润率

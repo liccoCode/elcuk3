@@ -63,15 +63,17 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart categoryColumn(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart columnChart = Cache.get(key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(key.intern()) {
+            columnChart = Cache.get(key, HighChart.class);
+            if(columnChart != null) return columnChart;
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = year + "年月度销售额";
             columnChart.series(saleCategoryColumn(type, year, team));
             columnChart.series(saleTaskCategoryColumn(type, year, team));
-            Cache.add(key, columnChart, "8h");
+            Cache.add(key, columnChart, "24h");
         }
         return columnChart;
     }
@@ -85,7 +87,7 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart categoryPie(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
         synchronized(key.intern()) {
@@ -93,7 +95,7 @@ public class PmDashboardESQuery {
             if(pieChart != null) return pieChart;
             pieChart = new HighChart(Series.PIE);
             pieChart.series(saleCategoryPie(type, year, team));
-            Cache.add(key, pieChart, "8h");
+            Cache.add(key, pieChart, "24h");
         }
         return pieChart;
     }
@@ -138,6 +140,7 @@ public class PmDashboardESQuery {
 
     /**
      * TEAM的销售额百分比
+     *
      * @param year
      * @return
      */
@@ -164,6 +167,7 @@ public class PmDashboardESQuery {
 
     /**
      * 利润百分比
+     *
      * @param year
      * @param team
      * @return
@@ -295,23 +299,26 @@ public class PmDashboardESQuery {
 
     /**
      * TEAM每个Category销售额曲线图
+     *
      * @param type
      * @param year
      * @param team
      * @return
      */
     public static HighChart salefeeline(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "最近六个月周销售额";
             List<Category> categorys = team.getObjCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleFeeLine(category, year));
             }
-            Cache.add(key, lineChart, "8h");
+            Cache.add(key, lineChart, "24h");
         }
         return lineChart;
     }
@@ -326,17 +333,19 @@ public class PmDashboardESQuery {
      */
     public static HighChart saleqtyline(final String type, final int year, final Team team) {
 
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "最近六个月周销量";
             List<Category> categorys = team.getObjCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleQtyLine(category, year));
             }
-            Cache.add(key, lineChart, "8h");
+            Cache.add(key, lineChart, "24h");
         }
         return lineChart;
     }
@@ -397,15 +406,17 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart profitrateline(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = year + "年月度利润率";
             lineChart.series(profitCategoryLine(type, year, team));
             lineChart.series(profitTaskCategoryLine(type, year, team));
-            Cache.add(key, lineChart, "8h");
+            Cache.add(key, lineChart, "24h");
         }
         return lineChart;
     }
@@ -490,13 +501,15 @@ public class PmDashboardESQuery {
         HighChart columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(cacked_key.intern()) {
+            columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
+            if(columnChart != null) return columnChart;
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = String.format("%s年度%s产品线销售额", year, categoryId);
             //已完成的柱状图
             columnChart.series(salesAmountColom(categoryId, year));
             //目标柱状图
             columnChart.series(salesAmountTargetColom(categoryId, year));
-            Cache.add(cacked_key, columnChart, "2h");
+            Cache.add(cacked_key, columnChart, "24h");
         }
         return columnChart;
     }
@@ -557,13 +570,15 @@ public class PmDashboardESQuery {
         HighChart lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(cacked_key.intern()) {
+            lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = String.format("%s年度%s产品线利润率", year, categoryId);
             //已完成曲线图
             lineChart.series(salesProfitLine(categoryId, year));
             //目标曲线图
             lineChart.series(salesProfitTargetLine(categoryId, year));
-            Cache.add(cacked_key, lineChart, "2h");
+            Cache.add(cacked_key, lineChart, "24h");
         }
         return lineChart;
     }

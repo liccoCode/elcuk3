@@ -11,6 +11,7 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
+import query.PmDashboardCache;
 import query.ProductQuery;
 import services.MetricProfitService;
 
@@ -35,7 +36,11 @@ public class AbnormalFetchJob extends BaseJob {
     public void doit() {
         long begin = System.currentTimeMillis();
         abnormal();
-        Logger.info("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
+        Logger.info("AbnormalFetchJobAbNormal calculate.... [%sms]", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+        PmDashboardCache.doCache();
+        Logger.info("AbnormalFetchJobChart calculate.... [%sms]", System.currentTimeMillis() - begin);
+
     }
 
     public static boolean isRnning() {

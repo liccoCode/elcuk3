@@ -69,13 +69,7 @@ public class Products extends Controller {
 
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
-
-        Date begin = DateTime.now().withYear(2011).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
-        //按照sku统计所有采购数量
-        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
-                pro.sku, null);
-        float procureqty = profitservice.esProcureQty();
+        float procureqty = SkuESQuery.esProcureQty(pro.sku);
         render(pro, procureqty);
     }
 
