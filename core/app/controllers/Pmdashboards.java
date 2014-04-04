@@ -41,7 +41,8 @@ public class Pmdashboards extends Controller {
                 cates.addAll(teamcates);
             }
         }
-        render(year, teams, cates);
+        long abnormalSize = AbnormalDTO.queryAbnormalDTOListSize(user);
+        render(year, teams, cates, abnormalSize);
     }
 
 
@@ -101,7 +102,7 @@ public class Pmdashboards extends Controller {
      */
     public static void salesQty(AbnormalDTO p) {
         try {
-            if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESQTY);
+            if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESQTY, 20);
             List<AbnormalDTO> dtos = p.query(User.findByUserName(Secure.Security.connected()));
             render("Pmdashboards/_salesQty.html", dtos, dtos, p);
         } catch(FastRuntimeException e) {
@@ -118,7 +119,7 @@ public class Pmdashboards extends Controller {
      */
     public static void salesAmount(AbnormalDTO p) {
         try {
-            if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESAMOUNT);
+            if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESAMOUNT, 5);
             List<AbnormalDTO> dtos = p.query(User.findByUserName(Secure.Security.connected()));
             render("Pmdashboards/_salesAmount.html", dtos, p);
         } catch(FastRuntimeException e) {
@@ -135,7 +136,7 @@ public class Pmdashboards extends Controller {
      */
     public static void salesProfit(AbnormalDTO p) {
         try {
-            if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESPROFIT);
+            if(p == null) p = new AbnormalDTO(AbnormalDTO.T.SALESPROFIT, 5);
             List<AbnormalDTO> dtos = p.query(User.findByUserName(Secure.Security.connected()));
             render("Pmdashboards/_salesProfit.html", dtos, p);
         } catch(FastRuntimeException e) {

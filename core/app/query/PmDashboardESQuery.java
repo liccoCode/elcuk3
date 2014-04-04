@@ -1,13 +1,10 @@
 package query;
 
 import com.alibaba.fastjson.JSONObject;
-import helper.Cached;
 import helper.Caches;
 import helper.DBUtils;
 import helper.Dates;
-import models.User;
 import models.product.Category;
-import models.product.Product;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import models.view.report.Profit;
@@ -495,7 +492,6 @@ public class PmDashboardESQuery {
      *
      * @return
      */
-    @Cached("2h")
     public static HighChart ajaxHighChartCategorySalesAmount(String categoryId, int year) {
         String cacked_key = String.format("%s_%s_categoryinfo_salesamount", year, categoryId);
         HighChart columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
@@ -509,7 +505,8 @@ public class PmDashboardESQuery {
             columnChart.series(salesAmountColom(categoryId, year));
             //目标柱状图
             columnChart.series(salesAmountTargetColom(categoryId, year));
-            Cache.add(cacked_key, columnChart, "24h");
+            Cache.delete(cacked_key);
+            Cache.add(cacked_key, columnChart);
         }
         return columnChart;
     }
@@ -564,7 +561,6 @@ public class PmDashboardESQuery {
      *
      * @return
      */
-    @Cached("2h")
     public static HighChart ajaxHighChartCategorySalesProfit(String categoryId, int year) {
         String cacked_key = String.format("%s_%s_categoryinfo_salesprofit", year, categoryId);
         HighChart lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
@@ -578,7 +574,8 @@ public class PmDashboardESQuery {
             lineChart.series(salesProfitLine(categoryId, year));
             //目标曲线图
             lineChart.series(salesProfitTargetLine(categoryId, year));
-            Cache.add(cacked_key, lineChart, "24h");
+            Cache.delete(cacked_key);
+            Cache.add(cacked_key, lineChart);
         }
         return lineChart;
     }
