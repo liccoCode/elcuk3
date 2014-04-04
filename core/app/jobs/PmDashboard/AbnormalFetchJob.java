@@ -34,6 +34,7 @@ public class AbnormalFetchJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        if(isRnning()) return;
         long begin = System.currentTimeMillis();
         abnormal();
         Logger.info("AbnormalFetchJobAbNormal calculate.... [%sms]", System.currentTimeMillis() - begin);
@@ -53,9 +54,9 @@ public class AbnormalFetchJob extends BaseJob {
      * @return
      */
     public void abnormal() {
+        Cache.add(RUNNING, RUNNING);
         //获取所有的 sku
         List<String> skus = new ProductQuery().skus();
-
         Map<String, List<AbnormalDTO>> dtoMap = new HashMap<String, List<AbnormalDTO>>();
         //准备数据容器
         List<AbnormalDTO> salesQty = new ArrayList<AbnormalDTO>();
@@ -74,6 +75,7 @@ public class AbnormalFetchJob extends BaseJob {
         dtoMap.put(AbnormalDTO.T.SALESAMOUNT.toString(), salesAmount);
         dtoMap.put(AbnormalDTO.T.SALESPROFIT.toString(), salesProfits);
         //将数据添加到缓存内
+        Cache.delete(AbnormalDTO_CACHE);
         Cache.add(AbnormalDTO_CACHE, dtoMap);
         Cache.delete(RUNNING);
     }
@@ -98,21 +100,26 @@ public class AbnormalFetchJob extends BaseJob {
     }
 
     /**
-     * 计算出所有review信息异常的sku
+     * 计算出昨日 review 异常的sku
      *
      * @param sku
      */
     private void fetchReview(String sku, List<AbnormalDTO> dtos) {
+        DateTime day1 = new DateTime().now().plusDays(-1);
+        Date day1begin = Dates.morning(day1.toDate());
+        Date day1end = Dates.night(day1.toDate());
+
         List<String> listingIds = Listing.getAllListingBySKU(sku);
-
-        SqlSelect sql = new SqlSelect().select("count(*) as count").from("AmazonListingReview").where(
-                SqlSelect.whereIn("listingId", listingIds))
-                .where("rating <= 3");//.where("reviewDate >=?").param(DateTime.now().plusDays(-1).toDate())
-
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        for(Map<String, Object> row : rows) {
-            if(NumberUtils.stringToInt(row.get("count").toString()) > 0) {
-                dtos.add(new AbnormalDTO(sku, AbnormalDTO.T.REVIEW));
+        if(listingIds.size() > 0) {
+            SqlSelect sql = new SqlSelect().select("count(*) as count").from("AmazonListingReview")
+                    .where(SqlSelect.whereIn("listingId", listingIds)).where("rating <= 3").where("reviewDate >=?")
+                    .param(day1begin).where("reviewDate <=?").param(
+                            day1end);
+            List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+            for(Map<String, Object> row : rows) {
+                if(NumberUtils.stringToInt(row.get("count").toString()) > 0) {
+                    dtos.add(new AbnormalDTO(sku, AbnormalDTO.T.REVIEW));
+                }
             }
         }
     }
