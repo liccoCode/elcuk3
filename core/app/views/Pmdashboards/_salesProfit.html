@@ -1,13 +1,11 @@
-#{if dtos.size >0}
-<form method="post" action="@{Pmdashboards.salesProfit()}" id="salesProfitform">
+<form method="post" id="salesProfitform" class="search_form">
   <div class="input-prepend input-append inline">
-    <span class="add-on">差异百分比 >=</span>
-    <input type="hidden" name="p.abnormalType" value="${p.abnormalType}">
-    <input type="text" class="input-medium" name="p.difference" placeholder="请输入差异百分比" value="${p.difference}">
+    <input type="text" class="input-medium" name="p.difference" value="${p.difference}">
+    <span class="add-on">%</span>
     <a class="btn btn-primary" id="salesProfitSearch" data-form="salesProfitform" data-div="salesProfit">搜索</a>
   </div>
+  <input type="text" style="display:none" name="p.abnormalType" value="${p.abnormalType}">
 </form>
-
 
 <table class="table table-condensed table-bordered">
   <tr>
@@ -16,16 +14,15 @@
     <th>历史利润率</th>
     <th title="差值">Diff(%)</th>
   </tr>
-    #{list items:dtos, as: 'dto'}
-      <tr>
-        <th>${dto.sku}</th>
-        <th>${dto.today}</th>
-        <th>${dto.before}</th>
-        <th>${dto.difference}</th>
-      </tr>
-    #{/list}
+#{list items:dtos, as: 'dto'}
+  <tr>
+    <td>${dto.sku}</td>
+    <td>${dto.today}</td>
+    <td>${dto.before}</td>
+    <td style="color:${dto.difference.diffRGB()}">
+    ${dto.difference.format('#.##%')}
+      (${dto.difference.format('#.##')})
+    </td>
+  </tr>
+#{/list}
 </table>
-#{/if}
-#{else }
-<p>暂无 SKU 利润率异常信息</p>
-#{/else}

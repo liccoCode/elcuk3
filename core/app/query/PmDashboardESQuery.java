@@ -1,12 +1,10 @@
 package query;
 
 import com.alibaba.fastjson.JSONObject;
-import helper.Cached;
 import helper.Caches;
 import helper.DBUtils;
 import helper.Dates;
 import models.product.Category;
-import models.product.Product;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import models.view.report.Profit;
@@ -62,15 +60,17 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart categoryColumn(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart columnChart = Cache.get(key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(key.intern()) {
+            columnChart = Cache.get(key, HighChart.class);
+            if(columnChart != null) return columnChart;
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = year + "年月度销售额";
             columnChart.series(saleCategoryColumn(type, year, team));
             columnChart.series(saleTaskCategoryColumn(type, year, team));
-            Cache.add(key, columnChart, "8h");
+            Cache.add(key, columnChart, "24h");
         }
         return columnChart;
     }
@@ -84,7 +84,7 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart categoryPie(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
         synchronized(key.intern()) {
@@ -92,7 +92,7 @@ public class PmDashboardESQuery {
             if(pieChart != null) return pieChart;
             pieChart = new HighChart(Series.PIE);
             pieChart.series(saleCategoryPie(type, year, team));
-            Cache.add(key, pieChart, "8h");
+            Cache.add(key, pieChart, "24h");
         }
         return pieChart;
     }
@@ -109,11 +109,11 @@ public class PmDashboardESQuery {
         //年的第一天
         Date begin = Dates.startDayYear(year);
         Date end = Dates.endDayYear(year);
-        List<Category> categorys = team.categorys;
+        List<String> categorys = team.getStrCategorys();
         float totalsalefee = 0f;
-        for(Category category : categorys) {
+        for(String categoryid : categorys) {
             MetricProfitService service = new MetricProfitService(begin, end, null,
-                    null, null, category.categoryId);
+                    null, null, categoryid);
             totalsalefee = totalsalefee + service.esSaleFee();
         }
         Series.Pie pie = new Series.Pie(team.name + " " + year + "销售额目标百分比");
@@ -148,11 +148,11 @@ public class PmDashboardESQuery {
         List<Team> teams = Team.findAll();
         Series.Pie pie = new Series.Pie(year + "TEAM销售额百分比");
         for(Team team : teams) {
-            List<Category> categorys = team.categorys;
+            List<String> categorys = team.getStrCategorys();
             float totalsalefee = 0f;
-            for(Category category : categorys) {
+            for(String categoryid : categorys) {
                 MetricProfitService service = new MetricProfitService(begin, end, null,
-                        null, null, category.categoryId);
+                        null, null, categoryid);
                 totalsalefee = totalsalefee + service.esSaleFee();
             }
             if(totalsalefee == 0f)
@@ -175,24 +175,14 @@ public class PmDashboardESQuery {
         Date begin = Dates.startDayYear(year);
         Date end = Dates.endDayYear(year);
 
-        String sql = "select categoryid From Category "
-                + " where team_id=" + team.id;
-        List<Map<String, Object>> categorys = DBUtils.rows(sql);
+        List<String> categoryIds = team.getStrCategorys();
+        //skus 集合
+        List<String> skus = Category.getSKUs(categoryIds);
         float totalsaleprofit = 0f;
-        for(Map<String, Object> category : categorys) {
-            String categoryid = (String) category.get("categoryid");
-            sql = "select sku From Product "
-                    + " where category_categoryid='" + categoryid + "' ";
-            List<Map<String, Object>> rows = DBUtils.rows(sql);
-            if(rows != null && rows.size() > 0) {
-                for(Map<String, Object> product : rows) {
-                    String sku = (String) product.get("sku");
-
-                    MetricProfitService service = new MetricProfitService(begin, end, null,
-                            sku, null);
-                    totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
-                }
-            }
+        for(String sku : skus) {
+            MetricProfitService service = new MetricProfitService(begin, end, null,
+                    sku, null);
+            totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
         }
         Series.Pie pie = new Series.Pie(team.name + " " + year + "利润目标百分比");
         if(totalsaleprofit == 0) {
@@ -214,6 +204,7 @@ public class PmDashboardESQuery {
         return pie;
     }
 
+
     /**
      * 利润百分比
      *
@@ -228,24 +219,14 @@ public class PmDashboardESQuery {
         Series.Pie pie = new Series.Pie(year + "TEAM利润百分比");
         String sql = "";
         for(Team team : teams) {
-            sql = "select categoryid From Category "
-                    + " where team_id=" + team.id;
-            List<Map<String, Object>> categorys = DBUtils.rows(sql);
+            List<String> categoryIds = team.getStrCategorys();
+            //skus 集合
+            List<String> skus = Category.getSKUs(categoryIds);
             float totalsaleprofit = 0f;
-            for(Map<String, Object> category : categorys) {
-                String categoryid = (String) category.get("categoryid");
-                sql = "select sku From Product "
-                        + " where category_categoryid='" + categoryid + "' ";
-                List<Map<String, Object>> rows = DBUtils.rows(sql);
-                if(rows != null && rows.size() > 0) {
-                    for(Map<String, Object> product : rows) {
-                        String sku = (String) product.get("sku");
-                        MetricProfitService service = new MetricProfitService(begin, end, null,
-                                sku, null);
-                        totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
-                    }
-
-                }
+            for(String sku : skus) {
+                MetricProfitService service = new MetricProfitService(begin, end, null,
+                        sku, null);
+                totalsaleprofit = totalsaleprofit + service.calProfit().totalprofit;
             }
             if(totalsaleprofit == 0f)
                 totalsaleprofit = 1;
@@ -275,11 +256,11 @@ public class PmDashboardESQuery {
             Date end = date.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate
                     ();
 
-            List<Category> categorys = team.categorys;
+            List<String> categorys = team.getStrCategorys();
             float totalsale = 0f;
-            for(Category category : categorys) {
+            for(String categoryid : categorys) {
                 MetricProfitService service = new MetricProfitService(begin, end, null,
-                        null, null, category.categoryId);
+                        null, null, categoryid);
                 totalsale = totalsale + service.esSaleFee();
             }
             column.add(totalsale, i + "月");
@@ -322,17 +303,19 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart salefeeline(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "最近六个月周销售额";
-            List<Category> categorys = team.getCategorys();
+            List<Category> categorys = team.getObjCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleFeeLine(category, year));
             }
-            Cache.add(key, lineChart, "8h");
+            Cache.add(key, lineChart, "24h");
         }
         return lineChart;
     }
@@ -347,17 +330,19 @@ public class PmDashboardESQuery {
      */
     public static HighChart saleqtyline(final String type, final int year, final Team team) {
 
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "最近六个月周销量";
-            List<Category> categorys = team.getCategorys();
+            List<Category> categorys = team.getObjCategorys();
             for(Category category : categorys) {
                 lineChart.series(esSaleQtyLine(category, year));
             }
-            Cache.add(key, lineChart, "8h");
+            Cache.add(key, lineChart, "24h");
         }
         return lineChart;
     }
@@ -418,15 +403,17 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart profitrateline(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = year + "年月度利润率";
             lineChart.series(profitCategoryLine(type, year, team));
             lineChart.series(profitTaskCategoryLine(type, year, team));
-            Cache.add(key, lineChart, "8h");
+            Cache.add(key, lineChart, "24h");
         }
         return lineChart;
     }
@@ -451,26 +438,18 @@ public class PmDashboardESQuery {
             calendar.setTime(date.toDate());
             Date end = date.withDayOfMonth(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)).toDate
                     ();
-            String sql = "select categoryid From Category "
-                    + " where team_id=" + team.id;
-            List<Map<String, Object>> categorys = DBUtils.rows(sql);
+            List<String> categoryIds = team.getStrCategorys();
+            //skus 集合
+            List<String> skus = Category.getSKUs(categoryIds);
+
             float totalsaleprofit = 0f;
             float totalsalefee = 0f;
-            for(Map<String, Object> category : categorys) {
-                String categoryid = (String) category.get("categoryid");
-                sql = "select sku From Product "
-                        + " where category_categoryid='" + categoryid + "' ";
-                List<Map<String, Object>> rows = DBUtils.rows(sql);
-                if(rows != null && rows.size() > 0) {
-                    for(Map<String, Object> product : rows) {
-                        String sku = (String) product.get("sku");
-                        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
-                                sku, null);
-                        Profit profit = profitservice.calProfit();
-                        totalsaleprofit = totalsaleprofit + profit.totalprofit;
-                        totalsalefee = totalsalefee + profit.totalfee;
-                    }
-                }
+            for(String sku : skus) {
+                MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+                        sku, null);
+                Profit profit = profitservice.calProfit();
+                totalsaleprofit = totalsaleprofit + profit.totalprofit;
+                totalsalefee = totalsalefee + profit.totalfee;
             }
             float rate = 0;
             if(totalsalefee != 0) {
@@ -513,19 +492,21 @@ public class PmDashboardESQuery {
      *
      * @return
      */
-    @Cached("2h")
     public static HighChart ajaxHighChartCategorySalesAmount(String categoryId, int year) {
         String cacked_key = String.format("%s_%s_categoryinfo_salesamount", year, categoryId);
         HighChart columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(cacked_key.intern()) {
+            columnChart = play.cache.Cache.get(cacked_key, HighChart.class);
+            if(columnChart != null) return columnChart;
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = String.format("%s年度%s产品线销售额", year, categoryId);
             //已完成的柱状图
             columnChart.series(salesAmountColom(categoryId, year));
             //目标柱状图
             columnChart.series(salesAmountTargetColom(categoryId, year));
-            Cache.add(cacked_key, columnChart, "2h");
+            Cache.delete(cacked_key);
+            Cache.add(cacked_key, columnChart);
         }
         return columnChart;
     }
@@ -580,19 +561,21 @@ public class PmDashboardESQuery {
      *
      * @return
      */
-    @Cached("2h")
     public static HighChart ajaxHighChartCategorySalesProfit(String categoryId, int year) {
         String cacked_key = String.format("%s_%s_categoryinfo_salesprofit", year, categoryId);
         HighChart lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(cacked_key.intern()) {
+            lineChart = play.cache.Cache.get(cacked_key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             lineChart.title = String.format("%s年度%s产品线利润率", year, categoryId);
             //已完成曲线图
             lineChart.series(salesProfitLine(categoryId, year));
             //目标曲线图
             lineChart.series(salesProfitTargetLine(categoryId, year));
-            Cache.add(cacked_key, lineChart, "2h");
+            Cache.delete(cacked_key);
+            Cache.add(cacked_key, lineChart);
         }
         return lineChart;
     }
