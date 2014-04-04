@@ -8,7 +8,6 @@ import models.product.Product;
 import models.view.dto.CategoryInfoDTO;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -31,6 +30,7 @@ public class CategoryInfoFetchJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        if(isRnning()) return;
         long begin = System.currentTimeMillis();
         categoryinfo();
         Logger.info("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
@@ -41,9 +41,11 @@ public class CategoryInfoFetchJob extends BaseJob {
     }
 
     /**
-     * Category信息数据计算
+     * Category 信息数据计算
      */
     public void categoryinfo() {
+        Cache.add(CategoryInfoFetchJob.RUNNING, CategoryInfoFetchJob.RUNNING);
+
         Map<String, List<CategoryInfoDTO>> dtoMap = new HashMap<String, List<CategoryInfoDTO>>();
         List<Category> categorys = Category.findAll();
         for(Category category : categorys) {
@@ -54,10 +56,8 @@ public class CategoryInfoFetchJob extends BaseJob {
                 dto.total = total(product.sku);
                 //2、sku本月销量(月初到月底)
                 dto.day30 = day30(product.sku);
-                //3、sku利润(今年)
-                dto.profit = profitAndProfitMargins(product.sku, "profit");
-                //4、sku利润率(今年)
-                dto.profitMargins = profitAndProfitMargins(product.sku, "profitmargin");
+                //3、sku利润(今年)和sku利润率(今年)
+                profitAndProfitMargins(dto);
                 //5、sku上周销售额(上上周六到上周五)
                 dto.lastWeekSales = lastWeekSales(product.sku);
                 //6、sku上上周销售额(往上同期)
@@ -70,6 +70,7 @@ public class CategoryInfoFetchJob extends BaseJob {
             }
             dtoMap.put(category.categoryId, categoryDtos);
         }
+        Cache.delete(CategoryInfo_Cache);
         Cache.add(CategoryInfo_Cache, dtoMap);
         Cache.delete(RUNNING);
     }
@@ -87,7 +88,8 @@ public class CategoryInfoFetchJob extends BaseJob {
             Date begin = (Date) row.get("min");
             Date end = (Date) row.get("max");
             MetricProfitService me = new MetricProfitService(begin, end, null, sku, null);
-            return NumberUtils.toLong(me.esSaleQty().toString());
+            float saleQty = me.esSaleQty();
+            return (long) saleQty;
         }
         return (long) 0;
     }
@@ -101,25 +103,26 @@ public class CategoryInfoFetchJob extends BaseJob {
     public int day30(String sku) {
         MetricProfitService me = new MetricProfitService(Dates.getCurrMonthFirst(), Dates.getCurrMonthLast(), null, sku,
                 null);
-        return NumberUtils.toInt(me.esSaleQty().toString());
+        float saleQty = me.esSaleQty();
+        return (int) saleQty;
     }
 
     /**
      * 利润(今年)和利润率(今年)
      *
-     * @param sku
+     * @param
      * @return
      */
-    public float profitAndProfitMargins(String sku, String type) {
-        DateTime now = new DateTime().now();
+    public void profitAndProfitMargins(CategoryInfoDTO dto) {
+        DateTime now = new DateTime().now().plusYears(-1);
         //获取本年第一天
         Date startDay = Dates.startDayYear(now.getYear());
         //获取本年最后一天
         Date endDay = Dates.endDayYear(now.getYear());
-        MetricProfitService me = new MetricProfitService(startDay, endDay, null, sku, null);
+        MetricProfitService me = new MetricProfitService(startDay, endDay, null, dto.sku, null);
         Profit profit = me.calProfit();
-        if(type.equalsIgnoreCase("profit")) return profit.totalprofit;
-        return profit.profitrate;
+        dto.profit = profit.totalprofit;
+        dto.profitMargins = profit.profitrate;
     }
 
     /**
@@ -161,7 +164,8 @@ public class CategoryInfoFetchJob extends BaseJob {
         //上周五
         DateTime end = lastFriday(1);
         MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
-        return NumberUtils.toInt(met.esSaleQty().toString());
+        float saleQty = met.esSaleQty();
+        return (int) saleQty;
     }
 
     /**
@@ -175,7 +179,8 @@ public class CategoryInfoFetchJob extends BaseJob {
         //上上周五
         DateTime end = lastFriday(2);
         MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
-        return NumberUtils.toInt(met.esSaleQty().toString());
+        float saleQty = met.esSaleQty();
+        return (int) saleQty;
     }
 
     /**
@@ -185,7 +190,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public DateTime lastFriday(int plusWeekNumber) {
-        DateTime monday = new DateTime(Dates.getMondayOfWeek());
+        DateTime monday = new DateTime(Dates.getMondayOfWeek()).plusYears(-1);
         return monday.plusDays(plusWeekNumber * (-3));
     }
 
@@ -196,7 +201,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public DateTime lastSaturday(int plusWeekNumber) {
-        DateTime monday = new DateTime(Dates.getMondayOfWeek());
+        DateTime monday = new DateTime(Dates.getMondayOfWeek()).plusYears(-1);
         return monday.plusDays(plusWeekNumber * (-9));
     }
 }

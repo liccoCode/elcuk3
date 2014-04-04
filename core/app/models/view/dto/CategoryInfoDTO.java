@@ -92,10 +92,25 @@ public class CategoryInfoDTO implements Serializable {
         if(dtoMap == null || dtoMap.size() == 0) {
             if(!CategoryInfoFetchJob.isRnning()) {
                 GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<String, Object>());
-                Cache.add(CategoryInfoFetchJob.RUNNING, CategoryInfoFetchJob.RUNNING);
             }
             return null;
         }
         return dtoMap.get(categoryId);
+    }
+
+    /**
+     * 计算 Category 利润率
+     *
+     * @param dtos
+     * @return
+     */
+    public static float categoryProfit(List<CategoryInfoDTO> dtos) {
+        float profit = 0;
+        if(dtos != null) {
+            for(CategoryInfoDTO dto : dtos) {
+                profit += dto.profit;
+            }
+        }
+        return profit;
     }
 }

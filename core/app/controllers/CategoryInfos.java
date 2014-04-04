@@ -29,6 +29,8 @@ public class CategoryInfos extends Controller {
         List<Category> cates = User.getTeamCategorys(user);
         if(StringUtils.isBlank(id) && cates.size() > 0) id = cates.get(0).categoryId;
         List<CategoryInfoDTO> dtos = CategoryInfoDTO.query(id);
-        render(cates, dtos);
+        //Category 利润
+        float categoryProfit = CategoryInfoDTO.categoryProfit(dtos);
+        render(cates, dtos, categoryProfit);
     }
 }
