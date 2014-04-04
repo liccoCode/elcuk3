@@ -1,7 +1,7 @@
 <form id="salesQtyform" class="search_form">
   <div class="input-prepend input-append inline">
-    <span class="add-on">差异 >=</span>
     <input type="text" class="input-medium" name="p.difference" value="${p.difference}">
+    <span class="add-on">%</span>
     <a class="btn btn-primary" id="salesQtySearch" data-form="salesQtyform" data-div="salesQty">搜索</a>
   </div>
   <input type="text" style="display:none" name="p.abnormalType" value="${p.abnormalType}">
@@ -14,15 +14,15 @@
     <th>过去四周平均值</th>
     <th title="差值">Diff(%)</th>
   </tr>
-    #{list items:dtos, as: 'dto'}
-      <tr>
-        <td>${dto.sku}</td>
-        <td>${dto.today}</td>
-        <td>${dto.before}</td>
-        <td style="color:${dto.difference.diffRGB()}">
-          ${dto.difference.format('#.##')}
-          (${dto.difference.format('#.##%')})
-        </td>
-      </tr>
-    #{/list}
+#{list items:dtos, as: 'dto'}
+  <tr>
+    <td>${dto.sku}</td>
+    <td>${dto.today}</td>
+    <td>${dto.before}</td>
+    <td style="color:${dto.difference.diffRGB()}">
+    ${dto.difference.format('#.##%')}
+      (${dto.difference.format('#.##')})
+    </td>
+  </tr>
+#{/list}
 </table>
