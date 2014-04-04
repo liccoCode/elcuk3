@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.DBUtils;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.product.Category;
@@ -436,16 +437,36 @@ public class User extends Model {
     }
 
     /**
+     * User的所有Category_Id
+     *
+     * @return
+     */
+    public static List<String> getTeamCategorys(User user) {
+        List<String> categories = new ArrayList<String>();
+        String sql = "select c.categoryid From User_Team u,Category c "
+                + " where u.teams_id=c.team_id"
+                + " and users_id=" + user.id;
+        List<Map<String, Object>> categorys = DBUtils.rows(sql);
+        if(categorys != null && categorys.size() > 0) {
+            for(Map<String, Object> row : categorys) {
+                categories.add(row.get("categoryid").toString());
+            }
+        }
+        return categories;
+    }
+
+
+    /**
      * User的所有Category
      *
      * @return
      */
-    public static List<Category> getTeamCategorys(User user) {
+    public static List<Category> getObjCategorys(User user) {
         List<Category> categories = new ArrayList<Category>();
         Iterator<Team> iterator = user.teams.iterator();
         while(iterator.hasNext()) {
             Team team = iterator.next();
-            List<Category> categoryList = team.categorys;
+            List<Category> categoryList = team.getObjCategorys();
             categories.addAll(categoryList);
         }
         return categories;

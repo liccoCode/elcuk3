@@ -7,6 +7,8 @@ import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.joda.time.DateTime;
@@ -16,7 +18,7 @@ import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.vo.OrderrVO;
-import org.elasticsearch.index.query.PrefixFilterBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 
 import java.util.*;
 
@@ -109,7 +111,6 @@ public class MetricProfitService {
                                 //销售费用项目
                                 .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
-        System.out.println(":::" + search.toString());
         return getEsTermsTotal(search, "salefee");
     }
 
@@ -626,8 +627,8 @@ public class MetricProfitService {
      * 检查参数
      */
     private void checkParam() {
-        if(this.begin == null) throw new FastRuntimeException("此方法 开始时间 必须指定");
-        if(this.end == null) throw new FastRuntimeException("此方法 结束时间 必须指定");
+        //if(this.begin == null) throw new FastRuntimeException("此方法 开始时间 必须指定");
+        //if(this.end == null) throw new FastRuntimeException("此方法 结束时间 必须指定");
         if(this.sku == null) throw new FastRuntimeException("此方法 sku 必须指定");
     }
 
@@ -671,12 +672,10 @@ public class MetricProfitService {
             toD = this.market.withTimeZone(end);
         }
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-
         BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
         if(this.market != null) {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()));
         }
-
         if(dateFilter) {
             boolFilter.must(FilterBuilders.rangeFilter("date").gte(fromD.toString(isoFormat))
                     .lt(toD.toString(isoFormat)));
@@ -688,13 +687,13 @@ public class MetricProfitService {
     /**
      * 计算PM的DASHBoard的每日的所有Category的日销售额
      */
-    public JSONArray dashboardSaleFee(int esType) {
+    public JSONArray dashboardSaleFee(int esFilterType) {
         FilterBuilder filter = null;
-        if(esType == 1) {
+        if(esFilterType == 1) {
             filter = FilterBuilders.prefixFilter("sku",
                     this.category.toLowerCase());
         }
-        if(esType == 2) {
+        if(esFilterType == 2) {
             filter = FilterBuilders.termsFilter("sku", parseEsSku());
         }
 
@@ -721,9 +720,7 @@ public class MetricProfitService {
             units = facets.getJSONObject("units");
             entries = units.getJSONArray("entries");
         }
-
         return entries;
-
     }
 
     /**
@@ -738,7 +735,6 @@ public class MetricProfitService {
         if(esType == 2) {
             filter = FilterBuilders.termsFilter("sku", parseEsSku());
         }
-
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
@@ -761,6 +757,63 @@ public class MetricProfitService {
             entries = units.getJSONArray("entries");
         }
         return entries;
-
     }
+
+
+    /**
+     * 计算SKU的采购价格和数量
+     * 采用Aggregation方式查询
+     */
+    public JSONArray skuProcureDate(String tablename, String fieldname, String caltype) {
+        BoolQueryBuilder qb = QueryBuilders
+                .boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
+
+        DateHistogramBuilder builder = AggregationBuilders.
+                dateHistogram("units")
+                .field("date")
+                .interval(DateHistogram.Interval.DAY)
+                .subAggregation(AggregationBuilders.avg("price").field(fieldname));
+        /**
+         * 求平均值
+         */
+        if(caltype.equals("avg")) {
+            builder.subAggregation(AggregationBuilders.avg("fieldvalue").field(fieldname));
+        }
+        /**
+         * 求和
+         */
+        if(caltype.equals("sum")) {
+            builder.subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname));
+        }
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(qb)
+                .aggregation(builder
+                ).size(0);
+        JSONObject result = ES.search("elcuk2", tablename, search);
+        if(result == null) {
+            throw new FastRuntimeException("ES连接异常!");
+        }
+        JSONObject aggregations = result.getJSONObject("aggregations");
+        JSONObject units = null;
+        JSONArray buckets = null;
+        if(aggregations != null) {
+            units = aggregations.getJSONObject("units");
+            buckets = units.getJSONArray("buckets");
+        }
+        return buckets;
+    }
+
+
+    /**
+     * SKU总采购数量
+     */
+    public Float esProcureQty() {
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(querybuilder())
+                .facet(FacetBuilders.statisticalFacet("units")
+                        .field("quantity")
+                ).size(0);
+        return getEsTermsTotal(search, "procurepayunit");
+    }
+
 }

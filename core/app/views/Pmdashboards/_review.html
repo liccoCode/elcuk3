@@ -1,8 +1,8 @@
 #{if dtos.size >0}
 <table class="table table-condensed table-bordered">
   <tr>
-    <td>SKU</td>
-    <td>Count</td>
+    <th>SKU</th>
+    <th>Count</th>
   </tr>
     #{list items:dtos, as: 'dto'}
       #{set reviews: dto.reviews()/}

@@ -26,7 +26,7 @@ public class CategoryInfos extends Controller {
     @Check("categoryinfos.show")
     public static void show(String id) {
         User user = User.findByUserName(Secure.Security.connected());
-        List<Category> cates = User.getTeamCategorys(user);
+        List<Category> cates = User.getObjCategorys(user);
         if(StringUtils.isBlank(id) && cates.size() > 0) id = cates.get(0).categoryId;
         List<CategoryInfoDTO> dtos = CategoryInfoDTO.query(id);
         //Category 利润

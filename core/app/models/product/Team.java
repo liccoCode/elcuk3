@@ -1,6 +1,7 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import models.User;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -8,10 +9,7 @@ import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,10 +47,6 @@ public class Team extends Model {
     @Expose
     public String memo;
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    public List<Category> categorys;
-
-
     @Override
     public String toString() {
         return String.format("%s:%s", this.teamId, this.name);
@@ -65,8 +59,9 @@ public class Team extends Model {
         /**
          * 1. Category上有没有绑定的 Team
          */
-        if(this.categorys != null && this.categorys.size() > 0) {
-            Validation.addError("", String.format("拥有 %s categorys 关联, 无法删除.", categorys.size()));
+        List<Category> cates = this.getObjCategorys();
+        if(cates != null && cates.size() > 0) {
+            Validation.addError("", String.format("拥有 %s categorys 关联, 无法删除.", cates.size()));
 
         }
         /**
@@ -131,14 +126,24 @@ public class Team extends Model {
         TEAM_CACHE.remove(user.username);
     }
 
+    public List<String> getStrCategorys() {
+        List<String> categories = new ArrayList<String>();
+        String sql = "select c.categoryid From Category c "
+                + " where c.team_id=" + this.id;
+        List<Map<String, Object>> categorys = DBUtils.rows(sql);
 
-    public List<Category> getCategorys() {
-        List<Category> categorys = Category.find("team_id=?", this.id).fetch();
-        return categorys;
+        for(Map<String, Object> row : categorys) {
+            categories.add(row.get("categoryid").toString());
+        }
+        return categories;
     }
 
-    public boolean existUser(User user){
+    public List<Category> getObjCategorys() {
+        List<Category> categories = Category.find("team=?", this).fetch();
+        return categories;
+    }
+
+    public boolean existUser(User user) {
         return user.teams.contains(this);
     }
-
 }

@@ -1,10 +1,7 @@
 package query;
 
 import helper.Caches;
-import helper.J;
 import models.product.Team;
-import models.view.highchart.HighChart;
-import models.view.highchart.Series;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 
@@ -18,7 +15,7 @@ import java.util.List;
  */
 public class PmDashboardCache {
 
-    public void doCache() throws Exception {
+    public static void doCache() {
         List<Team> teams = Team.findAll();
         int year = DateTime.now().getYear();
         for(Team teamobject : teams) {
@@ -27,50 +24,62 @@ public class PmDashboardCache {
                  * 月利润率
                  */
                 deleteCache("profitrateline", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .profitrateline("profitrateline", year, teamobject));
+                PmDashboardESQuery
+                        .profitrateline("profitrateline", year, teamobject);
                 /**
                  * 销售额曲线
                  */
                 deleteCache("salefeeline", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .salefeeline("salefeeline", year, teamobject));
+                PmDashboardESQuery
+                        .salefeeline("salefeeline", year, teamobject);
                 /**
                  * 销量曲线
                  */
                 deleteCache("saleqtyline", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .saleqtyline("saleqtyline", year, teamobject));
+                PmDashboardESQuery
+                        .saleqtyline("saleqtyline", year, teamobject);
                 /**
                  * 柱状
                  */
                 deleteCache("salecolumn", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .categoryColumn("salecolumn", year, teamobject));
+                PmDashboardESQuery
+                        .categoryColumn("salecolumn", year, teamobject);
                 /**
                  * 饼状
                  */
                 deleteCache("sale", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .categoryPie("sale", year, teamobject));
+                PmDashboardESQuery
+                        .categoryPie("sale", year, teamobject);
                 /**
                  * 饼状
                  */
                 deleteCache("profit", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .categoryPie("profit", year, teamobject));
+                PmDashboardESQuery
+                        .categoryPie("profit", year, teamobject);
                 /**
-                 * 饼状
+                 * TEAM销售额所占比重
                  */
                 deleteCache("teamsale", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .categoryPie("teamsale", year, teamobject));
+                PmDashboardESQuery
+                        .categoryPie("teamsale", year, teamobject);
                 /**
-                 * 饼状
+                 * TEAM利润所占比重
                  */
                 deleteCache("teamprofit", year, teamobject);
-                J.json(PmDashboardESQuery
-                        .categoryPie("teamprofit", year, teamobject));
+                PmDashboardESQuery
+                        .categoryPie("teamprofit", year, teamobject);
+
+                List<String> cates = teamobject.getStrCategorys();
+                for(String cateid : cates) {
+                    /**产品线CATEGORY的销售额**/
+                    deleteCache("%s_%s_categoryinfo_salesamount", cateid, year);
+                    PmDashboardESQuery
+                            .ajaxHighChartCategorySalesAmount(cateid, year);
+                    /**产品线CATEGORY的利润率**/
+                    deleteCache("%s_%s_categoryinfo_salesprofit", "", year);
+                    PmDashboardESQuery
+                            .ajaxHighChartCategorySalesProfit(cateid, year);
+                }
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -79,8 +88,19 @@ public class PmDashboardCache {
     }
 
 
+    /**
+     * 删除PM首页的cache
+     * @param type
+     * @param year
+     * @param team
+     */
     public static void deleteCache(final String type, final int year, final Team team) {
-        String key = Caches.Q.cacheKey(type, year, team.name);
+        String key = Caches.Q.cacheKey(type, year, team.id);
         Cache.delete(key);
+    }
+
+    public static void deleteCache(String keyname, String categoryId, int year) {
+        String cacked_key = String.format(keyname, year, categoryId);
+        Cache.delete(cacked_key);
     }
 }
