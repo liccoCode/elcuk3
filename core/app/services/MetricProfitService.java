@@ -624,8 +624,8 @@ public class MetricProfitService {
      * 检查参数
      */
     private void checkParam() {
-        if(this.begin == null) throw new FastRuntimeException("此方法 开始时间 必须指定");
-        if(this.end == null) throw new FastRuntimeException("此方法 结束时间 必须指定");
+        //if(this.begin == null) throw new FastRuntimeException("此方法 开始时间 必须指定");
+        //if(this.end == null) throw new FastRuntimeException("此方法 结束时间 必须指定");
         if(this.sku == null) throw new FastRuntimeException("此方法 sku 必须指定");
     }
 
@@ -669,12 +669,10 @@ public class MetricProfitService {
             toD = this.market.withTimeZone(end);
         }
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-
         BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
         if(this.market != null) {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()));
         }
-
         if(dateFilter) {
             boolFilter.must(FilterBuilders.rangeFilter("date").gte(fromD.toString(isoFormat))
                     .lt(toD.toString(isoFormat)));
@@ -686,13 +684,13 @@ public class MetricProfitService {
     /**
      * 计算PM的DASHBoard的每日的所有Category的日销售额
      */
-    public JSONArray dashboardSaleFee(int esType) {
+    public JSONArray dashboardSaleFee(int esFilterType) {
         FilterBuilder filter = null;
-        if(esType == 1) {
+        if(esFilterType == 1) {
             filter = FilterBuilders.prefixFilter("sku",
                     this.category.toLowerCase());
         }
-        if(esType == 2) {
+        if(esFilterType == 2) {
             filter = FilterBuilders.termsFilter("sku", parseEsSku());
         }
 
@@ -719,9 +717,7 @@ public class MetricProfitService {
             units = facets.getJSONObject("units");
             entries = units.getJSONArray("entries");
         }
-
         return entries;
-
     }
 
     /**
@@ -736,7 +732,6 @@ public class MetricProfitService {
         if(esType == 2) {
             filter = FilterBuilders.termsFilter("sku", parseEsSku());
         }
-
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
@@ -775,9 +770,15 @@ public class MetricProfitService {
                 .field("date")
                 .interval(DateHistogram.Interval.DAY)
                 .subAggregation(AggregationBuilders.avg("price").field(fieldname));
+        /**
+         * 求平均值
+         */
         if(caltype.equals("avg")) {
             builder.subAggregation(AggregationBuilders.avg("fieldvalue").field(fieldname));
         }
+        /**
+         * 求和
+         */
         if(caltype.equals("sum")) {
             builder.subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname));
         }
@@ -811,6 +812,5 @@ public class MetricProfitService {
                 ).size(0);
         return getEsTermsTotal(search, "procurepayunit");
     }
-
 
 }

@@ -33,6 +33,8 @@ public class SkuESQuery {
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             if(calType.equals("fee")) {
                 lineChart.title = "最近六个月周销售额";
@@ -89,7 +91,6 @@ public class SkuESQuery {
         return line;
     }
 
-
     /**
      * 每个SKU的利润
      *
@@ -123,7 +124,6 @@ public class SkuESQuery {
         return line;
     }
 
-
     /**
      * SKU采购价格曲线图
      *
@@ -137,6 +137,8 @@ public class SkuESQuery {
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
+            lineChart = Cache.get(key, HighChart.class);
+            if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             if(calType.equals("price")) {
                 lineChart.title = "采购价格";
@@ -151,7 +153,6 @@ public class SkuESQuery {
         return lineChart;
     }
 
-
     /**
      * 得到ES的结果
      *
@@ -165,10 +166,8 @@ public class SkuESQuery {
     public static Series.Line esProcureDate(String sku, String titlename, String tablename, String fieldname,
                                             String caltype) {
         Series.Line line = new Series.Line(sku + titlename);
-        Date begin = DateTime.now().withYear(2011).toDate();
-        Date end = DateTime.now().withTimeAtStartOfDay().toDate();
         //按照sku计算采购价格
-        MetricProfitService profitservice = new MetricProfitService(begin, end, null,
+        MetricProfitService profitservice = new MetricProfitService(null, null, null,
                 sku, null);
         JSONArray buckets = profitservice.skuProcureDate(tablename, fieldname, caltype);
         if(buckets == null) return line;
@@ -178,5 +177,27 @@ public class SkuESQuery {
         }
         line.sort();
         return line;
+    }
+
+    /**
+     * sku的总共采购数量
+     *
+     * @param sku
+     * @return
+     */
+    public static float esProcureQty(String sku) {
+        String key = Caches.Q.cacheKey(sku, "procureqty");
+        String procureqty = Cache.get(key, String.class);
+        if(procureqty != null) return new Float(procureqty);
+        synchronized(key.intern()) {
+            procureqty = Cache.get(key, String.class);
+            if(procureqty != null) return new Float(procureqty);
+            //按照sku统计所有采购数量
+            MetricProfitService profitservice = new MetricProfitService(null, null, null,
+                    sku, null);
+            procureqty = String.valueOf(profitservice.esProcureQty());
+            Cache.add(key, procureqty, "8h");
+        }
+        return new Float(procureqty);
     }
 }
