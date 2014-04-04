@@ -25,7 +25,6 @@ public class JobsInitialize extends Controller {
      */
     public static void initAbnormalFetchJob() {
         GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<String, Object>());
-        Cache.add(AbnormalFetchJob.RUNNING, AbnormalFetchJob.RUNNING);
     }
 
     /**
@@ -34,6 +33,5 @@ public class JobsInitialize extends Controller {
      */
     public static void initCategoryInfoFetchJob() {
         GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<String, Object>());
-        Cache.add(CategoryInfoFetchJob.RUNNING, CategoryInfoFetchJob.RUNNING);
     }
 }
