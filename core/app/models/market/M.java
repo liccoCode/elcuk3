@@ -771,7 +771,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
                 return String
-                        .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                        .format("https://catalog-sc.amazon.it/abis/product/DisplayEditProduct?sku=%s&asin=%s",
                                 msku, sell.asin);
             case AMAZON_UK:
                 return String
