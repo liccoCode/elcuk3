@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:'Category 信息' /}
+#{set title:'Category 销售分析' /}
 #{set 'moreScripts'}
 #{/set}
 
@@ -20,7 +20,7 @@
           #{list items:cates, as:'cat'}
             <tr>
               <td>
-                ${cat.categoryId}
+              ${cat.categoryId}
               </td>
               <td>
                 <a href="@{CategoryInfos.show()}/${cat.categoryId}">${cat.name}</a>
@@ -31,7 +31,64 @@
     </div>
 
     <div class="span8 well well-small">
-      #{info_row title: "SKU 列表信息"/}
+        #{if dtos == null}
+          <h4>正在后台计算中, 请 10 mn 后再尝试</h4>
+        #{/if}
+        #{else }
+            #{info_row title: "SKU 列表信息"/}
+          <table class="table table-bordered table-condensed">
+            <tr>
+              <th class="span3">SKU</th>
+              <th title="系统上线至今">总销量</th>
+              <th>生命周期</th>
+              <th title="本月销量">DAY(30)销量</th>
+              <th>销售等级</th>
+              <th title="单个 SKU 利润占 Category 利润比重">类别贡献比重</th>
+              <th>利润率(%)</th>
+              <th title="上上周六到上周五期间销售额对比同期">销售额趋势</th>
+              <th title="上上周六到上周五期间销量对比同期">销量趋势</th>
+            </tr>
+              #{list items:dtos, as: 'dto'}
+                <tr>
+                  <td>
+                    <a href="@{Products.show(dto.sku)}" target="_blank">${dto.sku}</a>
+                  </td>
+
+                  <td>
+                  ${dto.total}
+                  </td>
+
+                  <td>
+                  ${dto.productState}
+                  </td>
+
+                  <td>
+                  ${dto.day30}
+                  </td>
+
+                  <td>
+                  ${dto.salesLevel}
+                  </td>
+
+                  <td>
+                      #{render 'CategoryInfos/_percent.html', dto:dto, categoryProfit: categoryProfit/}
+                  </td>
+
+                  <td>
+                  ${dto.profitMargins.format('#.##')}%
+                  </td>
+
+                  <td>
+                      #{render 'CategoryInfos/_sales_icon.html', dto:dto/}
+                  </td>
+
+                  <td>
+                      #{render 'CategoryInfos/_qty_icon.html', dto:dto/}
+                  </td>
+                </tr>
+              #{/list}
+          </table>
+        #{/else}
 
     </div>
   </div>

@@ -28,7 +28,7 @@ import java.util.*;
  * Time: PM2:03
  */
 public class AbnormalFetchJob extends BaseJob {
-    public static final String RUNNING = "anormal_running";
+    public static final String RUNNING = "anormalfetchjob_running";
     public static final String AbnormalDTO_CACHE = "abnormal_info";
 
     @SuppressWarnings("unchecked")
@@ -133,7 +133,7 @@ public class AbnormalFetchJob extends BaseJob {
      * @param sku
      */
     private void fetchSalesAmount(String sku, List<AbnormalDTO> dtos) {
-        DateTime monday = new DateTime(getMondayOfWeek());
+        DateTime monday = new DateTime(Dates.getMondayOfWeek());
         Float[] beforeSales = new Float[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
@@ -158,7 +158,7 @@ public class AbnormalFetchJob extends BaseJob {
      * @param sku
      */
     private void fetchSalesProfit(String sku, List<AbnormalDTO> dtos) {
-        DateTime monday = new DateTime(getMondayOfWeek());
+        DateTime monday = new DateTime(Dates.getMondayOfWeek());
         Float[] beforeProfit = new Float[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
@@ -191,20 +191,5 @@ public class AbnormalFetchJob extends BaseJob {
             beforeSales += met.esSaleQty();
         }
         return beforeSales / 4;
-    }
-
-    /**
-     * 获取当前时间的星期一时间
-     *
-     * @return
-     */
-    public Date getMondayOfWeek() {
-        Calendar calendar = Calendar.getInstance(Locale.CHINA);
-        //设置一周起始日期为星期一
-        calendar.setFirstDayOfWeek(1);
-        //设置格式
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        //获取当前周的星期一
-        return calendar.getTime();
     }
 }
