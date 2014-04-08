@@ -70,7 +70,7 @@ public class PmDashboardESQuery {
             columnChart.title = year + "年月度销售额";
             columnChart.series(saleCategoryColumn(type, year, team));
             columnChart.series(saleTaskCategoryColumn(type, year, team));
-            Cache.add(key, columnChart, "24h");
+            Cache.add(key, columnChart);
         }
         return columnChart;
     }
@@ -92,7 +92,7 @@ public class PmDashboardESQuery {
             if(pieChart != null) return pieChart;
             pieChart = new HighChart(Series.PIE);
             pieChart.series(saleCategoryPie(type, year, team));
-            Cache.add(key, pieChart, "24h");
+            Cache.add(key, pieChart);
         }
         return pieChart;
     }
@@ -315,7 +315,7 @@ public class PmDashboardESQuery {
             for(Category category : categorys) {
                 lineChart.series(esSaleFeeLine(category, year));
             }
-            Cache.add(key, lineChart, "24h");
+            Cache.add(key, lineChart);
         }
         return lineChart;
     }
@@ -342,7 +342,7 @@ public class PmDashboardESQuery {
             for(Category category : categorys) {
                 lineChart.series(esSaleQtyLine(category, year));
             }
-            Cache.add(key, lineChart, "24h");
+            Cache.add(key, lineChart);
         }
         return lineChart;
     }
@@ -413,7 +413,7 @@ public class PmDashboardESQuery {
             lineChart.title = year + "年月度利润率";
             lineChart.series(profitCategoryLine(type, year, team));
             lineChart.series(profitTaskCategoryLine(type, year, team));
-            Cache.add(key, lineChart, "24h");
+            Cache.add(key, lineChart);
         }
         return lineChart;
     }

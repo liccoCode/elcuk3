@@ -9,6 +9,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by IntelliJ IDEA.
@@ -266,5 +267,44 @@ public class Dates {
         calendar.setTime(date.toDate());
         return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate
                 ();
+    }
+
+    /**
+     * 获取当前时间的星期一时间
+     *
+     * @return
+     */
+    public static Date getMondayOfWeek() {
+        Calendar calendar = Calendar.getInstance(Locale.CHINA);
+        //设置一周起始日期为星期一
+        calendar.setFirstDayOfWeek(1);
+        //设置格式
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        //获取当前周的星期一
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取本月第一天
+     *
+     * @return
+     */
+    public static Date getCurrMonthFirst() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DATE, 1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取本月最后一天
+     *
+     * @return
+     */
+    public static Date getCurrMonthLast() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DATE, 1);//设置为当前月1号
+        calendar.add(Calendar.MONTH, 1);//加一个月变成下一月的1号
+        calendar.add(Calendar.DATE, -1);//减去一天，变成当月最后一天
+        return calendar.getTime();
     }
 }
