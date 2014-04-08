@@ -3,6 +3,7 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.Privilege;
+import models.Role;
 import models.User;
 import models.product.Team;
 import models.view.Ret;
@@ -34,7 +35,8 @@ public class Users extends Controller {
         List<User> users = User.findAll();
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
-        render(users, privileges, teams);
+        List<Role> roles = Role.findAll();
+        render(users, privileges, teams, roles);
     }
 
     @Before(only = {"home", "updates"})
@@ -70,6 +72,18 @@ public class Users extends Controller {
         }
         int size = user.teams.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Team", size)));
+    }
+
+    public static void roles(Long id, List<Long> roleId) {
+        //if(roleId == null || roleId.size() == 0) renderJSON(new Ret(false, "必须选择角色"));
+        User user = User.findById(id);
+        try {
+            user.addRoles(roleId);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.E(e)));
+        }
+        int size = user.roles.size();
+        renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
     }
 
     public static void updates(User user, String newPassword, String newPasswordConfirm) {
@@ -211,7 +225,7 @@ public class Users extends Controller {
         if(user == null)
             renderJSON(new Ret("用户不存在，无法打开"));
         try {
-            Set<Privilege> privileges = Privilege.privileges(user.username);
+            Set<Privilege> privileges = Privilege.privileges(user.username,user.roles);
             Privilege.updatePrivileges(user.username, privileges);
 
             Set<Team> teams = Team.teams(user.username);

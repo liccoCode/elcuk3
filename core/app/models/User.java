@@ -52,6 +52,13 @@ public class User extends Model {
     @ManyToMany
     public Set<Team> teams = new HashSet<Team>();
 
+    /**
+     * 用户所拥有的ROLE
+     */
+    @ManyToMany
+    public Set<Role> roles = new HashSet<Role>();
+
+
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
     public List<Payment> paymentPaied = new ArrayList<Payment>();
 
@@ -228,6 +235,39 @@ public class User extends Model {
         }
     }
 
+
+    /**
+     * 增加Role;(删除原来的, 重新添加现在的)
+     *
+     * @param roleId
+     */
+    public void addRoles(List<Long> roleId) {
+        if(roleId == null || roleId.size() == 0) {
+            this.roles = new HashSet<Role>();
+            this.save();
+            Role.updateRoles(this.username, this.roles);
+        } else {
+            List<Role> roles = Role.find("id IN " + JpqlSelect.inlineParam(roleId))
+                    .fetch();
+            if(roleId.size() != roles.size())
+                throw new FastRuntimeException("需要修改的Role数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.roles = new HashSet<Role>();
+            this.save();
+            this.roles.addAll(roles);
+            Role.updateRoles(this.username, this.roles);
+            this.save();
+        }
+    }
+
+    /**
+     * 当前用户还没有的角色
+     *
+     * @return
+     */
+    public boolean isHaveRole(Role role) {
+        return this.roles.contains(role);
+    }
+
     /**
      * 修改密码
      *
@@ -263,7 +303,7 @@ public class User extends Model {
          * 3. 用户 Notification Queue 缓存
          */
         //TODO 这里的缓存都是通过 Model 自己进行的缓存, 只能够支持单机缓存, 无法分布式.
-        Privilege.privileges(this.username);
+        Privilege.privileges(this.username,this.roles);
     }
 
     /**
