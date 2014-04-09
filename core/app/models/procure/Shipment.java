@@ -379,6 +379,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
 
         for(ProcureUnit unit : procureUnits) {
+            if(unit.selling == null) {
+                Validation.addError("", "采购单的selling为空");
+                break;
+            }
             if(firstShipType != unit.shipType) {
                 Validation.addError("", "不同运输方式不可以创建到一个运输单.");
                 break;
@@ -390,6 +394,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.type = firstShipType;
 
         for(ProcureUnit unit : procureUnits) {
+            if(unit.whouse == null) {
+                Validation.addError("", "采购单仓库为空");
+                break;
+            }
+
             if(this.type == T.EXPRESS) {
                 if(!firstProcureUnit.whouse.id.equals(unit.whouse.id)) {
                     Validation.addError("", "快递运输, 仓库不一样不可以创建到一个运输单");

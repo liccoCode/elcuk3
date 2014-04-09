@@ -250,6 +250,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+
+    /**
+     * 手动单检查
+     */
+    public void manualValidate() {
+        Validation.required("交货日期", this.attrs.planDeliveryDate);
+        Validation.required("采购数量", this.attrs.planQty);
+        Validation.required("procureunit.cooperator", this.cooperator);
+        Validation.required("procureunit.handler", this.handler);
+        Validation.required("procureunit.product", this.product);
+        Validation.required("价格", this.attrs.price);
+        if(this.product != null) this.sku = this.product.sku;
+        Validation.required("procureunit.createDate", this.createDate);
+        if(this.attrs != null) this.attrs.validate();
+        if(this.selling == null && this.shipType != null) {
+            Validation.addError("", "运输方式不为空时,selling也不能为空!");
+        }
+    }
+
+
     /**
      * 手动单采购计划数据验证
      */
@@ -291,17 +311,27 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.attrs.planQty = unit.attrs.planQty;
         }
         newUnit.stage = STAGE.DELIVERY;
-        newUnit.validate();
+        if(unit.selling == null) {
+            newUnit.manualValidate();
+        } else {
+            newUnit.validate();
+        }
+
 
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
                 newUnit.whouse, newUnit.shipType);
-        if(shipments.size() <= 0)
+        //无selling的手动单不做处理
+        //快递不做判断
+        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS
+                && shipments.size() <= 0)
             Validation.addError("",
                     String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
                             newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
 
         if(Validation.hasErrors()) return newUnit;
-        Shipment shipment = shipments.get(0);
+        //无selling的手动单不做处理
+        Shipment shipment = null;
+        if(unit.selling != null && shipments.size() > 0) shipment = shipments.get(0);
         // FBA 变更
         if(this.fba != null)
             this.fba.updateFBAShipment(null);
@@ -311,7 +341,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.attrs.qty != null)
             this.attrs.qty = this.attrs.planQty;
         this.shipItemQty(this.qty());
-        this.save();
+        if(this.selling == null && this.attrs.planQty == 0) {
+            this.delete();
+        } else {
+            this.save();
+        }
 
         // 原采购计划的运输量变更
         int average = (int) Math.ceil((float) this.qty() / this.shipItems.size());
@@ -327,7 +361,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.save();
-        shipment.addToShip(newUnit);
+        if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
                 .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
@@ -914,6 +948,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public boolean isSatisfied(Object validatedObject, Object value) {
             ProcureUnit unit = (ProcureUnit) validatedObject;
             if(unit.product == null) return false;
+            if(unit.selling == null) return false;
             String[] args = StringUtils.split(unit.selling.sellingId, Webs.S);
             if(!StringUtils.contains(args[0], unit.product.sku)) {
                 setMessage("validation.sku", unit.product.sku);
