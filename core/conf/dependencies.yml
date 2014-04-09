@@ -21,7 +21,7 @@ require:
     - elcuk -> mws 1.0:
         exclude:
           - org.codehaus.woodstox -> *
-    - org.elasticsearch -> elasticsearch 1.0.1
+    - org.elasticsearch -> elasticsearch 1.1.0
     - com.jamonapi -> jamon 2.7.3 #监控
     - xerces -> xercesImpl 2.10.0
     - org.jsoup -> jsoup 1.7.1
