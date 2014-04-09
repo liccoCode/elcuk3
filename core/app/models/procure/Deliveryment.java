@@ -126,7 +126,7 @@ public class Deliveryment extends GenericModel {
     @Lob
     public String memo = " ";
 
-    public enum T{
+    public enum T {
         /**
          * 普通单
          */
@@ -462,9 +462,11 @@ public class Deliveryment extends GenericModel {
         List<CooperItem> cooperItems = new ArrayList<CooperItem>();
 
         for(ProcureUnit procureUnit : this.units) {
-            CooperItem cooperItem = CooperItem.find("cooperator.id=? AND product.sku=?", procureUnit.cooperator.id,
-                    procureUnit.product.sku).first();
-            cooperItems.add(cooperItem);
+            if(procureUnit.cooperator != null) {
+                CooperItem cooperItem = CooperItem.find("cooperator.id=? AND product.sku=?", procureUnit.cooperator.id,
+                        procureUnit.product.sku).first();
+                cooperItems.add(cooperItem);
+            }
         }
         return cooperItems;
     }
