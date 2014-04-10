@@ -101,8 +101,9 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public int day30(String sku) {
-        MetricProfitService me = new MetricProfitService(Dates.getCurrMonthFirst(), Dates.getCurrMonthLast(), null, sku,
-                null);
+        DateTime date = new DateTime().now();
+        MetricProfitService me = new MetricProfitService(Dates.getMonthFirst(date.getMonthOfYear()), Dates.getMonthLast(
+                date.getMonthOfYear()), null, sku, null);
         float saleQty = me.esSaleQty();
         return (int) saleQty;
     }

@@ -1,17 +1,16 @@
 #{extends 'main.html' /}
-#{set title:"年度销售目标#" + yearSt.id /}
+#{set title:"新增年度目标"/}
 #{set 'moreScripts'}
     #{script 'saletargets/blank.coffee'/}
 #{/set}
-
 #{errorMsgs /}
 #{flash_alert /}
 
 <div class="row">
   <div class="span12">
-    <form action="@{SaleTargets.update()}" method="POST" id="saleTargetsForm">
+    <form action="@{SaleTargets.create()}" method="POST" id="saleTargetsForm">
     #{info_row title:'总年度目标'/}
-      <table class="table table-bordered">
+      <table class="table table-condensed table-bordered">
         <tr>
           <th>年份</th>
           <td>
@@ -52,21 +51,19 @@
             <textarea rows="4" class="span10" name="yearSt.memo">${yearSt.memo}</textarea>
           </td>
         </tr>
-        <input type="hidden" name="yearSt.id" value="${yearSt.id}">
       </table>
 
     #{info_row title:'Category 年度目标'/}
-      <table class="table table-bordered" id="categorySaletargets">
+      <table class="table table-condensed table-bordered" id="categorySaletargets">
         <tr>
           <th>Category</th>
           <th>所属 Team</th>
           <th>销售额(万)</th>
           <th>利润率</th>
-          <th>操作</th>
         </tr>
       <tr>
       #{list items:sts, as:'st'}
-        #{set team: st.fetchTeam()/}
+         #{set team: st.fetchTeam()/}
         <tr>
           <td>
             <a href="@{Categorys.show(st.fid)}" target="_blank">${st.fid}</a>
@@ -82,20 +79,14 @@
               <span class="add-on">%</span>
             </div>
           </td>
-          <td>
-            <a class="btn btn-primary" href="@{SaleTargets.split(st.id)}">月度分解</a>
-          </td>
         </tr>
-        <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">
       #{/list}
         </tr>
       </table>
     </form>
 
-  #{records records:records/}
-
     <div class="btn-toolbar">
-      <button class="btn btn-primary" id="submitSaleTargets">更新</button>
+      <button class="btn btn-primary" id="submitSaleTargets">保存</button>
       <a class="btn btn-primary" href="@{SaleTargets.index()}">返回</a>
     </div>
   </div>
