@@ -37,24 +37,25 @@ public class SaleTargets extends Controller {
 
     @Check("saletargets.create")
     public static void blank() {
+        User user = User.findByUserName(Secure.Security.connected());
+        List<Category> cates = User.getObjCategorys(user);
         SaleTarget yearSt = new SaleTarget();
-        List<Category> cates = Category.findAll();
         List<SaleTarget> sts = yearSt.loadCategorySaleTargets(cates);
         render(yearSt, sts);
     }
 
     @Check("saletargets.create")
     public static void create(SaleTarget yearSt, List<SaleTarget> sts) {
-        yearSt.createuser = User.findByUserName(Secure.Security.connected());
-        yearSt.saleTargetType = SaleTarget.T.YEAR;
+        User user = User.findByUserName(Secure.Security.connected());
+        yearSt.createuser = user;
         if(yearSt.isExist()) Validation.addError("", String.format("已经存在 %s 年度的销售目标", yearSt.targetYear));
         yearSt.validate();
-        sts = yearSt.copySaleTarget(sts);
+        yearSt.validateChild(sts);
         if(Validation.hasErrors()) render("SaleTargets/blank.html", yearSt, sts);
-        yearSt.save();
         for(SaleTarget st : sts) {
             st.save();
         }
+        yearSt.save();
         flash.success("新建年度销售目标成功.");
         index();
     }
@@ -63,7 +64,6 @@ public class SaleTargets extends Controller {
         SaleTarget yearSt = SaleTarget.findById(id);
         User user = User.findByUserName(Secure.Security.connected());
         List<String> categoryIds = User.getTeamCategorys(user);
-
         List<SaleTarget> sts = SaleTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
                 "= ? AND saleTargetType=?", yearSt.targetYear, SaleTarget.T.CATEGORY).fetch();
         //操作日志
@@ -71,20 +71,17 @@ public class SaleTargets extends Controller {
         render(yearSt, sts, records);
     }
 
-    public static void update(SaleTarget yearSt, List<SaleTarget> sts) {
-        yearSt.validate();
-        sts = yearSt.copySaleTarget(sts);
-        if(Validation.hasErrors()) show(yearSt.id);
-        yearSt.save();
+    public static void update(Long id, SaleTarget yearSt, List<SaleTarget> sts) {
+        SaleTarget manageSt = SaleTarget.findById(id);
+        manageSt.update(yearSt, null);
+
         for(SaleTarget st : sts) {
-            st.updateOld();
-            new ElcukRecord(Messages.get("saletarget.update"), Messages.get("action.base", st.to_log()), yearSt.id + "")
-                    .save();
+            manageSt = SaleTarget.findById(st.id);
+            manageSt.update(st, id);
         }
-        new ElcukRecord(Messages.get("saletarget.update"), Messages.get("action.base", yearSt.to_log()), yearSt.id + "")
-                .save();
+        if(Validation.hasErrors()) show(id);
         flash.success("更新成功.");
-        show(yearSt.id);
+        show(id);
     }
 
     /**
@@ -94,26 +91,24 @@ public class SaleTargets extends Controller {
      */
     public static void split(Long id) {
         SaleTarget categorySt = SaleTarget.findById(id);
-        List<SaleTarget> sts = categorySt.loadMonthSaleTargets();
+        List<SaleTarget> sts = SaleTarget
+                .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
+                        SaleTarget.T.MONTH).fetch();
+        if(sts == null || sts.size() == 0) sts = categorySt.loadMonthSaleTargets();
         //操作日志
-        List<ElcukRecord> records = ElcukRecord.records(id + "", Messages.get("saletarget.split"));
+        List<ElcukRecord> records = ElcukRecord.records(id + "", Messages.get("saletarget.update"));
         render(categorySt, sts, records);
     }
 
-    public static void doSplit(SaleTarget categorySt, List<SaleTarget> sts) {
-        categorySt.validate();
-        sts = categorySt.copySaleTarget(sts);
-        if(Validation.hasErrors()) split(categorySt.id);
-        categorySt.save();
+    public static void doSplit(Long id, SaleTarget categorySt, List<SaleTarget> sts) {
+        SaleTarget manageSt = SaleTarget.findById(id);
+        manageSt.update(categorySt, null);
         for(SaleTarget st : sts) {
-            if(st.id == null)st.save();
-            else st.updateOld();
-            new ElcukRecord(Messages.get("saletarget.split"), Messages.get("action.base", st.to_log()),
-                    categorySt.id + "").save();
+            manageSt = SaleTarget.findById(st.id);
+            manageSt.update(st, id);
         }
-        new ElcukRecord(Messages.get("saletarget.update"), Messages.get("action.base", categorySt.to_log()),
-                categorySt.id + "").save();
+        if(Validation.hasErrors()) split(id);
         flash.success("更新成功.");
-        split(categorySt.id);
+        split(id);
     }
 }

@@ -2,8 +2,11 @@ package models;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.Reflects;
+import models.embedded.ERecordBuilder;
 import models.product.Category;
 import models.product.Team;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -110,41 +113,9 @@ public class SaleTarget extends Model {
 
     public SaleTarget() {
         DateTime dateTime = new DateTime().now();
+        this.saleTargetType = T.YEAR;
         this.createDate = dateTime.toDate();
         this.targetYear = dateTime.getYear();
-    }
-
-    public SaleTarget(Category category) {
-        DateTime dateTime = new DateTime().now();
-        this.fid = category.categoryId;
-        this.saleTargetType = T.CATEGORY;
-        this.targetYear = dateTime.getYear();
-        this.targetMonth = dateTime.getMonthOfYear();
-    }
-
-    public SaleTarget(SaleTarget categorySt) {
-        this.memo = categorySt.memo;
-        this.name = categorySt.name;
-        this.targetYear = categorySt.targetYear;
-        this.fid = categorySt.fid;
-        this.saleTargetType = T.MONTH;
-    }
-
-    public String to_log() {
-        SaleTarget old = SaleTarget.findById(this.id);
-        switch(this.saleTargetType) {
-            case YEAR:
-                return String.format("%s 年度目标 销售额从 %s 万变更为 %s 万，利润率从 %s 变更为 %s", this.targetYear, old.saleAmounts,
-                        this.saleAmounts, old.profitMargin, this.profitMargin);
-            case CATEGORY:
-                return String.format("%s 产品线销售额从 %s 万变更为 %s 万，利润率从 %s 变更为 %s",
-                        this.fid, old.saleAmounts, this.saleAmounts, this.profitMargin, old.profitMargin);
-            case MONTH:
-                return String.format("%s 产品线 %s 月份销售额从 %s 万变更为 %s 万，利润率从 %s 变更为 %s", this.fid, this.targetMonth,
-                        old.saleAmounts, this.saleAmounts, old.profitMargin, this.profitMargin);
-            default:
-                return "";
-        }
     }
 
     /**
@@ -152,9 +123,16 @@ public class SaleTarget extends Model {
      */
     public void validate() {
         Validation.required("年份", this.targetYear);
-        Validation.required("名称", this.name);
         Validation.required("销售额", this.saleAmounts);
         Validation.required("利润率", this.profitMargin);
+    }
+
+    public void validateChild(List<SaleTarget> sts) {
+        for(SaleTarget st : sts) {
+            st.createuser = this.createuser;
+            st.targetYear = this.targetYear;
+            st.validate();
+        }
     }
 
     /**
@@ -166,7 +144,13 @@ public class SaleTarget extends Model {
     public List<SaleTarget> loadCategorySaleTargets(List<Category> categorys) {
         List<SaleTarget> saleTargets = new ArrayList<SaleTarget>();
         for(Category category : categorys) {
-            SaleTarget categorySt = new SaleTarget(category);
+            SaleTarget categorySt = new SaleTarget();
+            categorySt.fid = category.categoryId;
+            categorySt.targetYear = this.targetYear;
+            categorySt.saleTargetType = T.CATEGORY;
+            categorySt.name = this.name;
+            category.memo = this.memo;
+            categorySt.createDate = new Date();
             saleTargets.add(categorySt);
         }
         return saleTargets;
@@ -178,15 +162,18 @@ public class SaleTarget extends Model {
      * @return
      */
     public List<SaleTarget> loadMonthSaleTargets() {
-        List<SaleTarget> saleTargets = SaleTarget
-                .find("fid=? AND targetYear=? AND saleTargetType=?", this.fid, this.targetYear, T.MONTH).fetch();
-        if(saleTargets == null || saleTargets.size() == 0) {
-            for(int i = 1; i <= 12; i++) {
-                SaleTarget monthSt = new SaleTarget(this);
-                monthSt.targetMonth = i;
-                monthSt.save();
-                saleTargets.add(monthSt);
-            }
+        List<SaleTarget> saleTargets = new ArrayList<SaleTarget>();
+        for(int i = 1; i <= 12; i++) {
+            SaleTarget monthSt = new SaleTarget();
+            monthSt.memo = this.memo;
+            monthSt.name = this.name;
+            monthSt.targetYear = this.targetYear;
+            monthSt.fid = this.fid;
+            monthSt.saleTargetType = T.MONTH;
+            monthSt.targetMonth = i;
+            monthSt.createDate = new Date();
+            monthSt.save();
+            saleTargets.add(monthSt);
         }
         return saleTargets;
     }
@@ -220,32 +207,13 @@ public class SaleTarget extends Model {
         }
     }
 
-
-    /**
-     * copy 出主题、备注 属性赋值给新销售目标对象
-     */
-    public List<SaleTarget> copySaleTarget(List<SaleTarget> sts) {
-        for(SaleTarget st : sts) {
-            st.memo = this.memo;
-            st.name = this.name;
-            st.targetYear = this.targetYear;
-            st.createuser = this.createuser;
-            st.saleTargetType = T.CATEGORY;
-            st.createDate = new Date();
-            st.validate();
-        }
-        return sts;
-    }
-
-    /**
-     * 将数据更新到数据库内
-     * 采用这种方式是由于直接保存会存在一个Hibernate 的 detached entity passed to persist问题
-     */
-    public void updateOld() {
-        SaleTarget old = SaleTarget.findById(this.id);
-        old.profitMargin = this.profitMargin;
-        old.saleAmounts = this.saleAmounts;
-        old.save();
+    public void update(SaleTarget newSt, Long id) {
+        this.beforeUpdateLog(newSt, id);
+        this.saleAmounts = newSt.saleAmounts;
+        this.profitMargin = newSt.profitMargin;
+        this.validate();
+        if(Validation.hasErrors()) return;
+        this.save();
     }
 
     /**
@@ -258,5 +226,43 @@ public class SaleTarget extends Model {
                 Dates.getMonthLast(this.targetYear, this.targetMonth), this.fid);
         me.esAmazonFee();
         return me.esSaleFee();
+    }
+
+    /**
+     * 修改时的日志 指定保存的日志的外键
+     *
+     * @param newSt
+     * @param parentId
+     */
+    public void beforeUpdateLog(SaleTarget newSt, Long parentId) {
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(Reflects.updateAndLogChanges(this, "saleAmounts", newSt.saleAmounts));
+        logs.addAll(Reflects.updateAndLogChanges(this, "profitMargin", newSt.profitMargin));
+        if(logs.size() > 0) {
+            Long fid = parentId == null ? this.id : parentId;
+            String[] logMsg = this.to_log();
+            new ERecordBuilder("saletarget.update", "saletarget.update.msg").msgArgs(logMsg[0], logMsg[1],
+                    StringUtils.join(logs, "，")).fid(fid).save();
+        }
+    }
+
+    public String[] to_log() {
+        String[] logMsg = new String[2];
+        switch(this.saleTargetType) {
+            case YEAR:
+                logMsg[0] = this.targetYear + "";
+                logMsg[1] = "年度";
+                break;
+            case CATEGORY:
+                logMsg[0] = this.fid;
+                logMsg[1] = " 产品线";
+                break;
+            case MONTH:
+                logMsg[0] = this.targetMonth + "";
+                logMsg[1] = "月份";
+                break;
+
+        }
+        return logMsg;
     }
 }

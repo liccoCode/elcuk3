@@ -9,7 +9,7 @@
 
 <div class="row">
   <div class="span12">
-    <form action="@{SaleTargets.update()}" method="POST" id="saleTargetsForm">
+    <form action="@{SaleTargets.update(yearSt.id)}" method="POST" id="saleTargetsForm">
     #{info_row title:'总年度目标'/}
       <table class="table table-bordered">
         <tr>
@@ -52,7 +52,6 @@
             <textarea rows="4" class="span10" name="yearSt.memo">${yearSt.memo}</textarea>
           </td>
         </tr>
-        <input type="hidden" name="yearSt.id" value="${yearSt.id}">
       </table>
 
     #{info_row title:'Category 年度目标'/}
@@ -87,16 +86,16 @@
           </td>
         </tr>
         <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">
+        <input type="hidden" name="sts[${st_index - 1}].saleTargetType" value="${st.saleTargetType}">
       #{/list}
         </tr>
       </table>
     </form>
 
-  #{records records:records/}
-
     <div class="btn-toolbar">
       <button class="btn btn-primary" id="submitSaleTargets">更新</button>
       <a class="btn btn-primary" href="@{SaleTargets.index()}">返回</a>
     </div>
+  #{records records:records/}
   </div>
 </div>

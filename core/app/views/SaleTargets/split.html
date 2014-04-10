@@ -10,7 +10,7 @@
 #{set team: categorySt.fetchTeam()/}
 <div class="row">
   <div class="span12">
-    <form action="@{SaleTargets.doSplit()}" method="POST" id="submitSaleTargetsForm">
+    <form action="@{SaleTargets.doSplit(categorySt.id)}" method="POST" id="submitSaleTargetsForm">
     #{info_row title:'Category 年度目标'/}
       <table class="table table-bordered">
         <tr>
@@ -62,8 +62,6 @@
             </div>
           </td>
         </tr>
-
-        <input type="hidden" name="categorySt.id" value="${categorySt.id}">
       </table>
 
     #{info_row title:'Category 目标月度分解'/}
@@ -87,7 +85,7 @@
             </div>
           </td>
           <td>
-            #{set reallySt: (st.reallySaleAmounts()/10000).format("#.####")/}
+              #{set reallySt: (st.reallySaleAmounts()/10000).format("#.####")/}
             <div>
               <input type="text" style="width:90px;" value="${reallySt}" name="reallySaleAmounts" data-old="${reallySt}">
             </div>
@@ -116,10 +114,9 @@
       </table>
     </form>
 
-  #{records records:records/}
-
     <div class="btn-toolbar">
       <button class="btn btn-primary" id="submit">更新</button>
     </div>
+  #{records records:records/}
   </div>
 </div>
