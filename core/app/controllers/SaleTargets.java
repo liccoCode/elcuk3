@@ -10,6 +10,7 @@ import models.view.Ret;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -28,6 +29,13 @@ import java.util.Map;
 
 @With({GlobalExceptionHandler.class, Secure.class})
 public class SaleTargets extends Controller {
+
+    @Before(only = {"show", "split"})
+    public static void beforeLos() {
+        String id = request.params.get("id");
+        List<ElcukRecord> records = ElcukRecord.records(id + "", Messages.get("saletarget.update"));
+        renderArgs.put("records", records);
+    }
 
     @Check("saletargets.index")
     public static void index() {
@@ -66,9 +74,7 @@ public class SaleTargets extends Controller {
         List<String> categoryIds = User.getTeamCategorys(user);
         List<SaleTarget> sts = SaleTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
                 "= ? AND saleTargetType=?", yearSt.targetYear, SaleTarget.T.CATEGORY).fetch();
-        //操作日志
-        List<ElcukRecord> records = ElcukRecord.records(id + "", Messages.get("saletarget.update"));
-        render(yearSt, sts, records);
+        render(yearSt, sts);
     }
 
     public static void update(Long id, SaleTarget yearSt, List<SaleTarget> sts) {
@@ -95,9 +101,7 @@ public class SaleTargets extends Controller {
                 .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
                         SaleTarget.T.MONTH).fetch();
         if(sts == null || sts.size() == 0) sts = categorySt.loadMonthSaleTargets();
-        //操作日志
-        List<ElcukRecord> records = ElcukRecord.records(id + "", Messages.get("saletarget.update"));
-        render(categorySt, sts, records);
+        render(categorySt, sts);
     }
 
     public static void doSplit(Long id, SaleTarget categorySt, List<SaleTarget> sts) {
