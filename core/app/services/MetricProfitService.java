@@ -192,7 +192,7 @@ public class MetricProfitService {
 
         //如果运价为0，则直接从采购计划中获取
         if(avgprice == 0) {
-            String sql = "select price From procureunit "
+            String sql = "select price From ProcureUnit "
                     + " where sku='" + this.sku + "' "
                     + " order by createDate desc limit 1 ";
             List<Map<String, Object>> rows = DBUtils.rows(sql);
@@ -461,8 +461,8 @@ public class MetricProfitService {
         SqlSelect itemsql = new SqlSelect()
                 .select("pu.qty", "pd.declaredValue")
                 .from("Shipment sm")
-                .leftJoin(" shipitem si on si.shipment_id=sm.id ")
-                .leftJoin(" procureunit pu on si.unit_id=pu.id ")
+                .leftJoin(" ShipItem si on si.shipment_id=sm.id ")
+                .leftJoin(" ProcureUnit pu on si.unit_id=pu.id ")
                 .leftJoin(" Product pd on pd.sku=pu.product_sku")
                 .where(insql);
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
@@ -534,8 +534,8 @@ public class MetricProfitService {
                 .select("pu.sku", "pu.qty", "pd.lengths",
                         "pd.width", "pd.heigh", "pd.weight")
                 .from("Shipment sm")
-                .leftJoin(" shipitem si on si.shipment_id=sm.id ")
-                .leftJoin(" procureunit pu on si.unit_id=pu.id ")
+                .leftJoin(" ShipItem si on si.shipment_id=sm.id ")
+                .leftJoin(" ProcureUnit pu on si.unit_id=pu.id ")
                 .leftJoin(" Product pd on pd.sku=pu.product_sku")
                 .where(insql);
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
