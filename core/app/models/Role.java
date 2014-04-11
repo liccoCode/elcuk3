@@ -149,6 +149,7 @@ public class Role extends GenericModel {
 
     public static boolean isPm(User user) {
         Role role = Role.find("roleName=?", "PM角色").first();
+        if(role == null) return false;
         return role.existRole(user);
     }
 }

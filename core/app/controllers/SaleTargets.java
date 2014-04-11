@@ -2,19 +2,22 @@ package controllers;
 
 import helper.DBUtils;
 import helper.Webs;
+import models.ElcukRecord;
 import models.SaleTarget;
 import models.User;
-import models.product.Team;
+import models.product.Category;
 import models.view.Ret;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
+import play.i18n.Messages;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 销售目标基本操作
@@ -28,101 +31,94 @@ import java.util.Set;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class SaleTargets extends Controller {
 
-    @Check("saletargets.annualindex")
-    public static void annualIndex() {
+    @Before(only = {"show", "split"})
+    public static void beforeLos() {
+        String id = request.params.get("id");
+        List<ElcukRecord> records = ElcukRecord.records(id + "", Messages.get("saletarget.update"));
+        renderArgs.put("records", records);
+    }
+
+    @Check("saletargets.index")
+    public static void index() {
         List<SaleTarget> salesTargets = SaleTarget.find("saleTargetType=?", SaleTarget.T.YEAR).fetch();
         render(salesTargets);
     }
 
-    @Check("saletargets.monthindex")
-    public static void monthIndex() {
-        Set<Team> teams = User.findByUserName(Secure
-                .Security.connected()).teams;
-        List<Long> teamIds = new ArrayList<Long>();
-        for(Team team : teams) {
-            teamIds.add(team.id);
+    @Check("saletargets.create")
+    public static void blank() {
+        User user = User.findByUserName(Secure.Security.connected());
+        List<Category> cates = User.getObjCategorys(user);
+        SaleTarget yearSt = new SaleTarget();
+        List<SaleTarget> sts = yearSt.loadCategorySaleTargets(cates);
+        render(yearSt, sts);
+    }
+
+    @Check("saletargets.create")
+    public static void create(SaleTarget yearSt, List<SaleTarget> sts) {
+        User user = User.findByUserName(Secure.Security.connected());
+        yearSt.createuser = user;
+        if(yearSt.isExist()) Validation.addError("", String.format("已经存在 %s 年度的销售目标", yearSt.targetYear));
+        yearSt.validate();
+        yearSt.validateChild(sts);
+        if(Validation.hasErrors()) render("SaleTargets/blank.html", yearSt, sts);
+        for(SaleTarget st : sts) {
+            st.save();
         }
-        List<SaleTarget> salesTargets = SaleTarget.find("saleTargetType=? AND fid in " + SqlSelect.inlineParam(teamIds)
-                + "", SaleTarget.T.MONTH).fetch();
-        render(salesTargets);
+        yearSt.save();
+        flash.success("新建年度销售目标成功.");
+        index();
     }
 
     public static void show(Long id) {
-        SaleTarget st = SaleTarget.findById(id);
-
-        List<SaleTarget> saleTargets = SaleTarget.find("parentId=?", id).fetch();
-        if(saleTargets.size() == 0) {
-            saleTargets = st.beforeDetails();
+        SaleTarget yearSt = SaleTarget.findById(id);
+        User user = User.findByUserName(Secure.Security.connected());
+        List<String> categoryIds = User.getTeamCategorys(user);
+        List<SaleTarget> sts = new ArrayList<SaleTarget>();
+        if(categoryIds != null && categoryIds.size() > 0) {
+            sts = SaleTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
+                    "= ? AND saleTargetType=?", yearSt.targetYear, SaleTarget.T.CATEGORY).fetch();
         }
-        render(st, saleTargets);
+        render(yearSt, sts);
     }
 
-    @Check("saletargets.createannual")
-    public static void createAnnual() {
-        SaleTarget st = new SaleTarget();
-        render(st);
-    }
+    @Check("saletargets.create")
+    public static void update(Long id, SaleTarget yearSt, List<SaleTarget> sts) {
+        SaleTarget manageSt = SaleTarget.findById(id);
+        manageSt.update(yearSt, null);
 
-    @Check("saletargets.createannual")
-    public static void doCreateAnnual(SaleTarget st) {
-        validation.valid(st);
-        st.createuser = User.findByUserName(Secure.Security.connected());
-        st.saleTargetType = SaleTarget.T.YEAR;
-        if(Validation.hasErrors()) {
-            render("SaleTargets/createAnnual.html", st);
+        for(SaleTarget st : sts) {
+            manageSt = SaleTarget.findById(st.id);
+            manageSt.update(st, id);
         }
-        //判断对象是否已经存在
-        if(st.isNotExist()) {
-            st.save();
-            flash.success("保存成功.");
-            show(st.id);
-        } else {
-            flash.error(String.format("已经存在 %s 年度的销售目标！", st.targetYear));
-            render("SaleTargets/createAnnual.html", st);
-        }
-    }
-
-
-    public static void updateAnnual(SaleTarget st, List<SaleTarget> childs) {
-        st.validate();
-        if(Validation.hasErrors()) {
-            renderJSON(new Ret(Webs.V(Validation.errors())));
-        }
-        //这里采用SQL查询而不采用Model.findById是因为该方法查询出来的数据总是从前端表单发送过来的新数据而不是数据库内储存的旧数据
-        //TODO 搞清楚Play 使用findById查询原理
-        Map<String, Object> rows = DBUtils.row("SELECT targetYear FROM SaleTarget WHERE id=?", st.id);
-        Integer oldTargetYear = (Integer) rows.get("targetYear");
-
-        if(!st.isNotExist() && !st.targetYear.equals(oldTargetYear)) {
-            flash.error(String.format("已经存在 %s 年度的销售目标！", st.targetYear));
-            show(st.id);
-        }
-        st.save();
-        if(childs != null) st.saveOrUpdateChild(childs, User.findByUserName(Secure.Security.connected()));
-        if(Validation.hasErrors()) {
-            List<SaleTarget> saleTargets = SaleTarget.find("parentId=?", st.id).fetch();
-            if(saleTargets.size() == 0) saleTargets = st.beforeDetails();
-            render("SaleTargets/show.html", st, saleTargets);
-        } else {
-            flash.success("更新成功");
-        }
-        show(st.id);
+        if(Validation.hasErrors()) show(id);
+        flash.success("更新成功.");
+        show(id);
     }
 
     /**
-     * 审核销售目标
-     *
-     * @param id
+     * 月度分解
      */
-    public static void verify(Long id) {
-        SaleTarget st = SaleTarget.findById(id);
-        if(st != null) {
-            st.state = SaleTarget.S.AUDITED;
-            st.save();
-            flash.success("审核成功");
-        } else {
-            flash.error("审核失败");
+    @Check("saletargets.split")
+    public static void split(Long id) {
+        User user = User.findByUserName(Secure.Security.connected());
+        SaleTarget categorySt = SaleTarget.findById(id);
+        List<SaleTarget> sts = SaleTarget
+                .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
+                        SaleTarget.T.MONTH).fetch();
+        if(sts == null || sts.size() == 0) sts = categorySt.loadMonthSaleTargets(user);
+        render(categorySt, sts);
+    }
+
+    @Check("saletargets.split")
+    public static void doSplit(Long id, SaleTarget categorySt, List<SaleTarget> sts) {
+        SaleTarget manageSt = SaleTarget.findById(id);
+        manageSt.update(categorySt, null);
+        for(SaleTarget st : sts) {
+            manageSt = SaleTarget.findById(st.id);
+            manageSt.update(st, id);
         }
-        show(id);
+        if(Validation.hasErrors()) split(id);
+        flash.success("更新成功.");
+        split(id);
     }
 }

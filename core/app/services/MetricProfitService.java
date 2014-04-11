@@ -38,6 +38,12 @@ public class MetricProfitService {
 
     public String category;
 
+    public MetricProfitService(Date begin, Date end, String category) {
+        this.begin = begin;
+        this.end = end;
+        this.category = category;
+    }
+
     public MetricProfitService(Date begin, Date end, M market,
                                String sku, String sellingId) {
         this.begin = begin;
