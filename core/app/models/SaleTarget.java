@@ -148,8 +148,6 @@ public class SaleTarget extends Model {
             categorySt.fid = category.categoryId;
             categorySt.targetYear = this.targetYear;
             categorySt.saleTargetType = T.CATEGORY;
-            categorySt.name = this.name;
-            category.memo = this.memo;
             categorySt.createDate = new Date();
             saleTargets.add(categorySt);
         }
@@ -161,17 +159,16 @@ public class SaleTarget extends Model {
      *
      * @return
      */
-    public List<SaleTarget> loadMonthSaleTargets() {
+    public List<SaleTarget> loadMonthSaleTargets(User user) {
         List<SaleTarget> saleTargets = new ArrayList<SaleTarget>();
         for(int i = 1; i <= 12; i++) {
             SaleTarget monthSt = new SaleTarget();
-            monthSt.memo = this.memo;
-            monthSt.name = this.name;
             monthSt.targetYear = this.targetYear;
             monthSt.fid = this.fid;
             monthSt.saleTargetType = T.MONTH;
             monthSt.targetMonth = i;
             monthSt.createDate = new Date();
+            monthSt.createuser = user;
             monthSt.save();
             saleTargets.add(monthSt);
         }

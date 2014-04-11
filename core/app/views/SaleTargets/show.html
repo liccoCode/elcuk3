@@ -15,7 +15,7 @@
         <tr>
           <th>年份</th>
           <td>
-          #{select_year  name: "yearSt.targetYear", value: yearSt.targetYear/}
+          #{select_year  name: "yearSt.targetYear", value: yearSt.targetYear, disabled:true/}
           </td>
         </tr>
 
@@ -55,6 +55,8 @@
       </table>
 
     #{info_row title:'Category 年度目标'/}
+    #{if sts.size() > 0}
+
       <table class="table table-bordered" id="categorySaletargets">
         <tr>
           <th>Category</th>
@@ -64,36 +66,45 @@
           <th>操作</th>
         </tr>
       <tr>
-      #{list items:sts, as:'st'}
-        #{set team: st.fetchTeam()/}
-        <tr>
-          <td>
-            <a href="@{Categorys.show(st.fid)}" target="_blank">${st.fid}</a>
-            <input type="hidden" name="sts[${st_index - 1}].fid" value="${st.fid}">
-          </td>
-          <td><a href="@{Teams.show(team.id)}" target="_blank">${team.name}</a></td>
-          <td>
-            <input type="text" class="input-small" value="${st.saleAmounts}" name="sts[${st_index - 1}].saleAmounts">
-          </td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" value="${st.profitMargin}" name="sts[${st_index - 1}].profitMargin">
-              <span class="add-on">%</span>
-            </div>
-          </td>
-          <td>
-            <a class="btn btn-primary" href="@{SaleTargets.split(st.id)}">月度分解</a>
-          </td>
-        </tr>
-        <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">
-        <input type="hidden" name="sts[${st_index - 1}].saleTargetType" value="${st.saleTargetType}">
-      #{/list}
+
+          #{list items:sts, as:'st'}
+              #{set team: st.fetchTeam()/}
+            <tr>
+              <td>
+                <a href="@{Categorys.show(st.fid)}" target="_blank">${st.fid}</a>
+                <input type="hidden" name="sts[${st_index - 1}].fid" value="${st.fid}">
+              </td>
+              <td><a href="@{Teams.show(team.id)}" target="_blank">${team.name}</a></td>
+              <td>
+                <input type="text" class="input-small" value="${st.saleAmounts}" name="sts[${st_index - 1}].saleAmounts">
+              </td>
+              <td>
+                <div class="input-append">
+                  <input type="text" class="input-mini" value="${st.profitMargin}" name="sts[${st_index - 1}].profitMargin">
+                  <span class="add-on">%</span>
+                </div>
+              </td>
+              <td>
+                  #{power.ck "saletargets.split"}
+                    <a class="btn btn-primary" href="@{SaleTargets.split(st.id)}">月度分解</a>
+                  #{/power.ck}
+              </td>
+            </tr>
+            <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">
+            <input type="hidden" name="sts[${st_index - 1}].saleTargetType" value="${st.saleTargetType}">
+          #{/list}
         </tr>
       </table>
+    #{/if}
+    #{else }
+      <p>当前用户没有 Category 权限</p>
+    #{/else}
     </form>
 
     <div class="btn-toolbar">
+    #{power.ck "saletargets.create"}
       <button class="btn btn-primary" id="submitSaleTargets">更新</button>
+    #{/power.ck}
       <a class="btn btn-primary" href="@{SaleTargets.index()}">返回</a>
     </div>
   #{records records:records/}

@@ -14,6 +14,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -72,11 +73,15 @@ public class SaleTargets extends Controller {
         SaleTarget yearSt = SaleTarget.findById(id);
         User user = User.findByUserName(Secure.Security.connected());
         List<String> categoryIds = User.getTeamCategorys(user);
-        List<SaleTarget> sts = SaleTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
-                "= ? AND saleTargetType=?", yearSt.targetYear, SaleTarget.T.CATEGORY).fetch();
+        List<SaleTarget> sts = new ArrayList<SaleTarget>();
+        if(categoryIds != null && categoryIds.size() > 0) {
+            sts = SaleTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
+                    "= ? AND saleTargetType=?", yearSt.targetYear, SaleTarget.T.CATEGORY).fetch();
+        }
         render(yearSt, sts);
     }
 
+    @Check("saletargets.create")
     public static void update(Long id, SaleTarget yearSt, List<SaleTarget> sts) {
         SaleTarget manageSt = SaleTarget.findById(id);
         manageSt.update(yearSt, null);
@@ -92,18 +97,19 @@ public class SaleTargets extends Controller {
 
     /**
      * 月度分解
-     *
-     * @param id
      */
+    @Check("saletargets.split")
     public static void split(Long id) {
+        User user = User.findByUserName(Secure.Security.connected());
         SaleTarget categorySt = SaleTarget.findById(id);
         List<SaleTarget> sts = SaleTarget
                 .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
                         SaleTarget.T.MONTH).fetch();
-        if(sts == null || sts.size() == 0) sts = categorySt.loadMonthSaleTargets();
+        if(sts == null || sts.size() == 0) sts = categorySt.loadMonthSaleTargets(user);
         render(categorySt, sts);
     }
 
+    @Check("saletargets.split")
     public static void doSplit(Long id, SaleTarget categorySt, List<SaleTarget> sts) {
         SaleTarget manageSt = SaleTarget.findById(id);
         manageSt.update(categorySt, null);
