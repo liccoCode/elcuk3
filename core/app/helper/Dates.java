@@ -284,27 +284,62 @@ public class Dates {
         return calendar.getTime();
     }
 
-    /**
-     * 获取本月第一天
-     *
-     * @return
-     */
-    public static Date getCurrMonthFirst() {
+    public static Date monthBegin(Date time) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time);
         calendar.set(Calendar.DATE, 1);
         return calendar.getTime();
     }
 
-    /**
-     * 获取本月最后一天
-     *
-     * @return
-     */
-    public static Date getCurrMonthLast() {
+    public static Date monthEnd(Date time) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time);
         calendar.set(Calendar.DATE, 1);//设置为当前月1号
         calendar.add(Calendar.MONTH, 1);//加一个月变成下一月的1号
         calendar.add(Calendar.DATE, -1);//减去一天，变成当月最后一天
         return calendar.getTime();
+    }
+
+    /**
+     * 获取当年某月第一天
+     *
+     * @return
+     */
+    public static Date getMonthFirst(int month) {
+        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        return monthBegin(dateTime.toDate());
+    }
+
+    /**
+     * 获取当年某月最后一天
+     *
+     * @return
+     */
+    public static Date getMonthLast(int month) {
+        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        return monthEnd(dateTime.toDate());
+    }
+
+    /**
+     * 获取某年某月的第一天
+     *
+     * @param year
+     * @param month
+     * @return
+     */
+    public static Date getMonthFirst(int year, int month) {
+        DateTime date = DateTime.now().withYear(year).withMonthOfYear(month);
+        return monthBegin(date.toDate());
+    }
+
+    /**
+     * 获取某年某月最后一天
+     * @param year
+     * @param month
+     * @return
+     */
+    public static Date getMonthLast(int year, int month) {
+        DateTime date = DateTime.now().withYear(year).withMonthOfYear(month);
+        return monthEnd(date.toDate());
     }
 }

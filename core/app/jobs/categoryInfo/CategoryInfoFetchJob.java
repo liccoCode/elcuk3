@@ -101,8 +101,9 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public int day30(String sku) {
-        MetricProfitService me = new MetricProfitService(Dates.getCurrMonthFirst(), Dates.getCurrMonthLast(), null, sku,
-                null);
+        DateTime date = new DateTime().now();
+        MetricProfitService me = new MetricProfitService(Dates.getMonthFirst(date.getMonthOfYear()), Dates.getMonthLast(
+                date.getMonthOfYear()), null, sku, null);
         float saleQty = me.esSaleQty();
         return (int) saleQty;
     }
@@ -114,7 +115,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public void profitAndProfitMargins(CategoryInfoDTO dto) {
-        DateTime now = new DateTime().now().plusYears(-1);
+        DateTime now = new DateTime().now();
         //获取本年第一天
         Date startDay = Dates.startDayYear(now.getYear());
         //获取本年最后一天
@@ -190,7 +191,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public DateTime lastFriday(int plusWeekNumber) {
-        DateTime monday = new DateTime(Dates.getMondayOfWeek()).plusYears(-1);
+        DateTime monday = new DateTime(Dates.getMondayOfWeek());
         return monday.plusDays(plusWeekNumber * (-3));
     }
 
@@ -201,7 +202,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      * @return
      */
     public DateTime lastSaturday(int plusWeekNumber) {
-        DateTime monday = new DateTime(Dates.getMondayOfWeek()).plusYears(-1);
+        DateTime monday = new DateTime(Dates.getMondayOfWeek());
         return monday.plusDays(plusWeekNumber * (-9));
     }
 }
