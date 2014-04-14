@@ -40,10 +40,10 @@ $ ->
     if $('input[name="taskvalue"]').val() isnt "1"
       new PieChart("sale_column").percent('salecolumn', year, team)
       new PieChart("profitrate_line").percent('profitrateline', year, team)
-      new PieChart("sale_percent").percent('sale', year, team)
-      new PieChart("profit_percent").percent('profit', year, team)
-      new PieChart("teamsale_percent").percent('teamsale', year, team)
-      new PieChart("teamprofit_percent").percent('teamprofit', year, team)
+      new PercentChart("sale_percent").percent('sale', year, team)
+      new PercentChart("profit_percent").percent('profit', year, team)
+      new PercentChart("teamsale_percent").percent('teamsale', year, team)
+      new PercentChart("teamprofit_percent").percent('teamprofit', year, team)
       $('input[name="taskvalue"]').val("1")
 
   )
@@ -144,6 +144,38 @@ $ ->
         })
         LoadMask.unmask(mask_selector)
       )
+
+  class PercentChart
+    constructor: (@container) ->
+    percent: (type = 'units', @year, @team, @cid, mask_selector = '#orders') =>
+      self = @
+      $div = $("##{self.container}")
+      LoadMask.mask(mask_selector)
+      $.get($div.data("url"), {cateid: @cid, type: type, year: @year, team: @team}, (p) ->
+        title = if p.title == undefined then p['series'][0]['name'] else p.title
+        $div.highcharts({
+          title: { text: title },
+          legend:
+            enabled: true
+          xAxis:
+            type: 'category'
+          yAxis: { min: 0 }
+          tooltip:
+            formatter: ->
+              "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>#{@y} / #{@total}"
+          plotOptions:
+            pie:
+              #cursor: 'point'
+              dataLabels:
+                enabled: true
+                #color: '#000'
+                formatter: ->
+                  "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
+          series: p['series']
+        })
+        LoadMask.unmask(mask_selector)
+      )
+
 
    # 点击搜索按钮
   $('#orders button[name="search"]').click ->
