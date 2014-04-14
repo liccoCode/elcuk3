@@ -21,12 +21,6 @@ public class PmDashboardCache {
         for(Team teamobject : teams) {
             try {
                 /**
-                 * 月利润率
-                 */
-                deleteCache("profitrateline", year, teamobject);
-                PmDashboardESQuery
-                        .profitrateline("profitrateline", year, teamobject);
-                /**
                  * 销售额曲线
                  */
                 deleteCache("salefeeline", year, teamobject);
@@ -38,6 +32,25 @@ public class PmDashboardCache {
                 deleteCache("saleqtyline", year, teamobject);
                 PmDashboardESQuery
                         .saleqtyline("saleqtyline", year, teamobject);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
+    public static void doTargetCache() {
+        List<Team> teams = Team.findAll();
+        int year = DateTime.now().getYear();
+        for(Team teamobject : teams) {
+            try {
+                /**
+                 * 月利润率
+                 */
+                deleteCache("profitrateline", year, teamobject);
+                PmDashboardESQuery
+                        .profitrateline("profitrateline", year, teamobject);
                 /**
                  * 柱状
                  */
@@ -90,6 +103,7 @@ public class PmDashboardCache {
 
     /**
      * 删除PM首页的cache
+     *
      * @param type
      * @param year
      * @param team
