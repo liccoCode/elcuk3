@@ -21,6 +21,7 @@ import java.util.Map;
 import models.SaleTarget;
 import com.alibaba.fastjson.JSONArray;
 import services.MetricProfitService;
+import play.db.helper.SqlSelect;
 
 /**
  * PM首页显示图形需要的数据
@@ -123,11 +124,20 @@ public class PmDashboardESQuery {
         /**
          * 获取TEAM的年度任务
          */
-        SaleTarget target = SaleTarget.find(" targetYear=? and saleTargetType=? and fid=?", year,
-                SaleTarget.T.YEAR, String.valueOf(team.id)).first();
+
+        String sql = "select sum(saleAmounts*10000) as amount From SaleTarget "
+                + " where targetYear=" + year
+                + " and saleTargetType='" + SaleTarget.T.CATEGORY + "' "
+                + " and " + SqlSelect.whereIn("fid", team.getStrCategorys());
+        Map<String, Object> row = DBUtils.row(sql);
+
         float task = 0;
-        if(target != null) {
-            task = target.saleAmounts - totalsalefee;
+        if(row != null && row.size() > 0) {
+            Object obj = row.get("amount");
+            if(obj != null) {
+                float amount = new Float(obj.toString());
+                task = amount - totalsalefee;
+            }
         }
         if(task < 0)
             task = 0;
@@ -189,14 +199,23 @@ public class PmDashboardESQuery {
             totalsaleprofit = 1;
         }
         pie.add(totalsaleprofit, "利润");
+
         /**
          * 获取TEAM的年度利润
          */
-        SaleTarget target = SaleTarget.find(" targetYear=? and saleTargetType=? and fid=?", year,
-                SaleTarget.T.YEAR, String.valueOf(team.id)).first();
+        String sql = "select sum(saleAmounts*profitMargin/100*10000) as amount From SaleTarget "
+                + " where targetYear=" + year
+                + " and saleTargetType='" + SaleTarget.T.CATEGORY + "' "
+                + " and " + SqlSelect.whereIn("fid", team.getStrCategorys());
+        Map<String, Object> row = DBUtils.row(sql);
+
         float task = 0;
-        if(target != null) {
-            task = target.saleAmounts * target.profitMargin / 100 - totalsaleprofit;
+        if(row != null && row.size() > 0) {
+            Object obj = row.get("amount");
+            if(obj != null) {
+                float amount = new Float(obj.toString());
+                task = amount - totalsaleprofit;
+            }
         }
         if(task < 0)
             task = 0;
@@ -281,14 +300,22 @@ public class PmDashboardESQuery {
         column.color = "#0000ff";
         for(int i = 1; i <= 12; i++) {
             /**
-             * 获取TEAM的CATEGORY销售额
+             *获取CATEGORY的月度销售额
              */
-            SaleTarget target = SaleTarget.find(" targetYear=? and "
-                    + " saleTargetType=? and fid=?"
-                    + " and targetMonth=?", year,
-                    SaleTarget.T.MONTH, String.valueOf(team.id), i).first();
-            float task = 0f;
-            if(target != null) task = target.saleAmounts;
+            String sql = "select sum(saleAmounts*10000) as amount From SaleTarget "
+                    + " where targetYear=" + year
+                    + " and targetmonth=" + i
+                    + " and saleTargetType='" + SaleTarget.T.MONTH + "' "
+                    + " and " + SqlSelect.whereIn("fid", team.getStrCategorys());
+            Map<String, Object> row = DBUtils.row(sql);
+
+            float task = 0;
+            if(row != null && row.size() > 0) {
+                Object obj = row.get("amount");
+                if (obj!=null){
+                task = new Float(obj.toString());
+                }
+            }
             column.add(task, i + "月");
         }
         return column;
@@ -473,14 +500,22 @@ public class PmDashboardESQuery {
         line.color = "#0000ff";
         for(int i = 1; i <= 12; i++) {
             /**
-             * 获取TEAM的CATEGORY销售额
+             * 获取TEAM的CATEGORY利润率
              */
-            SaleTarget target = SaleTarget.find(" targetYear=? and "
-                    + " saleTargetType=? and fid=?"
-                    + " and targetMonth=?", year,
-                    SaleTarget.T.MONTH, String.valueOf(team.id), i).first();
-            float task = 0f;
-            if(target != null) task = target.profitMargin;
+            String sql = "select avg(profitMargin) as profit From SaleTarget "
+                    + " where targetYear=" + year
+                    + " and saleTargetType='" + SaleTarget.T.MONTH + "' "
+                    + " and targetmonth=" + i
+                    + " and " + SqlSelect.whereIn("fid", team.getStrCategorys());
+            Map<String, Object> row = DBUtils.row(sql);
+
+            float task = 0;
+            if(row != null && row.size() > 0) {
+                Object obj = row.get("profit");
+                if(obj != null) {
+                    task = new Float(obj.toString());
+                }
+            }
             line.add(task, i + "月");
         }
         return line;
@@ -519,13 +554,13 @@ public class PmDashboardESQuery {
     public static Series.Column salesAmountTargetColom(String categoryId, int year) {
         DateTime now = new DateTime().now().withYear(year);
         List<SaleTarget> saleTargetList = SaleTarget.find("fid=? AND targetYear=? AND saleTargetType=?", categoryId,
-                now.getYear(), SaleTarget.T.CATEGORY).fetch();
+                now.getYear(), SaleTarget.T.MONTH).fetch();
 
         Series.Column column = new Series.Column("月度销售额目标");
         column.color = "#0000ff";
         for(int i = 0; i < saleTargetList.size(); i++) {
-            float target = saleTargetList.get(i).saleAmounts;
-            column.add(target, i + 1 + "月");
+            float target = saleTargetList.get(i).saleAmounts * 10000;
+            column.add(target, saleTargetList.get(i).targetMonth + "月");
         }
         return column;
     }
@@ -635,14 +670,14 @@ public class PmDashboardESQuery {
         DateTime now = new DateTime().now().withYear(year);
         Series.Line line = new Series.Line("月度利润率目标");
         List<SaleTarget> saleTargetList = SaleTarget.find("fid=? AND targetYear=? AND saleTargetType=?", categoryId,
-                now.getYear(), SaleTarget.T.CATEGORY).fetch();
+                now.getYear(), SaleTarget.T.MONTH).fetch();
 
         line.color = "#0000ff";
         for(int i = 0; i < saleTargetList.size(); i++) {
 
             float target = saleTargetList.get(i).profitMargin;
 
-            line.add(target, i + 1 + "月");
+            line.add(target, saleTargetList.get(i).targetMonth + "月");
         }
         return line;
     }
