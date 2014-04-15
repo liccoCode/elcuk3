@@ -16,7 +16,7 @@
   <div class="span12">
   #{errorMsgs /}
   #{flash_alert /}
-    <form action="@{Products.create()}" method="post">
+    <form action="@{Products.create()}" method="post" id="create_product_form">
       <table class="table table-bordered table-condensed">
         <tr>
           <th>Family</th>
@@ -86,41 +86,27 @@
 
           <th>上架状态</th>
           <td>
-            #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
+          #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
           </td>
         </tr>
 
         <tr>
           <th>采购状态</th>
           <td>
-            #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
+          #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
           </td>
 
           <th>产品的生命周期</th>
           <td>
-            #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
+          #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
           </td>
         </tr>
 
         <tr>
           <th>销售等级</th>
           <td colspan="3">
-            #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
+          #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
           </td>
-        </tr>
-
-        <tr>
-          <th>产品定位</th>
-          <td colspan="3">
-            <input type="text" style="width:95%" name="pro.locate" value="${pro.locate}">
-          </td>
-        </tr>
-
-        <tr>
-           <th>产品卖点</th>
-           <td colspan="3">
-             <input type="text" style="width:95%" name="pro.sellingPoints" value="${pro.sellingPoints}">
-           </td>
         </tr>
 
         <tr>
@@ -138,6 +124,65 @@
           </td>
         </tr>
 
+        <tr>
+          <th>产品定位</th>
+          <td colspan="3">
+            <table class="table table-hover table-condensed table-bordered">
+              <tr>
+                <th>Title</th>
+                <th>Content</th>
+              </tr>
+            #{list items:[0,1,2,3,4], as:'i'}
+              <tr>
+                <td class="span4">
+                  <textarea rows="2" style="width:90%" name="pro.locate[${i}].title">${pro.locate[i]?.title}</textarea>
+                </td>
+                <td>
+                  <textarea rows="2" style="width:90%" name="pro.locate[${i}].content">${pro.locate[i]?.content}</textarea>
+                </td>
+              </tr>
+            #{/list}
+              <tr>
+                <td colspan="3">
+                  <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+                     id="more_selling_point_btn">
+                    <i class="icon-plus"></i> More
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <th>产品卖点</th>
+          <td colspan="3">
+            <table class="table table-hover table-condensed table-bordered">
+              <tr>
+                <th>Title</th>
+                <th>Content</th>
+              </tr>
+            #{list items:[0,1,2,3,4], as:'i'}
+              <tr>
+                <td class="span4">
+                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${i}].title">${pro.sellingPoint[i]?.title}</textarea>
+                </td>
+                <td>
+                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${i}].content">${pro.sellingPoint[i]?.content}</textarea>
+                </td>
+              </tr>
+            #{/list}
+              <tr>
+                <td colspan="3">
+                  <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+                     id="more_selling_point_btn">
+                    <i class="icon-plus"></i> More
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
         <tr>
           <td colspan="4">
             <button class="btn btn-primary">创建</button>

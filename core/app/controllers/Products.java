@@ -14,7 +14,6 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
@@ -24,9 +23,7 @@ import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
-import services.MetricProfitService;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,6 +66,7 @@ public class Products extends Controller {
 
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         float procureqty = SkuESQuery.esProcureQty(pro.sku);
         render(pro, procureqty);
     }
@@ -122,6 +120,7 @@ public class Products extends Controller {
 
     public static void create(Product pro) {
         validation.valid(pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.createProduct();
         if(Validation.hasErrors()) render("Products/blank.html", pro);
         flash.success("Sku %s 添加成功", pro.sku);

@@ -1,0 +1,225 @@
+#{info_row title:'基本信息'}
+<ul>
+  <li>长,宽,高的单位为: mm</li>
+  <li>重量的单位为 kg</li>
+</ul>
+#{/info_row}
+<div class="row-fluid">
+  <form action="@{Products.update()}" method="post" id="update_product_form">
+    <table class="table table-bordered" id="prod_basic">
+      <tr>
+        <td>SKU</td>
+        <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
+        <td>长</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+      </tr>
+      <tr>
+        <td>宽</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+        <td>高</td>
+        <td>
+          <div class="input-append">
+
+            <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>重量</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
+            <span class="add-on">Kg</span>
+          </div>
+        </td>
+
+        <th>申报价格</th>
+        <td>
+          <div class="input-prepend">
+            <span class="add-on">$</span>
+            <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>Category</td>
+        <td>${pro.category}</td>
+        <td>Brand</td>
+        <td>${pro.family?.brand}</td>
+      </tr>
+      <tr>
+        <td>Family</td>
+        <td>${pro.family?.family}</td>
+        <td>产品品名(运输)</td>
+        <td>
+          <input type="text" name="pro.declareName" value="${pro.declareName}">
+        </td>
+      </tr>
+
+      <tr>
+        <th>上市时间</th>
+        <td>
+          <input type="date" name="pro.marketTime" value="${pro.marketTime}">
+        </td>
+
+        <th>上架状态</th>
+        <td>
+        #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
+        </td>
+      </tr>
+
+      <tr>
+        <th>采购状态</th>
+        <td>
+        #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
+        </td>
+
+        <th>产品的生命周期</th>
+        <td>
+        #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
+        </td>
+      </tr>
+
+      <tr>
+        <th>销售等级</th>
+        <td colspan="3">
+        #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
+        </td>
+      </tr>
+
+      <tr>
+        <td>产品简称</td>
+        <td colspan="3">
+          <input type="text" style="width:95%" name="pro.abbreviation" value="${pro.abbreviation}">
+        </td>
+      </tr>
+      <tr>
+        <td>产品名称</td>
+        <td colspan="3">
+          <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品定位</th>
+        <td colspan="3">
+          <table class="table table-hover table-condensed table-bordered">
+            <tr>
+              <th>Title</th>
+              <th>Content</th>
+            </tr>
+          #{list items:pro.locate, as:'locate'}
+            <tr>
+              <td class="span4">
+                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index}].title">${locate.title}</textarea>
+              </td>
+              <td>
+                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index}].content">${locate.content}</textarea>
+              </td>
+            </tr>
+          #{/list}
+            <tr>
+              <td colspan="3">
+                <a class="btn" rel="popover" content="不够?那就再来一行" placement="right" id="more_locate_btn">
+                  <i class="icon-plus"></i> More
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品卖点</th>
+        <td colspan="3">
+          <table class="table table-hover table-condensed table-bordered">
+            <tr>
+              <th>Title</th>
+              <th>Content</th>
+            </tr>
+          #{list items:pro.sellingPoint, as:'point'}
+            <tr>
+              <td class="span4">
+                <textarea rows="2" style="width:90%" name="pro.locate[${point_index}].title">${point.title}</textarea>
+              </td>
+              <td>
+                <textarea rows="2" style="width:90%" name="pro.locate[${point_index}].content">${point.content}</textarea>
+              </td>
+            </tr>
+          #{/list}
+            <tr>
+              <td colspan="3">
+                <a class="btn" rel="popover" content="不够?那就再来一行" placement="right"
+                   id="more_selling_point_btn">
+                  <i class="icon-plus"></i> More
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="10">
+          <button class="btn btn-primary" data-loading>保存</button>
+        #{power.ck "products.saleamazonlisting"}
+          <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
+        #{/power.ck}
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+#{info_row title:'Product (Selling)QTY'/}
+<div>
+  <table class="table table-bordered">
+    <tr>
+      <th>Qid</th>
+      <th>Inbound</th>
+      <th>Qty</th>
+      <th>Unsellable</th>
+      <th>Pending</th>
+      <th>ASIN</th>
+      <th>Whouse</th>
+      <th>&nbsp;</th>
+    </tr>
+  #{list items:qtys, as:'qty'}
+    <form method="post" action="@{Products.updateSellingQty()}">
+      <tr>
+        <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
+        <td>
+          <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
+        </td>
+        <td>
+          <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
+        </td>
+        <td>
+          <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
+        </td>
+        <td>
+          <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
+        </td>
+        <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
+        <td>${qty.whouse.name}</td>
+        <td>
+          <button class="btn btn-primary" data-confirm='确认更新?'>更新</button>
+        </td>
+      </tr>
+    </form>
+  #{/list}
+  </table>
+#{records records:records, row:true/}
+</div>

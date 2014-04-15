@@ -23,3 +23,8 @@ $ ->
   window.dropUpload.iniDropbox(fidCallBack, packageDropbox)
   window.dropUpload.iniDropbox(fidCallBack, instructionsDropbox)
   window.dropUpload.iniDropbox(fidCallBack, silkscreenDropbox)
+
+  # 产品定位和产品卖点点击新增一行
+  $("#update_product_form").on("click", "#more_locate_btn, #more_selling_point_btn", () ->
+    alert(1)
+  )

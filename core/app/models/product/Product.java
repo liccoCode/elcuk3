@@ -1,15 +1,14 @@
 package models.product;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.Cached;
-import helper.Caches;
-import helper.DBUtils;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
 import models.market.Selling;
 import models.procure.Cooperator;
+import models.view.dto.ProductDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.cache.Cache;
@@ -305,13 +304,23 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 产品定位
+     * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
-    public String locate;
+    @Transient
+    public List<ProductDTO> locate = new ArrayList<ProductDTO>();
+
+    @Lob
+    public String locates = " ";
 
     /**
      * 产品卖点
+     * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
-    public String sellingPoints;
+    @Transient
+    public List<ProductDTO> sellingPoint = new ArrayList<ProductDTO>();
+
+    @Lob
+    public String sellingPoints = " ";
 
     public Product() {
     }
@@ -322,6 +331,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public void setSku(String sku) {
         this.sku = sku.toUpperCase();
+    }
+
+    public enum FLAG {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
     }
 
     /**
@@ -544,5 +558,21 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public static boolean exist(String sku) {
         return Product.count("sku=?", sku) > 0;
+    }
+
+    /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成
+     *
+     * @param flag
+     */
+    public void arryParamSetUP(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.locates = J.json(this.locate);
+            this.sellingPoints = J.json(this.sellingPoint);
+        } else {
+            this.locate = JSON.parseArray(this.locates, ProductDTO.class);
+            this.sellingPoint = JSON.parseArray(this.locates, ProductDTO.class);
+        }
     }
 }
