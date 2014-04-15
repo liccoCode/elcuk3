@@ -295,7 +295,7 @@ public class PmDashboardESQuery {
     }
 
     /**
-     * TEAM每个Category销售额曲线图
+     * TEAM每个Category 最近六个月周销售额曲线图
      *
      * @param type
      * @param year
@@ -321,7 +321,7 @@ public class PmDashboardESQuery {
     }
 
     /**
-     * TEAM每个Category销售额曲线图
+     * TEAM每个Category 最近六个月周销量曲线图
      *
      * @param type
      * @param year
@@ -329,7 +329,6 @@ public class PmDashboardESQuery {
      * @return
      */
     public static HighChart saleqtyline(final String type, final int year, final Team team) {
-
         String key = Caches.Q.cacheKey(type, year, team.id);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
@@ -361,14 +360,23 @@ public class PmDashboardESQuery {
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
-        JSONArray entries = profitservice.dashboardSaleFee(1);
-        for(Object o : entries) {
+        JSONArray buckets = profitservice.dashboardDateAvg("salefee", "cost_in_usd", true);
+
+        for(Object o : buckets) {
             JSONObject entry = (JSONObject) o;
-            line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+            line.add(Dates.date2JDate(entry.getDate("key")),
+                    new  java.math.BigDecimal(
+                            entry.getJSONObject("fieldvalue").getFloat("value")/7)
+                            .setScale(2,4)
+                            .floatValue()
+            );
         }
         line.sort();
         return line;
     }
+
+
+
 
     /**
      * 每个Category销售额
@@ -384,14 +392,20 @@ public class PmDashboardESQuery {
         //按照category计算每天的销量
         MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                 null, null, category.categoryId);
-        JSONArray entries = profitservice.dashboardSaleQty(1);
+        JSONArray entries = profitservice.dashboardDateAvg("orderitem", "quantity", true);
         for(Object o : entries) {
             JSONObject entry = (JSONObject) o;
-            line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+            line.add(Dates.date2JDate(entry.getDate("key")),
+                    new  java.math.BigDecimal(
+                          entry.getJSONObject("fieldvalue").getFloat("value")/7)
+                          .setScale(2,4)
+                          .floatValue()
+            );
         }
         line.sort();
         return line;
     }
+
 
 
     /**
