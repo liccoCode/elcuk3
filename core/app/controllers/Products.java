@@ -8,13 +8,10 @@ import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.procure.Cooperator;
-import models.product.Category;
-import models.product.Family;
-import models.product.Product;
+import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
@@ -24,9 +21,7 @@ import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
-import services.MetricProfitService;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,7 +65,8 @@ public class Products extends Controller {
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
         float procureqty = SkuESQuery.esProcureQty(pro.sku);
-        render(pro, procureqty);
+        List<Template> templates = pro.category.templates;
+        render(pro, procureqty, templates);
     }
 
     public static void update(Product pro) {

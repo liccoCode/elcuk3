@@ -20,6 +20,9 @@
     <a href="#attribute" data-toggle='tab'>基本信息</a>
   </li>
   <li>
+    <a href="#extends" data-toggle='tab'>扩展属性</a>
+  </li>
+  <li>
     <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
   </li>
   <li>
@@ -212,8 +215,25 @@
   </div>
 </div>
 
+<div class="tab-pane fade" id='extends'>
+  <div class="row-fluid">
+    <form class="search_form">
+      <select name="p.whouseId" class="inline">
+        <option>请选择模板</option>
+          #{list items:templates, as:'template'}
+            <option value="${template.id}">${template.name}</option>
+          #{/list}
+      </select>
+      <button class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到产品内">添加属性</button>
+    </form>
+    #{info_row title:'扩展属性'/}
+    <div>
+    </div>
 
-<div class="tab-pane fade active" id='attach'>
+  </div>
+</div>
+
+<div class="tab-pane fade" id='attach'>
   <div class="accordion-group">
     <div class="accordion-heading">
       <h4 class="accordion-toggle" data-toggle="collapse" data-target="#collapse2">

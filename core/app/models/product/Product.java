@@ -51,6 +51,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @ManyToOne
     public Family family;
 
+    /**
+     * 产品拥有哪些扩展属性
+     */
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    public List<Attribute> attributes;
 
     /**
      * 唯一的标示

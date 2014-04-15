@@ -8,9 +8,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              #{power.ck "pmdashboards.index"}
+            #{power.ck "pmdashboards.index"}
               <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
-              #{/power.ck}
+            #{/power.ck}
               <li><a href="@{Application.index()}">DashBoard</a></li>
               <li><a href="@{Users.home()}">Home</a></li>
               <li><a href="@{Notifications.index()}">Notys</a></li>
@@ -35,7 +35,7 @@
                   <li><a href="@{Analyzes.index()}">销量分析</a></li>
                 #{/power.ck}
                 #{power.ck "profits.index"}
-                   <li><a href="@{Profits.index()}">利润分析</a></li>
+                  <li><a href="@{Profits.index()}">利润分析</a></li>
                 #{/power.ck}
                 #{power.ck "sellingrecords.index"}
                   <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
@@ -69,6 +69,12 @@
                 #{/power.ck}
                 #{power.ck "feeds.index"}
                   <li><a href="@{Feeds.index()}">Feed</a></li>
+                #{/power.ck}
+                #{power.ck "attributes.index"}
+                  <li><a href="@{Attributes.index()}">附加属性</a></li>
+                #{/power.ck}
+                #{power.ck "templates.show"}
+                  <li><a href="@{Templates.show()}">属性模板</a></li>
                 #{/power.ck}
                 #{power.ck "categoryinfos.show"}
                   <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
@@ -121,9 +127,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              #{power.ck "saletargets.index"}
-                <li><a href="@{SaleTargets.index()}">年度销售目标</a></li>
-              #{/power.ck}
+                #{power.ck "saletargets.index"}
+                  <li><a href="@{SaleTargets.index()}">年度销售目标</a></li>
+                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -166,7 +172,7 @@
             <a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
           </li>
           <li>
-            <a href="@{Notifications.index()}"  target="_blank">
+            <a href="@{Notifications.index()}" target="_blank">
               <b id="notifyimg"></b>
               Notify(<b id="notifyNumber"></b>)
             </a>

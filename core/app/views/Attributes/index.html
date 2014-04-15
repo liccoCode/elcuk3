@@ -1,0 +1,73 @@
+#{extends 'main_full.html'/}
+#{set title:"产品附加属性 (${atts.size()})"/}
+#{set 'moreScripts'}
+    #{script 'Attributes/index.coffee'/}
+#{/set}
+#{errorMsgs /}
+#{flash_alert /}
+
+#{if atts.size() > 0}
+    #{info_row title:"附加属性" /}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>属性名称</th>
+        <th>属性类型</th>
+        <th>排序</th>
+        <th>创建人</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+        #{list items:atts, as:'at'}
+          <form method="post" action="" id="${at.id}_att_form">
+            <tr>
+              <td><input type="text" class="input-block-level" name="at.name" value="${at.name}"></td>
+              <td>
+                  #{select_enum name: "at.type", items: models.product.Attribute.T.values(), value:at.type/}
+              </td>
+              <td><input type="text" class="input-mini" name="at.sort" value="${at.sort}"></td>
+              <td>${at.createUser.username}</td>
+              <td>
+                ${at.createDate.format("yyyy-MM-dd")}
+              </td>
+              <td>
+                <a class="btn btn-primary" name="att_update_btn" data-action="/attributes/update/${at.id}" data-form="${at
+                .id}_att_form">更新</a>
+                <a class="btn btn-danger" name="att_delete_btn" data-action="/attributes/delete/${at.id}"
+                   data-form="${at.id}_att_form" data-confirm='确认删除?'>删除</a>
+              </td>
+            </tr>
+          </form>
+        #{/list}
+    </table>
+  </div>
+</div>
+#{/if}
+
+#{info_row title:"创建附加属性" /}
+<div class="row-fluid">
+  <div class="span12">
+    <form method="post" action="@{Attributes.create()}">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>属性名称</th>
+          <td><input type="text" class="span12" name="newAt.name" value="${newAt.name}"></td>
+
+          <th>属性类型</th>
+          <td>
+          #{select_enum name: "newAt.type", items: models.product.Attribute.T.values(), value: newAt.type/}
+          </td>
+          <th>排序序号</th>
+          <td>
+            <input type="text" class="input-mini" name="newAt.sort" rel="popover" content="附加属性在页面上的展示顺序位置"
+                   placement="right" value="${newAt.sort}">
+          </td>
+          <td>
+            <button class="btn btn-primary">创建</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
