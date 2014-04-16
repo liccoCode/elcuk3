@@ -312,7 +312,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public List<ProductDTO> locate = new ArrayList<ProductDTO>();
 
     @Lob
-    public String locates = " ";
+    public String locates = "{}";
 
     /**
      * 产品卖点
@@ -322,7 +322,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public List<ProductDTO> sellingPoint = new ArrayList<ProductDTO>();
 
     @Lob
-    public String sellingPoints = " ";
+    public String sellingPoints = "{}";
 
     public Product() {
     }
