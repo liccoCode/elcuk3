@@ -1,7 +1,11 @@
 #{extends 'main_full.html' /}
 #{set title:'Category 销售分析' /}
 #{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'categoryinfos/categoryinfo.coffee'/}
 #{/set}
+
+
 
 <div class="row-fluid">
 #{if cates.size() == 0}
@@ -36,7 +40,8 @@
         #{/if}
         #{else }
             #{info_row title: "SKU 列表信息"/}
-          <table class="table table-bordered table-condensed">
+          <table id="example"   class="table table-bordered table-condensed dataTable">
+            <thead>
             <tr>
               <th class="span3">SKU</th>
               <th title="系统上线至今">总销量</th>
@@ -48,6 +53,9 @@
               <th title="上上周六到上周五期间销售额对比同期">销售额趋势</th>
               <th title="上上周六到上周五期间销量对比同期">销量趋势</th>
             </tr>
+            </thead>
+
+            <tbody>
               #{list items:dtos, as: 'dto'}
                 <tr>
                   <td>
@@ -87,6 +95,7 @@
                   </td>
                 </tr>
               #{/list}
+            </tbody>
           </table>
         #{/else}
 
