@@ -34,8 +34,8 @@ $ ->
         reviseSaleAmountsSUM += parseFloat(saleAmountsList[i].value)
       reallySUM += value
 
-    $("#reallySaleAmountsSUM").val(reallySUM.toFixed(4))
-    $("#reviseSaleAmounts").val(reviseSaleAmountsSUM.toFixed(4))
+    $("#reallySaleAmountsSUM").val(reallySUM.toFixed(2))
+    $("#reviseSaleAmounts").val(reviseSaleAmountsSUM.toFixed(2))
 
   # 计算销售额目标汇总数据
   saleAmountsSUM = ->
@@ -44,7 +44,7 @@ $ ->
     for saleAmounts, i in saleAmountsList
       value = parseFloat(saleAmounts.value)
       saSUM += value
-    $("#saleAmountsSUM").val(saSUM.toFixed(4))
+    $("#saleAmountsSUM").val(saSUM.toFixed(2))
 
   reallySaleAmountsSUM()
   saleAmountsSUM()

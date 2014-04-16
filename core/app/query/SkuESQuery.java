@@ -59,7 +59,7 @@ public class SkuESQuery {
     }
 
     /**
-     * 每个SKU销售额、销量
+     * 每个SKU 六个月周销售额、六个月周销量
      *
      * @param market
      * @param sku
@@ -77,15 +77,20 @@ public class SkuESQuery {
         JSONArray entries = null;
         if(calType.equals("fee")) {
             line = new Series.Line(market.name() + "销售额");
-            entries = profitservice.dashboardSaleFee(2);
+            entries = profitservice.dashboardDateAvg("salefee", "cost_in_usd", false);
         }
         if(calType.equals("qty")) {
             line = new Series.Line(market.name() + "销量");
-            entries = profitservice.dashboardSaleQty(2);
+            entries = profitservice.dashboardDateAvg("orderitem", "quantity", false);
         }
         for(Object o : entries) {
             JSONObject entry = (JSONObject) o;
-            line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+            line.add(Dates.date2JDate(entry.getDate("key")),
+                    new java.math.BigDecimal(
+                            entry.getJSONObject("fieldvalue").getFloat("value") / 7)
+                            .setScale(2, 4)
+                            .floatValue()
+            );
         }
         line.sort();
         return line;
