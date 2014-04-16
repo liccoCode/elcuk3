@@ -8,11 +8,6 @@ package models.view.dto;
  */
 public class ProductDTO {
     /**
-     * 编号
-     */
-    public Integer id;
-
-    /**
      * 标题
      */
     public String title;
@@ -23,9 +18,5 @@ public class ProductDTO {
     public String content;
 
     public ProductDTO() {
-    }
-
-    public ProductDTO(Integer id) {
-        this.id = id;
     }
 }

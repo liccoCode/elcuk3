@@ -115,7 +115,7 @@
       <tr>
         <th>产品定位</th>
         <td colspan="3">
-          <table class="table table-hover table-condensed table-bordered">
+          <table class="table table-hover table-condensed table-bordered" id="locates_table">
             <tr>
               <th>Title</th>
               <th>Content</th>
@@ -130,21 +130,17 @@
               </td>
             </tr>
           #{/list}
-            <tr>
-              <td colspan="3">
-                <a class="btn" rel="popover" content="不够?那就再来一行" placement="right" id="more_locate_btn">
-                  <i class="icon-plus"></i> More
-                </a>
-              </td>
-            </tr>
           </table>
+          <a class="btn" rel="popover" content="不够?那就再来一行" placement="right" id="more_locate_btn" data-table="locates_table">
+            <i class="icon-plus"></i> More
+          </a>
         </td>
       </tr>
 
       <tr>
         <th>产品卖点</th>
         <td colspan="3">
-          <table class="table table-hover table-condensed table-bordered">
+          <table class="table table-hover table-condensed table-bordered" id="selling_points_table">
             <tr>
               <th>Title</th>
               <th>Content</th>
@@ -152,22 +148,18 @@
           #{list items:pro.sellingPoint, as:'point'}
             <tr>
               <td class="span4">
-                <textarea rows="2" style="width:90%" name="pro.locate[${point_index}].title">${point.title}</textarea>
+                <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index}].title">${point.title}</textarea>
               </td>
               <td>
-                <textarea rows="2" style="width:90%" name="pro.locate[${point_index}].content">${point.content}</textarea>
+                <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index}].content">${point.content}</textarea>
               </td>
             </tr>
           #{/list}
-            <tr>
-              <td colspan="3">
-                <a class="btn" rel="popover" content="不够?那就再来一行" placement="right"
-                   id="more_selling_point_btn">
-                  <i class="icon-plus"></i> More
-                </a>
-              </td>
-            </tr>
           </table>
+          <a class="btn" rel="popover" content="不够?那就再来一行" placement="right"
+             id="more_selling_point_btn" data-table="selling_points_table">
+            <i class="icon-plus"></i> More
+          </a>
         </td>
       </tr>
 

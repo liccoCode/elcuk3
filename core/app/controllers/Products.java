@@ -114,6 +114,7 @@ public class Products extends Controller {
 
     public static void blank(Product pro) {
         if(pro == null) pro = new Product();
+        pro.beforeData();
         List<Category> cats = Category.all().fetch();
         render(pro, cats);
     }

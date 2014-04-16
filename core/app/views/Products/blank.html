@@ -127,60 +127,54 @@
         <tr>
           <th>产品定位</th>
           <td colspan="3">
-            <table class="table table-hover table-condensed table-bordered">
+            <table class="table table-hover table-condensed table-bordered" id="locates_table">
               <tr>
                 <th>Title</th>
                 <th>Content</th>
               </tr>
-            #{list items:[0,1,2,3,4], as:'i'}
+            #{list items:pro.locate, as:'locate'}
               <tr>
                 <td class="span4">
-                  <textarea rows="2" style="width:90%" name="pro.locate[${i}].title">${pro.locate[i]?.title}</textarea>
+                  <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].title">${locate
+                  .title}</textarea>
                 </td>
                 <td>
-                  <textarea rows="2" style="width:90%" name="pro.locate[${i}].content">${pro.locate[i]?.content}</textarea>
+                  <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].content">${locate
+                  .content}</textarea>
                 </td>
               </tr>
             #{/list}
-              <tr>
-                <td colspan="3">
-                  <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-                     id="more_selling_point_btn">
-                    <i class="icon-plus"></i> More
-                  </a>
-                </td>
-              </tr>
             </table>
+            <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+               id="more_locate_btn" data-table="locates_table">
+              <i class="icon-plus"></i> More
+            </a>
           </td>
         </tr>
 
         <tr>
           <th>产品卖点</th>
           <td colspan="3">
-            <table class="table table-hover table-condensed table-bordered">
+            <table class="table table-hover table-condensed table-bordered" id="selling_points_table">
               <tr>
                 <th>Title</th>
                 <th>Content</th>
               </tr>
-            #{list items:[0,1,2,3,4], as:'i'}
+            #{list items:pro.sellingPoint, as:'point'}
               <tr>
                 <td class="span4">
-                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${i}].title">${pro.sellingPoint[i]?.title}</textarea>
+                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">${point.title}</textarea>
                 </td>
                 <td>
-                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${i}].content">${pro.sellingPoint[i]?.content}</textarea>
+                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">${point.content}</textarea>
                 </td>
               </tr>
             #{/list}
-              <tr>
-                <td colspan="3">
-                  <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-                     id="more_selling_point_btn">
-                    <i class="icon-plus"></i> More
-                  </a>
-                </td>
-              </tr>
             </table>
+            <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+               id="more_selling_point_btn" data-table="selling_points_table">
+              <i class="icon-plus"></i> More
+            </a>
           </td>
         </tr>
         <tr>

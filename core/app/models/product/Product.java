@@ -572,7 +572,17 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             this.sellingPoints = J.json(this.sellingPoint);
         } else {
             this.locate = JSON.parseArray(this.locates, ProductDTO.class);
-            this.sellingPoint = JSON.parseArray(this.locates, ProductDTO.class);
+            this.sellingPoint = JSON.parseArray(this.sellingPoints, ProductDTO.class);
+        }
+    }
+
+    /**
+     * 准备数据
+     */
+    public void beforeData() {
+        for(int i = 0; i <= 4; i++) {
+            this.locate.add(new ProductDTO());
+            this.sellingPoint.add(new ProductDTO());
         }
     }
 }
