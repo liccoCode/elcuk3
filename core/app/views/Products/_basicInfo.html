@@ -123,10 +123,10 @@
           #{list items:pro.locate, as:'locate'}
             <tr>
               <td class="span4">
-                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index}].title">${locate.title}</textarea>
+                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].title">${locate.title}</textarea>
               </td>
               <td>
-                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index}].content">${locate.content}</textarea>
+                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].content">${locate.content}</textarea>
               </td>
             </tr>
           #{/list}
@@ -148,10 +148,12 @@
           #{list items:pro.sellingPoint, as:'point'}
             <tr>
               <td class="span4">
-                <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index}].title">${point.title}</textarea>
+                <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">${point
+                .title}</textarea>
               </td>
               <td>
-                <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index}].content">${point.content}</textarea>
+                <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">${point
+                .content}</textarea>
               </td>
             </tr>
           #{/list}

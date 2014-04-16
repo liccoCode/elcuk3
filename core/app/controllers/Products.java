@@ -75,6 +75,7 @@ public class Products extends Controller {
         validation.valid(pro);
         if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
         if(Validation.hasErrors()) render("Products/show.html", pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.save();
         flash.success("更新成功");
         new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),

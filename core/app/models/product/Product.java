@@ -2,7 +2,10 @@ package models.product;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.*;
+import helper.Cached;
+import helper.Caches;
+import helper.J;
+import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
@@ -15,7 +18,6 @@ import play.cache.Cache;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -571,8 +573,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             this.locates = J.json(this.locate);
             this.sellingPoints = J.json(this.sellingPoint);
         } else {
-            this.locate = JSON.parseArray(this.locates, ProductDTO.class);
-            this.sellingPoint = JSON.parseArray(this.sellingPoints, ProductDTO.class);
+            if(StringUtils.isNotBlank(this.locates)) this.locate = JSON.parseArray(this.locates, ProductDTO.class);
+            if(StringUtils.isNotBlank(this.sellingPoints)) this.sellingPoint = JSON.parseArray(this.sellingPoints,
+                    ProductDTO.class);
         }
     }
 
