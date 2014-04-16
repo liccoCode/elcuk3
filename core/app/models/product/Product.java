@@ -566,7 +566,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 将产品定位属性转换成 String 存入DB
-     * 或者将 String 转换成
+     * 或者将 String 转换成 List
      *
      * @param flag
      */
