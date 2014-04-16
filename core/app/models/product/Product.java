@@ -446,9 +446,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     @Override
     public String to_log() {
-        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s]",
+        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s] [上架状态:%s] " +
+                "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
                 this.lengths, this.width, this.heigh, this.weight, this.declaredValue,
-                this.productName);
+                this.productName, this.marketState.label(), this.procureState.label(), this.productState.label(),
+                this.salesLevel);
     }
 
     /**
