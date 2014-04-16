@@ -142,6 +142,9 @@
                   <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].content">${locate
                   .content}</textarea>
                 </td>
+                <td>
+                  <a class="btn" name='delete_locate_row'>删除</a>
+                </td>
               </tr>
             #{/list}
             </table>
@@ -159,6 +162,7 @@
               <tr>
                 <th>Title</th>
                 <th>Content</th>
+                <th>操作</th>
               </tr>
             #{list items:pro.sellingPoint, as:'point'}
               <tr>
@@ -167,6 +171,9 @@
                 </td>
                 <td>
                   <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">${point.content}</textarea>
+                </td>
+                <td>
+                  <a class="btn" name='delete_selling_point_row'>删除</a>
                 </td>
               </tr>
             #{/list}

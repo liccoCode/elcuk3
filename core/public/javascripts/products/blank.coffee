@@ -6,7 +6,7 @@ $ ->
     $(@).val($(@).val().toUpperCase())
 
   # 产品定位和产品卖点点击新增一行
-  $("#create_product_form").on("click", "#more_locate_btn, #more_selling_point_btn", () ->
+  $("#create_product_form").on("click", "#more_locate_btn, #more_selling_point_btn",() ->
     $btn = $(@)
     $table = $("##{$btn.data("table")}")[0]
     # 获取表格的行数
@@ -18,6 +18,9 @@ $ ->
     textareas = $newRow.getElementsByTagName("textarea")
     setTextAreaName($btn.attr("id"), rowsCount, textareas)
     $table.appendChild($newRow)
+  ).on("click", "[name^='delete_locate_row'], [name^='delete_selling_point_row']", () ->
+    $btn = $(@)
+    $btn.parent("td").parent().remove()
   )
 
   # 根据点击按钮的不同判断text的名称

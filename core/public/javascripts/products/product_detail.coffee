@@ -40,12 +40,16 @@ $ ->
       setTextAreaName($btn.attr("id"), rowsCount, textareas)
     else
       str = if $btn.attr("id") == "more_locate_btn"
-        "<tr><td class='span4'><textarea rows=2' style='width:90%' name='pro.locate[0].title'></textarea></td><td><textarea rows='2' style='width:90%' name='pro.locate[0].content'></textarea></td></tr>"
+        "<tr><td class='span4'><textarea rows=2' style='width:90%' name='pro.locate[0].title'></textarea></td><td><textarea rows='2' style='width:90%' name='pro.locate[0].content'></textarea></td><td><a class='btn' name='delete_locate_row'>删除</a></td></tr>"
       else
-        "<tr><td class='span4'><textarea rows=2' style='width:90%' name='pro.sellingPoint[0].title'></textarea></td><td><textarea rows='2' style='width:90%' name='pro.sellingPoint[0].content'></textarea></td></tr>"
+        "<tr><td class='span4'><textarea rows=2' style='width:90%' name='pro.sellingPoint[0].title'></textarea></td><td><textarea rows='2' style='width:90%' name='pro.sellingPoint[0].content'></textarea></td><td><a class='btn' name='delete_selling_point_row'>删除</a></td></tr>"
       $newRow = parseDom(str)
     $table.appendChild($newRow)
+  ).on("click", "[name^='delete_locate_row'], [name^='delete_selling_point_row']", () ->
+    $btn = $(@)
+    $btn.parent("td").parent().remove()
   )
+
 
   # 根据点击按钮的不同判断text的名称
   setTextAreaName = (flag, rowsCount, textareas) ->
