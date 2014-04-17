@@ -15,6 +15,7 @@
         <tr>
           <th class="span1">CategoryId</th>
           <th>Name</th>
+          <th>Team</th>
         </tr>
           #{list items:cates, as:'cat_left'}
             <tr>
@@ -22,6 +23,7 @@
               <td>
                 <a href="@{Categorys.show()}/${cat_left.categoryId}">${cat_left.name}</a>
               </td>
+              <td>${cat_left.team?.name}</td>
             </tr>
           #{/list}
       </table>
@@ -49,10 +51,19 @@
           <table class="table table-bordered table-condensed">
             <tr>
               <td>CategoryId:</td>
-              <td>${cat.categoryId}</td>
-              <td>Name:</td>
+              <td class="span6">${cat.categoryId}</td>
+              <td>TEAM组</td>
               <td>
-                <input class="input-medium" type="text" name="cat.name" value="${cat.name}">
+                  #{select 'cat.team.id', items: teams, labelProperty: 'name',
+                  value: cat.team?.id}
+                      #{option ''}选择Team组#{/option}
+                  #{/select}
+              </td>
+            </tr>
+            <tr>
+              <td>Name:</td>
+              <td colspan="3">
+                <input class="span12" type="text" name="cat.name" value="${cat.name}">
               </td>
             </tr>
             <tr>

@@ -1,0 +1,22 @@
+#{set week1: dto.lastWeekSales/}
+#{set week2: dto.last2WeekSales/}
+#{if (week1 == 0.0 && week2 != 0.0) || (week1 != 0.0 && week2 == 0.0)}
+<i rel="tooltip" title="上周：${week1} 上上周：${week2}" style="color:#ff0000"
+   class="text-center icon-question-sign"></i>
+#{/if}
+#{else }
+    #{if week1 > week2}
+    <i rel="tooltip" title="上升${(week1 - week2).format("#.##")}" style="color:#008000"
+       class="text-center icon-arrow-up"></i>
+    <span style="color:#008000">${((week1 - week2)/week1).format('#.##%')}</span>
+    #{/if}
+    #{elseif week1 == week2}
+    <i rel="tooltip" title="持平" style="color:#0000ff" class="text-center icon-minus"></i>
+    <span style="color:#0000ff">0%</span>
+    #{/elseif}
+    #{else}
+    <i rel="tooltip" title="下降${(week2 - week1).format("#.##")}" style="color:#ff0000"
+       class="text-center icon-arrow-down"></i>
+    <span style="color:#ff0000">${((week1 - week2)/week1).format('#.##%')}</span>
+    #{/else}
+#{/else}

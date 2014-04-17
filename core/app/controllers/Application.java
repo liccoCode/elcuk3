@@ -4,6 +4,7 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.Role;
 import models.market.*;
 import models.product.Whouse;
 import models.view.Ret;
@@ -25,10 +26,22 @@ import java.util.List;
 public class Application extends Controller {
 
     public static void index() {
+        /**如果是PM角色则跳转到PM首页**/
+        if(Role.isPm(Login.current())) {
+            Pmdashboards.index();
+        }
+
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         render(dashborad, fbaWhouse);
+    }
+
+    public static void oldDashBoard() {
+        DashBoard dashborad = Orderr.frontPageOrderTable(11);
+        // Feedback 信息
+        List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
+        render("Application/index.html", dashborad, fbaWhouse);
     }
 
     public static void percent(String type, Date date, String m) {

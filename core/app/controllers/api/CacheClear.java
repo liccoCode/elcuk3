@@ -2,11 +2,8 @@ package controllers.api;
 
 import models.view.Ret;
 import play.cache.Cache;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.util.List;
 
 /**
  * ES执行后需要清理缓存，保证数据及时

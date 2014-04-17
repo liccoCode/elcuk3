@@ -58,7 +58,6 @@ public class JobsSetup {
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
-
             every(KeepSessionJob.class, "29mn");
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);

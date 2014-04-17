@@ -143,13 +143,13 @@ public class OrderItemESQuery {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
-                        .keyField("createDate")
+                        .keyField("date")
                         .valueField("quantity")
                         .interval("day")
                         .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
                         .facetFilter(FilterBuilders.boolFilter()
                                 .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("createDate")
+                                .must(FilterBuilders.rangeFilter("date")
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat))
                                 )
@@ -195,7 +195,7 @@ public class OrderItemESQuery {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
         RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
-                .keyField("createDate").valueField("quantity")
+                .keyField("date").valueField("quantity")
                 .facetFilter(FilterBuilders.termFilter("market", market.name().toLowerCase()));
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
@@ -235,12 +235,12 @@ public class OrderItemESQuery {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(QueryBuilders.matchAllQuery())
                 .facet(FacetBuilders.termsStatsFacet("units")
-                        .keyField("cat")
+                        .keyField("category_id")
                         .valueField("quantity")
                         .size(30) // category 数量
                         .facetFilter(FilterBuilders.boolFilter()
                                 .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("createDate")
+                                .must(FilterBuilders.rangeFilter("date")
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat))
                                 )

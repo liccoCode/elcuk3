@@ -22,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import query.SkuESQuery;
 
 import java.util.List;
 
@@ -65,13 +66,16 @@ public class Products extends Controller {
 
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
-        render(pro);
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
+        float procureqty = SkuESQuery.esProcureQty(pro.sku);
+        render(pro, procureqty);
     }
 
     public static void update(Product pro) {
         validation.valid(pro);
         if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
         if(Validation.hasErrors()) render("Products/show.html", pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.save();
         flash.success("更新成功");
         new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
@@ -111,12 +115,14 @@ public class Products extends Controller {
 
     public static void blank(Product pro) {
         if(pro == null) pro = new Product();
+        pro.beforeData();
         List<Category> cats = Category.all().fetch();
         render(pro, cats);
     }
 
     public static void create(Product pro) {
         validation.valid(pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.createProduct();
         if(Validation.hasErrors()) render("Products/blank.html", pro);
         flash.success("Sku %s 添加成功", pro.sku);
@@ -210,9 +216,58 @@ public class Products extends Controller {
         buff.append("[");
         for(Cooperator co : cooperatorList) {
             buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name).append("\"").append("}");
+                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+                    .append("\"").append("}");
         }
         buff.append("]");
         renderJSON(buff.toString());
+    }
+
+
+    /**
+     * SKU的销售曲线
+     *
+     * @param type
+     * @param sku
+     */
+    public static void linechart(String type, String sku) {
+
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false));
+        String json = "";
+
+        if(type.equals("skusalefee")) {
+            /**
+             * 销售额曲线
+             */
+            json = J.json(SkuESQuery
+                    .esSaleLine(type, sku, "fee"));
+
+        } else if(type.equals("skusaleqty")) {
+            /**
+             * 销量曲线
+             */
+            json = J.json(SkuESQuery
+                    .esSaleLine(type, sku, "qty"));
+        } else if(type.equals("skuprofit")) {
+            /**
+             * 利润曲线
+             */
+            json = J.json(SkuESQuery
+                    .esSaleLine(type, sku, "profit"));
+        } else if(type.equals("skuprocureprice")) {
+            /**
+             * 采购价格曲线
+             */
+            json = J.json(SkuESQuery
+                    .esProcureLine(type, sku, "price"));
+        } else if(type.equals("skuprocureqty")) {
+            /**
+             * 采购数量曲线
+             */
+            json = J.json(SkuESQuery
+                    .esProcureLine(type, sku, "qty"));
+        }
+        renderJSON(json);
     }
 }

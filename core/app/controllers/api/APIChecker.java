@@ -1,11 +1,8 @@
 package controllers.api;
 
-import models.Server;
 import play.Logger;
-import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Http.Header;
 
 /**
  * 对 API 调用的检查
