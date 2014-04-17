@@ -71,7 +71,7 @@ public class OrderPOST extends ESPost<Orderr> {
             Set<String> orderIds = new HashSet<String>();
             for(Object obj : hits.getJSONArray("hits")) {
                 JSONObject hit = (JSONObject) obj;
-                orderIds.add(hit.getJSONObject("_source").getString("orderId"));
+                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
             }
             if(orderIds.size() <= 0)
                 throw new FastRuntimeException("没有结果");
