@@ -688,78 +688,71 @@ public class MetricProfitService {
 
 
     /**
-     * 计算PM的DASHBoard的每日的所有Category的日销售额
+     * 计算PM的DASHBoard的Category 周平均销售额，周平均销量
      */
-    public JSONArray dashboardSaleFee(int esFilterType) {
-        FilterBuilder filter = null;
-        if(esFilterType == 1) {
-            filter = FilterBuilders.prefixFilter("sku",
-                    this.category.toLowerCase());
-        }
-        if(esFilterType == 2) {
-            filter = FilterBuilders.termsFilter("sku", parseEsSku());
-        }
+    public JSONArray dashboardDateAvg(String tablename, String fieldname, boolean categoryFilter) {
 
+        DateHistogramBuilder builder = AggregationBuilders.
+                dateHistogram("units")
+                .field("date")
+                .interval(DateHistogram.Interval.WEEK)
+                .subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname))
+                ;
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .facet(FacetBuilders.dateHistogramFacet("units")
-                        .keyField("date")
-                        .valueField("cost_in_usd")
-                        .interval("week")
-                        .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
-                        .facetFilter(this.filterbuilder(true)
-                                //销售费用项目
-                                .must(FilterBuilders.termFilter("fee_type", "productcharges"))
-                                .must(filter)
-                        )
-                ).size(0);
-        JSONObject result = ES.search("elcuk2", "salefee", search);
+                .query(querybuilder(true, categoryFilter))
+                .aggregation(builder
+                )
+                .size(0);
+
+        System.out.println("aaaaaaaaaaaaaaaaaa::::::::::::::"+search.toString());
+
+        JSONObject result = ES.search("elcuk2", tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
-        JSONObject facets = result.getJSONObject("facets");
+        JSONObject aggregations = result.getJSONObject("aggregations");
         JSONObject units = null;
-        JSONArray entries = null;
-        if(facets != null) {
-            units = facets.getJSONObject("units");
-            entries = units.getJSONArray("entries");
+        JSONArray buckets = null;
+        if(aggregations != null) {
+            units = aggregations.getJSONObject("units");
+            buckets = units.getJSONArray("buckets");
         }
-        return entries;
+        return buckets;
     }
 
+
     /**
-     * 计算PM的DASHBoard的每日的所有Category的日销量
+     * 过滤条件
+     *
+     * @return
      */
-    public JSONArray dashboardSaleQty(int esType) {
-        FilterBuilder filter = null;
-        if(esType == 1) {
-            filter = FilterBuilders.prefixFilter("sku",
-                    this.category.toLowerCase());
+    private BoolQueryBuilder querybuilder(boolean dateFilter, boolean categoryFilter) {
+        DateTime fromD = null;
+        DateTime toD = null;
+        if(this.market == null) {
+            fromD = new DateTime(begin);
+            toD = new DateTime(end);
+        } else {
+            fromD = this.market.withTimeZone(begin);
+            toD = this.market.withTimeZone(end);
         }
-        if(esType == 2) {
-            filter = FilterBuilders.termsFilter("sku", parseEsSku());
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+        BoolQueryBuilder qb = null;
+        if(categoryFilter) {
+            qb = QueryBuilders.boolQuery().must(QueryBuilders.prefixQuery("sku", this.category.toLowerCase()));
+
+        } else {
+            qb = QueryBuilders.boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
         }
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .facet(FacetBuilders.dateHistogramFacet("units")
-                        .keyField("date")
-                        .valueField("quantity")
-                        .interval("week")
-                        .preZone(Dates.timeZone(M.AMAZON_US).getShortName(System.currentTimeMillis()))
-                        .facetFilter(this.filterbuilder(true)
-                                .must(filter)
-                        )
-                ).size(0);
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
-        if(result == null) {
-            throw new FastRuntimeException("ES连接异常!");
+
+        if(this.market != null) {
+            qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
-        JSONObject facets = result.getJSONObject("facets");
-        JSONObject units = null;
-        JSONArray entries = null;
-        if(facets != null) {
-            units = facets.getJSONObject("units");
-            entries = units.getJSONArray("entries");
+        if(dateFilter) {
+            qb.must(QueryBuilders.rangeQuery("date").gte(fromD.toString(isoFormat))
+                    .lt(toD.toString(isoFormat)));
         }
-        return entries;
+        return qb;
     }
 
 
@@ -774,8 +767,7 @@ public class MetricProfitService {
         DateHistogramBuilder builder = AggregationBuilders.
                 dateHistogram("units")
                 .field("date")
-                .interval(DateHistogram.Interval.DAY)
-                .subAggregation(AggregationBuilders.avg("price").field(fieldname));
+                .interval(DateHistogram.Interval.DAY);
         /**
          * 求平均值
          */

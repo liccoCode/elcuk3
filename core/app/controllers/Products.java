@@ -64,6 +64,7 @@ public class Products extends Controller {
 
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         float procureqty = SkuESQuery.esProcureQty(pro.sku);
         List<Template> templates = pro.category.templates;
         render(pro, procureqty, templates);
@@ -73,6 +74,7 @@ public class Products extends Controller {
         validation.valid(pro);
         if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
         if(Validation.hasErrors()) render("Products/show.html", pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.save();
         flash.success("更新成功");
         new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
@@ -112,12 +114,14 @@ public class Products extends Controller {
 
     public static void blank(Product pro) {
         if(pro == null) pro = new Product();
+        pro.beforeData();
         List<Category> cats = Category.all().fetch();
         render(pro, cats);
     }
 
     public static void create(Product pro) {
         validation.valid(pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.createProduct();
         if(Validation.hasErrors()) render("Products/blank.html", pro);
         flash.success("Sku %s 添加成功", pro.sku);

@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:"Category销售目标#" + categorySt.id /}
 #{set 'moreScripts'}
-    #{script 'saletargets/split.coffee'/}
+    #{script 'saleTargets/split.coffee'/}
 #{/set}
 
 #{errorMsgs /}
@@ -16,7 +16,7 @@
         <tr>
           <th>年份</th>
           <td colspan="4">
-          #{select_year  name: "categorySt.targetYear", value: categorySt.targetYear, disabled:true/}
+          #{select_year value: categorySt.targetYear, disabled:true/}
           </td>
         </tr>
 
@@ -37,7 +37,7 @@
           <td>
             <div class="input-prepend input-append">
               <span class="add-on">$</span>
-              <input type="text" name="categorySt.saleAmounts" value="${categorySt.saleAmounts}">
+              <input type="text" value="${categorySt.saleAmounts}" disabled>
               <span class="add-on">万</span>
             </div>
           </td>
@@ -57,7 +57,7 @@
           <th>利润率</th>
           <td colspan="4">
             <div class="input-append">
-              <input type="text" name="categorySt.profitMargin" value="${categorySt.profitMargin}">
+              <input type="text" value="${categorySt.profitMargin}" disabled>
               <span class="add-on">%</span>
             </div>
           </td>
@@ -85,7 +85,7 @@
             </div>
           </td>
           <td>
-              #{set reallySt: (st.reallySaleAmounts()/10000).format("#.####")/}
+              #{set reallySt: (st.reallySaleAmounts()/10000).format("#.##")/}
             <div>
               <input type="text" style="width:90px;" value="${reallySt}" name="reallySaleAmounts" data-old="${reallySt}">
             </div>

@@ -53,6 +53,8 @@ public class SaleTargets extends Controller {
         User user = User.findByUserName(Secure.Security.connected());
         yearSt.createuser = user;
         if(yearSt.isExist()) Validation.addError("", String.format("已经存在 %s 年度的销售目标", yearSt.targetYear));
+        //只有年度目标才会校验 name 不为空
+        validation.required("目标名称", yearSt.name);
         yearSt.validate();
         yearSt.validateChild(sts);
         if(Validation.hasErrors()) render("SaleTargets/blank.html", yearSt, sts);
@@ -105,11 +107,9 @@ public class SaleTargets extends Controller {
     }
 
     @Check("saletargets.split")
-    public static void doSplit(Long id, SaleTarget categorySt, List<SaleTarget> sts) {
-        SaleTarget manageSt = SaleTarget.findById(id);
-        manageSt.update(categorySt, null);
+    public static void doSplit(Long id, List<SaleTarget> sts) {
         for(SaleTarget st : sts) {
-            manageSt = SaleTarget.findById(st.id);
+            SaleTarget manageSt = SaleTarget.findById(st.id);
             manageSt.update(st, id);
         }
         if(Validation.hasErrors()) split(id);
