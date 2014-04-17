@@ -4,6 +4,13 @@ class OrderActor
   include Celluloid
   include ActorBase
 
+  def initialize
+    init_attrs
+    @es_index = "elcuk2"
+    @es_type = "order"
+  end
+
+
   MAPPING = %q({
    "order": {
       "properties": {
@@ -65,12 +72,6 @@ class OrderActor
       }
    }
 })
-
-  def initialize
-    init_attrs
-    @es_index = "elcuk2"
-    @es_type = "order"
-  end
 
   def bulk_submit(rows)
     submit(rows) do |row|

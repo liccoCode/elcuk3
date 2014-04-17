@@ -15,7 +15,10 @@ class ShipPayUnitActor
     @wname_market_mapping = {
       "FBA_DE" => "AMAZON_DE",
       "FBA_US" => "AMAZON_US",
-      "FBA_UK" => "AMAZON_UK"
+      "FBA_UK" => "AMAZON_UK",
+      "FBA_IT" => "AMAZON_IT",
+      "FBA_JP" => "AMAZON_JP",
+      "FBA_FR" => "AMAZON_FR"
     }
   end
 

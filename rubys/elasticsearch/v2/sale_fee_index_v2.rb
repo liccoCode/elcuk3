@@ -54,7 +54,10 @@ class SaleFeeActor
 
 end
 
-SQL = "SELECT fee.id, fee.date `date`, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId FROM SaleFee fee LEFT JOIN OrderItem oi ON fee.order_orderId=oi.order_orderId WHERE oi.product_sku IS NOT NULL and oi.market IS NOT NULL"
+SQL = %q(SELECT fee.id, fee.date `date`, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId
+  FROM SaleFee fee
+  LEFT JOIN OrderItem oi ON fee.order_orderId=oi.order_orderId
+  WHERE oi.product_sku IS NOT NULL AND oi.market IS NOT NULL AND date>=?)
 #SQL << " LIMIT 31000"
 SaleFeeActor.new.init_mapping
-process(actor: SaleFeeActor.pool(size: 6))
+process(dataset: DB[SQL, Time.parse('2012-01-01')].stream, actor: SaleFeeActor.pool(size: 6))
