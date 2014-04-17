@@ -8,60 +8,55 @@
     #{script 'products/skulinechart.coffee'/}
 #{/set}
 
-<div class="row" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<div class="row">
 #{if pro == null}
-读取的 Product 不存在!
+  读取的 Product 不存在!
 #{/if}
 #{else }
     #{errorMsgs /}
     #{flash_alert /}
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#basicinfo" data-toggle='tab'>基本信息</a>
-  </li>
-  <li>
-    <a href="#extends" data-toggle='tab'>扩展属性</a>
-  </li>
-  <li>
-    <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
-  </li>
-  <li>
-    <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
-  </li>
-  <li>
-    <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
-  </li>
-</ul>
-<div id="selling_tabs" class="tab-content">
-  <div class="tab-pane fade active in" id='basicinfo'>
-      #{include 'Products/_basicInfo.html'/}
-  </div>
-  <div class="tab-pane fade" id='extends'>
-    <div class="row-fluid">
-      <form class="search_form">
-        <select name="p.whouseId" class="inline">
-          <option>请选择模板</option>
-            #{list items:templates, as:'template'}
-              <option value="${template.id}">${template.name}</option>
-            #{/list}
-        </select>
-        <button class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到产品内">添加属性</button>
-      </form>
-        #{info_row title:'扩展属性'/}
-      <div>
-      </div>
+  <ul class="nav nav-tabs">
+    <li class="active">
+      <a href="#basicinfo" data-toggle='tab'>基本信息</a>
+    </li>
+    <li>
+      <a href="#extends" data-toggle='tab'>扩展属性</a>
+    </li>
+    <li>
+      <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
+    </li>
+    <li>
+      <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
+    </li>
+    <li>
+      <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
+    </li>
+  </ul>
 
+  <div id="selling_tabs" class="tab-content">
+    <div class="tab-pane fade active in" id='basicinfo'>
+        #{include 'Products/_basicInfo.html'/}
     </div>
-  </div>
 
-<div class="tab-pane fade" id='attach'>
-<div class="accordion-group">
-  <div class="accordion-heading">
-    <h4 class="accordion-toggle" data-toggle="collapse" data-target="#collapse2">
-      Package
-    </h4>
+    <div class="tab-pane fade" id='extends'>
+      <div class="row-fluid">
+        <form class="search_form">
+          <select name="p.whouseId" class="inline">
+            <option>请选择模板</option>
+              #{list items:templates, as:'template'}
+                <option value="${template.id}">${template.name}</option>
+              #{/list}
+          </select>
+          <button class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到产品内">添加属性</button>
+        </form>
+          #{info_row title:'扩展属性'/}
+        <div>
+        </div>
 
-    <div class="tab-pane fade active" id='attach'>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id='attach'>
         #{include 'Products/_attach.html'/}
     </div>
 
@@ -100,6 +95,6 @@
     </div>
 
   </div>
+</div>
 #{/else}
-</div></div></div></div>
 </div>
