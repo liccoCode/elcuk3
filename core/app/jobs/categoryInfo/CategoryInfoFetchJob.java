@@ -32,8 +32,10 @@ public class CategoryInfoFetchJob extends BaseJob {
     public void doit() {
         if(isRnning()) return;
         long begin = System.currentTimeMillis();
+        Cache.add(RUNNING, RUNNING);
         categoryinfo();
         Logger.info("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
+        Cache.delete(RUNNING);
     }
 
     public static boolean isRnning() {

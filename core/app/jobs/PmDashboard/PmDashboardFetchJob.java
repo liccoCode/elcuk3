@@ -37,8 +37,10 @@ public class PmDashboardFetchJob extends BaseJob {
         if(isRnning()) return;
         long begin = System.currentTimeMillis();
         begin = System.currentTimeMillis();
+        Cache.add(RUNNING, RUNNING);
         PmDashboardCache.doTargetCache();
         Logger.info("AbnormalFetchJobChart calculate.... [%sms]", System.currentTimeMillis() - begin);
+        Cache.delete(RUNNING);
     }
 
     public static boolean isRnning() {
