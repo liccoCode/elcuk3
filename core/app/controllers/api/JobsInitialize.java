@@ -4,6 +4,7 @@ import jobs.PmDashboard.AbnormalFetchJob;
 import jobs.categoryInfo.CategoryInfoFetchJob;
 import jobs.PmDashboard.PmDashboardFetchJob;
 import jobs.driver.GJob;
+import models.view.Ret;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -25,6 +26,7 @@ public class JobsInitialize extends Controller {
      */
     public static void initAbnormalFetchJob() {
         GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<String, Object>());
+        renderJSON(new Ret(true,"提交异常信息任务成功!"));
     }
 
     /**
@@ -33,6 +35,7 @@ public class JobsInitialize extends Controller {
      */
     public static void initCategoryInfoFetchJob() {
         GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<String, Object>());
+        renderJSON(new Ret(true,"提交CATEGORY销售分析信息任务成功!"));
     }
 
     /**
@@ -41,5 +44,6 @@ public class JobsInitialize extends Controller {
      */
     public static void initTargetInfoFetchJob() {
         GJob.perform(PmDashboardFetchJob.class.getName(), new HashMap<String, Object>());
+        renderJSON(new Ret(true,"提交PM首页利润目标信息任务成功!"));
     }
 }
