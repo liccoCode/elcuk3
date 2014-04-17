@@ -10,319 +10,69 @@
 
 <div class="row" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 #{if pro == null}
-读取的 Product 不存在!
+  读取的 Product 不存在!
 #{/if}
 #{else }
     #{errorMsgs /}
     #{flash_alert /}
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#attribute" data-toggle='tab'>基本信息</a>
-  </li>
-  <li>
-    <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
-  </li>
-  <li>
-    <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
-  </li>
-  <li>
-    <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
-  </li>
-</ul>
-<div id="selling_tabs" class="tab-content">
-<div class="tab-pane fade active in" id='attribute'>
-    #{info_row title:'基本信息'}
-      <ul>
-        <li>长,宽,高的单位为: mm</li>
-        <li>重量的单位为 kg</li>
-      </ul>
-    #{/info_row}
-  <div class="row-fluid">
-    <form action="@{Products.update()}" method="post">
-      <table class="table table-bordered" id="prod_basic">
-        <tr>
-          <td>SKU</td>
-          <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
-          <td>长</td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
-              <span class="add-on">mm</span>
-            </div>
-          </td>
-
-        </tr>
-        <tr>
-          <td>宽</td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
-              <span class="add-on">mm</span>
-            </div>
-          </td>
-          <td>高</td>
-          <td>
-            <div class="input-append">
-
-              <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
-              <span class="add-on">mm</span>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>重量</td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
-              <span class="add-on">Kg</span>
-            </div>
-          </td>
-
-          <th>申报价格</th>
-          <td>
-            <div class="input-prepend">
-              <span class="add-on">$</span>
-              <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>Category</td>
-          <td>${pro.category}</td>
-          <td>Brand</td>
-          <td>${pro.family?.brand}</td>
-        </tr>
-        <tr>
-          <td>Family</td>
-          <td>${pro.family?.family}</td>
-          <td>产品品名(运输)</td>
-          <td>
-            <input type="text" name="pro.declareName" value="${pro.declareName}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>上市时间</th>
-          <td>
-            <input type="date" name="pro.marketTime" value="${pro.marketTime}">
-          </td>
-
-          <th>上架状态</th>
-          <td>
-              #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
-          </td>
-        </tr>
-
-        <tr>
-          <th>采购状态</th>
-          <td>
-              #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
-          </td>
-
-          <th>产品的生命周期</th>
-          <td>
-              #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
-          </td>
-        </tr>
-
-        <tr>
-          <th>销售等级</th>
-          <td colspan="3">
-              #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
-          </td>
-        </tr>
-
-        <tr>
-          <th>产品定位</th>
-          <td colspan="3">
-            <input type="text" style="width:95%" name="pro.locate" value="${pro.locate}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>产品卖点</th>
-          <td colspan="3">
-            <input type="text" style="width:95%" name="pro.sellingPoints" value="${pro.sellingPoints}">
-          </td>
-        </tr>
-
-        <tr>
-          <td>产品简称</td>
-          <td colspan="3">
-            <input type="text" style="width:95%" name="pro.abbreviation" value="${pro.abbreviation}">
-          </td>
-        </tr>
-        <tr>
-          <td>产品名称</td>
-          <td colspan="3">
-            <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="10">
-            <button class="btn btn-primary" data-loading>保存</button>
-              #{power.ck "products.saleamazonlisting"}
-                <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
-              #{/power.ck}
-          </td>
-        </tr>
-      </table>
-    </form>
-  </div>
-
-    #{info_row title:'Product (Selling)QTY'/}
-  <div>
-    <table class="table table-bordered">
-      <tr>
-        <th>Qid</th>
-        <th>Inbound</th>
-        <th>Qty</th>
-        <th>Unsellable</th>
-        <th>Pending</th>
-        <th>ASIN</th>
-        <th>Whouse</th>
-        <th>&nbsp;</th>
-      </tr>
-        #{list items:qtys, as:'qty'}
-          <form method="post" action="@{Products.updateSellingQty()}">
-            <tr>
-              <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
-              <td>
-                <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
-              </td>
-              <td>
-                <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
-              </td>
-              <td>
-                <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
-              </td>
-              <td>
-                <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
-              </td>
-              <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
-              <td>${qty.whouse.name}</td>
-              <td>
-                <button class="btn btn-primary" data-confirm='确认更新?'>更新</button>
-              </td>
-            </tr>
-          </form>
-        #{/list}
-    </table>
-      #{records records:records, row:true/}
-  </div>
-</div>
-
-
-<div class="tab-pane fade active" id='attach'>
-  <div class="accordion-group">
-    <div class="accordion-heading">
-      <h4 class="accordion-toggle" data-toggle="collapse" data-target="#collapse2">
-        Package
-      </h4>
+  <ul class="nav nav-tabs">
+    <li class="active">
+      <a href="#basicinfo" data-toggle='tab'>基本信息</a>
+    </li>
+    <li>
+      <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
+    </li>
+    <li>
+      <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
+    </li>
+    <li>
+      <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
+    </li>
+  </ul>
+  <div id="selling_tabs" class="tab-content">
+    <div class="tab-pane fade active in" id='basicinfo'>
+        #{include 'Products/_basicInfo.html'/}
     </div>
-    <div id="collapse2" class="accordion-body collapse in">
-      <div class="accordion-inner">
-        <div id="collapseOne" class="accordion-body collapse in">
-          <div style="min-height:150px;" id="packageDropbox">
-            <ul class="thumbnails uploaded"></ul>
-            <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
-          </div>
-        </div>
+
+
+    <div class="tab-pane fade active" id='attach'>
+        #{include 'Products/_attach.html'/}
+    </div>
+
+    <div class="tab-pane fade" id='saleinfo'>
+      <input type="hidden" name="skuvalue" value="0">
+        #{info_row title:'销售额和销量'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;" id='skusalefee'></div>
+        <div class="span6" style="height:450px;" id='skusaleqty'></div>
+      </div>
+        #{info_row title:'利润'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
       </div>
     </div>
-  </div>
 
-  <div class="accordion-group">
-    <div class="accordion-heading">
-      <h4 class="accordion-toggle" data-toggle="collapse" data-target="#collapse3">
-        说明书
-      </h4>
-    </div>
-    <div id="collapse3" class="accordion-body collapse">
-      <div class="accordion-inner">
-        <div id="collapseOne" class="accordion-body collapse in">
-          <div style="min-height:150px;" id="instructionsDropbox">
-            <ul class="thumbnails uploaded"></ul>
-            <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
-          </div>
-        </div>
+    <div class="tab-pane fade" id='procureinfo'>
+      <input type="hidden" name="skuprocurevalue" value="0">
+
+      <div class="row-fluid">
+        <table class="table table-bordered">
+          <tr>
+            <td class="span2" style="font:bold">总采购数量</td>
+            <td>${procureqty}</td>
+          </tr>
+        </table>
+      </div>
+        #{info_row title:'采购价格'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
+      </div>
+        #{info_row title:'采购数量'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
       </div>
     </div>
-  </div>
 
-  <div class="accordion-group">
-    <div class="accordion-heading">
-      <h4 class="accordion-toggle" data-toggle="collapse" data-target="#collapse4">
-        丝印文件
-      </h4>
-    </div>
-    <div id="collapse4" class="accordion-body collapse">
-      <div class="accordion-inner">
-        <div id="collapseOne" class="accordion-body collapse in">
-          <div style="min-height:150px;" id="silkscreenDropbox">
-            <ul class="thumbnails uploaded"></ul>
-            <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
-
-
-  <div class="accordion-group">
-    <div class="accordion-heading">
-      <h4 class="accordion-toggle" data-toggle="collapse" data-target="#collapse1">
-        Images
-      </h4>
-    </div>
-    <div id="collapse1" class="accordion-body collapse">
-      <div class="accordion-inner">
-        <div id="collapseOne" class="accordion-body collapse in">
-          <div style="min-height:300px;" id="dropbox">
-            <ul class="thumbnails uploaded"></ul>
-            <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="tab-pane fade" id='saleinfo'>
-  <input type="hidden" name="skuvalue" value="0">
-    #{info_row title:'销售额和销量'/}
-  <div class="row-fluid">
-    <div class="span6" style="height:450px;" id='skusalefee'></div>
-    <div class="span6" style="height:450px;" id='skusaleqty'></div>
-  </div>
-    #{info_row title:'利润'/}
-  <div class="row-fluid">
-    <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
-  </div>
-</div>
-
-<div class="tab-pane fade" id='procureinfo'>
-  <input type="hidden" name="skuprocurevalue" value="0">
-
-  <div class="row-fluid">
-    <table class="table table-bordered">
-      <tr>
-        <td class="span2" style="font:bold">总采购数量</td>
-        <td>${procureqty}</td>
-      </tr>
-    </table>
-  </div>
-    #{info_row title:'采购价格'/}
-  <div class="row-fluid">
-    <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
-  </div>
-    #{info_row title:'采购数量'/}
-  <div class="row-fluid">
-    <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
-  </div>
-</div>
-
-</div>
 #{/else}
 </div>

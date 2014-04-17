@@ -1,22 +1,23 @@
 package models.product;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
-import helper.DBUtils;
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
 import models.market.Selling;
 import models.procure.Cooperator;
+import models.view.dto.ProductDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.cache.Cache;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -305,13 +306,23 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 产品定位
+     * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
-    public String locate;
+    @Transient
+    public List<ProductDTO> locate = new ArrayList<ProductDTO>();
+
+    @Lob
+    public String locates = "{}";
 
     /**
      * 产品卖点
+     * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
-    public String sellingPoints;
+    @Transient
+    public List<ProductDTO> sellingPoint = new ArrayList<ProductDTO>();
+
+    @Lob
+    public String sellingPoints = "{}";
 
     public Product() {
     }
@@ -322,6 +333,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public void setSku(String sku) {
         this.sku = sku.toUpperCase();
+    }
+
+    public enum FLAG {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
     }
 
     /**
@@ -430,9 +446,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     @Override
     public String to_log() {
-        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s]",
+        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s] [上架状态:%s] " +
+                "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
                 this.lengths, this.width, this.heigh, this.weight, this.declaredValue,
-                this.productName);
+                this.productName, this.marketState.label(), this.procureState.label(), this.productState.label(),
+                this.salesLevel);
     }
 
     /**
@@ -544,5 +562,32 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public static boolean exist(String sku) {
         return Product.count("sku=?", sku) > 0;
+    }
+
+    /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成 List
+     *
+     * @param flag
+     */
+    public void arryParamSetUP(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.locates = J.json(this.locate);
+            this.sellingPoints = J.json(this.sellingPoint);
+        } else {
+            if(StringUtils.isNotBlank(this.locates)) this.locate = JSON.parseArray(this.locates, ProductDTO.class);
+            if(StringUtils.isNotBlank(this.sellingPoints)) this.sellingPoint = JSON.parseArray(this.sellingPoints,
+                    ProductDTO.class);
+        }
+    }
+
+    /**
+     * 准备数据
+     */
+    public void beforeData() {
+        for(int i = 0; i <= 4; i++) {
+            this.locate.add(new ProductDTO());
+            this.sellingPoint.add(new ProductDTO());
+        }
     }
 }
