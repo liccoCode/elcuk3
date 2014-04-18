@@ -194,7 +194,8 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastFriday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
-        return monday.plusDays(plusWeekNumber * (-3));
+        /**上周五只减三天，上上周五减少10天**/
+        return monday.plusDays((plusWeekNumber-1)*(-7) + (-3));
     }
 
     /**
@@ -205,6 +206,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastSaturday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
-        return monday.plusDays(plusWeekNumber * (-9));
+        /**上周六只减9天，上上周六减少16天**/
+        return monday.plusDays((plusWeekNumber-1)*(-7) + plusWeekNumber * (-9));
     }
 }
