@@ -76,7 +76,7 @@ public class OrderItemESQuery {
      * @param market
      */
     public Series.Line catSalesAndUnits(String cat, M market, Date from, Date to) {
-        return base("\"" + cat + "\"", "category_id ", market, from, to);
+        return base("\"" + cat + "\"", "category_id", market, from, to);
     }
 
     /**
