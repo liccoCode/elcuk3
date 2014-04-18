@@ -22,7 +22,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,6 +69,7 @@ public class Products extends Controller {
         float procureqty = SkuESQuery.esProcureQty(pro.sku);
         List<Template> templates = pro.category.templates;
         List<ProductAttr> atts = pro.productAttrs;
+        Collections.sort(atts);
         render(pro, procureqty, templates, atts);
     }
 
@@ -276,15 +277,16 @@ public class Products extends Controller {
      * 保存 product 附加属性
      */
     public static void saveAttrs(String sku, List<ProductAttr> productAttrs) {
-        Product product = Product.findById(sku);
-        for(ProductAttr productAttr : productAttrs) {
-            productAttr.save();
+        if(productAttrs != null && productAttrs.size() > 0) {
+            for(ProductAttr productAttr : productAttrs) {
+                productAttr.update();
+            }
         }
         show(sku);
     }
 
     /**
-     * 加载 产品的 附加属性给客户端展示
+     * 加载 产品的 附加属性给 View
      */
     public static void attrs(String sku, Long templateId) {
         Product pro = Product.findById(sku);
@@ -295,9 +297,26 @@ public class Products extends Controller {
                 ProductAttr productAttr = new ProductAttr();
                 productAttr.product = pro;
                 productAttr.attribute = attribute;
+                productAttr.save();
                 atts.add(productAttr);
             }
         }
         render(pro, atts);
+    }
+
+    /**
+     * 删除附加属性
+     *
+     * @param attrId
+     */
+    public static void delAttr(String sku, Long attrId) {
+        try {
+            ProductAttr productAttr = ProductAttr.findById(attrId);
+            productAttr.delete();
+            renderJSON(new Ret(true, productAttr.attribute.name));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+
     }
 }

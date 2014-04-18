@@ -64,11 +64,24 @@ $ ->
     objE.childNodes[0]
 
   # 点击button load 模板参数
-  $("#extends").on("click", "#add_template_btn", () ->
+  $("#extends").on("click", "#add_template_btn",() ->
     LoadMask.mask()
     $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
       LoadMask.unmask()
     )
   ).on("click", "#remove_attr_btn", () ->
-
+    LoadMask.mask()
+    $btn = $(@)
+    $.ajax('/products/delAttr',
+    {type: 'GET', data: {sku: $btn.data("sku"), attrId: $btn.data("attr")}, dataType: 'json'})
+    .done((r) ->
+        msg = if r.flag is true
+          # 删除 tr
+          $btn.parent("td").parent().remove()
+          {text: "附加属性 #{r.message} 删除成功.", type: 'success'}
+        else
+          {text: "#{r.message}", type: 'error'}
+        noty(msg)
+        LoadMask.unmask()
+      )
   )

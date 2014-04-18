@@ -21,7 +21,7 @@ public class Attributes extends Controller {
 
     @Before(only = {"index", "update", "delete"})
     public static void beforeShow() {
-        List<Attribute> atts = Attribute.findAll();
+        List<Attribute> atts = Attribute.find("ORDER BY sort ASC").fetch();
         Attribute newAt = new Attribute();
         renderArgs.put("atts", atts);
         renderArgs.put("newAt", newAt);

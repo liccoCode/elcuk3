@@ -1,4 +1,4 @@
-#{extends 'main.html' /}
+#{extends 'main_full.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
@@ -8,7 +8,7 @@
     #{script 'products/skulinechart.coffee'/}
 #{/set}
 
-<div class="row">
+<div class="span12 offset3">
 #{if pro == null}
   读取的 Product 不存在!
 #{/if}
