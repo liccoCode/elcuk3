@@ -6,7 +6,7 @@
 #{/if}
 #{else }
     #{if week1 > week2}
-    <i rel="tooltip" title="上升${(week1 - week2).format("#.##")}/上上周${week2.format("#.##")}/上周${week1.format("#.##")}}"
+    <i rel="tooltip" title="上升${(week1 - week2).format("#.##")}/上上周${week2.format("#.##")}/上周${week1.format("#.##")}"
        style="color:#008000"
        class="text-center icon-arrow-up"></i>
     <span style="color:#008000">${((week1 - week2)/week2).format('#.##%')}</span>
