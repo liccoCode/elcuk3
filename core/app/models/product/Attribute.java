@@ -79,12 +79,6 @@ public class Attribute extends Model {
     @ManyToMany(mappedBy = "attributes", cascade = CascadeType.PERSIST)
     public List<Template> templates;
 
-    /**
-     * 拥有这个属性的产品
-     */
-    @ManyToMany(mappedBy = "attributes", cascade = CascadeType.PERSIST)
-    public List<Product> products;
-
     public boolean exist() {
         return Attribute.count("name=?", this.name) > 0;
     }
@@ -105,5 +99,14 @@ public class Attribute extends Model {
         this.name = att.name;
         this.type = att.type;
         this.sort = att.sort;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if(other instanceof ProductAttr) {
+            ProductAttr productAttr = (ProductAttr) other;
+            return this.id == productAttr.attribute.id;
+        }
+        return super.equals(other);
     }
 }

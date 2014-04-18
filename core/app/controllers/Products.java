@@ -22,6 +22,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,7 +68,8 @@ public class Products extends Controller {
         pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         float procureqty = SkuESQuery.esProcureQty(pro.sku);
         List<Template> templates = pro.category.templates;
-        render(pro, procureqty, templates);
+        List<ProductAttr> atts = pro.productAttrs;
+        render(pro, procureqty, templates, atts);
     }
 
     public static void update(Product pro) {
@@ -268,5 +270,34 @@ public class Products extends Controller {
                     .esProcureLine(type, sku, "qty"));
         }
         renderJSON(json);
+    }
+
+    /**
+     * 保存 product 附加属性
+     */
+    public static void saveAttrs(String sku, List<ProductAttr> productAttrs) {
+        Product product = Product.findById(sku);
+        for(ProductAttr productAttr : productAttrs) {
+            productAttr.save();
+        }
+        show(sku);
+    }
+
+    /**
+     * 加载 产品的 附加属性给客户端展示
+     */
+    public static void attrs(String sku, Long templateId) {
+        Product pro = Product.findById(sku);
+        Template template = Template.findById(templateId);
+        List<ProductAttr> atts = pro.productAttrs;
+        for(Attribute attribute : template.attributes) {
+            if(!atts.contains(attribute)) {
+                ProductAttr productAttr = new ProductAttr();
+                productAttr.product = pro;
+                productAttr.attribute = attribute;
+                atts.add(productAttr);
+            }
+        }
+        render(pro, atts);
     }
 }

@@ -55,8 +55,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 产品拥有哪些扩展属性
      */
-    @ManyToMany(cascade = CascadeType.PERSIST)
-    public List<Attribute> attributes;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
+    public List<ProductAttr> productAttrs = new ArrayList<ProductAttr>();
 
     /**
      * 唯一的标示

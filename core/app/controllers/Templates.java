@@ -26,8 +26,11 @@ public class Templates extends Controller {
     public static void show(Long id) {
         List<Template> temps = renderArgs.get("temps", List.class);
         Template temp = null;
-        if(id != null) temp = Template.findById(id);
-        if(temps.size() > 0) temp = temps.get(0);
+        if(id != null) {
+            temp = Template.findById(id);
+        } else {
+            if(temps.size() > 0) temp = temps.get(0);
+        }
         render(temps, temp);
     }
 
