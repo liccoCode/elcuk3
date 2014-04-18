@@ -33,6 +33,12 @@ class OrderItemActor
             },
             "order_id": {
                 "type": "string"
+            },
+            "category_id": {
+                "type": "string"
+            },
+            "msku": {
+                "type": "string"
             }
         }
     }
@@ -49,9 +55,10 @@ class OrderItemActor
 end
 
 # select oi.createDate date, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, oi.quantity, oi.order_orderId order_id from OrderItem oi limit 10;
-SQL = %q(SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, oi.product_sku sku, p.category_categoryId category_id, oi.market, oi.quantity, oi.order_orderId order_id
+SQL = %q(SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, s.merchantSKU msku, oi.product_sku sku, p.category_categoryId category_id, oi.market, oi.quantity, oi.order_orderId order_id
   FROM OrderItem oi
   LEFT JOIN Product p ON p.sku=oi.product_sku
+  LEFT JOIN Selling s ON oi.selling_sellingId=s.sellingId
   WHERE oi.product_sku IS NOT NULL AND oi.createDate>=?)
 # =============================================================================================================
 # 1. 初始化 OrderItemActor 用于多线程计算
