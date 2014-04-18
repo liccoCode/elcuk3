@@ -181,6 +181,7 @@ public class CategoryInfoFetchJob extends BaseJob {
         DateTime begin = lastSaturday(2);
         //上上周五
         DateTime end = lastFriday(2);
+
         MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
         float saleQty = met.esSaleQty();
         return (int) saleQty;
@@ -194,6 +195,7 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastFriday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
+        monday = new DateTime(Dates.night(monday.toDate()));
         /**上周五只减三天，上上周五减少10天**/
         return monday.plusDays((plusWeekNumber-1)*(-7) + (-3));
     }
@@ -206,7 +208,8 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastSaturday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
+        monday = new DateTime(Dates.morning(monday.toDate()));
         /**上周六只减9天，上上周六减少16天**/
-        return monday.plusDays((plusWeekNumber-1)*(-7) + plusWeekNumber * (-9));
+        return monday.plusDays((plusWeekNumber-1)*(-7) + (-9));
     }
 }

@@ -138,8 +138,10 @@ public class AbnormalFetchJob extends BaseJob {
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
             DateTime begin = monday.plusDays((i-1)*(-7) + (-9));
+            begin = new DateTime(Dates.morning(begin.toDate()));
             //上周五 以及 往前同期（上上周五）
             DateTime end = monday.plusDays((i-1)*(-7) + (-3));
+            end = new DateTime(Dates.night(end.toDate()));
             MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeSales[i - 1] = met.esSaleFee();
         }
@@ -163,8 +165,10 @@ public class AbnormalFetchJob extends BaseJob {
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
             DateTime begin = monday.plusDays((i-1)*(-7) + (-9));
+            begin = new DateTime(Dates.morning(begin.toDate()));
             //上周五 以及 往前同期（上上周五）
             DateTime end = monday.plusDays((i-1)*(-7) + (-3));
+            end = new DateTime(Dates.night(end.toDate()));
             MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeProfit[i - 1] = met.calProfit().profitrate;
         }
