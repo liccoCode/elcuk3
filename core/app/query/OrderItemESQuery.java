@@ -67,7 +67,7 @@ public class OrderItemESQuery {
     public Series.Line mskuSalesAndUnits(String sid, M market, Date from, Date to) {
         String[] args = StringUtils.split(sid, "|");
         if(args.length == 3) sid = args[0];
-        return base("\"" + sid + "\"", "selling_id", market, from, to);
+        return base("\"" + sid + "\"", "msku", market, from, to);
     }
 
     /**
@@ -110,7 +110,7 @@ public class OrderItemESQuery {
     public Series.Line mskuSalesMovingAvg(String sid, M market, Date from, Date to) {
         String[] args = StringUtils.split(sid, "|");
         if(args.length == 3) sid = args[0];
-        return baseMoveingAve("\"" + sid + "\"", "selling_id", market, from, to);
+        return baseMoveingAve("\"" + sid + "\"", "msku", market, from, to);
     }
 
     public Series.Line catSalesMovingAvg(String cat, M market, Date from, Date to) {
