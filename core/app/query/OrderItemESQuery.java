@@ -134,7 +134,7 @@ public class OrderItemESQuery {
      */
     private Series.Line base(String val, String type, M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
-        if(!Arrays.asList("sku", "msku", "cat", "all").contains(type))
+        if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
 
         DateTime fromD = market.withTimeZone(from);
@@ -162,6 +162,7 @@ public class OrderItemESQuery {
             search.query(QueryBuilders.queryString(val).defaultField(type));
         }
 
+        System.out.println(search.toString());
         JSONObject result = ES.search("elcuk2", "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");
         JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
@@ -188,7 +189,7 @@ public class OrderItemESQuery {
      */
     public Series.Line baseMoveingAve(String val, String type, M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
-        if(!Arrays.asList("sku", "msku", "cat", "all").contains(type))
+        if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
 
         DateTime fromD = market.withTimeZone(from);
