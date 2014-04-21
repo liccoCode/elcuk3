@@ -1,23 +1,11 @@
 package jobs.PmDashboard;
 
-import helper.DBUtils;
-import helper.Dates;
 import jobs.driver.BaseJob;
-import models.market.Account;
-import models.market.Listing;
-import models.view.dto.AbnormalDTO;
-import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
-import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 import query.PmDashboardCache;
-import query.ProductQuery;
-import services.MetricProfitService;
-
-import java.util.*;
 
 /**
  * PM 首页异常信息处理 Job
@@ -30,17 +18,17 @@ import java.util.*;
  * Time: PM2:03
  */
 public class PmDashboardFetchJob extends BaseJob {
-    public static final String RUNNING = "pmdashboardfetchjob_running";
-    public static final String AbnormalDTO_CACHE = "pmdashboard_info";
 
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
-        if(isRnning()) return;
 
         if(getContext().get("teamid") == null)
             throw new FastRuntimeException("没有提交 teamid 信息");
         String teamid = getContext().get("teamid").toString();
+        String runningname = "pmdashboardfetchjob_running" + teamid;
+        if(isRnning(runningname)) return;
+
         Long id = new Long(teamid);
 
         String year = getContext().get("year").toString();
@@ -51,14 +39,13 @@ public class PmDashboardFetchJob extends BaseJob {
 
         long begin = System.currentTimeMillis();
         begin = System.currentTimeMillis();
-        Cache.add(RUNNING, RUNNING);
-        PmDashboardCache.doTargetCache(id,calyear);
+        Cache.add(runningname, runningname);
+        PmDashboardCache.doTargetCache(id, calyear);
         Logger.info("AbnormalFetchJobChart calculate.... [%sms]", System.currentTimeMillis() - begin);
-        Cache.delete(RUNNING);
+        Cache.delete(runningname);
     }
 
-    public static boolean isRnning() {
-        return StringUtils.isNotBlank(Cache.get(RUNNING, String.class));
+    public static boolean isRnning(String runningname) {
+        return StringUtils.isNotBlank(Cache.get(runningname, String.class));
     }
-
 }
