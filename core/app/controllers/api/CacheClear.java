@@ -32,6 +32,19 @@ public class CacheClear extends Controller {
         /**删除与销量相关的redis信息**/
         Cache.delete(SellingSaleAnalyzeJob.AnalyzeDTO_SKU_CACHE);
         Cache.delete(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE);
+
+        Date to = DateTime.now().toDate();
+        Date from = DateTime.now().plusMonths(-1).toDate();
+        String unitkey = ajaxUnitOrderKey("all", "sid", from, to);
+        Cache.delete(unitkey);
+
         renderJSON(new Ret(true, "清理缓存成功!"));
     }
+
+
+    public static String ajaxUnitOrderKey(String val, String type, Date from, Date to) {
+        String key = Caches.Q.cacheKey("unit", val, type, from, to);
+        return key;
+    }
+
 }
