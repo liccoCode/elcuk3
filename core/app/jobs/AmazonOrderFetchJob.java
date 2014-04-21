@@ -106,7 +106,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 Logger.info("Deal %s orders....", partOrders.size());
             }
 
-            jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(30).withSecondOfMinute(0).toDate
+            jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(10).withSecondOfMinute(0).toDate
                     ();
             jobRequest.save();
 
