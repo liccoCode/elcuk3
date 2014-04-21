@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.GTs;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.JobRequest;
@@ -36,6 +37,7 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonFBAQtySyncJob.class.getName()).isExcute()) return;
         /**
          * 1. 从所有 Whouse 中找出 FBA 的 Whouse.
@@ -77,6 +79,7 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderFetchJob step5 done!");
+        LogUtils.JOBLOG.info(String.format("AmazonFBAQtySyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     @Override

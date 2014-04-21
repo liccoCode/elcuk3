@@ -2,6 +2,7 @@ package jobs.PmDashboard;
 
 import helper.DBUtils;
 import helper.Dates;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import models.market.Listing;
 import models.view.dto.AbnormalDTO;
@@ -37,10 +38,11 @@ public class AbnormalFetchJob extends BaseJob {
         if(isRnning()) return;
         long begin = System.currentTimeMillis();
         abnormal();
-        Logger.info("AbnormalFetchJobAbNormal calculate.... [%sms]", System.currentTimeMillis() - begin);
+        LogUtils.JOBLOG.info(String.format("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         PmDashboardCache.doCache();
-        Logger.info("AbnormalFetchJobChart calculate.... [%sms]", System.currentTimeMillis() - begin);
+        LogUtils.JOBLOG.info(String.format("AbnormalFetchdashboardJob calculate.... [%sms]",
+                System.currentTimeMillis() - begin));
 
     }
 
