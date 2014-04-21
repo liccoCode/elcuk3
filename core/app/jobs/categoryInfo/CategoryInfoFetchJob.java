@@ -2,6 +2,7 @@ package jobs.categoryInfo;
 
 import helper.DBUtils;
 import helper.Dates;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import models.product.Category;
 import models.product.Product;
@@ -34,8 +35,8 @@ public class CategoryInfoFetchJob extends BaseJob {
         long begin = System.currentTimeMillis();
         Cache.add(RUNNING, RUNNING);
         categoryinfo();
-        Logger.info("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
         Cache.delete(RUNNING);
+        LogUtils.JOBLOG.info(String.format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     public static boolean isRnning() {

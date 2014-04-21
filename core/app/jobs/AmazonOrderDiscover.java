@@ -2,15 +2,18 @@ package jobs;
 
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
 import helper.DBUtils;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Account;
 import models.market.Orderr;
 import mws.MWSOrders;
 import play.Logger;
+import play.cache.Cache;
 import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
+import query.PmDashboardCache;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -36,6 +39,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
 
     @Override
     public void doJob() {
+
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
@@ -47,6 +52,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 Logger.warn("Account %s is not fecth Order because of [%s]", acc.username, Webs.S(e));
             }
         }
+        LogUtils.JOBLOG.info(String.format("AmazonOrderDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     public static void updateOrders(List<Orderr> toUpdateOrders) {

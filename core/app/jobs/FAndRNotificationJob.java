@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.Dates;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.AmazonListingReview;
@@ -30,6 +31,7 @@ import java.util.List;
 public class FAndRNotificationJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(FAndRNotificationJob.class.getName()).isExcute()) return;
         Date yesterday = DateTime.now().minusDays(Play.mode.isDev() ? 10 : 1).toDate();
         List<Feedback> feedbacks = Feedback.find("createDate>=? ORDER BY score",
@@ -45,6 +47,7 @@ public class FAndRNotificationJob extends Job {
         if(!SystemMails.dailyReviewMail(reviews)) {
             Webs.systemMail("Review Daily Mail send Error.", reviews.size() + " reviews.");
         }
+        LogUtils.JOBLOG.info(String.format("FAndRNotificationJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     /**

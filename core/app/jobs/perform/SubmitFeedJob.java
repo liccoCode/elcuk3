@@ -1,6 +1,7 @@
 package jobs.perform;
 
 import helper.Constant;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
@@ -32,6 +33,7 @@ public class SubmitFeedJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        long begin = System.currentTimeMillis();
         /**
          * 1. 获取账户和提交的 Feed
          * 2. 向 MWS 提交 Feed
@@ -64,5 +66,6 @@ public class SubmitFeedJob extends BaseJob {
         } finally {
             FileUtils.deleteQuietly(file);
         }
+        LogUtils.JOBLOG.info(String.format("SubmitFeedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 }

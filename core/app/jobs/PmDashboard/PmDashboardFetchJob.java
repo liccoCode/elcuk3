@@ -1,5 +1,6 @@
 package jobs.PmDashboard;
 
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -41,8 +42,8 @@ public class PmDashboardFetchJob extends BaseJob {
         begin = System.currentTimeMillis();
         Cache.add(runningname, runningname);
         PmDashboardCache.doTargetCache(id, calyear);
-        Logger.info("AbnormalFetchJobChart calculate.... [%sms]", System.currentTimeMillis() - begin);
         Cache.delete(runningname);
+        LogUtils.JOBLOG.info(String.format("PmDashboardFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     public static boolean isRnning(String runningname) {

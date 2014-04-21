@@ -3,6 +3,7 @@ package jobs;
 import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
 import helper.J;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.*;
@@ -34,6 +35,7 @@ import java.util.List;
 public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderFetchJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
@@ -67,6 +69,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderFetchJob step5 done!");
+        LogUtils.JOBLOG.info(String.format("AmazonOrderFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     /**
