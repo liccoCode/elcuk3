@@ -647,6 +647,8 @@ public class PmDashboardESQuery {
         float totalsaleprofit = 0f;
         float totalsalefee = 0f;
         for(int i = 1; i <= 12; i++) {
+            totalsaleprofit = 0f;
+            totalsalefee = 0f;
             DateTime month = now.withMonthOfYear(i);
             //获得每个月份的完整的开始日期
             DateTime begin = month.withDayOfMonth(1);
