@@ -69,7 +69,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderFetchJob step5 done!");
-        LogUtils.JOBLOG.info(String.format("AmazonOrderFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        LogUtils.JOBLOG
+                .info(String.format("AmazonOrderFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     /**
@@ -226,16 +227,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             orderItem.listingName = amzOrderItem.getProductName();
             orderItem.quantity = amzOrderItem.getQuantity();
 
-            // TODO 如果是来自 DE 账户的 IT 订单, 需要转移选择 IT 账户.
-            // TODO 2014.3.30 日以后, 确定新 IT 市场账户启动则删除兼容代码
-            if(orderr.market == M.AMAZON_IT) {
-                orderItem.selling = Selling.findById(
-                        Selling.sid(amzOrderItem.getSKU().toUpperCase(), orderr.market, Account.saleAccount(M.AMAZON_IT))
-                );
-            } else {
-                orderItem.selling = Selling.findById(
-                        Selling.sid(amzOrderItem.getSKU().toUpperCase(), orderr.market, acc));
-            }
+            orderItem.selling = Selling.findById(
+                    Selling.sid(amzOrderItem.getSKU().toUpperCase(), orderr.market, acc));
             orderItem.product = Product.findByMerchantSKU(amzOrderItem.getSKU());
             orderItem.quantity = amzOrderItem.getQuantity();
 
