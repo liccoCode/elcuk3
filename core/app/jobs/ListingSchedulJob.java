@@ -88,7 +88,10 @@ public class ListingSchedulJob extends Job {
         } finally {
             lock.unlock();
         }
-        LogUtils.JOBLOG.info(String.format("ListingSchedulJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("ListingSchedulJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public static String peekListingId() {

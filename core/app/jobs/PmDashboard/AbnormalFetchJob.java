@@ -41,8 +41,10 @@ public class AbnormalFetchJob extends BaseJob {
         LogUtils.JOBLOG.info(String.format("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         PmDashboardCache.doCache();
-        LogUtils.JOBLOG.info(String.format("AbnormalFetchdashboardJob calculate.... [%sms]",
-                System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String.format("AbnormalFetchdashboardJob calculate.... [%sms]",
+                    System.currentTimeMillis() - begin));
+        }
 
     }
 
@@ -139,10 +141,10 @@ public class AbnormalFetchJob extends BaseJob {
         Float[] beforeSales = new Float[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
-            DateTime begin = monday.plusDays((i-1)*(-7) + (-9));
+            DateTime begin = monday.plusDays((i - 1) * (-7) + (-9));
             begin = new DateTime(Dates.morning(begin.toDate()));
             //上周五 以及 往前同期（上上周五）
-            DateTime end = monday.plusDays((i-1)*(-7) + (-3));
+            DateTime end = monday.plusDays((i - 1) * (-7) + (-3));
             end = new DateTime(Dates.night(end.toDate()));
             MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeSales[i - 1] = met.esSaleFee();
@@ -166,10 +168,10 @@ public class AbnormalFetchJob extends BaseJob {
         Float[] beforeProfit = new Float[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
-            DateTime begin = monday.plusDays((i-1)*(-7) + (-9));
+            DateTime begin = monday.plusDays((i - 1) * (-7) + (-9));
             begin = new DateTime(Dates.morning(begin.toDate()));
             //上周五 以及 往前同期（上上周五）
-            DateTime end = monday.plusDays((i-1)*(-7) + (-3));
+            DateTime end = monday.plusDays((i - 1) * (-7) + (-3));
             end = new DateTime(Dates.night(end.toDate()));
             MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeProfit[i - 1] = met.calProfit().profitrate;

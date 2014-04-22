@@ -33,7 +33,10 @@ public class ShipmentsMonitorJob extends Job {
 
         // 入库的时间
         dayTypeCheck("clearance", 3);
-        LogUtils.JOBLOG.info(String.format("ShipmentsMonitorJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("ShipmentsMonitorJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     private void dayTypeCheck(String dayType, int beforeDays) throws InterruptedException {

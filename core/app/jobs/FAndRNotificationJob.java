@@ -47,7 +47,10 @@ public class FAndRNotificationJob extends Job {
         if(!SystemMails.dailyReviewMail(reviews)) {
             Webs.systemMail("Review Daily Mail send Error.", reviews.size() + " reviews.");
         }
-        LogUtils.JOBLOG.info(String.format("FAndRNotificationJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("FAndRNotificationJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     /**

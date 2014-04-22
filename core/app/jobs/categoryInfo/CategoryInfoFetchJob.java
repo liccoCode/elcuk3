@@ -36,7 +36,10 @@ public class CategoryInfoFetchJob extends BaseJob {
         Cache.add(RUNNING, RUNNING);
         categoryinfo();
         Cache.delete(RUNNING);
-        LogUtils.JOBLOG.info(String.format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public static boolean isRnning() {
@@ -198,7 +201,7 @@ public class CategoryInfoFetchJob extends BaseJob {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
         monday = new DateTime(Dates.night(monday.toDate()));
         /**上周五只减三天，上上周五减少10天**/
-        return monday.plusDays((plusWeekNumber-1)*(-7) + (-3));
+        return monday.plusDays((plusWeekNumber - 1) * (-7) + (-3));
     }
 
     /**
@@ -211,6 +214,6 @@ public class CategoryInfoFetchJob extends BaseJob {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
         monday = new DateTime(Dates.morning(monday.toDate()));
         /**上周六只减9天，上上周六减少16天**/
-        return monday.plusDays((plusWeekNumber-1)*(-7) + (-9));
+        return monday.plusDays((plusWeekNumber - 1) * (-7) + (-9));
     }
 }

@@ -44,6 +44,9 @@ public class ShipmentSyncJob extends Job {
             // dev 只测试一个
             if(Play.mode.isDev()) break;
         }
-        LogUtils.JOBLOG.info(String.format("ShipmentSyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("ShipmentSyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 }

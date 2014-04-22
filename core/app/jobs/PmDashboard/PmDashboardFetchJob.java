@@ -43,7 +43,10 @@ public class PmDashboardFetchJob extends BaseJob {
         Cache.add(runningname, runningname);
         PmDashboardCache.doTargetCache(id, calyear);
         Cache.delete(runningname);
-        LogUtils.JOBLOG.info(String.format("PmDashboardFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("PmDashboardFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public static boolean isRnning(String runningname) {

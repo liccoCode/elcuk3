@@ -44,7 +44,10 @@ public class SellingRecordCheckJob extends Job {
         for(int i = -5; i <= 0; i++) {
             SellingRecordCheckJob.amazonNewestRecords(fixTime.plusDays(i));
         }
-        LogUtils.JOBLOG.info(String.format("SellingRecordCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("SellingRecordCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     /**

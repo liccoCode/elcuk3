@@ -74,6 +74,9 @@ public class SellingCategoryCheckerJob extends Job {
                     GTs.render("SellingCategoryCheckerJob",
                             GTs.newMap("invalidMap", invalidSelling).build()), FLog.T.JOBS_ERROR);
 
-        LogUtils.JOBLOG.info(String.format("SellingCategoryCheckerJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("SellingCategoryCheckerJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 }

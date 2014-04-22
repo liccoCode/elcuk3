@@ -52,7 +52,10 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 Logger.warn("Account %s is not fecth Order because of [%s]", acc.username, Webs.S(e));
             }
         }
-        LogUtils.JOBLOG.info(String.format("AmazonOrderDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("AmazonOrderDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public static void updateOrders(List<Orderr> toUpdateOrders) {

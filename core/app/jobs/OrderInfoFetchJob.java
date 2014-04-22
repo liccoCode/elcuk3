@@ -50,7 +50,10 @@ public class OrderInfoFetchJob extends Job {
                         ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
-        LogUtils.JOBLOG.info(String.format("OrderInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("OrderInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     // TODO 性能有问题
