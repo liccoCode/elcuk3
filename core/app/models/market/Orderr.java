@@ -235,7 +235,6 @@ public class Orderr extends GenericModel {
     /**
      * 如果导入salefee则feeflag=2
      */
-    @Column(columnDefinition="Int(2) default '0'")
     public int feeflag;
 
 
