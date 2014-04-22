@@ -90,6 +90,10 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             }
             AmazonFinanceCheckJob.deleteSaleFees(orderIds);
             AmazonFinanceCheckJob.saveFees(fees);
+            /**
+             * 更新订单标志feeflag为2,表示已处理salefee
+             */
+            AmazonFinanceCheckJob.updateFeeFlag(orderIds);
             Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees, left %s Orders to fetch.",
                     this.account.prettyName(), this.market.name(), orderIds.size(), fees.size(), this.leftOrders);
         } else {

@@ -233,6 +233,13 @@ public class Orderr extends GenericModel {
 
 
     /**
+     * 如果导入salefee则feeflag=2
+     */
+    @Column(columnDefinition="Int(2) default '0'")
+    public int feeflag;
+
+
+    /**
      * 此订单总共卖出的产品数量
      * ps: 对于分页使用这个方法, 性能暂时不是需要考虑的问题
      *
