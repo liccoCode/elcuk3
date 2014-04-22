@@ -97,7 +97,11 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees, left %s Orders to fetch.",
                     this.account.prettyName(), this.market.name(), orderIds.size(), fees.size(), this.leftOrders);
         } else {
-            Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", this.account.prettyName(), this.market);
+            if(this.account == null) {
+                Logger.info("AmazonFinanceCheckJob nullaccount %s No Fees founded.", this.market);
+            } else {
+                Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", this.account.prettyName(), this.market);
+            }
         }
         return fees;
     }
