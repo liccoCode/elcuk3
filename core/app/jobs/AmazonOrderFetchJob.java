@@ -80,7 +80,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
      */
     @Override
     public int intervalHours() {
-        return 24;
+        return 8;
     }
 
     /**
@@ -111,9 +111,27 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 partOrders = orders.subList(0, (orders.size() > 1000 ? 1000 : orders.size()));
                 Logger.info("Deal %s orders....", partOrders.size());
             }
+            int hour = DateTime.now().getHourOfDay();
 
-            jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(10).withSecondOfMinute(0).toDate
-                    ();
+            if(hour > 18 || hour <= 3) {
+                /**
+                 * 如果是晚上执行则改为22:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().withHourOfDay(22).withMinuteOfHour(0).withSecondOfMinute(0)
+                        .toDate();
+            } else if(hour >= 12 && hour <= 18) {
+                /**
+                 * 如果是下午执行则改为14:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().withHourOfDay(14).withMinuteOfHour(0).withSecondOfMinute(0)
+                        .toDate();
+            } else {
+                /**
+                 * 如果是早上执行则改为6:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(0).withSecondOfMinute(0)
+                        .toDate();
+            }
             jobRequest.save();
 
         } catch(Exception e) {
