@@ -23,6 +23,7 @@ import java.util.*;
  * Time: PM2:22
  */
 public class AbnormalDTO implements Serializable {
+    private static final long serialVersionUID = 6545835762456678553L;
     /**
      * 今天的数据
      */

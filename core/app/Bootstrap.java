@@ -1,7 +1,4 @@
-import helper.Caches;
-import helper.Currency;
-import helper.Dates;
-import helper.HTTP;
+import helper.*;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import models.ElcukConfig;
@@ -46,6 +43,10 @@ public class Bootstrap extends Job {
         }
 
 
+        /**
+         * 初始化日志类
+         */
+        LogUtils.initLog();
         HTTP.init();
         Privilege.init();
         JobsSetup.init();

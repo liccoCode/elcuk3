@@ -4,6 +4,7 @@ import ext.LinkHelper;
 import helper.Constant;
 import helper.DBUtils;
 import helper.HTTP;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.Notification;
@@ -39,6 +40,7 @@ public class GetAsinJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        long begin = System.currentTimeMillis();
         /**
          * 1. 获取账户模拟登陆到 Amazon 的后台
          * 2. 获取 UPS 去搜索对应的Listing, 并获取返回的 html 页面
@@ -127,6 +129,7 @@ public class GetAsinJob extends BaseJob {
             // 还原账户 Region
             account.changeRegion(account.type);
         }
+        LogUtils.JOBLOG.info(String.format("GetAsinJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     public boolean isExecuteble() {

@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.Dates;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Account;
@@ -35,6 +36,7 @@ import java.util.List;
 public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderUpdateJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
@@ -62,6 +64,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderUpdateJob step5 done!");
+        LogUtils.JOBLOG.info(String.format("AmazonOrderUpdateJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
 

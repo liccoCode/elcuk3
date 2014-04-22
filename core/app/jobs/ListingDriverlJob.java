@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import jobs.works.ListingWork;
 import models.Jobex;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +30,7 @@ public class ListingDriverlJob extends Job {
 
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         // 因为 Every 1s 产生的 log 太麻烦, 但 log 我又不能关闭, 需要查看东西, 所以真要在测试环境使用这个执行的时候, 需要注释掉这一行
         if(Play.mode.isDev()) return;
         if(!Jobex.findByClassName(ListingDriverlJob.class.getName()).isExcute()) return;
@@ -46,6 +48,7 @@ public class ListingDriverlJob extends Job {
             new ListingWork(ListingSchedulJob.peekListingId(), true).now();
         }
         Logger.info("After Work, Queue size left: %s", ListingSchedulJob.queueSize());
+        LogUtils.JOBLOG.info(String.format("ListingDriverlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
 

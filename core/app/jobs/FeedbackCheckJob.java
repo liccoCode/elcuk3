@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.HTTP;
+import helper.LogUtils;
 import models.Jobex;
 import models.market.Account;
 import models.market.Feedback;
@@ -29,12 +30,14 @@ import java.util.List;
 public class FeedbackCheckJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(FeedbackCheckJob.class.getName()).isExcute()) return;
         List<Feedback> feedbacks = Feedback.find("isRemove=? AND createDate>=? ORDER BY updateAt ASC",
                 false, DateTime.now().minusDays(70).toDate()).fetch(20);
         for(Feedback feedback : feedbacks) {
             FeedbackCheckJob.ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
         }
+        LogUtils.JOBLOG.info(String.format("FeedbackCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     /**

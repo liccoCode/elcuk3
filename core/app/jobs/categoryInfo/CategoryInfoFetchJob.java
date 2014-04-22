@@ -2,6 +2,7 @@ package jobs.categoryInfo;
 
 import helper.DBUtils;
 import helper.Dates;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import models.product.Category;
 import models.product.Product;
@@ -34,8 +35,8 @@ public class CategoryInfoFetchJob extends BaseJob {
         long begin = System.currentTimeMillis();
         Cache.add(RUNNING, RUNNING);
         categoryinfo();
-        Logger.info("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin);
         Cache.delete(RUNNING);
+        LogUtils.JOBLOG.info(String.format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     public static boolean isRnning() {
@@ -181,6 +182,7 @@ public class CategoryInfoFetchJob extends BaseJob {
         DateTime begin = lastSaturday(2);
         //上上周五
         DateTime end = lastFriday(2);
+
         MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
         float saleQty = met.esSaleQty();
         return (int) saleQty;
@@ -194,7 +196,9 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastFriday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
-        return monday.plusDays(plusWeekNumber * (-3));
+        monday = new DateTime(Dates.night(monday.toDate()));
+        /**上周五只减三天，上上周五减少10天**/
+        return monday.plusDays((plusWeekNumber-1)*(-7) + (-3));
     }
 
     /**
@@ -205,6 +209,8 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastSaturday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
-        return monday.plusDays(plusWeekNumber * (-9));
+        monday = new DateTime(Dates.morning(monday.toDate()));
+        /**上周六只减9天，上上周六减少16天**/
+        return monday.plusDays((plusWeekNumber-1)*(-7) + (-9));
     }
 }

@@ -89,13 +89,13 @@ window.dropUpload =
         this.data['a.p'] = args['p']
         # 这里判断是在哪个 DIV 上传的文件，设定相对应的 attachType 参数值
         if dropbox.attr("id") == "dropbox"
-           this.data['a.attachType'] = "IMAGE"
+          this.data['a.attachType'] = "IMAGE"
         if dropbox.attr("id") == "packageDropbox"
-           this.data['a.attachType'] = "PACKAGE"
+          this.data['a.attachType'] = "PACKAGE"
         if dropbox.attr("id") == "instructionsDropbox"
-           this.data['a.attachType'] = "INSTRUCTION"
+          this.data['a.attachType'] = "INSTRUCTION"
         if dropbox.attr("id") == "silkscreenDropbox"
-           this.data['a.attachType'] = "SILKSCREEN"
+          this.data['a.attachType'] = "SILKSCREEN"
         return false if this.data['a.fid'] is false
       uploadStarted: (i, file, len) ->
         #???
@@ -166,7 +166,7 @@ window.dropUpload =
         attachEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
         attachEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
         attachEl.find('div.progress').remove()
-        if i - 1 >=0
+        if i - 1 >= 0
           # 如果文件名和上一个相同并且文件类型也相同，版本号 +1 （查询出来时已经按照文件名分好组，文件名相同的在一块）
           if(img['originName'] == imgs[i - 1]['originName'] && type == imgs[i - 1].attachType)
             ++versionConut
@@ -176,4 +176,23 @@ window.dropUpload =
         attachEl.find('div.title2').text("文件名: " + img['originName'])
         attachEl.find('div.title3').text('创建日期: ' + img['createDate'])
         attachEl.appendTo(uploaded)
+    )
+
+  # 初始化页面的时候加载此 Product 对应的图片; dropbox 图片展示的 div
+  loadImages: (fid, dropbox, p = '', cls = 'span2') ->
+    uploaded = dropbox.find('.uploaded')
+    message = dropbox.find('.message')
+    $.getJSON('/attachs/images', {fid: fid, p: p},
+    (imgs) ->
+      message.remove() if(imgs.length > 0)
+      for img, i in imgs
+        imgEl = $(window.dropUpload.template)
+        imgEl.addClass(cls)
+        imgUrl = "/attachs/image?a.fileName=" + img['fileName']
+        window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl + "&w=140&h=100")
+        imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
+        imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
+        imgEl.find('div.progress').remove()
+        imgEl.find('div.title').text(img['originName'])
+        imgEl.appendTo(uploaded)
     )
