@@ -1,6 +1,7 @@
 package jobs;
 
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Account;
@@ -35,6 +36,7 @@ import java.util.List;
 public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderItemDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
@@ -62,6 +64,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 Logger.info("Discover %s  %s OrderItems.", acc.uniqueName, allOrderItems.size());
             }
         }
+        LogUtils.JOBLOG.info(String.format("AmazonOrderItemDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     public static void saveOrderItemByOrders(List<Orderr> orderrs) {

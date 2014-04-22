@@ -1,6 +1,7 @@
 package jobs.perform;
 
 import com.amazonaws.mws.MarketplaceWebServiceException;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
@@ -26,6 +27,8 @@ public class GetFeedJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        long begin = System.currentTimeMillis();
+
         /**
          * 1. 获取账户和提交的 Feed
          * 2. 向MWS 请求查询处理结果
@@ -77,5 +80,7 @@ public class GetFeedJob extends BaseJob {
         } finally {
             if(file != null) FileUtils.deleteQuietly(file);
         }
+
+        LogUtils.JOBLOG.info(String.format("GetFeedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 }

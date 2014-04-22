@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import models.market.Account;
 import play.Logger;
@@ -21,10 +22,12 @@ public class KeepSessionJob extends BaseJob {
 
     @Override
     public void doit() {
+        long begin = System.currentTimeMillis();
         List<Account> accs = Account.openedSaleAcc();
         for(Account ac : accs) {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
             ac.loginAmazonSellerCenter();
         }
+        LogUtils.JOBLOG.info(String.format("KeepSessionJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 }

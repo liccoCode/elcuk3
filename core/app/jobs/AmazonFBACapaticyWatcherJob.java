@@ -3,6 +3,7 @@ package jobs;
 import helper.Dates;
 import helper.GTs;
 import helper.HTTP;
+import helper.LogUtils;
 import models.Jobex;
 import models.market.Account;
 import models.product.Whouse;
@@ -25,6 +26,7 @@ import java.util.List;
 public class AmazonFBACapaticyWatcherJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonFBACapaticyWatcherJob.class.getName()).isExcute()) return;
         List<Whouse> whouses = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whouses) {
@@ -46,6 +48,7 @@ public class AmazonFBACapaticyWatcherJob extends Job {
             whouse.capaticyContent = fbaCapacityWidgetDiv(doc, whouse);
             whouse.save();
         }
+        LogUtils.JOBLOG.info(String.format("AmazonFBACapaticyWatcherJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
 

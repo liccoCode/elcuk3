@@ -2,6 +2,7 @@ package jobs;
 
 import helper.FLog;
 import helper.HTTP;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Orderr;
@@ -31,6 +32,7 @@ import java.util.List;
 public class OrderInfoFetchJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(OrderInfoFetchJob.class.getName()).isExcute()) return;
         /**
          * 1. 加载 SHIPPED 状态的订单, 并且限制数量;
@@ -48,6 +50,7 @@ public class OrderInfoFetchJob extends Job {
                         ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
+        LogUtils.JOBLOG.info(String.format("OrderInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
     }
 
     // TODO 性能有问题

@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.promise.FinanceShippedPromise;
 import models.Jobex;
@@ -33,6 +34,7 @@ public class AmazonFinanceCheckJob extends Job {
 
     @Override
     public void doJob() throws InterruptedException, ExecutionException, TimeoutException {
+        long begin = System.currentTimeMillis();
         // 不和两个大计算量的任何重合
         if(SellingSaleAnalyzeJob.isRnning()) return;
         // 1. 寻找需要处理的订单, 并且按照 market 进行分组
@@ -73,6 +75,7 @@ public class AmazonFinanceCheckJob extends Job {
             List<Orderr> orders = Orderr.find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
             new FinanceShippedPromise(acc, m, Orderr.ids(orders)).now();
         }
+        LogUtils.JOBLOG.info(String.format("AmazonFinanceCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
 
     }
 
