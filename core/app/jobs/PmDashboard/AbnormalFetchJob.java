@@ -189,6 +189,10 @@ public class AbnormalFetchJob extends BaseJob {
      */
     private float beforeMean(String sku, MetricProfitService met) {
         DateTime now = new DateTime().now();
+        /**
+         * 过去四周要从昨天销量的日期开始
+         */
+        now = now.plusDays(-1);
         float beforeSales = 0;
         for(int i = 1; i <= 4; i++) {
             //每次都减去7天
