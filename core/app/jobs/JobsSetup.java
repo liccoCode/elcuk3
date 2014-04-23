@@ -25,6 +25,11 @@ public class JobsSetup {
     public static void init() {
         boolean isprodjob = isProdJob();
         boolean isdevJob = isDevJob();
+
+        /**
+         * 因cookie无法转成json到redis,暂时两边都执行此job
+         */
+        every(KeepSessionJob.class, "29mn");
         if(isprodjob || isdevJob) {
             // 手动的将所有的需要的 Job 启动
 
@@ -59,7 +64,7 @@ public class JobsSetup {
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
-            every(KeepSessionJob.class, "29mn");
+            //every(KeepSessionJob.class, "29mn");
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
