@@ -87,7 +87,9 @@ public class Webs {
             ObjectInputStream ois = new ObjectInputStream(fis);
             BasicCookieStore cookieStore = (BasicCookieStore) ois.readObject();
             ois.close();
-            Account.cookieMap().put(Account.cookieKey(acc.uniqueName, acc.type), cookieStore);
+            Map<String, BasicCookieStore> cookiemap = Account.cookieMap();
+            cookiemap.put(Account.cookieKey(acc.uniqueName, acc.type), cookieStore);
+            play.cache.Cache.add(Account.COOKIEKEY, cookiemap);
         }
         Account.cookieMap().get(Account.cookieKey(acc.uniqueName, acc.type)).clearExpired(new Date());
     }

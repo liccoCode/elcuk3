@@ -179,9 +179,10 @@ public class Account extends Model {
     public BasicCookieStore cookieStore(M market) {
         if(market == null) market = this.type;
         String key = cookieKey(this.uniqueName, market);
-        if(!cookieMap().containsKey(key)) {
-            cookieMap().put(key, new BasicCookieStore());
-            play.cache.Cache.add(COOKIEKEY, cookieMap());
+        Map<String, BasicCookieStore> cookiemap = cookieMap();
+        if(!cookiemap.containsKey(key)) {
+            cookiemap.put(key, new BasicCookieStore());
+            play.cache.Cache.add(COOKIEKEY, cookiemap);
         }
         return cookieMap().get(key);
     }
