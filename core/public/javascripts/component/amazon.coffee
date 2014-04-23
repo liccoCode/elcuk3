@@ -121,7 +121,7 @@ $ ->
     "AMAZON_IT_ConsumerElectronics":[ 'AVFurniture', 'AccessoryOrPartOrSupply', 'AudioOrVideo', 'Battery', 'Binocular', 'CableOrAdapter', 'Camcorder', 'CameraFlash', 'CameraLenses', 'CameraOtherAccessories', 'CameraPowerSupply', 'CarElectronics', 'ConsumerElectronics', 'DigitalCamera', 'DigitalPictureFrame', 'FilmCamera', 'GpsOrNavigationSystem', 'Headphones', 'Phone', 'PhoneAccessory', 'PhotographicStudioItems', 'PortableAvDevice', 'PowerSuppliesOrProtection', 'Radio', 'RemoteControl', 'Speakers', 'Telescope', 'Television', 'VideoProjector', 'camerabagsandcases'],
 
     "AMAZON_JP_Computers":[ 'ComputerComponent', 'ComputerDriveOrStorage', 'InkOrToner', 'Monitor', 'NotebookComputer', 'PersonalComputer', 'Printer', 'Scanner', 'VideoProjector'],
-    "AMAZON_JP_ConsumerElectronics":["アクセサリー/パーツ/サプライ", "オーディオ/ビデオ", "AV家具", "バッテリー", "双眼鏡", "ケーブル/アダプター", "ビデオカメラ", "カメラバッグ/ケース", "デジタルカメラ", "フィルムカメラ", "カメラフラッシュ", "カメラレンズ", "カメラアクセサリ", "カメラパワーサプライ", "カーエレクトロニクス", "消費者向け電化製品", "フォトフレーム", "GPS/ナビゲーションシステム", "ヘッドフォン", "携帯/スマホ", "携帯/スマホ アクセサリー", "写真スタジオアイテム", "ポータブルAVデバイス", "パワーサプライ/プロテクション", "ラジオ", "リモコン", "スピーカー", "望遠鏡", "テレビ", "ビデオプロジェクター"]
+    "AMAZON_JP_ConsumerElectronics":["AccessoryOrPartOrSupply", "AudioOrVideo", "AvFurniture", "Battery", "Binocular", "CableOrAdapter", "Camcorder", "CameraBagsAndCases", "DigitalCamera", "FilmCamera", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector"]
 
   }
 
