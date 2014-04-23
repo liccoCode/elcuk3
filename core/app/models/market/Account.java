@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -48,7 +47,6 @@ public class Account extends Model {
      * 需要过滤掉的 MerchantId
      */
     public final static Map<String, String> OFFER_IDS;
-    public static final String COOKIEKEY = "accountcookiemap";
 
     static {
         OFFER_IDS = new HashMap<String, String>();
@@ -63,25 +61,8 @@ public class Account extends Model {
     private static Map<String, BasicCookieStore> COOKIE_STORE_MAP;
 
     public static Map<String, BasicCookieStore> cookieMap() {
-//        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
-//        return COOKIE_STORE_MAP;
-
-        Gson gson = new Gson();
-        String gsoncookie = play.cache.Cache.get(COOKIEKEY, String.class);
-        Map<String, BasicCookieStore> cookiemap = null;
-        if(StringUtils.isNotBlank(gsoncookie)) {
-            cookiemap = gson.fromJson(gsoncookie,
-                    new TypeToken<Map<String, List<BasicCookieStore>>>() {}.getType());
-        }
-        if(cookiemap == null) {
-            LogUtils.JOBLOG.info("COOKIEKEY:get::" + cookiemap);
-            cookiemap = new HashMap<String, BasicCookieStore>();
-
-            String gsonmap = gson.toJson(cookiemap);
-            play.cache.Cache.delete(COOKIEKEY);
-            play.cache.Cache.add(COOKIEKEY, gsonmap);
-        }
-        return cookiemap;
+        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
+        return COOKIE_STORE_MAP;
     }
 
 
@@ -188,18 +169,10 @@ public class Account extends Model {
     public BasicCookieStore cookieStore(M market) {
         if(market == null) market = this.type;
         String key = cookieKey(this.uniqueName, market);
-        Map<String, BasicCookieStore> cookiemap = cookieMap();
-        LogUtils.JOBLOG.info("COOKIEKEY:key::" + key);
-        if(!cookiemap.containsKey(key)) {
-            cookiemap.put(key, new BasicCookieStore());
-
-            Gson gson = new Gson();
-            String gsonmap = gson.toJson(cookiemap);
-            play.cache.Cache.delete(COOKIEKEY);
-            play.cache.Cache.add(COOKIEKEY, gsonmap);
-
+        if(!cookieMap().containsKey(key)) {
+            cookieMap().put(key, new BasicCookieStore());
         }
-        return cookiemap.get(key);
+        return cookieMap().get(key);
     }
 
     public String cookie(String name) {
