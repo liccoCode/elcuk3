@@ -58,15 +58,16 @@ public class Account extends Model {
     private static Map<String, BasicCookieStore> COOKIE_STORE_MAP;
 
     public static Map<String, BasicCookieStore> cookieMap() {
-        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
-        return COOKIE_STORE_MAP;
-//        Map<String, BasicCookieStore> cookiemap = play.cache.Cache.get(COOKIEKEY, Map.class);
-//        LogUtils.JOBLOG.info("COOKIEKEY:get::"+cookiemap);
-//        if(cookiemap == null) {
-//            cookiemap = new HashMap<String, BasicCookieStore>();
-//            play.cache.Cache.add(COOKIEKEY, cookiemap);
-//        }
-//        return cookiemap;
+//        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
+//        return COOKIE_STORE_MAP;
+        Map<String, BasicCookieStore> cookiemap = play.cache.Cache.get(COOKIEKEY, Map.class);
+        LogUtils.JOBLOG.info("COOKIEKEY:get::" + cookiemap);
+        if(cookiemap == null) {
+            cookiemap = new HashMap<String, BasicCookieStore>();
+            play.cache.Cache.delete(COOKIEKEY);
+            play.cache.Cache.add(COOKIEKEY, cookiemap);
+        }
+        return cookiemap;
     }
 
 
@@ -174,11 +175,10 @@ public class Account extends Model {
         if(market == null) market = this.type;
         String key = cookieKey(this.uniqueName, market);
         Map<String, BasicCookieStore> cookiemap = cookieMap();
-        LogUtils.JOBLOG.info("COOKIEKEY:key::"+key);
         if(!cookiemap.containsKey(key)) {
             cookiemap.put(key, new BasicCookieStore());
+            play.cache.Cache.delete(COOKIEKEY);
             play.cache.Cache.add(COOKIEKEY, cookiemap);
-            LogUtils.JOBLOG.info("COOKIEKEY:put::"+cookiemap.toString());
         }
         return cookiemap.get(key);
     }
