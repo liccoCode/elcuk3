@@ -46,6 +46,7 @@ public class Account extends Model {
      * 需要过滤掉的 MerchantId
      */
     public final static Map<String, String> OFFER_IDS;
+    public static final String COOKIEKEY = "accountcookiemap";
 
     static {
         OFFER_IDS = new HashMap<String, String>();
@@ -59,9 +60,19 @@ public class Account extends Model {
      */
     private static Map<String, CookieStore> COOKIE_STORE_MAP;
 
-    public static Map<String, CookieStore> cookieMap() {
-        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
-        return COOKIE_STORE_MAP;
+    public static Map<String, BasicCookieStore> cookieMap() {
+//        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
+//        return COOKIE_STORE_MAP;
+        return redisCookieMap();
+    }
+
+    public static Map<String, BasicCookieStore> redisCookieMap() {
+        Map<String, BasicCookieStore> cookiemap = play.cache.Cache.get(COOKIEKEY, Map.class);
+        if(cookiemap == null) {
+            cookiemap = new HashMap<String, BasicCookieStore>();
+            play.cache.Cache.add(COOKIEKEY, cookiemap);
+        }
+        return cookiemap;
     }
 
 
@@ -165,11 +176,13 @@ public class Account extends Model {
      *
      * @return
      */
-    public CookieStore cookieStore(M market) {
+    public BasicCookieStore cookieStore(M market) {
         if(market == null) market = this.type;
         String key = cookieKey(this.uniqueName, market);
-        if(!cookieMap().containsKey(key))
+        if(!cookieMap().containsKey(key)) {
             cookieMap().put(key, new BasicCookieStore());
+            play.cache.Cache.add(COOKIEKEY, cookieMap());
+        }
         return cookieMap().get(key);
     }
 

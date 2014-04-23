@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
 import play.Logger;
 import play.Play;
 import play.data.validation.Error;
@@ -84,7 +85,7 @@ public class Webs {
         } else {
             FileInputStream fis = new FileInputStream(jsonFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            CookieStore cookieStore = (CookieStore) ois.readObject();
+            BasicCookieStore cookieStore = (BasicCookieStore) ois.readObject();
             ois.close();
             Account.cookieMap().put(Account.cookieKey(acc.uniqueName, acc.type), cookieStore);
         }
