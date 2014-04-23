@@ -488,6 +488,7 @@ public enum M {
                         "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" +
                         marketplaceID;
             case AMAZON_US:
+            case AMAZON_JP:
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
