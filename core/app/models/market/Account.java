@@ -3,10 +3,7 @@ package models.market;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
-import helper.Constant;
-import helper.FLog;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -61,13 +58,8 @@ public class Account extends Model {
     private static Map<String, CookieStore> COOKIE_STORE_MAP;
 
     public static Map<String, BasicCookieStore> cookieMap() {
-//        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
-//        return COOKIE_STORE_MAP;
-        return redisCookieMap();
-    }
-
-    public static Map<String, BasicCookieStore> redisCookieMap() {
         Map<String, BasicCookieStore> cookiemap = play.cache.Cache.get(COOKIEKEY, Map.class);
+        LogUtils.JOBLOG.info("COOKIEKEY:get::"+cookiemap);
         if(cookiemap == null) {
             cookiemap = new HashMap<String, BasicCookieStore>();
             play.cache.Cache.add(COOKIEKEY, cookiemap);
@@ -183,8 +175,9 @@ public class Account extends Model {
         if(!cookiemap.containsKey(key)) {
             cookiemap.put(key, new BasicCookieStore());
             play.cache.Cache.add(COOKIEKEY, cookiemap);
+            LogUtils.JOBLOG.info("COOKIEKEY:put::"+cookiemap.toString());
         }
-        return cookieMap().get(key);
+        return cookiemap.get(key);
     }
 
     public String cookie(String name) {
