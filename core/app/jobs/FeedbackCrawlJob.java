@@ -62,7 +62,10 @@ public class FeedbackCrawlJob extends Job {
                 FeedbackCrawlJob.fetchAccountFeedback(acc, acc.type, 5);
             }
         }
-        LogUtils.JOBLOG.info(String.format("FeedbackCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("FeedbackCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
 
     }
 

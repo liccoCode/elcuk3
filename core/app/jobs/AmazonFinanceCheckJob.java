@@ -75,7 +75,10 @@ public class AmazonFinanceCheckJob extends Job {
             List<Orderr> orders = Orderr.find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
             new FinanceShippedPromise(acc, m, Orderr.ids(orders)).now();
         }
-        LogUtils.JOBLOG.info(String.format("AmazonFinanceCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonFinanceCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
 
     }
 
