@@ -767,9 +767,19 @@ public enum M {
             msku = "80-qw1a56-be";
         }
         switch(sell.market) {
-            case AMAZON_DE:
             case AMAZON_ES:
+            case AMAZON_DE:
+                return String
+                        .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                                msku, sell.asin);
             case AMAZON_FR:
+                return String
+                        .format("https://catalog-sc.amazon.fr/abis/edit/RelistProduct.amzn?sku=%s&asin=%s",
+                                msku, sell.asin);
+            case AMAZON_JP:
+                return String
+                        .format("https://catalog-sc.amazon.co.jp/abis/edit/RelistProduct.amzn?sku=%s&asin=%s",
+                                msku, sell.asin);
             case AMAZON_IT:
                 return String
                         .format("https://catalog-sc.amazon.it/abis/product/DisplayEditProduct?sku=%s&asin=%s",
