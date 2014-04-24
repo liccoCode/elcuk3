@@ -250,6 +250,9 @@ public class MWSReports {
                     case AMAZON_IT:
                         config.setServiceURL("https://mws.amazonservices.it");
                         break;
+                    case AMAZON_JP:
+                        config.setServiceURL("https://mws.amazonservices.jp");
+                        break;
                 }
 
                 client = new MarketplaceWebServiceClient(account.accessKey, account.token, "elcuk2", "1.0", config);
