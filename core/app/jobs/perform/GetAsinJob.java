@@ -129,7 +129,9 @@ public class GetAsinJob extends BaseJob {
             // 还原账户 Region
             account.changeRegion(account.type);
         }
-        LogUtils.JOBLOG.info(String.format("GetAsinJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String.format("GetAsinJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public boolean isExecuteble() {

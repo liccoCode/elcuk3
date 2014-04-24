@@ -17,4 +17,12 @@ public class LogUtils {
             JOBLOG = Logger.getLogger("elcuk2Job");
         }
     }
+
+    public static boolean isslow(long time) {
+        if(time >= 100000L) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

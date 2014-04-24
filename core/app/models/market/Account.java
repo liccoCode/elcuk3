@@ -1,12 +1,11 @@
 package models.market;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
-import helper.Constant;
-import helper.FLog;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -33,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import com.google.gson.reflect.TypeToken;
+
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
  * User: wyattpan
@@ -57,10 +58,10 @@ public class Account extends Model {
     /**
      * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
      */
-    private static Map<String, CookieStore> COOKIE_STORE_MAP;
+    private static Map<String, BasicCookieStore> COOKIE_STORE_MAP;
 
-    public static Map<String, CookieStore> cookieMap() {
-        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
+    public static Map<String, BasicCookieStore> cookieMap() {
+        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
         return COOKIE_STORE_MAP;
     }
 
@@ -165,11 +166,12 @@ public class Account extends Model {
      *
      * @return
      */
-    public CookieStore cookieStore(M market) {
+    public BasicCookieStore cookieStore(M market) {
         if(market == null) market = this.type;
         String key = cookieKey(this.uniqueName, market);
-        if(!cookieMap().containsKey(key))
+        if(!cookieMap().containsKey(key)) {
             cookieMap().put(key, new BasicCookieStore());
+        }
         return cookieMap().get(key);
     }
 

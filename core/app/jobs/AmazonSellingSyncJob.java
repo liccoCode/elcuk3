@@ -65,7 +65,10 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonSellingSyncJob step5 done!");
-        LogUtils.JOBLOG.info(String.format("AmazonSellingSyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonSellingSyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     @Override

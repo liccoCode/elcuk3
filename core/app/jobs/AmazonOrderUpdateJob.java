@@ -64,7 +64,10 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderUpdateJob step5 done!");
-        LogUtils.JOBLOG.info(String.format("AmazonOrderUpdateJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonOrderUpdateJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
 
@@ -150,9 +153,10 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
 
     private static void updateShippedOrder(List<Orderr> fbaShippedOrderrs) {
         try {
-            PreparedStatement psmt = DB.getConnection().prepareStatement("UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
-                    " email=?, buyer=?, reciver=?, address=?, address1=?" +
-                    " WHERE orderId=?");
+            PreparedStatement psmt = DB.getConnection()
+                    .prepareStatement("UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
+                            " email=?, buyer=?, reciver=?, address=?, address1=?" +
+                            " WHERE orderId=?");
             int i = 1;
             for(Orderr orderr : fbaShippedOrderrs) {
                 psmt.setTimestamp(i++, orderr.shipDate == null ? null : new Timestamp(orderr.shipDate.getTime()));
@@ -169,7 +173,8 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 i = 1;
             }
             int[] results = psmt.executeBatch();
-            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)", fbaShippedOrderrs.size(), Webs.intArrayString(results), results.length);
+            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)", fbaShippedOrderrs.size(),
+                    Webs.intArrayString(results), results.length);
         } catch(SQLException e) {
             e.printStackTrace();
         }

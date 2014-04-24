@@ -51,7 +51,10 @@ public class AmazonReviewCheckJob extends Job {
             review.save();
         }
 
-        LogUtils.JOBLOG.info(String.format("AmazonReviewCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonReviewCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
         // 如果对 Listing Review 还有其他检查, 可以在这里编写
     }
 }
