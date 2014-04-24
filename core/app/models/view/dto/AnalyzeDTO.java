@@ -142,8 +142,8 @@ public class AnalyzeDTO implements Serializable {
      *
      * @return ._1: 根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
      *         ._2: 根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
-     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
-     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
+     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
+     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         float _ps = this.getPs_cal();
@@ -151,9 +151,9 @@ public class AnalyzeDTO implements Serializable {
         return new F.T4<Float, Float, Float, Float>(
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
-                Webs.scale2PointUp((this.qty + this.way + this.working + this.worked) / _ps),
+                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
                 Webs.scale2PointUp(
-                        (this.qty + this.way + this.working + this.worked) / (ps == 0 ? _ps : ps))
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
