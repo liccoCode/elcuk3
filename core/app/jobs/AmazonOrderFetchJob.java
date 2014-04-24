@@ -113,7 +113,15 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             }
             int hour = DateTime.now().getHourOfDay();
 
-            if(hour > 18 || hour <= 3) {
+
+            if(hour >= 0 || hour <= 4) {
+                /**
+                 * 如果是早上执行则改为昨天的22:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().plusDays(-1).withHourOfDay(22).withMinuteOfHour(0)
+                        .withSecondOfMinute(0)
+                        .toDate();
+            } else if(hour > 18 || hour <= 24) {
                 /**
                  * 如果是晚上执行则改为22:00,避免执行时间不准确
                  */
