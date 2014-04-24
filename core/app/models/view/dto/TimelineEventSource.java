@@ -6,6 +6,7 @@ import ext.ShipmentsHelper;
 import helper.GTs;
 import helper.Webs;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.JVMRandom;
@@ -260,9 +261,9 @@ public class TimelineEventSource {
             return this;
         }
 
-        public Event color(ProcureUnit.STAGE stage) {
+        public Event color(ProcureUnit unit) {
             String color = "999999";
-            switch(stage) {
+            switch(unit.stage) {
                 case PLAN:
                     color = "A5B600";
                     break;
@@ -291,9 +292,40 @@ public class TimelineEventSource {
                     // error
                     color = "B94A48";
             }
+            color = fetchShipmentSate(unit);
             this.color = String.format("#%s", color);
             return this;
         }
+    }
+
+    /**
+     * 采购计划的运输单状态
+     */
+    public static String fetchShipmentSate(ProcureUnit unit) {
+        String color = "";
+        List<ShipItem> shipItems = unit.shipItems;
+        if(shipItems.size() == 1) {
+            //正常情况下一个采购计划只有一个对应的运输单
+            Shipment shipment = shipItems.get(0).shipment;
+            switch(shipment.state) {
+                case SHIPPING:
+                    color = "3A87AD";
+                    break;
+                case CLEARANCE:
+                case PACKAGE:
+                case BOOKED:
+                case DELIVERYING:
+                    color = "3746B1";
+                    break;
+                case RECEIPTD:
+                    color = "5437B1";
+                    break;
+            }
+        } else if(shipItems.size() > 1) {
+            //有多个对应的运输单，表示出现异常
+            color = "ff0000";
+        }
+        return color;
     }
 
     public static String getRandomColorCode() {
