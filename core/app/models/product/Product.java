@@ -346,6 +346,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * Product 在系统内的状态
      */
+    @Enumerated(EnumType.STRING)
     public S state = S.NEW;
 
     public Product() {

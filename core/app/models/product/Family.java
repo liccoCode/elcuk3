@@ -108,4 +108,14 @@ public class Family extends GenericModel {
         play.cache.Cache.add(Caches.FAMILYS, familys, "1h");
         return familys;
     }
+
+    /**
+     * Family 下的 Product
+     *
+     * @return
+     */
+    public List<Product> products() {
+        List<Product> products = Product.find("state <> 'DOWN' AND family_family = ?", this.family).fetch();
+        return products;
+    }
 }

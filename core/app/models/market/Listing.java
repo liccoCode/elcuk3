@@ -495,4 +495,13 @@ public class Listing extends GenericModel {
         }
         return listingIds;
     }
+
+    /**
+     * Listing 下所有的 Selling
+     * @return
+     */
+    public List<Selling> sellings() {
+        List<Selling> sellings = Selling.find("state <> 'DOWN' AND listing_listingId = ?", this.listingId).fetch();
+        return sellings;
+    }
 }

@@ -6,8 +6,9 @@
     <th>Review</th>
   </tr>
 #{list items:lsts, as:'l'}
+    #{set sellings: l.sellings()/}
   <tr>
-    <td data-toggle="toggle" data-target="#selling_${l_index}"><i class="icon-reorder"></i> ${l.sellings.size()}
+    <td data-toggle="toggle" data-target="#selling_${l_index}"><i class="icon-reorder"></i> ${sellings.size()}
     </td>
     <td><a href="@{Listings.listing(l.listingId)}" target="_blank">${l.listingId}</a></td>
     <td title="${l.title}">
@@ -21,18 +22,18 @@
     <td colspan="4" style="padding:0">
       <table class="table table-bordered table-condensed" style="margin:0">
         <tr>
-          <th>&nbsp;</th>
+          <th>Action</th>
           <th>SellingId</th>
           <th>Market</th>
           <th>State</th>
           <th>Acc</th>
         </tr>
-          #{list items:l.sellings, as:'sell'}
+          #{list items:sellings, as:'sell'}
             <tr>
               <td>
                 <div class="btn-group">
                   <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-wrench"></i><span class="caret"></span>
+                    <i class="icon-wrench"></i>&nbsp;&nbsp;<span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
                     <li><a href="javascript:;" action='remove' data-url='@{Sellings.destroy(sell.sellingId)}'>删除</a></li>
