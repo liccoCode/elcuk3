@@ -44,6 +44,12 @@ public class Category extends GenericModel {
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Team team;
 
+    /**
+     * Category拥有哪些模板
+     */
+    @ManyToMany(mappedBy = "categorys", cascade = CascadeType.PERSIST)
+    public List<Template> templates;
+
     @Id
     @Expose
     public String categoryId;

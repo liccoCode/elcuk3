@@ -1,4 +1,4 @@
-#{extends 'main.html' /}
+#{extends 'main_full.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
@@ -8,7 +8,7 @@
     #{script 'products/skulinechart.coffee'/}
 #{/set}
 
-<div class="row" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<div class="span12 offset3">
 #{if pro == null}
   读取的 Product 不存在!
 #{/if}
@@ -20,6 +20,9 @@
       <a href="#basicinfo" data-toggle='tab'>基本信息</a>
     </li>
     <li>
+      <a href="#extends" data-toggle='tab'>扩展属性</a>
+    </li>
+    <li>
       <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
     </li>
     <li>
@@ -29,13 +32,38 @@
       <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
     </li>
   </ul>
+
   <div id="selling_tabs" class="tab-content">
     <div class="tab-pane fade active in" id='basicinfo'>
         #{include 'Products/_basicInfo.html'/}
     </div>
 
+    <div class="tab-pane fade" id='extends'>
+      <div class="row-fluid">
+        <form class="search_form" id="select_template_form">
+          <select name="templateId" class="inline">
+            <option value="">请选择模板</option>
+              #{list items:templates, as:'template'}
+                <option value="${template.id}">${template.name}</option>
+              #{/list}
+          </select>
+          <input type="hidden" name="sku" value="${pro.sku}">
+          <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+        </form>
 
-    <div class="tab-pane fade active" id='attach'>
+          #{info_row title:'Attributes'/}
+        <div id="extends_atts_home">
+            #{if atts.size() > 0}
+                #{include 'Products/attrs.html'/}
+            #{/if}
+            #{else }
+              <p class="muted text-center">等待添加新的 Attribute.</p>
+            #{/else}
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id='attach'>
         #{include 'Products/_attach.html'/}
     </div>
 
@@ -74,5 +102,6 @@
     </div>
 
   </div>
+</div>
 #{/else}
 </div>
