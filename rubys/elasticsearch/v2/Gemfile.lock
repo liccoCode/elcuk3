@@ -27,4 +27,6 @@ DEPENDENCIES
   mysql2 (~> 0.3)
   nokogiri (~> 1.6)
   oj (~> 2.5)
+
   sequel (~> 4.8)
+

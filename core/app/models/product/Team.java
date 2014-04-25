@@ -5,6 +5,7 @@ import helper.DBUtils;
 import models.User;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
 
 import javax.persistence.*;

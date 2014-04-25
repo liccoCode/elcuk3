@@ -55,11 +55,13 @@ class OrderItemActor
 end
 
 # select oi.createDate date, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, oi.quantity, oi.order_orderId order_id from OrderItem oi limit 10;
+
 SQL = %q(SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, s.merchantSKU msku, oi.product_sku sku, p.category_categoryId category_id, oi.market, oi.quantity, oi.order_orderId order_id
   FROM OrderItem oi
   LEFT JOIN Product p ON p.sku=oi.product_sku
   LEFT JOIN Selling s ON oi.selling_sellingId=s.sellingId
   WHERE oi.product_sku IS NOT NULL AND oi.createDate>=?)
+
 # =============================================================================================================
 # 1. 初始化 OrderItemActor 用于多线程计算
 # 2. 使用流的方式加载数据库中数据, 每 2000 行数据派发给 Actor 一个任务, 并且每个任务间隔 0.3s 控制内存以及总处理速度

@@ -21,6 +21,7 @@ import java.util.Map;
 public class CategoryInfoDTO implements Serializable {
 
     private static final long serialVersionUID = -5856478468681674167L;
+
     public String sku;
 
     /**

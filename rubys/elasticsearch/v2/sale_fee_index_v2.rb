@@ -61,3 +61,4 @@ SQL = %q(SELECT fee.id, fee.date `date`, oi.selling_sellingId selling_id, oi.pro
 #SQL << " LIMIT 31000"
 SaleFeeActor.new.init_mapping
 process(dataset: DB[SQL, Time.parse('2012-01-01')].stream, actor: SaleFeeActor.pool(size: 6))
+

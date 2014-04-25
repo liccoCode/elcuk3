@@ -5,6 +5,7 @@ Dir['lib/*.rb'].each { |file| require File.expand_path(file) }
 
 
 # =============================== setup const ================================
+
 ES_HOST = "http://gengar.easya.cc:9200"
 #ES_HOST = "http://192.168.1.150:9200"
 
@@ -12,6 +13,7 @@ DB_HOST = "http://aggron.easya.cc"
 #DB_HOST = "localhost"
 DB_NAME = "elcuk2"
 #DB_NAME = "elcuk2_t"
+
 
 DB = Sequel.mysql2(DB_NAME, host: DB_HOST, user: 'root', password: 'crater10lake')
 # ============================================================================
