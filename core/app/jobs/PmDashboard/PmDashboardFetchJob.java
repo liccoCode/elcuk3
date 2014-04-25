@@ -3,7 +3,6 @@ package jobs.PmDashboard;
 import helper.LogUtils;
 import jobs.driver.BaseJob;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.cache.Cache;
 import play.utils.FastRuntimeException;
 import query.PmDashboardCache;
@@ -39,7 +38,6 @@ public class PmDashboardFetchJob extends BaseJob {
         }
 
         long begin = System.currentTimeMillis();
-        begin = System.currentTimeMillis();
         Cache.add(runningname, runningname);
         PmDashboardCache.doTargetCache(id, calyear);
         Cache.delete(runningname);
@@ -52,4 +50,6 @@ public class PmDashboardFetchJob extends BaseJob {
     public static boolean isRnning(String runningname) {
         return StringUtils.isNotBlank(Cache.get(runningname, String.class));
     }
+
+
 }

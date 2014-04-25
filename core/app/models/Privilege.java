@@ -107,6 +107,11 @@ public class Privilege extends Model {
         privileges.add(new Privilege("familys.index", "Family 页面"));
         privileges.add(new Privilege("feeds.index", "Feed 页面"));
 
+        privileges.add(new Privilege("attributes.index", "产品附加属性 页面"));
+        privileges.add(new Privilege("templates.show", "附加属性模板 页面"));
+
+
+
         privileges.add(new Privilege("procure", "采购模块"));
         privileges.add(new Privilege("procures.index", "采购计划 页面"));
         privileges.add(new Privilege("deliveryments.index", "采购单 页面"));
