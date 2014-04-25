@@ -4,6 +4,7 @@ import helper.Dates;
 import helper.Promises;
 import models.market.M;
 import models.procure.ProcureUnit;
+import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -86,8 +87,9 @@ public class SellingSaleAnalyzeJob extends Job {
                 // 准备计算用的数据容器
                 Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
                 if(isSku) {
-                    for(String sku : new ProductQuery().skus()) {
-                        analyzeMap.put(sku, new AnalyzeDTO(sku));
+                    Map<String, Product.S> products = new ProductQuery().skuAndStates();
+                    for(String sku : products.keySet()) {
+                        analyzeMap.put(sku, new AnalyzeDTO(sku, products.get(sku).toString()));
                     }
                 } else {
                     for(AnalyzeDTO dto : new SellingQuery().analyzePostDTO()) {

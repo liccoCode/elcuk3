@@ -25,7 +25,7 @@ public class SellingQuery {
      */
     public List<AnalyzeDTO> analyzePostDTO() {
         SqlSelect sql = new SqlSelect()
-                .select("s.sellingId", "s.asin", "s.ps", "s.account_id", "s.market")
+                .select("s.sellingId", "s.asin", "s.ps", "s.account_id", "s.market", "s.state")
                 .from("Selling s");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>();
@@ -36,6 +36,7 @@ public class SellingQuery {
             dto.aid = row.get("account_id").toString();
             dto.market = M.val(row.get("market").toString());
             dto.ps = NumberUtils.toFloat(row.get("ps").toString());
+            dto.state = row.get("state").toString();
             dtos.add(dto);
         }
         return dtos;
