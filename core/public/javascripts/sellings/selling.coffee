@@ -27,15 +27,15 @@ $ ->
     return false unless imageIndexCal()
     LoadMask.mask()
     $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-      .done((r) ->
+    .done((r) ->
         msg = if r.flag is true
-            {text: "#{r.message} Selling 更新成功", type: 'success'}
-          else
-            {text: r.message, type: 'error'}
+          {text: "#{r.message} Selling 更新成功", type: 'success'}
+        else
+          {text: r.message, type: 'error'}
         noty(msg)
         LoadMask.unmask()
       )
-      .fail((r) ->
+    .fail((r) ->
         noty({text: r.responseText, type: 'error'})
         LoadMask.unmask()
       )
@@ -57,14 +57,14 @@ $ ->
       else
     LoadMask.mask()
     $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-      .done((feed) ->
+    .done((feed) ->
         if feed.flag is false
           noty({text: feed.message, type: 'error'})
         else
-          noty({text: "成功创建 Feed(#{feed.id})"}, type: 'success')
+          noty({text: "成功创建 Feed(#{feed.id})", type: 'success'})
         LoadMask.unmask()
       )
-      .fail((r) ->
+    .fail((r) ->
         noty({text: r.responseText, type: 'error'})
         LoadMask.unmask()
       )
@@ -115,7 +115,7 @@ $ ->
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
       true
 
-  $('#showFeedsButton').on('shown',(e) ->
+  $('#showFeedsButton').on('shown', (e) ->
     sellingId = $('input[name="s.sellingId"]').val()
     LoadMask.mask()
     $("#feedsHome").load("/Sellings/feeds?sellingId=#{sellingId}")
@@ -125,4 +125,27 @@ $ ->
   # 图片上传的按钮
   $('#img_cal').click(imageIndexCal)
   $("#feedProductType").trigger('adjust')
+
+  $("#upAndDownForm").on("click", "#sellingUp, #sellingDown", (r) ->
+    LoadMask.mask()
+    $btn = $(@)
+    flag = if $btn.attr("id") == "sellingUp"
+      true
+    else
+      false
+    $.ajax("/sellings/changeSellingType",
+    {type: 'POST', data: {sellingId: $("#sellingId").val(), flag: flag}, dataType: 'json'})
+    .done((r) ->
+        msg = if r.flag is true and flag is true
+          $("#sellingState").val("SELLING")
+          {text: "#{r.message} 系统上架成功", type: 'success'}
+        else if r.flag is true and flag is false
+          $("#sellingState").val("DOWN")
+          {text: "#{r.message} 系统下架成功", type: 'warning'}
+        else
+          {text: r.message, type: 'error'}
+        noty(msg)
+        LoadMask.unmask()
+      )
+  )
 

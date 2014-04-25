@@ -210,4 +210,24 @@ public class Sellings extends Controller {
         renderArgs.put("feeds", Feed.find("fid=? ORDER BY createdAt DESC", sellingId).fetch());
         render("Feeds/_feed.html");
     }
+
+    /**
+     * 修改 Selling 在系统内的状态
+     */
+    public static void changeSellingType(String sellingId, boolean flag) {
+        try {
+            Selling selling = Selling.findById(sellingId);
+            if(flag) {
+                selling.state = Selling.S.SELLING;
+            } else {
+                selling.state = Selling.S.DOWN;
+            }
+            selling.save();
+            //修改 Product 在系统内的状态
+            Product.changeProductType(selling.merchantSKU);
+            renderJSON(new Ret(true, sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
 }
