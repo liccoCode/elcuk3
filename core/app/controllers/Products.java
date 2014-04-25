@@ -301,6 +301,7 @@ public class Products extends Controller {
                 atts.add(productAttr);
             }
         }
+        Collections.sort(atts);
         render(pro, atts);
     }
 
