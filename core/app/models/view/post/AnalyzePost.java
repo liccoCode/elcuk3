@@ -223,7 +223,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
             event.startAndEndDate(type)
                     .titleAndDesc()
-                    .color(unit.stage);
+                    .color(unit);
 
             eventSource.events.add(event);
         }
