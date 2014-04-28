@@ -35,7 +35,11 @@
                     <i class="icon-wrench"></i><span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a href="javascript:;" action='remove' data-url='@{Sellings.destroy(sell.sellingId)}'>删除</a></li>
+                    <li>
+                    #{power.ck "sellings.delete"}
+                      <a href="javascript:;" action='remove' data-url='@{Sellings.destroy(sell.sellingId)}'>删除</a>
+                    #{/power.ck}
+                    </li>
                   </ul>
                 </div>
               </td>

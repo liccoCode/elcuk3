@@ -126,3 +126,18 @@ $ ->
   $('#img_cal').click(imageIndexCal)
   $("#feedProductType").trigger('adjust')
 
+  # 刪除 Selling
+  $('#btns').on('click', 'a[action=remove]', (li) ->
+    LoadMask.mask()
+    $btn = $(@)
+    $.ajax($btn.data('url'))
+      .done((r) ->
+        type = if r.flag
+          alert(r.message)
+          window.close()
+        else
+          noty({text: r.message, type: 'error'})
+        LoadMask.unmask()
+      )
+    )
+
