@@ -4,6 +4,7 @@ import helper.Dates;
 import helper.Promises;
 import models.market.M;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -112,7 +113,7 @@ public class SellingSaleAnalyzeJob extends Job {
                         if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
-                        else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
+                        else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += countWay(unit);
                         else if(unit.stage == ProcureUnit.STAGE.INBOUND)
                             dto.inbound += (unit.qty() - unit.inboundingQty());
                     }
@@ -134,6 +135,27 @@ public class SellingSaleAnalyzeJob extends Job {
         }
 
         return dtos;
+    }
+
+    /**
+     * 统计在途的数量
+     * 公式为：(运输中 + 清关中 + 提货中 + 已预约 + 派送中 + 已签收)
+     */
+    public int countWay(ProcureUnit unit) {
+        int way = 0;
+        //采购计划的 shipItems
+        for(ShipItem si : unit.shipItems) {
+            switch(si.shipment.state) {
+                case SHIPPING:
+                case CLEARANCE:
+                case PACKAGE:
+                case BOOKED:
+                case DELIVERYING:
+                case RECEIPTD:
+                    way += si.qty;
+            }
+        }
+        return way;
     }
 
     private void pullDaySales(boolean isSku, Map<String, AnalyzeDTO> analyzeMap) {

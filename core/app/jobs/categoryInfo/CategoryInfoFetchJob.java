@@ -10,7 +10,6 @@ import models.view.dto.CategoryInfoDTO;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import services.MetricProfitService;
@@ -33,6 +32,7 @@ public class CategoryInfoFetchJob extends BaseJob {
     public void doit() {
         if(isRnning()) return;
         long begin = System.currentTimeMillis();
+
         Cache.add(RUNNING, RUNNING);
         categoryinfo();
         Cache.delete(RUNNING);
@@ -40,6 +40,7 @@ public class CategoryInfoFetchJob extends BaseJob {
             LogUtils.JOBLOG.info(String
                     .format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
+
     }
 
     public static boolean isRnning() {
@@ -199,9 +200,11 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastFriday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
+
         monday = new DateTime(Dates.night(monday.toDate()));
         /**上周五只减三天，上上周五减少10天**/
         return monday.plusDays((plusWeekNumber - 1) * (-7) + (-3));
+
     }
 
     /**
@@ -212,8 +215,10 @@ public class CategoryInfoFetchJob extends BaseJob {
      */
     public DateTime lastSaturday(int plusWeekNumber) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
+
         monday = new DateTime(Dates.morning(monday.toDate()));
         /**上周六只减9天，上上周六减少16天**/
         return monday.plusDays((plusWeekNumber - 1) * (-7) + (-9));
+
     }
 }

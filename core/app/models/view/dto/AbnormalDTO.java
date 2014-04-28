@@ -24,6 +24,7 @@ import java.util.*;
  */
 public class AbnormalDTO implements Serializable {
     private static final long serialVersionUID = 6545835762456678553L;
+
     /**
      * 今天的数据
      */
@@ -111,6 +112,7 @@ public class AbnormalDTO implements Serializable {
 
         List<AbnormalDTO> dtos = dtoMap.get(this.abnormalType.toString());
         List<AbnormalDTO> filterResult = AbnormalDTO.abnormalFilter(skus, dtos, this);
+
         return filterResult;
     }
 
@@ -124,6 +126,7 @@ public class AbnormalDTO implements Serializable {
         List<String> categoryIds = User.getTeamCategorys(user);
         //skus 集合
         List<String> skus = Category.getSKUs(categoryIds);
+
         Map<String, List<AbnormalDTO>> dtoMap = Cache.get(AbnormalFetchJob.AbnormalDTO_CACHE, Map.class);
         if(dtoMap != null) {
             long abnormalSize = 0;
@@ -131,6 +134,7 @@ public class AbnormalDTO implements Serializable {
                 List<AbnormalDTO> abnormalDTOs = dtoMap.get(key);
                 //执行过滤
                 abnormalDTOs = AbnormalDTO.abnormalFilter(skus, abnormalDTOs, new AbnormalDTO());
+
                 abnormalSize += abnormalDTOs == null ? 0 : abnormalDTOs.size();
             }
             return abnormalSize;
@@ -147,6 +151,7 @@ public class AbnormalDTO implements Serializable {
         List<AbnormalDTO> filterResult = new ArrayList<AbnormalDTO>();
         for(AbnormalDTO dto : dtos) {
             if(skus.contains(dto.sku) && dto.difference >= (arg.difference / 100)) filterResult.add(dto);
+
         }
         return filterResult;
     }

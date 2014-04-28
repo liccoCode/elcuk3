@@ -152,8 +152,9 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     }
 
     private static void updateShippedOrder(List<Orderr> fbaShippedOrderrs) {
+        PreparedStatement psmt = null;
         try {
-            PreparedStatement psmt = DB.getConnection()
+            psmt = DB.getConnection()
                     .prepareStatement("UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
                             " email=?, buyer=?, reciver=?, address=?, address1=?" +
                             " WHERE orderId=?");
@@ -177,6 +178,12 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                     Webs.intArrayString(results), results.length);
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(psmt != null) psmt.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -59,8 +59,9 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
     }
 
     public static void updateOrders(List<Orderr> toUpdateOrders) {
+        PreparedStatement pst = null;
         try {
-            PreparedStatement pst = DB.getConnection().prepareStatement(
+            pst = DB.getConnection().prepareStatement(
                     "UPDATE Orderr SET state=?, shipLevel=?, paymentDate=?," +
                             " city=?, country=?, postalCode=?, market=?, " +
                             " phone=?, province=?, reciver=?, address=?" +
@@ -90,16 +91,24 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
             );
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(pst != null) pst.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static void saveOrders(List<Orderr> toSaveOrders) {
+        PreparedStatement pst = null;
         try {
-            PreparedStatement pst = DB.getConnection().prepareStatement(
+            pst = DB.getConnection().prepareStatement(
                     "INSERT INTO Orderr(orderId, market, account_id, state, shipLevel, " +
                             "paymentDate, createDate, reviewMailed, warnning)" +
                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
+
             int i = 1;
             for(Orderr orderr : toSaveOrders) {
                 pst.setString(i++, orderr.orderId);
@@ -121,6 +130,12 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
             );
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(pst != null) pst.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

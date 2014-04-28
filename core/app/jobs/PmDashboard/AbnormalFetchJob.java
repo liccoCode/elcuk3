@@ -46,6 +46,7 @@ public class AbnormalFetchJob extends BaseJob {
                     System.currentTimeMillis() - begin));
         }
 
+
     }
 
     public static boolean isRnning() {
@@ -146,6 +147,7 @@ public class AbnormalFetchJob extends BaseJob {
             //上周五 以及 往前同期（上上周五）
             DateTime end = monday.plusDays((i - 1) * (-7) + (-3));
             end = new DateTime(Dates.night(end.toDate()));
+
             MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeSales[i - 1] = met.esSaleFee();
         }
@@ -173,6 +175,7 @@ public class AbnormalFetchJob extends BaseJob {
             //上周五 以及 往前同期（上上周五）
             DateTime end = monday.plusDays((i - 1) * (-7) + (-3));
             end = new DateTime(Dates.night(end.toDate()));
+
             MetricProfitService met = new MetricProfitService(begin.toDate(), end.toDate(), null, sku, null);
             beforeProfit[i - 1] = met.calProfit().profitrate;
         }
@@ -193,6 +196,7 @@ public class AbnormalFetchJob extends BaseJob {
          * 过去四周要从昨天销量的日期开始
          */
         now = now.plusDays(-1);
+
         float beforeSales = 0;
         for(int i = 1; i <= 4; i++) {
             //每次都减去7天

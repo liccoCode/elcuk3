@@ -1,12 +1,10 @@
 package controllers;
 
-import helper.DBUtils;
-import helper.Webs;
+
 import models.ElcukRecord;
 import models.SaleTarget;
 import models.User;
 import models.product.Category;
-import models.view.Ret;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -15,9 +13,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 销售目标基本操作
