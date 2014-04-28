@@ -84,8 +84,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
      * @param orderItems
      */
     public static void saveOrderItem(List<OrderItem> orderItems) {
+        PreparedStatement psmt = null;
         try {
-            PreparedStatement psmt = DB.getConnection().prepareStatement(
+            psmt = DB.getConnection().prepareStatement(
                     "INSERT INTO OrderItem(id, createDate, discountPrice, price, currency," +
                             " listingName, quantity, order_orderId, product_sku, selling_sellingId," +
                             " usdCost, market, promotionIDs, giftWrap)" +
@@ -126,6 +127,12 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             }
         } catch(SQLException e) {
             Logger.error(Webs.S(e));
+        } finally {
+            try {
+                if(psmt != null) psmt.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -138,8 +145,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
     }
 
     public static void updateOrderItem(List<OrderItem> orderItems) {
+        PreparedStatement psmt = null;
         try {
-            PreparedStatement psmt = DB.getConnection().prepareStatement(
+            psmt = DB.getConnection().prepareStatement(
                     "UPDATE OrderItem SET discountPrice=?, price=?, currency=?," +
                             " listingName=?, quantity=?, usdCost=?," +
                             " market=?, promotionIDs=?, giftWrap=?," +
@@ -184,6 +192,12 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             }
         } catch(SQLException e) {
             Logger.error(Webs.S(e));
+        } finally {
+            try {
+                if(psmt != null) psmt.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -105,8 +105,9 @@ public class AmazonFinanceCheckJob extends Job {
     }
 
     public static void saveFees(List<SaleFee> fees) {
+        PreparedStatement psmt = null;
         try {
-            PreparedStatement psmt = DB.getConnection().prepareStatement(
+            psmt = DB.getConnection().prepareStatement(
                     "INSERT INTO SaleFee(account_id, order_orderId, type_name, market, memo, orderId, `DATE`, cost, currency, usdCost, qty)" +
                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
@@ -131,6 +132,12 @@ public class AmazonFinanceCheckJob extends Job {
             psmt.executeBatch();
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(psmt != null) psmt.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
