@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
 import helper.DBUtils;
+import helper.Webs;
 import jobs.ListingSchedulJob;
 import jobs.works.ListingOffersWork;
 import models.product.Product;
@@ -494,5 +495,13 @@ public class Listing extends GenericModel {
             listingIds.add(row.get("listingId").toString());
         }
         return listingIds;
+    }
+
+    public void safeDelete() {
+        long size = this.sellings.size();
+        if(this.sellings.size() > 0) {
+            Webs.error("此 Listing 拥有 " + size + " 个 Selling 关联, 无法删除");
+        }
+        this.delete();
     }
 }
