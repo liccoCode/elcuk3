@@ -9,6 +9,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
+import models.market.OrderItem;
 import models.market.Selling;
 import models.procure.Cooperator;
 import models.view.dto.ProductDTO;
@@ -594,5 +595,20 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             this.locate.add(new ProductDTO());
             this.sellingPoint.add(new ProductDTO());
         }
+    }
+
+    /**
+     * Product 删除时的限制条件
+     */
+    public void safeDelete() {
+        if(this.listings.size() > 0) {
+            Validation.addError("", String.format("%s Product 下拥有 %s 个 相关Listing，无法删除",
+                    this.sku, this.listings.size()));
+        }
+        long orderItemCount = OrderItem.count("product_sku = ?", this.sku);
+        if(orderItemCount > 0)
+            Validation.addError("", String.format("%s Product 下找到 %s 个相关订单项，无法删除"), this.sku, orderItemCount + "");
+        if(Validation.hasErrors()) return;
+        this.delete();
     }
 }

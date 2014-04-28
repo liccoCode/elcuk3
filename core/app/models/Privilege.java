@@ -101,6 +101,8 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("product", "产品模块"));
         privileges.add(new Privilege("products.index", "产品 页面"));
+        privileges.add(new Privilege("products.delete", "产品 删除"));
+
         privileges.add(new Privilege("whouses.index", "仓库 页面"));
         privileges.add(new Privilege("categorys.show", "产品类别 页面"));
         privileges.add(new Privilege("brands.index", "产品品牌 页面"));
