@@ -64,13 +64,14 @@ $ ->
     objE.childNodes[0]
 
   $("#extends").on("click", "#add_template_btn",() ->
-    LoadMask.mask()
-    temp_id = $("#select_template_form").val()
-    if(temp_id is "")
+    temp_id = $("select[name='templateId']").val()
+    if temp_id is ""
       noty({text: "请选择要加载的模板", type: 'error', timeout: 5000})
-    $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
-      LoadMask.unmask()
-    )
+    else
+      LoadMask.mask()
+      $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
+        LoadMask.unmask()
+      )
   ).on("click", "#remove_attr_btn",() ->
     LoadMask.mask()
     $btn = $(@)
