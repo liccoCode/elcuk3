@@ -1,12 +1,12 @@
 #{extends 'main_full.html'/}
 #{set title:'Family' /}
 #{set 'moreScripts'}
-    #{script 'products/family.js'/}
+    #{script 'products/family.coffee'/}
 #{/set}
 
 #{flash_alert /}
 <div class="row-fluid">
-  <div class="span4">
+  <div class="span3">
     <h2>Category</h2>
     <ul id="slider" class="nav nav-list nav-collapse" style="font-size:1em;cursor:pointer;">
     #{list items:cats, as:'cat'}
@@ -15,10 +15,11 @@
           <nobr>${cat}(${cat.brands.size()})</nobr>
         </a>
       </li>
-      <ul id="${cat.categoryId}" class="nav nav-list collapse"> <!-- Brand -->
+      <ul id="${cat.categoryId}" class="nav nav-list collapse">
           #{list items:cat.brands, as:'bd'}
             <li>
-              <a style="display:inline;padding-left:0;">
+              <a level="brand" style="display:inline;padding-left:0;" cid="${cat.categoryId}" bid="${bd.name}"
+                 fid="${bd.firstFamily(cat.categoryId)}">
                 <nobr>${bd.name} ${bd.families.size() == 0 ? '(0)' :''}</nobr>
               </a>
             </li>
@@ -27,14 +28,20 @@
     #{/list}
     </ul>
   </div>
-  <div class="span4">
+
+  <div class="span9">
     <h2>Family</h2>
 
-    <div id="fam_div">请选择左侧的 Category 与 Brand</div>
+    <div id="fam_div">
+      请点击左侧加载 Brand 的 Family
+    </div>
   </div>
-  <div class="span4">
-    <h2>Brand</h2>
 
-    <div id="brand_div"></div>
+  <div class="span9">
+    <h2>Product</h2>
+
+    <div id="pro_div">
+      请点击 Family 加载 Product
+    </div>
   </div>
 </div>
