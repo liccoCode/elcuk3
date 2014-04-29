@@ -128,6 +128,7 @@ $ ->
 
   # 刪除 Selling
   $('#btns').on('click', 'a[action=remove]', (li) ->
+    return unless confirm('确认删除?')
     LoadMask.mask()
     $btn = $(@)
     $.ajax($btn.data('url'))
