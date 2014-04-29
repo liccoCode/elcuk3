@@ -21,7 +21,8 @@ import java.util.List;
 public class Familys extends Controller {
     @Check("familys.index")
     public static void index() {
-        render();
+        List<Category> cats = Category.find("ORDER BY categoryId").fetch();
+        render(cats);
     }
 
     public static void create(Family f) {
