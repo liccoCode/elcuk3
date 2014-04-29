@@ -114,7 +114,7 @@ public class Family extends GenericModel {
      *
      * @return
      */
-    public List<Product> products() {
+    public List<Product> productList() {
         List<Product> products = Product.find("state <> 'DOWN' AND family_family = ?", this.family).fetch();
         return products;
     }

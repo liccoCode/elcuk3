@@ -35,7 +35,7 @@
                 <ul id="${cat.categoryId}_${bd.name}" class="nav nav-list collapse"> <!-- Family -->
                     #{list items:bd.families, as:'fm'}
                         #{if fm.category == cat}
-                            #{set products: fm.products()/}
+                            #{set products: fm.productList()/}
                           <li>
                             <a data-toggle="collapse" data-target="#${cat.categoryId}_${fm.family}" style="display:inline;padding-left:0;">
                               <nobr>${fm.family} (${products.size()})</nobr>
