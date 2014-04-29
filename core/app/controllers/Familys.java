@@ -38,6 +38,7 @@ public class Familys extends Controller {
         }
     }
 
+    @Check("familys.delete")
     public static void destroy(String family) {
         try {
             Family fa = Family.findById(family);
