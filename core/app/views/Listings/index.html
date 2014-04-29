@@ -35,14 +35,15 @@
                 <ul id="${cat.categoryId}_${bd.name}" class="nav nav-list collapse"> <!-- Family -->
                     #{list items:bd.families, as:'fm'}
                         #{if fm.category == cat}
+                            #{set products: fm.products()/}
                           <li>
                             <a data-toggle="collapse" data-target="#${cat.categoryId}_${fm.family}" style="display:inline;padding-left:0;">
-                              <nobr>${fm.family} (${fm.products.size()})</nobr>
+                              <nobr>${fm.family} (${products.size()})</nobr>
                             </a>
                           </li>
                           <ul id="${cat.categoryId}_${fm.family}" class="nav nav-list collapse">
                             <!-- Product -->
-                              #{list items:fm.products, as:'prod'}
+                              #{list items:products, as:'prod'}
                                 <li>
                                   <a level="sku" cid="${cat.categoryId}" bid="${bd.name}" fid="${fm.family}" pid="${prod.sku}" style="display:inline;padding-left:0;font-size:0.9em;">
                                     <nobr><i class="icon-map-marker"></i>${prod.sku}</nobr>

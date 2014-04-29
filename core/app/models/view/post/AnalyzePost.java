@@ -59,6 +59,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     public String market;
 
+    public String state = "Active";
+
     @Override
     public F.T2<String, List<Object>> params() {
         // no use
@@ -94,6 +96,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(this.filterDot2) CollectionUtils.filter(dtos, new UnContainsPredicate(",2"));
         if(StringUtils.isNotBlank(this.market))
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
+        if(StringUtils.isNotBlank(this.state))
+            CollectionUtils.filter(dtos, new StatePredicate(this.state));
 
         return this.programPager(dtos);
     }
@@ -200,6 +204,28 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     }
 
+    /**
+     * Selling 和 Product 状态(NEW、SELLING、DOWN)过滤
+     */
+    private static class StatePredicate implements Predicate {
+        private String state;
+
+        public StatePredicate(String state) {
+            this.state = state;
+        }
+
+        @Override
+        public boolean evaluate(Object object) {
+            AnalyzeDTO dto = (AnalyzeDTO) object;
+            if(StringUtils.equalsIgnoreCase(this.state, "Active")) {
+                //只查询出活跃的(状态为 NEW、SELLING)
+                return dto.state.equals("NEW") || dto.state.equals("SELLING");
+            } else {
+                //只查询出不活跃的(状态为 DOWN 的)
+                return dto.state.equals("DOWN");
+            }
+        }
+    }
     // ---------------- TimeLine ------------------------
 
     /**

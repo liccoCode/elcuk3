@@ -23,6 +23,10 @@ public class AnalyzeDTO implements Serializable {
         this.fid = fid;
     }
 
+    public AnalyzeDTO(String fid, String state) {
+        this.fid = fid;
+        this.state = state;
+    }
 
     /**
      * 用来表示 SKU/Msku
@@ -122,6 +126,11 @@ public class AnalyzeDTO implements Serializable {
      * 市场
      */
     public M market;
+
+    /**
+     * 状态(NEW、SELLING、DOWN)
+     */
+    public String state;
 
     public float getPs_cal() {
         if(this.ps_cal <= 0) {

@@ -329,6 +329,31 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Lob
     public String sellingPoints = "{}";
 
+    /**
+     * Selling 在 ERP 系统内的状态
+     */
+    public enum S {
+        /**
+         * 刚创建
+         */
+        NEW,
+        /**
+         * 在系统内上架
+         */
+        SELLING,
+
+        /**
+         * 在系统内下架
+         */
+        DOWN
+    }
+
+    /**
+     * Product 在系统内的状态
+     */
+    @Enumerated(EnumType.STRING)
+    public S state = S.NEW;
+
     public Product() {
     }
 
@@ -594,5 +619,20 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             this.locate.add(new ProductDTO());
             this.sellingPoint.add(new ProductDTO());
         }
+    }
+
+    /**
+     * 修改 Product 在系统内的状态
+     */
+    public static void changeProductType(String merchantSKU) {
+        //当某一个 SKU 下所有的 Selling 都下架了则这个 SKU 状态改为"DOWN" ,反之则这个 SKU 状态则为“SELLING"
+        Product product = Product.findByMerchantSKU(merchantSKU);
+        long count = Selling.count("state IN ('SELLING', 'NEW') AND sellingId LIKE ?", product.sku + "%");
+        if(count > 0) {
+            product.state = S.SELLING;
+        } else {
+            product.state = S.DOWN;
+        }
+        product.save();
     }
 }
