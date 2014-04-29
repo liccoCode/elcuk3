@@ -104,11 +104,9 @@ public class Sellings extends Controller {
             String msku = String.format("%s,%s", sku.trim(), upc.trim());
             Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
             selling.patchToListing();
-            flash.success("手动添加 Selling 成功.");
-            Sellings.selling(selling.sellingId);
+            renderJSON(new Ret(true, selling.sellingId));
         } catch(FastRuntimeException e) {
-            Validation.addError("", e.getMessage());
-            render("Sellings/blank.html");
+            renderJSON(new Ret(Webs.E(e)));
         }
     }
 

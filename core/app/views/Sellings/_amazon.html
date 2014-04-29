@@ -21,6 +21,8 @@
               content="从 Amazon 同步回来更新到数据库" placement='bottom' rel="popover" title="Sync From Amazon Button">
         Sync
       </button>
+      <a class="btn btn-warning" href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnits
+      Button" content="创建此 Selling 相关采购计划" placement='bottom' rel="popover">采购计划</a>
     </div>
     <div class="btn-group">
       <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">Listing : ${s.listing.listingId}</a>
