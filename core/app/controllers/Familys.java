@@ -43,7 +43,7 @@ public class Familys extends Controller {
         try {
             Family fa = Family.findById(family);
             fa.safeDestroy();
-            render(new Ret(true, "成功删除"));
+            renderJSON(new Ret(true, "成功删除"));
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.E(e)));
         }
