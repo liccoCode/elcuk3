@@ -4,6 +4,7 @@
     <th>ListingId</th>
     <th>Title (<a href="@{Products.show(p.sku)}" target="_blank">${p.sku}</a>)</th>
     <th>Review</th>
+    <th>Action</th>
   </tr>
 #{list items:lsts, as:'l'}
     #{set sellings: l.sellings()/}
@@ -17,9 +18,14 @@
     <td>${l.reviews == null ? 0 : l.reviews}
       (<span style="color:${l.rating <= 3 ? 'red;' : 'green'}">${l.rating}</span>)
     </td>
+    <td>
+        #{power.ck "listings.delete"}
+          <a href="javascript:;" class="btn btn-danger btn-small" action='remove' data-url='@{Listings.destroy(l.listingId)}'>删除</a>
+        #{/power.ck}
+    </td>
   </tr>
   <tr id="selling_${l_index}" style="display:none;">
-    <td colspan="4" style="padding:0">
+    <td colspan="5" style="padding:0">
       <table class="table table-bordered table-condensed" style="margin:0">
         <tr>
           <th>Action</th>
@@ -36,7 +42,11 @@
                     <i class="icon-wrench"></i>&nbsp;&nbsp;<span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a href="javascript:;" action='remove' data-url='@{Sellings.destroy(sell.sellingId)}'>删除</a></li>
+                    <li>
+                        #{power.ck "sellings.delete"}
+                          <a href="javascript:;" action='remove' data-url='@{Sellings.destroy(sell.sellingId)}'>删除</a>
+                        #{/power.ck}
+                    </li>
                   </ul>
                 </div>
               </td>

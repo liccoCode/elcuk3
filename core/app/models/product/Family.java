@@ -3,6 +3,7 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
+import helper.Webs;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
@@ -117,5 +118,17 @@ public class Family extends GenericModel {
     public List<Product> productList() {
         List<Product> products = Product.find("state <> 'DOWN' AND family_family = ?", this.family).fetch();
         return products;
+    }
+
+    public void safeDestroy() {
+        long size = this.products.size();
+        if(size > 0) {
+            Webs.error("此 Family 下拥有" + size + "个 Product 关联, 无法删除");
+        }
+        this.delete();
+    }
+
+    public boolean isExist() {
+        return Family.count("category=? AND brand=? AND family=?", this.category, this.brand, this.family) > 0;
     }
 }

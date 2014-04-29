@@ -148,4 +148,19 @@ $ ->
         LoadMask.unmask()
       )
   )
+  # 刪除 Selling
+  $('#btns').on('click', 'a[action=remove]', (li) ->
+    return unless confirm('确认删除?')
+    LoadMask.mask()
+    $btn = $(@)
+    $.ajax($btn.data('url'))
+      .done((r) ->
+        type = if r.flag
+          alert(r.message)
+          window.close()
+        else
+          noty({text: r.message, type: 'error'})
+        LoadMask.unmask()
+      )
+    )
 
