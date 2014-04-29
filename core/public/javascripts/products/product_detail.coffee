@@ -66,7 +66,7 @@ $ ->
   $("#extends").on("click", "#add_template_btn",() ->
     LoadMask.mask()
     temp_id = $("#select_template_form").val()
-    if(temp_id == null)
+    if(temp_id is "")
       noty({text: "请选择要加载的模板", type: 'error', timeout: 5000})
     $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
       LoadMask.unmask()
