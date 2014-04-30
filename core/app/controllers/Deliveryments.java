@@ -215,7 +215,7 @@ public class Deliveryments extends Controller {
     /**
      * 将选定的采购单的 出货FBA 打成ZIP包，进行下载
      */
-    public static synchronized void downloadFBAZIP(String id, List<Long> pids) throws Exception {
+    public static synchronized void downloadFBAZIP(String id, List<Long> pids, List<String> boxNumbers) throws Exception {
         if(pids == null || pids.size() == 0)
             Validation.addError("", "必须选择需要下载的采购计划");
         if(Validation.hasErrors()) {
