@@ -4,15 +4,48 @@ $ ->
   Highcharts.setOptions(global:{useUTC: false})
 
   # table 数据列表
-  $("#below_tabContent").on("ajaxFresh","#sid,#sku",() ->
+  $("#below_tabContent").on("ajaxFresh","#sid",() ->
       $div =$(@)
       $("#postType").val($div.attr("id"))
       LoadMask.mask()
       $div.load("/Analyzes/analyzes",$('.search_form').serialize(),(r) ->
+        oTable = $("#sorttable").dataTable(
+          sDom: "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
+          sPaginationType: "full_numbers"
+          iDisplayLength: 25
+          aaSorting: [[15, "desc"]]
+        )
+        $('table.sortinfo').on('mouseenter', 'td:has(button.btn-info)',(e) ->
+          $tr = $(@).parents('tr')
+          id = $tr.find('td:eq(0)').text().trim()
+          tableParam =
+                id: id
+          text = _.template($('#sidlabel-template').html(), {pam: tableParam})
+
+          $td = $tr.find('td:eq(3)')
+          $td.html(text)
+
+        )
+        $('table.sortinfo').on('mouseleave', 'td:has(.icon-random)',(e) ->
+          $tr = $(@).parents('tr')
+          $td = $tr.find('td:eq(3)')
+          $td.html("<button class='btn btn-mini btn-info'>操作</button>")
+        )
         LoadMask.unmask()
       )
-
-    #分页事件 bootstrap_pager.html
+  ).on("ajaxFresh","#sku",() ->
+      $div =$(@)
+      $("#postType").val($div.attr("id"))
+      LoadMask.mask()
+      $div.load("/Analyzes/analyzes",$('.search_form').serialize(),(r) ->
+       oTable = $("#skutable").dataTable(
+        sDom: "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
+        sPaginationType: "full_numbers"
+        iDisplayLength: 25
+        aaSorting: [[15, "desc"]]
+       )
+       LoadMask.unmask()
+      )
   ).on("click",".pagination a[page]",(e) ->
      e.preventDefault()
      $a = $(@)
