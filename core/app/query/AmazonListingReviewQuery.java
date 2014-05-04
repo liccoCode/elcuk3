@@ -1,6 +1,7 @@
 package query;
 
 import helper.DBUtils;
+import helper.Webs;
 import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
 import play.libs.F;
@@ -30,7 +31,7 @@ public class AmazonListingReviewQuery {
             reviewT2Map.put(row.get("sellingId").toString(),
                     new F.T2<Integer, Float>(
                             NumberUtils.toInt(row.get("c").toString()),
-                            NumberUtils.toFloat(row.get("rating").toString()))
+                            Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())))
             );
         }
         return reviewT2Map;
@@ -50,7 +51,7 @@ public class AmazonListingReviewQuery {
             reviewT2Map.put(row.get("sku").toString(),
                     new F.T2<Integer, Float>(
                             NumberUtils.toInt(row.get("c").toString()),
-                            NumberUtils.toFloat(row.get("rating").toString()))
+                            Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())))
             );
         }
         return reviewT2Map;
@@ -82,7 +83,7 @@ public class AmazonListingReviewQuery {
             }
             latestReviewT2Map.put(row.get("sku").toString(),
                     new F.T2<Float, Date>(
-                            NumberUtils.toFloat(row.get("rating").toString()),
+                            Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())),
                             new Date(times))
             );
         }
@@ -104,7 +105,8 @@ public class AmazonListingReviewQuery {
                 .orderBy("r.createDate desc").limit(1);
         Map<String, Object> row = DBUtils.row(sql.toString(), sku);
         if(row.get("rating") != null) {
-            return new F.T2<Float, Date>(NumberUtils.toFloat(row.get("rating").toString()), (Date) row.get("dt"));
+            return new F.T2<Float, Date>(Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())),
+                    (Date) row.get("dt"));
         }
         return new F.T2<Float, Date>(-1f, null);
     }
