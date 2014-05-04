@@ -39,8 +39,9 @@ public class DBUtils {
      */
     public static Map<String, Object> row(Connection conn, String sql, Object... params) {
         Map<String, Object> row = new HashMap<String, Object>();
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             for(int i = 0; i < params.length; ) ps.setObject(++i, params[(i > 0 ? i - 1 : 0)]);
 
             loger.debug(String.format("%s -> %s", sql, Arrays.toString(params)));
@@ -57,9 +58,14 @@ public class DBUtils {
                 row = mapOneRow(mete, rs);
             }
             rs.close();
-            ps.close();
         } catch(Exception e) {
             throw new FastRuntimeException(e);
+        } finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
         return row;
     }
@@ -105,8 +111,9 @@ public class DBUtils {
      */
     public static List<Map<String, Object>> rows(Connection conn, String sql, Object... params) {
         List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             for(int i = 0; i < params.length; ) ps.setObject(++i, params[(i > 0 ? i - 1 : 0)]);
 
             loger.debug(String.format("%s -> %s", sql, Arrays.toString(params)));
@@ -117,9 +124,15 @@ public class DBUtils {
             while(rs.next()) {
                 rows.add(mapOneRow(mete, rs));
             }
-
+            rs.close();
         } catch(Exception e) {
             throw new FastRuntimeException(e);
+        } finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
         return rows;
     }

@@ -99,7 +99,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.state))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
 
-        return this.programPager(dtos);
+        //return this.programPager(dtos);
+        return dtos;
     }
 
     @Override
