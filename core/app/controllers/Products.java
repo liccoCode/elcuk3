@@ -53,11 +53,20 @@ public class Products extends Controller {
         render(prods, p);
     }
 
-    @Before(only = {"show", "update"})
+    @Before(only = {"show", "update", "delete"})
     public static void setUpShowPage() {
         String sku = Products.extarSku();
         Product pro = Product.findByMerchantSKU(sku);
 
+        float procureqty = SkuESQuery.esProcureQty(pro.sku);
+        //附加属性模板
+        List<Template> templates = pro.category.templates;
+        // 附加属性排序
+        List<ProductAttr> atts = pro.productAttrs;
+        Collections.sort(atts);
+
+        renderArgs.put("templates", templates);
+        renderArgs.put("procureqty", procureqty);
         renderArgs.put("cats", Category.all().<Category>fetch());
         renderArgs.put("qtys", SellingQTY.qtysAccodingSKU(pro));
         renderArgs.put("records", ElcukRecord.records(sku));
@@ -66,11 +75,7 @@ public class Products extends Controller {
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
         pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
-        float procureqty = SkuESQuery.esProcureQty(pro.sku);
-        List<Template> templates = pro.category.templates;
-        List<ProductAttr> atts = pro.productAttrs;
-        Collections.sort(atts);
-        render(pro, procureqty, templates, atts);
+        render(pro);
     }
 
     public static void update(Product pro) {
@@ -276,13 +281,15 @@ public class Products extends Controller {
     /**
      * 保存 product 附加属性
      */
-    public static void saveAttrs(String sku, List<ProductAttr> productAttrs) {
-        if(productAttrs != null && productAttrs.size() > 0) {
+    public static void saveAttrs(List<ProductAttr> productAttrs) {
+        try {
             for(ProductAttr productAttr : productAttrs) {
-                productAttr.update();
+                if(productAttr != null) productAttr.update();
             }
+            renderJSON(new Ret(true, ""));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
         }
-        show(sku);
     }
 
     /**
@@ -302,7 +309,7 @@ public class Products extends Controller {
             }
         }
         Collections.sort(atts);
-        render(pro, atts);
+        render(pro);
     }
 
     /**
@@ -318,6 +325,17 @@ public class Products extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
 
+    /**
+     * 产品删除
+     */
+    @Check("products.delete")
+    public static void delete(String id) {
+        Product pro = Product.findById(id);
+        pro.safeDelete();
+        if(Validation.hasErrors()) render("Products/show.html", pro);
+        flash.success("Product %s 删除成功", id);
+        redirect("/Products/index");
     }
 }

@@ -21,11 +21,22 @@
               content="从 Amazon 同步回来更新到数据库" placement='bottom' rel="popover" title="Sync From Amazon Button">
         Sync
       </button>
+      <a class="btn btn-warning" href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnits
+      Button" content="创建此 Selling 相关采购计划" placement='bottom' rel="popover">采购计划</a>
     </div>
     <div class="btn-group">
       <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">Listing : ${s.listing.listingId}</a>
-      <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">Product : ${s.merchantSKU.split(",")[0]}</a>
+      <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">Product
+        : ${s.merchantSKU.split(",")[0]}</a>
       <a class="btn btn-success" href="${s.showListingLink()}" target="_blank">Amazon : ${s.asin}</a>
+    </div>
+
+    <div class="btn-group">
+        #{power.ck "sellings.delete"}
+          <a href="javascript:;" class="btn btn-danger" action='remove'
+             data-url='@{Sellings.destroy(s.sellingId)}'>删除 Selling</a>
+          </td>
+        #{/power.ck}
     </div>
   </div>
 #{/else}
@@ -83,16 +94,16 @@
 
   </div>
   <div class="span12">
-     #{input_append /}
+      #{input_append /}
   </div>
   <div class="span10">
-      <div id="hardwarePlatformHome" style="display: none">
-          #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
+    <div id="hardwarePlatformHome" style="display: none">
+        #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
           #{text_field id:'hardwarePlatform2', name: 's.aps.hardwarePlatformss[1]', label: '', value: '' /}
           #{text_field id:'hardwarePlatform3', name: 's.aps.hardwarePlatformss[2]', label: '', value: '' /}
           #{text_field id:'hardwarePlatform4', name: 's.aps.hardwarePlatformss[3]', label: '', value: '' /}
           #{text_field id:'hardwarePlatform5', name: 's.aps.hardwarePlatformss[4]', label: '', value: '' /}
-      </div>
+    </div>
 
       #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: s.aps.keyFeturess[0]/}
       #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: s.aps.keyFeturess[1] /}

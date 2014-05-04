@@ -12,6 +12,7 @@ import models.User;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
+import models.market.Listing;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -109,7 +110,10 @@ public class GetAsinJob extends BaseJob {
                         DBUtils.execute("SET foreign_key_checks=1");
                         //提示操作人员任务已经处理完成
                         User user = User.findById(NumberUtils.toLong(getContext().get("user.id").toString()));
+                        selling.refresh();
                         noty("您提交的上架请求已经处理完成,请检查 ^_^", user);
+                        selling.refresh();
+
                     }
                 }
             }
@@ -135,7 +139,7 @@ public class GetAsinJob extends BaseJob {
     }
 
     public boolean isExecuteble() {
-        return this.executeCount < 3;
+        return this.executeCount < 5;
     }
 
     @SuppressWarnings("unchecked")

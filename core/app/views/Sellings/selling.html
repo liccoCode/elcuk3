@@ -35,6 +35,14 @@
               #{text_field id:'listing', name: 'listingId', label: 'Listing', value: s.listing?.listingId /}
             <button type="submit" class="btn">更换</button>
           #{/form}
+
+        <h4>设置参数</h4>
+        <form class="form" id="upAndDownForm">
+          #{text_field id: 'sellingState', label: '当前状态', value: s.state ,readonly: true /}
+          <input type="hidden" id="sellingId" value="${s.sellingId}">
+          <a class="btn btn-primary" id="sellingUp" data-confirm="确认上架?">系统内上架</a>
+          <a class="btn btn-danger" id="sellingDown" data-confirm="确认下架?">系统内下架</a>
+        </form>
       </div>
     </div>
   </div>

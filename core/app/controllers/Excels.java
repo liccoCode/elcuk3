@@ -3,7 +3,9 @@ package controllers;
 import helper.Webs;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
+import models.view.post.AnalyzePost;
 import models.view.post.DeliveryPost;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -78,5 +80,24 @@ public class Excels extends Controller {
         renderArgs.put("dateFormat", formatter);
         renderArgs.put("dmt", Deliveryment.findById(id));
         render(units);
+    }
+
+
+    /**
+     * 下载采购单综合Excel表格
+     */
+    public static void analyzes(AnalyzePost p) {
+        List<AnalyzeDTO> dtos = p.query();
+        if(dtos != null && dtos.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s销售分析.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dtos);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
     }
 }

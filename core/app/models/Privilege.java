@@ -91,6 +91,8 @@ public class Privilege extends Model {
         privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
         privileges.add(new Privilege("amazonoperations", "Amazon 操作"));
+        privileges.add(new Privilege("sellings.delete", "Selling 删除"));
+        privileges.add(new Privilege("listings.delete", "Listing 删除"));
 
         /*
          * TODO delete
@@ -101,10 +103,13 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("product", "产品模块"));
         privileges.add(new Privilege("products.index", "产品 页面"));
+        privileges.add(new Privilege("products.delete", "产品 删除"));
+
         privileges.add(new Privilege("whouses.index", "仓库 页面"));
         privileges.add(new Privilege("categorys.show", "产品类别 页面"));
         privileges.add(new Privilege("brands.index", "产品品牌 页面"));
         privileges.add(new Privilege("familys.index", "Family 页面"));
+        privileges.add(new Privilege("familys.delete", "Family 删除"));
         privileges.add(new Privilege("feeds.index", "Feed 页面"));
 
         privileges.add(new Privilege("attributes.index", "产品附加属性 页面"));

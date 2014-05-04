@@ -104,11 +104,9 @@ public class Sellings extends Controller {
             String msku = String.format("%s,%s", sku.trim(), upc.trim());
             Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
             selling.patchToListing();
-            flash.success("手动添加 Selling 成功.");
-            Sellings.selling(selling.sellingId);
+            renderJSON(new Ret(true, selling.sellingId));
         } catch(FastRuntimeException e) {
-            Validation.addError("", e.getMessage());
-            render("Sellings/blank.html");
+            renderJSON(new Ret(Webs.E(e)));
         }
     }
 
@@ -149,6 +147,7 @@ public class Sellings extends Controller {
         }
     }
 
+    @Check("sellings.delete")
     public static void destroy(String id) {
         try {
             Selling s = Selling.findById(id);
@@ -209,5 +208,25 @@ public class Sellings extends Controller {
     public static void feeds(String sellingId) {
         renderArgs.put("feeds", Feed.find("fid=? ORDER BY createdAt DESC", sellingId).fetch());
         render("Feeds/_feed.html");
+    }
+
+    /**
+     * 修改 Selling 在系统内的状态
+     */
+    public static void changeSellingType(String sellingId, boolean flag) {
+        try {
+            Selling selling = Selling.findById(sellingId);
+            if(flag) {
+                selling.state = Selling.S.SELLING;
+            } else {
+                selling.state = Selling.S.DOWN;
+            }
+            selling.save();
+            //修改 Product 在系统内的状态
+            Product.changeProductType(selling.merchantSKU);
+            renderJSON(new Ret(true, sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 }

@@ -1,12 +1,14 @@
 package controllers;
 
+import helper.Webs;
 import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
+import models.product.Product;
 import models.view.Ret;
-import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,36 +23,38 @@ import java.util.List;
 public class Familys extends Controller {
     @Check("familys.index")
     public static void index() {
-        render();
-    }
-
-    public static void create(Family f) {
-        //TODO Family 的格式还需要进行验证
-        validation.valid(f);
-        if(Validation.hasErrors()) {
-            renderJSON(new Ret("Family 已经存在, 不需要添加."));
-        }
-        f.checkAndCreate();
-        renderJSON(new Ret());
-    }
-
-    public static void cat_div(Brand b) {
-        List<Category> cats = null;
-
-        // 查找 Brand 相关的 Category
-        if(b != null && b.isPersistent()) cats = b.categories;
-        else cats = Category.all().fetch();
-
+        List<Category> cats = Category.find("ORDER BY categoryId").fetch();
         render(cats);
     }
 
-    public static void brand_div(Category c) {
-        List<Brand> brands = null;
+    public static void create(Family f) {
+        try {
+            if(f.isExist()) renderJSON(new Ret("Family 已经存在, 不需要添加."));
+            f.checkAndCreate();
+            renderJSON(new Ret(true, "创建成功."));
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(Webs.E(e)));
 
-        if(c != null && c.isPersistent()) brands = c.brands;
-        else brands = Brand.all().fetch();
+        }
+    }
 
-        render(brands, c);
+    @Check("familys.delete")
+    public static void destroy(String family) {
+        try {
+            Family fa = Family.findById(family);
+            fa.safeDestroy();
+            renderJSON(new Ret(true, "成功删除"));
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void pro_div(Family f) {
+        List<Product> prods = new ArrayList<Product>();
+
+        // 查找 Family 相关的 Product
+        if(f != null && f.isPersistent()) prods = f.products;
+        render("Products/_products.html", prods);
     }
 
     public static void fam_div(Brand b, Category c) {
