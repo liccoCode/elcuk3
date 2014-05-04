@@ -17,6 +17,7 @@ import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -127,4 +128,14 @@ public class Listings extends Controller {
         trackedListings();
     }
 
+    @Check("listings.delete")
+    public static void destroy(String listingId) {
+        try {
+            Listing listing = Listing.findById(listingId);
+            listing.safeDelete();
+            renderJSON(new Ret(true, "成功删除"));
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
 }

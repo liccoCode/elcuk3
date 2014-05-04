@@ -147,6 +147,7 @@ public class Sellings extends Controller {
         }
     }
 
+    @Check("sellings.delete")
     public static void destroy(String id) {
         try {
             Selling s = Selling.findById(id);

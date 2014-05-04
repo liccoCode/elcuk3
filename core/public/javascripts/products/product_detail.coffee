@@ -63,13 +63,16 @@ $ ->
     objE.innerHTML = arg
     objE.childNodes[0]
 
-  # 点击button load 模板参数
   $("#extends").on("click", "#add_template_btn",() ->
-    LoadMask.mask()
-    $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
-      LoadMask.unmask()
-    )
-  ).on("click", "#remove_attr_btn", () ->
+    temp_id = $("select[name='templateId']").val()
+    if temp_id is ""
+      noty({text: "请选择要加载的模板", type: 'error', timeout: 5000})
+    else
+      LoadMask.mask()
+      $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
+        LoadMask.unmask()
+      )
+  ).on("click", "#remove_attr_btn",() ->
     LoadMask.mask()
     $btn = $(@)
     $.ajax('/products/delAttr',
@@ -78,9 +81,21 @@ $ ->
         msg = if r.flag is true
           # 删除 tr
           $btn.parent("td").parent().remove()
-          {text: "附加属性 #{r.message} 删除成功.", type: 'success'}
+          {text: "附加属性 #{r.message} 删除成功.", type: 'success', timeout: 5000}
         else
-          {text: "#{r.message}", type: 'error'}
+          {text: "#{r.message}", type: 'error', timeout: 5000}
+        noty(msg)
+        LoadMask.unmask()
+      )
+  ).on("click", "#save_attrs_btn", () ->
+    LoadMask.mask()
+    $form = $("#save_attrs_form")
+    $.ajax('/products/saveAttrs', {type: 'GET', data: $form.serialize(), dataType: 'json'})
+    .done((r) ->
+        msg = if r.flag is true
+          {text: "保存成功.", type: 'success', timeout: 5000}
+        else
+          {text: "#{r.message}", type: 'error', timeout: 5000}
         noty(msg)
         LoadMask.unmask()
       )

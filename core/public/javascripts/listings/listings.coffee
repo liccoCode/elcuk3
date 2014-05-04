@@ -61,6 +61,7 @@ $ ->
     )
 
   $('#l_list').on('click', 'a[action=remove]', (li) ->
+    return unless confirm('确认删除?')
     LoadMask.mask()
     $li = $(@)
     $.ajax($li.data('url'))
