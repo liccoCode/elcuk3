@@ -60,7 +60,7 @@
             <h4>Memo:</h4>
             <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
           #{power.ck "products.edit"}
-            <button class="btn btn-primary" data-disable-with='更新中...'>更新</button>
+            <button class="btn btn-primary">更新</button>
           #{/power.ck}
           </td>
         </tr>
@@ -77,7 +77,7 @@
         <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
         <input type="hidden" name="id" value="${dmt.id}">
           #{power.ck "products.edit"}
-            <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary" data-disable-with='更新中...'>
+            <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
               确认
             </button>
           #{/power.ck}
@@ -115,23 +115,22 @@
     <div class="btn-toolbar">
     #{power.ck "products.edit"}
       <a data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE" id="delunit_form_submit" rel="popover"
-         data-disable-with='处理中...' content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+         content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
         解除
       </a>
     #{/power.ck}
     #{power.ck 'fbas.deploytoamazon'}
-      <a data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs"
-         class="btn btn-success" data-disable-with='创建中...'>
+      <a data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
         批量创建 FBA
       </a>
     #{/power.ck}
-      <a href="javascript:void(0);" id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
+      <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
        进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
 
       <a data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST" id="downloadProcureunitsOrder"
-         class="btn btn-success" rel="popover"
-         content="下载选定的采购单元的出货单" data-disable-with='正在处理中...'>
+         class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
         <i class="icon-download-alt"></i>下载出货单
       </a>
     </div>

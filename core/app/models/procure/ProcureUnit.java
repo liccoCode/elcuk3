@@ -977,7 +977,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param folder 指定PDF文件，生成的文件目录
      */
-    public void fbaAsPDF(File folder) throws Exception {
+    public void fbaAsPDF(File folder, Long boxNumber) throws Exception {
 
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
@@ -993,13 +993,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             map.put("shipFrom", Account.address(this.fba.account.type));
             map.put("fba", this.fba);
             map.put("procureUnit", this);
+            map.put("boxNumber", boxNumber);
 
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零
             options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
-
-            //生成箱内卖 PDF
-            PDFs.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", options, map);
 
             //生成箱外卖 PDF
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
@@ -1007,5 +1005,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
             FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
         }
+    }
+
+
+    /**
+     * 将数字转换成对应的三位数的字符串
+     * <p/>
+     * 示例：1 => 001; 10 => 010
+     *
+     * @param number
+     * @return
+     */
+    public String numberToStr(Long number) {
+        int targetSize = 3;
+        int size = number.toString().length();
+        return StringUtils.repeat("0", (targetSize - size)) + number.toString();
     }
 }
