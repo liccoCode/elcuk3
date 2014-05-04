@@ -12,7 +12,7 @@ $ ->
         oTable = $("#sorttable").dataTable(
           sDom: "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
           sPaginationType: "full_numbers"
-          iDisplayLength: 25
+          iDisplayLength: 50
           aaSorting: [[15, "desc"]]
         )
         $('table.sortinfo').on('mouseenter', 'td:has(button.btn-info)',(e) ->
@@ -41,7 +41,7 @@ $ ->
        oTable = $("#skutable").dataTable(
         sDom: "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
         sPaginationType: "full_numbers"
-        iDisplayLength: 25
+        iDisplayLength: 50
         aaSorting: [[15, "desc"]]
        )
        LoadMask.unmask()

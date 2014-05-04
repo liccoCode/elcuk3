@@ -6,6 +6,7 @@ import models.view.post.AnalyzePost;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -132,11 +133,15 @@ public class AnalyzeDTO implements Serializable {
      */
     public String state;
 
+
+
+
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
             this.ps_cal = ps <= 0 ? 0.1f : ps;
         }
+        this.ps_cal = Webs.scale2PointUp(this.ps_cal);
         return this.ps_cal;
     }
 
@@ -172,7 +177,7 @@ public class AnalyzeDTO implements Serializable {
      * @return .1: 差据的大小
      *         .2: 前台使用的颜色代码
      */
-    public F.T2<Float, String> psDiffer() {
+    public F.T2<Float, String> getPsDiffer() {
         float _ps = this.getPs_cal();
         if(_ps >= 5) {
             float diff = Math.abs(_ps - this.ps) /
@@ -182,7 +187,7 @@ public class AnalyzeDTO implements Serializable {
                 color = "E45652";
             else if(diff >= 0.2 && diff < 0.4)
                 color = "FAAB3B";
-            return new F.T2<Float, String>(diff, color);
+            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
         } else {
             return new F.T2<Float, String>(0f, "fff");
         }

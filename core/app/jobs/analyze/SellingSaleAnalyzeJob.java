@@ -2,6 +2,7 @@ package jobs.analyze;
 
 import helper.Dates;
 import helper.Promises;
+import helper.Webs;
 import models.market.M;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -15,6 +16,8 @@ import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
 import query.*;
+
+import java.text.DecimalFormat;
 
 import java.util.*;
 
@@ -120,6 +123,7 @@ public class SellingSaleAnalyzeJob extends Job {
                             dto.inbound += (unit.qty() - unit.inboundingQty());
                     }
                     dto.difference = dto.day1 - dto.day7 / 7;
+                    dto.difference = Webs.scale2PointUp(dto.difference);
                     dtos.add(dto);
                 }
 
@@ -326,6 +330,7 @@ public class SellingSaleAnalyzeJob extends Job {
             }
             if(dto.reviews > 0) {
                 dto.reviewRatio = dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
+                dto.reviewRatio = Webs.scale2PointUp(dto.reviewRatio);
             } else {
                 dto.reviewRatio = 0;
             }
@@ -338,6 +343,7 @@ public class SellingSaleAnalyzeJob extends Job {
                     dto.lastRatingDate = t2._2;
                 }
             }
+
         }
     }
 
