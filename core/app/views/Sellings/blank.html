@@ -1,11 +1,13 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'添加 Selling'/}
 #{set 'moreStyles'}
     #{stylesheet 'market.css'/}
 #{/set}
+#{set 'moreScripts'}
+  #{script 'sellings/blank.coffee'/}
+#{/set}
 
-#{errorMsgs /}
-<div class="row">
+<div class="span12 offset3">
   <form action="@{Sellings.create()}" class="form-horizontal" id='new_selling'>
     <h4 class="text-center">手动添加 Selling</h4>
 
@@ -18,7 +20,7 @@
     <div class="control-group">
       <div class="controls">
         <a href="@{Listings.index()}" class="btn btn-success">返回</a>
-        <button type="submit" class="btn" data-disable-with='提交中..'>提交</button>
+        <a class="btn" id="create_selling_btn">提交</a>
       </div>
     </div>
 

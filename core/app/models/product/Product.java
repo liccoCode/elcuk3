@@ -9,6 +9,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
+import models.market.OrderItem;
 import models.market.Selling;
 import models.procure.Cooperator;
 import models.view.dto.ProductDTO;
@@ -329,6 +330,31 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Lob
     public String sellingPoints = "{}";
 
+    /**
+     * Selling 在 ERP 系统内的状态
+     */
+    public enum S {
+        /**
+         * 刚创建
+         */
+        NEW,
+        /**
+         * 在系统内上架
+         */
+        SELLING,
+
+        /**
+         * 在系统内下架
+         */
+        DOWN
+    }
+
+    /**
+     * Product 在系统内的状态
+     */
+    @Enumerated(EnumType.STRING)
+    public S state = S.NEW;
+
     public Product() {
     }
 
@@ -594,5 +620,35 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             this.locate.add(new ProductDTO());
             this.sellingPoint.add(new ProductDTO());
         }
+    }
+
+    /**
+     * 修改 Product 在系统内的状态
+     */
+    public static void changeProductType(String merchantSKU) {
+        //当某一个 SKU 下所有的 Selling 都下架了则这个 SKU 状态改为"DOWN" ,反之则这个 SKU 状态则为“SELLING"
+        Product product = Product.findByMerchantSKU(merchantSKU);
+        long count = Selling.count("state IN ('SELLING', 'NEW') AND sellingId LIKE ?", product.sku + "%");
+        if(count > 0) {
+            product.state = S.SELLING;
+        } else {
+            product.state = S.DOWN;
+        }
+        product.save();
+    }
+
+    /*
+    * Product 删除时的限制条件
+    */
+    public void safeDelete() {
+        if(this.listings.size() > 0) {
+            Validation.addError("", String.format("%s Product 下拥有 %s 个 相关Listing，无法删除",
+                    this.sku, this.listings.size()));
+        }
+        long orderItemCount = OrderItem.count("product_sku = ?", this.sku);
+        if(orderItemCount > 0)
+            Validation.addError("", String.format("%s Product 下找到 %s 个相关订单项，无法删除"), this.sku, orderItemCount + "");
+        if(Validation.hasErrors()) return;
+        this.delete();
     }
 }

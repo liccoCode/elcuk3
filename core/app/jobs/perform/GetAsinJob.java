@@ -110,6 +110,7 @@ public class GetAsinJob extends BaseJob {
                         DBUtils.execute("SET foreign_key_checks=1");
                         //提示操作人员任务已经处理完成
                         User user = User.findById(NumberUtils.toLong(getContext().get("user.id").toString()));
+                        selling.refresh();
                         noty("您提交的上架请求已经处理完成,请检查 ^_^", user);
                         selling.refresh();
 

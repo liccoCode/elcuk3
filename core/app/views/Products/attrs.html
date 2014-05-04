@@ -1,11 +1,11 @@
-<form action="@{Products.saveAttrs(pro.sku)}" method="POST">
+<form action="@{Products.saveAttrs(pro.sku)}" method="POST" id="save_attrs_form">
   <table class="table table-bordered">
   <tr>
     <th>属性名称</th>
     <th>值</th>
     <th>操作</th>
   </tr>
-  #{list items:atts, as:'att'}
+  #{list items:pro.productAttrs, as:'att'}
     <tr>
       <td>
       ${att.attribute.name}
@@ -20,5 +20,5 @@
     </tr>
   #{/list}
   </table>
-  <button class="btn btn-primary">保存</button>
+  <a class="btn btn-primary" id="save_attrs_btn">保存</a>
 </form>

@@ -1,43 +1,58 @@
 <!-- 生成 Analyzes 页面下方的 selling 信息 -->
-<table class="table table-condensed table-bordered">
+<table id="sorttable" class="table table-condensed table-bordered sortinfo">
+  <thead>
   <tr>
     <th title="可双击下面 MerchantSKU">SellingId</th>
     <th>ASIN</th>
-    <th orderby='plan' name="plan" class="sortable">计划中 <i class="icon-sort"></i></th>
-    <th orderby='working' name="working" class="sortable">制作中 <i class="icon-sort"></i></th>
-    <th orderby='worked' name="worked" class="sortable">已交货 <i class="icon-sort"></i></th>
-    <th orderby='way' name="way" class="sortable">在途 <i class="icon-sort"></i></th>
-    <th orderby='inbound' name="inbound" class="sortable">入库 <i class="icon-sort"></i></th>
-    <th orderby='qty' name="qty" class="sortable">在库 <i class="icon-sort"></i></th>
-    <th orderby='reviewRatio' name="reviewRatio" class="sortable">Reviews <i class="icon-sort"></i></th>
-    <th orderby='rating' name="rating" class="sortable">Rating <i class="icon-sort"></i></th>
-    <th orderby='ps' name="ps" class="sortable">PS <i class="icon-sort"></i></th>
-    <th orderby='ps_cal' name="ps_cal" class="sortable">_PS <i class="icon-sort"></i></th>
-    <th orderby='day1' name="day1" class="sortable">Day1 <i class="icon-sort"></i></th>
-    <th orderby='difference' name="difference" class="sortable">
+    <th>计划中</th>
+    <th>采购</th>
+    <th>制作中</th>
+    <th>已交货</th>
+    <th>在途</th>
+    <th>入库</th>
+    <th>在库</th>
+    <th>Reviews</th>
+    <th>Rating</th>
+    <th>PS</th>
+    <th>_PS</th>
+    <th>Day1</th>
+    <th>
       <abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr>
-      <i class="icon-sort"></i>
     </th>
-    <th orderby='day7' name="day7" class="sortable">Day7(ave)<i class="icon-sort"></i></th>
-    <th orderby='day30' name="day30" class="sortable">Day30(ave)<i class="icon-sort"></i></th>
-    <th colspan="2">
-      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天; --- 根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天">
+    <th>Day7</th>
+    <th>Day7ave</th>
+    <th>Day30</th>
+    <th>Day30ave</th>
+    <th>
+      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天">
         TOR
       </abbr>
     </th>
-    <th colspan="2">
-      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天; --- 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天">
+    <th>
+      <abbr title="根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天">
+        TOR1
+      </abbr>
+    </th>
+    <th>
+      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天;">
         _TOR
       </abbr>
     </th>
+    <th>
+      <abbr title="根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天">
+        _TOR1
+      </abbr>
+    </th>
   </tr>
-#{list items:dtos, as:'dto'}
+  </thead>
+  <tbody>
+  #{list items:dtos, as:'dto'}
   <tr>
     <td class="sid"><i class="icon-bolt"></i> ${dto.fid}</td>
     <td><a href="${dto.asinLink()}" target="_blank"><i class="icon-external-link"></i> ${dto.asin}
     </a></td>
-    <td style="color:#A5B600" data-toggle="toggle" data-target="#sid_${dto_index}">${dto.plan}
-      <i class="icon-reorder"></i></td>
+    <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
+    <td width="90px"><button class="btn btn-mini btn-info">操作</button></td>
     <td class="text-warning">${dto.working}</td>
     <td style="color:#FE502A;">${dto.worked}</td>
     <td class="text-info">${dto.way}</td>
@@ -47,10 +62,14 @@
       <small>${dto.reviewRatio.format('#')}</small>
     </td>
     <td>${dto.rating.format('#.##')}</td>
-      #{set psDiffer:dto.psDiffer()/}
-    <td colspan="2" style="text-align:center;width:90px;background:${'#'+psDiffer._2}">
+      #{set psDiffer:dto.getPsDiffer()/}
+    <td  style="text-align:center;width:90px;background:${'#'+psDiffer._2}">
       <div class="input-prepend" style="margin:0;">
         <span class="add-on" style="width:35px">${psDiffer._1.format('#%')}</span>
+      </div>
+    </td>
+    <td  style="text-align:center;width:90px;background:${'#'+psDiffer._2}">
+      <div class="input-prepend" style="margin:0;">
         <input type="text" ps sid="${dto.fid}" value="${dto.ps}" style="width:45px;">
       </div>
     </td>
@@ -59,32 +78,15 @@
     ${dto.difference.format('#.##')}
       (${dto.percentage().format('#.##%')})
     </td>
-    <td>${dto.day7} ( ${(dto.day1 - dto.difference).format('#.##')} )</td>
-    <td>${dto.day30} ( ${(dto.day30 / 30).format('#.##')} )</td>
-      #{set t4:dto.turnOverT4/}
-      #{turnOver turnOver:t4._1 /}
-      #{turnOver turnOver:t4._2 /}
-      #{turnOver turnOver:t4._3 /}
-      #{turnOver turnOver:t4._4 /}
+    <td>${dto.day7}</td>
+    <td>${(dto.day1 - dto.difference).format('#.#')}</td>
+    <td>${dto.day30}</td>
+    <td>${(dto.day30 / 30).format('#.#')}</td>
+    <td>${dto.turnOverT4._1.format('#.#')}</td>
+    <td>${dto.turnOverT4._2.format('#.#')}</td>
+    <td>${dto.turnOverT4._3.format('#.#')}</td>
+    <td>${dto.turnOverT4._4.format('#.#')}</td>
   </tr>
-  <tr id="sid_${dto_index}" style="display:none;">
-    <td colspan="20">
-      <div class="row-fluid">
-        <div class="span1">
-          <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank" class="btn btn-info">
-            <i class="icon-random"></i> 采购计划
-          </a>
-          <a href="@{Sellings.selling()}/${dto.fid}" target="_blank" class="btn btn-success">
-            Selling 页面
-          </a>
-        </div>
-      </div>
-    </td>
-  </tr>
-#{/list}
-  <tr>
-    <td colspan="20">
-    #{bootstrap_pager pi:p, url:'#'/}
-    </td>
-  </tr>
+  #{/list}
+  </tbody>
 </table>
