@@ -185,7 +185,7 @@
                         </a>
                       #{/power.ck}
                     <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
-                    <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱外麦</a>
+                    <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
                   #{/if}
               </div>
             #{/if}
