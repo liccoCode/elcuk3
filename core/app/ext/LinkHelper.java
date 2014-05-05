@@ -25,6 +25,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
+            case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, market.toString(), r.userid);
         }
@@ -40,6 +41,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
+            case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, f.market, f.orderr.userid);
         }
@@ -66,6 +68,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
+            case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, selling.market.toString(), selling.asin);
         }
@@ -88,6 +91,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
+            case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, selling.market.toString(), selling.asin);
             case EBAY_UK:
@@ -112,6 +116,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
+            case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, listing.market.toString(), listing.asin);
             case EBAY_UK:
@@ -139,6 +144,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
+            case AMAZON_JP:
             case AMAZON_US:
                 return "https://sellercentral." + orderr.market.toString() +
                         "/gp/orders-v2/details?orderID=" + orderr.orderId;
@@ -156,6 +162,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
+            case AMAZON_JP:
             case AMAZON_US:
                 return "https://sellercentral." + fba.account.type.toString() +
                         "/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=" +

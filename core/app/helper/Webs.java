@@ -40,6 +40,7 @@ public class Webs {
     public static final String S = "|";
     //这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)
     public static final NumberFormat NN_DE = NumberFormat.getNumberInstance(Locale.GERMANY);
+    public static final NumberFormat NN_JP = NumberFormat.getNumberInstance(Locale.JAPAN);
     public static final NumberFormat NN_UK = NumberFormat.getNumberInstance(Locale.UK);
     // us 与 uk 一样
     public static final NumberFormat NN_US = NumberFormat.getNumberInstance(Locale.US);
@@ -48,6 +49,7 @@ public class Webs {
     public static final NumberFormat NC_UK = NumberFormat.getCurrencyInstance(Locale.UK);
     public static final NumberFormat NC_US = NumberFormat.getCurrencyInstance(Locale.US);
     public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
+    public static final NumberFormat NC_JP = NumberFormat.getCurrencyInstance(Locale.JAPAN);
 
     /**
      * 保留小数点后面两位, 并且向上取整
@@ -131,6 +133,8 @@ public class Webs {
                 case AMAZON_ES:
                 case AMAZON_IT:
                     return NN_DE.parse(priceStr).floatValue();
+                case AMAZON_JP:
+                    return NN_JP.parse(priceStr).floatValue();
                 default:
                     Logger.warn("Not Support Market." + market);
             }
@@ -215,6 +219,8 @@ public class Webs {
             case AMAZON_ES:
             case AMAZON_IT:
                 return NN_DE.format(price);
+            case AMAZON_JP:
+                return NN_JP.format(price);
             default:
                 return NN_UK.format(price);
         }
@@ -239,6 +245,8 @@ public class Webs {
                 case AMAZON_ES:
                 case AMAZON_IT:
                     return NC_DE.parse(priceStr).floatValue();
+                case AMAZON_JP:
+                    return NC_JP.parse(priceStr).floatValue();
                 default:
                     Logger.warn("Not Support Market." + market);
             }
@@ -267,6 +275,8 @@ public class Webs {
             case AMAZON_ES:
             case AMAZON_IT:
                 return NC_DE.format(price);
+            case AMAZON_JP:
+                return NC_JP.format(price);
             default:
                 return NC_UK.format(price);
         }

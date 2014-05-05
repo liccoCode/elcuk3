@@ -52,6 +52,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toJPY(Float value) {
+            return value * GBP_JPY;
+        }
+
+        @Override
         public float ratio(Currency currency) {
             switch(currency) {
                 case CNY:
@@ -62,6 +67,8 @@ public enum Currency {
                     return GBP_USD;
                 case HKD:
                     return GBP_HKD;
+                case JPY:
+                    return GBP_JPY;
                 default:
                     return 1f;
             }
@@ -117,6 +124,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toJPY(Float value) {
+            return value * EUR_JPY;
+        }
+
+        @Override
         public float ratio(Currency currency) {
             switch(currency) {
                 case CNY:
@@ -127,6 +139,8 @@ public enum Currency {
                     return EUR_HKD;
                 case USD:
                     return EUR_USD;
+                case JPY:
+                    return EUR_JPY;
                 default:
                     return 1f;
             }
@@ -182,6 +196,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toJPY(Float value) {
+            return value * CNY_JPY; // 1 CNY = 0.1004 GBP
+        }
+
+        @Override
         public float ratio(Currency currency) {
             switch(currency) {
                 case GBP:
@@ -192,6 +211,8 @@ public enum Currency {
                     return CNY_HKD;
                 case USD:
                     return CNY_USD;
+                case JPY:
+                    return CNY_JPY;
                 default:
                     return 1f;
             }
@@ -245,6 +266,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toJPY(Float value) {
+            return value * USD_JPY;
+        }
+
+        @Override
         public float ratio(Currency currency) {
             switch(currency) {
                 case CNY:
@@ -255,6 +281,8 @@ public enum Currency {
                     return USD_EUR;
                 case HKD:
                     return USD_HKD;
+                case JPY:
+                    return USD_JPY;
                 case USD:
                 default:
                     return 1;
@@ -305,6 +333,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toJPY(Float value) {
+            return value * HKD_JPY;
+        }
+
+        @Override
         public float ratio(Currency currency) {
             switch(currency) {
                 case CNY:
@@ -315,6 +348,8 @@ public enum Currency {
                     return HKD_EUR;
                 case USD:
                     return HKD_USD;
+                case JPY:
+                    return HKD_JPY;
                 default:
                     return 1;
             }
@@ -328,6 +363,74 @@ public enum Currency {
         @Override
         public String label() {
             return "港币";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 78.309 -> 0.78309
+            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
+        }
+    },
+
+
+    JPY {
+        @Override
+        public Float toGBP(Float value) {
+            return value * JPY_GBP;
+        }
+
+        @Override
+        public Float toEUR(Float value) {
+            return value * JPY_EUR;
+        }
+
+        @Override
+        public Float toHKD(Float value) {
+            return value * JPY_HKD;
+        }
+
+        @Override
+        public Float toUSD(Float value) {
+            return value * JPY_USD;
+        }
+
+        @Override
+        public Float toCNY(Float value) {
+            return value * JPY_CNY;
+        }
+
+        @Override
+        public Float toJPY(Float value) {
+            return value;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return JPY_CNY;
+                case GBP:
+                    return JPY_GBP;
+                case EUR:
+                    return JPY_EUR;
+                case USD:
+                    return JPY_USD;
+                case HKD:
+                    return JPY_HKD;
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "JPY￥";
+        }
+
+        @Override
+        public String label() {
+            return "日元";
         }
 
         @Override
@@ -353,6 +456,8 @@ public enum Currency {
 
     public abstract Float toCNY(Float value);
 
+    public abstract Float toJPY(Float value);
+
     public abstract float ratio(Currency currency);
 
     public abstract String symbol();
@@ -364,30 +469,42 @@ public enum Currency {
     private static float CNY_GBP = 0.107829021f;
     private static float CNY_HKD = 1.26433964f;
     private static float CNY_USD = 0.162962f;
+    private static float CNY_JPY = 16.2930f;
 
     //EUR
     private static float EUR_CNY = 7.99469721f;
     private static float EUR_GBP = 0.864950705f;
     private static float EUR_HKD = 10.1419028f;
     private static float EUR_USD = 1.3072f;
+    private static float EUR_JPY = 141.5580f;
 
     //GBP
     private static float GBP_CNY = 9.27394116f;
     private static float GBP_EUR = 1.15613525f;
     private static float GBP_HKD = 11.7254114f;
     private static float GBP_USD = 1.5113f;
+    private static float GBP_JPY = 172.0010f;
 
     //HKD
     private static float HKD_CNY = 0.790926719f;
     private static float HKD_EUR = 0.0986008262f;
     private static float HKD_GBP = 0.0852848541f;
     private static float HKD_USD = 0.128891f;
+    private static float HKD_JPY = 13.1423f;
 
     //USD
     private static float USD_CNY = 6.1363999f;
     private static float USD_EUR = 0.76499388f;
     private static float USD_GBP = 0.661681996f;
     private static float USD_HKD = 7.75849361f;
+    private static float USD_JPY = 102.0900f;
+
+    //JPY
+    private static float JPY_CNY = 0.0613f;
+    private static float JPY_EUR = 0.0071f;
+    private static float JPY_GBP = 0.0058f;
+    private static float JPY_HKD = 0.0759f;
+    private static float JPY_USD = 0.0098f;
 
 
     public static void updateCRY() {
@@ -403,6 +520,8 @@ public enum Currency {
             GBP_USD = tmp > 0 ? tmp : GBP_USD;
             tmp = ratio("GBP", "HKD");
             GBP_HKD = tmp > 0 ? tmp : GBP_HKD;
+            tmp = ratio("GBP", "JPY");
+            GBP_JPY = tmp > 0 ? tmp : GBP_JPY;
 
             // EUR
             tmp = ratio("EUR", "GBP");
@@ -413,6 +532,8 @@ public enum Currency {
             EUR_USD = tmp > 0 ? tmp : EUR_USD;
             tmp = ratio("EUR", "HKD");
             EUR_HKD = tmp > 0 ? tmp : EUR_HKD;
+            tmp = ratio("EUR", "JPY");
+            EUR_JPY = tmp > 0 ? tmp : EUR_JPY;
 
             // CNY
             tmp = ratio("CNY", "GBP");
@@ -423,6 +544,8 @@ public enum Currency {
             CNY_USD = tmp > 0 ? tmp : CNY_USD;
             tmp = ratio("CNY", "HKD");
             CNY_HKD = tmp > 0 ? tmp : CNY_HKD;
+            tmp = ratio("CNY", "JPY");
+            CNY_JPY = tmp > 0 ? tmp : CNY_JPY;
 
             // USD
             tmp = ratio("USD", "GBP");
@@ -433,6 +556,8 @@ public enum Currency {
             USD_EUR = tmp > 0 ? tmp : USD_EUR;
             tmp = ratio("USD", "HKD");
             USD_HKD = tmp > 0 ? tmp : USD_HKD;
+            tmp = ratio("USD", "JPY");
+            USD_JPY = tmp > 0 ? tmp : USD_JPY;
 
 
             // HKD
@@ -444,6 +569,20 @@ public enum Currency {
             HKD_GBP = tmp > 0 ? tmp : HKD_GBP;
             tmp = ratio("HKD", "USD");
             HKD_USD = tmp > 0 ? tmp : HKD_USD;
+            tmp = ratio("HKD", "JPY");
+            HKD_JPY = tmp > 0 ? tmp : HKD_JPY;
+
+            // JPY
+            tmp = ratio("JPY", "CNY");
+            JPY_CNY = tmp > 0 ? tmp : JPY_CNY;
+            tmp = ratio("JPY", "EUR");
+            JPY_EUR = tmp > 0 ? tmp : JPY_EUR;
+            tmp = ratio("JPY", "GBP");
+            JPY_GBP = tmp > 0 ? tmp : JPY_GBP;
+            tmp = ratio("JPY", "USD");
+            JPY_USD = tmp > 0 ? tmp : JPY_USD;
+            tmp = ratio("JPY", "HKD");
+            JPY_HKD = tmp > 0 ? tmp : JPY_HKD;
         }
     }
 
@@ -489,6 +628,8 @@ public enum Currency {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return JPY;
             case AMAZON_IT:
                 return EUR;
             case AMAZON_US:
