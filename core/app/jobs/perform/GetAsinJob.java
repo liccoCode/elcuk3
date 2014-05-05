@@ -12,6 +12,7 @@ import models.User;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
+import models.market.Listing;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -111,6 +112,8 @@ public class GetAsinJob extends BaseJob {
                         User user = User.findById(NumberUtils.toLong(getContext().get("user.id").toString()));
                         selling.refresh();
                         noty("您提交的上架请求已经处理完成,请检查 ^_^", user);
+                        selling.refresh();
+
                     }
                 }
             }
