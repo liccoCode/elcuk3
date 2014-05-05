@@ -114,13 +114,13 @@
   <div class="row-fluid">
     <div class="btn-toolbar">
     #{power.ck "products.edit"}
-      <a data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE" id="delunit_form_submit" rel="popover"
-         content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+      <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
+         id="delunit_form_submit" rel="popover"content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
         解除
       </a>
     #{/power.ck}
     #{power.ck 'fbas.deploytoamazon'}
-      <a data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
+      <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
         批量创建 FBA
       </a>
     #{/power.ck}
@@ -129,8 +129,8 @@
        进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
 
-      <a data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST" id="downloadProcureunitsOrder"
-         class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
+      <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
+         id="downloadProcureunitsOrder" class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
         <i class="icon-download-alt"></i>下载出货单
       </a>
     </div>
