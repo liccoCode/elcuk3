@@ -275,6 +275,8 @@ public class MWSOrders {
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp/Orders/2011-01-01");
                         break;
+                    case AMAZON_FR:
+                        config.setServiceURL("https://mws.amazonservices.fr/Orders/2011-01-01");
                     case AMAZON_IT:
                         config.setServiceURL("https://mws.amazonservices.it/Orders/2011-01-01");
                     default:
