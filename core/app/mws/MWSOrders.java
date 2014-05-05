@@ -280,7 +280,7 @@ public class MWSOrders {
                     case AMAZON_IT:
                         config.setServiceURL("https://mws.amazonservices.it/Orders/2011-01-01");
                     default:
-                        throw new UnsupportedOperationException("不支持的 FBA 地址");
+                        throw new UnsupportedOperationException("不支持的 FBA 地址"+acc.type);
                 }
                 client = new MarketplaceWebServiceOrdersClient(acc.accessKey, acc.token, "elcuk2",
                         "1.0",
