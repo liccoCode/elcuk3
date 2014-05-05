@@ -224,6 +224,8 @@ public enum M {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return "JPY¥;";
             case AMAZON_IT:
                 return "&euro;";
             case AMAZON_UK:
@@ -240,6 +242,8 @@ public enum M {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return Currency.JPY;
             case AMAZON_IT:
                 return Currency.EUR;
             case AMAZON_UK:
@@ -488,6 +492,7 @@ public enum M {
                         "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" +
                         marketplaceID;
             case AMAZON_US:
+            case AMAZON_JP:
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -739,6 +744,8 @@ public enum M {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return 1;
             case AMAZON_IT:
                 return -6;
             case AMAZON_UK:

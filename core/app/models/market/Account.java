@@ -370,7 +370,7 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
-        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK).contains(this.type)) return;
+        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK, M.AMAZON_JP).contains(this.type)) return;
         String url = "Account.changeRegion.";
         try {
             url = this.type.changeRegion(m.amid().name());
@@ -399,6 +399,8 @@ public class Account extends Model {
                 return M.MID.ATVPDKIKX0DER;
             case AMAZON_IT:
                 return M.MID.APJ6JRA9NG5V4;
+            case AMAZON_JP:
+                return M.MID.A1VC38T7YXB528;
             default:
                 return M.MID.A1F83G8C2ARO7P;
         }
@@ -588,6 +590,7 @@ public class Account extends Model {
             case AMAZON_FR:
             case AMAZON_ES:
             case AMAZON_IT:
+            case AMAZON_JP:
             case AMAZON_UK:
             case AMAZON_US:
                 return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)

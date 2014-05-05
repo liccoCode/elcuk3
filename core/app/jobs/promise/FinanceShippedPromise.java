@@ -353,6 +353,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "£"), ","));
         } else if(M.AMAZON_US == this.market) {
             return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "$"), ","));
+        } else if(M.AMAZON_JP == this.market) {
+            return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "￥"), ","));
         }
         return 0f;
     }
