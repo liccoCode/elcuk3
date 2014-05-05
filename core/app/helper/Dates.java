@@ -127,6 +127,8 @@ public class Dates {
     public static DateTimeZone timeZone(M market) {
         if(market == null) return Dates.CN;
         switch(market) {
+            case AMAZON_JP:
+                return DateTimeZone.forOffsetHours(1);
             case AMAZON_UK:
             case EBAY_UK:
                 return DateTimeZone.forOffsetHours(0);
@@ -161,6 +163,8 @@ public class Dates {
                 return new DateTime(date).toString("dd.MM.yyyy");
             case AMAZON_US:
                 return new DateTime(date).toString("MM/dd/yyyy");
+            case AMAZON_JP:
+                return new DateTime(date).toString("dd/MM/yyyy");
             default:
                 return new DateTime(date).toString("dd/MM/yyyy");
         }
@@ -180,6 +184,9 @@ public class Dates {
             case AMAZON_US:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
+            case AMAZON_JP:
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
             default:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
@@ -196,6 +203,9 @@ public class Dates {
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("dd MMM yyyy").withZone(Dates.timeZone(m))).toDate();
             case AMAZON_US:
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("MMM dd, yyyy").withZone(Dates.timeZone(m))).toDate();
+            case AMAZON_JP:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("MMM dd, yyyy").withZone(Dates.timeZone(m))).toDate();
             default:
@@ -334,6 +344,7 @@ public class Dates {
 
     /**
      * 获取某年某月最后一天
+     *
      * @param year
      * @param month
      * @return
