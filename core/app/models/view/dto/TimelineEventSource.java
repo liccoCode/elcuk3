@@ -292,7 +292,7 @@ public class TimelineEventSource {
                     // error
                     color = "B94A48";
             }
-            fetchShipmentSate(unit, color);
+            color = fetchShipmentSate(unit, color);
             this.color = String.format("#%s", color);
             return this;
         }
@@ -301,7 +301,7 @@ public class TimelineEventSource {
     /**
      * 采购计划的运输单状态
      */
-    public static void fetchShipmentSate(ProcureUnit unit, String color) {
+    public static String fetchShipmentSate(ProcureUnit unit, String color) {
         List<ShipItem> shipItems = unit.shipItems;
         if(shipItems.size() == 1) {
             //正常情况下一个采购计划只有一个对应的运输单
@@ -309,18 +309,22 @@ public class TimelineEventSource {
             switch(shipment.state) {
                 case SHIPPING:
                     color = "3A87AD";
+                    break;
                 case CLEARANCE:
                 case PACKAGE:
                 case BOOKED:
                 case DELIVERYING:
                     color = "3746B1";
+                    break;
                 case RECEIPTD:
                     color = "5437B1";
+                    break;
             }
         } else if(shipItems.size() > 1) {
             //有多个对应的运输单，表示出现异常
             color = "ff0000";
         }
+        return color;
     }
 
     public static String getRandomColorCode() {

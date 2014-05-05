@@ -109,8 +109,8 @@ public class SellingSaleAnalyzeJob extends Job {
                     // 切换 ProcureUnit 的 sku/sid 的参数?
                     // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
                     List<ProcureUnit> untis = ProcureUnit.find(
-                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage NOT IN (?,?)",
-                            dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER)
+                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage != ?",
+                            dto.fid, ProcureUnit.STAGE.CLOSE)
                             .fetch();
 
                     // plan, working, worked, way
@@ -118,9 +118,10 @@ public class SellingSaleAnalyzeJob extends Job {
                         if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
-                        else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += countWay(unit);
                         else if(unit.stage == ProcureUnit.STAGE.INBOUND)
                             dto.inbound += (unit.qty() - unit.inboundingQty());
+                        dto.way += countWay(unit);
+
                     }
                     dto.difference = dto.day1 - dto.day7 / 7;
                     dto.difference = Webs.scale2PointUp(dto.difference);
