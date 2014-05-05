@@ -6,9 +6,11 @@ import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -161,6 +163,10 @@ public class ProcurePost extends Post<ProcureUnit> {
 //                        .append("fba.shipmentId LIKE ?")
                     .append(") ");
             for(int i = 0; i < 2; i++) params.add(word);
+        }
+        if(StringUtils.isNotBlank(this.unitIds)) {
+            List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
+            sbd.append(" AND id IN " + SqlSelect.inlineParam(unitIdList));
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);

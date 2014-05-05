@@ -215,9 +215,12 @@ public class Deliveryments extends Controller {
     /**
      * 将选定的采购单的 出货FBA 打成ZIP包，进行下载
      */
-    public static synchronized void downloadFBAZIP(String id, List<Long> pids) throws Exception {
+    public static synchronized void downloadFBAZIP(String id, List<Long> pids, List<Long> boxNumbers)
+            throws Exception {
         if(pids == null || pids.size() == 0)
             Validation.addError("", "必须选择需要下载的采购计划");
+        if(boxNumbers == null || boxNumbers.size() == 0 || pids.size() != boxNumbers.size())
+            Validation.addError("", "采购单元箱数填写错误");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             show(id);
@@ -231,11 +234,12 @@ public class Deliveryments extends Controller {
             //生成工厂的文件夹. 格式：选中的采购单的id的组合a,b,c
             File factoryDir = new File(dirfile, String.format("采购单元-%s-出货FBA", StringUtils.join(pids.toArray(), ",")));
             factoryDir.mkdir();
+            for(int i = 0; i < pids.size(); i++) {
+                ProcureUnit procureunit = ProcureUnit.findById(pids.get(i));
 
-            for(Long pid : pids) {
-                ProcureUnit procureunit = ProcureUnit.findById(pid);
-                procureunit.fbaAsPDF(factoryDir);
+                procureunit.fbaAsPDF(factoryDir, boxNumbers.get(i));
             }
+
         } finally {
             File zip = new File(Constant.TMP + "/FBA.zip");
             Files.zip(dirfile, zip);
