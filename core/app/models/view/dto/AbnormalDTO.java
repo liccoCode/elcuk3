@@ -169,8 +169,9 @@ public class AbnormalDTO implements Serializable {
         List<String> listingIds = Listing.getAllListingBySKU(this.sku);
         List<AmazonListingReview> listingReviews = new ArrayList<AmazonListingReview>();
         if(listingIds.size() > 0) {
-            listingReviews = AmazonListingReview.find("rating <= 3 AND listingId IN" + SqlSelect.inlineParam
-                    (listingIds) + "AND " + "reviewDate >=?", day1begin + "reviewDate <= ", day1end).fetch();
+            listingReviews = AmazonListingReview
+                    .find("rating <= 3 AND listingId IN " + SqlSelect.inlineParam(listingIds) + " AND reviewDate >=? " +
+                            "AND " + "reviewDate <=?", day1begin, day1end).fetch();
         }
         return listingReviews;
     }
