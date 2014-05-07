@@ -29,7 +29,7 @@ public abstract class BaseJob extends Job {
     public void end(String msg) {
         Object jobId = getContext().get("gjobId");
         if(jobId != null) {
-            DB.execute("UPDATE GJob set msg=" + SqlSelect.quote(msg) +
+            DB.execute("UPDATE GJob set msg=" + SqlSelect.quote(msg == null ? "" : msg) +
                     ", state='" + GJob.S.END.name() + "' " +
                     "where id=" + jobId.toString());
         }
