@@ -31,10 +31,10 @@ public class PmDashboardFetchJob extends BaseJob {
 
         Long id = new Long(teamid);
 
-        String year = getContext().get("year").toString();
+        Object year = getContext().get("year");
         int calyear = 0;
-        if(StringUtils.isNotBlank(year)) {
-            calyear = Integer.parseInt(year);
+        if(year!=null) {
+            calyear = Integer.parseInt((String)year);
         }
 
         long begin = System.currentTimeMillis();
