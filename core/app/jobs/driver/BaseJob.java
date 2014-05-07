@@ -1,5 +1,6 @@
 package jobs.driver;
 
+import helper.LogUtils;
 import play.Logger;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -48,6 +49,9 @@ public abstract class BaseJob extends Job {
             doit();
             del();
         } catch(Exception e) {
+            LogUtils.JOBLOG
+                    .info(e.toString());
+            e.printStackTrace();
             end(e.getMessage());
         }
     }
