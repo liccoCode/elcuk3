@@ -153,7 +153,7 @@ public class Cooperator extends Model {
      * 备注信息
      */
     @Lob
-    public String memo;
+    public String memo = " ";
 
     /**
      * 类别的默认交易条款
@@ -169,6 +169,43 @@ public class Cooperator extends Model {
     @Expose
     public T type;
 
+    public enum L {
+        ABSOLVE {
+            @Override
+            public String label() {
+                return "免检";
+            }
+        },
+        MILD {
+            @Override
+            public String label() {
+                return "轻度检";
+            }
+        },
+        MEDIUM {
+            @Override
+            public String label() {
+                return "中度检";
+            }
+        },
+        SEVERR {
+            @Override
+            public String label() {
+                return "重度检";
+            }
+        };
+        public abstract String label();
+    }
+
+    /**
+     * 质检的级别
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public T qcLevel;
+
+    @Lob
+    public String instructions = " ";
 
     public Cooperator checkAndUpdate() {
         this.check();
