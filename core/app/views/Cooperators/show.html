@@ -2,118 +2,159 @@
 
 #{if flash.success}
 <div class="row-fluid">
-    <div class="alert alert-success">${flash.success}</div>
+  <div class="alert alert-success">${flash.success}</div>
 </div>
 #{/if}
 
-<!-- Cooperator 自己的信息 -->
-<div class="row-fluid">
-    <form id="cooperator" cid="${coper.id}">
+<ul class="nav nav-tabs">
+  <li class="active">
+    <a href="#basicinfo" data-toggle='tab'>Basic Info</a>
+  </li>
+
+  <li>
+    <a href="#qcinfo" data-toggle='tab'>QC Info</a>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane fade active in" id='basicinfo'>
+    <!-- Cooperator 自己的信息 -->
+    <div class="row-fluid">
+      <form id="cooperator" cid="${coper.id}">
         <label class="label label-info">合作者信息</label>
         <table class="table table-condensed table-bordered">
-            <tr>
-                <td>全称:</td>
-                <td><input type="text" name="cop.fullName" class="required" value="${coper.fullName}"></td>
-                <td>简称:</td>
-                <td><input type="text" name="cop.name" class="required" value="${coper.name}"></td>
-            </tr>
-            <tr>
-                <td>联系人:</td>
-                <td><input type="text" name="cop.contacter" class="required" value="${coper.contacter}"></td>
-                <td>手机:</td>
-                <td><input type="text" name="cop.phone" class="required" value="${coper.phone}"></td>
-            </tr>
+          <tr>
+            <td>全称:</td>
+            <td><input type="text" name="cop.fullName" class="required" value="${coper.fullName}"></td>
+            <td>简称:</td>
+            <td><input type="text" name="cop.name" class="required" value="${coper.name}"></td>
+          </tr>
+          <tr>
+            <td>联系人:</td>
+            <td><input type="text" name="cop.contacter" class="required" value="${coper.contacter}"></td>
+            <td>手机:</td>
+            <td><input type="text" name="cop.phone" class="required" value="${coper.phone}"></td>
+          </tr>
 
-            <tr>
-                <th>固定电话</th>
-                <td><input type="text" name="cop.tel" value="${coper.tel}"></td>
-                <th>传真</th>
-                <td><input type="text" name="cop.fax" value="${coper.fax}"></td>
-            </tr>
+          <tr>
+            <th>固定电话</th>
+            <td><input type="text" name="cop.tel" value="${coper.tel}"></td>
+            <th>传真</th>
+            <td><input type="text" name="cop.fax" value="${coper.fax}"></td>
+          </tr>
 
-            <tr>
-                <th>QQ</th>
-                <td><input type="text" name="cop.qq" value="${coper.qq}"></td>
-                <th>阿里旺旺</th>
-                <td><input type="text" name="cop.wangwang" value="${coper.wangwang}"></td>
-            </tr>
+          <tr>
+            <th>QQ</th>
+            <td><input type="text" name="cop.qq" value="${coper.qq}"></td>
+            <th>阿里旺旺</th>
+            <td><input type="text" name="cop.wangwang" value="${coper.wangwang}"></td>
+          </tr>
 
-            <tr>
-                <td>Type:</td>
-                <td><input type="text" readonly="" class="required" value="${coper.type.to_s()}"></td>
-                <td>Id:</td>
-                <td><input type="text" readonly="" name="cop.id" value="${coper.id}"></td>
-            </tr>
-
-
-            <tr>
-                <td>Address:</td>
-                <td colspan="3">
-                    <input type="text" name="cop.address" class="span10" value="${coper.address}">
-                </td>
-            </tr>
+          <tr>
+            <td>Type:</td>
+            <td><input type="text" readonly="" class="required" value="${coper.type.to_s()}"></td>
+            <td>Id:</td>
+            <td><input type="text" readonly="" name="cop.id" value="${coper.id}"></td>
+          </tr>
 
 
-            <tr>
-                <td colspan="4">
-                    Memo:
-                    <textarea rows="8" class="span12" name="cop.memo">${coper.memo}</textarea>
-                </td>
-            </tr>
+          <tr>
+            <td>Address:</td>
+            <td colspan="3">
+              <input type="text" name="cop.address" class="span10" value="${coper.address}">
+            </td>
+          </tr>
 
-            <tr>
-                <td colspan="4">
-                    交易条款
-                    <textarea rows="8" class="span12" name="cop.tradingTerms">${coper.tradingTerms}</textarea>
-                </td>
-            </tr>
 
-            <tr>
-                <td colspan="4">
-                    <a id="cop_update" class="btn btn-primary">更新</a>
-                </td>
-            </tr>
+          <tr>
+            <td colspan="4">
+              Memo:
+              <textarea rows="8" class="span12" name="cop.memo">${coper.memo}</textarea>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="4">
+              交易条款
+              <textarea rows="8" class="span12" name="cop.tradingTerms">${coper.tradingTerms}</textarea>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="4">
+              <a name="cop_update" class="btn btn-primary">更新</a>
+            </td>
+          </tr>
         </table>
-    </form>
-</div>
+      </form>
+    </div>
 
 
-<!-- 其关联的产品的信息 -->
-#{if coper.type == models.procure.Cooperator.T.SUPPLIER}
-<div class="row-fluid" style="min-height:200px">
-    <label class="label label-info">${coper.fullName} 生产的产品</label>
-    <table id="cooperItemList" class="table table-condensed table-bordered">
+    <!-- 其关联的产品的信息 -->
+  #{if coper.type == models.procure.Cooperator.T.SUPPLIER}
+    <div class="row-fluid" style="min-height:200px">
+      <label class="label label-info">${coper.fullName} 生产的产品</label>
+      <table id="cooperItemList" class="table table-condensed table-bordered">
         <tr>
-            <th>#</th>
-            <th>SKU</th>
-            <th>价格</th>
-            <th>生产周期(day)</th>
-            <th>每箱数量</th>
-            <th>最低采购量</th>
-            <th width="70"></th>
+          <th>#</th>
+          <th>SKU</th>
+          <th>价格</th>
+          <th>生产周期(day)</th>
+          <th>每箱数量</th>
+          <th>最低采购量</th>
+          <th width="70"></th>
         </tr>
-        #{list items:coper.cooperItems, as:'itm'}
+          #{list items:coper.cooperItems, as:'itm'}
             <tr>
-                <td>${itm.id}</td>
-                <td rel="popover" content="${itm.memo}">${itm.sku}</td>
-                <td>${itm.price.format('#.##')} ${itm.currency}</td>
-                <td>${itm.period}</td>
-                <td>${itm.boxSize}</td>
-                <td>${itm.lowestOrderNum}</td>
-                <td>
-                    <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
-                    <button copItemId='${itm.id}' class="btn btn-mini delelte"><i class="icon-remove"></i></button>
-                </td>
+              <td>${itm.id}</td>
+              <td rel="popover" content="${itm.memo}">${itm.sku}</td>
+              <td>${itm.price.format('#.##')} ${itm.currency}</td>
+              <td>${itm.period}</td>
+              <td>${itm.boxSize}</td>
+              <td>${itm.lowestOrderNum}</td>
+              <td>
+                <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
+                <button copItemId='${itm.id}' class="btn btn-mini delelte"><i class="icon-remove"></i></button>
+              </td>
             </tr>
-        #{/list}
+          #{/list}
         <!-- 为此供应商关联新的产品 -->
         <tr>
-            <td colspan="6">
-                <a href="@{Cooperators.newCooperItem(null, coper.id)}" class="btn btn-primary">
-                    为[${coper.fullName}]添加新的生产的产品</a>
-            </td>
+          <td colspan="6">
+            <a href="@{Cooperators.newCooperItem(null, coper.id)}" class="btn btn-primary">
+              为[${coper.fullName}]添加新的生产的产品</a>
+          </td>
         </tr>
-    </table>
-</div>
-#{/if}
+      </table>
+    </div>
+  #{/if}
+  </div>
 
+  <div class="tab-pane fade" id='qcinfo'>
+  #{if coper.type == models.procure.Cooperator.T.SHIPPER}
+    <p class="muted text-center">运输商不具备此类数据.</p>
+  #{/if}
+  #{else }
+    <form id="qc_info_form">
+      <table class="table table-bordered" id="prod_basic">
+        <tr>
+          <th>质检级别:</th>
+          <td>
+              #{select_enum name: "cop.qcLevel", items: models.procure.Cooperator.L.values(), value: coper.qcLevel/}
+          </td>
+          <th>注意事项:</th>
+          <td>
+            <textarea name="cop.instructions" rows="5" cols="80" class="span12">${coper.instructions}</textarea>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <a name="cop_update" class="btn btn-primary">更新</a>
+          </td>
+        </tr>
+      </table>
+    </form>
+  #{/else}
+  </div>
+
+</div>

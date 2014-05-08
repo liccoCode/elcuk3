@@ -1,9 +1,9 @@
 $ ->
-  $('#cop_update').click (e) ->
+  $(document).on("click", "a[name=cop_update]", (r) ->
     form = $('#cooperator')
     e.preventDefault() if form.valid() is false
     form.mask('更新中...')
-    $.post('/Cooperators/edit', form.formSerialize(),
+    $.post('/Cooperators/edit', form.formSerialize() + "&" + $("#qc_info_form").serialize(),
     (r) ->
       if r.flag is false
         alert(r.message)
@@ -11,6 +11,7 @@ $ ->
         alert('更新成功.')
       form.unmask()
     )
+  )
 
   $('button.delelte').click (e) ->
     return false if !confirm("确认删除?")

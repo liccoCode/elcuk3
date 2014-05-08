@@ -202,7 +202,7 @@ public class Cooperator extends Model {
      */
     @Enumerated(EnumType.STRING)
     @Expose
-    public T qcLevel;
+    public L qcLevel;
 
     @Lob
     public String instructions = " ";
