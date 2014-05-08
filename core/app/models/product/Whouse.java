@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Dates;
 import models.market.Account;
 import models.market.M;
+import models.procure.Cooperator;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -14,6 +15,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +46,11 @@ public class Whouse extends Model {
         /**
          * 自有仓库
          */
-        SELF
+        SELF,
+        /**
+         * 货代
+         */
+        FORWARD
     }
 
 
@@ -88,10 +94,88 @@ public class Whouse extends Model {
     @Lob
     public String capaticyContent = "";
 
+    /**
+     * 仓库类型为货代时的合作伙伴(货代)
+     */
+    @ManyToOne
+    public Cooperator cooperator;
+
+    /**
+     * 运输方式是否为海运
+     */
+    @Expose
+    public boolean isSEA = false;
+
+    /**
+     * 是否为空运
+     */
+    @Expose
+    public boolean isAIR = false;
+
+    /**
+     * 是否为快递
+     */
+    @Expose
+    public boolean isEXPRESS = false;
 
     public void validate() {
         if(this.type == T.FBA) {
             if(this.account == null) Validation.addError("", "wh.fba.account");
+        }
+        if(this.type == T.FORWARD) {
+            if(this.cooperator == null) Validation.addError("", "货代不能为空");
+            if(this.isAIR == false && this.isEXPRESS == false && this.isSEA == false)
+                Validation.addError("", "运输方式不能为空");
+        }
+        if(Validation.hasErrors()) return;
+        if(this.type == T.FORWARD) this.exist();
+    }
+
+    public StringBuilder buildStringHead() {
+        StringBuilder sbd = new StringBuilder();
+        sbd.append("cooperator_id = " + this.cooperator.id + "");
+        if(this.id != null) {
+            //update 的时候查询是否存在时需要将当前对象排除掉
+            sbd.append(" AND id != " + this.id + "");
+        }
+        return sbd;
+    }
+
+    /**
+     * 判断当前货代该运输方式是否已经被使用
+     * <p/>
+     * 由于运输方式可以多选，所以需要单独去判断每一个被选择的运输方式是否已经被使用
+     *
+     * @return
+     */
+    public void exist() {
+        StringBuilder sbd = buildStringHead();
+        List<Object> params = new ArrayList<Object>();
+        if(this.isAIR) {
+            sbd.append(" AND isAIR = ?");
+            params.add(this.isAIR);
+            if(Whouse.count(sbd.toString(), params.toArray()) > 0) {
+                Validation.addError("", String.format("货代：%s 空运仓库已经存在", this.cooperator.name));
+            }
+        }
+        if(this.isSEA) {
+            sbd = buildStringHead();
+            params.clear();
+            sbd.append(" AND isSEA = ?");
+            params.add(this.isSEA);
+            long count = Whouse.count(sbd.toString(), params.toArray());
+            if(count > 0) {
+                Validation.addError("", String.format("货代：%s 海运仓库已经存在", this.cooperator.name));
+            }
+        }
+        if(this.isEXPRESS) {
+            sbd = buildStringHead();
+            params.clear();
+            sbd.append(" AND isEXPRESS = ?");
+            params.add(this.isEXPRESS);
+            if(Whouse.count(sbd.toString(), params.toArray()) > 0) {
+                Validation.addError("", String.format("货代：%s 快递仓库已经存在", this.cooperator.name));
+            }
         }
     }
 
@@ -145,7 +229,6 @@ public class Whouse extends Model {
      * 根据星期判断shipmentType来处理运往某仓库的Shipment
      *
      * @param planShipments 用于判断的已经存在的运输单
-     * @param now           今天
      * @return 暂时无返回
      */
     public void checkWhouseNewShipment(List<Shipment> planShipments) {

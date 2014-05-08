@@ -1,8 +1,12 @@
 package controllers;
 
+import helper.J;
+import helper.Webs;
 import models.market.Account;
+import models.procure.Cooperator;
 import models.procure.FBACenter;
 import models.product.Whouse;
+import models.view.Ret;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -23,6 +27,7 @@ public class Whouses extends Controller {
     public static void setUpAccs() {
         renderArgs.put("accs", Account.openedSaleAcc());
         renderArgs.put("fbaCenters", FBACenter.all().<FBACenter>fetch());
+        renderArgs.put("cooperators", Cooperator.find("type = ?", Cooperator.T.SHIPPER).fetch());
     }
 
 
@@ -54,9 +59,10 @@ public class Whouses extends Controller {
     public static void update(Whouse wh) {
         validation.valid(wh);
         wh.validate();
-        if(Validation.hasErrors()) render("Whouses/edit.html", wh);
+        if(Validation.hasErrors()) {
+            renderJSON(new Ret(Webs.V(Validation.errors())));
+        }
         wh.save();
-        flash.success("更新成功");
-        redirect("/Whouses/index");
+        renderJSON(new Ret());
     }
 }
