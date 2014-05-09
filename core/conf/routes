@@ -160,6 +160,10 @@ POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
 
+# SKUCHECK
+POST    /skuchecks/{id}/update                               Skuchecks.update
+POST    /skuchecks/{id}/delete                               Skuchecks.remove
+
 # Elcuk
 GET     /elcuks                                             Elcuk.index
 PUT     /elcuk/config                                       Elcuk.updateConfig
