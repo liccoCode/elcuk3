@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.*;
@@ -33,6 +34,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonSellingSyncJob.class.getName()).isExcute()) return;
         /**
          * 1. 找到所有的 Account 并根据所有支持的 MarketPlace 申请同步的文件
@@ -63,6 +65,10 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonSellingSyncJob step5 done!");
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonSellingSyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     @Override

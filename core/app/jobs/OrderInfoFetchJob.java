@@ -2,6 +2,7 @@ package jobs;
 
 import helper.FLog;
 import helper.HTTP;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Orderr;
@@ -31,6 +32,7 @@ import java.util.List;
 public class OrderInfoFetchJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(OrderInfoFetchJob.class.getName()).isExcute()) return;
         /**
          * 1. 加载 SHIPPED 状态的订单, 并且限制数量;
@@ -47,6 +49,10 @@ public class OrderInfoFetchJob extends Job {
                 Logger.warn("Parse Order(%s) Info Error! email:%s, userId:%s, phone:%s. [%s]",
                         ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("OrderInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }
 
@@ -86,7 +92,8 @@ public class OrderInfoFetchJob extends Job {
         if(lin == null) {
             // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
             lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
-            if(StringUtils.isNotBlank(lin.text()) && StringUtils.contains(lin.text().toLowerCase(), "cancelled") ||
+            if(lin!=null && StringUtils.isNotBlank(lin.text()) && StringUtils.contains(lin.text().toLowerCase(),
+                    "cancelled") ||
                     StringUtils.contains(lin.text().toLowerCase(), "storniert")/*德语*/) {
                 Logger.info("Order %s state from %s to %s", order.orderId, order.state, Orderr.S.CANCEL);
                 order.state = Orderr.S.CANCEL;

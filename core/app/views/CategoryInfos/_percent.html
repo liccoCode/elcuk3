@@ -1,0 +1,6 @@
+#{if categoryProfit <= 0.0 || dto.profit <= 0.0}
+0%
+#{/if}
+#{else }
+${(dto.profit/categoryProfit).format('#.##%')}
+#{/else}

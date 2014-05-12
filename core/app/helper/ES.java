@@ -22,4 +22,17 @@ public class ES {
     public static JSONObject get(String index, String type, String id) {
         return HTTP.getJson(ES_HOST + "/" + index + "/" + type + "/" + id);
     }
+
+    /**
+     * ES中存在特殊字符-,|符号的，作转义处理
+     *
+     * @param esfield
+     * @return
+     */
+    public static String parseEsString(String esfield) {
+        if(esfield == null)
+            return null;
+        esfield = esfield.replace("-", "").replace(",", "").replace("|", "");
+        return esfield;
+    }
 }

@@ -1,0 +1,32 @@
+#{extends 'main.html'/}
+#{set title:'创建新 Role' /}
+#{set 'moreScripts'}
+#{/set}
+
+#{info_row title:'创建新的 Role', row:true/}
+<div class="row">
+#{flash_alert row:true/}
+  <div class="span12">
+  #{errorMsgs /}
+    <form action="@{Roles.create()}" method="post">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <input type="hidden" name="role.roleId" value="${role.roleId}">
+          <td>RoleName:</td>
+          <td><input class="input-medium" type="text" name="role.roleName" value="${role.roleName}"></td>
+        </tr>
+        <tr>
+          <td>Memo:</td>
+          <td colspan="3">
+            <textarea name="role.memo" class="span12" rows="10">${role.memo}</textarea>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <button class="btn btn-primary" data-loading>保存</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>

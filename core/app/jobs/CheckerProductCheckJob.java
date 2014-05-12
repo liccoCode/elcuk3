@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import models.Jobex;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
@@ -25,6 +26,7 @@ import java.util.List;
 public class CheckerProductCheckJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(CheckerProductCheckJob.class.getName()).isExcute()) return;
         /**
          * 1. 现在仅检查 Product 的图片问题
@@ -41,5 +43,9 @@ public class CheckerProductCheckJob extends Job {
         }
 
         SystemMails.productPicCheckermail(thisTimeWarnningProduct);
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("CheckerProductCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 }

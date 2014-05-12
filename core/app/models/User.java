@@ -1,10 +1,14 @@
 package models;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.DBUtils;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.product.Category;
+import models.product.Team;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -13,17 +17,10 @@ import play.db.jpa.Model;
 import play.libs.Crypto;
 import play.mvc.Scope;
 import play.utils.FastRuntimeException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-
-import java.util.Map.Entry;
-import java.util.Iterator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 系统中的用户
@@ -48,6 +45,19 @@ public class User extends Model {
      */
     @ManyToMany
     public Set<Privilege> privileges = new HashSet<Privilege>();
+
+    /**
+     * 用户所拥有的TEAM
+     */
+    @ManyToMany
+    public Set<Team> teams = new HashSet<Team>();
+
+    /**
+     * 用户所拥有的ROLE
+     */
+    @ManyToMany
+    public Set<Role> roles = new HashSet<Role>();
+
 
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
     public List<Payment> paymentPaied = new ArrayList<Payment>();
@@ -192,6 +202,72 @@ public class User extends Model {
         this.save();
     }
 
+
+    /**
+     * 当前用户还没有的权限
+     *
+     * @return
+     */
+    public boolean isHaveTeam(Team team) {
+        return this.teams.contains(team);
+    }
+
+    /**
+     * 增加Team;(删除原来的, 重新添加现在的)
+     *
+     * @param teamId
+     */
+    public void addTeams(List<Long> teamId) {
+        if(teamId == null || teamId.size() == 0) {
+            this.teams = new HashSet<Team>();
+            this.save();
+            Team.updateTeams(this.username, this.teams);
+        } else {
+            List<Team> teams = Team.find("id IN " + JpqlSelect.inlineParam(teamId))
+                    .fetch();
+            if(teamId.size() != teams.size())
+                throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.teams = new HashSet<Team>();
+            this.save();
+            this.teams.addAll(teams);
+            Team.updateTeams(this.username, this.teams);
+            this.save();
+        }
+    }
+
+
+    /**
+     * 增加Role;(删除原来的, 重新添加现在的)
+     *
+     * @param roleId
+     */
+    public void addRoles(List<Long> roleId) {
+        if(roleId == null || roleId.size() == 0) {
+            this.roles = new HashSet<Role>();
+            this.save();
+            Role.updateRoles(this.username, this.roles);
+        } else {
+            List<Role> roles = Role.find("id IN " + JpqlSelect.inlineParam(roleId))
+                    .fetch();
+            if(roleId.size() != roles.size())
+                throw new FastRuntimeException("需要修改的Role数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.roles = new HashSet<Role>();
+            this.save();
+            this.roles.addAll(roles);
+            Role.updateRoles(this.username, this.roles);
+            this.save();
+        }
+    }
+
+    /**
+     * 当前用户还没有的角色
+     *
+     * @return
+     */
+    public boolean isHaveRole(Role role) {
+        return this.roles.contains(role);
+    }
+
     /**
      * 修改密码
      *
@@ -227,7 +303,7 @@ public class User extends Model {
          * 3. 用户 Notification Queue 缓存
          */
         //TODO 这里的缓存都是通过 Model 自己进行的缓存, 只能够支持单机缓存, 无法分布式.
-        Privilege.privileges(this.username);
+        Privilege.privileges(this.username,this.roles);
     }
 
     /**
@@ -400,4 +476,39 @@ public class User extends Model {
         }
     }
 
+    /**
+     * User的所有Category_Id
+     *
+     * @return
+     */
+    public static List<String> getTeamCategorys(User user) {
+        List<String> categories = new ArrayList<String>();
+        String sql = "select c.categoryid From User_Team u,Category c "
+                + " where u.teams_id=c.team_id"
+                + " and users_id=" + user.id;
+        List<Map<String, Object>> categorys = DBUtils.rows(sql);
+        if(categorys != null && categorys.size() > 0) {
+            for(Map<String, Object> row : categorys) {
+                categories.add(row.get("categoryid").toString());
+            }
+        }
+        return categories;
+    }
+
+
+    /**
+     * User的所有Category
+     *
+     * @return
+     */
+    public static List<Category> getObjCategorys(User user) {
+        List<Category> categories = new ArrayList<Category>();
+        Iterator<Team> iterator = user.teams.iterator();
+        while(iterator.hasNext()) {
+            Team team = iterator.next();
+            List<Category> categoryList = team.getObjCategorys();
+            categories.addAll(categoryList);
+        }
+        return categories;
+    }
 }

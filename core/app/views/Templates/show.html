@@ -1,0 +1,170 @@
+#{extends 'main_full.html'/}
+#{set title:'Template' /}
+#{set 'moreScripts'}
+#{/set}
+
+<div class="row-fluid">
+  <div class="row-fluid">
+    <div class="span3 well well-small" id="cat_slider">
+    #{if temps.size() != 0}
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <th>模板名称</th>
+          <th>关联 Category 数量</th>
+          <th>关联 Attribute 数量</th>
+        </tr>
+          #{list items:temps, as:'temp_left'}
+            <tr>
+              <td>
+                <a href="@{Templates.show()}/${temp_left.id}">${temp_left.name}</a>
+              </td>
+              <td>
+              ${temp_left.categorys.size()}
+              </td>
+              <td>
+              ${temp_left.attributes.size()}
+              </td>
+            </tr>
+          #{/list}
+      </table>
+      <form action="@{Templates.delete()}" method="POST" style="display:inline-block;">
+        <input type="hidden" name="id" value="${temp.id}">
+          #{authenticityToken /}
+        <button data-confirm='确认删除?' class="btn btn-danger">删除 ${temp.name} 模板</button>
+      </form>
+    #{/if}
+      <a href="@{Templates.blank()}" class="btn btn-primary">创建新的模板</a>
+    </div>
+
+    <div class="span8 well well-small">
+    #{flash_alert /}
+    #{errorMsgs /}
+
+    #{if temp != null}
+        #{info_row title:'Template Info'/}
+      <div>
+        <form action="@{Templates.update()}" method="POST">
+          <table class="table table-bordered table-condensed">
+            <tr>
+              <td>模板名称:</td>
+              <td>
+                <input type="text" class="span12" name="temp.name" value="${temp.name}">
+                <input type="hidden" name="temp.id" value="${temp.id}">
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button class="btn btn-primary" data-loading>保存</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+
+
+        #{info_row title:'Attributes'/}
+      <div class="row-fluid">
+        <div class="span6">
+          <form method="POST" action="@{Templates.attribute()}">
+            <div style="margin-bottom:10px;">
+              <input type="hidden" name="id" value="${temp.id}">
+              <button class="btn btn-primary" data-loading>绑定</button>
+            </div>
+            <table class="table table-bordered table-condensed">
+              <tr>
+                <th></th>
+                <th>Name</th>
+              </tr>
+                #{list items:temp.getUnBindAttributes(), as:'unatt'}
+                  <tr>
+                    <td>
+                      <label><input type="checkbox" name="attributeIds" value="${unatt.id}"></label>
+                    </td>
+                    <td>${unatt.name}</td>
+                  </tr>
+                #{/list}
+            </table>
+          </form>
+        </div>
+        <div class="span6">
+          <form method="post" action="@{Templates.unattribute()}">
+            <div style="margin-bottom:10px;">
+              <input type="hidden" name="id" value="${temp.id}">
+              <button class="btn btn-warning" data-loading>解除绑定</button>
+            </div>
+            <table class="table table-bordered table-condensed">
+              <tr>
+                <th></th>
+                <th>Name</th>
+              </tr>
+                #{list items:temp.attributes, as:'att'}
+                  <tr>
+                    <td>
+                      <label><input type="checkbox" name="attributeIds" value="${att.id}"></label>
+                    </td>
+                    <td>${att.name}</td>
+                  </tr>
+                #{/list}
+            </table>
+          </form>
+        </div>
+      </div>
+
+
+        #{info_row title:'Categorys'/}
+    <div class="row-fluid">
+      <div class="span6">
+        <form method="POST" action="@{Templates.category()}">
+          <div style="margin-bottom:10px;">
+            <input type="hidden" name="id" value="${temp.id}">
+            <button class="btn btn-primary" data-loading>绑定</button>
+          </div>
+          <table class="table table-bordered table-condensed">
+            <tr>
+              <th></th>
+              <th>CategoryId</th>
+              <th>Name</th>
+            </tr>
+              #{list items:temp.getUnBindCategorys(), as:'uncate'}
+                <tr>
+                  <td>
+                    <label><input type="checkbox" name="categoryIds" value="${uncate.categoryId}"></label>
+                  </td>
+                  <td>${uncate.categoryId}</td>
+                  <td>${uncate.name}</td>
+                </tr>
+              #{/list}
+          </table>
+        </form>
+      </div>
+      <div class="span6">
+        <form method="post" action="@{Templates.uncategory()}">
+          <div style="margin-bottom:10px;">
+            <input type="hidden" name="id" value="${temp.id}">
+            <button class="btn btn-warning" data-loading>解除绑定</button>
+          </div>
+          <table class="table table-bordered table-condensed">
+            <tr>
+              <th></th>
+              <th>Name</th>
+            </tr>
+              #{list items:temp.categorys, as:'cate'}
+                <tr>
+                  <td>
+                    <label><input type="checkbox" name="categoryIds" value="${cate.categoryId}"></label>
+                  </td>
+                  <td>${cate.categoryId}</td>
+                  <td>${cate.name}</td>
+                </tr>
+              #{/list}
+          </table>
+        </form>
+      </div>
+    #{/if}
+    #{else }
+      <h4>等待创建新的模板 : )</h4>
+    #{/else}
+    </div>
+    </div>
+  </div>
+</div>

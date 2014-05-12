@@ -18,6 +18,7 @@ import models.procure.Shipment;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.post.ProcurePost;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
@@ -65,7 +66,7 @@ public class ProcureUnits extends Controller {
     /**
      * 将搜索结果 打成ZIP包，进行下载
      */
-    public static synchronized void downloadFBAZIP(ProcurePost p) throws Exception {
+    public static synchronized void downloadFBAZIP(ProcurePost p, List<Long> boxNumbers) throws Exception {
         List<ProcureUnit> procureUnitsList = p.query();
         if(procureUnitsList != null && procureUnitsList.size() != 0) {
             //创建FBA根目录，存放工厂FBA文件
@@ -73,21 +74,19 @@ public class ProcureUnits extends Controller {
             try {
                 Files.delete(dirfile);
                 dirfile.mkdir();
-                for(ProcureUnit procureUnit : procureUnitsList) {
-                    if(!StringUtils.isBlank(p.unitIds)) {
-                        if(!StringUtils.contains(p.unitIds, procureUnit.id.toString())) {
-                            continue;
-                        }
-                    }
+                for(int i = 0; i < procureUnitsList.size(); i++) {
+                    ProcureUnit procureUnit = procureUnitsList.get(i);
+
                     String name = procureUnit.cooperator.name;
                     String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
-
-                    //生成工厂的文件夹. 格式：预计交货日期-工厂名称
+                    //生成工厂的文件夹. 格式：采购单ID-预计交货日期-工厂名称
                     File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
                     factoryDir.mkdir();
                     //生成 PDF
-                    procureUnit.fbaAsPDF(factoryDir);
+                    procureUnit.fbaAsPDF(factoryDir, boxNumbers.get(i));
                 }
+                FileUtils.writeStringToFile(new File(dirfile, "采购计划ID列表.txt"),
+                        java.net.URLDecoder.decode(p.unitIds, "UTF-8"), "UTF-8");
             } finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");
                 Files.zip(dirfile, zip);

@@ -2,8 +2,11 @@ package jobs.analyze;
 
 import helper.Dates;
 import helper.Promises;
+import helper.Webs;
 import models.market.M;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -13,6 +16,8 @@ import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
 import query.*;
+
+import java.text.DecimalFormat;
 
 import java.util.*;
 
@@ -86,8 +91,9 @@ public class SellingSaleAnalyzeJob extends Job {
                 // 准备计算用的数据容器
                 Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
                 if(isSku) {
-                    for(String sku : new ProductQuery().skus()) {
-                        analyzeMap.put(sku, new AnalyzeDTO(sku));
+                    Map<String, Product.S> products = new ProductQuery().skuAndStates();
+                    for(String sku : products.keySet()) {
+                        analyzeMap.put(sku, new AnalyzeDTO(sku, products.get(sku).toString()));
                     }
                 } else {
                     for(AnalyzeDTO dto : new SellingQuery().analyzePostDTO()) {
@@ -103,8 +109,8 @@ public class SellingSaleAnalyzeJob extends Job {
                     // 切换 ProcureUnit 的 sku/sid 的参数?
                     // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
                     List<ProcureUnit> untis = ProcureUnit.find(
-                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage NOT IN (?,?)",
-                            dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER)
+                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage != ?",
+                            dto.fid, ProcureUnit.STAGE.CLOSE)
                             .fetch();
 
                     // plan, working, worked, way
@@ -112,11 +118,13 @@ public class SellingSaleAnalyzeJob extends Job {
                         if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
-                        else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.INBOUND)
                             dto.inbound += (unit.qty() - unit.inboundingQty());
+                        dto.way += countWay(unit);
+
                     }
                     dto.difference = dto.day1 - dto.day7 / 7;
+                    dto.difference = Webs.scale2PointUp(dto.difference);
                     dtos.add(dto);
                 }
 
@@ -134,6 +142,27 @@ public class SellingSaleAnalyzeJob extends Job {
         }
 
         return dtos;
+    }
+
+    /**
+     * 统计在途的数量
+     * 公式为：(运输中 + 清关中 + 提货中 + 已预约 + 派送中 + 已签收)
+     */
+    public int countWay(ProcureUnit unit) {
+        int way = 0;
+        //采购计划的 shipItems
+        for(ShipItem si : unit.shipItems) {
+            switch(si.shipment.state) {
+                case SHIPPING:
+                case CLEARANCE:
+                case PACKAGE:
+                case BOOKED:
+                case DELIVERYING:
+                case RECEIPTD:
+                    way += si.qty;
+            }
+        }
+        return way;
     }
 
     private void pullDaySales(boolean isSku, Map<String, AnalyzeDTO> analyzeMap) {
@@ -302,6 +331,7 @@ public class SellingSaleAnalyzeJob extends Job {
             }
             if(dto.reviews > 0) {
                 dto.reviewRatio = dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
+                dto.reviewRatio = Webs.scale2PointUp(dto.reviewRatio);
             } else {
                 dto.reviewRatio = 0;
             }
@@ -314,6 +344,7 @@ public class SellingSaleAnalyzeJob extends Job {
                     dto.lastRatingDate = t2._2;
                 }
             }
+
         }
     }
 

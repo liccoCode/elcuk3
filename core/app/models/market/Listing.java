@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
 import helper.DBUtils;
+import helper.Webs;
 import jobs.ListingSchedulJob;
 import jobs.works.ListingOffersWork;
 import models.product.Product;
@@ -16,6 +17,7 @@ import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -477,5 +479,39 @@ public class Listing extends GenericModel {
         //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
         this.closeWarnningTime = new Date();
         this.save();
+    }
+
+    /**
+     * 根据 sku 获取listingId 集合
+     *
+     * @param sku
+     * @return
+     */
+    public static List<String> getAllListingBySKU(String sku) {
+        List<String> listingIds = new ArrayList<String>();
+        SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku=?").param(sku);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        for(Map<String, Object> row : rows) {
+            listingIds.add(row.get("listingId").toString());
+        }
+        return listingIds;
+    }
+
+    /**
+     * Listing 下所有的 Selling
+     *
+     * @return
+     */
+    public List<Selling> sellings() {
+        List<Selling> sellings = Selling.find("state <> 'DOWN' AND listing_listingId = ?", this.listingId).fetch();
+        return sellings;
+    }
+
+    public void safeDelete() {
+        long size = this.sellings.size();
+        if(this.sellings.size() > 0) {
+            Webs.error("此 Listing 拥有 " + size + " 个 Selling 关联, 无法删除");
+        }
+        this.delete();
     }
 }

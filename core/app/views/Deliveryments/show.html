@@ -59,7 +59,9 @@
           <td colspan="6">
             <h4>Memo:</h4>
             <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
-            <button class="btn btn-primary" data-disable-with='更新中...'>更新</button>
+          #{power.ck "products.edit"}
+            <button class="btn btn-primary">更新</button>
+          #{/power.ck}
           </td>
         </tr>
       </table>
@@ -74,9 +76,11 @@
       <div class="input-prepend input-append" style="float:left;">
         <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
         <input type="hidden" name="id" value="${dmt.id}">
-        <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary" data-disable-with='更新中...'>
-          确认
-        </button>
+          #{power.ck "products.edit"}
+            <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
+              确认
+            </button>
+          #{/power.ck}
       </div>
     </form>
   #{/if}
@@ -109,29 +113,31 @@
   </div>
   <div class="row-fluid">
     <div class="btn-toolbar">
-      <a data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE" id="delunit_form_submit" rel="popover"
-         data-disable-with='处理中...' content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+    #{power.ck "products.edit"}
+      <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
+         id="delunit_form_submit" rel="popover"content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
         解除
       </a>
-      #{power.ck 'fbas.deploytoamazon'}
-        <a data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs"
-          class="btn btn-success" data-disable-with='创建中...'>
-          批量创建 FBA
-        </a>
-      #{/power.ck}
-      <a data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST" id="downloadFBAZIP"
-        class="btn btn-success" rel="popover"
-        content="将选定的采购单元的 出货FBA 进行压缩打包 " data-disable-with='正在处理中...'>
-        <i class="icon-download-alt"></i>下载FBA ZIP 包
+    #{/power.ck}
+    #{power.ck 'fbas.deploytoamazon'}
+      <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
+        批量创建 FBA
       </a>
-      <a data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST" id="downloadProcureunitsOrder"
-         class="btn btn-success" rel="popover"
-        content="下载选定的采购单元的出货单" data-disable-with='正在处理中...'>
+    #{/power.ck}
+      <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
+       进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
+      </a>
+
+      <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
+         id="downloadProcureunitsOrder" class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
         <i class="icon-download-alt"></i>下载出货单
       </a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
+
+  #{include 'Deliveryments/box_number_model.html'/}
 </form>
 
 
@@ -159,7 +165,7 @@
               所有快递 指定的货代是: 南山区南头街道办北环大道10014号办公楼1-3层 Mob：15019438423 Tel:86203228-821
               胡先生 QQ：2355760784 鸿捷国际货代
 
-              所有空运和海运 指定的货代是: 国建汉唐物流 徐先生 QQ516722101，电话15813728307仓库管理员林先生 15920059701 仓库地址是：深圳龙岗区坂田火车站旁货站物流中心105号仓库仓库
+              所有空运和海运 指定的货代是: 国建汉唐物流 徐先生 QQ516722101，电话15813728307仓库管理员李先生 15220156857 仓库地址是：深圳龙岗区坂田火车站旁货站物流中心105号仓库仓库
             </textarea>
           </td>
         </tr>
@@ -218,7 +224,7 @@
           <th>移动电话</th>
           <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
           <th>固定电话</th>
-          <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185066525">
+          <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185145965">
           </td>
         </tr>
 
@@ -254,7 +260,7 @@
 
           <th>地址</th>
           <td colspan="3">
-            <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress" value="湖南省芙蓉中路1段530号和府大厦2410室">
+            <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress" value="湖南省长沙市开福区万达写字楼B栋10016">
           </td>
         </tr>
         <tr>
@@ -286,7 +292,9 @@
   <div class="span12">
     <div class="pull-left input-prepend input-append">
       <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
-      <button id="plan_form_submit" class="btn btn-primary">添加</button>
+        #{power.ck "products.edit"}
+          <button id="plan_form_submit" class="btn btn-primary">添加</button>
+        #{/power.ck}
     </div>
   </div>
 </div>
@@ -302,6 +310,11 @@
 <div class="row-fluid">
   <div style="min-height:300px;" class="span12 well" id="dropbox">
     <ul class="thumbnails uploaded"></ul>
+  #{power.ck "products.edit"}
     <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  #{/power.ck}
   </div>
 </div>
+
+
+

@@ -233,6 +233,12 @@ public class Orderr extends GenericModel {
 
 
     /**
+     * 如果导入salefee则feeflag=2
+     */
+    public int feeflag;
+
+
+    /**
      * 此订单总共卖出的产品数量
      * ps: 对于分页使用这个方法, 性能暂时不是需要考虑的问题
      *
@@ -259,12 +265,15 @@ public class Orderr extends GenericModel {
          */
         switch(this.market) {
             case AMAZON_UK:
+                return "Thanks for purchasing from EasyAcc on " +
+                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
+                        this.orderId + ")";
             case AMAZON_US:
-                return "Thanks for purchasing EasyAcc Product on " +
+                return "Thanks for purchasing from EasyAcc on " +
                         JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
                         this.orderId + ")";
             case AMAZON_DE:
-                return "Vielen Dank für den Kauf EasyAcc Produkte auf Amazon.de (Bestellung: " +
+                return "Vielen Dank für den Kauf unseres EasyAcc Produkts auf Amazon.de (Bestellung: " +
                         this.orderId + ")";
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));

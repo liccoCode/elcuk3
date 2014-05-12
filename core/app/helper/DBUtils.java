@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import play.db.helper.SqlSelect;
+
 /**
  * 直接使用 SQL 的工具方法
  * User: wyattpan
@@ -37,8 +39,9 @@ public class DBUtils {
      */
     public static Map<String, Object> row(Connection conn, String sql, Object... params) {
         Map<String, Object> row = new HashMap<String, Object>();
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             for(int i = 0; i < params.length; ) ps.setObject(++i, params[(i > 0 ? i - 1 : 0)]);
 
             loger.debug(String.format("%s -> %s", sql, Arrays.toString(params)));
@@ -55,9 +58,14 @@ public class DBUtils {
                 row = mapOneRow(mete, rs);
             }
             rs.close();
-            ps.close();
         } catch(Exception e) {
             throw new FastRuntimeException(e);
+        } finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
         return row;
     }
@@ -103,8 +111,9 @@ public class DBUtils {
      */
     public static List<Map<String, Object>> rows(Connection conn, String sql, Object... params) {
         List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             for(int i = 0; i < params.length; ) ps.setObject(++i, params[(i > 0 ? i - 1 : 0)]);
 
             loger.debug(String.format("%s -> %s", sql, Arrays.toString(params)));
@@ -115,14 +124,44 @@ public class DBUtils {
             while(rs.next()) {
                 rows.add(mapOneRow(mete, rs));
             }
-
+            rs.close();
         } catch(Exception e) {
             throw new FastRuntimeException(e);
+        } finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
         return rows;
     }
 
     public static boolean execute(String sql) {
         return DB.execute(sql);
+    }
+
+    public static String whereOr(String column, Object param) {
+        String value = orlineParam(column, param);
+        if(value.length() == 0) return value;
+        return value;
+    }
+
+    public static String orlineParam(String column, Object param) {
+        if(param == null) return "NULL";
+        String str;
+        if(param instanceof String) str = column + "=" + SqlSelect.quote(param.toString());
+        else if(param instanceof Iterable<?>) {
+            SqlSelect.Concat list = new SqlSelect.Concat("(", " or ", ")");
+            for(Object p : (Iterable<?>) param) list.append(orlineParam(column, p));
+            str = list.toString();
+        } else if(param instanceof Object[]) {
+            SqlSelect.Concat list = new SqlSelect.Concat("(", " or ", ")");
+            for(Object p : (Object[]) param) list.append(orlineParam(column, p));
+            str = list.toString();
+        } else if(param instanceof Enum<?>) {
+            str = column + "=" + SqlSelect.quote(param.toString());
+        } else str = column + "=" + param.toString();
+        return str;
     }
 }

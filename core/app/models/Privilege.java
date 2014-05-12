@@ -24,6 +24,11 @@ public class Privilege extends Model {
      */
     private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
 
+    /**
+     * 将角色的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
+     */
+    private static final Map<String, Set<Privilege>> ROLE_PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
+
     public Privilege() {
     }
 
@@ -86,6 +91,8 @@ public class Privilege extends Model {
         privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
         privileges.add(new Privilege("amazonoperations", "Amazon 操作"));
+        privileges.add(new Privilege("sellings.delete", "Selling 删除"));
+        privileges.add(new Privilege("listings.delete", "Listing 删除"));
 
         /*
          * TODO delete
@@ -96,11 +103,19 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("product", "产品模块"));
         privileges.add(new Privilege("products.index", "产品 页面"));
+        privileges.add(new Privilege("products.delete", "产品 删除"));
+
         privileges.add(new Privilege("whouses.index", "仓库 页面"));
         privileges.add(new Privilege("categorys.show", "产品类别 页面"));
         privileges.add(new Privilege("brands.index", "产品品牌 页面"));
         privileges.add(new Privilege("familys.index", "Family 页面"));
+        privileges.add(new Privilege("familys.delete", "Family 删除"));
         privileges.add(new Privilege("feeds.index", "Feed 页面"));
+
+        privileges.add(new Privilege("attributes.index", "产品附加属性 页面"));
+        privileges.add(new Privilege("templates.show", "附加属性模板 页面"));
+
+
 
         privileges.add(new Privilege("procure", "采购模块"));
         privileges.add(new Privilege("procures.index", "采购计划 页面"));
@@ -115,6 +130,7 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("users.index", "用户管理 页面"));
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
+        privileges.add(new Privilege("categoryinfos.show", "Category 信息"));
 
         // 首页
         // TODO delete
@@ -174,6 +190,14 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
 
+
+        //销售目标控制器
+        privileges.add(new Privilege("saletarget", "目标模块"));
+        privileges.add(new Privilege("saletargets.index", "年度目标页面"));
+        privileges.add(new Privilege("saletargets.create", "创建年度目标"));
+        privileges.add(new Privilege("saletargets.split", "Category目标月度分解"));
+
+
         // ProcureUnits
         privileges.add(new Privilege("procureunits.billingprepay", "采购计划预付款申请"));
         privileges.add(new Privilege("procureunits.billingtailpay", "采购计划尾款申请"));
@@ -211,13 +235,21 @@ public class Privilege extends Model {
      * @param username
      * @return
      */
-    public static Set<Privilege> privileges(String username) {
+    public static Set<Privilege> privileges(String username, Set<Role> roles) {
         Set<Privilege> privileges = PRIVILEGE_CACHE.get(username);
         if(privileges == null) {
             PRIVILEGE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
                     new HashSet<Privilege>(User.findByUserName(username).privileges));
             privileges = PRIVILEGE_CACHE.get(username);
         }
+
+        for(Role role : roles) {
+            Set<Privilege> pris = roleprivileges(role.roleName);
+            if(pris != null && pris.size() > 0) {
+                privileges.addAll(pris);
+            }
+        }
+
         return privileges;
     }
 
@@ -239,5 +271,33 @@ public class Privilege extends Model {
      */
     public static void clearUserPrivilegesCache(User user) {
         PRIVILEGE_CACHE.remove(user.username);
+    }
+
+
+    /**
+     * 更新缓存的权限
+     *
+     * @param username
+     * @param privileges
+     */
+    public static void updateRolePrivileges(String rolename, Set<Privilege> privileges) {
+        ROLE_PRIVILEGE_CACHE.remove(rolename);
+        ROLE_PRIVILEGE_CACHE.put(rolename, privileges);
+    }
+
+    /**
+     * 初始化或者获取缓存的权限
+     *
+     * @param username
+     * @return
+     */
+    public static Set<Privilege> roleprivileges(String rolename) {
+        Set<Privilege> privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
+        if(privileges == null) {
+            ROLE_PRIVILEGE_CACHE.put(rolename, /*这里拿一个 Privileges 的备份*/
+                    new HashSet<Privilege>(Role.findByRoleName(rolename).privileges));
+            privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
+        }
+        return privileges;
     }
 }

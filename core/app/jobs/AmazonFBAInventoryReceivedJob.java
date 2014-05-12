@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import models.Jobex;
 import models.market.Account;
 import models.market.JobRequest;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AmazonFBAInventoryReceivedJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonFBAInventoryReceivedJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
@@ -54,6 +56,10 @@ public class AmazonFBAInventoryReceivedJob extends Job implements JobRequest.Ama
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonFBAInventoryReceivedJob step5 done!");
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonFBAInventoryReceivedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     @Override

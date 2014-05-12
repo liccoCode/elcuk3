@@ -3,18 +3,22 @@ package jobs;
 import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
 import helper.J;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
 
+import javax.print.attribute.DateTimeSyntax;
 import javax.xml.bind.JAXB;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,13 +28,14 @@ import java.util.List;
  * - 轮询周期: 1h
  * - Duration: 2h
  * - Job Interval: 24h
- * User: Wyatt
+ * User: Wyatt                   Shipment Plan
  * Date: 12-1-8
  * Time: 上午5:59
  */
 public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderFetchJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
@@ -64,6 +69,10 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderFetchJob step5 done!");
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("AmazonOrderFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     /**
@@ -71,7 +80,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
      */
     @Override
     public int intervalHours() {
-        return 24;
+        return 8;
     }
 
     /**
@@ -102,6 +111,37 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 partOrders = orders.subList(0, (orders.size() > 1000 ? 1000 : orders.size()));
                 Logger.info("Deal %s orders....", partOrders.size());
             }
+            int hour = DateTime.now().getHourOfDay();
+
+
+            if(hour >= 0 && hour <= 4) {
+                /**
+                 * 如果是早上执行则改为昨天的22:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().plusDays(-1).withHourOfDay(22).withMinuteOfHour(0)
+                        .withSecondOfMinute(0)
+                        .toDate();
+            } else if(hour > 18 && hour <= 24) {
+                /**
+                 * 如果是晚上执行则改为22:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().withHourOfDay(22).withMinuteOfHour(0).withSecondOfMinute(0)
+                        .toDate();
+            } else if(hour >= 12 && hour <= 18) {
+                /**
+                 * 如果是下午执行则改为14:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().withHourOfDay(14).withMinuteOfHour(0).withSecondOfMinute(0)
+                        .toDate();
+            } else {
+                /**
+                 * 如果是早上执行则改为6:00,避免执行时间不准确
+                 */
+                jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(0).withSecondOfMinute(0)
+                        .toDate();
+            }
+            jobRequest.save();
+
         } catch(Exception e) {
             Logger.warn("AmazonOrderFetchJob.callback error. %s", Webs.S(e));
         }

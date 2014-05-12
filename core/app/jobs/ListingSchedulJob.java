@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Listing;
@@ -47,6 +48,7 @@ public class ListingSchedulJob extends Job {
 
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(ListingSchedulJob.class.getName()).isExcute()) return;
         /**
          * 1. check init Listing queue
@@ -85,6 +87,10 @@ public class ListingSchedulJob extends Job {
             }
         } finally {
             lock.unlock();
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("ListingSchedulJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }
 

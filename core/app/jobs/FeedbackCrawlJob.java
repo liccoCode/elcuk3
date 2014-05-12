@@ -48,6 +48,7 @@ public class FeedbackCrawlJob extends Job {
      */
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         Currency.updateCRY();// 每一次的轮训, 都更新一次 CRY
         if(!Jobex.findByClassName(FeedbackCrawlJob.class.getName()).isExcute()) return;
 
@@ -60,6 +61,10 @@ public class FeedbackCrawlJob extends Job {
             } else {
                 FeedbackCrawlJob.fetchAccountFeedback(acc, acc.type, 5);
             }
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("FeedbackCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
 
     }

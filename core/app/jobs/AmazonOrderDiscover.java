@@ -2,15 +2,18 @@ package jobs;
 
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
 import helper.DBUtils;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Account;
 import models.market.Orderr;
 import mws.MWSOrders;
 import play.Logger;
+import play.cache.Cache;
 import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
+import query.PmDashboardCache;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -36,6 +39,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
 
     @Override
     public void doJob() {
+
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
@@ -47,11 +52,16 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 Logger.warn("Account %s is not fecth Order because of [%s]", acc.username, Webs.S(e));
             }
         }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("AmazonOrderDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public static void updateOrders(List<Orderr> toUpdateOrders) {
+        PreparedStatement pst = null;
         try {
-            PreparedStatement pst = DB.getConnection().prepareStatement(
+            pst = DB.getConnection().prepareStatement(
                     "UPDATE Orderr SET state=?, shipLevel=?, paymentDate=?," +
                             " city=?, country=?, postalCode=?, market=?, " +
                             " phone=?, province=?, reciver=?, address=?" +
@@ -81,16 +91,24 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
             );
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(pst != null) pst.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static void saveOrders(List<Orderr> toSaveOrders) {
+        PreparedStatement pst = null;
         try {
-            PreparedStatement pst = DB.getConnection().prepareStatement(
+            pst = DB.getConnection().prepareStatement(
                     "INSERT INTO Orderr(orderId, market, account_id, state, shipLevel, " +
                             "paymentDate, createDate, reviewMailed, warnning)" +
                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
+
             int i = 1;
             for(Orderr orderr : toSaveOrders) {
                 pst.setString(i++, orderr.orderId);
@@ -112,6 +130,12 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
             );
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(pst != null) pst.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

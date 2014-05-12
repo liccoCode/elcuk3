@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import models.ElcukConfig;
 import models.procure.Shipment;
 import notifiers.FBAMails;
@@ -20,6 +21,7 @@ public class ShipmentsMonitorJob extends Job {
 
     @Override
     public void doJob() throws Exception {
+        long begin = System.currentTimeMillis();
         /**
          * 此任务每天只执行一次, 对检查符合的 Shipment 只进行一次判断, 按时时间的消耗速度,
          * 运输单总会抵达需要检测的那一天(如何满足要求)
@@ -31,6 +33,10 @@ public class ShipmentsMonitorJob extends Job {
 
         // 入库的时间
         dayTypeCheck("clearance", 3);
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("ShipmentsMonitorJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     private void dayTypeCheck(String dayType, int beforeDays) throws InterruptedException {

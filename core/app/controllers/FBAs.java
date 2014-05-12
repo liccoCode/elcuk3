@@ -81,7 +81,7 @@ public class FBAs extends Controller {
      *
      * @param id
      */
-    public static void boxLabel(Long id, boolean html) {
+    public static void boxLabel(Long id, boolean html, Long boxNumber) {
         FBAShipment fba = FBAShipment.findById(id);
         renderArgs.put("shipmentId", fba.shipmentId);
         renderArgs.put("fba", fba);
@@ -90,7 +90,7 @@ public class FBAs extends Controller {
         ProcureUnit procureUnit = fba.units.get(0);
 
         renderArgs.put("procureUnit",procureUnit);
-
+        renderArgs.put("boxNumber", boxNumber);
         if(html) {
             render();
         } else {

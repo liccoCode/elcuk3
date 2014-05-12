@@ -1,6 +1,7 @@
 package jobs.perform;
 
 import helper.Constant;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.market.Account;
@@ -32,6 +33,7 @@ public class SubmitFeedJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        long begin = System.currentTimeMillis();
         /**
          * 1. 获取账户和提交的 Feed
          * 2. 向 MWS 提交 Feed
@@ -40,17 +42,16 @@ public class SubmitFeedJob extends BaseJob {
             throw new FastRuntimeException("没有提交 account.id 信息, 不知道是哪个销售账户上架.");
         if(getContext().get("feed.id") == null)
             throw new FastRuntimeException("没有提交 feed.id 信息, 没有提交的 Feed 数据");
+        if(getContext().get("marketId") == null)
+            throw new FastRuntimeException("没有提交 marketId 信息，无法确认目标市场");
 
-        M.MID marketId = null;
-        if(getContext().get("marketId") != null)
-            marketId = M.MID.valueOf(getContext().get("marketId").toString());
-
+        M.MID marketId = M.MID.valueOf(getContext().get("marketId").toString());
         Account account = Account.findById(NumberUtils.toLong(getContext().get("account.id").toString()));
         Feed feed = Feed.findById(NumberUtils.toLong(getContext().get("feed.id").toString()));
         File file = new File(String.format("%s/%s", Constant.TMP, "feed_" + feed.id));
         try {
             try {
-                FileUtils.write(file, feed.content, "ISO8859-1");
+                FileUtils.write(file, feed.content, chatSet(marketId));
             } catch(IOException e) {
                 throw new FastRuntimeException(e.getMessage());
             }
@@ -63,6 +64,31 @@ public class SubmitFeedJob extends BaseJob {
             GJob.perform(GetFeedJob.class, nextContext);
         } finally {
             FileUtils.deleteQuietly(file);
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("SubmitFeedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
+    }
+
+    /**
+     * 不同市场编码设置
+     *
+     * @return
+     */
+    public static String chatSet(M.MID marketId) {
+        switch(marketId.market()) {
+            case AMAZON_FR:
+            case AMAZON_UK:
+            case AMAZON_ES:
+            case AMAZON_IT:
+            case AMAZON_DE:
+            case AMAZON_US:
+                return "ISO8859-1";
+            case AMAZON_JP:
+                return "SJIS";
+            default:
+                return "ISO8859-1";
         }
     }
 }

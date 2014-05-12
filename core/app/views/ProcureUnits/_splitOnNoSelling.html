@@ -21,7 +21,9 @@
 <tr>
   <th>仓库</th>
   <td>
-  #{select 'newUnit.whouse.id', items: whouses, labelProperty: 'name', value: newUnit.whouse?.id}#{/select}
+  #{select 'newUnit.whouse.id', items: whouses, labelProperty: 'name', value: newUnit.whouse?.id}
+      #{option ''}请选择#{/option}
+  #{/select}
   </td>
 
   <th>供应商</th>

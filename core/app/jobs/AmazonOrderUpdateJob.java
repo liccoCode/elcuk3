@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.Dates;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.market.Account;
@@ -35,6 +36,7 @@ import java.util.List;
 public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonOrderUpdateJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
@@ -62,6 +64,10 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderUpdateJob step5 done!");
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonOrderUpdateJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
 
@@ -146,10 +152,12 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     }
 
     private static void updateShippedOrder(List<Orderr> fbaShippedOrderrs) {
+        PreparedStatement psmt = null;
         try {
-            PreparedStatement psmt = DB.getConnection().prepareStatement("UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
-                    " email=?, buyer=?, reciver=?, address=?, address1=?" +
-                    " WHERE orderId=?");
+            psmt = DB.getConnection()
+                    .prepareStatement("UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
+                            " email=?, buyer=?, reciver=?, address=?, address1=?" +
+                            " WHERE orderId=?");
             int i = 1;
             for(Orderr orderr : fbaShippedOrderrs) {
                 psmt.setTimestamp(i++, orderr.shipDate == null ? null : new Timestamp(orderr.shipDate.getTime()));
@@ -166,9 +174,16 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 i = 1;
             }
             int[] results = psmt.executeBatch();
-            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)", fbaShippedOrderrs.size(), Webs.intArrayString(results), results.length);
+            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)", fbaShippedOrderrs.size(),
+                    Webs.intArrayString(results), results.length);
         } catch(SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(psmt != null) psmt.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

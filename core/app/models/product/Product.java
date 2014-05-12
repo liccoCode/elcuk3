@@ -1,14 +1,18 @@
 package models.product;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.market.Listing;
 import models.market.M;
+import models.market.OrderItem;
 import models.market.Selling;
 import models.procure.Cooperator;
+import models.view.dto.ProductDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.cache.Cache;
@@ -21,10 +25,7 @@ import play.utils.FastRuntimeException;
 import query.ProductQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -52,6 +53,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @ManyToOne
     public Family family;
 
+    /**
+     * 产品拥有哪些扩展属性
+     */
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
+    public List<ProductAttr> productAttrs = new ArrayList<ProductAttr>();
 
     /**
      * 唯一的标示
@@ -115,6 +121,240 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Required
     public String abbreviation;
 
+    /**
+     * 上市时间
+     */
+    public Date marketTime;
+
+    public enum T {
+
+        /**
+         * 未上架
+         */
+        NOMARKET {
+            @Override
+            public String label() {
+                return "未上架";
+            }
+        },
+
+        /**
+         * 上架
+         */
+        MARKETING {
+            @Override
+            public String label() {
+                return "上架";
+            }
+        },
+
+        /**
+         * 下架
+         */
+        DOWN {
+            @Override
+            public String label() {
+                return "下架";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 上架状态(手动调整)
+     */
+    @Enumerated(EnumType.STRING)
+    public T marketState;
+
+    public enum P {
+        /**
+         * 未采购
+         */
+        NONE {
+            @Override
+            public String label() {
+                return "未采购";
+            }
+        },
+
+        /**
+         * 正常采购
+         */
+        NORMAL {
+            @Override
+            public String label() {
+                return "正常采购";
+            }
+        },
+
+        /**
+         * 停止采购
+         */
+        STOP {
+            @Override
+            public String label() {
+                return "停止采购";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 采购状态
+     */
+    @Enumerated(EnumType.STRING)
+    public P procureState;
+
+    public enum L {
+        /**
+         * 开发期
+         */
+        DEVELOP {
+            @Override
+            public String label() {
+                return "开发期";
+            }
+        },
+
+        /**
+         * 引进期
+         */
+        INTRODUCE {
+            @Override
+            public String label() {
+                return "引进期";
+            }
+        },
+
+        /**
+         * 成长期
+         */
+        GROWTH {
+            @Override
+            public String label() {
+                return "成长期";
+            }
+        },
+
+        /**
+         * 成熟期
+         */
+        MATURE {
+            @Override
+            public String label() {
+                return "成熟期";
+            }
+        },
+
+        /**
+         * 衰退期
+         */
+        DOWNTURN {
+            @Override
+            public String label() {
+                return "衰退期";
+            }
+        },
+
+        /**
+         * 退市
+         */
+        EXIT {
+            @Override
+            public String label() {
+                return "退市";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 产品的生命周期(所处状态)
+     */
+    @Enumerated(EnumType.STRING)
+    public L productState;
+
+    public enum E {
+        /**
+         * 销量最好
+         */
+        A,
+
+        /**
+         * 销量较好
+         */
+        B,
+
+        /**
+         * 销量低迷
+         */
+        C,
+
+        /**
+         * 销量较差
+         */
+        D,
+
+        /**
+         * 销量极差
+         */
+        E
+    }
+
+    /**
+     * 销售等级(手动调整)
+     */
+    @Enumerated(EnumType.STRING)
+    public E salesLevel;
+
+    /**
+     * 产品定位
+     * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
+     */
+    @Transient
+    public List<ProductDTO> locate = new ArrayList<ProductDTO>();
+
+    @Lob
+    public String locates = "{}";
+
+    /**
+     * 产品卖点
+     * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
+     */
+    @Transient
+    public List<ProductDTO> sellingPoint = new ArrayList<ProductDTO>();
+
+    @Lob
+    public String sellingPoints = "{}";
+
+    /**
+     * Selling 在 ERP 系统内的状态
+     */
+    public enum S {
+        /**
+         * 刚创建
+         */
+        NEW,
+        /**
+         * 在系统内上架
+         */
+        SELLING,
+
+        /**
+         * 在系统内下架
+         */
+        DOWN
+    }
+
+    /**
+     * Product 在系统内的状态
+     */
+    @Enumerated(EnumType.STRING)
+    public S state = S.NEW;
+
     public Product() {
     }
 
@@ -124,6 +364,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public void setSku(String sku) {
         this.sku = sku.toUpperCase();
+    }
+
+    public enum FLAG {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
     }
 
     /**
@@ -232,9 +477,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     @Override
     public String to_log() {
-        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s]",
+        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s] [上架状态:%s] " +
+                "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
                 this.lengths, this.width, this.heigh, this.weight, this.declaredValue,
-                this.productName);
+                this.productName, this.marketState.label(), this.procureState.label(), this.productState.label(),
+                this.salesLevel);
     }
 
     /**
@@ -341,10 +588,67 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public static F.T2<List<String>, List<String>> fetchSkusJson() {
         List<String> skus = Product.skus(true);
-        return new F.T2<List<String>, List<String>>(skus,skus);
+        return new F.T2<List<String>, List<String>>(skus, skus);
     }
 
     public static boolean exist(String sku) {
         return Product.count("sku=?", sku) > 0;
+    }
+
+    /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成 List
+     *
+     * @param flag
+     */
+    public void arryParamSetUP(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.locates = J.json(this.locate);
+            this.sellingPoints = J.json(this.sellingPoint);
+        } else {
+            if(StringUtils.isNotBlank(this.locates)) this.locate = JSON.parseArray(this.locates, ProductDTO.class);
+            if(StringUtils.isNotBlank(this.sellingPoints)) this.sellingPoint = JSON.parseArray(this.sellingPoints,
+                    ProductDTO.class);
+        }
+    }
+
+    /**
+     * 准备数据
+     */
+    public void beforeData() {
+        for(int i = 0; i <= 4; i++) {
+            this.locate.add(new ProductDTO());
+            this.sellingPoint.add(new ProductDTO());
+        }
+    }
+
+    /**
+     * 修改 Product 在系统内的状态
+     */
+    public static void changeProductType(String merchantSKU) {
+        //当某一个 SKU 下所有的 Selling 都下架了则这个 SKU 状态改为"DOWN" ,反之则这个 SKU 状态则为“SELLING"
+        Product product = Product.findByMerchantSKU(merchantSKU);
+        long count = Selling.count("state IN ('SELLING', 'NEW') AND sellingId LIKE ?", product.sku + "%");
+        if(count > 0) {
+            product.state = S.SELLING;
+        } else {
+            product.state = S.DOWN;
+        }
+        product.save();
+    }
+
+    /*
+    * Product 删除时的限制条件
+    */
+    public void safeDelete() {
+        if(this.listings.size() > 0) {
+            Validation.addError("", String.format("%s Product 下拥有 %s 个 相关Listing，无法删除",
+                    this.sku, this.listings.size()));
+        }
+        long orderItemCount = OrderItem.count("product_sku = ?", this.sku);
+        if(orderItemCount > 0)
+            Validation.addError("", String.format("%s Product 下找到 %s 个相关订单项，无法删除"), this.sku, orderItemCount + "");
+        if(Validation.hasErrors()) return;
+        this.delete();
     }
 }

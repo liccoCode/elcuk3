@@ -63,7 +63,7 @@ $ ->
     new PieChart("cat_percent_es", 'amazon_es').percent('units', date)
     new PieChart("cat_percent_it", 'amazon_it').percent('units', date)
     new PieChart("cat_percent_fr", 'amazon_fr').percent('units', date)
-    new PieChart("cat_percent_jp", 'amazon_jp').percent('units', date)
+#    new PieChart("cat_percent_jp", 'amazon_jp').percent('units', date)
 
   drawPies($("#orders tr:last td:eq(0)").attr('date'))
 

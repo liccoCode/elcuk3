@@ -8,9 +8,7 @@ import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.procure.Cooperator;
-import models.product.Category;
-import models.product.Family;
-import models.product.Product;
+import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
@@ -22,7 +20,9 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import query.SkuESQuery;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,11 +53,20 @@ public class Products extends Controller {
         render(prods, p);
     }
 
-    @Before(only = {"show", "update"})
+    @Before(only = {"show", "update", "delete"})
     public static void setUpShowPage() {
         String sku = Products.extarSku();
         Product pro = Product.findByMerchantSKU(sku);
 
+        float procureqty = SkuESQuery.esProcureQty(pro.sku);
+        //附加属性模板
+        List<Template> templates = pro.category.templates;
+        // 附加属性排序
+        List<ProductAttr> atts = pro.productAttrs;
+        Collections.sort(atts);
+
+        renderArgs.put("templates", templates);
+        renderArgs.put("procureqty", procureqty);
         renderArgs.put("cats", Category.all().<Category>fetch());
         renderArgs.put("qtys", SellingQTY.qtysAccodingSKU(pro));
         renderArgs.put("records", ElcukRecord.records(sku));
@@ -65,6 +74,7 @@ public class Products extends Controller {
 
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         render(pro);
     }
 
@@ -72,6 +82,7 @@ public class Products extends Controller {
         validation.valid(pro);
         if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
         if(Validation.hasErrors()) render("Products/show.html", pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.save();
         flash.success("更新成功");
         new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
@@ -111,12 +122,14 @@ public class Products extends Controller {
 
     public static void blank(Product pro) {
         if(pro == null) pro = new Product();
+        pro.beforeData();
         List<Category> cats = Category.all().fetch();
         render(pro, cats);
     }
 
     public static void create(Product pro) {
         validation.valid(pro);
+        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
         pro.createProduct();
         if(Validation.hasErrors()) render("Products/blank.html", pro);
         flash.success("Sku %s 添加成功", pro.sku);
@@ -195,6 +208,12 @@ public class Products extends Controller {
             ret = new Ret("https://catalog-mapper-uk.amazon.co.uk" + suffix);
         } else if(StringUtils.contains(market, "AMAZON_US")) {
             ret = new Ret("https://catalog-mapper-na.amazon.com" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_IT")) {
+            ret = new Ret("https://catalog-mapper-it.amazon.it" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_JP")) {
+            ret = new Ret("https://catalog-mapper-jp.amazon.co.jp" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_FR")) {
+            ret = new Ret("https://catalog-mapper-fr.amazon.fr" + suffix);
         }
         renderJSON(ret);
     }
@@ -210,9 +229,119 @@ public class Products extends Controller {
         buff.append("[");
         for(Cooperator co : cooperatorList) {
             buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name).append("\"").append("}");
+                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+                    .append("\"").append("}");
         }
         buff.append("]");
         renderJSON(buff.toString());
+    }
+
+
+    /**
+     * SKU的销售曲线
+     *
+     * @param type
+     * @param sku
+     */
+    public static void linechart(String type, String sku) {
+
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false));
+        String json = "";
+
+        if(type.equals("skusalefee")) {
+            /**
+             * 销售额曲线
+             */
+            json = J.json(SkuESQuery
+                    .esSaleLine(type, sku, "fee"));
+
+        } else if(type.equals("skusaleqty")) {
+            /**
+             * 销量曲线
+             */
+            json = J.json(SkuESQuery
+                    .esSaleLine(type, sku, "qty"));
+        } else if(type.equals("skuprofit")) {
+            /**
+             * 利润曲线
+             */
+            json = J.json(SkuESQuery
+                    .esSaleLine(type, sku, "profit"));
+        } else if(type.equals("skuprocureprice")) {
+            /**
+             * 采购价格曲线
+             */
+            json = J.json(SkuESQuery
+                    .esProcureLine(type, sku, "price"));
+        } else if(type.equals("skuprocureqty")) {
+            /**
+             * 采购数量曲线
+             */
+            json = J.json(SkuESQuery
+                    .esProcureLine(type, sku, "qty"));
+        }
+        renderJSON(json);
+    }
+
+    /**
+     * 保存 product 附加属性
+     */
+    public static void saveAttrs(List<ProductAttr> productAttrs) {
+        try {
+            for(ProductAttr productAttr : productAttrs) {
+                if(productAttr != null) productAttr.update();
+            }
+            renderJSON(new Ret(true, ""));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
+     * 加载 产品的 附加属性给 View
+     */
+    public static void attrs(String sku, Long templateId) {
+        Product pro = Product.findById(sku);
+        Template template = Template.findById(templateId);
+        List<ProductAttr> atts = pro.productAttrs;
+        for(Attribute attribute : template.attributes) {
+            if(!atts.contains(attribute)) {
+                ProductAttr productAttr = new ProductAttr();
+                productAttr.product = pro;
+                productAttr.attribute = attribute;
+                productAttr.save();
+                atts.add(productAttr);
+            }
+        }
+        Collections.sort(atts);
+        render(pro);
+    }
+
+    /**
+     * 删除附加属性
+     *
+     * @param attrId
+     */
+    public static void delAttr(String sku, Long attrId) {
+        try {
+            ProductAttr productAttr = ProductAttr.findById(attrId);
+            productAttr.delete();
+            renderJSON(new Ret(true, productAttr.attribute.name));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
+     * 产品删除
+     */
+    @Check("products.delete")
+    public static void delete(String id) {
+        Product pro = Product.findById(id);
+        pro.safeDelete();
+        if(Validation.hasErrors()) render("Products/show.html", pro);
+        flash.success("Product %s 删除成功", id);
+        redirect("/Products/index");
     }
 }

@@ -49,6 +49,9 @@ public class CategorySettings implements Serializable {
     @Column(columnDefinition = "varchar(100) DEFAULT ''")
     public String amazonESCategory;
 
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonJPCategory;
+
     public Map<String, String> amazonNodeMap() {
         String[] nodes = StringUtils.split(amazonNode, ",");
         Map<String, String> nodeMap = new HashMap<String, String>();
@@ -77,6 +80,8 @@ public class CategorySettings implements Serializable {
             return amazonESCategory;
         } else if(market == M.AMAZON_IT) {
             return amazonITCategory;
+        } else if(market == M.AMAZON_JP) {
+            return amazonJPCategory;
         } else {
             return "";
         }

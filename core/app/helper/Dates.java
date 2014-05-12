@@ -7,7 +7,9 @@ import org.joda.time.format.DateTimeFormat;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by IntelliJ IDEA.
@@ -125,6 +127,8 @@ public class Dates {
     public static DateTimeZone timeZone(M market) {
         if(market == null) return Dates.CN;
         switch(market) {
+            case AMAZON_JP:
+                return DateTimeZone.forOffsetHours(1);
             case AMAZON_UK:
             case EBAY_UK:
                 return DateTimeZone.forOffsetHours(0);
@@ -159,6 +163,8 @@ public class Dates {
                 return new DateTime(date).toString("dd.MM.yyyy");
             case AMAZON_US:
                 return new DateTime(date).toString("MM/dd/yyyy");
+            case AMAZON_JP:
+                return new DateTime(date).toString("dd/MM/yyyy");
             default:
                 return new DateTime(date).toString("dd/MM/yyyy");
         }
@@ -178,6 +184,9 @@ public class Dates {
             case AMAZON_US:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
+            case AMAZON_JP:
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
             default:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
@@ -194,6 +203,9 @@ public class Dates {
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("dd MMM yyyy").withZone(Dates.timeZone(m))).toDate();
             case AMAZON_US:
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("MMM dd, yyyy").withZone(Dates.timeZone(m))).toDate();
+            case AMAZON_JP:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("MMM dd, yyyy").withZone(Dates.timeZone(m))).toDate();
             default:
@@ -240,4 +252,105 @@ public class Dates {
         return cn(Dates.date2DateTime(time));
     }
 
+
+    /**
+     * 返回年的第一天
+     *
+     * @param year
+     * @return
+     */
+    public static Date startDayYear(int year) {
+        return DateTime.now().withYear(year).withDayOfYear(1).toDate();
+
+    }
+
+    /**
+     * 返回年的最后一天
+     *
+     * @param year
+     * @return
+     */
+    public static Date endDayYear(int year) {
+        DateTime date = DateTime.now().withYear(year);
+        //年的最后一天
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date.toDate());
+        return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate
+                ();
+    }
+
+    /**
+     * 获取当前时间的星期一时间
+     *
+     * @return
+     */
+    public static Date getMondayOfWeek() {
+        Calendar calendar = Calendar.getInstance(Locale.CHINA);
+        //设置一周起始日期为星期一
+        calendar.setFirstDayOfWeek(1);
+        //设置格式
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        //获取当前周的星期一
+        return calendar.getTime();
+    }
+
+    public static Date monthBegin(Date time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time);
+        calendar.set(Calendar.DATE, 1);
+        return calendar.getTime();
+    }
+
+    public static Date monthEnd(Date time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time);
+        calendar.set(Calendar.DATE, 1);//设置为当前月1号
+        calendar.add(Calendar.MONTH, 1);//加一个月变成下一月的1号
+        calendar.add(Calendar.DATE, -1);//减去一天，变成当月最后一天
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取当年某月第一天
+     *
+     * @return
+     */
+    public static Date getMonthFirst(int month) {
+        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        return monthBegin(dateTime.toDate());
+    }
+
+    /**
+     * 获取当年某月最后一天
+     *
+     * @return
+     */
+    public static Date getMonthLast(int month) {
+        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        return monthEnd(dateTime.toDate());
+    }
+
+    /**
+     * 获取某年某月的第一天
+     *
+     * @param year
+     * @param month
+     * @return
+     */
+    public static Date getMonthFirst(int year, int month) {
+        DateTime date = DateTime.now().withYear(year).withMonthOfYear(month);
+        return monthBegin(date.toDate());
+    }
+
+    /**
+     * 获取某年某月最后一天
+     *
+     * @param year
+     * @param month
+     * @return
+     */
+    public static Date getMonthLast(int year, int month) {
+        DateTime date = DateTime.now().withYear(year).withMonthOfYear(month);
+        return monthEnd(date.toDate());
+    }
 }

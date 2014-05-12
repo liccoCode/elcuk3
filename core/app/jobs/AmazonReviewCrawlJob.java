@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import jobs.works.ListingReviewsWork;
 import models.Jobex;
 import models.market.Listing;
@@ -19,6 +20,7 @@ import java.util.List;
 public class AmazonReviewCrawlJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonReviewCrawlJob.class.getName()).isExcute()) return;
 
         /**
@@ -28,6 +30,10 @@ public class AmazonReviewCrawlJob extends Job {
         List<Listing> listings = Listing.latestNeedReviewListing(10);
         for(Listing lst : listings) {
             new ListingReviewsWork(lst.listingId).now();
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonReviewCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }
 }

@@ -32,5 +32,4 @@ public class Reviews extends Controller {
         }
         renderJSON(new Ret(ord != null));
     }
-
 }

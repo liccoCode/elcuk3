@@ -62,11 +62,13 @@ public class Analyzes extends Controller {
     public static void analyzes(final AnalyzePost p) {
         try {
             List<AnalyzeDTO> dtos = p.query();
+            response.cacheFor(String.valueOf(dtos.hashCode()),"3h",System.currentTimeMillis());
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
     }
+
 
     /**
      * 加载指定 Selling 的时间段内的销量与销售额数据

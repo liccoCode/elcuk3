@@ -1,0 +1,27 @@
+#{extends 'main.html'/}
+#{set title:'创建新 Template' /}
+#{set 'moreScripts'}
+#{/set}
+
+<div class="row">
+#{flash_alert row:true/}
+
+  <div class="span12">
+  #{errorMsgs /}
+    <form action="@{Templates.create()}" method="post">
+    #{info_row title:'Template Info'/}
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <th>模板名称</th>
+          <td><input type="text" class="span10" name="temp.name"></td>
+          <td>: )</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <button class="btn btn-primary">保存</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>

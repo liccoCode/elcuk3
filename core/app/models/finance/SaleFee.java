@@ -281,8 +281,9 @@ public class SaleFee extends Model {
      * @param fees
      */
     public static void batchSaveWithJDBC(List<SaleFee> fees) {
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = DB.getConnection().prepareStatement(
+            ps = DB.getConnection().prepareStatement(
                     "INSERT INTO SaleFee(id, cost, currency, `DATE`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for(SaleFee f : fees) {
@@ -311,6 +312,12 @@ public class SaleFee extends Model {
             ps.executeBatch();
         } catch(Exception e) {
             throw new DBException(e);
+        } finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -331,14 +338,21 @@ public class SaleFee extends Model {
      * @param orderId
      */
     public static void deleteOrderRelateFee(String orderId) {
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = DB.getConnection().prepareStatement(
+            ps = DB.getConnection().prepareStatement(
                     // 不要使用 orderId 这个没索引,速度太慢了.
                     "DELETE FROM SaleFee WHERE order_orderId=?");
             ps.setString(1, orderId);
             ps.executeUpdate();
         } catch(Exception e) {
             throw new FastRuntimeException(e);
+        } finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

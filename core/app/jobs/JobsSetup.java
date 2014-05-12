@@ -23,8 +23,14 @@ public class JobsSetup {
     private static int jobs = 0;
 
     public static void init() {
-        if(Play.mode.isProd() ||
-                (Play.mode.isDev() && "true".equals(Play.configuration.getProperty("jobs.dev")))) {
+        boolean isprodjob = isProdJob();
+        boolean isdevJob = isDevJob();
+
+        /**
+         * 因cookie无法转成json到redis,暂时两边都执行此job
+         */
+        every(KeepSessionJob.class, "29mn");
+        if(isprodjob || isdevJob) {
             // 手动的将所有的需要的 Job 启动
 
             //TODO 所有的 Job 全部转移到 Crontab 中, 通过页面给予生成 crontab 然后泵更新 crontab 配置文件
@@ -33,7 +39,7 @@ public class JobsSetup {
             every(AmazonOrderDiscover.class, "1mn");
             every(AmazonOrderItemDiscover.class, "30s");
             every(AmazonOrderUpdateJob.class, "1h");
-            every(AmazonOrderFetchJob.class, "1h");
+            every(AmazonOrderFetchJob.class, "20mn");
             every(OrderInfoFetchJob.class, "1mn");
 
             // Amazon Review Job 的处理
@@ -58,8 +64,8 @@ public class JobsSetup {
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
+            //every(KeepSessionJob.class, "29mn");
 
-            every(KeepSessionJob.class, "29mn");
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
@@ -91,4 +97,29 @@ public class JobsSetup {
             throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
         }
     }
+
+    /**
+     * 正式环境，并且设置了执行job则可执行
+     */
+    public static boolean isProdJob() {
+        if(Play.mode.isProd() && "true".equals(Play.configuration.getProperty("jobs.prod"))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 开发环境，并且设置了执行job则可执行
+     *
+     * @return
+     */
+    public static boolean isDevJob() {
+        if(Play.mode.isDev() && "true".equals(Play.configuration.getProperty("jobs.dev"))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

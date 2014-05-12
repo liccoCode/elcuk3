@@ -1,160 +1,107 @@
-#{extends 'main.html' /}
+#{extends 'main_full.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
+    #{script 'highstock.js'/}
     #{script 'jquery.filedrop.js' /}
     #{script 'component/dropUpload.coffee'/}
     #{script 'products/product_detail.coffee'/}
+    #{script 'products/skulinechart.coffee'/}
 #{/set}
 
-<div class="row">
+<div class="span12 offset3">
 #{if pro == null}
   读取的 Product 不存在!
 #{/if}
 #{else }
     #{errorMsgs /}
     #{flash_alert /}
-    #{info_row title:'基本信息'}
-      <ul>
-        <li>长,宽,高的单位为: mm</li>
-        <li>重量的单位为 kg</li>
-      </ul>
-    #{/info_row}
-  <div class="row-fluid">
-    <form action="@{Products.update()}" method="post">
-      <table class="table table-bordered" id="prod_basic">
-        <tr>
-          <td>SKU</td>
-          <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
-          <td>长</td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
-              <span class="add-on">mm</span>
-            </div>
-          </td>
+  <ul class="nav nav-tabs">
+    <li class="active">
+      <a href="#basicinfo" data-toggle='tab'>基本信息</a>
+    </li>
+    <li>
+      <a href="#extends" data-toggle='tab'>扩展属性</a>
+    </li>
+    <li>
+      <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
+    </li>
+    <li>
+      <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
+    </li>
+    <li>
+      <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
+    </li>
+  </ul>
 
-        </tr>
-        <tr>
-          <td>宽</td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
-              <span class="add-on">mm</span>
-            </div>
-          </td>
-          <td>高</td>
-          <td>
-            <div class="input-append">
+  <div id="selling_tabs" class="tab-content">
+    <div class="tab-pane fade active in" id='basicinfo'>
+        #{include 'Products/_basicInfo.html'/}
+    </div>
 
-              <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
-              <span class="add-on">mm</span>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>重量</td>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
-              <span class="add-on">Kg</span>
-            </div>
-          </td>
+    <div class="tab-pane fade" id='extends'>
+      <div class="row-fluid">
+        <form class="search_form" id="select_template_form">
+          <select name="templateId" class="inline">
+            <option value="">请选择模板</option>
+              #{list items:templates, as:'template'}
+                <option value="${template.id}">${template.name}</option>
+              #{/list}
+          </select>
+          <input type="hidden" name="sku" value="${pro.sku}">
+          <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+        </form>
 
-          <th>申报价格</th>
-          <td>
-            <div class="input-prepend">
-              <span class="add-on">$</span>
-              <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>Category</td>
-          <td>${pro.category}</td>
-          <td>Brand</td>
-          <td>${pro.family?.brand}</td>
-        </tr>
-        <tr>
-          <td>Family</td>
-          <td>${pro.family?.family}</td>
-          <td>产品品名(运输)</td>
-          <td>
-            <input type="text" name="pro.declareName" value="${pro.declareName}">
-          </td>
-        </tr>
-        <tr>
-          <td>产品简称</td>
-          <td colspan="3">
-            <input type="text" name="pro.abbreviation" value="${pro.abbreviation}">
-          </td>
-        </tr>
-        <tr>
-          <td>产品名称</td>
-          <td colspan="3">
-            <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="10">
-            <button class="btn btn-primary" data-loading>保存</button>
-              #{power.ck "products.saleamazonlisting"}
-                <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
-              #{/power.ck}
-          </td>
-        </tr>
-      </table>
-    </form>
+          #{info_row title:'Attributes'/}
+        <div id="extends_atts_home">
+            #{if pro.productAttrs.size() > 0}
+                #{include 'Products/attrs.html'/}
+            #{/if}
+            #{else }
+              <p class="muted text-center">等待添加新的 Attribute.</p>
+            #{/else}
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id='attach'>
+        #{include 'Products/_attach.html'/}
+    </div>
+
+    <div class="tab-pane fade" id='saleinfo'>
+      <input type="hidden" name="skuvalue" value="0">
+        #{info_row title:'销售额和销量'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;" id='skusalefee'></div>
+        <div class="span6" style="height:450px;" id='skusaleqty'></div>
+      </div>
+        #{info_row title:'利润'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id='procureinfo'>
+      <input type="hidden" name="skuprocurevalue" value="0">
+
+      <div class="row-fluid">
+        <table class="table table-bordered">
+          <tr>
+            <td class="span2" style="font:bold">总采购数量</td>
+            <td>${procureqty}</td>
+          </tr>
+        </table>
+      </div>
+        #{info_row title:'采购价格'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
+      </div>
+        #{info_row title:'采购数量'/}
+      <div class="row-fluid">
+        <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
+      </div>
+    </div>
+
   </div>
-
-
-    #{info_row title:'Product (Selling)QTY'/}
-  <div>
-    <table class="table table-bordered">
-      <tr>
-        <th>Qid</th>
-        <th>Inbound</th>
-        <th>Qty</th>
-        <th>Unsellable</th>
-        <th>Pending</th>
-        <th>ASIN</th>
-        <th>Whouse</th>
-        <th>&nbsp;</th>
-      </tr>
-        #{list items:qtys, as:'qty'}
-          <form method="post" action="@{Products.updateSellingQty()}">
-            <tr>
-              <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
-              <td>
-                <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
-              </td>
-              <td>
-                <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
-              </td>
-              <td>
-                <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
-              </td>
-              <td>
-                <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
-              </td>
-              <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
-              <td>${qty.whouse.name}</td>
-              <td>
-                <button class="btn btn-primary" data-confirm='确认更新?'>更新</button>
-              </td>
-            </tr>
-          </form>
-        #{/list}
-    </table>
-      #{records records:records, row:true/}
-  </div>
-
-
-  <!-- Product Attrs 这一部分需要重新编写 -->
-
-    #{info_row title:"Images"/}
-  <div style="min-height:300px;background:#eee;" id="dropbox">
-    <ul class="thumbnails uploaded"></ul>
-    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-  </div>
+</div>
 #{/else}
 </div>

@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import helper.Crawl;
 import helper.Dates;
+import helper.LogUtils;
 import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
@@ -25,6 +26,7 @@ import java.util.List;
 public class AmazonReviewCheckJob extends Job {
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(AmazonReviewCheckJob.class.getName()).isExcute()) return;
         // 抓取没有删除, 并且按照最后更新时间的升序排列;
         // 自己或者其他让的 Listing 都检查.
@@ -49,6 +51,10 @@ public class AmazonReviewCheckJob extends Job {
             review.save();
         }
 
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("AmazonReviewCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
         // 如果对 Listing Review 还有其他检查, 可以在这里编写
     }
 }

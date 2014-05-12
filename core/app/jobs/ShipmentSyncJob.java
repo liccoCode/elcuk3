@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.procure.Shipment;
@@ -23,6 +24,7 @@ public class ShipmentSyncJob extends Job {
 
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(ShipmentSyncJob.class.getName()).isExcute()) return;
         List<Shipment> shipments = Shipment.findByTypeAndStates(Shipment.T.EXPRESS,
                 Shipment.S.SHIPPING, Shipment.S.CLEARANCE, Shipment.S.PACKAGE,
@@ -41,6 +43,10 @@ public class ShipmentSyncJob extends Job {
 
             // dev 只测试一个
             if(Play.mode.isDev()) break;
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG
+                    .info(String.format("ShipmentSyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }
 }

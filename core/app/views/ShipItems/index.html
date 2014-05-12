@@ -92,8 +92,8 @@
         <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
         <td>${unit.qty()}</td>
         <td>${unit.totalWeight()} kg</td>
-        <td>${unit.whouse.name}</td>
-        <td style="color:${unit.shipType.rgb()}">${unit.shipType.label()}</td>
+        <td>${unit.whouse?.name}</td>
+        <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
         <td>${unit.fba?.fbaCenter?.centerId}</td>
         <td>${unit.fba?.shipmentId}</td>
         <td>#{time_tooltip time: unit.attrs.planShipDate/}</td>

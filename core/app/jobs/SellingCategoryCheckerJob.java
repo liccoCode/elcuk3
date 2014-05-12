@@ -2,6 +2,7 @@ package jobs;
 
 import helper.FLog;
 import helper.GTs;
+import helper.LogUtils;
 import helper.Webs;
 import models.Jobex;
 import models.embedded.AmazonProps;
@@ -30,6 +31,7 @@ public class SellingCategoryCheckerJob extends Job {
 
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(SellingCategoryCheckerJob.class.getName()).isExcute()) return;
         /**
          * 1. 找到所有的 Category
@@ -71,5 +73,10 @@ public class SellingCategoryCheckerJob extends Job {
                     DateTime.now().toString("yyyy-MM-dd.HH.mm.ss")),
                     GTs.render("SellingCategoryCheckerJob",
                             GTs.newMap("invalidMap", invalidSelling).build()), FLog.T.JOBS_ERROR);
+
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("SellingCategoryCheckerJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 }

@@ -1,12 +1,11 @@
 package models.market;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
-import helper.Constant;
-import helper.FLog;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -33,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import com.google.gson.reflect.TypeToken;
+
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
  * User: wyattpan
@@ -57,10 +58,10 @@ public class Account extends Model {
     /**
      * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
      */
-    private static Map<String, CookieStore> COOKIE_STORE_MAP;
+    private static Map<String, BasicCookieStore> COOKIE_STORE_MAP;
 
-    public static Map<String, CookieStore> cookieMap() {
-        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
+    public static Map<String, BasicCookieStore> cookieMap() {
+        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
         return COOKIE_STORE_MAP;
     }
 
@@ -165,11 +166,12 @@ public class Account extends Model {
      *
      * @return
      */
-    public CookieStore cookieStore(M market) {
+    public BasicCookieStore cookieStore(M market) {
         if(market == null) market = this.type;
         String key = cookieKey(this.uniqueName, market);
-        if(!cookieMap().containsKey(key))
+        if(!cookieMap().containsKey(key)) {
             cookieMap().put(key, new BasicCookieStore());
+        }
         return cookieMap().get(key);
     }
 
@@ -227,11 +229,7 @@ public class Account extends Model {
                         );
                     }
 
-
-                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE, IT
-                            StringUtils.isNotBlank(this.cookie("at-main")) || //US
-                            StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
-                            StringUtils.isNotBlank(this.cookie("at-acbjp"))) { //JP
+                    if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
                         HTTP.clearExpiredCookie();
                     } else {
@@ -255,6 +253,14 @@ public class Account extends Model {
                         "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
                                 " is not support!");
         }
+    }
+
+    private boolean haveCorrectCookie() {
+        return StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE
+                StringUtils.isNotBlank(this.cookie("at-acbit")) || //IT
+                StringUtils.isNotBlank(this.cookie("at-main")) || //US
+                StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
+                StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
     public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
@@ -364,7 +370,7 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
-        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK).contains(this.type)) return;
+        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK, M.AMAZON_JP).contains(this.type)) return;
         String url = "Account.changeRegion.";
         try {
             url = this.type.changeRegion(m.amid().name());
@@ -391,6 +397,10 @@ public class Account extends Model {
                 return M.MID.A13V1IB3VIYZZH;
             case AMAZON_US:
                 return M.MID.ATVPDKIKX0DER;
+            case AMAZON_IT:
+                return M.MID.APJ6JRA9NG5V4;
+            case AMAZON_JP:
+                return M.MID.A1VC38T7YXB528;
             default:
                 return M.MID.A1F83G8C2ARO7P;
         }
@@ -580,6 +590,7 @@ public class Account extends Model {
             case AMAZON_FR:
             case AMAZON_ES:
             case AMAZON_IT:
+            case AMAZON_JP:
             case AMAZON_UK:
             case AMAZON_US:
                 return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
@@ -612,19 +623,11 @@ public class Account extends Model {
     }
 
     /**
-     * 通过账户获取 FBA 的发货地址
+     * 通过账户获取 FBA 的发货地址;
      */
     public static Address address(M type) {
-        switch(type) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
-                        "London", "LONDON", "UK", "NW6 7HY");
-            case AMAZON_US:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
-                        "London", "LONDON", "UK", "NW6 7HY");
-        }
-        return null;
+        // 统一为一个地址, 但接口参数预留
+        return new Address("EasyAcc", "26 Furley Road", null, null, "London", "LONDON", "GB", "SE15 5UQ");
     }
 
 

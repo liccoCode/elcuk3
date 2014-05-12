@@ -4,6 +4,7 @@ import ext.LinkHelper;
 import helper.Constant;
 import helper.DBUtils;
 import helper.HTTP;
+import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
 import models.Notification;
@@ -11,6 +12,7 @@ import models.User;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
+import models.market.Listing;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -39,6 +41,7 @@ public class GetAsinJob extends BaseJob {
     @SuppressWarnings("unchecked")
     @Override
     public void doit() {
+        long begin = System.currentTimeMillis();
         /**
          * 1. 获取账户模拟登陆到 Amazon 的后台
          * 2. 获取 UPS 去搜索对应的Listing, 并获取返回的 html 页面
@@ -107,7 +110,10 @@ public class GetAsinJob extends BaseJob {
                         DBUtils.execute("SET foreign_key_checks=1");
                         //提示操作人员任务已经处理完成
                         User user = User.findById(NumberUtils.toLong(getContext().get("user.id").toString()));
+                        selling.refresh();
                         noty("您提交的上架请求已经处理完成,请检查 ^_^", user);
+                        selling.refresh();
+
                     }
                 }
             }
@@ -127,10 +133,13 @@ public class GetAsinJob extends BaseJob {
             // 还原账户 Region
             account.changeRegion(account.type);
         }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String.format("GetAsinJob calculate.... [%sms]", System.currentTimeMillis() - begin));
+        }
     }
 
     public boolean isExecuteble() {
-        return this.executeCount < 3;
+        return this.executeCount < 5;
     }
 
     @SuppressWarnings("unchecked")

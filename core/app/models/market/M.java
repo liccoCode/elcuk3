@@ -111,6 +111,7 @@ public enum M {
         public String countryName() {
             return "日本";
         }
+
     };
 
     public abstract String label();
@@ -223,6 +224,8 @@ public enum M {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return "JPY¥;";
             case AMAZON_IT:
                 return "&euro;";
             case AMAZON_UK:
@@ -239,6 +242,8 @@ public enum M {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return Currency.JPY;
             case AMAZON_IT:
                 return Currency.EUR;
             case AMAZON_UK:
@@ -487,6 +492,7 @@ public enum M {
                         "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" +
                         marketplaceID;
             case AMAZON_US:
+            case AMAZON_JP:
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -613,8 +619,9 @@ public enum M {
             case AMAZON_US:
             case AMAZON_JP:
                 return String
-                        .format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU",
-                                this.toString());
+                        .format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_xx", this.toString());
+            //https://sellercentral.amazon.it/gp/ssof/product-label.pdf/ref=ag_xx_cont_xx
+            //https://sellercentral.amazon.it/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -737,6 +744,8 @@ public enum M {
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
+            case AMAZON_JP:
+                return 1;
             case AMAZON_IT:
                 return -6;
             case AMAZON_UK:
@@ -765,12 +774,22 @@ public enum M {
             msku = "80-qw1a56-be";
         }
         switch(sell.market) {
-            case AMAZON_DE:
             case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
+            case AMAZON_DE:
                 return String
                         .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                                msku, sell.asin);
+            case AMAZON_FR:
+                return String
+                        .format("https://catalog-sc.amazon.fr/abis/edit/RelistProduct.amzn?sku=%s&asin=%s",
+                                msku, sell.asin);
+            case AMAZON_JP:
+                return String
+                        .format("https://catalog-sc.amazon.co.jp/abis/edit/RelistProduct.amzn?sku=%s&asin=%s",
+                                msku, sell.asin);
+            case AMAZON_IT:
+                return String
+                        .format("https://catalog-sc.amazon.it/abis/product/DisplayEditProduct?sku=%s&asin=%s",
                                 msku, sell.asin);
             case AMAZON_UK:
                 return String

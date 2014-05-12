@@ -6,6 +6,7 @@ import models.view.post.AnalyzePost;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +24,10 @@ public class AnalyzeDTO implements Serializable {
         this.fid = fid;
     }
 
+    public AnalyzeDTO(String fid, String state) {
+        this.fid = fid;
+        this.state = state;
+    }
 
     /**
      * 用来表示 SKU/Msku
@@ -123,11 +128,20 @@ public class AnalyzeDTO implements Serializable {
      */
     public M market;
 
+    /**
+     * 状态(NEW、SELLING、DOWN)
+     */
+    public String state;
+
+
+
+
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
             this.ps_cal = ps <= 0 ? 0.1f : ps;
         }
+        this.ps_cal = Webs.scale2PointUp(this.ps_cal);
         return this.ps_cal;
     }
 
@@ -142,8 +156,8 @@ public class AnalyzeDTO implements Serializable {
      *
      * @return ._1: 根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
      *         ._2: 根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
-     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
-     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
+     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
+     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         float _ps = this.getPs_cal();
@@ -151,9 +165,9 @@ public class AnalyzeDTO implements Serializable {
         return new F.T4<Float, Float, Float, Float>(
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
-                Webs.scale2PointUp((this.qty + this.way + this.working + this.worked) / _ps),
+                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
                 Webs.scale2PointUp(
-                        (this.qty + this.way + this.working + this.worked) / (ps == 0 ? _ps : ps))
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
@@ -163,7 +177,7 @@ public class AnalyzeDTO implements Serializable {
      * @return .1: 差据的大小
      *         .2: 前台使用的颜色代码
      */
-    public F.T2<Float, String> psDiffer() {
+    public F.T2<Float, String> getPsDiffer() {
         float _ps = this.getPs_cal();
         if(_ps >= 5) {
             float diff = Math.abs(_ps - this.ps) /
@@ -173,7 +187,7 @@ public class AnalyzeDTO implements Serializable {
                 color = "E45652";
             else if(diff >= 0.2 && diff < 0.4)
                 color = "FAAB3B";
-            return new F.T2<Float, String>(diff, color);
+            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
         } else {
             return new F.T2<Float, String>(0f, "fff");
         }

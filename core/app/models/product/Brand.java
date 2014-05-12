@@ -133,4 +133,14 @@ public class Brand extends GenericModel {
             return !categories.contains(cat);
         }
     }
+
+    /**
+     * Brand 和 Category 下第一个 Family 的 名称
+     * @param categoryId
+     * @return
+     */
+    public String firstFamily(String categoryId) {
+        Family fa = Family.find("category_categoryId=? AND brand_name=?", categoryId, this.name).first();
+        return fa != null ? fa.family : "";
+    }
 }

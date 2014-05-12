@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.LogUtils;
 import models.Jobex;
 import models.market.Account;
 import models.market.SellingRecord;
@@ -28,6 +29,7 @@ public class SellingRecordCheckJob extends Job {
 
     @Override
     public void doJob() {
+        long begin = System.currentTimeMillis();
         if(!Jobex.findByClassName(SellingRecordCheckJob.class.getName()).isExcute()) return;
         /**
          * 0. 一 fixTime 为基准时间
@@ -41,6 +43,10 @@ public class SellingRecordCheckJob extends Job {
          */
         for(int i = -5; i <= 0; i++) {
             SellingRecordCheckJob.amazonNewestRecords(fixTime.plusDays(i));
+        }
+        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+            LogUtils.JOBLOG.info(String
+                    .format("SellingRecordCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }
 
