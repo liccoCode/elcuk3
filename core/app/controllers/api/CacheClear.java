@@ -1,20 +1,16 @@
 package controllers.api;
 
 import helper.Caches;
-import helper.Dates;
 import jobs.analyze.SellingSaleAnalyzeJob;
-import models.market.M;
-import models.product.Team;
+import models.product.Category;
 import models.view.Ret;
-import models.view.highchart.HighChart;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.Iterator;
+import java.util.List;
 
 /**
  * ES执行后需要清理缓存，保证数据及时
@@ -37,6 +33,12 @@ public class CacheClear extends Controller {
         Date from = DateTime.now().plusMonths(-1).toDate();
         String unitkey = ajaxUnitOrderKey("all", "sid", from, to);
         Cache.delete(unitkey);
+
+        List<Category> catelist = Category.findAll();
+        for(Category cat : catelist) {
+            String catekey = ajaxUnitOrderKey(cat.categoryId, "sid", from, to);
+            Cache.delete(catekey);
+        }
 
         renderJSON(new Ret(true, "清理缓存成功!"));
     }
