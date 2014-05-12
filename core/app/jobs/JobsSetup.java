@@ -3,6 +3,7 @@ package jobs;
 import jobs.driver.DriverJob;
 import play.Logger;
 import play.Play;
+import play.db.DB;
 import play.exceptions.UnexpectedException;
 import play.jobs.Job;
 import play.jobs.JobsPlugin;
@@ -10,6 +11,7 @@ import play.libs.Expression;
 import play.libs.Time;
 
 import java.util.concurrent.TimeUnit;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * 在 Dev 环境下, 自动启动 JobsPlugin 导致在代码修改 rleoad 的时候, 正常的 request 会与
@@ -31,6 +33,13 @@ public class JobsSetup {
          */
         every(KeepSessionJob.class, "29mn");
         if(isprodjob || isdevJob) {
+            /**
+             * 因job服务器经常出现数据库无法连接问题，所以设置此参数
+             * 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+             */
+            ((ComboPooledDataSource)DB.datasource).setMaxIdleTime(60);
+
+
             // 手动的将所有的需要的 Job 启动
 
             //TODO 所有的 Job 全部转移到 Crontab 中, 通过页面给予生成 crontab 然后泵更新 crontab 配置文件
