@@ -38,6 +38,8 @@ public class JobsSetup {
              * 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
              */
             ((ComboPooledDataSource)DB.datasource).setMaxIdleTime(60);
+            ((ComboPooledDataSource)DB.datasource).setMaxStatements(0);
+            ((ComboPooledDataSource)DB.datasource).setCheckoutTimeout(0);
 
 
             // 手动的将所有的需要的 Job 启动
