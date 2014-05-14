@@ -9,10 +9,7 @@ import play.db.jpa.Model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.Map;
 import java.util.Date;
 
@@ -62,7 +59,7 @@ public class CheckTask extends Model {
     /**
      * 处理方式
      */
-    @Expose
+    @Enumerated(EnumType.STRING)
     public DealType dealway;
 
     /**
@@ -75,7 +72,7 @@ public class CheckTask extends Model {
     /**
      * 是否合格结果
      */
-    @Expose
+    @Enumerated(EnumType.STRING)
     public ResultType result;
     /**
      * 是否发货
@@ -116,14 +113,14 @@ public class CheckTask extends Model {
     /**
      * 质检状态
      */
-    @Expose
-    public StatType checkstat;
+    @Enumerated(EnumType.STRING)
+    public StatType checkstat = StatType.UNCHECK;
 
     /**
      * 确认状态
      */
-    @Expose
-    public ConfirmType confirmstat;
+    @Enumerated(EnumType.STRING)
+    public ConfirmType confirmstat = ConfirmType.UNCONFIRM;
 
     public enum StatType {
         UNCHECK {
@@ -161,16 +158,16 @@ public class CheckTask extends Model {
     }
 
     public enum ConfirmType {
-        CONFIRM {
-            @Override
-            public String label() {
-                return "确认";
-            }
-        },
         UNCONFIRM {
             @Override
             public String label() {
                 return "未确认";
+            }
+        },
+        CONFIRM {
+            @Override
+            public String label() {
+                return "确认";
             }
         };
 
@@ -251,11 +248,14 @@ public class CheckTask extends Model {
         List<Map<String, Object>> units = DBUtils.rows("select id from ProcureUnit where isCheck=0");
         for(Map<String, Object> unit : units) {
             Long unitid = (Long) unit.get("id");
-            CheckTask task = CheckTask.find("procureUnitId=?", unitid).first();
+            CheckTask task = CheckTask.find("units.id=?", unitid).first();
             if(task == null) {
                 CheckTask newtask = new CheckTask();
                 ProcureUnit punit = ProcureUnit.findById(unitid);
                 newtask.units = punit;
+                newtask.confirmstat = ConfirmType.UNCONFIRM;
+                newtask.checkstat = StatType.UNCHECK;
+
                 newtask.save();
                 DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
             }
