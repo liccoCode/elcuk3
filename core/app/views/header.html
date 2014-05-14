@@ -145,7 +145,10 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">质检管理<b class="caret"></b></a>
           <ul class="dropdown-menu">
               #{power.ck "skuchecks.checklist"}
-                <li><a href="@{Skuchecks.checklist()}">CheckList列表</a></li>
+                <li><a href="@{SkuChecks.checklist()}">CheckList列表</a></li>
+              #{/power.ck}
+              #{power.ck "checktasks.checklist"}
+                <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
               #{/power.ck}
           </ul>
         </li>

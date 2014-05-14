@@ -71,26 +71,10 @@ public class CheckTaskPost extends Post<CheckTask> {
      */
     public String checkor;
 
-
-    /**
-     * 订单数量
-     */
-    public int planqty;
-
-    /**
-     * 实际抽检数量
-     */
-    public int pickqty;
-
     /**
      * 处理方式
      */
     public CheckTask.DealType dealway;
-
-    /**
-     * 质检完成时间
-     */
-    public Date endTime;
 
     /**
      * 是否合格结果
@@ -100,6 +84,10 @@ public class CheckTaskPost extends Post<CheckTask> {
      * 是否发货
      */
     public CheckTask.ShipType isship;
+    /**
+     * 状态
+     */
+    public CheckTask.StatType checkstat;
 
 
     @Override
@@ -107,23 +95,23 @@ public class CheckTaskPost extends Post<CheckTask> {
         List<Object> params = new ArrayList<Object>();
 
         StringBuilder sbd = new StringBuilder(
-                "SELECT DISTINCT c FROM CheckTask c LEFT JOIN c.units u WHERE 1=1 AND");
+                "SELECT DISTINCT c FROM CheckTask c LEFT JOIN c.units u WHERE 1=1 AND ");
 
 
-        Long procrueId = isSearchForId();
-        if(procrueId != null) {
-            sbd.append("u.id=?");
-            params.add(procrueId);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
-        }
-
-        String fba = isSearchFBA();
-        if(fba != null) {
-            sbd.append("u.fba.shipmentId=?");
-            params.add(fba);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
-        }
-
+//        Long procrueId = isSearchForId();
+//        if(procrueId != null) {
+//            sbd.append("u.id=?");
+//            params.add(procrueId);
+//            return new F.T2<String, List<Object>>(sbd.toString(), params);
+//        }
+//
+//        String fba = isSearchFBA();
+//        if(fba != null) {
+//            sbd.append("u.fba.shipmentId=?");
+//            params.add(fba);
+//            return new F.T2<String, List<Object>>(sbd.toString(), params);
+//        }
+//
         if(StringUtils.isBlank(this.dateType)) this.dateType = "u.attrs.planDeliveryDate";
         sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
                 .append("<=?");
@@ -138,6 +126,26 @@ public class CheckTaskPost extends Post<CheckTask> {
         if(this.cooperatorId > 0) {
             sbd.append(" AND u.cooperator.id=? ");
             params.add(this.cooperatorId);
+        }
+
+        if(this.checkstat != null) {
+            sbd.append(" AND c.checkstat=? ");
+            params.add(this.checkstat);
+        }
+
+        if(this.dealway != null) {
+            sbd.append(" AND c.dealway=? ");
+            params.add(this.dealway);
+        }
+
+        if(this.result != null) {
+            sbd.append(" AND c.result=? ");
+            params.add(this.result);
+        }
+
+        if(this.isship != null) {
+            sbd.append(" AND c.isship=? ");
+            params.add(this.isship);
         }
 
 
@@ -157,13 +165,13 @@ public class CheckTaskPost extends Post<CheckTask> {
     public List<CheckTask> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
-        return CheckTask.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,
+        return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch(this.page,
                 this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return SkuCheck.count(params._1, params._2.toArray());
+        return new Long(CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch().size());
     }
 
     @Override

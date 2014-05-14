@@ -227,7 +227,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public String comment = " ";
 
-    @Lob
+    @Expose
     public int isCheck;
 
 
