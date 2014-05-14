@@ -39,7 +39,7 @@ public class JobsSetup {
              */
             ((ComboPooledDataSource)DB.datasource).setMaxIdleTime(60);
             ((ComboPooledDataSource)DB.datasource).setMaxStatements(0);
-            ((ComboPooledDataSource)DB.datasource).setCheckoutTimeout(0);
+            //((ComboPooledDataSource)DB.datasource).setCheckoutTimeout(0);
 
 
             // 手动的将所有的需要的 Job 启动
