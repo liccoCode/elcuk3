@@ -227,6 +227,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public String comment = " ";
 
+    @Lob
+    public int isCheck;
+
 
     /**
      * ProcureUnit 的检查

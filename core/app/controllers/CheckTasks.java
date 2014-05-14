@@ -4,8 +4,10 @@ import exception.PaymentException;
 import helper.J;
 import helper.Webs;
 import models.qc.SkuCheck;
+import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.SkuCheckPost;
+import models.view.post.CheckTaskPost;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Before;
@@ -27,7 +29,7 @@ import play.utils.FastRuntimeException;
  * Time: 3:53 PM
  */
 @With({GlobalExceptionHandler.class, Secure.class})
-public class Skuchecks extends Controller {
+public class CheckTasks extends Controller {
 
     @Before(only = {"blank", "create", "show", "checkDelete"})
     public static void beforIndex() {
@@ -39,11 +41,11 @@ public class Skuchecks extends Controller {
 
 
     @Check("skuchecks.checklist")
-    public static void checklist(SkuCheckPost p) {
-        List<SkuCheck> skulist = null;
-        if(p == null) p = new SkuCheckPost();
-        skulist = p.query();
-        render(skulist, p);
+    public static void checklist(CheckTaskPost p) {
+        List<CheckTask> tasklist = null;
+        if(p == null) p = new CheckTaskPost();
+        tasklist = p.query();
+        render(tasklist, p);
     }
 
 
