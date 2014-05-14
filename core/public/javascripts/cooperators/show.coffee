@@ -1,5 +1,5 @@
 $ ->
-  $(document).on("click", "a[name=cop_update]", (r) ->
+  $("#cooperators_home").on("click", "#cop_update_basicinfo, #cop_update_qcinfo", (r) ->
     form = $(@).parents('form')
     e.preventDefault() if form.valid() is false
     form.mask('更新中...')
