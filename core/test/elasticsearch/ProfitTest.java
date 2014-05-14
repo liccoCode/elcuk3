@@ -24,9 +24,9 @@ public class ProfitTest extends UnitTest {
         String sku = "";
         String sellingId = "";
 
-        MetricProfitService service = new MetricProfitService(begin, end, market, sku, sellingId);
-        float a = service.sellingAmazonTotalFee();
-        System.out.println("aaaaaaaaa::" + a);
+//        MetricProfitService service = new MetricProfitService(begin, end, market, sku, sellingId);
+//        float a = service.sellingAmazonTotalFee();
+//        System.out.println("aaaaaaaaa::" + a);
 
     }
 }
