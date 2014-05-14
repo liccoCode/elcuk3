@@ -1,10 +1,9 @@
 $ ->
   $(document).on("click", "a[name=cop_update]", (r) ->
-    form = $('#cooperator')
+    form = $(@).parents('form')
     e.preventDefault() if form.valid() is false
     form.mask('更新中...')
-    $.post('/Cooperators/edit', form.formSerialize() + "&" + $("#qc_info_form").serialize(),
-    (r) ->
+    $.post('/Cooperators/edit', form.formSerialize(), (r) ->
       if r.flag is false
         alert(r.message)
       else
