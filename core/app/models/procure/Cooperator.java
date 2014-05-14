@@ -170,10 +170,10 @@ public class Cooperator extends Model {
     public T type;
 
     public enum L {
-        ABSOLVE {
+        MICRO {
             @Override
             public String label() {
-                return "免检";
+                return "微检";
             }
         },
         MILD {
