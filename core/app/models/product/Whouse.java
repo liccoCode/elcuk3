@@ -2,6 +2,7 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import models.User;
 import models.market.Account;
 import models.market.M;
 import models.procure.Cooperator;
@@ -99,6 +100,12 @@ public class Whouse extends Model {
      */
     @ManyToOne
     public Cooperator cooperator;
+
+    /**
+     * 货代仓库的质检员
+     */
+    @ManyToOne
+    public User user;
 
     /**
      * 运输方式是否为海运

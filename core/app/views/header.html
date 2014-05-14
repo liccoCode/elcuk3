@@ -8,9 +8,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              #{power.ck "pmdashboards.index"}
+            #{power.ck "pmdashboards.index"}
               <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
-              #{/power.ck}
+            #{/power.ck}
               <li><a href="@{Application.oldDashBoard()}">DashBoard</a></li>
 
               <li><a href="@{Users.home()}">Home</a></li>
@@ -39,7 +39,7 @@
                   <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
                 #{/power.ck}
                 #{power.ck "profits.index"}
-                   <li><a href="@{Profits.index()}">利润分析</a></li>
+                  <li><a href="@{Profits.index()}">利润分析</a></li>
 
                 #{/power.ck}
                 #{power.ck "sellingrecords.index"}
@@ -61,6 +61,9 @@
                 #{/power.ck}
                 #{power.ck "whouses.index"}
                   <li><a href="@{Whouses.index()}">仓库</a></li>
+                #{/power.ck}
+                #{power.ck "whouses.forwards"}
+                  <li><a href="@{Whouses.forwards()}">货代仓库</a></li>
                 #{/power.ck}
               <li class="divider"></li>
                 #{power.ck "categorys.show"}
@@ -132,9 +135,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              #{power.ck "saletargets.index"}
-                <li><a href="@{SaleTargets.index()}">年度销售目标</a></li>
-              #{/power.ck}
+                #{power.ck "saletargets.index"}
+                  <li><a href="@{SaleTargets.index()}">年度销售目标</a></li>
+                #{/power.ck}
 
             </ul>
           </li>

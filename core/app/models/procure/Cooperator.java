@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
 import models.product.Product;
+import models.product.Whouse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.hibernate.annotations.Cache;
@@ -206,6 +207,12 @@ public class Cooperator extends Model {
 
     @Lob
     public String instructions = " ";
+
+    /**
+     * 运输商的仓库
+     */
+    @OneToMany
+    public List<Whouse> whouses;
 
     public Cooperator checkAndUpdate() {
         this.check();
