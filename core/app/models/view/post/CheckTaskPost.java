@@ -5,6 +5,7 @@ import models.qc.CheckTask;
 import models.qc.SkuCheck;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
@@ -29,6 +30,8 @@ public class CheckTaskPost extends Post<CheckTask> {
 
     public CheckTaskPost() {
         this.perSize = 25;
+        this.from = DateTime.now().minusDays(30).toDate();
+        this.to = new Date();
     }
 
     public CheckTaskPost(int perSize) {
@@ -98,12 +101,12 @@ public class CheckTaskPost extends Post<CheckTask> {
                 "SELECT DISTINCT c FROM CheckTask c LEFT JOIN c.units u WHERE 1=1 AND ");
 
 
-//        Long procrueId = isSearchForId();
-//        if(procrueId != null) {
-//            sbd.append("u.id=?");
-//            params.add(procrueId);
-//            return new F.T2<String, List<Object>>(sbd.toString(), params);
-//        }
+        Long procrueId = isSearchForId();
+        if(procrueId != null) {
+            sbd.append("u.id=?");
+            params.add(procrueId);
+            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        }
 //
 //        String fba = isSearchFBA();
 //        if(fba != null) {
@@ -153,8 +156,7 @@ public class CheckTaskPost extends Post<CheckTask> {
             String word = this.word();
             sbd.append(" AND (")
                     .append("u.product.sku LIKE ? OR ")
-                    .append("u.selling.sellingId LIKE ?")
-                            //                        .append("fba.shipmentId LIKE ?")
+                    .append("u.fba.shipmentId LIKE ?")
                     .append(") ");
             for(int i = 0; i < 2; i++) params.add(word);
         }
