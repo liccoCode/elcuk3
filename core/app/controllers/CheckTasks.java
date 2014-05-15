@@ -1,5 +1,7 @@
 package controllers;
 
+import models.ElcukRecord;
+import models.User;
 import models.procure.Cooperator;
 import models.product.Whouse;
 import models.qc.CheckTask;
@@ -47,4 +49,29 @@ public class CheckTasks extends Controller {
         tasklist = p.query();
         render(tasklist, p);
     }
+
+    /**
+     * 质检员任务列表
+     */
+    public static void checkerList(CheckTaskPost p, int day) {
+        if(p == null) p = new CheckTaskPost();
+        if(day == 3) {
+            p.from = DateTime.now().minusDays(3).toDate();
+            p.to = new Date();
+        } else if(day == 2) {
+            p.from = DateTime.now().minusDays(2).toDate();
+            p.to = new Date();
+        } else if(day == 1) {
+            p.from = DateTime.now().minusDays(1).toDate();
+            p.to = new Date();
+        }
+        User user = Login.current();
+
+        List<CheckTask> checks = p.query();
+        List<CheckTask> checkeds = p.query();
+        List<ElcukRecord> records = ElcukRecord.records("qcCheckRecords");
+
+        render(p, checks, checkeds, records);
+    }
 }
+

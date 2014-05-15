@@ -1,0 +1,43 @@
+#{extends 'main_full.html'/}
+#{set title:"质检员质检任务列表" /}
+#{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'skuchecks/checkerlist.coffee'/}
+#{/set}
+
+#{flash_alert /}
+#{errorMsgs /}
+
+#{info_row}
+<ul>
+  <li><strong>质检任务列表</strong></li>
+</ul>
+#{/info_row}
+
+#{form @CheckTasks.checkerList(), class:'search_form'}
+    #{include 'CheckTasks/_search_form.html'/}
+#{/form}
+
+<div class="row-fluid">
+  <ul class="nav nav-tabs">
+    <li class="active" id="below_tab">
+      <a href="#checkList" data-toggle='tab'>待检任务</a>
+    </li>
+    <li>
+      <a href="#checkedList" data-toggle='tab'>已检任务</a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane fade active in" id='checkList'>
+    #{include 'CheckTasks/_check.html'/}
+    </div>
+
+    <div class="tab-pane fade" id='checkedList'>
+    #{include 'CheckTasks/_checked.html'/}
+    </div>
+  </div>
+</div>
+
+#{records records:records/}
+
