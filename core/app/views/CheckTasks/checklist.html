@@ -28,7 +28,14 @@
       <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
     </div>
 
-    <select name="p.whouseId" class="inline">
+
+    <div class="input-prepend inline">
+      <a class="btn btn_small btn-primary" href="@{CheckTasks.checklist(p,3)}">3天内</a>
+      <a class="btn btn_small btn-primary" href="@{CheckTasks.checklist(p,2)}">2天内</a>
+      <a class="btn btn_small btn-primary" href="@{CheckTasks.checklist(p,1)}">1天内</a>
+    </div>
+
+    <select style="margin-left:20px;" name="p.whouseId" class="inline">
       <option value="0">仓库</option>
         #{list items:whouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
@@ -73,9 +80,9 @@
 
     <div style="margin-left:40px;" class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
-      <input type="text" style='width:300px;' class="input-medium" name="p.search" placeholder="采购计划ID、SKU、FBA"
+      <input type="text" style='width:200px;' class="input-medium" name="p.search" placeholder="采购计划ID、SKU、FBA"
              value="${p
-      .search}">
+             .search}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
 
@@ -123,7 +130,7 @@
       <td>${tl.units.sku}</td>
       <td>${tl.units.fba?.shipmentId}</td>
       <td>${tl.units.selling?.fnSku}</td>
-      <td>${tl.units.deliveryment.id}</td>
+      <td><a href="@{Deliveryments.show(tl.units.deliveryment.id)}">${tl.units.deliveryment.id}</a></td>
       <td>${tl.units.whouse.name}</td>
       <td>${tl.units.cooperator.name}</td>
       <td></td>
@@ -140,13 +147,8 @@
       <td>${tl.workfee}</td>
       <td>${tl.workhour*tl.workfee}</td>
       <td>
+        <a target="_blank" class="btn btn_small btn-primary" href="#">查看</a>
         <a target="_blank" class="btn btn_small btn-primary" href="#">编辑</a>
-          #{if tl.confirmstat==models.qc.CheckTask.ConfirmType.CONFIRM}
-            已确认
-          #{/if}
-          #{else}
-          <button class="btn btn-danger btn_small">确认</button>
-          #{/else}
       </td>
     #{/list}
     </table>
