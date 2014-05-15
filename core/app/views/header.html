@@ -61,9 +61,6 @@
           #{power.ck "whouses.index"}
             <li><a href="@{Whouses.index()}">仓库</a></li>
           #{/power.ck}
-          #{power.ck "whouses.forwards"}
-            <li><a href="@{Whouses.forwards()}">货代仓库</a></li>
-          #{/power.ck}
         <li class="divider"></li>
           #{power.ck "categorys.show"}
             <li><a href="@{Categorys.show()}">产品类别</a></li>
@@ -151,6 +148,9 @@
           #{/power.ck}
           #{power.ck "checktasks.checklist"}
             <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
+          #{/power.ck}
+          #{power.ck "whouses.forwards"}
+            <li><a href="@{Whouses.forwards()}">质检员分配</a></li>
           #{/power.ck}
       </ul>
     </li>

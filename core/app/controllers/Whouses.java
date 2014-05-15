@@ -1,6 +1,5 @@
 package controllers;
 
-import helper.J;
 import helper.Webs;
 import models.User;
 import models.market.Account;
@@ -8,7 +7,6 @@ import models.procure.Cooperator;
 import models.procure.FBACenter;
 import models.product.Whouse;
 import models.view.Ret;
-import models.view.post.ProductPost;
 import models.view.post.WhousePost;
 import play.data.validation.Validation;
 import play.mvc.Before;
