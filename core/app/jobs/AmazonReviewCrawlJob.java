@@ -31,7 +31,7 @@ public class AmazonReviewCrawlJob extends Job {
         for(Listing lst : listings) {
             new ListingReviewsWork(lst.listingId).now();
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonReviewCrawlJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonReviewCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

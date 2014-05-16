@@ -81,7 +81,7 @@ public class GetFeedJob extends BaseJob {
             if(file != null) FileUtils.deleteQuietly(file);
         }
 
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"GetFeedJob")) {
             LogUtils.JOBLOG.info(String.format("GetFeedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }

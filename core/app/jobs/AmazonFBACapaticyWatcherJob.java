@@ -48,7 +48,7 @@ public class AmazonFBACapaticyWatcherJob extends Job {
             whouse.capaticyContent = fbaCapacityWidgetDiv(doc, whouse);
             whouse.save();
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonFBACapaticyWatcherJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonFBACapaticyWatcherJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

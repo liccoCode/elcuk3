@@ -50,7 +50,7 @@ public class OrderInfoFetchJob extends Job {
                         ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"OrderInfoFetchJob")) {
             LogUtils.JOBLOG
                     .info(String.format("OrderInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

@@ -41,7 +41,7 @@ public class AbnormalFetchJob extends BaseJob {
         LogUtils.JOBLOG.info(String.format("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         PmDashboardCache.doCache();
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AbnormalFetchdashboardJob")) {
             LogUtils.JOBLOG.info(String.format("AbnormalFetchdashboardJob calculate.... [%sms]",
                     System.currentTimeMillis() - begin));
         }
