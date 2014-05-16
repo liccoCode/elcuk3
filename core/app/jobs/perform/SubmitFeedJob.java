@@ -65,7 +65,7 @@ public class SubmitFeedJob extends BaseJob {
         } finally {
             FileUtils.deleteQuietly(file);
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"SubmitFeedJob")) {
             LogUtils.JOBLOG
                     .info(String.format("SubmitFeedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

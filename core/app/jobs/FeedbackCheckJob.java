@@ -37,7 +37,7 @@ public class FeedbackCheckJob extends Job {
         for(Feedback feedback : feedbacks) {
             FeedbackCheckJob.ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"FeedbackCheckJob")) {
             LogUtils.JOBLOG
                     .info(String.format("FeedbackCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

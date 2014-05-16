@@ -144,7 +144,7 @@ public class OrderMailCheck extends Job {
             Webs.systemMail("没有发送的邮件数量超过 3 成, 需要进行检查.", logInfo);
         }
         Logger.info("End OrderMailCheck Check REVIEW_MAIL...");
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"OrderMailCheck")) {
             LogUtils.JOBLOG
                     .info(String.format("OrderMailCheck calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

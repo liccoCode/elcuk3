@@ -51,7 +51,7 @@ public class AmazonReviewCheckJob extends Job {
             review.save();
         }
 
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonReviewCheckJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonReviewCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

@@ -64,7 +64,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 Logger.info("Discover %s  %s OrderItems.", acc.uniqueName, allOrderItems.size());
             }
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonOrderItemDiscover")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonOrderItemDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

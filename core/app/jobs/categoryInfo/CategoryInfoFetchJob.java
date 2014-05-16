@@ -36,7 +36,7 @@ public class CategoryInfoFetchJob extends BaseJob {
         Cache.add(RUNNING, RUNNING);
         categoryinfo();
         Cache.delete(RUNNING);
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"CategoryInfoFetchJob")) {
             LogUtils.JOBLOG.info(String
                     .format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

@@ -64,7 +64,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderUpdateJob step5 done!");
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonOrderUpdateJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonOrderUpdateJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
