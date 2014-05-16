@@ -1,10 +1,10 @@
 package controllers;
 
 import models.ElcukRecord;
-import models.User;
 import models.procure.Cooperator;
 import models.product.Whouse;
 import models.qc.CheckTask;
+import models.view.Ret;
 import models.view.post.CheckTaskPost;
 import org.joda.time.DateTime;
 import play.mvc.Before;
@@ -23,10 +23,11 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class CheckTasks extends Controller {
 
-    @Before(only = {"checklist"})
+    @Before(only = {"checklist", "checkerList"})
     public static void beforIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.<Whouse>findAll());
+        renderArgs.put("whouses", Whouse.<Whouse>find("type !=?", Whouse.T.FORWARD).fetch());
+        renderArgs.put("shipwhouses", Whouse.<Whouse>find("type =?", Whouse.T.FORWARD).fetch());
         renderArgs.put("cooperators", cooperators);
     }
 
@@ -53,8 +54,10 @@ public class CheckTasks extends Controller {
     /**
      * 质检员任务列表
      */
+    @Check("checktasks.checkerList")
     public static void checkerList(CheckTaskPost p, int day) {
-        if(p == null) p = new CheckTaskPost();
+        String username = Secure.Security.connected();
+        if(p == null) p = new CheckTaskPost(username);
         if(day == 3) {
             p.from = DateTime.now().minusDays(3).toDate();
             p.to = new Date();
@@ -65,13 +68,22 @@ public class CheckTasks extends Controller {
             p.from = DateTime.now().minusDays(1).toDate();
             p.to = new Date();
         }
-        User user = Login.current();
-
-        List<CheckTask> checks = p.query();
-        List<CheckTask> checkeds = p.query();
+        List<CheckTask> checks = p.check();
+        List<CheckTask> checkeds = p.checked();
+        List<CheckTask> checkRepeats = p.checkRepeat();
         List<ElcukRecord> records = ElcukRecord.records("qcCheckRecords");
 
-        render(p, checks, checkeds, records);
+        render(p, checks, checkeds, checkRepeats, records);
+    }
+
+    /**
+     * 更新质检方式
+     */
+    public static void updateQcType(long id, CheckTask.T qcType) {
+        CheckTask check = CheckTask.findById(id);
+        check.qcType = qcType;
+        check.save();
+        renderJSON(new Ret());
     }
 }
 

@@ -35,7 +35,7 @@ public class CheckTask extends Model {
     public Whouse shipwhouse;
 
     @Expose
-    public String sku;// 冗余 sku 字段
+    public String sku;
 
     /**
      * 检测人
@@ -240,6 +240,30 @@ public class CheckTask extends Model {
         public abstract String label();
     }
 
+    public enum T {
+        SAMPLE {
+            @Override
+            public String label() {
+                return "抽检";
+            }
+        },
+
+        WHOLE {
+            @Override
+            public String label() {
+                return "全检";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 质检方式
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public T qcType;
 
     /**
      * 产生质检任务

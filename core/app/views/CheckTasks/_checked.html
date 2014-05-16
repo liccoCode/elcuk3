@@ -43,11 +43,11 @@
         <td>${checked.units.id}</td>
         <td>${checked.units.product.sku}</td>
         <td>${checked.units.fba?.id}</td>
-        <td>${checked.units.selling.fnSku}</td>
+        <td>${checked.units.selling?.fnSku}</td>
         <td>${checked.units.deliveryment?.id}</td>
         <td>${checked.shipwhouse?.name}</td>
-        <td>${checked.units.cooperator.name}</td>
-        <td>${checked.shipwhouse}</td>
+        <td>${checked.units.cooperator?.name}</td>
+        <td>${checked.units.cooperator?.qcLevel?.label()}</td>
         <td>${checked.dealway}</td>
         <td>
           <a href="#">查看</a>&nbsp;
@@ -58,5 +58,5 @@
 </table>
 #{/if}
 #{else }
-<p class="muted text-center">暂无已检任务 :) .</p>
+<p class="muted text-center">暂无已检任务 : )</p>
 #{/else}

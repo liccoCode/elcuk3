@@ -27,25 +27,23 @@
       <tr>
         <td>${check.id}</td>
         <td>
-          <a href="#">打印</a>&nbsp;
+          <a href="#" target="_blank">打印</a>&nbsp;
           <a href="#">质检</a>
         </td>
         <td>
-          <select class="inline">
+          #{select_enum name: 'check.qcType', items: models.qc.CheckTask.T.values(), value: check.qcType}
             <option value="">选择方式</option>
-            <option value="">抽检</option>
-            <option value="">全检</option>
-          </select>
+          #{/select_enum}
         </td>
         <td>${check.units.attrs.planShipDate}</td>
         <td>${check.units.attrs.planDeliveryDate}</td>
         <td>${check.units.attrs.deliveryDate}</td>
-        <td>${check.shipwhouse}</td>
+        <td>${check.units.cooperator?.qcLevel?.label()}</td>
         <td>${check.checkstat.label()}</td>
         <td>${check.units.id}</td>
         <td>${check.units.product.sku}</td>
-        <td>${check.units?.fba?.id}</td>
-        <td>${check.units.selling.fnSku}</td>
+        <td>${check.units?.fba?.shipmentId}</td>
+        <td>${check.units.selling?.fnSku}</td>
         <td>${check.units.deliveryment?.id}</td>
         <td>${check.shipwhouse?.name}</td>
         <td>${check.units.cooperator.name}</td>
@@ -57,5 +55,5 @@
 </table>
 #{/if}
 #{else }
-<p class="muted text-center">暂无待检任务 :) .</p>
+<p class="muted text-center">暂无待检任务 : )</p>
 #{/else}
