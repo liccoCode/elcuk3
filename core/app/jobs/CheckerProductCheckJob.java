@@ -43,7 +43,7 @@ public class CheckerProductCheckJob extends Job {
         }
 
         SystemMails.productPicCheckermail(thisTimeWarnningProduct);
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"CheckerProductCheckJob")) {
             LogUtils.JOBLOG.info(String
                     .format("CheckerProductCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

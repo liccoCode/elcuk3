@@ -88,7 +88,7 @@ public class AmazonFinanceCheckJob extends Job {
             Cache.delete(RUNNING);
         }
 
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonFinanceCheckJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonFinanceCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

@@ -48,7 +48,7 @@ public class ListingDriverlJob extends Job {
             new ListingWork(ListingSchedulJob.peekListingId(), true).now();
         }
         Logger.info("After Work, Queue size left: %s", ListingSchedulJob.queueSize());
-        if(LogUtils.isslow(System.currentTimeMillis() - begin)) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin,"ListingDriverlJob")) {
             LogUtils.JOBLOG
                     .info(String.format("ListingDriverlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
