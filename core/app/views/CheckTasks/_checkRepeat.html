@@ -31,13 +31,13 @@
           <a href="#" target="_blank">打印</a>&nbsp;
           <a href="#">质检</a>
         </td>
-         <td>
-           <a href="#" target="_blank">查看</a>&nbsp;
-         </td>
         <td>
-          #{select_enum name: 'cr.qcType', items: models.qc.CheckTask.T.values(), value: cr.qcType}
-            <option value="">选择方式</option>
-          #{/select_enum}
+            #{select_enum name: 'cr.qcType', items: models.qc.CheckTask.T.values(), value: cr.qcType}
+              <option value="">选择方式</option>
+            #{/select_enum}
+        </td>
+        <td>
+          <a href="#" target="_blank">查看</a>&nbsp;
         </td>
         <td>${cr.units.attrs.planShipDate}</td>
         <td>${cr.units.attrs.planDeliveryDate}</td>

@@ -68,6 +68,11 @@ public class CheckTask extends Model {
     @Expose
     public Date endTime;
 
+    /**
+     * 质检开始时间
+     */
+    @Expose
+    public Date startTime;
 
     /**
      * 是否合格结果
@@ -99,10 +104,16 @@ public class CheckTask extends Model {
     public String updator;
 
     /**
-     * 工作小时
+     * 工作小时(质检工时)
      */
     @Expose
     public float workhour;
+
+    /**
+     * 质检员人数
+     */
+    @Expose
+    public int workers;
 
     /**
      * 人工费
