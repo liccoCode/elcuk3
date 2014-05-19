@@ -603,8 +603,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public void arryParamSetUP(FLAG flag) {
         if(flag.equals(FLAG.ARRAY_TO_STR)) {
-            this.locates = J.json(this.locate);
-            this.sellingPoints = J.json(this.sellingPoint);
+            /**
+             * 在转换成Json字符串之前需要对空字符串做一点处理
+             */
+            this.locates = J.json(this.fixNullStr(this.locate));
+            this.sellingPoints = J.json(this.fixNullStr(this.sellingPoint));
         } else {
             if(StringUtils.isNotBlank(this.locates)) this.locate = JSON.parseArray(this.locates, ProductDTO.class);
             if(StringUtils.isNotBlank(this.sellingPoints)) this.sellingPoint = JSON.parseArray(this.sellingPoints,
@@ -613,8 +616,25 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 对空字符进行处理
+     *
+     * @return
+     */
+    private List<ProductDTO> fixNullStr(List<ProductDTO> target) {
+        Iterator<ProductDTO> iterator = target.iterator();
+        while(iterator.hasNext()) {
+            ProductDTO p = iterator.next();
+            if(null == p) {
+                iterator.remove();
+            }
+        }
+        return target;
+    }
+
+    /**
      * 准备数据
      */
+
     public void beforeData() {
         for(int i = 0; i <= 4; i++) {
             this.locate.add(new ProductDTO());
