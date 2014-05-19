@@ -1,8 +1,8 @@
+<table class="table table-condensed table-bordered">
 #{if fmys.size() == 0}
   <p class="muted text-center">等待添加新的 Family.</p>
 #{/if}
 #{else }
-<table class="table table-condensed table-bordered">
   <tr>
     <th>Name</th>
     <th>Action</th>
@@ -17,6 +17,7 @@
         </td>
       </tr>
     #{/list}
+#{/else}
   <tr>
     <td colspan="2">
       <div class="row-fluid">
@@ -28,4 +29,3 @@
     </td>
   </tr>
 </table>
-#{/else}
