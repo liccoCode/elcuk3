@@ -85,5 +85,16 @@ public class CheckTasks extends Controller {
         check.save();
         renderJSON(new Ret());
     }
+
+    public static void show(Long id) {
+        CheckTask check = CheckTask.findById(id);
+        render(check);
+    }
+
+    public static void update(CheckTask checkTask) {
+        validation.valid(checkTask);
+        checkTask.save();
+        show(checkTask.id);
+    }
 }
 

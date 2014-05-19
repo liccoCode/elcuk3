@@ -1,0 +1,82 @@
+#{extends 'main.html'/}
+#{set title:"质检员任务列表" /}
+#{set 'moreScripts'}
+#{/set}
+  #{script 'component/dropUpload.coffee'/}
+  #{script 'checktasks/show.coffee'/}
+#{flash_alert /}
+#{errorMsgs /}
+
+#{info_row}
+<ul>
+  <li><strong>回填质检信息</strong></li>
+</ul>
+#{/info_row}
+#{if check == null}
+<p class="muted text-center">读取的质检任务不存在!</p>
+#{/if}
+<div class="row-fluid">
+  <table class="table table-bordered">
+    <tr>
+      <td>FBA</td>
+      <td>${check.units?.fba?.shipmentId}</td>
+      <td>FnSku</td>
+      <td>${check.units.selling?.fnSku}</td>
+      <td>质检员</td>
+      <td>${check.checkor}</td>
+      <td>状态</td>
+      <td>${check.checkstat}</td>
+      <td>订单数量</td>
+      <td>${check.planqty}</td>
+    </tr>
+
+    <tr>
+      <td>实际交货数量</td>
+      <td>
+        <input type="hidden" name="check.id" value="${check.id}">
+        <input type="text" name="check.units.attrs.qty" value="${check.units.attrs.qty}" class="input-small">
+      </td>
+      <td>实际抽检数量</td>
+      <td><input type="text" name="check.pickqty" class="input-small"></td>
+      <td>处理方式</td>
+      <td colspan="5">
+        <input type="text">
+      </td>
+    </tr>
+
+    <tr>
+      <td>质检完成时间</td>
+      <td colspan="9"><input type="datetime-local" name="check.endTime"></td>
+    </tr>
+
+    <tr>
+      <td>是否合格</td>
+      <td colspan="5">
+      #{select_enum name: 'check.result', items: models.qc.CheckTask.ResultType.values(), value: check.result/}
+      </td>
+      <td>是否发货</td>
+      <td colspan="5">
+      #{select_enum name: 'check.isship', items: models.qc.CheckTask.ShipType.values(), value: check.isship/}
+      </td>
+    </tr>
+
+    <tr>
+      <td>备注</td>
+      <td colspan="10">
+        <textarea name="check.checknote" rows="5" cols="80" class="span12">${check.checknote}</textarea>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <h4 class="alert alert-success">凭证<i class="icon-sort-down"></i></h4>
+  </div>
+</div>
+<div class="row-fluid">
+  <div style="min-height:300px;" class="span12 well" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  </div>
+</div>
