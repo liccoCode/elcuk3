@@ -696,15 +696,20 @@ public class MetricProfitService {
                 dateHistogram("units")
                 .field("date")
                 .interval(DateHistogram.Interval.WEEK)
-                .subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname))
-                ;
+                .subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname));
+
+        BoolQueryBuilder qb = querybuilder(true, categoryFilter);
+        //销售费用项目
+        if(tablename.equals("salefee"))
+            qb = qb.must(QueryBuilders.termQuery("fee_type", "productcharges"));
+
+
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(querybuilder(true, categoryFilter))
+                .query(qb)
                 .aggregation(builder
                 )
                 .size(0);
 
-        System.out.println("aaaaaaaaaaaaaaaaaa::::::::::::::"+search.toString());
 
         JSONObject result = ES.search("elcuk2", tablename, search);
         if(result == null) {
