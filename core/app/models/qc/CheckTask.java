@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.DBUtils;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import java.util.ArrayList;
@@ -49,6 +50,12 @@ public class CheckTask extends Model {
      */
     @Expose
     public int planqty;
+
+    /**
+     * 实际交货数量
+     */
+    @Expose
+    public int qty;
 
     /**
      * 实际抽检数量
@@ -277,6 +284,15 @@ public class CheckTask extends Model {
     public T qcType;
 
     /**
+     * 质检任务检查
+     */
+    public void validate() {
+        Validation.required("实际交货数量", this.qty);
+        Validation.required("实际抽检数量", this.pickqty);
+        if(this.qty < 0) Validation.addError("", "实际交货数量");
+    }
+
+    /**
      * 产生质检任务
      */
     public static void generateTask() {
@@ -296,5 +312,4 @@ public class CheckTask extends Model {
             }
         }
     }
-
 }
