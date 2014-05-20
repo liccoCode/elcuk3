@@ -188,9 +188,11 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 toSave.add(orderr);
             }
         }
-
+        LogUtils.isslow(0l, "AmazonOrderDiscover1");
         AmazonOrderDiscover.updateOrders(toUpdate);
+        LogUtils.isslow(0l, "AmazonOrderDiscover2");
         AmazonOrderDiscover.saveOrders(toSave);
+        LogUtils.isslow(0l, "AmazonOrderDiscover3");
 
         if(isIncludeOrderItems) {
             AmazonOrderItemDiscover.updateOrderItemByOrders(toUpdate);
