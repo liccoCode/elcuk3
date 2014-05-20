@@ -12,7 +12,9 @@
             <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
           #{/power.ck}
             <li><a href="@{Application.oldDashBoard()}">DashBoard</a></li>
-
+          #{power.ck "activitis.index"}
+            <li><a href="@{Activitis.index()}">待处理流程</a></li>
+          #{/power.ck}
             <li><a href="@{Users.home()}">Home</a></li>
             <li><a href="@{Notifications.index()}">Notys</a></li>
             <li><a href="@{Secure.logout()}">Logout</a></li>
