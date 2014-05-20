@@ -136,7 +136,7 @@ public class FBAShipment extends Model {
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
     @Lob
-    public String records;
+    public String records = "";
 
     /**
      * 每一个 FBAShipment 拥有一个地址

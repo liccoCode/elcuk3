@@ -38,6 +38,9 @@ public class CheckTaskPost extends Post<CheckTask> {
         this.perSize = perSize;
     }
 
+    public CheckTaskPost(String checkor) {
+        this.checkor = checkor;
+    }
 
     public static final List<F.T2<String, String>> DATE_TYPES;
 
@@ -55,7 +58,15 @@ public class CheckTaskPost extends Post<CheckTask> {
     public Date from;
     public Date to;
 
+    /**
+     * 采购计划仓库
+     */
     public long whouseId;
+
+    /**
+     * 货代仓库
+     */
+    public long shipwhouseId;
 
     public long cooperatorId;
 
@@ -92,7 +103,6 @@ public class CheckTaskPost extends Post<CheckTask> {
      */
     public CheckTask.StatType checkstat;
 
-
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<Object>();
@@ -120,6 +130,11 @@ public class CheckTaskPost extends Post<CheckTask> {
                 .append("<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
+
+        if(this.shipwhouseId > 0) {
+            sbd.append(" AND c.shipwhouse.id=?");
+            params.add(this.shipwhouseId);
+        }
 
         if(this.whouseId > 0) {
             sbd.append(" AND u.whouse.id=?");
@@ -151,7 +166,6 @@ public class CheckTaskPost extends Post<CheckTask> {
             params.add(this.isship);
         }
 
-
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
@@ -161,7 +175,31 @@ public class CheckTaskPost extends Post<CheckTask> {
             for(int i = 0; i < 2; i++) params.add(word);
         }
 
+        if(StringUtils.isNotBlank(this.checkor)) {
+            sbd.append(" AND c.checkor=? ");
+            params.add(this.checkor);
+        }
+
         return new F.T2<String, List<Object>>(sbd.toString(), params);
+    }
+
+    /**
+     * 查询待检任务、已检任务、重检任务
+     *
+     * @return
+     */
+    public F.T2<String, List<Object>> checkOrUncheckParams(F.T2<String, List<Object>> params, String flag) {
+        String sbd = params._1;
+        if(StringUtils.equalsIgnoreCase("check", flag)) {
+            sbd += " AND c.checkstat =  '" + CheckTask.StatType.UNCHECK + "'";
+        } else if(StringUtils.equalsIgnoreCase("checked", flag)) {
+            sbd += " AND c.checkstat =  '" + CheckTask.StatType.CHECKFINISH + "'";
+        } else {
+            CheckTask.StatType[] checkstats = {CheckTask.StatType.CHECKNODEAL, CheckTask.StatType.CHECKDEAL,
+                    CheckTask.StatType.REPEATCHECK};
+            sbd += " AND c.checkstat IN " + SqlSelect.inlineParam(checkstats) + "";
+        }
+        return new F.T2<String, List<Object>>(sbd, params._2);
     }
 
     public List<CheckTask> query() {
@@ -169,6 +207,21 @@ public class CheckTaskPost extends Post<CheckTask> {
         this.count = this.count(params);
         return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch(this.page,
                 this.perSize);
+    }
+
+    public List<CheckTask> check() {
+        F.T2<String, List<Object>> params = checkOrUncheckParams(params(), "check");
+        return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch();
+    }
+
+    public List<CheckTask> checked() {
+        F.T2<String, List<Object>> params = checkOrUncheckParams(params(), "checked");
+        return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch();
+    }
+
+    public List<CheckTask> checkRepeat() {
+        F.T2<String, List<Object>> params = checkOrUncheckParams(params(), "checkRepeat");
+        return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch();
     }
 
     @Override
