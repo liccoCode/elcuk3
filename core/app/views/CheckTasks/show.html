@@ -1,0 +1,8 @@
+#{extends 'main.html'/}
+#{set title:"质检任务信息" /}
+#{set 'moreScripts'}
+#{/set}
+#{flash_alert /}
+#{errorMsgs /}
+
+#{render 'CheckTasks/_show.html', check: check/}

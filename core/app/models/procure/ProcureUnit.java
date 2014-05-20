@@ -230,6 +230,29 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public int isCheck;
 
+    public enum S {
+        SHIPED {
+            @Override
+            public String label() {
+                return "已发货";
+            }
+        },
+        NOSHIP {
+            @Override
+            public String label() {
+                return "不发货待处理";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 采购计划的不发货处理状态
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public S shipState;
 
     /**
      * ProcureUnit 的检查

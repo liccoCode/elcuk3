@@ -6,11 +6,17 @@ import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.data.binding.As;
+import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -84,6 +90,33 @@ public class CheckTasks extends Controller {
         check.qcType = qcType;
         check.save();
         renderJSON(new Ret());
+    }
+
+    public static void show(Long id) {
+        CheckTask check = CheckTask.findById(id);
+        render(check);
+    }
+
+    @Check("checktasks.update")
+    public static void update(CheckTask check) {
+        check.validateRight();
+        if(Validation.hasErrors()) render("CheckTasks/show.html", check);
+        check.save();
+        flash.success("更新成功");
+        redirect("/CheckTasks/show/" + check.id);
+    }
+
+    @Check("checktasks.update")
+    public static void fullUpdate(CheckTask check, @As("yyyy-MM-dd HH:mm") Date from, @As("yyyy-MM-dd HH:mm") Date to) {
+        check.startTime = from;
+        check.endTime = to;
+        validation.valid(check);
+        check.validateRequired();
+        check.validateRight();
+        if(Validation.hasErrors()) render("CheckTasks/show.html", check);
+        check.fullSave();
+        flash.success("更新成功");
+        redirect("/CheckTasks/checkerlist");
     }
 }
 
