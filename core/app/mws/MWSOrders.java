@@ -6,6 +6,7 @@ import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersConfig;
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
 import com.amazonservices.mws.orders.model.*;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import helper.LogUtils;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
@@ -46,10 +47,14 @@ public class MWSOrders {
         Logger.info("Fetch lastUpdateDate %s minutes ago orders.", nMinutesAgo);
 
         request.setLastUpdatedAfter(new XMLGregorianCalendarImpl(dt.toGregorianCalendar()));
+        LogUtils.isslow(0l, "AmazonOrderDiscover1");
         ListOrdersResponse response = client(account).listOrders(request);
+        LogUtils.isslow(0l, "AmazonOrderDiscover2");
         ListOrdersResult result = response.getListOrdersResult();
+        LogUtils.isslow(0l, "AmazonOrderDiscover3");
 
         List<Orderr> orders = responseToOrders(result.getOrders(), account);
+        LogUtils.isslow(0l, "AmazonOrderDiscover4");
         String token = result.getNextToken();
         while(StringUtils.isNotBlank(token)) {
             F.T2<String, List<Orderr>> t2 = listOrdersByNextToken(account, token);
