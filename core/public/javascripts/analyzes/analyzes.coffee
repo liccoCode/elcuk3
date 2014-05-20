@@ -16,6 +16,7 @@ $ ->
           sPaginationType: "full_numbers"
           iDisplayLength: 50
           aaSorting: [[15, "desc"]]
+          aoColumnDefs: [ { sDefaultContent: '', aTargets: [ '_all' ] } ]
         )
         $('table.sortinfo').on('mouseenter', 'td:has(button.btn-info)',(e) ->
           $tr = $(@).parents('tr')
