@@ -1,5 +1,7 @@
 # timeline/timeline_js/timeline-api.js 中覆盖了 JQuery对象，所以重置
 window.jQuery = window.$
+$.extend $.fn.dataTableExt.oStdClasses,
+    sWrapper: "dataTables_wrapper form-inline"
 $ ->
   Highcharts.setOptions(global:{useUTC: false})
 
@@ -14,6 +16,7 @@ $ ->
           sPaginationType: "full_numbers"
           iDisplayLength: 50
           aaSorting: [[15, "desc"]]
+          aoColumnDefs: [ { sDefaultContent: '', aTargets: [ '_all' ] } ]
         )
         $('table.sortinfo').on('mouseenter', 'td:has(button.btn-info)',(e) ->
           $tr = $(@).parents('tr')
