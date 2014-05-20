@@ -104,13 +104,15 @@ public class CheckTasks extends Controller {
         redirect("/CheckTasks/show/" + check.id);
     }
 
-    public static void fullUpdate(CheckTask check, @As("yyyy-MM-ddT HH:mm")Date t) throws ParseException {
-
+    public static void fullUpdate(CheckTask check, @As("yyyy-MM-dd HH:mm") Date from, @As("yyyy-MM-dd HH:mm") Date to) {
+        check.startTime = from;
+        check.endTime = to;
         validation.valid(check);
         check.validateRequired();
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
         check.fullSave();
+        flash.success("更新成功");
         redirect("/CheckTasks/show/" + check.id);
     }
 }

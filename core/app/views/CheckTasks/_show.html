@@ -1,6 +1,8 @@
+#{stylesheet 'bootstrap-datetimepicker.min.css'/}
+#{script 'bootstrap-datetimepicker.min.js'/}
+#{script 'jquery.filedrop.js' /}
 #{script 'component/dropUpload.coffee'/}
 #{script 'checktasks/show.coffee'/}
-
 
 #{info_row}
 <ul>
@@ -44,13 +46,14 @@
       <tr>
         <th>质检开始时间</th>
         <td colspan="3">
-          <input type="datetime-local" name="check.startTime" value="${check.startTime}">
-          <input type="hidden" name="startTime">
+          <input size="16" type="text" value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" readonly
+                 class="form_datetime"
+                 name="from">
         </td>
         <th>质检完成时间</th>
         <td colspan="3">
-          <input type="datetime-local" name="check.endTime" value="${check.endTime}">
-          <input type="hidden" name="endTime">
+          <input size="16" type="text" value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" readonly
+                 class="form_datetime" name="to">
         </td>
       </tr>
 
