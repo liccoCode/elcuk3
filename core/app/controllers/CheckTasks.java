@@ -118,5 +118,9 @@ public class CheckTasks extends Controller {
         flash.success("更新成功");
         redirect("/CheckTasks/checkerlist");
     }
+
+    public static void checkListPrint() {
+
+    }
 }
 
