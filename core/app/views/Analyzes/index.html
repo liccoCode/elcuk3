@@ -2,7 +2,6 @@
 #{set title:'Analyze'/}
 #{set 'moreScripts'}
     #{script 'jquery.dataTables.js'/}
-    #{script 'analyzes/sidsort.coffee'/}
     #{script 'highstock.js'/}
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
@@ -115,11 +114,10 @@
 </div>
 
 
-
 <script type="text/template" id="sidlabel-template">
   <div>
     <a href="/sellings/<%= pam.id %>/procureunit/new/" target="_blank" class="btn btn-mini btn-info">
-              <i class="icon-random"></i> 采购计划</a>
+      <i class="icon-random"></i> 采购计划</a>
     <a href="@{Sellings.selling()}/<%= pam.id %>" target="_blank" class="btn btn-mini btn-success">Selling
       页面</a>
   </div>
