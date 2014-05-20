@@ -331,7 +331,7 @@ public class CheckTask extends Model {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
                 if(this.units.shipState == ProcureUnit.S.NOSHIP) {
-                    //TODO:采购计划ID的“不发货处理”状态还原成 当初系统开启此不发货流程时  采购计划ID的“不发货处理”状态值
+                    //TODO:采购计划的“不发货处理”状态还原成 当初系统开启此不发货流程时 采购计划的“不发货处理”状态值
                     //TODO:结束不发货流程
                 }
                 break;
@@ -339,7 +339,7 @@ public class CheckTask extends Model {
                 this.checkstat = StatType.CHECKNODEAL;
                 //对应采购计划ID的“不发货处理”状态更新为：不发货待处理
                 this.units.shipState = ProcureUnit.S.NOSHIP;
-                //TODO:启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人生成 不发货待处理任务
+                //TODO:启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
                 break;
         }
         this.save();

@@ -101,6 +101,7 @@ public class CheckTasks extends Controller {
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
         check.save();
+        flash.success("更新成功");
         redirect("/CheckTasks/show/" + check.id);
     }
 
@@ -113,7 +114,7 @@ public class CheckTasks extends Controller {
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
         check.fullSave();
         flash.success("更新成功");
-        redirect("/CheckTasks/show/" + check.id);
+        redirect("/CheckTasks/checkerlist");
     }
 }
 

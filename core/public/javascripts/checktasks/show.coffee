@@ -11,6 +11,7 @@ $ ->
   )
 
   $("#update_form").on("click", "#update_btn, #fullupdate_btn", (r) ->
+    return unless confirm('确认提交?')
     $btn = $(@)
     $form = $("#update_form")
     $ship = $("select[name='check.isship']")
