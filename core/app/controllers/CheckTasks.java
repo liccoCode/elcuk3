@@ -6,11 +6,17 @@ import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.data.binding.As;
+import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -91,10 +97,21 @@ public class CheckTasks extends Controller {
         render(check);
     }
 
-    public static void update(CheckTask checkTask) {
-        validation.valid(checkTask);
-        checkTask.save();
-        show(checkTask.id);
+    public static void update(CheckTask check) {
+        check.validateRight();
+        if(Validation.hasErrors()) render("CheckTasks/show.html", check);
+        check.save();
+        redirect("/CheckTasks/show/" + check.id);
+    }
+
+    public static void fullUpdate(CheckTask check, @As("yyyy-MM-ddT HH:mm")Date t) throws ParseException {
+
+        validation.valid(check);
+        check.validateRequired();
+        check.validateRight();
+        if(Validation.hasErrors()) render("CheckTasks/show.html", check);
+        check.fullSave();
+        redirect("/CheckTasks/show/" + check.id);
     }
 }
 

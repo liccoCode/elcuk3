@@ -1,0 +1,99 @@
+#{script 'component/dropUpload.coffee'/}
+#{script 'checktasks/show.coffee'/}
+
+
+#{info_row}
+<ul>
+  <li><strong>回填质检信息</strong></li>
+</ul>
+#{/info_row}
+#{if check == null}
+<p class="muted text-center">读取的质检任务不存在!</p>
+#{/if}
+<div class="row-fluid">
+  <form method="POST" id="update_form">
+    <table class="table table-bordered">
+      <tr>
+        <th>FBA</th>
+        <td>${check.units?.fba?.shipmentId}</td>
+        <th>FnSku</th>
+        <td>${check.units.selling?.fnSku}</td>
+        <th>质检员</th>
+        <td>${check.checkor}</td>
+        <th>状态</th>
+        <td>${check.checkstat.label()}</td>
+      </tr>
+
+      <tr>
+        <th>订单数量</th>
+        <td>${check.units.attrs.qty}</td>
+        <th>实际交货数量</th>
+        <td>
+          <input type="text" name="check.qty" class="input-mini" value="${check.qty}">
+        </td>
+        <th>实际抽检数量</th>
+        <td><input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}"></td>
+        <th>处理方式</th>
+        <td>
+        #{select_enum name: 'check.dealway', items: models.qc.CheckTask.DealType.values(), value: check.dealway}
+          <option value="">请选择</option>
+        #{/select_enum}
+        </td>
+      </tr>
+
+      <tr>
+        <th>质检开始时间</th>
+        <td colspan="3">
+          <input type="datetime-local" name="check.startTime" value="${check.startTime}">
+          <input type="hidden" name="startTime">
+        </td>
+        <th>质检完成时间</th>
+        <td colspan="3">
+          <input type="datetime-local" name="check.endTime" value="${check.endTime}">
+          <input type="hidden" name="endTime">
+        </td>
+      </tr>
+
+      <tr>
+        <th>是否合格</th>
+        <td colspan="3">
+        #{select_enum name: 'check.result', items: models.qc.CheckTask.ResultType.values(), value: check.result/}
+        </td>
+        <th>是否发货</th>
+        <td colspan="3">
+          <select name="check.isship" size="1" disabled>
+          #{list items:models.qc.CheckTask.ShipType.values(), as: 'shipType'}
+            <option value="${shipType}" ${shipType == check.isship? 'selected':''}>${shipType.label()}</option>
+          #{/list}
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th>备注</th>
+        <td colspan="10">
+          <textarea name="check.checknote" rows="5" cols="80" class="span12">${check.checknote}</textarea>
+          <input type="hidden" name="check.id" value="${check.id}">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6">
+          <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
+          <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
+          <a href="@{CheckTasks.checkerList()}" class="btn btn-success" data-loading>取消</a>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <h4 class="alert alert-success">凭证<i class="icon-sort-down"></i></h4>
+  </div>
+</div>
+<div class="row-fluid">
+  <div style="min-height:300px;" class="span12 well" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  </div>
+</div>
