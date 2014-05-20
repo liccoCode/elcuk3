@@ -35,7 +35,7 @@ public class CheckTask extends Model {
     public Whouse shipwhouse;
 
     @Expose
-    public String sku;// 冗余 sku 字段
+    public String sku;
 
     /**
      * 检测人
@@ -68,6 +68,11 @@ public class CheckTask extends Model {
     @Expose
     public Date endTime;
 
+    /**
+     * 质检开始时间
+     */
+    @Expose
+    public Date startTime;
 
     /**
      * 是否合格结果
@@ -99,10 +104,16 @@ public class CheckTask extends Model {
     public String updator;
 
     /**
-     * 工作小时
+     * 工作小时(质检工时)
      */
     @Expose
     public float workhour;
+
+    /**
+     * 质检员人数
+     */
+    @Expose
+    public int workers;
 
     /**
      * 人工费
@@ -240,6 +251,30 @@ public class CheckTask extends Model {
         public abstract String label();
     }
 
+    public enum T {
+        SAMPLE {
+            @Override
+            public String label() {
+                return "抽检";
+            }
+        },
+
+        WHOLE {
+            @Override
+            public String label() {
+                return "全检";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 质检方式
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public T qcType;
 
     /**
      * 产生质检任务

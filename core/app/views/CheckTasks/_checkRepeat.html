@@ -1,0 +1,63 @@
+#{if checks.size >0}
+<table id="checkRepeat" class="table table-bordered table-condensed dataTable">
+  <thead>
+  <tr>
+    <th>#</th>
+    <th>Action</th>
+    <th>质检方式</th>
+    <th>历史质检信息</th>
+    <th>预计运输时间</th>
+    <th>预计交货时间</th>
+    <th>实际交货时间</th>
+    <th>质检级别</th>
+    <th>状态</th>
+    <th>采购计划 ID</th>
+    <th>SKU</th>
+    <th>FBA</th>
+    <th>FnSku</th>
+    <th>采购单</th>
+    <th>货代仓库</th>
+    <th>工厂</th>
+    <th>订单数量</th>
+    <th>处理方式</th>
+  </tr>
+  </thead>
+
+  <tbody>
+      #{list items:checkRepeats, as: 'cr'}
+      <tr>
+        <td>${cr.id}</td>
+        <td>
+          <a href="#" target="_blank">打印</a>&nbsp;
+          <a href="#">质检</a>
+        </td>
+        <td>
+            #{select_enum name: 'cr.qcType', items: models.qc.CheckTask.T.values(), value: cr.qcType}
+              <option value="">选择方式</option>
+            #{/select_enum}
+        </td>
+        <td>
+          <a href="#" target="_blank">查看</a>&nbsp;
+        </td>
+        <td>${cr.units.attrs.planShipDate}</td>
+        <td>${cr.units.attrs.planDeliveryDate}</td>
+        <td>${cr.units.attrs.deliveryDate}</td>
+        <td>${cr.units.cooperator?.qcLevel?.label()}</td>
+        <td>${cr.checkstat.label()}</td>
+        <td>${cr.units.id}</td>
+        <td>${cr.units.product.sku}</td>
+        <td>${cr.units?.fba?.shipmentId}</td>
+        <td>${cr.units.selling?.fnSku}</td>
+        <td>${cr.units.deliveryment?.id}</td>
+        <td>${cr.shipwhouse?.name}</td>
+        <td>${cr.units.cooperator.name}</td>
+        <td>${cr.units.attrs.planQty}</td>
+        <td>${cr.dealway}</td>
+      </tr>
+      #{/list}
+  </tbody>
+</table>
+#{/if}
+#{else }
+<p class="muted text-center">暂无待检任务 : )</p>
+#{/else}

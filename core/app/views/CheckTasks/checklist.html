@@ -130,10 +130,10 @@
       <td>${tl.units.sku}</td>
       <td>${tl.units.fba?.shipmentId}</td>
       <td>${tl.units.selling?.fnSku}</td>
-      <td><a href="@{Deliveryments.show(tl.units.deliveryment.id)}">${tl.units.deliveryment.id}</a></td>
+      <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
       <td>${tl.units.whouse.name}</td>
       <td>${tl.units.cooperator.name}</td>
-      <td></td>
+      <td>${tl.units.cooperator?.qcLevel}</td>
       <td>${tl.units.attrs.planQty}</td>
       <td>${tl.units.attrs.qty}</td>
       <td></td>
