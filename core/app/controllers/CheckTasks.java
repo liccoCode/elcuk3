@@ -97,6 +97,7 @@ public class CheckTasks extends Controller {
         render(check);
     }
 
+    @Check("checktasks.update")
     public static void update(CheckTask check) {
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
@@ -105,6 +106,7 @@ public class CheckTasks extends Controller {
         redirect("/CheckTasks/show/" + check.id);
     }
 
+    @Check("checktasks.update")
     public static void fullUpdate(CheckTask check, @As("yyyy-MM-dd HH:mm") Date from, @As("yyyy-MM-dd HH:mm") Date to) {
         check.startTime = from;
         check.endTime = to;

@@ -81,8 +81,12 @@
       </tr>
       <tr>
         <td colspan="6">
-          <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
-          <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
+        #{power.ck "checktasks.update"}
+            #{if check.checkstat != models.qc.CheckTask.StatType.CHECKFINISH}
+              <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
+              <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
+            #{/if}
+        #{/power.ck}
           <a href="@{CheckTasks.checkerList()}" class="btn btn-success" data-loading>取消</a>
       </tr>
     </table>

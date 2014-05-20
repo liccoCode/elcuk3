@@ -28,7 +28,7 @@
         <td>${check.id}</td>
         <td>
           <a href="#" target="_blank">打印</a>&nbsp;
-          <a href="#">质检</a>
+          <a href="@{CheckTasks.show(check.id)}">质检</a>
         </td>
         <td>
           #{select_enum name: 'check.qcType', items: models.qc.CheckTask.T.values(), value: check.qcType}
