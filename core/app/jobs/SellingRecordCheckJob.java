@@ -44,7 +44,7 @@ public class SellingRecordCheckJob extends Job {
         for(int i = -5; i <= 0; i++) {
             SellingRecordCheckJob.amazonNewestRecords(fixTime.plusDays(i));
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"SellingRecordCheckJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "SellingRecordCheckJob")) {
             LogUtils.JOBLOG.info(String
                     .format("SellingRecordCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
@@ -60,7 +60,12 @@ public class SellingRecordCheckJob extends Job {
         Set<SellingRecord> records = null;
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
         for(Account acc : accs) {
-            records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.toDate());
+            try {
+                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.toDate());
+            } catch(Exception e) {
+                e.printStackTrace();
+                LogUtils.JOBLOG.info(e.getMessage());
+            }
             Logger.info("Fetch Account(%s) %s records", acc.prettyName(), records.size());
             if(records.size() <= 0) continue;
             // 直接这样处理,因为通过 SellingRecord.newRecordFromAmazonBusinessReports 出来的方法已经存在与 Session 缓存中了.

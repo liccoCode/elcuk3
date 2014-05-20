@@ -590,6 +590,13 @@ public enum M {
                                 this.toString(),
                                 Dates.listingUpdateFmt(AMAZON_US, from),
                                 Dates.listingUpdateFmt(AMAZON_US, to), currentPage);
+            case AMAZON_JP:
+                return String
+                        .format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
+                                "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
+                                this.toString(),
+                                Dates.listingUpdateFmt(AMAZON_JP, from),
+                                Dates.listingUpdateFmt(AMAZON_JP, to), currentPage);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
