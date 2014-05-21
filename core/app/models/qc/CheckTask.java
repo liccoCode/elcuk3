@@ -3,6 +3,7 @@ package models.qc;
 import com.google.gson.annotations.Expose;
 import com.sun.xml.bind.v2.TODO;
 import helper.DBUtils;
+import models.embedded.CheckTaskAttrs;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
 import play.data.binding.As;
@@ -284,6 +285,13 @@ public class CheckTask extends Model {
     @Enumerated(EnumType.STRING)
     @Expose
     public T qcType;
+
+    /**
+     * 质检任务的方式和要求
+     */
+    @Embedded
+    @Expose
+    public CheckTaskAttrs attrs;
 
     /**
      * 质检任务检查

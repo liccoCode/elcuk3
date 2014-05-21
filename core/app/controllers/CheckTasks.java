@@ -119,7 +119,12 @@ public class CheckTasks extends Controller {
         redirect("/CheckTasks/checkerlist");
     }
 
-    public static void checkListPrint() {
+    public static void print(Long id) {
+
+        render();
+    }
+
+    public static void doPrint() {
 
     }
 }
