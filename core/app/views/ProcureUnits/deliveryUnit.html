@@ -3,20 +3,16 @@
 #{set 'moreScripts'}
 #{/set}
 
-#{if unit.selling == null}
-    #{flash_alert row:true /}
-#{/if}
-#{else }
+#{flash_alert/}
+#{errorMsgs /}
 
-    #{errorMsgs /}
-
-    #{info_row row:true}
-    <ul>
-      <li>通过此页面进行 采购单元 的交货操作</li>
-      <li>如果 采购单元 已经交货完成, 那么不再允许修改</li>
-      <li>如果 采购单元 为部分交货, 那么系统会自动将剩余没有交货的数量复制新的无 预计时间 的 采购单元</li>
-    </ul>
-    #{/info_row}
+#{info_row row:true}
+<ul>
+  <li>通过此页面进行 采购单元 的交货操作</li>
+  <li>如果 采购单元 已经交货完成, 那么不再允许修改</li>
+  <li>如果 采购单元 为部分交货, 那么系统会自动将剩余没有交货的数量复制新的无 预计时间 的 采购单元</li>
+</ul>
+#{/info_row}
 
 <div class="row">
   <div class="span12">
@@ -89,9 +85,9 @@
         <tr>
           <td colspan="4">
             <button class="btn btn-warning" data-confirm="确认交货?">交货更新</button>
-              #{if unit.stage == models.procure.ProcureUnit.STAGE.DONE}
-                <a href="#revertDelivery" class="btn btn-danger" data-toggle="modal">取消交货</a>
-              #{/if}
+          #{if unit.stage == models.procure.ProcureUnit.STAGE.DONE}
+            <a href="#revertDelivery" class="btn btn-danger" data-toggle="modal">取消交货</a>
+          #{/if}
           </td>
         </tr>
       </table>
@@ -99,23 +95,22 @@
   </div>
 </div>
 <div id="revertDelivery" class="modal hide fade">
-    #{form @ProcureUnits.reverDelivery(unit.id), method: 'DELETE'}
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3>取消采购计划 ${unit.id} 的交货状态</h3>
-      </div>
-      <div class="modal-body">
-        <div class="row-fluid">
-          <label>原因</label>
-          <textarea rows="5" name="msg" class="span12"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <button type="submit" class="btn btn-danger">取消交货</button>
-      </div>
-    #{/form}
+#{form @ProcureUnits.reverDelivery(unit.id), method: 'DELETE'}
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>取消采购计划 ${unit.id} 的交货状态</h3>
+  </div>
+  <div class="modal-body">
+    <div class="row-fluid">
+      <label>原因</label>
+      <textarea rows="5" name="msg" class="span12"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <button type="submit" class="btn btn-danger">取消交货</button>
+  </div>
+#{/form}
 </div>
-    #{records_ul records: unit.records()/}
-#{/else }
+#{records_ul records: unit.records()/}
 
