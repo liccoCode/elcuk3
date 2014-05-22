@@ -1,21 +1,16 @@
 package models.qc;
 
 import com.google.gson.annotations.Expose;
-import com.sun.xml.bind.v2.TODO;
 import helper.DBUtils;
-import models.embedded.CheckTaskAttrs;
+import helper.Webs;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
-import play.data.binding.As;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.*;
-import java.util.Map;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -287,11 +282,54 @@ public class CheckTask extends Model {
     public T qcType;
 
     /**
-     * 质检任务的方式和要求
+     * 检测要求
      */
-    @Embedded
-    @Expose
-    public CheckTaskAttrs attrs;
+    @Lob
+    public String qcRequires = "";
+
+    @Transient
+    public List<String> qcRequire = new ArrayList<String>();
+
+    /**
+     * 检测方法
+     */
+    @Lob
+    public String qcWays = "";
+
+    @Transient
+    public List<String> qcWay = new ArrayList<String>();
+
+    public enum FLAG {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
+    }
+
+    /**
+     * List 和 String 之间的转换
+     * @param flag
+     */
+    public void arryParamSetUP(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.qcRequires = StringUtils.join(this.qcRequire, Webs.SPLIT);
+            this.qcWays = StringUtils.join(this.qcWay, Webs.SPLIT);
+        } else {
+            this.qcRequire = new ArrayList<String>();
+            this.qcWay = new ArrayList<String>();
+
+            String temp[] = StringUtils.splitByWholeSeparator(this.qcRequires, Webs.SPLIT);
+            if(temp != null) Collections.addAll(this.qcRequire, temp);
+
+            temp = StringUtils.splitByWholeSeparator(this.qcWays, Webs.SPLIT);
+            if(temp != null) Collections.addAll(this.qcWay, temp);
+
+            if(StringUtils.isBlank(this.qcRequires)) {
+                this.qcRequires = " ";
+            }
+            if(StringUtils.isBlank(this.qcWays)) {
+                this.qcWays = " ";
+            }
+        }
+    }
 
     /**
      * 质检任务检查

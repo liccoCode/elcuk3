@@ -6,19 +6,20 @@ import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
-import org.apache.commons.lang.StringUtils;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.DateTime;
+import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * sku_check列表
@@ -119,13 +120,36 @@ public class CheckTasks extends Controller {
         redirect("/CheckTasks/checkerlist");
     }
 
-    public static void print(Long id) {
-
-        render();
+    public static void prints(Long id) {
+        CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        render(check);
     }
 
-    public static void doPrint() {
+    public static void addRequireAndWay(String require, String way, Long id) {
+        if(StringUtil.isBlank(require)) {
+            require = " ";
+        }
+        if(StringUtil.isBlank(way)) {
+            way = " ";
+        }
+        CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        check.qcRequire.add(require);
+        check.qcWay.add(way);
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
+        check.save();
+        flash.success("添加成功!");
+        prints(id);
+    }
 
+    public static void doPrints(Long id) {
+        CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        renderArgs.put("check", check);
+        final PDF.Options options = new PDF.Options();
+        options.pageSize = IHtmlToPdfTransformer.A4P;
+        renderPDF(options);
     }
 }
 
