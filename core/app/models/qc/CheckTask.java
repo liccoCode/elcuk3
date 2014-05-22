@@ -285,6 +285,7 @@ public class CheckTask extends Model {
      * 检测要求
      */
     @Lob
+    @Expose
     public String qcRequires = "";
 
     @Transient
@@ -294,10 +295,17 @@ public class CheckTask extends Model {
      * 检测方法
      */
     @Lob
+    @Expose
     public String qcWays = "";
 
     @Transient
     public List<String> qcWay = new ArrayList<String>();
+
+    /**
+     * 打印次数
+     */
+    @Expose
+    public int printNumber;
 
     public enum FLAG {
         ARRAY_TO_STR,

@@ -146,6 +146,8 @@ public class CheckTasks extends Controller {
     public static void doPrints(Long id) {
         CheckTask check = CheckTask.findById(id);
         check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        check.printNumber++;
+        check.save();
         renderArgs.put("check", check);
         final PDF.Options options = new PDF.Options();
         options.pageSize = IHtmlToPdfTransformer.A4P;

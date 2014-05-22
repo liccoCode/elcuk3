@@ -164,6 +164,12 @@ PUT     /shipitem/{id}/recevied                             ShipItems.received
 POST    /skuchecks/{id}/update                               Skuchecks.update
 POST    /skuchecks/{id}/delete                               Skuchecks.remove
 
+# CheckTasks
+GET     /checktasks/{id}/prints                              checktasks.prints
+GET     /checktasks/{id}/prints                              checktasks.prints
+GET     /checktasks/{id}/doprints                            checktasks.doprints
+GET     /checktasks/{id}/show                                checktasks.show
+
 # Elcuk
 GET     /elcuks                                             Elcuk.index
 PUT     /elcuk/config                                       Elcuk.updateConfig
