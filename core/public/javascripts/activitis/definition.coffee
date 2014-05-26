@@ -7,7 +7,8 @@ $ ->
       menucode: $(self).parents('tr').find("td:eq(1) input").val(),
       menuname: $(self).parents('tr').find("td:eq(2) input").val(),
       processname: $(self).parents('tr').find("td:eq(3) input").val(),
-      processxml: $(self).parents('tr').find("td:eq(4) input").val()
+      processxml: $(self).parents('tr').find("td:eq(4) input").val(),
+      processid: $(self).parents('tr').find("td:eq(5) input").val()
 
     $.post("/activitis/#{id}/update", params, (r) ->
       try

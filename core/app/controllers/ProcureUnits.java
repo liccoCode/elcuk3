@@ -241,6 +241,30 @@ public class ProcureUnits extends Controller {
         edit(id);
     }
 
+
+    /**
+     * TODO effect: 需要调整的采购计划的修改
+     *
+     * @param id
+     * @param oldPlanQty
+     */
+    public static void updateprocess(Long id,Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
+
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        ProcureUnit managedUnit = ProcureUnit.findById(id);
+        managedUnit.update(unit, shipmentId);
+        if(Validation.hasErrors()) {
+            flash.error(Validation.errors().toString());
+            unit.id = managedUnit.id;
+            //render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
+            CheckTasks.showActiviti(checkid);
+        }
+        flash.success("成功修改采购计划!", id);
+
+        CheckTasks.showActiviti(checkid);
+
+    }
+
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         Set<User> users = unit.editToUsers();
