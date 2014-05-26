@@ -2,7 +2,10 @@ package models.qc;
 
 import com.google.gson.annotations.Expose;
 import helper.DBUtils;
+import helper.Reflects;
 import helper.Webs;
+import models.embedded.ERecordBuilder;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
@@ -257,6 +260,13 @@ public class CheckTask extends Model {
     }
 
     public enum T {
+        SELF {
+            @Override
+            public String label() {
+                return "工厂自检";
+            }
+        },
+
         SAMPLE {
             @Override
             public String label() {
@@ -314,6 +324,7 @@ public class CheckTask extends Model {
 
     /**
      * List 和 String 之间的转换
+     *
      * @param flag
      */
     public void arryParamSetUP(FLAG flag) {
@@ -367,7 +378,12 @@ public class CheckTask extends Model {
                 newtask.units = punit;
                 newtask.confirmstat = ConfirmType.UNCONFIRM;
                 newtask.checkstat = StatType.UNCHECK;
-
+                if(punit.cooperator.qcLevel == Cooperator.L.MICRO) {
+                    //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检
+                    newtask.qcType = T.SELF;
+                }
+                //根据采购计划对应的运输单中的货代+运输方式自动匹配货代仓库
+                newtask.shipwhouse = punit.fetchForwardWhouse();
                 newtask.save();
                 DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
             }
@@ -377,14 +393,14 @@ public class CheckTask extends Model {
     /**
      * 保存质检任务且修改相关联的对应的采购计划数据
      */
-    public void fullSave() {
-        long diff = this.endTime.getTime() - this.startTime.getTime();
+    public void fullUpdate(CheckTask newCt) {
+        long diff = newCt.endTime.getTime() - newCt.startTime.getTime();
         this.workhour = diff / (60 * 60 * 1000);
-        this.units.attrs.qty = this.qty;
-        switch(this.isship) {
+        this.units.attrs.qty = newCt.qty;
+        switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
-                if(this.units.shipState == ProcureUnit.S.NOSHIP) {
+                if(newCt.units.shipState == ProcureUnit.S.NOSHIPWAIT) {
                     //TODO:采购计划的“不发货处理”状态还原成 当初系统开启此不发货流程时 采购计划的“不发货处理”状态值
                     //TODO:结束不发货流程
                 }
@@ -392,10 +408,55 @@ public class CheckTask extends Model {
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
                 //对应采购计划ID的“不发货处理”状态更新为：不发货待处理
-                this.units.shipState = ProcureUnit.S.NOSHIP;
+                this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
                 //TODO:启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
                 break;
         }
+        this.update(newCt);
+    }
+
+    /**
+     * 获取对应的质检任务查看链接
+     * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
+     * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面
+     *
+     * @return
+     */
+    public String fetchCheckTaskLink() {
+        List<CheckTask> tasks = CheckTask.find("units_id=?", this.units.id).fetch();
+        if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
+        if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.units.id);
+        return null;
+    }
+
+    /**
+     * 更新时的日志
+     */
+    public void beforeUpdateLog(CheckTask newCt) {
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(Reflects.updateAndLogChanges(this, "startTime", newCt.startTime));
+        logs.addAll(Reflects.updateAndLogChanges(this, "endTime", newCt.endTime));
+        logs.addAll(Reflects.updateAndLogChanges(this, "isship", newCt.isship));
+        logs.addAll(Reflects.updateAndLogChanges(this, "result", newCt.result));
+        logs.addAll(Reflects.updateAndLogChanges(this, "pickqty", newCt.pickqty));
+        logs.addAll(Reflects.updateAndLogChanges(this, "qty", newCt.qty));
+        logs.addAll(Reflects.updateAndLogChanges(this, "checknote", newCt.checknote));
+        if(logs.size() > 0) {
+            new ERecordBuilder("checktask.update", "checktask.update.msg").msgArgs(StringUtils.join(logs, "，"))
+                    .fid(this.id).save();
+        }
+    }
+
+    public void update(CheckTask newCt) {
+        this.beforeUpdateLog(newCt);
+        this.qty = newCt.qty;
+        this.pickqty = newCt.pickqty;
+        if(newCt.dealway != null) this.dealway = newCt.dealway;
+        if(newCt.startTime != null) this.startTime = newCt.startTime;
+        if(newCt.endTime != null) this.endTime = newCt.endTime;
+        if(newCt.result != null) this.result = newCt.result;
+        if(newCt.isship != null) this.isship = newCt.isship;
+        if(newCt.checknote != null) this.checknote = newCt.checknote;
         this.save();
     }
 }

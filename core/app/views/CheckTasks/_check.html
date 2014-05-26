@@ -31,9 +31,18 @@
           <a href="@{CheckTasks.show(check.id)}">质检</a>
         </td>
         <td>
-          #{select_enum name: 'check.qcType', items: models.qc.CheckTask.T.values(), value: check.qcType}
-            <option value="">选择方式</option>
-          #{/select_enum}
+            #{if check.units.cooperator?.qcLevel == models.procure.Cooperator.L.MICRO}
+              <select disabled>
+                <option value="">工厂自检</option>
+              </select>
+            #{/if}
+            #{else }
+              <select name="check.qcType">
+                <option value="">选择方式</option>
+                <option ${check.qcType == models.qc.CheckTask.T.SAMPLE?'selected' : ''} value="SAMPLE">抽检</option>
+                <option ${check.qcType == models.qc.CheckTask.T.WHOLE?'selected' : ''} value="WHOLE">全检</option>
+              </select>
+            #{/else}
         </td>
         <td>${check.units.attrs.planShipDate}</td>
         <td>${check.units.attrs.planDeliveryDate}</td>

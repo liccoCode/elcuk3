@@ -26,7 +26,8 @@ public class CheckTaskPost extends Post<CheckTask> {
 
 
     private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
-    private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
+    private static final Pattern SKU = Pattern.compile("^sku:(\\S*)$");
+
 
     public CheckTaskPost() {
         this.perSize = 25;
@@ -110,21 +111,20 @@ public class CheckTaskPost extends Post<CheckTask> {
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT c FROM CheckTask c LEFT JOIN c.units u WHERE 1=1 AND ");
 
-
         Long procrueId = isSearchForId();
         if(procrueId != null) {
-            sbd.append("u.id=?");
+            sbd.append("c.id=?");
             params.add(procrueId);
             return new F.T2<String, List<Object>>(sbd.toString(), params);
         }
-//
-//        String fba = isSearchFBA();
-//        if(fba != null) {
-//            sbd.append("u.fba.shipmentId=?");
-//            params.add(fba);
-//            return new F.T2<String, List<Object>>(sbd.toString(), params);
-//        }
-//
+
+        String sku = isSearchForSKU();
+        if(StringUtils.isNotBlank(sku)) {
+            sbd.append("u.product.sku=?");
+            params.add(sku);
+            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        }
+
         if(StringUtils.isBlank(this.dateType)) this.dateType = "u.attrs.planDeliveryDate";
         sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
                 .append("<=?");
@@ -169,10 +169,9 @@ public class CheckTaskPost extends Post<CheckTask> {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append("u.product.sku LIKE ? OR ")
-                    .append("u.fba.shipmentId LIKE ?")
+                    .append("u.product.sku LIKE ?")
                     .append(") ");
-            for(int i = 0; i < 2; i++) params.add(word);
+            params.add(word);
         }
 
         if(StringUtils.isNotBlank(this.checkor)) {
@@ -243,7 +242,9 @@ public class CheckTaskPost extends Post<CheckTask> {
     private Long isSearchForId() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
+            if(matcher.find()) {
+                return NumberUtils.toLong(matcher.group(1));
+            }
         }
         return null;
     }
@@ -253,10 +254,12 @@ public class CheckTaskPost extends Post<CheckTask> {
      *
      * @return
      */
-    private String isSearchFBA() {
+    private String isSearchForSKU() {
         if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = FBA.matcher(this.search);
-            if(matcher.find()) return matcher.group(1);
+            Matcher matcher = SKU.matcher(this.search);
+            if(matcher.find()) {
+                return matcher.group(1);
+            }
         }
         return null;
     }

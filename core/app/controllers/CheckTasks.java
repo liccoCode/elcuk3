@@ -1,16 +1,19 @@
 package controllers;
 
 import models.ElcukRecord;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -75,10 +78,10 @@ public class CheckTasks extends Controller {
             p.from = DateTime.now().minusDays(1).toDate();
             p.to = new Date();
         }
+        List<ElcukRecord> records = ElcukRecord.find("action like '%CheckTask%' ORDER BY createAt DESC").fetch();
         List<CheckTask> checks = p.check();
         List<CheckTask> checkeds = p.checked();
         List<CheckTask> checkRepeats = p.checkRepeat();
-        List<ElcukRecord> records = ElcukRecord.records("qcCheckRecords");
 
         render(p, checks, checkeds, checkRepeats, records);
     }
@@ -99,23 +102,28 @@ public class CheckTasks extends Controller {
     }
 
     @Check("checktasks.update")
-    public static void update(CheckTask check) {
+    public static void update(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
+                              @As("yyyy-MM-dd HH:mm") Date to) {
+        CheckTask old = CheckTask.findById(id);
+        check.startTime = from;
+        check.endTime = to;
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
-        check.save();
+        old.update(check);
         flash.success("更新成功");
-        redirect("/CheckTasks/show/" + check.id);
+        redirect("/CheckTasks/show/" + id);
     }
 
     @Check("checktasks.update")
-    public static void fullUpdate(CheckTask check, @As("yyyy-MM-dd HH:mm") Date from, @As("yyyy-MM-dd HH:mm") Date to) {
+    public static void fullUpdate(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
+                                  @As("yyyy-MM-dd HH:mm") Date to) {
+        CheckTask old = CheckTask.findById(id);
         check.startTime = from;
         check.endTime = to;
-        validation.valid(check);
         check.validateRequired();
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
-        check.fullSave();
+        old.fullUpdate(check);
         flash.success("更新成功");
         redirect("/CheckTasks/checkerlist");
     }
@@ -148,10 +156,22 @@ public class CheckTasks extends Controller {
         check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         check.printNumber++;
         check.save();
+        //log
+        new ERecordBuilder("checktask.doPrints").fid(id).msgArgs(id).save();
         renderArgs.put("check", check);
         final PDF.Options options = new PDF.Options();
         options.pageSize = IHtmlToPdfTransformer.A4P;
         renderPDF(options);
+    }
+
+    /**
+     * 质检信息查看列表
+     * <p/>
+     * 当采购计划ID下存在1个以上的质检任务
+     */
+    public static void showList(Long id) {
+        List<CheckTask> checks = CheckTask.find("units_id=?", id).fetch();
+        render(checks);
     }
 }
 

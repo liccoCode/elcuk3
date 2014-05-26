@@ -9,11 +9,9 @@
     <th>实际交货时间</th>
     <th>质检开始时间</th>
     <th>质检完成时间</th>
-
     <th>质检工时</th>
     <th>每人工时</th>
     <th>人数</th>
-
     <th>订单数量</th>
     <th>实际交货数量</th>
     <th>状态</th>
@@ -49,19 +47,19 @@
         <td>${checked.workers}</td>
         <td>${checked.units.attrs.planQty}</td>
         <td>${checked.units.attrs.qty}</td>
-        <td>${checked.checkstat.label()}</td>
-        <td>${checked.qcType}</td>
-        <td>${checked.result}</td>
-        <td>${checked.isship}</td>
+        <td>${checked.checkstat?.label()}</td>
+        <td>${checked.qcType?.label()}</td>
+        <td>${checked.result?.label()}</td>
+        <td>${checked.isship?.label()}</td>
         <td>${checked.units.id}</td>
         <td>${checked.units.product.sku}</td>
-        <td>${checked.units.fba?.id}</td>
+        <td>${checked.units.fba?.shipmentId}</td>
         <td>${checked.units.selling?.fnSku}</td>
         <td>${checked.units.deliveryment?.id}</td>
         <td>${checked.shipwhouse?.name}</td>
         <td>${checked.units.cooperator?.name}</td>
         <td>${checked.units.cooperator?.qcLevel?.label()}</td>
-        <td>${checked.dealway}</td>
+        <td>${checked.dealway?.label()}</td>
       </tr>
       #{/list}
   </tbody>

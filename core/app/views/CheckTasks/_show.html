@@ -76,15 +76,15 @@
         <th>备注</th>
         <td colspan="10">
           <textarea name="check.checknote" rows="5" cols="80" class="span12">${check.checknote}</textarea>
-          <input type="hidden" name="check.id" value="${check.id}">
+          <input type="hidden" name="id" value="${check.id}">
         </td>
       </tr>
       <tr>
         <td colspan="6">
         #{power.ck "checktasks.update"}
             #{if check.checkstat != models.qc.CheckTask.StatType.CHECKFINISH}
-              <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
-              <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
+              <a id="update_btn" href="javascript:void(0)" class="btn btn-info">保存不提交</a>
+              <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary">保存并提交</a>
             #{/if}
         #{/power.ck}
           <a href="@{CheckTasks.checkerList()}" class="btn btn-success" data-loading>取消</a>

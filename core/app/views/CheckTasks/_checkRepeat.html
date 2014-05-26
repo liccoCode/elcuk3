@@ -28,16 +28,26 @@
       <tr>
         <td>${cr.id}</td>
         <td>
-          <a href="#" target="_blank">打印</a>&nbsp;
-          <a href="#">质检</a>
+          <a href="@{CheckTasks.prints(cr.id)}" target="_blank">打印(${cr.printNumber}次)</a>&nbsp;
+            #{if cr.checkstat == models.qc.CheckTask.StatType.REPEATCHECK}
+              <a href="@{CheckTasks.show(cr.id)}">质检</a>#{/if}
         </td>
         <td>
-            #{select_enum name: 'cr.qcType', items: models.qc.CheckTask.T.values(), value: cr.qcType}
-              <option value="">选择方式</option>
-            #{/select_enum}
+            #{if cr.units.cooperator?.qcLevel == models.procure.Cooperator.L.MICRO}
+              <select disabled>
+                <option value="">工厂自检</option>
+              </select>
+            #{/if}
+            #{else }
+              <select name="cr.qcType">
+                <option value="">选择方式</option>
+                <option ${cr.qcType == models.qc.CheckTask.T.SAMPLE?'selected' : ''} value="SAMPLE">抽检</option>
+                <option ${cr.qcType == models.qc.CheckTask.T.WHOLE?'selected' : ''} value="WHOLE">全检</option>
+              </select>
+            #{/else}
         </td>
         <td>
-          <a href="#" target="_blank">查看</a>&nbsp;
+          <a href="${cr.fetchCheckTaskLink()}" target="_blank">查看</a>&nbsp;
         </td>
         <td>${cr.units.attrs.planShipDate}</td>
         <td>${cr.units.attrs.planDeliveryDate}</td>
