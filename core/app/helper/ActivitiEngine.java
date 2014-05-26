@@ -53,9 +53,9 @@ public class ActivitiEngine {
                 .startProcessInstanceByKey("process1");
 
         models.activiti.ActivitiProcess p = new models.activiti.ActivitiProcess();
-        p.menuCode = "aaa";
-        p.menuName = "菜单";
-        p.processName = "质检";
+//        p.menuCode = "aaa";
+//        p.menuName = "菜单";
+//        p.processName = "质检";
         p.objectId = 2L;
         p.objectUrl = "xx";
         p.processDefinitionId = processInstance.getProcessDefinitionId();
@@ -134,6 +134,31 @@ public class ActivitiEngine {
 //
 //        //renderBinary(is);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

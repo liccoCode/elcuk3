@@ -9,8 +9,11 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricVariableInstanceQuery;
 import org.activiti.engine.impl.bpmn.diagram.ProcessDiagramGenerator;
 import org.activiti.engine.task.Task;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.history.HistoricTaskInstance;
@@ -20,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.io.InputStream;
+import java.util.Map;
+
+import org.activiti.engine.history.HistoricVariableInstance;
 
 
 /**
@@ -34,23 +40,12 @@ public class ActivitiProcess extends Model {
     public ActivitiProcess() {
     }
 
-    /**
-     * 菜单编码
-     */
-    @Expose
-    public String menuCode;
 
     /**
-     * 菜单名称
+     * 流程定义
      */
-    @Expose
-    public String menuName;
-
-    /**
-     * 流程名称
-     */
-    @Expose
-    public String processName;
+    @ManyToOne(cascade = {CascadeType.PERSIST})
+    public ActivitiDefinition definition;
 
     /**
      * 对象ID
@@ -88,15 +83,22 @@ public class ActivitiProcess extends Model {
     public static InputStream processImage(String pdId, String piId) {
         RepositoryService repositoryService1 = ActivitiEngine.processEngine.getRepositoryService();
 
+
         BpmnModel bpmnModel = repositoryService1.getBpmnModel(pdId);
-        new org.activiti.bpmn.BpmnAutoLayout(bpmnModel).execute();
-
+        //com.mxgraph.view.mxGraph graph = new com.mxgraph.view.mxGraph();
+        //new BPMNLayout(graph).execute(bpmnModel);
+        // new org.activiti.bpmn.BpmnAutoLayout(bpmnModel).execute();
         RuntimeService runtimeService = ActivitiEngine.processEngine.getRuntimeService();
-
-
-        // 会通过id -> parent_id -> parent_id -> ... 循环找出所有的执行中的子流程
-        List<String> highLightedFlows = runtimeService.getActiveActivityIds(piId);
-        return ProcessDiagramGenerator.generateDiagram(bpmnModel, "png", highLightedFlows);
+        try {
+            List<String> highLightedFlows = runtimeService.getActiveActivityIds(piId);
+            if(highLightedFlows != null && highLightedFlows.size() > 0) {
+                return ProcessDiagramGenerator.generateDiagram(bpmnModel, "png", highLightedFlows);
+            } else {
+                return ProcessDiagramGenerator.generatePngDiagram(bpmnModel);
+            }
+        } catch(Exception e) {
+            return ProcessDiagramGenerator.generatePngDiagram(bpmnModel);
+        }
     }
 
 
@@ -128,7 +130,7 @@ public class ActivitiProcess extends Model {
     public static List<ActivitiProcess> findProcess(String userid) {
         List<String> userlist = userTask(userid);
         if(userlist.size() > 0) {
-            String sql = SqlSelect.whereIn("processInstanceId", userlist).toString();
+            String sql = SqlSelect.whereIn("processInstanceId", userlist).toString() + " ORDER BY createAt desc ";
             List<ActivitiProcess> prolist = ActivitiProcess.find(sql).fetch();
             return prolist;
         } else {
@@ -143,14 +145,115 @@ public class ActivitiProcess extends Model {
      * @param pdId
      * @param userid
      */
-    public static void submitProcess(String pdId, String userid) {
-
-
+    public static void submitProcess(String pdId, String userid,
+                                     java.util.Map<String, Object> variableMap,
+                                     String opition) {
         TaskService taskService = ActivitiEngine.processEngine.getTaskService();
         List<Task> list = taskService.createTaskQuery().processInstanceId(pdId).taskAssignee(userid).list();
 
         if(list != null && list.size() > 0) {
+            taskService.setVariableLocal(list.get(0).getId(), "opition", opition);
+            if(variableMap != null && variableMap.size() > 0) {
+                taskService.complete(list.get(0).getId(), variableMap);
+            } else {
+                taskService.complete(list.get(0).getId());
+            }
+        }
+    }
 
+
+    /**
+     * 是否有权限提交
+     *
+     * @param pdId
+     * @param userid
+     */
+    public static String privilegeProcess(String processInstanceId, String userid) {
+
+
+        TaskService taskService = ActivitiEngine.processEngine.getTaskService();
+        List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).active()
+                .taskAssignee(userid).list();
+        if(list != null && list.size() > 0) {
+            return list.get(0).getName();
+        } else
+            return null;
+    }
+
+
+    /**
+     * 流程历史信息
+     *
+     * @param processInstanceId
+     * @param userid
+     */
+    public static List<Map<String, String>> processInfo(String processInstanceId) {
+        List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+        if(StringUtils.isBlank(processInstanceId)) {
+            return result;
+        }
+        TaskService taskService = ActivitiEngine.processEngine.getTaskService();
+        HistoryService historyService = ActivitiEngine.processEngine.getHistoryService();
+
+        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery()
+                .processInstanceId(processInstanceId).list();
+
+        //List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+
+        HistoricVariableInstanceQuery detail =
+                historyService.createHistoricVariableInstanceQuery()
+                        .processInstanceId(processInstanceId);
+
+        if(list != null && list.size() > 0) {
+            for(HistoricTaskInstance t : list) {
+                java.util.HashMap<String, String> map = new java.util.HashMap<String, String>();
+                map.put("name", t.getName());
+                map.put("assignee", t.getAssignee());
+                if(t.getStartTime() != null) {
+                    map.put("begintime", new DateTime(t.getStartTime()).toString("yyyy-MM-dd HH:mm:ss"));
+                } else {
+                    map.put("begintime", "");
+                }
+                if(t.getEndTime() != null) {
+                    map.put("endtime", new DateTime(t.getEndTime()).toString("yyyy-MM-dd HH:mm:ss"));
+                } else {
+                    map.put("endtime", "");
+                }
+                String opition = "";
+
+                try {
+                    List<org.activiti.engine.history.HistoricVariableInstance> variablelist = detail.taskId(t.getId())
+                            .list();
+                    if(variablelist.size() > 0) {
+                        for(HistoricVariableInstance var : variablelist) {
+                            if(var.getVariableName().equals("opition")) {
+                                opition = (String) var.getValue();
+                            }
+                        }
+                    }
+                } catch(Exception e) {
+                }
+                map.put("opition", opition);
+                result.add(map);
+            }
+            return result;
+        } else
+            return result;
+    }
+
+
+    /**
+     * 认领完成第一步流程
+     *
+     * @param pdId
+     * @param userid
+     */
+    public static void claimProcess(String pdId, String userid) {
+
+        TaskService taskService = ActivitiEngine.processEngine.getTaskService();
+        List<Task> list = taskService.createTaskQuery().processInstanceId(pdId).active().list();
+        if(list != null && list.size() > 0) {
+            taskService.claim(list.get(0).getId(), userid);
             taskService.complete(list.get(0).getId());
         }
     }
@@ -164,9 +267,29 @@ public class ActivitiProcess extends Model {
      */
     public static List<ActivitiProcess> findHistoryProcess(String userid) {
         List<String> userlist = userHistoryTask(userid);
-        List<ActivitiProcess> prolist = ActivitiProcess.find(SqlSelect.whereIn("processInstanceId",
-                userlist)).fetch(50);
-        return prolist;
+        if(userlist.size() > 0) {
+            String sql = SqlSelect.whereIn("processInstanceId", userlist).toString() + " ORDER BY createAt desc ";
+            List<ActivitiProcess> prolist = ActivitiProcess.find(sql).fetch(100);
+            return prolist;
+        } else
+            return new ArrayList<ActivitiProcess>();
+    }
+
+
+    /**
+     * 查找正在执行流程
+     *
+     * @param userid
+     * @return
+     */
+    public static List<ActivitiProcess> findRunProcess(String userid) {
+        List<String> userlist = userRunTask(userid);
+        if(userlist.size() > 0) {
+            String sql = SqlSelect.whereIn("processInstanceId", userlist).toString() + " ORDER BY createAt desc ";
+            List<ActivitiProcess> prolist = ActivitiProcess.find(sql).fetch();
+            return prolist;
+        } else
+            return new ArrayList<ActivitiProcess>();
     }
 
 
@@ -179,8 +302,8 @@ public class ActivitiProcess extends Model {
     public static List<String> userHistoryTask(String userid) {
         HistoryService historyService = ActivitiEngine.processEngine.getHistoryService();
 
-        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery().taskAssignee(userid).list();
-
+        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery().processFinished().
+                taskAssignee(userid).list();
         List<String> processlist = new ArrayList<String>();
         for(HistoricTaskInstance e : list) {
             processlist.add(e.getProcessInstanceId());
@@ -188,18 +311,27 @@ public class ActivitiProcess extends Model {
         return processlist;
     }
 
+
     /**
-     * 查找历史流程图
+     * 查找正在执行任务
      *
-     * @param pdId
-     * @param piId
+     * @param userid
      * @return
      */
-    public static InputStream processHistoryImage(String pdId, String piId) {
-        RepositoryService repositoryService1 = ActivitiEngine.processEngine.getRepositoryService();
+    public static List<String> userRunTask(String userid) {
+        List<String> usertasks = userTask(userid);
 
-        BpmnModel bpmnModel = repositoryService1.getBpmnModel(pdId);
-        new org.activiti.bpmn.BpmnAutoLayout(bpmnModel).execute();
-        return ProcessDiagramGenerator.generatePngDiagram(bpmnModel);
+        HistoryService historyService = ActivitiEngine.processEngine.getHistoryService();
+
+        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery()
+                .processUnfinished().
+                        taskAssignee(userid).list();
+        List<String> processlist = new ArrayList<String>();
+        for(HistoricTaskInstance e : list) {
+            if(!usertasks.contains(e.getProcessInstanceId())) {
+                processlist.add(e.getProcessInstanceId());
+            }
+        }
+        return processlist;
     }
 }
