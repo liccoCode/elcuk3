@@ -1112,41 +1112,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 当前采购计划的货代仓库
-     * <p/>
-     * 根据采购计划对应的运输单中的货代+运输方式匹配货代仓库
-     *
-     * @return
-     */
-    public Whouse fetchForwardWhouse() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT c FROM Whouse c WHERE 1=1 AND ");
-        List<Object> params = new ArrayList<Object>();
-        switch(this.shipType) {
-            case AIR:
-                sbd.append("c.isAIR=true ");
-                break;
-            case EXPRESS:
-                sbd.append("c.isEXPRESS=true ");
-                break;
-            case SEA:
-                sbd.append("c.isSEA=true ");
-                break;
-        }
-        sbd.append("AND c.type=? ");
-        params.add(Whouse.T.FORWARD);
-        if(this.shipItems.size() == 1) {
-            //得到运输单内的运输商
-            Cooperator cooperator = this.shipItems.get(0).shipment.cooper;
-            sbd.append("AND c.cooperator=? ");
-            params.add(cooperator);
-        } else {
-            return null;
-        }
-        return Whouse.find(sbd.toString(), params.toArray()).first();
-    }
-
-
-    /**
      * 将数字转换成对应的三位数的字符串
      * <p/>
      * 示例：1 => 001; 10 => 010

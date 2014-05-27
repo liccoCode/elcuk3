@@ -45,6 +45,10 @@
   <th>预计交货日期</th>
   <td>
     <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+  #{if oldplanDeliveryDate!=null}
+    <span class="add-on">比原预计交货日期${oldplanDeliveryDate.date()}推迟${(unit.attrs
+    .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
+  #{/if}
     <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
   </td>
 </tr>

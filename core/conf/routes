@@ -50,6 +50,11 @@ POST    /feetype/{name}/update                               FeeTypes.update
 POST    /feetype                                             FeeTypes.create
 POST    /feetype/{name}/delete                               FeeTypes.remove
 
+# activitis
+POST    /activitis/{id}/update                               Activitis.update
+POST    /activitis                                             Activitis.create
+POST    /activitis/{id}/delete                               Activitis.remove
+
 # Orders
 GET     /orders                                             Orders.index
 POST    /orders                                             Orders.index
@@ -77,6 +82,8 @@ GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
+POST     /procureunit/{id}                                   ProcureUnits.update
+POST    /procureunits/updateprocess/{id}                     ProcureUnits.updateprocess
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
