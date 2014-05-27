@@ -17,7 +17,7 @@
   <div class="span12">
 
     <div class="input-prepend inline">
-      <select name="p.dateType" style="width:130px;margin-left:20px;">
+      <select name="p.dateType" style="width:130px;">
           #{list items:models.view.post.CheckTaskPost.DATE_TYPES, as:'t'}
             <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
           #{/list}
@@ -30,9 +30,9 @@
 
 
     <div class="input-prepend inline">
-      <a class="btn btn_small btn-primary" href="@{CheckTasks.checklist(p,3)}">3天内</a>
-      <a class="btn btn_small btn-primary" href="@{CheckTasks.checklist(p,2)}">2天内</a>
-      <a class="btn btn_small btn-primary" href="@{CheckTasks.checklist(p,1)}">1天内</a>
+      <a class="btn btn_small" href="@{CheckTasks.checklist(p,3)}">3天内</a>
+      <a class="btn btn_small" href="@{CheckTasks.checklist(p,2)}">2天内</a>
+      <a class="btn btn_small" href="@{CheckTasks.checklist(p,1)}">1天内</a>
     </div>
 
     <select style="margin-left:20px;" name="p.whouseId" class="inline">
@@ -80,8 +80,7 @@
 
     <div style="margin-left:40px;" class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
-      <input type="text" style='width:200px;' class="input-medium" name="p.search" placeholder="ID、SKU"
-             value="${p.search}">
+      <input type="text" class="input-medium" name="p.search" placeholder="ID、SKU" value="${p.search}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
 
@@ -146,8 +145,10 @@
       <td>${tl.workfee}</td>
       <td>${tl.workhour*tl.workfee}</td>
       <td>
-        <a target="_blank" class="btn btn_small btn-primary" href="#">查看</a>
-        <a target="_blank" class="btn btn_small btn-primary" href="#">编辑</a>
+          #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
+            <a target="_blank" class="btn btn_small btn-primary" href="@{CheckTasks.show(tl.id)}">查看</a>
+            <a target="_blank" class="btn btn_small btn-primary" href="#">编辑</a>
+          #{/if}
       </td>
     #{/list}
     </table>

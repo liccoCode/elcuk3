@@ -368,7 +368,8 @@ public class CheckTask extends Model {
      * 产生质检任务
      */
     public static void generateTask() {
-        List<Map<String, Object>> units = DBUtils.rows("select id from ProcureUnit where isCheck=0");
+        List<Map<String, Object>> units = DBUtils
+                .rows("select id from ProcureUnit where isCheck=0 AND shipType is not null");
         for(Map<String, Object> unit : units) {
             Long unitid = (Long) unit.get("id");
             CheckTask task = CheckTask.find("units.id=?", unitid).first();
@@ -379,11 +380,16 @@ public class CheckTask extends Model {
                 newtask.confirmstat = ConfirmType.UNCONFIRM;
                 newtask.checkstat = StatType.UNCHECK;
                 if(punit.cooperator.qcLevel == Cooperator.L.MICRO) {
-                    //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检
+                    //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
                     newtask.qcType = T.SELF;
                 }
-                //根据采购计划对应的运输单中的货代+运输方式自动匹配货代仓库
-                newtask.shipwhouse = punit.fetchForwardWhouse();
+                //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
+                Whouse forwardWhouse = punit.fetchForwardWhouse();
+                if(forwardWhouse != null) {
+                    newtask.shipwhouse = forwardWhouse;
+                    newtask.checkor = forwardWhouse.user.username;
+                }
+                newtask.creatat = new Date();
                 newtask.save();
                 DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
             }
@@ -400,7 +406,7 @@ public class CheckTask extends Model {
         switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
-                if(newCt.units.shipState == ProcureUnit.S.NOSHIPWAIT) {
+                if(this.units.shipState == ProcureUnit.S.NOSHIPWAIT) {
                     //TODO:采购计划的“不发货处理”状态还原成 当初系统开启此不发货流程时 采购计划的“不发货处理”状态值
                     //TODO:结束不发货流程
                 }
@@ -423,7 +429,7 @@ public class CheckTask extends Model {
      * @return
      */
     public String fetchCheckTaskLink() {
-        List<CheckTask> tasks = CheckTask.find("units_id=?", this.units.id).fetch();
+        List<CheckTask> tasks = CheckTask.find("units_id=? AND checkstat is not 'UNCHECK'", this.units.id).fetch();
         if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
         if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.units.id);
         return null;
@@ -442,7 +448,7 @@ public class CheckTask extends Model {
         logs.addAll(Reflects.updateAndLogChanges(this, "qty", newCt.qty));
         logs.addAll(Reflects.updateAndLogChanges(this, "checknote", newCt.checknote));
         if(logs.size() > 0) {
-            new ERecordBuilder("checktask.update", "checktask.update.msg").msgArgs(StringUtils.join(logs, "，"))
+            new ERecordBuilder("checktask.update", "checktask.update.msg").msgArgs(this.id, StringUtils.join(logs, "，"))
                     .fid(this.id).save();
         }
     }

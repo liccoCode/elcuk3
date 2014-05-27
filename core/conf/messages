@@ -237,4 +237,4 @@ qty=\u5b9e\u9645\u4ea4\u8d27\u6570\u91cf
 checknote=\u5907\u6ce8
 
 checktask.update=[CheckTask]\u66f4\u65b0
-checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1]:%s
+checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1 ID:%s]:%s

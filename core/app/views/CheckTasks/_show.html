@@ -36,11 +36,7 @@
         <th>实际抽检数量</th>
         <td><input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}"></td>
         <th>处理方式</th>
-        <td>
-        #{select_enum name: 'check.dealway', items: models.qc.CheckTask.DealType.values(), value: check.dealway}
-          <option value="">请选择</option>
-        #{/select_enum}
-        </td>
+        <td>${check.dealway}</td>
       </tr>
 
       <tr>

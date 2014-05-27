@@ -1119,25 +1119,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public Whouse fetchForwardWhouse() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT c FROM Whouse WHERE 1=1 AND");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT c FROM Whouse c WHERE 1=1 AND ");
         List<Object> params = new ArrayList<Object>();
         switch(this.shipType) {
             case AIR:
-                sbd.append("isAIR=true");
+                sbd.append("c.isAIR=true ");
                 break;
             case EXPRESS:
-                sbd.append("isEXPRESS=true");
+                sbd.append("c.isEXPRESS=true ");
                 break;
             case SEA:
-                sbd.append("isSEA=true");
+                sbd.append("c.isSEA=true ");
                 break;
         }
-        sbd.append("AND type=?");
+        sbd.append("AND c.type=? ");
         params.add(Whouse.T.FORWARD);
         if(this.shipItems.size() == 1) {
+            //得到运输单内的运输商
             Cooperator cooperator = this.shipItems.get(0).shipment.cooper;
-            sbd.append("AND cooperator_id=?");
-            params.add(cooperator.id);
+            sbd.append("AND c.cooperator=? ");
+            params.add(cooperator);
         } else {
             return null;
         }
