@@ -146,8 +146,8 @@
       <td>${tl.workhour*tl.workfee}</td>
       <td>
           #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
-            <a target="_blank" class="btn btn_small btn-primary" href="@{CheckTasks.show(tl.id)}">查看</a>
-            <a target="_blank" class="btn btn_small btn-primary" href="#">编辑</a>
+            <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
+            <a target="_blank" href="#">编辑</a>
           #{/if}
       </td>
     #{/list}
