@@ -18,7 +18,6 @@ public class ActivitiDefinition extends Model {
     public ActivitiDefinition() {
     }
 
-
     /**
      * 菜单编码
      */

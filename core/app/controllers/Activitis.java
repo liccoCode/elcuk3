@@ -22,11 +22,9 @@ import java.util.ArrayList;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Activitis extends Controller {
 
-    @Check("activitis.index")
     public static void index(Long id) {
         List<ActivitiProcess> aps = null;
         aps = ActivitiProcess.findProcess(Secure.Security.connected());
-
 
         ActivitiProcess ap = new ActivitiProcess();
         if(aps != null && aps.size() > 0) {
@@ -96,9 +94,7 @@ public class Activitis extends Controller {
     }
 
     public static void create(ActivitiDefinition ad) {
-
         ad.save();
-
         RepositoryService repositoryService = ActivitiEngine.processEngine.getRepositoryService();
         DeploymentBuilder builder = repositoryService.createDeployment();
         builder.addClasspathResource(ad.processXml);
@@ -112,7 +108,6 @@ public class Activitis extends Controller {
         ActivitiDefinition ad = ActivitiDefinition.findById(id);
         if(ad == null)
             renderJSON(new Ret("不存在, 无法删除"));
-
         try {
             ad.delete();
         } catch(PaymentException e) {

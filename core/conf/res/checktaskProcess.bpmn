@@ -4,27 +4,27 @@
     <startEvent id="startevent1" name="Start"></startEvent>
     <userTask id="usertask1" name="启动人"></userTask>
     <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="usertask1"></sequenceFlow>
-    <userTask id="usertask2" name="采购员" activiti:assignee="su"></userTask>
+    <userTask id="usertask2" name="采购员"></userTask>
     <sequenceFlow id="flow2" sourceRef="usertask1" targetRef="usertask2"></sequenceFlow>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
     <sequenceFlow id="flow3" sourceRef="usertask2" targetRef="exclusivegateway1"></sequenceFlow>
-    <userTask id="usertask3" name="运营" activiti:assignee="wyatt"></userTask>
+    <userTask id="usertask3" name="运营"></userTask>
     <sequenceFlow id="flow4" sourceRef="exclusivegateway1" targetRef="usertask3">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${flow=='1'}]]></conditionExpression>
     </sequenceFlow>
     <endEvent id="endevent1" name="end"></endEvent>
-    <userTask id="usertask4" name="质检确认" activiti:assignee="su"></userTask>
+    <userTask id="usertask4" name="质检确认"></userTask>
     <sequenceFlow id="flow6" sourceRef="usertask3" targetRef="usertask4"></sequenceFlow>
     <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
     <sequenceFlow id="flow7" sourceRef="usertask4" targetRef="exclusivegateway2"></sequenceFlow>
     <endEvent id="endevent3" name="End"></endEvent>
-    <sequenceFlow id="flow12" name="不发货" sourceRef="exclusivegateway2" targetRef="usertask2">
+    <sequenceFlow id="flow12" sourceRef="exclusivegateway2" targetRef="usertask2">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${flow=='2'}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="flow13" name="发货" sourceRef="exclusivegateway2" targetRef="endevent3">
+    <sequenceFlow id="flow13" sourceRef="exclusivegateway2" targetRef="endevent3">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${flow=='1'}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="flow14" name="复原" sourceRef="exclusivegateway1" targetRef="endevent1">
+    <sequenceFlow id="flow14" sourceRef="exclusivegateway1" targetRef="endevent1">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${flow=='2'}]]></conditionExpression>
     </sequenceFlow>
   </process>
