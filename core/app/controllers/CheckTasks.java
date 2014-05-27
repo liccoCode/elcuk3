@@ -8,7 +8,6 @@ import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.binding.As;
 import play.data.validation.Validation;
@@ -16,7 +15,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -96,74 +94,63 @@ public class CheckTasks extends Controller {
 
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
+        Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
-        ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?",
-                CheckTask.ACTIVITINAME, id).first();
-        int issubmit = 0;
-        String taskname = "";
-
-        int oldPlanQty = 0;
+        ActivitiProcess ap = (ActivitiProcess) map.get("ap");
+        int issubmit = (Integer) map.get("issubmit");
+        String taskname = (String) map.get("taskname");
+        int oldPlanQty = (Integer) map.get("oldPlanQty");
         List<Whouse> whouses = null;
-        ProcureUnit unit = null;
-
-        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
-        if(ap == null) {
-            ap = new ActivitiProcess();
-        } else {
-            //判断是否有权限提交流程
-            taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
-            if(StringUtils.isNotBlank(taskname)) {
-                issubmit = 1;
-
-                //如果是运营,则查询运营相关信息
-                if(taskname.equals("运营")) {
-                    unit = ProcureUnit.findById(ap.objectId);
-                    oldPlanQty = unit.attrs.planQty;
-                    whouses = Whouse.findByAccount(unit.selling.account);
-                }
-
-
-            }
-            //查找流程历史信息
-            infos = ActivitiProcess.processInfo(ap.processInstanceId);
+        Object temp = map.get("whouses");
+        if(temp != null) {
+            whouses = (List<Whouse>) map.get("whouses");
         }
-        render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses);
+        ProcureUnit unit = null;
+        temp = map.get("whouses");
+        if(temp != null) {
+            unit = (ProcureUnit) map.get("unit");
+        }
+        Date oldplanDeliveryDate = null;
+        temp = map.get("oldplanDeliveryDate");
+        if(temp != null) {
+            oldplanDeliveryDate = (Date) map.get("oldplanDeliveryDate");
+        }
+        List<Map<String, String>> infos = (List<Map<String, String>>) map.get("infos");
+
+        render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
     }
 
     public static void showActiviti(Long id) {
         CheckTask check = CheckTask.findById(id);
-        ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?",
-                CheckTask.ACTIVITINAME, id).first();
-        int issubmit = 0;
+        Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
+
+        ActivitiProcess ap = (ActivitiProcess) map.get("ap");
+        int issubmit = (Integer) map.get("issubmit");
         String taskname = "";
-
-        int oldPlanQty = 0;
-        List<Whouse> whouses = null;
-        ProcureUnit unit = null;
-
-        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
-        if(ap == null) {
-            ap = new ActivitiProcess();
-        } else {
-            //判断是否有权限提交流程
-            taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
-            if(StringUtils.isNotBlank(taskname)) {
-                issubmit = 1;
-
-                //如果是运营,则查询运营相关信息
-                if(taskname.equals("运营")) {
-                    unit = ProcureUnit.findById(ap.objectId);
-                    oldPlanQty = unit.attrs.planQty;
-                    whouses = Whouse.findByAccount(unit.selling.account);
-                }
-
-
-            }
-            //查找流程历史信息
-            infos = ActivitiProcess.processInfo(ap.processInstanceId);
+        Object temp = map.get("taskname");
+        if(temp != null) {
+            taskname = (String) temp;
         }
 
-        render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses);
+        int oldPlanQty = (Integer) map.get("oldPlanQty");
+        List<Whouse> whouses = null;
+        temp = map.get("whouses");
+        if(temp != null) {
+            whouses = (List<Whouse>) temp;
+        }
+        ProcureUnit unit = null;
+        temp = map.get("unit");
+        if(temp != null) {
+            unit = (ProcureUnit) temp;
+        }
+        Date oldplanDeliveryDate = null;
+        temp = map.get("oldplanDeliveryDate");
+        if(temp != null) {
+            oldplanDeliveryDate = (Date) temp;
+        }
+        List<Map<String, String>> infos = (List<Map<String, String>>) map.get("infos");
+
+        render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
     }
 
     @Check("checktasks.update")
@@ -196,7 +183,7 @@ public class CheckTasks extends Controller {
             c.dealway = check.dealway;
             c.workfee = check.workfee;
             c.checknote = check.checknote;
-            c.planArrivDate = check.planArrivDate;
+            c.planDeliveryDate = check.planDeliveryDate;
             c.qty = check.qty;
             c.pickqty = check.pickqty;
             c.endTime = check.endTime;
@@ -219,7 +206,7 @@ public class CheckTasks extends Controller {
         c.dealway = check.dealway;
         c.workfee = check.workfee;
         c.checknote = check.checknote;
-        c.planArrivDate = check.planArrivDate;
+        c.planDeliveryDate = check.planDeliveryDate;
         c.qty = check.qty;
         c.pickqty = check.pickqty;
         c.endTime = check.endTime;

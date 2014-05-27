@@ -1,7 +1,6 @@
 package models.qc;
 
 import com.google.gson.annotations.Expose;
-import com.sun.xml.bind.v2.TODO;
 import helper.ActivitiEngine;
 import helper.DBUtils;
 import models.activiti.ActivitiDefinition;
@@ -10,20 +9,17 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Whouse;
-import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.repository.DeploymentBuilder;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
-import play.data.binding.As;
+import org.activiti.engine.task.Task;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.persistence.*;
-import java.util.Map;
-import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -110,16 +106,11 @@ public class CheckTask extends Model {
     public String checknote = " ";
 
     /**
-     * 创建人
+     * 创建时间
      */
     @Expose
     public java.util.Date creatat;
 
-    /**
-     * 修改人
-     */
-    @Expose
-    public String updator;
 
     /**
      * 工作小时(质检工时)
@@ -140,7 +131,14 @@ public class CheckTask extends Model {
      * 预计交货日期
      */
     @Expose
-    public Date planArrivDate;
+    public Date planDeliveryDate;
+
+    /**
+     * 保存上次预计交货日期
+     */
+    @Expose
+    public Date oldplanDeliveryDate;
+
 
     /**
      * 质检状态
@@ -343,6 +341,7 @@ public class CheckTask extends Model {
                     newtask.shipwhouse = wh;
                 }
 
+                newtask.creatat = new Date();
                 newtask.save();
                 DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
             }
@@ -359,6 +358,26 @@ public class CheckTask extends Model {
                 checktask.save();
             }
         }
+    }
+
+
+    /**
+     * 产生重检任务
+     */
+    public static void generateRepeatTask(CheckTask.DealType dt, long chechtaskid, long unitid) {
+        CheckTask newtask = new CheckTask();
+        ProcureUnit punit = ProcureUnit.findById(unitid);
+        newtask.units = punit;
+        newtask.confirmstat = ConfirmType.UNCONFIRM;
+        newtask.checkstat = StatType.UNCHECK;
+        newtask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
+        newtask.creatat = new Date();
+        //查找仓库
+        Whouse wh = searchWarehouse(punit.shipItems);
+        if(wh != null) {
+            newtask.shipwhouse = wh;
+        }
+        newtask.save();
     }
 
 
@@ -418,11 +437,6 @@ public class CheckTask extends Model {
 
     public void startActiviti(String username) {
         ActivitiDefinition definition = ActivitiDefinition.find("menuCode=?", ACTIVITINAME).first();
-//        RepositoryService repositoryService = ActivitiEngine.processEngine.getRepositoryService();
-//        DeploymentBuilder builder = repositoryService.createDeployment();
-//        builder.addClasspathResource(definition.processXml);
-//        builder.deploy();
-
         RuntimeService runtimeService = ActivitiEngine.processEngine.getRuntimeService();
         ProcessInstance processInstance = runtimeService
                 .startProcessInstanceByKey(definition.processid);
@@ -433,24 +447,44 @@ public class CheckTask extends Model {
         p.processDefinitionId = processInstance.getProcessDefinitionId();
         p.processInstanceId = processInstance.getProcessInstanceId();
         p.createAt = new Date();
+        p.creator = username;
         p.save();
         ActivitiProcess.claimProcess(processInstance.getProcessInstanceId(), username);
+        //设置下一步审批人
+        taskclaim(processInstance.getProcessInstanceId(), username);
     }
 
-
-    public void editplanArrivDate() {
-        if(this.planArrivDate != null) {
-            List<ShipItem> ships = this.units.shipItems;
-            for(ShipItem item : ships) {
-                item.shipment.dates.planArrivDate = this.planArrivDate;
-                item.save();
+    public void taskclaim(String processInstanceId, String username) {
+        //启动流程后设置各节点的审批人
+        TaskService taskService = ActivitiEngine.processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId)
+                .active().singleResult();
+        if(task != null) {
+            if(task.getName().equals("采购员")) {
+                taskService.claim(task.getId(), this.units.deliveryment.handler.username);
+            }
+            if(task.getName().equals("运营")) {
+                taskService.claim(task.getId(), this.units.handler.username);
+            }
+            if(task.getName().equals("质检确认")) {
+                taskService.claim(task.getId(), username);
             }
         }
     }
 
 
-    public void submitActiviti(int flow, long id, String username) {
+    public void editplanArrivDate() {
+        if(this.planDeliveryDate != null) {
+            this.oldplanDeliveryDate = this.units.attrs.planDeliveryDate;
+            this.save();
 
+            this.units.attrs.planDeliveryDate = this.planDeliveryDate;
+            this.units.save();
+        }
+    }
+
+
+    public void submitActiviti(int flow, long id, String username) {
         ActivitiProcess ap = ActivitiProcess.findById(id);
         //判断是否有权限提交流程
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, username);
@@ -462,6 +496,12 @@ public class CheckTask extends Model {
                 variableMap.put("flow", "2");
             } else {
                 variableMap.put("flow", "1");
+            }
+
+            //退回工厂或者到仓库返工 需要重检
+            if(this.dealway == CheckTask.DealType.RETURN ||
+                    this.dealway == CheckTask.DealType.WAREHOUSE) {
+                generateRepeatTask(this.dealway, this.id, this.units.id);
             }
         }
         if(taskname.equals("运营")) {
@@ -487,6 +527,53 @@ public class CheckTask extends Model {
             }
         }
         ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, this.opition);
+        //设置下一步审批人
+        taskclaim(ap.processInstanceId, ap.creator);
+    }
+
+
+    public Map<String, Object> showInfo(Long id, String username) {
+        ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?",
+                CheckTask.ACTIVITINAME, id).first();
+        int issubmit = 0, oldPlanQty = 0;
+        String taskname = "";
+        List<Whouse> whouses = null;
+        ProcureUnit unit = null;
+        Date oldplanDeliveryDate = null;
+
+        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
+        if(ap == null) {
+            ap = new ActivitiProcess();
+        } else {
+            //判断是否有权限提交流程
+            taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, username);
+            if(StringUtils.isNotBlank(taskname)) {
+                issubmit = 1;
+                //如果是运营,则查询运营相关信息
+                if(taskname.equals("运营")) {
+                    CheckTask ct = CheckTask.findById(ap.objectId);
+                    oldplanDeliveryDate = ct.oldplanDeliveryDate;
+                    unit = ct.units;
+                    oldPlanQty = ct.units.attrs.planQty;
+                    whouses = Whouse.findByAccount(ct.units.selling.account);
+                }
+            }
+            //查找流程历史信息
+            infos = ActivitiProcess.processInfo(ap.processInstanceId);
+        }
+
+        Map<String, Object> map = new Hashtable<String, Object>();
+        map.put("ap", ap);
+        map.put("issubmit", issubmit);
+        if(taskname != null) map.put("taskname", taskname);
+        map.put("infos", infos);
+        if(unit != null) map.put("unit", unit);
+
+        map.put("oldPlanQty", oldPlanQty);
+        if(whouses != null) map.put("whouses", whouses);
+        if(oldplanDeliveryDate != null) map.put("oldplanDeliveryDate", oldplanDeliveryDate);
+
+        return map;
     }
 
 }

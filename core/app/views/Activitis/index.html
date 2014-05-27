@@ -33,13 +33,25 @@
             </tr>
           #{list items:aps, as:'aps_left'}
             <tr>
-              <td>${aps_left.id}</td>
-              <td>${aps_left.definition?.menuName}</td>
-              <td>
-                <a href="@{Activitis.index()}/${aps_left.id}">${aps_left.definition?.processName}</a>
-              </td>
-              <td>${aps_left.objectId}</td>
-              <td>${aps_left.createAt?.dateTimeString}</td>
+                #{if ((new java.util.Date())-aps_left.createAt)>=2 }
+                  <td><font color="red" >${aps_left.id}</font></td>
+                  <td><font color="red" >${aps_left.definition?.menuName}</font></td>
+                  <td>
+                    <a href="@{Activitis.index()}/${aps_left.id}"><font color="red">  ${aps_left.definition?.processName}</font></a>
+                  </td>
+                  <td><font color="red" >${aps_left.objectId}</font></td>
+                  <td><font color="red" >${aps_left.createAt?.dateTimeString}</font></td>
+                #{/if}
+                #{else}
+                  <td>${aps_left.id}</td>
+                  <td>${aps_left.definition?.menuName}</td>
+                  <td>
+                    <a href="@{Activitis.index()}/${aps_left.id}">${aps_left.definition?.processName}</a>
+                  </td>
+                  <td>${aps_left.objectId}</td>
+                  <td>${aps_left.createAt?.dateTimeString}</td>
+                #{/else}
+
             </tr>
           #{/list}
           </table>

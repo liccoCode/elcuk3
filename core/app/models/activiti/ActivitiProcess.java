@@ -72,25 +72,28 @@ public class ActivitiProcess extends Model {
     @Expose
     public Date createAt;
 
+    /**
+     * 流程启动人
+     */
+    @Expose
+    public String creator;
+
 
     /**
      * 显示流程图
      *
-     * @param pdId
-     * @param piId
+     * @param processDefinitionId
+     * @param processInstanceId
      * @return
      */
-    public static InputStream processImage(String pdId, String piId) {
+    public static InputStream processImage(String processDefinitionId, String processInstanceId) {
         RepositoryService repositoryService1 = ActivitiEngine.processEngine.getRepositoryService();
 
 
-        BpmnModel bpmnModel = repositoryService1.getBpmnModel(pdId);
-        //com.mxgraph.view.mxGraph graph = new com.mxgraph.view.mxGraph();
-        //new BPMNLayout(graph).execute(bpmnModel);
-        // new org.activiti.bpmn.BpmnAutoLayout(bpmnModel).execute();
+        BpmnModel bpmnModel = repositoryService1.getBpmnModel(processDefinitionId);
         RuntimeService runtimeService = ActivitiEngine.processEngine.getRuntimeService();
         try {
-            List<String> highLightedFlows = runtimeService.getActiveActivityIds(piId);
+            List<String> highLightedFlows = runtimeService.getActiveActivityIds(processInstanceId);
             if(highLightedFlows != null && highLightedFlows.size() > 0) {
                 return ProcessDiagramGenerator.generateDiagram(bpmnModel, "png", highLightedFlows);
             } else {
@@ -142,14 +145,14 @@ public class ActivitiProcess extends Model {
     /**
      * 提交流程
      *
-     * @param pdId
+     * @param processDefinitionId
      * @param userid
      */
-    public static void submitProcess(String pdId, String userid,
+    public static void submitProcess(String processDefinitionId, String userid,
                                      java.util.Map<String, Object> variableMap,
                                      String opition) {
         TaskService taskService = ActivitiEngine.processEngine.getTaskService();
-        List<Task> list = taskService.createTaskQuery().processInstanceId(pdId).taskAssignee(userid).list();
+        List<Task> list = taskService.createTaskQuery().processInstanceId(processDefinitionId).taskAssignee(userid).list();
 
         if(list != null && list.size() > 0) {
             taskService.setVariableLocal(list.get(0).getId(), "opition", opition);
@@ -165,12 +168,10 @@ public class ActivitiProcess extends Model {
     /**
      * 是否有权限提交
      *
-     * @param pdId
+     * @param pdId    processDefinitionId
      * @param userid
      */
     public static String privilegeProcess(String processInstanceId, String userid) {
-
-
         TaskService taskService = ActivitiEngine.processEngine.getTaskService();
         List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).active()
                 .taskAssignee(userid).list();
@@ -197,9 +198,6 @@ public class ActivitiProcess extends Model {
 
         List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery()
                 .processInstanceId(processInstanceId).list();
-
-        //List<Task> list = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
-
         HistoricVariableInstanceQuery detail =
                 historyService.createHistoricVariableInstanceQuery()
                         .processInstanceId(processInstanceId);
@@ -243,21 +241,19 @@ public class ActivitiProcess extends Model {
 
 
     /**
-     * 认领完成第一步流程
+     * 启动流程后,认领完成第一步流程
      *
-     * @param pdId
+     * @param pdId   processDefinitionId
      * @param userid
      */
-    public static void claimProcess(String pdId, String userid) {
-
+    public static void claimProcess(String processDefinitionId, String userid) {
         TaskService taskService = ActivitiEngine.processEngine.getTaskService();
-        List<Task> list = taskService.createTaskQuery().processInstanceId(pdId).active().list();
+        List<Task> list = taskService.createTaskQuery().processInstanceId(processDefinitionId).active().list();
         if(list != null && list.size() > 0) {
             taskService.claim(list.get(0).getId(), userid);
             taskService.complete(list.get(0).getId());
         }
     }
-
 
     /**
      * 查找历史流程
