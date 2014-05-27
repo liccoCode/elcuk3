@@ -10,8 +10,69 @@ $ ->
       $ship.removeAttr("disabled")
   )
 
-  $("#update_form").on("click", "#update_btn, #fullupdate_btn", (r) ->
+  $("#update_form").on("click", "#update_btn, #fullupdate_btn, #endactiviti_btn, #submitactiviti_btn, #updateactiviti_btn", (r) ->
+    $btn = $(@)
+    $ship = $("select[name='check.isship']")
+    if($btn.attr("id") == "endactiviti_btn")
+      return unless confirm('还原后采购计划将更新为发货，并结束不发货流程.确认提交?')
+    else if($btn.attr("id") == "update_btn")
+      return unless confirm('确认保存?')
+    else if($btn.attr("id") == "updateactiviti_btn")
+      return unless confirm('确认保存?')
+    else
+      return unless confirm('确认提交?')
+
+
+    $form = $("#update_form")
+    $ship = $("select[name='check.isship']")
+    $form.attr("action", "/checktasks/#{$btn.attr("id").split("_")[0]}")
+    # 提交表单前将下拉项的disabled属性取消掉
+    $ship.removeAttr("disabled")
+    $form.submit()
+    $ship.val("NOTSHIP").attr("disabled", 'true')
+  )
+
+
+  $("#update_form").on("click", "#submitqc_btn", (r) ->
+    $btn = $(@)
+    $ship = $("select[name='check.isship']")
+    if ($ship.val() == 'NOTSHIP')
+      return unless confirm('不发货则表示流程流转到采购,确认提交?')
+    else
+      return unless confirm('确认提交?')
+
+    $form = $("#update_form")
+    $form.attr("action", "/checktasks/submitactiviti")
+    # 提交表单前将下拉项的disabled属性取消掉
+    $ship.removeAttr("disabled")
+    $form.submit()
+    $ship.val("NOTSHIP").attr("disabled", 'true')
+  )
+
+
+  $("#update_form").on("click", "#planactiviti_btn", (r) ->
+    $plan = $("input[name='check.planDeliveryDate']")
+    if ($plan.val() == '')
+      alert('请填写最新预计交货日期!')
+      return
+
+    $btn = $(@)
+    $ship = $("select[name='check.isship']")
     return unless confirm('确认提交?')
+
+
+    $form = $("#update_form")
+    $ship = $("select[name='check.isship']")
+    $form.attr("action", "/checktasks/submitactiviti")
+    # 提交表单前将下拉项的disabled属性取消掉
+    $ship.removeAttr("disabled")
+    $form.submit()
+    $ship.val("NOTSHIP").attr("disabled", 'true')
+  )
+
+
+  $("#unitEditForm").on("click", "#submitactiviti_btn", (r) ->
+    return unless confirm('确认后则表示已确认该采购计划的预计时间,确认提交?')
     $btn = $(@)
     $form = $("#update_form")
     $ship = $("select[name='check.isship']")
@@ -22,9 +83,10 @@ $ ->
     $ship.val("NOTSHIP").attr("disabled", 'true')
   )
 
+
   $(".form_datetime").datetimepicker({
-    format: 'yyyy-mm-dd hh:ii',
-    startDate: new Date().getFullYear()- 4 +"-01-01"
+  format: 'yyyy-mm-dd hh:ii',
+  startDate: new Date().getFullYear() - 4 + "-01-01"
   })
 
   fidCallBack = () ->

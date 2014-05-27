@@ -82,6 +82,8 @@ GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
+POST     /procureunit/{id}                                   ProcureUnits.update
+POST    /procureunits/updateprocess/{id}                     ProcureUnits.updateprocess
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon

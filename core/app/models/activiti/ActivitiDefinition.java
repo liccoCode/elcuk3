@@ -1,7 +1,9 @@
 package models.activiti;
 
 import com.google.gson.annotations.Expose;
+
 import javax.persistence.*;
+
 import play.db.jpa.Model;
 
 /**
@@ -15,7 +17,6 @@ public class ActivitiDefinition extends Model {
 
     public ActivitiDefinition() {
     }
-
 
     /**
      * 菜单编码
@@ -40,5 +41,13 @@ public class ActivitiDefinition extends Model {
      */
     @Expose
     public String processXml;
+
+
+    /**
+     * 流程ID
+     */
+    @Expose
+    public String processid;
+
 
 }

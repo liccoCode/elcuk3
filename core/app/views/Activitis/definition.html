@@ -26,6 +26,8 @@
     <input type="text" name="ad.processName">
     <label>流程XML</label>
     <input type="text" name="ad.processXml">
+    <label>流程ID</label>
+    <input type="text" name="ad.processid">
     <button class="btn btn-primary">创建</button>
   </form>
 </div>
@@ -38,6 +40,7 @@
       <th>菜单名称</th>
       <th>流程名称</th>
       <th>流程XML</th>
+      <th>流程ID</th>
       <th>操作</th>
     </tr>
   #{list items:ads, as:'ad'}
@@ -47,6 +50,7 @@
     <td><input type="text" name="menuName" value="${ad.menuName}"></td>
     <td><input type="text" name="processName" value="${ad.processName}"></td>
     <td><input type="text" name="processXml" value="${ad.processXml}"></td>
+    <td><input type="text" name="processXml" value="${ad.processid}"></td>
     <td>
       <button class="btn btn-primary submit">更新</button>
       <button class="btn btn-danger delete">删除</button>
