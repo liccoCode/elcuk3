@@ -14,6 +14,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
+import models.qc.CheckTask;
 import mws.FBA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -231,13 +232,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public int isCheck;
 
     public enum S {
-        SHIPED {
+        NOSHIPED {
             @Override
             public String label() {
-                return "已发货";
+                return "不发货已处理";
             }
         },
-        NOSHIP {
+        NOSHIPWAIT {
             @Override
             public String label() {
                 return "不发货待处理";
@@ -253,6 +254,56 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     @Enumerated(EnumType.STRING)
     public S shipState;
+
+    public enum OPCONFIRM {
+        CONFIRM {
+            @Override
+            public String label() {
+                return "待确认";
+            }
+        },
+
+        CONFIRMED {
+            @Override
+            public String label() {
+                return "已确认";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 运营确认
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public OPCONFIRM opConfirm;
+
+    public enum QCCONFIRM {
+        CONFIRM {
+            @Override
+            public String label() {
+                return "待确认";
+            }
+        },
+
+        CONFIRMED {
+            @Override
+            public String label() {
+                return "已确认";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 质检员确认
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public QCCONFIRM qcConfirm;
 
     /**
      * ProcureUnit 的检查
@@ -1033,6 +1084,32 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 查看当前采购计划(对应的质检任务)的是否发货状态
+     *
+     * @return
+     */
+    public String isship() {
+        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        if(tasks != null && tasks.size() > 0) {
+            return tasks.get(0).isship.label();
+        }
+        return null;
+    }
+
+    /**
+     * 获取对应的质检任务查看链接
+     * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
+     * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面
+     *
+     * @return
+     */
+    public String fetchCheckTaskLink() {
+        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
+        if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.id);
+        return null;
+    }
 
     /**
      * 将数字转换成对应的三位数的字符串

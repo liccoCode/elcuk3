@@ -20,11 +20,7 @@
   <th>实际抽检数量</th>
   <td><input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}"></td>
   <th>处理方式</th>
-  <td>
-  #{select_enum name: 'check.dealway', items: models.qc.CheckTask.DealType.values(), value: check.dealway}
-    <option value="">请选择</option>
-  #{/select_enum}
-  </td>
+  <td>${check.dealway}</td>
 </tr>
 <tr>
   <th>质检开始时间</th>
@@ -57,14 +53,14 @@
   <th>备注</th>
   <td colspan="10">
     <textarea name="check.checknote" rows="5" cols="80" class="span12">${check.checknote}</textarea>
-    <input type="hidden" name="check.id" value="${check.id}">
+    <input type="hidden" name="id" value="${check.id}">
   </td>
 </tr>
 <tr>
   <td colspan="6">
   #{if ap==null || ap.id==null}
       #{power.ck "checktasks.update"}
-          #{if check.checkstat != models.qc.CheckTask.StatType.CHECKFINISH}
+          #{if check.checkstat == models.qc.CheckTask.StatType.UNCHECK}
             <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
             <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
           #{/if}

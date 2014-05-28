@@ -3,8 +3,12 @@ package models.qc;
 import com.google.gson.annotations.Expose;
 import helper.ActivitiEngine;
 import helper.DBUtils;
+import helper.Reflects;
+import helper.Webs;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
+import models.embedded.ERecordBuilder;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
@@ -17,9 +21,8 @@ import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
-import java.util.*;
-
 import javax.persistence.*;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -280,6 +283,13 @@ public class CheckTask extends Model {
     }
 
     public enum T {
+        SELF {
+            @Override
+            public String label() {
+                return "工厂自检";
+            }
+        },
+
         SAMPLE {
             @Override
             public String label() {
@@ -305,6 +315,65 @@ public class CheckTask extends Model {
     public T qcType;
 
     /**
+     * 检测要求
+     */
+    @Lob
+    @Expose
+    public String qcRequires = "";
+
+    @Transient
+    public List<String> qcRequire = new ArrayList<String>();
+
+    /**
+     * 检测方法
+     */
+    @Lob
+    @Expose
+    public String qcWays = "";
+
+    @Transient
+    public List<String> qcWay = new ArrayList<String>();
+
+    /**
+     * 打印次数
+     */
+    @Expose
+    public int printNumber;
+
+    public enum FLAG {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
+    }
+
+    /**
+     * List 和 String 之间的转换
+     *
+     * @param flag
+     */
+    public void arryParamSetUP(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.qcRequires = StringUtils.join(this.qcRequire, Webs.SPLIT);
+            this.qcWays = StringUtils.join(this.qcWay, Webs.SPLIT);
+        } else {
+            this.qcRequire = new ArrayList<String>();
+            this.qcWay = new ArrayList<String>();
+
+            String temp[] = StringUtils.splitByWholeSeparator(this.qcRequires, Webs.SPLIT);
+            if(temp != null) Collections.addAll(this.qcRequire, temp);
+
+            temp = StringUtils.splitByWholeSeparator(this.qcWays, Webs.SPLIT);
+            if(temp != null) Collections.addAll(this.qcWay, temp);
+
+            if(StringUtils.isBlank(this.qcRequires)) {
+                this.qcRequires = " ";
+            }
+            if(StringUtils.isBlank(this.qcWays)) {
+                this.qcWays = " ";
+            }
+        }
+    }
+
+    /**
      * 质检任务检查
      */
     public void validateRequired() {
@@ -322,7 +391,8 @@ public class CheckTask extends Model {
      * 产生质检任务
      */
     public static void generateTask() {
-        List<Map<String, Object>> units = DBUtils.rows("select id from ProcureUnit where isCheck=0");
+        List<Map<String, Object>> units = DBUtils
+                .rows("select id from ProcureUnit where isCheck=0 AND shipType is not null");
         for(Map<String, Object> unit : units) {
             Long unitid = (Long) unit.get("id");
             CheckTask task = CheckTask.find("units.id=?", unitid).first();
@@ -334,11 +404,17 @@ public class CheckTask extends Model {
                 newtask.units = punit;
                 newtask.confirmstat = ConfirmType.UNCONFIRM;
                 newtask.checkstat = StatType.UNCHECK;
+                if(punit.cooperator.qcLevel == Cooperator.L.MICRO) {
+                    //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
+                    newtask.qcType = T.SELF;
+                }
 
-                //查找仓库
+
+                //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
                 Whouse wh = searchWarehouse(punit.shipItems);
                 if(wh != null) {
                     newtask.shipwhouse = wh;
+                    newtask.checkor = wh.user.username;
                 }
 
                 newtask.creatat = new Date();
@@ -355,6 +431,7 @@ public class CheckTask extends Model {
             Whouse wh = searchWarehouse(checktask.units.shipItems);
             if(wh != null) {
                 checktask.shipwhouse = wh;
+                checktask.checkor = wh.user.username;
                 checktask.save();
             }
         }
@@ -411,14 +488,14 @@ public class CheckTask extends Model {
     /**
      * 保存质检任务且修改相关联的对应的采购计划数据
      */
-    public void fullSave(String username) {
-        long diff = this.endTime.getTime() - this.startTime.getTime();
+    public void fullUpdate(CheckTask newCt, String username) {
+        long diff = newCt.endTime.getTime() - newCt.startTime.getTime();
         this.workhour = diff / (60 * 60 * 1000);
-        this.units.attrs.qty = this.qty;
-        switch(this.isship) {
+        this.units.attrs.qty = newCt.qty;
+        switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
-                if(this.units.shipState == ProcureUnit.S.NOSHIP) {
+                if(this.units.shipState == ProcureUnit.S.NOSHIPWAIT) {
                     //TODO:采购计划的“不发货处理”状态还原成 当初系统开启此不发货流程时 采购计划的“不发货处理”状态值
                     //TODO:结束不发货流程
                 }
@@ -426,11 +503,56 @@ public class CheckTask extends Model {
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
                 //对应采购计划ID的“不发货处理”状态更新为：不发货待处理
-                this.units.shipState = ProcureUnit.S.NOSHIP;
+                this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
                 //TODO:启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
                 startActiviti(username);
                 break;
         }
+        this.update(newCt);
+    }
+
+    /**
+     * 获取对应的质检任务查看链接
+     * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
+     * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面
+     *
+     * @return
+     */
+    public String fetchCheckTaskLink() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? AND checkstat is not 'UNCHECK'", this.units.id).fetch();
+        if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
+        if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.units.id);
+        return null;
+    }
+
+    /**
+     * 更新时的日志
+     */
+    public void beforeUpdateLog(CheckTask newCt) {
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(Reflects.updateAndLogChanges(this, "startTime", newCt.startTime));
+        logs.addAll(Reflects.updateAndLogChanges(this, "endTime", newCt.endTime));
+        logs.addAll(Reflects.updateAndLogChanges(this, "isship", newCt.isship));
+        logs.addAll(Reflects.updateAndLogChanges(this, "result", newCt.result));
+        logs.addAll(Reflects.updateAndLogChanges(this, "pickqty", newCt.pickqty));
+        logs.addAll(Reflects.updateAndLogChanges(this, "qty", newCt.qty));
+        logs.addAll(Reflects.updateAndLogChanges(this, "checknote", newCt.checknote));
+        if(logs.size() > 0) {
+            new ERecordBuilder("checktask.update", "checktask.update.msg").msgArgs(this.id, StringUtils.join(logs, "，"))
+                    .fid(this.id).save();
+        }
+    }
+
+    public void update(CheckTask newCt) {
+        this.beforeUpdateLog(newCt);
+        this.qty = newCt.qty;
+        this.pickqty = newCt.pickqty;
+        if(newCt.dealway != null) this.dealway = newCt.dealway;
+        if(newCt.startTime != null) this.startTime = newCt.startTime;
+        if(newCt.endTime != null) this.endTime = newCt.endTime;
+        if(newCt.result != null) this.result = newCt.result;
+        if(newCt.isship != null) this.isship = newCt.isship;
+        if(newCt.checknote != null) this.checknote = newCt.checknote;
         this.save();
     }
 

@@ -54,8 +54,16 @@
   <div class="row-fluid">
     <div style="min-height:300px;" class="span12 well" id="dropbox">
       <ul class="thumbnails uploaded"></ul>
-      <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+      <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
     </div>
+  </div>
+  <div class="row-fluid">
+    <form action="/attachs/uploadForForm" enctype="multipart/form-data" method="POST">
+      <input type="file" name="a.file">
+      <input type="hidden" name="a.p" value="CHECKTASK">
+      <input type="hidden" name="a.fid" value="${check.id}">
+      <input type="submit" class="btn btn-success" value="上传">
+    </form>
   </div>
 #{/if}
 
@@ -63,5 +71,4 @@
     #{render 'CheckTasks/_processOperate.html', check:check,oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
     whouses:whouses/}
 #{/if}
-
 </div>
