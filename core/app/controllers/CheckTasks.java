@@ -246,6 +246,7 @@ public class CheckTasks extends Controller {
     public static void prints(Long id) {
         CheckTask check = CheckTask.findById(id);
         check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        check.fetchSkucheck();
         render(check);
     }
 
@@ -271,6 +272,7 @@ public class CheckTasks extends Controller {
         check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         check.printNumber++;
         check.save();
+        check.fetchSkucheck();
         //log
         new ERecordBuilder("checktask.doPrints").fid(id).msgArgs(id).save();
         renderArgs.put("check", check);
