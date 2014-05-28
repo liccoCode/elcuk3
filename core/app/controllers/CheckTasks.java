@@ -291,6 +291,7 @@ public class CheckTasks extends Controller {
     /**
      * 允许质检任务重新编辑
      */
+    @Check("checktasks.resetedit")
     public static void resetEdit(Long id) {
         try {
             CheckTask check = CheckTask.findById(id);

@@ -29,6 +29,9 @@
     <th>供应商</th>
     <th>总重量(kg)</th>
     <th>抵达?</th>
+    <th>是否合格</th>
+    <th>是否发货</th>
+    <th>质检信息</th>
   #{if useCheckbox}
     <th>运往仓库</th>
   #{/if}
@@ -99,6 +102,13 @@
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()}</td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
+    <td>${itm.unit.result()}</td>
+    <td>${itm.unit.isship()}</td>
+    <td>
+        #{if itm.unit.fetchCheckTaskLink() != null}
+          <a href="${itm.unit.fetchCheckTaskLink()}" target="_blank">查看</a>
+        #{/if}
+    </td>
 
       #{if useCheckbox}
         <td>${itm.unit.whouse.name()}</td>

@@ -1098,6 +1098,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 查看当前采购计划(对应的质检任务)的是否合格状态
+     *
+     * @return
+     */
+    public String result() {
+        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        if(tasks != null && tasks.size() > 0) {
+            return tasks.get(0).result.label();
+        }
+        return null;
+    }
+
+    /**
      * 获取对应的质检任务查看链接
      * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
      * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面

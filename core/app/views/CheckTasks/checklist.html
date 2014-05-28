@@ -148,9 +148,11 @@
           #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
             <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
           #{/if}
-          #{if tl.checkstat == models.qc.CheckTask.StatType.UNCHECK}
-            <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
-          #{/if}
+          #{power.ck "checktasks.resetedit"}
+              #{if tl.checkstat == models.qc.CheckTask.StatType.UNCHECK}
+                <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
+              #{/if}
+          #{/power.ck}
       </td>
     #{/list}
     </table>
