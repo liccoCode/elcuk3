@@ -446,9 +446,11 @@ public class CheckTask extends Model {
         ProcureUnit punit = ProcureUnit.findById(unitid);
         newtask.units = punit;
         newtask.confirmstat = ConfirmType.UNCONFIRM;
-        newtask.checkstat = StatType.UNCHECK;
+        //重检
+        newtask.checkstat = StatType.REPEATCHECK;
         newtask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
         newtask.creatat = new Date();
+
         //查找仓库
         Whouse wh = searchWarehouse(punit.shipItems);
         if(wh != null) {
