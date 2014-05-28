@@ -14,4 +14,8 @@ $ ->
         noty({text: r.message, type: type})
         LoadMask.unmask()
       )
+  ).on("click", "#reset_edit", (r) ->
+    return unless confirm('确认重新编辑?')
+
   )
+
