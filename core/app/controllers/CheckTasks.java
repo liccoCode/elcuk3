@@ -183,7 +183,7 @@ public class CheckTasks extends Controller {
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
         old.fullUpdate(check, Secure.Security.connected());
         flash.success("更新成功");
-        show(check.id);
+        show(id);
     }
 
 

@@ -431,6 +431,7 @@ public class CheckTask extends Model {
             Whouse wh = searchWarehouse(checktask.units.shipItems);
             if(wh != null) {
                 checktask.shipwhouse = wh;
+                checktask.checkor = wh.user.username;
                 checktask.save();
             }
         }
