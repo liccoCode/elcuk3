@@ -25,7 +25,7 @@
         <div class="span3 well well-small" id="acitviti_slider">
           <table class="table table-bordered table-condensed">
             <tr>
-              <th>ID</th>
+              <th>流程ID</th>
               <th>菜单名称</th>
               <th>流程名称</th>
               <th>单据ID</th>
@@ -39,7 +39,7 @@
                   <td>
                     <a href="@{Activitis.index()}/${aps_left.id}"><font color="red">  ${aps_left.definition?.processName}</font></a>
                   </td>
-                  <td><font color="red" >${aps_left.objectId}</font></td>
+                  <td><font color="red" >${aps_left.billId}</font></td>
                   <td><font color="red" >${aps_left.createAt?.dateTimeString}</font></td>
                 #{/if}
                 #{else}

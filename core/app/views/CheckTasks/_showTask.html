@@ -1,30 +1,44 @@
-#{info_row title:'质检信息'}
+#{info_row title:'质检信息' }
 #{/info_row}
 <tr>
+  <th>采购计划ID</th>
+  <td>
+  #{if controllers.Login.check("deliveryments.index")}
+    <a href="@{Deliveryments.show(check.units?.deliveryment?.id)}" target="_blank">${check.units?.id}</a>
+  #{/if}
+  #{else}
+  ${check.units?.id}
+  #{/else}
+  </td>
   <th>FBA</th>
   <td>${check.units?.fba?.shipmentId}</td>
   <th>FnSku</th>
   <td>${check.units.selling?.fnSku}</td>
+</tr>
+<tr>
   <th>质检员</th>
   <td>${check.checkor}</td>
   <th>状态</th>
   <td>${check.checkstat.label()}</td>
-</tr>
-<tr>
   <th>订单数量</th>
   <td>${check.units.attrs.qty}</td>
+</tr>
+<tr>
   <th>实际交货数量</th>
   <td>
     <input type="text" name="check.qty" class="input-mini" value="${check.qty}">
   </td>
   <th>实际抽检数量</th>
   <td><input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}"></td>
+
+
   <th>处理方式</th>
   <td>
   #{select_enum name: 'check.dealway', items: models.qc.CheckTask.DealType.values(), value: check.dealway}
     <option value="">请选择</option>
   #{/select_enum}
   </td>
+
 </tr>
 <tr>
   <th>质检开始时间</th>
