@@ -168,6 +168,8 @@ procureunit.prepay=\u7533\u8BF7\u9884\u4ED8\u6B3E
 procureunit.prepay.msg=\u4E3A %s \u7533\u8BF7 %s \u9884\u4ED8\u6B3E
 procureunit.tailpay=\u7533\u8BF7\u5C3E\u6B3E
 procureunit.tailpay.msg=\u4E3A %s \u7533\u8BF7 %s \u5C3E\u6B3E
+procureunit.reworkpay=\u8fd4\u5de5\u8d39\u7528\u7533\u8bf7
+procureunit.reworkpay.msg=\u4E3A %s \u7533\u8BF7 %s \u8fd4\u5de5\u8d39\u7528
 
 shipment.update=\u66F4\u65B0[\u8FD0\u8F93\u5355]
 shipment.updateFBA=[\u8FD0\u8F93\u5355]\u66F4\u65B0 FBA

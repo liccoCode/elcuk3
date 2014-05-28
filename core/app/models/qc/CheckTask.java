@@ -363,13 +363,29 @@ public class CheckTask extends Model {
 
             temp = StringUtils.splitByWholeSeparator(this.qcWays, Webs.SPLIT);
             if(temp != null) Collections.addAll(this.qcWay, temp);
+        }
+    }
 
-            if(StringUtils.isBlank(this.qcRequires)) {
-                this.qcRequires = " ";
-            }
-            if(StringUtils.isBlank(this.qcWays)) {
-                this.qcWays = " ";
-            }
+    public void fetchSkucheck() {
+        //查询出已经设置好的CheckList
+        //1. Catrgory 的检测要求
+        //2. SKU 的检测要求
+        List<SkuCheck> parents = new ArrayList<SkuCheck>();
+        List<SkuCheck> cates =  SkuCheck.find("SkuName=?", this.units.product.category + "").fetch();
+        List<SkuCheck> skus =  SkuCheck.find("SkuName=?", this.units.product.sku).fetch();
+        parents.addAll(cates);
+        parents.addAll(skus);
+
+        List<SkuCheck> skuChecks = new ArrayList<SkuCheck>();
+        for(SkuCheck parent : parents) {
+            //当前对象下所有的子对象
+            List<SkuCheck> temps = SkuCheck.find("pid=?", parent.id).fetch();
+            skuChecks.addAll(temps);
+        }
+
+        for(SkuCheck check : skuChecks) {
+            this.qcRequire.add(check.checkRequire);
+            this.qcWay.add(check.checkMethod);
         }
     }
 

@@ -831,6 +831,38 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 返工费用申请
+     *
+     * @return
+     */
+    public PaymentUnit billingReworkPay(float amount) {
+        /**
+         * 0. 基本检查
+         * 1. 检查是否已经存在一个尾款
+         * 2. 申请尾款
+         */
+        this.billingValid();
+        if(amount <= 0) {
+            Validation.addError("", String.format("申请的费用错误, 错误值:%S", amount));
+        }
+        if(this.hasReworkPay()) {
+            Validation.addError("", "不允许重复申请返工费用.");
+        }
+        if(Validation.hasErrors()) return null;
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.rework();
+        //费用需要计算选中的质检任务内的返工费用
+        fee.amount = amount;
+        fee.save();
+        new ERecordBuilder("procureunit.reworkpay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
+    }
+
+    /**
      * 1. 采购计划所在的采购单需要拥有一个请款单
      * 2. 采购计划需要已经交货
      */
@@ -904,6 +936,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean hasTailPay() {
         for(PaymentUnit fee : this.fees()) {
             if(fee.feeType == FeeType.procurement())
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否拥有返工费用
+     *
+     * @return
+     */
+    public boolean hasReworkPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.rework())
                 return true;
         }
         return false;
@@ -1093,6 +1138,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).isship != null) return tasks.get(0).isship.label();
+        }
+        return null;
+    }
+
+    /**
+     * 查看当前采购计划(对应的质检任务)的是否合格状态
+     *
+     * @return
+     */
+    public String result() {
+        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        if(tasks != null && tasks.size() > 0) {
+            return tasks.get(0).result.label();
         }
         return null;
     }

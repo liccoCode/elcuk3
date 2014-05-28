@@ -19,7 +19,7 @@ $ ->
 
 
   $("button.delete").click ->
-    return unless confirm('确认删除这个费用类型吗?!')
+    return unless confirm('确认删除?')
     self = @
     id = $(self).parents('tr').find("input").val()
     LoadMask.mask()
