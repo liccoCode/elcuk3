@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Webs;
 import models.ElcukRecord;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -285,6 +286,20 @@ public class CheckTasks extends Controller {
     public static void showList(Long id) {
         List<CheckTask> checks = CheckTask.find("units_id=?", id).fetch();
         render(checks);
+    }
+
+    /**
+     * 允许质检任务重新编辑
+     */
+    public static void resetEdit(Long id) {
+        try {
+            CheckTask check = CheckTask.findById(id);
+            check.checkstat = CheckTask.StatType.UNCHECK;
+            check.save();
+            renderJSON(new Ret(true, "操作成功."));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 }
 

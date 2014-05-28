@@ -60,7 +60,7 @@
   <td colspan="6">
   #{if ap==null || ap.id==null}
       #{power.ck "checktasks.update"}
-          #{if check.checkstat != models.qc.CheckTask.StatType.CHECKFINISH}
+          #{if check.checkstat == models.qc.CheckTask.StatType.UNCHECK}
             <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
             <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
           #{/if}

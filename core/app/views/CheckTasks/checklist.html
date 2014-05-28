@@ -147,7 +147,9 @@
       <td>
           #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
             <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
-            <a href="javascript:void(0)" id="reset_edit">编辑</a>
+          #{/if}
+          #{if tl.checkstat == models.qc.CheckTask.StatType.UNCHECK}
+            <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
           #{/if}
       </td>
     #{/list}
