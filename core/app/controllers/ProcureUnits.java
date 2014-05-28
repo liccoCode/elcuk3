@@ -46,7 +46,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.<Whouse>findAll());
+        renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
         renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
         renderArgs.put("cooperators", cooperators);
 
