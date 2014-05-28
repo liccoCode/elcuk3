@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"质检任务列表 (${tasklist.size()})" /}
 #{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
     #{script 'skuchecks/checklist.coffee'/}
 #{/set}
 
@@ -90,7 +91,8 @@
 
 <div class="row-fluid">
   <div class="span12" id="check_div">
-    <table class="table table-condensed table-bordered">
+    <table id="check_table" class="table table-condensed table-bordered dataTable">
+      <thead>
       <tr>
         <th>#</th>
         <th>预计运输时间</th>
@@ -118,43 +120,45 @@
         <th>费用(元)</th>
         <th>操作</th>
       </tr>
-    #{list items:tasklist, as:'tl'}
-    <tr>
-      <td>${tl.id}</td>
-      <td>${tl.units.attrs.planShipDate}</td>
-      <td>${tl.units.attrs.planDeliveryDate}</td>
-      <td>${tl.units.attrs.deliveryDate}</td>
-      <td>${tl.units.id}</td>
-      <td>${tl.units.sku}</td>
-      <td>${tl.units.fba?.shipmentId}</td>
-      <td>${tl.units.selling?.fnSku}</td>
-      <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
-      <td>${tl.units.whouse.name}</td>
-      <td>${tl.units.cooperator.name}</td>
-      <td>${tl.units.cooperator?.qcLevel}</td>
-      <td>${tl.units.attrs.planQty}</td>
-      <td>${tl.units.attrs.qty}</td>
-      <td></td>
-      <td>${tl.checkstat?.label()}</td>
-      <td>${tl.checkor}</td>
-      <td>${tl.result?.label()}</td>
-      <td>${tl.isship?.label()}</td>
-      <td>${tl.endTime?.datetime()}</td>
-      <td>${tl.dealway?.label()}</td>
-      <td>${tl.workhour}</td>
-      <td>${tl.workfee}</td>
-      <td>${tl.workhour*tl.workfee}</td>
-      <td>
-          #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
-            <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
-          #{/if}
-          #{power.ck "checktasks.resetedit"}
-              #{if tl.checkstat == models.qc.CheckTask.StatType.UNCHECK}
-                <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
-              #{/if}
-          #{/power.ck}
-      </td>
-    #{/list}
+      </thead>
+
+      <tbody>
+      #{list items:tasklist, as:'tl'}
+      <tr>
+        <td>${tl.id}</td>
+        <td>${tl.units.attrs.planShipDate}</td>
+        <td>${tl.units.attrs.planDeliveryDate}</td>
+        <td>${tl.units.attrs.deliveryDate}</td>
+        <td>${tl.units.id}</td>
+        <td>${tl.units.sku}</td>
+        <td>${tl.units.fba?.shipmentId}</td>
+        <td>${tl.units.selling?.fnSku}</td>
+        <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
+        <td>${tl.units.whouse.name}</td>
+        <td>${tl.units.cooperator.name}</td>
+        <td>${tl.units.cooperator?.qcLevel}</td>
+        <td>${tl.units.attrs.planQty}</td>
+        <td>${tl.units.attrs.qty}</td>
+        <td></td>
+        <td>${tl.checkstat?.label()}</td>
+        <td>${tl.checkor}</td>
+        <td>${tl.result?.label()}</td>
+        <td>${tl.isship?.label()}</td>
+        <td>${tl.endTime?.datetime()}</td>
+        <td>${tl.dealway?.label()}</td>
+        <td>${tl.workhour}</td>
+        <td>${tl.workfee}</td>
+        <td>${tl.workhour*tl.workfee}</td>
+        <td>
+            #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
+              <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
+            #{/if}
+            #{if tl.checkstat == models.qc.CheckTask.StatType.UNCHECK}
+              <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
+            #{/if}
+        </td>
+      #{/list}
+      </tbody>
     </table>
   </div>
 </div>

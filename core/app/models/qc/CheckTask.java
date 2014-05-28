@@ -446,9 +446,11 @@ public class CheckTask extends Model {
         ProcureUnit punit = ProcureUnit.findById(unitid);
         newtask.units = punit;
         newtask.confirmstat = ConfirmType.UNCONFIRM;
-        newtask.checkstat = StatType.UNCHECK;
+        //重检
+        newtask.checkstat = StatType.REPEATCHECK;
         newtask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
         newtask.creatat = new Date();
+
         //查找仓库
         Whouse wh = searchWarehouse(punit.shipItems);
         if(wh != null) {
@@ -565,6 +567,7 @@ public class CheckTask extends Model {
         models.activiti.ActivitiProcess p = new models.activiti.ActivitiProcess();
         p.definition = definition;
         p.objectId = this.id;
+        p.billId = String.valueOf(this.units.id);
         p.objectUrl = "/checktasks/showactiviti/" + this.id;
         p.processDefinitionId = processInstance.getProcessDefinitionId();
         p.processInstanceId = processInstance.getProcessInstanceId();
@@ -574,6 +577,10 @@ public class CheckTask extends Model {
         ActivitiProcess.claimProcess(processInstance.getProcessInstanceId(), username);
         //设置下一步审批人
         taskclaim(processInstance.getProcessInstanceId(), username);
+
+        //修改为不发货待处理
+        this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
+        this.units.save();
     }
 
     public void taskclaim(String processInstanceId, String username) {
@@ -625,9 +632,17 @@ public class CheckTask extends Model {
                     this.dealway == CheckTask.DealType.WAREHOUSE) {
                 generateRepeatTask(this.dealway, this.id, this.units.id);
             }
+
+            /**
+             * 已检已处理
+             */
+            this.checkstat = StatType.CHECKDEAL;
         }
         if(taskname.equals("运营")) {
             variableMap.put("flow", "1");
+
+            //修改运营为确认状态
+            this.units.opConfirm = ProcureUnit.OPCONFIRM.CONFIRM;
         }
         if(taskname.equals("质检确认")) {
             //退回工厂或者到仓库返工
@@ -635,6 +650,13 @@ public class CheckTask extends Model {
             if(this.dealway == CheckTask.DealType.RETURN ||
                     this.dealway == CheckTask.DealType.WAREHOUSE) {
                 variableMap.put("flow", "1");
+                //修改为不发货已处理
+                this.units.shipState = ProcureUnit.S.NOSHIPED;
+
+                /**
+                 * 已检完成
+                 */
+                this.checkstat = StatType.CHECKFINISH;
             }
             //代仓库返工
             //不发货 返回采购员
@@ -642,12 +664,21 @@ public class CheckTask extends Model {
                 if(this.isship == CheckTask.ShipType.SHIP) {
                     //发货
                     variableMap.put("flow", "1");
+                    this.units.shipState = ProcureUnit.S.NOSHIPED;
+                    /**
+                     * 已检完成
+                     */
+                    this.checkstat = StatType.CHECKFINISH;
                 } else {
                     //不发货
                     variableMap.put("flow", "2");
                 }
             }
+            //修改质检为确认状态
+            this.units.qcConfirm = ProcureUnit.QCCONFIRM.CONFIRM;
         }
+
+        this.save();
         ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, this.opition);
         //设置下一步审批人
         taskclaim(ap.processInstanceId, ap.creator);

@@ -128,6 +128,7 @@ public class CheckTasks extends Controller {
     }
 
     public static void showActiviti(Long id) {
+        if(id == null) return;
         CheckTask check = CheckTask.findById(id);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 

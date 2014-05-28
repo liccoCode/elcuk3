@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import org.activiti.engine.HistoryService;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import play.db.jpa.Model;
 
@@ -52,6 +53,12 @@ public class ActivitiProcess extends Model {
      */
     @Expose
     public Long objectId;
+
+    /**
+     * 对应的单据ID
+     */
+    @Expose
+    public String billId;
 
     /**
      * 对象的网页
@@ -152,7 +159,8 @@ public class ActivitiProcess extends Model {
                                      java.util.Map<String, Object> variableMap,
                                      String opition) {
         TaskService taskService = ActivitiEngine.processEngine.getTaskService();
-        List<Task> list = taskService.createTaskQuery().processInstanceId(processDefinitionId).taskAssignee(userid).list();
+        List<Task> list = taskService.createTaskQuery().processInstanceId(processDefinitionId).taskAssignee(userid)
+                .list();
 
         if(list != null && list.size() > 0) {
             taskService.setVariableLocal(list.get(0).getId(), "opition", opition);
@@ -168,7 +176,7 @@ public class ActivitiProcess extends Model {
     /**
      * 是否有权限提交
      *
-     * @param pdId    processDefinitionId
+     * @param pdId   processDefinitionId
      * @param userid
      */
     public static String privilegeProcess(String processInstanceId, String userid) {
@@ -317,13 +325,12 @@ public class ActivitiProcess extends Model {
     public static List<String> userRunTask(String userid) {
         List<String> usertasks = userTask(userid);
 
-        HistoryService historyService = ActivitiEngine.processEngine.getHistoryService();
-
-        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery()
-                .processUnfinished().
-                        taskAssignee(userid).list();
+        List<ProcessInstance> processInstances = ActivitiEngine.processEngine.getRuntimeService()
+                .createProcessInstanceQuery()
+                .involvedUser(userid)
+                .list();
         List<String> processlist = new ArrayList<String>();
-        for(HistoricTaskInstance e : list) {
+        for(ProcessInstance e : processInstances) {
             if(!usertasks.contains(e.getProcessInstanceId())) {
                 processlist.add(e.getProcessInstanceId());
             }
