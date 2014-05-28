@@ -565,6 +565,7 @@ public class CheckTask extends Model {
         models.activiti.ActivitiProcess p = new models.activiti.ActivitiProcess();
         p.definition = definition;
         p.objectId = this.id;
+        p.billId = String.valueOf(this.units.id);
         p.objectUrl = "/checktasks/showactiviti/" + this.id;
         p.processDefinitionId = processInstance.getProcessDefinitionId();
         p.processInstanceId = processInstance.getProcessInstanceId();

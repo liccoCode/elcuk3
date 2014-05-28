@@ -43,7 +43,7 @@ public class AmazonOrderFetchJobTest extends UnitTest {
     @Test
     public void testParseOrder() {
         JobRequest job = new JobRequest();
-        job.path = "/Users/wyatt/Programer/repos/elcuk2/core/test/html/21089866544.xml";
+        job.path = "/Users/mac/javadevelop/caryelcuk2/core/test/html/21089866544.xml";
         job.account = Account.findById(2l);
         new AmazonOrderFetchJob().callBack(job);
     }
