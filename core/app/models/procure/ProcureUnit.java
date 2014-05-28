@@ -1092,7 +1092,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String isship() {
         List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
-            return tasks.get(0).isship.label();
+            if(tasks.get(0).isship != null) return tasks.get(0).isship.label();
         }
         return null;
     }
