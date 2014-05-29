@@ -72,7 +72,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public String productName;
 
     /**
-     * 长度, 单位 mm
+     * 长度, 单位(包材) mm
      */
     @Expose
     @Required
@@ -81,7 +81,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public Float lengths = 0f;
 
     /**
-     * 高度, 单位 mm
+     * 高度, 单位(包材) mm
      */
     @Expose
     @Required
@@ -89,7 +89,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public Float heigh = 0f;
 
     /**
-     * 宽度, 单位 mm
+     * 宽度, 单位(包材) mm
      */
     @Expose
     @Required
@@ -97,12 +97,41 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public Float width = 0f;
 
     /**
-     * 重量, 单位 kg
+     * 重量, 单位(包材) kg
      */
     @Expose
     @Required
     @Min(0.001)
     public Float weight = 0f;
+
+
+    /**
+     * 长度, 单位(产品) mm
+     */
+    @Expose
+    @Min(0.001)
+    public Float productLengths = 0f;
+
+    /**
+     * 高度, 单位(产品) mm
+     */
+    @Expose
+    @Min(0.001)
+    public Float productHeigh = 0f;
+
+    /**
+     * 宽度, 单位(产品) mm
+     */
+    @Expose
+    @Min(0.001)
+    public Float productWidth = 0f;
+
+    /**
+     * 重量, 单位(产品) kg
+     */
+    @Expose
+    @Min(0.001)
+    public Float productWeight = 0f;
 
     /**
      * 申报价格 (USD)
@@ -354,6 +383,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     @Enumerated(EnumType.STRING)
     public S state = S.NEW;
+
+    /**
+     * 副标题
+     */
+    @Lob
+    public String subtitle;
 
     public Product() {
     }
