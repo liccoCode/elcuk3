@@ -75,6 +75,8 @@ public class Whouses extends Controller {
         if(Validation.hasErrors()) {
             renderJSON(new Ret(Webs.V(Validation.errors())));
         }
+
+
         wh.save();
         renderJSON(new Ret());
     }
@@ -82,8 +84,10 @@ public class Whouses extends Controller {
     public static void updates(List<Whouse> whs) {
         for(Whouse wh : whs) {
             Whouse manage = Whouse.findById(wh.id);
-            manage.user = wh.user;
-            manage.save();
+            if(wh.user != null && wh.user.id != null) {
+                manage.user = wh.user;
+                manage.save();
+            }
         }
         flash.success("更新成功");
         redirect("/Whouses/forwards");

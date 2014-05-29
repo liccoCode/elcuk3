@@ -229,7 +229,7 @@ public class Whouse extends Model {
     }
 
     public static List<Whouse> findByAccount(Account account) {
-        return Whouse.find("account=?", account).fetch();
+        return Whouse.find("account=? and type=?", account,T.FBA).fetch();
     }
 
     /**

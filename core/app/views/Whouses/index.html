@@ -27,7 +27,7 @@
                 <td>${wh.postalCode}</td>
                 <td>${wh.country}</td>
                 <td>${wh.type}</td>
-                <td>${wh.account.prettyName()}</td>
+                <td>${wh.account?.prettyName()}</td>
                 <td>
                     <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-primary">更新</a>
                 </td>

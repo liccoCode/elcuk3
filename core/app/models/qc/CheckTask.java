@@ -428,7 +428,7 @@ public class CheckTask extends Model {
 
                 //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
                 Whouse wh = searchWarehouse(punit.shipItems);
-                if(wh != null) {
+                if(wh != null && wh.user!=null) {
                     newtask.shipwhouse = wh;
                     newtask.checkor = wh.user.username;
                 }
@@ -445,7 +445,7 @@ public class CheckTask extends Model {
             CheckTask checktask = CheckTask.findById(taskid);
 
             Whouse wh = searchWarehouse(checktask.units.shipItems);
-            if(wh != null) {
+            if(wh != null && wh.user!=null) {
                 checktask.shipwhouse = wh;
                 checktask.checkor = wh.user.username;
                 checktask.save();
@@ -469,7 +469,7 @@ public class CheckTask extends Model {
 
         //查找仓库
         Whouse wh = searchWarehouse(punit.shipItems);
-        if(wh != null) {
+        if(wh != null && wh.user!=null) {
             newtask.shipwhouse = wh;
             newtask.checkor = wh.user.username;
         }
@@ -566,6 +566,7 @@ public class CheckTask extends Model {
         this.beforeUpdateLog(newCt);
         this.qty = newCt.qty;
         this.pickqty = newCt.pickqty;
+        this.checkor = newCt.checkor;
         if(newCt.dealway != null) this.dealway = newCt.dealway;
         if(newCt.startTime != null) this.startTime = newCt.startTime;
         if(newCt.endTime != null) this.endTime = newCt.endTime;
@@ -639,10 +640,15 @@ public class CheckTask extends Model {
             this.workfee = wfee;
             //修改预计交货时间
             this.editplanArrivDate();
+
             if(flow == 2) {
                 variableMap.put("flow", "2");
+                //已完成
+                this.checkstat = StatType.CHECKFINISH;
             } else {
                 variableMap.put("flow", "1");
+                //已处理
+                this.checkstat = StatType.CHECKDEAL;
             }
 
             //退回工厂或者到仓库返工 需要重检
@@ -650,16 +656,9 @@ public class CheckTask extends Model {
                     this.dealway == CheckTask.DealType.WAREHOUSE) {
                 generateRepeatTask(this.dealway, this.id, this.units.id);
             }
-
-            /**
-             * 已检已处理
-             */
-            this.checkstat = StatType.CHECKDEAL;
-
         }
         if(taskname.equals("运营")) {
             variableMap.put("flow", "1");
-
             //修改运营为确认状态
             this.units.opConfirm = ProcureUnit.OPCONFIRM.CONFIRM;
         }
