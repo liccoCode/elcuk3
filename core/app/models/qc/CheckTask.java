@@ -371,7 +371,7 @@ public class CheckTask extends Model {
         //1. Catrgory 的检测要求
         //2. SKU 的检测要求
         List<SkuCheck> parents = new ArrayList<SkuCheck>();
-        List<SkuCheck> cates = SkuCheck.find("SkuName=?", this.units.product.category + "").fetch();
+        List<SkuCheck> cates = SkuCheck.find("SkuName=?", this.units.product.category.categoryId).fetch();
         List<SkuCheck> skus = SkuCheck.find("SkuName=?", this.units.product.sku).fetch();
         parents.addAll(cates);
         parents.addAll(skus);
