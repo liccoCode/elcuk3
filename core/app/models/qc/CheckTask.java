@@ -436,7 +436,7 @@ public class CheckTask extends Model {
 
                 //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
                 Whouse wh = searchWarehouse(punit.shipItems);
-                if(wh != null && wh.user!=null) {
+                if(wh != null && wh.user != null) {
                     newtask.shipwhouse = wh;
                     newtask.checkor = wh.user.username;
                 }
@@ -453,7 +453,7 @@ public class CheckTask extends Model {
             CheckTask checktask = CheckTask.findById(taskid);
 
             Whouse wh = searchWarehouse(checktask.units.shipItems);
-            if(wh != null && wh.user!=null) {
+            if(wh != null && wh.user != null) {
                 checktask.shipwhouse = wh;
                 checktask.checkor = wh.user.username;
                 checktask.save();
@@ -477,7 +477,7 @@ public class CheckTask extends Model {
 
         //查找仓库
         Whouse wh = searchWarehouse(punit.shipItems);
-        if(wh != null && wh.user!=null) {
+        if(wh != null && wh.user != null) {
             newtask.shipwhouse = wh;
             newtask.checkor = wh.user.username;
         }
@@ -522,15 +522,10 @@ public class CheckTask extends Model {
         switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
-                if(this.units.shipState == ProcureUnit.S.NOSHIPWAIT) {
-                    //TODO:采购计划的“不发货处理”状态还原成 当初系统开启此不发货流程时 采购计划的“不发货处理”状态值
-                    //TODO:结束不发货流程
-                }
                 break;
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
                 //对应采购计划ID的“不发货处理”状态更新为：不发货待处理
-                this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
                 //TODO:启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
                 startActiviti(username);
                 break;
@@ -639,12 +634,11 @@ public class CheckTask extends Model {
     }
 
 
-    public void submitActiviti(float wfee, int flow, long id, String username) {
-        ActivitiProcess ap = ActivitiProcess.findById(id);
-        //判断是否有权限提交流程
-        String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, username);
+    public void submitActiviti(ActivitiProcess ap, String taskname, float wfee, int flow, long id, String username) {
+
         java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
         if(taskname.equals("采购员")) {
+            this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
             this.workfee = wfee;
             //修改预计交货时间
             this.editplanArrivDate();
@@ -653,6 +647,9 @@ public class CheckTask extends Model {
                 variableMap.put("flow", "2");
                 //已完成
                 this.checkstat = StatType.CHECKFINISH;
+                //合格
+                this.isship = ShipType.SHIP;
+                this.result = ResultType.AGREE;
             } else {
                 variableMap.put("flow", "1");
                 //已处理
@@ -668,7 +665,7 @@ public class CheckTask extends Model {
         if(taskname.equals("运营")) {
             variableMap.put("flow", "1");
             //修改运营为确认状态
-            this.units.opConfirm = ProcureUnit.OPCONFIRM.CONFIRM;
+            this.units.opConfirm = ProcureUnit.OPCONFIRM.CONFIRMED;
         }
         if(taskname.equals("质检确认")) {
             //退回工厂或者到仓库返工
@@ -676,9 +673,6 @@ public class CheckTask extends Model {
             if(this.dealway == CheckTask.DealType.RETURN ||
                     this.dealway == CheckTask.DealType.WAREHOUSE) {
                 variableMap.put("flow", "1");
-                //修改为不发货已处理
-                this.units.shipState = ProcureUnit.S.NOSHIPED;
-
             }
             //代仓库返工
             //不发货 返回采购员
@@ -686,7 +680,6 @@ public class CheckTask extends Model {
                 if(this.isship == CheckTask.ShipType.SHIP) {
                     //发货
                     variableMap.put("flow", "1");
-                    this.units.shipState = ProcureUnit.S.NOSHIPED;
                     /**
                      * 已检完成
                      */
@@ -697,10 +690,11 @@ public class CheckTask extends Model {
                 }
             }
             //修改质检为确认状态
-            this.units.qcConfirm = ProcureUnit.QCCONFIRM.CONFIRM;
+            this.units.qcConfirm = ProcureUnit.QCCONFIRM.CONFIRMED;
         }
 
         this.save();
+        if(this.opition == null) this.opition = "";
         if(this.dealway != null) this.opition = "[" + this.dealway.label() + "]" + this.opition;
         ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, this.opition);
         //设置下一步审批人
