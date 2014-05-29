@@ -213,9 +213,11 @@ public class PaymentUnit extends Model {
      * 在删除PaymentUnit的同时将对应的CheckTask质检任务内的关联删除
      */
     public void beforeDelete() {
-        CheckTask check = CheckTask.find("reworkPay=?", this).first();
-        check.reworkPay = null;
-        check.save();
+        List<CheckTask> checks = CheckTask.find("reworkPay=?", this).fetch();
+        for(CheckTask check : checks) {
+            check.reworkPay = null;
+            check.save();
+        }
     }
 
     public PaymentUnit transportFeeRemove(String reason) {
