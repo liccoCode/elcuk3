@@ -495,8 +495,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
         if(this.deliveryment == null)
             Validation.addError("", "没有进入采购单, 无法交货.");
-        Validation.required("procureunit.attrs.qty", attrs.qty);
-        Validation.min("procureunit.attrs.qty", attrs.qty, 0);
+        if (attrs.qty==null) attrs.qty = 0;
+        //Validation.required("procureunit.attrs.qty", attrs.qty);
+        //Validation.min("procureunit.attrs.qty", attrs.qty, 0);
         Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
         if(Validation.hasErrors())
             throw new FastRuntimeException("检查不合格");
@@ -812,8 +813,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 2. 申请尾款
          */
         this.billingValid();
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
-            Validation.addError("", "请确定采购计划的交货数量(交货)");
+        //2014-05-28要求没签收也可先付款
+        //if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+        //    Validation.addError("", "请确定采购计划的交货数量(交货)");
         if(this.hasTailPay())
             Validation.addError("", "不允许重复申请尾款");
         if(Validation.hasErrors()) return null;
@@ -1163,7 +1165,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String fetchCheckTaskLink() {
-        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        List<CheckTask> tasks = CheckTask.find("units_id=? and checkstat!=?", this.id,
+                CheckTask.StatType.UNCHECK).fetch();
         if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
         if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.id);
         return null;

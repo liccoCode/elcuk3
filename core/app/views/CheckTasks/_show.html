@@ -36,10 +36,12 @@
       #{if taskname!=null && taskname=="运营"}
         <input type="hidden" name="acttype" value="2">
         <input type="hidden" name="check.id" value="${check.id}">
+          #{render 'CheckTasks/_processOperate.html', check:check,oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
+          whouses:whouses/}
       #{/if}
 
       #{if taskname==null || taskname!="运营"}
-          #{render 'CheckTasks/_showTask.html', check:check,ap:ap/}
+          #{render 'CheckTasks/_showTask.html', check:check,ap:ap,taskname:taskname/}
       #{/if}
       </table>
     </form>
@@ -67,8 +69,4 @@
   </div>
 #{/if}
 
-#{if taskname!=null && taskname=="运营"}
-    #{render 'CheckTasks/_processOperate.html', check:check,oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
-    whouses:whouses/}
-#{/if}
 </div>

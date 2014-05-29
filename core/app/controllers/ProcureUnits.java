@@ -196,6 +196,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
+        if(unit.isCheck != 1) unit.isCheck = 0;
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
