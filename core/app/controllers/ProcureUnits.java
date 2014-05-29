@@ -256,10 +256,8 @@ public class ProcureUnits extends Controller {
             unit.id = managedUnit.id;
             CheckTasks.showactiviti(checkid);
         }
-        flash.success("成功修改采购计划!", id);
-
+        flash.success("成功修改采购计划!!", id);
         CheckTasks.showactiviti(checkid);
-
     }
 
     public static void destroy(long id) {
