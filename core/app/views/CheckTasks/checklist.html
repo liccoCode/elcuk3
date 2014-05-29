@@ -116,7 +116,7 @@
         <th>质检完成时间</th>
         <th>处理方式</th>
         <th>工时</th>
-        <th>每人时</th>
+        <th>人数</th>
         <th>费用(元)</th>
         <th>操作</th>
       </tr>
@@ -134,12 +134,12 @@
         <td>${tl.units.fba?.shipmentId}</td>
         <td>${tl.units.selling?.fnSku}</td>
         <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
-        <td>${tl.units.whouse.name}</td>
+        <td>${tl.shipwhouse?.name}</td>
         <td>${tl.units.cooperator.name}</td>
-        <td>${tl.units.cooperator?.qcLevel}</td>
+        <td>${tl.units.cooperator?.qcLevel?.label()}</td>
         <td>${tl.units.attrs.planQty}</td>
         <td>${tl.units.attrs.qty}</td>
-        <td></td>
+        <td>${tl.qcType}</td>
         <td>${tl.checkstat?.label()}</td>
         <td>${tl.checkor}</td>
         <td>${tl.result?.label()}</td>
@@ -147,13 +147,13 @@
         <td>${tl.endTime?.datetime()}</td>
         <td>${tl.dealway?.label()}</td>
         <td>${tl.workhour}</td>
+        <td>${tl.workers}</td>
         <td>${tl.workfee}</td>
-        <td>${tl.workhour*tl.workfee}</td>
         <td>
-            #{if tl.checkstat != models.qc.CheckTask.StatType.UNCHECK}
+            #{if tl.checkstat != models.qc.CheckTask.StatType.CHECKFINISH}
               <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
             #{/if}
-            #{if tl.checkstat == models.qc.CheckTask.StatType.UNCHECK}
+            #{if tl.checkstat == models.qc.CheckTask.StatType.CHECKFINISH}
               <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
             #{/if}
         </td>

@@ -33,6 +33,7 @@ public class CheckTaskPost extends Post<CheckTask> {
         this.perSize = 25;
         this.from = DateTime.now().minusDays(30).toDate();
         this.to = new Date();
+        this.dateType = "u.attrs.planShipDate";
     }
 
     public CheckTaskPost(int perSize) {
@@ -41,6 +42,9 @@ public class CheckTaskPost extends Post<CheckTask> {
 
     public CheckTaskPost(String checkor) {
         this.checkor = checkor;
+        this.from = DateTime.now().minusDays(30).toDate();
+        this.to = new Date();
+        this.dateType = "u.attrs.planShipDate";
     }
 
     public static final List<F.T2<String, String>> DATE_TYPES;
@@ -194,7 +198,8 @@ public class CheckTaskPost extends Post<CheckTask> {
         } else if(StringUtils.equalsIgnoreCase("checked", flag)) {
             sbd += " AND c.checkstat =  '" + CheckTask.StatType.CHECKFINISH + "'";
         } else {
-            CheckTask.StatType[] checkstats = {CheckTask.StatType.CHECKNODEAL, CheckTask.StatType.CHECKDEAL,
+            CheckTask.StatType[] checkstats = {
+                    //CheckTask.StatType.CHECKNODEAL, CheckTask.StatType.CHECKDEAL,
                     CheckTask.StatType.REPEATCHECK};
             sbd += " AND c.checkstat IN " + SqlSelect.inlineParam(checkstats) + "";
         }

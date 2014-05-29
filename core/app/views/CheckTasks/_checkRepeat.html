@@ -30,7 +30,7 @@
         <td>
           <a href="@{CheckTasks.prints(cr.id)}" target="_blank">打印(${cr.printNumber}次)</a>&nbsp;
             #{if cr.checkstat == models.qc.CheckTask.StatType.REPEATCHECK}
-              <a href="@{CheckTasks.show(cr.id)}">质检</a>#{/if}
+              <a href="@{CheckTasks.show(cr.id)}" target="_blank">质检</a>#{/if}
         </td>
         <td>
             #{if cr.units.cooperator?.qcLevel == models.procure.Cooperator.L.MICRO}
@@ -62,7 +62,7 @@
         <td>${cr.shipwhouse?.name}</td>
         <td>${cr.units.cooperator.name}</td>
         <td>${cr.units.attrs.planQty}</td>
-        <td>${cr.dealway.label()}</td>
+        <td>${cr.dealway?.label()}</td>
       </tr>
       #{/list}
   </tbody>

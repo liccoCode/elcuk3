@@ -6,8 +6,6 @@
      <li>完成交货: 预计到库时间, 预计交货时间, 预计运输时间, 运输单</li>
    </ol>
    #{/warning_row}
-
-<form action="@{ProcureUnits.updateprocess(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
  <input type="hidden" name="id" value="${unit.id}">
  <table class="table table-condensed table-bordered">
      #{render 'ProcureUnits/_unit_table_trs.html',oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
@@ -21,10 +19,10 @@
 
    <tr>
      <td colspan="4">
+       <input type="hidden" name="unitid" value="${unit.id}">
        <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
        <button type="submit" class="btn btn-primary">更新</button>
-       <a id="submitactiviti_btn" href="javascript:void(0)" class="btn btn-info" >提交流程</a>
+       <a id="operateactiviti_btn" href="javascript:void(0)" class="btn btn-info" >提交流程</a>
      </td>
    </tr>
  </table>
-</form>

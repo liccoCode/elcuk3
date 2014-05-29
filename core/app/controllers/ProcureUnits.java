@@ -195,6 +195,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
+        if(unit.isCheck != 1) unit.isCheck = 0;
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
@@ -248,7 +249,7 @@ public class ProcureUnits extends Controller {
      * @param id
      * @param oldPlanQty
      */
-    public static void updateprocess(Long id,Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
+    public static void updateprocess(Long id, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
 
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);

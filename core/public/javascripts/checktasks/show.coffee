@@ -51,11 +51,6 @@ $ ->
 
 
   $("#update_form").on("click", "#planactiviti_btn", (r) ->
-    $plan = $("input[name='check.planDeliveryDate']")
-    if ($plan.val() == '')
-      alert('请填写最新预计交货日期!')
-      return
-
     $btn = $(@)
     $ship = $("select[name='check.isship']")
     return unless confirm('确认提交?')
@@ -71,12 +66,12 @@ $ ->
   )
 
 
-  $("#unitEditForm").on("click", "#submitactiviti_btn", (r) ->
+  $("#update_form").on("click", "#operateactiviti_btn", (r) ->
     return unless confirm('确认后则表示已确认该采购计划的预计时间,确认提交?')
     $btn = $(@)
     $form = $("#update_form")
     $ship = $("select[name='check.isship']")
-    $form.attr("action", "/checktasks/#{$btn.attr("id").split("_")[0]}")
+    $form.attr("action", "/checktasks/operateupdateprocess")
     # 提交表单前将下拉项的disabled属性取消掉
     $ship.removeAttr("disabled")
     $form.submit()

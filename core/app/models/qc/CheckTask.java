@@ -455,6 +455,7 @@ public class CheckTask extends Model {
         Whouse wh = searchWarehouse(punit.shipItems);
         if(wh != null) {
             newtask.shipwhouse = wh;
+            newtask.checkor = wh.user.username;
         }
         newtask.save();
     }
@@ -613,12 +614,13 @@ public class CheckTask extends Model {
     }
 
 
-    public void submitActiviti(int flow, long id, String username) {
+    public void submitActiviti(float wfee,int flow, long id, String username) {
         ActivitiProcess ap = ActivitiProcess.findById(id);
         //判断是否有权限提交流程
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, username);
         java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
         if(taskname.equals("采购员")) {
+            this.workfee = wfee;
             //修改预计交货时间
             this.editplanArrivDate();
             if(flow == 2) {
@@ -653,10 +655,6 @@ public class CheckTask extends Model {
                 //修改为不发货已处理
                 this.units.shipState = ProcureUnit.S.NOSHIPED;
 
-                /**
-                 * 已检完成
-                 */
-                this.checkstat = StatType.CHECKFINISH;
             }
             //代仓库返工
             //不发货 返回采购员

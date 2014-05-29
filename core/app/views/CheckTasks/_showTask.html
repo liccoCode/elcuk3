@@ -32,7 +32,7 @@
   <td><input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}"></td>
 
   <th>处理方式</th>
-  <td>${check.dealway}</td>
+  <td>${check.dealway?.label()}</td>
 </tr>
 <tr>
   <th>质检开始时间</th>
@@ -61,6 +61,20 @@
     </select>
   </td>
 </tr>
+
+#{if (check.dealway==models.qc.CheckTask.DealType.HELP && taskname!=null && taskname=="质检确认") || check.workhour>0 || check.workers>0}
+<tr>
+  <th>工作小时</th>
+  <td colspan="3">
+    <input type="text" name="check.workhour" class="input-mini" value="${check.workhour}">
+  </td>
+  <th>人数</th>
+  <td colspan="3">
+    <input type="text" name="check.workers" class="input-mini" value="${check.workers}">
+  </td>
+</tr>
+#{/if}
+
 <tr>
   <th>备注</th>
   <td colspan="10">
@@ -72,7 +86,8 @@
   <td colspan="6">
   #{if ap==null || ap.id==null}
       #{power.ck "checktasks.update"}
-          #{if check.checkstat == models.qc.CheckTask.StatType.UNCHECK}
+          #{if check.checkstat == models.qc.CheckTask.StatType.UNCHECK || check.checkstat == models.qc.CheckTask
+          .StatType.REPEATCHECK}
             <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
             <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
           #{/if}

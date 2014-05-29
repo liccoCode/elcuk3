@@ -194,7 +194,6 @@ public class CheckTasks extends Controller {
         //2为运营,不执行保存
         if(acttype != 2) {
             c.dealway = check.dealway;
-            c.workfee = check.workfee;
             c.checknote = check.checknote;
             c.planDeliveryDate = check.planDeliveryDate;
             c.qty = check.qty;
@@ -204,20 +203,51 @@ public class CheckTasks extends Controller {
             c.result = check.result;
             c.isship = check.isship;
             c.checknote = check.checknote;
+            c.workers = check.workers;
+            c.workhour = check.workhour;
             c.save();
         }
 
-        //提交流程
-        c.submitActiviti(1, id, Secure.Security.connected());
+        c.submitActiviti(check.workfee, 1, id, Secure.Security.connected());
 
         flash.success("更新成功");
         CheckTasks.showActiviti(check.id);
     }
 
+
+    /**
+     * 调整运营的数据并提交流程
+     * @param check
+     * @param id
+     * @param unitid
+     * @param checkid
+     * @param oldPlanQty
+     * @param unit
+     * @param shipmentId
+     */
+    public static void operateupdateprocess(
+            CheckTask check, long id,
+            Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
+
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        ProcureUnit managedUnit = ProcureUnit.findById(unitid);
+        managedUnit.update(unit, shipmentId);
+        if(Validation.hasErrors()) {
+            flash.error(Validation.errors().toString());
+            unit.id = managedUnit.id;
+            CheckTasks.showActiviti(checkid);
+        }
+
+        CheckTask c = CheckTask.findById(check.id);
+        c.submitActiviti(check.workfee, 1, id, Secure.Security.connected());
+        flash.success("更新成功");
+        CheckTasks.showActiviti(check.id);
+    }
+
+
     public static void endactiviti(CheckTask check, long id) {
         CheckTask c = CheckTask.findById(check.id);
         c.dealway = check.dealway;
-        c.workfee = check.workfee;
         c.checknote = check.checknote;
         c.planDeliveryDate = check.planDeliveryDate;
         c.qty = check.qty;
@@ -227,10 +257,12 @@ public class CheckTasks extends Controller {
         c.result = check.result;
         c.isship = check.isship;
         c.checknote = check.checknote;
+        c.workers = check.workers;
+        c.workhour = check.workhour;
         c.save();
 
         //提交流程
-        c.submitActiviti(2, id, Secure.Security.connected());
+        c.submitActiviti(check.workfee, 2, id, Secure.Security.connected());
 
         flash.success("更新成功");
         CheckTasks.showActiviti(check.id);
@@ -294,6 +326,12 @@ public class CheckTasks extends Controller {
      */
     public static void resetEdit(Long id) {
         try {
+            ActivitiProcess p = ActivitiProcess.find("objectid=? and definition.menuCode='checktasks.fullupdate'",
+                    id).first();
+            if(p != null) {
+                renderJSON(new Ret(false, "已经在不发货流程处理中."));
+            }
+
             CheckTask check = CheckTask.findById(id);
             check.checkstat = CheckTask.StatType.UNCHECK;
             check.save();
