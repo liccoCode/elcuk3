@@ -403,6 +403,7 @@ public class CheckTask extends Model {
         Validation.required("实际交货数量", this.qty);
         Validation.required("质检开始时间", this.startTime);
         Validation.required("质检结束时间", this.endTime);
+        if(!endTime.after(startTime)) Validation.addError("", "质检开始时间不能大于结束时间");
     }
 
     public void validateRight() {
