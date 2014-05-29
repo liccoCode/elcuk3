@@ -371,8 +371,8 @@ public class CheckTask extends Model {
         //1. Catrgory 的检测要求
         //2. SKU 的检测要求
         List<SkuCheck> parents = new ArrayList<SkuCheck>();
-        List<SkuCheck> cates =  SkuCheck.find("SkuName=?", this.units.product.category + "").fetch();
-        List<SkuCheck> skus =  SkuCheck.find("SkuName=?", this.units.product.sku).fetch();
+        List<SkuCheck> cates = SkuCheck.find("SkuName=?", this.units.product.category + "").fetch();
+        List<SkuCheck> skus = SkuCheck.find("SkuName=?", this.units.product.sku).fetch();
         parents.addAll(cates);
         parents.addAll(skus);
 
@@ -630,7 +630,7 @@ public class CheckTask extends Model {
     }
 
 
-    public void submitActiviti(float wfee,int flow, long id, String username) {
+    public void submitActiviti(float wfee, int flow, long id, String username) {
         ActivitiProcess ap = ActivitiProcess.findById(id);
         //判断是否有权限提交流程
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, username);
@@ -655,6 +655,7 @@ public class CheckTask extends Model {
              * 已检已处理
              */
             this.checkstat = StatType.CHECKDEAL;
+
         }
         if(taskname.equals("运营")) {
             variableMap.put("flow", "1");
@@ -693,6 +694,7 @@ public class CheckTask extends Model {
         }
 
         this.save();
+        if(this.dealway != null) this.opition = "[" + this.dealway.label() + "]" + this.opition;
         ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, this.opition);
         //设置下一步审批人
         taskclaim(ap.processInstanceId, ap.creator);
