@@ -844,12 +844,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 2. 申请尾款
          */
         this.billingValid();
-        if(amount <= 0) {
-            Validation.addError("", String.format("申请的费用错误, 错误值:%S", amount));
-        }
-        if(this.hasReworkPay()) {
-            Validation.addError("", "不允许重复申请返工费用.");
-        }
         if(Validation.hasErrors()) return null;
         PaymentUnit fee = new PaymentUnit(this);
         fee.feeType = FeeType.rework();
@@ -938,19 +932,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean hasTailPay() {
         for(PaymentUnit fee : this.fees()) {
             if(fee.feeType == FeeType.procurement())
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * 是否拥有返工费用
-     *
-     * @return
-     */
-    public boolean hasReworkPay() {
-        for(PaymentUnit fee : this.fees()) {
-            if(fee.feeType == FeeType.rework())
                 return true;
         }
         return false;

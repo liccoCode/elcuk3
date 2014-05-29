@@ -7,6 +7,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.*;
+import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -199,12 +200,22 @@ public class PaymentUnit extends Model {
         if(Validation.hasErrors()) return null;
 
         this.remove = true;
+        if(this.feeType == FeeType.rework()) beforeDelete();
         this.save();
         new ERecordBuilder("paymentunit.destroy")
                 .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
                 .fid(this.procureUnit.id) // 取消的操作, 记录在 ProcureUnit 身上, 因为是对采购计划取消请款
                 .save();
         return this;
+    }
+
+    /**
+     * 在删除PaymentUnit的同时将对应的CheckTask质检任务内的关联删除
+     */
+    public void beforeDelete() {
+        CheckTask check = CheckTask.find("reworkPay=?", this).first();
+        check.reworkPay = null;
+        check.save();
     }
 
     public PaymentUnit transportFeeRemove(String reason) {

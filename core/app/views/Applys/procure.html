@@ -129,14 +129,12 @@
                         #{/ifnot}
                     #{/power.ck}
                     #{power.ck 'procureunits.billingreworkpay'}
-                        #{ifnot procureUnit.hasReworkPay()}
                           #{form @ProcureUnits.billingReworkPay(pid, apply.id), method:'POST',
                           id: "billing_rework_pay_form"}
                             <input type="hidden" id="checktask_id_list" name="ids">
                             <a href="javascript:void(0)" id="billing_rework_pay_btn" data-pid="${pid}"
                                class="btn">申请返工费用</a>
                           #{/form}
-                        #{/ifnot}
                     #{/power.ck}
                 </div>
                 <div class="span11">
