@@ -85,7 +85,7 @@ $ ->
   })
 
   fidCallBack = () ->
-    {fid: $("input[name='id']").val(), p: 'CHECKTASK'}
+    {fid: $("input[name='attid']").val(), p: 'CHECKTASK'}
   dropbox = $('#dropbox')
   window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
   window.dropUpload.iniDropbox(fidCallBack, dropbox)

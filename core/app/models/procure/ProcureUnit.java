@@ -235,13 +235,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         NOSHIPED {
             @Override
             public String label() {
-                return "不发货已处理";
+                return "采购员未确认";
             }
         },
         NOSHIPWAIT {
             @Override
             public String label() {
-                return "不发货待处理";
+                return "采购员确认";
             }
         };
 
@@ -1137,7 +1137,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String isship() {
-        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).isship != null) return tasks.get(0).isship.label();
         }
@@ -1150,7 +1150,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String result() {
-        List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).result != null) return tasks.get(0).result.label();
         }
