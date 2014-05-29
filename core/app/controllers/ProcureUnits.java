@@ -12,16 +12,17 @@ import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.market.Selling;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
 import models.product.Whouse;
+import models.qc.CheckTask;
 import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 import play.libs.Files;
@@ -377,6 +378,42 @@ public class ProcureUnits extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("%s 请款成功", FeeType.procurement().nickName);
+        Applys.procure(applyId);
+    }
+
+    /**
+     * 加载当前采购计划相关的质检任务
+     *
+     * @param id
+     */
+    public static void loadCheckList(Long id) {
+        List<CheckTask> checks = CheckTask.find("units_id=?", id).fetch();
+        render("ProcureUnits/_reworkpay_modal.html", checks);
+    }
+
+    /**
+     * 申请返工费用
+     *
+     * @param id
+     * @param applyId
+     */
+    public static void billingReworkPay(Long id, Long applyId, String ids) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        try {
+            List<CheckTask> checks = CheckTask.find("id IN " + SqlSelect.inlineParam(ids.split("_")) + "").fetch();
+            float amount = 0f;
+            for(CheckTask check : checks) {
+                amount += check.workfee;
+            }
+            unit.billingReworkPay(amount);
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("%s 请款成功", FeeType.rework().nickName);
+        }
         Applys.procure(applyId);
     }
 

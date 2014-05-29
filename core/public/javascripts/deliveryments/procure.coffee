@@ -4,6 +4,23 @@ $ ->
     $('#paymentUnit_destroy_form').attr('action', @getAttribute('url'))
     $('#paymentUnit_destroy').modal()
 
+  $(document).on("click", "#billing_rework_pay_btn", (r) ->
+    $("#modal_home").load('/Procureunits/loadChecklist', id: $(@).data("pid"), (r) ->
+      $('#reworkpay_modal').modal('show')
+    )
+  ).on("click", "#sumbit_billing_btn", (r) ->
+    # 计算用户勾选的费用记录
+    checkids = []
+    checkboxList = $('input[name="checkids"]')
+    for checkbox in checkboxList when checkbox.checked then checkids.push(checkbox.value)
+    if checkids.length is 0
+      noty({text: '请选择费用记录！', type: 'error'})
+      return false
+    $("#checktask_id_list").val(checkids.join("_"))
+    $("#billing_rework_pay_form").submit()
+    $('#reworkpay_modal').modal('hide')
+  )
+
   calculateSumery = ->
     $('.table_summary').each ->
       cny_summery = 0
