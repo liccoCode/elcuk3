@@ -1078,7 +1078,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
         //确定仓库接收的运输单
-        List<Whouse> whs = Whouse.all().fetch();
+        List<Whouse> whs = Whouse.find("type=?",Whouse.T.FBA).fetch();
         for(Whouse whouse : whs) {
             whouse.checkWhouseNewShipment(planedShipments);
         }

@@ -179,7 +179,7 @@ public class CheckTaskPost extends Post<CheckTask> {
         }
 
         if(StringUtils.isNotBlank(this.checkor)) {
-            sbd.append(" AND c.checkor=? ");
+            sbd.append(" AND c.shipwhouse.user.username=? ");
             params.add(this.checkor);
         }
 

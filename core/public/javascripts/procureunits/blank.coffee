@@ -41,7 +41,7 @@ $ ->
       planArrivDate.next().text("#{(new Date(planArrivDate.val()) - new Date(planShipDate.val())) / (24 * 3600 * 1000)} 天")
 
   # Ajax 加载 Shipment
-  $('#new_procureunit,#unitEditForm').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
+  $('#new_procureunit,#unitEditForm,#update_form').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
     whouseId = $("[name='unit.whouse.id']").val()
     shipType = $("[name='unit.shipType']:checked").val()
     shipment = $('#shipments')

@@ -495,7 +495,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
         if(this.deliveryment == null)
             Validation.addError("", "没有进入采购单, 无法交货.");
-        if (attrs.qty==null) attrs.qty = 0;
+        if(attrs.qty == null) attrs.qty = 0;
         //Validation.required("procureunit.attrs.qty", attrs.qty);
         //Validation.min("procureunit.attrs.qty", attrs.qty, 0);
         Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
@@ -1152,7 +1152,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String result() {
         List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
-            return tasks.get(0).result.label();
+            if(tasks.get(0).result != null) return tasks.get(0).result.label();
         }
         return null;
     }

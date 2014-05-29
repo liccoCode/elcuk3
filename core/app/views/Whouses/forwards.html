@@ -50,6 +50,7 @@
         <td>${wh.cooperator?.fullName}</td>
         <td>
           <select name="whs[${wh_index - 1}].user.id" class="inline">
+              <option value="">请选择</option>
               #{list items:users, as:'user'}
                 <option value="${user.id}" ${wh.user?.id == user.id? 'selected': ''}>${user.username}</option>
               #{/list}

@@ -167,6 +167,7 @@ public class CheckTasks extends Controller {
         CheckTask old = CheckTask.findById(id);
         check.startTime = from;
         check.endTime = to;
+        check.checkor = old.shipwhouse.user.username;
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
         old.update(check);
@@ -180,6 +181,7 @@ public class CheckTasks extends Controller {
         CheckTask old = CheckTask.findById(id);
         check.startTime = from;
         check.endTime = to;
+        check.checkor = old.shipwhouse.user.username;
         check.validateRequired();
         check.validateRight();
         if(Validation.hasErrors()) render("CheckTasks/show.html", check);
@@ -217,6 +219,7 @@ public class CheckTasks extends Controller {
 
     /**
      * 调整运营的数据并提交流程
+     *
      * @param check
      * @param id
      * @param unitid
@@ -245,6 +248,11 @@ public class CheckTasks extends Controller {
     }
 
 
+    /**
+     * 还原结束流程
+     * @param check
+     * @param id
+     */
     public static void endactiviti(CheckTask check, long id) {
         CheckTask c = CheckTask.findById(check.id);
         c.dealway = check.dealway;
@@ -259,6 +267,8 @@ public class CheckTasks extends Controller {
         c.checknote = check.checknote;
         c.workers = check.workers;
         c.workhour = check.workhour;
+        c.isship = CheckTask.ShipType.SHIP;
+        c.result = CheckTask.ResultType.AGREE;
         c.save();
 
         //提交流程
