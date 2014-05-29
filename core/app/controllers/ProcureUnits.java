@@ -255,11 +255,11 @@ public class ProcureUnits extends Controller {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
             //render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
-            CheckTasks.showActiviti(checkid);
+            CheckTasks.showactiviti(checkid);
         }
         flash.success("成功修改采购计划!", id);
 
-        CheckTasks.showActiviti(checkid);
+        CheckTasks.showactiviti(checkid);
 
     }
 
