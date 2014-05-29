@@ -127,7 +127,7 @@ public class CheckTasks extends Controller {
         render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
     }
 
-    public static void showActiviti(Long id) {
+    public static void showactiviti(Long id) {
         if(id == null) return;
         CheckTask check = CheckTask.findById(id);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
@@ -191,10 +191,27 @@ public class CheckTasks extends Controller {
     }
 
 
-    public static void submitactiviti(CheckTask check, long id, int acttype) {
+    public static void submitactiviti(CheckTask check, long id) {
         CheckTask c = CheckTask.findById(check.id);
-        //2为运营,不执行保存
-        if(acttype != 2) {
+        ActivitiProcess ap = ActivitiProcess.findById(id);
+        String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
+
+        int issave = 1;
+        if(taskname.equals("质检确认")) {
+            //退回工厂或者到仓库返工
+            //结束
+            if(check.dealway == CheckTask.DealType.RETURN ||
+                    check.dealway == CheckTask.DealType.WAREHOUSE) {
+                //退回工厂不保存质检资料
+                issave = 0;
+            }
+        }
+        //运营,不执行保存
+        if(taskname.equals("运营")) {
+            issave = 0;
+        }
+
+        if(issave == 1) {
             c.dealway = check.dealway;
             c.checknote = check.checknote;
             c.planDeliveryDate = check.planDeliveryDate;
@@ -210,10 +227,11 @@ public class CheckTasks extends Controller {
             c.save();
         }
 
-        c.submitActiviti(check.workfee, 1, id, Secure.Security.connected());
+
+        c.submitActiviti(ap, taskname, check.workfee, 1, id, Secure.Security.connected());
 
         flash.success("更新成功");
-        CheckTasks.showActiviti(check.id);
+        CheckTasks.showactiviti(check.id);
     }
 
 
@@ -232,28 +250,34 @@ public class CheckTasks extends Controller {
             CheckTask check, long id,
             Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
 
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        ActivitiProcess ap = ActivitiProcess.findById(id);
+        String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
+
         ProcureUnit managedUnit = ProcureUnit.findById(unitid);
         managedUnit.update(unit, shipmentId);
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
-            CheckTasks.showActiviti(checkid);
+            CheckTasks.showactiviti(checkid);
         }
 
         CheckTask c = CheckTask.findById(check.id);
-        c.submitActiviti(check.workfee, 1, id, Secure.Security.connected());
+        c.submitActiviti(ap, taskname, check.workfee, 1, id, Secure.Security.connected());
         flash.success("更新成功");
-        CheckTasks.showActiviti(check.id);
+        CheckTasks.showactiviti(check.id);
     }
 
 
     /**
      * 还原结束流程
+     *
      * @param check
      * @param id
      */
     public static void endactiviti(CheckTask check, long id) {
+        ActivitiProcess ap = ActivitiProcess.findById(id);
+        String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
+
         CheckTask c = CheckTask.findById(check.id);
         c.dealway = check.dealway;
         c.checknote = check.checknote;
@@ -272,17 +296,17 @@ public class CheckTasks extends Controller {
         c.save();
 
         //提交流程
-        c.submitActiviti(check.workfee, 2, id, Secure.Security.connected());
+        c.submitActiviti(ap, taskname, check.workfee, 2, id, Secure.Security.connected());
 
         flash.success("更新成功");
-        CheckTasks.showActiviti(check.id);
+        CheckTasks.showactiviti(check.id);
     }
 
 
     public static void updateactiviti(CheckTask check) {
         check.save();
         flash.success("更新成功");
-        CheckTasks.showActiviti(check.id);
+        CheckTasks.showactiviti(check.id);
     }
 
     public static void prints(Long id) {
