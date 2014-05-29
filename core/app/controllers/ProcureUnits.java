@@ -1,15 +1,13 @@
 package controllers;
 
 import exception.PaymentException;
-import helper.Constant;
-import helper.Dates;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -31,9 +29,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -382,12 +378,24 @@ public class ProcureUnits extends Controller {
     }
 
     /**
-     * 加载当前采购计划相关的质检任务
+     * 加载当前采购计划供应商下所有未申请的返工费用
      *
      * @param id
      */
     public static void loadCheckList(Long id) {
-        List<CheckTask> checks = CheckTask.find("units_id=?", id).fetch();
+        ProcureUnit pro = ProcureUnit.findById(id);
+        //首先查询出当前采购计划下所属的供应商下所有的采购计划ID
+        SqlSelect sql = new SqlSelect().select("id").from("ProcureUnit").where("cooperator_id=?").param(pro
+                .cooperator.id);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<Long> unitIds = new ArrayList<Long>();
+        for(Map<String, Object> row : rows) {
+            unitIds.add(Long.parseLong(row.get("id").toString()));
+        }
+        //使用查询出来的采购计划ID去查询 所有未申请返工费用的质检任务(费用需要大于0)
+        List<CheckTask> checks = CheckTask
+                .find("reworkPay = null AND workfee > 0 AND units_id IN " + SqlSelect.inlineParam(unitIds) + "")
+                .fetch();
         render("ProcureUnits/_reworkpay_modal.html", checks);
     }
 
@@ -402,10 +410,15 @@ public class ProcureUnits extends Controller {
         try {
             List<CheckTask> checks = CheckTask.find("id IN " + SqlSelect.inlineParam(ids.split("_")) + "").fetch();
             float amount = 0f;
+            PaymentUnit reworkPay = unit.billingReworkPay(amount);
             for(CheckTask check : checks) {
                 amount += check.workfee;
+                //将PaymentUnit对应到CheckTask
+                check.reworkPay = reworkPay;
+                check.save();
             }
-            unit.billingReworkPay(amount);
+            reworkPay.amount = amount;
+            reworkPay.save();
         } catch(PaymentException e) {
             Validation.addError("", e.getMessage());
         }

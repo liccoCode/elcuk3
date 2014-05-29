@@ -8,6 +8,7 @@ import helper.Webs;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
+import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -339,6 +340,12 @@ public class CheckTask extends Model {
      */
     @Expose
     public int printNumber;
+
+    /**
+     * 申请的返工费用
+     */
+    @OneToOne
+    public PaymentUnit reworkPay;
 
     public enum FLAG {
         ARRAY_TO_STR,
