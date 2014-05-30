@@ -1120,7 +1120,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String isship() {
         List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).isship != null) return tasks.get(0).isship.label();
+            if(tasks.get(0).isship != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
+                return tasks.get(0).isship.label();
         }
         return null;
     }
@@ -1133,7 +1134,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String result() {
         List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
         if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).result != null) return tasks.get(0).result.label();
+            if(tasks.get(0).result != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
+                return tasks.get(0).result.label();
         }
         return null;
     }

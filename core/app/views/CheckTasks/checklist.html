@@ -120,6 +120,7 @@
         <th>质检员</th>
         <th>是否合格</th>
         <th>是否发货</th>
+        <th>质检开始时间</th>
         <th>质检完成时间</th>
         <th>处理方式</th>
         <th>质检工时</th>
@@ -152,23 +153,27 @@
         <td>${tl.checkor}</td>
         <td>${tl.result?.label()}</td>
         <td>${tl.isship?.label()}</td>
+        <td>${tl.startTime?.datetime()}</td>
         <td>${tl.endTime?.datetime()}</td>
         <td>${tl.dealway?.label()}</td>
         <td>
             #{if tl.startTime != null && tl.endTime != null}
-              ${(tl.endTime.getTime() - tl.startTime.getTime())/(60* 60 * 1000)}
+              ${(float)(Math.round((tl.endTime.getTime() - tl.startTime.getTime())/(60* 60 * 1000)*100))/100}
             #{/if}
         </td>
         <td>${tl.workhour}</td>
         <td>${tl.workers}</td>
         <td>${tl.workfee}</td>
         <td>
-            #{if tl.checkstat != models.qc.CheckTask.StatType.CHECKFINISH}
-              <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
-            #{/if}
-            #{if tl.checkstat == models.qc.CheckTask.StatType.CHECKFINISH}
-              <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
-            #{/if}
+
+          <a target="_blank" href="@{CheckTasks.show(tl.id)}">查看</a>
+
+            #{power.ck "checktasks.resetedit"}
+                #{if tl.checkstat == models.qc.CheckTask.StatType.CHECKFINISH}
+                  <a href="javascript:void(0)" data-href="@{CheckTasks.resetEdit(tl.id)}" id="reset_edit">编辑</a>
+                #{/if}
+            #{/power.ck}
+
         </td>
       #{/list}
       </tbody>

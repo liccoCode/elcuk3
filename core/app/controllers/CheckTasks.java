@@ -384,6 +384,7 @@ public class CheckTasks extends Controller {
 
             CheckTask check = CheckTask.findById(id);
             check.checkstat = CheckTask.StatType.UNCHECK;
+            check.finishStat = CheckTask.ConfirmType.UNCONFIRM;
             check.save();
             renderJSON(new Ret(true, "操作成功."));
         } catch(Exception e) {
