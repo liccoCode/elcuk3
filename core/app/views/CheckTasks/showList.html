@@ -41,7 +41,8 @@
       <th>质检完成时间</th>
       <th>处理方式</th>
       <th>费用</th>
-      <th>工时</th>
+      <th>质检工时</th>
+      <th>每人工时</th>
       <th>人数</th>
     </tr>
     </thead>
@@ -75,6 +76,11 @@
           <td>${check.endTime.format("yyyy-MM-dd hh:mm:ss")}</td>
           <td>${check.dealway?.label()}</td>
           <td>${check.workfee}</td>
+          <td>
+              #{if check.startTime != null && check.endTime != null}
+                ${((check.endTime.getTime() - check.startTime.getTime())/(60 * 60 * 1000)).format("#.##")}
+              #{/if}
+          </td>
           <td>${check.workhour}</td>
           <td>${check.workers}</td>
         </tr>

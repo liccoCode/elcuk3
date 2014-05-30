@@ -122,7 +122,8 @@
         <th>是否发货</th>
         <th>质检完成时间</th>
         <th>处理方式</th>
-        <th>工时</th>
+        <th>质检工时</th>
+        <th>每人工时</th>
         <th>人数</th>
         <th>费用(元)</th>
         <th>操作</th>
@@ -153,6 +154,11 @@
         <td>${tl.isship?.label()}</td>
         <td>${tl.endTime?.datetime()}</td>
         <td>${tl.dealway?.label()}</td>
+        <td>
+            #{if tl.startTime != null && tl.endTime != null}
+              ${(tl.endTime.getTime() - tl.startTime.getTime())/(60* 60 * 1000)}
+            #{/if}
+        </td>
         <td>${tl.workhour}</td>
         <td>${tl.workers}</td>
         <td>${tl.workfee}</td>

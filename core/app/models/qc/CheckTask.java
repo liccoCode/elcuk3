@@ -117,11 +117,14 @@ public class CheckTask extends Model {
 
 
     /**
-     * 工作小时(质检工时)
+     * 每人工时
      */
     @Expose
     public float workhour;
 
+    /**
+     * 人数
+     */
     @Expose
     public int workers;
 
@@ -411,12 +414,14 @@ public class CheckTask extends Model {
         Validation.required("实际交货数量", this.qty);
         Validation.required("质检开始时间", this.startTime);
         Validation.required("质检结束时间", this.endTime);
-        if(!endTime.after(startTime)) Validation.addError("", "质检开始时间不能大于结束时间");
     }
 
     public void validateRight() {
         if(this.qty < 0) Validation.addError("", "实际交货数量不能小于0");
         if(this.pickqty < 0) Validation.addError("", "实际抽检数量不能小于0");
+        if(startTime != null && endTime != null && !endTime.after(startTime)) {
+            Validation.addError("", "质检开始时间不能大于结束时间");
+        }
     }
 
     /**
@@ -526,8 +531,6 @@ public class CheckTask extends Model {
      * 保存质检任务且修改相关联的对应的采购计划数据
      */
     public void fullUpdate(CheckTask newCt, String username) {
-        long diff = newCt.endTime.getTime() - newCt.startTime.getTime();
-        this.workhour = diff / (60 * 60 * 1000);
         this.units.attrs.qty = newCt.qty;
         switch(newCt.isship) {
             case SHIP:

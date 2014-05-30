@@ -174,7 +174,10 @@ public class CheckTasks extends Controller {
         check.endTime = to;
         check.checkor = old.shipwhouse.user.username;
         check.validateRight();
-        if(Validation.hasErrors()) render("CheckTasks/show.html", check);
+        if(Validation.hasErrors()) {
+            check = old;
+            render("CheckTasks/show.html", check);
+        }
         old.update(check);
         flash.success("更新成功");
         redirect("/CheckTasks/show/" + id);
@@ -191,7 +194,10 @@ public class CheckTasks extends Controller {
         check.validateRight();
         if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
 
-        if(Validation.hasErrors()) render("CheckTasks/show.html", check);
+        if(Validation.hasErrors()) {
+            check = old;
+            render("CheckTasks/show.html", check);
+        }
         old.fullUpdate(check, Secure.Security.connected());
         flash.success("更新成功");
         show(id);
