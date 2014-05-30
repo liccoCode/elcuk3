@@ -148,7 +148,7 @@
         <td>${tl.endTime?.datetime()}</td>
         <td>${tl.dealway?.label()}</td>
         <td>
-            #{if tl.startTime != null && checked.endTime != null}
+            #{if tl.startTime != null && tl.endTime != null}
               ${(tl.endTime.getTime() - tl.startTime.getTime())/(60* 60 * 1000)}
             #{/if}
         </td>
