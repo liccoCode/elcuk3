@@ -289,6 +289,7 @@ public class CheckTasks extends Controller {
         CheckTask c = CheckTask.findById(checkid);
         c.isship = CheckTask.ShipType.SHIP;
         c.result = CheckTask.ResultType.AGREE;
+        c.opition = "[还原]"+check.opition;
 
         //提交流程
         c.submitActiviti(ap, taskname, check.workfee, 2, Secure.Security.connected());

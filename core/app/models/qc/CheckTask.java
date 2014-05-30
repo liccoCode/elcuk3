@@ -592,6 +592,7 @@ public class CheckTask extends Model {
         if(newCt.result != null) this.result = newCt.result;
         if(newCt.isship != null) this.isship = newCt.isship;
         if(newCt.checknote != null) this.checknote = newCt.checknote;
+        this.units.save();
         this.save();
     }
 
