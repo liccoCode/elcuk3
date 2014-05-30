@@ -536,6 +536,7 @@ public class CheckTask extends Model {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
                 this.finishStat = ConfirmType.CONFIRM;
+                this.updateFinishStat();
                 break;
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
