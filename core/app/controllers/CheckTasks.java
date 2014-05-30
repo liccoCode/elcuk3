@@ -204,47 +204,42 @@ public class CheckTasks extends Controller {
     }
 
 
-    public static void submitactiviti(CheckTask check, long id) {
-        CheckTask c = CheckTask.findById(check.id);
-        ActivitiProcess ap = ActivitiProcess.findById(id);
+    public static void submitactiviti(CheckTask check, long checkid, long processid, @As("yyyy-MM-dd HH:mm") Date from,
+                                      @As("yyyy-MM-dd HH:mm") Date to) {
+        CheckTask c = CheckTask.findById(checkid);
+        ActivitiProcess ap = ActivitiProcess.findById(processid);
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
 
-        int issave = 1;
-        if(taskname.equals("质检确认")) {
+        if(taskname.equals("采购员")) {
+            c.dealway = check.dealway;
+            c.planDeliveryDate = check.planDeliveryDate;
+            c.workfee = check.workfee;
+        } else if(taskname.equals("质检确认")) {
             //退回工厂或者到仓库返工
             //结束
             if(check.dealway == CheckTask.DealType.RETURN ||
                     check.dealway == CheckTask.DealType.WAREHOUSE) {
-                //退回工厂不保存质检资料
-                issave = 0;
+            } else {
+                c.checknote = check.checknote;
+                c.qty = check.qty;
+                c.pickqty = check.pickqty;
+                c.startTime = from;
+                c.endTime = to;
+                c.result = check.result;
+                c.isship = check.isship;
+                c.checknote = check.checknote;
+                c.workers = check.workers;
+                c.workhour = check.workhour;
+
             }
         }
-        //运营,不执行保存
-        if(taskname.equals("运营")) {
-            issave = 0;
-        }
-
-        if(issave == 1) {
-            c.dealway = check.dealway;
-            c.checknote = check.checknote;
-            c.planDeliveryDate = check.planDeliveryDate;
-            c.qty = check.qty;
-            c.pickqty = check.pickqty;
-            c.endTime = check.endTime;
-            c.startTime = check.startTime;
-            c.result = check.result;
-            c.isship = check.isship;
-            c.checknote = check.checknote;
-            c.workers = check.workers;
-            c.workhour = check.workhour;
-            c.save();
-        }
+        c.opition = check.opition;
 
 
         c.submitActiviti(ap, taskname, check.workfee, 1, Secure.Security.connected());
 
         flash.success("更新成功");
-        CheckTasks.showactiviti(check.id);
+        CheckTasks.showactiviti(checkid);
     }
 
 
@@ -260,10 +255,10 @@ public class CheckTasks extends Controller {
      * @param shipmentId
      */
     public static void operateupdateprocess(
-            CheckTask check, long id,
+            CheckTask check, long processid,
             Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
 
-        ActivitiProcess ap = ActivitiProcess.findById(id);
+        ActivitiProcess ap = ActivitiProcess.findById(processid);
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
 
         ProcureUnit managedUnit = ProcureUnit.findById(unitid);
@@ -274,10 +269,10 @@ public class CheckTasks extends Controller {
             CheckTasks.showactiviti(checkid);
         }
 
-        CheckTask c = CheckTask.findById(check.id);
+        CheckTask c = CheckTask.findById(checkid);
         c.submitActiviti(ap, taskname, check.workfee, 1, Secure.Security.connected());
         flash.success("更新成功");
-        CheckTasks.showactiviti(check.id);
+        CheckTasks.showactiviti(checkid);
     }
 
 
@@ -287,39 +282,39 @@ public class CheckTasks extends Controller {
      * @param check
      * @param id
      */
-    public static void endactiviti(CheckTask check, long id) {
-        ActivitiProcess ap = ActivitiProcess.findById(id);
+    public static void endactiviti(CheckTask check, long checkid, long processid) {
+        ActivitiProcess ap = ActivitiProcess.findById(processid);
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
 
-        CheckTask c = CheckTask.findById(check.id);
-        c.dealway = check.dealway;
-        c.checknote = check.checknote;
-        c.planDeliveryDate = check.planDeliveryDate;
-        c.qty = check.qty;
-        c.pickqty = check.pickqty;
-        c.endTime = check.endTime;
-        c.startTime = check.startTime;
-        c.result = check.result;
-        c.isship = check.isship;
-        c.checknote = check.checknote;
-        c.workers = check.workers;
-        c.workhour = check.workhour;
+        CheckTask c = CheckTask.findById(checkid);
         c.isship = CheckTask.ShipType.SHIP;
         c.result = CheckTask.ResultType.AGREE;
-        c.save();
 
         //提交流程
         c.submitActiviti(ap, taskname, check.workfee, 2, Secure.Security.connected());
 
         flash.success("更新成功");
-        CheckTasks.showactiviti(check.id);
+        CheckTasks.showactiviti(checkid);
     }
 
 
-    public static void updateactiviti(CheckTask check) {
-        check.save();
+    public static void updateactiviti(CheckTask check, long checkid, @As("yyyy-MM-dd HH:mm") Date from,
+                                      @As("yyyy-MM-dd HH:mm") Date to) {
+        CheckTask c = CheckTask.findById(checkid);
+        c.checknote = check.checknote;
+        c.planDeliveryDate = check.planDeliveryDate;
+        c.qty = check.qty;
+        c.pickqty = check.pickqty;
+        c.startTime = from;
+        c.endTime = to;
+        c.result = check.result;
+        c.isship = check.isship;
+        c.checknote = check.checknote;
+        c.workers = check.workers;
+        c.workhour = check.workhour;
+        c.save();
         flash.success("更新成功");
-        CheckTasks.showactiviti(check.id);
+        CheckTasks.showactiviti(checkid);
     }
 
     public static void prints(Long id) {

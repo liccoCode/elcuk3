@@ -23,22 +23,20 @@
   <div class="row-fluid">
     <form method="POST" id="update_form">
       <table class="table table-bordered ">
+        <input type="hidden" name="checkid" value="${check.id}">
 
       #{if ap!=null && ap.id!=null && issubmit!=null && issubmit==1}
+        <input type="hidden" name="processid" value="${ap.id}">
           #{if taskname!=null && taskname=="采购员"}
               #{render 'CheckTasks/_processProcureUnit.html', check:check/}
           #{/if}
-        <input type="hidden" name="id" value="${ap.id}">
           #{if taskname!=null && taskname=="质检确认"}
               #{render 'CheckTasks/_processQc.html', check:check/}
           #{/if}
-      #{/if}
-
-      #{if taskname!=null && taskname=="运营"}
-        <input type="hidden" name="acttype" value="2">
-        <input type="hidden" name="check.id" value="${check.id}">
-          #{render 'CheckTasks/_processOperate.html', check:check,oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
-          whouses:whouses/}
+          #{if taskname!=null && taskname=="运营"}
+              #{render 'CheckTasks/_processOperate.html', check:check,oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
+              whouses:whouses/}
+          #{/if}
       #{/if}
 
       #{if taskname==null || taskname!="运营"}

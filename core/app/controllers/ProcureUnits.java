@@ -246,17 +246,18 @@ public class ProcureUnits extends Controller {
      * @param id
      * @param oldPlanQty
      */
-    public static void updateprocess(Long id, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
+    public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
+                                     String shipmentId) {
 
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-        ProcureUnit managedUnit = ProcureUnit.findById(id);
+        ProcureUnit managedUnit = ProcureUnit.findById(unitid);
         managedUnit.update(unit, shipmentId);
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
             CheckTasks.showactiviti(checkid);
         }
-        flash.success("成功修改采购计划!!", id);
+        flash.success("成功修改采购计划!!", unitid);
         CheckTasks.showactiviti(checkid);
     }
 

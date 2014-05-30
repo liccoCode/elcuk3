@@ -75,10 +75,14 @@ $ ->
     $form = $("#update_form")
     $ship = $("select[name='check.isship']")
     $form.attr("action", "/checktasks/operateupdateprocess")
-    # 提交表单前将下拉项的disabled属性取消掉
-    $ship.removeAttr("disabled")
     $form.submit()
-    $ship.val("NOTSHIP").attr("disabled", 'true')
+  )
+
+  $("#update_form").on("click", "#updateprocess_btn", (r) ->
+    $btn = $(@)
+    $form = $("#update_form")
+    $form.attr("action", "/procureunits/updateprocess")
+    $form.submit()
   )
 
 
