@@ -53,12 +53,7 @@
 
           #{info_row title:'Attributes'/}
         <div id="extends_atts_home">
-            #{if pro.productAttrs.size() > 0}
-                #{include 'Products/attrs.html'/}
-            #{/if}
-            #{else }
-              <p class="muted text-center">等待添加新的 Attribute.</p>
-            #{/else}
+            #{include 'Products/attrs.html'/}
         </div>
       </div>
     </div>

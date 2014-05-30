@@ -19,17 +19,16 @@
     <form action="@{Products.create()}" method="post" id="create_product_form">
       <table class="table table-bordered table-condensed">
         <tr>
+          <th>SKU</th>
+          <td><input type="text" id="pro_sku" name="pro.sku" value="${pro.sku}"></td>
           <th>Family</th>
           <td>
             <input type="text" id="pro_family" name="pro.family.family" data-provide="typeahead" data-source="${families}" value="${pro.family?.family}">
           </td>
-
-          <th>SKU</th>
-          <td><input type="text" id="pro_sku" name="pro.sku" value="${pro.sku}"></td>
         </tr>
 
         <tr>
-          <th>长</th>
+          <th>长(包材)</th>
           <td>
             <div class="input-append">
               <input type="text" style="width:100px" name="pro.lengths" value="${pro.lengths}">
@@ -37,7 +36,7 @@
             </div>
           </td>
 
-          <th>宽(mm)</th>
+          <th>宽(包材)</th>
           <td>
             <div class="input-append">
               <input type="text" style="width:100px" name="pro.width" value="${pro.width}">
@@ -47,7 +46,7 @@
         </tr>
 
         <tr>
-          <th>高(mm)</th>
+          <th>高(包材)</th>
           <td>
             <div class="input-append">
               <input type="text" style="width:100px" name="pro.heigh" value="${pro.heigh}">
@@ -55,10 +54,46 @@
             </div>
           </td>
 
-          <th>重量(kg)</th>
+          <th>重量(包材)</th>
           <td>
             <div class="input-append">
               <input type="text" style="width:100px" name="pro.weight" value="${pro.weight}">
+              <span class="add-on">Kg</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th>长(产品)</th>
+          <td>
+            <div class="input-append">
+              <input type="text" style="width:100px" name="pro.productLengths" value="${pro.productLengths}">
+              <span class="add-on">mm</span>
+            </div>
+          </td>
+
+          <th>宽(产品)</th>
+          <td>
+            <div class="input-append">
+              <input type="text" style="width:100px" name="pro.productWidth" value="${pro.productWidth}">
+              <span class="add-on">mm</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th>高(产品)</th>
+          <td>
+            <div class="input-append">
+              <input type="text" style="width:100px" name="pro.productHeigh" value="${pro.productHeigh}">
+              <span class="add-on">mm</span>
+            </div>
+          </td>
+
+          <th>重量(产品)</th>
+          <td>
+            <div class="input-append">
+              <input type="text" style="width:100px" name="pro.productWeight" value="${pro.productWeight}">
               <span class="add-on">Kg</span>
             </div>
           </td>
@@ -72,7 +107,7 @@
               <input type="text" style="width:100px" name="pro.declaredValue" value="${pro.declaredValue}">
             </div>
           </td>
-          <th>产品品名</th>
+          <th>申报品名(运输)</th>
           <td>
             <input type="text" id="pro_declareName" name="pro.declareName" value="${pro.declareName}">
           </td>
@@ -110,7 +145,7 @@
         </tr>
 
         <tr>
-          <th>产品简称</th>
+          <th>产品名称</th>
           <td colspan="3">
             <input type="text" style="width:95%" id="pro_abbreviation" name="pro.abbreviation" value="${pro
             .abbreviation}">
@@ -119,8 +154,12 @@
 
         <tr>
           <th>标题</th>
-          <td colspan="3">
+          <td>
             <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+          </td>
+          <th>副标题</th>
+          <td>
+            <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.subtitle">
           </td>
         </tr>
 

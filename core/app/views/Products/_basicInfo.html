@@ -1,18 +1,20 @@
-#{info_row title:'基本信息'}
-<ul>
-  <li>长,宽,高的单位为: mm</li>
-  <li>重量的单位为 kg</li>
-</ul>
-#{/info_row}
 <div class="row-fluid">
   <form action="@{Products.update()}" method="post" id="update_product_form">
     <table class="table table-bordered" id="prod_basic">
       <tr>
         <td>SKU</td>
         <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
+        <td>Category</td>
+        <td>${pro.category}</td>
+      </tr>
+
+      <tr>
+        <td>Brand</td>
+         <td>${pro.family?.brand}</td>
         <td>Family</td>
         <td>${pro.family?.family}</td>
       </tr>
+
       <tr>
         <td>长(包材)</td>
         <td>
@@ -93,7 +95,7 @@
             <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
           </div>
         </td>
-        <th>申报品名</th>
+        <th>申报品名(运输)</th>
         <td>
           <input type="text" name="pro.declareName" value="${pro.declareName}">
         </td>
@@ -130,25 +132,25 @@
         #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
         </td>
 
-        <th>State</th>
+        <th>State(运营)</th>
         <td style="color:${pro.state?.fontcolor()}">${pro.state}</td>
       </tr>
 
       <tr>
-        <td>产品名称</td>
+        <th>产品名称</th>
         <td colspan="4">
           <input type="text" style="width:95%" name="pro.abbreviation" value="${pro.abbreviation}">
         </td>
       </tr>
 
       <tr>
-        <td>标题</td>
+        <th>标题</th>
         <td>
           <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
         </td>
-        <td>副标题</td>
+        <th>副标题</th>
         <td>
-          <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.productName">
+          <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.subtitle">
         </td>
       </tr>
 
