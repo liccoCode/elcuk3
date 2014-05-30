@@ -14,7 +14,6 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import play.db.DB;
 
 public class ActivitiEngine {
-
     public static ProcessEngine processEngine;
 
     public static void initEngine() {
@@ -26,10 +25,9 @@ public class ActivitiEngine {
         processEngineConfiguration.setDataSource(DB.datasource);
         processEngineConfiguration.setJobExecutorActivate(true);
 
-        processEngineConfiguration.setActivityFontName("宋体");
-        processEngineConfiguration.setLabelFontName("宋体");
+        processEngineConfiguration.setActivityFontName("微软雅黑");
+        processEngineConfiguration.setLabelFontName("微软雅黑");
         processEngine = processEngineConfiguration.buildProcessEngine();
         Context.setProcessEngineConfiguration((ProcessEngineConfigurationImpl) processEngineConfiguration);
     }
-
 }
