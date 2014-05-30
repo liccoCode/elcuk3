@@ -52,7 +52,10 @@ $ ->
 
   $("#update_form").on("click", "#planactiviti_btn", (r) ->
     $btn = $(@)
-    $ship = $("select[name='check.isship']")
+    $dealway = $("select[name='check.dealway']")
+    if ($dealway.val() == '')
+      alert('请填写处理方式!')
+      return
     return unless confirm('确认提交?')
 
 

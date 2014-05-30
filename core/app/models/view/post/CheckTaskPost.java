@@ -196,7 +196,7 @@ public class CheckTaskPost extends Post<CheckTask> {
         if(StringUtils.equalsIgnoreCase("check", flag)) {
             sbd += " AND c.checkstat =  '" + CheckTask.StatType.UNCHECK + "'";
         } else if(StringUtils.equalsIgnoreCase("checked", flag)) {
-            sbd += " AND c.checkstat =  '" + CheckTask.StatType.CHECKFINISH + "'";
+            sbd += " AND c.finishStat ='" + CheckTask.ConfirmType.CONFIRM + "'";
         } else {
             CheckTask.StatType[] checkstats = {
                     //CheckTask.StatType.CHECKNODEAL, CheckTask.StatType.CHECKDEAL,

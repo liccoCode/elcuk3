@@ -156,6 +156,14 @@ public class CheckTask extends Model {
     @Enumerated(EnumType.STRING)
     public ConfirmType confirmstat = ConfirmType.UNCONFIRM;
 
+
+    /**
+     * 完成状态,后台记录，不显示
+     */
+    @Enumerated(EnumType.STRING)
+    public ConfirmType finishStat = ConfirmType.UNCONFIRM;
+
+
     @Transient
     public static String ACTIVITINAME = "checktasks.fullupdate";
 
@@ -442,6 +450,7 @@ public class CheckTask extends Model {
                 }
 
                 newtask.creatat = new Date();
+                newtask.finishStat = ConfirmType.UNCONFIRM;
                 newtask.save();
                 DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
             }
@@ -474,6 +483,7 @@ public class CheckTask extends Model {
         newtask.checkstat = StatType.REPEATCHECK;
         newtask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
         newtask.creatat = new Date();
+        newtask.finishStat = ConfirmType.UNCONFIRM;
 
         //查找仓库
         Whouse wh = searchWarehouse(punit.shipItems);
@@ -522,6 +532,7 @@ public class CheckTask extends Model {
         switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
+                this.finishStat = ConfirmType.CONFIRM;
                 break;
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
@@ -626,41 +637,86 @@ public class CheckTask extends Model {
     public void editplanArrivDate() {
         if(this.planDeliveryDate != null) {
             this.oldplanDeliveryDate = this.units.attrs.planDeliveryDate;
-            this.save();
-
             this.units.attrs.planDeliveryDate = this.planDeliveryDate;
-            this.units.save();
         }
     }
 
+    /**
+     * 采购确认
+     *
+     * @param wfee
+     * @param flow
+     * @return
+     */
+    public java.util.Map<String, Object> processProcureUnit(float wfee, int flow) {
+        java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
+        this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
+        this.workfee = wfee;
+        //修改预计交货时间
+        this.editplanArrivDate();
 
-    public void submitActiviti(ActivitiProcess ap, String taskname, float wfee, int flow, long id, String username) {
+        if(flow == 2) {
+            variableMap.put("flow", "2");
+            //已完成
+            this.checkstat = StatType.CHECKFINISH;
+            //合格
+            this.isship = ShipType.SHIP;
+            this.result = ResultType.AGREE;
+            updateFinishStat();
+        } else {
+            variableMap.put("flow", "1");
+            //已处理
+            this.checkstat = StatType.CHECKDEAL;
+        }
 
+        //退回工厂或者到仓库返工 需要重检
+        if(this.dealway == CheckTask.DealType.RETURN ||
+                this.dealway == CheckTask.DealType.WAREHOUSE) {
+            generateRepeatTask(this.dealway, this.id, this.units.id);
+        }
+
+        return variableMap;
+    }
+
+    /**
+     * 质检确认
+     *
+     * @return
+     */
+    public java.util.Map<String, Object> processQc() {
+        java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
+        //退回工厂或者到仓库返工
+        //结束
+        if(this.dealway == CheckTask.DealType.RETURN ||
+                this.dealway == CheckTask.DealType.WAREHOUSE) {
+            variableMap.put("flow", "1");
+        }
+        //代仓库返工
+        //不发货 返回采购员
+        if(this.dealway == CheckTask.DealType.HELP) {
+            if(this.isship == CheckTask.ShipType.SHIP) {
+                //发货
+                variableMap.put("flow", "1");
+                /**
+                 * 已检完成
+                 */
+                this.checkstat = StatType.CHECKFINISH;
+                updateFinishStat();
+            } else {
+                //不发货
+                variableMap.put("flow", "2");
+            }
+        }
+        //修改质检为确认状态
+        this.units.qcConfirm = ProcureUnit.QCCONFIRM.CONFIRMED;
+        return variableMap;
+    }
+
+
+    public void submitActiviti(ActivitiProcess ap, String taskname, float wfee, int flow, String username) {
         java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
         if(taskname.equals("采购员")) {
-            this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
-            this.workfee = wfee;
-            //修改预计交货时间
-            this.editplanArrivDate();
-
-            if(flow == 2) {
-                variableMap.put("flow", "2");
-                //已完成
-                this.checkstat = StatType.CHECKFINISH;
-                //合格
-                this.isship = ShipType.SHIP;
-                this.result = ResultType.AGREE;
-            } else {
-                variableMap.put("flow", "1");
-                //已处理
-                this.checkstat = StatType.CHECKDEAL;
-            }
-
-            //退回工厂或者到仓库返工 需要重检
-            if(this.dealway == CheckTask.DealType.RETURN ||
-                    this.dealway == CheckTask.DealType.WAREHOUSE) {
-                generateRepeatTask(this.dealway, this.id, this.units.id);
-            }
+            variableMap = processProcureUnit(wfee, flow);
         }
         if(taskname.equals("运营")) {
             variableMap.put("flow", "1");
@@ -668,31 +724,8 @@ public class CheckTask extends Model {
             this.units.opConfirm = ProcureUnit.OPCONFIRM.CONFIRMED;
         }
         if(taskname.equals("质检确认")) {
-            //退回工厂或者到仓库返工
-            //结束
-            if(this.dealway == CheckTask.DealType.RETURN ||
-                    this.dealway == CheckTask.DealType.WAREHOUSE) {
-                variableMap.put("flow", "1");
-            }
-            //代仓库返工
-            //不发货 返回采购员
-            if(this.dealway == CheckTask.DealType.HELP) {
-                if(this.isship == CheckTask.ShipType.SHIP) {
-                    //发货
-                    variableMap.put("flow", "1");
-                    /**
-                     * 已检完成
-                     */
-                    this.checkstat = StatType.CHECKFINISH;
-                } else {
-                    //不发货
-                    variableMap.put("flow", "2");
-                }
-            }
-            //修改质检为确认状态
-            this.units.qcConfirm = ProcureUnit.QCCONFIRM.CONFIRMED;
+            variableMap = processQc();
         }
-
         this.save();
         if(this.opition == null) this.opition = "";
         if(this.dealway != null) this.opition = "[" + this.dealway.label() + "]" + this.opition;
@@ -702,6 +735,26 @@ public class CheckTask extends Model {
     }
 
 
+    /**
+     * 更新所有采购计划的质检状态为已完成
+     */
+    public void updateFinishStat() {
+        this.finishStat = ConfirmType.CONFIRM;
+        List<CheckTask> checklist = CheckTask.find("units=? and id!=?", units, this.id).fetch();
+        for(CheckTask task : checklist) {
+            task.finishStat = ConfirmType.CONFIRM;
+            task.save();
+        }
+    }
+
+
+    /**
+     * 显示流程历史意见
+     *
+     * @param id
+     * @param username
+     * @return
+     */
     public Map<String, Object> showInfo(Long id, String username) {
         ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?",
                 CheckTask.ACTIVITINAME, id).first();
