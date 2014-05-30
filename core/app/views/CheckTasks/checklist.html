@@ -36,9 +36,9 @@
       <a class="btn btn_small" href="@{CheckTasks.checklist(p,1)}">1天内</a>
     </div>
 
-    <select style="margin-left:20px;" name="p.whouseId" class="inline">
+    <select style="margin-left:20px;" name="p.shipwhouseId" class="inline">
       <option value="0">仓库</option>
-        #{list items:whouses, as:'wh'}
+        #{list items:shipwhouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
         #{/list}
     </select>
@@ -47,6 +47,13 @@
       <option value="0">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+        #{/list}
+    </select>
+
+    <select name="p.checkor" class="inline">
+      <option value="">质检员</option>
+        #{list items:users, as:'user'}
+          <option value="${user.username}" ${p.checkor == user.username? 'selected': ''}>${user.username}</option>
         #{/list}
     </select>
 

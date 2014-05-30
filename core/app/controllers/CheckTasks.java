@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.ElcukRecord;
+import models.User;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
@@ -41,6 +42,10 @@ public class CheckTasks extends Controller {
         renderArgs.put("whouses", Whouse.find("type !=?", Whouse.T.FORWARD).fetch());
         renderArgs.put("shipwhouses", Whouse.find("type =?", Whouse.T.FORWARD).fetch());
         renderArgs.put("cooperators", cooperators);
+
+        List<User> users = User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
+                "like ?", "%质检%").fetch();
+        renderArgs.put("users", users);
     }
 
 
@@ -187,6 +192,8 @@ public class CheckTasks extends Controller {
         check.checkor = old.shipwhouse.user.username;
         check.validateRequired();
         check.validateRight();
+        if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
+
         if(Validation.hasErrors()) {
             check = old;
             render("CheckTasks/show.html", check);
@@ -234,7 +241,7 @@ public class CheckTasks extends Controller {
         }
 
 
-        c.submitActiviti(ap, taskname, check.workfee, 1, id, Secure.Security.connected());
+        c.submitActiviti(ap, taskname, check.workfee, 1, Secure.Security.connected());
 
         flash.success("更新成功");
         CheckTasks.showactiviti(check.id);
@@ -268,7 +275,7 @@ public class CheckTasks extends Controller {
         }
 
         CheckTask c = CheckTask.findById(check.id);
-        c.submitActiviti(ap, taskname, check.workfee, 1, id, Secure.Security.connected());
+        c.submitActiviti(ap, taskname, check.workfee, 1, Secure.Security.connected());
         flash.success("更新成功");
         CheckTasks.showactiviti(check.id);
     }
@@ -302,7 +309,7 @@ public class CheckTasks extends Controller {
         c.save();
 
         //提交流程
-        c.submitActiviti(ap, taskname, check.workfee, 2, id, Secure.Security.connected());
+        c.submitActiviti(ap, taskname, check.workfee, 2, Secure.Security.connected());
 
         flash.success("更新成功");
         CheckTasks.showactiviti(check.id);
