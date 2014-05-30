@@ -13,13 +13,12 @@ whouses:whouses /}
   #{render 'ProcureUnits/_shipments.html'/}
   </td>
 </tr>
-<input type="hidden" name="checkid" value="${check.id}">
 
 <tr>
   <td colspan="4">
     <input type="hidden" name="unitid" value="${unit.id}">
     <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
-    <button type="submit" class="btn btn-primary">更新</button>
+    <a id="updateprocess_btn" href="javascript:void(0)" class="btn btn-info">更新</a>
     <a id="operateactiviti_btn" href="javascript:void(0)" class="btn btn-info">提交流程</a>
   </td>
 </tr>

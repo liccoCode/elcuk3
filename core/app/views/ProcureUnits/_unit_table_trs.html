@@ -24,9 +24,9 @@
   </td>
 
   <th>价格</th>
-  <td>
+  <td class="span3">
     <div class="input-append">
-      <input type="text" class="span1" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+      <input type="text" class="span3" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
     #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
     </div>
   </td>

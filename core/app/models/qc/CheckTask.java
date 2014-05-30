@@ -37,7 +37,8 @@ public class CheckTask extends Model {
     /**
      * 采购计划单
      */
-    @OneToOne(cascade = {CascadeType.PERSIST})
+    @Expose
+    @OneToOne
     public ProcureUnit units;
 
     /**
@@ -536,6 +537,7 @@ public class CheckTask extends Model {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
                 this.finishStat = ConfirmType.CONFIRM;
+                this.updateFinishStat();
                 break;
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
@@ -729,6 +731,7 @@ public class CheckTask extends Model {
         if(taskname.equals("质检确认")) {
             variableMap = processQc();
         }
+        this.units.save();
         this.save();
         if(this.opition == null) this.opition = "";
         if(this.dealway != null) this.opition = "[" + this.dealway.label() + "]" + this.opition;
