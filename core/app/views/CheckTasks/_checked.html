@@ -42,8 +42,12 @@
         <td>${checked.units.attrs.deliveryDate}</td>
         <td>${checked.startTime}</td>
         <td>${checked.endTime}</td>
+        <td>
+            #{if checked.startTime != null && checked.endTime != null}
+              ${((checked.endTime.getTime() - checked.startTime.getTime())/(60 * 60 * 1000)).format("#.##")}
+            #{/if}
+        </td>
         <td>${checked.workhour}</td>
-        <td>#{if checked.workers != 0}${(checked.workhour/checked.workers).format("#.###")}#{/if}</td>
         <td>${checked.workers}</td>
         <td>${checked.units.attrs.planQty}</td>
         <td>${checked.units.attrs.qty}</td>
