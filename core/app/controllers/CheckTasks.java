@@ -217,9 +217,8 @@ public class CheckTasks extends Controller {
         } else if(taskname.equals("质检确认")) {
             //退回工厂或者到仓库返工
             //结束
-            if(check.dealway == CheckTask.DealType.RETURN ||
-                    check.dealway == CheckTask.DealType.WAREHOUSE) {
-            } else {
+            if(!(check.dealway == CheckTask.DealType.RETURN ||
+                    check.dealway == CheckTask.DealType.WAREHOUSE)) {
                 c.checknote = check.checknote;
                 c.qty = check.qty;
                 c.pickqty = check.pickqty;
@@ -230,12 +229,9 @@ public class CheckTasks extends Controller {
                 c.checknote = check.checknote;
                 c.workers = check.workers;
                 c.workhour = check.workhour;
-
             }
         }
         c.opition = check.opition;
-
-
         c.submitActiviti(ap, taskname, check.workfee, 1, Secure.Security.connected());
 
         flash.success("更新成功");
@@ -289,6 +285,7 @@ public class CheckTasks extends Controller {
         CheckTask c = CheckTask.findById(checkid);
         c.isship = CheckTask.ShipType.SHIP;
         c.result = CheckTask.ResultType.AGREE;
+        c.opition = "[还原]" + check.opition;
 
         //提交流程
         c.submitActiviti(ap, taskname, check.workfee, 2, Secure.Security.connected());
