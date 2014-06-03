@@ -121,3 +121,8 @@ $ ->
       $input.parent().after($span)
   )
 
+  # 页面初始化时触发一次
+  inputs = ["input[name='pro.lengths']", "input[name='pro.width']", "input[name='pro.heigh']", "input[name='pro.productLengths']", "input[name='pro.productWidth']", "input[name='pro.productHeigh']", "input[name='pro.weight']", "input[name='pro.productWeight']"]
+  _.each(inputs, (value) ->
+    $(value).trigger("change")
+  )
