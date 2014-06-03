@@ -1,16 +1,22 @@
-#{info_row title:'基本信息'}
-<ul>
-  <li>长,宽,高的单位为: mm</li>
-  <li>重量的单位为 kg</li>
-</ul>
-#{/info_row}
 <div class="row-fluid">
   <form action="@{Products.update()}" method="post" id="update_product_form">
     <table class="table table-bordered" id="prod_basic">
       <tr>
         <td>SKU</td>
         <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
-        <td>长</td>
+        <td>Category</td>
+        <td>${pro.category}</td>
+      </tr>
+
+      <tr>
+        <td>Brand</td>
+         <td>${pro.family?.brand}</td>
+        <td>Family</td>
+        <td>${pro.family?.family}</td>
+      </tr>
+
+      <tr>
+        <td>长(包材)</td>
         <td>
           <div class="input-append">
             <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
@@ -18,16 +24,16 @@
           </div>
         </td>
 
-      </tr>
-      <tr>
-        <td>宽</td>
+        <td>宽(包材)</td>
         <td>
           <div class="input-append">
             <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
             <span class="add-on">mm</span>
           </div>
         </td>
-        <td>高</td>
+      </tr>
+      <tr>
+        <td>高(包材)</td>
         <td>
           <div class="input-append">
 
@@ -35,16 +41,53 @@
             <span class="add-on">mm</span>
           </div>
         </td>
-      </tr>
-      <tr>
-        <td>重量</td>
+
+        <td>重量(包材)</td>
         <td>
           <div class="input-append">
             <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
             <span class="add-on">Kg</span>
           </div>
         </td>
+      </tr>
 
+      <tr>
+        <td>长(产品)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.productLengths" value="${pro.productLengths}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+        <td>宽(产品)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.productWidth" value="${pro.productWidth}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>高(产品)</td>
+        <td>
+          <div class="input-append">
+
+            <input type="text" class="input-mini" name="pro.productHeigh" value="${pro.productHeigh}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+        <td>重量(产品)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.productWeight" value="${pro.productWeight}">
+            <span class="add-on">Kg</span>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
         <th>申报价格</th>
         <td>
           <div class="input-prepend">
@@ -52,21 +95,12 @@
             <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
           </div>
         </td>
-      </tr>
-      <tr>
-        <td>Category</td>
-        <td>${pro.category}</td>
-        <td>Brand</td>
-        <td>${pro.family?.brand}</td>
-      </tr>
-      <tr>
-        <td>Family</td>
-        <td>${pro.family?.family}</td>
-        <td>产品品名(运输)</td>
+        <th>申报品名(运输)</th>
         <td>
           <input type="text" name="pro.declareName" value="${pro.declareName}">
         </td>
       </tr>
+
 
       <tr>
         <th>上市时间</th>
@@ -98,20 +132,25 @@
         #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
         </td>
 
-        <th>State</th>
+        <th>State(运营)</th>
         <td style="color:${pro.state?.fontcolor()}">${pro.state}</td>
       </tr>
 
       <tr>
-        <td>产品简称</td>
-        <td colspan="3">
+        <th>产品名称</th>
+        <td colspan="4">
           <input type="text" style="width:95%" name="pro.abbreviation" value="${pro.abbreviation}">
         </td>
       </tr>
+
       <tr>
-        <td>产品名称</td>
-        <td colspan="3">
+        <th>标题</th>
+        <td>
           <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+        </td>
+        <th>副标题</th>
+        <td>
+          <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.subtitle">
         </td>
       </tr>
 
@@ -122,6 +161,7 @@
             <tr>
               <th>Title</th>
               <th>Content</th>
+              <th>Action</th>
             </tr>
           #{list items:pro.locate, as:'locate'}
             <tr>
@@ -151,6 +191,7 @@
             <tr>
               <th>Title</th>
               <th>Content</th>
+              <th>Action</th>
             </tr>
           #{list items:pro.sellingPoint, as:'point'}
             <tr>
@@ -176,15 +217,15 @@
       </tr>
 
       <tr>
-        <td colspan="10">
-          <button class="btn btn-primary" data-loading>保存</button>
-        #{power.ck "products.saleamazonlisting"}
-          <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
-        #{/power.ck}
-        #{power.ck "products.delete"}
-          <a href="@{Products.delete(pro.sku)}" class="btn btn-danger" data-confirm='确认删除?'>删除</a>
-        </td>
-        #{/power.ck}
+      <td colspan="10">
+        <button class="btn btn-primary" data-loading>保存</button>
+      #{power.ck "products.saleamazonlisting"}
+        <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
+      #{/power.ck}
+      #{power.ck "products.delete"}
+        <a href="@{Products.delete(pro.sku)}" class="btn btn-danger" data-confirm='确认删除?'>删除</a>
+      </td>
+      #{/power.ck}
       </tr>
     </table>
   </form>
