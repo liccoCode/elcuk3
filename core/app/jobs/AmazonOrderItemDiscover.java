@@ -208,6 +208,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                     .append(" Market[").append(orderItem.market).append("]")
                     .append(" Product[").append(orderItem.product).append("]")
                     .append(" Selling[").append(orderItem.selling).append("]")
+                    .append(" memo[").append(orderItem.memo).append("]")
                     .append("<br><br>");
             return false;
         }

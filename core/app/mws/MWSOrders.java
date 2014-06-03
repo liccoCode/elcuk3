@@ -189,12 +189,13 @@ public class MWSOrders {
                         "%|" + item.order.market.nickName() +
                         "|" + acc.id;
                 item.selling = Selling.find("sellingId like ?", likeSellingId).first();
+                item.memo = item.memo+"likeSellingId:"+likeSellingId;
             } else {
                 item.selling = Selling.findById(Selling.sid(
                         mappingSku,
                         item.order.market, acc
                 ));
-
+                item.memo = item.memo+"mappingSku:"+mappingSku;
             }
             item.id = String.format("%s_%s", orderId,
                     Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
