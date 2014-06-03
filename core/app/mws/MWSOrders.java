@@ -194,8 +194,9 @@ public class MWSOrders {
                         mappingSku,
                         item.order.market, acc
                 ));
-
             }
+            item.memo = item.memo+"getSellerSKU:"+amzItem.getSellerSKU();
+
             item.id = String.format("%s_%s", orderId,
                     Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
             item.quantity = amzItem.getQuantityOrdered();

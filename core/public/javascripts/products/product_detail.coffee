@@ -100,3 +100,29 @@ $ ->
         LoadMask.unmask()
       )
   )
+
+  # 将输入的长度、宽度、高度换算成英寸(inch)
+  $(document).on("change", "input[name='pro.lengths'], input[name='pro.width'], input[name='pro.heigh'], input[name='pro.productLengths'], input[name='pro.productWidth'], input[name='pro.productHeigh']", (r) ->
+    $input = $(@)
+    if($input.val() is "" or $input.val() < 0 or isNaN($input.val()))
+      false
+    else
+      $span = $("<span style='margin-left:10px;'></span>").text("(inch: #{(($input.val()) * 0.0393701).toFixed(2)})")
+      $input.parent().next().empty()
+      $input.parent().after($span)
+  ).on("change", "input[name='pro.weight'], input[name='pro.productWeight']", (r) ->
+    # 将输入的重量换算成盎司(oz)
+    $input = $(@)
+    if($input.val() is "" or $input.val() < 0 or isNaN($input.val()))
+      false
+    else
+      $span = $("<span style='margin-left:10px;'></span>").text("(oz: #{(($input.val()) * 35.2739619).toFixed(2)})")
+      $input.parent().next().empty()
+      $input.parent().after($span)
+  )
+
+  # 页面初始化时触发一次
+  inputs = ["input[name='pro.lengths']", "input[name='pro.width']", "input[name='pro.heigh']", "input[name='pro.productLengths']", "input[name='pro.productWidth']", "input[name='pro.productHeigh']", "input[name='pro.weight']", "input[name='pro.productWeight']"]
+  _.each(inputs, (value) ->
+    $(value).trigger("change")
+  )
