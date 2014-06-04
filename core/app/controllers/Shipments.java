@@ -157,23 +157,40 @@ public class Shipments extends Controller {
     }
 
     //TODO effect: 需要调整
-    public static void update(Shipment ship) {
+    public static void update(Shipment ship, String shipid) {
+        Shipment dbship = Shipment.findById(shipid);
+        dbship.cooper = ship.cooper;
+        dbship.whouse = ship.whouse;
+        dbship.title = ship.title;
+        dbship.trackNo = ship.trackNo;
+        dbship.memo = ship.memo;
+        dbship.dates.beginDate = ship.dates.beginDate;
+
         checkAuthenticity();
-        validation.valid(ship);
-        ship.validate();
+        validation.valid(dbship);
+        dbship.validate();
+        String s = Validation.errors().toString();
         if(Validation.hasErrors()) {
             renderArgs.put("ship", ship);
             render("Shipments/show.html");
         }
-        ship.updateShipment();
+        dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
+        /**
+         * 日期发生改变则记录旧的日期
+         */
+        if(dbship.dates.planArrivDate.compareTo(ship.dates.planArrivDate) != 0)
+            dbship.dates.oldPlanArrivDate = dbship.dates.planArrivDate;
+        dbship.dates.planArrivDate = ship.dates.planArrivDate;
+        dbship.updateShipment();
+
         if(Validation.hasErrors()) {
             renderArgs.put("ship", ship);
             render("Shipments/show.html");
         }
         new ElcukRecord(Messages.get("shipment.update"),
-                Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
+                Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
         flash.success("更新成功.");
-        show(ship.id);
+        show(dbship.id);
     }
 
     /**
