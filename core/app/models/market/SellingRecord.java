@@ -427,6 +427,15 @@ public class SellingRecord extends GenericModel {
             } else if(rcd.market == M.AMAZON_US) {
                 chart.series("PageView(us)").add(rcd.date, rcd.pageViews.floatValue());
                 chart.series("Session(us)").add(rcd.date, rcd.sessions.floatValue());
+            } else if(rcd.market == M.AMAZON_JP) {
+                chart.series("PageView(jp)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(jp)").add(rcd.date, rcd.sessions.floatValue());
+            } else if(rcd.market == M.AMAZON_IT) {
+                chart.series("PageView(it)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(it)").add(rcd.date, rcd.sessions.floatValue());
+            } else if(rcd.market == M.AMAZON_ES) {
+                chart.series("PageView(es)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(es)").add(rcd.date, rcd.sessions.floatValue());
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
@@ -453,6 +462,12 @@ public class SellingRecord extends GenericModel {
                 chart.series("TurnRatio(fr)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_US)
                 chart.series("TurnRatio(us)").add(rcd.date, turnRatio);
+            else if(rcd.market == M.AMAZON_IT)
+                chart.series("TurnRatio(it)").add(rcd.date, turnRatio);
+            else if(rcd.market == M.AMAZON_JP)
+                chart.series("TurnRatio(jp)").add(rcd.date, turnRatio);
+            else if(rcd.market == M.AMAZON_ES)
+                chart.series("TurnRatio(es)").add(rcd.date, turnRatio);
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }
