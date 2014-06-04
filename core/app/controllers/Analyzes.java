@@ -126,8 +126,6 @@ public class Analyzes extends Controller {
             }.now());
             renderJSON(json);
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.info(e.getMessage());
             renderJSON(new Ret(Webs.E(e)));
         }
     }
