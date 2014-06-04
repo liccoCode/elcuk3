@@ -115,6 +115,33 @@ public class Webs {
         return Mail.send(email);
     }
 
+
+    /**
+     * 简单的发送 HTML 的系统邮件
+     *
+     * @param subject 邮件标题
+     * @param content 邮件内容
+     * @return
+     */
+    public static Future<Boolean> systemMail(String subject, String content, List<String> mailaddress) {
+        HtmlEmail email = new HtmlEmail();
+        try {
+            email.setCharset("UTF-8");
+            email.setSubject(subject);
+
+            for(String address:mailaddress) {
+                email.addTo(address);
+            }
+
+            email.setFrom("support@easyacceu.com", "EasyAcc");
+            email.setHtmlMsg(content);
+        } catch(EmailException e) {
+            Logger.warn("Email error: " + e.getMessage());
+        }
+        return Mail.send(email);
+    }
+
+
     /**
      * 这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)
      *

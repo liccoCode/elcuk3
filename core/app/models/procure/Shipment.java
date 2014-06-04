@@ -16,6 +16,8 @@ import models.finance.TransportApply;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
@@ -27,10 +29,14 @@ import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.F;
+import play.libs.Mail;
 import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
+
+import helper.Webs;
+
 import java.util.*;
 
 
@@ -1145,6 +1151,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public float minimumTraffic() {
         //海运和空运暂时的最小运输量是500 而快递是不能超过500
         return 500;
+    }
+
+    public void sendMsgMail(Date planArrivDate, String username) {
+        String subject = "";
+        String content = "";
+        List<String> mailaddress = new ArrayList<String>();
+
+        if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
+            subject = String.format("更改运输单[%s]预计到库时间", this.id);
+            content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:http://e.easya.cc/shipment/%s"
+                    , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate), username,
+                    this.id);
+            List<ProcureUnit> punits = ProcureUnit.find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
+                    "  LEFT JOIN " +
+                    " si.shipment " +
+                    " sp " +
+                    " where sp.id=?", this.id).fetch();
+            for(ProcureUnit pu : punits) {
+                String email = pu.handler.email;
+                if(StringUtils.isNotBlank(email)) {
+                    mailaddress.add(email);
+                }
+            }
+            if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
+        }
+
     }
 
 }
