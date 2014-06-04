@@ -14,7 +14,7 @@ import java.util.Date;
  * Time: 9:44 AM
  */
 @Embeddable
-public class ShipmentDates implements Serializable{
+public class ShipmentDates implements Serializable {
 
     private static final long serialVersionUID = -8792808495254263522L;
     /**
@@ -67,6 +67,13 @@ public class ShipmentDates implements Serializable{
     @Expose
     @Required
     public Date planArrivDate;
+
+    /**
+     * 上次预计运输完成时间
+     */
+    @Expose
+    public Date oldPlanArrivDate;
+
 
     /**
      * 实际运输完成时间
