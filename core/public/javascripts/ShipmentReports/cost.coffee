@@ -87,7 +87,7 @@ $ ->
               dataLabels:
                 enabled: true
                 formatter: ->
-                  "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
+                  "<b>#{@point.name}</b>: #{@y.toFixed(2)} [#{@percentage.toFixed(2)}%]"
           series: p['series']
         })
         LoadMask.unmask(mask_selector)

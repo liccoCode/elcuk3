@@ -124,7 +124,7 @@ public class ShipmentReportESQuery {
             } else {
                 result = mes.countShipWeight();
             }
-            pie.add(result == 0 ? 1 : result, m.name());
+            if(result > 0) pie.add(result, m.name());
         }
         return pie;
     }
