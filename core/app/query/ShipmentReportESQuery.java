@@ -36,7 +36,7 @@ public class ShipmentReportESQuery {
                 columnChart.series(shipColum(year, month, t, "shipFee"));
             }
             Cache.delete(key);
-            Cache.add(key, columnChart, "8h");
+            Cache.add(key, columnChart, "4h");
         }
         return columnChart;
     }
@@ -54,7 +54,7 @@ public class ShipmentReportESQuery {
             pieChart.title = String.format("[%s]年度[%s]月份[%s]各市场运输费用统计(USD)", year, month, type);
             pieChart.series(shipPie(year, month, type, "shipFee"));
             Cache.delete(key);
-            Cache.add(key, pieChart, "8h");
+            Cache.add(key, pieChart, "4h");
         }
         return pieChart;
     }
@@ -73,7 +73,7 @@ public class ShipmentReportESQuery {
                 columnChart.series(shipColum(year, month, t, "shipWeight"));
             }
             Cache.delete(key);
-            Cache.add(key, columnChart, "8h");
+            Cache.add(key, columnChart, "4h");
         }
         return columnChart;
     }
@@ -90,7 +90,7 @@ public class ShipmentReportESQuery {
             pieChart.title = String.format("[%s]年度[%s]月份[%s]各市场运输重量统计(Kg)", year, month, type);
             pieChart.series(shipPie(year, month, type, "shipWeight"));
             Cache.delete(key);
-            Cache.add(key, pieChart, "8h");
+            Cache.add(key, pieChart, "4h");
         }
         return pieChart;
     }
