@@ -21,6 +21,7 @@ public class ShipmentReports extends Controller {
     /**
      * 运输方式的重量与费用统计(成本)
      */
+    @Check("shipmentreports.cost")
     public static void cost() {
         render();
     }
