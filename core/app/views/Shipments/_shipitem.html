@@ -26,6 +26,7 @@
     <th>采购单</th>
     <th>预计发货时间</th>
     <th>预计到库时间</th>
+    <th>实际交货时间</th>
     <th>供应商</th>
     <th>总重量(kg)</th>
     <th>抵达?</th>
@@ -33,6 +34,8 @@
     <th>运往仓库</th>
   #{/if}
     <th>采购计划</th>
+    <th>运营创建人</th>
+    <th>采购创建人</th>
   #{power.ck 'paymentunits.postfromtransport'}
       #{if isExpress}
         <th>记录运费</th>
@@ -96,6 +99,7 @@
         #{time_tooltip time: itm.unit.attrs.planShipDate/}
     </td>
     <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
+    <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()}</td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
@@ -108,6 +112,8 @@
       ${itm.unit.id}
       </a>
     </td>
+     <td>${itm.unit.handler.username}</td>
+     <td>${itm.unit.deliveryment?.handler?.username}</td>
       #{power.ck 'paymentunits.postfromtransport'}
           #{if isExpress}
             <td>
