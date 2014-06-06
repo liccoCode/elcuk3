@@ -1,0 +1,43 @@
+#{extends 'main_full.html'/}
+#{set title:'物流重量与费用统计'/}
+#{set 'moreScripts'}
+    #{script 'highstock.js'/}
+    #{script 'ShipmentReports/cost.coffee'/}
+#{/set}
+
+<div class="row-fluid">
+  <div class="span12">
+    <span>日期选择:</span>
+  #{select_year class:'span1', id:'select_year'/}
+  #{select_month class:'span1', id:'select_month'/}
+    <input type="button" class="btn" value="Search" id="count_btn">
+  </div>
+</div>
+<br/>
+
+#{success_row}
+<ul>
+  <li>运输重量与费用统计</li>
+</ul>
+#{/success_row}
+<div class="row-fluid" id="column_home">
+  <div class="span6" style="height:450px;width:47%" id='shipfee_by_type_column'
+       data-url="@{ShipmentReports.countShipFeeByType()}"></div>
+  <div class="span6" style="height:450px;width:47%" id='shipweight_by_type_column'
+       data-url="@{ShipmentReports.countShipWeightByType()}"></div>
+</div>
+<br/>
+
+#{success_row}
+<ul>
+  <li>各市场统计</li>
+</ul>
+#{/success_row}
+<div class="row-fluid" id="pie_home">
+  <div class="span6" style="height:450px;width:47%" id='shipfee_by_market_pie'
+       data-url="@{ShipmentReports.countShipFeeByMarket()}"></div>
+  <div class="span6" style="height:450px;width:47%" id='shipweight_by_market_pie'
+       data-url="@{ShipmentReports.countShipWeightByMarket()}"></div>
+</div>
+
+
