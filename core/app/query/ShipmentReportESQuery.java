@@ -108,7 +108,13 @@ public class ShipmentReportESQuery {
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
             lineChart.title = String.format("[%s]年度[%s][%s]准时到货率", year, shipType, countType.toUpperCase());
-            lineChart.series(rateLine(year, shipType, countType));
+            if(shipType != null) {
+                lineChart.series(rateLine(year, shipType, countType));
+            } else {
+                for(Shipment.T t : Shipment.T.values()) {
+                    lineChart.series(rateLine(year, t, countType));
+                }
+            }
             Cache.delete(key);
             Cache.add(key, lineChart, "4h");
         }
@@ -152,7 +158,7 @@ public class ShipmentReportESQuery {
 
     public static Series.Line rateLine(int year, Shipment.T shipType, String countType) {
         Series.Line line = new Series.Line(String.format("%s年度%s", year, shipType.label()));
-        line.color = "#49A4C6";
+        line.color = ProcuresHelper.rgb(shipType);
         for(int i = 1; i <= 12; i++) {
             //分别计算每个月份的到货率情况
             Date from = Dates.getMonthFirst(year, i);

@@ -13,6 +13,7 @@
 
     <span>运输方式:</span>
     <select class="span1" name="ship_type">
+    <option value="">请选择</option>
     #{list items: models.procure.Shipment.T, as: 't'}
       <option value="${t.name()}">${t.label()}</option>
     #{/list}
