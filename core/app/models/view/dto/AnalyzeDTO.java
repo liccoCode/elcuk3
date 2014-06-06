@@ -158,7 +158,9 @@ public class AnalyzeDTO implements Serializable {
     public float getDis_Price() {
         Selling sell = Selling.findById(this.fid);
         if(sell != null) {
-            if(sell.listing != null) return sell.listing.displayPrice;
+            if(sell.listing != null && sell.listing.displayPrice != null) {
+                return sell.listing.displayPrice;
+            }
         }
         return 0;
     }
