@@ -55,6 +55,9 @@ class ShipPayUnitActor
          },
          "cost_in_usd": {
              "type": "float"
+         },
+         "weight": {
+             "type": "float"
          }
       }
    }
@@ -63,10 +66,11 @@ class ShipPayUnitActor
   # return: partial hash: {sku: [..], selling_id: [..]}
   def shipitem_relate(shipitem_id)
     # [{sku: xx, selling_id: yy}, {sku: zz, selling_id: cc}]
-    row_gorup = {sku: [], selling_id: []}
-    DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id FROM ShipItem si LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id WHERE si.id=?", shipitem_id].each do |row|
+    row_gorup = {sku: [], selling_id: [], weight: 0}
+    DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id, pro.weight*pu.qty weight FROM ShipItem si LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id LEFT JOIN Product pro on pu.product_sku = pro.sku WHERE si.id=?", shipitem_id].each do |row|
       row_gorup[:sku] << row[:sku] unless row_gorup[:sku].include?(row[:sku])
       row_gorup[:selling_id] << row[:selling_id] unless row_gorup[:selling_id].include?(row[:selling_id])
+      row_gorup[:weight] += row[:weight] unless row[:weight] == nil or row[:weight] == "NULL"
     end
     row_gorup
   end
@@ -74,10 +78,11 @@ class ShipPayUnitActor
   # return: partial hash: {sku: [..], selling_id: [..]}
   def shipment(shipment_id)
     unless @shipment_hash.key?(shipment_id)
-      row_gorup = {sku: [], selling_id: []}
-      DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id FROM ShipItem si LEFT JOIN Shipment s ON si.shipment_id=s.id LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id WHERE si.shipment_id=?", shipment_id].each do |row|
+      row_gorup = {sku: [], selling_id: [], weight: 0}
+      DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id, pro.weight*pu.qty weight FROM ShipItem si LEFT JOIN Shipment s ON si.shipment_id=s.id LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id LEFT JOIN Product pro on pu.product_sku = pro.sku WHERE si.shipment_id=?", shipment_id].each do |row|
         row_gorup[:sku] << row[:sku] unless row_gorup[:sku].include?(row[:sku])
         row_gorup[:selling_id] << row[:selling_id] unless row_gorup[:selling_id].include?(row[:selling_id])
+        row_gorup[:weight] += row[:weight] unless row[:weight] == nil or row[:weight] == "NULL"
       end
       @shipment_hash[shipment_id] = row_gorup
     end
