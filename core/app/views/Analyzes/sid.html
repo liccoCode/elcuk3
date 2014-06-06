@@ -48,6 +48,9 @@
         断货天数
       </abbr>
     </th>
+    <th>
+      实时价格
+    </th>
   </tr>
   </thead>
   <tbody>
@@ -92,6 +95,7 @@
     #{turnOver turnOver:dto.turnOverT4._3/}
     #{turnOver turnOver:dto.turnOverT4._4/}
     <td>${dto.outday}</td>
+    <td>${dto.displayPrice}</td>
   </tr>
   #{/list}
   </tbody>

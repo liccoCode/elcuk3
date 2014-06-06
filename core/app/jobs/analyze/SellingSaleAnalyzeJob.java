@@ -125,7 +125,7 @@ public class SellingSaleAnalyzeJob extends Job {
                     }
                     dto.difference = dto.day1 - dto.day7 / 7;
                     dto.difference = Webs.scale2PointUp(dto.difference);
-
+                    dto.displayPrice = dto.getDis_Price();
                     dtos.add(dto);
                 }
 
