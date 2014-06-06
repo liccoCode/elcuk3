@@ -102,12 +102,19 @@ public class ShipmentReportESQuery {
      * 运输准时到货率统计
      */
     public static HighChart arrivalRateLine(final int year, final Shipment.T shipType, final String countType) {
-        String key = Caches.Q.cacheKey(year, shipType, countType.toUpperCase(), "ArrivalRate");
+        String key;
+        if(shipType == null) {
+            key = Caches.Q.cacheKey(year, countType, "ArrivalRate");
+        } else {
+            key = Caches.Q.cacheKey(year, shipType, countType, "ArrivalRate");
+        }
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
-            lineChart.title = String.format("[%s]年度[%s][%s]准时到货率", year, shipType, countType.toUpperCase());
+            lineChart.title = shipType == null ?
+                    String.format("[%s]年度[%s]准时到货率", year, countType) :
+                    String.format("[%s]年度[%s][%s]准时到货率", year, shipType, countType);
             if(shipType != null) {
                 lineChart.series(rateLine(year, shipType, countType));
             } else {
@@ -157,7 +164,7 @@ public class ShipmentReportESQuery {
     }
 
     public static Series.Line rateLine(int year, Shipment.T shipType, String countType) {
-        Series.Line line = new Series.Line(String.format("%s年度%s", year, shipType.label()));
+        Series.Line line = new Series.Line(String.format(shipType.label()));
         line.color = ProcuresHelper.rgb(shipType);
         for(int i = 1; i <= 12; i++) {
             //分别计算每个月份的到货率情况
@@ -202,7 +209,7 @@ public class ShipmentReportESQuery {
         SqlSelect sql = new SqlSelect().select("COUNT(pro.qty) qty").from("Procureunit pro").leftJoin("ShipItem " +
                 "si ON pro.id=si.unit_id").leftJoin("Shipment sp ON si.shipment_id=sp.id").where("sp.type=?")
                 .param(shipType.toString());
-        if(StringUtils.equals(countType, "receiptDate")) {
+        if(StringUtils.equals(countType, "ReceiptDate")) {
             sql.andWhere("sp.receiptDate>=?").param(from).where("sp.receiptDate<=?").param(to);
         } else {
             sql.andWhere("sp.planBeginDate>=?").param(from).where("sp.planBeginDate<=?").param(to);
