@@ -159,8 +159,8 @@ public class AnalyzeDTO implements Serializable {
         try {
             Selling sell = Selling.findById(this.fid);
             if(sell != null) {
-                if(sell.listing != null && sell.listing.displayPrice != null) {
-                    return sell.listing.displayPrice;
+                if(sell.aps != null && sell.aps.salePrice != null) {
+                    return sell.aps.salePrice;
                 }
             }
         } catch(Exception e) {

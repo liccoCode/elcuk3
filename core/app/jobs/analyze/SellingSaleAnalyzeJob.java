@@ -141,8 +141,9 @@ public class SellingSaleAnalyzeJob extends Job {
                     //查找需要计算的采购计划
                     List<ProcureUnit> untis = ProcureUnit.find(
                             (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage != ?"
+                                    + " AND stage != ?"
                                     + " ORDER BY attrs.planArrivDate ",
-                            dto.fid, ProcureUnit.STAGE.CLOSE)
+                            dto.fid, ProcureUnit.STAGE.CLOSE,ProcureUnit.STAGE.INBOUND)
                             .fetch();
                     /**
                      * 计算采购计划不间断供应多少天
