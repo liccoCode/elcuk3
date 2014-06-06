@@ -1,7 +1,9 @@
 package models.view.dto;
 
 import helper.Webs;
+import models.market.Listing;
 import models.market.M;
+import models.market.Selling;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
@@ -138,7 +140,10 @@ public class AnalyzeDTO implements Serializable {
      */
     public int outday;
 
-
+    /**
+     * 实时价格
+     */
+    public float displayPrice;
 
 
     public float getPs_cal() {
@@ -149,6 +154,14 @@ public class AnalyzeDTO implements Serializable {
         this.ps_cal = Webs.scale2PointUp(this.ps_cal);
         return this.ps_cal;
     }
+
+    public float getDis_Price() {
+        Selling sell = Selling.findById(this.fid);
+        if(sell != null)
+            return sell.listing.displayPrice;
+        else return 0;
+    }
+
 
     /**
      * 计算系数内的两个 Turnover 值<br/>
