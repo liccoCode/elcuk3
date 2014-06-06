@@ -133,6 +133,11 @@ public class AnalyzeDTO implements Serializable {
      */
     public String state;
 
+    /**
+     * 断货天数
+     */
+    public int outday;
+
 
 
 
