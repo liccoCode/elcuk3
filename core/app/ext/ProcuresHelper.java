@@ -1,6 +1,7 @@
 package ext;
 
 import helper.Webs;
+import models.market.M;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
@@ -102,6 +103,27 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#C09853";
             case DELETED:
                 return "#BD4A48";
+            default:
+                return "#333333";
+        }
+    }
+
+    public static String rgb(M market) {
+        switch(market) {
+            case AMAZON_US:
+                return "#333333";
+            case AMAZON_UK:
+                return "#49A4C6";
+            case AMAZON_DE:
+                return "#3DA4C2";
+            case AMAZON_FR:
+                return "#108080";
+            case AMAZON_IT:
+                return "#006ACC";
+            case AMAZON_ES:
+                return "#F9A021";
+            case AMAZON_JP:
+                return "#5BB75B";
             default:
                 return "#333333";
         }

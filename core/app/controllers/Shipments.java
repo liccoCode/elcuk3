@@ -171,7 +171,7 @@ public class Shipments extends Controller {
         dbship.validate();
         String s = Validation.errors().toString();
         if(Validation.hasErrors()) {
-            renderArgs.put("ship", ship);
+            renderArgs.put("ship", dbship);
             render("Shipments/show.html");
         }
         dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
@@ -184,7 +184,7 @@ public class Shipments extends Controller {
         dbship.updateShipment();
 
         if(Validation.hasErrors()) {
-            renderArgs.put("ship", ship);
+            renderArgs.put("ship", dbship);
             render("Shipments/show.html");
         }
         new ElcukRecord(Messages.get("shipment.update"),
