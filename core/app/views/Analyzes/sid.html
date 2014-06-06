@@ -43,6 +43,14 @@
         _TOR1
       </abbr>
     </th>
+    <th>
+      <abbr title="在库库存周转天数到下一批预计到库时间之间出现衔接不上即出现断货的情况，即为断货天数">
+        断货天数
+      </abbr>
+    </th>
+    <th>
+      实时价格
+    </th>
   </tr>
   </thead>
   <tbody>
@@ -86,6 +94,8 @@
     #{turnOver turnOver:dto.turnOverT4._2/}
     #{turnOver turnOver:dto.turnOverT4._3/}
     #{turnOver turnOver:dto.turnOverT4._4/}
+    <td>${dto.outday}</td>
+    <td>${dto.displayPrice}</td>
   </tr>
   #{/list}
   </tbody>

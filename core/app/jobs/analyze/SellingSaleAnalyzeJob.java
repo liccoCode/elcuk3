@@ -125,14 +125,47 @@ public class SellingSaleAnalyzeJob extends Job {
                     }
                     dto.difference = dto.day1 - dto.day7 / 7;
                     dto.difference = Webs.scale2PointUp(dto.difference);
+                    dto.displayPrice = dto.getDis_Price();
                     dtos.add(dto);
                 }
 
                 // qty cal
                 pullQtyToDTO(isSku, analyzeMap);
 
+                //断货天数
+                for(AnalyzeDTO dto : analyzeMap.values()) {
+                    int outday = Webs.scale2PointUp(dto.qty / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)).intValue();
+                    DateTime time = DateTime.now();
+                    time = time.plusDays(outday);
+
+                    //查找需要计算的采购计划
+                    List<ProcureUnit> untis = ProcureUnit.find(
+                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage != ?"
+                                    + " ORDER BY attrs.planArrivDate ",
+                            dto.fid, ProcureUnit.STAGE.CLOSE)
+                            .fetch();
+                    /**
+                     * 计算采购计划不间断供应多少天
+                     */
+                    for(ProcureUnit unit : untis) {
+                        //判断到达仓库日期是否在断货日期之前
+                        if(unit.attrs != null && unit.attrs.planArrivDate != null && unit.attrs.planArrivDate.before(time
+                                .plusDays(1).toDate())) {
+                            int arrivday = Webs.scale2PointUp(unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
+                            ).intValue();
+                            outday = outday + arrivday;
+                            time = time.plusDays(arrivday);
+                        } else {
+                            break;
+                        }
+                    }
+                    dto.outday = outday;
+                }
+
+
                 // review
                 pullReviewToDTO(isSku, analyzeMap);
+
 
                 Cache.add(cacke_key, dtos, "8h");
                 Cache.set(cacke_key + ".time", DateTime.now().plusHours(8).toDate(), "8h");
