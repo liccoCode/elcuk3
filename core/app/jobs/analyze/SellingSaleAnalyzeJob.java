@@ -149,7 +149,8 @@ public class SellingSaleAnalyzeJob extends Job {
                      */
                     for(ProcureUnit unit : untis) {
                         //判断到达仓库日期是否在断货日期之前
-                        if(unit.attrs.planArrivDate.before(time.plusDays(1).toDate())) {
+                        if(unit.attrs != null && unit.attrs.planArrivDate != null && unit.attrs.planArrivDate.before(time
+                                .plusDays(1).toDate())) {
                             int arrivday = Webs.scale2PointUp(unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
                             ).intValue();
                             outday = outday + arrivday;
