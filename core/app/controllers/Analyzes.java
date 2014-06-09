@@ -8,6 +8,8 @@ import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
+import models.view.post.TrafficRatePost;
+import models.view.report.TrafficRate;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
@@ -64,6 +66,22 @@ public class Analyzes extends Controller {
             List<AnalyzeDTO> dtos = p.query();
             //response.cacheFor(String.valueOf(dtos.hashCode()),"3h",System.currentTimeMillis());
             render("Analyzes/" + p.type + ".html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<h3>" + e.getMessage() + "</h3>");
+        }
+    }
+
+
+    /**
+     * 流量转化率统计报表
+     *
+     * @param p
+     */
+    public static void trafficRate(TrafficRatePost p) {
+        try {
+            if(p == null) p = new TrafficRatePost();
+            List<TrafficRate> trs = p.query();
+            render(trs, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
