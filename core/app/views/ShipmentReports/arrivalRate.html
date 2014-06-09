@@ -1,0 +1,43 @@
+#{extends 'main_full.html'/}
+#{set title:'运输到货率统计'/}
+#{set 'moreScripts'}
+    #{script 'highstock.js'/}
+    #{script 'ShipmentReports/arrivalRate.coffee'/}
+#{/set}
+
+<div class="row-fluid">
+  <div class="span12">
+    <span>年份:</span>
+  #{select_year class:'span1', name:'select_year'/}
+    &nbsp;
+
+    <span>运输方式:</span>
+    <select class="span1" name="ship_type">
+    <option value="">请选择</option>
+    #{list items: models.procure.Shipment.T, as: 't'}
+      <option value="${t.name()}">${t.label()}</option>
+    #{/list}
+    </select>
+    &nbsp;
+
+    <span>统计方式:</span>
+    <select class="span1" name="count_type">
+      <option value="ReceiptDate">签收时间</option>
+      <option value="PlanBeginDate">预计发货日期</option>
+    </select>
+    &nbsp;
+
+    <input type="button" class="btn" value="Search" id="submit_btn">
+  </div>
+</div>
+<br/>
+
+#{success_row}
+<ul>
+  <li>准时到货率统计</li>
+</ul>
+#{/success_row}
+
+<div class="row-fluid">
+  <div class="span12" style="height:450px;" id='arrival_rate_line' data-url="@{ShipmentReports.countArrivalRate()}"></div>
+</div>

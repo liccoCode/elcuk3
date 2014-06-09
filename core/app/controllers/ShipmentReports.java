@@ -73,4 +73,31 @@ public class ShipmentReports extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
+
+
+    public static void arrivalRate() {
+        render();
+    }
+
+    /**
+     * 统计物流准时到货率
+     * <p/>
+     * 规则:
+     * <p/>
+     * 预计到库时间 < 签收时间, 超时抵达
+     * 预计到库时间 = 签收时间, 准时抵达
+     * 预计到库时间 > 签收时间, 提前抵达
+     * <p/>
+     * 准时到货率的公式:
+     * 准时到货率 = (准时抵达数量 + 提前抵达数量) / (超时抵达数量 + 提前抵达数量 + 准时抵达数量)*100%
+     * 注: 数量(采购计划的实际交货数量)
+     */
+    public static void countArrivalRate(int year, Shipment.T shipType, String countType) {
+        try {
+            HighChart chart = ShipmentReportESQuery.arrivalRateLine(year, shipType, countType);
+            renderJSON(J.json(chart));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
 }
