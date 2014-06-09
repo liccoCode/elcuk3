@@ -58,6 +58,10 @@ class ShipPayUnitActor
          },
          "weight": {
              "type": "float"
+         },
+         "ship_date": {
+            "type": "date",
+            "format": "date_optional_time"    
          }
       }
    }
@@ -67,7 +71,7 @@ class ShipPayUnitActor
   def shipitem_relate(shipitem_id)
     # [{sku: xx, selling_id: yy}, {sku: zz, selling_id: cc}]
     row_gorup = {sku: [], selling_id: [], weight: 0}
-    DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id, pro.weight*pu.qty weight FROM ShipItem si LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id LEFT JOIN Product pro on pu.product_sku = pro.sku WHERE si.id=?", shipitem_id].each do |row|
+    DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id, (CASE WHEN pu.qty>0 THEN pro.weight*pu.qty WHEN pu.qty=0 THEN pro.weight*pu.planQty WHEN pu.qty IS NULL THEN pro.weight*pu.planQty END) weight FROM ShipItem si LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id LEFT JOIN Product pro on pu.product_sku = pro.sku WHERE si.id=?", shipitem_id].each do |row|
       row_gorup[:sku] << row[:sku] unless row_gorup[:sku].include?(row[:sku])
       row_gorup[:selling_id] << row[:selling_id] unless row_gorup[:selling_id].include?(row[:selling_id])
       row_gorup[:weight] += row[:weight] unless row[:weight] == nil or row[:weight] == "NULL"
@@ -79,7 +83,7 @@ class ShipPayUnitActor
   def shipment(shipment_id)
     unless @shipment_hash.key?(shipment_id)
       row_gorup = {sku: [], selling_id: [], weight: 0}
-      DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id, pro.weight*pu.qty weight FROM ShipItem si LEFT JOIN Shipment s ON si.shipment_id=s.id LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id LEFT JOIN Product pro on pu.product_sku = pro.sku WHERE si.shipment_id=?", shipment_id].each do |row|
+      DB["SELECT pu.product_sku sku, pu.selling_sellingId selling_id, (CASE WHEN pu.qty>0 THEN pro.weight*pu.qty WHEN pu.qty=0 THEN pro.weight*pu.planQty WHEN pu.qty IS NULL THEN pro.weight*pu.planQty END) weight FROM ShipItem si LEFT JOIN Shipment s ON si.shipment_id=s.id LEFT JOIN ProcureUnit pu ON si.unit_id=pu.id LEFT JOIN Product pro on pu.product_sku = pro.sku WHERE si.shipment_id=?", shipment_id].each do |row|
         row_gorup[:sku] << row[:sku] unless row_gorup[:sku].include?(row[:sku])
         row_gorup[:selling_id] << row[:selling_id] unless row_gorup[:selling_id].include?(row[:selling_id])
         row_gorup[:weight] += row[:weight] unless row[:weight] == nil or row[:weight] == "NULL"
@@ -97,6 +101,7 @@ class ShipPayUnitActor
     submit(rows) do |row|
       row[:cost_in_usd] = routine_cost_in_usd(row)
       row[:market] = wname_to_market(row.delete(:wname))
+      row[:ship_date] = routine_date_format(row[:ship_date])
       row
     end
   end
@@ -105,7 +110,7 @@ end
 pool = ShipPayUnitActor.pool(size: 6)
 # 1. 找出需要的 PaymentUnit
 # 2. 补全这些 PaymentUnit 中的 sku 与 selling_id
-SQL = %q(SELECT pau.id, pau.createdAt `date`, s.id shipment_id, pau.shipItem_id shipitem_id, s.type ship_type, pau.amount - pau.fixValue cost, pau.currency, pau.feeType_name fee_type, w.name wname  FROM PaymentUnit pau
+SQL = %q(SELECT pau.id, pau.createdAt `date`, s.id shipment_id, pau.shipItem_id shipitem_id, s.type ship_type, pau.amount - pau.fixValue cost, pau.currency, pau.feeType_name fee_type, w.name wname, s.planBeginDate `ship_date` FROM PaymentUnit pau
  LEFT JOIN Shipment s ON pau.shipment_id=s.id
  LEFT JOIN Whouse w ON w.id=s.whouse_id
  WHERE pau.shipment_id IS NOT NULL;)

@@ -7,6 +7,8 @@ import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
 import models.view.post.AnalyzePost;
 import models.view.post.DeliveryPost;
+import models.view.post.TrafficRatePost;
+import models.view.report.TrafficRate;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.modules.excel.RenderExcel;
@@ -96,6 +98,25 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(dtos);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+
+    /**
+     * 下载转化率Excel表格
+     */
+    public static void trafficRate(TrafficRatePost p) {
+        List<TrafficRate> dtos = p.query();
+        if(dtos != null && dtos.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%sSelling流量转化率.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dtos,p);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
