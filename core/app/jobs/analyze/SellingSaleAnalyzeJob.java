@@ -17,6 +17,8 @@ import play.jobs.On;
 import play.libs.F;
 import query.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 import java.util.*;
@@ -152,7 +154,7 @@ public class SellingSaleAnalyzeJob extends Job {
                         //判断到达仓库日期是否在断货日期之前
                         if(unit.attrs != null && unit.attrs.planArrivDate != null && unit.attrs.planArrivDate.before(time
                                 .plusDays(1).toDate())) {
-                            int arrivday = Webs.scale2PointUp(unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
+                            int arrivday = Webs.scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
                             ).intValue();
                             outday = outday + arrivday;
                             time = time.plusDays(arrivday);
