@@ -76,7 +76,7 @@ public class MetricShipmentService {
             qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
         //日期过滤
-        qb.must(QueryBuilders.rangeQuery("date").gte(fromD.toString(isoFormat))
+        qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat))
                 .lt(toD.toString(isoFormat)));
         // 运输方式不为空时做 type 过滤
         if(this.type != null) qb.must(QueryBuilders.termQuery("ship_type", this.type.name().toLowerCase()));
