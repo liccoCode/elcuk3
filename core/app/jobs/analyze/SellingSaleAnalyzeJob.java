@@ -135,36 +135,39 @@ public class SellingSaleAnalyzeJob extends Job {
                 pullQtyToDTO(isSku, analyzeMap);
 
                 //断货天数
-                for(AnalyzeDTO dto : analyzeMap.values()) {
-                    int outday = Webs.scale2PointUp(dto.qty / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)).intValue();
-                    DateTime time = DateTime.now();
-                    time = time.plusDays(outday);
+                if(!isSku) {
+                    for(AnalyzeDTO dto : analyzeMap.values()) {
+                        int outday = Webs.scalePointUp(0, dto.qty / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)).intValue();
+                        DateTime time = DateTime.now();
+                        time = time.plusDays(outday);
 
-                    //查找需要计算的采购计划
-                    List<ProcureUnit> untis = ProcureUnit.find(
-                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage != ?"
-                                    + " AND stage != ?"
-                                    + " ORDER BY attrs.planArrivDate ",
-                            dto.fid, ProcureUnit.STAGE.CLOSE,ProcureUnit.STAGE.INBOUND)
-                            .fetch();
-                    /**
-                     * 计算采购计划不间断供应多少天
-                     */
-                    for(ProcureUnit unit : untis) {
-                        //判断到达仓库日期是否在断货日期之前
-                        if(unit.attrs != null && unit.attrs.planArrivDate != null && unit.attrs.planArrivDate.before(time
-                                .plusDays(1).toDate())) {
-                            int arrivday = Webs.scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
-                            ).intValue();
-                            outday = outday + arrivday;
-                            time = time.plusDays(arrivday);
-                        } else {
-                            break;
+                        //查找需要计算的采购计划
+                        List<ProcureUnit> untis = ProcureUnit.find(
+                                "selling.sellingId=?" + " AND stage != ?"
+                                        + " AND stage != ?"
+                                        + " ORDER BY attrs.planArrivDate ",
+                                dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.INBOUND)
+                                .fetch();
+                        /**
+                         * 计算采购计划不间断供应多少天
+                         */
+                        for(ProcureUnit unit : untis) {
+                            //判断到达仓库日期是否在断货日期之前
+                            if(unit.attrs != null && unit.attrs.planArrivDate != null &&
+                                    unit.attrs.planArrivDate.before(time
+                                            .plusDays(1).toDate())) {
+                                int arrivday = Webs.scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
+                                ).intValue();
+                                outday = outday + arrivday;
+                                time = time.plusDays(arrivday);
+                            } else {
+                                break;
+                            }
                         }
+                        dto.outday = outday;
                     }
-                    dto.outday = outday;
-                }
 
+                }
 
                 // review
                 pullReviewToDTO(isSku, analyzeMap);
