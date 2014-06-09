@@ -2,6 +2,7 @@ package models.view.post;
 
 import controllers.Login;
 import models.User;
+import models.market.Listing;
 import models.market.M;
 import models.product.Category;
 import models.view.dto.SaleReportDTO;
@@ -94,12 +95,20 @@ public class SaleReportPost extends Post<SaleReportDTO> {
      * 当前用户拥有的 Selling 集合
      */
     private List<String> sellings() {
-        User user = Login.current();
-        List<Category> cates = User.getObjCategorys(user);
         List<String> sellings = new ArrayList<String>();
-        for(Category ca : cates) {
 
+        User user = Login.current();
+        //当前用户的 Category 权限
+        List<String> cates = User.getTeamCategorys(user);
+        //sku 权限
+        List<String> skus = Category.getSKUs(cates);
+        //Listing  权限
+        List<String> listings = new ArrayList<String>();
+        for(String sku : skus) {
+            listings.addAll(Listing.getAllListingBySKU(sku));
         }
+
+        //
         return sellings;
     }
 
