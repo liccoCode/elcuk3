@@ -1,0 +1,57 @@
+#{extends 'main_full.html'/}
+#{set title:'产品销售统计报表'/}
+#{set 'moreScripts'}
+    #{script 'SaleReports/saleCount.coffee'/}
+#{/set}
+
+<div class="row-fluid">
+  <form action="#" method="POST" class="search_form">
+    <div class="span12">
+      <div class="input-prepend inline">
+        <span class="add-on">From:</span>
+        <input type="date" style="width:90px;" class="input-small" name="p.from" value="${p.from.date()}">
+      </div>
+
+      <div class="input-prepend inline">
+        <span class="add-on">To:</span>
+        <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
+      </div>
+
+      <select class="span1 inline" name="p.market">
+        <option value="">Market</option>
+      #{list items: models.market.M, as: 'm'}
+        <option value="${m.name()}">${m}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" style="width:150px;" name="p.search" placeHolder="Category、SKU、Selling" value="${p.search}">
+        <a data-url="@{SaleReports.saleCount()}" class="btn btn-primary" id="search_btn">Search</a>
+      </div>
+
+      <a href="#" class="btn btn-success" id="export_btn">导出</a>
+    </div>
+  </form>
+</div>
+<br/>
+
+#{success_row title: '销售统计报表'/}
+#{if dtos.size > 0}
+<div class="row-fluid">
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <th>Category</th>
+      <th>SKU</th>
+      <th>Selling</th>
+      <th>Market</th>
+      <th>销量</th>
+      <th>销售额(美元)</th>
+    </tr>
+  </table>
+</div>
+#{/if}
+#{else }
+<p class="muted text-center">未找到相应数据.</p>
+#{/else}
+
