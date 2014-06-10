@@ -6,6 +6,7 @@ import helper.Webs;
 import models.market.M;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
@@ -145,15 +146,25 @@ public class SellingSaleAnalyzeJob extends Job {
                             (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage != ?"
                                     + " AND stage != ?"
                                     + " ORDER BY attrs.planArrivDate ",
-                            dto.fid, ProcureUnit.STAGE.CLOSE,ProcureUnit.STAGE.INBOUND)
+                            dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.INBOUND)
                             .fetch();
                     /**
                      * 计算采购计划不间断供应多少天
                      */
                     for(ProcureUnit unit : untis) {
-                        //判断到达仓库日期是否在断货日期之前
-                        if(unit.attrs != null && unit.attrs.planArrivDate != null && unit.attrs.planArrivDate.before(time
-                                .plusDays(1).toDate())) {
+                        List<Shipment> shipments = unit.relateShipment();
+                        if(shipments != null && shipments.size() > 0) {
+                            if(shipments.get(0).dates.planArrivDate != null &&
+                                    shipments.get(0).dates.planArrivDate.before(time
+                                            .plusDays(1).toDate())) {
+                                int arrivday = Webs.scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
+                                ).intValue();
+                                outday = outday + arrivday;
+                                time = time.plusDays(arrivday);
+                            }
+                        } else if(unit.attrs != null && unit.attrs.planArrivDate != null &&
+                                unit.attrs.planArrivDate.before(time
+                                        .plusDays(1).toDate())) {
                             int arrivday = Webs.scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
                             ).intValue();
                             outday = outday + arrivday;
