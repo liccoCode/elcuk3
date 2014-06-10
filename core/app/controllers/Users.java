@@ -100,7 +100,9 @@ public class Users extends Controller {
             render("Users/home.html", dbuser);
 
         try {
-            dbuser.email = user.email;
+            dbuser.tel = user.tel;
+            dbuser.wangwang = user.wangwang;
+            dbuser.phone = user.phone;
             dbuser.qq = user.qq;
             dbuser.update();
             if(StringUtils.isNotBlank(newPassword))
