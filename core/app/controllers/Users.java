@@ -110,7 +110,7 @@ public class Users extends Controller {
         } catch(Exception e) {
             e.printStackTrace();
             Validation.addError("", Webs.E(e));
-            render("Users/home.html", user);
+            render("Users/home.html", dbuser);
         }
         flash.success("修改成功.");
         redirect("/users/home");
