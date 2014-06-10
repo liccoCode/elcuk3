@@ -88,25 +88,23 @@ public class Users extends Controller {
 
     public static void updates(User user,Long userid, String newPassword, String newPasswordConfirm) {
 
+        User dbuser = User.findById(userid);
         user.confirm = user.password;
-        validation.valid(user);
+        //validation.valid(user);
 
         // 如果填写了新密码, 那么则需要修改密码
         if(StringUtils.isNotBlank(newPassword)) {
             validation.equals(newPassword, newPasswordConfirm);
         }
         if(Validation.hasErrors())
-            render("Users/home.html", user);
+            render("Users/home.html", dbuser);
 
         try {
-            User dbuser = User.findById(userid);
-            dbuser.confirm = user.password;
-            dbuser.password = user.password;
             dbuser.email = user.email;
             dbuser.qq = user.qq;
             dbuser.update();
             if(StringUtils.isNotBlank(newPassword))
-                user.changePasswd(newPassword);
+                dbuser.changePasswd(newPassword);
         } catch(Exception e) {
             e.printStackTrace();
             Validation.addError("", Webs.E(e));
