@@ -16,10 +16,7 @@ import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
 import query.*;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
+import models.procure.Shipment;
 
 import java.util.*;
 
@@ -152,17 +149,29 @@ public class SellingSaleAnalyzeJob extends Job {
                          * 计算采购计划不间断供应多少天
                          */
                         for(ProcureUnit unit : untis) {
-                            //判断到达仓库日期是否在断货日期之前
-                            if(unit.attrs != null && unit.attrs.planArrivDate != null &&
-                                    unit.attrs.planArrivDate.before(time
-                                            .plusDays(1).toDate())) {
-                                int arrivday = Webs.scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
-                                ).intValue();
-                                outday = outday + arrivday;
-                                time = time.plusDays(arrivday);
-                            } else {
-                                break;
-                            }
+                            List<Shipment> shipments = unit.relateShipment();
+                            if(shipments != null && shipments.size() > 0) {
+                                if(shipments.get(0).dates.planArrivDate != null &&
+                                        shipments.get(0).dates.planArrivDate.before(time.plusDays(1).toDate())) {
+                                    int arrivday = Webs
+                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
+                                            ).intValue();
+                                    outday = outday + arrivday;
+                                    time = time.plusDays(arrivday);
+                                }
+                            } else
+                                //判断到达仓库日期是否在断货日期之前
+                                if(unit.attrs != null && unit.attrs.planArrivDate != null &&
+                                        unit.attrs.planArrivDate.before(time
+                                                .plusDays(1).toDate())) {
+                                    int arrivday = Webs
+                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
+                                            ).intValue();
+                                    outday = outday + arrivday;
+                                    time = time.plusDays(arrivday);
+                                } else {
+                                    break;
+                                }
                         }
                         dto.outday = outday;
                     }
@@ -187,6 +196,7 @@ public class SellingSaleAnalyzeJob extends Job {
      * 统计在途的数量
      * 公式为：(运输中 + 清关中 + 提货中 + 已预约 + 派送中 + 已签收)
      */
+
     public int countWay(ProcureUnit unit) {
         int way = 0;
         //采购计划的 shipItems
