@@ -844,4 +844,28 @@ public enum M {
             return null;
         }
     }
+
+    /**
+     * 仓库与 Market 映射
+     *
+     * @return
+     */
+    public String marketAndWhouseMapping() {
+        switch(this) {
+            case AMAZON_DE:
+                return "FBA_DE";
+            case AMAZON_US:
+                return "FBA_US";
+            case AMAZON_UK:
+                return "FBA_UK";
+            case AMAZON_IT:
+                return "FBA_IT";
+            case AMAZON_JP:
+                return "FBA_JP";
+            case AMAZON_FR:
+                return "FBA_FR";
+            default:
+                return null;
+        }
+    }
 }
