@@ -4,6 +4,7 @@ import controllers.Login;
 import models.User;
 import models.market.Listing;
 import models.market.M;
+import models.market.Selling;
 import models.product.Category;
 import models.view.dto.SaleReportDTO;
 import org.apache.commons.lang.StringUtils;
@@ -107,8 +108,8 @@ public class SaleReportPost extends Post<SaleReportDTO> {
         for(String sku : skus) {
             listings.addAll(Listing.getAllListingBySKU(sku));
         }
-
-        //
+        //Selling 权限
+        sellings = Selling.getSellingIds(listings);
         return sellings;
     }
 

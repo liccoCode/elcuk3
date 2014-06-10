@@ -21,6 +21,7 @@ import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.libs.IO;
@@ -492,4 +493,26 @@ public class Selling extends GenericModel {
         // update
         return generateFeedTemplateFile(sellingList, templateType, market, "Update");
     }
+
+    /**
+     * 根据传入的 ListingId 集合查找出对应的 SellingId 集合
+     *
+     * @param listingIds
+     * @return
+     */
+    public static List<String> getSellingIds(List<String> listingIds) {
+        List<String> sellingIds = new ArrayList<String>();
+        List<Map<String, Object>> rows = null;
+
+        if(listingIds != null && listingIds.size() > 0) {
+            SqlSelect sql = new SqlSelect().select("sellingId").from("Selling").where("state != 'DOWN'")
+                    .andWhere(SqlSelect.whereIn("listing_listingId", listingIds));
+            rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        }
+        for(Map<String, Object> row : rows) {
+            sellingIds.add(row.get("sellingId").toString());
+        }
+        return sellingIds;
+    }
+
 }
