@@ -86,7 +86,7 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
     }
 
-    public static void updates(User user, String newPassword, String newPasswordConfirm) {
+    public static void updates(User user,Long userid, String newPassword, String newPasswordConfirm) {
 
         user.confirm = user.password;
         validation.valid(user);
@@ -99,7 +99,7 @@ public class Users extends Controller {
             render("Users/home.html", user);
 
         try {
-            User dbuser = User.findById(user.id);
+            User dbuser = User.findById(userid);
             dbuser.confirm = user.password;
             dbuser.password = user.password;
             dbuser.email = user.email;
@@ -108,6 +108,7 @@ public class Users extends Controller {
             if(StringUtils.isNotBlank(newPassword))
                 user.changePasswd(newPassword);
         } catch(Exception e) {
+            e.printStackTrace();
             Validation.addError("", Webs.E(e));
             render("Users/home.html", user);
         }
