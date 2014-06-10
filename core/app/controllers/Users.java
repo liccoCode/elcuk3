@@ -87,6 +87,7 @@ public class Users extends Controller {
     }
 
     public static void updates(User user, String newPassword, String newPasswordConfirm) {
+
         user.confirm = user.password;
         validation.valid(user);
 
@@ -98,7 +99,12 @@ public class Users extends Controller {
             render("Users/home.html", user);
 
         try {
-            user.update();
+            User dbuser = User.findById(user.id);
+            dbuser.confirm = user.password;
+            dbuser.password = user.password;
+            dbuser.email = user.email;
+            dbuser.qq = user.qq;
+            dbuser.update();
             if(StringUtils.isNotBlank(newPassword))
                 user.changePasswd(newPassword);
         } catch(Exception e) {
