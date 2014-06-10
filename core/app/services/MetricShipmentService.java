@@ -1,9 +1,11 @@
 package services;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.DBUtils;
 import helper.ES;
 import models.market.M;
 import models.procure.Shipment;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -12,6 +14,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.util.Date;
@@ -76,7 +79,7 @@ public class MetricShipmentService {
             qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
         //日期过滤
-        qb.must(QueryBuilders.rangeQuery("date").gte(fromD.toString(isoFormat))
+        qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat))
                 .lt(toD.toString(isoFormat)));
         // 运输方式不为空时做 type 过滤
         if(this.type != null) qb.must(QueryBuilders.termQuery("ship_type", this.type.name().toLowerCase()));
@@ -103,14 +106,23 @@ public class MetricShipmentService {
      * 统计运输重量(市场 或者 运输方式)
      */
     public Float countShipWeight() {
-        SumBuilder builder = AggregationBuilders.sum("weight").field("weight");
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(filterbuilder())
-                .aggregation(builder)
-                .size(0);
-        JSONObject result = ES.search("elcuk2", "shippayunit", search);
-        if(result == null) throw new FastRuntimeException("ES 连接异常!");
-        JSONObject weight = result.getJSONObject("aggregations").getJSONObject("weight");
-        return weight.getFloat("value");
+        //由于ES的shippayunit与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为count统计函数)
+        SqlSelect sql = new SqlSelect()
+                .select("SUM(CASE " +
+                        "WHEN pu.qty>0 THEN pro.weight*pu.qty " +
+                        "WHEN pu.qty=0 THEN pro.weight*pu.planQty " +
+                        "WHEN pu.qty IS NULL THEN pro.weight*pu.planQty END" +
+                        ") weight")
+                .from("ShipItem si")
+                .leftJoin("Shipment s ON si.shipment_id=s.id")
+                .leftJoin("ProcureUnit pu ON si.unit_id=pu.id")
+                .leftJoin("Product pro on pu.product_sku = pro.sku")
+                .leftJoin("Whouse w ON w.id=s.whouse_id")
+                .where("s.planBeginDate>=?").param(this.from)
+                .andWhere("s.planBeginDate<=?").param(this.to);
+        if(this.type != null) sql.andWhere("s.type=?").param(this.type.toString());
+        if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
+        Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("weight");
+        return result == null ? 0 : NumberUtils.toFloat(result.toString());
     }
 }
