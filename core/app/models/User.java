@@ -163,7 +163,7 @@ public class User extends Model {
         if(!this.authenticate(this.password))
             throw new FastRuntimeException("密码错误");
         this.save();
-        Login.updateUserCache(this);
+        //Login.updateUserCache(this);
     }
 
     public List<Notification> notificationFeeds(int page) {
@@ -278,7 +278,7 @@ public class User extends Model {
         this.password = passwd;
         this.passwordDigest = Crypto.encryptAES(this.password);
         this.save();
-        Login.updateUserCache(this);
+        //Login.updateUserCache(this);
     }
 
     /**
