@@ -49,10 +49,11 @@ public class SellingRecordCaculateJob extends Job {
     @Override
     public void doJob() {
         Logger.info("SellingRecordCaculateJob begin %s (nocached)", dateTime.toString("yyyy-MM-dd"));
-        metric();
+        metric(dateTime);
+        metric(dateTime.plusDays(-1));
     }
 
-    public List<SellingRecord> metric() {
+    public List<SellingRecord> metric(DateTime dt) {
         /**
          * 计算出每个 Selling 的:
          * 销售价格: 这个需要对 Listing 进行抓取获取. (或者每天保持每个 Listing 的更新)
@@ -78,41 +79,41 @@ public class SellingRecordCaculateJob extends Job {
         else sellings = Selling.find("sellingId like '80%'").fetch();
 
         long begin = System.currentTimeMillis();
-        Map<String, Integer> sellingUnits = salesService.sellingUnits(dateTime.toDate());
+        Map<String, Integer> sellingUnits = salesService.sellingUnits(dt.toDate());
         Logger.info("SellingUnit: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Integer> sellOrders = salesService.sellingOrders(dateTime.toDate());
+        Map<String, Integer> sellOrders = salesService.sellingOrders(dt.toDate());
         Logger.info("SellingOrders: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> sellingSales = salesService.sellingSales(dateTime.toDate(), sellings, sellingUnits);
+        Map<String, Float> sellingSales = salesService.sellingSales(dt.toDate(), sellings, sellingUnits);
         Logger.info("SellingSales: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> sellingVATFee = shipCostService.sellingVATFee(dateTime.toDate());
+        Map<String, Float> sellingVATFee = shipCostService.sellingVATFee(dt.toDate());
         Logger.info("SellingVAT: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> sellingAmzFee = amzService.sellingAmazonFee(dateTime.toDate(), sellings, sellingUnits);
+        Map<String, Float> sellingAmzFee = amzService.sellingAmazonFee(dt.toDate(), sellings, sellingUnits);
         Logger.info("SellingAmazon: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> sellingFBAFee = amzService.sellingAmazonFBAFee(dateTime.toDate(), sellings, sellingUnits);
+        Map<String, Float> sellingFBAFee = amzService.sellingAmazonFBAFee(dt.toDate(), sellings, sellingUnits);
         Logger.info("SellingFBA: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
         List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
 
-        Map<String, Float> seaCost = shipCostService.seaCost(dateTime.toDate());
+        Map<String, Float> seaCost = shipCostService.seaCost(dt.toDate());
         Logger.info("SellingSeaCost: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> airCost = shipCostService.airCost(dateTime.toDate());
+        Map<String, Float> airCost = shipCostService.airCost(dt.toDate());
         Logger.info("SellingAirCost: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> expressCost = shipCostService.expressCost(dateTime.toDate());
+        Map<String, Float> expressCost = shipCostService.expressCost(dt.toDate());
         Logger.info("SellingExpressCost: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
@@ -120,8 +121,8 @@ public class SellingRecordCaculateJob extends Job {
         for(Selling selling : sellings) {
             try {
                 String sid = selling.sellingId;
-                SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
-                SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
+                SellingRecord record = SellingRecord.oneDay(sid, dt.toDate());
+                SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dt.minusDays(1).toDate());
                 // 销量
                 record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
                 // 销售额
@@ -141,7 +142,7 @@ public class SellingRecordCaculateJob extends Job {
                 // 实际收入 = 销量 - amazon 扣费
                 record.income = record.totalToSingle(record.sales) - record.amzFee;
 
-                F.T2<Float, Integer> procureCostAndQty = pcCostService.sellingProcreCost(selling, dateTime.toDate());
+                F.T2<Float, Integer> procureCostAndQty = pcCostService.sellingProcreCost(selling, dt.toDate());
                 // 采购成本
                 record.procureCost = procureCostAndQty._1;
                 record.procureNumberSum = procureCostAndQty._2;
