@@ -4,6 +4,14 @@
     #{script 'SaleReports/saleCount.coffee'/}
 #{/set}
 
+#{success_row title: '销售统计报表'}
+<ul>
+  <li>搜索格式:</li>
+  <li>sku:10HTCG14-1900S</li>
+  <li>selling:10HTCG14-1900S|A_DE|2</li>
+  <li>category:10</li>
+</ul>
+#{/success_row}
 <div class="row-fluid">
   <form action="#" method="POST" class="search_form">
     <div class="span12">
@@ -20,23 +28,22 @@
       <select class="span1 inline" name="p.market">
         <option value="">Market</option>
       #{list items: models.market.M, as: 'm'}
-        <option value="${m.name()}">${m}</option>
+        <option value="${m.name()}" ${p.market == m ? "selected" : ""}>${m}</option>
       #{/list}
       </select>
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" style="width:150px;" name="p.search" placeHolder="Category、SKU、Selling" value="${p.search}">
-        <a data-url="@{SaleReports.saleCount()}" class="btn btn-primary" id="search_btn">Search</a>
+        <a data-url="@{SaleReports.saleCount()}" class="btn btn-primary" id="search_btn"
+           data-disable-with="Loading">Search</a>
       </div>
 
-      <a href="#" class="btn btn-success" id="export_btn">导出</a>
+      <a data-url="@{Excels.saleReport()}" class="btn btn-success" id="export_btn">导出</a>
     </div>
   </form>
 </div>
-<br/>
 
-#{success_row title: '销售统计报表'/}
 #{if dtos.size > 0}
 <div class="row-fluid">
   <table class="table table-condensed table-bordered">
@@ -48,6 +55,16 @@
       <th>销量</th>
       <th>销售额(美元)</th>
     </tr>
+      #{list items:dtos, as: 'dto'}
+        <tr>
+          <td>${dto.categoryId}</td>
+          <td>${dto.sku}</td>
+          <td>${dto.sellingId}</td>
+          <td>${dto.market.countryName()}</td>
+          <td>${dto.sales}</td>
+          <td>${dto.salesAmount}</td>
+        </tr>
+      #{/list}
   </table>
 </div>
 #{/if}

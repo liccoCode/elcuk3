@@ -206,6 +206,7 @@ public class ShipmentReportESQuery {
     private static SqlSelect buildSqlHeader(int year, Shipment.T shipType, String countType, int month) {
         Date from = Dates.getMonthFirst(year, month);
         Date to = Dates.getMonthLast(year, month);
+        //TODO: Shipment 与 ShipItem 不构成一对一关系，统计显示 Shipment 为2698， ShipItem 为 5097
         SqlSelect sql = new SqlSelect().select("COUNT(pro.qty) qty").from("ProcureUnit pro").leftJoin("ShipItem " +
                 "si ON pro.id=si.unit_id").leftJoin("Shipment sp ON si.shipment_id=sp.id").where("sp.type=?")
                 .param(shipType.toString());

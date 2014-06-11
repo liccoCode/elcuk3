@@ -43,5 +43,12 @@ public class SaleReportDTO implements Serializable {
      */
     public Float salesAmount;
 
-
+    public SaleReportDTO(String categoryId, String sku, String sellingId, M market, Float sales, Float salesAmount) {
+        this.categoryId = categoryId;
+        this.sku = sku;
+        this.sellingId = sellingId;
+        this.market = market;
+        this.sales = sales;
+        this.salesAmount = salesAmount;
+    }
 }

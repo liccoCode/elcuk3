@@ -515,4 +515,43 @@ public class Selling extends GenericModel {
         return sellingIds;
     }
 
+    /**
+     * 查找传入的 SKU 下所有的 SellingId
+     *
+     * @return
+     */
+    public static List<String> sids(List<String> skus) {
+        List<String> listings = new ArrayList<String>();
+        for(String sku : skus) {
+            listings.addAll(Listing.getAllListingBySKU(sku));
+        }
+        return getSellingIds(listings);
+    }
+
+    public static List<String> sids(String sku) {
+        return sids(Arrays.asList(sku));
+    }
+
+    /**
+     * 由 SellingId 判断市场
+     *
+     * @param sid
+     * @return
+     */
+    public static M sidToMarket(String sid) {
+        return M.val(StringUtils.split(sid, "|")[1].replace("_", ""));
+    }
+
+    /**
+     * 由 SellingId 判断 SKU
+     * @return
+     */
+    public static String sidToSKU(String sid) {
+        String temp = StringUtils.split(sid, "|")[0];
+        String[] splits = StringUtils.split(temp, ",");
+        if(splits.length > 1) {
+            return splits[0];
+        }
+        return temp;
+    }
 }

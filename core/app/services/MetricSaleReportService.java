@@ -41,7 +41,7 @@ public class MetricSaleReportService {
         qb.must(QueryBuilders.rangeQuery("date").gte(fromD.toString(isoFormat))
                 .lt(toD.toString(isoFormat)));
         if(StringUtils.isNotBlank(sellingId)) qb.must(QueryBuilders.termQuery("selling_id",
-                sellingId.toLowerCase()));
+                ES.parseEsString(sellingId).toLowerCase()));
         return qb;
     }
 
@@ -70,7 +70,7 @@ public class MetricSaleReportService {
     public Float countSalesAmount(Date from, Date to, M market, String sellingId) {
         SumBuilder builder = AggregationBuilders.sum("cost_in_usd").field("cost_in_usd");
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(filterbuilder(from, to, market, sellingId))
+                .query((filterbuilder(from, to, market, sellingId)).must(QueryBuilders.termQuery("fee_type", "productcharges")))
                 .aggregation(builder)
                 .size(0);
         JSONObject result = ES.search("elcuk2", "salefee", search);

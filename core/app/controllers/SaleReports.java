@@ -1,8 +1,10 @@
 package controllers;
 
+import helper.Webs;
 import models.view.dto.SaleReportDTO;
 import models.view.post.SaleReportPost;
 import play.mvc.Controller;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -17,9 +19,13 @@ public class SaleReports extends Controller {
     /**
      * 产品的销售统计报表
      */
-    public static void saleCount() {
-        SaleReportPost p = new SaleReportPost();
-        List<SaleReportDTO> dtos = p.query();
-        render(p, dtos);
+    public static void saleCount(SaleReportPost p) {
+        try {
+            if(p == null) p = new SaleReportPost();
+            List<SaleReportDTO> dtos = p.query();
+            render(p, dtos);
+        } catch(FastRuntimeException e) {
+            flash.error(Webs.E(e));
+        }
     }
 }
