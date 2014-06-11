@@ -32,8 +32,7 @@ module Rates
     if row[:currency] == 'USD'
       row[:cost]
     else
-      payment_rate = payment_rate > 1 ? (1 / payment_rate) : payment_rate 
-      rate = (payment_state == 'PAID' ? payment_rate : send("#{row[:currency].downcase}_to_usd"))
+      rate = send("#{row[:currency].downcase}_to_usd"))
       row[:cost] * rate  
     end
   end
