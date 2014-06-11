@@ -109,9 +109,8 @@ public class MetricShipmentService {
         //由于ES的shippayunit与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为count统计函数)
         SqlSelect sql = new SqlSelect()
                 .select("SUM(CASE " +
-                        "WHEN pu.qty>0 THEN pro.weight*pu.qty " +
-                        "WHEN pu.qty=0 THEN pro.weight*pu.planQty " +
-                        "WHEN pu.qty IS NULL THEN pro.weight*pu.planQty END" +
+                        "WHEN pro.weight IS NULL THEN 0 * si.qty " +
+                        "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
                         ") weight")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")
