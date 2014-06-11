@@ -1,9 +1,6 @@
 package jobs.promise;
 
-import helper.Currency;
-import helper.Dates;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import jobs.AmazonFinanceCheckJob;
 import models.finance.FeeType;
 import models.finance.SaleFee;
@@ -126,6 +123,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public String transactionView(String orderId) {
+        LogUtils.JOBLOG.info(":111:"+this.account.type.oneTransactionFees(orderId));
         return HTTP.get(this.account.cookieStore(), this.account.type.oneTransactionFees(orderId));
     }
 
@@ -330,6 +328,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public List<String> transactionURLs(String orderId) {
         String html = this.transactionView(orderId);
+        LogUtils.JOBLOG.info("::"+html);
+
         List<String> urls = new ArrayList<String>();
 
         Document doc = Jsoup.parse(html);
