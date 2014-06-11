@@ -5,19 +5,36 @@ module Rates
     doc.at_css('#currency_converter_result span').text.split(" ")[0].strip.to_f
   end
 
-  def cny_to_usd(n = 1, currency)
-    @rate ||= google_rate(n, currency)
+  def cny_to_usd(n = 1)
+    @rate ||= google_rate(n, 'CNY')
+  end
+
+  def gbp_to_usd(n = 1)
+    @rate ||= google_rate(n, 'GBP')
+  end
+
+  def eur_to_usd(n = 1)
+    @rate ||= google_rate(n, 'EUR')
+  end
+
+  def hkd_to_usd(n = 1)
+    @rate ||= google_rate(n, 'HKD')
+  end
+
+  def jpy_to_usd(n = 1)
+    @rate ||= google_rate(n, 'JPY')
   end
 
   def routine_cost_in_usd(row)
     payment_state = row.delete(:state)
     payment_rate = row.delete(:rate)
+    
     if row[:currency] == 'USD'
       row[:cost]
     else
-      rate = (payment_state == 'PAID' ? payment_rate : cny_to_usd(1, row[:currency]))
-      # DB 里面的数据需要调整
-      row[:cost] * (rate > 1 ? (1 / rate) : rate)
+      payment_rate = payment_rate > 1 ? (1 / payment_rate) : payment_rate 
+      rate = (payment_state == 'PAID' ? payment_rate : send("#{row[:currency].downcase}_to_usd"))
+      row[:cost] * rate  
     end
   end
 end
