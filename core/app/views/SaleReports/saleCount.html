@@ -4,6 +4,8 @@
     #{script 'SaleReports/saleCount.coffee'/}
 #{/set}
 
+#{flash_alert /}
+
 #{success_row title: '销售统计报表'}
 <ul>
   <li>搜索格式:</li>
@@ -12,6 +14,7 @@
   <li>category:10</li>
 </ul>
 #{/success_row}
+
 <div class="row-fluid">
   <form action="#" method="POST" class="search_form">
     <div class="span12">
