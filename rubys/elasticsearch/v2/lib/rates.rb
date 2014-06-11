@@ -6,23 +6,23 @@ module Rates
   end
 
   def cny_to_usd(n = 1)
-    @rate ||= google_rate(n, 'CNY')
+    @cny_to_usd_rate ||= google_rate(n, 'CNY')
   end
 
   def gbp_to_usd(n = 1)
-    @rate ||= google_rate(n, 'GBP')
+    @gbp_to_usd_rate ||= google_rate(n, 'GBP')
   end
 
   def eur_to_usd(n = 1)
-    @rate ||= google_rate(n, 'EUR')
+    @eur_to_usd_rate ||= google_rate(n, 'EUR')
   end
 
   def hkd_to_usd(n = 1)
-    @rate ||= google_rate(n, 'HKD')
+    @hkd_to_usd_rate ||= google_rate(n, 'HKD')
   end
 
   def jpy_to_usd(n = 1)
-    @rate ||= google_rate(n, 'JPY')
+    @jpy_to_usd_rate ||= google_rate(n, 'JPY')
   end
 
   def routine_cost_in_usd(row)
