@@ -328,13 +328,22 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     public List<String> transactionURLs(String orderId) {
         String html = this.transactionView(orderId);
         if (orderId.equals("171-0008965-3649912")){
-            LogUtils.JOBLOG.info("::::::::::11111111111:::"+html);
+            LogUtils.JOBLOG.info("::::::::::11111111111:::"+orderId);
         }
 
         List<String> urls = new ArrayList<String>();
 
         Document doc = Jsoup.parse(html);
+
+        Elements aaa = doc.select("#content-main-entities table");
+        if (orderId.equals("171-0008965-3649912")){
+                   LogUtils.JOBLOG.info("::::::::::2222:::"+aaa.size());
+               }
+
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
+        if (orderId.equals("171-0008965-3649912")){
+                           LogUtils.JOBLOG.info("::::::::::3333:::"+rows.size());
+                       }
 
         if(rows.size() <= 0) return urls;
 
