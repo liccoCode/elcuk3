@@ -123,7 +123,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public String transactionView(String orderId) {
-        LogUtils.JOBLOG.info(":111:"+this.account.type.oneTransactionFees(orderId));
         return HTTP.get(this.account.cookieStore(), this.account.type.oneTransactionFees(orderId));
     }
 
@@ -328,18 +327,19 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public List<String> transactionURLs(String orderId) {
         String html = this.transactionView(orderId);
-        LogUtils.JOBLOG.info("::"+html);
 
         List<String> urls = new ArrayList<String>();
 
         Document doc = Jsoup.parse(html);
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
+        LogUtils.JOBLOG.info("::::::::::11111111111:::"+rows.size());
         if(rows.size() <= 0) return urls;
 
         // 去除第一行 title
         rows.remove(0);
         for(Element row : rows) {
             String url = row.select("td").last().select("a").attr("href");
+            LogUtils.JOBLOG.info("::::::::::2222:::"+url);
             urls.add(url);
             Logger.info("FinanceShippedPromise URL: %s", url);
         }
