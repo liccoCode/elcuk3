@@ -123,6 +123,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public String transactionView(String orderId) {
+        LogUtils.JOBLOG.info("ccccccc::" + this.account.type.oneTransactionFees(orderId));
         return HTTP.get(this.account.cookieStore(), this.account.type.oneTransactionFees(orderId));
     }
 
@@ -330,7 +331,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         String html = this.transactionView(orderId);
         List<String> urls = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
-        LogUtils.JOBLOG.info("bbb::" + html);
+        //LogUtils.JOBLOG.info("bbb::" + html);
 
         Elements tables = doc.select("#content-main-entities table");
         if(orderId.equals("171-3963657-9740311")) {
