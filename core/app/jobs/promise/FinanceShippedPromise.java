@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.http.cookie.Cookie;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyatt
@@ -123,7 +125,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public String transactionView(String orderId) {
-        LogUtils.JOBLOG.info("ccccccc::" + this.account.type.oneTransactionFees(orderId));
         return HTTP.get(this.account.cookieStore(), this.account.type.oneTransactionFees(orderId));
     }
 
@@ -330,6 +331,18 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
         LogUtils.JOBLOG.info("aaaaaaaaa::" + orderId);
         LogUtils.JOBLOG.info("xxxxxxx::" + this.account.cookieStore().toString());
+        if(this.account.type == M.AMAZON_IT) {
+            List<Cookie> cookies = this.account.cookieStore().getCookies();
+            for(int i = 0; i < cookies.size(); i++) {
+                Cookie c = cookies.get(i);
+                if(c.getName().equals("a-ogbcbff")) {
+                    LogUtils.JOBLOG.info("mmmmmmmm::");
+                    cookies.remove(i);
+                    i--;
+                }
+            }
+        }
+
         String html = this.transactionView(orderId);
         List<String> urls = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
