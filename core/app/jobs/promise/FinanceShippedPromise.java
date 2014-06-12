@@ -326,6 +326,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public List<String> transactionURLs(String orderId) {
+        LogUtils.JOBLOG.info("aaaaaaaaa::" + orderId);
         String html = this.transactionView(orderId);
         List<String> urls = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
