@@ -8,18 +8,16 @@ import models.embedded.CategorySettings;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
-import play.cache.*;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
-import query.ProductQuery;
 
 import javax.persistence.*;
-import javax.persistence.Cache;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -266,5 +264,9 @@ public class Category extends GenericModel {
             skus.add(row.get("sku").toString());
         }
         return skus;
+    }
+
+    public static List<String> getSKUs(String categoryId) {
+        return getSKUs(Arrays.asList(categoryId));
     }
 }
