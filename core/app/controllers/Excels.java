@@ -5,8 +5,10 @@ import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
+import models.view.dto.SaleReportDTO;
 import models.view.post.AnalyzePost;
 import models.view.post.DeliveryPost;
+import models.view.post.SaleReportPost;
 import models.view.post.TrafficRatePost;
 import models.view.report.TrafficRate;
 import play.data.validation.Validation;
@@ -116,7 +118,25 @@ public class Excels extends Controller {
                     String.format("%s-%sSelling流量转化率.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
-            render(dtos,p);
+            render(dtos, p);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 下载转化率Excel表格
+     */
+    public static void saleReport(SaleReportPost p) {
+        List<SaleReportDTO> dtos = p.query();
+        if(dtos != null && dtos.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s产品销售统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dtos, p);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
