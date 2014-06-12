@@ -13,8 +13,10 @@ import models.market.OrderItem;
 import models.market.Selling;
 import models.procure.Cooperator;
 import models.view.dto.ProductDTO;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.RandomUtils;
 import play.cache.Cache;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -25,6 +27,8 @@ import play.utils.FastRuntimeException;
 import query.ProductQuery;
 
 import javax.persistence.*;
+import java.io.File;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -390,6 +394,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Lob
     public String subtitle;
 
+    @Transient
+    public int iscopy = 0;
+
     public Product() {
     }
 
@@ -705,5 +712,101 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", String.format("%s Product 下找到 %s 个相关订单项，无法删除"), this.sku, orderItemCount + "");
         if(Validation.hasErrors()) return;
         this.delete();
+    }
+
+
+    /**
+     * 复制另一个SKU的信息，但不保存
+     *
+     * @param choseid
+     * @param skuid
+     * @param base
+     * @param extend
+     * @param attach
+     * @return
+     */
+    public static Product copyProduct(String choseid, String skuid, String base, String extend, String attach) {
+        Product pro = Product.findByMerchantSKU(choseid);
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
+        Product copysku = Product.findByMerchantSKU(skuid);
+        copysku.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
+        //基本属性
+        if(StringUtils.isNotBlank(base) && base.equals("1")) {
+            pro.lengths = copysku.lengths;
+            pro.productName = copysku.productName;
+            pro.heigh = copysku.heigh;
+            pro.width = copysku.width;
+            pro.weight = copysku.weight;
+            pro.productLengths = copysku.productLengths;
+            pro.productHeigh = copysku.productHeigh;
+            pro.productWidth = copysku.productWidth;
+            pro.productWeight = copysku.productWeight;
+            pro.procureState = copysku.procureState;
+            pro.declaredValue = copysku.declaredValue;
+            pro.declareName = copysku.declareName;
+            pro.salesLevel = copysku.salesLevel;
+            pro.abbreviation = copysku.abbreviation;
+            pro.marketTime = copysku.marketTime;
+            pro.locates = copysku.locates;
+            pro.subtitle = copysku.subtitle;
+            pro.locates = copysku.locates;
+            pro.sellingPoints = copysku.sellingPoints;
+
+            pro.iscopy = 2;
+        }
+        //扩展信息
+        if(StringUtils.isNotBlank(extend) && extend.equals("1")) {
+            List<ProductAttr> proattrs = copysku.productAttrs;
+            List<ProductAttr> attrs = new ArrayList<ProductAttr>();
+            for(ProductAttr p : proattrs) {
+                ProductAttr np = new ProductAttr();
+                np.product = pro;
+                np.attribute = p.attribute;
+                np.value = p.value;
+                attrs.add(np);
+            }
+            pro.productAttrs = attrs;
+        }
+        //附件
+        if(StringUtils.isNotBlank(attach) && attach.equals("1")) {
+            List<Attach> attaches = Attach.attaches(copysku.sku, null);
+            List<Attach> skuattaches = Attach.attaches(pro.sku, null);
+
+            for(Attach att : attaches) {
+                Attach skuatt = new Attach();
+                skuatt.fid = pro.sku;
+                skuatt.outName = att.outName;
+                skuatt.p = att.p;
+                skuatt.originName = "C_" + att.originName;
+                skuatt.remove = att.remove;
+                skuatt.attachType = att.attachType;
+
+                //判断是否存在此附件
+                boolean isexists = false;
+                for(Attach existsatt : skuattaches) {
+                    if(existsatt.originName.equals(skuatt.originName)) {
+                        isexists = true;
+                    }
+                }
+                if(!isexists) {
+                    try {
+                        skuatt.file = new File(att.location);
+                        long subfix = RandomUtils.nextInt();
+                        skuatt.fileSize = skuatt.file.length();
+                        skuatt.fileName = String.format("%s_%s%s", skuatt.fid, subfix,
+                                skuatt.file.getPath().substring(skuatt.file.getPath().lastIndexOf("."))).trim();
+                        skuatt.location = skuatt.location();
+                        skuatt.createDate = new Date();
+
+                        FileUtils.copyFile(skuatt.file, new File(skuatt.location));
+                        skuatt.save();
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return pro;
+
     }
 }

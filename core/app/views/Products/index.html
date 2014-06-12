@@ -2,6 +2,7 @@
 #{set title:'Product' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
+    #{script 'products/copysku.coffee'/}
 #{/set}
 
 <div style="margin:5px 0 0;" class="row">
@@ -23,5 +24,5 @@
 
 
 <div id="prod_list">
-    #{render 'Products/_products.html', prods:prods, pi:p/}
+    #{render 'Products/_products.html', prods:prods, pi:p,products:products/}
 </div>
