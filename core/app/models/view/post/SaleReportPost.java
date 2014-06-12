@@ -107,7 +107,7 @@ public class SaleReportPost {
             Float sales = service.countSales(this.from, this.to, market, sid);
             Float salesAmount = service.countSalesAmount(this.from, this.to, market, sid);
 
-            if(sales != 0 || salesAmount != 0)
+            if(sales != 0 && salesAmount != 0)
                 dtos.add(new SaleReportDTO(categoryId, sku, sid, market, (float) (Math.round(sales * 100)) / 100,
                         (float) (Math.round(salesAmount * 100)) / 100));
         }
