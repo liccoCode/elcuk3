@@ -173,20 +173,20 @@ public class ShipmentReportESQuery {
 
             //准时
             SqlSelect sql = buildSqlHeader(year, shipType, countType, i);
-            sql.andWhere("pro.planArrivDate=sp.receiptDate");
-            Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("qty");
+            sql.andWhere("sp.planArrivDate=sp.receiptDate");
+            Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("count");
             float onTime = (result == null ? 0 : NumberUtils.toFloat(result.toString()));
 
             //提前
             sql = buildSqlHeader(year, shipType, countType, i);
-            sql.andWhere("pro.planArrivDate>sp.receiptDate");
-            result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("qty");
+            sql.andWhere("sp.planArrivDate>sp.receiptDate");
+            result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("count");
             float early = (result == null ? 0 : NumberUtils.toFloat(result.toString()));
 
             //超时
             sql = buildSqlHeader(year, shipType, countType, i);
-            sql.andWhere("pro.planArrivDate<sp.receiptDate");
-            result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("qty");
+            sql.andWhere("sp.planArrivDate<sp.receiptDate");
+            result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("count");
             float timeOut = (result == null ? 0 : NumberUtils.toFloat(result.toString()));
 
             float sum = onTime + early + timeOut;
@@ -207,8 +207,7 @@ public class ShipmentReportESQuery {
         Date from = Dates.getMonthFirst(year, month);
         Date to = Dates.getMonthLast(year, month);
         //TODO: Shipment 与 ShipItem 不构成一对一关系，统计显示 Shipment 为2698， ShipItem 为 5097
-        SqlSelect sql = new SqlSelect().select("COUNT(pro.qty) qty").from("ProcureUnit pro").leftJoin("ShipItem " +
-                "si ON pro.id=si.unit_id").leftJoin("Shipment sp ON si.shipment_id=sp.id").where("sp.type=?")
+        SqlSelect sql = new SqlSelect().select("COUNT(*) count").from("Shipment sp").where("sp.type=?")
                 .param(shipType.toString());
         if(StringUtils.equals(countType, "ReceiptDate")) {
             sql.andWhere("sp.receiptDate>=?").param(from).where("sp.receiptDate<=?").param(to);
