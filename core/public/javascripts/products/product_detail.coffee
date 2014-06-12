@@ -101,6 +101,25 @@ $ ->
       )
   )
 
+  $("#basicinfo").on("click", "#save_basic_btn",() ->
+    if $('input[name="pro.iscopy"]').val() is "2"
+      return unless confirm('该SKU的产品名称与选择的SKU的产品名称一致,确定保存?')
+
+    LoadMask.mask()
+    $form = $("#update_product_form")
+    $.ajax('/products/update', {type: 'GET', data: $form.serialize(), dataType: 'json'})
+    .done((r) ->
+        msg = if r.flag is true
+          {text: "保存成功.", type: 'success', timeout: 5000}
+        else
+          {text: "#{r.message}", type: 'error', timeout: 5000}
+        noty(msg)
+        LoadMask.unmask()
+      )
+  ).on("change", "#proabbreviation", () ->
+    $('input[name="pro.iscopy"]').val("1")
+  )
+
   # 将输入的长度、宽度、高度换算成英寸(inch)
   $(document).on("change", "input[name='pro.lengths'], input[name='pro.width'], input[name='pro.heigh'], input[name='pro.productLengths'], input[name='pro.productWidth'], input[name='pro.productHeigh']", (r) ->
     $input = $(@)

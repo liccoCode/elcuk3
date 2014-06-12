@@ -32,7 +32,7 @@ module Rates
     if row[:currency] == 'USD'
       row[:cost]
     else
-      rate = send("#{row[:currency].downcase}_to_usd"))
+      rate = send("#{row[:currency].downcase}_to_usd")
       row[:cost] * rate  
     end
   end

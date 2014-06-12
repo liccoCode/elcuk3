@@ -2,6 +2,7 @@ package services;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.DBUtils;
+import helper.Dates;
 import helper.ES;
 import models.market.M;
 import models.procure.Shipment;
@@ -48,15 +49,15 @@ public class MetricShipmentService {
     public Shipment.T type;
 
     public MetricShipmentService(Date from, Date to, Shipment.T type, M market) {
-        this.from = from;
-        this.to = to;
+        this.from = Dates.morning(from);
+        this.to = Dates.night(to);
         this.market = market;
         this.type = type;
     }
 
     public MetricShipmentService(Date from, Date to, Shipment.T type) {
-        this.from = from;
-        this.to = to;
+        this.from = Dates.morning(from);
+        this.to = Dates.night(to);
         this.type = type;
     }
 
@@ -68,7 +69,8 @@ public class MetricShipmentService {
     private BoolQueryBuilder filterbuilder() {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         BoolQueryBuilder qb = QueryBuilders.boolQuery();
-        DateTime fromD, toD = null;
+        DateTime fromD = null;
+        DateTime toD = null;
         if(this.market == null) {
             fromD = new DateTime(this.from);
             toD = new DateTime(this.to);
@@ -78,6 +80,7 @@ public class MetricShipmentService {
             //market 不为空时做 market 过滤
             qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
+
         //日期过滤
         qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat))
                 .lt(toD.toString(isoFormat)));

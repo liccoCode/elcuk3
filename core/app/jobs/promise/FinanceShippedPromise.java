@@ -330,8 +330,15 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         List<String> urls = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
 
+
         Elements tables = doc.select("#content-main-entities table");
+        if(orderId.equals("171-3963657-9740311")) {
+            LogUtils.JOBLOG.info("1::" + orderId + ":::" + tables.size());
+        }
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
+        if(orderId.equals("171-3963657-9740311")) {
+            LogUtils.JOBLOG.info("1::" + orderId + ":::" + rows.size());
+        }
 
         if(rows.size() <= 0) return urls;
         // 去除第一行 title
