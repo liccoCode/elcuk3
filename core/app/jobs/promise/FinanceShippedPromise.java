@@ -329,32 +329,13 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public List<String> transactionURLs(String orderId) {
 
-        LogUtils.JOBLOG.info("aaaaaaaaa::" + orderId);
-        LogUtils.JOBLOG.info("xxxxxxx::" + this.account.cookieStore().toString());
-        if(this.account.type == M.AMAZON_IT) {
-            List<Cookie> cookies = this.account.cookieStore().getCookies();
-            for(int i = 0; i < cookies.size(); i++) {
-                Cookie c = cookies.get(i);
-                if(c.getName().equals("a-ogbcbff")) {
-                    LogUtils.JOBLOG.info("mmmmmmmm::");
-                    cookies.remove(i);
-                    i--;
-                }
-            }
-        }
 
         String html = this.transactionView(orderId);
         List<String> urls = new ArrayList<String>();
         Document doc = Jsoup.parse(html);
 
         Elements tables = doc.select("#content-main-entities table");
-        if(orderId.equals("171-3963657-9740311")) {
-            LogUtils.JOBLOG.info("1::" + orderId + ":::" + tables.size());
-        }
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
-        if(orderId.equals("171-3963657-9740311")) {
-            LogUtils.JOBLOG.info("1::" + orderId + ":::" + rows.size());
-        }
 
         if(rows.size() <= 0) return urls;
         // 去除第一行 title
