@@ -21,6 +21,7 @@ import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.libs.IO;
@@ -491,5 +492,66 @@ public class Selling extends GenericModel {
     public static String generateUpdateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
         // update
         return generateFeedTemplateFile(sellingList, templateType, market, "Update");
+    }
+
+    /**
+     * 根据传入的 ListingId 集合查找出对应的 SellingId 集合
+     *
+     * @param listingIds
+     * @return
+     */
+    public static List<String> getSellingIds(List<String> listingIds) {
+        List<String> sellingIds = new ArrayList<String>();
+        List<Map<String, Object>> rows = null;
+
+        if(listingIds != null && listingIds.size() > 0) {
+            SqlSelect sql = new SqlSelect().select("sellingId").from("Selling").where("state != 'DOWN'")
+                    .andWhere(SqlSelect.whereIn("listing_listingId", listingIds));
+            rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        }
+        for(Map<String, Object> row : rows) {
+            sellingIds.add(row.get("sellingId").toString());
+        }
+        return sellingIds;
+    }
+
+    /**
+     * 查找传入的 SKU 下所有的 SellingId
+     *
+     * @return
+     */
+    public static List<String> sids(List<String> skus) {
+        List<String> listings = new ArrayList<String>();
+        for(String sku : skus) {
+            listings.addAll(Listing.getAllListingBySKU(sku));
+        }
+        return getSellingIds(listings);
+    }
+
+    public static List<String> sids(String sku) {
+        return sids(Arrays.asList(sku));
+    }
+
+    /**
+     * 由 SellingId 判断市场
+     *
+     * @param sid
+     * @return
+     */
+    public static M sidToMarket(String sid) {
+        return M.val(StringUtils.split(sid, "|")[1].replace("_", ""));
+    }
+
+    /**
+     * 由 SellingId 判断 SKU
+     * @return
+     */
+    public static String sidToSKU(String sid) {
+        String temp = StringUtils.split(sid, "|")[0];
+        String[] splits = StringUtils.split(temp, ",");
+        if(splits.length > 1) {
+            return splits[0];
+        }
+        return temp;
     }
 }
