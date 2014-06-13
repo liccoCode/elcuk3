@@ -1,9 +1,6 @@
 package jobs.promise;
 
-import helper.Currency;
-import helper.Dates;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import jobs.AmazonFinanceCheckJob;
 import models.finance.FeeType;
 import models.finance.SaleFee;
@@ -27,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.http.cookie.Cookie;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,31 +62,76 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     @Override
     public List<SaleFee> doJobWithResult() {
+
+
+        /**
+         * 检查意大利登陆是否有效，重新登陆一次
+         */
+        if(this.market == M.AMAZON_IT) {
+            List<String> urls = this.transactionURLs("402-0275820-2101172");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+        if(this.market == M.AMAZON_DE) {
+            List<String> urls = this.transactionURLs("028-1135738-8832340");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+        if(this.market == M.AMAZON_FR) {
+            List<String> urls = this.transactionURLs("402-5493577-1293136");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+        if(this.market == M.AMAZON_US) {
+            List<String> urls = this.transactionURLs("002-0186811-1738602");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+        if(this.market == M.AMAZON_UK) {
+            List<String> urls = this.transactionURLs("026-1947342-7795530");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+        if(this.market == M.AMAZON_ES) {
+            List<String> urls = this.transactionURLs("171-2088753-0234721");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
+
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
         if(orderIds != null && orderIds.size() > 0) {
-            synchronized(this.account.cookieStore()) {
-                try {
-                    this.account.changeRegion(this.market);
-                    for(String orderId : orderIds) {
-                        List<String> urls = this.transactionURLs(orderId);
-                        List<SaleFee> orderFees = new ArrayList<SaleFee>();
-                        for(String url : urls) {
-                            orderFees.addAll(this.saleFees(url));
-                        }
-                        fees.addAll(orderFees);
-                        if(FinanceShippedPromise.isWarnning(orderFees)) {
-                            Orderr changeOrderr = Orderr.findById(orderId);
-                            changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
-                            changeOrderr.save();
-                        }
+            //synchronized(this.account.cookieStore()) {
+            try {
+                this.account.changeRegion(this.market);
+                for(String orderId : orderIds) {
+                    List<String> urls = this.transactionURLs(orderId);
+
+                    if(this.market == M.AMAZON_IT) {
+                        if(urls.size() <= 0)
+                            this.account.loginAmazonSellerCenter();
+                        //再取一次订单费用明细
+                        urls = this.transactionURLs(orderId);
                     }
-                } finally {
-                    this.account.changeRegion(this.account.type);
-                    emailWarnningCheck();
+
+                    List<SaleFee> orderFees = new ArrayList<SaleFee>();
+                    for(String url : urls) {
+                        orderFees.addAll(this.saleFees(url));
+                    }
+                    fees.addAll(orderFees);
+                    if(FinanceShippedPromise.isWarnning(orderFees)) {
+                        Orderr changeOrderr = Orderr.findById(orderId);
+                        changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
+                        changeOrderr.save();
+                    }
                 }
+            } finally {
+                this.account.changeRegion(this.account.type);
+                emailWarnningCheck();
             }
+            //}
             AmazonFinanceCheckJob.deleteSaleFees(orderIds);
             AmazonFinanceCheckJob.saveFees(fees);
             /**
@@ -329,13 +373,16 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public List<String> transactionURLs(String orderId) {
+
+
         String html = this.transactionView(orderId);
         List<String> urls = new ArrayList<String>();
-
         Document doc = Jsoup.parse(html);
-        Elements rows = doc.select("#content-main-entities table:eq(2) tr");
-        if(rows.size() <= 0) return urls;
 
+        Elements tables = doc.select("#content-main-entities table");
+        Elements rows = doc.select("#content-main-entities table:eq(2) tr");
+
+        if(rows.size() <= 0) return urls;
         // 去除第一行 title
         rows.remove(0);
         for(Element row : rows) {

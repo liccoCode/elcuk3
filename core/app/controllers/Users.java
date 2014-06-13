@@ -86,24 +86,31 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
     }
 
-    public static void updates(User user, String newPassword, String newPasswordConfirm) {
+    public static void updates(User user,Long userid, String newPassword, String newPasswordConfirm) {
+
+        User dbuser = User.findById(userid);
         user.confirm = user.password;
-        validation.valid(user);
+        //validation.valid(user);
 
         // 如果填写了新密码, 那么则需要修改密码
         if(StringUtils.isNotBlank(newPassword)) {
             validation.equals(newPassword, newPasswordConfirm);
         }
         if(Validation.hasErrors())
-            render("Users/home.html", user);
+            render("Users/home.html", dbuser);
 
         try {
-            user.update();
+            dbuser.tel = user.tel;
+            dbuser.wangwang = user.wangwang;
+            dbuser.phone = user.phone;
+            dbuser.qq = user.qq;
+            dbuser.update();
             if(StringUtils.isNotBlank(newPassword))
-                user.changePasswd(newPassword);
+                dbuser.changePasswd(newPassword);
         } catch(Exception e) {
+            e.printStackTrace();
             Validation.addError("", Webs.E(e));
-            render("Users/home.html", user);
+            render("Users/home.html", dbuser);
         }
         flash.success("修改成功.");
         redirect("/users/home");
