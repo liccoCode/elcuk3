@@ -10,6 +10,7 @@ import java.util.*;
 
 import models.view.report.Profit;
 import services.MetricProfitService;
+import services.MetricQtyService;
 import models.product.Product;
 import models.product.Category;
 
@@ -133,8 +134,27 @@ public class ProfitPost extends Post<Profit> {
                            String prosku, String sellingId) {
         MetricProfitService service = new MetricProfitService(begin, end, market, prosku, sellingId);
         Profit profit = service.calProfit();
+
+
+        //增加库存数据
+        MetricQtyService qtyservice = new MetricQtyService(market, prosku);
+        profit = qtyservice.calProfit(profit);
+
+        /**
+         * (制作中+已交货)库存占用资金总金额(USD)
+         */
+        profit.workingfee = profit.workingqty * profit.procureprice;
+        /**
+         * 在途库存占用资金总金额(USD)
+         */
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
+        /**
+         * (入库+在库)库存占用资金总金额(USD)
+         */
+        profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
+                + profit.inboundqty * profit.vatprice;
+
         return profit;
     }
-
 
 }
