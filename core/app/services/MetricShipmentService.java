@@ -2,6 +2,7 @@ package services;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.DBUtils;
+import helper.Dates;
 import helper.ES;
 import models.market.M;
 import models.procure.Shipment;
@@ -48,15 +49,15 @@ public class MetricShipmentService {
     public Shipment.T type;
 
     public MetricShipmentService(Date from, Date to, Shipment.T type, M market) {
-        this.from = from;
-        this.to = to;
+        this.from = Dates.morning(from);
+        this.to = Dates.night(to);
         this.market = market;
         this.type = type;
     }
 
     public MetricShipmentService(Date from, Date to, Shipment.T type) {
-        this.from = from;
-        this.to = to;
+        this.from = Dates.morning(from);
+        this.to = Dates.night(to);
         this.type = type;
     }
 
@@ -68,7 +69,8 @@ public class MetricShipmentService {
     private BoolQueryBuilder filterbuilder() {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         BoolQueryBuilder qb = QueryBuilders.boolQuery();
-        DateTime fromD, toD = null;
+        DateTime fromD = null;
+        DateTime toD = null;
         if(this.market == null) {
             fromD = new DateTime(this.from);
             toD = new DateTime(this.to);
@@ -78,6 +80,7 @@ public class MetricShipmentService {
             //market 不为空时做 market 过滤
             qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
+
         //日期过滤
         qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat))
                 .lt(toD.toString(isoFormat)));
@@ -109,9 +112,8 @@ public class MetricShipmentService {
         //由于ES的shippayunit与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为count统计函数)
         SqlSelect sql = new SqlSelect()
                 .select("SUM(CASE " +
-                        "WHEN pu.qty>0 THEN pro.weight*pu.qty " +
-                        "WHEN pu.qty=0 THEN pro.weight*pu.planQty " +
-                        "WHEN pu.qty IS NULL THEN pro.weight*pu.planQty END" +
+                        "WHEN pro.weight IS NULL THEN 0 * si.qty " +
+                        "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
                         ") weight")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")

@@ -7,6 +7,8 @@ import controllers.Login;
 import helper.DBUtils;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.market.Listing;
+import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
 import org.apache.commons.collections.Predicate;
@@ -163,7 +165,7 @@ public class User extends Model {
         if(!this.authenticate(this.password))
             throw new FastRuntimeException("密码错误");
         this.save();
-        Login.updateUserCache(this);
+        //Login.updateUserCache(this);
     }
 
     public List<Notification> notificationFeeds(int page) {
@@ -278,7 +280,7 @@ public class User extends Model {
         this.password = passwd;
         this.passwordDigest = Crypto.encryptAES(this.password);
         this.save();
-        Login.updateUserCache(this);
+        //Login.updateUserCache(this);
     }
 
     /**
@@ -303,7 +305,7 @@ public class User extends Model {
          * 3. 用户 Notification Queue 缓存
          */
         //TODO 这里的缓存都是通过 Model 自己进行的缓存, 只能够支持单机缓存, 无法分布式.
-        Privilege.privileges(this.username,this.roles);
+        Privilege.privileges(this.username, this.roles);
     }
 
     /**
@@ -510,5 +512,38 @@ public class User extends Model {
             categories.addAll(categoryList);
         }
         return categories;
+    }
+
+    /**
+     * User 的 SKU 权限
+     *
+     * @param user
+     * @return
+     */
+    public static List<String> getSkus(User user) {
+        return Category.getSKUs(getTeamCategorys(user));
+    }
+
+    /**
+     * User 的 Listing 权限
+     *
+     * @return
+     */
+    public static List<String> getListings(User user) {
+        List<String> listings = new ArrayList<String>();
+        for(String sku : getSkus(user)) {
+            listings.addAll(Listing.getAllListingBySKU(sku));
+        }
+        return listings;
+    }
+
+    /**
+     * User 的 Selling 权限
+     *
+     * @param user
+     * @return
+     */
+    public static List<String> getSellings(User user) {
+        return Selling.getSellingIds(getListings(user));
     }
 }

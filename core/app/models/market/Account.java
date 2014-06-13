@@ -370,7 +370,7 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
-        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK, M.AMAZON_JP).contains(this.type)) return;
+        if(Arrays.asList(M.EBAY_UK).contains(this.type)) return;
         String url = "Account.changeRegion.";
         try {
             url = this.type.changeRegion(m.amid().name());

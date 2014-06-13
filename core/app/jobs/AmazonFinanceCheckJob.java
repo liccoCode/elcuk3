@@ -72,7 +72,7 @@ public class AmazonFinanceCheckJob extends Job {
             for(M m : M.values()) {
                 if(m == M.EBAY_UK) continue;
                 Account acc = null;
-                if(Arrays.asList(M.AMAZON_IT, M.AMAZON_FR, M.AMAZON_DE, M.AMAZON_ES).contains(m)) {
+                if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES).contains(m)) {
                     acc = accMap.get(M.AMAZON_DE.name());
                 } else {
                     acc = accMap.get(m.name());

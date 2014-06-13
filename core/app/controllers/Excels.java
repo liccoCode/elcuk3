@@ -8,9 +8,14 @@ import models.product.Category;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
+import models.view.dto.SaleReportDTO;
 import models.view.post.AnalyzePost;
 import models.view.post.DeliveryPost;
+<<<<<<<HEAD
 import models.view.post.ProfitPost;
+=======
+import models.view.post.SaleReportPost;
+>>>>>>>develop
 import models.view.post.TrafficRatePost;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
@@ -175,6 +180,22 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    public static void saleReport(SaleReportPost p) {
+        List<SaleReportDTO> dtos = p.query();
+        if(dtos != null && dtos.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s产品销售统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dtos, p);
+
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
