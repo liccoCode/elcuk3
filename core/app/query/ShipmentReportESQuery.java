@@ -212,9 +212,9 @@ public class ShipmentReportESQuery {
                 .andWhere("sp.type=?")
                 .param(shipType.toString());
         if(StringUtils.equals(countType, "ReceiptDate")) {
-            sql.andWhere("sp.receiptDate>=?").param(from).where("sp.receiptDate<=?").param(to);
+            sql.andWhere("sp.receiptDate>=?").param(Dates.morning(from)).where("sp.receiptDate<=?").param(Dates.night(to));
         } else {
-            sql.andWhere("sp.planBeginDate>=?").param(from).where("sp.planBeginDate<=?").param(to);
+            sql.andWhere("sp.planBeginDate>=?").param(Dates.morning(from)).where("sp.planBeginDate<=?").param(Dates.night(to));
         }
         return sql;
     }
