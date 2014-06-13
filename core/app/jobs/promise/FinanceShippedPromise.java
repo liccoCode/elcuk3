@@ -66,7 +66,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
         if(orderIds != null && orderIds.size() > 0) {
-            synchronized(this.account.cookieStore()) {
+            //synchronized(this.account.cookieStore()) {
                 try {
                     this.account.changeRegion(this.market);
                     for(String orderId : orderIds) {
@@ -86,7 +86,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                     this.account.changeRegion(this.account.type);
                     emailWarnningCheck();
                 }
-            }
+            //}
             AmazonFinanceCheckJob.deleteSaleFees(orderIds);
             AmazonFinanceCheckJob.saveFees(fees);
             /**
