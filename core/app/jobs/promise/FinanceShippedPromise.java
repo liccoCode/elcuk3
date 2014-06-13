@@ -335,9 +335,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         Document doc = Jsoup.parse(html);
 
         Elements tables = doc.select("#content-main-entities table");
-        Logger.info("bbbbbbb:::", tables.size());
+        Logger.info("bbbbbbb:::"+tables.size());
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
-        Logger.info("aaaaaaaa:::", rows.size());
+        Logger.info("aaaaaaaa:::"+rows.size());
 
         if(rows.size() <= 0) return urls;
         // 去除第一行 title
