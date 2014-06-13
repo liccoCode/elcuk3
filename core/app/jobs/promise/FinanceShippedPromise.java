@@ -73,6 +73,36 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                 this.account.loginAmazonSellerCenter();
         }
 
+        if(this.market == M.AMAZON_DE) {
+            List<String> urls = this.transactionURLs("028-1135738-8832340");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
+        if(this.market == M.AMAZON_FR) {
+            List<String> urls = this.transactionURLs("402-5493577-1293136");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
+        if(this.market == M.AMAZON_US) {
+            List<String> urls = this.transactionURLs("002-0186811-1738602");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
+        if(this.market == M.AMAZON_UK) {
+            List<String> urls = this.transactionURLs("026-1947342-7795530");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
+        if(this.market == M.AMAZON_ES) {
+            List<String> urls = this.transactionURLs("171-2088753-0234721");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
 
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
@@ -347,9 +377,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         Document doc = Jsoup.parse(html);
 
         Elements tables = doc.select("#content-main-entities table");
-        Logger.info("bbbbbbb:::" + tables.size());
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
-        Logger.info("aaaaaaaa:::" + rows.size());
 
         if(rows.size() <= 0) return urls;
         // 去除第一行 title
