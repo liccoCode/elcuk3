@@ -1,5 +1,8 @@
 package controllers;
 
+import jobs.promise.FinanceShippedPromise;
+import models.market.Account;
+import models.market.M;
 import models.product.Team;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -57,6 +60,15 @@ public class Teams extends Controller {
     }
 
     public static void blank() {
+
+         //连接it后台
+        Account acc = Account.findById(134l);
+        acc.loginAmazonSellerCenter();
+            acc.changeRegion(M.AMAZON_IT);
+            FinanceShippedPromise finance = new FinanceShippedPromise(acc, M.AMAZON_IT,
+                    null);
+            List<String> urls = finance.transactionURLs("402-0275820-2101172");
+
         Team team = new Team();
         render(team);
     }
