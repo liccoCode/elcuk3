@@ -1,6 +1,7 @@
 package services;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.Dates;
 import helper.ES;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -53,7 +54,7 @@ public class MetricSaleReportService {
     public Float countSales(Date from, Date to, M market, String sellingId) {
         SumBuilder builder = AggregationBuilders.sum("quantity").field("quantity");
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(filterbuilder(from, to, market, sellingId))
+                .query(filterbuilder(Dates.morning(from), Dates.night(to), market, sellingId))
                 .aggregation(builder)
                 .size(0);
         JSONObject result = ES.search("elcuk2", "orderitem", search);
@@ -70,7 +71,8 @@ public class MetricSaleReportService {
     public Float countSalesAmount(Date from, Date to, M market, String sellingId) {
         SumBuilder builder = AggregationBuilders.sum("cost_in_usd").field("cost_in_usd");
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query((filterbuilder(from, to, market, sellingId)).must(QueryBuilders.termQuery("fee_type", "productcharges")))
+                .query((filterbuilder(Dates.morning(from), Dates.night(to), market, sellingId))
+                        .must(QueryBuilders.termQuery("fee_type", "productcharges")))
                 .aggregation(builder)
                 .size(0);
         JSONObject result = ES.search("elcuk2", "salefee", search);
