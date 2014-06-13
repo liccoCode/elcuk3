@@ -62,30 +62,42 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     @Override
     public List<SaleFee> doJobWithResult() {
+
+
+        /**
+         * 检查意大利登陆是否有效，重新登陆一次
+         */
+        if(this.market == M.AMAZON_IT) {
+            List<String> urls = this.transactionURLs("402-0275820-2101172");
+            if(urls.size() <= 0)
+                this.account.loginAmazonSellerCenter();
+        }
+
+
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
         if(orderIds != null && orderIds.size() > 0) {
             //synchronized(this.account.cookieStore()) {
-                try {
-                    this.account.changeRegion(this.market);
-                    for(String orderId : orderIds) {
-                        List<String> urls = this.transactionURLs(orderId);
-                        List<SaleFee> orderFees = new ArrayList<SaleFee>();
-                        for(String url : urls) {
-                            orderFees.addAll(this.saleFees(url));
-                        }
-                        fees.addAll(orderFees);
-                        if(FinanceShippedPromise.isWarnning(orderFees)) {
-                            Orderr changeOrderr = Orderr.findById(orderId);
-                            changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
-                            changeOrderr.save();
-                        }
+            try {
+                this.account.changeRegion(this.market);
+                for(String orderId : orderIds) {
+                    List<String> urls = this.transactionURLs(orderId);
+                    List<SaleFee> orderFees = new ArrayList<SaleFee>();
+                    for(String url : urls) {
+                        orderFees.addAll(this.saleFees(url));
                     }
-                } finally {
-                    this.account.changeRegion(this.account.type);
-                    emailWarnningCheck();
+                    fees.addAll(orderFees);
+                    if(FinanceShippedPromise.isWarnning(orderFees)) {
+                        Orderr changeOrderr = Orderr.findById(orderId);
+                        changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
+                        changeOrderr.save();
+                    }
                 }
+            } finally {
+                this.account.changeRegion(this.account.type);
+                emailWarnningCheck();
+            }
             //}
             AmazonFinanceCheckJob.deleteSaleFees(orderIds);
             AmazonFinanceCheckJob.saveFees(fees);
@@ -335,9 +347,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         Document doc = Jsoup.parse(html);
 
         Elements tables = doc.select("#content-main-entities table");
-        Logger.info("bbbbbbb:::"+tables.size());
+        Logger.info("bbbbbbb:::" + tables.size());
         Elements rows = doc.select("#content-main-entities table:eq(2) tr");
-        Logger.info("aaaaaaaa:::"+rows.size());
+        Logger.info("aaaaaaaa:::" + rows.size());
 
         if(rows.size() <= 0) return urls;
         // 去除第一行 title
