@@ -45,6 +45,8 @@
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <button class="btn btn-primary" data-loading>搜索</button>
+      <a href="@{Excels.profit(p)}" class="btn btn-primary" target="_blank"><i
+                  class="icon-download-alt"></i>导出Excel</a>
     </div>
   </div>
 </div>
@@ -64,6 +66,13 @@
         <th>平均采购价(USD)</th>
         <th>平均运费单价(USD)</th>
         <th>关税和VAT单价(USD)</th>
+
+        <th>(制作中+已交货)库存量</th>
+        <th>在途库存量</th>
+        <th>(入库+在库)库存量</th>
+        <th>(制作中+已交货)库存占用资金总金额(USD)</th>
+        <th>在途库存占用资金总金额(USD)</th>
+        <th>(入库+在库)库存占用资金总金额(USD)</th>
       </tr>
         #{list items:profits, as:'pro'}
           <tr>
@@ -78,6 +87,12 @@
             <td>${pro.procureprice}</td>
             <td>${pro.shipprice}</td>
             <td>${pro.vatprice}</td>
+            <td>${pro.workingqty}</td>
+            <td>${pro.wayqty}</td>
+            <td>${pro.inboundqty}</td>
+            <td>${pro.workingfee}</td>
+            <td>${pro.wayfee}</td>
+            <td>${pro.inboundfee}</td>
           </tr>
         #{/list}
     </table>

@@ -1,16 +1,23 @@
 package controllers;
 
 import helper.Webs;
+import jobs.analyze.SellingSaleAnalyzeJob;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.product.Category;
+import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
 import models.view.dto.SaleReportDTO;
 import models.view.post.AnalyzePost;
 import models.view.post.DeliveryPost;
+import models.view.post.ProfitPost;
 import models.view.post.SaleReportPost;
 import models.view.post.TrafficRatePost;
+import models.view.report.Profit;
 import models.view.report.TrafficRate;
+import org.apache.commons.lang.StringUtils;
+import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.modules.excel.RenderExcel;
@@ -18,6 +25,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -125,8 +133,55 @@ public class Excels extends Controller {
     }
 
     /**
-     * 下载转化率Excel表格
+     * 利润下载
      */
+    public static void profit(ProfitPost p) {
+        List<Profit> profits = new ArrayList<Profit>();
+
+        String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
+        // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
+        List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
+        if(dtos == null) {
+            renderText("Analyze后台事务正在执行中,请稍候...");
+        }
+
+        if(StringUtils.isBlank(p.category) && StringUtils.isBlank(p.sku)) {
+            renderText("未选择category或者sku!");
+        } else {
+            if(!StringUtils.isBlank(p.sku)) {
+                if(!Product.exist(p.sku)) {
+                    renderText("系统不存在sku:" + p.sku);
+                }
+            }
+
+            if(!StringUtils.isBlank(p.category)) {
+                if(!Category.exist(p.category)) {
+                    renderText("系统不存在category:" + p.category);
+                }
+            }
+
+            String postkey = helper.Caches.Q.cacheKey("profitpost", p.from, p.to, p.category, p.sku);
+            profits = Cache.get(postkey, List.class);
+            if(profits == null) {
+                //从ES查找SKU的利润
+                profits = p.query();
+                Cache.add(postkey, profits, "2h");
+            }
+        }
+
+        if(profits != null && profits.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s销售库存利润报表.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(profits, p);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
     public static void saleReport(SaleReportPost p) {
         List<SaleReportDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
@@ -137,6 +192,7 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(dtos, p);
+
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
