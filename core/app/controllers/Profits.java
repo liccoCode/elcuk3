@@ -2,9 +2,12 @@ package controllers;
 
 
 import helper.J;
+import jobs.analyze.SellingSaleAnalyzeJob;
 import models.product.Product;
+import models.view.dto.AnalyzeDTO;
 import models.view.post.ProfitPost;
 import org.apache.commons.lang.StringUtils;
+import play.cache.Cache;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -40,7 +43,18 @@ public class Profits extends Controller {
         List<Profit> profits = new ArrayList<Profit>();
         if(p == null) {
             p = new ProfitPost();
+            render(profits, p);
         } else {
+
+            String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
+            // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
+            List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
+            if(dtos == null) {
+                flash.error("Analyze后台事务正在执行中,请稍候...");
+                render(profits, p);
+            }
+
+
             if(StringUtils.isBlank(p.category) && StringUtils.isBlank(p.sku)) {
                 flash.error("未选择category或者sku!");
             } else {
@@ -57,10 +71,18 @@ public class Profits extends Controller {
                         render(profits, p);
                     }
                 }
+
+                String postkey = helper.Caches.Q.cacheKey("profitpost", p.from, p.to, p.category, p.sku);
+                profits = Cache.get(postkey, List.class);
+                if(profits != null) {
+                    render(profits, p);
+                }
                 //从ES查找SKU的利润
                 profits = p.query();
+                Cache.add(postkey, profits, "2h");
             }
+
+            render(profits, p);
         }
-        render(profits, p);
     }
 }
