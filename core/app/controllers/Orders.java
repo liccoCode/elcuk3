@@ -36,8 +36,9 @@ public class Orders extends Controller {
     public static void refreshFee(String id) {
         Orderr orderr = Orderr.findById(id);
         try {
+            Account account = Account.findById(orderr.account.id);
             List<SaleFee> fees = new FinanceShippedPromise(
-                    orderr.account, orderr.market, Lists.newArrayList(orderr.orderId)).now().get();
+                    account, orderr.market, Lists.newArrayList(orderr.orderId)).now().get();
             renderJSON(new Ret(true, "总共处理 " + fees.size() + " 个费用"));
         } catch(Exception e) {
             renderJSON(new Ret(e.getMessage()));
