@@ -11,11 +11,8 @@ import models.view.dto.DeliveryExcel;
 import models.view.dto.SaleReportDTO;
 import models.view.post.AnalyzePost;
 import models.view.post.DeliveryPost;
-<<<<<<<HEAD
 import models.view.post.ProfitPost;
-=======
 import models.view.post.SaleReportPost;
->>>>>>>develop
 import models.view.post.TrafficRatePost;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
