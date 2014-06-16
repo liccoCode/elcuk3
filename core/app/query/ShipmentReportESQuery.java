@@ -206,13 +206,15 @@ public class ShipmentReportESQuery {
     private static SqlSelect buildSqlHeader(int year, Shipment.T shipType, String countType, int month) {
         Date from = Dates.getMonthFirst(year, month);
         Date to = Dates.getMonthLast(year, month);
-        //TODO: Shipment 与 ShipItem 不构成一对一关系，统计显示 Shipment 为2698， ShipItem 为 5097
-        SqlSelect sql = new SqlSelect().select("COUNT(*) count").from("Shipment sp").where("sp.type=?")
+        String[] state = {Shipment.S.RECEIPTD.toString(), Shipment.S.RECEIVING.toString(), Shipment.S.DONE.toString()};
+        SqlSelect sql = new SqlSelect().select("COUNT(*) count").from("Shipment sp")
+                .where("state IN " + SqlSelect.inlineParam(state) + "")
+                .andWhere("sp.type=?")
                 .param(shipType.toString());
         if(StringUtils.equals(countType, "ReceiptDate")) {
-            sql.andWhere("sp.receiptDate>=?").param(from).where("sp.receiptDate<=?").param(to);
+            sql.andWhere("sp.receiptDate>=?").param(Dates.morning(from)).where("sp.receiptDate<=?").param(Dates.night(to));
         } else {
-            sql.andWhere("sp.planBeginDate>=?").param(from).where("sp.planBeginDate<=?").param(to);
+            sql.andWhere("sp.planBeginDate>=?").param(Dates.morning(from)).where("sp.planBeginDate<=?").param(Dates.night(to));
         }
         return sql;
     }
