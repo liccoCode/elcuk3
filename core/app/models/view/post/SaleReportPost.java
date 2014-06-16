@@ -103,13 +103,16 @@ public class SaleReportPost {
     public List<SaleReportDTO> query() {
         User user = Login.current();
         String key = Caches.Q.cacheKey(this.from, this.to, (this.market != null ? this.market : "AllMarket"),
-                user.username,
-                "SaleReports");
+                user.username, "SaleReports");
         List<SaleReportDTO> dtos = Cache.get(key, List.class);
         if(dtos == null) {
-            sellingIds = params();
+            this.sellingIds = params();
             new SaleReportsCalculateJob(key).start();
             throw new FastRuntimeException("正在后台计算中，请稍后再尝试~");
+        }
+        if(StringUtils.isNotBlank(this.search)) {
+            this.sellingIds = params();
+            org.apache.commons.collections.CollectionUtils.filter(dtos, new SearchPredicate());
         }
         return dtos;
     }
@@ -183,10 +186,18 @@ public class SaleReportPost {
                                 (float) (Math.round(sales * 100)) / 100, (float) (Math.round(salesAmount * 100)) / 100));
                     }
                 }
-                Cache.add(key, dtos);
+                Cache.add(key, dtos, "4h");
             }
             LogUtils.JOBLOG.info(String.format("SaleReportPost execute with key: %s, Calculate time: %s", key,
                     System.currentTimeMillis() - begin));
+        }
+    }
+
+    private class SearchPredicate implements org.apache.commons.collections.Predicate {
+        @Override
+        public boolean evaluate(Object o) {
+            SaleReportDTO dto = (SaleReportDTO) o;
+            return sellingIds.contains(dto.sellingId);
         }
     }
 }
