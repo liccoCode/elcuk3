@@ -2,6 +2,8 @@ package models.view.report;
 
 import models.market.M;
 
+import java.io.Serializable;
+
 /**
  * 利润的对象
  * Created by IntelliJ IDEA.
@@ -9,7 +11,9 @@ import models.market.M;
  * Date: 3-10-14
  * Time: 上午11:51
  */
-public class Profit {
+public class Profit implements Serializable {
+    private static final long serialVersionUID = -6924566933690728789L;
+
     /**
      * SKU
      */
@@ -61,5 +65,34 @@ public class Profit {
      * 利润率
      */
     public Float profitrate;
+    /**
+     * 正在制作+已交货的数量
+     */
+    public int workingqty = 0;
+    /**
+     * 在途库存
+     */
+    public int wayqty = 0;
+    /**
+     * 入库+在库
+     */
+    public int inboundqty = 0;
+
+
+    /**
+     * (制作中+已交货)库存占用资金总金额(USD)
+     */
+    public Float workingfee = 0f;
+
+    /**
+     * 在途库存占用资金总金额(USD)
+     */
+    public Float wayfee = 0f;
+
+    /**
+     * (入库+在库)库存占用资金总金额(USD)
+     */
+    public Float inboundfee = 0f;
+
 
 }

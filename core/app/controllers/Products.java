@@ -22,6 +22,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,16 +79,28 @@ public class Products extends Controller {
         render(pro);
     }
 
+    public static void copy(String choseid, String skuid, String base, String extend, String attach) {
+        Product pro = Product.copyProduct(choseid, skuid, base, extend, attach);
+        render("Products/show.html", pro);
+    }
+
+
     public static void update(Product pro) {
-        validation.valid(pro);
-        if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
-        if(Validation.hasErrors()) render("Products/show.html", pro);
-        pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
-        pro.save();
-        flash.success("更新成功");
-        new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
-                pro.sku).save();
-        redirect("/Products/show/" + pro.sku);
+        try {
+            validation.valid(pro);
+            if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
+
+            if(Validation.hasErrors())
+                        renderJSON(Webs.VJson(Validation.errors()));
+
+            pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
+            pro.save();
+            new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
+                    pro.sku).save();
+            renderJSON(new Ret(true, ""));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     public static void saleAmazon(String id) {
@@ -117,7 +130,9 @@ public class Products extends Controller {
     @Before(only = {"blank", "create", "index"})
     public static void setUpCreatePage() {
         List<String> families = Family.familys(true);
+        List<String> products = Product.skus(true);
         renderArgs.put("families", J.json(families));
+        renderArgs.put("products", J.json(products));
     }
 
     public static void blank(Product pro) {
@@ -290,7 +305,13 @@ public class Products extends Controller {
     public static void saveAttrs(List<ProductAttr> productAttrs) {
         try {
             for(ProductAttr productAttr : productAttrs) {
-                if(productAttr != null) productAttr.update();
+                if(productAttr != null) {
+                    if(productAttr.id != null && productAttr.id != 0) {
+                        productAttr.update();
+                    } else {
+                        productAttr.save();
+                    }
+                }
             }
             renderJSON(new Ret(true, ""));
         } catch(Exception e) {
