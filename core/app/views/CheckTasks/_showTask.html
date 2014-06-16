@@ -37,13 +37,13 @@
 <tr>
   <th>质检开始时间</th>
   <td colspan="3">
-    <input size="16" type="text"  value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" readonly
+    <input size="16" type="text" value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" readonly
            class="form_datetime"
            name="from">
   </td>
   <th>质检完成时间</th>
   <td colspan="3">
-    <input size="16" type="text"  value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" readonly
+    <input size="16" type="text" value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" readonly
            class="form_datetime" name="to">
   </td>
 </tr>
@@ -83,6 +83,29 @@
     <input type="hidden" name="id" value="${check.id}">
   </td>
 </tr>
+
+
+<div class="row-fluid">
+  <div class="span12">
+    <h4 class="alert alert-success">凭证<i class="icon-sort-down"></i></h4>
+  </div>
+</div>
+<div class="row-fluid">
+  <div style="min-height:300px;" class="span12 well" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
+  </div>
+</div>
+<div class="row-fluid">
+  <form action="/attachs/uploadForForm" enctype="multipart/form-data" method="POST">
+    <input type="file" name="a.file">
+    <input type="hidden" name="a.p" value="CHECKTASK">
+    <input type="hidden" name="a.fid" value="${check.id}">
+    <input type="submit" class="btn btn-success" value="上传">
+  </form>
+</div>
+
+
 <tr>
   <td colspan="6">
   #{if ap==null || ap.id==null}
