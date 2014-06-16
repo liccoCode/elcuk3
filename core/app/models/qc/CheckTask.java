@@ -732,6 +732,12 @@ public class CheckTask extends Model {
         if(taskname.equals("质检确认")) {
             variableMap = processQc();
         }
+
+        if (this.units.relateShipment().size()<=0){
+            Validation.addError("", String.format("关联运输单为空!"));
+        }
+        if(Validation.hasErrors()) return;
+
         this.units.save();
         this.save();
         if(this.opition == null) this.opition = "";
