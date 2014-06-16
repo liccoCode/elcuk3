@@ -240,6 +240,44 @@ public class CheckTasks extends Controller {
 
 
     /**
+     * 质检管理取消费用并 回滚到采购
+     *
+     * @param check
+     * @param checkid
+     * @param processid
+     * @param from
+     * @param to
+     */
+    public static void rollactiviti(CheckTask check, long checkid, long processid, @As("yyyy-MM-dd HH:mm") Date from,
+                                    @As("yyyy-MM-dd HH:mm") Date to) {
+        CheckTask c = CheckTask.findById(checkid);
+        ActivitiProcess ap = ActivitiProcess.findById(processid);
+        String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
+
+        //退回工厂或者到仓库返工
+        //结束
+        if(!(check.dealway == CheckTask.DealType.RETURN ||
+                check.dealway == CheckTask.DealType.WAREHOUSE)) {
+            c.checknote = check.checknote;
+            c.qty = check.qty;
+            c.pickqty = check.pickqty;
+            c.startTime = from;
+            c.endTime = to;
+            c.result = check.result;
+            c.isship = check.isship;
+            c.checknote = check.checknote;
+            c.workers = check.workers;
+            c.workhour = check.workhour;
+        }
+        c.opition = check.opition;
+        c.submitActiviti(ap, taskname, check.workfee, 2, Secure.Security.connected());
+
+        flash.success("更新成功");
+        CheckTasks.showactiviti(checkid);
+    }
+
+
+    /**
      * 调整运营的数据并提交流程
      *
      * @param check

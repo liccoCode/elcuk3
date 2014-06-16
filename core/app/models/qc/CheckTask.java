@@ -689,7 +689,7 @@ public class CheckTask extends Model {
      *
      * @return
      */
-    public java.util.Map<String, Object> processQc() {
+    public java.util.Map<String, Object> processQc(int flow) {
         java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
         //退回工厂或者到仓库返工
         //结束
@@ -713,6 +713,11 @@ public class CheckTask extends Model {
                 variableMap.put("flow", "2");
             }
         }
+
+        if(flow != 0 && flow == 2) {
+            variableMap.put("flow", "2");
+        }
+
         //修改质检为确认状态
         this.units.qcConfirm = ProcureUnit.QCCONFIRM.CONFIRMED;
         return variableMap;
@@ -720,6 +725,7 @@ public class CheckTask extends Model {
 
 
     public void submitActiviti(ActivitiProcess ap, String taskname, float wfee, int flow, String username) {
+        if(this.opition == null) this.opition = "";
         java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
         if(taskname.equals("采购员")) {
             variableMap = processProcureUnit(wfee, flow);
@@ -730,17 +736,20 @@ public class CheckTask extends Model {
             this.units.opConfirm = ProcureUnit.OPCONFIRM.CONFIRMED;
         }
         if(taskname.equals("质检确认")) {
-            variableMap = processQc();
+            variableMap = processQc(flow);
+            if(flow == 2) {
+                this.opition = "[取消费用]" + this.opition;
+            }
         }
 
-        if (this.units.relateShipment().size()<=0){
+        if(this.units.relateShipment().size() <= 0) {
             Validation.addError("", String.format("关联运输单为空!"));
         }
         if(Validation.hasErrors()) return;
 
         this.units.save();
         this.save();
-        if(this.opition == null) this.opition = "";
+
         if(this.dealway != null) this.opition = "[" + this.dealway.label() + "]" + this.opition;
         ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, this.opition);
         //设置下一步审批人

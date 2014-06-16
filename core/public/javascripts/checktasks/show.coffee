@@ -50,6 +50,17 @@ $ ->
   )
 
 
+  $("#update_form").on("click", "#submitqcroll_btn", (r) ->
+    $btn = $(@)
+    return unless confirm('取消费用将流转到采购,确认提交?')
+
+    $form = $("#update_form")
+    $form.attr("action", "/checktasks/rollactiviti")
+    # 提交表单前将下拉项的disabled属性取消掉
+    $form.submit()
+  )
+
+
   $("#update_form").on("click", "#planactiviti_btn", (r) ->
     $btn = $(@)
     $dealway = $("select[name='check.dealway']")
