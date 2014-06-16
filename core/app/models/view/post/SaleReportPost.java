@@ -179,8 +179,8 @@ public class SaleReportPost {
                     Float salesAmount = service.countSalesAmount(from, to, market, sid);
 
                     if(sales != 0 || salesAmount != 0) {
-                        dtos.add(new SaleReportDTO(categoryId, sku, sid, market, (float) (Math.round(sales * 100)) / 100,
-                                (float) (Math.round(salesAmount * 100)) / 100));
+                        dtos.add(new SaleReportDTO(categoryId.length() <= 3 ? categoryId : "", sku, sid, market,
+                                (float) (Math.round(sales * 100)) / 100, (float) (Math.round(salesAmount * 100)) / 100));
                     }
                 }
                 Cache.add(key, dtos);
