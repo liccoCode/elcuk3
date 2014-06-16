@@ -1,6 +1,8 @@
 package models.view.post;
 
 import controllers.Login;
+import helper.Caches;
+import helper.LogUtils;
 import models.User;
 import models.market.M;
 import models.market.Selling;
@@ -8,6 +10,7 @@ import models.product.Category;
 import models.view.dto.SaleReportDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.cache.Cache;
 import play.utils.FastRuntimeException;
 import services.MetricSaleReportService;
 
@@ -47,6 +50,11 @@ public class SaleReportPost {
     public Date to;
     public M market;
     public String search;
+
+    /**
+     * 拥有权限的Selling集合
+     */
+    private List<String> sellingIds;
 
     public SaleReportPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -93,23 +101,15 @@ public class SaleReportPost {
 
 
     public List<SaleReportDTO> query() {
-        List<SaleReportDTO> dtos = new ArrayList<SaleReportDTO>();
-
-        List<String> sellingIds = params();
-        //匹配 SellingID 中的 Category
-        Pattern CATEGORYID = Pattern.compile("\\d*");
-        for(String sid : sellingIds) {
-            Matcher matcher = CATEGORYID.matcher(sid);
-            String categoryId = matcher.find() ? matcher.group() : null;
-            String sku = Selling.sidToSKU(sid);
-            M market = Selling.sidToMarket(sid);
-
-            Float sales = service.countSales(this.from, this.to, market, sid);
-            Float salesAmount = service.countSalesAmount(this.from, this.to, market, sid);
-
-            if(sales != 0 || salesAmount != 0)
-                dtos.add(new SaleReportDTO(categoryId, sku, sid, market, (float) (Math.round(sales * 100)) / 100,
-                        (float) (Math.round(salesAmount * 100)) / 100));
+        User user = Login.current();
+        String key = Caches.Q.cacheKey(this.from, this.to, (this.market != null ? this.market : "AllMarket"),
+                user.username,
+                "SaleReports");
+        List<SaleReportDTO> dtos = Cache.get(key, List.class);
+        if(dtos == null) {
+            sellingIds = params();
+            new SaleReportsCalculateJob(key).start();
+            throw new FastRuntimeException("正在后台计算中，请稍后再尝试~");
         }
         return dtos;
     }
@@ -151,5 +151,42 @@ public class SaleReportPost {
             if(matcher.find()) return matcher.group(1);
         }
         return null;
+    }
+
+    /**
+     * 销售报表计算Job
+     */
+    class SaleReportsCalculateJob extends Thread {
+        private String key;
+
+        public SaleReportsCalculateJob(String key) {
+            this.key = key;
+        }
+
+        public void run() {
+            long begin = System.currentTimeMillis();
+            List<SaleReportDTO> dtos = new ArrayList<SaleReportDTO>();
+            synchronized(key.intern()) {
+                //匹配 SellingID 中的 Category
+                Pattern CATEGORYID = Pattern.compile("\\d*");
+                for(String sid : sellingIds) {
+                    Matcher matcher = CATEGORYID.matcher(sid);
+                    String categoryId = matcher.find() ? matcher.group() : null;
+                    String sku = Selling.sidToSKU(sid);
+                    M market = Selling.sidToMarket(sid);
+
+                    Float sales = service.countSales(from, to, market, sid);
+                    Float salesAmount = service.countSalesAmount(from, to, market, sid);
+
+                    if(sales != 0 || salesAmount != 0) {
+                        dtos.add(new SaleReportDTO(categoryId.length() <= 3 ? categoryId : "", sku, sid, market,
+                                (float) (Math.round(sales * 100)) / 100, (float) (Math.round(salesAmount * 100)) / 100));
+                    }
+                }
+                Cache.add(key, dtos);
+            }
+            LogUtils.JOBLOG.info(String.format("SaleReportPost execute with key: %s, Calculate time: %s", key,
+                    System.currentTimeMillis() - begin));
+        }
     }
 }
