@@ -13,7 +13,13 @@ $ ->
   $("#update_form").on("click", "#update_btn, #fullupdate_btn, #endactiviti_btn, #submitactiviti_btn, #updateactiviti_btn", (r) ->
     $btn = $(@)
     $ship = $("select[name='check.isship']")
-    if($btn.attr("id") == "endactiviti_btn")
+
+    if($btn.attr("id") == "fullupdate_btn")
+      if ($ship.val() == 'NOTSHIP')
+        return unless confirm('不发货则会进入不发货流程,确认提交?')
+      else
+        return unless confirm('确认提交?')
+    else if($btn.attr("id") == "endactiviti_btn")
       return unless confirm('还原后采购计划将更新为发货，并结束不发货流程.确认提交?')
     else if($btn.attr("id") == "update_btn")
       return unless confirm('确认保存?')
