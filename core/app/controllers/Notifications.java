@@ -3,6 +3,7 @@ package controllers;
 import helper.GTs;
 import models.Notification;
 import models.User;
+import models.activiti.ActivitiProcess;
 import models.view.Ret;
 import models.view.post.NotificationPost;
 import org.apache.commons.lang.StringUtils;
@@ -48,13 +49,23 @@ public class Notifications extends Controller {
      * 计算当前用户的通知信息的数量
      */
     public static void amount() {
-        long count = Notification.count("user=? and state=?", User.current(),
-                Notification.S.UNCHECKED);
+        //改成未执行流程的数量
+
+        List<String> tasks = ActivitiProcess.userTask(Secure.Security.connected());
+        long count = tasks.size();
         renderJSON(GTs.MapBuilder
                 .map("user", User.username())
                 .put("count", count + "")
                 .build()
         );
+
+//        long count = Notification.count("user=? and state=?", User.current(),
+//                Notification.S.UNCHECKED);
+//        renderJSON(GTs.MapBuilder
+//                .map("user", User.username())
+//                .put("count", count + "")
+//                .build()
+//        );
 
     }
 

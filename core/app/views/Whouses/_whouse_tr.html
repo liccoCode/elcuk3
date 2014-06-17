@@ -1,53 +1,82 @@
 <tr>
-    <th>仓库名称</th>
-    <td><input type="text" name="wh.name" value="${wh.name}"></td>
+  <th>仓库名称</th>
+  <td><input type="text" name="wh.name" value="${wh.name}"></td>
 
-    <th>仓库类型</th>
-    <td>
-        <select name="wh.type">
-            <option value="">选择类型</option>
-        #{list items:models.product.Whouse.T.values(), as:'t'}
-            <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t}</option>
-        #{/list}
-        </select>
-    </td>
+  <th>仓库类型</th>
+  <td>
+    <select name="wh.type">
+      <option value="">选择类型</option>
+    #{list items:models.product.Whouse.T.values(), as:'t'}
+      <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t}</option>
+    #{/list}
+    </select>
+  </td>
 
-    <th>Account</th>
-    <td>
-        <select name="wh.account.id">
-            <option value="">请选择</option>
-        #{list items:accs, as:'acc'}
-            <option ${acc.id == wh.account?.id ? 'selected' : ''} value="${acc.id}">${acc.prettyName()}</option>
-        #{/list}
-        </select>
-    </td>
+  <th>Account</th>
+  <td>
+    <select name="wh.account.id">
+      <option value="">请选择</option>
+    #{list items:accs, as:'acc'}
+      <option ${acc.id == wh.account?.id ? 'selected' : ''} value="${acc.id}">${acc.prettyName()}</option>
+    #{/list}
+    </select>
+  </td>
 </tr>
 
 <tr>
-    <th>Address</th>
-    <td><input readonly="" type="text" name="wh.address" value="${wh.address}"></td>
+  <th>Address</th>
+  <td><input readonly="" type="text" name="wh.address" value="${wh.address}"></td>
 
-    <th>City</th>
-    <td>
-        <input type="text" name="wh.city" value="${wh.city}">
-    </td>
+  <th>City</th>
+  <td>
+    <input type="text" name="wh.city" value="${wh.city}">
+  </td>
 
-    <th>Country</th>
-    <td>
-        <input type="text" name="wh.country" value="${wh.country}">
-    </td>
+  <th>Country</th>
+  <td>
+    <input type="text" name="wh.country" value="${wh.country}">
+  </td>
 </tr>
 
 <tr>
-    <th>PostalCode</th>
-    <td>
-        <input type="text" name="wh.postalCode" value="${wh.postalCode}">
-    </td>
+  <th>PostalCode</th>
+  <td>
+    <input type="text" name="wh.postalCode" value="${wh.postalCode}">
+  </td>
 
-    <th>Province</th>
-    <td>
-        <input type="text" name="wh.province" value="${wh.province}">
-    </td>
+  <th>Province</th>
+  <td>
+    <input type="text" name="wh.province" value="${wh.province}">
+  </td>
 
-    <td colspan="2"></td>
+  <td colspan="2"></td>
+</tr>
+
+<tr style="display:none" id="forward_shipment_tr">
+  <th>货代</th>
+  <td>
+    <select name="wh.cooperator.id">
+      <option value="">请选择</option>
+    #{list items:cooperators, as:'c'}
+      <option ${c.id == wh.cooperator?.id ? 'selected' : ''} value="${c.id}">${c.name}</option>
+    #{/list}
+    </select>
+  </td>
+
+  <th>运输方式</th>
+  <td colspan="3">
+    <label class="checkbox inline">
+      <input type="hidden" name="wh.isSEA" value="${wh.isSEA}" id="sea_hidden">
+      <input type="checkbox" name="wh.isSEA" value="${wh.isSEA}" data-id="sea_hidden" ${wh.isSEA ? 'checked' : ''}>海运
+    </label>
+    <label class="checkbox inline">
+      <input type="hidden" name="wh.isAIR" value="${wh.isAIR}" id="air_hidden">
+      <input type="checkbox" name="wh.isAIR" value="${wh.isAIR}" data-id="air_hidden" ${wh.isAIR ? 'checked' : ''}>空运
+    </label>
+    <label class="checkbox inline">
+      <input type="hidden" name="wh.isEXPRESS" value="${wh.isEXPRESS}" id="express_hidden">
+      <input type="checkbox" name="wh.isEXPRESS" value="${wh.isEXPRESS}" data-id="express_hidden" ${wh.isEXPRESS ?
+      'checked' : ''}>快递
+    </label>
+  </td>
 </tr>

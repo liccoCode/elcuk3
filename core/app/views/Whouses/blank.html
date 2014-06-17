@@ -1,6 +1,7 @@
 #{extends 'main.html'/}
 #{set title:'添加仓库'/}
 #{set 'moreScripts'}
+    #{script 'whouse/blank.coffee'/}
 #{/set}
 
 #{errorMsgs /}
@@ -13,7 +14,7 @@
     <div class="span12">
         <form action="@{Whouses.create()}" method="post">
             <table class="table table-condensed table-bordered">
-            #{render 'Whouses/_whouse_tr.html', wh:wh, accs:accs/}
+            #{render 'Whouses/_whouse_tr.html', wh:wh, accs:accs, cooperators: cooperators/}
 
                 <tr>
                     <td colspan="6">

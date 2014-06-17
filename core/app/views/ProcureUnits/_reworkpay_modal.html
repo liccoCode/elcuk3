@@ -1,0 +1,43 @@
+<div id="reworkpay_modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>返工类型的费用记录</h3>
+  </div>
+  <div class="modal-body">
+  #{if checks == null || checks.size == 0}
+    <p class="muted text-center">Sorry 未找到相关费用信息.</p>
+  #{/if}
+  #{else }
+    <table class="table table-bordered table-condensed">
+      <tr>
+        <th>#</th>
+        <th>质检任务ID</th>
+        <th>采购计划ID</th>
+        <th>质检开始时间</th>
+        <th>质检完成时间</th>
+        <th>每人工时</th>
+        <th>人数</th>
+        <th>总费用(元)</th>
+      </tr>
+        #{list items:checks, as: 'check'}
+          <tr>
+            <td>
+              <label class="checkbox"><input type="checkbox" name="checkids" value="${check.id}"></label>
+            </td>
+            <td>${check.id}</td>
+            <td>${check.units.id}</td>
+            <td>${check.startTime?.format("yyyy-MM-dd HH:mm")}</td>
+            <td>${check.endTime?.format("yyyy-MM-dd HH:mm")}</td>
+            <td>#{if check.workers != 0}${(check.workhour/check.workers).format("#.###")}#{/if}</td>
+            <td>${check.workers}</td>
+            <td>${check.workfee}</td>
+          </tr>
+        #{/list}
+    </table>
+  #{/else}
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="sumbit_billing_btn">提交</a>
+  </div>
+</div>
