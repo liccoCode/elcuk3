@@ -348,11 +348,6 @@ public class CheckTasks extends Controller {
         c.workers = check.workers;
         c.workhour = check.workhour;
 
-        if(c.units.relateShipment().size() <= 0) {
-            flash.error("关联运输单为空!");
-            CheckTasks.showactiviti(checkid);
-        }
-
         c.save();
         flash.success("更新成功");
         CheckTasks.showactiviti(checkid);
