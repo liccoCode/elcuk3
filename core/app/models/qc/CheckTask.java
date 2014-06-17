@@ -593,10 +593,6 @@ public class CheckTask extends Model {
         if(newCt.isship != null) this.isship = newCt.isship;
         if(newCt.checknote != null) this.checknote = newCt.checknote;
 
-        if(this.units.relateShipment().size() <= 0) {
-            Validation.addError("", String.format("关联运输单为空!"));
-        }
-        if(Validation.hasErrors()) return;
         this.units.save();
         this.save();
     }
@@ -624,10 +620,6 @@ public class CheckTask extends Model {
         //修改为不发货待处理
         this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
 
-        if(this.units.relateShipment().size() <= 0) {
-            Validation.addError("", String.format("关联运输单为空!"));
-        }
-        if(Validation.hasErrors()) return;
         this.units.save();
     }
 
@@ -752,10 +744,6 @@ public class CheckTask extends Model {
             }
         }
 
-        if(this.units.relateShipment().size() <= 0) {
-            Validation.addError("", String.format("关联运输单为空!"));
-        }
-        if(Validation.hasErrors()) return;
 
         this.units.save();
         this.save();
