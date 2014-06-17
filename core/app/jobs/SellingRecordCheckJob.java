@@ -41,7 +41,7 @@ public class SellingRecordCheckJob extends Job {
          * 找到所有 Amazon 市场的 SellingRecord 数据
          * PS: 只能抓取到两天前的 PageView 数据
          */
-        for(int i = -5; i <= 0; i++) {
+        for(int i = -20; i <= 0; i++) {
             SellingRecordCheckJob.amazonNewestRecords(fixTime.plusDays(i));
         }
         if(LogUtils.isslow(System.currentTimeMillis() - begin, "SellingRecordCheckJob")) {
@@ -63,6 +63,7 @@ public class SellingRecordCheckJob extends Job {
             try {
                 records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.toDate());
             } catch(Exception e) {
+                LogUtils.JOBLOG.info("SellingRecordCheckJob2:"+acc.toString()+e.getMessage());
                 e.printStackTrace();
                 LogUtils.JOBLOG.info(e.getMessage());
             }

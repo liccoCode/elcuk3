@@ -316,6 +316,9 @@ public class SellingRecord extends GenericModel {
                             .getAsJsonObject();
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
+
+                    LogUtils.JOBLOG.info("SellingRecordCheckJob:"+market.toString()+e.getMessage());
+
                     FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market,
                             Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                     return records;
@@ -344,6 +347,9 @@ public class SellingRecord extends GenericModel {
 
                         records.add(record);
                     } catch(Exception e) {
+
+                        LogUtils.JOBLOG.info("SellingRecordCheckJob1:"+market.toString()+e.getMessage());
+
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
                                 Webs.E(e));
                     }

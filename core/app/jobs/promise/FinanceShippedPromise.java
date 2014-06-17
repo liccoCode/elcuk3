@@ -72,31 +72,31 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             if(urls.size() <= 0)
                 this.account.loginAmazonSellerCenter();
         }
-        if(this.market == M.AMAZON_DE) {
-            List<String> urls = this.transactionURLs("028-1135738-8832340");
-            if(urls.size() <= 0)
-                this.account.loginAmazonSellerCenter();
-        }
-        if(this.market == M.AMAZON_FR) {
-            List<String> urls = this.transactionURLs("402-5493577-1293136");
-            if(urls.size() <= 0)
-                this.account.loginAmazonSellerCenter();
-        }
-        if(this.market == M.AMAZON_US) {
-            List<String> urls = this.transactionURLs("002-0186811-1738602");
-            if(urls.size() <= 0)
-                this.account.loginAmazonSellerCenter();
-        }
-        if(this.market == M.AMAZON_UK) {
-            List<String> urls = this.transactionURLs("026-1947342-7795530");
-            if(urls.size() <= 0)
-                this.account.loginAmazonSellerCenter();
-        }
-        if(this.market == M.AMAZON_ES) {
-            List<String> urls = this.transactionURLs("171-2088753-0234721");
-            if(urls.size() <= 0)
-                this.account.loginAmazonSellerCenter();
-        }
+//        if(this.market == M.AMAZON_DE) {
+//            List<String> urls = this.transactionURLs("028-1135738-8832340");
+//            if(urls.size() <= 0)
+//                this.account.loginAmazonSellerCenter();
+//        }
+//        if(this.market == M.AMAZON_FR) {
+//            List<String> urls = this.transactionURLs("402-5493577-1293136");
+//            if(urls.size() <= 0)
+//                this.account.loginAmazonSellerCenter();
+//        }
+//        if(this.market == M.AMAZON_US) {
+//            List<String> urls = this.transactionURLs("002-0186811-1738602");
+//            if(urls.size() <= 0)
+//                this.account.loginAmazonSellerCenter();
+//        }
+//        if(this.market == M.AMAZON_UK) {
+//            List<String> urls = this.transactionURLs("026-1947342-7795530");
+//            if(urls.size() <= 0)
+//                this.account.loginAmazonSellerCenter();
+//        }
+//        if(this.market == M.AMAZON_ES) {
+//            List<String> urls = this.transactionURLs("171-2088753-0234721");
+//            if(urls.size() <= 0)
+//                this.account.loginAmazonSellerCenter();
+//        }
 
 
         // 1. 访问 Transaction View 获取 transaction detail URL
@@ -108,13 +108,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                 this.account.changeRegion(this.market);
                 for(String orderId : orderIds) {
                     List<String> urls = this.transactionURLs(orderId);
-
-                    if(this.market == M.AMAZON_IT) {
-                        if(urls.size() <= 0)
-                            this.account.loginAmazonSellerCenter();
-                        //再取一次订单费用明细
-                        urls = this.transactionURLs(orderId);
-                    }
 
                     List<SaleFee> orderFees = new ArrayList<SaleFee>();
                     for(String url : urls) {
