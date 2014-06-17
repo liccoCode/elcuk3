@@ -463,15 +463,58 @@ public class CheckTask extends Model {
         }
 
         List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
-        for(Map<String, Object> task : tasks) {
-            Long taskid = (Long) task.get("id");
-            CheckTask checktask = CheckTask.findById(taskid);
+        if(tasks.size() > 0) {
+            //欧嘉货代
+            Cooperator cooperator = Cooperator.findById(59l);
+            for(Map<String, Object> task : tasks) {
+                Long taskid = (Long) task.get("id");
+                CheckTask checktask = CheckTask.findById(taskid);
 
-            Whouse wh = searchWarehouse(checktask.units.shipItems);
-            if(wh != null && wh.user != null) {
-                checktask.shipwhouse = wh;
-                checktask.checkor = wh.user.username;
-                checktask.save();
+                Whouse wh = searchWarehouse(checktask.units.shipItems);
+                if(wh != null && wh.user != null) {
+                    checktask.shipwhouse = wh;
+                    checktask.checkor = wh.user.username;
+                    checktask.save();
+                } else {
+                    //如果是快递则默认为欧嘉
+                    if(checktask.units.shipType == Shipment.T.EXPRESS) {
+                        wh = searchCooperWarehouse(cooperator);
+                        if(wh != null && wh.user != null) {
+                            checktask.shipwhouse = wh;
+                            checktask.checkor = wh.user.username;
+                            checktask.save();
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+
+    public static Whouse searchCooperWarehouse(Cooperator cooperator) {
+        List<Object> params = new ArrayList<Object>();
+        StringBuilder sbd = new StringBuilder(
+                " cooperator=? ");
+        params.add(cooperator);
+        sbd.append(" and isEXPRESS=? ");
+        params.add(true);
+        return Whouse.find(sbd.toString(), params.toArray()).first();
+    }
+
+    public static void updateExpressWarehouse(Long id) {
+        //更新快递单的货代仓库
+        List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where units_id=" + id);
+        if(tasks.size() > 0) {
+            for(Map<String, Object> task : tasks) {
+                Long taskid = (Long) task.get("id");
+                CheckTask checktask = CheckTask.findById(taskid);
+                Whouse wh = CheckTask.searchWarehouse(checktask.units.shipItems);
+                if(wh != null && wh.user != null) {
+                    checktask.shipwhouse = wh;
+                    checktask.checkor = wh.user.username;
+                    checktask.save();
+                }
             }
         }
     }
@@ -496,7 +539,16 @@ public class CheckTask extends Model {
         if(wh != null && wh.user != null) {
             newtask.shipwhouse = wh;
             newtask.checkor = wh.user.username;
-        }
+        } else
+            //如果是快递则默认为欧嘉
+            if(newtask.units.shipType == Shipment.T.EXPRESS) {
+                Cooperator cooperator = Cooperator.findById(59l);
+                wh = searchCooperWarehouse(cooperator);
+                if(wh != null && wh.user != null) {
+                    newtask.shipwhouse = wh;
+                    newtask.checkor = wh.user.username;
+                }
+            }
         newtask.save();
     }
 

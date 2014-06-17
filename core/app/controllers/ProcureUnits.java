@@ -237,6 +237,7 @@ public class ProcureUnits extends Controller {
         }
         flash.success("成功修改采购计划!", id);
         edit(id);
+
     }
 
 
