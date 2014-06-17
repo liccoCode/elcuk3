@@ -416,7 +416,8 @@ public class ProcureUnits extends Controller {
                 check.reworkPay = reworkPay;
                 check.save();
             }
-            reworkPay.amount = amount;
+            //返工费用是需要向工厂收取的费用 所以这里转成负数
+            reworkPay.amount = -amount;
             reworkPay.save();
         } catch(PaymentException e) {
             Validation.addError("", e.getMessage());
