@@ -3,6 +3,7 @@ package models.view.post;
 import controllers.Login;
 import helper.Caches;
 import helper.LogUtils;
+import jobs.SaleReportsJob;
 import models.User;
 import models.market.M;
 import models.market.Selling;
@@ -28,7 +29,6 @@ import java.util.regex.Pattern;
  * Time: AM10:17
  */
 public class SaleReportPost {
-    private MetricSaleReportService service = new MetricSaleReportService();
 
     /**
      * 匹配 SKU
@@ -45,16 +45,10 @@ public class SaleReportPost {
      */
     public final Pattern CATEGORY = Pattern.compile("^category:(\\d*)");
 
-
     public Date from;
     public Date to;
     public M market;
     public String search;
-
-    /**
-     * 拥有权限的Selling集合
-     */
-    private List<String> sellingIds;
 
     public SaleReportPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -99,17 +93,21 @@ public class SaleReportPost {
         return sellings;
     }
 
-
     public List<SaleReportDTO> query() {
         User user = Login.current();
         String key = Caches.Q.cacheKey(this.from, this.to, (this.market != null ? this.market : "AllMarket"),
-                user.username,
-                "SaleReports");
+                (this.search != null ? this.search : ""), user.username, "SaleReports");
+
         List<SaleReportDTO> dtos = Cache.get(key, List.class);
         if(dtos == null) {
-            sellingIds = params();
-            new SaleReportsCalculateJob(key).start();
-            throw new FastRuntimeException("正在后台计算中，请稍后再尝试~");
+            if(!SaleReportsJob.isRunning(key)) {
+                List<String> sellingIds = params();
+                if(this.market != null) {
+                    org.apache.commons.collections.CollectionUtils.filter(sellingIds, new SellingIdPredicate());
+                }
+                new SaleReportsJob(this.from, this.to, this.market, this.search, user.username, sellingIds).now();
+            }
+            throw new FastRuntimeException("已经在后台计算中，请于 10min 后再来查看结果~");
         }
         return dtos;
     }
@@ -153,40 +151,11 @@ public class SaleReportPost {
         return null;
     }
 
-    /**
-     * 销售报表计算Job
-     */
-    class SaleReportsCalculateJob extends Thread {
-        private String key;
-
-        public SaleReportsCalculateJob(String key) {
-            this.key = key;
-        }
-
-        public void run() {
-            long begin = System.currentTimeMillis();
-            List<SaleReportDTO> dtos = new ArrayList<SaleReportDTO>();
-            synchronized(key.intern()) {
-                //匹配 SellingID 中的 Category
-                Pattern CATEGORYID = Pattern.compile("\\d*");
-                for(String sid : sellingIds) {
-                    Matcher matcher = CATEGORYID.matcher(sid);
-                    String categoryId = matcher.find() ? matcher.group() : null;
-                    String sku = Selling.sidToSKU(sid);
-                    M market = Selling.sidToMarket(sid);
-
-                    Float sales = service.countSales(from, to, market, sid);
-                    Float salesAmount = service.countSalesAmount(from, to, market, sid);
-
-                    if(sales != 0 || salesAmount != 0) {
-                        dtos.add(new SaleReportDTO(categoryId.length() <= 3 ? categoryId : "", sku, sid, market,
-                                (float) (Math.round(sales * 100)) / 100, (float) (Math.round(salesAmount * 100)) / 100));
-                    }
-                }
-                Cache.add(key, dtos);
-            }
-            LogUtils.JOBLOG.info(String.format("SaleReportPost execute with key: %s, Calculate time: %s", key,
-                    System.currentTimeMillis() - begin));
+    private class SellingIdPredicate implements org.apache.commons.collections.Predicate {
+        @Override
+        public boolean evaluate(Object o) {
+            String sellingId = (String) o;
+            return StringUtils.endsWithIgnoreCase(Selling.sidToMarket(sellingId).name(), market.name());
         }
     }
 }
