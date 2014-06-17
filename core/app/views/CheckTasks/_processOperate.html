@@ -8,6 +8,13 @@
 #{/warning_row}
 #{render 'ProcureUnits/_unit_table_trs.html',oldplanDeliveryDate:oldplanDeliveryDate, unit:unit,
 whouses:whouses /}
+
+<tr>
+  <td colspan="4">
+    <h4>审核意见</h4>
+    <textarea name="check.opition" rows="5" cols="80" class="span12">${check?.opition}</textarea>
+  </td>
+</tr>
 <tr>
   <td colspan="4">
   #{render 'ProcureUnits/_shipments.html'/}

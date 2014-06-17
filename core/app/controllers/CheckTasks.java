@@ -304,6 +304,7 @@ public class CheckTasks extends Controller {
         }
 
         CheckTask c = CheckTask.findById(checkid);
+        c.opition = check.opition;
         c.submitActiviti(ap, taskname, check.workfee, 1, Secure.Security.connected());
         flash.success("更新成功");
         CheckTasks.showactiviti(checkid);
