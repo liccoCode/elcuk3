@@ -1,27 +1,26 @@
 package controllers;
 
 import exception.PaymentException;
-import helper.Constant;
-import helper.Dates;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
 import models.product.Whouse;
+import models.qc.CheckTask;
 import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 import play.libs.Files;
@@ -30,9 +29,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -46,7 +43,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.<Whouse>findAll());
+        renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
         renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
         renderArgs.put("cooperators", cooperators);
 
@@ -195,6 +192,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
+        if(unit.isCheck != 1) unit.isCheck = 0;
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
@@ -239,6 +237,29 @@ public class ProcureUnits extends Controller {
         }
         flash.success("成功修改采购计划!", id);
         edit(id);
+
+    }
+
+
+    /**
+     * TODO effect: 需要调整的采购计划的修改
+     *
+     * @param id
+     * @param oldPlanQty
+     */
+    public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
+                                     String shipmentId) {
+
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        ProcureUnit managedUnit = ProcureUnit.findById(unitid);
+        managedUnit.update(unit, shipmentId);
+        if(Validation.hasErrors()) {
+            flash.error(Validation.errors().toString());
+            unit.id = managedUnit.id;
+            CheckTasks.showactiviti(checkid);
+        }
+        flash.success("成功修改采购计划!!", unitid);
+        CheckTasks.showactiviti(checkid);
     }
 
     public static void destroy(long id) {
@@ -352,6 +373,60 @@ public class ProcureUnits extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("%s 请款成功", FeeType.procurement().nickName);
+        Applys.procure(applyId);
+    }
+
+    /**
+     * 加载当前采购计划供应商下所有未申请的返工费用
+     *
+     * @param id
+     */
+    public static void loadCheckList(Long id) {
+        ProcureUnit pro = ProcureUnit.findById(id);
+        //首先查询出当前采购计划下所属的供应商下所有的采购计划ID
+        SqlSelect sql = new SqlSelect().select("id").from("ProcureUnit").where("cooperator_id=?").param(pro
+                .cooperator.id);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<Long> unitIds = new ArrayList<Long>();
+        for(Map<String, Object> row : rows) {
+            unitIds.add(Long.parseLong(row.get("id").toString()));
+        }
+        //使用查询出来的采购计划ID去查询 所有未申请返工费用的质检任务(费用需要大于0)
+        List<CheckTask> checks = CheckTask
+                .find("reworkPay = null AND workfee > 0 AND units_id IN " + SqlSelect.inlineParam(unitIds) + "")
+                .fetch();
+        render("ProcureUnits/_reworkpay_modal.html", checks);
+    }
+
+    /**
+     * 申请返工费用
+     *
+     * @param id
+     * @param applyId
+     */
+    public static void billingReworkPay(Long id, Long applyId, String ids) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        try {
+            List<CheckTask> checks = CheckTask.find("id IN " + SqlSelect.inlineParam(ids.split("_")) + "").fetch();
+            float amount = 0f;
+            PaymentUnit reworkPay = unit.billingReworkPay(amount);
+            for(CheckTask check : checks) {
+                amount += check.workfee;
+                //将PaymentUnit对应到CheckTask
+                check.reworkPay = reworkPay;
+                check.save();
+            }
+            //返工费用是需要向工厂收取的费用 所以这里转成负数
+            reworkPay.amount = -amount;
+            reworkPay.save();
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("%s 请款成功", FeeType.rework().nickName);
+        }
         Applys.procure(applyId);
     }
 

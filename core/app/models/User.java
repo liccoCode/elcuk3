@@ -11,6 +11,7 @@ import models.market.Listing;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
+import models.product.Whouse;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -129,6 +130,12 @@ public class User extends Model {
 
     @Transient
     public static JsonObject USER_CATEGORY;
+
+    /**
+     * 指派给用户去质检的仓库
+     */
+    @OneToMany
+    public List<Whouse> whouses;
 
     public User() {
     }

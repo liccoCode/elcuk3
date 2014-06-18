@@ -69,6 +69,11 @@
         <th>预计交货时间</th>
         <th>实际交货时间</th>
         <th>抵达货代</th>
+        <th>Selling</th>
+
+        <th>是否合格</th>
+        <th>是否发货</th>
+        <th>质检信息</th>
       </tr>
     #{list items: units, as:'unit'}
       <tr>
@@ -94,6 +99,15 @@
         <td>#{time_tooltip time: unit.attrs.planDeliveryDate/}</td>
         <td>#{time_tooltip time: unit.attrs.deliveryDate/}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
+        <td>${unit.sid}</td>
+
+        <td>${unit.result()}</td>
+        <td>${unit.isship()}</td>
+        <td>
+            #{if unit.fetchCheckTaskLink() != null}
+              <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
+            #{/if}
+        </td>
       </tr>
     #{/list}
     </table>

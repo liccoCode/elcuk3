@@ -50,6 +50,11 @@ POST    /feetype/{name}/update                               FeeTypes.update
 POST    /feetype                                             FeeTypes.create
 POST    /feetype/{name}/delete                               FeeTypes.remove
 
+# activitis
+POST    /activitis/{id}/update                               Activitis.update
+POST    /activitis                                             Activitis.create
+POST    /activitis/{id}/delete                               Activitis.remove
+
 # Orders
 GET     /orders                                             Orders.index
 POST    /orders                                             Orders.index
@@ -77,6 +82,8 @@ GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
+POST     /procureunit/{id}                                   ProcureUnits.update
+POST    /procureunits/updateprocess/{id}                     ProcureUnits.updateprocess
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
@@ -159,6 +166,17 @@ GET     /shipitem/{id}.json                                 ShipItems.showJson(f
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
+
+# SKUCHECK
+POST    /skuchecks/{id}/update                               Skuchecks.update
+POST    /skuchecks/{id}/delete                               Skuchecks.remove
+
+# CheckTasks
+GET     /checktasks/{id}/prints                              checktasks.prints
+GET     /checktasks/{id}/prints                              checktasks.prints
+GET     /checktasks/{id}/doprints                            checktasks.doprints
+GET     /checktasks/{id}/show                                checktasks.show
+GET     /checktasks/{id}/showList                            checktasks.showList
 
 # Elcuk
 GET     /elcuks                                             Elcuk.index

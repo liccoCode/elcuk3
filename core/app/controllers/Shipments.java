@@ -11,6 +11,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Whouse;
+import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -191,7 +192,15 @@ public class Shipments extends Controller {
         new ElcukRecord(Messages.get("shipment.update"),
                 Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
         flash.success("更新成功.");
-        show(dbship.id);
+
+         //更新快递单的货代仓库
+        if(ship.type == Shipment.T.EXPRESS) {
+            for(ShipItem item:ship.items){
+                CheckTask.updateExpressWarehouse(item.unit.id);
+            }
+        }
+
+        show(ship.id);
     }
 
     /**

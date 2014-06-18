@@ -27,7 +27,7 @@
                 <td>${wh.postalCode}</td>
                 <td>${wh.country}</td>
                 <td>${wh.type}</td>
-                <td>${wh.account.prettyName()}</td>
+                <td>${wh.account?.prettyName()}</td>
                 <td>
                     <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-primary">更新</a>
                 </td>
@@ -54,8 +54,8 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <a href="@{Whouses.blank()}" class="btn btn-primary">添加新仓库</a>
-    </div>
+        <a href="@{Whouses.blank()}" class="btn btn-primary">添加仓库</a>
+    </div>&nbsp;
 </div>
 
 #{info_row title:"FBA FC`s"/}

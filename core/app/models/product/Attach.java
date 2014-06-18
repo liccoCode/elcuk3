@@ -78,7 +78,12 @@ public class Attach extends Model {
                         .fid(attach.fid)
                         .save();
             }
-        };
+        },
+
+        /**
+         * 质检的凭证
+         */
+        CHECKTASK;
 
         /**
          * 默认的附件删除方法.物理删除

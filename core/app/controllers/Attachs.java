@@ -55,6 +55,19 @@ public class Attachs extends Controller {
         renderJSON(J.G(a));
     }
 
+    public static void uploadForForm(Attach a) {
+        a.setUpAttachName();
+        Logger.info("%s File save to %s.[%s kb]", a.fid, a.location, a.fileSize / 1024);
+        try {
+            FileUtils.copyFile(a.file, new File(a.location));
+            a.save();
+            flash.success("上传成功！");
+        } catch(Exception e) {
+            flash.error(Webs.E(e));
+        }
+        redirect(String.format("/checktasks/%s/show", a.fid));
+    }
+
     public static void rm(Attach a) {
         Attach attach = Attach.findAttach(a);
         if(attach == null) renderJSON(new Ret("系统中不存在."));

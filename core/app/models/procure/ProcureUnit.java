@@ -14,6 +14,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
+import models.qc.CheckTask;
 import mws.FBA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -227,6 +228,82 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public String comment = " ";
 
+    @Expose
+    public int isCheck;
+
+    public enum S {
+        NOSHIPED {
+            @Override
+            public String label() {
+                return "采购员未确认";
+            }
+        },
+        NOSHIPWAIT {
+            @Override
+            public String label() {
+                return "采购员确认";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 采购计划的不发货处理状态
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public S shipState;
+
+    public enum OPCONFIRM {
+        CONFIRM {
+            @Override
+            public String label() {
+                return "待确认";
+            }
+        },
+
+        CONFIRMED {
+            @Override
+            public String label() {
+                return "已确认";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 运营确认
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public OPCONFIRM opConfirm;
+
+    public enum QCCONFIRM {
+        CONFIRM {
+            @Override
+            public String label() {
+                return "待确认";
+            }
+        },
+
+        CONFIRMED {
+            @Override
+            public String label() {
+                return "已确认";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 质检员确认
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public QCCONFIRM qcConfirm;
 
     /**
      * ProcureUnit 的检查
@@ -418,8 +495,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
         if(this.deliveryment == null)
             Validation.addError("", "没有进入采购单, 无法交货.");
-        Validation.required("procureunit.attrs.qty", attrs.qty);
-        Validation.min("procureunit.attrs.qty", attrs.qty, 0);
+        if(attrs.qty == null) attrs.qty = 0;
+        //Validation.required("procureunit.attrs.qty", attrs.qty);
+        //Validation.min("procureunit.attrs.qty", attrs.qty, 0);
         Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
         if(Validation.hasErrors())
             throw new FastRuntimeException("检查不合格");
@@ -735,8 +813,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 2. 申请尾款
          */
         this.billingValid();
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
-            Validation.addError("", "请确定采购计划的交货数量(交货)");
+        //2014-05-28要求没签收也可先付款
+        //if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+        //    Validation.addError("", "请确定采购计划的交货数量(交货)");
         if(this.hasTailPay())
             Validation.addError("", "不允许重复申请尾款");
         if(Validation.hasErrors()) return null;
@@ -746,6 +825,32 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         fee.amount = this.leftAmount();
         fee.save();
         new ERecordBuilder("procureunit.tailpay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
+    }
+
+    /**
+     * 返工费用申请
+     *
+     * @return
+     */
+    public PaymentUnit billingReworkPay(float amount) {
+        /**
+         * 0. 基本检查
+         * 1. 检查是否已经存在一个尾款
+         * 2. 申请尾款
+         */
+        this.billingValid();
+        if(Validation.hasErrors()) return null;
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.rework();
+        //费用需要计算选中的质检任务内的返工费用
+        fee.amount = amount;
+        fee.save();
+        new ERecordBuilder("procureunit.reworkpay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id)
@@ -1007,6 +1112,48 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 查看当前采购计划(对应的质检任务)的是否发货状态
+     *
+     * @return
+     */
+    public String isship() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        if(tasks != null && tasks.size() > 0) {
+            if(tasks.get(0).isship != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
+                return tasks.get(0).isship.label();
+        }
+        return null;
+    }
+
+    /**
+     * 查看当前采购计划(对应的质检任务)的是否合格状态
+     *
+     * @return
+     */
+    public String result() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        if(tasks != null && tasks.size() > 0) {
+            if(tasks.get(0).result != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
+                return tasks.get(0).result.label();
+        }
+        return null;
+    }
+
+    /**
+     * 获取对应的质检任务查看链接
+     * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
+     * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面
+     *
+     * @return
+     */
+    public String fetchCheckTaskLink() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? and checkstat!=?", this.id,
+                CheckTask.StatType.UNCHECK).fetch();
+        if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
+        if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.id);
+        return null;
+    }
 
     /**
      * 将数字转换成对应的三位数的字符串

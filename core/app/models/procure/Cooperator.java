@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
 import models.product.Product;
+import models.product.Whouse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.hibernate.annotations.Cache;
@@ -153,7 +154,7 @@ public class Cooperator extends Model {
      * 备注信息
      */
     @Lob
-    public String memo;
+    public String memo = " ";
 
     /**
      * 类别的默认交易条款
@@ -169,6 +170,49 @@ public class Cooperator extends Model {
     @Expose
     public T type;
 
+    public enum L {
+        MICRO {
+            @Override
+            public String label() {
+                return "微检";
+            }
+        },
+        MILD {
+            @Override
+            public String label() {
+                return "轻度检";
+            }
+        },
+        MEDIUM {
+            @Override
+            public String label() {
+                return "中度检";
+            }
+        },
+        SEVERR {
+            @Override
+            public String label() {
+                return "重度检";
+            }
+        };
+        public abstract String label();
+    }
+
+    /**
+     * 质检的级别
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public L qcLevel;
+
+    @Lob
+    public String instructions = " ";
+
+    /**
+     * 运输商的仓库
+     */
+    @OneToMany
+    public List<Whouse> whouses;
 
     public Cooperator checkAndUpdate() {
         this.check();
