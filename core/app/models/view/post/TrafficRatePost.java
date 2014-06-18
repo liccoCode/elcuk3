@@ -71,13 +71,13 @@ public class TrafficRatePost extends Post<TrafficRate> {
 
         sbd.append("date").append(">=?").append(" AND ")
                 .append("date<=?");
-        if(this.market != null) {
-            params.add(market.withTimeZone(Dates.morning(this.from)));
-            params.add(market.withTimeZone(Dates.morning(this.to)));
-        } else {
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
-        }
+        //if(this.market != null) {
+        //    params.add(market.withTimeZone(Dates.morning(this.from)).toDate());
+        //    params.add(market.withTimeZone(Dates.morning(this.to)).toDate());
+        //} else {
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
+        //}
 
 
         if(StringUtils.isNotBlank(this.SellingId)) {
