@@ -14,6 +14,7 @@
     <th>状态</th>
     <th>采购计划 ID</th>
     <th>SKU</th>
+    <th>SKU标题</th>
     <th>FBA</th>
     <th>FnSku</th>
     <th>采购单</th>
@@ -40,7 +41,7 @@
               </select>
             #{/if}
             #{else }
-              <select name="cr.qcType">
+              <select name="cr.qcType"  style="width:60px">
                 <option value="">选择方式</option>
                 <option ${cr.qcType == models.qc.CheckTask.T.SAMPLE?'selected' : ''} value="SAMPLE">抽检</option>
                 <option ${cr.qcType == models.qc.CheckTask.T.WHOLE?'selected' : ''} value="WHOLE">全检</option>
@@ -58,7 +59,11 @@
         <td>${cr.checkstat.label()}</td>
         <td><a href="@{Deliveryments.show(cr.units?.deliveryment?.id)}" target="_blank">${cr.units?.id}</a></td>
 
-        <td>${cr.units.product.sku}</td>
+        <td><a href="@{Products.show(cr.units.product.sku)}" target="_blank" rel="popover" content="名称:${cr
+                .units
+                .product.abbreviation}  标题:${cr.units
+                        .product.productName}">${cr.units.product.sku}</a></td>
+        <td style="width:300px">${cr.units.product.productName}</td>
         <td>${cr.units?.fba?.shipmentId}</td>
         <td>${cr.units.selling?.fnSku}</td>
         <td>${cr.units.deliveryment?.id}</td>
