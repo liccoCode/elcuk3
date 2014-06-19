@@ -142,7 +142,10 @@
 
         <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}" target="_blank">${tl.units?.id}</a></td>
 
-        <td>${tl.units.sku}</td>
+        <td><a href="@{Products.show(tl.units.product.sku)}" target="_blank" rel="popover" content="名称:${tl
+                .units
+                .product.abbreviation}  标题:${tl.units
+                        .product.productName}">${tl.units.product.sku}</a></td>
         <td>${tl.units.fba?.shipmentId}</td>
         <td>${tl.units.selling?.fnSku}</td>
         <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
