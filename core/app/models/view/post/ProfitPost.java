@@ -23,7 +23,7 @@ import models.product.Category;
 public class ProfitPost extends Post<Profit> {
     public Date begin;
     public Date end;
-    public String market;
+    public String pmarket;
     public String sku;
     public String sellingId;
     public String category;
@@ -33,6 +33,7 @@ public class ProfitPost extends Post<Profit> {
         this.end = now.toDate();
         DateTime from = DateTime.now().withDayOfYear(1);
         this.begin = from.toDate();
+        this.pmarket = "market";
         this.perSize = 10;
         this.page = 1;
     }
@@ -58,7 +59,7 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 每个市场遍历
          */
-        if(market.equals("market")) {
+        if(pmarket.equals("market")) {
             M[] marray = models.market.M.values();
             for(M m : marray) {
                 count = calCount(count);
@@ -82,26 +83,125 @@ public class ProfitPost extends Post<Profit> {
         return count;
     }
 
+
+    public M[] getMarket() {
+        M[] marray = null;
+        if(pmarket.equals("market")) {
+            marray = models.market.M.values();
+
+        } else {
+            M skumarket = null;
+            if(pmarket != null && !pmarket.equals("total")) {
+                skumarket = M.valueOf(pmarket);
+            }
+            marray = new M[1];
+            marray[0] = skumarket;
+        }
+        return marray;
+    }
+
     @SuppressWarnings("unchecked")
     public List<Profit> query() {
         List<Profit> profitlist = new ArrayList<Profit>();
         /**
          * 每个市场遍历
          */
-        if(market.equals("market")) {
-            M[] marray = models.market.M.values();
-            for(M m : marray) {
-                profitlist = searchProfitList(profitlist, m);
-            }
-        } else {
-            M skumarket = null;
-            if(market != null && !market.equals("total")) {
-                skumarket = M.valueOf(market);
-            }
-            profitlist = searchProfitList(profitlist, skumarket);
+        M[] marray = getMarket();
+        for(M m : marray) {
+            profitlist = searchProfitList(profitlist, m);
         }
         return profitlist;
     }
+
+
+    public List<Profit> calTotal(List<Profit> profits) {
+
+
+        List<Profit> newprofits = new ArrayList<Profit>();
+        /**
+         * 计算每个SKU的合计
+         */
+        Profit skuprofit = initPorfit();
+        if(profits.size() > 0) {
+            Collections.sort(profits);
+
+            skuprofit.sku = profits.get(0).sku;
+            skuprofit.memo = skuprofit.sku + "合计";
+            for(Profit p : profits) {
+                if(skuprofit.sku.equals(p.sku)) {
+                    addProfit(skuprofit, p);
+                } else {
+                    skuprofit.sku = skuprofit.sku + "合计";
+                    newprofits.add(skuprofit);
+                    skuprofit = initPorfit();
+                    skuprofit.sku = p.sku;
+                    skuprofit.memo = skuprofit.sku + "合计";
+                    addProfit(skuprofit, p);
+                }
+                newprofits.add(p);
+            }
+            skuprofit.sku = skuprofit.sku + "合计";
+            newprofits.add(skuprofit);
+        }
+
+
+        M[] marray = getMarket();
+        Profit totalp = initPorfit();
+        totalp.sku = "所有合计";
+        totalp.memo = "所有合计";
+        totalp.market = null;
+        for(Profit p : profits) {
+            addProfit(totalp, p);
+        }
+        for(M m : marray) {
+            Profit mp = initPorfit();
+            mp.sku = m.label() + "合计";
+            mp.market = m;
+            mp.memo = m.label() + "合计";
+            for(Profit p : profits) {
+                if(p.market == m) {
+                    addProfit(mp, p);
+                }
+            }
+            newprofits.add(mp);
+        }
+        newprofits.add(totalp);
+        return newprofits;
+
+    }
+
+
+    private Profit initPorfit() {
+        Profit totalp = new Profit();
+        totalp.totalfee = 0f;
+        totalp.amazonfee = 0f;
+        totalp.fbafee = 0f;
+        totalp.quantity = 0f;
+        totalp.totalprofit = 0f;
+        totalp.workingqty = 0;
+        totalp.wayqty = 0;
+        totalp.inboundqty = 0;
+        totalp.workingfee = 0f;
+        totalp.wayfee = 0f;
+        totalp.inboundfee = 0f;
+        return totalp;
+    }
+
+    private Profit addProfit(Profit total, Profit p) {
+        total.totalfee += p.totalfee;
+        total.amazonfee += p.amazonfee;
+        total.fbafee += p.fbafee;
+        total.quantity += p.quantity;
+        total.totalprofit += p.totalprofit;
+        total.workingqty += p.workingqty;
+        total.wayqty += p.wayqty;
+        total.inboundqty += p.inboundqty;
+        total.workingfee += p.workingfee;
+        total.wayfee += p.wayfee;
+        total.inboundfee += p.inboundfee;
+        return total;
+    }
+
 
     public List<Profit> searchProfitList(List<Profit> profitlist, M skumarket) {
         /**
