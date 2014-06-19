@@ -165,7 +165,7 @@ public class Shipments extends Controller {
         dbship.title = ship.title;
         dbship.trackNo = ship.trackNo;
         dbship.memo = ship.memo;
-        dbship.dates.beginDate = ship.dates.beginDate;
+        dbship.dates.planBeginDate = ship.dates.planBeginDate;
         dbship.internationExpress = ship.internationExpress;
 
         checkAuthenticity();
