@@ -200,7 +200,7 @@ public class Shipments extends Controller {
             }
         }
 
-        show(ship.id);
+        show(shipid);
     }
 
     /**
