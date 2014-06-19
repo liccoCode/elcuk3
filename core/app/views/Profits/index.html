@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"SKU利润分析" /}
 #{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
     #{script 'profits/index.coffee'/}
 #{/set}
 
@@ -23,7 +24,7 @@
     </div>
 
     <div class="inline">
-        #{select_enum name:'p.market', items:models.market.M.values(), value:p.market}
+        #{select_enum name:'p.pmarket', items:models.market.M.values(), value:p.market}
           <option value="market">Market</option>
           <option value="total">汇总</option>
         #{/select_enum}
@@ -53,7 +54,8 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <table class="table table-condensed table-bordered">
+    <table id="profit" class="table table-condensed table-bordered">
+      <thead>
       <tr>
         <th>SKU</th>
         <th>市场</th>
@@ -73,7 +75,10 @@
         <th>(制作中+已交货)库存占用资金总金额(USD)</th>
         <th>在途库存占用资金总金额(USD)</th>
         <th>(入库+在库)库存占用资金总金额(USD)</th>
+        <th>备注</th>
       </tr>
+      </thead>
+      <tbody>
         #{list items:profits, as:'pro'}
           <tr>
             <td>${pro.sku}</td>
@@ -93,8 +98,10 @@
             <td>${pro.workingfee}</td>
             <td>${pro.wayfee}</td>
             <td>${pro.inboundfee}</td>
+            <td>${pro.memo}</td>
           </tr>
         #{/list}
+      </tbody>
     </table>
   </div>
 </div>
