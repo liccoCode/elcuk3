@@ -735,6 +735,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             for(ShipItem item : this.shipItems) {
                 item.delete();
             }
+
+            //删除 质检任务相关
+            List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+            for(CheckTask task : tasks) {
+                task.delete();
+            }
             this.delete();
         } else {
             Validation.addError("",
