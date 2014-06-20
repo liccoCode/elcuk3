@@ -7,6 +7,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
+import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -217,6 +218,11 @@ public class ShipItem extends GenericModel {
         for(ShipItem itm : items) {
             itm.shipment = shipment;
             itm.save();
+        }
+
+        //更新货代仓库
+        for(ShipItem item : items) {
+            CheckTask.updateExpressWarehouse(item.unit.id);
         }
     }
 
