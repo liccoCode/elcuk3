@@ -193,11 +193,9 @@ public class Shipments extends Controller {
                 Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
         flash.success("更新成功.");
 
-         //更新快递单的货代仓库
-        if(ship.type == Shipment.T.EXPRESS) {
-            for(ShipItem item:ship.items){
-                CheckTask.updateExpressWarehouse(item.unit.id);
-            }
+        //更新快递单的货代仓库
+        for(ShipItem item : ship.items) {
+            CheckTask.updateExpressWarehouse(item.unit.id);
         }
 
         show(shipid);
