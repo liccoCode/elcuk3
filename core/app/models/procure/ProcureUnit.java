@@ -633,6 +633,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return;
         }
         if(this.shipItems.size() == 0) {
+            CheckTask.updateExpressWarehouse(this.id);
             // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
             if(shipment == null) return;
             shipment.addToShip(this);
