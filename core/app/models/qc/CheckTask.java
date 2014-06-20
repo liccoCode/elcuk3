@@ -559,7 +559,9 @@ public class CheckTask extends Model {
             if(ment != null) {
                 StringBuilder sbd = new StringBuilder(
                         " cooperator=? ");
-                params.add(ment.cooper);
+                Cooperator cooperator = ment.cooper;
+                if(cooperator == null) cooperator = Cooperator.findById(59l);
+                params.add(cooperator);
                 if(ment.type == Shipment.T.SEA) {
                     sbd.append(" and isSEA=? ");
                     params.add(true);
