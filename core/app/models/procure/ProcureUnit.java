@@ -655,6 +655,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
         }
+
+        //更新快递单的货代仓库
+        for(ShipItem item : this.shipItems) {
+            CheckTask.updateExpressWarehouse(item.unit.id);
+        }
+
     }
 
     /**
@@ -734,6 +740,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             // 删除运输相关
             for(ShipItem item : this.shipItems) {
                 item.delete();
+            }
+
+            //删除 质检任务相关
+            List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+            for(CheckTask task : tasks) {
+                task.delete();
             }
             this.delete();
         } else {

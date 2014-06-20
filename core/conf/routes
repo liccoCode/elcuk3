@@ -175,7 +175,7 @@ POST    /skuchecks/{id}/delete                               Skuchecks.remove
 GET     /checktasks/{id}/prints                              checktasks.prints
 GET     /checktasks/{id}/prints                              checktasks.prints
 GET     /checktasks/{id}/doprints                            checktasks.doprints
-GET     /checktasks/{id}/show                                checktasks.show
+*       /checktasks/{id}/show                                checktasks.show
 GET     /checktasks/{id}/showList                            checktasks.showList
 
 # Elcuk

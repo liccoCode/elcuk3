@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Date: 3-10-14
  * Time: 上午11:51
  */
-public class Profit implements Serializable {
+public class Profit implements Serializable, Comparable {
     private static final long serialVersionUID = -6924566933690728789L;
 
     /**
@@ -22,6 +22,9 @@ public class Profit implements Serializable {
      * sellingId
      */
     public String sellingId;
+
+
+    public String memo;
 
     /**
      * 市场
@@ -94,5 +97,20 @@ public class Profit implements Serializable {
      */
     public Float inboundfee = 0f;
 
+    @Override
+    public int compareTo(Object o) {
+        if(o instanceof Profit) {
+            Profit productAttr = (Profit) o;
+            if(this.sku.compareTo(((Profit) o).sku) > 0) {
+                return 1;
+            }
+            if(this.sku.compareTo(((Profit) o).sku) < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+        return 0;
+    }
 
 }

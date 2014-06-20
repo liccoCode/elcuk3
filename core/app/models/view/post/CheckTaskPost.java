@@ -209,8 +209,7 @@ public class CheckTaskPost extends Post<CheckTask> {
     public List<CheckTask> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
-        return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch(this.page,
-                this.perSize);
+        return CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch();
     }
 
     public List<CheckTask> check() {

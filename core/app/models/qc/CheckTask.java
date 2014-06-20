@@ -447,9 +447,8 @@ public class CheckTask extends Model {
                     newtask.qcType = T.SELF;
                 }
 
-
                 //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
-                Whouse wh = searchWarehouse(punit.shipItems);
+                Whouse wh = searchWarehouse(punit);
                 if(wh != null && wh.user != null) {
                     newtask.shipwhouse = wh;
                     newtask.checkor = wh.user.username;
@@ -470,35 +469,43 @@ public class CheckTask extends Model {
                 Long taskid = (Long) task.get("id");
                 CheckTask checktask = CheckTask.findById(taskid);
 
-                Whouse wh = searchWarehouse(checktask.units.shipItems);
+                Whouse wh = searchWarehouse(checktask.units);
                 if(wh != null && wh.user != null) {
                     checktask.shipwhouse = wh;
                     checktask.checkor = wh.user.username;
                     checktask.save();
                 } else {
-                    //如果是快递则默认为欧嘉
-                    if(checktask.units.shipType == Shipment.T.EXPRESS) {
-                        wh = searchCooperWarehouse(cooperator);
-                        if(wh != null && wh.user != null) {
-                            checktask.shipwhouse = wh;
-                            checktask.checkor = wh.user.username;
-                            checktask.save();
-                        }
+                    //如果是快递、空运、海运则默认为欧嘉
+                    wh = searchCooperWarehouse(cooperator, checktask.units.shipType);
+                    if(wh != null && wh.user != null) {
+                        checktask.shipwhouse = wh;
+                        checktask.checkor = wh.user.username;
+                        checktask.save();
                     }
-
                 }
             }
         }
     }
 
 
-    public static Whouse searchCooperWarehouse(Cooperator cooperator) {
+    public static Whouse searchCooperWarehouse(Cooperator cooperator, Shipment.T shiptype) {
         List<Object> params = new ArrayList<Object>();
         StringBuilder sbd = new StringBuilder(
                 " cooperator=? ");
         params.add(cooperator);
-        sbd.append(" and isEXPRESS=? ");
-        params.add(true);
+
+        if(shiptype == Shipment.T.SEA) {
+            sbd.append(" and isSEA=? ");
+            params.add(true);
+        }
+        if(shiptype == Shipment.T.EXPRESS) {
+            sbd.append(" and isEXPRESS=? ");
+            params.add(true);
+        }
+        if(shiptype == Shipment.T.AIR) {
+            sbd.append(" and isAIR=? ");
+            params.add(true);
+        }
         return Whouse.find(sbd.toString(), params.toArray()).first();
     }
 
@@ -509,7 +516,7 @@ public class CheckTask extends Model {
             for(Map<String, Object> task : tasks) {
                 Long taskid = (Long) task.get("id");
                 CheckTask checktask = CheckTask.findById(taskid);
-                Whouse wh = CheckTask.searchWarehouse(checktask.units.shipItems);
+                Whouse wh = CheckTask.searchWarehouse(checktask.units);
                 if(wh != null && wh.user != null) {
                     checktask.shipwhouse = wh;
                     checktask.checkor = wh.user.username;
@@ -535,25 +542,17 @@ public class CheckTask extends Model {
         newtask.finishStat = ConfirmType.UNCONFIRM;
 
         //查找仓库
-        Whouse wh = searchWarehouse(punit.shipItems);
+        Whouse wh = searchWarehouse(punit);
         if(wh != null && wh.user != null) {
             newtask.shipwhouse = wh;
             newtask.checkor = wh.user.username;
-        } else
-            //如果是快递则默认为欧嘉
-            if(newtask.units.shipType == Shipment.T.EXPRESS) {
-                Cooperator cooperator = Cooperator.findById(59l);
-                wh = searchCooperWarehouse(cooperator);
-                if(wh != null && wh.user != null) {
-                    newtask.shipwhouse = wh;
-                    newtask.checkor = wh.user.username;
-                }
-            }
+        }
         newtask.save();
     }
 
 
-    public static Whouse searchWarehouse(List<ShipItem> shipitem) {
+    public static Whouse searchWarehouse(ProcureUnit units) {
+        List<ShipItem> shipitem = units.shipItems;
         List<Object> params = new ArrayList<Object>();
         if(shipitem != null && shipitem.size() > 0) {
             Shipment ment = shipitem.get(0).shipment;
@@ -575,9 +574,14 @@ public class CheckTask extends Model {
                 }
                 return Whouse.find(sbd.toString(), params.toArray()).first();
 
+            } else {
+                Cooperator cooperator = Cooperator.findById(59l);
+                return searchCooperWarehouse(cooperator, units.shipType);
             }
+        } else {
+            Cooperator cooperator = Cooperator.findById(59l);
+            return searchCooperWarehouse(cooperator, units.shipType);
         }
-        return null;
     }
 
     /**

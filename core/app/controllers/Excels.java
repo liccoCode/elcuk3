@@ -137,7 +137,6 @@ public class Excels extends Controller {
      */
     public static void profit(ProfitPost p) {
         List<Profit> profits = new ArrayList<Profit>();
-
         String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
         List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
@@ -160,11 +159,21 @@ public class Excels extends Controller {
                 }
             }
 
-            String postkey = helper.Caches.Q.cacheKey("profitpost", p.from, p.to, p.category, p.sku);
+
+            String skukey = "";
+            String marketkey = "";
+            String categorykey = "";
+            if(p.sku != null) skukey = p.sku;
+            if(p.pmarket != null) marketkey = p.pmarket;
+            if(p.category != null) categorykey = p.category.toLowerCase();
+            String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
+                    "excel");
             profits = Cache.get(postkey, List.class);
             if(profits == null) {
                 //从ES查找SKU的利润
                 profits = p.query();
+                //计算合计
+                profits = p.calTotal(profits);
                 Cache.add(postkey, profits, "2h");
             }
         }
@@ -173,7 +182,7 @@ public class Excels extends Controller {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s销售库存利润报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                    String.format("%s-%s销售库存利润报表.xls", formatter.format(p.begin), formatter.format(p.end)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
