@@ -655,6 +655,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
         }
+
+        //更新快递单的货代仓库
+        for(ShipItem item : this.shipItems) {
+            CheckTask.updateExpressWarehouse(item.unit.id);
+        }
+
     }
 
     /**
