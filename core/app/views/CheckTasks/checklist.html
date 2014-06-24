@@ -109,6 +109,7 @@
         <th>采购计划ID</th>
         <th>SKU</th>
         <th>FBA</th>
+        <th>发往国家</th>
         <th>FnSku</th>
         <th>采购单</th>
         <th>货代仓库</th>
@@ -147,6 +148,7 @@
                 .product.abbreviation}  标题:${tl.units
                         .product.productName}">${tl.units.product.sku}</a></td>
         <td>${tl.units.fba?.shipmentId}</td>
+        <td>${tl.units.whouse.name}</td>
         <td>${tl.units.selling?.fnSku}</td>
         <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
         <td>${tl.shipwhouse?.name}</td>

@@ -12,8 +12,9 @@
     <th>状态</th>
     <th>采购计划 ID</th>
     <th>SKU</th>
-    <th>SKU标题</th>
+    <th>SKU名称</th>
     <th>FBA</th>
+    <th>发往国家</th>
     <th>FnSku</th>
     <th>采购单</th>
     <th>货代仓库</th>
@@ -57,9 +58,10 @@
         .units
         .product.abbreviation}  标题:${check.units
         .product.productName}">${check.units.product.sku}</a></td>
-        <td style="width:300px">${check.units.product.productName}</td>
+        <td style="width:300px">${check.units.product.abbreviation}</td>
 
         <td>${check.units?.fba?.shipmentId}</td>
+        <td>${check.units.whouse.name}</td>
         <td>${check.units.selling?.fnSku}</td>
         <td>${check.units.deliveryment?.id}</td>
         <td>${check.shipwhouse?.name}</td>

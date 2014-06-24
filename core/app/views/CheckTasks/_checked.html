@@ -21,8 +21,9 @@
     <th>是否发货</th>
     <th>采购计划 ID</th>
     <th>SKU</th>
-    <th>SKU标题</th>
+    <th>SKU名称</th>
     <th>FBA</th>
+    <th>发往国家</th>
     <th>FnSku</th>
     <th>采购单</th>
     <th>货代仓库</th>
@@ -62,8 +63,9 @@
                 .units
                 .product.abbreviation}  标题:${checked.units
                         .product.productName}">${checked.units.product.sku}</a></td>
-        <td style="width:300px">${checked.units.product.productName}</td>
+        <td style="width:300px">${checked.units.product.abbreviation}</td>
         <td>${checked.units.fba?.shipmentId}</td>
+        <td>${checked.units.whouse.name}</td>
         <td>${checked.units.selling?.fnSku}</td>
         <td>${checked.units.deliveryment?.id}</td>
         <td>${checked.shipwhouse?.name}</td>
