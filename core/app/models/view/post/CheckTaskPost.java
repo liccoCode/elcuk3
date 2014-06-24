@@ -51,7 +51,7 @@ public class CheckTaskPost extends Post<CheckTask> {
 
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("u.attrs.planShipDate", "预计 [发货] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("u.attrs.planShipDate", "预计 [运输] 时间"));
         DATE_TYPES.add(new F.T2<String, String>("u.attrs.planDeliveryDate", "预计 [交货] 时间"));
         DATE_TYPES.add(new F.T2<String, String>("u.attrs.deliveryDate", "实际 [交货] 时间"));
         DATE_TYPES.add(new F.T2<String, String>("c.endTime", "质检完成时间"));
