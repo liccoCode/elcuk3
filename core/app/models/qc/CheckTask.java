@@ -474,7 +474,7 @@ public class CheckTask extends Model {
                     checktask.shipwhouse = wh;
                     checktask.checkor = wh.user.username;
                     checktask.save();
-                } else {
+                } else if(wh == null){
                     //如果是快递、空运、海运则默认为欧嘉
                     wh = searchCooperWarehouse(cooperator, checktask.units.shipType);
                     if(wh != null && wh.user != null) {
