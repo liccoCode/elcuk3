@@ -36,7 +36,10 @@ $ ->
 
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
+    family = $tr.find('td:eq(1)').text().trim()
 
     $("#backup_choseid").val(id)
+    $("#back_sku").val(id)
+    $("#back_families").val(family)
     $('#backup_modal').modal('show')
   )
