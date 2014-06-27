@@ -29,3 +29,14 @@ $ ->
     $.ajax({url: "/paymenttarget/#{id}", type: 'DELETE'}).done((r) ->
       window.location.href = '/paymenttargets'
     )
+
+
+  $(document).on('click', '#backupBtn', ->
+    $self = $(@)
+
+    $tr = $(@).parents('tr')
+    id = $tr.find('td:eq(0)').text().trim()
+
+    $("#backup_choseid").val(id)
+    $('#backup_modal').modal('show')
+  )
