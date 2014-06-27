@@ -919,7 +919,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         skuatt.createDate = new Date();
 
                         FileUtils.copyFile(skuatt.file, new File(skuatt.location));
-                        if(Validation.hasErrors())
+                        if(!Validation.hasErrors())
                             skuatt.save();
                     } catch(Exception e) {
                         e.printStackTrace();
