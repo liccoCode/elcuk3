@@ -84,6 +84,11 @@ public class Products extends Controller {
         render("Products/show.html", pro);
     }
 
+    public static void backup(String choseid, String base, String extend, String attach, String sku, String family) {
+        Product pro = Product.backupProduct(choseid, base, extend, attach, sku, family);
+        render("Products/show.html", pro);
+    }
+
 
     public static void update(Product pro) {
         try {
@@ -91,7 +96,7 @@ public class Products extends Controller {
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
 
             if(Validation.hasErrors())
-                        renderJSON(Webs.VJson(Validation.errors()));
+                renderJSON(Webs.VJson(Validation.errors()));
 
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.save();
@@ -127,7 +132,7 @@ public class Products extends Controller {
      * ========== Product ===============
      */
 
-    @Before(only = {"blank", "create", "index"})
+    @Before(only = {"blank", "create", "index", "backup"})
     public static void setUpCreatePage() {
         List<String> families = Family.familys(true);
         List<String> products = Product.skus(true);
