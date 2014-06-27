@@ -54,7 +54,9 @@ class SaleFeeActor
 
 end
 
-SQL = %q(SELECT fee.id, fee.date `date`, oi.selling_sellingId selling_id, oi.product_sku sku, oi.market, fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId
+SQL = %q(SELECT fee.id, oi.createDate `date`, oi.selling_sellingId selling_id, 
+  case when fee.product_sku is not null then fee.product_sku when fee.orderitem_sku is not null then fee.orderitem_sku else  oi.product_sku end sku, 
+    oi.market, fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId
   FROM SaleFee fee
   LEFT JOIN OrderItem oi ON fee.order_orderId=oi.order_orderId
   WHERE oi.product_sku IS NOT NULL AND oi.market IS NOT NULL AND date>=?)
