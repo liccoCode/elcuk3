@@ -716,7 +716,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
 
     /**
-     * 复制另一个SKU的信息，但不保存
+     * 同步另一个SKU的信息，但不保存
      *
      * @param choseid
      * @param skuid
@@ -807,6 +807,128 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             }
         }
         return pro;
+
+    }
+
+
+    /**
+     * 复制另一个SKU的信息，将会保存
+     *
+     * @param choseid
+     * @param skuid
+     * @param base
+     * @param extend
+     * @param attach
+     * @return
+     */
+    public static Product backupProduct(String skuid, String base, String extend, String attach, String sku,
+                                        String family) {
+        Product pro = Product.findByMerchantSKU(skuid);
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
+
+        Product backupsku = new Product();
+
+        Product validpro = Product.findByMerchantSKU(sku);
+        if(validpro != null) {
+            Validation.addError("", String.format("已经存在SKU%s!", sku));
+            return backupsku;
+        }
+
+
+        backupsku.sku = sku;
+        backupsku.family = Family.findById(family);
+
+        backupsku.lengths = pro.lengths;
+        backupsku.productName = pro.productName;
+        backupsku.heigh = pro.heigh;
+        backupsku.width = pro.width;
+        backupsku.weight = pro.weight;
+        backupsku.productLengths = pro.productLengths;
+        backupsku.productHeigh = pro.productHeigh;
+        backupsku.productWidth = pro.productWidth;
+        backupsku.productWeight = pro.productWeight;
+        backupsku.procureState = pro.procureState;
+        backupsku.declaredValue = pro.declaredValue;
+        backupsku.declareName = pro.declareName;
+        backupsku.salesLevel = pro.salesLevel;
+        backupsku.abbreviation = pro.abbreviation;
+        backupsku.marketTime = pro.marketTime;
+        backupsku.locates = pro.locates;
+        backupsku.subtitle = pro.subtitle;
+        backupsku.locates = pro.locates;
+        backupsku.sellingPoints = pro.sellingPoints;
+        backupsku.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
+
+        backupsku.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
+
+        if(backupsku.declaredValue == null)
+            backupsku.declaredValue = 0f;
+        if(backupsku.declareName == null)
+            backupsku.declareName = "";
+        if(backupsku.abbreviation == null)
+            backupsku.abbreviation = "";
+        backupsku.createProduct();
+
+
+        //扩展信息
+        if(StringUtils.isNotBlank(extend) && extend.equals("1")) {
+            List<ProductAttr> proattrs = pro.productAttrs;
+            List<ProductAttr> attrs = new ArrayList<ProductAttr>();
+            for(ProductAttr p : proattrs) {
+                ProductAttr np = new ProductAttr();
+                np.product = backupsku;
+                np.attribute = p.attribute;
+                np.value = p.value;
+                attrs.add(np);
+            }
+            backupsku.productAttrs = attrs;
+            if(!Validation.hasErrors())
+                backupsku.save();
+        }
+
+
+        //附件
+        if(StringUtils.isNotBlank(attach) && attach.equals("1")) {
+            List<Attach> attaches = Attach.attaches(pro.sku, null);
+            List<Attach> skuattaches = Attach.attaches(backupsku.sku, null);
+
+            for(Attach att : attaches) {
+                Attach skuatt = new Attach();
+                skuatt.fid = backupsku.sku;
+                skuatt.outName = att.outName;
+                skuatt.p = att.p;
+                skuatt.originName = "B_" + att.originName;
+                skuatt.remove = att.remove;
+                skuatt.attachType = att.attachType;
+
+                //判断是否存在此附件
+                boolean isexists = false;
+                for(Attach existsatt : skuattaches) {
+                    if(existsatt.originName.equals(skuatt.originName)) {
+                        isexists = true;
+                    }
+                }
+                if(!isexists) {
+                    try {
+                        skuatt.file = new File(att.location);
+                        long subfix = RandomUtils.nextInt();
+                        skuatt.fileSize = skuatt.file.length();
+                        skuatt.fileName = String.format("%s_%s%s", skuatt.fid, subfix,
+                                skuatt.file.getPath().substring(skuatt.file.getPath().lastIndexOf("."))).trim();
+                        skuatt.location = skuatt.location();
+                        skuatt.createDate = new Date();
+
+                        FileUtils.copyFile(skuatt.file, new File(skuatt.location));
+                        if(Validation.hasErrors())
+                            skuatt.save();
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        return backupsku;
 
     }
 }
