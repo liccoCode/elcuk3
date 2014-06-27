@@ -5,6 +5,7 @@
 <table class="table table-condensed table-bordered">
   <tr>
     <th>SKU</th>
+    <th>Family</th>
     <th>操作</th>
     <th>Pics</th>
     <th>Name</th>
@@ -17,8 +18,9 @@
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
 
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
+        <td>${prod.family?.family}</td>
           #{set count:prod.pictureCount() /}
-        <td style="length:30px"><a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
+        <td style="width:100px"><a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
           <i class="icon-refresh"></i>同步</a>
           <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info">
             复制</a></td>
@@ -31,6 +33,8 @@
         <td>${prod.heigh == null ? 0 : prod.heigh}</td>
         <td>${prod.width == null ? 0 : prod.width}</td>
         <td>${prod.weight == null ? 0 : prod.weight}</td>
+
+
       </tr>
     #{/list}
     #{if pi}
@@ -107,11 +111,12 @@
     <tr>
       <th>Family</th>
       <td>
-        <input style="width:140px" type="text" name="family" data-provide="typeahead" data-source="${families}"
+        <input style="width:150px" id="back_families" type="text" name="family" data-provide="typeahead"
+               data-source="${families}"
                value="" autocomplete="off">
       </td>
       <th>SKU</th>
-      <td><input style="width:140px" type="text" name="sku" value="" autocomplete="off"></td>
+      <td><input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off"></td>
 
     </tr>
     <dl class="dl-horizontal">
