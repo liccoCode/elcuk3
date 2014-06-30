@@ -103,6 +103,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
         if(orderIds != null && orderIds.size() > 0) {
+            LogUtils.JOBLOG.info(String
+                                .format("AmazonFinanceCheckJob orderIds: [%sms]", orderIds));
             //synchronized(this.account.cookieStore()) {
             try {
                 this.account.changeRegion(this.market);
