@@ -7,6 +7,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import models.view.report.Profit;
@@ -203,7 +204,7 @@ public class ProfitPost extends Post<Profit> {
     }
 
     private Profit addProfit(Profit total, Profit p) {
-        total.totalfee += p.totalfee;
+        total.totalfee =new BigDecimal(total.totalfee).add(new BigDecimal(p.totalfee)).floatValue();
         total.amazonfee += p.amazonfee;
         total.fbafee += p.fbafee;
         total.quantity += p.quantity;
