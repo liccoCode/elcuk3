@@ -806,6 +806,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 }
             }
         }
+        pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         return pro;
 
     }
@@ -927,7 +928,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 }
             }
         }
-
+        backupsku.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         return backupsku;
 
     }
