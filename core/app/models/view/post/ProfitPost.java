@@ -144,34 +144,34 @@ public class ProfitPost extends Post<Profit> {
                 if(skuprofit.sku.equals(p.sku)) {
                     addProfit(skuprofit, p);
                 } else {
-                    skuprofit.sku = skuprofit.sku + "合计";
+                    skuprofit.sku = skuprofit.sku + "合计1";
                     newprofits.add(skuprofit);
                     skuprofit = initPorfit();
                     skuprofit.sku = p.sku;
-                    skuprofit.memo = skuprofit.sku + "合计";
+                    skuprofit.memo = skuprofit.sku + "合计1";
                     addProfit(skuprofit, p);
                 }
 
                 newprofits.add(p);
             }
-            skuprofit.sku = skuprofit.sku + "合计";
+            skuprofit.sku = skuprofit.sku + "合计1";
             newprofits.add(skuprofit);
         }
 
 
         M[] marray = getMarket();
         Profit totalp = initPorfit();
-        totalp.sku = "所有合计";
-        totalp.memo = "所有合计";
+        totalp.sku = "所有合计1";
+        totalp.memo = "所有合计1";
         totalp.market = null;
         for(Profit p : profits) {
             addProfit(totalp, p);
         }
         for(M m : marray) {
             Profit mp = initPorfit();
-            mp.sku = m.label() + "合计";
+            mp.sku = m.label() + "合计1";
             mp.market = m;
-            mp.memo = m.label() + "合计";
+            mp.memo = m.label() + "合计1";
             for(Profit p : profits) {
                 if(p.market == m) {
                     addProfit(mp, p);
