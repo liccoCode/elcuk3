@@ -167,7 +167,7 @@ public class AbnormalFetchJob extends BaseJob {
      */
     private void fetchSalesProfit(String sku, List<AbnormalDTO> dtos) {
         DateTime monday = new DateTime(Dates.getMondayOfWeek());
-        Float[] beforeProfit = new Float[2];
+        Double[] beforeProfit = new Double[2];
         for(int i = 1; i <= 2; i++) {
             //两个礼拜前的的礼拜六 以及 往前同期（三个礼拜前的礼拜六）
             DateTime begin = monday.plusDays((i - 1) * (-7) + (-9));
@@ -180,8 +180,10 @@ public class AbnormalFetchJob extends BaseJob {
             beforeProfit[i - 1] = met.calProfit().profitrate;
         }
         if(beforeProfit[0] > 0 && beforeProfit[1] > 0 && beforeProfit[0] <= (beforeProfit[1] * 0.99)) {
-            float difference = (beforeProfit[1] - beforeProfit[0]) / beforeProfit[1];
-            dtos.add(new AbnormalDTO(beforeProfit[0], beforeProfit[1], difference, sku, AbnormalDTO.T.SALESPROFIT));
+            double difference = (beforeProfit[1] - beforeProfit[0]) / beforeProfit[1];
+            dtos.add(new AbnormalDTO(new Float(beforeProfit[0]), new Float(beforeProfit[1]), new Float(difference),
+                    sku,
+                    AbnormalDTO.T.SALESPROFIT));
         }
     }
 
