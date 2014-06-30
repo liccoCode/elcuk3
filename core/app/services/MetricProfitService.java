@@ -83,10 +83,13 @@ public class MetricProfitService {
         profit.market = market;
         //总销售额
         profit.totalfee = this.esSaleFee();
+        profit.totalfee = Webs.scale2PointUp(profit.totalfee);
         //亚马逊费用
         profit.amazonfee = this.esAmazonFee();
+        profit.amazonfee = Webs.scale2PointUp(profit.amazonfee);
         //fba费用
         profit.fbafee = this.esFBAFee();
+        profit.fbafee = Webs.scale2PointUp(profit.fbafee);
         //总销量
         profit.quantity = this.esSaleQty();
         //采购价格
@@ -97,6 +100,7 @@ public class MetricProfitService {
         profit.vatprice = this.esVatPrice();
         //利润
         profit.totalprofit = this.totalProfit(profit);
+        profit.totalprofit = Webs.scale2PointUp(profit.totalprofit);
         //利润率
         profit.profitrate = this.profitRate(profit);
         return profit;

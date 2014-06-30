@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.Webs;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -244,15 +245,18 @@ public class ProfitPost extends Post<Profit> {
          * (制作中+已交货)库存占用资金总金额(USD)
          */
         profit.workingfee = profit.workingqty * profit.procureprice;
+        profit.workingfee = Webs.scale2PointUp(profit.workingfee);
         /**
          * 在途库存占用资金总金额(USD)
          */
         profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
+        profit.wayfee = Webs.scale2PointUp(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)
          */
         profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
                 + profit.inboundqty * profit.vatprice;
+        profit.inboundfee = Webs.scale2PointUp(profit.inboundfee);
 
         return profit;
     }
