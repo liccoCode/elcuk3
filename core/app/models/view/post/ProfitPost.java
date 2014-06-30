@@ -204,8 +204,7 @@ public class ProfitPost extends Post<Profit> {
     }
 
     private Profit addProfit(Profit total, Profit p) {
-        total.totalfee =new BigDecimal(String.valueOf(total.totalfee)).
-                add(new BigDecimal(String.valueOf(p.totalfee))).floatValue();
+        total.totalfee =new Double(new Double(total.totalfee)+new Double(p.totalfee)).floatValue();
         total.amazonfee += p.amazonfee;
         total.fbafee += p.fbafee;
         total.quantity += p.quantity;
