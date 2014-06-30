@@ -18,11 +18,12 @@ public class LogUtils {
         }
     }
 
-    public static boolean isslow(long time,String jobname) {
+    public static boolean isslow(long time, String jobname) {
         Runtime r = Runtime.getRuntime();
-        LogUtils.JOBLOG.info(String
-                            .format("jobname:%s totalmemory%s freememory%s",jobname,r.totalMemory(),r.freeMemory()));
-
+        if(jobname.equals("AmazonFinanceCheckJob")) {
+            LogUtils.JOBLOG.info(String
+                    .format("jobname:%s totalmemory%s freememory%s", jobname, r.totalMemory(), r.freeMemory()));
+        }
         if(time >= 100000L) {
             return true;
         } else {

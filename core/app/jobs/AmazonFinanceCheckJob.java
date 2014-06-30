@@ -63,6 +63,7 @@ public class AmazonFinanceCheckJob extends Job {
             if(hourOfDay >= 19 || hourOfDay <= 9) orderSize = 24;
             if(Arrays.asList(6, 7).contains(dayOfWeek)) orderSize = 24;
 
+
             List<Account> accounts = Account.openedSaleAcc();
             Map<String, Account> accMap = new HashMap<String, Account>();
             for(Account acc : accounts) {
