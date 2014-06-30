@@ -94,15 +94,19 @@ public class MetricProfitService {
         profit.quantity = this.esSaleQty();
         //采购价格
         profit.procureprice = this.esProcurePrice();
+        profit.procureprice = Webs.scale2PointUp(profit.procureprice);
         //运输价格
         profit.shipprice = this.esShipPrice();
+        profit.shipprice = Webs.scale2PointUp(profit.shipprice);
         //vat价格
         profit.vatprice = this.esVatPrice();
+        profit.vatprice = Webs.scale2PointUp(profit.vatprice);
         //利润
         profit.totalprofit = this.totalProfit(profit);
         profit.totalprofit = Webs.scale2PointUp(profit.totalprofit);
         //利润率
         profit.profitrate = this.profitRate(profit);
+        profit.profitrate = Webs.scale2PointUp(profit.profitrate);
         return profit;
     }
 
