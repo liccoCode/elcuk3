@@ -129,6 +129,18 @@ public class ProfitPost extends Post<Profit> {
             skuprofit.sku = profits.get(0).sku;
             skuprofit.memo = skuprofit.sku + "合计";
             for(Profit p : profits) {
+                p.totalfee = Webs.scale2PointUp(p.totalfee);
+                p.amazonfee = Webs.scale2PointUp(p.amazonfee);
+                p.fbafee = Webs.scale2PointUp(p.fbafee);
+                p.procureprice = Webs.scale2PointUp(p.procureprice);
+                p.shipprice = Webs.scale2PointUp(p.shipprice);
+                p.vatprice = Webs.scale2PointUp(p.vatprice);
+                p.totalprofit = Webs.scale2PointUp(p.totalprofit);
+                p.profitrate = Webs.scale2PointUp(p.profitrate);
+                p.workingfee = Webs.scale2PointUp(p.workingfee);
+                p.wayfee = Webs.scale2PointUp(p.wayfee);
+                p.inboundfee = Webs.scale2PointUp(p.inboundfee);
+
                 if(skuprofit.sku.equals(p.sku)) {
                     addProfit(skuprofit, p);
                 } else {
@@ -139,6 +151,7 @@ public class ProfitPost extends Post<Profit> {
                     skuprofit.memo = skuprofit.sku + "合计";
                     addProfit(skuprofit, p);
                 }
+
                 newprofits.add(p);
             }
             skuprofit.sku = skuprofit.sku + "合计";
