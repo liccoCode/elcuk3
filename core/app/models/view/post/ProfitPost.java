@@ -142,6 +142,7 @@ public class ProfitPost extends Post<Profit> {
                 p.inboundfee = Webs.scale2PointUp(p.inboundfee);
 
                 if(skuprofit.sku.equals(p.sku)) {
+                    p.sku = p.sku +String.valueOf(p.totalfee);
                     addProfit(skuprofit, p);
                 } else {
                     skuprofit.sku = skuprofit.sku + "合计1";
