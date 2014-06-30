@@ -5,6 +5,7 @@
 <table class="table table-condensed table-bordered">
   <tr>
     <th>SKU</th>
+    <th>Family</th>
     <th>操作</th>
     <th>Pics</th>
     <th>Name</th>
@@ -17,9 +18,12 @@
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
 
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
+        <td>${prod.family?.family}</td>
           #{set count:prod.pictureCount() /}
-        <td><a href="javascript:void(0);" id="copyBtn" class="btn btn-success">
-          <i class="icon-refresh"></i>同步</a></td>
+        <td style="width:100px"><a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
+          <i class="icon-refresh"></i>同步</a>
+          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info">
+            复制</a></td>
 
 
         <td>${count} <i class="${count > 0 ? 'icon-picture' : 'icon-exclamation-sign'}"></i>
@@ -29,6 +33,8 @@
         <td>${prod.heigh == null ? 0 : prod.heigh}</td>
         <td>${prod.width == null ? 0 : prod.width}</td>
         <td>${prod.weight == null ? 0 : prod.weight}</td>
+
+
       </tr>
     #{/list}
     #{if pi}
@@ -86,6 +92,56 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
       <button class="btn btn-primary">同步</button>
+    </div>
+  #{/form}
+  </div>
+
+</div>
+
+
+<div id="backup_modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>复制SKU</h3>
+  </div>
+  <div class="modal-body">
+  #{form @Products.backup(), id:'update_form'}
+    <input type="hidden" id="backup_choseid" name="choseid" value="0">
+
+    <tr>
+      <th>Family</th>
+      <td>
+        <input style="width:150px" id="back_families" type="text" name="family" data-provide="typeahead"
+               data-source="${families}"
+               value="" autocomplete="off">
+      </td>
+      <th>SKU</th>
+      <td><input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off"></td>
+
+    </tr>
+    <dl class="dl-horizontal">
+
+      <dt>选择复制的信息:</dt>
+      <dd>
+        <label class="checkbox">
+          <input disabled="true" type="checkbox" name="base" value="1" checked>
+          <a>基本属性</a>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="extend" value="1" checked>
+          <a>扩展属性</a>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="attach" value="1" checked>
+          <a>附件</a>
+        </label>
+      </dd>
+    </dl>
+
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+      <button class="btn btn-primary">复制</button>
     </div>
   #{/form}
   </div>
