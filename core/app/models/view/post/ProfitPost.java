@@ -130,21 +130,21 @@ public class ProfitPost extends Post<Profit> {
             skuprofit.sku = profits.get(0).sku;
             skuprofit.memo = skuprofit.sku + "合计";
             for(Profit p : profits) {
-                p.totalfee = Webs.scale2PointUp(p.totalfee);
-                p.amazonfee = Webs.scale2PointUp(p.amazonfee);
-                p.fbafee = Webs.scale2PointUp(p.fbafee);
-                p.procureprice = Webs.scale2PointUp(p.procureprice);
-                p.shipprice = Webs.scale2PointUp(p.shipprice);
-                p.vatprice = Webs.scale2PointUp(p.vatprice);
-                p.totalprofit = Webs.scale2PointUp(p.totalprofit);
-                p.profitrate = Webs.scale2PointUp(p.profitrate);
-                p.workingfee = Webs.scale2PointUp(p.workingfee);
-                p.wayfee = Webs.scale2PointUp(p.wayfee);
-                p.inboundfee = Webs.scale2PointUp(p.inboundfee);
+                p.totalfee = Webs.scale2Double(p.totalfee);
+                p.amazonfee = Webs.scale2Double(p.amazonfee);
+                p.fbafee = Webs.scale2Double(p.fbafee);
+                p.procureprice = Webs.scale2Double(p.procureprice);
+                p.shipprice = Webs.scale2Double(p.shipprice);
+                p.vatprice = Webs.scale2Double(p.vatprice);
+                p.totalprofit = Webs.scale2Double(p.totalprofit);
+                p.profitrate = Webs.scale2Double(p.profitrate);
+                p.workingfee = Webs.scale2Double(p.workingfee);
+                p.wayfee = Webs.scale2Double(p.wayfee);
+                p.inboundfee = Webs.scale2Double(p.inboundfee);
 
                 if(skuprofit.sku.equals(p.sku)) {
                     skuprofit = addProfit(skuprofit, p);
-                    p.sku = p.sku +String.valueOf(p.totalfee)+" "+skuprofit.totalfee;
+                    p.sku = p.sku + String.valueOf(p.totalfee) + " " + skuprofit.totalfee;
                 } else {
                     skuprofit.sku = skuprofit.sku + "合计1";
                     newprofits.add(skuprofit);
@@ -204,7 +204,7 @@ public class ProfitPost extends Post<Profit> {
     }
 
     private Profit addProfit(Profit total, Profit p) {
-        total.totalfee =new Double(new Double(total.totalfee)+new Double(p.totalfee)).floatValue();
+        total.totalfee += p.totalfee;
         total.amazonfee += p.amazonfee;
         total.fbafee += p.fbafee;
         total.quantity += p.quantity;
@@ -260,18 +260,18 @@ public class ProfitPost extends Post<Profit> {
          * (制作中+已交货)库存占用资金总金额(USD)
          */
         profit.workingfee = profit.workingqty * profit.procureprice;
-        profit.workingfee = Webs.scale2PointUp(profit.workingfee);
+        profit.workingfee = Webs.scale2Double(profit.workingfee);
         /**
          * 在途库存占用资金总金额(USD)
          */
         profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
-        profit.wayfee = Webs.scale2PointUp(profit.wayfee);
+        profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)
          */
         profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
                 + profit.inboundqty * profit.vatprice;
-        profit.inboundfee = Webs.scale2PointUp(profit.inboundfee);
+        profit.inboundfee = Webs.scale2Double(profit.inboundfee);
 
         return profit;
     }

@@ -34,40 +34,40 @@ public class Profit implements Serializable, Comparable {
     /**
      * SKU销售额
      */
-    public Float totalfee;
+    public double totalfee;
     /**
      * 亚马逊费用
      */
-    public Float amazonfee;
+    public double amazonfee;
     /**
      * FBA费用
      */
-    public Float fbafee;
+    public double fbafee;
     /**
      * SKU销量
      */
-    public Float quantity;
+    public double quantity;
     /**
      * 平均采购价
      */
-    public Float procureprice;
+    public double procureprice;
     /**
      * 平均运费单价
      */
-    public Float shipprice;
+    public double shipprice;
     /**
      * 关税和VAT单价
      */
-    public Float vatprice;
+    public double vatprice;
 
     /**
      * 总利润
      */
-    public Float totalprofit;
+    public double totalprofit;
     /**
      * 利润率
      */
-    public Float profitrate;
+    public double profitrate;
     /**
      * 正在制作+已交货的数量
      */
@@ -85,17 +85,17 @@ public class Profit implements Serializable, Comparable {
     /**
      * (制作中+已交货)库存占用资金总金额(USD)
      */
-    public Float workingfee = 0f;
+    public double workingfee = 0f;
 
     /**
      * 在途库存占用资金总金额(USD)
      */
-    public Float wayfee = 0f;
+    public double wayfee = 0f;
 
     /**
      * (入库+在库)库存占用资金总金额(USD)
      */
-    public Float inboundfee = 0f;
+    public double inboundfee = 0f;
 
     @Override
     public int compareTo(Object o) {

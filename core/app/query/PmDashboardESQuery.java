@@ -188,7 +188,7 @@ public class PmDashboardESQuery {
         List<String> categoryIds = team.getStrCategorys();
         //skus 集合
         List<String> skus = Category.getSKUs(categoryIds);
-        float totalsaleprofit = 0f;
+        double totalsaleprofit = 0f;
         for(String sku : skus) {
             MetricProfitService service = new MetricProfitService(begin, end, null,
                     sku, null);
@@ -198,7 +198,7 @@ public class PmDashboardESQuery {
         if(totalsaleprofit == 0) {
             totalsaleprofit = 1;
         }
-        pie.add(totalsaleprofit, "利润");
+        pie.add(new Float(totalsaleprofit), "利润");
 
         /**
          * 获取TEAM的年度利润
@@ -209,7 +209,7 @@ public class PmDashboardESQuery {
                 + " and " + SqlSelect.whereIn("fid", team.getStrCategorys());
         Map<String, Object> row = DBUtils.row(sql);
 
-        float task = 0;
+        double task = 0;
         if(row != null && row.size() > 0) {
             Object obj = row.get("amount");
             if(obj != null) {
@@ -219,7 +219,7 @@ public class PmDashboardESQuery {
         }
         if(task < 0)
             task = 0;
-        pie.add(task, "未完成目标");
+        pie.add(new Float(task), "未完成目标");
         return pie;
     }
 
@@ -241,7 +241,7 @@ public class PmDashboardESQuery {
             List<String> categoryIds = team.getStrCategorys();
             //skus 集合
             List<String> skus = Category.getSKUs(categoryIds);
-            float totalsaleprofit = 0f;
+            double totalsaleprofit = 0f;
             for(String sku : skus) {
                 MetricProfitService service = new MetricProfitService(begin, end, null,
                         sku, null);
@@ -249,7 +249,7 @@ public class PmDashboardESQuery {
             }
             if(totalsaleprofit == 0f)
                 totalsaleprofit = 1;
-            pie.add(totalsaleprofit, team.name + "利润");
+            pie.add(new Float(totalsaleprofit), team.name + "利润");
         }
         return pie;
     }
@@ -483,8 +483,8 @@ public class PmDashboardESQuery {
             //skus 集合
             List<String> skus = Category.getSKUs(categoryIds);
 
-            float totalsaleprofit = 0f;
-            float totalsalefee = 0f;
+            double totalsaleprofit = 0f;
+            double totalsalefee = 0f;
             for(String sku : skus) {
                 MetricProfitService profitservice = new MetricProfitService(begin, end, null,
                         sku, null);
@@ -492,11 +492,11 @@ public class PmDashboardESQuery {
                 totalsaleprofit = totalsaleprofit + profit.totalprofit;
                 totalsalefee = totalsalefee + profit.totalfee;
             }
-            float rate = 0;
+            double rate = 0;
             if(totalsalefee != 0) {
                 rate = totalsaleprofit / totalsalefee * 100;
             }
-            line.add(rate, i + "月");
+            line.add(new Float(rate), i + "月");
         }
         return line;
     }
@@ -644,8 +644,8 @@ public class PmDashboardESQuery {
                 + " where category_categoryid='" + categoryId + "' ";
         List<Map<String, Object>> rows = DBUtils.rows(sql);
 
-        float totalsaleprofit = 0f;
-        float totalsalefee = 0f;
+        double totalsaleprofit = 0f;
+        double totalsalefee = 0f;
         for(int i = 1; i <= 12; i++) {
             totalsaleprofit = 0f;
             totalsalefee = 0f;
@@ -667,11 +667,11 @@ public class PmDashboardESQuery {
             }
             MetricProfitService service = new MetricProfitService(begin.toDate(), end.toDate(), null,
                     null, null, categoryId);
-            float rate = 0;
+            double rate = 0;
             if(totalsalefee != 0) {
                 rate = totalsaleprofit / totalsalefee * 100;
             }
-            line.add(rate, i + "月");
+            line.add(new Float(rate), i + "月");
         }
         return line;
     }
