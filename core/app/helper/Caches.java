@@ -103,6 +103,7 @@ public class Caches {
             Logger.info("Delete running keys: %s", StringUtils.join(runningkeys, ","));
             RedisCacheImpl.getCacheConnection().del(runningkeys.toArray(new String[runningkeys.size()]));
         }
+        Cache.delete("amazonfinancecheckjob_running");
     }
 
     /**
