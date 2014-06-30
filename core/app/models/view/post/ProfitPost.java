@@ -1,11 +1,13 @@
 package models.view.post;
 
+import helper.Webs;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import models.view.report.Profit;
@@ -128,16 +130,29 @@ public class ProfitPost extends Post<Profit> {
             skuprofit.sku = profits.get(0).sku;
             skuprofit.memo = skuprofit.sku + "合计";
             for(Profit p : profits) {
+                p.totalfee = Webs.scale2Double(p.totalfee);
+                p.amazonfee = Webs.scale2Double(p.amazonfee);
+                p.fbafee = Webs.scale2Double(p.fbafee);
+                p.procureprice = Webs.scale2Double(p.procureprice);
+                p.shipprice = Webs.scale2Double(p.shipprice);
+                p.vatprice = Webs.scale2Double(p.vatprice);
+                p.totalprofit = Webs.scale2Double(p.totalprofit);
+                p.profitrate = Webs.scale2Double(p.profitrate);
+                p.workingfee = Webs.scale2Double(p.workingfee);
+                p.wayfee = Webs.scale2Double(p.wayfee);
+                p.inboundfee = Webs.scale2Double(p.inboundfee);
+
                 if(skuprofit.sku.equals(p.sku)) {
-                    addProfit(skuprofit, p);
+                    skuprofit = addProfit(skuprofit, p);
                 } else {
                     skuprofit.sku = skuprofit.sku + "合计";
                     newprofits.add(skuprofit);
                     skuprofit = initPorfit();
                     skuprofit.sku = p.sku;
                     skuprofit.memo = skuprofit.sku + "合计";
-                    addProfit(skuprofit, p);
+                    skuprofit = addProfit(skuprofit, p);
                 }
+
                 newprofits.add(p);
             }
             skuprofit.sku = skuprofit.sku + "合计";
@@ -160,7 +175,7 @@ public class ProfitPost extends Post<Profit> {
             mp.memo = m.label() + "合计";
             for(Profit p : profits) {
                 if(p.market == m) {
-                    addProfit(mp, p);
+                    mp = addProfit(mp, p);
                 }
             }
             newprofits.add(mp);
@@ -244,15 +259,18 @@ public class ProfitPost extends Post<Profit> {
          * (制作中+已交货)库存占用资金总金额(USD)
          */
         profit.workingfee = profit.workingqty * profit.procureprice;
+        profit.workingfee = Webs.scale2Double(profit.workingfee);
         /**
          * 在途库存占用资金总金额(USD)
          */
         profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
+        profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)
          */
         profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
                 + profit.inboundqty * profit.vatprice;
+        profit.inboundfee = Webs.scale2Double(profit.inboundfee);
 
         return profit;
     }

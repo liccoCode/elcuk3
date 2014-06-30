@@ -129,8 +129,8 @@ public class CategoryInfoFetchJob extends BaseJob {
         Date endDay = Dates.endDayYear(now.getYear());
         MetricProfitService me = new MetricProfitService(startDay, endDay, null, dto.sku, null);
         Profit profit = me.calProfit();
-        dto.profit = profit.totalprofit;
-        dto.profitMargins = profit.profitrate;
+        dto.profit = new Float(profit.totalprofit);
+        dto.profitMargins = new Float(profit.profitrate);
     }
 
     /**

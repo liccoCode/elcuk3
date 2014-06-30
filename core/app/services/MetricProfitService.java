@@ -83,22 +83,30 @@ public class MetricProfitService {
         profit.market = market;
         //总销售额
         profit.totalfee = this.esSaleFee();
+        profit.totalfee = Webs.scale2Double(profit.totalfee);
         //亚马逊费用
         profit.amazonfee = this.esAmazonFee();
+        profit.amazonfee = Webs.scale2Double(profit.amazonfee);
         //fba费用
         profit.fbafee = this.esFBAFee();
+        profit.fbafee = Webs.scale2Double(profit.fbafee);
         //总销量
         profit.quantity = this.esSaleQty();
         //采购价格
         profit.procureprice = this.esProcurePrice();
+        profit.procureprice = Webs.scale2Double(profit.procureprice);
         //运输价格
         profit.shipprice = this.esShipPrice();
+        profit.shipprice = Webs.scale2Double(profit.shipprice);
         //vat价格
         profit.vatprice = this.esVatPrice();
+        profit.vatprice = Webs.scale2Double(profit.vatprice);
         //利润
         profit.totalprofit = this.totalProfit(profit);
+        profit.totalprofit = Webs.scale2Double(profit.totalprofit);
         //利润率
         profit.profitrate = this.profitRate(profit);
+        profit.profitrate = Webs.scale2Double(profit.profitrate);
         return profit;
     }
 
@@ -395,7 +403,7 @@ public class MetricProfitService {
     /**
      * 总利润
      */
-    public Float totalProfit(Profit profit) {
+    public double totalProfit(Profit profit) {
         /**
          *  SKU总实际利润[A] = SKU总销售额[B] - SKU总亚马逊费用[C] - SKU总FBA费用[D]
          *  - SKU总销量[E] * (SKU平均采购单价[F] + SKU平均运费单价[G] + 关税和VAT单价[H])
@@ -408,7 +416,7 @@ public class MetricProfitService {
     /**
      * 利润率
      */
-    public Float profitRate(Profit profit) {
+    public double profitRate(Profit profit) {
         if(profit.totalfee > 0f) {
             //利润率
             return profit.totalprofit / profit.totalfee * 100;

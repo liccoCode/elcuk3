@@ -65,6 +65,10 @@ public class Webs {
         return new BigDecimal(val).setScale(scala, RoundingMode.HALF_UP).floatValue();
     }
 
+    public static double scale2Double(double val) {
+        return new BigDecimal(val).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
     /**
      * 测试环境下使用的辅助登陆方法.  会将用户登陆的 CookieStore 保存到 test 目录下, 如果超过 10 小时则放弃缓存, 重新登陆
      *
@@ -129,7 +133,7 @@ public class Webs {
             email.setCharset("UTF-8");
             email.setSubject(subject);
 
-            for(String address:mailaddress) {
+            for(String address : mailaddress) {
                 email.addTo(address);
             }
 

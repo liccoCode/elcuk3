@@ -118,8 +118,8 @@ public class SkuESQuery {
             //按照SKU计算每周的利润
             MetricProfitService profitservice = new MetricProfitService(begin, end, market,
                     sku, null);
-            Float profit = profitservice.calProfit().totalprofit;
-            line.add(Dates.date2JDate(begin), profit);
+            double profit = profitservice.calProfit().totalprofit;
+            line.add(Dates.date2JDate(begin), new Float(profit));
             i = i + 1;
 
             /*结束日期大于了当天日期则退出*/
