@@ -143,7 +143,7 @@ public class ProfitPost extends Post<Profit> {
                 p.inboundfee = Webs.scale2PointUp(p.inboundfee);
 
                 if(skuprofit.sku.equals(p.sku)) {
-                    addProfit(skuprofit, p);
+                    skuprofit = addProfit(skuprofit, p);
                     p.sku = p.sku +String.valueOf(p.totalfee)+" "+skuprofit.totalfee;
                 } else {
                     skuprofit.sku = skuprofit.sku + "合计1";
@@ -151,7 +151,7 @@ public class ProfitPost extends Post<Profit> {
                     skuprofit = initPorfit();
                     skuprofit.sku = p.sku;
                     skuprofit.memo = skuprofit.sku + "合计1";
-                    addProfit(skuprofit, p);
+                    skuprofit = addProfit(skuprofit, p);
                 }
 
                 newprofits.add(p);
@@ -176,7 +176,7 @@ public class ProfitPost extends Post<Profit> {
             mp.memo = m.label() + "合计1";
             for(Profit p : profits) {
                 if(p.market == m) {
-                    addProfit(mp, p);
+                    mp = addProfit(mp, p);
                 }
             }
             newprofits.add(mp);
