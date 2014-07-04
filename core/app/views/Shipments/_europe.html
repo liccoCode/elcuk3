@@ -31,9 +31,17 @@
   <td>GB117317336000</td>
 #{/else}
 </tr>
+
+
 <tr>
   <td>Buyer VAT No. :</td>
+
+#{if country == 'DE' }
+  <td>DE 292695920</td>
+#{/if}
+#{else}
   <td>GB117317336</td>
+#{/else}
 </tr>
 <tr>
   <td>INVOICE NO.:</td>
