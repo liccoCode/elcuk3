@@ -1,8 +1,13 @@
 <tr>
   <td colspan="3" rowspan="4" class="td1">
-
+  #{if country == 'DE' }
+    Buyer : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
+    VAT No. : DE 292695920<br>
+  #{/if}
+  #{else}
     Buyer : Edeer Network Technology CO., LTD <br>
     VAT No. : GB117317336<br>
+  #{/else}
     Attn : Yeping Xie <br>
     Tel :
   #{if country == 'DE' }
@@ -15,11 +20,16 @@
     +390707040008
   #{/if}
     <br>
-    Email：Jason@easyacceu.com <br>
+    Email: Jason@easyacceu.com <br>
     Add : ${address}
   </td>
   <td>Buyer EORI NO.：</td>
+#{if country == 'DE' }
+  <td>1667318915</td>
+#{/if}
+#{else}
   <td>GB117317336000</td>
+#{/else}
 </tr>
 <tr>
   <td>Buyer VAT No. :</td>
