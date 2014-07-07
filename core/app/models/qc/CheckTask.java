@@ -461,30 +461,42 @@ public class CheckTask extends Model {
             }
         }
 
+
+        //因为运输方式经常变化，需要重新检查一次
+        List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where checkstat='UNCHECK'");
+        if(unchecktasks.size() > 0) {
+            checkwarehouse(unchecktasks);
+        }
+
         List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
         if(tasks.size() > 0) {
-            //欧嘉货代
-            Cooperator cooperator = Cooperator.findById(59l);
-            for(Map<String, Object> task : tasks) {
-                Long taskid = (Long) task.get("id");
-                CheckTask checktask = CheckTask.findById(taskid);
+            checkwarehouse(tasks);
+        }
+    }
 
-                Whouse wh = searchWarehouse(checktask.units);
+    public static void checkwarehouse(List<Map<String, Object>> tasks) {
+        //欧嘉货代
+        Cooperator cooperator = Cooperator.findById(59l);
+        for(Map<String, Object> task : tasks) {
+            Long taskid = (Long) task.get("id");
+            CheckTask checktask = CheckTask.findById(taskid);
+
+            Whouse wh = searchWarehouse(checktask.units);
+            if(wh != null && wh.user != null) {
+                checktask.shipwhouse = wh;
+                checktask.checkor = wh.user.username;
+                checktask.save();
+            } else if(wh == null) {
+                //如果是快递、空运、海运则默认为欧嘉
+                wh = searchCooperWarehouse(cooperator, checktask.units.shipType);
                 if(wh != null && wh.user != null) {
                     checktask.shipwhouse = wh;
                     checktask.checkor = wh.user.username;
                     checktask.save();
-                } else if(wh == null){
-                    //如果是快递、空运、海运则默认为欧嘉
-                    wh = searchCooperWarehouse(cooperator, checktask.units.shipType);
-                    if(wh != null && wh.user != null) {
-                        checktask.shipwhouse = wh;
-                        checktask.checkor = wh.user.username;
-                        checktask.save();
-                    }
                 }
             }
         }
+
     }
 
 
