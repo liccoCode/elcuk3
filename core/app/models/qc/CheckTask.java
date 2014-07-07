@@ -483,16 +483,20 @@ public class CheckTask extends Model {
 
             Whouse wh = searchWarehouse(checktask.units);
             if(wh != null && wh.user != null) {
-                checktask.shipwhouse = wh;
-                checktask.checkor = wh.user.username;
-                checktask.save();
+                if(checktask.checkor == null || !checktask.checkor.equals(wh.user)) {
+                    checktask.shipwhouse = wh;
+                    checktask.checkor = wh.user.username;
+                    checktask.save();
+                }
             } else if(wh == null) {
                 //如果是快递、空运、海运则默认为欧嘉
                 wh = searchCooperWarehouse(cooperator, checktask.units.shipType);
                 if(wh != null && wh.user != null) {
-                    checktask.shipwhouse = wh;
-                    checktask.checkor = wh.user.username;
-                    checktask.save();
+                    if(checktask.checkor == null || !checktask.checkor.equals(wh.user)) {
+                        checktask.shipwhouse = wh;
+                        checktask.checkor = wh.user.username;
+                        checktask.save();
+                    }
                 }
             }
         }
