@@ -463,7 +463,12 @@ public class CheckTask extends Model {
 
 
         //因为运输方式经常变化，需要重新检查一次
-        List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where checkstat='UNCHECK'");
+        List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where "
+                +"  units_id in (" +
+                "  select unit_id from ShipItem where shipment_id in (" +
+                "  select id from Shipment where type='EXPRESS'" +
+                "  )" +
+                "  ) and checkstat='UNCHECK'");
         if(unchecktasks.size() > 0) {
             checkwarehouse(unchecktasks);
         }
