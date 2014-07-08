@@ -13,7 +13,7 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-#{form @Profits.index(), class:'search_form', id:'profits_form'}
+#{form @Excels.profit(), class:'search_form', id:'profits_form'}
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend input-append inline">
@@ -45,9 +45,7 @@
 
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
-      <button class="btn btn-primary" data-loading>搜索</button>
-      <a href="@{Excels.profit(p)}" class="btn btn-primary" target="_blank"><i
-                  class="icon-download-alt"></i>导出Excel</a>
+      <button class="btn btn-primary" data-loading>导出Excel</button>
     </div>
   </div>
 </div>
