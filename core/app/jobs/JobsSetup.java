@@ -31,7 +31,7 @@ public class JobsSetup {
         /**
          * 因cookie无法转成json到redis,暂时两边都执行此job
          */
-        every(KeepSessionJob.class, "29mn");
+        every(KeepSessionJob.class, "15mn");
         if(isprodjob || isdevJob) {
             /**
              * 因job服务器经常出现数据库无法连接问题，所以设置此参数
