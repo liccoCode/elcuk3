@@ -159,8 +159,11 @@ public class MetricProfitService {
      * 总销量
      */
     public Float esSaleQty() {
+        BoolQueryBuilder qb =  (BoolQueryBuilder)querybuilder();
+        qb = qb.mustNot(QueryBuilders.termQuery("state", "cancel"));
+
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(querybuilder())
+                .query(qb)
                 .facet(FacetBuilders.statisticalFacet("units")
                         .field("quantity")
                         .facetFilter(this.filterbuilder(true))
