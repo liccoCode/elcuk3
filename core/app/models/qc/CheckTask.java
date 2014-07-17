@@ -472,6 +472,15 @@ public class CheckTask extends Model {
         if(unchecktasks.size() > 0) {
             checkwarehouse(unchecktasks);
         }
+        unchecktasks = DBUtils.rows("select id from CheckTask where "
+                        +" not exists (select 1 from ShipItem where ShipItem.unit_id=CheckTask.units_id)"
+                        +" and exists (select 1 from ProcureUnit where "
+                        +" ProcureUnit.id=CheckTask.units_id and shipType='EXPRESS')"
+                        +" and checkstat='UNCHECK'");
+                if(unchecktasks.size() > 0) {
+                    checkwarehouse(unchecktasks);
+                }
+
 
         List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
         if(tasks.size() > 0) {
