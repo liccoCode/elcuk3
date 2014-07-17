@@ -475,7 +475,11 @@ public class AmazonListingReview extends GenericModel {
         review.helpClick = rwObj.get("helpClick").getAsInt();
         review.username = rwObj.get("username").getAsString();
         review.userid = rwObj.get("userid").getAsString();
-        review.reviewDate = DateTime.parse(rwObj.get("reviewDate").getAsString()).toDate();
+
+        //解析英文日期
+        String reviewdate = rwObj.get("reviewDate").getAsString();
+        review.reviewDate = parseDate(reviewdate);
+
         review.purchased = rwObj.get("purchased").getAsBoolean();
         review.resolved = rwObj.get("resolved").getAsBoolean();
         review.isVedio = rwObj.get("isVedio").getAsBoolean();
@@ -488,6 +492,23 @@ public class AmazonListingReview extends GenericModel {
         review.comments = rwObj.get("comments").getAsInt();
 
         return review;
+    }
+
+    public static Date parseDate(String reviewdate) {
+        Date reviewDate = new Date();
+        if(reviewdate != null && reviewdate.length() > 0 && reviewdate.indexOf(",") != -1) {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.ENGLISH);
+            try {
+                reviewDate = sdf.parse(reviewdate);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            if(reviewdate != null && reviewdate.length() > 0) {
+                reviewDate = DateTime.parse(reviewdate).toDate();
+            }
+        }
+        return reviewDate;
     }
 
     public static AmazonListingReview findByReviewId(String reviewId) {
