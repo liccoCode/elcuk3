@@ -32,7 +32,7 @@ public class Crawl {
     }
 
     private static String crawlUrl(String action, String market, String asin) {
-        market = market.substring(market.indexOf(".")+1,market.length());
+        market = market.substring(market.lastIndexOf(".")+1,market.length());
         return String.format("%s/%s/%s/%s.json",
                 Server.server(Server.T.CRAWLER).url, action, market, asin);
     }
