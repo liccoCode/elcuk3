@@ -490,7 +490,8 @@ public class AmazonListingReview extends GenericModel {
         review.isRealName = rwObj.get("isRealName").getAsBoolean();
         review.isVineVoice = rwObj.get("isVineVoice").getAsBoolean();
         review.topN = rwObj.get("topN").getAsInt();
-        review.reviewRank = rwObj.get("reviewRank").getAsInt();
+        //review.reviewRank = rwObj.get("reviewRank").getAsInt();
+        review.reviewRank = 1;
         review.comments = rwObj.get("comments").getAsInt();
 
         return review;
