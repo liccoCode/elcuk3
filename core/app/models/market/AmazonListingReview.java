@@ -351,7 +351,11 @@ public class AmazonListingReview extends GenericModel {
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
+
+        if(o == null || getClass() != o.getClass()) {
+            Logger.warn("REVIEWID:o null[%s]. [%s]",getClass().toString(),o.getClass().toString());
+            return false;
+        }
         if(!super.equals(o)) return false;
 
         AmazonListingReview that = (AmazonListingReview) o;
