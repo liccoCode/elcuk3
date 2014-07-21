@@ -465,7 +465,7 @@ public class AmazonListingReview extends GenericModel {
     public static AmazonListingReview parseAmazonReviewJson(JsonElement jsonReviewElement) {
         JsonObject rwObj = jsonReviewElement.getAsJsonObject();
         AmazonListingReview review = new AmazonListingReview();
-        review.alrId = rwObj.get("alrId").getAsString();
+        //review.alrId = rwObj.get("alrId").getAsString();
         review.listingId = rwObj.get("listingId").getAsString();
         review.rating = rwObj.get("rating").getAsFloat();
         review.lastRating = rwObj.get("lastRating").getAsFloat();
@@ -475,6 +475,8 @@ public class AmazonListingReview extends GenericModel {
         review.helpClick = rwObj.get("helpClick").getAsInt();
         review.username = rwObj.get("username").getAsString();
         review.userid = rwObj.get("userid").getAsString();
+
+        review.alrId = review.listingId.toUpperCase()+"_"+review.userid.toUpperCase();
 
         //解析英文日期
         String reviewdate = rwObj.get("reviewDate").getAsString();
