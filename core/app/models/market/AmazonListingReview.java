@@ -3,10 +3,7 @@ package models.market;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-import helper.Dates;
-import helper.GTs;
-import helper.J;
-import helper.Jitbit;
+import helper.*;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -359,6 +356,9 @@ public class AmazonListingReview extends GenericModel {
 
         AmazonListingReview that = (AmazonListingReview) o;
 
+
+        Logger.warn("REVIEWID:[%s] NEWREVIEWID[%s].", reviewId, that.reviewId);
+
         if(reviewId != null ? !reviewId.equals(that.reviewId) : that.reviewId != null) return false;
 
         return true;
@@ -476,7 +476,7 @@ public class AmazonListingReview extends GenericModel {
         review.username = rwObj.get("username").getAsString();
         review.userid = rwObj.get("userid").getAsString();
 
-        review.alrId = review.listingId.toUpperCase()+"_"+review.userid.toUpperCase();
+        review.alrId = review.listingId.toUpperCase() + "_" + review.userid.toUpperCase();
 
         //解析英文日期
         String reviewdate = rwObj.get("reviewDate").getAsString();
