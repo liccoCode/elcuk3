@@ -350,6 +350,7 @@ public class AmazonListingReview extends GenericModel {
 
     @Override
     public boolean equals(Object o) {
+        Logger.warn("equals test.");
         if(this == o) return true;
 
         if(o == null || getClass() != o.getClass()) {
