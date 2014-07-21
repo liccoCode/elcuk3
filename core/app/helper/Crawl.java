@@ -32,7 +32,8 @@ public class Crawl {
     }
 
     private static String crawlUrl(String action, String market, String asin) {
-        return String.format("%s/%s/%s/%s",
+        market = market.split(".")[1];
+        return String.format("%s/%s/%s/%s.json",
                 Server.server(Server.T.CRAWLER).url, action, market, asin);
     }
 
