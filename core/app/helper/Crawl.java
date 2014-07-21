@@ -39,21 +39,23 @@ public class Crawl {
     private static String marketurl(String market) {
         Logger.info("marketurl : %s", market);
         String key = "";
-        if(market.equals("amazon.co.uk")) {
+        if(market.equals("amazon.co.uk") || market.equals("AMAZON_UK")) {
             key = "uk";
-        } else if(market.equals("amazon.de")) {
+        } else if(market.equals("amazon.de") || market.equals("AMAZON_DE")) {
             key = "de";
-        } else if(market.equals("amazon.fr")) {
+        } else if(market.equals("amazon.fr") || market.equals("AMAZON_FR")) {
             key = "fr";
-        } else if(market.equals("amazon.it")) {
+        } else if(market.equals("amazon.it") || market.equals("AMAZON_IT")) {
             key = "it";
-        } else if(market.equals("amazon.es")) {
+        } else if(market.equals("amazon.es") || market.equals("AMAZON_ES")) {
             key = "es";
-        } else if(market.equals("amazon.com")) {
+        } else if(market.equals("amazon.com") || market.equals("AMAZON_US")) {
             key = "us";
-        } else if(market.equals("amazon.co.jp")) {
+        } else if(market.equals("amazon.co.jp") || market.equals("AMAZON_JP")) {
             key = "jp";
         }
+
+
         return key;
     }
 }
