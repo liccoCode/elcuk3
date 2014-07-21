@@ -356,7 +356,10 @@ public class AmazonListingReview extends GenericModel {
             Logger.warn("REVIEWID:o null[%s]. [%s]",getClass().toString(),o.getClass().toString());
             return false;
         }
-        if(!super.equals(o)) return false;
+        if(!super.equals(o)) {
+            Logger.warn("REVIEWID111:[%s]. [%s]",getClass().toString(),o.getClass().toString());
+            return false;
+        }
 
         AmazonListingReview that = (AmazonListingReview) o;
 
