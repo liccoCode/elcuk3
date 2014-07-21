@@ -32,9 +32,27 @@ public class Crawl {
     }
 
     private static String crawlUrl(String action, String market, String asin) {
-        market = market.substring(market.lastIndexOf(".")+1,market.length());
         return String.format("%s/%s/%s/%s.json",
-                Server.server(Server.T.CRAWLER).url, action, market, asin);
+                Server.server(Server.T.CRAWLER).url, action, marketurl(market), asin);
     }
 
+    private static String marketurl(String market) {
+        String key = "";
+        if(market.equals("amazon.co.uk")) {
+            key = "uk";
+        } else if(market.equals("amazon.de")) {
+            key = "de";
+        } else if(market.equals("amazon.fr")) {
+            key = "fr";
+        } else if(market.equals("amazon.it")) {
+            key = "it";
+        } else if(market.equals("amazon.es")) {
+            key = "es";
+        } else if(market.equals("amazon.com")) {
+            key = "us";
+        } else if(market.equals("amazon.co.jp")) {
+            key = "jp";
+        }
+        return key;
+    }
 }
