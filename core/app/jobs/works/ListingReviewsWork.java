@@ -59,6 +59,7 @@ public class ListingReviewsWork extends Job<Listing> {
                     Orderr ord = review.tryToRelateOrderByUserId();
                     if(ord != null) review.orderr = ord;
                     try {
+                        Logger.warn("alrid:%s asin:%s",review.alrId,listing.asin);
                         review.createReview();// 创建新的
                         review.checkMailAndTicket();
                     } catch(Exception fe) {
