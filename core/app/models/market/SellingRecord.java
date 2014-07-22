@@ -317,7 +317,7 @@ public class SellingRecord extends GenericModel {
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
 
-                    LogUtils.JOBLOG.info("SellingRecordCheckJob:"+market.toString()+e.getMessage());
+                    LogUtils.JOBLOG.info("SellingRecordCheckJob:" + market.toString() + e.getMessage());
 
                     FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market,
                             Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
@@ -337,6 +337,23 @@ public class SellingRecord extends GenericModel {
                         String sid = Selling.sid(msku, market, acc);
 
                         SellingRecord record = SellingRecord.oneDay(sid, oneDay);
+
+
+                        SqlSelect sql = new SqlSelect()
+                                .select("oi.selling_sellingId as sellingId", "count(o.orderId) as qty")
+                                .from("Orderr o")
+                                .leftJoin("OrderItem oi ON o.orderId=oi.order_orderId")
+                                .where("selling_sellingId=?").param(record.selling.sellingId);
+                        List<Map<String, Object>> sellingrow = DBUtils.rows(sql.toString(),
+                                sql.getParams().toArray());
+                        for(Map<String, Object> srow : sellingrow) {
+                            Object sellingId = srow.get("sellingId");
+                            if(sellingId != null && !StringUtils.isBlank(sellingId.toString())) {
+                                record.orders = org.apache.commons.lang.math.NumberUtils
+                                        .toInt(srow.get("qty").toString());
+                            }
+                        }
+
                         // 无论数据库中存在不存在都需要更新下面数据
                         record.sessions = Webs
                                 .amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString())
@@ -348,7 +365,7 @@ public class SellingRecord extends GenericModel {
                         records.add(record);
                     } catch(Exception e) {
 
-                        LogUtils.JOBLOG.info("SellingRecordCheckJob1:"+market.toString()+e.getMessage());
+                        LogUtils.JOBLOG.info("SellingRecordCheckJob1:" + market.toString() + e.getMessage());
 
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
                                 Webs.E(e));

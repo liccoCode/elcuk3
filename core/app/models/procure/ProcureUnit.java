@@ -418,11 +418,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.attrs.qty != null)
             this.attrs.qty = this.attrs.planQty;
         this.shipItemQty(this.qty());
-        if(this.selling == null && this.attrs.planQty == 0) {
-            this.delete();
-        } else {
-            this.save();
-        }
+        this.save();
 
         // 原采购计划的运输量变更
         int average = (int) Math.ceil((float) this.qty() / this.shipItems.size());
