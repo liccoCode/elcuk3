@@ -343,7 +343,7 @@ public class SellingRecord extends GenericModel {
                                 .select("oi.selling_sellingId as sellingId", "count(o.orderId) as qty")
                                 .from("Orderr o")
                                 .leftJoin("OrderItem oi ON o.orderId=oi.order_orderId")
-                                .where("sellingId=?").param(record.selling);
+                                .where("selling_sellingId=?").param(record.selling.sellingId);
                         List<Map<String, Object>> sellingrow = DBUtils.rows(sql.toString(),
                                 sql.getParams().toArray());
                         for(Map<String, Object> srow : sellingrow) {
