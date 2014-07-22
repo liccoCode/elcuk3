@@ -62,6 +62,8 @@ public class ListingReviewsWork extends Job<Listing> {
                         review.createReview();// 创建新的
                         review.checkMailAndTicket();
                     } catch(Exception fe) {
+                        Logger.warn("trace1:%s", fe.getStackTrace().toString());
+                        Logger.warn("message1:%s", fe.getMessage());
                         Logger.warn(Webs.E(fe) + "|" + J.json(Validation.errors()));
                     }
                 } else {
@@ -70,6 +72,8 @@ public class ListingReviewsWork extends Job<Listing> {
                 }
             }
         } catch(Exception e) {
+            Logger.warn("trace:%s", e.getStackTrace().toString());
+            Logger.warn("message:%s", e.getMessage());
             Logger.warn("Listing Review have [%s].", Webs.E(e));
         } finally {
             listing.lastReviewCheckDate = new Date();
