@@ -483,8 +483,6 @@ public class AmazonListingReview extends GenericModel {
         review.username = rwObj.get("username").getAsString();
         review.userid = rwObj.get("userid").getAsString();
 
-        review.alrId = review.listingId.toUpperCase() + "_" + review.userid.toUpperCase();
-
         //解析英文日期
         String reviewdate = rwObj.get("reviewDate").getAsString();
         review.reviewDate = parseDate(reviewdate);
@@ -500,6 +498,8 @@ public class AmazonListingReview extends GenericModel {
         //review.reviewRank = rwObj.get("reviewRank").getAsInt();
         review.reviewRank = 1;
         review.comments = rwObj.get("comments").getAsInt();
+
+        review.alrId = review.listingId.toUpperCase() + "_" + review.reviewId.toUpperCase();
 
         return review;
     }
