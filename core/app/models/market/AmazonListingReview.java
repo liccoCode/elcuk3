@@ -353,7 +353,6 @@ public class AmazonListingReview extends GenericModel {
         if(this == o) return true;
 
         if(o == null || getClass() != o.getClass()) {
-            Logger.warn("REVIEWID:o null[%s]. [%s]", getClass().toString(), o.getClass().toString());
             return false;
         }
         // if(!super.equals(o)) {
@@ -362,9 +361,6 @@ public class AmazonListingReview extends GenericModel {
         //}
 
         AmazonListingReview that = (AmazonListingReview) o;
-
-
-        Logger.warn("REVIEWID:[%s] NEWREVIEWID[%s].", reviewId, that.reviewId);
 
         if(reviewId != null ? !reviewId.equals(that.reviewId) : that.reviewId != null) return false;
 

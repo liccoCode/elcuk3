@@ -37,6 +37,8 @@ public class AmazonReviewCheckJob extends Job {
             JsonElement reviewElement = Crawl
                     .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
             JsonObject reviewObj = reviewElement.getAsJsonObject();
+            if(reviewObj.get("isRemove") == null)
+                continue;
             if(reviewObj.get("isRemove").getAsBoolean()) {
                 review.isRemove = true;
             } else {
@@ -51,7 +53,7 @@ public class AmazonReviewCheckJob extends Job {
             review.save();
         }
 
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonReviewCheckJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "AmazonReviewCheckJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonReviewCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
