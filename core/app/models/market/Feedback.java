@@ -158,6 +158,11 @@ public class Feedback extends GenericModel {
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
     public String openTicket(String title) {
+        if(Feedback.find("orderid=?", this.orderId).fetch().size() <= 0) {
+            Logger.info("feedback orderId is not exist!! %s", this.orderId);
+            return null;
+        }
+
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
             return null;
