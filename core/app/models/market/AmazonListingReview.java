@@ -323,8 +323,8 @@ public class AmazonListingReview extends GenericModel {
             }
             this.openTicket(null);
             this.save();
-            Mails.listingReviewWarn(this);
-            this.save();
+//            Mails.listingReviewWarn(this);
+//            this.save();
         }
     }
 
