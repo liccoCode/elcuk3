@@ -317,6 +317,9 @@ public class AmazonListingReview extends GenericModel {
      * 如果此 Review 需要开 Ticket 进行处理, 也在此判断了
      */
     public void checkMailAndTicket() {
+        if(StringUtils.isBlank(this.alrId)) return;
+        if(AmazonListingReview.find("alrid=?", this.alrId).fetch().size() <= 0) return;
+
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0)
             return;// 判断这个 Listing 是我们自己有上架的
