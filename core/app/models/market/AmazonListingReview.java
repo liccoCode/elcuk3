@@ -317,7 +317,12 @@ public class AmazonListingReview extends GenericModel {
             return;// 超过 70 天的不处理
 
         if(this.rating != null && this.rating <= 3) {
+            if(StringUtils.isNotBlank(this.osTicketId)) {
+                Logger.info("Review OsTicket is exist!! %s", this.osTicketId);
+                return;
+            }
             this.openTicket(null);
+            this.save();
             Mails.listingReviewWarn(this);
             this.save();
         }
