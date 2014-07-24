@@ -5,11 +5,13 @@ import com.google.gson.JsonObject;
 import helper.Crawl;
 import helper.Dates;
 import helper.LogUtils;
+import helper.Webs;
 import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.jobs.Job;
 
 import java.util.List;
@@ -34,23 +36,29 @@ public class AmazonReviewCheckJob extends Job {
                 "isRemove=false AND createDate>=? ORDER BY updateAt ASC",
                 DateTime.now().minusDays(70).toDate()).fetch(20);
         for(AmazonListingReview review : reviews) {
-            JsonElement reviewElement = Crawl
-                    .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
-            JsonObject reviewObj = reviewElement.getAsJsonObject();
-            if(reviewObj.get("isRemove") == null)
-                continue;
-            if(reviewObj.get("isRemove").getAsBoolean()) {
-                review.isRemove = true;
-            } else {
-                AmazonListingReview newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
-                // 1
-                if(StringUtils.isNotBlank(StringUtils.difference(review.review, newReview.review)))
-                    review.comment(String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
+            AmazonListingReview newReview = null;
+            try {
+                JsonElement reviewElement = Crawl
+                        .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
+                JsonObject reviewObj = reviewElement.getAsJsonObject();
+                if(reviewObj.get("isRemove") == null)
+                    continue;
+                if(reviewObj.get("isRemove").getAsBoolean()) {
+                    review.isRemove = true;
+                } else {
+                    newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
+                    // 1
+                    if(StringUtils.isNotBlank(StringUtils.difference(review.review, newReview.review)))
+                        review.comment(String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
 
-                // 2
-                review.updateAttr(newReview);
+                    // 2
+                    review.updateAttr(newReview);
+                }
+                review.save();
+            } catch(Exception e) {
+                if(newReview != null) Logger.warn("update attr: %s, %s", newReview.review, newReview.alrId);
+                Logger.warn("review check: %s", e.getMessage());
             }
-            review.save();
         }
 
         if(LogUtils.isslow(System.currentTimeMillis() - begin, "AmazonReviewCheckJob")) {
