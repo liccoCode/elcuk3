@@ -79,7 +79,7 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderFetchJob step5 done!");
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonFBAQtySyncJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "AmazonFBAQtySyncJob")) {
             LogUtils.JOBLOG
                     .info(String.format("AmazonFBAQtySyncJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
@@ -97,11 +97,13 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
                 try {
                     sqty.attach2Selling(sqty.msku(), wh);
                 } catch(Exception e) {
-                    String warmsg = "FBA CSV Report hava Selling[" + sid +
-                            "] that system can not be found!";
-                    Logger.warn(warmsg);
-                    Webs.systemMail(warmsg, warmsg + "<br/>\r\n" + Webs.E(e) +
-                            ";<br/>\r\n需要通过 Amazon 与系统内的 Selling 进行同步, 处理掉丢失的 Product 与 Selling, 然后再重新进行 FBA 库存的解析.");
+                    if(!(jobRequest.account.type.nickName().equals("A_FR") && jobRequest.account.id == 155)) {
+                        String warmsg = "FBA CSV Report hava Selling[" + sid +
+                                "] that system can not be found!";
+                        Logger.warn(warmsg);
+                        Webs.systemMail(warmsg, warmsg + "<br/>\r\n" + Webs.E(e) +
+                                ";<br/>\r\n需要通过 Amazon 与系统内的 Selling 进行同步, 处理掉丢失的 Product 与 Selling, 然后再重新进行 FBA 库存的解析.");
+                    }
                 }
             } else {
                 sqty.save();
