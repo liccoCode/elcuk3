@@ -291,6 +291,13 @@ public class AmazonListingReview extends GenericModel {
         if(newReview.reviewRank > 0) this.reviewRank = newReview.reviewRank;
         if(newReview.comments > 0) this.comments = newReview.comments;
         this.isSelf = this.isSelf();
+
+        try {
+            this.review = new String(this.review.getBytes(), "UTF-8");
+        } catch(Exception e) {
+            Logger.warn("review UTF-8: %s", e.getMessage());
+        }
+
         // resolved 不做处理
         return this.save();
     }
