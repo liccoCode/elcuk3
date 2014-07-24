@@ -481,6 +481,7 @@ public class AmazonListingReview extends GenericModel {
         } else {
             this.osTicketId = Jitbit.addTicket(this.orderr.email, name, subject, content, Jitbit.Category.REVIEW);
         }
+        LogUtils.JOBLOG.info(String.format("sendticket :%s, %s", this.alrId, this.osTicketId));
         return this.osTicketId;
     }
 
