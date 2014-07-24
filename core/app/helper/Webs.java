@@ -116,6 +116,7 @@ public class Webs {
         } catch(EmailException e) {
             Logger.warn("Email error: " + e.getMessage());
         }
+        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
         return Mail.send(email);
     }
 

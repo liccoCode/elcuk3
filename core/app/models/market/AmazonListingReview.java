@@ -291,6 +291,13 @@ public class AmazonListingReview extends GenericModel {
         if(newReview.reviewRank > 0) this.reviewRank = newReview.reviewRank;
         if(newReview.comments > 0) this.comments = newReview.comments;
         this.isSelf = this.isSelf();
+
+        try {
+            this.review = new String(this.review.getBytes(), "UTF-8");
+        } catch(Exception e) {
+            Logger.warn("review UTF-8: %s", e.getMessage());
+        }
+
         // resolved 不做处理
         return this.save();
     }
@@ -317,9 +324,14 @@ public class AmazonListingReview extends GenericModel {
             return;// 超过 70 天的不处理
 
         if(this.rating != null && this.rating <= 3) {
+            if(StringUtils.isNotBlank(this.osTicketId)) {
+                Logger.info("Review OsTicket is exist!! %s", this.osTicketId);
+                return;
+            }
             this.openTicket(null);
-            Mails.listingReviewWarn(this);
             this.save();
+//            Mails.listingReviewWarn(this);
+//            this.save();
         }
     }
 
@@ -353,7 +365,6 @@ public class AmazonListingReview extends GenericModel {
         if(this == o) return true;
 
         if(o == null || getClass() != o.getClass()) {
-            Logger.warn("REVIEWID:o null[%s]. [%s]", getClass().toString(), o.getClass().toString());
             return false;
         }
         // if(!super.equals(o)) {
@@ -362,9 +373,6 @@ public class AmazonListingReview extends GenericModel {
         //}
 
         AmazonListingReview that = (AmazonListingReview) o;
-
-
-        Logger.warn("REVIEWID:[%s] NEWREVIEWID[%s].", reviewId, that.reviewId);
 
         if(reviewId != null ? !reviewId.equals(that.reviewId) : that.reviewId != null) return false;
 
@@ -483,8 +491,6 @@ public class AmazonListingReview extends GenericModel {
         review.username = rwObj.get("username").getAsString();
         review.userid = rwObj.get("userid").getAsString();
 
-        review.alrId = review.listingId.toUpperCase() + "_" + review.userid.toUpperCase();
-
         //解析英文日期
         String reviewdate = rwObj.get("reviewDate").getAsString();
         review.reviewDate = parseDate(reviewdate);
@@ -500,6 +506,8 @@ public class AmazonListingReview extends GenericModel {
         //review.reviewRank = rwObj.get("reviewRank").getAsInt();
         review.reviewRank = 1;
         review.comments = rwObj.get("comments").getAsInt();
+
+        review.alrId = review.listingId.toUpperCase() + "_" + review.reviewId.toUpperCase();
 
         return review;
     }

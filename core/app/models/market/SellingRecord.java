@@ -16,6 +16,7 @@ import play.Play;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -297,6 +298,10 @@ public class SellingRecord extends GenericModel {
      * @return
      */
     public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
+        DateTime dt = new DateTime(oneDay).plusDays(1);
+        F.T2<DateTime, DateTime> actualDatePair = market
+                .withTimeZone(Dates.morning(oneDay), Dates.morning(dt.toDate()));
+
         Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
         int curentPage = 0;
@@ -343,7 +348,9 @@ public class SellingRecord extends GenericModel {
                                 .select("oi.selling_sellingId as sellingId", "count(o.orderId) as qty")
                                 .from("Orderr o")
                                 .leftJoin("OrderItem oi ON o.orderId=oi.order_orderId")
-                                .where("selling_sellingId=?").param(record.selling.sellingId);
+                                .where("selling_sellingId=?").param(record.selling.sellingId)
+                                .where("o.createDate>=?").param(actualDatePair._1.toDate())
+                                .where("o.createDate<?").param(actualDatePair._2.toDate());
                         List<Map<String, Object>> sellingrow = DBUtils.rows(sql.toString(),
                                 sql.getParams().toArray());
                         for(Map<String, Object> srow : sellingrow) {

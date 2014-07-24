@@ -37,7 +37,6 @@ public class Crawl {
     }
 
     private static String marketurl(String market) {
-        Logger.info("marketurl : %s", market);
         String key = "";
         if(market.equals("amazon.co.uk") || market.equals("AMAZON_UK")) {
             key = "uk";
@@ -54,8 +53,6 @@ public class Crawl {
         } else if(market.equals("amazon.co.jp") || market.equals("AMAZON_JP")) {
             key = "jp";
         }
-
-
         return key;
     }
 }
