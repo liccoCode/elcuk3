@@ -50,7 +50,7 @@ public class OrderInfoFetchJob extends Job {
                         ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"OrderInfoFetchJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "OrderInfoFetchJob")) {
             LogUtils.JOBLOG
                     .info(String.format("OrderInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
@@ -92,9 +92,9 @@ public class OrderInfoFetchJob extends Job {
         if(lin == null) {
             // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
             lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
-            if(lin!=null && StringUtils.isNotBlank(lin.text()) && StringUtils.contains(lin.text().toLowerCase(),
+            if(lin != null && StringUtils.isNotBlank(lin.text()) && StringUtils.contains(lin.text().toLowerCase(),
                     "cancelled") ||
-                    StringUtils.contains(lin.text().toLowerCase(), "storniert")/*德语*/) {
+                    (lin != null && StringUtils.contains(lin.text().toLowerCase(), "storniert"))/*德语*/) {
                 Logger.info("Order %s state from %s to %s", order.orderId, order.state, Orderr.S.CANCEL);
                 order.state = Orderr.S.CANCEL;
                 order.memo = lin.text();
