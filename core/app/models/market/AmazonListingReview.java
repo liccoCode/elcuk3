@@ -318,8 +318,14 @@ public class AmazonListingReview extends GenericModel {
      */
     public void checkMailAndTicket() {
         if(StringUtils.isBlank(this.alrId)) return;
-        if(AmazonListingReview.find("alrid=?", this.alrId).fetch().size() <= 0) {
+        AmazonListingReview dbreview = AmazonListingReview.find("alrid=?", this.alrId).first();
+        if(dbreview == null) {
             Logger.info("Review alrId is not exist!! %s", this.alrId);
+            return;
+        }
+
+        if(StringUtils.isNotBlank(dbreview.osTicketId)) {
+            Logger.info("dbReview OsTicket is exist! %s", dbreview.osTicketId);
             return;
         }
 
@@ -459,9 +465,10 @@ public class AmazonListingReview extends GenericModel {
 
         if(StringUtils.isBlank(subject)) {
             if(this.listing.market == M.AMAZON_DE) {
-                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen helfen?";
+                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen " +
+                        "helfen??";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
-                subject = "We would like to address your review!";
+                subject = "We would like to address your review!!";
             }
         }
 
