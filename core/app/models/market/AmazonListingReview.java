@@ -514,6 +514,11 @@ public class AmazonListingReview extends GenericModel {
         review.comments = rwObj.get("comments").getAsInt();
 
         review.alrId = review.listingId.toUpperCase() + "_" + review.reviewId.toUpperCase();
+        try {
+            review.review = new String(review.review.getBytes(), "UTF-8");
+        } catch(Exception e) {
+            Logger.warn("review UTF-8: %s", e.getMessage());
+        }
 
         return review;
     }
