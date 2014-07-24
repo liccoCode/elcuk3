@@ -318,7 +318,10 @@ public class AmazonListingReview extends GenericModel {
      */
     public void checkMailAndTicket() {
         if(StringUtils.isBlank(this.alrId)) return;
-        if(AmazonListingReview.find("alrid=?", this.alrId).fetch().size() <= 0) return;
+        if(AmazonListingReview.find("alrid=?", this.alrId).fetch().size() <= 0) {
+            Logger.info("Review alrId is not exist!! %s", this.alrId);
+            return;
+        }
 
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0)
