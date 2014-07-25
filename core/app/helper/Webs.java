@@ -1,5 +1,7 @@
 package helper;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import models.market.Account;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +52,7 @@ public class Webs {
     public static final NumberFormat NC_US = NumberFormat.getCurrencyInstance(Locale.US);
     public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     public static final NumberFormat NC_JP = NumberFormat.getCurrencyInstance(Locale.JAPAN);
+
 
     /**
      * 保留小数点后面两位, 并且向上取整
@@ -106,18 +109,41 @@ public class Webs {
      * @return
      */
     public static Future<Boolean> systemMail(String subject, String content) {
-        HtmlEmail email = new HtmlEmail();
-        try {
-            email.setCharset("UTF-8");
-            email.setSubject(subject);
-            email.addTo("wppurking@gmail.com");
-            email.setFrom("support@easyacceu.com", "EasyAcc");
-            email.setHtmlMsg(content);
-        } catch(EmailException e) {
-            Logger.warn("Email error: " + e.getMessage());
-        }
-        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
-        return Mail.send(email);
+//        HtmlEmail email = new HtmlEmail();
+//        try {
+//            email.setCharset("UTF-8");
+//            email.setSubject(subject);
+//            email.addTo("wppurking@gmail.com");
+//            email.setFrom("support@easyacceu.com", "EasyAcc");
+//            email.setHtmlMsg(content);
+//        } catch(EmailException e) {
+//            Logger.warn("Email error: " + e.getMessage());
+//        }
+//        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
+//        return Mail.send(email);
+        return null;
+    }
+
+
+    public static void rollbar(String message) {
+        JsonObject payload = new JsonObject();
+        HashMap<String,String> map = new HashMap<String,String>();
+        map.put("access_token", "380247fd2c4f4845ad511e3544b2e15e");
+
+        HashMap<String,String> body = new HashMap<String,String>();
+        body.put("body", message);
+
+        HashMap<String,String> mess = new HashMap<String,String>();
+        mess.put("message", J.json(body));
+
+        HashMap<String,String> data = new HashMap<String,String>();
+        data.put("body", J.json(mess));
+        data.put("environment", "elcuk2");
+        map.put("data", J.json(data));
+
+        System.out.println("xxxxxxxxxxxxx:" + J.json(map));
+        JSONObject post =  HTTP.postJson("https://api.rollbar.com/api/1/item/", J.json(map));
+        System.out.println("yyyy:" + post.toJSONString());
     }
 
 
