@@ -3,6 +3,7 @@ package jobs.works;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import helper.Crawl;
+import helper.DBUtils;
 import helper.J;
 import helper.Webs;
 import models.market.AmazonListingReview;
@@ -10,6 +11,7 @@ import models.market.Listing;
 import models.market.Orderr;
 import play.Logger;
 import play.data.validation.Validation;
+import play.db.DB;
 import play.jobs.Job;
 
 import java.util.Date;
@@ -65,8 +67,13 @@ public class ListingReviewsWork extends Job<Listing> {
                         Logger.warn(Webs.E(fe) + "|" + J.json(Validation.errors()));
                     }
                 } else {
-                    fromDB.updateAttr(review); // 更新
-                    fromDB.checkMailAndTicket();
+                    //加上捕捉，防止报错数据库回滚
+                    try {
+                        fromDB.updateAttr(review); // 更新
+                        fromDB.checkMailAndTicket();
+                    } catch(Exception fe) {
+                        Logger.warn(Webs.E(fe) + "||" + J.json(Validation.errors()));
+                    }
                 }
             }
         } catch(Exception e) {
@@ -74,6 +81,11 @@ public class ListingReviewsWork extends Job<Listing> {
         } finally {
             listing.lastReviewCheckDate = new Date();
             listing.save();
+            try {
+                DB.getConnection().commit();
+            } catch(Exception e) {
+                Logger.warn("db connection [%s].", e.getMessage());
+            }
         }
 
     }

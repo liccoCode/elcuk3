@@ -249,6 +249,7 @@ public class AmazonListingReview extends GenericModel {
             this.isSelf = false;
             this.comment(String.format("这个 Review 对应的 Listing 非自建."));
         }
+        Logger.warn("AmazonListingReview %s save!", this.reviewId);
         return this.save();
     }
 
