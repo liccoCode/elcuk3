@@ -155,21 +155,22 @@ public class Webs {
      * @return
      */
     public static Future<Boolean> systemMail(String subject, String content, List<String> mailaddress) {
-        HtmlEmail email = new HtmlEmail();
-        try {
-            email.setCharset("UTF-8");
-            email.setSubject(subject);
-
-            for(String address : mailaddress) {
-                email.addTo(address);
-            }
-
-            email.setFrom("support@easyacceu.com", "EasyAcc");
-            email.setHtmlMsg(content);
-        } catch(EmailException e) {
-            Logger.warn("Email error: " + e.getMessage());
-        }
-        return Mail.send(email);
+//        HtmlEmail email = new HtmlEmail();
+//        try {
+//            email.setCharset("UTF-8");
+//            email.setSubject(subject);
+//
+//            for(String address : mailaddress) {
+//                email.addTo(address);
+//            }
+//
+//            email.setFrom("support@easyacceu.com", "EasyAcc");
+//            email.setHtmlMsg(content);
+//        } catch(EmailException e) {
+//            Logger.warn("Email error: " + e.getMessage());
+//        }
+//        return Mail.send(email);
+        return null;
     }
 
 

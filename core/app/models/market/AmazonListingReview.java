@@ -294,12 +294,16 @@ public class AmazonListingReview extends GenericModel {
 
         try {
             this.review = new String(this.review.getBytes(), "UTF-8");
+            this.title = new String(this.title.getBytes(), "UTF-8");
         } catch(Exception e) {
             Logger.warn("review UTF-8: %s", e.getMessage());
         }
 
+        DBUtils.execute("update AmazonListingReview set rating=" + this.rating
+                + ",lastRating=" + this.lastRating
+                + " where alrid='" + this.alrId + "'");
         // resolved 不做处理
-        return this.save();
+        return AmazonListingReview.findById(this.alrId);
     }
 
     private boolean isSelf() {
@@ -340,8 +344,16 @@ public class AmazonListingReview extends GenericModel {
                 Logger.info("Review OsTicket is exist!! %s", this.osTicketId);
                 return;
             }
+
+            long reviewcount = AmazonListingReview.count("alrid=?", this.alrId);
+            if(reviewcount != 1l) {
+                Logger.info("Review alrId count is not exist!! %s", this.alrId);
+                return;
+            }
             this.openTicket(null);
-            this.save();
+            DBUtils.execute("update AmazonListingReview set osTicketId=" + this.osTicketId
+                    + " where alrid='" + this.alrId + "'");
+//            this.save();
 //            Mails.listingReviewWarn(this);
 //            this.save();
         }
@@ -524,6 +536,7 @@ public class AmazonListingReview extends GenericModel {
         review.alrId = review.listingId.toUpperCase() + "_" + review.reviewId.toUpperCase();
         try {
             review.review = new String(review.review.getBytes(), "UTF-8");
+            review.title = new String(review.title.getBytes(), "UTF-8");
         } catch(Exception e) {
             Logger.warn("review UTF-8: %s", e.getMessage());
         }
