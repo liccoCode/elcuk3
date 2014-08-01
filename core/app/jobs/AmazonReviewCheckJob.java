@@ -39,8 +39,8 @@ public class AmazonReviewCheckJob extends Job {
 
             AmazonListingReview newReview = null;
             try {
-                //停止1000毫秒
-                Thread.sleep(1000);
+                //停止3000毫秒
+                Thread.sleep(3000);
 
                 JsonElement reviewElement = Crawl
                         .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);

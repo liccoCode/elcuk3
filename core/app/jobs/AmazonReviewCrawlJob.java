@@ -31,8 +31,8 @@ public class AmazonReviewCrawlJob extends Job {
         List<Listing> listings = Listing.latestNeedReviewListing(10);
         for(Listing lst : listings) {
             try {
-                //停止1000毫秒
-                Thread.sleep(1000);
+                //停止3000毫秒
+                Thread.sleep(3000);
                 new ListingReviewsWork(lst.listingId).now();
             } catch(Exception e) {
                 Logger.warn("review crawl: %s", e.getMessage());
