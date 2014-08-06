@@ -47,7 +47,10 @@ public class JobsSetup {
             //TODO 所有的 Job 全部转移到 Crontab 中, 通过页面给予生成 crontab 然后泵更新 crontab 配置文件
 
             // Order Deal 5 step
-            every(AmazonOrderDiscover.class, "1mn");
+
+            //ruby job 已执行
+            //every(AmazonOrderDiscover.class, "1mn");
+
             every(AmazonOrderItemDiscover.class, "30s");
             every(AmazonOrderUpdateJob.class, "1h");
             every(AmazonOrderFetchJob.class, "20mn");
