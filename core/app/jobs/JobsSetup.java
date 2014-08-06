@@ -70,7 +70,9 @@ public class JobsSetup {
             //ruby job 已执行
             //every(AmazonFBACapaticyWatcherJob.class, "30mn");
 
-            every(AmazonFBAQtySyncJob.class, "5mn");
+            //ruby job 已执行
+            //every(AmazonFBAQtySyncJob.class, "5mn");
+
             every(AmazonSellingSyncJob.class, "1h");
 
             //ruby job 已执行
