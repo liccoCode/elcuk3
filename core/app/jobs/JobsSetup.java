@@ -63,10 +63,16 @@ public class JobsSetup {
             every(FeedbackCheckJob.class, "5mn");
 
             every(OrderMailCheck.class, "10mn");
-            every(AmazonFBACapaticyWatcherJob.class, "30mn");
+
+            //ruby job 已执行
+            //every(AmazonFBACapaticyWatcherJob.class, "30mn");
+
             every(AmazonFBAQtySyncJob.class, "5mn");
             every(AmazonSellingSyncJob.class, "1h");
-            every(AmazonFBAInventoryReceivedJob.class, "20mn");
+
+            //ruby job 已执行
+            //every(AmazonFBAInventoryReceivedJob.class, "20mn");
+
             every(CheckerProductCheckJob.class, "1d");
             every(FAndRNotificationJob.class, "1h");
             every(AmazonFinanceCheckJob.class, "1mn");
