@@ -1,5 +1,7 @@
 package helper;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import models.market.Account;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +52,7 @@ public class Webs {
     public static final NumberFormat NC_US = NumberFormat.getCurrencyInstance(Locale.US);
     public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     public static final NumberFormat NC_JP = NumberFormat.getCurrencyInstance(Locale.JAPAN);
+
 
     /**
      * 保留小数点后面两位, 并且向上取整
@@ -106,18 +109,42 @@ public class Webs {
      * @return
      */
     public static Future<Boolean> systemMail(String subject, String content) {
-        HtmlEmail email = new HtmlEmail();
-        try {
-            email.setCharset("UTF-8");
-            email.setSubject(subject);
-            email.addTo("wppurking@gmail.com");
-            email.setFrom("support@easyacceu.com", "EasyAcc");
-            email.setHtmlMsg(content);
-        } catch(EmailException e) {
-            Logger.warn("Email error: " + e.getMessage());
-        }
-        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
-        return Mail.send(email);
+//        HtmlEmail email = new HtmlEmail();
+//        try {
+//            email.setCharset("UTF-8");
+//            email.setSubject(subject);
+//            email.addTo("wppurking@gmail.com");
+//            email.setFrom("support@easyacceu.com", "EasyAcc");
+//            email.setHtmlMsg(content);
+//        } catch(EmailException e) {
+//            Logger.warn("Email error: " + e.getMessage());
+//        }
+//        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
+//        return Mail.send(email);
+        rollbar(subject, content);
+        return null;
+    }
+
+
+    public static void rollbar(String message, String context) {
+        String x = "{\"access_token\":\"380247fd2c4f4845ad511e3544b2e15e\"," +
+                "\"data\":{\"body\":{\"message\":{\"body\":\"" + message + "\"" +
+                "}},\"environment\":\"production\","
+                + "\"timestamp\": " + (System.currentTimeMillis() / 1000) + ","
+                + " \"platform\": \"linux\", \"language\": \"java\",\"framework\": \"play\", "
+                + "\"level\": \"warning\","
+                + "  \"request\": { \"url\": \"http://job.easya.cc\",\"method\": \"GET\","
+                + "   \"headers\": {\"Accept\": \"text/html\", \"Referer\": \"http://job.easya.cc/\"},   "
+                + "   \"params\": {\"controller\": \"project\",\"action\": \"index\"},      "
+                + "    \"GET\": {},\"query_string\": \"\",\"POST\": {},     "
+                + "     \"body\": \"" + context + "\",  "
+                + "     \"user_ip\": \"\" },  "
+
+                + "  \"server\": {\"host\": \"job.easya.cc\",  \"root\": \"/Users/\",\"branch\": \"master\", "
+                + "   \"code_version\": \"\","
+                + " \"sha\": \"\" } "
+                + "} }";
+        JSONObject post = HTTP.postJson("https://api.rollbar.com/api/1/item/", x);
     }
 
 

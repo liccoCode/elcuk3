@@ -4,6 +4,7 @@ import helper.LogUtils;
 import jobs.works.ListingReviewsWork;
 import models.Jobex;
 import models.market.Listing;
+import play.Logger;
 import play.jobs.Job;
 
 import java.util.List;
@@ -29,9 +30,15 @@ public class AmazonReviewCrawlJob extends Job {
 
         List<Listing> listings = Listing.latestNeedReviewListing(10);
         for(Listing lst : listings) {
-            new ListingReviewsWork(lst.listingId).now();
+            try {
+                //停止3000毫秒
+                Thread.sleep(3000);
+                new ListingReviewsWork(lst.listingId).now();
+            } catch(Exception e) {
+                Logger.warn("review crawl: %s", e.getMessage());
+            }
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonReviewCrawlJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "AmazonReviewCrawlJob")) {
             LogUtils.JOBLOG.info(String
                     .format("AmazonReviewCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

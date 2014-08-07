@@ -36,8 +36,12 @@ public class AmazonReviewCheckJob extends Job {
                 "isRemove=false AND createDate>=? ORDER BY updateAt ASC",
                 DateTime.now().minusDays(70).toDate()).fetch(20);
         for(AmazonListingReview review : reviews) {
+
             AmazonListingReview newReview = null;
             try {
+                //停止3000毫秒
+                Thread.sleep(3000);
+
                 JsonElement reviewElement = Crawl
                         .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
                 JsonObject reviewObj = reviewElement.getAsJsonObject();

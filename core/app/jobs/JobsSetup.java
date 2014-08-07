@@ -47,7 +47,10 @@ public class JobsSetup {
             //TODO 所有的 Job 全部转移到 Crontab 中, 通过页面给予生成 crontab 然后泵更新 crontab 配置文件
 
             // Order Deal 5 step
-            every(AmazonOrderDiscover.class, "1mn");
+
+            //ruby job 已执行
+            //every(AmazonOrderDiscover.class, "1mn");
+
             every(AmazonOrderItemDiscover.class, "30s");
             every(AmazonOrderUpdateJob.class, "1h");
             every(AmazonOrderFetchJob.class, "20mn");
@@ -63,10 +66,18 @@ public class JobsSetup {
             every(FeedbackCheckJob.class, "5mn");
 
             every(OrderMailCheck.class, "10mn");
-            every(AmazonFBACapaticyWatcherJob.class, "30mn");
-            every(AmazonFBAQtySyncJob.class, "5mn");
+
+            //ruby job 已执行
+            //every(AmazonFBACapaticyWatcherJob.class, "30mn");
+
+            //ruby job 已执行
+            //every(AmazonFBAQtySyncJob.class, "5mn");
+
             every(AmazonSellingSyncJob.class, "1h");
-            every(AmazonFBAInventoryReceivedJob.class, "20mn");
+
+            //ruby job 已执行
+            //every(AmazonFBAInventoryReceivedJob.class, "20mn");
+
             every(CheckerProductCheckJob.class, "1d");
             every(FAndRNotificationJob.class, "1h");
             every(AmazonFinanceCheckJob.class, "1mn");

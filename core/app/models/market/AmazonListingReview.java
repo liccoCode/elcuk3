@@ -249,6 +249,7 @@ public class AmazonListingReview extends GenericModel {
             this.isSelf = false;
             this.comment(String.format("这个 Review 对应的 Listing 非自建."));
         }
+        Logger.warn("AmazonListingReview %s save!", this.reviewId);
         return this.save();
     }
 
@@ -294,12 +295,16 @@ public class AmazonListingReview extends GenericModel {
 
         try {
             this.review = new String(this.review.getBytes(), "UTF-8");
+            this.title = new String(this.title.getBytes(), "UTF-8");
         } catch(Exception e) {
             Logger.warn("review UTF-8: %s", e.getMessage());
         }
 
+        DBUtils.execute("update AmazonListingReview set rating=" + this.rating
+                + ",lastRating=" + this.lastRating
+                + " where alrid='" + this.alrId + "'");
         // resolved 不做处理
-        return this.save();
+        return AmazonListingReview.findById(this.alrId);
     }
 
     private boolean isSelf() {
@@ -318,8 +323,14 @@ public class AmazonListingReview extends GenericModel {
      */
     public void checkMailAndTicket() {
         if(StringUtils.isBlank(this.alrId)) return;
-        if(AmazonListingReview.find("alrid=?", this.alrId).fetch().size() <= 0) {
+        AmazonListingReview dbreview = AmazonListingReview.find("alrid=?", this.alrId).first();
+        if(dbreview == null) {
             Logger.info("Review alrId is not exist!! %s", this.alrId);
+            return;
+        }
+
+        if(StringUtils.isNotBlank(dbreview.osTicketId)) {
+            Logger.info("dbReview OsTicket is exist! %s", dbreview.osTicketId);
             return;
         }
 
@@ -334,8 +345,16 @@ public class AmazonListingReview extends GenericModel {
                 Logger.info("Review OsTicket is exist!! %s", this.osTicketId);
                 return;
             }
+
+            long reviewcount = AmazonListingReview.count("alrid=?", this.alrId);
+            if(reviewcount != 1l) {
+                Logger.info("Review alrId count is not exist!! %s", this.alrId);
+                return;
+            }
             this.openTicket(null);
-            this.save();
+            DBUtils.execute("update AmazonListingReview set osTicketId=" + this.osTicketId
+                    + " where alrid='" + this.alrId + "'");
+//            this.save();
 //            Mails.listingReviewWarn(this);
 //            this.save();
         }
@@ -459,9 +478,10 @@ public class AmazonListingReview extends GenericModel {
 
         if(StringUtils.isBlank(subject)) {
             if(this.listing.market == M.AMAZON_DE) {
-                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen helfen?";
+                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen " +
+                        "helfen??";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
-                subject = "We would like to address your review!";
+                subject = "We would like to address your review!!";
             }
         }
 
@@ -474,6 +494,7 @@ public class AmazonListingReview extends GenericModel {
         } else {
             this.osTicketId = Jitbit.addTicket(this.orderr.email, name, subject, content, Jitbit.Category.REVIEW);
         }
+        LogUtils.JOBLOG.info(String.format("sendticket :%s, %s", this.alrId, this.osTicketId));
         return this.osTicketId;
     }
 
@@ -516,6 +537,7 @@ public class AmazonListingReview extends GenericModel {
         review.alrId = review.listingId.toUpperCase() + "_" + review.reviewId.toUpperCase();
         try {
             review.review = new String(review.review.getBytes(), "UTF-8");
+            review.title = new String(review.title.getBytes(), "UTF-8");
         } catch(Exception e) {
             Logger.warn("review UTF-8: %s", e.getMessage());
         }
