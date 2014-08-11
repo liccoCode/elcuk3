@@ -51,8 +51,8 @@ public class JobsSetup {
             //ruby job 已执行
             //every(AmazonOrderDiscover.class, "1mn");
 
-            every(AmazonOrderItemDiscover.class, "30s");
-            every(AmazonOrderUpdateJob.class, "1h");
+            //every(AmazonOrderItemDiscover.class, "30s");
+            //every(AmazonOrderUpdateJob.class, "1h");
             every(AmazonOrderFetchJob.class, "20mn");
             every(OrderInfoFetchJob.class, "1mn");
 
