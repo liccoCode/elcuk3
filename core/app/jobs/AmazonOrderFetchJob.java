@@ -69,7 +69,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
         Logger.info("AmazonOrderFetchJob step5 done!");
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonOrderFetchJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "AmazonOrderFetchJob")) {
             LogUtils.JOBLOG
                     .info(String.format("AmazonOrderFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
@@ -266,6 +266,12 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                         Selling.sid(amzOrderItem.getSKU().toUpperCase(), orderr.market, acc));
             }
             orderItem.product = Product.findByMerchantSKU(amzOrderItem.getSKU());
+            if(orderItem.selling == null) {
+                String likeSellingId = "%" + orderItem.product + "%|" + orderr.market.nickName() +
+                        "|" + acc.id;
+                orderItem.selling = Selling.find("sellingId like ?", likeSellingId).first();
+            }
+
             orderItem.quantity = amzOrderItem.getQuantity();
 
             // ItemPrice
