@@ -116,28 +116,28 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
 
             if(hour >= 0 && hour <= 4) {
                 /**
-                 * 如果是早上执行则改为昨天的22:00,避免执行时间不准确
+                 * 如果是早上执行则改为昨天的23:00,避免执行时间不准确
                  */
-                jobRequest.requestDate = DateTime.now().plusDays(-1).withHourOfDay(22).withMinuteOfHour(0)
+                jobRequest.requestDate = DateTime.now().plusDays(-1).withHourOfDay(23).withMinuteOfHour(0)
                         .withSecondOfMinute(0)
                         .toDate();
             } else if(hour > 18 && hour <= 24) {
                 /**
-                 * 如果是晚上执行则改为22:00,避免执行时间不准确
+                 * 如果是晚上执行则改为23:00,避免执行时间不准确
                  */
-                jobRequest.requestDate = DateTime.now().withHourOfDay(22).withMinuteOfHour(0).withSecondOfMinute(0)
+                jobRequest.requestDate = DateTime.now().withHourOfDay(23).withMinuteOfHour(0).withSecondOfMinute(0)
                         .toDate();
             } else if(hour >= 12 && hour <= 18) {
                 /**
-                 * 如果是下午执行则改为14:00,避免执行时间不准确
+                 * 如果是下午执行则改为15:00,避免执行时间不准确
                  */
-                jobRequest.requestDate = DateTime.now().withHourOfDay(14).withMinuteOfHour(0).withSecondOfMinute(0)
+                jobRequest.requestDate = DateTime.now().withHourOfDay(15).withMinuteOfHour(0).withSecondOfMinute(0)
                         .toDate();
             } else {
                 /**
-                 * 如果是早上执行则改为6:00,避免执行时间不准确
+                 * 如果是早上执行则改为7:00,避免执行时间不准确
                  */
-                jobRequest.requestDate = DateTime.now().withHourOfDay(6).withMinuteOfHour(0).withSecondOfMinute(0)
+                jobRequest.requestDate = DateTime.now().withHourOfDay(7).withMinuteOfHour(0).withSecondOfMinute(0)
                         .toDate();
             }
             jobRequest.save();
