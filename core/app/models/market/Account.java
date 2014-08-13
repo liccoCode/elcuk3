@@ -210,6 +210,7 @@ public class Account extends Model {
             case AMAZON_US:
             case AMAZON_IT:
             case AMAZON_FR:
+            case AMAZON_CA:
             case AMAZON_JP:
                 String body = "";
                 try {
@@ -305,6 +306,7 @@ public class Account extends Model {
      */
     public boolean loginAmazonSite(M market) {
         switch(this.type) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_FR:
@@ -389,6 +391,8 @@ public class Account extends Model {
      */
     public M.MID marketplaceId() {
         switch(this.type) {
+            case AMAZON_CA:
+                return M.MID.A2EUQ1WTGCTBG2;
             case AMAZON_UK:
                 return M.MID.A1F83G8C2ARO7P;
             case AMAZON_DE:
@@ -586,6 +590,7 @@ public class Account extends Model {
      */
     public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
         switch(market) {
+            case AMAZON_CA:
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:

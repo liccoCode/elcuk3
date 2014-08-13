@@ -317,7 +317,7 @@ public class SellingRecord extends GenericModel {
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
 
-                    LogUtils.JOBLOG.info("SellingRecordCheckJob:"+market.toString()+e.getMessage());
+                    LogUtils.JOBLOG.info("SellingRecordCheckJob:" + market.toString() + e.getMessage());
 
                     FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market,
                             Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
@@ -348,7 +348,7 @@ public class SellingRecord extends GenericModel {
                         records.add(record);
                     } catch(Exception e) {
 
-                        LogUtils.JOBLOG.info("SellingRecordCheckJob1:"+market.toString()+e.getMessage());
+                        LogUtils.JOBLOG.info("SellingRecordCheckJob1:" + market.toString() + e.getMessage());
 
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
                                 Webs.E(e));
@@ -442,6 +442,9 @@ public class SellingRecord extends GenericModel {
             } else if(rcd.market == M.AMAZON_ES) {
                 chart.series("PageView(es)").add(rcd.date, rcd.pageViews.floatValue());
                 chart.series("Session(es)").add(rcd.date, rcd.sessions.floatValue());
+            } else if(rcd.market == M.AMAZON_CA) {
+                chart.series("PageView(ca)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(ca)").add(rcd.date, rcd.sessions.floatValue());
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
@@ -474,6 +477,8 @@ public class SellingRecord extends GenericModel {
                 chart.series("TurnRatio(jp)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_ES)
                 chart.series("TurnRatio(es)").add(rcd.date, turnRatio);
+            else if(rcd.market == M.AMAZON_CA)
+                chart.series("TurnRatio(ca)").add(rcd.date, turnRatio);
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }

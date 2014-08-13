@@ -91,7 +91,7 @@ public class Products extends Controller {
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
 
             if(Validation.hasErrors())
-                        renderJSON(Webs.VJson(Validation.errors()));
+                renderJSON(Webs.VJson(Validation.errors()));
 
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.save();
@@ -229,6 +229,8 @@ public class Products extends Controller {
             ret = new Ret("https://catalog-mapper-jp.amazon.co.jp" + suffix);
         } else if(StringUtils.contains(market, "AMAZON_FR")) {
             ret = new Ret("https://catalog-mapper-fr.amazon.fr" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_CA")) {
+            ret = new Ret("https://catalog-mapper-ca.amazon.ca" + suffix);
         }
         renderJSON(ret);
     }

@@ -50,6 +50,7 @@ public class Webs {
     public static final NumberFormat NC_US = NumberFormat.getCurrencyInstance(Locale.US);
     public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
     public static final NumberFormat NC_JP = NumberFormat.getCurrencyInstance(Locale.JAPAN);
+    public static final NumberFormat NC_CA = NumberFormat.getNumberInstance(Locale.CANADA);
 
     /**
      * 保留小数点后面两位, 并且向上取整
@@ -129,7 +130,7 @@ public class Webs {
             email.setCharset("UTF-8");
             email.setSubject(subject);
 
-            for(String address:mailaddress) {
+            for(String address : mailaddress) {
                 email.addTo(address);
             }
 
@@ -263,6 +264,8 @@ public class Webs {
     public static Float amazonPriceCurrency(M market, String priceStr) {
         try {
             switch(market) {
+                case AMAZON_CA:
+                    return NC_CA.parse(priceStr).floatValue();
                 case AMAZON_US:
                     return NC_US.parse(priceStr).floatValue();
                 case AMAZON_UK:
@@ -293,6 +296,8 @@ public class Webs {
     public static String priceLocalCurrencyFormat(M market, Float price) {
         if(price == null) price = 0f;
         switch(market) {
+            case AMAZON_CA:
+                return NC_CA.format(price);
             case AMAZON_US:
                 return NC_US.format(price);
             case AMAZON_UK:

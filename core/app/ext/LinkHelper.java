@@ -20,6 +20,7 @@ public class LinkHelper extends JavaExtensions {
         String[] args = r.listingId.split("_");
         M market = M.val(args[1]);
         switch(market) {
+            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
@@ -36,6 +37,7 @@ public class LinkHelper extends JavaExtensions {
         if(f.orderr == null) return "#";
         String baseAmazon = "http://www.%s/gp/pdp/profile/%s";
         switch(f.market) {
+            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
@@ -63,6 +65,7 @@ public class LinkHelper extends JavaExtensions {
         //http://www.amazon.co.uk/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=B003TQ3NCY
         String baseAmazon = "http://www.%s/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=%s";
         switch(selling.market) {
+            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
@@ -86,6 +89,7 @@ public class LinkHelper extends JavaExtensions {
         //http://www.ebay.co.uk/itm/170724459305
         String baseEbay = "http://www.%s/itm/%s";
         switch(selling.market) {
+            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
@@ -111,6 +115,7 @@ public class LinkHelper extends JavaExtensions {
         //http://www.ebay.co.uk/itm/170724459305
         String baseEbay = "http://www.%s/itm/%s";
         switch(listing.market) {
+            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
@@ -139,6 +144,7 @@ public class LinkHelper extends JavaExtensions {
     public static String orderLink(Orderr orderr) {
         //https://sellercentral.amazon.co.uk/gp/orders-v2/details?orderID=203-5364157-2572327
         switch(orderr.market) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -157,6 +163,7 @@ public class LinkHelper extends JavaExtensions {
     public static String fbaLink(FBAShipment fba) {
         //https://sellercentral.amazon.de/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=FBA5LBGGC
         switch(fba.account.type) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
