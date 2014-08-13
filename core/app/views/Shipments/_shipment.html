@@ -1,4 +1,4 @@
-<form action="@{Shipments.update()}" method="post">
+<form action="@{Shipments.update()}" method="post" id="shipment_form">
 #{authenticityToken /}
   <table class="table table-condensed table-bordered">
     <tr>
@@ -28,9 +28,10 @@
       <th>预计到库时间</th>
       <td>
         <input type="date" name="ship.dates.planArrivDate" value="${ship.dates.planArrivDate.date()}">
-        #{if ship.dates.oldPlanArrivDate!=null}
-          <span class="add-on">比原预计交货日期${ship.dates.oldPlanArrivDate.date()}差异${(ship.dates.planArrivDate.getTime()-ship.dates.oldPlanArrivDate.getTime())/(24*60*60*1000)}天</span>
-        #{/if}
+      #{if ship.dates.oldPlanArrivDate!=null}
+        <span class="add-on">比原预计交货日期${ship.dates.oldPlanArrivDate.date()}
+          差异${(ship.dates.planArrivDate.getTime()-ship.dates.oldPlanArrivDate.getTime())/(24*60*60*1000)}天</span>
+      #{/if}
       </td>
     </tr>
 
@@ -38,10 +39,39 @@
       <th>Track No.</th>
       <td>
         <div class="input-append">
-          <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
-        #{if ship.internationExpress && ship.trackNo}
-          <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
-        #{/if}
+
+
+          <table class="table table-hover table-condensed table-bordered" id="trackno_table">
+          #{if ship.tracknolist==null || ship.tracknolist.size()<=0}
+            <tr>
+              <td class="span2">
+                <input type="text" class="input-medium" name="ship.tracknolist[${0}]" value="">
+              </td>
+            </tr>
+          #{/if}
+          #{else }
+
+              #{list items:ship.tracknolist, as:'trackno'}
+                <tr>
+                  <td class="span4">
+                    <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
+                      #{if ship.internationExpress && trackno}
+                        <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                      #{/if}
+                  </td>
+                  <td>
+                    <a class="btn" name='delete_trackno_row'>删除</a>
+                  </td>
+                </tr>
+              #{/list}
+          #{/else}
+          </table>
+          <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+             id="more_trackno_btn" data-table="trackno_table">
+            <i class="icon-plus"></i> More
+          </a>
+
+
         </div>
       </td>
       <th>国际快递商</th>

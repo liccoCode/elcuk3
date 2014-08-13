@@ -52,6 +52,13 @@ public class Shipments extends Controller {
         if(p == null)
             p = new ShipmentPost();
         shipments = p.query();
+
+        for(int i = 0; i < shipments.size(); i++) {
+            Shipment ship = shipments.get(i);
+            ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            shipments.set(i, ship);
+        }
+
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
     }
@@ -70,6 +77,7 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) {
             render("Shipments/blank.html", ship);
         }
+        ship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         Shipment shipment = new Shipment(ship).save();
         show(shipment.id);
     }
@@ -132,6 +140,7 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.endShipByComputer();
         List<Cooperator> cooperators = Cooperator.shippers();
+        ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         render(ship, cooperators);
     }
 
@@ -163,19 +172,23 @@ public class Shipments extends Controller {
         dbship.cooper = ship.cooper;
         dbship.whouse = ship.whouse;
         dbship.title = ship.title;
+
+        dbship.tracknolist = ship.tracknolist;
         dbship.trackNo = ship.trackNo;
         dbship.memo = ship.memo;
         dbship.dates.planBeginDate = ship.dates.planBeginDate;
         dbship.internationExpress = ship.internationExpress;
-
+        dbship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         checkAuthenticity();
         validation.valid(dbship);
         dbship.validate();
         String s = Validation.errors().toString();
         if(Validation.hasErrors()) {
+            dbship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
             renderArgs.put("ship", dbship);
             render("Shipments/show.html");
         }
+
         dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
         /**
          * 日期发生改变则记录旧的日期
