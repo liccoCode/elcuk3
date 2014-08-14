@@ -53,7 +53,7 @@ public class JobsSetup {
 
             //every(AmazonOrderItemDiscover.class, "30s");
             //every(AmazonOrderUpdateJob.class, "1h");
-            every(AmazonOrderFetchJob.class, "20mn");
+            //every(AmazonOrderFetchJob.class, "20mn");
             every(OrderInfoFetchJob.class, "1mn");
 
             // Amazon Review Job 的处理
