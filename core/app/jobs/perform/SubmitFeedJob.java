@@ -78,6 +78,7 @@ public class SubmitFeedJob extends BaseJob {
      */
     public static String chatSet(M.MID marketId) {
         switch(marketId.market()) {
+            case AMAZON_CA:
             case AMAZON_FR:
             case AMAZON_UK:
             case AMAZON_ES:

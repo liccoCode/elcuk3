@@ -22,6 +22,7 @@ public class LinkHelper extends JavaExtensions {
             return "#";
         }
         switch (s.market) {
+            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:

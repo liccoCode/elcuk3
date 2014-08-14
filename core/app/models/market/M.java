@@ -112,6 +112,17 @@ public enum M {
             return "日本";
         }
 
+    }, AMAZON_CA {
+        @Override
+        public String label() {
+            return "加拿大亚马逊";
+        }
+
+        @Override
+        public String countryName() {
+            return "加拿大";
+        }
+
     };
 
     public abstract String label();
@@ -150,7 +161,11 @@ public enum M {
         /**
          * JP
          */
-        A1VC38T7YXB528,;
+        A1VC38T7YXB528,
+        /**
+         * CA
+         */
+        A2EUQ1WTGCTBG2,;
 
         public M market() {
             switch(this) {
@@ -168,6 +183,8 @@ public enum M {
                     return AMAZON_ES;
                 case A1VC38T7YXB528:
                     return AMAZON_JP;
+                case A2EUQ1WTGCTBG2:
+                    return AMAZON_CA;
                 case EBAY_UK:
                 default:
                     return M.EBAY_UK;
@@ -198,6 +215,8 @@ public enum M {
                 return MID.ATVPDKIKX0DER;
             case AMAZON_JP:
                 return MID.A1VC38T7YXB528;
+            case AMAZON_CA:
+                return MID.A2EUQ1WTGCTBG2;
             case EBAY_UK:
             default:
                 return MID.EBAY_UK;
@@ -219,6 +238,8 @@ public enum M {
      */
     public String htmlCurrency() {
         switch(this) {
+            case AMAZON_CA:
+                return "CAD";
             case AMAZON_US:
                 return "$";
             case AMAZON_DE:
@@ -237,6 +258,8 @@ public enum M {
 
     public Currency currency() {
         switch(this) {
+            case AMAZON_CA:
+                return Currency.CAD;
             case AMAZON_US:
                 return Currency.USD;
             case AMAZON_DE:
@@ -255,6 +278,8 @@ public enum M {
 
     public String toString() {
         switch(this) {
+            case AMAZON_CA:
+                return "amazon.ca";
             case AMAZON_UK:
                 return "amazon.co.uk";
             case AMAZON_DE:
@@ -278,6 +303,8 @@ public enum M {
 
     public String nickName() {
         switch(this) {
+            case AMAZON_CA:
+                return "A_CA";
             case AMAZON_UK:
                 return "A_UK";
             case AMAZON_DE:
@@ -306,6 +333,7 @@ public enum M {
      */
     public String sellerCentralHomePage() {
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -349,6 +377,8 @@ public enum M {
                 "&openid.ns.pape=http://specs.openid.net/extensions/pape/1.0" +
                 "&openid.identity=http://specs.openid.net/auth/2.0/identifier_select";
         switch(this) {
+            case AMAZON_CA:
+                return String.format(baseUrl, this.toString(), "ca");
             case AMAZON_UK:
                 return String.format(baseUrl, this.toString(), "gb");
             case AMAZON_DE:
@@ -373,6 +403,7 @@ public enum M {
     public String amazonLikeLink() {
         //http://www.amazon.de/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -398,6 +429,7 @@ public enum M {
      */
     public String amazonWishList() {
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -415,6 +447,7 @@ public enum M {
 
     public String amazonNewWishList() {
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -433,6 +466,7 @@ public enum M {
 
     public String amazonAsinLink(String asin) {
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -457,6 +491,7 @@ public enum M {
     public String feedbackPage(int page) {
         //https://sellercentral.amazon.co.uk/gp/feedback-manager/view-all-feedback.html?ie=UTF8&sortType=sortByDate&pageSize=50&dateRange=&descendingOrder=1&currentPage=1
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -483,6 +518,7 @@ public enum M {
     public String changeRegion(String marketplaceID) {
         //https://sellercentral.amazon.de/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=A1PA6795UKMFR9
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -508,6 +544,7 @@ public enum M {
     public String orderDetail(String oid) {
         //https://sellercentral.amazon.co.uk/gp/orders-v2/details?orderID=203-5364157-2572327
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_US:
             case AMAZON_JP:
@@ -538,6 +575,7 @@ public enum M {
     public String feedbackLink() {
         //https://sellercentral.amazon.de/gp/orders-v2/remote-actions/action.html
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_US:
             case AMAZON_JP:
@@ -571,6 +609,7 @@ public enum M {
          * currentPage=0
          */
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -618,6 +657,7 @@ public enum M {
          * labelType:ItemLabel_A4_27
          */
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -643,6 +683,7 @@ public enum M {
     public String fbaCapacityPage() {
         //https://sellercentral.amazon.de/gp/ssof/knights/items-list.html/ref=ag_fbalist_cont_fbamnginv
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
@@ -668,6 +709,7 @@ public enum M {
     public String oneTransactionFees(String orderId) {
         //https://sellercentral.amazon.com/gp/payments-account/view-transactions.html?orderId=110-6815187-8483453&view=search&range=all
         switch(this) {
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_US:
             case AMAZON_JP:
@@ -748,6 +790,8 @@ public enum M {
      */
     public int timeZoneOffset() {
         switch(this) {
+            case AMAZON_CA:
+                return -16;
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
@@ -781,6 +825,10 @@ public enum M {
             msku = "80-qw1a56-be";
         }
         switch(sell.market) {
+            case AMAZON_CA:
+                return String
+                        .format("https://catalog-sc.amazon.ca/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                                msku, sell.asin);
             case AMAZON_ES:
             case AMAZON_DE:
                 return String
@@ -816,7 +864,10 @@ public enum M {
     public static M val(String str) {
         if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();
-        if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") ||
+        if(s.equals("cad") || s.equals("amazon_ca") || s.equals("amazon.ca") ||
+                s.equals("www.amazon.ca")) {
+            return AMAZON_CA;
+        } else if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") ||
                 s.equals("www.amazon.co.uk")) {
             return AMAZON_UK;
         } else if(s.equals("afr") || s.equals("amazon_fr") || s.equals("amazon.fr") ||
@@ -852,6 +903,8 @@ public enum M {
      */
     public String marketAndWhouseMapping() {
         switch(this) {
+            case AMAZON_CA:
+                return "FBA_CA";
             case AMAZON_DE:
                 return "FBA_DE";
             case AMAZON_US:

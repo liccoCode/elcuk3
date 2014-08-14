@@ -1,10 +1,9 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import helper.*;
 import helper.Currency;
-import helper.Dates;
-import helper.FLog;
-import helper.Webs;
 import models.ElcukConfig;
 import models.ElcukRecord;
 import models.User;
@@ -14,6 +13,7 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
 import models.product.Whouse;
+import models.view.dto.ProductDTO;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
@@ -298,7 +298,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     @Expose
     @Column
-    public String trackNo;
+    public String trackNo = "{}";
 
     /**
      * 国际快递商人
@@ -327,6 +327,17 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @Lob
     public String memo = " ";
+
+    /**
+     * 多个traceno
+     */
+    @Transient
+    public List<String> tracknolist = new ArrayList<String>();
+
+    public enum FLAG {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
+    }
 
     /**
      * Shipment 的检查
@@ -1084,7 +1095,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
         //确定仓库接收的运输单
-        List<Whouse> whs = Whouse.find("type=?",Whouse.T.FBA).fetch();
+        List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whs) {
             whouse.checkWhouseNewShipment(planedShipments);
         }
@@ -1177,6 +1188,46 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
         }
 
+    }
+
+
+    /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成 List
+     *
+     * @param flag
+     */
+    public void arryParamSetUP(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            /**
+             * 在转换成Json字符串之前需要对空字符串做一点处理
+             */
+            this.trackNo = this.fixNullStr(this.tracknolist).toString();
+        } else {
+            if(StringUtils.isNotBlank(this.trackNo)) {
+                if(!trackNo.contains("[")) {
+                    this.trackNo = "[\"" + this.trackNo + "\"]";
+                }
+                this.tracknolist = JSON.parseArray(this.trackNo, String.class);
+            }
+
+        }
+    }
+
+    /**
+     * 对空字符进行处理
+     *
+     * @return
+     */
+    private List<String> fixNullStr(List<String> target) {
+        Iterator<String> iterator = target.iterator();
+        while(iterator.hasNext()) {
+            String p = iterator.next();
+            if(null == p) {
+                iterator.remove();
+            }
+        }
+        return target;
     }
 
 }

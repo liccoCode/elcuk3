@@ -106,6 +106,7 @@ public class MetricSalesService {
                 else if(sell.account.type == M.AMAZON_UK) currency = Currency.GBP;
                 else if(sell.account.type == M.AMAZON_US) currency = Currency.USD;
                 else if(sell.account.type == M.AMAZON_JP) currency = Currency.JPY;
+                else if(sell.account.type == M.AMAZON_CA) currency = Currency.CAD;
                 sellingSales.put(sell.sellingId,
                         units * (sell.aps.salePrice == null ? 0 : currency.toUSD(sell.aps.salePrice)));
             }

@@ -195,7 +195,7 @@ public class MWSOrders {
                         item.order.market, acc
                 ));
             }
-            item.memo = item.memo+"getSellerSKU:"+amzItem.getSellerSKU();
+            item.memo = item.memo + "getSellerSKU:" + amzItem.getSellerSKU();
 
             item.id = String.format("%s_%s", orderId,
                     Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
@@ -280,11 +280,14 @@ public class MWSOrders {
                     case AMAZON_FR:
                         config.setServiceURL("https://mws.amazonservices.fr/Orders/2011-01-01");
                         break;
+                    case AMAZON_CA:
+                        config.setServiceURL("https://mws.amazonservices.ca/Orders/2011-01-01");
+                        break;
                     case AMAZON_IT:
                         config.setServiceURL("https://mws.amazonservices.it/Orders/2011-01-01");
                         break;
                     default:
-                        throw new UnsupportedOperationException("不支持的 FBA 地址"+acc.type);
+                        throw new UnsupportedOperationException("不支持的 FBA 地址" + acc.type);
                 }
                 client = new MarketplaceWebServiceOrdersClient(acc.accessKey, acc.token, "elcuk2",
                         "1.0",

@@ -16,6 +16,7 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Validation;
+import play.db.DB;
 import play.jobs.Job;
 import play.libs.IO;
 
@@ -62,7 +63,7 @@ public class FeedbackCrawlJob extends Job {
                 FeedbackCrawlJob.fetchAccountFeedback(acc, acc.type, 5);
             }
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"FeedbackCrawlJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "FeedbackCrawlJob")) {
             LogUtils.JOBLOG
                     .info(String.format("FeedbackCrawlJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
@@ -94,6 +95,13 @@ public class FeedbackCrawlJob extends Job {
         } catch(Exception e) {
             Logger.warn(String.format("Account %s Market %s fetch feedback have some error![%s]",
                     acc.username, market, e.getMessage()));
+        } finally {
+            //防止feedback重复发
+            try {
+                DB.getConnection().commit();
+            } catch(Exception e) {
+                Logger.warn("db connection [%s].", e.getMessage());
+            }
         }
     }
 
