@@ -1,5 +1,6 @@
 package models.market;
 
+import helper.DBUtils;
 import helper.Dates;
 import helper.GTs;
 import helper.Jitbit;
@@ -107,6 +108,8 @@ public class Feedback extends GenericModel {
          */
         if(this.score <= 3 && this.isSelfBuildListing()) {
             this.openTicket(null);
+            DBUtils.execute("update Feedback set osTicketId=" + this.osTicketId
+                    + " where orderId='" + this.orderId + "'");
             Mails.feedbackWarnning(this);
             this.save();
         }

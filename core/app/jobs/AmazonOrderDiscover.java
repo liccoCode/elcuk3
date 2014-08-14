@@ -52,7 +52,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 Logger.warn("Account %s is not fecth Order because of [%s]", acc.username, Webs.S(e));
             }
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AmazonOrderDiscover")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "AmazonOrderDiscover")) {
             LogUtils.JOBLOG
                     .info(String.format("AmazonOrderDiscover calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
@@ -63,6 +63,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         try {
             pst = DB.getConnection().prepareStatement(
                     "UPDATE Orderr SET state=?, shipLevel=?, paymentDate=?," +
+                            " createDate=?," +
                             " city=?, country=?, postalCode=?, market=?, " +
                             " phone=?, province=?, reciver=?, address=?" +
                             " WHERE orderId=?"
@@ -73,6 +74,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 pst.setString(i++, orderr.shipLevel);
                 pst.setTimestamp(i++,
                         orderr.paymentDate == null ? null : new Timestamp(orderr.paymentDate.getTime()));
+                pst.setTimestamp(i++,
+                        orderr.createDate == null ? null : new Timestamp(orderr.createDate.getTime()));
                 pst.setString(i++, orderr.city);
                 pst.setString(i++, orderr.country);
                 pst.setString(i++, orderr.postalCode);

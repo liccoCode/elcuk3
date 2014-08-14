@@ -45,8 +45,7 @@ public class OrderItemQuery {
         } else {
             sql.groupBy("oi.selling_sellingId");
         }
-        LogUtils.JOBLOG
-                .info("qty1:" + sql.toString());
+        LogUtils.JOBLOG.info("qty1:" + sql.toString()+ " ---------"+sql.getParams().toString());
         List<Map<String, Object>> rows = DBUtils.rows(conn, sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {
             saleMap.put(row.get("k").toString(), NumberUtils.toInt(row.get("qty").toString()));
