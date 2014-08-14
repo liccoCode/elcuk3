@@ -26,7 +26,10 @@
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
     </td>
     <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
-      <i class="icon-reorder"></i> ${ship.trackNo}
+      <i class="icon-reorder"></i>
+      #{list items:ship.tracknolist, as:'trackno'}
+        ${trackno+" "}
+      #{/list}
       <span class="badge badge-info">${ship.items.size()}</span>
     </td>
     <td>${ship.cooper?.name}</td>

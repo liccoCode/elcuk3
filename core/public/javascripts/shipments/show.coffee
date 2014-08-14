@@ -4,7 +4,7 @@ $ ->
     mask = $('#container')
     mask.mask('更新 Comment')
     $.post('/shipments/comment',
-    {id: $("input[name=shipid]").val(), cmt: $("#ship_memo").val().trim(), track: $("[name=ship\\.trackNo]").val()},
+      {id: $("input[name=shipid]").val(), cmt: $("#ship_memo").val().trim(), track: $("[name=ship\\.trackNo]").val()},
     (r) ->
       if r.flag is false
         alert(r.message)
@@ -79,3 +79,29 @@ $ ->
       targetTr.parents('tr').prev().find('td[data-toggle]').click()
       EF.scoll(targetTr)
       EF.colorAnimate(targetTr)
+
+
+  # trace_no新增一行
+  $("#shipment_form").on("click", "#more_trackno_btn",() ->
+    $btn = $(@)
+    $table = $("##{$btn.data("table")}")[0]
+    # 获取表格的行数
+    rowsCount = $table.rows.length
+    # 通过 js 克隆出一个新的行 由于表格的第一行是标题行，所以使用 表格的行数减去1得到最后一行
+    $tr = $("##{$btn.data("table")} tr:eq(#{rowsCount - 1})")[0]
+    $newRow = $tr.cloneNode(true)
+    # 修改 tr 元素内 textarea 的 name 属性
+    inputs = $newRow.getElementsByTagName("input")
+
+    setInputName($btn.attr("id"), rowsCount, inputs)
+    $table.appendChild($newRow)
+  ).on("click", "[name^='delete_trackno_row']", () ->
+    $btn = $(@)
+    $btn.parent("td").parent().remove()
+  )
+
+
+  # 根据点击按钮的不同判断text的名称
+  setInputName = (flag, rowsCount, inputs) ->
+    inputs[0].name = "ship.tracknolist[#{rowsCount - 1}]"
+    inputs[0].value = ""
