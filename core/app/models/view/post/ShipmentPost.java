@@ -118,8 +118,8 @@ public class ShipmentPost extends Post {
                 sbd.append(" AND SIZE(s.items)>").append(shipItemSize).append(" ");
             } else {
                 sbd.append(" AND (")
-                        .append("s.trackNo LIKE ?")
-                        .append(" OR it.unit.fba.shipmentId LIKE ?")
+                        .append(" s.trackNo LIKE ? ")
+                        .append(" OR s.id LIKE ?")
                         .append(" OR u.selling.sellingId LIKE ?")
                         .append(")");
                 for(int i = 0; i < 3; i++) params.add(word);

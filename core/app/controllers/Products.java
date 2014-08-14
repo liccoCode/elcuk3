@@ -234,6 +234,8 @@ public class Products extends Controller {
             ret = new Ret("https://catalog-mapper-jp.amazon.co.jp" + suffix);
         } else if(StringUtils.contains(market, "AMAZON_FR")) {
             ret = new Ret("https://catalog-mapper-fr.amazon.fr" + suffix);
+        } else if(StringUtils.contains(market, "AMAZON_CA")) {
+            ret = new Ret("https://catalog-mapper-ca.amazon.ca" + suffix);
         }
         renderJSON(ret);
     }
