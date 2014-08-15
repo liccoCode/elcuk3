@@ -1208,7 +1208,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 if(!trackNo.contains("[")) {
                     this.trackNo = "[\"" + this.trackNo + "\"]";
                 }
-                this.tracknolist = JSON.parseArray(this.trackNo, String.class);
+                try {
+                    this.tracknolist = JSON.parseArray(this.trackNo, String.class);
+                } catch(Exception e) {
+                    LogUtils.JOBLOG.info(this.trackNo+"--"+e.getMessage());
+                }
             }
 
         }
