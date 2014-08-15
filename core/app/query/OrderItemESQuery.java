@@ -172,21 +172,25 @@ public class OrderItemESQuery {
         JSONObject result = ES.search("elcuk2", "orderitem", search);
         Logger.info(result.toString());
         JSONObject facets = result.getJSONObject("facets");
-        JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
+        if(facets != null && facets.getJSONObject("units") != null) {
+            JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
+            Series.Line line = new Series.Line(market.label() + "销量");
+            for(Object o : entries) {
+                JSONObject entry = (JSONObject) o;
+                line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+            }
 
-        Series.Line line = new Series.Line(market.label() + "销量");
-        for(Object o : entries) {
-            JSONObject entry = (JSONObject) o;
-            line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+            DateTime datePointer = new DateTime(from);
+            while(datePointer.getMillis() <= to.getTime()) {
+                line.add(0f, Dates.date2JDate(from));
+                datePointer = datePointer.plusDays(1);
+            }
+            line.sort();
+            return line;
+        } else {
+            Series.Line line = new Series.Line(market.label() + "销量");
+            return line;
         }
-
-        DateTime datePointer = new DateTime(from);
-        while(datePointer.getMillis() <= to.getTime()) {
-            line.add(0f, Dates.date2JDate(from));
-            datePointer = datePointer.plusDays(1);
-        }
-        line.sort();
-        return line;
     }
 
     /**
