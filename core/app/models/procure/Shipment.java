@@ -1203,6 +1203,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
             this.trackNo = J.json(this.fixNullStr(this.tracknolist));
+            if(this.trackNo.equals("{}")) {
+                this.trackNo = null;
+            }
         } else {
             if(StringUtils.isNotBlank(this.trackNo)) {
                 if(!trackNo.contains("[")) {
@@ -1211,7 +1214,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 try {
                     this.tracknolist = JSON.parseArray(this.trackNo, String.class);
                 } catch(Exception e) {
-                    LogUtils.JOBLOG.info(this.trackNo+"--"+e.getMessage());
+                    LogUtils.JOBLOG.info(this.trackNo + "--" + e.getMessage());
                 }
             }
 
