@@ -352,7 +352,6 @@ public class Webs {
      * @return
      */
     public static <E extends Throwable> String E(E e) {
-        e.printStackTrace();
         if(Play.mode.isDev()) e.printStackTrace();
         return e.getMessage() + "|" + e.getClass().getSimpleName();
     }

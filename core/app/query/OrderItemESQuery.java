@@ -29,17 +29,22 @@ import java.util.Date;
 public class OrderItemESQuery {
 
     public Series.Line salesFade(String type, String val, M m, Date from, Date to) {
-        if("all".equals(val)) {
-            return this.allSalesAndUnits(m, from, to);
-        } else if(val.matches("^\\d{2}$")) {
-            return this.catSalesAndUnits(val, m, from, to);
-        } else if("sid".equals(type)) {
-            return this.mskuSalesAndUnits(val, m, from, to);
-        } else if("sku".equals(type)) {
-            return this.skuSalesAndUnits(val, m, from, to);
-        } else {
-            throw new FastRuntimeException("不支持的类型!");
+        try {
+            if("all".equals(val)) {
+                return this.allSalesAndUnits(m, from, to);
+            } else if(val.matches("^\\d{2}$")) {
+                return this.catSalesAndUnits(val, m, from, to);
+            } else if("sid".equals(type)) {
+                return this.mskuSalesAndUnits(val, m, from, to);
+            } else if("sku".equals(type)) {
+                return this.skuSalesAndUnits(val, m, from, to);
+            } else {
+                throw new FastRuntimeException("不支持的类型!");
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     /**
