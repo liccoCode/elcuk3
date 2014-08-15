@@ -1202,8 +1202,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             /**
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
-            this.trackNo = J.json(this.fixNullStr(this.tracknolist));
-            if(this.trackNo.equals("{}")) {
+            this.trackNo = this.listToStr(this.tracknolist);
+            if(this.trackNo.equals("{}") || this.trackNo.equals("[\"\"]")) {
                 this.trackNo = null;
             }
         } else {
@@ -1235,6 +1235,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         }
         return target;
+    }
+
+
+    /**
+     * 对空字符进行处理
+     *
+     * @return
+     */
+    private String listToStr(List<String> target) {
+        Iterator<String> iterator = target.iterator();
+        String str = "[";
+        while(iterator.hasNext()) {
+            String p = iterator.next();
+            if(null == p) {
+                iterator.remove();
+            }
+            String[] args = p.split(",");
+            for(int i = 0; i < args.length; i++) {
+                str = str + J.json(args[i].replace(" ", "")) + ",";
+            }
+        }
+        if(!str.equals("[")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        str = str + "]";
+        return str;
     }
 
 }
