@@ -15,6 +15,7 @@ import org.elasticsearch.search.facet.range.RangeFacetBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import play.Logger;
 import play.utils.FastRuntimeException;
 
 import java.util.Arrays;
@@ -167,8 +168,9 @@ public class OrderItemESQuery {
             search.query(QueryBuilders.queryString(val).defaultField(type));
         }
 
-        System.out.println(search.toString());
+        Logger.info(search.toString());
         JSONObject result = ES.search("elcuk2", "orderitem", search);
+        Logger.info(result.toString());
         JSONObject facets = result.getJSONObject("facets");
         JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
 
