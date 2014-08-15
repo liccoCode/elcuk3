@@ -1202,7 +1202,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             /**
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
-            this.trackNo = J.json(this.fixNullStr(this.tracknolist).toString());
+            this.trackNo = J.json(this.fixNullStr(this.tracknolist));
         } else {
             if(StringUtils.isNotBlank(this.trackNo)) {
                 if(!trackNo.contains("[")) {
