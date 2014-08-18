@@ -298,7 +298,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     @Expose
     @Column
-    public String trackNo = "{}";
+    public String trackNo = NULL;
 
     /**
      * 国际快递商人
