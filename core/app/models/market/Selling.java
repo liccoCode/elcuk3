@@ -4,9 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
-import jobs.driver.GJob;
-import jobs.perform.SubmitFeedJob;
-import models.User;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
 import models.product.Attach;
@@ -14,6 +11,7 @@ import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.http.NameValuePair;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -248,18 +246,17 @@ public class Selling extends GenericModel {
         }
     }
 
-    public Map<String, Object> submitJobParams(Feed feed) {
+    public List<NameValuePair> submitJobParams(Feed feed) {
         Validate.notNull(feed);
         Validate.notNull(this.account);
         Validate.notNull(this.market);
         Validate.notEmpty(this.sellingId);
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("account.id", this.account.id); // 使用哪一个账号
-        args.put("marketId", this.market.amid().name()); // 向哪一个市场
-        args.put("feed.id", feed.id); // 提交哪一个 Feed ?
-        args.put("selling.id", this.sellingId); // 作用与哪一个 Selling
-        args.put("user.id", User.current().id);
-        return args;
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("account.id", this.account.id.toString()));// 使用哪一个账号
+        params.add(new BasicNameValuePair("marketId", this.market.amid().name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("feed.id", feed.id.toString()));// 提交哪一个 Feed ?
+        params.add(new BasicNameValuePair("selling.id", this.sellingId)); // 作用与哪一个 Selling
+        return params;
     }
 
     public Feed deploy() {
@@ -270,9 +267,9 @@ public class Selling extends GenericModel {
                 .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(),
                         "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
-        Map<String, Object> args = this.submitJobParams(feed);
-        args.put("action", "update");
-        GJob.perform(SubmitFeedJob.class, args);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("action", "update"));
+        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
         return feed;
     }
 
@@ -299,7 +296,7 @@ public class Selling extends GenericModel {
         patchToListing();
         Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
                 this.aps.templateType, this.market.toString()), this);
-        GJob.perform(SubmitFeedJob.class, this.submitJobParams(feed));
+        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
         return this;
     }
 
@@ -544,6 +541,7 @@ public class Selling extends GenericModel {
 
     /**
      * 由 SellingId 判断 SKU
+     *
      * @return
      */
     public static String sidToSKU(String sid) {
