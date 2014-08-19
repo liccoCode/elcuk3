@@ -58,8 +58,8 @@ public class JobsSetup {
 
             // Amazon Review Job 的处理
             // TODO 还有两个未知的家伙:  ReviewPromise, ReviewMailCheckPromise
-            every(AmazonReviewCrawlJob.class, "1mn");
-            every(AmazonReviewCheckJob.class, "1mn");
+            //every(AmazonReviewCrawlJob.class, "1mn");
+            //every(AmazonReviewCheckJob.class, "1mn");
 
             // Feedback Job 处理
             every(FeedbackCrawlJob.class, "30mn");
