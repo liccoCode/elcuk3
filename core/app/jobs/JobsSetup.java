@@ -65,7 +65,7 @@ public class JobsSetup {
             every(FeedbackCrawlJob.class, "30mn");
             every(FeedbackCheckJob.class, "5mn");
 
-            every(OrderMailCheck.class, "10mn");
+            //every(OrderMailCheck.class, "10mn");
 
             //ruby job 已执行
             //every(AmazonFBACapaticyWatcherJob.class, "30mn");
