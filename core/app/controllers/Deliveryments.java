@@ -69,7 +69,7 @@ public class Deliveryments extends Controller {
     //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        String expressid = ",";
+        String expressid = ",,";
         for(ProcureUnit unit : dmt.units) {
             if(unit.shipType == Shipment.T.EXPRESS) {
                 expressid = expressid + unit.id + ",";

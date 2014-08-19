@@ -15,7 +15,6 @@ $ ->
     checkboxList = $('input[name="pids"]')
 
     expressid = $("input[name='expressid']").val()
-    alert expressid
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     if unitIds.length is 0
