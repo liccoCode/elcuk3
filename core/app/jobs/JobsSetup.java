@@ -80,7 +80,7 @@ public class JobsSetup {
 
             every(CheckerProductCheckJob.class, "1d");
             every(FAndRNotificationJob.class, "1h");
-            every(AmazonFinanceCheckJob.class, "1mn");
+            //every(AmazonFinanceCheckJob.class, "1mn");
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
