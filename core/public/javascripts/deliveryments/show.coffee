@@ -13,6 +13,8 @@ $ ->
     $('#box_number_modal').modal('hide')
   ).on('click', '#downloadFBAZIP',(e) ->
     checkboxList = $('input[name="pids"]')
+
+    expressid = $("input[name='expressid']").val()
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     if unitIds.length is 0
@@ -25,7 +27,10 @@ $ ->
       $table.removeChild($table.lastChild)
     # 使用选择的采购单 ID 生成新的 tr
     _.each(unitIds, (value) ->
-      $tr = parseDom1("<tr><td>#{value}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='1' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
+      if expressid.indexOf(','+value+',') > 0
+        $tr = parseDom1("<tr><td>#{value}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='1' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
+      else
+        $tr = parseDom1("<tr><td>#{value}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='1' maxlength='3'/><span class='add-on'>箱(不加后缀)</span></div></td></tr>")
       $table.appendChild($tr)
     )
     $('#box_number_modal').modal('show')

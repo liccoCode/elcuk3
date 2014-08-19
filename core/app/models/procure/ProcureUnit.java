@@ -1108,6 +1108,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             map.put("fba", this.fba);
             map.put("procureUnit", this);
             map.put("boxNumber", boxNumber);
+            if(this.shipType == Shipment.T.EXPRESS) {
+                map.put("isexpress", "1");
+            } else {
+                map.put("isexpress", "0");
+            }
 
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零

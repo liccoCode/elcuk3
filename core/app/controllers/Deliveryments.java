@@ -9,6 +9,7 @@ import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import models.product.Product;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
@@ -68,7 +69,13 @@ public class Deliveryments extends Controller {
     //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        render(dmt);
+        String expressid = ",";
+        for(ProcureUnit unit : dmt.units) {
+            if(unit.shipType == Shipment.T.EXPRESS) {
+                expressid = expressid + unit.id + ",";
+            }
+        }
+        render(dmt, expressid);
     }
 
     public static void update(Deliveryment dmt) {
