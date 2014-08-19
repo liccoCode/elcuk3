@@ -18,7 +18,8 @@
     <td width="2%">
     </td>
     <td width="49%">
-        #{render './fba.html', shipmentId: shipmentId, fba: fba, shipFrom: shipFrom, boxNumber: procureUnit.numberToStr(i)/}
+        #{render './fba.html', isexpress: isexpress,shipmentId: shipmentId, fba: fba, shipFrom: shipFrom,
+        boxNumber: procureUnit.numberToStr(i)/}
     </td>
   </tr>
     #{if !i_isLast }
