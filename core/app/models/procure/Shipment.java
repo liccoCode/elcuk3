@@ -1254,12 +1254,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         String str = "[";
         while(iterator.hasNext()) {
             String p = iterator.next();
-            if(null == p) {
+            if(null == p || p.trim().equals("")) {
                 iterator.remove();
-            }
-            String[] args = p.split(",");
-            for(int i = 0; i < args.length; i++) {
-                str = str + J.json(args[i].replace(" ", "")) + ",";
+            } else {
+                String[] args = p.split(",");
+                for(int i = 0; i < args.length; i++) {
+                    str = str + J.json(args[i].replace(" ", "")) + ",";
+                }
             }
         }
         if(!str.equals("[")) {
