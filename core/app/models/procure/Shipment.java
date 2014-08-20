@@ -90,8 +90,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.id = Shipment.id();
         this.dates.planBeginDate = planBeginDate;
         this.type = type;
-        this.calcuPlanArriveDate();
         this.whouse = whouse;
+        this.calcuPlanArriveDate();
         this.title = String.format("%s 去往 %s 在 %s", this.id, this.whouse.name(),
                 Dates.date2Date(this.dates.planBeginDate));
     }
@@ -361,13 +361,37 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
         int plusDay = 7;
-        if(type == T.EXPRESS) plusDay = 7;
-        else if(type == T.AIR) plusDay = 15;
-        else if(type == T.SEA) plusDay = 60;
+//        if(type == T.EXPRESS) plusDay = 7;
+//        else if(type == T.AIR) plusDay = 15;
+//        else if(type == T.SEA) plusDay = 60;
+        plusDay = shipDay();
+
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
         return true;
     }
+
+    /**
+     * 查询运输相关的天数
+     *
+     * @return
+     */
+    public int shipDay() {
+        String market = this.whouse.country.toLowerCase();
+        String name = String.format("%s_%s", market, this.type.name().toLowerCase());
+        int day = 7;
+        String sql = "select sum(val) as day From ElcukConfig "
+                + " where name like '%" + name + "%' ";
+        Map<String, Object> row = DBUtils.row(sql);
+        if(row != null && row.size() > 0) {
+            Object obj = row.get("day");
+            if(obj != null) {
+                day = Float.valueOf(obj.toString()).intValue();
+            }
+        }
+        return day;
+    }
+
 
     public List<ProcureUnit> multipleUnitValidate(List<Long> units) {
         List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
@@ -433,8 +457,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         this.id = Shipment.id();
         this.dates.planBeginDate = earlyPlanBeginDate;
-        this.calcuPlanArriveDate();
         this.whouse = firstProcureUnit.whouse;
+        this.calcuPlanArriveDate();
         this.creater = User.current();
         this.save();
         for(ProcureUnit unit : procureUnits) {

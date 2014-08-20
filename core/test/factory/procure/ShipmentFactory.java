@@ -24,10 +24,10 @@ public class ShipmentFactory extends ModelFactory<Shipment> {
         shipment.id = Shipment.id();
         shipment.type = Shipment.T.EXPRESS;
         shipment.dates.planBeginDate = now.minusDays(45).toDate();
+        shipment.whouse = FactoryBoy.lastOrCreate(Whouse.class);
         shipment.calcuPlanArriveDate();
         shipment.internationExpress = iExpress.DHL;
         shipment.trackNo = "this_is_trackNo";
-        shipment.whouse = FactoryBoy.lastOrCreate(Whouse.class);
         shipment.cooper = FactoryBoy.lastOrCreate(Cooperator.class);
         shipment.dates.beginDate = shipment.dates.planBeginDate;
         shipment.dates.atPortDate = now.minusDays(15).toDate();
