@@ -842,12 +842,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Logger.warn("Shipment %s do not have trackNo.", this.id);
             return "";
         }
-        Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(this.trackNo));
-        String html = this.internationExpress.fetchStateHTML(this.trackNo);
+
+        this.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+        if(this.tracknolist == null || this.tracknolist.size() <= 0) return "";
+        String onetrackno = this.tracknolist.get(0);
+        if(StringUtils.isBlank(onetrackno)) return "";
+
+        Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(onetrackno));
+        String html = this.internationExpress.fetchStateHTML(onetrackno);
         try {
-            this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
+            this.iExpressHTML = this.internationExpress.parseExpress(html, onetrackno);
         } catch(Exception e) {
-            FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo,
+            FLog.fileLog(String.format("%s.%s.%s.html", this.id, onetrackno,
                     this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
             throw new FastRuntimeException(Webs.S(e));
         }
