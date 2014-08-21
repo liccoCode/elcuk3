@@ -74,6 +74,20 @@ public class Sellings extends Controller {
         renderJSON(J.json(sids));
     }
 
+
+    /**
+     * 加载指定 Sid 下的所有的 SellingId
+     *
+     * @param sid
+     */
+    public static void sameSidSellings(String sid) {
+        List<Selling> sellings = Selling
+                .find("sellingId like '"+sid+"%'").fetch();
+        List<String> sids = new ArrayList<String>();
+        for(Selling s : sellings) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
+    }
+
     /**
      * 加载 Techical, SearchTerms, ProductDesc 三块信息的 JSON 格式给前台
      */
