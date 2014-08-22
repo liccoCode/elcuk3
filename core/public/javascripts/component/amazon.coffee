@@ -10,7 +10,7 @@ $ ->
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
-  Invalid_Characters = new Array('，', '。', '`', '~', '！', '（', '）', '——', '—', '、', '；', '：', '‘', '’', '“', '”', '《', '》', '？', '【', '】')
+  Invalid_Characters = ['，', '。', '`', '~', '！', '（', '）', '——', '—', '、', '；', '：', '‘', '’', '“', '”', '《', '》', '？', '【', '】']
   checkInvalidCharacters = (obj, e) ->
     str = obj.value
     _.each(Invalid_Characters, (value) ->
