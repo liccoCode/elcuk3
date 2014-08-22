@@ -10,6 +10,13 @@ $ ->
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
+  Invalid_Characters = new Array('，', '。', '`', '~', '！', '（', '）', '——', '—', '、', '；', '：', '‘', '’', '“', '”', '《', '》', '？', '【', '】')
+  checkInvalidCharacters = (obj, e) ->
+    str = obj.value
+    _.each(Invalid_Characters, (value) ->
+      noty({text: "#{obj.id} 使用了 Amazon 不允许使用的字符[#{value}] 请将输入法切换到英文状态重新输入此字符", layout: 'top', type: 'error', timeout: false, closeWith: ['click']}) if str.indexOf(value) >= 0
+    )
+
   # 预览 Desc 的方法
   previewBtn = (e) ->
     invalidTag = false
@@ -44,6 +51,8 @@ $ ->
   ).on('click', '.btn:contains(Preview)', (e) ->
     previewBtn.call(@, e)
     false
+  ).on('blur', "#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc", (e) ->
+    checkInvalidCharacters(@, e)
   )
 
   $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
