@@ -19,7 +19,6 @@ import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
-import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -28,7 +27,6 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -280,7 +278,7 @@ public class Selling extends GenericModel {
      *
      * @return
      */
-    public Selling buildFromProduct() throws SQLException {
+    public Selling buildFromProduct() {
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
@@ -298,7 +296,6 @@ public class Selling extends GenericModel {
         patchToListing();
         Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
                 this.aps.templateType, this.market.toString()), this);
-        DB.getConnection().commit();//这里存在一个 DB 的事务问题导致 Rockend 接收到请求后但是 Feed 还插入到 DB, 所以手动提交事务
         HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
         return this;
     }

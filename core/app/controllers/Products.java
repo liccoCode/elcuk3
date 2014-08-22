@@ -19,8 +19,10 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -121,7 +123,7 @@ public class Products extends Controller {
             checkAuthenticity();
             s.buildFromProduct();
             renderJSON(new Ret(true, s.sellingId));
-        } catch(Exception e) {
+        } catch(FastRuntimeException e) {
             renderJSON(new Ret(e.getMessage()));
         }
     }
