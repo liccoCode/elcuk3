@@ -74,16 +74,38 @@ public class Sellings extends Controller {
         renderJSON(J.json(sids));
     }
 
+
+    /**
+     * 加载指定 Sid 下的所有的 SellingId
+     *
+     * @param sid
+     */
+    public static void sameSidSellings(String sid) {
+        List<Selling> sellings = Selling
+                .find("sellingId like '"+sid+"%'").fetch();
+        List<String> sids = new ArrayList<String>();
+        for(Selling s : sellings) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
+    }
+
     /**
      * 加载 Techical, SearchTerms, ProductDesc 三块信息的 JSON 格式给前台
      */
     public static void tsp(String sid) {
         Selling s = Selling.findById(sid);// 利用 hibernate 二级缓存, Play 的 JavaBean 填充的查询语句含有 limit 语句
+        if (s==null){
+            flash.error("找不到selling:"+sid);
+            renderJSON(new Ret("找不到selling:"+sid));
+        }
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
         renderJSON(J.json(GTs.MapBuilder
                 .map("t", s.aps.keyFeturess)
                 .put("s", s.aps.searchTermss)
                 .put("p", Arrays.asList(s.aps.productDesc))
+                .put("man",Arrays.asList(s.aps.manufacturer))
+                .put("brand",Arrays.asList(s.aps.brand))
+                .put("price",Arrays.asList(s.aps.standerPrice.toString()))
+                .put("type",Arrays.asList(s.aps.itemType))
                 .build()));
     }
 

@@ -55,9 +55,7 @@ $ ->
   ).on('change', 'input',(e) ->
     #  自动补全的 sid 的功能条
     $input = $(@)
-    if $input.data('sids') is undefined
-      $input.data('sids', $input.data('source'))
-    return false if !(@value in $input.data('sids'))
+    return false if @value.length<10
 
     LoadMask.mask()
     $.ajax('/sellings/tsp', {type: 'GET', data: {sid: @value}, dataType: 'json'})
@@ -74,6 +72,12 @@ $ ->
       return false
     # product Desc
     $("[name='s.aps.productDesc']").val(json['p'][0]).blur()
+
+    $("[name='s.aps.manufacturer']").val(json['man'][0]).blur()
+    $("[name='s.aps.brand']").val(json['brand'][0]).blur()
+    $("[name='s.aps.standerPrice']").val(json['price'][0]).blur()
+    $("[name='s.aps.itemType']").val(json['type'][0]).blur()
+
     # technical
     tech = json['t']
     $("[name*='s.aps.keyFeturess']").each((i) ->
@@ -163,3 +167,13 @@ $ ->
   $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})
   $('#state').popover({trigger: 'focus', content: 'NEW 状态 Selling 还没有同步回 ASIN, SELLING 状态为正常销售'})
   $('#itemType').popover({trigger: 'focus', content: '此属性字段为 UK 的 Games 模板独有，请填写 RBN 所对应的类别名称'})
+
+  $sellingId = $("input[name='selling.sellingId']")
+  $sellingId.typeahead({
+    source: (query, process) ->
+      sid = $sellingId.val()
+      $.get('/sellings/sameSidSellings', {sid: sid})
+      .done((c) ->
+          process(c)
+        )
+  })
