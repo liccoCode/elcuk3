@@ -28,6 +28,8 @@ import play.mvc.With;
 
 import java.util.*;
 
+import org.joda.time.DateTime;
+
 import static play.modules.pdf.PDF.renderPDF;
 
 /**
@@ -451,6 +453,22 @@ public class Shipments extends Controller {
         Map<String, String> dates = new HashMap<String, String>();
         dates.put("begin", Dates.date2Date(shipment.dates.planBeginDate));
         dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
+        renderJSON(dates);
+    }
+
+
+    public static void planArriveDate(String shipType, String planShipDate, String warehouseid) {
+        System.out.println("1"+shipType);
+        System.out.println("2"+planShipDate);
+        System.out.println("3"+warehouseid);
+
+        Shipment shipment = new Shipment();
+        shipment.type = Shipment.T.valueOf(shipType);
+        shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));
+        int day = shipment.shipDay();
+        DateTime arrivedate = Dates.cn(planShipDate).plusDays(day);
+        Map<String, String> dates = new HashMap<String, String>();
+        dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
     }
 
