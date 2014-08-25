@@ -345,7 +345,8 @@ public class Selling extends GenericModel {
             } else {
                 Date expireTime = Cache.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE + ".time", Date.class);
                 long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
-                Cache.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, dtos, diffSecond + "s");
+
+                Cache.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, J.json(dtos), diffSecond + "s");
             }
         }
         return this.save();
