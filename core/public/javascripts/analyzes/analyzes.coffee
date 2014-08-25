@@ -83,6 +83,10 @@ $ ->
      $td.parents('table').find('tr').removeClass('selected')
      $td.parents('tr').addClass('selected')
 
+     _.each($('#a_units').highcharts().series, (serie) ->
+      serie.hide() if serie.name != '销量 汇总'
+     )
+
    #列排序事件
   ).on('click', 'th[orderby]', (e) ->
       $td = $(@)
@@ -231,6 +235,7 @@ $ ->
 
     head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
     $("#a_units").trigger("ajaxFresh",[head,"Units",{},'没有数据, 无法绘制曲线...'])
+
 
   # 转换率的曲线
   ajaxTurnOverLine = ->
