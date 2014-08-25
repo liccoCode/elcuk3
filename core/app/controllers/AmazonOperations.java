@@ -47,8 +47,25 @@ public class AmazonOperations extends Controller {
 
     public static void reviewTable(String asin, String m) {
         M market = M.val(m);
-        Listing lst = Listing.findById(Listing.lid(asin, market));
+        String lid = Listing.lid(asin, market);
+        Listing lst = Listing.findById(lid);
         List<F.T2<Long, Integer>> rows = lst.reviewMonthTable();
+
+        //不存在,则重新抓取
+        if(!Listing.exist(lid)) {
+            // 如果不存在, 先去抓取 Listing 然后再抓取 Review
+            lst = Listing.crawl(asin, market);
+            if(lst != null) {
+                lst.save();
+                await(new ListingReviewsWork(lid).now());
+                rows = lst.reviewMonthTable();
+            }
+        } else {
+            if(rows.size() <= 0) {
+                await(new ListingReviewsWork(lid).now());
+                rows = lst.reviewMonthTable();
+            }
+        }
         render(rows);
     }
 
@@ -69,8 +86,10 @@ public class AmazonOperations extends Controller {
             if(!Listing.exist(lid)) {
                 // 如果不存在, 先去抓取 Listing 然后再抓取 Review
                 Listing lst = Listing.crawl(asin, market);
-                if(lst != null) lst.save();
-                else
+                if(lst != null) {
+                    lst.save();
+                    await(new ListingReviewsWork(lid).now());
+                } else
                     renderJSON(new Ret(false, "Amazon 上 Listing 不存在或者已经被删除."));
             } else {
                 await(new ListingReviewsWork(lid).now());

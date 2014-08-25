@@ -54,7 +54,7 @@ public class JobsSetup {
             //every(AmazonOrderItemDiscover.class, "30s");
             //every(AmazonOrderUpdateJob.class, "1h");
             //every(AmazonOrderFetchJob.class, "20mn");
-            every(OrderInfoFetchJob.class, "1mn");
+            //every(OrderInfoFetchJob.class, "1mn");
 
             // Amazon Review Job 的处理
             // TODO 还有两个未知的家伙:  ReviewPromise, ReviewMailCheckPromise
@@ -65,7 +65,7 @@ public class JobsSetup {
             every(FeedbackCrawlJob.class, "30mn");
             every(FeedbackCheckJob.class, "5mn");
 
-            every(OrderMailCheck.class, "10mn");
+            //every(OrderMailCheck.class, "10mn");
 
             //ruby job 已执行
             //every(AmazonFBACapaticyWatcherJob.class, "30mn");
@@ -79,8 +79,8 @@ public class JobsSetup {
             //every(AmazonFBAInventoryReceivedJob.class, "20mn");
 
             every(CheckerProductCheckJob.class, "1d");
-            every(FAndRNotificationJob.class, "1h");
-            every(AmazonFinanceCheckJob.class, "1mn");
+            //every(FAndRNotificationJob.class, "1h");
+            //every(AmazonFinanceCheckJob.class, "1mn");
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
