@@ -3,6 +3,7 @@ package models.view.post;
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.Dates;
+import helper.HTTP;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.M;
 import models.procure.ProcureUnit;
@@ -75,7 +76,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
         // 用于提示后台正在运行计算
         if(dtos == null) {
-            new SellingSaleAnalyzeJob().now();
+            HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
         return dtos;
