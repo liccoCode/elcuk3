@@ -139,6 +139,8 @@ public class OrderItemESQuery {
      * @return
      */
     private Series.Line base(String val, String type, M market, Date from, Date to) {
+
+
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
         if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");

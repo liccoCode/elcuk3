@@ -40,22 +40,22 @@ public class SellingSaleAnalyzeJob extends Job {
 
     @Override
     public void doJob() {
-        if(isRnning()) return;
-        /**
-         * 1. 北京时间最近 1 周
-         * 2. 两种类型 sid/sku
-         */
-        // 清理掉原来的
-        Cache.delete(AnalyzeDTO_SID_CACHE);
-        Cache.delete(AnalyzeDTO_SKU_CACHE);
-
-        long begin = System.currentTimeMillis();
-        analyzes("sid");
-        Logger.info("SellingSaleAnalyzeJob calculate Sellings.... [%sms]", System.currentTimeMillis() - begin);
-
-        begin = System.currentTimeMillis();
-        analyzes("sku");
-        Logger.info("SellingSaleAnalyzeJob calculate SKU.... [%sms]", System.currentTimeMillis() - begin);
+//        if(isRnning()) return;
+//        /**
+//         * 1. 北京时间最近 1 周
+//         * 2. 两种类型 sid/sku
+//         */
+//        // 清理掉原来的
+//        Cache.delete(AnalyzeDTO_SID_CACHE);
+//        Cache.delete(AnalyzeDTO_SKU_CACHE);
+//
+//        long begin = System.currentTimeMillis();
+//        analyzes("sid");
+//        Logger.info("SellingSaleAnalyzeJob calculate Sellings.... [%sms]", System.currentTimeMillis() - begin);
+//
+//        begin = System.currentTimeMillis();
+//        analyzes("sku");
+//        Logger.info("SellingSaleAnalyzeJob calculate SKU.... [%sms]", System.currentTimeMillis() - begin);
     }
 
     /**
@@ -78,7 +78,12 @@ public class SellingSaleAnalyzeJob extends Job {
 
         String cacke_key = "sid".equals(type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-        List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
+
+        List<AnalyzeDTO> dtos = null;
+        String cache_str = Caches.get(cacke_key);
+        if(!StringUtils.isBlank(cache_str)) {
+            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
+        }
         if(dtos != null) return dtos;
 
         synchronized(AnalyzeDTO.class) {

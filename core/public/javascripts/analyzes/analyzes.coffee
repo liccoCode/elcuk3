@@ -83,10 +83,6 @@ $ ->
      $td.parents('table').find('tr').removeClass('selected')
      $td.parents('tr').addClass('selected')
 
-     _.each($('#a_units').highcharts().series, (serie) ->
-      serie.hide() if serie.name != '销量 汇总'
-     )
-
    #列排序事件
   ).on('click', 'th[orderby]', (e) ->
       $td = $(@)
