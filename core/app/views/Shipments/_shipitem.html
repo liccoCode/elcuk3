@@ -56,7 +56,8 @@
       #{/if}
     <td>${itm.id}</td>
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
-    <td><a href="@{Sellings.selling(itm.unit.sid)}">${itm.unit.sid}</a></td>
+    <td><a id="unitbutton">${itm.unit.sid}</a></td>
+
       #{if useCheckbox}
           #{if itm.unit.fba}
             <td>
