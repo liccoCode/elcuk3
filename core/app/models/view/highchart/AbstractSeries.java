@@ -54,6 +54,11 @@ public abstract class AbstractSeries implements Serializable {
      */
     public Marker marker;
 
+    /**
+     * 是否可见
+     */
+    public boolean visible = true;
+
     public <T extends AbstractSeries> T add(Date date, Float y) {
         return add(y, date);
     }

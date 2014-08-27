@@ -5,6 +5,7 @@ import models.product.Product;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
+import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import query.OrderItemESQuery;
@@ -187,10 +188,22 @@ public class OrderItem extends GenericModel {
                 }
             });
             highChart.series(highChart.sumSeries("销量"));
+            System.out.println("aaaaaaaaaaaaaaaaaaaaaa" + type);
+            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all")) {
+                for(int i = 0; i < highChart.series.size(); i++) {
+                    AbstractSeries serie = highChart.series.get(i);
+                    if(serie.name.indexOf("汇总") == -1) {
+                        serie.visible = false;
+                        highChart.series.set(i, serie);
+                    }
+                }
+            }
+
             Cache.add(cacked_key, highChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);
     }
+
 
     public static HighChart ajaxHighChartMovinAvg(final String val, final String type, M m, Date from,
                                                   Date to) {

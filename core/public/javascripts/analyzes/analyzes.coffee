@@ -87,6 +87,8 @@ $ ->
       serie.hide() if serie.name != '销量 汇总'
      )
 
+     $('#a_units').highcharts().redraw()
+
    #列排序事件
   ).on('click', 'th[orderby]', (e) ->
       $td = $(@)
