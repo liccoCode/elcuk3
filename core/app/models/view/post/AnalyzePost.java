@@ -73,9 +73,14 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public List<AnalyzeDTO> analyzes() {
         String cacke_key = "sid".equals(this.type) ?
                 SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE : SellingSaleAnalyzeJob.AnalyzeDTO_SKU_CACHE;
-        List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
+
+        List<AnalyzeDTO> dtos = null;
+        String cache_str = Caches.get(cacke_key);
+        if(!StringUtils.isBlank(cache_str)) {
+            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
+        }
         // 用于提示后台正在运行计算
-        if(dtos == null) {
+        if(StringUtils.isBlank(cache_str) || dtos == null) {
             HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
