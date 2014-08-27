@@ -40,6 +40,19 @@ $ ->
     if planArrivDate.val() and planShipDate.val()
       planArrivDate.next().text("#{(new Date(planArrivDate.val()) - new Date(planShipDate.val())) / (24 * 3600 * 1000)} 天")
 
+  $("[name='unit.attrs.planShipDate']").change () ->
+    shipType = $("[name='unit.shipType']:checked").val()
+    if shipType != 'EXPRESS'
+     return
+    planShipDate = $("[name='unit.attrs.planShipDate']").val()
+    warehouseid = $("[name='unit.whouse.id']").val()
+    $.get('/shipments/planArriveDate', {planShipDate: planShipDate, shipType: shipType,warehouseid})
+      .done((r) ->
+        $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
+      )
+
+
+
   # Ajax 加载 Shipment
   $('#new_procureunit,#unitEditForm,#update_form').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
     whouseId = $("[name='unit.whouse.id']").val()
@@ -56,6 +69,18 @@ $ ->
           shipment.html(html)
           LoadMask.unmask()
         )
+
+    if shipType != 'EXPRESS'
+      return
+    planShipDate = $("[name='unit.attrs.planShipDate']").val()
+    if planShipDate == ''
+      return
+    warehouseid = $("[name='unit.whouse.id']").val()
+    $.get('/shipments/planArriveDate', {planShipDate: planShipDate, shipType: shipType,warehouseid})
+      .done((r) ->
+        $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
+      )
+
   )
 
   $('#shipments').on('change', '[name=shipmentId]', (e) ->

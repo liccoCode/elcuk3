@@ -1,5 +1,7 @@
 package controllers;
 
+import com.alibaba.fastjson.JSON;
+import helper.Caches;
 import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.procure.Deliveryment;
@@ -139,7 +141,7 @@ public class Excels extends Controller {
         List<Profit> profits = new ArrayList<Profit>();
         String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-        List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
+        List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
         if(dtos == null) {
             renderText("Analyze后台事务正在执行中,请稍候...");
         }

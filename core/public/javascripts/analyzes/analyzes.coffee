@@ -232,6 +232,7 @@ $ ->
     head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
     $("#a_units").trigger("ajaxFresh",[head,"Units",{},'没有数据, 无法绘制曲线...'])
 
+
   # 转换率的曲线
   ajaxTurnOverLine = ->
     #无数据提示
