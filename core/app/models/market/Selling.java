@@ -271,7 +271,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
-        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
+        HTTP.post("http://rock.easya.cc:4567/submit_feed", params);
         return feed;
     }
 
