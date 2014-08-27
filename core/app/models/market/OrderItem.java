@@ -188,7 +188,7 @@ public class OrderItem extends GenericModel {
                 }
             });
             highChart.series(highChart.sumSeries("销量"));
-            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all")) {
+            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length()>=4) {
                 for(int i = 0; i < highChart.series.size(); i++) {
                     AbstractSeries serie = highChart.series.get(i);
                     if(serie.name.indexOf("汇总") == -1) {
