@@ -101,7 +101,30 @@ $ ->
   )
 
 
+  # trace_no新增一行
+  $("#adjust_shipitems").on("click","#unitbutton",() ->
+    $td =$(@)
+    sid = $td.text().trim()
+    paintProcureUnitInTimeline('sid', sid)
+  )
+
   # 根据点击按钮的不同判断text的名称
   setInputName = (flag, rowsCount, inputs) ->
     inputs[0].name = "ship.tracknolist[#{rowsCount - 1}]"
     inputs[0].value = ""
+
+
+  paintProcureUnitInTimeline = (type, val)->
+    LoadMask.mask()
+    $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
+    (r) ->
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          eventSource = $('#tl').data('source')
+          eventSource.clear()
+          eventSource.loadJSON(r, '/')
+      finally
+        LoadMask.unmask()
+    )
