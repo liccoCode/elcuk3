@@ -1,5 +1,7 @@
 package models.view.post;
 
+import com.alibaba.fastjson.JSON;
+import helper.Caches;
 import helper.Dates;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.M;
@@ -10,7 +12,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -71,7 +72,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public List<AnalyzeDTO> analyzes() {
         String cacke_key = "sid".equals(this.type) ?
                 SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE : SellingSaleAnalyzeJob.AnalyzeDTO_SKU_CACHE;
-        List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
+        List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
         // 用于提示后台正在运行计算
         if(dtos == null) {
             new SellingSaleAnalyzeJob().now();
