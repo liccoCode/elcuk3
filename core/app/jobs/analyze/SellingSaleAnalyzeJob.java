@@ -40,22 +40,22 @@ public class SellingSaleAnalyzeJob extends Job {
 
     @Override
     public void doJob() {
-        if(isRnning()) return;
-        /**
-         * 1. 北京时间最近 1 周
-         * 2. 两种类型 sid/sku
-         */
-        // 清理掉原来的
-        Cache.delete(AnalyzeDTO_SID_CACHE);
-        Cache.delete(AnalyzeDTO_SKU_CACHE);
-
-        long begin = System.currentTimeMillis();
-        analyzes("sid");
-        Logger.info("SellingSaleAnalyzeJob calculate Sellings.... [%sms]", System.currentTimeMillis() - begin);
-
-        begin = System.currentTimeMillis();
-        analyzes("sku");
-        Logger.info("SellingSaleAnalyzeJob calculate SKU.... [%sms]", System.currentTimeMillis() - begin);
+//        if(isRnning()) return;
+//        /**
+//         * 1. 北京时间最近 1 周
+//         * 2. 两种类型 sid/sku
+//         */
+//        // 清理掉原来的
+//        Cache.delete(AnalyzeDTO_SID_CACHE);
+//        Cache.delete(AnalyzeDTO_SKU_CACHE);
+//
+//        long begin = System.currentTimeMillis();
+//        analyzes("sid");
+//        Logger.info("SellingSaleAnalyzeJob calculate Sellings.... [%sms]", System.currentTimeMillis() - begin);
+//
+//        begin = System.currentTimeMillis();
+//        analyzes("sku");
+//        Logger.info("SellingSaleAnalyzeJob calculate SKU.... [%sms]", System.currentTimeMillis() - begin);
     }
 
     /**
