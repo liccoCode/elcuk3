@@ -170,9 +170,15 @@ public class ProfitPost extends Post<Profit> {
         }
         for(M m : marray) {
             Profit mp = initPorfit();
-            mp.sku = m.label() + "合计";
+            if(m == null || m.label() == null) {
+                mp.sku = "合计";
+                mp.memo = "合计";
+            } else {
+                mp.sku = m.label() + "合计";
+                mp.memo = m.label() + "合计";
+            }
+
             mp.market = m;
-            mp.memo = m.label() + "合计";
             for(Profit p : profits) {
                 if(p.market == m) {
                     mp = addProfit(mp, p);
