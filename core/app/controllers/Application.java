@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Dates;
+import helper.HTTP;
 import helper.J;
 import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
@@ -110,7 +111,7 @@ public class Application extends Controller {
     }
 
     public static void aaa() {
-        new SellingSaleAnalyzeJob().now();
+        HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
         renderText("成功执行, 请看后台 Command Line");
     }
 }
