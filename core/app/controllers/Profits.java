@@ -50,8 +50,14 @@ public class Profits extends Controller {
 
             String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
             // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-            List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
-            if(dtos == null) {
+
+            List<AnalyzeDTO> dtos = null;
+            String cache_str = Caches.get(cacke_key);
+            if(!StringUtils.isBlank(cache_str)) {
+                dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
+            }
+            // 用于提示后台正在运行计算
+            if(StringUtils.isBlank(cache_str) || dtos == null) {
                 flash.error("Analyze后台事务正在执行中,请稍候...");
                 render(profits, p);
             }
