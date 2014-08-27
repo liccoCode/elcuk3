@@ -188,7 +188,6 @@ public class OrderItem extends GenericModel {
                 }
             });
             highChart.series(highChart.sumSeries("销量"));
-            System.out.println("aaaaaaaaaaaaaaaaaaaaaa" + type);
             if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all")) {
                 for(int i = 0; i < highChart.series.size(); i++) {
                     AbstractSeries serie = highChart.series.get(i);
