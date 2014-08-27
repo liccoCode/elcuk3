@@ -1,6 +1,7 @@
 package services;
 
 import com.alibaba.fastjson.JSON;
+import helper.Caches;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.M;
 import models.market.Selling;
@@ -43,7 +44,7 @@ public class MetricQtyService {
             String AnalyzeDTO_SID_MAP_CACHE = "analyze_post_sid_map";
             String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
             // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-            List<AnalyzeDTO> dtos = JSON.parseArray(Cache.get(cacke_key, String.class), AnalyzeDTO.class);
+            List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
             if(dtos != null) {
                 java.util.Map<String, AnalyzeDTO> dtomap = Cache.get(AnalyzeDTO_SID_MAP_CACHE, java.util.Map.class);
                 if(dtomap == null) {
