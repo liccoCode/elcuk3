@@ -188,7 +188,7 @@ public class OrderItem extends GenericModel {
                 }
             });
             highChart.series(highChart.sumSeries("销量"));
-            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length()>=6) {
+            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length() >= 6) {
                 for(int i = 0; i < highChart.series.size(); i++) {
                     AbstractSeries serie = highChart.series.get(i);
                     if(serie.name.indexOf("汇总") == -1) {
@@ -311,12 +311,10 @@ public class OrderItem extends GenericModel {
 
             HighChart tmphighChart = new HighChart();
 
-            for(int i = 0; i < skus.length; i++) {
-                final String sku = skus[i];
                 Promises.forkJoin(new Promises.Callback<Object>() {
                     @Override
                     public Object doJobWithResult(M m) {
-                        highChart.series(esQuery.salesFade(type, sku, m, _from, _to));
+                        highChart.series(esQuery.skusSearch("\"" + val + "\"", "sku", m, _from, _to));
                         return null;
                     }
 
@@ -327,19 +325,16 @@ public class OrderItem extends GenericModel {
                 });
 
                 for(M market : Promises.MARKETS) {
-                    tmphighChart.series(esQuery.movingAvgFade(type, val, market, _from, _to));
+                    tmphighChart.series(esQuery.skusMoveingAve(val,type, market, _from, _to));
                 }
-            }
 
 
             highChart.series(highChart.sumSeries("销量"));
-            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all")) {
-                for(int i = 0; i < highChart.series.size(); i++) {
-                    AbstractSeries serie = highChart.series.get(i);
-                    if(serie.name.indexOf("汇总") == -1) {
-                        serie.visible = false;
-                        highChart.series.set(i, serie);
-                    }
+            for(int i = 0; i < highChart.series.size(); i++) {
+                AbstractSeries serie = highChart.series.get(i);
+                if(serie.name.indexOf("汇总") == -1) {
+                    serie.visible = false;
+                    highChart.series.set(i, serie);
                 }
             }
 

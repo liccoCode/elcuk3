@@ -183,11 +183,6 @@ $ ->
     )
 
 
-  # 页面 初始化数据
-  ajaxFreshAcitveTableTab()
-  ajaxSaleUnitLines()
-  # 默认 PageView 线
-  pageViewDefaultContent()
 
   $('#skusearch').change (e) ->
     $input = $(@)
