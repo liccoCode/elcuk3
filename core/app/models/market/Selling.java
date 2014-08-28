@@ -19,12 +19,12 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.libs.IO;
+import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -354,8 +354,8 @@ public class Selling extends GenericModel {
                             .withZone(Dates.CN).toDate();
                 }
                 long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
-
-                Cache.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, J.json(dtos), diffSecond + "s");
+                Caches.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, J.json(dtos),
+                        Time.parseDuration(diffSecond + "s"));
             }
         }
         return this.save();

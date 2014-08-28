@@ -116,10 +116,14 @@ public class Caches {
 
     public static String get(String key) {
         Jedis jr = RedisCacheImpl.getCacheConnection();
-        Object cache_str = jr.get(key);
-        if(cache_str == null) {
-            return "";
-        }
-        return cache_str.toString();
+        String cache_str = jr.get(key);
+        if(cache_str == null || StringUtils.isBlank(cache_str)) return "";
+        return cache_str;
+    }
+
+    public static void set(String key, String value, int expiration) {
+        Jedis jr = RedisCacheImpl.getCacheConnection();
+        jr.set(key, value);
+        jr.expire(key, expiration);
     }
 }
