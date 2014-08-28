@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.cache.Cache;
 import play.modules.redis.RedisCacheImpl;
+import redis.clients.jedis.Jedis;
 
 import java.util.Date;
 import java.util.Set;
@@ -111,5 +112,18 @@ public class Caches {
      */
     public static void clearRunningCacheKey() {
         Cache.delete(ORDERITEM_AJAXUNITRUNNING);
+    }
+
+    public static String get(String key) {
+        Jedis jr = RedisCacheImpl.getCacheConnection();
+        String cache_str = jr.get(key);
+        if(cache_str == null || StringUtils.isBlank(cache_str)) return "";
+        return cache_str;
+    }
+
+    public static void set(String key, String value, int expiration) {
+        Jedis jr = RedisCacheImpl.getCacheConnection();
+        jr.set(key, value);
+        jr.expire(key, expiration);
     }
 }

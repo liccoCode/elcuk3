@@ -1,6 +1,9 @@
 package models.view.post;
 
+import com.alibaba.fastjson.JSON;
+import helper.Caches;
 import helper.Dates;
+import helper.HTTP;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.M;
 import models.procure.ProcureUnit;
@@ -10,7 +13,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -71,10 +73,15 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public List<AnalyzeDTO> analyzes() {
         String cacke_key = "sid".equals(this.type) ?
                 SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE : SellingSaleAnalyzeJob.AnalyzeDTO_SKU_CACHE;
-        List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
+
+        List<AnalyzeDTO> dtos = null;
+        String cache_str = Caches.get(cacke_key);
+        if(!StringUtils.isBlank(cache_str)) {
+            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
+        }
         // 用于提示后台正在运行计算
-        if(dtos == null) {
-            new SellingSaleAnalyzeJob().now();
+        if(StringUtils.isBlank(cache_str) || dtos == null) {
+            HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
         return dtos;

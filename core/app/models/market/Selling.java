@@ -15,14 +15,16 @@ import org.apache.http.NameValuePair;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.libs.IO;
+import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -269,7 +271,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
-        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
+        HTTP.post("http://rock.easya.cc:4567/submit_feed", params);
         return feed;
     }
 
@@ -343,9 +345,17 @@ public class Selling extends GenericModel {
             if(!find) {
                 throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
             } else {
-                Date expireTime = Cache.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE + ".time", Date.class);
+                Date expireTime;
+                String cache_str = Caches.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE + ".time");
+                if(StringUtils.isBlank(cache_str)) {
+                    expireTime = DateTime.now().plusHours(8).toDate();
+                } else {
+                    expireTime = DateTime.parse(cache_str, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z"))
+                            .withZone(Dates.CN).toDate();
+                }
                 long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
-                Cache.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, dtos, diffSecond + "s");
+                Caches.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, J.json(dtos),
+                        Time.parseDuration(diffSecond + "s"));
             }
         }
         return this.save();

@@ -1,22 +1,25 @@
 package jobs.analyze;
 
+import com.alibaba.fastjson.JSON;
+import helper.Caches;
 import helper.Dates;
 import helper.Promises;
 import helper.Webs;
 import models.market.M;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
 import query.*;
-import models.procure.Shipment;
 
 import java.util.*;
 
@@ -37,22 +40,22 @@ public class SellingSaleAnalyzeJob extends Job {
 
     @Override
     public void doJob() {
-        if(isRnning()) return;
-        /**
-         * 1. 北京时间最近 1 周
-         * 2. 两种类型 sid/sku
-         */
-        // 清理掉原来的
-        Cache.delete(AnalyzeDTO_SID_CACHE);
-        Cache.delete(AnalyzeDTO_SKU_CACHE);
-
-        long begin = System.currentTimeMillis();
-        analyzes("sid");
-        Logger.info("SellingSaleAnalyzeJob calculate Sellings.... [%sms]", System.currentTimeMillis() - begin);
-
-        begin = System.currentTimeMillis();
-        analyzes("sku");
-        Logger.info("SellingSaleAnalyzeJob calculate SKU.... [%sms]", System.currentTimeMillis() - begin);
+//        if(isRnning()) return;
+//        /**
+//         * 1. 北京时间最近 1 周
+//         * 2. 两种类型 sid/sku
+//         */
+//        // 清理掉原来的
+//        Cache.delete(AnalyzeDTO_SID_CACHE);
+//        Cache.delete(AnalyzeDTO_SKU_CACHE);
+//
+//        long begin = System.currentTimeMillis();
+//        analyzes("sid");
+//        Logger.info("SellingSaleAnalyzeJob calculate Sellings.... [%sms]", System.currentTimeMillis() - begin);
+//
+//        begin = System.currentTimeMillis();
+//        analyzes("sku");
+//        Logger.info("SellingSaleAnalyzeJob calculate SKU.... [%sms]", System.currentTimeMillis() - begin);
     }
 
     /**
@@ -75,7 +78,12 @@ public class SellingSaleAnalyzeJob extends Job {
 
         String cacke_key = "sid".equals(type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-        List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
+
+        List<AnalyzeDTO> dtos = null;
+        String cache_str = Caches.get(cacke_key);
+        if(!StringUtils.isBlank(cache_str)) {
+            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
+        }
         if(dtos != null) return dtos;
 
         synchronized(AnalyzeDTO.class) {
@@ -405,6 +413,12 @@ public class SellingSaleAnalyzeJob extends Job {
      */
     public static Date cachedDate(String type) {
         String cacke_key = "sid".equals(type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
-        return Cache.get(cacke_key + ".time", Date.class);
+        String cache_str = Caches.get(cacke_key + ".time");
+        if(StringUtils.isBlank(cache_str)) {
+            return null;
+        } else {
+            return DateTime.parse(cache_str, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z")).withZone(Dates.CN)
+                    .toDate();
+        }
     }
 }
