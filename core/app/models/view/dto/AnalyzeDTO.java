@@ -1,14 +1,12 @@
 package models.view.dto;
 
 import helper.Webs;
-import models.market.Listing;
 import models.market.M;
 import models.market.Selling;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
