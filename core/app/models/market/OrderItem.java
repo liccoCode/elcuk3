@@ -188,7 +188,7 @@ public class OrderItem extends GenericModel {
                 }
             });
             highChart.series(highChart.sumSeries("销量"));
-            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length()>=6) {
+            if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length() >= 6) {
                 for(int i = 0; i < highChart.series.size(); i++) {
                     AbstractSeries serie = highChart.series.get(i);
                     if(serie.name.indexOf("汇总") == -1) {
@@ -278,5 +278,67 @@ public class OrderItem extends GenericModel {
             Cache.add(key, pieChart, "8h");
         }
         return pieChart;
+    }
+
+
+    /**
+     * <pre>
+     * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
+     * </pre>
+     *
+     * @param val 需要查询的 all, categoryId, sku, sid
+     * @param to  @return {series_size, days, series_n}
+     */
+    @Cached("2h")
+    public static HighChart ajaxSkusUnitOrder(final String val, final String type, Date from, Date to) {
+        String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
+        HighChart lines = Cache.get(cacked_key, HighChart.class);
+        if(lines != null) return lines;
+        synchronized(cacked_key.intern()) {
+            lines = Cache.get(cacked_key, HighChart.class);
+            if(lines != null) return lines;
+
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            final HighChart highChart = new HighChart();
+            final OrderItemESQuery esQuery = new OrderItemESQuery();
+
+
+            HighChart tmphighChart = new HighChart();
+
+                Promises.forkJoin(new Promises.Callback<Object>() {
+                    @Override
+                    public Object doJobWithResult(M m) {
+                        highChart.series(esQuery.skusSearch("sku","\"" + val + "\"",  m, _from, _to));
+                        return null;
+                    }
+
+                    @Override
+                    public String id() {
+                        return "OrderItem.ajaxHighChartUnitOrder(ES)";
+                    }
+                });
+
+                for(M market : Promises.MARKETS) {
+                    tmphighChart.series(esQuery.skusMoveingAve("sku",val, market, _from, _to));
+                }
+
+
+            highChart.series(highChart.sumSeries("销量"));
+            for(int i = 0; i < highChart.series.size(); i++) {
+                AbstractSeries serie = highChart.series.get(i);
+                if(serie.name.indexOf("汇总") == -1) {
+                    serie.visible = false;
+                    highChart.series.set(i, serie);
+                }
+            }
+
+            highChart.series(tmphighChart.sumSeries("滑动平均"));
+            Cache.add(cacked_key, highChart, "2h");
+        }
+        return Cache.get(cacked_key, HighChart.class);
     }
 }

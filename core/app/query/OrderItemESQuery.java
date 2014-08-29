@@ -7,8 +7,7 @@ import helper.ES;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.range.RangeFacetBuilder;
@@ -273,5 +272,119 @@ public class OrderItemESQuery {
         }
 
         return pie;
+    }
+
+    public OrFilterBuilder skusfilter(String type, String val) {
+        String[] skus = val.replace("\"","").split(",");
+        OrFilterBuilder builders = FilterBuilders.orFilter();
+        for(int i = 0; i < skus.length; i++) {
+            if(StringUtils.isNotBlank(skus[i])) {
+                builders.add(FilterBuilders.termFilter(type,
+                        ES.parseEsString(skus[i]).toLowerCase().trim()));
+            }
+        }
+        return builders;
+    }
+
+
+    /**
+     * @param val
+     * @param type sku/msku/cat
+     * @return
+     */
+    public Series.Line skusSearch(String type, String val, M market, Date from, Date to) {
+
+
+        if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
+        if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
+            throw new FastRuntimeException("还不支持 " + type + " " + "类型");
+
+        DateTime fromD = market.withTimeZone(from);
+        DateTime toD = market.withTimeZone(to);
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+
+
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(FacetBuilders.dateHistogramFacet("units")
+                        .keyField("date")
+                        .valueField("quantity")
+                        .interval("day")
+                        .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                        .facetFilter(FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                .must(FilterBuilders.rangeFilter("date")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat))
+                                ).must(skusfilter(type, val))
+                        )
+                ).size(0);
+
+        Logger.info(search.toString());
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        Logger.info(result.toString());
+        JSONObject facets = result.getJSONObject("facets");
+        if(facets != null && facets.getJSONObject("units") != null) {
+            JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
+            Series.Line line = new Series.Line(market.label() + "销量");
+            for(Object o : entries) {
+                JSONObject entry = (JSONObject) o;
+                line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
+            }
+
+            DateTime datePointer = new DateTime(from);
+            while(datePointer.getMillis() <= to.getTime()) {
+                line.add(0f, Dates.date2JDate(from));
+                datePointer = datePointer.plusDays(1);
+            }
+            line.sort();
+            return line;
+        } else {
+            Series.Line line = new Series.Line(market.label() + "销量");
+            return line;
+        }
+    }
+
+
+    /**
+     * 计算滑动平均
+     *
+     * @return
+     */
+    public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to) {
+        if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
+        if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
+            throw new FastRuntimeException("还不支持 " + type + " " + "类型");
+
+        DateTime fromD = market.withTimeZone(from);
+        DateTime toD = market.withTimeZone(to);
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+
+        RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
+                .keyField("date").valueField("quantity")
+                .facetFilter(FilterBuilders.boolFilter()
+                        .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                        .must(skusfilter(type, val))
+                );
+        DateTime datePointer = new DateTime(fromD);
+        while(datePointer.getMillis() <= toD.getMillis()) {
+            facetBuilder.addRange(datePointer.minusDays(7).toString(isoFormat), datePointer.toString(isoFormat));
+            // 以天为单位, 指针向前移动
+            datePointer = datePointer.plusDays(1);
+        }
+
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(facetBuilder)
+                .size(0);
+
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject facets = result.getJSONObject("facets");
+        JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
+
+        Series.Line line = new Series.Line(market.label() + " 滑动平均");
+        for(Object o : movingAveRanges) {
+            JSONObject range = (JSONObject) o;
+            line.add(Dates.date2JDate(range.getDate("to")), range.getFloat("total") / 7);
+        }
+        return line;
     }
 }
