@@ -168,8 +168,10 @@ public class Webs {
 
             email.setFrom("support@easyacceu.com", "EasyAcc");
             email.setHtmlMsg(content);
+            LogUtils.JOBLOG.info("Email:send::"+subject);
         } catch(EmailException e) {
             Logger.warn("Email error: " + e.getMessage());
+            LogUtils.JOBLOG.info("Email:error::"+e.getMessage());
         }
         return Mail.send(email);
     }
