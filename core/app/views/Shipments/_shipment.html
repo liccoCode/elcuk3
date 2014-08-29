@@ -29,7 +29,7 @@
       <td>
         <input type="date" name="ship.dates.planArrivDate" value="${ship.dates.planArrivDate.date()}">
       #{if ship.dates.oldPlanArrivDate!=null}
-        <span class="add-on">比原预计交货日期${ship.dates.oldPlanArrivDate.date()}
+        <span class="add-on">比原预计到库日期${ship.dates.oldPlanArrivDate.date()}
           差异${(ship.dates.planArrivDate.getTime()-ship.dates.oldPlanArrivDate.getTime())/(24*60*60*1000)}天</span>
       #{/if}
       </td>
