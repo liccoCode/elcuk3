@@ -307,14 +307,12 @@ public class OrderItem extends GenericModel {
             final OrderItemESQuery esQuery = new OrderItemESQuery();
 
 
-            String[] skus = val.split(",");
-
             HighChart tmphighChart = new HighChart();
 
                 Promises.forkJoin(new Promises.Callback<Object>() {
                     @Override
                     public Object doJobWithResult(M m) {
-                        highChart.series(esQuery.skusSearch("\"" + val + "\"", "sku", m, _from, _to));
+                        highChart.series(esQuery.skusSearch("sku","\"" + val + "\"",  m, _from, _to));
                         return null;
                     }
 
@@ -325,7 +323,7 @@ public class OrderItem extends GenericModel {
                 });
 
                 for(M market : Promises.MARKETS) {
-                    tmphighChart.series(esQuery.skusMoveingAve(val,type, market, _from, _to));
+                    tmphighChart.series(esQuery.skusMoveingAve("sku",val, market, _from, _to));
                 }
 
 
