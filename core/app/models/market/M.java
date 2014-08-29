@@ -792,11 +792,11 @@ public enum M {
         switch(this) {
             case AMAZON_CA:
                 return -16;
+            case AMAZON_JP:
+                return 1;
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
-            case AMAZON_JP:
-                return 1;
             case AMAZON_IT:
                 return -6;
             case AMAZON_UK:
