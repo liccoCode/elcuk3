@@ -798,9 +798,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-                return -6;
-            case AMAZON_UK:
                 return -7;
+            case AMAZON_UK:
+                return -8;
             case AMAZON_US:
                 return -15;
             default:
