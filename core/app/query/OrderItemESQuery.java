@@ -7,10 +7,7 @@ import helper.ES;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.range.RangeFacetBuilder;
@@ -22,8 +19,6 @@ import play.utils.FastRuntimeException;
 
 import java.util.Arrays;
 import java.util.Date;
-
-import org.elasticsearch.index.query.OrFilterBuilder;
 
 /**
  * 通过向 ElasticSearch 进行搜索的 OrderItem Query
@@ -279,23 +274,25 @@ public class OrderItemESQuery {
         return pie;
     }
 
-    public OrFilterBuilder skusfilter(String val, String type) {
-        String[] skus = val.split(",");
+    public OrFilterBuilder skusfilter(String type, String val) {
+        String[] skus = val.replace("\"","").split(",");
         OrFilterBuilder builders = FilterBuilders.orFilter();
         for(int i = 0; i < skus.length; i++) {
-            FilterBuilder boolFilter = FilterBuilders.queryFilter(QueryBuilders.queryString
-                    (skus[i]).defaultField(type));
-            builders.add(boolFilter);
+            if(StringUtils.isNotBlank(skus[i])) {
+                builders.add(FilterBuilders.termFilter(type,
+                        ES.parseEsString(skus[i]).toLowerCase().trim()));
+            }
         }
         return builders;
     }
+
 
     /**
      * @param val
      * @param type sku/msku/cat
      * @return
      */
-    public Series.Line skusSearch(String val, String type, M market, Date from, Date to) {
+    public Series.Line skusSearch(String type, String val, M market, Date from, Date to) {
 
 
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -308,6 +305,8 @@ public class OrderItemESQuery {
 
 
         SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                .postFilter(skusfilter(type, val))
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
                         .valueField("quantity")
@@ -319,7 +318,6 @@ public class OrderItemESQuery {
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat))
                                 )
-                                .must(skusfilter(type, val))
                         )
                 ).size(0);
 
@@ -354,7 +352,7 @@ public class OrderItemESQuery {
      *
      * @return
      */
-    public Series.Line skusMoveingAve(String val, String type, M market, Date from, Date to) {
+    public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
         if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
@@ -367,7 +365,6 @@ public class OrderItemESQuery {
                 .keyField("date").valueField("quantity")
                 .facetFilter(FilterBuilders.boolFilter()
                         .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                        .must(skusfilter(type, val))
                 );
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
@@ -377,13 +374,10 @@ public class OrderItemESQuery {
         }
 
         SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                .postFilter(skusfilter(type, val))
                 .facet(facetBuilder)
                 .size(0);
-        if(StringUtils.isBlank(val)) {
-            search.query(QueryBuilders.matchAllQuery());
-        } else {
-            search.query(QueryBuilders.queryString(val).defaultField(type));
-        }
 
         JSONObject result = ES.search("elcuk2", "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");

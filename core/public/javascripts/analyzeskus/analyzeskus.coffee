@@ -207,3 +207,5 @@ $ ->
     $sku.parent("td").remove()
 
     )
+
+  ajaxSaleUnitLines()
