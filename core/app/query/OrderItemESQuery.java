@@ -305,8 +305,6 @@ public class OrderItemESQuery {
 
 
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(QueryBuilders.termQuery("market", market.name().toLowerCase()))
-                .postFilter(skusfilter(type, val))
                 .facet(FacetBuilders.dateHistogramFacet("units")
                         .keyField("date")
                         .valueField("quantity")
@@ -317,7 +315,7 @@ public class OrderItemESQuery {
                                 .must(FilterBuilders.rangeFilter("date")
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat))
-                                )
+                                ).must(skusfilter(type, val))
                         )
                 ).size(0);
 
@@ -365,6 +363,7 @@ public class OrderItemESQuery {
                 .keyField("date").valueField("quantity")
                 .facetFilter(FilterBuilders.boolFilter()
                         .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                        .must(skusfilter(type, val))
                 );
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
@@ -374,8 +373,6 @@ public class OrderItemESQuery {
         }
 
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(QueryBuilders.termQuery("market", market.name().toLowerCase()))
-                .postFilter(skusfilter(type, val))
                 .facet(facetBuilder)
                 .size(0);
 
