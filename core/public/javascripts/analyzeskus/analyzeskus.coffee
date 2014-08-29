@@ -186,12 +186,21 @@ $ ->
 
   $('#skusearch').change (e) ->
     $input = $(@)
+    postval = $("#postVal").val()
     if $input.data('products') is undefined
        $input.data('products', $input.data('source'))
     return false if !(@value in $input.data('products'))
+    return false if postval.indexOf(@value) > 0
 
-    $("#skutr").append("<td colspan=1><a href='javascript:;' rel='tooltip'>"+@value+"</a> <a name='skudelete' copItemId='"+@value+"' class='btn btn-mini delelte'><i class='icon-remove'></i></a></td>")
-    postval = $("#postVal").val()
+    trcount = $("#skutable tr").length
+
+    gettr = document.getElementById("skutable").rows[trcount-1]
+    gettr.innerHTML+="<td  colspan=1><a href='javascript:;' rel='tooltip'>"+@value+"</a> <a name='skudelete' copItemId='"+@value+"' class='btn btn-mini delelte'><i class='icon-remove'></i></a></td>"
+
+    tdcount = gettr.getElementsByTagName("td").length
+    if tdcount!=0 and tdcount % 6==0
+      $("#skutable").append("<tr  class='table table-condensed table-bordered'></tr>")
+
     $("#postVal").val(postval+","+@value)
 
 
