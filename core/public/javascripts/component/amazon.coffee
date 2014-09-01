@@ -66,6 +66,10 @@ $ ->
     checkInvalidCharacters(@, e)
   )
 
+  $(document).ready ->
+    $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
+
+
   $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
 
   # 方便提供自动加载其他 Selling 的功能
