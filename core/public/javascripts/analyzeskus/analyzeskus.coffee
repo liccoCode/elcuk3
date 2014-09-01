@@ -185,15 +185,21 @@ $ ->
 
 
   $('#skusearch').change (e) ->
+    islike = document.getElementById("islike").checked
+
     $input = $(@)
     postval = $("#postVal").val()
     if $input.data('products') is undefined
        $input.data('products', $input.data('source'))
+
     return false if !(@value in $input.data('products'))
+
+    if islike==true
+     addSkus()
+     return
+
     return false if postval.indexOf(@value) > 0
-
     trcount = $("#skutable tr").length
-
     gettr = document.getElementById("skutable").rows[trcount-1]
     gettr.innerHTML+="<td  colspan=1><a href='javascript:;' rel='tooltip'>"+@value+"</a> <a name='skudelete' copItemId='"+@value+"' class='btn btn-mini delelte'><i class='icon-remove'></i></a></td>"
 
@@ -202,6 +208,22 @@ $ ->
       $("#skutable").append("<tr  class='table table-condensed table-bordered'></tr>")
 
     $("#postVal").val(postval+","+@value)
+
+  addSkus = ->
+    $input = $("#skusearch")
+    prefix = $input.val().substr(0,$input.val().indexOf("-")+1)
+    _.each($input.data('products'), (product) ->
+      postval = $("#postVal").val()
+      if postval.indexOf(product) <= 0 and prefix == product.substr(0, prefix.length)
+        trcount = $("#skutable tr").length
+        gettr = document.getElementById("skutable").rows[trcount-1]
+        gettr.innerHTML+="<td  colspan=1><a href='javascript:;' rel='tooltip'>"+product+"</a> <a name='skudelete' copItemId='"+product+"' class='btn btn-mini delelte'><i class='icon-remove'></i></a></td>"
+        tdcount = gettr.getElementsByTagName("td").length
+        if tdcount!=0 and tdcount % 6==0
+          $("#skutable").append("<tr  class='table table-condensed table-bordered'></tr>")
+        $("#postVal").val(postval+","+product)
+    )
+
 
 
 
