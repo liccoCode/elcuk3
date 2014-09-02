@@ -14,6 +14,7 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -721,6 +722,7 @@ public class MetricProfitService {
                 )
                 .size(0);
 
+        Logger.info("salefeeline:::"+search.toString());
 
         JSONObject result = ES.search("elcuk2", tablename, search);
         if(result == null) {
