@@ -11,7 +11,7 @@ $ ->
     $("<div/>").text(string).html()
 
   EU_And_US_Invalid_Characters = ['，', '。', '`', '~', '！', '（', '）', '——', '—', '、', '；', '：', '‘', '’', '“', '”', '《', '》', '？', '【', '】']
-  JP_Invalid_Characters = ['——', '—']
+  JP_Invalid_Characters = ['——', '—', '✦', '•', '◉', '⦿', '▷', '▶', '❏', '❒', '♫']
   checkInvalidCharacters = (obj, e) ->
     market = $('#market').val()
     Invalid_Characters = []
