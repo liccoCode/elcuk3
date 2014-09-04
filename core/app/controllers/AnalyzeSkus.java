@@ -50,7 +50,7 @@ public class AnalyzeSkus extends Controller {
 
 
     /**
-     * 加载指定 Selling 的时间段内的销量与销售额数据
+     * 加载指定 SKU 的时间段内的销量
      */
     public static void ajaxUnit(AnalyzePost p) {
         try {
@@ -58,6 +58,23 @@ public class AnalyzeSkus extends Controller {
             p.from = now.plusDays(-30).toDate();
             p.to = now.toDate();
             HighChart chart = OrderItem.ajaxSkusUnitOrder(p.val, p.type, p.from, p.to);
+            renderJSON(J.json(chart));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+
+    /**
+     * 加载多个SKU 的market 的时间段内的销量
+     */
+    public static void ajaxUnitMarket(AnalyzePost p) {
+        try {
+            DateTime now = DateTime.now();
+            p.from = now.plusDays(-30).toDate();
+            p.to = now.toDate();
+
+            HighChart chart = OrderItem.ajaxSkusMarketUnitOrder(p.val,p.market, p.type, p.from, p.to,p.ismoveing);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
