@@ -373,25 +373,14 @@ public class OrderItem extends GenericModel {
             String[] skus = val.replace("\"", "").split(",");
 
             if(market.equals("total")) {
-                final HighChart tmphighChart = new HighChart();
                 for(int i = 0; i < skus.length; i++) {
-                    final String sku = skus[i];
+                    HighChart tmphighChart = new HighChart();
+                    String sku = skus[i];
                     if(StringUtils.isNotBlank(skus[i])) {
                         if(ismoveing != 2) {
-                            Promises.forkJoin(new Promises.Callback<Object>() {
-                                @Override
-                                public Object doJobWithResult(M m) {
-
-                                    tmphighChart.series(esQuery.skusSearch("sku", sku, m, _from, _to, true));
-
-                                    return null;
-                                }
-
-                                @Override
-                                public String id() {
-                                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
-                                }
-                            });
+                            for(M m : Promises.MARKETS) {
+                                tmphighChart.series(esQuery.skusSearch("sku", sku, m, _from, _to, true));
+                            }
                             highChart.series(tmphighChart.sumSeries(sku + "销量"));
                         } else {
                             for(M m : Promises.MARKETS) {
