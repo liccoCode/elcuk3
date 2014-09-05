@@ -339,7 +339,7 @@ public class Listing extends GenericModel {
          * 否则返回一个瞬时状态的 Listing 对象
          */
         JsonObject lst = listingJson.getAsJsonObject();
-        if(lst.get("isRemove").getAsBoolean()) {
+        if(lst.get("is_remove").getAsBoolean()) {
             return null;
         }
 
