@@ -30,7 +30,7 @@ public class SellingProfitJob extends Job {
 
     @Override
     public void doJob() {
-        if(isRnning()) return;
+
 
         String skukey = "";
         String marketkey = "";
@@ -40,6 +40,7 @@ public class SellingProfitJob extends Job {
         if(post.category != null) categorykey = post.category.toLowerCase();
         String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey, marketkey,
                 "excel");
+        if(isRnning(postkey)) return;
         Cache.add(postkey + RUNNING, postkey + RUNNING);
         List<Profit> profits = new ArrayList<Profit>();
         //从ES查找SKU的利润
@@ -55,15 +56,7 @@ public class SellingProfitJob extends Job {
      *
      * @return
      */
-    public boolean isRnning() {
-        String skukey = "";
-        String marketkey = "";
-        String categorykey = "";
-        if(post.sku != null) skukey = post.sku;
-        if(post.pmarket != null) marketkey = post.pmarket;
-        if(post.category != null) categorykey = post.category.toLowerCase();
-        String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey, marketkey,
-                "excel");
+    public boolean isRnning(String postkey) {
         return StringUtils.isNotBlank(Cache.get(postkey + RUNNING, String.class));
     }
 }
