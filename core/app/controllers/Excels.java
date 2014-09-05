@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import jobs.analyze.SellingProfitJob;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -176,11 +178,7 @@ public class Excels extends Controller {
                     "excel");
             profits = Cache.get(postkey, List.class);
             if(profits == null) {
-                //从ES查找SKU的利润
-                profits = p.query();
-                //计算合计
-                profits = p.calTotal(profits);
-                Cache.add(postkey, profits, "2h");
+                new SellingProfitJob(p).now();
             }
         }
 
@@ -193,7 +191,7 @@ public class Excels extends Controller {
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
         } else {
-            renderText("没有数据无法生成Excel文件！");
+            renderText("正在后台计算生成Excel文件！");
         }
     }
 
