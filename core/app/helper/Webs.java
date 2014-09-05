@@ -167,6 +167,8 @@ public class Webs {
             }
 
             email.setFrom("support@easyacceu.com", "EasyAcc");
+            email.setSSL(true);
+            email.setSslSmtpPort("587");
             email.setHtmlMsg(content);
             LogUtils.JOBLOG.info("Email:send::"+subject);
         } catch(EmailException e) {
