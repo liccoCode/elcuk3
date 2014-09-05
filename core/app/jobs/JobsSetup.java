@@ -62,8 +62,10 @@ public class JobsSetup {
             //every(AmazonReviewCheckJob.class, "1mn");
 
             // Feedback Job 处理
-            every(FeedbackCrawlJob.class, "30mn");
-            every(FeedbackCheckJob.class, "5mn");
+            //ruby job 已执行
+            //every(FeedbackCrawlJob.class, "30mn");
+            //ruby job 已执行
+            //every(FeedbackCheckJob.class, "5mn");
 
             //every(OrderMailCheck.class, "10mn");
 
