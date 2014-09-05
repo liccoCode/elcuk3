@@ -1212,8 +1212,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             for(ProcureUnit pu : punits) {
                 String email = pu.handler.email;
                 if(StringUtils.isNotBlank(email)) {
-                    mailaddress.add(email);
-                    LogUtils.JOBLOG.info("Email:::"+email);
+                    if(!mailaddress.contains(email)) {
+                        mailaddress.add(email);
+                        LogUtils.JOBLOG.info("Email:::" + email);
+                    }
                 }
             }
             if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
