@@ -63,6 +63,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     public String state = "Active";
 
+    public int ismoveing;
+
     @Override
     public F.T2<String, List<Object>> params() {
         // no use

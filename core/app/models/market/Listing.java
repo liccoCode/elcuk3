@@ -318,7 +318,7 @@ public class Listing extends GenericModel {
      */
     public static Listing crawl(String asin, M market) {
         JsonElement listing = Crawl.crawlListing(market.toString(), asin);
-        if(listing.getAsJsonObject().get("isRemove").getAsBoolean()) {
+        if(listing.getAsJsonObject().get("is_remove").getAsBoolean()) {
             return null;
         }
         return Listing.parseAndUpdateListingFromCrawl(listing, true);
@@ -339,7 +339,7 @@ public class Listing extends GenericModel {
          * 否则返回一个瞬时状态的 Listing 对象
          */
         JsonObject lst = listingJson.getAsJsonObject();
-        if(lst.get("isRemove").getAsBoolean()) {
+        if(lst.get("is_remove").getAsBoolean()) {
             return null;
         }
 

@@ -6,6 +6,8 @@ import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.OrFilterBuilder;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import query.OrderItemESQuery;
@@ -309,22 +311,22 @@ public class OrderItem extends GenericModel {
 
             HighChart tmphighChart = new HighChart();
 
-                Promises.forkJoin(new Promises.Callback<Object>() {
-                    @Override
-                    public Object doJobWithResult(M m) {
-                        highChart.series(esQuery.skusSearch("sku","\"" + val + "\"",  m, _from, _to));
-                        return null;
-                    }
-
-                    @Override
-                    public String id() {
-                        return "OrderItem.ajaxHighChartUnitOrder(ES)";
-                    }
-                });
-
-                for(M market : Promises.MARKETS) {
-                    tmphighChart.series(esQuery.skusMoveingAve("sku",val, market, _from, _to));
+            Promises.forkJoin(new Promises.Callback<Object>() {
+                @Override
+                public Object doJobWithResult(M m) {
+                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", m, _from, _to, false));
+                    return null;
                 }
+
+                @Override
+                public String id() {
+                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
+                }
+            });
+
+            for(M market : Promises.MARKETS) {
+                tmphighChart.series(esQuery.skusMoveingAve("sku", val, market, _from, _to, false));
+            }
 
 
             highChart.series(highChart.sumSeries("销量"));
@@ -337,6 +339,71 @@ public class OrderItem extends GenericModel {
             }
 
             highChart.series(tmphighChart.sumSeries("滑动平均"));
+            Cache.add(cacked_key, highChart, "2h");
+        }
+        return Cache.get(cacked_key, HighChart.class);
+    }
+
+
+    /**
+     * <pre>
+     * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
+     * </pre>
+     *
+     * @param val 需要查询的 all, categoryId, sku, sid
+     * @param to  @return {series_size, days, series_n}
+     */
+    @Cached("2h")
+    public static HighChart ajaxSkusMarketUnitOrder(final String val, final String market, final String type,
+                                                    Date from, Date to, int ismoveing) {
+        String cacked_key = Caches.Q.cacheKey("unit", val, market, ismoveing, type, from, to);
+        HighChart lines = Cache.get(cacked_key, HighChart.class);
+        if(lines != null) return lines;
+        synchronized(cacked_key.intern()) {
+            lines = Cache.get(cacked_key, HighChart.class);
+            if(lines != null) return lines;
+
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            final HighChart highChart = new HighChart();
+            final OrderItemESQuery esQuery = new OrderItemESQuery();
+            String[] skus = val.replace("\"", "").split(",");
+
+            if(market.equals("total")) {
+                for(int i = 0; i < skus.length; i++) {
+                    HighChart tmphighChart = new HighChart();
+                    String sku = skus[i];
+                    if(StringUtils.isNotBlank(skus[i])) {
+                        if(ismoveing != 2) {
+                            for(M m : Promises.MARKETS) {
+                                tmphighChart.series(esQuery.skusSearch("sku", sku, m, _from, _to, true));
+                            }
+                            highChart.series(tmphighChart.sumSeries(sku + "销量"));
+                        } else {
+                            for(M m : Promises.MARKETS) {
+                                tmphighChart.series(esQuery.skusMoveingAve("sku", sku, m, _from, _to, true));
+                            }
+                            highChart.series(tmphighChart.sumSeries(sku + "滑动平均"));
+                        }
+                    }
+                }
+
+            } else {
+                final M m = M.val(market);
+
+                for(int i = 0; i < skus.length; i++) {
+                    if(StringUtils.isNotBlank(skus[i])) {
+                        if(ismoveing != 2) {
+                            highChart.series(esQuery.skusSearch("sku", skus[i], m, _from, _to, true));
+                        } else
+                            highChart.series(esQuery.skusMoveingAve("sku", skus[i], m, _from, _to, true));
+                    }
+                }
+            }
+
             Cache.add(cacked_key, highChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);

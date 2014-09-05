@@ -275,7 +275,7 @@ public class OrderItemESQuery {
     }
 
     public OrFilterBuilder skusfilter(String type, String val) {
-        String[] skus = val.replace("\"","").split(",");
+        String[] skus = val.replace("\"", "").split(",");
         OrFilterBuilder builders = FilterBuilders.orFilter();
         for(int i = 0; i < skus.length; i++) {
             if(StringUtils.isNotBlank(skus[i])) {
@@ -292,7 +292,7 @@ public class OrderItemESQuery {
      * @param type sku/msku/cat
      * @return
      */
-    public Series.Line skusSearch(String type, String val, M market, Date from, Date to) {
+    public Series.Line skusSearch(String type, String val, M market, Date from, Date to, boolean issku) {
 
 
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -326,6 +326,8 @@ public class OrderItemESQuery {
         if(facets != null && facets.getJSONObject("units") != null) {
             JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
             Series.Line line = new Series.Line(market.label() + "销量");
+            if(issku)
+                line = new Series.Line(market.label() + val + "销量");
             for(Object o : entries) {
                 JSONObject entry = (JSONObject) o;
                 line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
@@ -340,6 +342,8 @@ public class OrderItemESQuery {
             return line;
         } else {
             Series.Line line = new Series.Line(market.label() + "销量");
+            if(issku)
+                line = new Series.Line(market.label() + val + "销量");
             return line;
         }
     }
@@ -350,7 +354,7 @@ public class OrderItemESQuery {
      *
      * @return
      */
-    public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to) {
+    public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to,boolean issku) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
         if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
@@ -381,6 +385,8 @@ public class OrderItemESQuery {
         JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
 
         Series.Line line = new Series.Line(market.label() + " 滑动平均");
+        if (issku)
+            line = new Series.Line(market.label() + val+" 滑动平均");
         for(Object o : movingAveRanges) {
             JSONObject range = (JSONObject) o;
             line.add(Dates.date2JDate(range.getDate("to")), range.getFloat("total") / 7);
