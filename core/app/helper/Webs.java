@@ -174,6 +174,7 @@ public class Webs {
             email.setHtmlMsg(content);
             LogUtils.JOBLOG.info("Email:send::"+subject);
         } catch(EmailException e) {
+            e.printStackTrace();
             Logger.warn("Email error: " + e.getMessage());
             LogUtils.JOBLOG.info("Email:error::"+e.getMessage());
         }
