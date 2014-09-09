@@ -252,10 +252,10 @@ public class Products extends Controller {
         for(Cooperator co : cooperatorList) {
             buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
                     ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
-                    .append("\"").append("}");
+                    .append("\"").append("},");
         }
         buff.append("]");
-        renderJSON(buff.toString());
+        renderJSON( StringUtils.replace(buff.toString(),"},]","}]"));
     }
 
 
