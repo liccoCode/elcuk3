@@ -169,8 +169,7 @@ public class Webs {
             email.setFrom("support@easyacceu.com", "EasyAcc");
             email.setSSL(true);
             email.setSslSmtpPort("587");
-            email.setHostName("23.21.161.144");
-
+            email.setHostName("ec2-107-21-238-216.compute-1.amazonaws.com");
 
             email.setAuthentication("AKIAJK2EC5XKMEZLW2SQ","ApTdBH8QIUJ5fLB/j62kwmEjcmXMzxdwCN5bdh79fJRf");
             email.setHtmlMsg(content);
