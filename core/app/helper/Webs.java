@@ -169,7 +169,9 @@ public class Webs {
             email.setFrom("support@easyacceu.com", "EasyAcc");
             email.setSSL(true);
             email.setSslSmtpPort("587");
-            email.setHostName("email-smtp.us-east-1.amazonaws.com");
+            email.setHostName("23.21.161.144");
+
+
             email.setAuthentication("AKIAJK2EC5XKMEZLW2SQ","ApTdBH8QIUJ5fLB/j62kwmEjcmXMzxdwCN5bdh79fJRf");
             email.setHtmlMsg(content);
             LogUtils.JOBLOG.info("Email:send::"+subject);
