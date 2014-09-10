@@ -173,19 +173,19 @@ public class ShipmentReportESQuery {
 
             //准时
             SqlSelect sql = buildSqlHeader(year, shipType, countType, i);
-            sql.andWhere("sp.planArrivDate=sp.receiptDate");
+            sql.andWhere("date_format(sp.planArrivDate,'%y-%m-%d')=date_format(sp.receiptDate,'%y-%m-%d')");
             Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("count");
             float onTime = (result == null ? 0 : NumberUtils.toFloat(result.toString()));
 
             //提前
             sql = buildSqlHeader(year, shipType, countType, i);
-            sql.andWhere("sp.planArrivDate>sp.receiptDate");
+            sql.andWhere("date_format(sp.planArrivDate,'%y-%m-%d')>date_format(sp.receiptDate,'%y-%m-%d')");
             result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("count");
             float early = (result == null ? 0 : NumberUtils.toFloat(result.toString()));
 
             //超时
             sql = buildSqlHeader(year, shipType, countType, i);
-            sql.andWhere("sp.planArrivDate<sp.receiptDate");
+            sql.andWhere("date_format(sp.planArrivDate,'%y-%m-%d')<date_format(sp.receiptDate,'%y-%m-%d')");
             result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("count");
             float timeOut = (result == null ? 0 : NumberUtils.toFloat(result.toString()));
 
