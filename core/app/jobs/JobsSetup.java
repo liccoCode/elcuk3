@@ -75,7 +75,8 @@ public class JobsSetup {
             //ruby job 已执行
             //every(AmazonFBAQtySyncJob.class, "5mn");
 
-            every(AmazonSellingSyncJob.class, "1h");
+            //ruby job 已执行
+            //every(AmazonSellingSyncJob.class, "1h");
 
             //ruby job 已执行
             //every(AmazonFBAInventoryReceivedJob.class, "20mn");
@@ -86,8 +87,12 @@ public class JobsSetup {
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
-            every(SellingRecordCheckJob.class, "5mn");
-            every(ShipmentSyncJob.class, "5mn");
+
+            //ruby job 已执行
+            //every(SellingRecordCheckJob.class, "5mn");
+
+            //ruby job 已执行
+            //every(ShipmentSyncJob.class, "5mn");
             //every(KeepSessionJob.class, "29mn");
 
             new DriverJob().now();

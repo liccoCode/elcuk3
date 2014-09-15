@@ -261,6 +261,8 @@ public class Account extends Model {
                 StringUtils.isNotBlank(this.cookie("at-acbit")) || //IT
                 StringUtils.isNotBlank(this.cookie("at-main")) || //US
                 StringUtils.isNotBlank(this.cookie("at-acbuk")) || //UK
+                StringUtils.isNotBlank(this.cookie("at-acbfr")) || //fr
+                StringUtils.isNotBlank(this.cookie("at-acbca")) || //ca
                 StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
