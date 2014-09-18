@@ -56,15 +56,19 @@
       <dt>最后交货时间</dt>
       <dd>${twoDeliveryDate._2}&nbsp;</dd>
     </dl>
-      #{if dmt.isProcureApplyDepartable()}
-        <dl class="dl-horizontal">
-          <dt>&nbsp;</dt>
-          <dd>
-            <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small"
-               data-method='DELETE' data-confirm='确认移除?'>从当前请款单中移除</a>
-          </dd>
-        </dl>
-      #{/if}
+    <dl class="dl-horizontal">
+      <dt>&nbsp;</dt>
+      <dd>
+        <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-small" target="_blank"
+           content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
+          <i class="icon-download-alt"></i>下载 Excel
+        </a>
+          #{if dmt.isProcureApplyDepartable()}
+            <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small" data-method='DELETE'
+               data-confirm='确认移除?'>从当前请款单中移除</a>
+          #{/if}
+      </dd>
+    </dl>
   </div>
 
   <div class="span9">
@@ -129,12 +133,12 @@
                         #{/ifnot}
                     #{/power.ck}
                     #{power.ck 'procureunits.billingreworkpay'}
-                          #{form @ProcureUnits.billingReworkPay(pid, apply.id), method:'POST',
-                          id: "billing_rework_pay_form"}
-                            <input type="hidden" id="checktask_id_list" name="ids">
-                            <a href="javascript:void(0)" id="billing_rework_pay_btn" data-pid="${pid}"
-                               class="btn">申请返工费用</a>
-                          #{/form}
+                        #{form @ProcureUnits.billingReworkPay(pid, apply.id), method:'POST',
+                        id: "billing_rework_pay_form"}
+                          <input type="hidden" id="checktask_id_list" name="ids">
+                          <a href="javascript:void(0)" id="billing_rework_pay_btn" data-pid="${pid}"
+                             class="btn">申请返工费用</a>
+                        #{/form}
                     #{/power.ck}
                 </div>
                 <div class="span11">

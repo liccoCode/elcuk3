@@ -2,6 +2,7 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
+import helper.Currency;
 import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.procure.Deliveryment;
@@ -209,5 +210,37 @@ public class Excels extends Controller {
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
+    }
+
+    /**
+     * 请款单页面导出采购单中所有采购计划列表数据
+     *
+     * @param id 采购单ID
+     */
+    public static void exportDeliverymentDetailToExcel(String id) {
+        Deliveryment deliveryment = Deliveryment.findById(id);
+        List<ProcureUnit> units = deliveryment.units;
+        if(units != null && units.size() > 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("采购单%s采购计划列表数据.xls", deliveryment.id));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            float cny_summery = 0f;
+            float usd_summery = 0f;
+            float unkown_summery = 0f;
+            for(ProcureUnit unit : units) {
+                if(unit.attrs.currency == Currency.CNY) {
+                    cny_summery += unit.totalAmount();
+                } else if(unit.attrs.currency == Currency.USD) {
+                    usd_summery += unit.totalAmount();
+                } else {
+                    unkown_summery += unit.totalAmount();
+                }
+            }
+            render(units, cny_summery, usd_summery, unkown_summery);
+        } else {
+            renderText("没有数据无法生成Excel文件!");
+        }
+
     }
 }
