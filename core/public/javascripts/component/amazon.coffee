@@ -16,8 +16,6 @@ $ ->
     market = $('#market').val()
     Invalid_Characters = []
     if market is ''
-      noty({text: '请先选择市场(便于检测非法字符)!', type: 'error', timeout: 3000})
-      $(obj).val('')
       return
     else if market is 'AMAZON_JP'
       Invalid_Characters = JP_Invalid_Characters
@@ -67,8 +65,8 @@ $ ->
   )
 
   $(document).ready ->
+    # 页面初始化时校验非法字符
     $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
-
 
   $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
 
@@ -178,6 +176,8 @@ $ ->
   # 市场 下拉项变化 feedProductType 跟着变化
   $(document).on('change', '#market', (r) ->
     $("#feedProductType").trigger('adjust')
+    # 市场变化时检查非法字符
+    $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
   )
 
   # 模板 下拉项变化 feedProductType 跟着变化
