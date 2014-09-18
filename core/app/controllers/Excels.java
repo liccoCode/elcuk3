@@ -12,11 +12,7 @@ import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
 import models.view.dto.SaleReportDTO;
-import models.view.post.AnalyzePost;
-import models.view.post.DeliveryPost;
-import models.view.post.ProfitPost;
-import models.view.post.SaleReportPost;
-import models.view.post.TrafficRatePost;
+import models.view.post.*;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
@@ -242,5 +238,23 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件!");
         }
 
+    }
+
+    /**
+     * 导出产品SKU基本信息
+     */
+    public static void exportProductDetailToExcel(String search) {
+        ProductPost p = new ProductPost();
+        p.search = search;
+        List<Product> prods = p.query();
+        if(prods != null && prods.size() != 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s产品SKU基本信息.xls", search));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(prods, p);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
     }
 }
