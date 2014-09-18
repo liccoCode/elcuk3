@@ -37,43 +37,45 @@
 <hr style="border-top: 1px dashed;">
 #{list items:apply.deliveryments, as:'dmt'}
 <div class="row-fluid">
-  <div class="span3">
-    <dl class="dl-horizontal">
-      <dt>#</dt>
-      <dd><a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
-      <dt>状态</dt>
-      <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
-      <dt>供应商</dt>
-      <dd>${dmt.cooperator.fullName}</dd>
-      <dt>交货进度</dt>
-        #{set progress:dmt.deliveryProcress() /}
-      <dd>${(progress._1 / progress._2).format('#.##%')}</dd>
-      <dt>创建时间</dt>
-      <dd>${dmt.createDate}</dd>
-      <dt>下单时间</dt>
-      <dd>${dmt.orderTime}</dd>
-        #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
-      <dt>最后交货时间</dt>
-      <dd>${twoDeliveryDate._2}&nbsp;</dd>
-    </dl>
-    <dl class="dl-horizontal">
-      <dt>&nbsp;</dt>
-      <dd>
-        <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-small" target="_blank"
-           content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
-          <i class="icon-download-alt"></i>下载 Excel
-        </a>
-          #{if dmt.isProcureApplyDepartable()}
-            <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small" data-method='DELETE'
-               data-confirm='确认移除?'>从当前请款单中移除</a>
-          #{/if}
-      </dd>
-    </dl>
-  </div>
+<div class="span3">
+  <dl class="dl-horizontal">
+    <dt>#</dt>
+    <dd><a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
+    <dt>状态</dt>
+    <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
+    <dt>供应商</dt>
+    <dd>${dmt.cooperator.fullName}</dd>
+    <dt>交货进度</dt>
+      #{set progress:dmt.deliveryProcress() /}
+    <dd>${(progress._1 / progress._2).format('#.##%')}</dd>
+    <dt>创建时间</dt>
+    <dd>${dmt.createDate}</dd>
+    <dt>下单时间</dt>
+    <dd>${dmt.orderTime}</dd>
+      #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+    <dt>最后交货时间</dt>
+    <dd>${twoDeliveryDate._2}&nbsp;</dd>
+  </dl>
+  <dl class="dl-horizontal">
+    <dt>&nbsp;</dt>
+    <dd>
+      <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-small" target="_blank"
+         content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
+        <i class="icon-download-alt"></i>下载 Excel
+      </a>
+        #{if dmt.isProcureApplyDepartable()}
+          <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small" data-method='DELETE'
+             data-confirm='确认移除?'>从当前请款单中移除</a>
+        #{/if}
+    </dd>
+  </dl>
+</div>
 
-  <div class="span9">
+<div class="span9">
+  <form method="post" action="@{ProcureUnits.morebillingTailPay()}" class="procureunit_form">
     <table class="table table-bordered table-condensed">
       <tr>
+        <th></th>
         <th>#</th>
         <th>SKU</th>
         <th>Selling</th>
@@ -84,9 +86,11 @@
         <th>抵达货代</th>
         <th>FBA</th>
       </tr>
+
         #{list items:dmt.units, as:'procureUnit'}
           <tr>
               #{set pid:procureUnit.id/}
+            <td><input type="checkbox" name="unitids" value="${procureUnit.id}"></td>
             <td data-toggle="toggle" data-target="#unit_${pid}">
               <i class="icon-reorder"></i>
             ${procureUnit.id}
@@ -229,10 +233,31 @@
         <td rel='tooltip' title='汇总美金' class="usd"></td>
         <td rel='tooltip' title="汇总人民币" class="cny"></td>
         <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
-        <td colspan="2"></td>
+        <td colspan="3"></td>
+      </tr>
+      <tr class="table_summary">
+        <td colspan="3">
+          <input type="hidden" name="applyid" value="${apply.id}">
+            #{power.ck 'procureunits.billingtailpay'}
+                #{ifnot procureUnit.hasTailPay()}
+                  <button class="btn btn-primary">批量申请尾款</button>
+                #{/ifnot}
+            #{/power.ck}
+        </td>
+
+        <td colspan="3">
+            #{power.ck 'procureunits.billingprepay'}
+                #{ifnot procureUnit.hasPrePay()}
+                  <button class="btn btn-primary">批量申请预付款</button>
+                #{/ifnot}
+            #{/power.ck}
+        </td>
+
+        <td colspan="1"></td>
       </tr>
     </table>
-  </div>
+  </form>
+</div>
 </div>
 <hr style="border-top: 1px dashed;">
 #{/list}
