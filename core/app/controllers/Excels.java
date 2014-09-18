@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.Currency;
 import helper.Webs;
+import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -24,11 +25,10 @@ import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import jobs.analyze.SellingProfitJob;
 
 /**
  * Created by IntelliJ IDEA.
@@ -250,11 +250,12 @@ public class Excels extends Controller {
         F.T2<String, List<Object>> params = p.params();
         List<Product> prods = Product.find(params._1, params._2.toArray()).fetch();
         if(prods != null && prods.size() != 0) {
+            DecimalFormat df = new DecimalFormat("0.00");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
                     String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(search) ? "ALL" : search));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            render(prods, p);
+            render(prods, df);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
