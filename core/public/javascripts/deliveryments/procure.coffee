@@ -23,23 +23,48 @@ $ ->
 
   # Form 搜索功能
   $(".procureunit_form").on("click",".btn:contains(尾款)",(e) ->
-      $.post('/ProcureUnits/morebillingTailPay', $('.procureunit_form').formSerialize(), (r) ->
+      form = $(@).parents('form')
+      applyid = $('#applyid')
+      form.mask('处理中...')
+      $.get('/ProcureUnits/morebillingTailPay', form.formSerialize(), (r) ->
         if r.flag is false
           alert(r.message)
+          window.location.reload()
         else
           alert('申请尾款成功.')
           window.location.reload()
+        form.unmask()
       )
       e.preventDefault()
   ).on("click",".btn:contains(付款)",(e) ->
-      $.post('/ProcureUnits/morebillingPrePay', $('.procureunit_form').formSerialize(), (r) ->
+      form = $(@).parents('form')
+      applyid = $('#applyid')
+      form.mask('处理中...')
+      $.get('/ProcureUnits/morebillingPrePay', form.formSerialize(), (r) ->
         if r.flag is false
           alert(r.message)
+          window.location.reload()
         else
           alert('申请预付款成功.')
           window.location.reload()
+        form.unmask()
       )
       e.preventDefault()
+  ).on('click', "#allunitid",(e) ->
+      check = $(@).val()
+      alert check
+
+      checkObj = document.all("unitids")
+      if check=='on'
+        i = 0
+        while i < checkObj.length
+          checkObj[i].checked = true
+          i++
+      else
+        i = 0
+        while i < checkObj.length
+          checkObj[i].checked = false
+          i++
   )
 
 

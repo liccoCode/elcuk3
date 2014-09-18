@@ -376,7 +376,7 @@ public class ProcureUnits extends Controller {
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().get(0).message()));
         }
-        renderJSON(new Ret("预付款请款成功"));
+        renderJSON(new Ret(true,"预付款请款成功"));
     }
 
 
@@ -413,7 +413,7 @@ public class ProcureUnits extends Controller {
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().toString()));
         }
-        renderJSON(new Ret("尾款请款成功"));
+        renderJSON(new Ret(true,"尾款请款成功"));
     }
 
 
