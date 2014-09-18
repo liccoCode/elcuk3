@@ -232,19 +232,20 @@
         <td colspan="3"></td>
       </tr>
       <tr class="table_summary">
-        <td colspan="3">
-          <input type="hidden" name="applyid" value="${apply.id}">
-            #{power.ck 'procureunits.billingtailpay'}
-                #{ifnot procureUnit.hasTailPay()}
-                  <button class="btn btn-primary">批量申请尾款</button>
-                #{/ifnot}
-            #{/power.ck}
-        </td>
 
         <td colspan="3">
             #{power.ck 'procureunits.billingprepay'}
                 #{ifnot procureUnit.hasPrePay()}
                   <button class="btn btn-primary">批量申请预付款</button>
+                #{/ifnot}
+            #{/power.ck}
+        </td>
+
+        <td colspan="3">
+          <input type="hidden" name="applyid" value="${apply.id}">
+            #{power.ck 'procureunits.billingtailpay'}
+                #{ifnot procureUnit.hasTailPay()}
+                  <button class="btn btn-primary">批量申请尾款</button>
                 #{/ifnot}
             #{/power.ck}
         </td>
