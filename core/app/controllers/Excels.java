@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -246,11 +247,12 @@ public class Excels extends Controller {
     public static void exportProductDetailToExcel(String search) {
         ProductPost p = new ProductPost();
         p.search = search;
-        List<Product> prods = p.query();
+        F.T2<String, List<Object>> params = p.params();
+        List<Product> prods = Product.find(params._1, params._2.toArray()).fetch();
         if(prods != null && prods.size() != 0) {
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s产品SKU基本信息.xls", search));
+                    String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(search) ? "ALL" : search));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(prods, p);
         } else {
