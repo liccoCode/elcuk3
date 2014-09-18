@@ -51,7 +51,9 @@ $ ->
         $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
       )
 
-
+  $(document).ready ->
+    $shipType = $("[name='unit.shipType']")
+    $shipType.trigger('change') if $shipType.val() != undefined && $shipType.val() != 'EXPRESS'
 
   # Ajax 加载 Shipment
   $('#new_procureunit,#unitEditForm,#update_form').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
@@ -63,7 +65,7 @@ $ ->
     if shipType == 'EXPRESS'
       $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.')
     else
-      LoadMask.mask()
+      LoadMask.mask(shipment)
       $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
         .done((html) ->
           shipment.html(html)

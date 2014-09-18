@@ -2,7 +2,9 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
+import helper.Currency;
 import helper.Webs;
+import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -11,26 +13,22 @@ import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
 import models.view.dto.SaleReportDTO;
-import models.view.post.AnalyzePost;
-import models.view.post.DeliveryPost;
-import models.view.post.ProfitPost;
-import models.view.post.SaleReportPost;
-import models.view.post.TrafficRatePost;
+import models.view.post.*;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import jobs.analyze.SellingProfitJob;
 
 /**
  * Created by IntelliJ IDEA.
@@ -206,6 +204,58 @@ public class Excels extends Controller {
             renderArgs.put("dateFormat", formatter);
             render(dtos, p);
 
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 请款单页面导出采购单中所有采购计划列表数据
+     *
+     * @param id 采购单ID
+     */
+    public static void exportDeliverymentDetailToExcel(String id) {
+        Deliveryment deliveryment = Deliveryment.findById(id);
+        List<ProcureUnit> units = deliveryment.units;
+        if(units != null && units.size() > 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("采购单%s采购计划列表数据.xls", deliveryment.id));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            float cny_summery = 0f;
+            float usd_summery = 0f;
+            float unkown_summery = 0f;
+            for(ProcureUnit unit : units) {
+                if(unit.attrs.currency == Currency.CNY) {
+                    cny_summery += unit.totalAmount();
+                } else if(unit.attrs.currency == Currency.USD) {
+                    usd_summery += unit.totalAmount();
+                } else {
+                    unkown_summery += unit.totalAmount();
+                }
+            }
+            render(units, cny_summery, usd_summery, unkown_summery);
+        } else {
+            renderText("没有数据无法生成Excel文件!");
+        }
+
+    }
+
+    /**
+     * 导出产品SKU基本信息
+     */
+    public static void exportProductDetailToExcel(String search) {
+        ProductPost p = new ProductPost();
+        p.search = search;
+        F.T2<String, List<Object>> params = p.params();
+        List<Product> prods = Product.find(params._1, params._2.toArray()).fetch();
+        if(prods != null && prods.size() != 0) {
+            DecimalFormat df = new DecimalFormat("0.00");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(search) ? "ALL" : search));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(prods, df);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }

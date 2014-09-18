@@ -11,13 +11,17 @@
     <a href="@{Products.blank()}" class="btn btn-primary" target="_blank">添加新产品</a>
   #{/power.ck}
 
-    <div class="span3 pull-right input-prepend input-append">
+    <div class="span4 pull-right input-prepend input-append">
         <form action="@{Products.index()}" method="post">
             <span class="add-on"><i class="icon-search"></i></span>
             <input type="hidden" name="p.page" value="${p.page}">
             <input type="text" autocomplete="off" data-provide="typeahead" data-items="5" data-source="${families}"
                    name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU">
             <button data-loading class="btn">搜索</button>
+            <a href="@{Excels.exportProductDetailToExcel(p.search)}" class="btn btn-success" target="_blank"
+                   content="将搜索出来的 Product 导出基本信息到 Excel" placement='bottom' rel="popover">
+              <i class="icon-download-alt"></i>下载 Excel
+            </a>
         </form>
     </div>
 </div>
