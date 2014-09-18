@@ -15,6 +15,7 @@ import models.procure.Shipment;
 import models.product.Product;
 import models.product.Whouse;
 import models.qc.CheckTask;
+import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -356,6 +357,29 @@ public class ProcureUnits extends Controller {
         Applys.procure(applyId);
     }
 
+
+    /**
+     * 预付款申请
+     *
+     * @param id
+     */
+    @Check("procureunits.billingprepay")
+    public static void morebillingPrePay(Long applyid, List<Long> unitids) {
+        if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
+        for(Long unitid : unitids) {
+            ProcureUnit unit = ProcureUnit.findById(unitid);
+            try {
+                unit.billingPrePay();
+            } catch(PaymentException e) {
+                Validation.addError("", e.getMessage());
+            }
+            if(Validation.hasErrors())
+                renderJSON(new Ret(Validation.errors().get(0).message()));
+        }
+        renderJSON(new Ret("预付款请款成功"));
+    }
+
+
     /**
      * 尾款申请
      *
@@ -375,6 +399,23 @@ public class ProcureUnits extends Controller {
             flash.success("%s 请款成功", FeeType.procurement().nickName);
         Applys.procure(applyId);
     }
+
+
+    public static void morebillingTailPay(Long applyid, List<Long> unitids) {
+        if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
+        for(Long unitid : unitids) {
+            ProcureUnit unit = ProcureUnit.findById(unitid);
+            try {
+                unit.billingTailPay();
+            } catch(PaymentException e) {
+                Validation.addError("", e.getMessage());
+            }
+            if(Validation.hasErrors())
+                renderJSON(new Ret(Validation.errors().toString()));
+        }
+        renderJSON(new Ret("尾款请款成功"));
+    }
+
 
     /**
      * 加载当前采购计划供应商下所有未申请的返工费用
