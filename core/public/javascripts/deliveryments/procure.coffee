@@ -21,6 +21,29 @@ $ ->
     $('#reworkpay_modal').modal('hide')
   )
 
+  # Form 搜索功能
+  $(".procureunit_form").on("click",".btn:contains(尾款)",(e) ->
+      $.post('/ProcureUnits/morebillingTailPay', $('.procureunit_form').formSerialize(), (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('申请尾款成功.')
+          window.location.reload()
+      )
+      e.preventDefault()
+  ).on("click",".btn:contains(付款)",(e) ->
+      $.post('/ProcureUnits/morebillingPrePay', $('.procureunit_form').formSerialize(), (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('申请预付款成功.')
+          window.location.reload()
+      )
+      e.preventDefault()
+  )
+
+
+
   calculateSumery = ->
     $('.table_summary').each ->
       cny_summery = 0
