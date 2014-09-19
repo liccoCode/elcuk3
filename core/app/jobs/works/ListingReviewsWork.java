@@ -50,6 +50,7 @@ public class ListingReviewsWork extends Job<Listing> {
             for(JsonElement e : array) {
                 AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                 AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
+                Logger.warn(listingId+" reviewid:"+review.reviewId);
                 if(fromDB == null) {
                     if(listing.listingId.equals(review.listingId)) {
                         review.listing = listing;
