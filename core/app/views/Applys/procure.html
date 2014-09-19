@@ -35,7 +35,6 @@
 </div>
 
 <hr style="border-top: 1px dashed;">
-<form method="post" action="@{ProcureUnits.morebillingTailPay()}" class="procureunit_form">
 #{list items:apply.deliveryments, as:'dmt'}
 #{set tr_key: key ? key : 'unit'/}
 <div class="row-fluid">
@@ -267,7 +266,6 @@
   </div>
 </div>
 
-</form>
 
 #{power.ck 'paymentunits.destroy'}
 <div class="modal hide fade" id="paymentUnit_destroy">
