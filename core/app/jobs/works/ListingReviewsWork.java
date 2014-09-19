@@ -47,6 +47,7 @@ public class ListingReviewsWork extends Job<Listing> {
              * 更新, 需要对某一些字段进行判断后更新并添加 Comment
              */
             JsonArray array = reviews.getAsJsonArray();
+            Logger.warn(listingId+" array:"+array.size());
             for(JsonElement e : array) {
                 AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                 AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
