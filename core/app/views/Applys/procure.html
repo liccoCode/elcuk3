@@ -35,7 +35,10 @@
 </div>
 
 <hr style="border-top: 1px dashed;">
+
+
 #{list items:apply.deliveryments, as:'dmt'}
+#{set tr_key: key ? key : 'unit'/}
 <div class="row-fluid">
 <div class="span3">
   <dl class="dl-horizontal">
@@ -72,10 +75,9 @@
 </div>
 
 <div class="span9">
-  <form method="post" action="@{ProcureUnits.morebillingTailPay()}" class="procureunit_form">
     <table class="table table-bordered table-condensed">
       <tr>
-        <th></th>
+        <th> <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall"></th>
         <th>#</th>
         <th>SKU</th>
         <th>Selling</th>
@@ -90,7 +92,7 @@
         #{list items:dmt.units, as:'procureUnit'}
           <tr>
               #{set pid:procureUnit.id/}
-            <td><input type="checkbox" name="unitids" value="${procureUnit.id}"></td>
+            <td><label class="checkbox"><input type="checkbox" name="unitids" value="${procureUnit.id}" class="${tr_key}" id="unitids"></label></td>
             <td data-toggle="toggle" data-target="#unit_${pid}">
               <i class="icon-reorder"></i>
             ${procureUnit.id}
@@ -235,33 +237,37 @@
         <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
         <td colspan="3"></td>
       </tr>
-      <tr class="table_summary">
-
-        <td colspan="3">
-            #{power.ck 'procureunits.billingprepay'}
-                #{ifnot procureUnit.hasPrePay()}
-                  <button class="btn btn-primary">批量申请预付款</button>
-                #{/ifnot}
-            #{/power.ck}
-        </td>
-
-        <td colspan="3">
-          <input type="hidden" name="applyid" value="${apply.id}">
-            #{power.ck 'procureunits.billingtailpay'}
-                #{ifnot procureUnit.hasTailPay()}
-                  <button class="btn btn-primary">批量申请尾款</button>
-                #{/ifnot}
-            #{/power.ck}
-        </td>
-
-        <td colspan="1"></td>
-      </tr>
     </table>
-  </form>
 </div>
 </div>
 <hr style="border-top: 1px dashed;">
 #{/list}
+
+<div class="row-fluid">
+  <div class="span3">
+  </div>
+  <div class="span9">
+    <table class="table table-bordered table-condensed">
+      <tr class="table_summary">
+        <td colspan="2">
+        #{power.ck 'procureunits.billingprepay'}
+          <button id="prepaybtn" class="btn btn-primary">批量申请预付款</button>
+        #{/power.ck}
+        </td>
+
+        <td colspan="3">
+          <input type="hidden" name="applyid" id="applyid" value="${apply.id}">
+        #{power.ck 'procureunits.billingtailpay'}
+          <button id="tailpaybtn"  class="btn btn-primary">批量申请尾款</button>
+        #{/power.ck}
+        </td>
+        <td colspan="4"></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
 #{power.ck 'paymentunits.destroy'}
 <div class="modal hide fade" id="paymentUnit_destroy">
   <form action="#" method="POST" id="paymentUnit_destroy_form">
@@ -288,7 +294,3 @@
 #{records records: apply.records()/}
 
 <div id="modal_home"></div>
-
-
-
-

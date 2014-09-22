@@ -61,7 +61,7 @@ public class PaymentUnits extends Controller {
             flash.success("修正值更新成功.");
         }
         // NOTE: 如果 fixValue 的 routes 文件改变, 这里也需要改变
-        redirect("/apply/" + paymentUnit.procureUnit.deliveryment.apply.id + "/procure#" + id);
+        Applys.procure(paymentUnit.procureUnit.deliveryment.apply.id);
     }
 
     @Check("paymentunits.deny")
