@@ -19,7 +19,9 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -376,7 +378,7 @@ public class ProcureUnits extends Controller {
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().get(0).message()));
         }
-        renderJSON(new Ret(true,"预付款请款成功"));
+        renderJSON(new Ret(true, "预付款请款成功"));
     }
 
 
@@ -413,7 +415,7 @@ public class ProcureUnits extends Controller {
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().toString()));
         }
-        renderJSON(new Ret(true,"尾款请款成功"));
+        renderJSON(new Ret(true, "尾款请款成功"));
     }
 
 
