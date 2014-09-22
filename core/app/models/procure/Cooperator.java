@@ -17,8 +17,9 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.Collator;
+import java.text.RuleBasedCollator;
+import java.util.*;
 
 /**
  * 所有与公司一起的合作者;
@@ -195,6 +196,7 @@ public class Cooperator extends Model {
                 return "重度检";
             }
         };
+
         public abstract String label();
     }
 
@@ -305,7 +307,9 @@ public class Cooperator extends Model {
      * 返回所有供应商
      */
     public static List<Cooperator> suppliers() {
-        return Cooperator.find("type=?", T.SUPPLIER).fetch();
+        List<Cooperator> cooperators = Cooperator.find("type=?", T.SUPPLIER).fetch();
+        Collections.sort(cooperators, new PinyinSort());
+        return cooperators;
     }
 
     /**
@@ -317,4 +321,14 @@ public class Cooperator extends Model {
         return Cooperator.find("type=?", T.SHIPPER).fetch();
     }
 
+    private static class PinyinSort implements Comparator<Object> {
+        RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
+
+        @Override
+        public int compare(Object o1, Object o2) {
+            Cooperator a = (Cooperator) o1;
+            Cooperator b = (Cooperator) o2;
+            return collator.compare(a.name, b.name);
+        }
+    }
 }
