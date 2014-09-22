@@ -35,6 +35,8 @@
 </div>
 
 <hr style="border-top: 1px dashed;">
+
+
 #{list items:apply.deliveryments, as:'dmt'}
 #{set tr_key: key ? key : 'unit'/}
 <div class="row-fluid">
@@ -241,7 +243,6 @@
 <hr style="border-top: 1px dashed;">
 #{/list}
 
-
 <div class="row-fluid">
   <div class="span3">
   </div>
@@ -250,14 +251,14 @@
       <tr class="table_summary">
         <td colspan="2">
         #{power.ck 'procureunits.billingprepay'}
-          <button class="btn btn-primary">批量申请预付款</button>
+          <button id="prepaybtn" class="btn btn-primary">批量申请预付款</button>
         #{/power.ck}
         </td>
 
         <td colspan="3">
           <input type="hidden" name="applyid" id="applyid" value="${apply.id}">
         #{power.ck 'procureunits.billingtailpay'}
-          <button class="btn btn-primary">批量申请尾款</button>
+          <button id="tailpaybtn"  class="btn btn-primary">批量申请尾款</button>
         #{/power.ck}
         </td>
         <td colspan="4"></td>
