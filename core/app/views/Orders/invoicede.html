@@ -127,7 +127,7 @@
 
 #{list items:ord.items, as:'item'}
   <tr>
-    <td class="td3" style="width:50%">${item.product.productName}</td>
+    <td class="td3" style="width:50%">${item.listingName}</td>
     <td class="td3">${item.quantity}</td>
       #{if invoice != null}
         <td class="td3">${invoice.price.get(item_index-1)}</td>

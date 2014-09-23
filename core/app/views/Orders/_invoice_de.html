@@ -108,7 +108,8 @@
             .replace("DE","Deutschland")}">
           #{/if}
           #{else}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.address.replace("DE","Deutschland")}">
+            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.address +
+            ','+ ord.city+','+ord.province+','+ord.postalCode+',Deutschland,phone:'+ord.phone}">
           #{/else}
       #{/else}
 
@@ -132,12 +133,9 @@
         <input style="width:100%" type="text" id="address" name="invoice.address" value="${invoice.address.replace("DE","Deutschland")}">
       #{/if}
       #{else}
-          #{if ord.address1!=null && ord.address1.length()>0}
-            <input style="width:100%" type="text" id="address" name="invoice.address" value="${ord.address1.replace("DE","Deutschland")}">
-          #{/if}
-          #{else}
-            <input style="width:100%" type="text" id="address" name="invoice.address" value="${ord.address.replace("DE","Deutschland")}">
-          #{/else}
+            <input style="width:100%" type="text" id="address" name="invoice.address" value="${ord.reciver + ','+
+            ord.address  + ','+ ord.city+','+ord.province+','+ord.postalCode+',Deutschland, phone:'+ord.phone}">
+
       #{/else}
 
       </td>
@@ -158,7 +156,7 @@
 
   #{list items:ord.items, as:'item'}
     <tr>
-      <td class="td3" style="width:50%">${item.product.productName}</td>
+      <td class="td3" style="width:50%">${item.listingName}</td>
       <td class="td3">${item.quantity}</td>
 
         #{if invoice != null}
