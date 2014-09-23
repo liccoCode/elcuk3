@@ -55,12 +55,8 @@ public class TrafficRatePost extends Post<TrafficRate> {
 
     public List<TrafficRate> query() {
         String cacheKey = "trafficRate";
-        if(this.market != null) {
-            cacheKey = cacheKey + this.market.label();
-        }
-        if(StringUtils.isNotBlank(this.SellingId)) {
-            cacheKey = cacheKey + this.SellingId;
-        }
+        if(this.market != null) cacheKey = String.format("%s|%s", cacheKey, this.market.name());
+        if(StringUtils.isNotBlank(this.SellingId)) String.format("%s|%s", cacheKey, this.SellingId);
 
         cacheKey = Caches.Q.cacheKey(cacheKey, from, to);
         List<TrafficRate> cacheElement = Cache.get(cacheKey, List.class);
@@ -68,30 +64,20 @@ public class TrafficRatePost extends Post<TrafficRate> {
 
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<Object>();
-
         sbd.append("date").append(">=?").append(" AND ")
                 .append("date<=?");
-        //if(this.market != null) {
-        //    params.add(market.withTimeZone(Dates.morning(this.from)).toDate());
-        //    params.add(market.withTimeZone(Dates.morning(this.to)).toDate());
-        //} else {
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
-        //}
-
 
         if(StringUtils.isNotBlank(this.SellingId)) {
             sbd.append(" AND selling.sellingId=?");
             params.add(this.SellingId);
         }
-
         if(this.market != null) {
             sbd.append(" AND market=? ");
             params.add(this.market);
         }
-
         sbd.append(" ORDER BY selling.sellingId,date");
-
 
         List<SellingRecord> dateMixRecords = SellingRecord
                 .find(sbd.toString(), params.toArray()).fetch();
@@ -116,6 +102,4 @@ public class TrafficRatePost extends Post<TrafficRate> {
         Cache.set(cacheKey, traffics, "4h");
         return traffics;
     }
-
-
 }
