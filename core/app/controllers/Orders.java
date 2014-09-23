@@ -2,15 +2,31 @@ package controllers;
 
 import com.google.common.collect.Lists;
 import jobs.promise.FinanceShippedPromise;
+import models.ElcukRecord;
+import models.embedded.ERecordBuilder;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.Orderr;
+import models.market.OrderInvoice;
+import models.market.OrderItem;
+import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
+
+import java.math.BigDecimal;
+
 import models.view.Ret;
 import models.view.post.OrderPOST;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import play.i18n.Messages;
+import play.libs.F;
+import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.List;
+import java.util.*;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,7 +46,25 @@ public class Orders extends Controller {
 
     public static void show(String id) {
         Orderr ord = Orderr.findById(id);
-        render(ord);
+
+        OrderInvoice invoice = OrderInvoice.findById(id);
+        if(invoice != null) invoice.setprice();
+
+        F.T3<Float, Float, Float> amt = ord.amount();
+        Float totalamount = amt._1;
+        Float notaxamount = amt._2;
+        Float tax = amt._3;
+        if(invoice != null) {
+            notaxamount = invoice.notaxamount;
+            tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+        }
+
+        List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
+                + "action like '%orderinvoice.invoice%' ORDER BY "
+                + " createAt  DESC")
+                .fetch();
+
+        render(ord, totalamount, tax, notaxamount, invoice, records);
     }
 
     public static void refreshFee(String id) {
@@ -44,5 +78,30 @@ public class Orders extends Controller {
             renderJSON(new Ret(e.getMessage()));
         }
 
+    }
+
+
+    /**
+     * 生成订单发票
+     */
+    public static void invoicede(OrderInvoice invoice) {
+        Orderr ord = Orderr.findById(invoice.orderid);
+        invoice.updateDate = new Date();
+        invoice.updator = Secure.Security.connected();
+        invoice.saveprice();
+        invoice.europevat = OrderInvoice.VAT.NORMAL;
+        invoice.save();
+        new ElcukRecord("orderinvoice.invoice",
+                String.format("%s", invoice.invoiceto), invoice.orderid).save();
+
+
+        F.T3<Float, Float, Float> amt = ord.amount();
+        Float totalamount = amt._1;
+        final PDF.Options options = new PDF.Options();
+        options.filename = "Rechnung de" + invoice.orderid;
+        options.pageSize = IHtmlToPdfTransformer.A3P;
+        Float notaxamount = invoice.notaxamount;
+        Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+        renderPDF(options, ord, totalamount, notaxamount, tax, invoice);
     }
 }

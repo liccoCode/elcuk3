@@ -13,6 +13,7 @@ import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.templates.JavaExtensions;
 import query.OrderrQuery;
 import query.vo.OrderrVO;
@@ -465,5 +466,18 @@ public class Orderr extends GenericModel {
         List<String> orderIds = new ArrayList<String>();
         for(Orderr o : orderrs) orderIds.add(o.orderId);
         return orderIds;
+    }
+
+
+    public F.T3<Float, Float, Float> amount() {
+        Float totalamount = 0f;
+        OrderInvoice invoice = OrderInvoice.findById(this.orderId);
+        for(OrderItem item : this.items) {
+            totalamount = totalamount + item.quantity * item.price;
+        }
+        Float notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(OrderInvoice.devat),2,
+                java.math.RoundingMode.HALF_DOWN).floatValue();
+        Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+        return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
     }
 }
