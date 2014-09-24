@@ -71,7 +71,6 @@ $ ->
         label = feeStateLabel(r['state'])
         $form.parents('div.top').find('.paymentInfo tr:last')
           .after(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
-        noty({text: "成功添加 #{r['currency']} #{r['amount']} ", type: 'success', timeout: 3000})
         $form.trigger('reset')
         #计算页面所有运输单费用信息的各种币种的总和
         $('table.paymentInfo').trigger("statisticFee")
