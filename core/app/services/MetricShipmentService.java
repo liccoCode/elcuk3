@@ -109,7 +109,7 @@ public class MetricShipmentService {
      * 统计运输重量(市场 或者 运输方式)
      */
     public Float countShipWeight() {
-        //由于ES的shippayunit与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为count统计函数)
+        //由于ES的 shippayunit 与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为 SUM 统计函数)
         SqlSelect sql = new SqlSelect()
                 .select("SUM(CASE " +
                         "WHEN pro.weight IS NULL THEN 0 * si.qty " +
