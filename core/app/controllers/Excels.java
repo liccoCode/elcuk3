@@ -13,6 +13,7 @@ import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.DeliveryExcel;
 import models.view.dto.SaleReportDTO;
+import models.view.dto.ShipmentWeight;
 import models.view.post.*;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
@@ -29,6 +30,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -256,6 +258,21 @@ public class Excels extends Controller {
                     String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(search) ? "ALL" : search));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(prods, df);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    public static void exportShipmentWeighReport(ShipmentWeight excel) {
+        Map<String, ShipmentWeight> sws = excel.query();
+        if(sws != null && sws.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put("dateFormat", formatter);
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s运输重量报表.xls", formatter.format(excel.from), formatter.format(excel.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(sws, excel);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }

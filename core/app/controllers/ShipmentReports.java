@@ -3,11 +3,18 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.procure.Shipment;
+import models.product.Category;
+import models.product.Product;
 import models.view.Ret;
+import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
+import play.libs.F;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import query.ShipmentReportESQuery;
+
+import java.util.List;
 
 /**
  * 物流模块报表控制器
@@ -17,6 +24,16 @@ import query.ShipmentReportESQuery;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ShipmentReports extends Controller {
+
+    @Before(only = {"cost"})
+    public static void setUpIndexPage() {
+        F.T2<List<String>, List<String>> categorysToJson = Category.fetchCategorysJson();
+        renderArgs.put("categorys", J.json(categorysToJson._2));
+        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
+        renderArgs.put("skus", J.json(skusToJson._2));
+        ShipmentWeight excel = new ShipmentWeight();
+        renderArgs.put("excel", excel);
+    }
 
     /**
      * 运输方式的重量与费用统计(成本)
