@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import models.view.Ret;
 import models.view.post.OrderPOST;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.StringUtils;
 import play.i18n.Messages;
 import play.libs.F;
 import play.modules.pdf.PDF;
@@ -64,7 +65,16 @@ public class Orders extends Controller {
                 + " createAt  DESC")
                 .fetch();
 
-        render(ord, totalamount, tax, notaxamount, invoice, records);
+        ord.address = ord.address.replace(",,", ",");
+        ord.address1 = ord.address1.replace(",,", ",");
+        if(ord.address != null && ord.address.indexOf(",") == 0) {
+            ord.address = ord.address.substring(1, ord.address.length());
+        }
+        if(ord.address1 != null && ord.address1.indexOf(",") == 0) {
+            ord.address1 = ord.address1.substring(1, ord.address.length());
+        }
+        String editaddress = ord.formataddress();
+        render(ord, totalamount, tax, notaxamount, invoice, records,editaddress);
     }
 
     public static void refreshFee(String id) {
