@@ -75,7 +75,6 @@ public class Orders extends Controller {
             ord.address1 = ord.address1.substring(1, ord.address.length());
         }
         String editaddress = ord.formataddress();
-
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
 
         render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat);
