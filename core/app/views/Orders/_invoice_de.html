@@ -98,18 +98,16 @@
     <tr>
       <td class="td4">
         <strong>To</strong> <br>
-      ${ord.buyer}<br>
       #{if invoice != null}
         <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.invoiceto.replace("DE","Deutschland")}">
       #{/if}
       #{else}
           #{if ord.address1!=null && ord.address1.length()>0}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.address1
+            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.reciver+","+ord.address1
             .replace("DE","Deutschland")}">
           #{/if}
           #{else}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.address +
-            ','+ ord.city+','+ord.province+','+ord.postalCode+',Deutschland,phone:'+ord.phone?.toString()}">
+            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
           #{/else}
       #{/else}
 
@@ -134,8 +132,7 @@
         <input style="width:100%" type="text" id="address" name="invoice.address" value="${invoice.address.replace("DE","Deutschland")}">
       #{/if}
       #{else}
-            <input style="width:100%" type="text" id="address" name="invoice.address" value="${ord.reciver + ','+
-            ord.address  + ','+ ord.city+','+ord.province+','+ord.postalCode+',Deutschland,phone:'+ord.phone?.toString()}">
+        <input style="width:100%" type="text" id="address" name="invoice.address" value="${editaddress}">
 
       #{/else}
 

@@ -149,7 +149,7 @@
   <div class="tab-pane fade" id='invoiceinfo'>
   #{if ord.market==models.market.M.AMAZON_DE}
     #{render 'Orders/_invoice_de.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
-  invoice: invoice,records:records/}
+  invoice: invoice,records:records,editaddress:editaddress/}
   #{/if}
 
   </div>

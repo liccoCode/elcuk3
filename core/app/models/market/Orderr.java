@@ -7,6 +7,7 @@ import helper.Dates;
 import helper.Promises;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -475,9 +476,37 @@ public class Orderr extends GenericModel {
         for(OrderItem item : this.items) {
             totalamount = totalamount + item.quantity * item.price;
         }
-        Float notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(OrderInvoice.devat),2,
+        Float notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(OrderInvoice.devat), 2,
                 java.math.RoundingMode.HALF_DOWN).floatValue();
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
+    }
+
+
+    public String formataddress() {
+        String editaddress = "";
+        if(!StringUtils.isBlank(this.reciver)) {
+            editaddress = editaddress + "," + this.reciver;
+        }
+        if(!StringUtils.isBlank(this.address)) {
+            editaddress = editaddress + "," + this.address;
+        }
+        if(!StringUtils.isBlank(this.city)) {
+            editaddress = editaddress + "," + this.city;
+        }
+        if(!StringUtils.isBlank(this.province)) {
+            editaddress = editaddress + "," + this.province;
+        }
+        if(!StringUtils.isBlank(this.postalCode)) {
+            editaddress = editaddress + "," + this.postalCode;
+        }
+        editaddress = editaddress + ",Deutschland";
+        if(!StringUtils.isBlank(this.phone)) {
+            editaddress = editaddress + ",phone:" + this.phone;
+        }
+        if(editaddress != null && editaddress.indexOf(",") == 0) {
+            editaddress = editaddress.substring(1, editaddress.length());
+        }
+        return editaddress;
     }
 }
