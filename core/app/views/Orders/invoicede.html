@@ -65,8 +65,17 @@
 <table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
   <tr>
     <td class="td1">
-      <strong><font style="font-weight: bold;" size="4pt">Rechnung #: ${ord.orderId}</font> <br>
-        Datum: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}  </strong>
+    #{if ord.market==models.market.M.AMAZON_FR}
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: CN${ord.orderId}</font>
+      </strong><br>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title1} #: ${ord.orderId}</font>
+      </strong><br>
+    #{/if}
+    #{else}
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
+      </strong><br>
+    #{/else}
+    ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}  </strong>
     </td>
     <td rowspan="4" class="td2">
       <div class="div1">
@@ -93,22 +102,28 @@
     </td>
     <td class="td2">
       <strong>From</strong> <br>
-      TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
-      Unit A5, 9/F Silvercorp Int'l <br>
-      Tower 707-713 Nathan Rd <br>
-      Mongkok, KL <br>
-      999077 Hongkong <br>
-      <strong>Steuernummer: 1667318915</strong> <br>
-      <strong>USt-ID-Nr.: DE 292695920</strong> <br>
+    ${invoiceformat.frominfo1} <br>
+    ${invoiceformat.frominfo2} <br>
+    ${invoiceformat.frominfo3}<br>
+    ${invoiceformat.frominfo4} <br>
+    ${invoiceformat.frominfo5} <br>
+      <strong>${invoiceformat.frominfo6}</strong> <br>
+      <strong>${invoiceformat.frominfo7}</strong> <br>
     </td>
   </tr>
 
 
   <tr>
-    <td class="td1"><strong>Lieferadresse</strong><br>
+    <td class="td1"><strong>${invoiceformat.address}</strong><br>
     #{list items:invoice.address.split(","), as:'add'}
     ${add}<br>
     #{/list}
+
+    #{if ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT}
+      <br>
+    ${invoiceformat.rate}<br>
+    #{/if}
+
     </td>
     <td rowspan="2"></td>
   </tr>
@@ -118,10 +133,10 @@
 
 <table class="table1" cellpadding="8px" style="width:70%" cellspacing="0" align='center'>
   <tr>
-    <td class="td3"><strong>Beschreibung</strong></td>
-    <td class="td3"><strong>Menge</strong></td>
-    <td class="td3"><strong>Stückpreis(€)</strong></td>
-    <td class="td3"><strong>Betrag(€)</strong></td>
+    <td class="td3"><strong>${invoiceformat.itemname}</strong></td>
+    <td class="td3"><strong>${invoiceformat.qty}</strong></td>
+    <td class="td3"><strong>${invoiceformat.price}</strong></td>
+    <td class="td3"><strong>${invoiceformat.itemamount}</strong></td>
   </tr>
 
 
@@ -129,43 +144,65 @@
   <tr>
     <td class="td3" style="width:50%">${item.listingName}</td>
     <td class="td3">${item.quantity}</td>
-      #{if invoice != null}
-        <td class="td3">${invoice.price.get(item_index-1)}</td>
-        <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1)))
+      #{if invoice!=null && invoice.isreturn ==2 }
+        <td class="td3">${new BigDecimal(-1*item.price).setScale(2, 4)}</td>
+        <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(-1*item.price))
         .setScale(2, 4).floatValue()}</td>
       #{/if}
-      #{else }
-        <td class="td3">${new BigDecimal(item.price).divide(new
-        BigDecimal(models.market.OrderInvoice.devat,2,
-        java.math.RoundingMode.HALF_DOWN)).floatValue()}</td>
-        <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).divide(new
-        BigDecimal(models.market.OrderInvoice.devat,2,
-        java.math.RoundingMode.HALF_DOWN)).floatValue()).setScale(2, 4).floatValue()}</td>
+      #{else}
+          #{if invoice != null}
+              #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+                <td class="td3">${item.price}</td>
+                <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price)).setScale(2, 4)}</td>
+              #{/if}
+              #{else}
+                <td class="td3">${invoice.price.get(item_index-1)}</td>
+                <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1)))
+                .setScale(2, 4).floatValue()}</td>
+              #{/else}
+          #{/if}
+          #{else }
+            <td class="td3">${new BigDecimal(item.price).divide(new
+            BigDecimal(ord.orderrate(),2,
+            java.math.RoundingMode.HALF_DOWN)).floatValue()}</td>
+            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).divide(new
+            BigDecimal(ord.orderrate(),2,
+            java.math.RoundingMode.HALF_DOWN)).floatValue()).setScale(2, 4).floatValue()}</td>
+          #{/else}
       #{/else}
   </tr>
 #{/list}
 
-
-
-
-
   <tr>
     <td class="td3"></td>
     <td class="td3"></td>
-    <td class="td3"><strong>Zwischensumme</strong></td>
+    <td class="td3"><strong>${invoiceformat.notaxamount}</strong></td>
     <td class="td3">${notaxamount}</td>
   </tr>
   <tr>
     <td class="td3"></td>
     <td class="td3"></td>
-    <td class="td3"><strong>MwST(19%)</strong></td>
-    <td class="td3">${tax}</td>
+
+  #{if invoice?.isreturn ==2 }
+    <td class="td3"><strong>${invoiceformat.taxamount}</strong></td>
+    <td class="td3">0</td>
+  #{/if}
+  #{else}
+      #{if invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE}
+        <td class="td3"><strong>${invoiceformat.taxamount}</strong></td>
+        <td class="td3">0</td>
+      #{/if}
+      #{else}
+        <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>
+        <td class="td3">${tax}</td>
+      #{/else}
+  #{/else}
   </tr>
 
   <tr>
     <td class="td3"></td>
     <td class="td3"></td>
-    <td class="td3"><strong>Summe</strong></td>
+    <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
     <td class="td3"><strong>${totalamount}</strong></td>
   </tr>
 </table>
