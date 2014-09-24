@@ -568,7 +568,7 @@ public class AmazonListingReview extends GenericModel {
 
     public static List<AmazonListingReview> listingReviews(String listingId, String orderBy) {
         return AmazonListingReview.listingReviews(listingId, orderBy,
-                ("reviewRank".equals(orderBy) ? " ASC" : " DESC"));
+                ("rating".equals(orderBy) ? " ASC" : " DESC"));
     }
 
     public static List<AmazonListingReview> listingReviews(String listingId, String orderBy,
