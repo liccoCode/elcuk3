@@ -156,6 +156,7 @@ public class OrderInvoice extends GenericModel {
             format.taxamount = "MwST";
             format.taxamountper = "MwST(19%)";
             format.totalamount = "Summe";
+            format.country = "Deutschland";
         } else if(m == M.AMAZON_UK) {
             format.title = "Invoice";
             format.date = "Date";
@@ -176,6 +177,7 @@ public class OrderInvoice extends GenericModel {
             format.taxamount = "VAT";
             format.taxamountper = "VAT(20%)";
             format.totalamount = "Total";
+            format.country = "United Kingdom";
         } else if(m == M.AMAZON_IT) {
             format.title = "Fattura";
             format.date = "Data";
@@ -197,6 +199,7 @@ public class OrderInvoice extends GenericModel {
             format.totalamount = "Totale";
             format.taxamountper = "Totale(22%)";
             format.rate = "Tasso di cambio: 1 EUR = 0,8358 GBP";
+            format.country = "Italia";
         } else if(m == M.AMAZON_FR) {
             format.title = "Note de Crédit";
             format.title1 = "Facture d'origine";
@@ -218,6 +221,7 @@ public class OrderInvoice extends GenericModel {
             format.taxamountper = "TVA(20%)";
             format.totalamount = "Total";
             format.rate = "Taux de change: 1 EUR = 0,8358 GBP";
+            format.country = "France";
         }
         return format;
     }

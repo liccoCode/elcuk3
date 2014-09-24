@@ -44,4 +44,6 @@ public class OrderInvoiceFormat {
 
     public String totalamount;
 
+    public String country;
+
 }

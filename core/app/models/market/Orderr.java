@@ -493,7 +493,7 @@ public class Orderr extends GenericModel {
     }
 
 
-    public String formataddress() {
+    public String formataddress(String country) {
         String editaddress = "";
         if(!StringUtils.isBlank(this.reciver)) {
             editaddress = editaddress + "," + this.reciver;
@@ -510,7 +510,7 @@ public class Orderr extends GenericModel {
         if(!StringUtils.isBlank(this.postalCode)) {
             editaddress = editaddress + "," + this.postalCode;
         }
-        editaddress = editaddress + ",Deutschland";
+        editaddress = editaddress + ","+country;
         if(!StringUtils.isBlank(this.phone)) {
             editaddress = editaddress + ",phone:" + this.phone;
         }
