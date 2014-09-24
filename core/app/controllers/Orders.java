@@ -65,8 +65,12 @@ public class Orders extends Controller {
                 + " createAt  DESC")
                 .fetch();
 
-        ord.address = ord.address.replace(",,", ",");
-        ord.address1 = ord.address1.replace(",,", ",");
+        if(!StringUtils.isBlank(ord.address)) {
+            ord.address = ord.address.replace(",,", ",");
+        }
+        if(!StringUtils.isBlank(ord.address1)) {
+            ord.address1 = ord.address1.replace(",,", ",");
+        }
         if(ord.address != null && ord.address.indexOf(",") == 0) {
             ord.address = ord.address.substring(1, ord.address.length());
         }
@@ -74,7 +78,7 @@ public class Orders extends Controller {
             ord.address1 = ord.address1.substring(1, ord.address.length());
         }
         String editaddress = ord.formataddress();
-        render(ord, totalamount, tax, notaxamount, invoice, records,editaddress);
+        render(ord, totalamount, tax, notaxamount, invoice, records, editaddress);
     }
 
     public static void refreshFee(String id) {
