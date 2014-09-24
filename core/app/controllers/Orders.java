@@ -74,8 +74,9 @@ public class Orders extends Controller {
         if(ord.address1 != null && ord.address1.indexOf(",") == 0) {
             ord.address1 = ord.address1.substring(1, ord.address.length());
         }
-        String editaddress = ord.formataddress();
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+        String editaddress = ord.formataddress(invoiceformat.country);
+
 
         render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat);
     }
