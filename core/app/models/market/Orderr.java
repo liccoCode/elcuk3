@@ -478,7 +478,7 @@ public class Orderr extends GenericModel {
         for(OrderItem item : this.items) {
             totalamount = totalamount + new BigDecimal(item.price).setScale(2, 4).floatValue();
         }
-        totalamount = new BigDecimal(totalamount).setScale(2, 4).floatValue()
+        totalamount = new BigDecimal(totalamount).setScale(2, 4).floatValue();
 
         Float notaxamount = 0f;
         if(invoice != null && invoice.europevat == OrderInvoice.VAT.EUROPE) {
