@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Email;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.templates.JavaExtensions;
@@ -24,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -474,10 +476,17 @@ public class Orderr extends GenericModel {
         Float totalamount = 0f;
         OrderInvoice invoice = OrderInvoice.findById(this.orderId);
         for(OrderItem item : this.items) {
-            totalamount = totalamount + item.quantity * item.price;
+            totalamount = totalamount + new BigDecimal(item.price).setScale(2, 4).floatValue();
         }
-        Float notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(OrderInvoice.devat), 2,
-                java.math.RoundingMode.HALF_DOWN).floatValue();
+
+        Float notaxamount = 0f;
+        if(invoice != null && invoice.europevat == OrderInvoice.VAT.EUROPE) {
+            notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(OrderInvoice.buyervat), 2,
+                    java.math.RoundingMode.HALF_DOWN).floatValue();
+        } else {
+            notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(this.orderrate()), 2,
+                    java.math.RoundingMode.HALF_DOWN).floatValue();
+        }
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
     }
@@ -508,5 +517,41 @@ public class Orderr extends GenericModel {
             editaddress = editaddress.substring(1, editaddress.length());
         }
         return editaddress;
+    }
+
+    public boolean refundmoney() {
+        SqlSelect itemsql = new SqlSelect()
+                .select("sum(cost) as cost")
+                .from("SaleFee s")
+                .where(" s.order_orderid='" + this.orderId + "' and type_name='productcharges' ");
+        List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
+        float cost = 0f;
+        for(Map<String, Object> row : rows) {
+            Object rowobject = row.get("cost");
+            if(rowobject != null) {
+                cost = cost + new Float(rowobject.toString());
+            }
+        }
+        if(rows.size() <= 0 || cost > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public float orderrate() {
+        if(market == M.AMAZON_DE) {
+            return OrderInvoice.devat;
+        }
+        if(market == M.AMAZON_UK) {
+            return OrderInvoice.ukvat;
+        }
+        if(market == M.AMAZON_FR) {
+            return OrderInvoice.frvat;
+        }
+        if(market == M.AMAZON_IT) {
+            return OrderInvoice.itvat;
+        }
+        return 0;
     }
 }

@@ -1,30 +1,15 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import helper.Cached;
-import helper.DBUtils;
-import helper.Dates;
-import helper.Promises;
-import models.embedded.ERecordBuilder;
-import models.finance.SaleFee;
-import models.view.dto.DashBoard;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.joda.time.DateTime;
-import play.Logger;
-import play.cache.Cache;
-import play.data.validation.Email;
 import play.db.jpa.GenericModel;
-import play.libs.F;
-import play.templates.JavaExtensions;
-import query.OrderrQuery;
-import query.vo.OrderrVO;
+
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
+
+import helper.OrderInvoiceFormat;
 
 /**
  * 订单发票
@@ -85,6 +70,9 @@ public class OrderInvoice extends GenericModel {
      */
     public VAT europevat;
 
+    @Transient
+    public int isreturn;
+
 
     public enum VAT {
         /**
@@ -93,7 +81,7 @@ public class OrderInvoice extends GenericModel {
         NORMAL {
             @Override
             public String label() {
-                return "普通发票";
+                return "普通税号";
             }
         },
         /**
@@ -102,7 +90,7 @@ public class OrderInvoice extends GenericModel {
         EUROPE {
             @Override
             public String label() {
-                return "欧盟发票";
+                return "欧盟税号";
             }
         };
 
@@ -112,6 +100,18 @@ public class OrderInvoice extends GenericModel {
 
     @Transient
     public static float devat = 1.19f;
+
+    @Transient
+    public static float buyervat = 1f;
+
+    @Transient
+    public static float ukvat = 1.20f;
+
+    @Transient
+    public static float frvat = 1.20f;
+
+    @Transient
+    public static float itvat = 1.22f;
 
 
     public void setprice() {
@@ -132,5 +132,94 @@ public class OrderInvoice extends GenericModel {
         }
     }
 
+
+    public static OrderInvoiceFormat invoiceformat(M m) {
+        OrderInvoiceFormat format = new OrderInvoiceFormat();
+
+        if(m == M.AMAZON_DE) {
+            format.title = "Rechnung";
+            format.date = "Datum";
+            format.frominfo1 = "TUGGLE ELECTRONIC COMMERCE CO.,LTD";
+            format.frominfo2 = "Unit A5, 9/F Silvercorp Int'l";
+            format.frominfo3 = "Tower 707-713 Nathan Rd";
+            format.frominfo4 = "Mongkok, KL";
+            format.frominfo5 = "999077 Hongkong";
+            format.frominfo6 = "Steuernummer: 1667318915";
+            format.frominfo7 = "USt-ID-Nr.: DE 292695920";
+            format.address = "Lieferadresse";
+            format.itemname = "Beschreibung";
+            format.qty = "Menge";
+            format.price = "Stückpreis(€)";
+            format.itemamount = "Betrag(€)";
+
+            format.notaxamount = "Zwischensumme";
+            format.taxamount = "MwST";
+            format.taxamountper = "MwST(19%)";
+            format.totalamount = "Summe";
+        } else if(m == M.AMAZON_UK) {
+            format.title = "Invoice";
+            format.date = "Date";
+            format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
+            format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
+            format.frominfo3 = "COMMERCIAL BUILDING";
+            format.frominfo4 = "97 BONHAM STRAND, SHEUNG WAN ";
+            format.frominfo5 = "999077 HONGKONG";
+            format.frominfo6 = "VAT No.: GB 117317336";
+            format.frominfo7 = "";
+            format.address = "Delivery Address";
+            format.itemname = "Description";
+            format.qty = "Quantity";
+            format.price = "Unit Price(£)";
+            format.itemamount = "Amount(£)";
+
+            format.notaxamount = "Subtotal";
+            format.taxamount = "VAT";
+            format.taxamountper = "VAT(20%)";
+            format.totalamount = "Total";
+        } else if(m == M.AMAZON_IT) {
+            format.title = "Fattura";
+            format.date = "Data";
+            format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
+            format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
+            format.frominfo3 = "COMMERCIAL BUILDING";
+            format.frominfo4 = "97 BONHAM STRAND, SHEUNG WAN ";
+            format.frominfo5 = "999077 HONGKONG";
+            format.frominfo6 = "VAT No.: GB 117317336";
+            format.frominfo7 = "";
+            format.address = "Indirizzo di spedizione";
+            format.itemname = "Dettagli prodotto";
+            format.qty = "Quantità";
+            format.price = "prezzo unitario(€)";
+            format.itemamount = "Ammontare(€)";
+
+            format.notaxamount = "Sottotale";
+            format.taxamount = "IVA";
+            format.totalamount = "Totale";
+            format.taxamountper = "Totale(22%)";
+            format.rate = "Tasso di cambio: 1 EUR = 0,8358 GBP";
+        } else if(m == M.AMAZON_FR) {
+            format.title = "Note de Crédit";
+            format.title1 = "Facture d'origine";
+            format.date = "Date";
+            format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
+            format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
+            format.frominfo3 = "COMMERCIAL BUILDING";
+            format.frominfo4 = "97 BONHAM STRAND, SHEUNG WAN ";
+            format.frominfo5 = "999077 HONGKONG";
+            format.frominfo6 = "VAT No.: GB 117317336";
+            format.frominfo7 = "";
+            format.address = "Adresse d'expédition";
+            format.itemname = "Détails du produit";
+            format.qty = "Quantité";
+            format.price = "Prix ​​unitaire(€)";
+            format.itemamount = "Montant(€)";
+            format.notaxamount = "Sous-total";
+            format.taxamount = "TVA";
+            format.taxamountper = "TVA(20%)";
+            format.totalamount = "Total";
+            format.rate = "Taux de change: 1 EUR = 0,8358 GBP";
+        }
+        return format;
+    }
 
 }

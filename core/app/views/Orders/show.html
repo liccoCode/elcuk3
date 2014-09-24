@@ -6,6 +6,9 @@
     #{/set}
 #{/ifnot}
 
+#{flash_alert /}
+
+#{errorMsgs /}
 
 
 <ul class="nav nav-tabs" id="below_tab">
@@ -14,7 +17,11 @@
   </li>
 
   <li>
-    <a href="#invoiceinfo" data-toggle='tab'>发票信息</a>
+    <a href="#invoiceinfo" data-toggle='tab'>销售发票信息</a>
+  </li>
+
+  <li>
+    <a href="#returninfo" data-toggle='tab'>退款发票信息</a>
   </li>
 
 </ul>
@@ -147,10 +154,23 @@
 
 
   <div class="tab-pane fade" id='invoiceinfo'>
-  #{if ord.market==models.market.M.AMAZON_DE}
+  #{if ord.market==models.market.M.AMAZON_DE || ord.market==models.market.M.AMAZON_UK  || ord.market==models.market.M
+  .AMAZON_IT || ord.market==models.market.M.AMAZON_FR}
     #{render 'Orders/_invoice_de.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
-  invoice: invoice,records:records,editaddress:editaddress/}
+  invoice: invoice,records:records,editaddress:editaddress,isreturn:0,invoiceformat:invoiceformat/}
   #{/if}
 
   </div>
+
+  <div class="tab-pane fade" id='returninfo'>
+  #{if ord.state == models.market.Orderr.S.REFUNDED &&
+  (ord.market==models.market.M.AMAZON_DE || ord.market==models.market.M.AMAZON_UK
+  || ord.market==models.market.M.AMAZON_IT
+  || ord.market==models.market.M.AMAZON_FR)}
+      #{render 'Orders/_invoice_de.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
+  invoice: invoice,records:records,editaddress:editaddress,isreturn:2,invoiceformat:invoiceformat/}
+    #{/if}
+  </div>
+
+
 </div>
