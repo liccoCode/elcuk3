@@ -198,7 +198,8 @@
             divide(new BigDecimal(item.quantity),2,4).divide(new
             BigDecimal(ord.orderrate()),2,
             java.math.RoundingMode.HALF_DOWN)}"></td>
-            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).divide(new
+            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).
+                        divide(new BigDecimal(item.quantity),2,4).divide(new
                         BigDecimal(ord.orderrate()),2,
                         java.math.RoundingMode.HALF_DOWN)).setScale(2, 4).floatValue()}</td>
           #{/else}
