@@ -212,6 +212,60 @@
         #{/else}
     </tr>
   #{/list}
+
+
+
+
+
+#{set feecount:ord.items.size()/}
+#{list items:ord.fees, as:'fee'}
+    #{if (fee.type.name=='shipping' || fee.type.name=='giftwrap') && fee.cost>0}
+      <tr>
+          #{if fee.type.name=='shipping'}
+            <td class="td3" style="width:50%">${invoiceformat.shipfee}</td>
+          #{/if}
+          #{if fee.type.name=='giftwrap'}
+            <td class="td3" style="width:50%">${invoiceformat.giftwrapfee}</td>
+          #{/if}
+        <td class="td3">1</td>
+          #{if invoice != null}
+              #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+                <td class="td3">
+                  <input type="text" name="invoice.price" value="${new java.math.BigDecimal(-1*fee.cost).setScale(2, 4)}">
+                </td>
+                <td class="td3">${new java.math.BigDecimal(-1*fee.cost).setScale(2, 4)}</td>
+              #{/if}
+              #{else}
+                <td class="td3"><input type="text" name="invoice.price" value="${invoice.price.get(feecount)}">
+                </td>
+                <td class="td3">${invoice.price.get(feecount)}</td>
+              #{/else}
+              #{set feecount:feecount+1/}
+          #{/if}
+          #{else }
+            <td class="td3"><input type="text" name="invoice.price" value="${new BigDecimal(-1*fee.cost).divide(new
+            BigDecimal(ord.orderrate()),2,
+            java.math.RoundingMode.HALF_DOWN)}"></td>
+            <td class="td3">${new BigDecimal(-1*fee.cost).divide(new
+            BigDecimal(ord.orderrate()),2,
+            java.math.RoundingMode.HALF_DOWN).setScale(2, 4).floatValue()}</td>
+          #{/else}
+      </tr>
+    #{/if}
+#{/list}
+
+
+
+
+
+
+
+
+
+
+
+
+
     <tr>
       <td class="td3"></td>
       <td class="td3"></td>
