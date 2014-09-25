@@ -502,6 +502,7 @@ public class Orderr extends GenericModel {
         }
 
         totalamount = new BigDecimal(totalamount).setScale(2, 4).floatValue();
+        itemamount = new BigDecimal(itemamount).setScale(2, 4).floatValue();
 
         Float notaxamount = 0f;
         //欧盟税号的税率为1
