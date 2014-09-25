@@ -493,7 +493,7 @@ public class Orderr extends GenericModel {
         }
 
         for(SaleFee fee : this.fees) {
-            if((fee.type.name.equals("shipping") || fee.type.name.equals("giftwrap")) && fee.cost>0) {
+            if((fee.type.name.equals("shipping") || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
                 totalamount = totalamount + fee.cost;
                 itemamount = itemamount + new BigDecimal(fee.cost).divide(
                         new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).setScale(2, 4)
@@ -609,4 +609,22 @@ public class Orderr extends GenericModel {
         }
         return 0;
     }
+
+
+    /**
+     * 退货日期
+     *
+     * @return
+     */
+    public Date returndate() {
+        if(this.state == S.REFUNDED) {
+            for(SaleFee fee : this.fees) {
+                if(fee.type.name.equals("productcharges") && fee.cost < 0) {
+                    return fee.date;
+                }
+            }
+        }
+        return this.createDate;
+    }
+
 }
