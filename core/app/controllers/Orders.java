@@ -45,24 +45,26 @@ public class Orders extends Controller {
     public static void show(String id) {
         Orderr ord = Orderr.findById(id);
 
-        OrderInvoice invoice = OrderInvoice.findById(id);
-        if(invoice != null) invoice.setprice();
-
-        F.T3<Float, Float, Float> amt = ord.amount();
-        Float totalamount = amt._1;
-        Float notaxamount = amt._2;
-        Float tax = amt._3;
-        if(invoice != null) {
-            notaxamount = invoice.notaxamount;
-            tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
-        }
-        List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
-                + "action like '%orderinvoice.invoice%' ORDER BY "
-                + " createAt  DESC")
-                .fetch();
-        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
-        String editaddress = ord.formataddress(invoiceformat.country);
-        render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat);
+        if(ord.orderrate() != 0) {
+            OrderInvoice invoice = OrderInvoice.findById(id);
+            if(invoice != null) invoice.setprice();
+            F.T3<Float, Float, Float> amt = ord.amount();
+            Float totalamount = amt._1;
+            Float notaxamount = amt._2;
+            Float tax = amt._3;
+            if(invoice != null) {
+                notaxamount = invoice.notaxamount;
+                tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+            }
+            List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
+                    + "action like '%orderinvoice.invoice%' ORDER BY "
+                    + " createAt  DESC")
+                    .fetch();
+            OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+            String editaddress = ord.formataddress(invoiceformat.country);
+            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat);
+        } else
+            render(ord);
     }
 
     public static void refreshFee(String id) {
