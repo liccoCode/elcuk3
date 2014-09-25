@@ -77,6 +77,15 @@
     <tr>
       <td class="td1">
         <input type="hidden" name="invoice.isreturn" value="0">
+        <div class="${_row ? 'row' : 'row-fluid'}" style="margin-top:5px;max-height:200px;overflow:auto;margin-bottom:20px">
+          <div class="span12">
+          #{if records!=null && records.size()>0 }
+            <p class="text-info">${records.get(0).record().raw()}</p>
+          #{/if}
+          </div>
+        </div>
+
+
         <select name="invoice.europevat" style="width:120px;">
         #{list items:models.market.OrderInvoice.VAT.values(), as:'v'}
             #{if !(ord.market==models.market.M.AMAZON_UK && v==models.market.OrderInvoice.VAT.EUROPE)}
