@@ -82,8 +82,15 @@
     #{/if}
     #{else}
       <input type="hidden" name="invoice.isreturn" value="0">
-        #{select_enum name:'invoice.europevat', items:models.market.OrderInvoice.VAT.values(), value:invoice?.europevat}
-        #{/select_enum}
+
+      <select name="invoice.europevat" style="width:120px;">
+          #{list items:models.market.OrderInvoice.VAT.values(), as:'v'}
+              #{if !(ord.market==models.market.M.AMAZON_UK && v==models.market.OrderInvoice.VAT.EUROPE)}
+                <option ${v==invoice?.europevat ? 'selected' : ''} value="${v}">${v.label()}</option>
+              #{/if}
+          #{/list}
+      </select>
+
     #{/else}
     </td>
     <td>
@@ -199,9 +206,9 @@
             BigDecimal(ord.orderrate()),2,
             java.math.RoundingMode.HALF_DOWN)}"></td>
             <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).
-                        divide(new BigDecimal(item.quantity),2,4).divide(new
-                        BigDecimal(ord.orderrate()),2,
-                        java.math.RoundingMode.HALF_DOWN)).setScale(2, 4).floatValue()}</td>
+            divide(new BigDecimal(item.quantity),2,4).divide(new
+            BigDecimal(ord.orderrate()),2,
+            java.math.RoundingMode.HALF_DOWN)).setScale(2, 4).floatValue()}</td>
           #{/else}
 
       #{/else}
