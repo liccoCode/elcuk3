@@ -141,6 +141,7 @@ public class OrderInvoice extends GenericModel {
 
     /**
      * 格式化发票的信息
+     *
      * @param m
      * @return
      */
@@ -218,6 +219,13 @@ public class OrderInvoice extends GenericModel {
             format.filename = "Fattura it";
             format.returntitle = "Nota di Credito";
             format.returntitle1 = "Fattura Originale";
+            format.fromeurinfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
+            format.fromeurinfo2 = "Unit E6, 3 FLOOR WING TAT";
+            format.fromeurinfo3 = "COMMERCIAL BUILDING";
+            format.fromeurinfo4 = "97 BONHAM STRAND, SHEUNG WAN ";
+            format.fromeurinfo5 = "999077 HONGKONG";
+            format.fromeurinfo6 = "VAT No.: GB 117317336";
+            format.fromeurinfo7 = "";
         } else if(m == M.AMAZON_FR) {
             format.title = "Note de Crédit";
             format.date = "Date";

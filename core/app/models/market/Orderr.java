@@ -474,15 +474,24 @@ public class Orderr extends GenericModel {
 
     /**
      * 计算正常发票的总金额,未含税金额，税金额
+     *
      * @return
      */
     public F.T3<Float, Float, Float> amount() {
         Float totalamount = 0f;
         OrderInvoice invoice = OrderInvoice.findById(this.orderId);
         //累计总金额
+        float itemamount = 0f;
         for(OrderItem item : this.items) {
             totalamount = totalamount + new BigDecimal(item.price).setScale(2, 4).floatValue();
+            itemamount = itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).divide(new BigDecimal
+                    (item.quantity), 2,
+                    4).divide(new BigDecimal(this.orderrate()), 2,
+                    java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
+                    .floatValue();
         }
+
+
         totalamount = new BigDecimal(totalamount).setScale(2, 4).floatValue();
 
         Float notaxamount = 0f;
@@ -492,8 +501,7 @@ public class Orderr extends GenericModel {
                     java.math.RoundingMode.HALF_DOWN).floatValue();
         } else {
             //用各国的税率计算
-            notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(this.orderrate()), 2,
-                    java.math.RoundingMode.HALF_DOWN).floatValue();
+            notaxamount = itemamount;
         }
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
@@ -502,6 +510,7 @@ public class Orderr extends GenericModel {
 
     /**
      * 格式化地址信息
+     *
      * @param country
      * @return
      */
@@ -548,6 +557,7 @@ public class Orderr extends GenericModel {
 
     /**
      * 判断是否是全额退款
+     *
      * @return
      */
     public boolean refundmoney() {
@@ -572,6 +582,7 @@ public class Orderr extends GenericModel {
 
     /**
      * 各国税率
+     *
      * @return
      */
     public float orderrate() {
