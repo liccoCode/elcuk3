@@ -126,8 +126,8 @@
     ${add}<br>
     #{/list}
 
-    #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE && (ord.market==models.market.M.AMAZON_FR ||
-    ord.market==models.market.M.AMAZON_IT)}
+    #{if (invoice.europevat==models.market.OrderInvoice.VAT.EUROPE &&
+    ord.market==models.market.M.AMAZON_IT) ||ord.market==models.market.M.AMAZON_FR}
       <br>
     ${invoiceformat.rate}<br>
     #{/if}
