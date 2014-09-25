@@ -85,41 +85,61 @@ public class Orders extends Controller {
     public static void invoicepdf(OrderInvoice invoice) {
         Orderr ord = Orderr.findById(invoice.orderid);
 
-        if(invoice.isreturn != 2) {
-            invoice.updateDate = new Date();
-            invoice.updator = Secure.Security.connected();
-            invoice.saveprice();
-            if(invoice.europevat != null && invoice.europevat != OrderInvoice.VAT.EUROPE)
-                invoice.europevat = OrderInvoice.VAT.NORMAL;
-            invoice.save();
-            new ElcukRecord("orderinvoice.invoice",
-                    String.format("%s %s", invoice.invoiceto, invoice.europevat.label()), invoice.orderid).save();
-        } else {
-            if(!ord.refundmoney()) {
-                flash.error("未全部退款!");
-                Orders.show(ord.orderId);
-            }
-            new ElcukRecord("orderinvoice.invoice",
-                    String.format("%s  ", "退款发票"), invoice.orderid).save();
-        }
-
+        invoice.updateDate = new Date();
+        invoice.updator = Secure.Security.connected();
+        invoice.saveprice();
+        if(invoice.europevat != null && invoice.europevat != OrderInvoice.VAT.EUROPE)
+            invoice.europevat = OrderInvoice.VAT.NORMAL;
+        invoice.save();
+        new ElcukRecord("orderinvoice.invoice",
+                String.format("销售发票 %s", invoice.europevat.label()), invoice.orderid).save();
 
         F.T3<Float, Float, Float> amt = ord.amount();
         Float totalamount = amt._1;
-        //如果是退货，则金额为负
-        if(invoice.isreturn == 2) totalamount = totalamount * -1;
-
 
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
         final PDF.Options options = new PDF.Options();
         options.filename = invoiceformat.filename + invoice.orderid;
         options.pageSize = IHtmlToPdfTransformer.A3P;
         Float notaxamount = 0f;
-        if(invoice.europevat == OrderInvoice.VAT.EUROPE || invoice.isreturn == 2) {
+        if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
             notaxamount = totalamount;
         } else
             notaxamount = invoice.notaxamount;
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+
+
+        renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat);
+    }
+
+
+    /**
+     * 生成退货发票
+     */
+    public static void invoicereturnpdf(OrderInvoice invoice) {
+        Orderr ord = Orderr.findById(invoice.orderid);
+
+        if(!ord.refundmoney()) {
+            flash.error("未全部退款!");
+            Orders.show(ord.orderId);
+        }
+        new ElcukRecord("orderinvoice.invoice",
+                String.format("%s %s", "退款发票", invoice.europevat.label()), invoice.orderid).save();
+
+        F.T3<Float, Float, Float> amt = ord.amount();
+        Float totalamount = amt._1;
+
+        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+        final PDF.Options options = new PDF.Options();
+        options.filename = invoiceformat.filename + invoice.orderid;
+        options.pageSize = IHtmlToPdfTransformer.A3P;
+        Float notaxamount = 0f;
+        if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
+            notaxamount = -1 * totalamount;
+        } else
+            notaxamount = invoice.notaxamount;
+        Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2,
+                4).floatValue();
 
         renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat);
     }

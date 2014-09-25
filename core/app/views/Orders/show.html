@@ -148,27 +148,22 @@
         #{render './_order_fees.html', fees:ord.fees/}
     </div>
   #{/else}
-
-
   </div>
-
 
   <div class="tab-pane fade" id='invoiceinfo'>
   #{if ord.market==models.market.M.AMAZON_DE || ord.market==models.market.M.AMAZON_UK  || ord.market==models.market.M
   .AMAZON_IT || ord.market==models.market.M.AMAZON_FR}
     #{render 'Orders/_invoice.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
-  invoice: invoice,records:records,editaddress:editaddress,isreturn:0,invoiceformat:invoiceformat/}
+  invoice: invoice,records:records,editaddress:editaddress,invoiceformat:invoiceformat/}
   #{/if}
-
   </div>
-
   <div class="tab-pane fade" id='returninfo'>
   #{if ord.state == models.market.Orderr.S.REFUNDED &&
   (ord.market==models.market.M.AMAZON_DE || ord.market==models.market.M.AMAZON_UK
   || ord.market==models.market.M.AMAZON_IT
   || ord.market==models.market.M.AMAZON_FR)}
-      #{render 'Orders/_invoice.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
-  invoice: invoice,records:records,editaddress:editaddress,isreturn:2,invoiceformat:invoiceformat/}
+      #{render 'Orders/_invoice_return.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
+  invoice: invoice,records:records,editaddress:editaddress,invoiceformat:invoiceformat/}
     #{/if}
   </div>
 

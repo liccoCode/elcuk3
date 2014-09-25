@@ -65,7 +65,9 @@
 <table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
   <tr>
     <td class="td1">
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle} #: CN${ord.orderId}</font>
+      </strong><br>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle1} #: ${ord.orderId}</font>
       </strong><br>
     ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}  </strong>
     </td>
@@ -93,6 +95,7 @@
     </td>
     <td class="td2">
       <strong>From</strong> <br>
+
     #{if  ord.market==models.market.M.AMAZON_IT && invoice!=null && invoice.europevat==models.market.OrderInvoice.VAT
     .EUROPE}
     ${invoiceformat.fromeurinfo1} <br>
@@ -119,7 +122,6 @@
     #{list items:invoice.address.split(","), as:'add'}
     ${add}<br>
     #{/list}
-
     #{if ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT}
       <br>
     ${invoiceformat.rate}<br>
@@ -128,6 +130,7 @@
     <td rowspan="2"></td>
   </tr>
 </table>
+
 <table class="table1" cellpadding="8px" style="width:70%" cellspacing="0" align='center'>
   <tr>
     <td class="td3"><strong>${invoiceformat.itemname}</strong></td>
@@ -141,12 +144,13 @@
     <td class="td3">${item.quantity}</td>
       #{if invoice != null}
           #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
-            <td class="td3">${new BigDecimal(item.price).divide(new BigDecimal(item.quantity),2,4)}</td>
-            <td class="td3">${new BigDecimal(item.price).setScale(2, 4).floatValue()}</td>
+            <td class="td3">${new BigDecimal(-1*item.price).divide(new BigDecimal(item.quantity),2,4)}</td>
+            <td class="td3">${new BigDecimal(-1*item.price).setScale(2, 4).floatValue()}</td>
           #{/if}
           #{else}
             <td class="td3">${invoice.price.get(item_index-1)}</td>
-            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1)))
+            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get
+            (item_index-1)))
             .setScale(2, 4).floatValue()}</td>
           #{/else}
       #{/if}
@@ -174,7 +178,7 @@
     <td class="td3"></td>
     <td class="td3"></td>
     <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
-    <td class="td3"><strong>${totalamount}</strong></td>
+    <td class="td3"><strong>${new java.math.BigDecimal(-1*totalamount).setScale(2, 4)}</strong></td>
   </tr>
 </table>
 </body>

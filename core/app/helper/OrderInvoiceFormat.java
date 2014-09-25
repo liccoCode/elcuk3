@@ -34,4 +34,13 @@ public class OrderInvoiceFormat {
     public String country;
     public String filename;
 
+    //欧盟税号发票信息
+    public String fromeurinfo1;
+    public String fromeurinfo2;
+    public String fromeurinfo3;
+    public String fromeurinfo4;
+    public String fromeurinfo5;
+    public String fromeurinfo6;
+    public String fromeurinfo7;
+
 }
