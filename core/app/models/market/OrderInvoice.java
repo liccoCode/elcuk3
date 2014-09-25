@@ -171,6 +171,8 @@ public class OrderInvoice extends GenericModel {
             format.filename = "Rechnung de";
             format.returntitle = "Gutschrift";
             format.returntitle1 = "Originalrechnung";
+            format.shipfee = "Versandkosten";
+            format.giftwrapfee = "Geschenkpapier";
         } else if(m == M.AMAZON_UK) {
             format.title = "Invoice";
             format.date = "Date";
@@ -195,6 +197,12 @@ public class OrderInvoice extends GenericModel {
 
             format.returntitle = "Credit Note";
             format.returntitle1 = "Original Invoice";
+
+
+            format.shipfee = "Shipping cost";
+            format.giftwrapfee = "giftwrap";
+
+
         } else if(m == M.AMAZON_IT) {
             format.title = "Fattura";
             format.date = "Data";
@@ -226,6 +234,10 @@ public class OrderInvoice extends GenericModel {
             format.fromeurinfo5 = "999077 HONGKONG";
             format.fromeurinfo6 = "VAT No.: GB 117317336";
             format.fromeurinfo7 = "";
+
+            format.shipfee = "Spese di Spedizione";
+            format.giftwrapfee = "carta da regalo";
+
         } else if(m == M.AMAZON_FR) {
             format.title = "Note de Crédit";
             format.date = "Date";
@@ -250,6 +262,9 @@ public class OrderInvoice extends GenericModel {
             format.filename = "France";
             format.returntitle = "Note de Crédit";
             format.returntitle1 = "Facture d'origine";
+            format.shipfee = "Livraison";
+            format.giftwrapfee = "emballage cadeau";
+
         }
         return format;
     }

@@ -484,13 +484,22 @@ public class Orderr extends GenericModel {
         float itemamount = 0f;
         for(OrderItem item : this.items) {
             totalamount = totalamount + new BigDecimal(item.price).setScale(2, 4).floatValue();
-            itemamount = itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).divide(new BigDecimal
-                    (item.quantity), 2,
-                    4).divide(new BigDecimal(this.orderrate()), 2,
-                    java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
-                    .floatValue();
+            itemamount =
+                    itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).divide(new BigDecimal
+                            (item.quantity), 2,
+                            4).divide(new BigDecimal(this.orderrate()), 2,
+                            java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
+                            .floatValue();
         }
 
+        for(SaleFee fee : this.fees) {
+            if((fee.type.name.equals("shipping") || fee.type.name.equals("giftwrap")) && fee.cost>0) {
+                totalamount = totalamount + fee.cost;
+                itemamount = itemamount + new BigDecimal(fee.cost).divide(
+                        new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).setScale(2, 4)
+                        .floatValue();
+            }
+        }
 
         totalamount = new BigDecimal(totalamount).setScale(2, 4).floatValue();
 

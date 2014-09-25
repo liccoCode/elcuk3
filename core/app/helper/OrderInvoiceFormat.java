@@ -43,4 +43,6 @@ public class OrderInvoiceFormat {
     public String fromeurinfo6;
     public String fromeurinfo7;
 
+    public String shipfee;
+    public String giftwrapfee;
 }
