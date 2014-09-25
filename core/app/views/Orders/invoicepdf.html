@@ -65,10 +65,10 @@
 <table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
   <tr>
     <td class="td1">
-    #{if ord.market==models.market.M.AMAZON_FR}
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: CN${ord.orderId}</font>
+    #{if invoice?.isreturn ==2 }
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle} #: CN${ord.orderId}</font>
       </strong><br>
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title1} #: ${ord.orderId}</font>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle1} #: ${ord.orderId}</font>
       </strong><br>
     #{/if}
     #{else}

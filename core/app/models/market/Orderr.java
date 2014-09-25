@@ -472,19 +472,26 @@ public class Orderr extends GenericModel {
     }
 
 
+    /**
+     * 计算正常发票的总金额,未含税金额，税金额
+     * @return
+     */
     public F.T3<Float, Float, Float> amount() {
         Float totalamount = 0f;
         OrderInvoice invoice = OrderInvoice.findById(this.orderId);
+        //累计总金额
         for(OrderItem item : this.items) {
             totalamount = totalamount + new BigDecimal(item.price).setScale(2, 4).floatValue();
         }
         totalamount = new BigDecimal(totalamount).setScale(2, 4).floatValue();
 
         Float notaxamount = 0f;
+        //欧盟税号的税率为1
         if(invoice != null && invoice.europevat == OrderInvoice.VAT.EUROPE) {
             notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(OrderInvoice.buyervat), 2,
                     java.math.RoundingMode.HALF_DOWN).floatValue();
         } else {
+            //用各国的税率计算
             notaxamount = new BigDecimal(totalamount).divide(new BigDecimal(this.orderrate()), 2,
                     java.math.RoundingMode.HALF_DOWN).floatValue();
         }
@@ -493,7 +500,26 @@ public class Orderr extends GenericModel {
     }
 
 
+    /**
+     * 格式化地址信息
+     * @param country
+     * @return
+     */
     public String formataddress(String country) {
+
+        if(!StringUtils.isBlank(this.address)) {
+            this.address = this.address.replace(",,", ",");
+        }
+        if(!StringUtils.isBlank(this.address1)) {
+            this.address1 = this.address1.replace(",,", ",");
+        }
+        if(this.address != null && this.address.indexOf(",") == 0) {
+            this.address = this.address.substring(1, this.address.length());
+        }
+        if(this.address1 != null && this.address1.indexOf(",") == 0) {
+            this.address1 = this.address1.substring(1, this.address.length());
+        }
+
         String editaddress = "";
         if(!StringUtils.isBlank(this.reciver)) {
             editaddress = editaddress + "," + this.reciver;
@@ -510,7 +536,7 @@ public class Orderr extends GenericModel {
         if(!StringUtils.isBlank(this.postalCode)) {
             editaddress = editaddress + "," + this.postalCode;
         }
-        editaddress = editaddress + ","+country;
+        editaddress = editaddress + "," + country;
         if(!StringUtils.isBlank(this.phone)) {
             editaddress = editaddress + ",phone:" + this.phone;
         }
@@ -520,6 +546,10 @@ public class Orderr extends GenericModel {
         return editaddress;
     }
 
+    /**
+     * 判断是否是全额退款
+     * @return
+     */
     public boolean refundmoney() {
         SqlSelect itemsql = new SqlSelect()
                 .select("sum(cost) as cost")
@@ -540,6 +570,10 @@ public class Orderr extends GenericModel {
         }
     }
 
+    /**
+     * 各国税率
+     * @return
+     */
     public float orderrate() {
         if(market == M.AMAZON_DE) {
             return OrderInvoice.devat;

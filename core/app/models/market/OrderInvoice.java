@@ -114,6 +114,9 @@ public class OrderInvoice extends GenericModel {
     public static float itvat = 1.22f;
 
 
+    /**
+     * 价格信息转化给前台显示
+     */
     public void setprice() {
         if(editprice != null) {
             String[] prices = editprice.split(",");
@@ -125,6 +128,9 @@ public class OrderInvoice extends GenericModel {
     }
 
 
+    /**
+     * 保存价格信息
+     */
     public void saveprice() {
         this.editprice = "";
         for(float p : this.price) {
@@ -133,6 +139,11 @@ public class OrderInvoice extends GenericModel {
     }
 
 
+    /**
+     * 格式化发票的信息
+     * @param m
+     * @return
+     */
     public static OrderInvoiceFormat invoiceformat(M m) {
         OrderInvoiceFormat format = new OrderInvoiceFormat();
 
@@ -151,12 +162,14 @@ public class OrderInvoice extends GenericModel {
             format.qty = "Menge";
             format.price = "Stückpreis(€)";
             format.itemamount = "Betrag(€)";
-
             format.notaxamount = "Zwischensumme";
             format.taxamount = "MwST";
             format.taxamountper = "MwST(19%)";
             format.totalamount = "Summe";
             format.country = "Deutschland";
+            format.filename = "Rechnung de";
+            format.returntitle = "Gutschrift";
+            format.returntitle1 = "Originalrechnung";
         } else if(m == M.AMAZON_UK) {
             format.title = "Invoice";
             format.date = "Date";
@@ -172,37 +185,41 @@ public class OrderInvoice extends GenericModel {
             format.qty = "Quantity";
             format.price = "Unit Price(£)";
             format.itemamount = "Amount(£)";
-
             format.notaxamount = "Subtotal";
             format.taxamount = "VAT";
             format.taxamountper = "VAT(20%)";
             format.totalamount = "Total";
             format.country = "United Kingdom";
+            format.filename = "Invoice uk";
+
+            format.returntitle = "Credit Note";
+            format.returntitle1 = "Original Invoice";
         } else if(m == M.AMAZON_IT) {
             format.title = "Fattura";
             format.date = "Data";
-            format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
-            format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
-            format.frominfo3 = "COMMERCIAL BUILDING";
-            format.frominfo4 = "97 BONHAM STRAND, SHEUNG WAN ";
-            format.frominfo5 = "999077 HONGKONG";
-            format.frominfo6 = "VAT No.: GB 117317336";
+            format.frominfo1 = "TUGGLE ELECTRONIC COMMERCE CO.,LTD";
+            format.frominfo2 = "Unit A5, 9/F Silvercorp Int'l";
+            format.frominfo3 = "Tower 707-713 Nathan Rd";
+            format.frominfo4 = "Mongkok, KL";
+            format.frominfo5 = "999077 Hongkong";
+            format.frominfo6 = "P.IVA: 08677060967";
             format.frominfo7 = "";
             format.address = "Indirizzo di spedizione";
             format.itemname = "Dettagli prodotto";
             format.qty = "Quantità";
             format.price = "prezzo unitario(€)";
             format.itemamount = "Ammontare(€)";
-
             format.notaxamount = "Sottotale";
             format.taxamount = "IVA";
             format.totalamount = "Totale";
-            format.taxamountper = "Totale(22%)";
+            format.taxamountper = "IVA(22%)";
             format.rate = "Tasso di cambio: 1 EUR = 0,8358 GBP";
             format.country = "Italia";
+            format.filename = "Fattura it";
+            format.returntitle = "Nota di Credito";
+            format.returntitle1 = "Fattura Originale";
         } else if(m == M.AMAZON_FR) {
             format.title = "Note de Crédit";
-            format.title1 = "Facture d'origine";
             format.date = "Date";
             format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
             format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
@@ -222,6 +239,9 @@ public class OrderInvoice extends GenericModel {
             format.totalamount = "Total";
             format.rate = "Taux de change: 1 EUR = 0,8358 GBP";
             format.country = "France";
+            format.filename = "France";
+            format.returntitle = "Note de Crédit";
+            format.returntitle1 = "Facture d'origine";
         }
         return format;
     }

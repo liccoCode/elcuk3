@@ -56,28 +56,12 @@ public class Orders extends Controller {
             notaxamount = invoice.notaxamount;
             tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         }
-
         List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
                 + "action like '%orderinvoice.invoice%' ORDER BY "
                 + " createAt  DESC")
                 .fetch();
-
-        if(!StringUtils.isBlank(ord.address)) {
-            ord.address = ord.address.replace(",,", ",");
-        }
-        if(!StringUtils.isBlank(ord.address1)) {
-            ord.address1 = ord.address1.replace(",,", ",");
-        }
-        if(ord.address != null && ord.address.indexOf(",") == 0) {
-            ord.address = ord.address.substring(1, ord.address.length());
-        }
-        if(ord.address1 != null && ord.address1.indexOf(",") == 0) {
-            ord.address1 = ord.address1.substring(1, ord.address.length());
-        }
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
         String editaddress = ord.formataddress(invoiceformat.country);
-
-
         render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat);
     }
 
@@ -98,7 +82,7 @@ public class Orders extends Controller {
     /**
      * 生成订单发票
      */
-    public static void invoicede(OrderInvoice invoice) {
+    public static void invoicepdf(OrderInvoice invoice) {
         Orderr ord = Orderr.findById(invoice.orderid);
 
         if(invoice.isreturn != 2) {
@@ -111,7 +95,6 @@ public class Orders extends Controller {
             new ElcukRecord("orderinvoice.invoice",
                     String.format("%s %s", invoice.invoiceto, invoice.europevat.label()), invoice.orderid).save();
         } else {
-
             if(!ord.refundmoney()) {
                 flash.error("未全部退款!");
                 Orders.show(ord.orderId);
@@ -123,11 +106,13 @@ public class Orders extends Controller {
 
         F.T3<Float, Float, Float> amt = ord.amount();
         Float totalamount = amt._1;
+        //如果是退货，则金额为负
         if(invoice.isreturn == 2) totalamount = totalamount * -1;
 
 
+        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
         final PDF.Options options = new PDF.Options();
-        options.filename = "Rechnung de" + invoice.orderid;
+        options.filename = invoiceformat.filename + invoice.orderid;
         options.pageSize = IHtmlToPdfTransformer.A3P;
         Float notaxamount = 0f;
         if(invoice.europevat == OrderInvoice.VAT.EUROPE || invoice.isreturn == 2) {
@@ -136,8 +121,6 @@ public class Orders extends Controller {
             notaxamount = invoice.notaxamount;
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
 
-
-        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
         renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat);
     }
 }
