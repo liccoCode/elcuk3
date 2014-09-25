@@ -313,12 +313,6 @@
   <tr>
     <td class="td1" colspan="4">
       <button class="btn btn-primary">保存并下载订单发票</button>
-    #{if invoice!=null}
-      <br>已开发票 开票人:${invoice.updator} 开票时间:${new org.joda.time.DateTime(invoice.updateDate).toString("dd/MM/yyyy")}
-    #{/if}
-    #{else}
-      <br>未开发票
-    #{/else}
     </td>
   </tr>
 
