@@ -173,6 +173,7 @@ public class OrderInvoice extends GenericModel {
             format.returntitle1 = "Originalrechnung";
             format.shipfee = "Versandkosten";
             format.giftwrapfee = "Geschenkpapier";
+            format.rate = "Wechselkurs: 1 EUR = 0.8358 GBP";
         } else if(m == M.AMAZON_UK) {
             format.title = "Invoice";
             format.date = "Date";

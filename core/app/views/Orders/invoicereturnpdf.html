@@ -69,7 +69,7 @@
       </strong><br>
       <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle1} #: ${ord.orderId}</font>
       </strong><br>
-    ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}  </strong>
+    ${invoiceformat.date}: ${new org.joda.time.DateTime(returndate).toString("dd/MM/yyyy")}  </strong>
     </td>
     <td rowspan="4" class="td2">
       <div class="div1">
@@ -122,7 +122,8 @@
     #{list items:invoice.address.split(","), as:'add'}
     ${add}<br>
     #{/list}
-    #{if ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT}
+    #{if (ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT) ||(ord.market==models.market
+    .M.AMAZON_DE && invoice.europevat==models.market.OrderInvoice.VAT.EUROPE)}
       <br>
     ${invoiceformat.rate}<br>
     #{/if}
@@ -198,7 +199,7 @@
     <td class="td3"></td>
   #{if invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE}
     <td class="td3"><strong>${invoiceformat.taxamount}</strong></td>
-    <td class="td3">0</td>
+    <td class="td3">0.00</td>
   #{/if}
   #{else}
     <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>

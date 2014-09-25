@@ -62,7 +62,8 @@ public class Orders extends Controller {
                     .fetch();
             OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
             String editaddress = ord.formataddress(invoiceformat.country);
-            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat);
+            Date returndate = ord.returndate();
+            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat,returndate);
         } else
             render(ord);
     }
@@ -142,7 +143,7 @@ public class Orders extends Controller {
             notaxamount = invoice.notaxamount;
         Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2,
                 4).floatValue();
-
-        renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat);
+        Date returndate = ord.returndate();
+        renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat,returndate);
     }
 }
