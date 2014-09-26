@@ -635,11 +635,14 @@ public class Orderr extends GenericModel {
      *
      * @return
      */
-    public boolean isreturn() {
+    public int isreturn() {
         if(this.state == S.REFUNDED) {
-            return true;
+            return 1;
         }
-        return refundmoney();
+        if(refundmoney()) {
+            return 1;
+        } else
+            return 0;
     }
 
 }

@@ -65,7 +65,7 @@ public class Orders extends Controller {
             String editaddress = ord.formataddress(invoiceformat.country);
             Date returndate = ord.returndate();
             //判断是否存在退款
-            boolean isreturn = ord.isreturn();
+            int isreturn = ord.isreturn();
 
             render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat,returndate,isreturn);
         } else
