@@ -483,14 +483,14 @@ public class Orderr extends GenericModel {
         //累计总金额
         float itemamount = 0f;
         for(OrderItem item : this.items) {
-            totalamount = totalamount + new BigDecimal(item.price-item.discountPrice).setScale(2, 4).floatValue();
+            totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             itemamount =
-                    itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price-item.discountPrice)
+                    itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
                             .divide(new
-                            BigDecimal
-                            (item.quantity), 2,
-                            4).divide(new BigDecimal(this.orderrate()), 2,
-                            java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
+                                    BigDecimal
+                                    (item.quantity), 2,
+                                    4).divide(new BigDecimal(this.orderrate()), 2,
+                                    java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
                             .floatValue();
         }
 
@@ -620,14 +620,25 @@ public class Orderr extends GenericModel {
      * @return
      */
     public Date returndate() {
-        if(this.state == S.REFUNDED) {
-            for(SaleFee fee : this.fees) {
-                if(fee.type.name.equals("productcharges") && fee.cost < 0) {
-                    return fee.date;
-                }
+        for(SaleFee fee : this.fees) {
+            if(fee.type.name.equals("productcharges") && fee.cost < 0) {
+                return fee.date;
             }
         }
         return this.createDate;
+    }
+
+
+    /**
+     * 是否退款
+     *
+     * @return
+     */
+    public boolean isreturn() {
+        if(this.state == S.REFUNDED) {
+            return true;
+        }
+        return refundmoney();
     }
 
 }

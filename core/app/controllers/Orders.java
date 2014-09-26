@@ -63,7 +63,10 @@ public class Orders extends Controller {
             OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
             String editaddress = ord.formataddress(invoiceformat.country);
             Date returndate = ord.returndate();
-            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat,returndate);
+            //判断是否存在退款
+            boolean isreturn = ord.isreturn();
+
+            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat,returndate,isreturn);
         } else
             render(ord);
     }
