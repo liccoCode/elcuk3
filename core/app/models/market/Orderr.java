@@ -586,7 +586,6 @@ public class Orderr extends GenericModel {
             }
         }
 
-        Logger.info("aaaaaaaaaaaaaa:::::::::"+cost+" xxxx::"+rows.size());
         if(rows.size() <= 0 || cost > 0) {
             return false;
         } else {
@@ -637,7 +636,6 @@ public class Orderr extends GenericModel {
      * @return
      */
     public boolean isreturn() {
-        Logger.info("111111111111111");
         if(this.state == S.REFUNDED) {
             return true;
         }

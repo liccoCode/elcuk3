@@ -16,6 +16,7 @@ import models.view.Ret;
 import models.view.post.OrderPOST;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.modules.pdf.PDF;
@@ -65,6 +66,7 @@ public class Orders extends Controller {
             Date returndate = ord.returndate();
             //判断是否存在退款
             boolean isreturn = ord.isreturn();
+            Logger.info("aaaaaaaaaaaaaa:::::::::" + isreturn);
 
             render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat,returndate,isreturn);
         } else
