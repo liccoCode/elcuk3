@@ -585,6 +585,8 @@ public class Orderr extends GenericModel {
                 cost = cost + new Float(rowobject.toString());
             }
         }
+
+        System.out.println("aaaaaaaaaaaaaa:::"+cost);
         if(rows.size() <= 0 || cost > 0) {
             return false;
         } else {
