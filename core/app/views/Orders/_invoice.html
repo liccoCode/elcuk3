@@ -192,9 +192,10 @@
       #{if invoice != null}
           #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
             <td class="td3">
-              <input type="text" name="invoice.price" value="${new BigDecimal(item.price).divide(new BigDecimal(item.quantity),2,4)}">
+              <input type="text" name="invoice.price" value="${new BigDecimal(item.price-item.discountPrice).divide(new BigDecimal
+              (item.quantity),2,4)}">
             </td>
-            <td class="td3">${new BigDecimal(item.price).setScale(2, 4).floatValue()}</td>
+            <td class="td3">${new BigDecimal(item.price-item.discountPrice).setScale(2, 4).floatValue()}</td>
           #{/if}
           #{else}
             <td class="td3"><input type="text" name="invoice.price" value="${invoice.price.get(item_index-1)}">
@@ -204,11 +205,11 @@
           #{/else}
       #{/if}
       #{else }
-        <td class="td3"><input type="text" name="invoice.price" value="${new BigDecimal(item.price).
+        <td class="td3"><input type="text" name="invoice.price" value="${new BigDecimal(item.price-item.discountPrice).
         divide(new BigDecimal(item.quantity),2,4).divide(new
         BigDecimal(ord.orderrate()),2,
         java.math.RoundingMode.HALF_DOWN)}"></td>
-        <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price).
+        <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price-item.discountPrice).
         divide(new BigDecimal(item.quantity),2,4).divide(new
         BigDecimal(ord.orderrate()),2,
         java.math.RoundingMode.HALF_DOWN)).setScale(2, 4).floatValue()}</td>
