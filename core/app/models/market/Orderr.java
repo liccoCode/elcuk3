@@ -586,7 +586,7 @@ public class Orderr extends GenericModel {
             }
         }
 
-        Logger.info("aaaaaaaaaaaaaa:::::::::"+cost);
+        Logger.info("aaaaaaaaaaaaaa:::::::::"+cost+" xxxx::"+rows.size());
         if(rows.size() <= 0 || cost > 0) {
             return false;
         } else {
