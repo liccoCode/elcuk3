@@ -38,7 +38,7 @@ $ ->
       )
       if flag
         Invalid_Text += "#{$obj.attr('id')}: #{str}<br/>"
-        noty({text: "该 Selling 使用了 Amazon 不允许使用的字符,请参照页面下方 <a href='#previewInvalidCharacters'>红色区域</a> 去修改或者删除此字符", layout: 'top', type: 'error', timeout: false, closeWith: ['click'], onClose: set_should_noty_flag}) if Should_Noty
+        noty({text: "该 Selling 使用了 Amazon 不允许使用的字符,请参照 <a href='#previewInvalidCharacters'>这儿</a> 修改或者删除此字符", layout: 'top', type: 'error', timeout: false, closeWith: ['click'], onClose: set_should_noty_flag}) if Should_Noty
         Should_Noty = false
     )
     if Invalid_Text == ""
