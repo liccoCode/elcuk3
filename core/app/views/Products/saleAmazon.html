@@ -64,6 +64,8 @@
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: '0' /}
+      #{select_field id:'sellingCycle', name: 's.sellingCycle', label: '生命周期', items: ['NEW',
+            'GROW', 'MATURE', 'RECESSION', 'DELISTING'], value: s.sellingCycle?.name() /}
   </div>
   <div class="span12">
     #{input_append /}
