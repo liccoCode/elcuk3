@@ -67,6 +67,34 @@ public class Selling extends GenericModel {
         DOWN
     }
 
+
+    /*
+     * Selling 的生命周期
+     */
+    public enum SC {
+        /**
+         * 引入
+         */
+        NEW,
+        /**
+         * 成长
+         */
+        GROW,
+        /**
+         * 成熟
+         */
+        MATURE,
+        /**
+         * 衰退
+         */
+        RECESSION,
+        /**
+         * 退市
+         */
+        DELISTING
+    }
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
@@ -108,6 +136,13 @@ public class Selling extends GenericModel {
     @Required
     @Expose
     public S state;
+
+
+    /**
+     * selling生命周期(所处状态)
+     */
+    @Enumerated(EnumType.STRING)
+    public SC sellingCycle;
 
 
     /**

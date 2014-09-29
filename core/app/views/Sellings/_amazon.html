@@ -97,6 +97,8 @@
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: s.aps.manufacturerPartNumber /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: "0" /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+      #{select_field id:'sellingCycle', name: 's.sellingCycle', label: '生命周期', items: ['NEW',
+        'GROW', 'MATURE', 'RECESSION', 'DELISTING'], value: s.sellingCycle?.name() /}
 
   </div>
   <div class="span12">
