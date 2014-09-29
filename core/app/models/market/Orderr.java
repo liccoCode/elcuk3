@@ -483,6 +483,8 @@ public class Orderr extends GenericModel {
         //累计总金额
         float itemamount = 0f;
         for(OrderItem item : this.items) {
+            if(item.discountPrice == null) item.discountPrice = 0f;
+            if(item.price == null) item.price = 0f;
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             itemamount =
                     itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
