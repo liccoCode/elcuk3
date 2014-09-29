@@ -19,6 +19,7 @@ $ ->
     market = $('#market').val()
     Invalid_Characters = []
     if market is ''
+      invalid_div.hide()
       return
     else if market is 'AMAZON_JP'
       Invalid_Characters = JP_Invalid_Characters
@@ -202,7 +203,7 @@ $ ->
   $(document).on('change', '#market', (r) ->
     $("#feedProductType").trigger('adjust')
     # 市场变化时检查非法字符
-    checkInvalidCharacters
+    checkInvalidCharacters()
     #$('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
   )
 
