@@ -7,7 +7,6 @@
     <th style="width:20px">国际快递</th>
     <th style="width:20px">运输方式</th>
     <th style="width:20px">去往仓库</th>
-    <th style="width:20px">Title</th>
     <th style="width:20px">目的地</th>
     <th style="width:20px">状态</th>
     <th style="width:20px">预计开始时间</th>
@@ -36,19 +35,6 @@
     <td>${ship.internationExpress}</td>
     <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
     <td>${ship.whouse?.name()}</td>
-    <td>
-        #{ifnot ship.creater}
-          <i style="color:#dc143c;" class="icon-warning-sign"></i>
-        #{/ifnot}
-        #{set fbas: ship.fbas() /}
-        #{if fbas.size() > 0}
-          <span class="pull-right" style="word-break:break-all">
-            <i style="color:#FFA601;" class="icon-amazon"></i>
-            <strong>${fbas.join(',')}</strong>
-          </span>
-        #{/if}
-    ${ship.title}
-    </td>
     <td>${ship.target}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
