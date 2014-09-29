@@ -144,6 +144,12 @@ public class AnalyzeDTO implements Serializable {
     public float displayPrice;
 
 
+    /**
+     * 生命周期
+     */
+    public String sellingCycle;
+
+
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
