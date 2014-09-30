@@ -250,26 +250,14 @@ public class TimelineEventSource {
         public ProcureUnit.STAGE getunitstage() {
             /**如果是入库数量相等则是已入库**/
             ProcureUnit.STAGE unitstage = this.unit.stage;
-            LogUtils.JOBLOG.info("unid111: "+this.unit.id+" unitstage:"
-                               +unitstage.label()+" this.unit.shipItems:("+this.unit.shipItems.toString
-                               ());
             if(unitstage != ProcureUnit.STAGE.INBOUND && unitstage != ProcureUnit.STAGE.CLOSE
                     && this.unit.shipItems != null && this.unit.shipItems.size() >
                     0) {
                 ShipItem item = this.unit.shipItems.get(0);
-
-                LogUtils.JOBLOG.info("unid222: "+this.unit.id+" item.qty:"+item.qty+" item.recivedQty:"+item
-                        .recivedQty);
-
                 if(item.qty!=0 && item.qty<=item.recivedQty) {
-                    LogUtils.JOBLOG.info("unid3333: "+this.unit.id+" item.qty:"+item.qty+" item.recivedQty:"+item
-                                            .recivedQty);
                     unitstage = ProcureUnit.STAGE.INBOUND;
                 }
             }
-            LogUtils.JOBLOG.info("unid: "+this.unit.id+" unitstage:"
-                    +unitstage.label()+" this.unit.shipItems:("+this.unit.shipItems.toString
-                    ());
             return unitstage;
         }
 
