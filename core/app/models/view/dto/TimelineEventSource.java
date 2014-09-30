@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import ext.ShipmentsHelper;
 import helper.GTs;
+import helper.LogUtils;
 import helper.Webs;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -257,6 +258,9 @@ public class TimelineEventSource {
                     unitstage = ProcureUnit.STAGE.INBOUND;
                 }
             }
+            LogUtils.JOBLOG.info("unid: "+this.unit.id+" unitstage:"
+                    +unitstage.label()+" this.unit.shipItems:("+this.unit.shipItems.toString
+                    ());
             return unitstage;
         }
 
