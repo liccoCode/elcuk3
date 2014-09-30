@@ -249,7 +249,7 @@ public class TimelineEventSource {
         public ProcureUnit.STAGE getunitstage() {
             /**如果是入库数量相等则是已入库**/
             ProcureUnit.STAGE unitstage = this.unit.stage;
-            if(this.unit.stage != ProcureUnit.STAGE.INBOUND && this.unit.stage != ProcureUnit.STAGE.CLOSE
+            if(unitstage != ProcureUnit.STAGE.INBOUND && unitstage != ProcureUnit.STAGE.CLOSE
                     && this.unit.shipItems != null && this.unit.shipItems.size() >
                     0) {
                 ShipItem item = this.unit.shipItems.get(0);
