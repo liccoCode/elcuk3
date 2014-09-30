@@ -261,7 +261,9 @@ public class TimelineEventSource {
                 LogUtils.JOBLOG.info("unid222: "+this.unit.id+" item.qty:"+item.qty+" item.recivedQty:"+item
                         .recivedQty);
 
-                if(item.qty > 0 && item.qty == item.recivedQty) {
+                if(item.qty!=0 && item.qty<=item.recivedQty) {
+                    LogUtils.JOBLOG.info("unid3333: "+this.unit.id+" item.qty:"+item.qty+" item.recivedQty:"+item
+                                            .recivedQty);
                     unitstage = ProcureUnit.STAGE.INBOUND;
                 }
             }
