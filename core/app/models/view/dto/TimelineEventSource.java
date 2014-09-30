@@ -237,12 +237,27 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
+
             this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                     // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
-                    this.unit.id, this.unit.stage.label(), this.unit.attrs.planQty, this.lastDays);
+                    this.unit.id, getunitstage().label(), this.unit.attrs.planQty, this.lastDays);
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
             return this;
+        }
+
+        public ProcureUnit.STAGE getunitstage() {
+            /**如果是入库数量相等则是已入库**/
+            ProcureUnit.STAGE unitstage = this.unit.stage;
+            if(this.unit.stage != ProcureUnit.STAGE.INBOUND && this.unit.stage != ProcureUnit.STAGE.CLOSE
+                    && this.unit.shipItems != null && this.unit.shipItems.size() >
+                    0) {
+                ShipItem item = this.unit.shipItems.get(0);
+                if(item.qty > 0 && item.qty == item.recivedQty) {
+                    unitstage = ProcureUnit.STAGE.INBOUND;
+                }
+            }
+            return unitstage;
         }
 
         /**
@@ -261,9 +276,9 @@ public class TimelineEventSource {
             return this;
         }
 
-        public Event color(ProcureUnit unit) {
+        public Event color(ProcureUnit unitunit) {
             String color = "999999";
-            switch(unit.stage) {
+            switch(getunitstage()) {
                 case PLAN:
                     color = "A5B600";
                     break;
