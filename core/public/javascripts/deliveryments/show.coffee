@@ -1,3 +1,4 @@
+window.jQuery = window.$
 $ ->
   $(document).on('click', "#delunit_form_submit, #deployFBAs, #downloadProcureunitsOrder",
   (e) ->
@@ -79,6 +80,32 @@ $ ->
           $("#excel_buyerPhone").val(r['phone'])
         mask.unmask()
       )
+
+  $("#tl").hide()
+  $("#unit_list").on("mouseenter focus", "table td.selling_id", (e) ->
+      $(@).css('cursor' : 'pointer')
+  ).on("click", "table td.selling_id", (e) ->
+    $("#tl").show()
+    $td = $(@)
+    loadTimeLine('sid', $td.text().trim())
+  )
+
+  loadTimeLine = (type, val)->
+    $time_line_home = $("#tl")
+    LoadMask.mask($time_line_home)
+    $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
+    (r) ->
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          eventSource = $('#tl').data('source')
+          eventSource.clear()
+          eventSource.loadJSON(r, '/')
+      finally
+        LoadMask.unmask($time_line_home)
+    )
+
 
   do ->
     procureUntiId = window.location.hash[1..-1]
