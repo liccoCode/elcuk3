@@ -58,26 +58,34 @@
       #{select_field id:'account', name: 's.account.id', label: '上架账户', blank: true, items: accs /}
       #{select_field id:'market', name: 's.market', label:'市场', blank: true, items: models.market.M.values() /}
       #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
-  'ConsumerElectronics', 'Wireless', 'HomeImprovement','Home', 'Games', 'Sports', 'Lighting']/}
+      'ConsumerElectronics', 'Wireless', 'HomeImprovement','Home', 'Games', 'Sports', 'Lighting']/}
       #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: '0' /}
-      #{select_field id:'sellingCycle', name: 's.sellingCycle', label: '生命周期', items: ['NEW',
-            'GROW', 'MATURE', 'RECESSION', 'DELISTING'], value: s.sellingCycle?.name() /}
+
+      <label class="control-label" for="sellingCycle">生命周期</label>
+      <div class="controls">
+       <select name="s.sellingCycle" size="1">
+           #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+             <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+           #{/list}
+       </select>
+      </div>
+
   </div>
   <div class="span12">
-    #{input_append /}
+      #{input_append /}
   </div>
   <div class="span10">
-      <div id="hardwarePlatformHome" style="display: none">
-         #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
+    <div id="hardwarePlatformHome" style="display: none">
+        #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
          #{text_field id:'hardwarePlatform2', name: 's.aps.hardwarePlatformss[1]', label: '', value: '' /}
          #{text_field id:'hardwarePlatform3', name: 's.aps.hardwarePlatformss[2]', label: '', value: '' /}
          #{text_field id:'hardwarePlatform4', name: 's.aps.hardwarePlatformss[3]', label: '', value: '' /}
          #{text_field id:'hardwarePlatform5', name: 's.aps.hardwarePlatformss[4]', label: '', value: '' /}
-      </div>
+    </div>
 
       #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: ''/}
       #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: '' /}
