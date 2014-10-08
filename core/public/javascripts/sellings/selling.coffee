@@ -4,7 +4,6 @@ $ ->
 
   # 图片初始化方法
   imageInit = ->
-    noty({text: "Update更新数据前请先Sync同步Amazon后台数据", layout: 'topCenter',type: 'success',timeout: false})
     imagesUL = $('#images')
     imageNameObj = {}
     for imageName, i in $('input[name=s\\.aps\\.imageName]').val().split('|-|')
