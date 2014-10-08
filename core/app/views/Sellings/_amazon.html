@@ -7,6 +7,12 @@
   </div>
 #{/if}
 #{else }
+  <div class="alert alert-block">
+    <p style="text-align:center;">
+      <i class=" icon-volume-up"> </i>温馨提示: &nbsp;Deploy 操作前请先进行 Sync 操作将 Amazon 的数据同步到系统内.
+    </p>
+  </div>
+
   <div class="btn-toolbar" id='btns'>
     <div class="btn-group">
       <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}"
@@ -121,6 +127,7 @@
 
       #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: s.aps.productDesc /}
   </div>
+  <div class="offset1 span9 alert alert-error" id="previewInvalidCharacters"></div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}
 </div>
