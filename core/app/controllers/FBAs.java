@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.market.Account;
+import models.market.M;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -83,7 +84,13 @@ public class FBAs extends Controller {
      */
     public static void boxLabel(Long id, boolean html, Long boxNumber) {
         FBAShipment fba = FBAShipment.findById(id);
-        renderArgs.put("shipmentId", fba.shipmentId);
+
+        String shipmentid = fba.shipmentId;
+        if (fba.account.type== M.AMAZON_FR){
+            shipmentid = shipmentid.trim()+"U";
+        }
+
+        renderArgs.put("shipmentId", shipmentid);
         renderArgs.put("fba", fba);
         renderArgs.put("shipFrom", Account.address(fba.account.type));
 
