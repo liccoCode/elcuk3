@@ -252,15 +252,14 @@ public class TimelineEventSource {
         public ProcureUnit.STAGE getunitstage() {
             /**如果是入库数量相等则是已入库**/
             ProcureUnit.STAGE unitstage = this.unit.stage;
-            if(unitstage != ProcureUnit.STAGE.CLOSE
-                    && this.unit.shipItems != null && this.unit.shipItems.size() >
-                    0) {
+            if(unitstage != ProcureUnit.STAGE.CLOSE) {
                 ShipItem item = this.unit.shipItems.get(0);
-                if(item.qty != 0 && item.qty < item.recivedQty) {
-                    unitstage = ProcureUnit.STAGE.INBOUND;
-                }
-                if(item.qty != 0 && item.qty == item.recivedQty) {
+                int inboundingqty = this.unit.inboundingQty();
+                int planqty = this.unit.attrs.planQty - inboundingqty;
+                if(planqty == 0) {
                     unitstage = ProcureUnit.STAGE.CLOSE;
+                } else if(inboundingqty > 0) {
+                    unitstage = ProcureUnit.STAGE.INBOUND;
                 }
             }
             return unitstage;
