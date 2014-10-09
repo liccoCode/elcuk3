@@ -187,7 +187,7 @@ public class TimelineEventSource {
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
 
-            this.lastDays = Webs.scale2PointUp(this.unit.qty() / this.ps(type));
+            this.lastDays = Webs.scale2PointUp(this.unit.qty()-this.unit.inboundingQty() / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
@@ -241,11 +241,14 @@ public class TimelineEventSource {
 
             this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                     // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
-                    this.unit.id, getunitstage().label(), this.unit.attrs.planQty, this.lastDays);
+                    this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
+                    this.lastDays);
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
             return this;
         }
+
+
 
         public ProcureUnit.STAGE getunitstage() {
             /**如果是入库数量相等则是已入库**/
@@ -254,7 +257,7 @@ public class TimelineEventSource {
                     && this.unit.shipItems != null && this.unit.shipItems.size() >
                     0) {
                 ShipItem item = this.unit.shipItems.get(0);
-                if(item.qty!=0 && item.qty<=item.recivedQty) {
+                if(item.qty != 0 && item.qty <= item.recivedQty) {
                     unitstage = ProcureUnit.STAGE.INBOUND;
                 }
             }
