@@ -187,7 +187,7 @@ public class TimelineEventSource {
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
 
-            this.lastDays = Webs.scale2PointUp(this.unit.qty()-this.unit.inboundingQty() / this.ps(type));
+            this.lastDays = Webs.scale2PointUp((this.unit.qty()-this.unit.inboundingQty()) / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
