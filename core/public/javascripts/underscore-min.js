@@ -310,4 +310,3 @@
         j.prototype[n] = function(){return D.call(this, t.apply(this._wrapped, arguments))}
     }), j.extend(j.prototype, {chain: function(){return this._chain = !0, this}, value: function(){return this._wrapped}})
 }.call(this);
-//# sourceMappingURL=underscore-min.map
