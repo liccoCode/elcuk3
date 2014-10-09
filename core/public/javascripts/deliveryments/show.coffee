@@ -81,14 +81,19 @@ $ ->
         mask.unmask()
       )
 
-  $("#tl").hide()
-  $("#unit_list").on("mouseenter focus", "table td.selling_id", (e) ->
+  $("#tl").hide() # 隐藏 Timeline DIV
+  _.each($(".selling_id a"), (a) -> # 删除Selling 链接的 href、target 属性
+    a.removeAttribute("href")
+    a.removeAttribute("target")
+  )
+  $("#unit_list").on("mouseenter focus", "table td.selling_id a", (e) ->
       $(@).css('cursor' : 'pointer')
-  ).on("click", "table td.selling_id", (e) ->
+  ).on("click", "table td.selling_id a", (e) ->
     $("#tl").show()
     $td = $(@)
     loadTimeLine('sid', $td.text().trim())
   )
+
 
   loadTimeLine = (type, val)->
     $time_line_home = $("#tl")
@@ -110,5 +115,6 @@ $ ->
   do ->
     procureUntiId = window.location.hash[1..-1]
     targetTr = $("#procureUnit_#{procureUntiId}")
-    EF.scoll(targetTr)
-    EF.colorAnimate(targetTr)
+    if targetTr.size() > 0
+      EF.scoll(targetTr)
+      EF.colorAnimate(targetTr)
