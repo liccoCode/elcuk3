@@ -187,7 +187,7 @@ public class TimelineEventSource {
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
 
-            this.lastDays = Webs.scale2PointUp((this.unit.qty()-this.unit.inboundingQty()) / this.ps(type));
+            this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
@@ -249,16 +249,18 @@ public class TimelineEventSource {
         }
 
 
-
         public ProcureUnit.STAGE getunitstage() {
             /**如果是入库数量相等则是已入库**/
             ProcureUnit.STAGE unitstage = this.unit.stage;
-            if(unitstage != ProcureUnit.STAGE.INBOUND && unitstage != ProcureUnit.STAGE.CLOSE
+            if(unitstage != ProcureUnit.STAGE.CLOSE
                     && this.unit.shipItems != null && this.unit.shipItems.size() >
                     0) {
                 ShipItem item = this.unit.shipItems.get(0);
-                if(item.qty != 0 && item.qty <= item.recivedQty) {
+                if(item.qty != 0 && item.qty < item.recivedQty) {
                     unitstage = ProcureUnit.STAGE.INBOUND;
+                }
+                if(item.qty != 0 && item.qty == item.recivedQty) {
+                    unitstage = ProcureUnit.STAGE.CLOSE;
                 }
             }
             return unitstage;
