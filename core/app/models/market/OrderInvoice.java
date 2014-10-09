@@ -240,8 +240,8 @@ public class OrderInvoice extends GenericModel {
             format.giftwrapfee = "carta da regalo";
 
         } else if(m == M.AMAZON_FR) {
-            format.title = "Note de Crédit";
-            format.date = "Date";
+            format.title = "Facture";
+            format.date = "Data";
             format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
             format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
             format.frominfo3 = "COMMERCIAL BUILDING";
