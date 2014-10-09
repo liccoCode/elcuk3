@@ -483,15 +483,21 @@ public class Orderr extends GenericModel {
         //累计总金额
         float itemamount = 0f;
         for(OrderItem item : this.items) {
+            if(item.discountPrice == null) item.discountPrice = 0f;
+            if(item.price == null) item.price = 0f;
+            if(item.quantity == null) item.quantity = 0;
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
-            itemamount =
-                    itemamount + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                            .divide(new
-                                    BigDecimal
-                                    (item.quantity), 2,
-                                    4).divide(new BigDecimal(this.orderrate()), 2,
-                                    java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
-                            .floatValue();
+            if(item.quantity != 0) {
+                itemamount =
+                        itemamount +
+                                new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                                        .divide(new
+                                                BigDecimal
+                                                (item.quantity), 2,
+                                                4).divide(new BigDecimal(this.orderrate()), 2,
+                                                java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
+                                        .floatValue();
+            }
         }
 
         for(SaleFee fee : this.fees) {

@@ -11,6 +11,7 @@ import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
@@ -1103,7 +1104,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             );
 
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("shipmentId", this.fba.shipmentId);
+
+            String shipmentid = fba.shipmentId;
+            if(fba.account.type == M.AMAZON_FR && this.shipType==Shipment.T.EXPRESS) {
+                shipmentid = shipmentid.trim() + "U";
+            }
+
+            map.put("shipmentId", shipmentid);
             map.put("shipFrom", Account.address(this.fba.account.type));
             map.put("fba", this.fba);
             map.put("procureUnit", this);

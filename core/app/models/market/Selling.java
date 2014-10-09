@@ -67,7 +67,6 @@ public class Selling extends GenericModel {
         DOWN
     }
 
-
     /*
      * Selling 的生命周期
      */
@@ -75,23 +74,49 @@ public class Selling extends GenericModel {
         /**
          * 引入
          */
-        NEW,
+        NEW {
+            @Override
+            public String label() {
+                return "引入";
+            }
+        },
         /**
          * 成长
          */
-        GROW,
+        GROW {
+            @Override
+            public String label() {
+                return "成长";
+            }
+        },
         /**
          * 成熟
          */
-        MATURE,
+        MATURE {
+            @Override
+            public String label() {
+                return "成熟";
+            }
+        },
         /**
          * 衰退
          */
-        RECESSION,
+        RECESSION {
+            @Override
+            public String label() {
+                return "衰退";
+            }
+        },
         /**
          * 退市
          */
-        DELISTING
+        DELISTING {
+            @Override
+            public String label() {
+                return "退市";
+            }
+        };
+        public abstract String label();
     }
 
 

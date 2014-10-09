@@ -90,15 +90,24 @@
       #{hidden_field id: 'accountId', name: 's.account.id', value: s.account.id /}
       #{text_field id:'market', name: 's.market', readonly: true, label:'市场', value: s.market.name() /}
       #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
-  'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Sports', 'Lighting'], value: s.aps.templateType/}
+      'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Sports', 'Lighting'], value: s.aps.templateType/}
       #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps.feedProductType], value: s.aps.feedProductType /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格',value: s.aps.salePrice /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: s.aps.manufacturerPartNumber /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: "0" /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
-      #{select_field id:'sellingCycle', name: 's.sellingCycle', label: '生命周期', items: ['NEW',
-        'GROW', 'MATURE', 'RECESSION', 'DELISTING'], value: s.sellingCycle?.name() /}
+
+
+    <label class="control-label" for="sellingCycle">生命周期</label>
+    <div class="controls">
+      <select name="s.sellingCycle" size="1">
+          #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+            <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+          #{/list}
+      </select>
+    </div>
+
 
   </div>
   <div class="span12">

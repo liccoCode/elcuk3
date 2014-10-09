@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import ext.ShipmentsHelper;
 import helper.GTs;
+import helper.LogUtils;
 import helper.Webs;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -186,7 +187,7 @@ public class TimelineEventSource {
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
 
-            this.lastDays = Webs.scale2PointUp(this.unit.qty() / this.ps(type));
+            this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
@@ -237,12 +238,30 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
+
             this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                     // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
-                    this.unit.id, this.unit.stage.label(), this.unit.attrs.planQty, this.lastDays);
+                    this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
+                    this.lastDays);
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
             return this;
+        }
+
+
+        public ProcureUnit.STAGE getunitstage() {
+            /**如果是入库数量相等则是已入库**/
+            ProcureUnit.STAGE unitstage = this.unit.stage;
+            if(unitstage != ProcureUnit.STAGE.CLOSE) {
+                int inboundingqty = this.unit.inboundingQty();
+                int planqty = this.unit.attrs.planQty - inboundingqty;
+                if(planqty == 0) {
+                    unitstage = ProcureUnit.STAGE.CLOSE;
+                } else if(inboundingqty > 0) {
+                    unitstage = ProcureUnit.STAGE.INBOUND;
+                }
+            }
+            return unitstage;
         }
 
         /**
@@ -261,9 +280,9 @@ public class TimelineEventSource {
             return this;
         }
 
-        public Event color(ProcureUnit unit) {
+        public Event color(ProcureUnit unitunit) {
             String color = "999999";
-            switch(unit.stage) {
+            switch(getunitstage()) {
                 case PLAN:
                     color = "A5B600";
                     break;

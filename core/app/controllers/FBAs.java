@@ -2,8 +2,10 @@ package controllers;
 
 import helper.Webs;
 import models.market.Account;
+import models.market.M;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import play.data.validation.Validation;
 import play.modules.pdf.PDF;
@@ -59,7 +61,6 @@ public class FBAs extends Controller {
      * 箱內麦
      *
      * @param id
-     *
      */
     public static void packingSlip(Long id, boolean html) {
         final FBAShipment fba = FBAShipment.findById(id);
@@ -83,20 +84,26 @@ public class FBAs extends Controller {
      */
     public static void boxLabel(Long id, boolean html, Long boxNumber) {
         FBAShipment fba = FBAShipment.findById(id);
-        renderArgs.put("shipmentId", fba.shipmentId);
+
         renderArgs.put("fba", fba);
         renderArgs.put("shipFrom", Account.address(fba.account.type));
 
         ProcureUnit procureUnit = fba.units.get(0);
 
-        renderArgs.put("procureUnit",procureUnit);
+
+        String shipmentid = fba.shipmentId;
+        if(fba.account.type == M.AMAZON_FR && procureUnit.shipType == Shipment.T.EXPRESS) {
+            shipmentid = shipmentid.trim() + "U";
+        }
+        renderArgs.put("shipmentId", shipmentid);
+        renderArgs.put("procureUnit", procureUnit);
         renderArgs.put("boxNumber", boxNumber);
         if(html) {
             render();
         } else {
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零
-            options.pageSize =  new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+            options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
             renderPDF(options);
         }
     }
