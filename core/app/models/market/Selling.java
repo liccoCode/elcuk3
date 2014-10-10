@@ -622,4 +622,30 @@ public class Selling extends GenericModel {
         }
         return temp;
     }
+
+    /**
+     * 根据传入的参数创建 Selling
+     *
+     * @param line
+     * @return
+     */
+    public static void createWithArgs(String line) {
+        String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+        if(args.length < 5) Webs.error("数据不完整");
+
+        String sku = args[0].trim();
+        String upc = args[1].trim();
+        String asin = args[2].trim();
+        M market = M.val(args[3].trim());
+        Account acc = Account.find("uniqueName like ? AND isSaleAcc = true", args[4].trim() + "%").first();
+
+        if(StringUtils.isBlank(sku)) Webs.error("SKU 无效.");
+        if(StringUtils.isBlank(upc) || upc.length() != 12) Webs.error("UPC 无效.");
+        if(StringUtils.isBlank(asin) || asin.length() != 10) Webs.error("ASIN 无效.");
+        if(market == null) Webs.error("Market 无效.");
+        if(StringUtils.isBlank(args[4]) || acc == null) Webs.error("Account 无效.");
+        String msku = String.format("%s,%s", sku.trim(), upc.trim());
+        Selling newSelling = Selling.blankSelling(msku, asin, upc, acc, market);
+        newSelling.patchToListing();
+    }
 }
