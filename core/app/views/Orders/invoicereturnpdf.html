@@ -129,8 +129,8 @@
     #{list items:invoice.address.split(","), as:'add'}
     ${add}<br>
     #{/list}
-    #{if (ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT) ||(ord.market==models.market
-    .M.AMAZON_DE && invoice.europevat==models.market.OrderInvoice.VAT.EUROPE)}
+    #{if (ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT) ||((ord.market==models.market
+    .M.AMAZON_DE || ord.market==models.market.M.AMAZON_ES) && invoice.europevat==models.market.OrderInvoice.VAT.EUROPE)}
       <br>
     ${invoiceformat.rate}<br>
     #{/if}
