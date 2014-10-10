@@ -617,6 +617,9 @@ public class Orderr extends GenericModel {
         if(market == M.AMAZON_IT) {
             return OrderInvoice.itvat;
         }
+        if(market == M.AMAZON_ES) {
+                    return OrderInvoice.esvat;
+                }
         return 0;
     }
 
