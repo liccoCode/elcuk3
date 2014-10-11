@@ -11,7 +11,6 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
-import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
@@ -82,7 +81,7 @@ public class Sellings extends Controller {
      */
     public static void sameSidSellings(String sid) {
         List<Selling> sellings = Selling
-                .find("sellingId like '"+sid+"%'").fetch();
+                .find("sellingId like '" + sid + "%'").fetch();
         List<String> sids = new ArrayList<String>();
         for(Selling s : sellings) sids.add(s.sellingId);
         renderJSON(J.json(sids));
@@ -93,19 +92,19 @@ public class Sellings extends Controller {
      */
     public static void tsp(String sid) {
         Selling s = Selling.findById(sid);// 利用 hibernate 二级缓存, Play 的 JavaBean 填充的查询语句含有 limit 语句
-        if (s==null){
-            flash.error("找不到selling:"+sid);
-            renderJSON(new Ret("找不到selling:"+sid));
+        if(s == null) {
+            flash.error("找不到selling:" + sid);
+            renderJSON(new Ret("找不到selling:" + sid));
         }
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
         renderJSON(J.json(GTs.MapBuilder
                 .map("t", s.aps.keyFeturess)
                 .put("s", s.aps.searchTermss)
                 .put("p", Arrays.asList(s.aps.productDesc))
-                .put("man",Arrays.asList(s.aps.manufacturer))
-                .put("brand",Arrays.asList(s.aps.brand))
-                .put("price",Arrays.asList(s.aps.standerPrice.toString()))
-                .put("type",Arrays.asList(s.aps.itemType))
+                .put("man", Arrays.asList(s.aps.manufacturer))
+                .put("brand", Arrays.asList(s.aps.brand))
+                .put("price", Arrays.asList(s.aps.standerPrice.toString()))
+                .put("type", Arrays.asList(s.aps.itemType))
                 .build()));
     }
 
@@ -250,5 +249,48 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
+
+    /**
+     * 批量导入 Selling
+     */
+    public static void bulkImport(File sellingFile) {
+        if(sellingFile == null) renderText("文件为空.");
+        List<String> lines = new ArrayList<String>();
+        StringBuffer msg = new StringBuffer();
+        try {
+            String fileName = sellingFile.getName();
+            if(!(fileName.substring(fileName.lastIndexOf(".") + 1)).equalsIgnoreCase("txt")) //文件类型校验
+                msg.append("不支持的文件格式! 请使用 TXT 文档.");
+            lines = FileUtils.readLines(sellingFile);
+        } catch(Exception e) {
+            msg.append(e.getMessage());
+        }
+        if(lines.size() == 0 || !(lines.get(0).toString().contains("SKU\tUPC\tASIN\tMarket\tAccount")))
+            msg.append("文件校验失败, 请检查是否内容为空或标题行错误!");
+        //开始解析 Selling
+        lines.remove(0); // 删除第一行的标题
+        for(int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+            try {
+                Selling.createWithArgs(line);
+            } catch(FastRuntimeException e) {
+                msg.append(String.format("ERROR:[%s], 位置: [第 %s 行], 内容: [%s] ", e.getMessage(), i + 1, line));
+            }
+        }
+        if(StringUtils.isNotBlank(msg.toString())) {
+            renderText(String.format("解析过程中出现错误: %s", msg.toString()));
+        }
+        renderText("恭喜, 文件解析成功! ^………^");
+    }
+
+    /**
+     * 下载 Selling 导入模板
+     */
+    public static void sellingTemplate() {
+        File template = new File(String.format("%s/%s", System.getProperty("application.path"),
+                "app/views/Sellings/uploadTemplate.xls"));
+        renderBinary(template);
     }
 }
