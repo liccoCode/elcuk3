@@ -255,24 +255,25 @@ public class Sellings extends Controller {
      * 批量导入 Selling
      */
     public static void bulkImport(File sellingFile) {
-        if(sellingFile == null) renderText("文件为空.");
         List<String> lines = new ArrayList<String>();
         StringBuffer msg = new StringBuffer();
+        // 文件基本属性校验(是否存在、格式、标题行)
         try {
+            if(sellingFile == null) Webs.error("文件为空!");
             String fileName = sellingFile.getName();
             if(!(fileName.substring(fileName.lastIndexOf(".") + 1)).equalsIgnoreCase("txt")) //文件类型校验
-                msg.append("不支持的文件格式! 请使用 TXT 文档.");
+                Webs.error("不支持的文件格式! 请使用 TXT 文档.");
             lines = FileUtils.readLines(sellingFile);
+            if(lines.size() == 0 || !(lines.get(0).toString().contains("SKU\tUPC\tASIN\tMarket\tAccount")))
+                Webs.error("文件校验失败, 内容为空或标题行不存在!");
         } catch(Exception e) {
-            msg.append(e.getMessage());
+            renderText(e.getMessage());
         }
-        if(lines.size() == 0 || !(lines.get(0).toString().contains("SKU\tUPC\tASIN\tMarket\tAccount")))
-            msg.append("文件校验失败, 请检查是否内容为空或标题行错误!");
+
         //开始解析 Selling
         lines.remove(0); // 删除第一行的标题
         for(int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
-            String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
             try {
                 Selling.createWithArgs(line);
             } catch(FastRuntimeException e) {
@@ -282,7 +283,7 @@ public class Sellings extends Controller {
         if(StringUtils.isNotBlank(msg.toString())) {
             renderText(String.format("解析过程中出现错误: %s", msg.toString()));
         }
-        renderText("恭喜, 文件解析成功! ^………^");
+        renderText("恭喜, 文件解析成功!请刷新 Listing 首页查看 Selling 新数据.");
     }
 
     /**
