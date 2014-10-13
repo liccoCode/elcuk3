@@ -116,6 +116,7 @@ public class Selling extends GenericModel {
                 return "退市";
             }
         };
+
         public abstract String label();
     }
 
@@ -647,5 +648,11 @@ public class Selling extends GenericModel {
         String msku = String.format("%s,%s", sku.trim(), upc.trim());
         Selling newSelling = Selling.blankSelling(msku, asin, upc, acc, market);
         newSelling.patchToListing();
+    }
+
+    public static String cyclename(String cycle) {
+        if(StringUtils.isBlank(cycle))
+            return "";
+        return SC.valueOf(cycle).label();
     }
 }
