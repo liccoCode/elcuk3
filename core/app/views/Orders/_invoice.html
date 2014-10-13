@@ -104,7 +104,8 @@
     </td>
     <td rowspan="4" class="td2">
       <div class="div1">
-      #{if  (ord.market==models.market.M.AMAZON_UK ||ord.market==models.market.M.AMAZON_FR) || (ord.market==models
+      #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ||ord.market==models
+      .market.M.AMAZON_FR) || (ord.market==models
       .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
         <img src="/images/common/EDEER-logo.jpg" style="height:100%">
       #{/if}
@@ -125,7 +126,7 @@
   </tr>
   <tr>
     <td class="td4">
-      <strong>To</strong> <br>
+      <strong>${invoiceformat.to}</strong> <br>
     #{if invoice != null}
       <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.invoiceto.replace("DE","Deutschland")}">
     #{/if}
@@ -141,7 +142,7 @@
 
     </td>
     <td class="td2">
-      <strong>From</strong> <br>
+      <strong>${invoiceformat.from}</strong> <br>
     #{if  ord.market==models.market.M.AMAZON_IT && invoice!=null && invoice.europevat==models.market.OrderInvoice.VAT
     .EUROPE}
     ${invoiceformat.fromeurinfo1} <br>

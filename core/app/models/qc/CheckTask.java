@@ -442,7 +442,7 @@ public class CheckTask extends Model {
                 newtask.units = punit;
                 newtask.confirmstat = ConfirmType.UNCONFIRM;
                 newtask.checkstat = StatType.UNCHECK;
-                if(punit.cooperator.qcLevel == Cooperator.L.MICRO) {
+                if(punit.cooperator!=null && punit.cooperator.qcLevel == Cooperator.L.MICRO) {
                     //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
                     newtask.qcType = T.SELF;
                 }

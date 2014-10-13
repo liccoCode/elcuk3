@@ -113,6 +113,9 @@ public class OrderInvoice extends GenericModel {
     @Transient
     public static float itvat = 1.22f;
 
+    @Transient
+    public static float esvat = 1.20f;
+
 
     /**
      * 价格信息转化给前台显示
@@ -174,6 +177,9 @@ public class OrderInvoice extends GenericModel {
             format.shipfee = "Versandkosten";
             format.giftwrapfee = "Geschenkpapier";
             format.rate = "Wechselkurs: 1 EUR = 0.8358 GBP";
+
+            format.from = "From";
+            format.to = "To";
         } else if(m == M.AMAZON_UK) {
             format.title = "Invoice";
             format.date = "Date";
@@ -203,6 +209,8 @@ public class OrderInvoice extends GenericModel {
             format.shipfee = "Shipping cost";
             format.giftwrapfee = "giftwrap";
 
+            format.from = "From";
+            format.to = "To";
 
         } else if(m == M.AMAZON_IT) {
             format.title = "Fattura";
@@ -239,9 +247,12 @@ public class OrderInvoice extends GenericModel {
             format.shipfee = "Spese di Spedizione";
             format.giftwrapfee = "carta da regalo";
 
+            format.from = "From";
+            format.to = "To";
+
         } else if(m == M.AMAZON_FR) {
-            format.title = "Note de Crédit";
-            format.date = "Date";
+            format.title = "Facture";
+            format.date = "Data";
             format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
             format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
             format.frominfo3 = "COMMERCIAL BUILDING";
@@ -266,6 +277,38 @@ public class OrderInvoice extends GenericModel {
             format.shipfee = "Livraison";
             format.giftwrapfee = "emballage cadeau";
 
+            format.from = "From";
+            format.to = "To";
+
+        } else if(m == M.AMAZON_ES) {
+            format.title = "Factura";
+            format.date = "Fecha";
+            format.frominfo1 = "EDEER NETWORK TECHNOLOGY CO., LTD";
+            format.frominfo2 = "Unit E6, 3 FLOOR WING TAT";
+            format.frominfo3 = "COMMERCIAL BUILDING";
+            format.frominfo4 = "97 BONHAM STRAND, SHEUNG WAN ";
+            format.frominfo5 = "999077 HONGKONG";
+            format.frominfo6 = "VAT No.: GB 117317336";
+            format.frominfo7 = "";
+            format.address = "Dirección de envío";
+            format.itemname = "Detalles del producto";
+            format.qty = "Cantidad";
+            format.price = "Precio(€)";
+            format.itemamount = "Importe(€)";
+            format.notaxamount = "Subtotal";
+            format.taxamount = "VAT";
+            format.taxamountper = "VAT(20%)";
+            format.totalamount = "Total";
+            format.rate = "Tipo de cambio: 1 EUR = 0,8358 GBP";
+            format.country = "España";
+            format.filename = "España";
+            format.returntitle = "Nota de Crédito";
+            format.returntitle1 = "Factura original";
+            format.shipfee = "Spese di Spedizione";
+            format.giftwrapfee = "";
+
+            format.from = "Desde";
+            format.to = "Factura a";
         }
         return format;
     }
