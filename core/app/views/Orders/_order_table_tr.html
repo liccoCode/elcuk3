@@ -19,7 +19,7 @@
     <td>${ord.market.toString()}</td>
     <td data-toggle="toggle" data-target="#order_index_${ord_index}">
         <i class="icon-reorder"></i>
-        <span class="badge badge-info">${ord.fees.size()}</span>
+        <span class="badge badge-info">${ord?.fees?.size()}</span>
         #{set percent: (ord.totalMarketFee() / ord.totalUSDSales())/}
         #{if percent >= 0.25}
             <span style="color:red">${percent.format("#.##%")}</span>
