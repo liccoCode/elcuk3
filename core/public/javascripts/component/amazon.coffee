@@ -10,48 +10,6 @@ $ ->
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
-  EU_And_US_Invalid_Characters = ['，', '。', '`', '~', '！', '（', '）', '——', '—', '、', '；', '：', '‘', '’', '“', '”', '《', '》', '？', '【', '】']
-  JP_Invalid_Characters = ['——', '—', '✦', '•', '◉', '⦿', '▷', '▶', '❏', '❒', '♫', '®']
-  Should_Noty = true
-
-  checkInvalidCharacters = ->
-    invalid_div = $("#previewInvalidCharacters")
-    market = $('#market').val()
-    Invalid_Characters = []
-    if market is ''
-      invalid_div.hide()
-      return
-    else if market is 'AMAZON_JP'
-      Invalid_Characters = JP_Invalid_Characters
-    else
-      Invalid_Characters = EU_And_US_Invalid_Characters
-    Invalid_Text = ''
-    flag = false
-    id_list = ['title', 'bulletPoint1', 'bulletPoint2', 'bulletPoint3', 'bulletPoint4', 'bulletPoint5', 'searchTerms1', 'searchTerms2', 'searchTerms3', 'searchTerms4', 'searchTerms5', 'productDesc']
-    _.each(id_list, (id) -> # 每次触发事件都强制检查所有的文本框是否合法
-      $obj = $("##{id}")
-      str = $obj.val()
-      flag = false
-      _.each(Invalid_Characters, (value) ->
-        flag = true if str.indexOf(value) >= 0
-        reg = "/#{value}/g"
-        str = str.replace(eval(reg), "<span style='background-color:#DC3023'>#{value}</span>")
-      )
-      if flag
-        Invalid_Text += "#{$obj.attr('id')}: #{str}<br/>"
-        noty({text: "该 Selling 使用了 Amazon 不允许使用的字符,请参照 <a href='#previewInvalidCharacters'>这儿</a> 修改或者删除此字符", layout: 'top', type: 'error', timeout: false, closeWith: ['click'], onClose: set_should_noty_flag}) if Should_Noty
-        Should_Noty = false
-    )
-    if Invalid_Text == ""
-      invalid_div.hide()
-    else
-      Invalid_Text = "<h4>非法字符(底色加深的为非法字符所在位置) : </h4><br/>#{Invalid_Text}"
-      invalid_div.html(Invalid_Text)
-      invalid_div.show()
-
-  set_should_noty_flag = ->
-    Should_Noty = true
-
   # 预览 Desc 的方法
   previewBtn = (e) ->
     invalidTag = false
@@ -87,12 +45,12 @@ $ ->
     previewBtn.call(@, e)
     false
   ).on('change', "#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc", (e) ->
-    checkInvalidCharacters()
+    replaceInvalidCharacters(@, e)
   )
 
   $(document).ready ->
     # 页面初始化时校验非法字符
-    checkInvalidCharacters()
+    $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
 
   $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
 
@@ -203,8 +161,7 @@ $ ->
   $(document).on('change', '#market', (r) ->
     $("#feedProductType").trigger('adjust')
     # 市场变化时检查非法字符
-    checkInvalidCharacters()
-    #$('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
+    $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
   )
 
   # 模板 下拉项变化 feedProductType 跟着变化
@@ -228,3 +185,53 @@ $ ->
           process(c)
         )
   })
+
+  EU_And_US_Invalid_Characters = {
+    "，": ",",
+    "。": ".",
+    "！": "!",
+    "（": "(",
+    "）": ")",
+    "——": "-",
+    "—": "-",
+    "、": ".",
+    "；": ";",
+    "‘": "\'",
+    "’": "\'",
+    "“": "\"",
+    "”": "\"",
+    "《": "<<",
+    "》": ">>",
+    "？": "?",
+    "【": "[",
+    "】": "]",
+    "​": ""
+  }
+
+  JP_Invalid_Characters = {
+    "——": "-",
+    "—": "-",
+    "✦": "",
+    "•": "",
+    "◉": "",
+    "⦿": "",
+    "▷": "",
+    "▶": "",
+    "❏": "",
+    "❒": "",
+    "♫": "",
+    "®": ""
+  }
+
+  replaceInvalidCharacters = (obj, e) ->
+    str = obj.value
+    Invalid_Characters = {}
+    market = $('#market').val()
+    if market is 'AMAZON_JP'
+      Invalid_Characters = JP_Invalid_Characters
+    else
+      Invalid_Characters = $.extend(EU_And_US_Invalid_Characters, JP_Invalid_Characters)
+    for key, value of Invalid_Characters
+      if str.indexOf(key) >= 0
+        reg = "/#{key}/g"
+        $(obj).val(str.replace(eval(reg), value))

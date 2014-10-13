@@ -100,9 +100,9 @@
       #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: ''/}
       #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: '' /}
   </div>
-  <div class="offset1 span9 alert alert-error" id="previewInvalidCharacters"></div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}
+#{include 'Sellings/_invalid_characters.html'/}
 </div>
 
 
