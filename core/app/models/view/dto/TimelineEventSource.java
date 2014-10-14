@@ -195,6 +195,8 @@ public class TimelineEventSource {
             if(this.unit.stage == ProcureUnit.STAGE.INBOUND) {
                 // 如果在入库中, 进度条自动缩短
                 timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
+            } else if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
+                timeLineDays = 0f;
             }
             // 如果不够卖到第二天, 那么就省略
             this.end = add8Hour(new DateTime(predictShipFinishDate)
@@ -239,10 +241,17 @@ public class TimelineEventSource {
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
 
-            this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                    // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
-                    this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
-                    this.lastDays);
+            if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
+                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
+                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
+                        this.unit.id, getunitstage().label(), 0,
+                        0);
+            } else {
+                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
+                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
+                        this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
+                        this.lastDays);
+            }
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
             return this;
