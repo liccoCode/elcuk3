@@ -181,6 +181,7 @@ public class TimelineEventSource {
             for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
             for(Shipment shipment : relateShipments) shipment.endShipByComputer();
 
+            dateplan = "";
             if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
                 if(!Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
@@ -225,6 +226,7 @@ public class TimelineEventSource {
                 timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
             } else if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
                 timeLineDays = 0f;
+                dateplan = "";
             }
             // 如果不够卖到第二天, 那么就省略
             this.end = add8Hour(new DateTime(predictShipFinishDate)
