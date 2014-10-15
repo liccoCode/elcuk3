@@ -313,6 +313,17 @@ public class Cooperator extends Model {
     }
 
     /**
+     * 返回所有供应商的名称集合
+     *
+     * @return
+     */
+    public static List<String> supplierNames() {
+        List<String> supplierNames = new ArrayList<String>();
+        for(Cooperator co : suppliers()) supplierNames.add(co.name);
+        return supplierNames;
+    }
+
+    /**
      * 所有快递商
      *
      * @return

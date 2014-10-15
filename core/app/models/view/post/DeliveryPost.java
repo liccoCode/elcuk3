@@ -72,6 +72,7 @@ public class DeliveryPost extends Post<Deliveryment> {
     public DateType dateType;
 
     public Long cooperId;
+    public String cooperName;
 
     public Deliveryment.T deliveryType;
 
@@ -110,9 +111,14 @@ public class DeliveryPost extends Post<Deliveryment> {
             params.add(this.state);
         }
 
-        if(this.cooperId != null) {
+        if(this.cooperId != null && this.cooperId > 0) {
             sbd.append(" AND d.cooperator.id=?");
             params.add(this.cooperId);
+        }
+
+        if(StringUtils.isNotBlank(this.cooperName)) {
+            sbd.append(" AND d.cooperator.name=?");
+            params.add(this.cooperName);
         }
 
         if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {

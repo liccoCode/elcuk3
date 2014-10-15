@@ -23,19 +23,27 @@
       <input type="date" name="p.to" value="${p.to.date()}">
     </div>
 
+      #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType,
+      class:'inline' /}
+
+      #{select_enum name:'p.state', items:models.procure.Deliveryment.S.values(), value:p.state, class:'inline'}
+        <option value="">状态</option>
+      #{/select_enum}
+
+      #{select_enum name: "p.deliveryType", items: models.procure.Deliveryment.T.values(), value: p.deliveryType, class:'inline'}
+        <option value="">类型</option>
+      #{/select_enum}
+
+    <select name="p.cooperId" class="inline">
+      <option value="0">供应商</option>
+        #{list items:suppliers, as:'sp'}
+          <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+        #{/list}
+    </select>
+
     <div class="inline">
-        #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType /}
-
-        #{select_enum name:'p.state', items:models.procure.Deliveryment.S.values(), value:p.state}
-          <option value="">状态</option>
-        #{/select_enum}
-
-        #{select 'p.cooperId', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.cooperId}
-            #{option ''}供应商#{/option}
-        #{/select}
-        #{select_enum name: "p.deliveryType", items: models.procure.Deliveryment.T.values(), value: p.deliveryType}
-          <option value="">类型</option>
-        #{/select_enum}
+      <input type="text" name="p.cooperName" class="input-medium" value="${p.cooperName}" placeHolder="手动输入供应商" data-provide="typeahead"
+             data-source="${suppliersJson}">
     </div>
 
     <div class="input-prepend input-append inline">
@@ -44,13 +52,15 @@
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
 
-    #{power.ck "deliveryments.manual"}
-      <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
-        <i class="icon-plus"></i>新增手动单
-      </a>
-    #{/power.ck}
+    <div class="inline">
+        #{power.ck "deliveryments.manual"}
+          <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
+            <i class="icon-plus"></i>新增手动单
+          </a>
+        #{/power.ck}
 
-    <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
+      <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
+    </div>
   </div>
 </div>
 
