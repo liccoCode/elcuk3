@@ -1203,7 +1203,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Shipment shipment = relateShipments.get(0);
             if(this.inboundingQty() <= 0) {
                 if(shipment.dates.oldPlanArrivDate != null && shipment.dates.planArrivDate != null) {
-                    datedesc = ",运输单最新预计到库时间" + shipment.dates.planArrivDate
+                    datedesc = "系统备注:运输单最新预计到库时间" + shipment.dates.planArrivDate
                             + "，比原预计到库日期" + shipment.dates.oldPlanArrivDate
                             + "差异" +
                             (shipment.dates.planArrivDate.getTime() - shipment.dates.oldPlanArrivDate.getTime()) /
@@ -1214,7 +1214,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 if(this.attrs.planArrivDate != null && shipment.dates.planArrivDate != null && ((this.attrs
                         .planArrivDate.getTime() - shipment.dates
                         .planArrivDate.getTime()) != 0)) {
-                    datedesc = ",采购计划单最新预计到库时间" + this.attrs.planArrivDate
+                    datedesc = "系统备注:采购计划单最新预计到库时间" + this.attrs.planArrivDate
                             + "，比原预计到库日期" + shipment.dates.planArrivDate
                             + "差异" + (this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) /
                             (24 * 60 * 60 * 1000)
