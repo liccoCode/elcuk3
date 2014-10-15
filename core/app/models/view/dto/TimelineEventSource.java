@@ -165,9 +165,6 @@ public class TimelineEventSource {
 
         public Float lastDays;
 
-        @Transient
-        public String dateplan;
-
         /**
          * 计算并设置 Start, End Date 与持续天数
          *
@@ -181,34 +178,10 @@ public class TimelineEventSource {
             for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
             for(Shipment shipment : relateShipments) shipment.endShipByComputer();
 
-            dateplan = "";
             if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
                 if(!Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
-
-
-                if(this.unit.inboundingQty() <= 0) {
-                    if(shipment.dates.oldPlanArrivDate != null && shipment.dates.planArrivDate != null) {
-                        dateplan = ",运输单最新预计到库时间" + shipment.dates.planArrivDate
-                                + "，比原预计到库日期" + shipment.dates.oldPlanArrivDate
-                                + "差异" +
-                                (shipment.dates.planArrivDate.getTime() - shipment.dates.oldPlanArrivDate.getTime()) /
-                                        (24 * 60 * 60 * 1000)
-                                + "天";
-                    }
-                } else {
-                    if(unit.attrs.planArrivDate != null && shipment.dates.planArrivDate != null && ((unit.attrs
-                            .planArrivDate.getTime() - shipment.dates
-                            .planArrivDate.getTime()) != 0)) {
-                        dateplan = ",采购计划单最新预计到库时间" + unit.attrs.planArrivDate
-                                + "，比原预计到库日期" + shipment.dates.planArrivDate
-                                + "差异" + (unit.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) /
-                                (24 * 60 * 60 * 1000)
-                                + "天";
-                    }
-                }
-
             }
 
             //如果有签收数量则用采购计划的入库时间
@@ -226,7 +199,6 @@ public class TimelineEventSource {
                 timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
             } else if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
                 timeLineDays = 0f;
-                dateplan = "";
             }
             // 如果不够卖到第二天, 那么就省略
             this.end = add8Hour(new DateTime(predictShipFinishDate)
@@ -274,15 +246,15 @@ public class TimelineEventSource {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
 
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
-                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天 %s",
+                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                         // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
                         this.unit.id, getunitstage().label(), 0,
-                        0, dateplan);
+                        0);
             } else {
-                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天 %s",
+                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                         // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
                         this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
-                        this.lastDays, dateplan);
+                        this.lastDays);
             }
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
