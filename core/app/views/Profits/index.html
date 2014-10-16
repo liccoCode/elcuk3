@@ -29,11 +29,10 @@
           <option value="total">汇总</option>
         #{/select_enum}
 
-      <th>Category:</th>
-      <td>
-        <input type="text" name="p.category" data-provide="typeahead" data-source="${categorys}"
-               value="${p?.category}" id="unit_category">
-      </td>
+        #{select 'p.category', items:categorys, value: p.category}
+            #{option ''}Category#{/option}
+        #{/select}
+
 
       <th>SKU:</th>
       <td>
@@ -78,7 +77,7 @@
       </tr>
       </thead>
       <tbody>
-        #{list items:profits, as:'pro'}
+          #{list items:profits, as:'pro'}
           <tr>
             <td>${pro.sku}</td>
             <td>${pro.market?pro.market.label():"汇总"}</td>
@@ -99,7 +98,7 @@
             <td>${pro.inboundfee}</td>
             <td>${pro.memo}</td>
           </tr>
-        #{/list}
+          #{/list}
       </tbody>
     </table>
   </div>
