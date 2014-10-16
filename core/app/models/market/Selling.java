@@ -649,10 +649,4 @@ public class Selling extends GenericModel {
         Selling newSelling = Selling.blankSelling(msku, asin, upc, acc, market);
         newSelling.patchToListing();
     }
-
-    public static String cyclename(String cycle) {
-        if(StringUtils.isBlank(cycle))
-            return "";
-        return SC.valueOf(cycle).label();
-    }
 }
