@@ -29,6 +29,7 @@ public class ProfitPost extends Post<Profit> {
     public String sku;
     public String sellingId;
     public String category;
+    public String state;
 
     public ProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -231,8 +232,12 @@ public class ProfitPost extends Post<Profit> {
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
             for(Product pro : cat.products) {
-                Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
-                profitlist.add(profit);
+                if((this.state.equals("Active") && pro.marketState != Product.T.DOWN)
+                        || (!this.state.equals("Active") && pro.marketState == Product.T.DOWN)) {
+                    Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
+                    profitlist.add(profit);
+                }
+
             }
         } else if(!StringUtils.isBlank(sku)) {
             Profit profit = esProfit(begin, end, skumarket, sku, sellingId);

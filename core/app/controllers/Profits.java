@@ -87,7 +87,8 @@ public class Profits extends Controller {
                 if(p.sku != null) skukey = p.sku;
                 if(p.pmarket != null) marketkey = p.pmarket;
                 if(p.category != null) categorykey = p.category.toLowerCase();
-                String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey);
+                String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey,
+                        marketkey,p.state);
 
                 profits = Cache.get(postkey, List.class);
                 if(profits != null) {

@@ -175,6 +175,7 @@ public class Excels extends Controller {
             if(p.pmarket != null) marketkey = p.pmarket;
             if(p.category != null) categorykey = p.category.toLowerCase();
             String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
+                    p.state,
                     "excel");
             profits = Cache.get(postkey, List.class);
             if(profits == null) {
