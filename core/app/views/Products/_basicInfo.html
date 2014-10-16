@@ -139,7 +139,7 @@
 <tr>
   <th>产品名称</th>
   <td colspan="4">
-    <input type="hidden" style="width:95%"  name="pro.iscopy" value="${pro.iscopy}">
+    <input type="hidden" style="width:95%" name="pro.iscopy" value="${pro.iscopy}">
     <input type="text" style="width:95%" id="proabbreviation" name="pro.abbreviation" value="${pro.abbreviation}">
   </td>
 </tr>
@@ -223,8 +223,10 @@
 #{power.ck "products.saleamazonlisting"}
   <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
 #{/power.ck}
-#{power.ck "products.delete"}
-  <a href="@{Products.delete(pro.sku)}" class="btn btn-danger" data-confirm='确认删除?'>删除</a>
+#{power.ck "products.destroy"}
+  <a href="#" data-sku="${pro.sku}" id="deleteBtn" class="btn btn-danger">
+    删除
+  </a>
 </td>
 #{/power.ck}
 </tr>
@@ -272,3 +274,4 @@
   </table>
 #{records records:records, row:true/}
 </div>
+#{include 'Products/_destroyLogForm.html'/}
