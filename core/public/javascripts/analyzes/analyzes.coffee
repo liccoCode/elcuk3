@@ -134,6 +134,10 @@ $ ->
   ).on("click",".btn:contains(Reload)",(e) ->
     e.preventDefault()
     ajaxSaleUnitLines()
+  ).on("click",".btn:contains(Excel)",(e) ->
+    e.preventDefault()
+    $form = $('#click_param')
+    window.location.href = '/Excels/analyzes?'+$form.serialize()
   )
 
 
