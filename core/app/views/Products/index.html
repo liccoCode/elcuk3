@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+  #{extends 'main_full.html' /}
 #{set title:'Product' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -7,6 +7,7 @@
 
 <div style="margin:5px 0 0;" class="row">
   #{flash_alert /}
+  #{errorMsgs /}
   #{power.ck "products.edit"}
     <a href="@{Products.blank()}" class="btn btn-primary" target="_blank">添加新产品</a>
   #{/power.ck}
@@ -30,3 +31,4 @@
 <div id="prod_list">
     #{render 'Products/_products.html', prods:prods, pi:p,products:products,families:families/}
 </div>
+#{records records:records, row:true/}

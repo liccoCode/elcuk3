@@ -138,6 +138,11 @@ $ ->
       $span = $("<span style='margin-left:10px;'></span>").text("(oz: #{(($input.val()) * 35.2739619).toFixed(2)})")
       $input.parent().next().empty()
       $input.parent().after($span)
+  ).on('click', '#deleteBtn', ->
+    $deleteBtn = $(@)
+    $logForm = $("#logForm")
+    $($("#logForm input")[0]).val($deleteBtn.data('sku')) # 设置 SKU 到隐藏的 Modal 中
+    $logForm.modal() # 展示 Modal
   )
 
   # 页面初始化时触发一次

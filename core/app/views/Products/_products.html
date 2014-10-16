@@ -6,35 +6,50 @@
   <tr>
     <th>SKU</th>
     <th>Family</th>
-    <th>操作</th>
-    <th>Pics</th>
     <th>Name</th>
-    <th>L(包材)</th>
-    <th>H(包材)</th>
-    <th>W(包材)</th>
-    <th>Wt(包材)</th>
+    <th>最近采购价格</th>
+    <th>最近采购供应商</th>
+    <th>产品状态</th>
+    <th>销售级别</th>
+    <th>上市时间</th>
+    <th>退市时间</th>
+    <th>Action</th>
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
-
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>
-          #{set count:prod.pictureCount() /}
-        <td style="width:100px"><a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
-          <i class="icon-refresh"></i>同步</a>
-          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info">
-            复制</a></td>
-
-
-        <td>${count} <i class="${count > 0 ? 'icon-picture' : 'icon-exclamation-sign'}"></i>
-        </td>
         <td>${prod.productName}</td>
-        <td>${prod.lengths == null ? 0 : prod.lengths}</td>
-        <td>${prod.heigh == null ? 0 : prod.heigh}</td>
-        <td>${prod.width == null ? 0 : prod.width}</td>
-        <td>${prod.weight == null ? 0 : prod.weight}</td>
-
-
+          #{set unit: prod.recentlyUnit()/}
+        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
+        <td><a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a></td>
+        <td>
+          <select name='pro.state' class="span1" style="width:90px;" size="1">
+            <option>请选择</option>
+              #{list items: models.product.Product.S.values(), as: 's'}
+                <option value="${s}" ${prod.state == s? 'selected' : ''}>${s}</option>
+              #{/list}
+          </select>
+        </td>
+        <td>
+          <select name='pro.salesLevel' class="span1" style="width:80px;" size="1">
+            <option>请选择</option>
+              #{list items: models.product.Product.E.values(), as: 's'}
+                <option value="${s}" ${prod.salesLevel == s? 'selected' : ''}>${s}</option>
+              #{/list}
+          </select>
+        </td>
+        <td>#{time_tooltip time:prod.marketTime/}</td>
+        <td>#{time_tooltip time:prod.delistingTime/}</td>
+        <td style="width:120px">
+          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
+            <i class="icon-refresh"></i>同步
+          </a>
+          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info">复制</a>
+            #{power.ck "products.destroy"}
+              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-mini btn-danger">删除</a>
+            #{/power.ck}
+        </td>
       </tr>
     #{/list}
     #{if pi}
@@ -46,13 +61,6 @@
     #{/if}
 </table>
 #{/else}
-
-
-
-
-
-
-
 
 <div id="copy_modal" class="modal hide fade">
   <div class="modal-header">
@@ -87,17 +95,13 @@
         </label>
       </dd>
     </dl>
-
-
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
       <button class="btn btn-primary">同步</button>
     </div>
   #{/form}
   </div>
-
 </div>
-
 
 <div id="backup_modal" class="modal hide fade">
   <div class="modal-header">
@@ -112,15 +116,12 @@
       <th>Family</th>
       <td>
         <input style="width:150px" id="back_families" type="text" name="family" data-provide="typeahead"
-               data-source="${families}"
-               value="" autocomplete="off">
+               data-source="${families}" value="" autocomplete="off">
       </td>
       <th>SKU</th>
       <td><input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off"></td>
-
     </tr>
     <dl class="dl-horizontal">
-
       <dt>选择复制的信息:</dt>
       <dd>
         <label class="checkbox">
@@ -138,12 +139,12 @@
       </dd>
     </dl>
 
-
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
       <button class="btn btn-primary">复制</button>
     </div>
   #{/form}
   </div>
-
 </div>
+
+#{include 'Products/_destroyLogForm.html'/}

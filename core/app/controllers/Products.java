@@ -41,6 +41,10 @@ public class Products extends Controller {
         return sku;
     }
 
+    @Before(only = {"index"})
+    public static void setIndexLog() {
+        renderArgs.put("records", ElcukRecord.fid("product.destroy").<ElcukRecord>fetch(50));
+    }
 
     /**
      * 展示所有的 Product
@@ -254,7 +258,7 @@ public class Products extends Controller {
                     .append("\"").append("},");
         }
         buff.append("]");
-        renderJSON( StringUtils.replace(buff.toString(),"},]","}]"));
+        renderJSON(StringUtils.replace(buff.toString(), "},]", "}]"));
     }
 
 
@@ -363,12 +367,42 @@ public class Products extends Controller {
     /**
      * 产品删除
      */
-    @Check("products.delete")
-    public static void delete(String id) {
+    @Check("products.destroy")
+    public static void destroy(String id, String reason) {
         Product pro = Product.findById(id);
-        pro.safeDelete();
-        if(Validation.hasErrors()) render("Products/show.html", pro);
+        pro.safeDelete(reason);
+        if(Validation.hasErrors()) {
+            ProductPost p = new ProductPost();
+            List<Product> prods = p.query();
+            render("Products/index.html", p, prods);
+        }
         flash.success("Product %s 删除成功", id);
-        redirect("/Products/index");
+        index(null);
+    }
+
+    /**
+     * 更新 Product 在系统内的状态
+     *
+     * @param sku
+     * @param state
+     */
+    public static void updateState(String sku, Product.S state) {
+        Product product = Product.findById(sku);
+        product.state = state;
+        product.save();
+        renderJSON(new Ret());
+    }
+
+    /**
+     * 更新 Product 的销售等级
+     *
+     * @param sku
+     * @param salesLevel
+     */
+    public static void updateSalesLevel(String sku, Product.E salesLevel) {
+        Product product = Product.findById(sku);
+        product.salesLevel = salesLevel;
+        product.save();
+        renderJSON(new Ret());
     }
 }
