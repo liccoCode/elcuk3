@@ -16,3 +16,11 @@ $ ->
       bPaginate: false
       aaSorting: [[0, "desc"]]
     )
+
+
+# Form 搜索功能
+  $(".search_form").on("click",".btn:contains(Excel)",(e) ->
+    e.preventDefault()
+    $form = $('#profits_form')
+    window.open('/Excels/profit?'+$form.serialize(),"_blank")
+  )
