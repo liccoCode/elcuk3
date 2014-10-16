@@ -159,6 +159,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 上市时间
      */
     public Date marketTime;
+
+    /**
+     * 退市时间
+     */
     public Date delistingTime;
 
     public enum T {

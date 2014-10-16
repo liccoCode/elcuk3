@@ -33,14 +33,28 @@ $ ->
       $input.parent().next().empty()
       $input.parent().after($span)
   ).on("change", "input[name='pro.weight'], input[name='pro.productWeight']", (r) ->
-    # 将输入的重量换算成盎司(oz)
+    # 将输入的重量(kg)换算成盎司(oz)
     $input = $(@)
     if($input.val() is "" or $input.val() < 0 or isNaN($input.val()))
       false
     else
       $span = $("<span style='margin-left:10px;'></span>").text("(oz: #{(($input.val()) * 35.2739619).toFixed(2)})")
-      $input.parent().next().empty()
-      $input.parent().after($span)
+      $input.parent().next().next().empty()
+      $input.parent().next().after($span)
+  ).on('change', "#pro_weight_g, #pro_productWeight_g", ->
+    # 将输入的重量(g)换算成 kg
+    $input = $(@)
+    if($input.val() is "" or $input.val() < 0 or isNaN($input.val()))
+      false
+    else
+      select = ""
+      if($input.attr('id') == 'pro_weight_g')
+        select = "input[name='pro.weight']"
+      else
+        select = "input[name='pro.productWeight']"
+      $(select).val(($input.val() / 1000).toFixed(2))
+      $(select).trigger('change')
+
   )
 
   # 根据点击按钮的不同判断text的名称

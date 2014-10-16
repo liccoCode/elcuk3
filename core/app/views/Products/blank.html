@@ -55,8 +55,13 @@
           <th>重量(包材)</th>
           <td>
             <div class="input-append">
-              <input type="text" style="width:100px" name="pro.weight" value="${pro.weight}">
+              <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
               <span class="add-on">Kg</span>
+            </div>
+
+            <div class="input-append">
+              <input type="text" class="input-mini" id="pro_weight_g">
+              <span class="add-on">g</span>
             </div>
           </td>
         </tr>
@@ -91,8 +96,13 @@
           <th>重量(产品)</th>
           <td>
             <div class="input-append">
-              <input type="text" style="width:100px" name="pro.productWeight" value="${pro.productWeight}">
+              <input type="text" class="input-mini" name="pro.productWeight" value="${pro.productWeight}">
               <span class="add-on">Kg</span>
+            </div>
+
+            <div class="input-append">
+              <input type="text" class="input-mini" id="pro_productWeight_g">
+              <span class="add-on">g</span>
             </div>
           </td>
         </tr>
@@ -112,9 +122,9 @@
         </tr>
 
         <tr>
-          <th>上市时间</th>
+          <th>销售等级</th>
           <td>
-            <input type="date" name="pro.marketTime" value="${pro.marketTime}">
+          #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
           </td>
 
           <th>上架状态</th>
@@ -136,9 +146,14 @@
         </tr>
 
         <tr>
-          <th>销售等级</th>
-          <td colspan="3">
-          #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
+          <th>上市时间</th>
+          <td>
+            <input type="date" name="pro.marketTime" value="${pro.marketTime}">
+          </td>
+
+          <th>退市时间</th>
+          <td>
+            <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
           </td>
         </tr>
 
