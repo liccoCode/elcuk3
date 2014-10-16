@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.DBUtils;
 import helper.Webs;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -231,9 +232,13 @@ public class ProfitPost extends Post<Profit> {
          */
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
+            String sql = "";
             for(Product pro : cat.products) {
-                if((this.state.equals("Active") && pro.marketState != Product.T.DOWN)
-                        || (!this.state.equals("Active") && pro.marketState == Product.T.DOWN)) {
+                sql = "select 1 from Selling where state!='DOWN' and sellingid like '%" + pro.sku + "%" +
+                        skumarket.name() + "%'";
+                int issale = DBUtils.rows(sql.toString()).size();
+                if((this.state.equals("Active") && issale > 0)
+                        || (!this.state.equals("Active") && issale <= 0)) {
                     Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
                     profitlist.add(profit);
                 }
