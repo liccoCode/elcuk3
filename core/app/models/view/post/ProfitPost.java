@@ -235,7 +235,7 @@ public class ProfitPost extends Post<Profit> {
             String sql = "";
             for(Product pro : cat.products) {
                 sql = "select 1 from Selling where state!='DOWN' and sellingid like '%" + pro.sku + "%" +
-                        skumarket + "%'";
+                        skumarket.nickName() + "%'";
                 int issale = DBUtils.rows(sql.toString()).size();
                 if((this.state.equals("Active") && issale > 0)
                         || (!this.state.equals("Active") && issale <= 0)) {

@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.J;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.market.M;
+
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.ProfitPost;
@@ -88,7 +90,7 @@ public class Profits extends Controller {
                 if(p.pmarket != null) marketkey = p.pmarket;
                 if(p.category != null) categorykey = p.category.toLowerCase();
                 String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey,
-                        marketkey,p.state);
+                        marketkey, p.state);
 
                 profits = Cache.get(postkey, List.class);
                 if(profits != null) {
