@@ -4,6 +4,7 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.J;
+import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
@@ -14,6 +15,7 @@ import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import jobs.analyze.SellingProfitSearch;
 
 import java.util.List;
 
@@ -91,10 +93,11 @@ public class Profits extends Controller {
                 profits = Cache.get(postkey, List.class);
                 if(profits != null) {
                     render(profits, p);
+                } else {
+                    new SellingProfitSearch(p).now();
+                    profits = new ArrayList<Profit>();
+                    flash.error("后台事务正在计算中,请稍候...");
                 }
-                //从ES查找SKU的利润
-                profits = p.query();
-                Cache.add(postkey, profits, "2h");
             }
 
             render(profits, p);
