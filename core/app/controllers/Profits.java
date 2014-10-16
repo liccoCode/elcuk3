@@ -4,7 +4,6 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.J;
-import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
@@ -36,8 +35,8 @@ public class Profits extends Controller {
 
     @Before(only = {"index"})
     public static void setUpIndexPage() {
-        F.T2<List<String>, List<String>> categorysToJson = Category.fetchCategorysJson();
-        renderArgs.put("categorys", J.json(categorysToJson._2));
+        List<String> categoryIds = Category.categoryIds();
+        renderArgs.put("categorys", categoryIds);
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
     }
