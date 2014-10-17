@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.User;
@@ -26,7 +27,7 @@ import java.util.Set;
  * Time: 下午2:44
  */
 
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Pmdashboards extends Controller {
 
     @Check("pmdashboards.index")

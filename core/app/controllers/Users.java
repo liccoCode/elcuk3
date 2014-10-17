@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.Privilege;
@@ -27,7 +28,7 @@ import java.util.Set;
  * Date: 2/9/12
  * Time: 3:43 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Users extends Controller {
 
     @Check("users.index")

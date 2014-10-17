@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Dates;
 import helper.HTTP;
 import helper.J;
@@ -23,7 +24,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Application extends Controller {
 
     public static void index() {

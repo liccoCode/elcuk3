@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.J;
 import helper.Webs;
@@ -21,7 +22,7 @@ import java.util.List;
  * Date: 5/4/12
  * Time: 2:53 PM
  */
-@With({GlobalExceptionHandler.class})
+@With({GlobalExceptionHandler.class,SystemOperation.class})
 public class Attachs extends Controller {
 
     public static void image(Attach a, Integer w, Integer h) {

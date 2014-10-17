@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import jobs.promise.FinanceShippedPromise;
 import models.market.Account;
 import models.market.M;
@@ -18,7 +19,7 @@ import java.util.List;
  * Date: 3/4/14
  * Time: 11:05 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Teams extends Controller {
 
     @Before(only = {"show", "update", "delete"})

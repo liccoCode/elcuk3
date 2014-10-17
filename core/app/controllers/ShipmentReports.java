@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.procure.Shipment;
@@ -22,7 +23,7 @@ import java.util.List;
  * Date: 14-6-3
  * Time: PM3:27
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class ShipmentReports extends Controller {
 
     @Before(only = {"cost"})

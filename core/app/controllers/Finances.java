@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
 import jobs.promise.FinanceShippedPromise;
@@ -21,7 +22,7 @@ import java.util.List;
  * Date: 3/20/12
  * Time: 10:11 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 @Check("finances")
 public class Finances extends Controller {
 

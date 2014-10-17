@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
@@ -13,7 +14,7 @@ import play.mvc.With;
  * Date: 7/26/12
  * Time: 11:46 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Reviews extends Controller {
 
     public static void show(String rid) {

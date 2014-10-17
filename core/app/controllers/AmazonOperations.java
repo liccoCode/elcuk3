@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import jobs.works.ListingReviewsWork;
@@ -21,7 +22,7 @@ import java.util.Set;
  * Date: 7/19/12
  * Time: 11:59 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 @Check("amazonoperations")
 public class AmazonOperations extends Controller {
 

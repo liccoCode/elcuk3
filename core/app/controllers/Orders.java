@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.collect.Lists;
+import controllers.api.SystemOperation;
 import helper.DBUtils;
 import helper.OrderInvoiceFormat;
 import jobs.promise.FinanceShippedPromise;
@@ -33,7 +34,7 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 12-1-6
  * Time: 下午4:02
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Orders extends Controller {
 
     public static void index(OrderPOST p) {

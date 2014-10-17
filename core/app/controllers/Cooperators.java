@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
@@ -18,7 +19,7 @@ import java.util.List;
  * Date: 7/16/12
  * Time: 12:12 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Cooperators extends Controller {
 
     @Check("cooperators.index")

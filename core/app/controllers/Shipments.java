@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import ext.ShipmentsHelper;
 import helper.Dates;
 import helper.Webs;
@@ -38,7 +39,7 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 6/20/12
  * Time: 3:09 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Shipments extends Controller {
     @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
