@@ -274,8 +274,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
         String feedate = doc.select("#transaction_date").text().split(":")[1].trim();
         String[] feedateformate = feedate.split("\\.");
-        Logger.info("::::::"+feedateformate.length+"  "+feedate);
-        if(feedateformate!=null && feedateformate.length > 0) {
+        Logger.info("::::::" + feedateformate.length + "  " + feedate);
+        if(feedateformate != null && feedateformate.length > 0) {
             Calendar c = Calendar.getInstance();
             c.set(Integer.parseInt(feedateformate[2]),
                     Integer.parseInt(feedateformate[1]),
@@ -299,7 +299,17 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
         fee.account = this.account;
         fee.market = this.market;
-        fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
+
+        String feedate = doc.select("#transaction_date").text().split(":")[1].trim();
+        String[] feedateformate = feedate.split("\\.");
+        if(feedateformate != null && feedateformate.length > 0) {
+            Calendar c = Calendar.getInstance();
+            c.set(Integer.parseInt(feedateformate[2]),
+                    Integer.parseInt(feedateformate[1]),
+                    Integer.parseInt(feedateformate[0]), 0, 0);
+            fee.date = c.getTime();
+        } else
+            fee.date = this.date(feedate);
 
         fee.cost = this.fee(nextTr.select("td:eq(2)").text());
         fee.currency = this.currency(nextTr.select("td:eq(2)").text());
