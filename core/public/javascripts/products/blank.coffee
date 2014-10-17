@@ -67,6 +67,8 @@ $ ->
         )
   )
 
+  $('#pro_family').popover({trigger: 'focus', content: "<a href='/familys/index' target='_blank'>新增一个 Family</a>", html: true, placement: "top"})
+
   # 根据点击按钮的不同判断text的名称
   setTextAreaName = (flag, rowsCount, textareas) ->
     if(flag == "more_locate_btn")
