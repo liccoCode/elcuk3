@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.market.Feed;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -12,7 +13,7 @@ import java.util.List;
  * Date: 13-12-26
  * Time: 下午5:07
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Feeds extends Controller {
 
     /**

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.User;
 import models.product.Attribute;
 import org.apache.commons.lang.StringUtils;
@@ -16,7 +17,7 @@ import java.util.List;
  * Date: 14-4-14
  * Time: PM3:17
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Attributes extends Controller {
 
     @Before(only = {"index", "update", "delete"})

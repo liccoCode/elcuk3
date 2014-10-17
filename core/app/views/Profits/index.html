@@ -13,7 +13,7 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-#{form @Excels.profit(), class:'search_form', id:'profits_form'}
+#{form @Profits.index(), class:'search_form', id:'profits_form'}
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend input-append inline">
@@ -29,11 +29,12 @@
           <option value="total">汇总</option>
         #{/select_enum}
 
-      <th>Category:</th>
-      <td>
-        <input type="text" name="p.category" data-provide="typeahead" data-source="${categorys}"
-               value="${p?.category}" id="unit_category">
-      </td>
+        #{select 'p.category', items:categorys, value: p.category}
+            #{option ''}Category#{/option}
+        #{/select}
+
+        #{select 'p.state', items:['Active', 'Inactive'], value: p.state}
+        #{/select}
 
       <th>SKU:</th>
       <td>
@@ -45,7 +46,8 @@
 
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
-      <button class="btn btn-primary">导出Excel</button>
+      <button class="btn btn-primary" data-loading>搜索</button>
+      <button class="btn btn-primary" id="exceldown">导出Excel</button>
     </div>
   </div>
 </div>
@@ -77,7 +79,7 @@
       </tr>
       </thead>
       <tbody>
-        #{list items:profits, as:'pro'}
+          #{list items:profits, as:'pro'}
           <tr>
             <td>${pro.sku}</td>
             <td>${pro.market?pro.market.label():"汇总"}</td>
@@ -98,7 +100,7 @@
             <td>${pro.inboundfee}</td>
             <td>${pro.memo}</td>
           </tr>
-        #{/list}
+          #{/list}
       </tbody>
     </table>
   </div>

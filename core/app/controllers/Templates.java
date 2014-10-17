@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.User;
 import models.product.Template;
 import play.data.validation.Validation;
@@ -15,7 +16,7 @@ import java.util.List;
  * Date: 14-4-14
  * Time: PM2:50
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Templates extends Controller {
     @Before(only = {"show", "update", "delete", "attribute", "attribute", "unattribute", "category", "uncategory"})
     public static void beforeShow() {

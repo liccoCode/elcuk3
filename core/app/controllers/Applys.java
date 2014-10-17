@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.User;
 import models.finance.Apply;
@@ -26,7 +27,7 @@ import java.util.List;
  * Date: 3/26/13
  * Time: 3:53 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Applys extends Controller {
 
     @Before(only = {"procures", "transports"})

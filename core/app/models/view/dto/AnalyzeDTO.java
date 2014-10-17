@@ -4,6 +4,7 @@ import helper.Webs;
 import models.market.M;
 import models.market.Selling;
 import models.view.post.AnalyzePost;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.io.Serializable;
@@ -247,5 +248,11 @@ public class AnalyzeDTO implements Serializable {
             }
         }
         return null;
+    }
+
+    public String cyclename() {
+        if(StringUtils.isBlank(this.sellingCycle))
+            return "";
+        return Selling.SC.valueOf(this.sellingCycle).label();
     }
 }

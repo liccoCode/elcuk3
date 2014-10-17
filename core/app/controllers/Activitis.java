@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.ActivitiEngine;
 import models.activiti.ActivitiDefinition;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
  * Date: 5/10/14
  * Time: 4:25 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Activitis extends Controller {
 
     public static void index(Long id) {

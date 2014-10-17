@@ -2,6 +2,7 @@ package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import ext.ShipmentsHelper;
 import helper.*;
 import models.ElcukRecord;
 import models.Notification;
@@ -1106,7 +1107,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Map<String, Object> map = new HashMap<String, Object>();
 
             String shipmentid = fba.shipmentId;
-            if(fba.account.type == M.AMAZON_FR && this.shipType==Shipment.T.EXPRESS) {
+            if(fba.account.type == M.AMAZON_FR && this.shipType == Shipment.T.EXPRESS) {
                 shipmentid = shipmentid.trim() + "U";
             }
 
@@ -1188,5 +1189,40 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int targetSize = 3;
         int size = number.toString().length();
         return StringUtils.repeat("0", (targetSize - size)) + number.toString();
+    }
+
+
+    public String dateDesc() {
+        if(this.stage == ProcureUnit.STAGE.CLOSE) {
+            return "";
+        }
+        List<Shipment> relateShipments = this.relateShipment();
+
+        String datedesc = "";
+        if(relateShipments.size() > 0) {
+            Shipment shipment = relateShipments.get(0);
+            if(this.inboundingQty() <= 0) {
+                if(shipment.dates.oldPlanArrivDate != null && shipment.dates.planArrivDate != null) {
+                    datedesc = "系统备注:运输单最新预计到库时间" + shipment.dates.planArrivDate
+                            + "，比原预计到库日期" + shipment.dates.oldPlanArrivDate
+                            + "差异" +
+                            (shipment.dates.planArrivDate.getTime() - shipment.dates.oldPlanArrivDate.getTime()) /
+                                    (24 * 60 * 60 * 1000)
+                            + "天";
+                }
+            } else {
+                if(this.attrs.planArrivDate != null && shipment.dates.planArrivDate != null && ((this.attrs
+                        .planArrivDate.getTime() - shipment.dates
+                        .planArrivDate.getTime()) != 0)) {
+                    datedesc = "系统备注:采购计划单最新预计到库时间" + this.attrs.planArrivDate
+                            + "，比原预计到库日期" + shipment.dates.planArrivDate
+                            + "差异" + (this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) /
+                            (24 * 60 * 60 * 1000)
+                            + "天";
+                }
+            }
+
+        }
+        return datedesc;
     }
 }

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.J;
 import helper.Webs;
@@ -26,7 +27,7 @@ import play.utils.FastRuntimeException;
  * Date: 5/8/14
  * Time: 3:53 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Skuchecks extends Controller {
 
     @Before(only = {"blank", "create", "show", "checkDelete"})

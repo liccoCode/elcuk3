@@ -229,7 +229,7 @@ public class Whouse extends Model {
     }
 
     public static List<Whouse> findByAccount(Account account) {
-        return Whouse.find("account=? and type=?", account,T.FBA).fetch();
+        return Whouse.find("account=? and type=?", account, T.FBA).fetch();
     }
 
     /**
@@ -264,13 +264,18 @@ public class Whouse extends Model {
                 if(Arrays.asList(M.AMAZON_DE).contains(type))
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
-            } else if(nextBeginDate.getDayOfWeek() == 4) {
-                if(Arrays.asList(M.AMAZON_DE,M.AMAZON_FR, M.AMAZON_UK, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_IT,
+                //空运改为每周3
+                if(Arrays.asList(M.AMAZON_DE, M.AMAZON_FR, M.AMAZON_UK, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_IT,
                         M.AMAZON_JP).contains(type))
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
-                else
-                    throw new FastRuntimeException("还不支持向 " + type.name() + " 仓库创建运输单");
-            }
+
+            } //else if(nextBeginDate.getDayOfWeek() == 4) {
+                //if(Arrays.asList(M.AMAZON_DE, M.AMAZON_FR, M.AMAZON_UK, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_IT,
+                        //M.AMAZON_JP).contains(type))
+                    //Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
+                //else
+                    //throw new FastRuntimeException("还不支持向 " + type.name() + " 仓库创建运输单");
+            //}
         }
     }
 

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.view.dto.SaleReportDTO;
 import models.view.post.SaleReportPost;
@@ -16,7 +17,7 @@ import java.util.List;
  * Date: 14-6-9
  * Time: AM10:12
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class SaleReports extends Controller {
 
     /**

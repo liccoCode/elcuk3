@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.DBUtils;
 import helper.Webs;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +30,7 @@ public class ProfitPost extends Post<Profit> {
     public String sku;
     public String sellingId;
     public String category;
+    public String state;
 
     public ProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -230,9 +232,17 @@ public class ProfitPost extends Post<Profit> {
          */
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
+            String sql = "";
             for(Product pro : cat.products) {
-                Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
-                profitlist.add(profit);
+                sql = "select 1 from Selling where state!='DOWN' and sellingid like '%" + pro.sku + "%" +
+                        skumarket.nickName() + "%'";
+                int issale = DBUtils.rows(sql.toString()).size();
+                if((this.state.equals("Active") && issale > 0)
+                        || (!this.state.equals("Active") && issale <= 0)) {
+                    Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
+                    profitlist.add(profit);
+                }
+
             }
         } else if(!StringUtils.isBlank(sku)) {
             Profit profit = esProfit(begin, end, skumarket, sku, sellingId);

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.J;
 import helper.Webs;
@@ -14,6 +15,7 @@ import models.product.Product;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -33,7 +35,7 @@ import java.util.List;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Deliveryments extends Controller {
 
     @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
@@ -253,6 +255,9 @@ public class Deliveryments extends Controller {
                 procureunit.fbaAsPDF(factoryDir, boxNumbers.get(i));
             }
 
+        } catch(Exception e) {
+            e.printStackTrace();
+            Logger.warn("downloadFBAZIP %s:%s", id,e.getMessage());
         } finally {
             File zip = new File(Constant.TMP + "/FBA.zip");
             Files.zip(dirfile, zip);

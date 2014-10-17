@@ -2,9 +2,12 @@ package controllers;
 
 
 import com.alibaba.fastjson.JSON;
+import controllers.api.SystemOperation;
 import helper.Caches;
 import helper.J;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.market.M;
+
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.ProfitPost;
@@ -14,6 +17,7 @@ import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import jobs.analyze.SellingProfitSearch;
 
 import java.util.List;
 
@@ -29,13 +33,13 @@ import models.product.Category;
  * Date: 3/10/14
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Profits extends Controller {
 
     @Before(only = {"index"})
     public static void setUpIndexPage() {
-        F.T2<List<String>, List<String>> categorysToJson = Category.fetchCategorysJson();
-        renderArgs.put("categorys", J.json(categorysToJson._2));
+        List<String> categoryIds = Category.categoryIds();
+        renderArgs.put("categorys", categoryIds);
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
     }
@@ -86,15 +90,17 @@ public class Profits extends Controller {
                 if(p.sku != null) skukey = p.sku;
                 if(p.pmarket != null) marketkey = p.pmarket;
                 if(p.category != null) categorykey = p.category.toLowerCase();
-                String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey);
+                String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey,
+                        marketkey, p.state);
 
                 profits = Cache.get(postkey, List.class);
                 if(profits != null) {
                     render(profits, p);
+                } else {
+                    new SellingProfitSearch(p).now();
+                    profits = new ArrayList<Profit>();
+                    flash.error("后台事务正在计算中,请稍候...");
                 }
-                //从ES查找SKU的利润
-                profits = p.query();
-                Cache.add(postkey, profits, "2h");
             }
 
             render(profits, p);

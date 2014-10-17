@@ -1,6 +1,7 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
+import controllers.api.SystemOperation;
 import helper.Caches;
 import helper.Currency;
 import helper.Webs;
@@ -38,7 +39,7 @@ import java.util.Map;
  * Date: 10/31/12
  * Time: 11:47 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Excels extends Controller {
 
 
@@ -175,6 +176,7 @@ public class Excels extends Controller {
             if(p.pmarket != null) marketkey = p.pmarket;
             if(p.category != null) categorykey = p.category.toLowerCase();
             String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
+                    p.state,
                     "excel");
             profits = Cache.get(postkey, List.class);
             if(profits == null) {

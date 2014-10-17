@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.product.Brand;
@@ -20,7 +21,7 @@ import java.util.List;
  * Date: 4/27/12
  * Time: 11:36 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Familys extends Controller {
     @Check("familys.index")
     public static void index() {

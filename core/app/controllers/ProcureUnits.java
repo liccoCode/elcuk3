@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.*;
 import models.ElcukRecord;
@@ -40,7 +41,7 @@ import java.util.*;
  * Date: 3/26/13
  * Time: 5:56 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class ProcureUnits extends Controller {
 
     @Before(only = {"index"})

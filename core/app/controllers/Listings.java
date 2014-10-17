@@ -20,6 +20,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.util.List;
+import controllers.api.SystemOperation;
 
 /**
  * Listing 的引入:
@@ -29,7 +30,7 @@ import java.util.List;
  * Date: 12/28/11
  * Time: 12:49 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Listings extends Controller {
 
     public static void index() {

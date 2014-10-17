@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
@@ -31,7 +32,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午11:57
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Products extends Controller {
 
     @Util

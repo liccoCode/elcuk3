@@ -184,8 +184,10 @@ public class TimelineEventSource {
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
-            if(predictShipFinishDate == null)
+            //如果有签收数量则用采购计划的入库时间
+            if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
+            }
 
             this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
@@ -202,6 +204,8 @@ public class TimelineEventSource {
             this.end = add8Hour(new DateTime(predictShipFinishDate)
                     .plusDays(timeLineDays.intValue()).toDate());
             this.durationEvent = true;
+
+
             return this;
         }
 

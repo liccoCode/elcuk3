@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.market.SellingRecord;
 import models.product.Category;
 import models.view.highchart.HighChart;
@@ -20,7 +21,7 @@ import java.util.List;
  * Date: 8/16/13
  * Time: 2:03 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class SellingRecords extends Controller {
 
     @Check("sellingrecords.index")

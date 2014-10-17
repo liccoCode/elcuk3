@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import jobs.AmazonOrderUpdateJob;
 import jobs.promise.FeedbackFixPromise;
@@ -20,7 +21,7 @@ import java.util.Date;
  * Date: 12/29/11
  * Time: 12:43 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Jobs extends Controller {
 
     @Before(only = {"index", "update", "create"})
