@@ -93,7 +93,7 @@ public class FBAs extends Controller {
 
 
         String shipmentid = fba.shipmentId;
-        if(fba.account.type == M.AMAZON_FR && procureUnit.shipType == Shipment.T.EXPRESS) {
+        if(procureUnit.shipType == Shipment.T.EXPRESS) {
             shipmentid = shipmentid.trim() + "U";
         }
         renderArgs.put("shipmentId", shipmentid);
