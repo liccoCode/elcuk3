@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.GTs;
 import helper.J;
@@ -29,7 +30,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午11:41
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Sellings extends Controller {
 
 

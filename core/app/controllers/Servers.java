@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.Server;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -13,7 +14,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午1:58
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Servers extends Controller {
 
     @Check("servers.index")

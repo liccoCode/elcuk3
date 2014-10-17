@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Currency;
 import helper.J;
 import helper.Webs;
@@ -27,7 +28,7 @@ import java.util.List;
  * Date: 1/24/13
  * Time: 4:43 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Payments extends Controller {
 
     @Before(only = {"index"})

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import jobs.PmDashboard.AbnormalFetchJob;
 import jobs.categoryInfo.CategoryInfoFetchJob;
 import models.User;
@@ -20,7 +21,7 @@ import java.util.Map;
  * Date: 14-3-27
  * Time: AM10:19
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class CategoryInfos extends Controller {
 
     @Check("categoryinfos.show")

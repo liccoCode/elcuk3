@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
@@ -23,7 +24,7 @@ import java.util.List;
  * Date: 1/28/13
  * Time: 10:43 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class PaymentUnits extends Controller {
 
     @Check("paymentunits.destroy")

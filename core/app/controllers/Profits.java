@@ -2,6 +2,7 @@ package controllers;
 
 
 import com.alibaba.fastjson.JSON;
+import controllers.api.SystemOperation;
 import helper.Caches;
 import helper.J;
 import jobs.analyze.SellingSaleAnalyzeJob;
@@ -32,7 +33,7 @@ import models.product.Category;
  * Date: 3/10/14
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Profits extends Controller {
 
     @Before(only = {"index"})

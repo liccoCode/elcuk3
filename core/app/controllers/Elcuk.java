@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import jobs.driver.DriverJob;
 import models.ElcukConfig;
 import play.mvc.Controller;
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
  * Date: 1/14/13
  * Time: 3:27 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Elcuk extends Controller {
     public static void index() {
         render();

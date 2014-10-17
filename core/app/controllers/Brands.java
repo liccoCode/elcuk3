@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import models.product.Brand;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
@@ -16,7 +17,7 @@ import java.util.List;
  * Date: 4/26/12
  * Time: 11:28 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Brands extends Controller {
 
     @Before(only = {"index", "bindCategory", "unbindCategory", "update", "create"})

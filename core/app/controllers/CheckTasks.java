@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -33,7 +34,7 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 5/8/14
  * Time: 3:53 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class CheckTasks extends Controller {
 
     @Before(only = {"checklist", "checkerList"})

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import exception.PaymentException;
 import models.finance.FeeType;
 import models.view.Ret;
@@ -14,7 +15,7 @@ import java.util.List;
  * Date: 1/28/13
  * Time: 4:25 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class FeeTypes extends Controller {
 
     @Check("feetypes.index")

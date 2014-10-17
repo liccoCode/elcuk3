@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.User;
 import models.market.Account;
@@ -21,7 +22,7 @@ import java.util.List;
  * Date: 9/26/12
  * Time: 11:34 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Whouses extends Controller {
 
     @Before(only = {"index", "blank", "create", "edit", "update"})

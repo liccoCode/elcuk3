@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import jobs.FeedbackCheckJob;
 import jobs.FeedbackCrawlJob;
 import models.market.Account;
@@ -17,7 +18,7 @@ import java.util.List;
  * Date: 3/15/12
  * Time: 1:41 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Feedbacks extends Controller {
 
     public static void show(String id) {

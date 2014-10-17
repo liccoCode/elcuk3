@@ -7,6 +7,7 @@ package controllers;
  * Time: 上午10:11
  */
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.Privilege;
 import models.Role;
@@ -26,7 +27,7 @@ import java.util.List;
  * Date: 3/4/14
  * Time: 11:05 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Roles extends Controller {
 
     @Before(only = {"show", "update", "delete"})

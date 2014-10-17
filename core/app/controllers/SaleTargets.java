@@ -1,6 +1,7 @@
 package controllers;
 
 
+import controllers.api.SystemOperation;
 import models.ElcukRecord;
 import models.SaleTarget;
 import models.User;
@@ -24,7 +25,7 @@ import java.util.List;
  * Time: PM4:50
  */
 
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class SaleTargets extends Controller {
 
     @Before(only = {"show", "split"})

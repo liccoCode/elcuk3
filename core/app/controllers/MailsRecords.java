@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.MailsRecord;
@@ -16,7 +17,7 @@ import java.util.List;
  * Date: 13-4-3
  * Time: 下午1:48
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class MailsRecords extends Controller {
 
     @Check("mailsRecords.index")

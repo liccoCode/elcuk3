@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.market.*;
@@ -30,7 +31,7 @@ import java.util.List;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Analyzes extends Controller {
 
     @Check("analyzes.index")

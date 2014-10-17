@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.procure.FBACenter;
 import models.procure.ProcureUnit;
@@ -14,7 +15,7 @@ import play.mvc.With;
 
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class ShipItems extends Controller {
 
     @Before(only = "index")

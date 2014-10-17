@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.J;
 import helper.Webs;
@@ -34,7 +35,7 @@ import java.util.List;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Deliveryments extends Controller {
 
     @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})

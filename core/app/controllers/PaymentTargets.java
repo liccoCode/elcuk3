@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Webs;
 import models.finance.PaymentTarget;
 import models.procure.Cooperator;
@@ -17,7 +18,7 @@ import java.util.List;
  * Date: 3/15/13
  * Time: 11:43 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class PaymentTargets extends Controller {
 
     @Before(only = {"index", "save", "update", "destroy"})
