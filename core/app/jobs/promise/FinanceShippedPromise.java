@@ -274,7 +274,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
         String feedate = doc.select("#transaction_date").text().split(":")[1].trim();
         Logger.info("date::::::::"+feedate);
-        String[] feedateformate = (feedate.replace(" ","")).split(".");
+        String[] feedateformate = feedate.split("\\.");
         Logger.info("feedateformate::::::::"+feedateformate.length);
         if(feedateformate.length > 0) {
             Calendar c = Calendar.getInstance();
