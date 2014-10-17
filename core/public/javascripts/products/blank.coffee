@@ -55,6 +55,16 @@ $ ->
       $(select).val(($input.val() / 1000).toFixed(2))
       $(select).trigger('change')
 
+  ).on('change', '#pro_category', ->
+    categoryId = $(@).val()
+    unless categoryId.length < 2 # 输入2 位数才有效(Category ID 不存在一位数的)
+      $.get('/familys/categoryRelateFamily', {categoryId: categoryId})
+        .done((c) ->
+          data_source = c
+          $("#pro_family").typeahead({
+            source: data_source
+          })
+        )
   )
 
   # 根据点击按钮的不同判断text的名称

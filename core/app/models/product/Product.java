@@ -20,7 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
 import play.cache.Cache;
-import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
@@ -71,7 +70,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Expose
     public String sku;
 
-    @Required
     @Lob
     @Expose
     public String productName;
@@ -80,73 +78,59 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 长度, 单位(包材) mm
      */
     @Expose
-    @Required
-    // 因为默认是 >=
-    @Min(0.001)
-    public Float lengths = 0f;
+    public Float lengths;
 
     /**
      * 高度, 单位(包材) mm
      */
     @Expose
-    @Required
-    @Min(0.001)
-    public Float heigh = 0f;
+    public Float heigh;
 
     /**
      * 宽度, 单位(包材) mm
      */
     @Expose
-    @Required
-    @Min(0.001)
-    public Float width = 0f;
+    public Float width;
 
     /**
      * 重量, 单位(包材) kg
      */
     @Expose
-    @Required
-    @Min(0.001)
-    public Float weight = 0f;
+    public Float weight;
 
 
     /**
      * 长度, 单位(产品) mm
      */
     @Expose
-    @Min(0.001)
-    public Float productLengths = 0f;
+    public Float productLengths;
 
     /**
      * 高度, 单位(产品) mm
      */
     @Expose
-    @Min(0.001)
-    public Float productHeigh = 0f;
+    public Float productHeigh;
 
     /**
      * 宽度, 单位(产品) mm
      */
     @Expose
-    @Min(0.001)
-    public Float productWidth = 0f;
+    public Float productWidth;
 
     /**
      * 重量, 单位(产品) kg
      */
     @Expose
-    @Min(0.001)
-    public Float productWeight = 0f;
+    public Float productWeight;
 
     /**
      * 申报价格 (USD)
      */
-    public Float declaredValue = 0f;
+    public Float declaredValue;
 
     /**
      * 产品品名
      */
-    @Required
     public String declareName;
 
     /**
@@ -441,11 +425,13 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          * 4. 检查 SKU 前缀是否与 Family 一致
          * 5. Category 不能为空
          * 6. 产品的名称不能为空
-         * 7. 长宽高一定需要填写
-         * 8. 申报价不为空
          */
-        if(StringUtils.isBlank(this.sku)) Webs.error("SKU 必须存在");
-
+        if(Product.findById(this.sku) != null) {
+            Validation.addError("", String.format("Product[%s]已经存在, 不允许重复创建!", sku));
+            return;
+        }
+        if(StringUtils.isBlank(this.sku))
+            Validation.addError("", "SKU 必须存在");
         if(!Product.validSKU(this.sku))
             Validation.addError("", "SKU[ " + this.sku + " ] 不合法!");
         if(Product.unUsedSKU(this.sku))
@@ -453,23 +439,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.family == null)
             Validation.addError("", "Family 不存在,请先添加后再创建 Product!");
         if(this.family != null && !StringUtils.startsWith(this.sku, this.family.family))
-            Validation.addError("",
-                    "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
-        if(this.declaredValue == null)
-            Validation.addError("", "申报价值必须填写");
-        if(this.declareName == null)
-            Validation.addError("", "产品品名必须填写");
-        if(this.abbreviation == null)
-            Validation.addError("", "产品简称必须填写");
-
-
-        if(Validation.hasErrors()) return;
-
-        this.category = this.family.category;
+            Validation.addError("", "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(this.category == null)
             Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
         if(Validation.hasErrors()) return;
-
         this.save();
     }
 

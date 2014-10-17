@@ -139,8 +139,10 @@ public class Products extends Controller {
     public static void setUpCreatePage() {
         List<String> families = Family.familys(true);
         List<String> products = Product.skus(true);
+        List<String> categorys = Category.allcategorys();
         renderArgs.put("families", J.json(families));
         renderArgs.put("products", J.json(products));
+        renderArgs.put("categorys", J.json(categorys));
     }
 
     public static void blank(Product pro) {
