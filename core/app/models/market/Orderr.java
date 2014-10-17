@@ -564,9 +564,9 @@ public class Orderr extends GenericModel {
             editaddress = editaddress + "," + this.postalCode;
         }
         editaddress = editaddress + "," + country;
-        if(!StringUtils.isBlank(this.phone)) {
-            editaddress = editaddress + ",phone:" + this.phone;
-        }
+        //if(!StringUtils.isBlank(this.phone)) {
+        //    editaddress = editaddress + ",phone:" + this.phone;
+        //}
         if(editaddress != null && editaddress.indexOf(",") == 0) {
             editaddress = editaddress.substring(1, editaddress.length());
         }
