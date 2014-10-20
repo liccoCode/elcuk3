@@ -81,7 +81,7 @@ public class AbnormalFetchJob extends BaseJob {
         dtoMap.put(AbnormalDTO.T.SALESPROFIT.toString(), salesProfits);
         //将数据添加到缓存内
         Cache.delete(AbnormalDTO_CACHE);
-        Cache.add(AbnormalDTO_CACHE, dtoMap);
+        Cache.add(AbnormalDTO_CACHE, dtoMap, "5h");
         Cache.delete(RUNNING);
     }
 
