@@ -168,8 +168,8 @@ public class Login extends Secure.Security {
      * @throws InterruptedException
      */
     public static void job(@As("yyyy-MM-dd") Date date) throws ExecutionException, InterruptedException {
-        Logger.info(request.remoteAddress);
-        new SellingRecordCaculateJob(new DateTime(date)).now().get();
+        //Logger.info(request.remoteAddress);
+        //new SellingRecordCaculateJob(new DateTime(date)).now().get();
         renderHtml("<h3>SellingRecordCaculateJob 开始执行</h3>");
     }
 
