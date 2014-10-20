@@ -108,32 +108,39 @@
     <input type="date" name="pro.marketTime" value="${pro.marketTime}">
   </td>
 
+  <th>退市时间</th>
+  <td>
+    <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
+  </td>
+</tr>
+
+<tr>
   <th>上架状态</th>
   <td>
   #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
   </td>
-</tr>
 
-<tr>
   <th>采购状态</th>
   <td>
   #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
   </td>
+</tr>
 
+<tr>
   <th>产品的生命周期</th>
   <td>
   #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
   </td>
-</tr>
 
-<tr>
   <th>销售等级</th>
   <td>
   #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
   </td>
+</tr>
 
+<tr>
   <th>State(运营)</th>
-  <td style="color:${pro.state?.fontcolor()}">${pro.state}</td>
+  <td colspan="3" style="color:${pro.state?.fontcolor()}">${pro.state}</td>
 </tr>
 
 <tr>

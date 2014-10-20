@@ -93,7 +93,7 @@ public class CategoryInfoDTO implements Serializable {
         Map<String, List<CategoryInfoDTO>> dtoMap = Cache.get(CategoryInfoFetchJob.CategoryInfo_Cache, Map.class);
         if(dtoMap == null || dtoMap.size() == 0) {
             if(!CategoryInfoFetchJob.isRnning()) {
-                GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<String, Object>());
+                new CategoryInfoFetchJob().now();
             }
             return null;
         }

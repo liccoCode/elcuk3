@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import helper.Webs;
 import models.product.Brand;
 import models.product.Category;
@@ -63,5 +64,17 @@ public class Familys extends Controller {
         if(b != null && b.isPersistent() && c != null && c.isPersistent())
             fmys = Family.bcRelateFamily(b, c);
         render(fmys, b, c);
+    }
+
+    /**
+     * 根据 CategoryId 获取 familyId 集合
+     * @param categoryId
+     * @return
+     */
+    public static void categoryRelateFamily(String categoryId) {
+        List<Family> families = Family.find("category_categoryId =?", categoryId).fetch();
+        List<String> familieIds = new ArrayList<String>();
+        for(Family f : families) familieIds.add(f.family);
+        renderJSON(J.json(familieIds));
     }
 }

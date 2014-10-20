@@ -102,7 +102,7 @@ public class AbnormalDTO implements Serializable {
         if(dtoMap == null || dtoMap.size() == 0) {
             if(!AbnormalFetchJob.isRnning()) {
                 //这里会存在一次创建几个任务的情况，但是不会影响后台 Job 的执行次数，当 Job 发现缓存中存在 Running 这个 Key 时，会直接返回然后将当前任务从 DB 内删除，并不会执行计算
-                GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<String, Object>());
+                new AbnormalFetchJob().now();
             }
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }

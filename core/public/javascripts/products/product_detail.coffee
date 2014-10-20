@@ -104,7 +104,9 @@ $ ->
   $("#basicinfo").on("click", "#save_basic_btn",() ->
     if $('input[name="pro.iscopy"]').val() is "2"
       return unless confirm('该SKU的产品名称与选择的SKU的产品名称一致,确定保存?')
-
+    if $("#proabbreviation").val() is ""
+      noty({text: "产品名称不允许为空.", type: 'error', timeout: 5000})
+      return
     LoadMask.mask()
     $form = $("#update_product_form")
     $.ajax('/products/update', {type: 'GET', data: $form.serialize(), dataType: 'json'})
