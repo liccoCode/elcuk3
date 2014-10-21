@@ -37,8 +37,8 @@ public class JobsSetup {
              * 因job服务器经常出现数据库无法连接问题，所以设置此参数
              * 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
              */
-            ((ComboPooledDataSource)DB.datasource).setMaxIdleTime(60);
-            ((ComboPooledDataSource)DB.datasource).setMaxStatements(0);
+            //((ComboPooledDataSource)DB.datasource).setMaxIdleTime(60);
+            //((ComboPooledDataSource)DB.datasource).setMaxStatements(0);
             //((ComboPooledDataSource)DB.datasource).setCheckoutTimeout(0);
 
 
@@ -81,12 +81,12 @@ public class JobsSetup {
             //ruby job 已执行
             //every(AmazonFBAInventoryReceivedJob.class, "20mn");
 
-            every(CheckerProductCheckJob.class, "1d");
+            //every(CheckerProductCheckJob.class, "1d");
             //every(FAndRNotificationJob.class, "1h");
             //every(AmazonFinanceCheckJob.class, "1mn");
-            every(ListingDriverlJob.class, "1s");
-            every(ListingSchedulJob.class, "1mn");
-            every(SellingCategoryCheckerJob.class, "1d");
+            //every(ListingDriverlJob.class, "1s");
+            //every(ListingSchedulJob.class, "1mn");
+            //every(SellingCategoryCheckerJob.class, "1d");
 
             //ruby job 已执行
             //every(SellingRecordCheckJob.class, "5mn");
