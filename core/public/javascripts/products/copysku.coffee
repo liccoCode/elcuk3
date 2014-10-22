@@ -51,11 +51,22 @@ $ ->
       else
         $.post('/products/updateSalesLevel', {salesLevel: $select.val(), sku: sku })
     LoadMask.unmask()
-  ).on('click', '#deleteBtn', ->
+  ).on('click', '#deleteBtn',->
     $deleteBtn = $(@)
     $logForm = $("#logForm")
     firstTd = $deleteBtn.parents('tr').children('td')[0]
     sku = $(firstTd).children('a')[0].innerHTML # 得到 SKU
     $($("#logForm input")[0]).val(sku) # 设置 SKU 到隐藏的 Modal 中
     $logForm.modal() # 展示 Modal
+  ).on('click', '#searchBtn, #downloadBtn', ->
+    $btn = $(@)
+    $form = $($btn.parents('form')[0])
+    $form.attr('action', $btn.data('href'))
+
+    if $btn.attr('id') is "downloadBtn"
+      $form.attr("target", "_blank")
+    else
+      $form.removeAttr('target')
+
+    $form.submit()
   )

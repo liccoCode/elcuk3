@@ -2,6 +2,7 @@ package models.view.post;
 
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.regex.Pattern;
  */
 public class ProductPost extends Post<Product> {
     public final Pattern SKU = Pattern.compile("([0-9a-zA-Z]+-[0-9a-zA-Z]+-?[0-9a-zA-Z]*)");
+    public String state = "Active";
 
     public ProductPost() {
         this.perSize = 25;
@@ -25,7 +27,7 @@ public class ProductPost extends Post<Product> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return Product.count(params._1, params._2.toArray());
+        return new Long(Product.find(params._1, params._2.toArray()).fetch().size());
     }
 
     @Override
@@ -36,16 +38,29 @@ public class ProductPost extends Post<Product> {
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = skuSearch();
-        if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
-
-        StringBuilder sbd = new StringBuilder("1=1");
-        List<Object> params = new ArrayList<Object>();
-        if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND sku LIKE ?");
-            params.add(this.search + "%");
+        if(specialSearch._1) {
+            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3); //针对 SKU 的唯一搜索
         }
 
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM Product p LEFT JOIN p.productAttrs a WHERE 1=1");
+        List<Object> params = new ArrayList<Object>();
+        if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {
+            String word = this.word();
+            sbd.append("AND (")
+                    .append(" p.sku LIKE ?")
+                    .append(" OR a.value LIKE ?")
+                    .append(")");
+            for(int i = 0; i < 2; i++) params.add(word);
+        }
+
+        if(StringUtils.isNotBlank(this.state)) {
+            sbd.append(" AND state IN ");
+            if(StringUtils.equalsIgnoreCase(this.state, "Active")) {
+                sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.NEW, Product.S.SELLING)));
+            } else {
+                sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.DOWN)));
+            }
+        }
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 

@@ -19,10 +19,10 @@ import models.view.post.*;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
-import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -39,7 +39,7 @@ import java.util.Map;
  * Date: 10/31/12
  * Time: 11:47 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Excels extends Controller {
 
 
@@ -248,16 +248,14 @@ public class Excels extends Controller {
     /**
      * 导出产品SKU基本信息
      */
-    public static void exportProductDetailToExcel(String search) {
-        ProductPost p = new ProductPost();
-        p.search = search;
-        F.T2<String, List<Object>> params = p.params();
-        List<Product> prods = Product.find(params._1, params._2.toArray()).fetch();
+    public static void exportProductDetailToExcel(ProductPost p) {
+        p.perSize = NumberUtils.toInt(Product.count() + "");
+        List<Product> prods = p.query();
         if(prods != null && prods.size() != 0) {
             DecimalFormat df = new DecimalFormat("0.00");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(search) ? "ALL" : search));
+                    String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(p.search) ? "ALL" : p.search));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(prods, df);
         } else {
