@@ -23,9 +23,9 @@ public class SellingRecordFixPromise extends Job {
 
     @Override
     public void doJob() {
-        DateTime dt = new DateTime(this.begin);
-        for(int i = 0; i <= this.days; i++) {
-            SellingRecordCheckJob.amazonNewestRecords(dt.plusDays(i));
-        }
+//        DateTime dt = new DateTime(this.begin);
+//        for(int i = 0; i <= this.days; i++) {
+//            SellingRecordCheckJob.amazonNewestRecords(dt.plusDays(i));
+//        }
     }
 }
