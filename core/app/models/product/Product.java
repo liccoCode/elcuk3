@@ -822,10 +822,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             return backupsku;
         }
 
-
+        Family fm = Family.findById(family);
         backupsku.sku = sku;
-        backupsku.family = Family.findById(family);
-
+        backupsku.family = fm;
+        backupsku.category = fm.category;
         backupsku.lengths = pro.lengths;
         backupsku.productName = pro.productName;
         backupsku.heigh = pro.heigh;
