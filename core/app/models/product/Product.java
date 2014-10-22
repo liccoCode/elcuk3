@@ -693,7 +693,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         long procureUnitCount = ProcureUnit.count("sku=?", this.sku);
         if(procureUnitCount > 0)
             Validation.addError("", String.format("Product[%s]下找到 %s 个相关采购计划，无法删除", this.sku, procureUnitCount));
-
+        long prodAttrCount = this.productAttrs.size();
+        if(prodAttrCount > 0)
+            Validation.addError("", String.format("Product[%s]下找到 %s 个附加属性，无法删除，请先删除附加属性", this.sku, prodAttrCount));
         if(Validation.hasErrors()) return;
         this.delete();
         new ERecordBuilder("product.destroy")
