@@ -46,8 +46,6 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public long cooperatorId;
 
-    public String cooperatorName;
-
     public ProcureUnit.STAGE stage;
 
     public PLACEDSTATE isPlaced;
@@ -222,11 +220,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.cooperatorId > 0) {
             sbd.append(" AND cooperator.id=? ");
             params.add(this.cooperatorId);
-        }
-
-        if(StringUtils.isNotBlank(this.cooperatorName)) {
-            sbd.append(" AND cooperator.name=?");
-            params.add(this.cooperatorName);
         }
 
         if(this.stage != null) {
