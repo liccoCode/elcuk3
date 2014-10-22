@@ -248,16 +248,14 @@ public class Excels extends Controller {
     /**
      * 导出产品SKU基本信息
      */
-    public static void exportProductDetailToExcel(String search) {
-        ProductPost p = new ProductPost();
+    public static void exportProductDetailToExcel(ProductPost p, String search) {
         p.search = search;
-        F.T2<String, List<Object>> params = p.params();
-        List<Product> prods = Product.find(params._1, params._2.toArray()).fetch();
+        List<Product> prods = p.query();
         if(prods != null && prods.size() != 0) {
             DecimalFormat df = new DecimalFormat("0.00");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(search) ? "ALL" : search));
+                    String.format("%s产品SKU基本信息.xls", StringUtils.isEmpty(p.search) ? "ALL" : p.search));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(prods, df);
         } else {
