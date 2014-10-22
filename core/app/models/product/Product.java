@@ -548,8 +548,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 记录修改之前的记录
-     *
-     * @param unit
      */
     public List<String> beforeDoneUpdate(Product pro) {
         List<String> logs = new ArrayList<String>();
