@@ -1,8 +1,13 @@
 #{extends 'main_full.html'/}
 #{set title:"采购单列表 (${deliveryments.size()})" /}
+#{set 'moreStyles'}
+    #{stylesheet 'selectize.default.css'/}
+#{/set}
 #{set 'moreScripts'}
     #{script 'deliveryments/index.coffee'/}
+    #{script 'selectize.min.js'/}
 #{/set}
+
 
 #{info_row}
 <ul>
@@ -34,17 +39,12 @@
         <option value="">类型</option>
       #{/select_enum}
 
-    <select name="p.cooperId" class="inline">
+    <select name="p.cooperId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
       <option value="0">供应商</option>
         #{list items:suppliers, as:'sp'}
           <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
         #{/list}
     </select>
-
-    <div class="inline">
-      <input type="text" name="p.cooperName" class="input-medium" value="${p.cooperName}" placeHolder="手动输入供应商" data-provide="typeahead"
-             data-source="${suppliersJson}">
-    </div>
 
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
