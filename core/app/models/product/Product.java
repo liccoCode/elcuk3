@@ -2,10 +2,7 @@ package models.product;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.Cached;
-import helper.Caches;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
 import models.market.Listing;
@@ -504,6 +501,94 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 this.productName, this.marketState.label(), this.procureState.label(), this.productState.label(),
                 this.salesLevel);
     }
+
+
+    public static Product dbProduct(String sku) {
+        Product dbpro = new Product();
+        dbpro.sku = sku;
+        String sql = "select "
+                + " lengths,width,heigh,weight,declaredvalue,productname,"
+                + " marketstate,procurestate,productstate,saleslevel,productlengths,"
+                + " productwidth,productheigh,productweight,declaredvalue,declarename,abbreviation,"
+                + " locates,sellingpoints,subtitle,markettime,delistingtime "
+                + " from Product where sku='" + sku + "'";
+        Map<String, Object> map = DBUtils.rows(sql).get(0);
+        dbpro.lengths = (Float) map.get("lengths");
+        dbpro.width = (Float) map.get("width");
+        dbpro.heigh = (Float) map.get("heigh");
+        dbpro.weight = (Float) map.get("weight");
+        dbpro.declaredValue = (Float) map.get("declaredvalue");
+        dbpro.productName = (String) map.get("productname");
+        String marketstate = (String) map.get("marketstate");
+        if(!StringUtils.isBlank(marketstate))
+            dbpro.marketState = T.valueOf(marketstate);
+        String procurestate = (String) map.get("procurestate");
+        if(!StringUtils.isBlank(procurestate))
+            dbpro.procureState = P.valueOf(procurestate);
+        String productstate = (String) map.get("productstate");
+        if(!StringUtils.isBlank(productstate))
+            dbpro.productState = L.valueOf(productstate);
+        String saleslevel = (String) map.get("saleslevel");
+        if(!StringUtils.isBlank(saleslevel))
+            dbpro.salesLevel = E.valueOf(saleslevel);
+        dbpro.productLengths = (Float) map.get("productlengths");
+        dbpro.productWidth = (Float) map.get("productwidth");
+        dbpro.productHeigh = (Float) map.get("productheigh");
+        dbpro.productWeight = (Float) map.get("productweight");
+        dbpro.declaredValue = (Float) map.get("declaredvalue");
+        dbpro.declareName = (String) map.get("declarename");
+        dbpro.abbreviation = (String) map.get("abbreviation");
+        dbpro.locates = (String) map.get("locates");
+        dbpro.sellingPoints = (String) map.get("sellingpoints");
+        dbpro.subtitle = (String) map.get("subtitle");
+        dbpro.marketTime = (Date) map.get("markettime");
+        dbpro.delistingTime = (Date) map.get("delistingtime");
+        return dbpro;
+    }
+
+    /**
+     * 记录修改之前的记录
+     *
+     * @param unit
+     */
+    public List<String> beforeDoneUpdate(Product pro) {
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(replace(Reflects.logFieldFade(this, "lengths", pro.lengths), "lengths", "长度(包材)"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "width", pro.width), "width", "宽度(包材)"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "heigh", pro.heigh), "heigh", "高度(包材)"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "weight", pro.weight), "weight", "重量(包材)"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "declaredValue", pro.declaredValue), "declaredValue", "申报价格"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "productName", pro.productName), "productName", "产品名称"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "marketState", pro.marketState), "marketState", "上架状态"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "procureState", pro.procureState), "procureState", "采购状态"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "productState", pro.productState), "productState", "生命周期"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "salesLevel", pro.salesLevel), "salesLevel", "销售等级"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "productLengths", pro.productLengths), "productLengths", "长度"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "productWidth", pro.productWidth), "productWidth", "宽度"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "productHeigh", pro.productHeigh), "productHeigh", "高度"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "productWeight", pro.productWeight), "productWeight", "重量"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "declareName", pro.declareName), "declareName", "产品品名"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "abbreviation", pro.abbreviation), "abbreviation", "产品简称"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "locates", pro.locates), "locates", "产品定位"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "sellingPoints", pro.sellingPoints), "sellingPoints", "产品卖点"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "subtitle", pro.subtitle), "subtitle", "副标题"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "marketTime", pro.marketTime), "marketTime", "上市时间"));
+        logs.addAll(replace(Reflects.logFieldFade(this, "delistingTime", pro.delistingTime), "delistingTime", "退市时间"));
+
+        this.productAttrs = new java.util.ArrayList<ProductAttr>();
+        logs.addAll(replace(Reflects.logFieldFade(this, "productAttrs", pro.productAttrs), "productAttrs", "扩展属性"));
+
+
+        return logs;
+    }
+
+    public static List<String> replace(List<String> log, String name, String toname) {
+        for(int i = 0; i < log.size(); i++) {
+            log.set(i, log.get(i).replace(name, toname));
+        }
+        return log;
+    }
+
 
     /**
      * 验证这个 SKU 是否合法

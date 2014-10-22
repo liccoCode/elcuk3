@@ -1,14 +1,17 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.DBUtils;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.embedded.ERecordBuilder;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.procure.Cooperator;
+import models.procure.Shipment;
 import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
@@ -23,8 +26,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * 产品模块的基本的类别的基本操作在此
@@ -32,7 +34,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午11:57
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Products extends Controller {
 
     @Util
@@ -102,14 +104,21 @@ public class Products extends Controller {
             if(Validation.hasErrors())
                 renderJSON(Webs.VJson(Validation.errors()));
 
+            Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.save();
-            new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
-                    pro.sku).save();
+            List<String> logs = new ArrayList<String>();
+            logs.addAll(dbpro.beforeDoneUpdate(pro));
+            if(logs.size() > 0) {
+                new ElcukRecord(Messages.get("product.update"),
+                        Messages.get("action.base", StringUtils.join(logs, "<br>")),
+                        pro.sku).save();
+            }
             renderJSON(new Ret(true, ""));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+
     }
 
     public static void saleAmazon(String id) {
@@ -317,13 +326,21 @@ public class Products extends Controller {
      */
     public static void saveAttrs(List<ProductAttr> productAttrs) {
         try {
+            String log = "";
             for(ProductAttr productAttr : productAttrs) {
                 if(productAttr != null) {
                     if(productAttr.id != null && productAttr.id != 0) {
                         productAttr.update();
+                        log = log + "更新属性:" + productAttr.value;
                     } else {
                         productAttr.save();
+                        log = log + "新增属性:" + productAttr.value;
                     }
+
+                    new ElcukRecord(Messages.get("product.update"),
+                            Messages.get("action.base", log),
+                            productAttr.product.sku).save();
+
                 }
             }
             renderJSON(new Ret(true, ""));
@@ -361,6 +378,12 @@ public class Products extends Controller {
         try {
             ProductAttr productAttr = ProductAttr.findById(attrId);
             productAttr.delete();
+
+            String log = "删除属性:" + productAttr.value;
+            new ElcukRecord(Messages.get("product.update"),
+                    Messages.get("action.base", log),
+                    productAttr.product.sku).save();
+
             renderJSON(new Ret(true, productAttr.attribute.name));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
