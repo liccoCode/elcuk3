@@ -3,7 +3,6 @@ package jobs.categoryInfo;
 import helper.DBUtils;
 import helper.Dates;
 import helper.LogUtils;
-import jobs.driver.BaseJob;
 import models.product.Category;
 import models.product.Product;
 import models.view.dto.CategoryInfoDTO;
@@ -12,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
+import play.jobs.Job;
 import services.MetricProfitService;
 
 import java.util.*;
@@ -23,20 +23,19 @@ import java.util.*;
  * Date: 14-4-2
  * Time: PM2:56
  */
-public class CategoryInfoFetchJob extends BaseJob {
+public class CategoryInfoFetchJob extends Job {
     public static final String CategoryInfo_Cache = "categoryinfo_cache";
     public static final String RUNNING = "categoryinfofetchjob_running";
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void doit() {
+    public void doJob() {
         if(isRnning()) return;
         long begin = System.currentTimeMillis();
 
         Cache.add(RUNNING, RUNNING);
         categoryinfo();
         Cache.delete(RUNNING);
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"CategoryInfoFetchJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "CategoryInfoFetchJob")) {
             LogUtils.JOBLOG.info(String
                     .format("CategoryInfoFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
