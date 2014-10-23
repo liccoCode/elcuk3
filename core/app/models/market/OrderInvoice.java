@@ -54,6 +54,17 @@ public class OrderInvoice extends GenericModel {
     public float notaxamount;
 
     /**
+     * 含税金额
+     */
+    public float taxamount;
+
+    /**
+     * 总金额
+     */
+    public float totalamount;
+
+
+    /**
      * 价格
      */
     @Transient

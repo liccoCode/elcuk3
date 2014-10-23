@@ -214,14 +214,14 @@
   #{/if}
   #{else}
     <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>
-    <td class="td3">${tax}</td>
+    <td class="td3">${invoice.taxamount}</td>
   #{/else}
   </tr>
   <tr>
     <td class="td3"></td>
     <td class="td3"></td>
     <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
-    <td class="td3"><strong>${totalamount}</strong></td>
+    <td class="td3"><strong>${invoice.totalamount}</strong></td>
   </tr>
 </table>
 </body>
