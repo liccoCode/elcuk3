@@ -297,14 +297,26 @@
   #{/if}
   #{else}
     <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>
-    <td class="td3">${tax}</td>
+      #{if invoice != null}
+        <td class="td3"><input type="text" name="invoice.taxamount" value="${invoice.taxamount}"></td>
+      #{/if}
+      #{else}
+        <td class="td3"><input type="text" name="invoice.taxamount" value="${tax}"></td>
+      #{/else}
+
   #{/else}
   </tr>
   <tr>
     <td class="td3"></td>
     <td class="td3"></td>
     <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
-    <td class="td3"><strong>${totalamount}</strong></td>
+  #{if invoice != null}
+    <td class="td3"><input type="text" name="invoice.totalamount" value="${invoice.totalamount}"></td>
+  #{/if}
+  #{else}
+    <td class="td3"><input type="text" name="invoice.totalamount" value="${totalamount}"></td>
+  #{/else}
+
   </tr>
   <tr>
     <td class="td1" colspan="4">
