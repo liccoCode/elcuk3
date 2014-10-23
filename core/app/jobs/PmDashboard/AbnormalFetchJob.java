@@ -3,15 +3,14 @@ package jobs.PmDashboard;
 import helper.DBUtils;
 import helper.Dates;
 import helper.LogUtils;
-import jobs.driver.BaseJob;
 import models.market.Listing;
 import models.view.dto.AbnormalDTO;
 import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
+import play.jobs.Job;
 import query.PmDashboardCache;
 import query.ProductQuery;
 import services.MetricProfitService;
@@ -28,20 +27,19 @@ import java.util.*;
  * Date: 14-3-21
  * Time: PM2:03
  */
-public class AbnormalFetchJob extends BaseJob {
+public class AbnormalFetchJob extends Job {
     public static final String RUNNING = "anormalfetchjob_running";
     public static final String AbnormalDTO_CACHE = "abnormal_info";
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void doit() {
+    public void doJob() {
         if(isRnning()) return;
         long begin = System.currentTimeMillis();
         abnormal();
         LogUtils.JOBLOG.info(String.format("AbnormalFetchJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         PmDashboardCache.doCache();
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"AbnormalFetchdashboardJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "AbnormalFetchdashboardJob")) {
             LogUtils.JOBLOG.info(String.format("AbnormalFetchdashboardJob calculate.... [%sms]",
                     System.currentTimeMillis() - begin));
         }
