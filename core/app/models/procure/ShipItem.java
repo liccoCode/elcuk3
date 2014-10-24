@@ -264,11 +264,11 @@ public class ShipItem extends GenericModel {
     }
 
     /**
-     * 检查 recivedQty 值是否是由 0 修改的(标识 FBA 条码错误等原因造成的 FBA 接受数量为零的这种情况)
+     * 检查 recivedQty 值是否是由 0 修改为其他值的(标识 FBA 条码错误等原因造成的 FBA 接受数量为零的这种情况)
      *
      * @return
      */
-    public boolean isChangeFromZero() {
+    public boolean changeFromZero() {
         List<ElcukRecord> records = ElcukRecord.records(this.id + "", Messages.get("shipitem.receviedQty"));
         for(ElcukRecord r : records) {
             if(StringUtils.containsIgnoreCase(r.message, "从 0 修改为")) return true;
