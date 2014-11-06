@@ -23,8 +23,7 @@ public class SystemOperation extends Controller {
     @Before(unless = {"login", "authenticate", "logout"})
     static void rollApi() throws Throwable {
         if(session.contains("username")) {
-            boolean isprodjob = JobsSetup.isProdJob();
-            if(isprodjob) {
+            if(Play.mode.isProd()) {
                 new SystemOperationsJob(request.actionMethod, request.url, request.controller).now();
             }
         }
