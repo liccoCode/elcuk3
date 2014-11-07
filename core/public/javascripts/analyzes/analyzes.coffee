@@ -12,7 +12,7 @@ $ ->
       LoadMask.mask()
       $div.load("/Analyzes/analyzes",$('.search_form').serialize(),(r) ->
         oTable = $("#sorttable").dataTable(
-          sDom: "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
+          sDom: "<'row-fluid'<'span10'><'span2'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
           sPaginationType: "full_numbers"
           iDisplayLength: 50
           aaSorting: [[15, "desc"]]

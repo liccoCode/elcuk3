@@ -83,8 +83,8 @@
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
       #{if itmRecord}
-        <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" name='recivedQty'
-            placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
+        <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
+            name='recivedQty' placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
         ${itm.recivedQty}
           <i class="icon-wrench"></i>
         </td>
