@@ -28,6 +28,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import play.mvc.Http;
+
 /**
  * 用户登陆限制
  * User: wyattpan
@@ -51,7 +53,12 @@ public class Login extends Secure.Security {
          */
         User user = User.findByUserName(username);
         if(user == null) return false;
-        return user.authenticate(password);
+        boolean iscorrect = user.authenticate(password);
+        if(iscorrect) {
+            Http.Response.current().setCookie("username", username, "24h");
+            Http.Response.current().setCookie("usermd5", user.userMd5(username), "24h");
+        }
+        return iscorrect;
     }
 
     static boolean check(String profile) {
@@ -68,6 +75,8 @@ public class Login extends Secure.Security {
     static void onDisconnect() {
         try {
             Login.current().logout();
+            Http.Response.current().setCookie("username", "", "10h");
+            Http.Response.current().setCookie("usermd5", "", "10h");
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
