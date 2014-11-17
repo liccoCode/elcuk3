@@ -178,17 +178,20 @@ public class TimelineEventSource {
             for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
             for(Shipment shipment : relateShipments) shipment.endShipByComputer();
 
-            //如果有签收数量则用采购计划的入库时间
-            //if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
-            //因为要求线条的起始时间是运营填写的到库时间，所以直接改为到库时间 2014.11.17
-            predictShipFinishDate = this.unit.attrs.planArrivDate;
-            //}
 
             if(predictShipFinishDate == null && relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
-                if(!Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
+                predictShipFinishDate = shipment.dates.planArrivDate;
+                if(predictShipFinishDate == null && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN,
+                        Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
+
+            //如果有签收数量则用采购计划的入库时间
+            if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
+                predictShipFinishDate = this.unit.attrs.planArrivDate;
+            }
+
 
             this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
