@@ -30,6 +30,9 @@ import java.util.concurrent.ExecutionException;
 
 import play.mvc.Http;
 
+import java.net.HttpCookie;
+
+
 /**
  * 用户登陆限制
  * User: wyattpan
@@ -55,8 +58,8 @@ public class Login extends Secure.Security {
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username);
-            Http.Response.current().setCookie("usermd5", user.userMd5(username));
+            Http.Response.current().setCookie("username", username, "easya.cc", "/", 3600, false);
+            Http.Response.current().setCookie("usermd5", user.userMd5(username), "easya.cc", "/", 3600, false);
         }
         return iscorrect;
     }
@@ -75,8 +78,9 @@ public class Login extends Secure.Security {
     static void onDisconnect() {
         try {
             Login.current().logout();
-            Http.Response.current().setCookie("username", "", "10h");
-            Http.Response.current().setCookie("usermd5", "", "10h");
+            Http.Response.current().setCookie("username", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("usermd5", "", "easya.cc", "/", 0, false);
+
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
