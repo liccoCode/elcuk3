@@ -55,8 +55,8 @@ public class Login extends Secure.Security {
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, "24h");
-            Http.Response.current().setCookie("usermd5", user.userMd5(username), "24h");
+            Http.Response.current().setCookie("username", username);
+            Http.Response.current().setCookie("usermd5", user.userMd5(username));
         }
         return iscorrect;
     }
