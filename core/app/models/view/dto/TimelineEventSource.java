@@ -178,9 +178,12 @@ public class TimelineEventSource {
             for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
             for(Shipment shipment : relateShipments) shipment.endShipByComputer();
 
-            if(relateShipments.size() > 0) {
+
+            if(predictShipFinishDate == null && relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
-                if(!Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
+                predictShipFinishDate = shipment.dates.planArrivDate;
+                if(predictShipFinishDate == null && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN,
+                        Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
@@ -188,6 +191,7 @@ public class TimelineEventSource {
             if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
             }
+
 
             this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 

@@ -24,6 +24,7 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.security.MessageDigest;
 
 /**
  * 系统中的用户
@@ -553,4 +554,41 @@ public class User extends Model {
     public static List<String> getSellings(User user) {
         return Selling.getSellingIds(getListings(user));
     }
+
+
+    /**
+     * 用户登陆后将验证key值返回给 cookie
+     *
+     * @param password
+     * @return
+     */
+    public String userMd5(String username) {
+        String userkey = "playelcuk2userauthenticate" + username;
+        return Md5(userkey);
+    }
+
+
+    private static String Md5(String plainText) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte b[] = md.digest();
+            int i;
+            StringBuffer buf = new StringBuffer("");
+            for(int offset = 0; offset < b.length; offset++) {
+                i = b[offset];
+                if(i < 0) i += 256;
+                if(i < 16)
+                    buf.append("0");
+                buf.append(Integer.toHexString(i));
+            }
+            return buf.toString();
+        } catch(Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
 }

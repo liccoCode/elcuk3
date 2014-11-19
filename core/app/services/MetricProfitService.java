@@ -160,7 +160,7 @@ public class MetricProfitService {
      * 总销量
      */
     public Float esSaleQty() {
-        BoolQueryBuilder qb =  (BoolQueryBuilder)querybuilder();
+        BoolQueryBuilder qb = (BoolQueryBuilder) querybuilder();
         qb = qb.mustNot(QueryBuilders.termQuery("state", "cancel"));
 
         SearchSourceBuilder search = new SearchSourceBuilder()
@@ -400,6 +400,7 @@ public class MetricProfitService {
         if(rows != null && rows.size() > 0) {
             price = (Float) rows.get(0).get("declaredvalue");
         }
+        if(price == null) price = 0f;
 
         return price * param;
     }
@@ -722,7 +723,7 @@ public class MetricProfitService {
                 )
                 .size(0);
 
-        Logger.info("salefeeline:::"+search.toString());
+        Logger.info("salefeeline:::" + search.toString());
 
         JSONObject result = ES.search("elcuk2", tablename, search);
         if(result == null) {
