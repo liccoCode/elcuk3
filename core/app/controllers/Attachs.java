@@ -22,7 +22,7 @@ import java.util.List;
  * Date: 5/4/12
  * Time: 2:53 PM
  */
-@With({GlobalExceptionHandler.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, SystemOperation.class})
 public class Attachs extends Controller {
 
     public static void image(Attach a, Integer w, Integer h) {
@@ -56,17 +56,18 @@ public class Attachs extends Controller {
         renderJSON(J.G(a));
     }
 
-    public static void uploadForForm(Attach a) {
-        a.setUpAttachName();
-        Logger.info("%s File save to %s.[%s kb]", a.fid, a.location, a.fileSize / 1024);
+    public static void uploadForBase64(Attach.P p, String fid, String base64File, String originName) {
+        Attach a = new Attach(p, fid);
         try {
+            File image = Attach.generateImageByBase64(base64File, originName);
+            a.file = image;
+            a.setUpAttachName();
             FileUtils.copyFile(a.file, new File(a.location));
             a.save();
-            flash.success("上传成功！");
         } catch(Exception e) {
-            flash.error(Webs.E(e));
+            renderJSON(new Ret(Webs.E(e)));
         }
-        redirect(String.format("/checktasks/%s/show", a.fid));
+        renderJSON(new Ret("上传成功!"));
     }
 
     public static void rm(Attach a) {
