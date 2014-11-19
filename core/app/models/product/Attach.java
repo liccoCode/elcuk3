@@ -99,6 +99,9 @@ public class Attach extends Model {
         }
     }
 
+    public Attach() {
+    }
+
     public Attach(P p, String fid) {
         this.p = p;
         this.fid = fid;
