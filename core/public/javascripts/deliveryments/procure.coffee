@@ -4,11 +4,11 @@ $ ->
     $('#paymentUnit_destroy_form').attr('action', @getAttribute('url'))
     $('#paymentUnit_destroy').modal()
 
-  $(document).on("click", "#billing_rework_pay_btn", (r) ->
+  $(document).on("click", "#billing_rework_pay_btn",(r) ->
     $("#modal_home").load('/Procureunits/loadChecklist', id: $(@).data("pid"), (r) ->
       $('#reworkpay_modal').modal('show')
     )
-  ).on("click", "#sumbit_billing_btn", (r) ->
+  ).on("click", "#sumbit_billing_btn",(r) ->
     # 计算用户勾选的费用记录
     checkids = []
     checkboxList = $('input[name="checkids"]')
@@ -19,7 +19,18 @@ $ ->
     $("#checktask_id_list").val(checkids.join("_"))
     $("#billing_rework_pay_form").submit()
     $('#reworkpay_modal').modal('hide')
+  ).on("change", "#switch_pay", (r) ->
+    self = $(@)
+    feesize = self.parents('tr').find("input[name='feesize']").val()
+    if feesize>0
+      alert '存在费用明细,不可以更改收款状态!'
+      window.location.reload()
+    else
+      $('#edit_pay_form').attr('action', @getAttribute('url'))
+      $('#edit_pay').modal()
   )
+
+
 
   # Form 搜索功能
   $("#tailpaybtn").click (e) ->
@@ -28,11 +39,11 @@ $ ->
     i = 0
     while i < checkObj.length
       if checkObj[i].checked == true
-        data = data + "&unitids="+ checkObj[i].value
+        data = data + "&unitids=" + checkObj[i].value
       i++
 
     applyid = $('#applyid')
-    data = data + "&applyid="+ applyid.val()
+    data = data + "&applyid=" + applyid.val()
     $.get('/ProcureUnits/morebillingTailPay', data, (r) ->
       if r.flag is false
         alert(r.message)
@@ -49,11 +60,11 @@ $ ->
     i = 0
     while i < checkObj.length
       if checkObj[i].checked == true
-        data = data + "&unitids="+ checkObj[i].value
+        data = data + "&unitids=" + checkObj[i].value
       i++
 
     applyid = $('#applyid')
-    data = data + "&applyid="+ applyid.val()
+    data = data + "&applyid=" + applyid.val()
 
     $.get('/ProcureUnits/morebillingPrePay', data, (r) ->
       if r.flag is false
@@ -64,8 +75,6 @@ $ ->
         window.location.reload()
       form.unmask()
     )
-
-
 
 
   calculateSumery = ->
