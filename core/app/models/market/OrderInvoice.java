@@ -1,6 +1,7 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
+import models.finance.SaleFee;
 import play.db.jpa.GenericModel;
 
 
@@ -150,6 +151,25 @@ public class OrderInvoice extends GenericModel {
         for(float p : this.price) {
             this.editprice = this.editprice + p + ",";
         }
+    }
+
+
+    /**
+     * 判断invoice是否有效
+     */
+    public boolean checkInvoice(Orderr ord) {
+        int pricecount = ord.items.size();
+        for(int i = 0; i < ord.fees.size(); i++) {
+            SaleFee fee = ord.fees.get(i);
+            if(fee.type.name.equals("shipping") || fee.type.name.equals("giftwrap")) {
+                pricecount++;
+            }
+        }
+        if(pricecount > this.price.size()) {
+            this.delete();
+            return false;
+        }
+        return true;
     }
 
 
