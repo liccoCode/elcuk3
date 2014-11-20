@@ -34,7 +34,7 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 12-1-6
  * Time: 下午4:02
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Orders extends Controller {
 
     public static void index(OrderPOST p) {
@@ -49,7 +49,12 @@ public class Orders extends Controller {
 
         if(ord.orderrate() != 0) {
             OrderInvoice invoice = OrderInvoice.findById(id);
-            if(invoice != null) invoice.setprice();
+            if(invoice != null) {
+                invoice.setprice();
+                boolean check = invoice.checkInvoice(ord);
+                if(!check) invoice = null;
+            }
+
             F.T3<Float, Float, Float> amt = ord.amount();
             Float totalamount = amt._1;
             Float notaxamount = amt._2;
@@ -68,7 +73,8 @@ public class Orders extends Controller {
             //判断是否存在退款
             int isreturn = ord.isreturn();
 
-            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat,returndate,isreturn);
+            render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat, returndate,
+                    isreturn);
         } else
             render(ord);
     }
@@ -149,6 +155,6 @@ public class Orders extends Controller {
         Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2,
                 4).floatValue();
         Date returndate = ord.returndate();
-        renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat,returndate);
+        renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat, returndate);
     }
 }
