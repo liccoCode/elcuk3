@@ -102,16 +102,32 @@ $ ->
     $form.submit()
   )
 
-
   $(".form_datetime").datetimepicker({
   format: 'yyyy-mm-dd hh:ii',
   startDate: new Date().getFullYear() - 4 + "-01-01"
   })
+
+  lr = new LocalResize(document.getElementById('file_home'), {})
+  lr.success (stop, data) ->
+    $file_home = $('#file_home')
+    $file_home.data('base64_file', data['base64Clean'])
+    $file_home.data('origin_name', data['original']['name'])
+    stop()
+
+  $('#submit_button').click ->
+    $file_home = $('#file_home')
+    $.post('/attachs/uploadForBase64', {p: 'CHECKTASK', fid: $file_home.data('fid'), base64File: $file_home.data('base64_file'), originName: $file_home.data('origin_name') }, (r) ->
+      alert(r.message)
+      window.location.reload()
+    )
 
   fidCallBack = () ->
     {fid: $("input[name='attid']").val(), p: 'CHECKTASK'}
   dropbox = $('#dropbox')
   window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
+  initAttachs = ->
+    window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
+    window.dropUpload.iniDropbox(fidCallBack, dropbox)
 
 

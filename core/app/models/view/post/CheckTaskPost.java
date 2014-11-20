@@ -31,8 +31,8 @@ public class CheckTaskPost extends Post<CheckTask> {
 
     public CheckTaskPost() {
         this.perSize = 25;
-        this.from = DateTime.now().minusDays(30).toDate();
-        this.to = new Date();
+        this.from = new Date();
+        this.to = DateTime.now().plusDays(30).toDate();
         this.dateType = "u.attrs.planShipDate";
     }
 
@@ -80,9 +80,6 @@ public class CheckTaskPost extends Post<CheckTask> {
      */
     public String dateType;
 
-    /**
-     * 在 ProcureUnits中，downloadFBAZIP 方法 需要调用 传入 POST 查询条件， PLay 无法解析父类的属性，必须重写
-     */
     public String search;
 
     /**
@@ -173,8 +170,11 @@ public class CheckTaskPost extends Post<CheckTask> {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append("u.product.sku LIKE ?")
+                    .append("c.id = ?")
+                    .append("OR u.id = ?")
+                    .append("OR u.product.sku LIKE ?")
                     .append(") ");
+            for(int i = 0; i < 2; i++) params.add(NumberUtils.toLong(this.search));
             params.add(word);
         }
 

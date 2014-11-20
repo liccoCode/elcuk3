@@ -12,9 +12,11 @@ import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
 import play.utils.FastRuntimeException;
+import sun.misc.BASE64Decoder;
 
 import javax.persistence.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Date;
@@ -95,6 +97,14 @@ public class Attach extends Model {
             String localtion = attach.location;
             FileUtils.deleteQuietly(new File(localtion));
         }
+    }
+
+    public Attach() {
+    }
+
+    public Attach(P p, String fid) {
+        this.p = p;
+        this.fid = fid;
     }
 
     @PrePersist
@@ -267,5 +277,16 @@ public class Attach extends Model {
                     .fetch();
         else
             return Attach.find("fid=? AND remove=false ORDER BY originName,createDate ASC", fid).fetch();
+    }
+
+    public static File generateImageByBase64(String base64Str, String originName) throws IOException {
+        BASE64Decoder decoder = new BASE64Decoder();
+        byte[] bytes = decoder.decodeBuffer(base64Str);
+        String tmpLocation = String.format("%s/%s", Constant.TMP, originName);
+        File image = new File(tmpLocation);
+        FileOutputStream fos = new FileOutputStream(tmpLocation);
+        fos.write(bytes);
+        fos.close();
+        return image;
     }
 }
