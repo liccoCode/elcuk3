@@ -41,7 +41,7 @@ import java.util.*;
  * Date: 3/26/13
  * Time: 5:56 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
     @Before(only = {"index"})
@@ -378,6 +378,8 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
+            if(unit.isNeedPay == false)
+                renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingPrePay();
             } catch(PaymentException e) {
@@ -415,6 +417,8 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
+            if(unit.isNeedPay == false)
+                renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingTailPay();
             } catch(PaymentException e) {
@@ -500,5 +504,27 @@ public class ProcureUnits extends Controller {
         flash.success("成功修改采购计划!", id);
         renderArgs.put("unit", managedUnit);
         render("ProcureUnits/editManualProcureUnit.html");
+    }
+
+
+    /**
+     * 修改采购计划的是否付款
+     *
+     * @param id
+     * @param applyId
+     */
+
+    @Check("procureunits.billingprepay")
+    public static void editPaySatus(Long pid, Long applyId, String reason) {
+        ProcureUnit unit = ProcureUnit.findById(pid);
+        try {
+            unit.editPayStatus();
+            new ElcukRecord(Messages.get("procureunit.editPaySatus"),
+                    "采购计划id:" + pid + " 更改收款状态:" + !unit.isNeedPay + " " + reason, String.valueOf(applyId)).save();
+        } catch(Exception e) {
+            Validation.addError("", e.getMessage());
+        }
+
+        Applys.procure(applyId);
     }
 }

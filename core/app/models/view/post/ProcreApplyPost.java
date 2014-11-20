@@ -9,6 +9,7 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import play.db.jpa.GenericModel.JPAQuery;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,6 +38,8 @@ public class ProcreApplyPost extends Post<Apply> {
 
     public Long supplierId;
 
+    public int isneedPay;
+
 
     public enum DateType {
 
@@ -59,9 +62,15 @@ public class ProcreApplyPost extends Post<Apply> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-
         StringBuilder sql = new StringBuilder(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
+
+        //查询不需要付款的请款单
+        if(this.isneedPay == 1) {
+            sql = new StringBuilder(
+                    "SELECT DISTINCT p FROM ProcureApply p LEFT JOIN p.deliveryments d "
+                            + "  LEFT JOIN d.units u  WHERE 1=1 AND u.isNeedPay=false ");
+        }
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
@@ -78,7 +87,7 @@ public class ProcreApplyPost extends Post<Apply> {
             params.add(this.supplierId);
         }
 
-        if(this.search != null && !"".equals(this.search.trim())) {
+        if(this.search != null && !"" .equals(this.search.trim())) {
             sql.append(" AND serialNumber like ?");
             params.add(this.word());
         }
@@ -88,9 +97,10 @@ public class ProcreApplyPost extends Post<Apply> {
 
     public List<Apply> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = this.count(params);
-        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,
-                this.perSize);
+        JPAQuery query = ProcureApply.find(params._1 + "ORDER BY createdAt DESC",
+                params._2.toArray());
+        this.count = query.fetch().size();
+        return query.fetch(this.page,this.perSize);
     }
 
     @Override
