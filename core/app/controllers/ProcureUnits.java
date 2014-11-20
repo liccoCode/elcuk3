@@ -41,7 +41,7 @@ import java.util.*;
  * Date: 3/26/13
  * Time: 5:56 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
     @Before(only = {"index"})
@@ -64,6 +64,11 @@ public class ProcureUnits extends Controller {
         renderArgs.put("suppliersJson", suppliersJson);
     }
 
+    @Before(only = {"edit", "update"})
+    public static void beforeLog(Long id) {
+        List<ElcukRecord> logs = ElcukRecord.records(id.toString(), Messages.get("procureunit.update"));
+        renderArgs.put("logs", logs);
+    }
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
@@ -238,10 +243,11 @@ public class ProcureUnits extends Controller {
      * @param id
      * @param oldPlanQty
      */
-    public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
+    public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
+        Validation.required("procureunit.update.reason", msg);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        managedUnit.update(unit, shipmentId);
+        managedUnit.update(unit, shipmentId, msg);
         if(Validation.hasErrors()) {
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
@@ -253,17 +259,14 @@ public class ProcureUnits extends Controller {
 
 
     /**
-     * TODO effect: 需要调整的采购计划的修改
-     *
-     * @param id
+     * @param unitid
      * @param oldPlanQty
      */
     public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
-                                     String shipmentId) {
-
+                                     String shipmentId, String msg) {
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(unitid);
-        managedUnit.update(unit, shipmentId);
+        managedUnit.update(unit, shipmentId, msg);
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
@@ -371,7 +374,7 @@ public class ProcureUnits extends Controller {
     /**
      * 预付款申请
      *
-     * @param id
+     * @param applyid
      */
     @Check("procureunits.billingprepay")
     public static void morebillingPrePay(Long applyid, List<Long> unitids) {

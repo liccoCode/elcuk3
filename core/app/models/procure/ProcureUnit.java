@@ -532,7 +532,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unit
      */
-    public void update(ProcureUnit unit, String shipmentId) {
+    public void update(ProcureUnit unit, String shipmentId, String reason) {
         /**
          * 1. 修改不同阶段可以修改的信息
          * 2. 根据运输类型修改运输单
@@ -558,7 +558,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         if(logs.size() > 0) {
-            new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
+            new ERecordBuilder("procureunit.update").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
+                    this.generateProcureUnitStatusInfo()).fid(this.id).save();
             noty(this.sku, StringUtils.join(logs, ","));
         }
         this.shipItemQty(this.qty());
@@ -589,10 +590,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 在采购计划交货前的状态, 可以修改采购计划的:
+     * 通过反射获取采购计划更新的字段和值
+     * 附: 在采购计划交货前的状态, 可以修改采购计划的:
      * 数量, 价格, 币种, 预计交货日期, 预计运输日期, 预计到库日期, 运输单
      *
      * @param unit
+     * @return List<String>
      */
     public List<String> beforeDoneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<String>();
@@ -616,6 +619,27 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return logs;
     }
 
+    /**
+     * 生成当前采购计划的状态信息(是否抵达货代、FBA 信息、付款信息)
+     *
+     * @return String
+     */
+    public String generateProcureUnitStatusInfo() {
+        String paymentInfo = "";
+        PaymentUnit prePay = this.fetchPrePay();
+        PaymentUnit tailPay = this.fetchTailPay();
+        if(prePay != null) {
+            if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
+            if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+        }
+        if(tailPay != null) {
+            if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
+            if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
+        }
+        String procureUnitStatus = String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
+                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
+        return procureUnitStatus;
+    }
 
     /**
      * 调整采购计划所产生的运输项目的运输单
@@ -934,6 +958,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 预付款
+     *
+     * @return
+     */
+    public PaymentUnit fetchPrePay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.cashpledge()) return fee;
+        }
+        return null;
+    }
+
+    /**
      * 是否拥有了尾款
      *
      * @return
@@ -945,6 +981,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         return false;
     }
+
+    /**
+     * 尾款
+     *
+     * @return
+     */
+    public PaymentUnit fetchTailPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.procurement())
+                return fee;
+        }
+        return null;
+    }
+
 
     public List<PaymentUnit> fees() {
         List<PaymentUnit> fees = new ArrayList<PaymentUnit>();

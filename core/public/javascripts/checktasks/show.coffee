@@ -96,6 +96,9 @@ $ ->
   )
 
   $("#update_form").on("click", "#updateprocess_btn", (r) ->
+    if $("#edit_msg").val() == ""
+      alert("必须填写修改原因")
+      return
     $btn = $(@)
     $form = $("#update_form")
     $form.attr("action", "/procureunits/updateprocess")

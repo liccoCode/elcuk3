@@ -5,8 +5,7 @@
 #{/set}
 
 #{errorMsgs /}
-#{flash_alert row:true /}
-
+#{flash_alert/}
 #{warning_row ''}
 <h4>采购计划在不同状态修改会有限制</h4>
 <ol>
@@ -16,19 +15,26 @@
 </ol>
 #{/warning_row}
 
-<form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
-  <table class="table table-condensed table-bordered">
-  #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
-    <tr>
-      <td colspan="4">
-      #{render 'ProcureUnits/_shipments.html'/}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="4">
-        <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
-        <button type="submit" class="btn btn-primary">更新</button>
-      </td>
-    </tr>
-  </table>
-</form>
+<div class="row-fluid">
+  <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
+    <table class="table table-condensed table-bordered">
+    #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
+      <tr>
+        <td colspan="4">
+        #{render 'ProcureUnits/_shipments.html'/}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
+
+          <div class="input-append">
+            <input type="text" name="msg" placeholder="简要填写变更的原因">
+            <button type="submit" class="btn btn-danger" data-loading>更新</button>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+#{records records:logs/}
