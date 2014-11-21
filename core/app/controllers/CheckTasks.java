@@ -289,9 +289,8 @@ public class CheckTasks extends Controller {
      * @param unit
      * @param shipmentId
      */
-    public static void operateupdateprocess(
-            CheckTask check, long processid,
-            Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
+    public static void operateupdateprocess(CheckTask check, long processid, Long unitid, Long checkid,
+                                            Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
 
         ActivitiProcess ap = ActivitiProcess.findById(processid);
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
