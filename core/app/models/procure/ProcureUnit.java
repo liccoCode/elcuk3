@@ -228,7 +228,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 是否需要付款
      */
-    @Column(columnDefinition = "DEFAULT 'true'")
     public boolean isNeedPay = true;
 
 
