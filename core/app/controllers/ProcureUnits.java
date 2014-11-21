@@ -244,7 +244,7 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
-        Validation.required("procureunit.update.reason", msg);
+        //Validation.required("procureunit.update.reason", msg);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.update(unit, shipmentId, msg);

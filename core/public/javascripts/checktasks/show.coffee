@@ -87,9 +87,9 @@ $ ->
 
 
   $("#update_form").on("click", "#operateactiviti_btn", (r) ->
-    if $("#edit_msg").val() == ""
-      alert("必须填写修改原因")
-      return
+    #if $("#edit_msg").val() == ""
+      #alert("必须填写修改原因")
+      #return
     return unless confirm('确认后则表示已确认该采购计划的预计时间,确认提交?')
     $btn = $(@)
     $form = $("#update_form")
@@ -99,9 +99,9 @@ $ ->
   )
 
   $("#update_form").on("click", "#updateprocess_btn", (r) ->
-    if $("#edit_msg").val() == ""
-      alert("必须填写修改原因")
-      return
+    #if $("#edit_msg").val() == ""
+      #alert("必须填写修改原因")
+      #return
     $btn = $(@)
     $form = $("#update_form")
     $form.attr("action", "/procureunits/updateprocess")
