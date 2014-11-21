@@ -546,19 +546,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         // 1
         //采购计划的FBA已存在后再次编辑该采购计划的 运输方式 或采购数量 时对修改原因做不为空校验
-        if(this.fba != null && (unit.shipType != this.shipType || unit.attrs.planQty != this.attrs.planQty))
+        if(this.fba != null && (unit.shipType != this.shipType || (int) unit.attrs.planQty != (int) this.attrs.planQty))
             Validation.required("procureunit.update.reason", reason);
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
-
-        List<String> logs = new ArrayList<String>();
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            logs.addAll(this.beforeDoneUpdate(unit));
-        } else if(this.stage == STAGE.DONE) {
-            logs.addAll(this.doneUpdate(unit));
-        }
         this.comment = unit.comment;
-
         // 2
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
             this.changeShipItemShipment(
@@ -566,14 +558,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             );
         }
         if(Validation.hasErrors()) return;
-
-        if(logs.size() > 0) {
-            new ERecordBuilder("procureunit.update").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
-                    this.generateProcureUnitStatusInfo()).fid(this.id).save();
-            noty(this.sku, StringUtils.join(logs, ","));
-        }
+        this.createLogs(unit, reason);
         this.shipItemQty(this.qty());
         this.save();
+    }
+
+    /**
+     * 保存这一次更新的系统日志
+     *
+     * @param unit, reason
+     * @return
+     */
+    public void createLogs(ProcureUnit unit, String reason) {
+        List<String> logs = new ArrayList<String>();
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            logs.addAll(this.beforeDoneUpdate(unit));
+        } else if(this.stage == STAGE.DONE) {
+            logs.addAll(this.doneUpdate(unit));
+        }
+        if(logs.size() > 0) {
+            if(StringUtils.isBlank(reason)) {
+                new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
+                        this.generateProcureUnitStatusInfo()).fid(this.id).save();
+            } else {
+                new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
+                        this.generateProcureUnitStatusInfo()).fid(this.id).save();
+            }
+            noty(this.sku, StringUtils.join(logs, ","));
+        }
     }
 
     /**
