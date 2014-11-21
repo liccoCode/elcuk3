@@ -3,6 +3,7 @@ package ext;
 import models.ElcukConfig;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 
@@ -58,6 +59,7 @@ public class ShipmentsHelper extends JavaExtensions {
 
         int totalDays = 0;
         for(String dayType : ElcukConfig.DAY_TYPES.keySet()) {
+            Logger.info("test1111:"+dayType);
             totalDays += shipment.config(dayType).toInteger();
         }
 

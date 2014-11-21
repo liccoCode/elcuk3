@@ -989,6 +989,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public ElcukConfig config(String dayType) {
         String market = this.whouse.country.toLowerCase();
         String name = String.format("%s_%s_%s", market, this.type.name().toLowerCase(), dayType);
+        Logger.info("test111122222:"+name);
         return ElcukConfig.findByName(name);
     }
 
