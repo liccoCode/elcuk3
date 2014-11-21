@@ -291,13 +291,13 @@ public class CheckTasks extends Controller {
      */
     public static void operateupdateprocess(
             CheckTask check, long processid,
-            Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
+            Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
 
         ActivitiProcess ap = ActivitiProcess.findById(processid);
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
 
         ProcureUnit managedUnit = ProcureUnit.findById(unitid);
-        managedUnit.update(unit, shipmentId);
+        managedUnit.update(unit, shipmentId, msg);
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
