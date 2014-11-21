@@ -23,6 +23,11 @@
         #{/select}
     </div>
 
+    <select name="p.isneedPay" class="inline span1">
+      <option ${p.isneedPay==0 ? 'selected' : ''} value="0">请款开关</option>
+      <option ${p.isneedPay==1 ? 'selected' : ''} value="1">不需请款</option>
+    </select>
+
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <input type="hidden" name="p.page" value="${p.page}">

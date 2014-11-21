@@ -224,6 +224,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isPlaced = false;
 
+
+    /**
+     * 是否需要付款
+     */
+    @Column(columnDefinition = "DEFAULT 'true'")
+    public boolean isNeedPay = true;
+
+
     @Lob
     @Expose
     public String comment = " ";
@@ -834,6 +842,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .fid(this.id)
                 .save();
         return fee;
+    }
+
+
+    /**
+     * 修改付款状态
+     */
+    public void editPayStatus() {
+        this.isNeedPay = !this.isNeedPay;
+        this.save();
     }
 
     /**
