@@ -366,6 +366,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 //        else if(type == T.SEA) plusDay = 60;
         plusDay = shipDay();
 
+
+        System.out.println("xxxxxxxxxxxxxxxxxxxx:::::"+plusDay);
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
         return true;
@@ -380,6 +382,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         String market = this.whouse.country.toLowerCase();
         String name = String.format("%s_%s", market, this.type.name().toLowerCase());
         int day = 7;
+
+        System.out.println("YYYYYYYYYYYYYYYYYYYYY:::::"+name);
+
+
         String sql = "select sum(val) as day From ElcukConfig "
                 + " where name like '%" + name + "%' ";
         Map<String, Object> row = DBUtils.row(sql);
