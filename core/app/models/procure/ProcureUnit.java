@@ -545,7 +545,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 2. 根据运输类型修改运输单
          */
         // 1
-        if(this.fba != null) Validation.required("procureunit.update.reason", reason);
+        //采购计划的FBA已存在后再次编辑该采购计划的 运输方式 或采购数量 时对修改原因做不为空校验
+        if(this.fba != null && (unit.shipType != this.shipType || unit.attrs.planQty != this.attrs.planQty))
+            Validation.required("procureunit.update.reason", reason);
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
 
