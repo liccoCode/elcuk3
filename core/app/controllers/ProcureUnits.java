@@ -66,7 +66,8 @@ public class ProcureUnits extends Controller {
 
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
-        List<ElcukRecord> logs = ElcukRecord.records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"));
+        List<ElcukRecord> logs = ElcukRecord
+                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"));
         renderArgs.put("logs", logs);
     }
 
@@ -528,5 +529,13 @@ public class ProcureUnits extends Controller {
         }
 
         Applys.procure(applyId);
+    }
+
+    /**
+     * 导出修改日志
+     */
+    public static void exportLogs(ProcurePost p) {
+        if(p == null) p = new ProcurePost();
+        render(p);
     }
 }

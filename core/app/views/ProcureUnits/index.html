@@ -39,14 +39,14 @@
       #{/list}
       </select>
 
-      <select name="p.stage" class="inline">
+      <select name="p.stage" class="inline" style="width:82px;">
         <option value="">阶段</option>
       #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
         <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.shipType" class="inline">
+      <select name="p.shipType" class="inline" style="width:82px;">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
         <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
@@ -67,7 +67,7 @@
       #{/list}
       </select>
 
-      <select name="p.opConfirm" class="inline">
+      <select name="p.opConfirm" class="inline" style="width:82px;">
         <option value="">运营确认</option>
       #{list items:models.view.post.ProcurePost.OPCONFIRM.values(), as:'o'}
         <option ${o == p.opConfirm ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
@@ -110,6 +110,7 @@
         <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
           <i class="icon-download-alt"></i>下载ZIP
         </a>
+        <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>
       </div>
     #{include 'Deliveryments/box_number_model.html'/}
     </div>

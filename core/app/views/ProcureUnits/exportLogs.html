@@ -1,0 +1,60 @@
+#{extends 'main_full.html' /}
+#{set 'moreScripts'}
+    #{script 'procureunits/exportLogs.coffee'/}
+#{/set}
+
+#{info_row}
+<ul>
+  <li>导出采购计划修改的系统日志</li>
+</ul>
+#{/info_row}
+
+<div class="row-fluid">
+  <form action="" method="get" class="search_form">
+    <div class="span12">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">From:</span>
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${p.to.date()}">
+      </div>
+      <div class="inline">
+        <a data-href="@{ProcureUnits.exportLogs()}" class="btn btn-default" data-loading>Search</a>
+        <a data-href="@{Excels.exportProcureUnitsLogs(p)}" class="btn btn-info">
+          <i class="icon-download-alt"></i> Export
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Date</th>
+        <th>User</th>
+        <th>采购计划 ID</th>
+        <th>Selling ID</th>
+        <th>抵达货代</th>
+        <th>FBA</th>
+        <th>付款信息</th>
+        <th>变更原因</th>
+        <th>变更内容</th>
+      </tr>
+    #{list items:p.queryLogs(), as:'log'}
+      <tr>
+        <td>${log.get("date").date()}</td>
+        <td>${log.get("user")}</td>
+        <td>${log.get("fid")}</td>
+        <td>${log.get("sellingId")}</td>
+        <td>${log.get("isPlaced")}</td>
+        <td>${log.get("fba")}</td>
+        <td>${log.get("payInfo")}</td>
+        <td>${log.get("reason").toString()}</td>
+        <td>${log.get("detail").toString()}</td>
+      </tr>
+    #{/list}
+    </table>
+  </div>
+</div>
