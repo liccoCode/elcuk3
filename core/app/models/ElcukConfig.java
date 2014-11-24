@@ -32,7 +32,7 @@ public class ElcukConfig extends Model {
     static {
         MARKETS = Collections.unmodifiableMap(
                 GTs.MapBuilder.map("uk", "英国").put("de", "德国").put("us", "美国").
-                        put("fr", "法国").put("it", "意大利").put("jp", "日本").build());
+                        put("fr", "法国").put("it", "意大利").put("jp", "日本").put("ca", "加拿大").build());
 
         SHIP_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map(Shipment.T.SEA.name().toLowerCase(), "海运")
