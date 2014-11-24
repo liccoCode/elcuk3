@@ -284,7 +284,7 @@ public class Excels extends Controller {
         if(logs != null && logs.size() > 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
-            renderArgs.put("dateFormat", formatter);
+            renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
             renderArgs.put(RenderExcel.RA_FILENAME,
                     String.format("%s-%s采购计划log记录.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
