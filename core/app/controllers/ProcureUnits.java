@@ -66,7 +66,8 @@ public class ProcureUnits extends Controller {
 
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
-        List<ElcukRecord> logs = ElcukRecord.records(id.toString(), Messages.get("procureunit.update"));
+        List<ElcukRecord> logs = ElcukRecord
+                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"));
         renderArgs.put("logs", logs);
     }
 
@@ -244,7 +245,6 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
-        //Validation.required("procureunit.update.reason", msg);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.update(unit, shipmentId, msg);
@@ -529,5 +529,13 @@ public class ProcureUnits extends Controller {
         }
 
         Applys.procure(applyId);
+    }
+
+    /**
+     * 导出修改日志
+     */
+    public static void exportLogs(ProcurePost p) {
+        if(p == null) p = new ProcurePost();
+        render(p);
     }
 }

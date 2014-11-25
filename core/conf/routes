@@ -95,6 +95,7 @@ POST    /procureunit/{id}/split                             ProcureUnits.doSplit
 GET     /procureunit/{id}/delivery                          ProcureUnits.deliveryunit
 DELETE  /procureunit/{id}/delivery                          ProcureUnits.reverDelivery
 GET     /procureunits/downloadFBAZIP                        ProcureUnits.downloadFBAZIP
+GET     /procureunits/exportlogs                            ProcureUnits.exportLogs
 
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip

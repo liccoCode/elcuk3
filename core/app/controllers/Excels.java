@@ -30,6 +30,7 @@ import play.mvc.With;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -275,6 +276,21 @@ public class Excels extends Controller {
             render(sws, excel);
         } else {
             renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    public static void exportProcureUnitsLogs(ProcurePost p) {
+        List<HashMap<String, Object>> logs = p.queryLogs();
+        if(logs != null && logs.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s采购计划log记录.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(logs);
+        } else {
+            renderText("没有数据无法生成Excel文件!");
         }
     }
 }

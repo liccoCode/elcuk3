@@ -1,18 +1,18 @@
 package models.view.post;
 
+import helper.DBUtils;
 import helper.Dates;
+import models.finance.PaymentUnit;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
+import play.i18n.Messages;
 import play.libs.F;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -278,5 +278,57 @@ public class ProcurePost extends Post<ProcureUnit> {
             if(matcher.find()) return matcher.group(1);
         }
         return null;
+    }
+
+    /**
+     * 查询出所有采购计划的修改日志(写了修改原因的那些)
+     *
+     * @return
+     */
+    public List<HashMap<String, Object>> queryLogs() {
+        String sql = "SELECT e.createAt as createAt, e.username as username, fid as fid," +
+                "p.selling_sellingId as sellingId,p.isPlaced as isPlaced,f.shipmentId as fba,e.message as message " +
+                "FROM ElcukRecord e LEFT JOIN ProcureUnit p ON e.fid = p.id LEFT JOIN FBAShipment f ON p.fba_id = f.id " +
+                "WHERE e.action=? AND e.createAt >= ? AND e.createAt <= ? ORDER BY e.createAt DESC";
+        List<Map<String, Object>> rows = DBUtils
+                .rows(sql, Messages.get("procureunit.deepUpdate"), Dates.morning(this.from), Dates.night(this.to));
+        List<HashMap<String, Object>> logs = new ArrayList<HashMap<String, Object>>();
+        for(Map<String, Object> row : rows) {
+            HashMap<String, Object> log = new HashMap<String, Object>();
+            log.put("date", row.get("createAt"));
+            log.put("user", row.get("username"));
+            log.put("fid", row.get("fid"));
+            log.put("sellingId", row.get("sellingId"));
+            log.put("isPlaced", row.get("isPlaced"));
+            log.put("fba", row.get("fba"));
+            log.put("payInfo", this.generatePayInfo((String) row.get("fid")));
+            String message = (String) row.get("message");
+            log.put("reason", StringUtils.substringsBetween(message, "因[", "]")[0]);
+            log.put("detail", StringUtils.substringsBetween(message, "更新内容[", "]")[0]);
+            logs.add(log);
+        }
+        return logs;
+    }
+
+    /**
+     * 生成采购计划的付款信息
+     *
+     * @param id
+     * @return
+     */
+    public String generatePayInfo(String id) {
+        String paymentInfo = "";
+        ProcureUnit unit = ProcureUnit.<ProcureUnit>findById(NumberUtils.toLong(id));
+        PaymentUnit prePay = unit.fetchPrePay();
+        PaymentUnit tailPay = unit.fetchTailPay();
+        if(prePay != null) {
+            if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
+            if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+        }
+        if(tailPay != null) {
+            if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
+            if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
+        }
+        return paymentInfo;
     }
 }
