@@ -33,7 +33,7 @@ import models.product.Category;
  * Date: 3/10/14
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Profits extends Controller {
 
     @Before(only = {"index"})
@@ -91,8 +91,7 @@ public class Profits extends Controller {
                 if(p.pmarket != null) marketkey = p.pmarket;
                 if(p.category != null) categorykey = p.category.toLowerCase();
                 String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey,
-                        marketkey, p.state);
-
+                        marketkey);
                 profits = Cache.get(postkey, List.class);
                 if(profits != null) {
                     render(profits, p);
@@ -102,7 +101,6 @@ public class Profits extends Controller {
                     flash.error("后台事务正在计算中,请稍候...");
                 }
             }
-
             render(profits, p);
         }
     }
