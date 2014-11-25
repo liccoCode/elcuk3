@@ -550,6 +550,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.required("procureunit.update.reason", reason);
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
+
+        List<String> logs = new ArrayList<String>();
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            logs.addAll(this.beforeDoneUpdate(unit));
+        } else if(this.stage == STAGE.DONE) {
+            logs.addAll(this.doneUpdate(unit));
+        }
         this.comment = unit.comment;
         // 2
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
@@ -558,24 +565,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             );
         }
         if(Validation.hasErrors()) return;
-        this.createLogs(unit, reason);
-        this.shipItemQty(this.qty());
-        this.save();
-    }
 
-    /**
-     * 保存这一次更新的系统日志
-     *
-     * @param unit, reason
-     * @return
-     */
-    public void createLogs(ProcureUnit unit, String reason) {
-        List<String> logs = new ArrayList<String>();
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            logs.addAll(this.beforeDoneUpdate(unit));
-        } else if(this.stage == STAGE.DONE) {
-            logs.addAll(this.doneUpdate(unit));
-        }
         if(logs.size() > 0) {
             if(StringUtils.isBlank(reason)) {
                 new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
@@ -586,6 +576,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             noty(this.sku, StringUtils.join(logs, ","));
         }
+        this.shipItemQty(this.qty());
+        this.save();
     }
 
     /**
