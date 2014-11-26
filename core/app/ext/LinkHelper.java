@@ -51,8 +51,9 @@ public class LinkHelper extends JavaExtensions {
     }
 
     public static String reviewLink(AmazonListingReview review) {
-        String site = StringUtils.split(review.listingId, "_")[1];
-        return String.format("http://www.%s/review/%s", site, review.reviewId);
+        String[] sites = StringUtils.split(review.listingId, "_");
+        if(sites.length <= 1) return "";
+        return String.format("http://www.%s/review/%s", sites[1], review.reviewId);
     }
 
     /**
