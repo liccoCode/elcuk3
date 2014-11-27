@@ -559,7 +559,7 @@ public class User extends Model {
     /**
      * 用户登陆后将验证key值返回给 cookie
      *
-     * @param password
+     * @param username
      * @return
      */
     public String userMd5(String username) {
@@ -584,11 +584,17 @@ public class User extends Model {
             }
             return buf.toString();
         } catch(Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return "";
     }
 
-
+    /**
+     * 还没有通知的消息
+     *
+     * @return
+     */
+    public List<Notification> unNotifiedNotification() {
+        return Notification.find("user=? AND state = 'UNCHECKED' ORDER BY createAt", this).fetch();
+    }
 }
