@@ -543,7 +543,7 @@ public class AmazonProps implements Serializable {
         Elements inputs = doc.select("form[name=productForm] input");
         if(inputs.size() == 0) {
             String msg = doc.select("div").text();
-            if(StringUtils.isBlank(msg)) msg = "Display Post page visit Error. Please try again.";
+            if(StringUtils.isBlank(msg)) msg = "AMZ返回页面信息不正确,请重新更新! Display Post page visit Error. Please try again.";
             throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
         }
         Set<NameValuePair> params = new HashSet<NameValuePair>();
@@ -595,7 +595,7 @@ public class AmazonProps implements Serializable {
                     throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
 
                 if(this.productDesc.indexOf("style=\"color") > 0)
-                    throw new FastRuntimeException("产品详细描述包含非法字符:style=\"color");
+                    throw new FastRuntimeException("产品详细描述包含非法字符:style=\"color\"");
 
                 params.add(new BasicNameValuePair(name, this.productDesc));
             } else {

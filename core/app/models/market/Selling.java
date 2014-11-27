@@ -307,7 +307,8 @@ public class Selling extends GenericModel {
             // 2. 获取修改 Selling 的页面, 获取参数
             html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
             if(StringUtils.isBlank(html))
-                throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+                throw new FastRuntimeException(String.format("AMAZON页面超时,请重新更新! Visit %s page is empty.",
+                        M.listingEditPage(this)));
 
             doc = Jsoup.parse(html);
             // ----- Input 框框
@@ -317,7 +318,8 @@ public class Selling extends GenericModel {
                 this.account.changeRegion(this.market);
                 html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
                 if(StringUtils.isBlank(html))
-                    throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+                    throw new FastRuntimeException(String.format("AMAZON页面超时,请重新更新! Visit %s page is empty.",
+                            M.listingEditPage(this)));
             }
 
             if(Play.mode.isDev()) {
@@ -344,9 +346,10 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(html)) // 这个最先检查
             throw new FastRuntimeException(
                     "Selling update is failed! Return Content is Empty!");
-        Elements error = doc.select(".messageboxerror li");
+        Document rdoc = Jsoup.parse(html);
+        Elements error = rdoc.select(".messageboxerror li");
         if(error.size() > 0)
-            throw new FastRuntimeException("Error:" + error.text());
+            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());
     }
 
 
