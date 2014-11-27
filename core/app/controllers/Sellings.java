@@ -9,6 +9,7 @@ import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
 import models.view.Ret;
+import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
@@ -30,7 +31,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午11:41
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Sellings extends Controller {
 
 
@@ -58,7 +59,8 @@ public class Sellings extends Controller {
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("feeds", s.feeds());
-        render(s);
+        SellingAmzPost p = new SellingAmzPost();
+        render(s, p);
     }
 
     /**
@@ -168,6 +170,27 @@ public class Sellings extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
+
+    /**
+     * 将部分信息同步到AMAZON
+     *
+     * @param s
+     * @param p
+     */
+    public static void amazon_update(Selling s, SellingAmzPost p) {
+        if(p == null) {
+            renderJSON(new Ret(false, "请勾选Selling信息更新!"));
+        }
+        try {
+            s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+            s.syncAndUpdateAmazon(p);
+            s.save();
+            renderJSON(new Ret(true));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
 
     @Check("sellings.delete")
     public static void destroy(String id) {

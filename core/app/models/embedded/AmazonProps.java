@@ -6,6 +6,7 @@ import helper.FLog;
 import helper.Webs;
 import models.market.M;
 import models.market.Selling;
+import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -344,6 +345,7 @@ public class AmazonProps implements Serializable {
         Document doc = Jsoup.parse(html);
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
+
         if(inputs.size() == 0) {
             /**
              * 1. 尝试检查是否为 Listing Not Found 的异常
@@ -525,4 +527,88 @@ public class AmazonProps implements Serializable {
     private void addParams(String name, String value, Collection<NameValuePair> params) {
         params.add(new BasicNameValuePair(name, value));
     }
+
+
+    /**
+     * 根据 Amazon Post Listing 的页面解析出参数, 并生成根据 aps 生成好的参数集合, 同时将解析的 document 原始文档也返回
+     *
+     * @param html
+     * @param sell
+     * @return
+     */
+    public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(Document doc,
+                                                                               Selling sell,
+                                                                               SellingAmzPost p) {
+        // ----- Input 框框
+        Elements inputs = doc.select("form[name=productForm] input");
+        if(inputs.size() == 0) {
+            String msg = doc.select("div").text();
+            if(StringUtils.isBlank(msg)) msg = "Display Post page visit Error. Please try again.";
+            throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
+        }
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(
+                doc.select("#our_price").val(), sell.account.type);
+        for(Element el : inputs) {
+            String name = el.attr("name").toLowerCase().trim();
+
+            if("item_name".equals(name) && p.title)
+                params.add(new BasicNameValuePair(name, this.title));
+            else if("discounted_price".equals(name) && p.saleprice && this.salePrice > 0) {
+                params.add(new BasicNameValuePair("discounted_price",
+                        Webs.priceLocalNumberFormat(our_price._1, this.salePrice)));
+
+            } else if(StringUtils.startsWith(name, "bullet_point") &&
+                    StringUtils.isNotBlank(this.keyFetures) && p.keyfeturess) {
+                this.bulletPointsCheck(params);
+            } else if("generic_keywords[0]".equals(name) && p.searchtermss) {
+                params.add(new BasicNameValuePair(name, this.searchTermss.get(0)));
+            } else if("generic_keywords[1]".equals(name) && p.searchtermss) {
+                params.add(new BasicNameValuePair(name, this.searchTermss.get(1)));
+            } else if("generic_keywords[2]".equals(name) && p.searchtermss) {
+                params.add(new BasicNameValuePair(name, this.searchTermss.get(2)));
+            } else if("generic_keywords[3]".equals(name) && p.searchtermss) {
+                params.add(new BasicNameValuePair(name, this.searchTermss.get(3)));
+            } else if("generic_keywords[4]".equals(name) && p.searchtermss) {
+                params.add(new BasicNameValuePair(name, this.searchTermss.get(4)));
+            } else if("activeClientTimeOnTask".equals(name)) {
+                // Amazon 的一个记录值
+                params.add(new BasicNameValuePair(name, 18059 + ""));
+            } else {
+                /**
+                 * 因为 Amazon 的 checkbox 都是 checkbox 与 hidden 一并出现, 所以:
+                 *  排除掉 checkbox , 只需要提交 checkbox 关联的 hidden 元素
+                 */
+                if("checkbox".equals(el.attr("type"))) {
+                    continue;
+                }
+                params.add(new BasicNameValuePair(name, el.val()));
+            }
+
+        }
+        // ------------ TextArea 框框
+        Elements textareas = doc.select("form[name=productForm] textarea");
+        for(Element text : textareas) {
+            String name = text.attr("name");
+            if("product_description".equals(name) && p.productdesc && StringUtils.isNotBlank(this.productDesc)) {
+                if(this.productDesc.length() > 2000)
+                    throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+
+                if(this.productDesc.indexOf("style=\"color") > 0)
+                    throw new FastRuntimeException("产品详细描述包含非法字符:style=\"color");
+
+                params.add(new BasicNameValuePair(name, this.productDesc));
+            } else {
+                params.add(new BasicNameValuePair(name, text.val()));
+            }
+        }
+        // ------------ Select 框框
+        Elements selects = doc.select("form[name=productForm] select");
+        for(Element select : selects) {
+            params.add(new BasicNameValuePair(select.attr("name"),
+                    select.select("option[selected]").val()));
+        }
+        return new F.T2<Collection<NameValuePair>, Document>(params, doc);
+    }
+
 }

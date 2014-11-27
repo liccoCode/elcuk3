@@ -9,6 +9,7 @@ import models.procure.ProcureUnit;
 import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
+import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.NameValuePair;
@@ -30,6 +31,12 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.util.*;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -289,6 +296,59 @@ public class Selling extends GenericModel {
         this.aps.syncPropFromAmazonPostPage(html, this);
         this.save();
     }
+
+
+    public void syncAndUpdateAmazon(SellingAmzPost p) {
+        String html = "";
+        Document doc = null;
+        synchronized(this.account.cookieStore()) {
+            // 1. 切换 Selling 所在区域
+            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+            // 2. 获取修改 Selling 的页面, 获取参数
+            html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+            if(StringUtils.isBlank(html))
+                throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+
+            doc = Jsoup.parse(html);
+            // ----- Input 框框
+            Elements inputs = doc.select("form[name=productForm] input");
+            if(inputs.size() == 0) {
+                this.account.loginAmazonSellerCenter();
+                this.account.changeRegion(this.market);
+                html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+                if(StringUtils.isBlank(html))
+                    throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+            }
+
+            if(Play.mode.isDev()) {
+                IO.writeContent(html,
+                        new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            }
+            this.account.changeRegion(this.account.type);
+        }
+
+        F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps
+                .generateDeployAmazonProps(doc, this, p);
+        String[] args = StringUtils
+                .split(paramAndDocTuple._2.select("form[name=productForm]").first()
+                        .attr("action"), ";");
+        /**
+         * 发送信息
+         */
+        html = HTTP.post(this.account.cookieStore(),
+                M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
+                        (args.length >= 2 ? args[1] : "")),
+                paramAndDocTuple._1);
+
+
+        if(StringUtils.isBlank(html)) // 这个最先检查
+            throw new FastRuntimeException(
+                    "Selling update is failed! Return Content is Empty!");
+        Elements error = doc.select(".messageboxerror li");
+        if(error.size() > 0)
+            throw new FastRuntimeException("Error:" + error.text());
+    }
+
 
     public byte[] downloadFnSkuLabel() {
         if(StringUtils.isBlank(this.fnSku))

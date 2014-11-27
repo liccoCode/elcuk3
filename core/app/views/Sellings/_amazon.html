@@ -27,6 +27,10 @@
               content="从 Amazon 同步回来更新到数据库" placement='bottom' rel="popover" title="Sync From Amazon Button">
         Sync
       </button>
+      <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.amazon_update()}"
+              content="AMZ局部更新" placement='bottom' rel="popover">
+        AMZ局部更新
+      </button>
       <a class="btn btn-warning" href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnits
       Button" content="创建此 Selling 相关采购计划" placement='bottom' rel="popover">采购计划</a>
     </div>
@@ -63,13 +67,16 @@
 
 #{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
-      #{textarea_field id:'title', name: 's.aps.title', rows: 3, label: '标题', value: s.aps.title /}
+      <td> #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3,
+      label: '标题', value: s.aps.title /} </td>
   </div>
   <div class="span5">
     <input type="hidden" name="s.sellingId" value="${s.sellingId}">
     <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
-      #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: s.merchantSKU/}
-      #{text_field id:'upc', name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
+      #{text_field id:'msku',name: 's.merchantSKU', readonly: true,
+      label: 'Merchant SKU',
+      value: s.merchantSKU/}
+      #{text_field id:'upc',name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
       #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: s.aps.standerPrice /}
@@ -92,7 +99,8 @@
       #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
       'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Sports', 'Lighting'], value: s.aps.templateType/}
       #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps.feedProductType], value: s.aps.feedProductType /}
-      #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格',value: s.aps.salePrice /}
+      #{checkbox_text_field id:'salePrice',checkboxname: 'p.saleprice', name: 's.aps.salePrice', label: '优惠销售价格',
+      value: s.aps.salePrice /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: s.aps.manufacturerPartNumber /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: "0" /}
@@ -100,6 +108,7 @@
 
 
     <label class="control-label" for="sellingCycle">生命周期</label>
+
     <div class="controls">
       <select name="s.sellingCycle" size="1">
           #{list items:models.market.Selling.SC.values(), as: 'cycle'}
@@ -122,22 +131,27 @@
           #{text_field id:'hardwarePlatform5', name: 's.aps.hardwarePlatformss[4]', label: '', value: '' /}
     </div>
 
-      #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: s.aps.keyFeturess[0]/}
+      #{checkbox_text_field id:'bulletPoint1', checkboxname:'p.keyfeturess', name: 's.aps.keyFeturess[0]',
+      label: 'BulletPoint 1~5',
+      value: s.aps.keyFeturess[0]/}
       #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: s.aps.keyFeturess[1] /}
       #{text_field id:'bulletPoint3', name: 's.aps.keyFeturess[2]', label: '', value: s.aps.keyFeturess[2]/}
       #{text_field id:'bulletPoint4', name: 's.aps.keyFeturess[3]', label: '', value: s.aps.keyFeturess[3]/}
       #{text_field id:'bulletPoint5', name: 's.aps.keyFeturess[4]', label: '', value: s.aps.keyFeturess[4]/}
 
-      #{text_field id:'searchTerms1', name: 's.aps.searchTermss[0]', label: 'SearchTerms 1~5', value: s.aps.searchTermss[0]/}
+      #{checkbox_text_field id:'searchTerms1', checkboxname:'p.searchtermss', name: 's.aps.searchTermss[0]',
+      label: 'SearchTerms 1~5', value: s.aps.searchTermss[0]/}
       #{text_field id:'searchTerms2', name: 's.aps.searchTermss[1]', label: '', value: s.aps.searchTermss[1]/}
       #{text_field id:'searchTerms3', name: 's.aps.searchTermss[2]', label: '', value: s.aps.searchTermss[2]/}
       #{text_field id:'searchTerms4', name: 's.aps.searchTermss[3]', label: '', value: s.aps.searchTermss[3]/}
       #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: s.aps.searchTermss[4]/}
 
-      #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: s.aps.productDesc /}
+      #{checkbox_textarea_field id:'productDesc', checkboxname:'p.productdesc',name: 's.aps.productDesc', rows: 10,
+      label: '产品详细描述',
+      value: s.aps.productDesc /}
   </div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}
-  #{include 'Sellings/_invalid_characters.html'/}
+#{include 'Sellings/_invalid_characters.html'/}
 </div>
 

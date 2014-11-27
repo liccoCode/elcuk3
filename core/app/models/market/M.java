@@ -921,4 +921,27 @@ public enum M {
                 return null;
         }
     }
+
+
+    public static String listingPostPage(M market, String jsessionId) {
+        //EU: https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+        //US: https://catalog.amazon.co.uk/abis/product/ProcessEditProduct
+        switch(market) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_IT:
+                return "https://catalog-sc." + market.toString() +
+                        "/abis/product/ProcessEditProduct" +
+                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+            case AMAZON_US:
+                return "https://catalog." + market.toString() + "/abis/product/ProcessEditProduct" +
+                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
 }

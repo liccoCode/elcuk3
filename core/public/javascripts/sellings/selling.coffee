@@ -41,6 +41,28 @@ $ ->
       )
     false
 
+
+  # AMA局部更新 按钮
+  $('#amz-part-update').click ->
+    LoadMask.mask('#btns')
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
+    .done((r) ->
+        msg = if r.flag is true
+          "#{r.message} AMAZON的Selling局部更新成功"
+        else
+          r.message
+        alert msg
+        LoadMask.unmask('#btns')
+      )
+    .fail((r) ->
+        alert r.responseText
+        LoadMask.unmask('#btns')
+      )
+    false
+
+
+
+
   # Deploy 按钮
   $('#amz-deploy').click ->
     # check account 与 market 不一样, 要提醒
