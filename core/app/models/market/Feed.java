@@ -1,5 +1,6 @@
 package models.market;
 
+import models.User;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -41,11 +42,16 @@ public class Feed extends Model {
 
     public Date updatedAt;
 
+    /**
+     * Feed 的创建者
+     */
+    public String byWho;
 
     /**
      * 因 API 的限制, 所以每一个 Selling 不可以无限制的上传 Feed.
      * 每个 Feed 间隔 3 分钟以上
      * 更新：由于 Amazon 使用账户区分，所以系统也更新采用区分账户来做提交限制。
+     *
      * @return
      */
     public static boolean isFeedAvalible(Long accountId) {
@@ -71,6 +77,7 @@ public class Feed extends Model {
         Feed feed = new Feed();
         feed.content = content;
         feed.fid = selling.sellingId;
+        feed.byWho = User.username();
         return feed.save();
     }
 
