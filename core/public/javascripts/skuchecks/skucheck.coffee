@@ -10,9 +10,9 @@ $ ->
     $.post("/skuchecks/#{id}/update", params, (r) ->
       try
         if r.flag
-          Notify.ok("更新成功", r.message)
+          alert("更新成功: #{r.message}")
         else
-          Notify.alarm("更新失败", r.message)
+          alert("更新失败: #{r.message}")
       finally
         LoadMask.unmask()
     )
