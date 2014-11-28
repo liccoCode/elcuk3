@@ -24,12 +24,12 @@ public class SystemNotification extends Controller {
      */
     public static void notifyFeedProcessResult(Long id, String result) {
         Feed feed = Feed.findById(id);
-        if(StringUtils.isBlank(result)) {
+        if(StringUtils.isNotBlank(result)) {
             feed.result = result;
             feed.save();
         }
-        Notification.newNoty("Feed 处理结果", feed.result,
-                String.format("%s/feed/%s/show", Constant.ROOT_PATH, id), User.findByUserName(feed.byWho))
+        Notification.newNoty(feed.checkResult(),
+                String.format("Selling Id: %s", feed.fid), "", User.findByUserName(feed.byWho))
                 .save();
         renderText("创建通知成功!");
     }

@@ -21,14 +21,14 @@ $ ->
             $('#notification_btn').click ->
               alert('无法使用桌面 Notification 提醒, 请使用 Chrome 浏览器.')
 
-    notify: (title, text, timeout = 6, pic = '/img/green.png') ->
-      new Notification(title, { icon: pic,body: text })
+    notify: (title, text, pic = '/img/green.png') ->
+      new Notification(title, { icon: pic, body: text })
 
-    alarm: (title, text, timeout = 3) ->
-      @notify(title, text, timeout, '/img/alarm.png')
+    alarm: (title, text) ->
+      @notify(title, text, '/img/alarm.png')
 
-    ok: (title, text, timeout = 3) ->
-      @notify(title, text, timeout, '/img/ok.png')
+    ok: (title, text) ->
+      @notify(title, text, '/img/ok.png')
 
     # 是否可以发提示消息?
     isOn: () ->
@@ -41,7 +41,12 @@ $ ->
         setInterval(->
           $.get("/Notifications/nextNotification", {}, (r) ->
             if r['title']
-              self.notify("#{r.title} #{r.createAt}", r['content'])
+              if r['title'].indexOf("成功") > 0
+                self.ok(r.title, r['content'])
+              else if r['title'].indexOf("错误") > 0 || r['title'].indexOf("失败") > 0 || r['title'].indexOf("非法")
+                self.alarm(r.title, r['content'])
+              else
+                self.notify(r.title, r['content'])
           )
           # 15 s
         , interval * 1000)

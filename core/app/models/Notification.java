@@ -70,6 +70,7 @@ public class Notification extends GenericModel {
     /**
      * 触发消息的源头 URL
      */
+    @Expose
     public String sourceURL;
 
     /**

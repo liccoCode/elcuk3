@@ -1,6 +1,7 @@
 package models.market;
 
 import models.User;
+import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -96,4 +97,18 @@ public class Feed extends Model {
         this.updatedAt = new Date();
     }
 
+    public String checkResult() {
+        String[] lines = StringUtils.split(this.result, "\r\n");
+        for(String line : lines) {
+            String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+            if(args.length == 5 && "Error".equals(args[3])) {
+                return "Amazon 报告该 Feed 包含错误,请检查";
+            }
+        }
+        if(this.result.contains("Encoding::UndefinedConversionError")) {
+            return "Feed 使用了非法字符,请报告开发";
+        } else {
+            return "Feed 处理成功";
+        }
+    }
 }
