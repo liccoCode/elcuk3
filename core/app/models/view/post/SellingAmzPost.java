@@ -23,6 +23,8 @@ public class SellingAmzPost {
         this.keyfeturess = false;
         this.searchtermss = false;
         this.productdesc = false;
+        this.standerprice = false;
+        this.rbns = false;
     }
 
     public boolean title;
@@ -30,5 +32,7 @@ public class SellingAmzPost {
     public boolean keyfeturess;
     public boolean searchtermss;
     public boolean productdesc;
+    public boolean standerprice;
+    public boolean rbns;
 }
 

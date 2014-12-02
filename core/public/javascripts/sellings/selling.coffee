@@ -126,12 +126,12 @@ $ ->
     names = []
     for i in [0...9]
       if !(i of fNames) and i < fNames.size
-        noty({text: "期待的图片索引应该是 #{i}", type: 'warning'})
+        alert "图片索引#{i}未找到,请填写图片索引信息!"
         return false
       names.push(fNames[i]) if fNames[i]
 
     if names.length <= 0
-      noty({text: '图片索引为空', type: 'warning'})
+      alert '图片索引为空'
       true
     else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
@@ -144,8 +144,6 @@ $ ->
     LoadMask.unmask()
   )
 
-  # 图片上传的按钮
-  $('#img_cal').click(imageIndexCal)
   $("#feedProductType").trigger('adjust')
 
   $("#upAndDownForm").on("click", "#sellingUp, #sellingDown", (r) ->
@@ -184,5 +182,22 @@ $ ->
           noty({text: r.message, type: 'error'})
         LoadMask.unmask()
       )
+    )
+
+  # 图片上传的按钮
+  $('#img_cal').click ->
+    return false if !imageIndexCal()
+    return false if !confirm("图片确定要更新到 " + $("input[name=s\\.market]").val() + " ?")
+    imgDiv = $(@).parent()
+    imgDiv.mask("上传图片中...")
+    params =
+      'sid': $('[name=s\\.sellingId]').val()
+      imgs: $('[name=s\\.aps\\.imageName]').val()
+    $.post('/sellings/imageUpload', params, (r) ->
+      if r.flag is true
+        alert "AMAZON图片更新成功!"
+      else
+        alert(r.message)
+      imgDiv.unmask()
     )
 

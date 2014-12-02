@@ -932,6 +932,7 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_JP:
+            case AMAZON_CA:
             case AMAZON_IT:
                 return "https://catalog-sc." + market.toString() +
                         "/abis/product/ProcessEditProduct" +
@@ -944,4 +945,49 @@ public enum M {
                 throw new NotSupportChangeRegionFastException();
         }
     }
+
+
+    public String uploadImageLink() {
+        //https://catalog-sc.amazon.co.uk/abis/image/AddImage.ajax
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_CA:
+            case AMAZON_IT:
+                return String
+                        .format("https://catalog-sc.%s/abis/image/AddImage.ajax", this.toString());
+            case AMAZON_US:
+                return String
+                        .format("https://catalog.%s/abis/image/AddImage.ajax", this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    public String removeImageLink() {
+        //https://catalog-sc.amazon.co.uk/abis/image/RemoveImage.ajax
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_CA:
+            case AMAZON_IT:
+                return String.format("https://catalog-sc.%s/abis/image/RemoveImage.ajax",
+                        this.toString());
+            case AMAZON_US:
+                return String
+                        .format("https://catalog.%s/abis/image/RemoveImage.ajax", this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+
 }

@@ -539,6 +539,8 @@ public class AmazonProps implements Serializable {
     public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(Document doc,
                                                                                Selling sell,
                                                                                SellingAmzPost p) {
+
+
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
         if(inputs.size() == 0) {
@@ -552,7 +554,13 @@ public class AmazonProps implements Serializable {
         for(Element el : inputs) {
             String name = el.attr("name").toLowerCase().trim();
 
-            if("item_name".equals(name) && p.title)
+            if("our_price".equals(name) && p.standerprice && this.standerPrice != null && this.standerPrice > 0)
+                params.add(new BasicNameValuePair(name,
+                        Webs.priceLocalNumberFormat(our_price._1, this.standerPrice)));
+            else if(StringUtils.startsWith(name, "generic_keywords") && p.searchtermss &&
+                    StringUtils.isNotBlank(this.searchTerms))
+                this.searchTermsCheck(params);
+            else if("item_name".equals(name) && p.title)
                 params.add(new BasicNameValuePair(name, this.title));
             else if("discounted_price".equals(name) && p.saleprice && this.salePrice > 0) {
                 params.add(new BasicNameValuePair("discounted_price",
@@ -561,16 +569,17 @@ public class AmazonProps implements Serializable {
             } else if(StringUtils.startsWith(name, "bullet_point") &&
                     StringUtils.isNotBlank(this.keyFetures) && p.keyfeturess) {
                 this.bulletPointsCheck(params);
-            } else if("generic_keywords[0]".equals(name) && p.searchtermss) {
-                params.add(new BasicNameValuePair(name, this.searchTermss.get(0)));
-            } else if("generic_keywords[1]".equals(name) && p.searchtermss) {
-                params.add(new BasicNameValuePair(name, this.searchTermss.get(1)));
-            } else if("generic_keywords[2]".equals(name) && p.searchtermss) {
-                params.add(new BasicNameValuePair(name, this.searchTermss.get(2)));
-            } else if("generic_keywords[3]".equals(name) && p.searchtermss) {
-                params.add(new BasicNameValuePair(name, this.searchTermss.get(3)));
-            } else if("generic_keywords[4]".equals(name) && p.searchtermss) {
-                params.add(new BasicNameValuePair(name, this.searchTermss.get(4)));
+            } else if(StringUtils.startsWith(name, "item_type_keyword") && p.rbns) {
+                System.out.println("xxxxxxxxxxxxx::::" + this.rbns.get(0));
+                //美国市场与其他市场不同
+                params.add(new BasicNameValuePair("item_type_keyword", this.rbns.get(0)));
+            } else if(StringUtils.startsWith(name, "recommended_browse_nodes") && p.rbns) {
+                if(this.rbns != null && this.rbns.size() >= 1) {
+                    for(int i = 0; i < this.rbns.size(); i++) {
+                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]",
+                                this.rbns.get(i)));
+                    }
+                }
             } else if("activeClientTimeOnTask".equals(name)) {
                 // Amazon 的一个记录值
                 params.add(new BasicNameValuePair(name, 18059 + ""));

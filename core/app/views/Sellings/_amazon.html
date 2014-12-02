@@ -56,18 +56,19 @@
   <div class="span11">
     <ul class="thumbnails" id="images" sku='${s.merchantSKU.split(",")[0]}'></ul>
     <div class="input-prepend span12">
-      <button id="img_cal" placement='right' class="btn" rel="popover" title="Image Check Button"
-              content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值.">
-        <i class="icon-eye-open"></i>
+      <button class="btn btn-warning" id="img_cal"
+              content="图片按照 0~8 设置好编号以后,点击此按钮更新到AMAZON." placement='bottom'
+              rel="popover">
+        AMZ图片更新
+      </button>
       </button>
       <input type="text" class="span10" name="s.aps.imageName" readonly value="${s.aps.imageName}">
-
     </div>
   </div>
 
 #{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
-      <td> #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3,
+    <td> #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3,
       label: '标题', value: s.aps.title /} </td>
   </div>
   <div class="span5">
@@ -79,9 +80,11 @@
       #{text_field id:'upc',name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
-      #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: s.aps.standerPrice /}
+      #{checkbox_text_field id:'standerPrice',checkboxname: 'p.standerprice', name: 's.aps.standerPrice',
+      label: '标准价格', value: s.aps.standerPrice /}
       #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期', value: s.aps.startDate?.format('yyyy-MM-dd') /}
-      #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes', value: s.aps.rbns[0] /}
+      #{checkbox_text_field id:'RBN',checkboxname: 'p.rbns', name: 's.aps.rbns[0]', label: 'Recommanded Browser Nodes',
+      value: s.aps.rbns[0] /}
       #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',
       value: '' /}
       #{checkbox_wrap id:'giftwrap', label: '附加选项'}

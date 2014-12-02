@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import play.data.validation.Error;
+
 /**
  * 控制 Selling
  * User: Wyatt
@@ -147,6 +149,30 @@ public class Sellings extends Controller {
             Sellings.selling(s.sellingId);
         }
     }
+
+
+    public static void imageUpload(final String sid, final String imgs) {
+        if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
+        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
+            @Override
+            public List<Error> doJobWithResult() throws Exception {
+                List<Error> errors = new ArrayList<Error>();
+                Selling s = Selling.findById(sid);
+                try {
+                    s.uploadAmazonImg(imgs, false);
+                } catch(Exception e) {
+                    errors.add(new Error("", Webs.E(e), new String[]{}));
+                }
+                return errors;
+            }
+        }.now());
+        if(errors.size() > 0) {
+            renderJSON(new Ret(false, errors.toString()));
+        } else {
+            renderJSON(new Ret(true));
+        }
+    }
+
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
     public static void update(Selling s) {
