@@ -79,6 +79,8 @@
 #{/list}
 </div>
 
+#{render './_relate_fees.html', apply: apply/}
+
 #{render './_relate_payments.html', payments: apply.payments/}
 
 #{records records: apply.records()/}

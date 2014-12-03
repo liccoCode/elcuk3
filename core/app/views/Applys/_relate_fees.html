@@ -1,0 +1,19 @@
+#{warning_row title: '金额汇总' /}
+<div class="row-fluid">
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th>货币</th>
+      <th>总请款金额</th>
+      <th>已批准总金额</th>
+      <th>未批准总金额</th>
+    </tr>
+  #{list items:apply.currencyFees(), as:'fee'}
+    <tr>
+      <td>${fee.currency}</td>
+      <td>${fee.total_fee}</td>
+      <td>${fee.approval_fee}</td>
+      <td>${fee.noapproval_fee}</td>
+    </tr>
+  #{/list}
+  </table>
+</div>
