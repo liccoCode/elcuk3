@@ -144,6 +144,7 @@ public class Shipments extends Controller {
         ship.endShipByComputer();
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+        System.out.println("xxxxxxxxxxxxxxxx::::::::"+ship.items.get(0).lossqty);
         render(ship, cooperators);
     }
 
