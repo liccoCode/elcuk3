@@ -12,6 +12,7 @@ import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import helper.Currency;
 
 import java.util.List;
 
@@ -75,10 +76,11 @@ public class ShipItems extends Controller {
      * @param qty
      */
     @Check("shipitems.received")
-    public static void received(Long id, Integer qty, String msg) {
+    public static void received(Long id, Integer qty,String compentype, String msg,Integer lossqty,Currency currency,
+                                Float compenamt) {
         if(qty == null) qty = 0;
         ShipItem itm = ShipItem.findById(id);
-        itm.receviedQty(qty, msg);
+        itm.receviedQty(qty, msg,compentype,lossqty,currency,compenamt);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else

@@ -58,14 +58,51 @@
       <h4>手动修改入库数量</h4>
     </div>
     <div class="modal-body row-fluid">
-      <label>数量</label>
+      <table>
+        <tr>
+          <td>
+            <label>数量</label>
 
-      <div class="input-append">
-        <input type="text" class="input-mini" name="qty">
-        <span class="add-on">当前入库数量 <%= qty %></span>
-      </div>
-      <label>原因:</label>
-      <textarea role="5" name="msg" class="span11"></textarea>
+            <div class=" input-append">
+              <input type="text" class="input-mini" name="qty">
+              <span class="add-on">当前入库数量 <%= qty %></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class=" input-append">
+              <span class="add-on">赔偿类型</span>
+              <select name="compentype" id="compentype" class="inline" style="width:110px;">
+                <option value="" selected="selected">选择</option>
+                <option value="amazon">Amazon</option>
+                <option value="other">Other</option>
+              </select>
+              <span class="add-on" style="margin-left:100px;">丢失量</span>
+              <input type="text" class="input-mini" name="lossqty" value=<%= lossqty %> >
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="input-append">
+              <span class="add-on">赔偿金额</span>
+              <input type="text" class="input-mini" name="compenamt" value=<%= compenamt %>>
+              <select name="currency" id="currency" class="inline" style="width:100px;">
+              #{list items:helper.Currency.values(), as: 'c'}
+                <option value="${c}">${c}</option>
+              #{/list}
+              </select>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>原因:</label>
+            <textarea role="5" name="msg" class="span12"></textarea>
+          </td>
+        </tr>
+      </table>
     </div>
     <div class="modal-footer">
       <a href="#" class="btn" data-dismiss="modal">Close</a>
@@ -122,9 +159,9 @@
 
         <div class="controls">
           <select name="fee.cooperator.id" class="input-small">
-            #{list items:cooperators, as:'cooper'}
-             <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
-            #{/list}
+          #{list items:cooperators, as:'cooper'}
+            <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
+          #{/list}
           </select>
         </div>
       </div>
