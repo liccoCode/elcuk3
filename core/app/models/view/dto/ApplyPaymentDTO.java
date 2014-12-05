@@ -1,6 +1,7 @@
 package models.view.dto;
 
 import helper.Currency;
+import java.math.BigDecimal;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,9 +13,9 @@ public class ApplyPaymentDTO {
     private static final long serialVersionUID = -6922564943590728789L;
 
     public ApplyPaymentDTO() {
-        this.total_fee = 0f;
-        this.approval_fee = 0f;
-        this.noapproval_fee = 0f;
+        this.total_fee = new BigDecimal(0);
+        this.approval_fee = new BigDecimal(0);
+        this.noapproval_fee = new BigDecimal(0);
     }
 
     /**
@@ -24,13 +25,13 @@ public class ApplyPaymentDTO {
     /**
      * 总金额
      */
-    public float total_fee;
+    public BigDecimal total_fee;
     /**
      * 批准总金额
      */
-    public float approval_fee;
+    public BigDecimal approval_fee;
     /**
      * 未批准总金额
      */
-    public float noapproval_fee;
+    public BigDecimal noapproval_fee;
 }

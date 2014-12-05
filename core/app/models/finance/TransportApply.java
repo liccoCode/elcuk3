@@ -164,23 +164,23 @@ public class TransportApply extends Apply {
             for(Shipment ship : shipments) {
                 for(PaymentUnit payment : ship.fees) {
                     if(payment.currency == currency) {
-                        dto.total_fee = new BigDecimal(Float.toString(dto.total_fee))
+                        dto.total_fee = dto.total_fee
                                 .add(new BigDecimal(Float.toString(payment
-                                        .amount()))).floatValue();
+                                        .amount())));
                         //已批准和已支付的
                         if(payment.state == PaymentUnit.S.APPROVAL || payment.state == PaymentUnit.S.PAID) {
-                            dto.approval_fee = new BigDecimal(Float.toString(dto.approval_fee)).
+                            dto.approval_fee = dto.approval_fee.
                                     add(new BigDecimal
-                                            (Float.toString(payment.amount()))).floatValue();
+                                            (Float.toString(payment.amount())));
                         } else {
-                            dto.noapproval_fee = new BigDecimal(Float.toString(dto.noapproval_fee))
-                                    .add(new BigDecimal(Float.toString(payment.amount()))).floatValue();
+                            dto.noapproval_fee = dto.noapproval_fee
+                                    .add(new BigDecimal(Float.toString(payment.amount())));
                         }
 
                     }
                 }
             }
-            if(dto.total_fee != 0) apply.add(dto);
+            if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
         }
         return apply;
     }
