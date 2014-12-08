@@ -15,6 +15,12 @@ public class LossRate implements Serializable {
      * sku
      */
     public String sku;
+
+    /**
+     * 运输量
+     */
+    public int qty;
+
     /**
      * 丢失数量
      */

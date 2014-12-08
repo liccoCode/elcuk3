@@ -33,7 +33,7 @@ public class LossRatePost extends Post<LossRate> {
     public F.T2<String, List<Object>> params() {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<Object>();
-        sql.append("select f.shipmentid,p.sku,s.lossqty,s.compenusdamt From ShipItem s "
+        sql.append("select f.shipmentid,p.sku,s.qty,s.lossqty,s.compenusdamt From ShipItem s "
                 + " left join ProcureUnit p on s.unit_id=p.id "
                 + " left join Shipment m on s.shipment_id=m.id "
                 + " left join FBAShipment f on p.fba_id=f.id "
@@ -55,6 +55,7 @@ public class LossRatePost extends Post<LossRate> {
             LossRate loss = new LossRate();
             loss.sku = (String) row.get("sku");
             loss.fba = (String) row.get("shipmentid");
+            loss.qty = (Integer) row.get("qty");
             loss.lossqty = (Integer) row.get("lossqty");
             Object compenusdamt = row.get("compenusdamt");
             if(compenusdamt != null)
