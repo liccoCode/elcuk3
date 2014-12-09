@@ -30,7 +30,6 @@ public class ProfitPost extends Post<Profit> {
     public String sku;
     public String sellingId;
     public String category;
-    public String state;
 
     public ProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -232,17 +231,13 @@ public class ProfitPost extends Post<Profit> {
          */
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
-            String sql = "";
             for(Product pro : cat.products) {
-                sql = "select 1 from Selling where state!='DOWN' and sellingid like '%" + pro.sku + "%" +
-                        skumarket.nickName() + "%'";
-                int issale = DBUtils.rows(sql.toString()).size();
-                if((this.state.equals("Active") && issale > 0)
-                        || (!this.state.equals("Active") && issale <= 0)) {
-                    Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
+                Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
+                if(profit.totalfee != 0 || profit.amazonfee != 0
+                        || profit.fbafee != 0 || profit.quantity != 0
+                        || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
                     profitlist.add(profit);
                 }
-
             }
         } else if(!StringUtils.isBlank(sku)) {
             Profit profit = esProfit(begin, end, skumarket, sku, sellingId);

@@ -39,8 +39,7 @@ public class SellingProfitJob extends Job {
         if(post.pmarket != null) marketkey = post.pmarket;
         if(post.category != null) categorykey = post.category.toLowerCase();
         String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey, marketkey
-                , post.state,
-                "excel");
+                ,   "excel");
         if(isRnning(postkey)) return;
         Cache.add(postkey + RUNNING, postkey + RUNNING);
         List<Profit> profits = new ArrayList<Profit>();

@@ -459,10 +459,6 @@ public class Shipments extends Controller {
 
 
     public static void planArriveDate(String shipType, String planShipDate, String warehouseid) {
-        System.out.println("1"+shipType);
-        System.out.println("2"+planShipDate);
-        System.out.println("3"+warehouseid);
-
         Shipment shipment = new Shipment();
         shipment.type = Shipment.T.valueOf(shipType);
         shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));

@@ -16,6 +16,7 @@ import models.view.dto.DeliveryExcel;
 import models.view.dto.SaleReportDTO;
 import models.view.dto.ShipmentWeight;
 import models.view.post.*;
+import models.view.report.LossRate;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import models.view.post.LossRatePost;
 
 /**
  * Created by IntelliJ IDEA.
@@ -177,7 +180,6 @@ public class Excels extends Controller {
             if(p.pmarket != null) marketkey = p.pmarket;
             if(p.category != null) categorykey = p.category.toLowerCase();
             String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
-                    p.state,
                     "excel");
             profits = Cache.get(postkey, List.class);
             if(profits == null) {
@@ -293,4 +295,24 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件!");
         }
     }
+
+
+    public static void lossRateReport(LossRatePost p) {
+        if(p == null) p = new LossRatePost();
+        List<LossRate> lossrates = p.query();
+        LossRate losstotal = p.querytotal();
+        if(lossrates != null && lossrates.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(lossrates, losstotal, p);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+
 }

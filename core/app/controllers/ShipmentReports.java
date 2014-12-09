@@ -17,13 +17,17 @@ import query.ShipmentReportESQuery;
 
 import java.util.List;
 
+import models.view.post.LossRatePost;
+import models.view.report.LossRate;
+import play.utils.FastRuntimeException;
+
 /**
  * 物流模块报表控制器
  * User: mac
  * Date: 14-6-3
  * Time: PM3:27
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipmentReports extends Controller {
 
     @Before(only = {"cost"})
@@ -118,4 +122,16 @@ public class ShipmentReports extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
+
+    public static void lossRateReport(LossRatePost p) {
+        try {
+            if(p == null) p = new LossRatePost();
+            List<LossRate> lossrates = p.query();
+            LossRate losstotal = p.querytotal();
+            render(lossrates,losstotal, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<h3>" + e.getMessage() + "</h3>");
+        }
+    }
+
 }

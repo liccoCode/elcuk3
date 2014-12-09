@@ -58,8 +58,8 @@ public class Login extends Secure.Security {
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, "easya.cc", "/", 60*24*7, false);
-            Http.Response.current().setCookie("usermd5", user.userMd5(username), "easya.cc", "/", 60*24*7, false);
+            Http.Response.current().setCookie("username", username, "easya.cc", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("usermd5", user.userMd5(username), "easya.cc", "/", 60 * 60 * 24 * 30, false);
         }
         return iscorrect;
     }
