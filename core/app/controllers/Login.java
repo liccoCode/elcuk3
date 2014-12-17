@@ -50,6 +50,8 @@ public class Login extends Secure.Security {
      * 登陆
      */
     static boolean authenticate(String username, String password) {
+        //全部转为小写
+        username = username.toLowerCase();
         /**
          * 1. 判断是否拥有此用户; 使用公司邮箱 @easyacceu.com
          * 2. 判断用户登陆是否正常
@@ -95,11 +97,11 @@ public class Login extends Secure.Security {
          */
         // 初始化用户缓存中的用户;
         if(USER_CACHE.get(Secure.Security.connected()) == null) {
-            User user = User.findByUserName(Secure.Security.connected());
+            User user = User.findByUserName(Secure.Security.connected().toLowerCase());
             user.login();
             USER_CACHE.put(user.username, user);
         }
-        return USER_CACHE.get(Secure.Security.connected());
+        return USER_CACHE.get(Secure.Security.connected().toLowerCase());
     }
 
     @SuppressWarnings("unchecked")
