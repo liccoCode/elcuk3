@@ -861,6 +861,32 @@ public enum M {
     }
 
 
+    /**
+     * 模拟人工查询FNSKU的地址
+     *
+     * @return
+     */
+    public String listingfnSkuPage(Selling sell) {
+        String msku = sell.merchantSKU;
+        switch(sell.market) {
+            case AMAZON_CA:
+            case AMAZON_ES:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_IT:
+            case AMAZON_UK:
+            case AMAZON_US:
+                return String
+                        .format("https://sellercentral.%s/gp/ssof/knights/items-list-xml.html/ref=ag_xx_cont_fbalist?searchType=genericQuery&genericQuery=%s",
+                               this.toString(), msku);
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+
     public static M val(String str) {
         if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();

@@ -19,17 +19,13 @@
               content="直接更新到数据库" placement='bottom' rel="popover" title="Local Update Button">
         Update
       </button>
-      <button class="btn btn-warning" id="amz-deploy" data-url="@{Sellings.deploy(s.sellingId)}"
-              content="从数据库中加载最新保存的内容向 Amazon 提交更新" placement='bottom' rel="popover" title="Sync To Amazon Button">
-        Deploy
-      </button>
       <button class="btn btn-warning" id="amz-sync"
               content="从 Amazon 同步回来更新到数据库" placement='bottom' rel="popover" title="Sync From Amazon Button">
         Sync
       </button>
       <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.amazon_update()}"
               content="AMZ局部更新" placement='bottom' rel="popover">
-        AMZ局部更新
+        Deploy Part
       </button>
       <a class="btn btn-warning" href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnits
       Button" content="创建此 Selling 相关采购计划" placement='bottom' rel="popover">采购计划</a>
@@ -94,6 +90,18 @@
         </label>
       #{/checkbox_wrap}
       #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
+
+      #{checkbox_product_volume id:'productvolume',readonly:true,
+      checkboxname: 'p.productvolume', label:'长宽高(产品)',
+      id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
+      hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
+      name1: 'p.productLengths',
+      label1: '长(产品)', value1: s.listing.product.productLengths,
+      name2: 'p.productWidth',
+      label2: '宽(产品)', value2: s.listing.product.productWidth,
+      name3: 'p.productHeigh',
+      label3: '高(产品)', value3: s.listing.product.productHeigh /}
+
   </div>
   <div class="span5">
       #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}
@@ -106,9 +114,19 @@
       value: s.aps.salePrice /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: s.aps.manufacturerPartNumber /}
+      #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number',value: s.aps.modelNumber /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: "0" /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
 
+      #{checkbox_product_weight readonly:true,sid:'sproductWeight',hid:'hproductWeight' , id:'productWeight',
+      unitname:'p.productWeightUnit',
+      checkboxname: 'p.productWeight',
+      name: 'p.proWeight',
+      label: '重量(产品)', value: s.listing.product.productWeight /}
+      #{checkbox_product_weight readonly:true,sid:'sweight',hid:'hweight', id:'weight',unitname:'p.weightUnit',
+      checkboxname: 'p.weight',
+      name: 'p.packWeight',
+      label: '重量(包材)', value: s.listing.product.weight /}
 
     <label class="control-label" for="sellingCycle">生命周期</label>
 
@@ -119,7 +137,6 @@
           #{/list}
       </select>
     </div>
-
 
   </div>
   <div class="span12">

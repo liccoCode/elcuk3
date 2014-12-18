@@ -282,7 +282,9 @@ public class Selling extends GenericModel {
      */
     public void syncFromAmazon() {
         String html = "";
+        String fnskuhtml = "";
         synchronized(this.account.cookieStore()) {
+            checkAmazonLogin();
             // 1. 切换 Selling 所在区域
             this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
@@ -294,10 +296,16 @@ public class Selling extends GenericModel {
                 IO.writeContent(html,
                         new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
             }
+            // 获取Fnsku
+            fnskuhtml = HTTP.get(this.account.cookieStore(), this.market.listingfnSkuPage(this));
             this.account.changeRegion(this.account.type);
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
+        String fnsku = this.aps.syncfnSkuFromAmazonPostPage(fnskuhtml, this);
+        if(StringUtils.isNotBlank(fnsku)) {
+            this.fnSku = fnsku;
+        }
         this.save();
     }
 
@@ -313,11 +321,8 @@ public class Selling extends GenericModel {
             if(StringUtils.isBlank(html))
                 throw new FastRuntimeException(String.format("AMAZON页面超时,请重新更新! Visit %s page is empty.",
                         M.listingEditPage(this)));
-
-            System.out.println("mmmmmmmmmmm::::::::::"+String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin));
             IO.writeContent(html,
-                                   new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-
+                    new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
 
             doc = Jsoup.parse(html);
             // ----- Input 框框

@@ -33,6 +33,23 @@ public class SellingAmzPost {
     public boolean searchtermss;
     public boolean productdesc;
     public boolean standerprice;
+    public boolean modelNumber;
     public boolean rbns;
+
+
+    public boolean productvolume;
+    public String volumeunit;
+
+    public Float productLengths;
+    public Float productWidth;
+    public Float productHeigh;
+
+    public Float proWeight;
+    public Float packWeight;
+
+    public boolean productWeight;
+    public String productWeightUnit;
+    public boolean weight;
+    public String weightUnit;
 }
 

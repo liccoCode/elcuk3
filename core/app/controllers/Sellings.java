@@ -233,17 +233,13 @@ public class Sellings extends Controller {
      * 从 Amazon 上将 Selling 信息同步回来
      */
     public static void syncAmazon(final String sid) {
-        // play status 检查平均耗时 2.5s , 开放线程时间 3s 后回掉
-        await(new Job<Selling>() {
-            @Override
-            public Selling doJobWithResult() {
-                Selling selling = Selling.findById(sid);
-                selling.syncFromAmazon();
-                return selling;
-            }
-
-        }.now());
-        renderJSON(new Ret());
+        try {
+            Selling selling = Selling.findById(sid);
+            selling.syncFromAmazon();
+            renderJSON(new Ret());
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     /**
