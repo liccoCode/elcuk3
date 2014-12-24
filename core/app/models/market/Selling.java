@@ -29,6 +29,7 @@ import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.*;
 
@@ -760,20 +761,25 @@ public class Selling extends GenericModel {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("asin", this.asin));
         params.add(new BasicNameValuePair("sku", Codec.encodeBASE64(this.merchantSKU)));
-        Map<String, File> uploadImages = new HashMap<String, File>();
+        Map<String, F.T2<String, BufferedInputStream>> uploadImages = new HashMap<String, F.T2<String, BufferedInputStream>>();
         for(int i = 0; i < images.length; i++) {
             String fileParamName;
             if(i == 0) fileParamName = "MAIN";
             else fileParamName = "PT0" + i;
-            Attach attch = Attach.findByFileName(images[i]);
-            if(attch == null)
+
+
+            //Attach attch = Attach.findByFileName(images[i]);
+            String location = Attach.attachImage(this.sellingId.split(",")[0], images[i]);
+
+            if(StringUtils.isBlank(location))
                 throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
             if(waterMark) {
                 // TODO 如果需要打水印, 在这里处理
                 throw new UnsupportedOperationException("功能还没实现.");
             } else {
-                uploadImages.put(fileParamName, new File(attch.location));
+                uploadImages.put(fileParamName, Attach.urlToFile(location, images[i]));
             }
+
             usedAmazonFileName.get(fileParamName).set(true);
         }
         synchronized(this.account.cookieStore()) {
@@ -783,6 +789,7 @@ public class Selling extends GenericModel {
             String body = HTTP
                     .upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params,
                             uploadImages);
+
             if(Play.mode.isDev())
                 FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body,
                         FLog.T.IMGUPLOAD);

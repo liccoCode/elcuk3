@@ -50,6 +50,8 @@ public class Login extends Secure.Security {
      * 登陆
      */
     static boolean authenticate(String username, String password) {
+        //全部转为小写
+        username = username.toLowerCase();
         /**
          * 1. 判断是否拥有此用户; 使用公司邮箱 @easyacceu.com
          * 2. 判断用户登陆是否正常
@@ -59,7 +61,15 @@ public class Login extends Secure.Security {
         boolean iscorrect = user.authenticate(password);
         if(iscorrect) {
             Http.Response.current().setCookie("username", username, "easya.cc", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", user.userMd5(username), "easya.cc", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easya.cc", "/", 60 * 60 * 24 * 30,
+                    false);
+
+            Http.Response.current().setCookie("kod_name", "elcuk2", "easya.cc", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), "easya.cc", "/",
+                    60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_user_language", "zh_CN", "easya.cc", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easya.cc", "/",
+                    60 * 60 * 24 * 30, false);
         }
         return iscorrect;
     }
@@ -81,6 +91,10 @@ public class Login extends Secure.Security {
             Http.Response.current().setCookie("username", "", "easya.cc", "/", 0, false);
             Http.Response.current().setCookie("usermd5", "", "easya.cc", "/", 0, false);
 
+            Http.Response.current().setCookie("kod_name", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("kod_token", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("kod_user_language", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("kod_user_online_version", "", "easya.cc", "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
@@ -95,11 +109,11 @@ public class Login extends Secure.Security {
          */
         // 初始化用户缓存中的用户;
         if(USER_CACHE.get(Secure.Security.connected()) == null) {
-            User user = User.findByUserName(Secure.Security.connected());
+            User user = User.findByUserName(Secure.Security.connected().toLowerCase());
             user.login();
             USER_CACHE.put(user.username, user);
         }
-        return USER_CACHE.get(Secure.Security.connected());
+        return USER_CACHE.get(Secure.Security.connected().toLowerCase());
     }
 
     @SuppressWarnings("unchecked")
