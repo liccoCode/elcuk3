@@ -65,10 +65,25 @@ $ ->
     false
   ).on('dblclick', '[name=recivedQty]', (e) ->
     self = $(@)
+
+    c = self.parents('tr').data('currency')
+    type = self.parents('tr').data('compentype')
     params =
       url: self.parents('tr').data('received-url')
       qty: self.text()
+      lossqty: self.parents('tr').data('lossqty')
+      compenamt: self.parents('tr').data('compenamt')
     $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html(), params)).modal('show')
+
+    $('#compentype').find('option').each((index, element)->
+      if (element.text.toLowerCase() == type.toLowerCase())
+        element.setAttribute('selected', 'selected')
+    )
+    $('#currency').find('option').each((index, element)->
+      if (element.text.toLowerCase() == c.toLowerCase())
+        element.setAttribute('selected', 'selected')
+    )
+
     false
   )
 
@@ -102,7 +117,7 @@ $ ->
 
 
   # trace_no新增一行
-  $("#adjust_shipitems").on("click","#unitbutton",() ->
+  $("#adjust_shipitems").on("click", "#unitbutton", () ->
     $td =$(@)
     sid = $td.text().trim()
     paintProcureUnitInTimeline('sid', sid)

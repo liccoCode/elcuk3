@@ -15,4 +15,8 @@ public class Channels extends Controller {
     public static void index() {
         render();
     }
+
+    public static void tags() {
+        render();
+    }
 }

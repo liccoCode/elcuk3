@@ -1,6 +1,7 @@
 package models.finance;
 
-import helper.Dates;
+import helper.*;
+import helper.Currency;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -16,7 +17,11 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
+
+import models.view.dto.ApplyPaymentDTO;
 
 /**
  * Created by IntelliJ IDEA.
@@ -143,5 +148,40 @@ public class TransportApply extends Apply {
             }
         }
         return new F.T2<Float, Float>(usd, cny);
+    }
+
+
+    /**
+     * 金额的明细
+     *
+     * @return
+     */
+    public List<ApplyPaymentDTO> currencyFees() {
+        List<ApplyPaymentDTO> apply = new java.util.ArrayList<ApplyPaymentDTO>();
+        for(Currency currency : helper.Currency.values()) {
+            ApplyPaymentDTO dto = new ApplyPaymentDTO();
+            dto.currency = currency;
+            for(Shipment ship : shipments) {
+                for(PaymentUnit payment : ship.fees) {
+                    if(payment.currency == currency) {
+                        dto.total_fee = dto.total_fee
+                                .add(new BigDecimal(Float.toString(payment
+                                        .amount())));
+                        //已批准和已支付的
+                        if(payment.state == PaymentUnit.S.APPROVAL || payment.state == PaymentUnit.S.PAID) {
+                            dto.approval_fee = dto.approval_fee.
+                                    add(new BigDecimal
+                                            (Float.toString(payment.amount())));
+                        } else {
+                            dto.noapproval_fee = dto.noapproval_fee
+                                    .add(new BigDecimal(Float.toString(payment.amount())));
+                        }
+
+                    }
+                }
+            }
+            if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
+        }
+        return apply;
     }
 }

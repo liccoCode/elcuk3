@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Currency;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -113,6 +114,13 @@ public class ShipItem extends GenericModel {
      * 这个创建 ShipItem 的时候默认填充 Selling 中的 FNSKU, 在创建好了 FBA 以后, 将 FBA 返回的值同步在这.
      */
     public String fulfillmentNetworkSKU;
+
+    public int lossqty;
+    public Currency currency;
+    public Float compenamt;
+    public Float compenusdamt;
+
+    public String compentype;
 
     /**
      * 在通过 FBA 更新了 FNsku 以后, 自动尝试更新 Unit 关联的 Selling 的 Fnsku
@@ -244,14 +252,24 @@ public class ShipItem extends GenericModel {
      *
      * @param msg
      */
-    public void receviedQty(int recivedQty, String msg) {
+    public void receviedQty(int recivedQty, String msg, String compentype, Integer lossqty, Currency currency,
+                            Float compenamt) {
+        if(lossqty == null) lossqty = 0;
+        if(compenamt == null) compenamt = 0f;
         float percent = ((float) Math.abs(recivedQty - this.qty) / this.qty);
         if(percent > 0.1)
             Validation.addError("", "入库库存与运输库存差据为 " + (percent * 100) + "百分比 大于 10 百分比 请检查数量.");
+        if((lossqty != 0 && compenamt == 0) || (lossqty == 0 && compenamt != 0))
+            Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
         if(Validation.hasErrors()) return;
 
         int oldQty = this.recivedQty;
         this.recivedQty = recivedQty;
+        this.lossqty = lossqty;
+        this.currency = currency;
+        this.compenamt = compenamt;
+        this.compenusdamt = currency.toUSD(compenamt);
+        this.compentype = compentype;
         this.save();
         new ERecordBuilder("shipitem.receviedQty")
                 .msgArgs(msg, oldQty, recivedQty)
