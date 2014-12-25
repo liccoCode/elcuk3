@@ -1,6 +1,6 @@
 $ ->
   ALERT_TEMPLATE = "<div class='alert alert-success fade in' style='text-align:center;'><button class='close' data-dismiss='alert'>×</button><div id='replace_it'></div></div>"
-  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img></a><input style='width:95%;height:12px;text-align:center;'></li>"
+  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label><input style='width:95%;height:12px;text-align:center;'></li>"
 
   # 图片初始化方法
   imageInit = ->
@@ -8,13 +8,15 @@ $ ->
     imageNameObj = {}
     for imageName, i in $('input[name=s\\.aps\\.imageName]').val().split('|-|')
       imageNameObj[imageName] = i
-    $.getJSON('/attachs/images', fid: imagesUL.attr('sku'),
+    $.getJSON('/attachs/explorerImages', fid: imagesUL.attr('sku'),
       (imgs) ->
         for img in imgs
-          fName = img['fileName']
+          fName = img['name']
+          href = img['href']
           imgLI = $(IMGLI_TEMPLATE).attr('filename', fName)
-          imgLI.find('a').attr('href', '/attachs/image?a.fileName=' + fName)
-          imgLI.find('img').attr('src', '/attachs/image?w=140&h=100&a.fileName=' + fName)
+          imgLI.find('label').text(fName)
+          imgLI.find('a').attr('href', href)
+          imgLI.find('img').attr('src', href)
           imgLI.find('input').val(imageNameObj[fName]) if fName of imageNameObj
           imgLI.appendTo(imagesUL)
     )
@@ -40,6 +42,28 @@ $ ->
         LoadMask.unmask()
       )
     false
+
+
+  # AMA局部更新 按钮
+  $('#amz-part-update').click ->
+    LoadMask.mask('#btns')
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
+    .done((r) ->
+        msg = if r.flag is true
+          "#{r.message} AMAZON的Selling局部更新成功"
+        else
+          r.message
+        alert msg
+        LoadMask.unmask('#btns')
+      )
+    .fail((r) ->
+        alert r.responseText
+        LoadMask.unmask('#btns')
+      )
+    false
+
+
+
 
   # Deploy 按钮
   $('#amz-deploy').click ->
@@ -104,12 +128,12 @@ $ ->
     names = []
     for i in [0...9]
       if !(i of fNames) and i < fNames.size
-        noty({text: "期待的图片索引应该是 #{i}", type: 'warning'})
+        alert "图片索引#{i}未找到,请填写图片索引信息!"
         return false
       names.push(fNames[i]) if fNames[i]
 
     if names.length <= 0
-      noty({text: '图片索引为空', type: 'warning'})
+      alert '图片索引为空'
       true
     else
       $('input[name=s\\.aps\\.imageName]').val(names.join('|-|'))
@@ -122,8 +146,6 @@ $ ->
     LoadMask.unmask()
   )
 
-  # 图片上传的按钮
-  $('#img_cal').click(imageIndexCal)
   $("#feedProductType").trigger('adjust')
 
   $("#upAndDownForm").on("click", "#sellingUp, #sellingDown", (r) ->
@@ -164,3 +186,50 @@ $ ->
       )
     )
 
+  # 图片上传的按钮
+  $('#img_cal').click ->
+    return false if !imageIndexCal()
+    return false if !confirm("图片确定要更新到 " + $("input[name=s\\.market]").val() + " ?")
+    imgDiv = $(@).parent()
+    imgDiv.mask("上传图片中...")
+    params =
+      'sid': $('[name=s\\.sellingId]').val()
+      imgs: $('[name=s\\.aps\\.imageName]').val()
+    $.post('/sellings/imageUpload', params, (r) ->
+      if r.flag is true
+        alert "AMAZON图片更新成功!"
+      else
+        alert(r.message)
+      imgDiv.unmask()
+    )
+
+  $('#volumeunit').change ->
+    $unit = $(@)
+    productLengths = $('#productLengths')
+    productWidth = $('#productWidth')
+    productHeigh = $('#productHeigh')
+
+    if $unit.val() == 'IN'
+      productLengths.val((productLengths.val() * 0.0393701).toFixed(2))
+      productWidth.val((productWidth.val() * 0.0393701).toFixed(2))
+      productHeigh.val((productHeigh.val() * 0.0393701).toFixed(2))
+    else
+      productLengths.val($('#dbLengths').val())
+      productWidth.val($('#dbWidth').val())
+      productHeigh.val($('#dbHeigh').val())
+
+  $('#sproductWeight').change ->
+    $unit = $(@)
+    productWeight = $('#productWeight')
+    if $unit.val() == 'OZ'
+      productWeight.val((productWeight.val() * 35.2739619).toFixed(2))
+    else
+      productWeight.val($('#hproductWeight').val())
+
+  $('#sweight').change ->
+    $unit = $(@)
+    weight = $('#weight')
+    if $unit.val() == 'OZ'
+      weight.val((weight.val() * 35.2739619).toFixed(2))
+    else
+      weight.val($('#hweight').val())

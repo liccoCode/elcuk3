@@ -562,13 +562,13 @@ public class User extends Model {
      * @param password
      * @return
      */
-    public String userMd5(String username) {
+    public static String userMd5(String username) {
         String userkey = "playelcuk2userauthenticate" + username;
         return Md5(userkey);
     }
 
 
-    private static String Md5(String plainText) {
+    public  static String Md5(String plainText) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(plainText.getBytes());

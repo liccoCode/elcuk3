@@ -1,16 +1,25 @@
 package models.product;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import exception.PaymentException;
 import helper.Constant;
+import helper.HTTP;
 import helper.J;
+import models.User;
 import models.embedded.ERecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 import sun.misc.BASE64Decoder;
 
@@ -19,8 +28,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import java.io.BufferedInputStream;
+import java.net.URL;
+import java.net.HttpURLConnection;
 
 /**
  * 系统中, 可以附加的附件; 这个 Model 存在这里, 其自己不知道自己附属与谁, 但其拥有者知道(单项关系), 但并非使用 DB 的
@@ -289,4 +304,111 @@ public class Attach extends Model {
         fos.close();
         return image;
     }
+
+    public static BasicClientCookie cookie(String name, String value) {
+        BasicClientCookie cookie = new BasicClientCookie(name, value);
+        cookie.setDomain("easya.cc");
+        cookie.setVersion(0);
+        cookie.setPath("/");
+        return cookie;
+    }
+
+    /**
+     * 获取文件目录的网址
+     *
+     * @param sku
+     * @return
+     */
+    public static String attachPathList(String sku) {
+        return "http://pangoro.easya.cc:8080/index.php?explorer/pathList&path=SKU/" + sku;
+    }
+
+    /**
+     * 读取图片的网址
+     *
+     * @param sku
+     * @param name
+     * @return
+     */
+    public static String attachImage(String sku, String name) {
+        return "http://pangoro.easya.cc:8080/data/User/elcuk2/home/SKU/" + sku + "/" + name;
+    }
+
+    /**
+     * 获取SKU下的图片列表
+     *
+     * @param fid
+     * @return
+     */
+    public static List<java.util.Map<String, String>> attachImages(String fid) {
+        JsonArray rows = null;
+        String url = Attach.attachPathList(fid);
+        BasicCookieStore store = new BasicCookieStore();
+        store.addCookie(Attach.cookie("kod_name", "elcuk2"));
+        store.addCookie(Attach.cookie("kod_token", User.Md5(User.userMd5("elcuk2"))));
+        store.addCookie(Attach.cookie("kod_user_language", "zh_CN"));
+        store.addCookie(Attach.cookie("kod_user_online_version", "check-at-1418867696"));
+        String rtJson = HTTP.get(store, url);
+        JsonObject data = null;
+        try {
+            data = new JsonParser().parse(rtJson).getAsJsonObject().get("data")
+                    .getAsJsonObject();
+        } catch(Exception e) {
+        }
+        rows = data.get("filelist").getAsJsonArray();
+        List<java.util.Map<String, String>> imgs = new ArrayList<Map<String, String>>();
+        for(JsonElement row : rows) {
+            try {
+                String name = row.getAsJsonObject().get("name").getAsString();
+                java.util.Map<String, String> map = new java.util.HashMap<String, String>();
+                map.put("name", name);
+                map.put("href", Attach.attachImage(fid, name));
+                imgs.add(map);
+            } catch(Exception e) {
+            }
+        }
+        return imgs;
+    }
+
+
+    /**
+     * 图片网址转为文件
+     *
+     * @param destUrl
+     * @param fileName
+     * @throws IOException
+     */
+
+    public static F.T2<String, BufferedInputStream> urlToFile(String destUrl,String imagename){
+        try {
+            URL url = null;
+            BufferedInputStream bis = null;
+            HttpURLConnection httpUrl = null;
+            // 建立链接
+            url = new URL(destUrl);
+            httpUrl = (HttpURLConnection) url.openConnection();
+            // 连接指定的资源
+            httpUrl.connect();
+            // 获取网络输入流
+            bis = new BufferedInputStream(httpUrl.getInputStream());
+
+            return new F.T2<String,BufferedInputStream>(imagename, bis);
+        } catch(Exception e) {
+
+        }
+        return null;
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+

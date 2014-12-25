@@ -861,6 +861,32 @@ public enum M {
     }
 
 
+    /**
+     * 模拟人工查询FNSKU的地址
+     *
+     * @return
+     */
+    public String listingfnSkuPage(Selling sell) {
+        String msku = sell.merchantSKU;
+        switch(sell.market) {
+            case AMAZON_CA:
+            case AMAZON_ES:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_IT:
+            case AMAZON_UK:
+            case AMAZON_US:
+                return String
+                        .format("https://sellercentral.%s/gp/ssof/knights/items-list-xml.html/ref=ag_xx_cont_fbalist?searchType=genericQuery&genericQuery=%s",
+                               this.toString(), msku);
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+
     public static M val(String str) {
         if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();
@@ -921,4 +947,73 @@ public enum M {
                 return null;
         }
     }
+
+
+    public static String listingPostPage(M market, String jsessionId) {
+        //EU: https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+        //US: https://catalog.amazon.co.uk/abis/product/ProcessEditProduct
+        switch(market) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_CA:
+            case AMAZON_IT:
+                return "https://catalog-sc." + market.toString() +
+                        "/abis/product/ProcessEditProduct" +
+                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+            case AMAZON_US:
+                return "https://catalog." + market.toString() + "/abis/product/ProcessEditProduct" +
+                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+
+    public String uploadImageLink() {
+        //https://catalog-sc.amazon.co.uk/abis/image/AddImage.ajax
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_CA:
+            case AMAZON_IT:
+                return String
+                        .format("https://catalog-sc.%s/abis/image/AddImage.ajax", this.toString());
+            case AMAZON_US:
+                return String
+                        .format("https://catalog.%s/abis/image/AddImage.ajax", this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    public String removeImageLink() {
+        //https://catalog-sc.amazon.co.uk/abis/image/RemoveImage.ajax
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_CA:
+            case AMAZON_IT:
+                return String.format("https://catalog-sc.%s/abis/image/RemoveImage.ajax",
+                        this.toString());
+            case AMAZON_US:
+                return String
+                        .format("https://catalog.%s/abis/image/RemoveImage.ajax", this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+
 }
