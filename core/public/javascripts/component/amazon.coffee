@@ -220,7 +220,7 @@ $ ->
     "❏": "",
     "❒": "",
     "♫": "",
-    "®": ""
+    "®": "&reg;"
   }
 
   replaceInvalidCharacters = (obj, e) ->
