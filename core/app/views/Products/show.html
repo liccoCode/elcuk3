@@ -23,8 +23,9 @@
       <a href="#extends" data-toggle='tab'>扩展属性</a>
     </li>
     <li>
-      <a href="#attach" data-toggle='tab' id="showFeeds">附件</a>
+      <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
     </li>
+
     <li>
       <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
     </li>
@@ -61,6 +62,10 @@
     <div class="tab-pane fade" id='attach'>
         #{include 'Products/_attach.html'/}
     </div>
+
+    <div class="tab-pane fade" id='newattach'>
+            #{include 'Products/_newattach.html'/}
+        </div>
 
     <div class="tab-pane fade" id='saleinfo'>
       <input type="hidden" name="skuvalue" value="0">

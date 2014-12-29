@@ -17,7 +17,6 @@ import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -35,6 +34,7 @@ import play.libs.F;
 import play.libs.IO;
 import play.libs.MimeTypes;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.entity.mime.content.InputStreamBody;
 
 /**
  * 对 HttpClient 4 的封装 HTTP 请求
@@ -161,6 +162,7 @@ public class HTTP {
                     cookieStore(cookieStore).execute(new HttpGet(url)).getEntity(),
                     "UTF-8");
         } catch(IOException e) {
+            e.printStackTrace();
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return "";
         }
@@ -294,7 +296,7 @@ public class HTTP {
      */
     public static String upload(CookieStore cookieStore, String url,
                                 Collection<? extends NameValuePair> params,
-                                Map<String, File> uploadFiles) {
+                                Map<String, F.T2<String, BufferedInputStream>> uploadFiles) {
         HttpPost post = new HttpPost(url);
         MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
@@ -303,13 +305,16 @@ public class HTTP {
             }
 
             for(String fileParamName : uploadFiles.keySet()) {
-                File file = uploadFiles.get(fileParamName);
+                F.T2<String, BufferedInputStream> file = uploadFiles.get(fileParamName);
+
+
                 multipartEntity.addPart(fileParamName,
-                        new FileBody(file, MimeTypes.getMimeType(file.getName())));
+                        new InputStreamBody(file._2, MimeTypes.getMimeType(file._1)));
             }
             post.setEntity(multipartEntity);
             return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
+            e.printStackTrace();
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
         }

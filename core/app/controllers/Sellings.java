@@ -9,6 +9,7 @@ import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
 import models.view.Ret;
+import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
@@ -24,13 +25,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import play.data.validation.Error;
+
 /**
  * 控制 Selling
  * User: Wyatt
  * Date: 12-1-7
  * Time: 上午11:41
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Sellings extends Controller {
 
 
@@ -58,7 +61,8 @@ public class Sellings extends Controller {
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("feeds", s.feeds());
-        render(s);
+        SellingAmzPost p = new SellingAmzPost();
+        render(s, p);
     }
 
     /**
@@ -146,6 +150,30 @@ public class Sellings extends Controller {
         }
     }
 
+
+    public static void imageUpload(final String sid, final String imgs) {
+        if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
+        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
+            @Override
+            public List<Error> doJobWithResult() throws Exception {
+                List<Error> errors = new ArrayList<Error>();
+                Selling s = Selling.findById(sid);
+                try {
+                    s.uploadAmazonImg(imgs, false);
+                } catch(Exception e) {
+                    errors.add(new Error("", Webs.E(e), new String[]{}));
+                }
+                return errors;
+            }
+        }.now());
+        if(errors.size() > 0) {
+            renderJSON(new Ret(false, errors.toString()));
+        } else {
+            renderJSON(new Ret(true));
+        }
+    }
+
+
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
     public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
@@ -169,6 +197,27 @@ public class Sellings extends Controller {
         }
     }
 
+    /**
+     * 将部分信息同步到AMAZON
+     *
+     * @param s
+     * @param p
+     */
+    public static void amazon_update(Selling s, SellingAmzPost p) {
+        if(p == null) {
+            renderJSON(new Ret(false, "请勾选Selling信息更新!"));
+        }
+        try {
+            s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+            s.syncAndUpdateAmazon(p);
+            s.save();
+            renderJSON(new Ret(true));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+
     @Check("sellings.delete")
     public static void destroy(String id) {
         try {
@@ -184,17 +233,13 @@ public class Sellings extends Controller {
      * 从 Amazon 上将 Selling 信息同步回来
      */
     public static void syncAmazon(final String sid) {
-        // play status 检查平均耗时 2.5s , 开放线程时间 3s 后回掉
-        await(new Job<Selling>() {
-            @Override
-            public Selling doJobWithResult() {
-                Selling selling = Selling.findById(sid);
-                selling.syncFromAmazon();
-                return selling;
-            }
-
-        }.now());
-        renderJSON(new Ret());
+        try {
+            Selling selling = Selling.findById(sid);
+            selling.syncFromAmazon();
+            renderJSON(new Ret());
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     /**

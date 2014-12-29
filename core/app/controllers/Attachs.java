@@ -1,19 +1,31 @@
 package controllers;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import controllers.api.SystemOperation;
-import helper.Constant;
-import helper.J;
-import helper.Webs;
+import helper.*;
+import jobs.works.ListingOffersWork;
+import models.User;
+import models.market.ListingOffer;
 import models.product.Attach;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.cookie.ClientCookie;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import play.Logger;
+import play.Play;
 import play.libs.Images;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import org.apache.http.cookie.Cookie;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -86,4 +98,11 @@ public class Attachs extends Controller {
         List<Attach> imgs = Attach.attaches(fid, p);
         renderJSON(J.G(imgs));
     }
+
+
+    public static void explorerImages(String fid) {
+        List<java.util.Map<String, String>> imgs = Attach.attachImages(fid);
+        renderJSON(J.G(imgs));
+    }
+
 }

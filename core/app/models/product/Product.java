@@ -26,6 +26,7 @@ import query.ProductQuery;
 
 import javax.persistence.*;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -1015,4 +1016,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(procureUnit == null) return new ProcureUnit();
         return procureUnit;
     }
+
+
 }

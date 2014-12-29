@@ -6,6 +6,7 @@ import helper.FLog;
 import helper.Webs;
 import models.market.M;
 import models.market.Selling;
+import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -203,6 +204,7 @@ public class AmazonProps implements Serializable {
     @Expose
     public String itemType;
 
+
     /**
      * 使用 Webs.SPLIT 进行分割, 5 行
      * Games模板特有字段，硬件相关
@@ -344,6 +346,7 @@ public class AmazonProps implements Serializable {
         Document doc = Jsoup.parse(html);
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
+
         if(inputs.size() == 0) {
             /**
              * 1. 尝试检查是否为 Listing Not Found 的异常
@@ -422,6 +425,25 @@ public class AmazonProps implements Serializable {
         this.arryParamSetUP(T.STR_TO_ARRAY); // 对 hibernate 3.6 的 Lob bug 兼容
     }
 
+
+    /**
+     * 从修改 Listing 页面中获取数据, 并同步到此 Aps 中
+     *
+     * @param html
+     * @param sell
+     */
+    public String syncfnSkuFromAmazonPostPage(String html, Selling sell) {
+        int index = html.indexOf("name=\"fnSku");
+        if(index > 0) {
+            String fnsku = html.substring(html.indexOf("name=\"fnSku") - 19, html.indexOf("name=\"fnSku"));
+            return fnsku.substring(fnsku.indexOf("value=") + 7, fnsku.length() - 2);
+        } else {
+            throw new FastRuntimeException(
+                    String.format("返回snSku列表为空!"));
+        }
+    }
+
+
     /**
      * 根据 Amazon Post Listing 的页面解析出参数, 并生成根据 aps 生成好的参数集合, 同时将解析的 document 原始文档也返回
      *
@@ -469,7 +491,6 @@ public class AmazonProps implements Serializable {
             } else if(name.startsWith("recommended_browse_nodes")) {
                 this.rbnCheck(params);
             }
-
             // Offer
             else if("our_price".equals(name)) { // 显示价格
                 if(this.standerPrice == null || this.standerPrice <= 0) this.standerPrice = 999f;
@@ -525,4 +546,133 @@ public class AmazonProps implements Serializable {
     private void addParams(String name, String value, Collection<NameValuePair> params) {
         params.add(new BasicNameValuePair(name, value));
     }
+
+
+    /**
+     * 根据 Amazon Post Listing 的页面解析出参数, 并生成根据 aps 生成好的参数集合, 同时将解析的 document 原始文档也返回
+     *
+     * @param html
+     * @param sell
+     * @return
+     */
+    public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(Document doc,
+                                                                               Selling sell,
+                                                                               SellingAmzPost p) {
+
+
+        // ----- Input 框框
+        Elements inputs = doc.select("form[name=productForm] input");
+        if(inputs.size() == 0) {
+            String msg = doc.select("div").text();
+            if(StringUtils.isBlank(msg)) msg = "AMZ返回页面信息不正确,请重新更新! Display Post page visit Error. Please try again.";
+            throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
+        }
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(
+                doc.select("#our_price").val(), sell.account.type);
+        for(Element el : inputs) {
+            String name = el.attr("name").toLowerCase().trim();
+
+            if("our_price".equals(name) && p.standerprice && this.standerPrice != null && this.standerPrice > 0)
+                params.add(new BasicNameValuePair(name,
+                        Webs.priceLocalNumberFormat(our_price._1, this.standerPrice)));
+            else if(StringUtils.startsWith(name, "generic_keywords") && p.searchtermss &&
+                    StringUtils.isNotBlank(this.searchTerms))
+                this.searchTermsCheck(params);
+            else if("item_name".equals(name) && p.title)
+                params.add(new BasicNameValuePair(name, this.title));
+            else if("discounted_price".equals(name) && p.saleprice && this.salePrice > 0) {
+                params.add(new BasicNameValuePair("discounted_price",
+                        Webs.priceLocalNumberFormat(our_price._1, this.salePrice)));
+
+            } else if(StringUtils.startsWith(name, "bullet_point") &&
+                    StringUtils.isNotBlank(this.keyFetures) && p.keyfeturess) {
+                this.bulletPointsCheck(params);
+            } else if(StringUtils.startsWith(name, "item_type_keyword") && p.rbns) {
+                //美国市场与其他市场不同
+                params.add(new BasicNameValuePair("item_type_keyword", this.rbns.get(0)));
+            } else if(StringUtils.startsWith(name, "recommended_browse_nodes") && p.rbns) {
+                if(this.rbns != null && this.rbns.size() >= 1) {
+                    for(int i = 0; i < this.rbns.size(); i++) {
+                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]",
+                                this.rbns.get(i)));
+                    }
+                }
+            } else if("activeClientTimeOnTask".equals(name)) {
+                // Amazon 的一个记录值
+                params.add(new BasicNameValuePair(name, 18059 + ""));
+            }
+            //长宽高
+            else if("item_length".equals(name) && p.productvolume) {
+                params.add(new BasicNameValuePair(name, p.productLengths.toString()));
+            }//长宽高
+            else if("item_width".equals(name) && p.productvolume) {
+                params.add(new BasicNameValuePair(name, p.productWidth.toString()));
+            } else if("item_height".equals(name) && p.productvolume) {
+                params.add(new BasicNameValuePair(name, p.productHeigh.toString()));
+            }
+            //长宽高的单位
+            else if(("item_length-uom".equals(name)
+                    || "item_width-uom".equals(name)
+                    || "item_height-uom".equals(name)) && p.productvolume) {
+                params.add(new BasicNameValuePair(name, p.volumeunit));
+            }
+            //重量
+            else if("item_weight".equals(name) && p.productWeight) {
+                params.add(new BasicNameValuePair(name, p.proWeight.toString()));
+            } else if("item_weight-uom".equals(name) && p.productWeight) {
+                params.add(new BasicNameValuePair("item_weight-uom", p.productWeightUnit));
+            }
+            //包装重量
+            else if("website_shipping_weight".equals(name) && p.weight) {
+                params.add(new BasicNameValuePair(name, p.packWeight.toString()));
+            } else if("website_shipping_weight-uom".equals(name) && p.weight) {
+                params.add(new BasicNameValuePair("website_shipping_weight-uom", p.weightUnit));
+            } else {
+                /**
+                 * 因为 Amazon 的 checkbox 都是 checkbox 与 hidden 一并出现, 所以:
+                 *  排除掉 checkbox , 只需要提交 checkbox 关联的 hidden 元素
+                 */
+                if("checkbox".equals(el.attr("type"))) {
+                    continue;
+                }
+                params.add(new BasicNameValuePair(name, el.val()));
+            }
+
+        }
+        // ------------ TextArea 框框
+        Elements textareas = doc.select("form[name=productForm] textarea");
+        for(Element text : textareas) {
+            String name = text.attr("name");
+            if("product_description".equals(name) && p.productdesc && StringUtils.isNotBlank(this.productDesc)) {
+                if(this.productDesc.length() > 2000)
+                    throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+
+                if(this.productDesc.indexOf("style=\"color") > 0)
+                    throw new FastRuntimeException("产品详细描述包含非法字符:style=\"color\"");
+
+                params.add(new BasicNameValuePair(name, this.productDesc));
+            } else {
+                params.add(new BasicNameValuePair(name, text.val()));
+            }
+        }
+        // ------------ Select 框框
+        Elements selects = doc.select("form[name=productForm] select");
+        for(Element select : selects) {
+            String name = select.attr("name").toLowerCase().trim();
+            if(("item_length-uom".equals(name)
+                    || "item_width-uom".equals(name)
+                    || "item_height-uom".equals(name)) && p.productvolume) {
+                params.add(new BasicNameValuePair(name, p.volumeunit));
+            } else if("item_weight-uom".equals(name) && p.productWeight) {
+                params.add(new BasicNameValuePair("item_weight-uom", p.productWeightUnit));
+            } else if("website_shipping_weight-uom".equals(name) && p.productWeight) {
+                params.add(new BasicNameValuePair("website_shipping_weight-uom", p.weightUnit));
+            } else
+                params.add(new BasicNameValuePair(select.attr("name"),
+                        select.select("option[selected]").val()));
+        }
+        return new F.T2<Collection<NameValuePair>, Document>(params, doc);
+    }
+
 }

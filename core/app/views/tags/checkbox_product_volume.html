@@ -1,0 +1,27 @@
+<div class="control-group">
+  <label style="color:red;" class="control-label" for="${_id}">
+    <input type="checkbox" name="${_checkboxname}" value="true">${_label}</label>
+  <div class="controls">
+    <input type="text" style="width:80px;" id="${_id1}" ${_disabled ? 'disabled' : ''} ${_readonly ? 'readonly' : ''}
+           class="${_span?:'span10'}" name="${_name1}"
+           placeholder="${_placeholder?:_label1}"
+           value="${_value1?:''}">
+    <input type="text" style="width:80px;"  id="${_id2}" ${_disabled ? 'disabled' : ''} ${_readonly ? 'readonly' : ''}
+               class="${_span?:'span10'}" name="${_name2}"
+               placeholder="${_placeholder?:_label2}"
+               value="${_value2?:''}">
+    <input type="text" style="width:80px;"  id="${_id3}" ${_disabled ? 'disabled' : ''} ${_readonly ? 'readonly' : ''}
+               class="${_span?:'span10'}" name="${_name3}"
+               placeholder="${_placeholder?:_label3}"
+               value="${_value3?:''}">
+
+    <select style="width:80px;" id="volumeunit" name="p.volumeunit">
+       <option value="MM">mm</option>
+       <option value="IN">inch</option>
+    </select>
+    <input type="hidden" id="${_hid1}" value="${_value1?:''}">
+    <input type="hidden" id="${_hid2}" value="${_value2?:''}">
+    <input type="hidden" id="${_hid3}" value="${_value3?:''}">
+    <span class="help-inline" id="${_id}_hint"></span>
+  </div>
+</div>
