@@ -1,12 +1,14 @@
 package controllers;
 
 import helper.GTs;
+import helper.J;
 import models.Notification;
 import models.User;
 import models.activiti.ActivitiProcess;
 import models.view.Ret;
 import models.view.post.NotificationPost;
 import org.apache.commons.lang.StringUtils;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -34,7 +36,6 @@ public class Notifications extends Controller {
         redirect("/users/home");
     }
 
-
     /**
      * 当前用户的通知信息列表
      */
@@ -50,7 +51,6 @@ public class Notifications extends Controller {
      */
     public static void amount() {
         //改成未执行流程的数量
-
         List<String> tasks = ActivitiProcess.userTask(Secure.Security.connected());
         long count = tasks.size();
         renderJSON(GTs.MapBuilder
@@ -58,28 +58,17 @@ public class Notifications extends Controller {
                 .put("count", count + "")
                 .build()
         );
-
-//        long count = Notification.count("user=? and state=?", User.current(),
-//                Notification.S.UNCHECKED);
-//        renderJSON(GTs.MapBuilder
-//                .map("user", User.username())
-//                .put("count", count + "")
-//                .build()
-//        );
-
     }
 
     /**
      * 修改通知状态为 已阅
      */
     public static void updateState(List<Long> noteID) {
-
         if(noteID != null) {
             Notification.markAsRead(noteID);
         } else {
             renderJSON(new Ret("未选中，无法更新状态"));
         }
-
         renderJSON(new Ret(true, "通知已标记为已读"));
     }
 
@@ -96,4 +85,14 @@ public class Notifications extends Controller {
         redirect(noty.sourceURL);
     }
 
+    /**
+     * 下一个通知
+     */
+    public static void nextNotification() {
+        F.Option<Notification> notification = Notification.next(Login.current());
+        if(notification.isDefined())
+            renderJSON(J.G(notification.get()));
+        else
+            renderJSON(new Ret(false));
+    }
 }

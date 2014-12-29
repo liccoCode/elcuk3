@@ -1,5 +1,7 @@
 package models.market;
 
+import models.User;
+import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -41,11 +43,16 @@ public class Feed extends Model {
 
     public Date updatedAt;
 
+    /**
+     * Feed 的创建者
+     */
+    public String byWho;
 
     /**
      * 因 API 的限制, 所以每一个 Selling 不可以无限制的上传 Feed.
      * 每个 Feed 间隔 3 分钟以上
      * 更新：由于 Amazon 使用账户区分，所以系统也更新采用区分账户来做提交限制。
+     *
      * @return
      */
     public static boolean isFeedAvalible(Long accountId) {
@@ -71,6 +78,7 @@ public class Feed extends Model {
         Feed feed = new Feed();
         feed.content = content;
         feed.fid = selling.sellingId;
+        feed.byWho = User.username();
         return feed.save();
     }
 
@@ -89,4 +97,18 @@ public class Feed extends Model {
         this.updatedAt = new Date();
     }
 
+    public String checkResult() {
+        String[] lines = StringUtils.split(this.result, "\r\n");
+        for(String line : lines) {
+            String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+            if(args.length == 5 && "Error".equals(args[3])) {
+                return "Amazon 报告该 Feed 包含错误,请检查";
+            }
+        }
+        if(this.result.contains("Encoding::UndefinedConversionError")) {
+            return "Feed 使用了非法字符,请报告开发";
+        } else {
+            return "Feed 处理成功";
+        }
+    }
 }

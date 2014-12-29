@@ -6,10 +6,15 @@ import play.data.validation.Required;
 import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 用户的提醒消息(push)
@@ -20,6 +25,11 @@ import java.util.List;
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Notification extends GenericModel {
+    /**
+     * 用来记录用户 Notification 的 Queue Map
+     */
+    private static final Map<String, BlockingQueue<Notification>> USER_QUEUE_CACHE = new ConcurrentHashMap<String, BlockingQueue<Notification>>();
+
     public static final String INDEX = "http://e.easya.cc/Notifications/index";
 
     private static final long serialVersionUID = -3890283395796257638L;
@@ -34,6 +44,7 @@ public class Notification extends GenericModel {
         this.title = title;
         this.content = content;
         this.sourceURL = sourceURL;
+        clearUserNotificationQueue(user);
     }
 
     @Id
@@ -59,6 +70,7 @@ public class Notification extends GenericModel {
     /**
      * 触发消息的源头 URL
      */
+    @Expose
     public String sourceURL;
 
     /**
@@ -162,5 +174,43 @@ public class Notification extends GenericModel {
     public static void markAsRead(List<Long> ids) {
         DB.execute(String.format("UPDATE Notification set state='%s' WHERE %s",
                 Notification.S.CHECKED.name(), SqlSelect.whereIn("id", ids)));
+    }
+
+    /**
+     * 获取下一个通知.(每次一个)
+     * 首先查找 Queue Cache, 如果 Queue 中用, 则返回 Queue 中的.
+     * 如果 Queue Cache 没缓存, 重新初始化 Queue, 再返回 Queue 中的
+     *
+     * @return
+     */
+    public static F.Option<Notification> next(User user) {
+        if(!USER_QUEUE_CACHE.containsKey(user.username))
+            Notification.initUserNotificationQueue(user);
+
+        Notification note = USER_QUEUE_CACHE.get(user.username).poll();
+        if(note == null) return F.Option.None();
+        else {
+            Notification managedNote = Notification.findById(note.id);
+            managedNote.state = S.CHECKED;
+            return F.Option.Some(managedNote.<Notification>save());
+        }
+    }
+
+    public static void initUserNotificationQueue(User user) {
+        if(!USER_QUEUE_CACHE.containsKey(user.username)) {
+            synchronized(USER_QUEUE_CACHE) {
+                if(USER_QUEUE_CACHE.containsKey(user.username)) return; // double check
+                BlockingQueue<Notification> blockingQueue = new LinkedBlockingQueue<Notification>();
+                List<Notification> notifications = user.unNotifiedNotification();
+                for(Notification note : notifications) {
+                    blockingQueue.add(note);
+                }
+                USER_QUEUE_CACHE.put(user.username, blockingQueue);//不限制 Notification Queue 容量
+            }
+        }
+    }
+
+    public static void clearUserNotificationQueue(User user) {
+        USER_QUEUE_CACHE.remove(user.username);
     }
 }
