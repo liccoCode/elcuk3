@@ -46,7 +46,6 @@
       #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期',  value: '2013-12-01' /}
       #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes',  value: '' /}
       #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',  value: '' /}
-      #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
       #{checkbox_wrap id:'giftwrap', label: '附加选项'}
         <label class="checkbox">
           <input type="checkbox" id='giftwrap' checked name="s.aps.isGiftWrap" value="true">
@@ -63,7 +62,7 @@
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
-      #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: '0' /}
+      #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
 
       <label class="control-label" for="sellingCycle">生命周期</label>
       <div class="controls">
