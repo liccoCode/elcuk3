@@ -47,6 +47,22 @@
       #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes',  value: '' /}
       #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',  value: '' /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+
+
+
+      #{checkbox_product_volume ischeck:false,id:'productvolume',readonly:true,
+      unitname:'s.volumeunit',
+      checkboxname: 's.productvolume', label:'长宽高(产品)',
+      id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
+      hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
+      name1: 's.productLengths',
+      label1: '长(产品)', value1: product.productLengths,
+      name2: 's.productWidth',
+      label2: '宽(产品)', value2: product.productWidth,
+      name3: 's.productHeigh',
+      label3: '高(产品)', value3: product.productHeigh /}
+
+
       #{checkbox_wrap id:'giftwrap', label: '附加选项'}
         <label class="checkbox">
           <input type="checkbox" id='giftwrap' checked name="s.aps.isGiftWrap" value="true">
@@ -63,16 +79,33 @@
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
+      #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number', value: '' /}
       #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: '0' /}
 
-      <label class="control-label" for="sellingCycle">生命周期</label>
-      <div class="controls">
-       <select name="s.sellingCycle" size="1">
-           #{list items:models.market.Selling.SC.values(), as: 'cycle'}
-             <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
-           #{/list}
-       </select>
-      </div>
+
+      #{checkbox_product_weight ischeck:false,readonly:true,sid:'sproductWeight',hid:'hproductWeight' ,
+      id:'productWeight',
+      unitname:'s.productWeightUnit',
+      checkboxname: 's.productWeight',
+      name: 's.proWeight',
+      label: '重量(产品)', value: product.productWeight /}
+
+      #{checkbox_product_weight ischeck:false,readonly:true,sid:'sweight',hid:'hweight', id:'weight',
+      unitname:'s.weightUnit',
+      checkboxname: 's.weight',
+      name: 's.packWeight',
+      label: '重量(包材)', value: product.weight /}
+
+
+    <label class="control-label" for="sellingCycle">生命周期</label>
+
+    <div class="controls">
+      <select name="s.sellingCycle" size="1">
+          #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+            <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+          #{/list}
+      </select>
+    </div>
 
   </div>
   <div class="span12">

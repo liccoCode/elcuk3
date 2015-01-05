@@ -12,6 +12,7 @@ import models.procure.Cooperator;
 import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
+import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
