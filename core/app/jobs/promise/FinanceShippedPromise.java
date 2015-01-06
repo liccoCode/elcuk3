@@ -352,7 +352,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         text = text.toLowerCase();
         if(text.equals("commission:")) {
             return FeeType.findById("commission");
-        } else if(text.equals("referral fee")) {
+        } else if(text.contains("referral fee")) {
             return FeeType.findById("commission");
         } else if(text.contains("refund commission")) {
             return FeeType.findById("refundcommission");
