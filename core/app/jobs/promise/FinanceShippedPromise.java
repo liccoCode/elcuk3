@@ -352,6 +352,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         text = text.toLowerCase();
         if(text.equals("commission:")) {
             return FeeType.findById("commission");
+        } else if(text.equals("referral fee")) {
+            return FeeType.findById("commission");
         } else if(text.contains("refund commission")) {
             return FeeType.findById("refundcommission");
         } else if(text.contains("cross-border")) {
@@ -409,7 +411,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public Float fee(String text) {
-        text = text.replace(",",".");
+        text = text.replace(",", ".");
         if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR, M.AMAZON_IT).contains(this.market)) {
             return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "€"), ","));
         } else if(M.AMAZON_UK == this.market) {
