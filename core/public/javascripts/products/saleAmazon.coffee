@@ -95,34 +95,3 @@ $ ->
 
   # 触发 document 绑定的事件（默认去加载了 UK 英国市场 Computer 模板的 FeedProductType）
   $("#feedProductType").trigger('adjust')
-
-  $('#volumeunit').change ->
-    $unit = $(@)
-    productLengths = $('#productLengths')
-    productWidth = $('#productWidth')
-    productHeigh = $('#productHeigh')
-
-    if $unit.val() == 'IN'
-      productLengths.val((productLengths.val() * 0.0393701).toFixed(2))
-      productWidth.val((productWidth.val() * 0.0393701).toFixed(2))
-      productHeigh.val((productHeigh.val() * 0.0393701).toFixed(2))
-    else
-      productLengths.val($('#dbLengths').val())
-      productWidth.val($('#dbWidth').val())
-      productHeigh.val($('#dbHeigh').val())
-
-  $('#sproductWeight').change ->
-    $unit = $(@)
-    productWeight = $('#productWeight')
-    if $unit.val() == 'OZ'
-      productWeight.val((productWeight.val() * 35.2739619).toFixed(2))
-    else
-      productWeight.val($('#hproductWeight').val())
-
-  $('#sweight').change ->
-    $unit = $(@)
-    weight = $('#weight')
-    if $unit.val() == 'OZ'
-      weight.val((weight.val() * 35.2739619).toFixed(2))
-    else
-      weight.val($('#hweight').val())

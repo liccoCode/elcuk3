@@ -204,24 +204,6 @@ public class Selling extends GenericModel {
     public AmazonProps aps;
     // ---- Images ????
 
-    // -----------------------  上架时的长宽高重量信息 ----------------------------
-    @Transient
-    public String volumeunit;
-    @Transient
-    public Float productLengths;
-    @Transient
-    public Float productWidth;
-    @Transient
-    public Float productHeigh;
-    @Transient
-    public Float proWeight;
-    @Transient
-    public Float packWeight;
-    @Transient
-    public String productWeightUnit;
-    @Transient
-    public String weightUnit;
-
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
 
 
@@ -455,7 +437,7 @@ public class Selling extends GenericModel {
         patchToListing();
         Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
                 this.aps.templateType, this.market.toString()), this);
-        //HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
+        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
         return this;
     }
 
@@ -656,10 +638,9 @@ public class Selling extends GenericModel {
     }
 
 
-    public static String generateUpdateFeedTemplateFile(List<Selling> sellingList, String templateType, String market
-                                                        ) {
+    public static String generateUpdateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
         // update
-        return generateFeedTemplateFile(sellingList, templateType, market,"Update");
+        return generateFeedTemplateFile(sellingList, templateType, market, "Update");
     }
 
     /**
