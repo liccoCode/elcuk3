@@ -13,9 +13,9 @@ $ ->
     $.post("/activitis/#{id}/update", params, (r) ->
       try
         if r.flag
-          Notify.ok("更新成功", r.message)
+          alert("更新成功: #{r.message}")
         else
-          Notify.alarm("更新失败", r.message)
+          alert("更新失败: #{r.message}")
       finally
         LoadMask.unmask()
     )
@@ -30,9 +30,9 @@ $ ->
       try
         if r.flag
           $(self).parents('tr').remove()
-          Notify.ok("删除 流程", r.message)
+          alert("删除 流程 成功: #{r.message}")
         else
-          Notify.alarm("删除 流程 失败", r.message)
+          alert("删除 流程 失败: #{r.message}")
       finally
         LoadMask.unmask()
     )
