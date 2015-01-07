@@ -92,6 +92,8 @@ public class Applys extends Controller {
     public static void transportAddShipment(Long id, String shipmentId) {
         TransportApply apply = TransportApply.findById(id);
         Shipment ship = Shipment.findById(shipmentId);
+        if (ship.apply!=null)
+            Validation.addError("", "已经存在请款单, 无法添加成功.");
         apply.appendShipment(Arrays.asList(ship.id));
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
