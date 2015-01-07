@@ -1,0 +1,239 @@
+#{extends 'main.html' /}
+#{set title:"Category销售目标#" + categorySt.id /}
+#{set 'moreScripts'}
+    #{script 'saleOpTargets/marketsplit.coffee'/}
+#{/set}
+
+#{errorMsgs /}
+#{flash_alert /}
+
+#{set team: categorySt.fetchTeam()/}
+<div class="row">
+<div class="span12">
+<form action="@{SaleOpTargets.doSeasonSplit(categorySt.id)}" method="POST" id="submitSaleOpTargetsForm">
+#{info_row title:'Category 年度目标'/}
+<table class="table table-bordered">
+  <tr>
+    <th>年份</th>
+    <td colspan="4">
+    #{select_year value: categorySt.targetYear, disabled:true/}
+    </td>
+  </tr>
+
+  <tr>
+    <th>Team</th>
+    <td>
+    ${team.name}
+    </td>
+
+    <th>产品线</th>
+    <td>
+    ${categorySt.fid}
+    </td>
+  </tr>
+
+  <tr>
+    <th>市场</th>
+    <td>
+    ${categorySt.targetMarket}
+    </td>
+
+    <th></th>
+    <td>
+    </td>
+  </tr>
+
+  <tr>
+    <th>目标日均销量</th>
+    <td>
+      <div class="input-append">
+        <input type="text" value="${categorySt.saleQty}" disabled>
+      </div>
+    </td>
+
+    <th>目标销售额</th>
+    <td>
+      <div class="input-prepend input-append">
+        <span class="add-on">$</span>
+        <input type="text" id="amount" value="${categorySt.saleAmounts}" disabled>
+        <input type="text" id="amountrmb" readonly placement="right" style="width:150px">
+      </div>
+    </td>
+  </tr>
+
+
+  <tr>
+    <th>日均销量修正值</th>
+    <td>
+      <div class="input-prepend input-append">
+        <input type="text" id="reviseSaleQtys" readonly rel="popover"
+               content="销量(修正)值为各月目标日均销量与实际日均销量对比计算得出" placement="right">
+      </div>
+    </td>
+
+    <th>销售额修正值</th>
+    <td>
+      <div class="input-prepend input-append">
+        <span class="add-on">$</span>
+        <input type="text" id="reviseSaleAmounts" readonly rel="popover"
+               content="销售额(修正)值为各月目标销售额与实际销售额对比计算得出" placement="right">
+        <input type="text" id="reviseamountrmb" readonly placement="right" style="width:150px">
+      </div>
+    </td>
+  </tr>
+
+
+</table>
+
+#{info_row title:'Category 目标季度分解'/}
+<table class="table table-bordered" id="monthSaleOptargets">
+  <tr>
+    <th>季度</th>
+    <th>目标日均销量</th>
+    <th>日均销量修正值</th>
+    <th>目标销售额($)</th>
+    <th>销售额修正值</th>
+  </tr>
+<tr>
+#{list items:seasons, as:'st'}
+  <tr>
+    <td>
+      第${st.targetSeason}季度
+    </td>
+
+    <td>
+      <div class="input-append">
+          #{if st.saleQty>0}
+            <input type="text" class="input" value="${st.saleQty}" name="ss[${st_index - 1}].saleQty"
+                   id="categoryprofitMargin">
+          #{/if}
+          #{else}
+            <input type="text" class="input" value="" name="ss[${st_index - 1}].saleQty"
+                   id="categoryprofitMargin">
+          #{/else}
+      </div>
+    </td>
+
+    <td>
+
+      <div class="input-prepend input-append">
+        <input type="text" id="reviseSeasonSaleQtys${st.targetSeason}" readonly rel="popover"
+               content="销量(修正)值为各月目标日均销量与实际日均销量对比计算得出" placement="right">
+      </div>
+
+    </td>
+
+    <td>
+      <div>
+          #{if st.saleAmounts>0}
+            <input type="text" class="input" value="${st.saleAmounts}" name="ss[${st_index - 1}].saleAmounts"
+                   data-old="${st.saleAmounts}">
+          #{/if}
+          #{else}
+            <input type="text" class="input" value="" name="ss[${st_index - 1}].saleAmounts"
+                   data-old="${st.saleAmounts}">
+          #{/else}
+      </div>
+    </td>
+
+    <td>
+      <div class="input-prepend input-append">
+        <input type="text" id="reviseSeasonSaleAmounts${st.targetSeason}" readonly rel="popover"
+               content="销售额(修正)值为各月目标销售额与实际销售额对比计算得出" placement="right">
+      </div>
+
+    </td>
+
+
+  </tr>
+  <input type="hidden" name="ss[${st_index - 1}].id" value="${st.id}">
+#{/list}
+</table>
+
+
+#{info_row title:'Category 目标月度分解'/}
+<table class="table table-bordered" id="monthSaleOptargets">
+  <tr>
+    <th>月度</th>
+    <th>目标日均销量</th>
+    <th>实际日均销量</th>
+    <th>目标销售额($)</th>
+    <th>实际销售额($)</th>
+  </tr>
+<tr>
+
+#{list items:months, as:'st'}
+  <tr>
+    <td>
+    ${st.targetMonth}
+    </td>
+
+    <td>
+      <div class="input-append">
+
+          #{if st.saleQty>0}
+            <input type="text" class="input-mini" value="${st.saleQty}" name="ms[${st_index - 1}].saleQty"
+                   id="categoryprofitMargin1">
+          #{/if}
+          #{else}
+            <input type="text" class="input-mini" value="" name="ms[${st_index - 1}].saleQty"
+                   id="categoryprofitMargin1">
+          #{/else}
+
+
+      </div>
+    </td>
+
+    <td>
+        #{set reallyQty: st.reallySaleQtys()/}
+      <div>
+        <input type="text" readonly="true" style="width:90px;" value="${reallyQty}" name="reallySaleQtys"
+               data-old="${reallyQty}">
+      </div>
+    </td>
+
+    <td>
+      <div>
+          #{if st.saleAmounts>0}
+            <input type="text" class="input-small" value="${st.saleAmounts}" name="ms[${st_index - 1}].saleAmounts"
+                   data-old="${st.saleAmounts}">
+          #{/if}
+          #{else}
+            <input type="text" class="input-small" value="" name="ms[${st_index - 1}].saleAmounts"
+                   data-old="${st.saleAmounts}">
+          #{/else}
+      </div>
+    </td>
+
+    <td>
+        #{set reallySt: st.reallySaleAmounts()/}
+      <div>
+        <input type="text" readonly="true" style="width:90px;" value="${reallySt}" name="reallySaleAmounts"
+               data-old="${reallySt}">
+      </div>
+    </td>
+
+  </tr>
+  <input type="hidden" name="ms[${st_index - 1}].id" value="${st.id}">
+#{/list}
+  <tr>
+    <th>月度汇总</th>
+    <td>
+      <input type="text" style="width:90px;" id="saleQtySUM">
+    </td>
+    <td></td>
+    <td>
+      <input type="text" style="width:90px;" id="saleAmountsSUM">
+    </td>
+    <td></td>
+  </tr>
+  </tr>
+</table>
+</form>
+
+<div class="btn-toolbar">
+  <button class="btn btn-primary" id="submit">更新</button>
+</div>
+#{records records:records/}
+</div>
+</div>
