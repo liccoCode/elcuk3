@@ -1,0 +1,128 @@
+#{extends 'main.html' /}
+#{set title:"Category销售目标#" + categorySt.id /}
+#{set 'moreScripts'}
+    #{script 'saleOpTargets/marketsplit.coffee'/}
+#{/set}
+
+#{errorMsgs /}
+#{flash_alert /}
+
+#{set team: categorySt.fetchTeam()/}
+<div class="row">
+  <div class="span12">
+    <form action="@{SaleOpTargets.doMarketSplit(categorySt.id)}" method="POST" id="submitSaleOpTargetsForm">
+    #{info_row title:'Category 年度目标'/}
+      <table class="table table-bordered">
+        <tr>
+          <th>年份</th>
+          <td colspan="4">
+          #{select_year value: categorySt.targetYear, disabled:true/}
+          </td>
+        </tr>
+
+        <tr>
+          <th>Team</th>
+          <td>
+          ${team.name}
+          </td>
+
+          <th>产品线</th>
+          <td>
+          ${categorySt.fid}
+          </td>
+        </tr>
+
+
+        <tr>
+
+          <th>目标日均销量</th>
+          <td>
+            <div class="input-append">
+              <input type="text" value="${categorySt.saleQty}" disabled>
+            </div>
+          </td>
+
+          <th>年度销售额</th>
+          <td>
+            <div class="input-prepend input-append">
+              <span class="add-on">$</span>
+              <input type="text" id="amount" value="${categorySt.saleAmounts}" disabled>
+              <input type="text" id="amountrmb" readonly placement="right" style="width:150px">
+            </div>
+          </td>
+        </tr>
+
+
+      </table>
+
+    #{info_row title:'Category 目标市场分解'/}
+      <table class="table table-bordered" id="monthSaleOptargets">
+        <tr>
+          <th>市场</th>
+          <th>目标日均销量</th>
+          <th>目标销售额($)</th>
+          <th>操作</th>
+        </tr>
+      <tr>
+      #{list items:sts, as:'st'}
+        <tr>
+          <td>
+          ${st.targetMarket}
+          </td>
+
+          <td>
+            <div class="input-append">
+
+                #{if st.saleQty>0}
+                  <input type="text" class="input-mini" value="${st.saleQty}" name="sts[${st_index - 1}].saleQty"
+                         id="categoryprofitMargin">
+                #{/if}
+                #{else}
+                  <input type="text" class="input-mini" value="" name="sts[${st_index - 1}].saleQty"
+                         id="categoryprofitMargin">
+                #{/else}
+            </div>
+          </td>
+
+          <td>
+            <div>
+
+                #{if st.saleAmounts>0}
+                  <input type="text" class="input-small" value="${st.saleAmounts}" name="sts[${st_index - 1}].saleAmounts"
+                         data-old="${st.saleAmounts}">
+                #{/if}
+                #{else}
+                  <input type="text" class="input-small" value="" name="sts[${st_index - 1}].saleAmounts"
+                         data-old="${st.saleAmounts}">
+                #{/else}
+
+            </div>
+          </td>
+
+          <td>
+            <a class="btn btn-primary" href="@{SaleOpTargets.seasonSplit(st.id)}">季度分解</a>
+          </td>
+
+        </tr>
+        <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">
+      #{/list}
+        <tr>
+          <th>市场汇总</th>
+          <td>
+            <input type="text" style="width:90px;" id="saleMarketQtySUM">
+          </td>
+          <td>
+            <input type="text" style="width:90px;" id="saleAmountsSUM">
+          </td>
+          <td></td>
+        </tr>
+        </tr>
+      </table>
+    </form>
+
+    <div class="btn-toolbar">
+      <button class="btn btn-primary" id="submit">更新</button>
+    </div>
+  #{records records:records/}
+  </div>
+</div>
