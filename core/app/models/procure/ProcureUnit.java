@@ -586,6 +586,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void updateManualData(ProcureUnit unit) {
         this.attrs.price = unit.attrs.price;
         this.attrs.planQty = unit.attrs.planQty;
+        this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
     }
 
