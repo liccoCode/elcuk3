@@ -56,10 +56,11 @@ public class MarketAnalysis extends Controller {
     public static void exportReviewRecords(Date from, Date to, String category) {
         HighChart reviewRatingLine = AmazonListingReview.reviewRatingLine(from, to, category);
         HighChart poorRatingLine = AmazonListingReview.poorRatingLine(from, to, category);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        SimpleDateFormat fileNameFormatter = new SimpleDateFormat("yyyyMMdd");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME,
-                String.format("%s-%s品线Review星级与中差评.xls", formatter.format(from), formatter.format(to)));
+                String.format("%s-%s品线Review星级与中差评.xls", fileNameFormatter.format(from), fileNameFormatter.format(to)));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
         renderArgs.put("reviewRatingLine", reviewRatingLine);
