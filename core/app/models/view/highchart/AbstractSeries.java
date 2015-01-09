@@ -1,6 +1,7 @@
 package models.view.highchart;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,6 +80,27 @@ public abstract class AbstractSeries implements Serializable {
         for(Object[] d : this.data) {
             if(d[0].equals(k)) {
                 d[1] = (Float) d[1] + y;
+                add = false;
+            }
+        }
+        if(add)
+            this.data.add(new Object[]{k, y});
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends AbstractSeries> T addWithBigDecimal(Float y, Object key) {
+        boolean add = true;
+        Object k = key;
+        if(key.getClass().equals(Date.class)
+                || key.getClass().equals(java.sql.Date.class)
+                || key.getClass().equals(Timestamp.class))
+            k = ((Date) key).getTime();
+
+        for(Object[] d : this.data) {
+            if(d[0].equals(k)) {
+                BigDecimal summand = new BigDecimal((Float) d[1]);
+                d[1] = summand.add(new BigDecimal(y)).floatValue();
                 add = false;
             }
         }

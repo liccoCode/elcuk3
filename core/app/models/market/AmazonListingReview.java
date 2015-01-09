@@ -656,7 +656,7 @@ public class AmazonListingReview extends GenericModel {
                 }
                 lineChart.series(line);
             }
-            lineChart.series(lineChart.sumSeries("星级"));
+            lineChart.series(lineChart.sumSeriesWithBigDecimal("星级"));
             Cache.add(cacked_key, lineChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);
@@ -697,7 +697,7 @@ public class AmazonListingReview extends GenericModel {
                 }
                 lineChart.series(line);
             }
-            lineChart.series(lineChart.sumSeries("中差评"));
+            lineChart.series(lineChart.sumSeriesWithBigDecimal("中差评"));
             Cache.add(cacked_key, lineChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);

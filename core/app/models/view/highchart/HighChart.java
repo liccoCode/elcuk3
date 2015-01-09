@@ -95,4 +95,30 @@ public class HighChart implements Serializable {
         }
         return s;
     }
+
+    /**
+     * 生成一个汇总的曲线(BigDecimal 高精度, float 会出现一些奇怪的精度问题)
+     *
+     * @return
+     */
+    public AbstractSeries sumSeriesWithBigDecimal(String name) {
+        AbstractSeries s = null;
+        if(Series.LINE.equals(this.type)) {
+            s = new Series.Line(name + " 汇总");
+        } else if(Series.COLUMN.equals(this.type)) {
+            s = new Series.Column(name + "汇总");
+        } else if(Series.PIE.equals(this.type)) {
+            s = new Series.Pie(name + "汇总");
+        }
+
+        for(AbstractSeries series : this.series) {
+            for(Object[] data : series.data) {
+                s.addWithBigDecimal((Float) data[1], data[0]);
+            }
+        }
+        if(s.type.equals(Series.LINE)) {
+            ((Series.Line) s).sort();
+        }
+        return s;
+    }
 }
