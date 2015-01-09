@@ -99,8 +99,8 @@ public abstract class AbstractSeries implements Serializable {
 
         for(Object[] d : this.data) {
             if(d[0].equals(k)) {
-                BigDecimal summand = new BigDecimal((Float) d[1]);
-                d[1] = summand.add(new BigDecimal(y)).floatValue();
+                BigDecimal summand = new BigDecimal(d[1].toString());
+                d[1] = summand.add(new BigDecimal(y.toString())).floatValue();
                 add = false;
             }
         }
