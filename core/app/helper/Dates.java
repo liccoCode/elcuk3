@@ -378,7 +378,7 @@ public class Dates {
     }
 
     /**
-     * 获取给定时间范围内每周的周末
+     * 获取给定时间范围内每个完整的一周的周末
      *
      * @param begin
      * @param end
@@ -409,7 +409,7 @@ public class Dates {
     }
 
     /**
-     * 获取给定时间范围内每周的周一
+     * 获取给定时间范围内每个完整的一周的周一
      *
      * @param begin
      * @param end
@@ -431,7 +431,11 @@ public class Dates {
         Calendar c = Calendar.getInstance();
         List<Date> dates = new ArrayList<Date>();
         while(_begin.getTime() <= _end.getTime()) {
-            dates.add(Dates.morning(_begin));
+            //这里还有一个问题 当结束日期刚好是周一时,由于无法找到对应的周日(超出了结束时间)来构成完整的一周,所以需要舍弃该日期
+            if(Dates.getSundayOfSpecifyTime(_begin).getTime() <= end.getTime()) {
+                //获取到对应的周末需要小于或等于结束日期才是一个合法的周一
+                dates.add(Dates.morning(_begin));
+            }
             c.setTime(_begin);
             c.add(Calendar.DATE, 7); // 每次日期加7天
             _begin = c.getTime();
