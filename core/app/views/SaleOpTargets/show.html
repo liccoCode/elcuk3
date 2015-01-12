@@ -27,7 +27,6 @@
         </tr>
 
         <tr>
-
           <th>目标日均销量</th>
           <td>
             <div class="input-append">
@@ -39,15 +38,37 @@
           <td>
             <div class="input-prepend input-append">
               <span class="add-on">$</span>
-              <input type="text" id="amount" name="yearSt.saleAmounts" value="${yearSt.saleAmounts}" readonly
+              <input type="text" id="amount" name="yearSt.saleAmounts"
+                     value="${helper.Dates.scaleNumber(yearSt.saleAmounts)}" readonly
                      rel="popover"
                      content="年度销售目标的总销售额数据为各 Category 销售额数据汇总得出" placement="right">
-              <input type="text" id="amountrmb" readonly placement="right" style="width:150px">
+              <input type="text" readonly placement="right" style="width:150px"
+                     value="￥${helper.Dates.scaleNumber(yearSt.saleAmountRmbs)}">
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th>目标日均修正值</th>
+          <td>
+            <div class="input-append">
+              <input type="text" name="yearSt.saleQtyLast" readonly value="${yearSt.saleQtyLast}">
             </div>
           </td>
 
-
+          <th>目标销售额修正值</th>
+          <td>
+            <div class="input-prepend input-append">
+              <span class="add-on">$</span>
+              <input type="text"  name="yearSt.saleAmountsLast"
+                     value="${helper.Dates.scaleNumber(yearSt.saleAmountsLast)}" readonly
+                     rel="popover" placement="right">
+              <input type="text" readonly placement="right" style="width:150px"
+                     value="￥${helper.Dates.scaleNumber(yearSt.saleAmountsLastRmb)}">
+            </div>
+          </td>
         </tr>
+
 
         <tr>
           <th>备注</th>
@@ -65,7 +86,9 @@
           <th>Category</th>
           <th>所属 Team</th>
           <th>目标日均销量</th>
+          <th>目标日均销量修正值</th>
           <th>目标销售额($)</th>
+          <th>目标销售额修正值($)</th>
           <th>操作</th>
         </tr>
       <tr>
@@ -88,18 +111,45 @@
                   #{/else}
                 </div>
               </td>
+
+              <td>
+                <div class="input-append">
+                  #{if st.saleQtyLast>0}
+                    <input type="text" readonly="true" class="input-mini" value="${st.saleQtyLast}" name="sts[${st_index-1}].saleQtyLast">
+                  #{/if}
+                  #{else}
+                    <input type="text" readonly="true" class="input-mini" value="" name="sts[${st_index - 1}].saleQty">
+                  #{/else}
+                </div>
+              </td>
+
+
               <td>
                 #{if st.saleAmounts>0}
-                  <input type="text" class="input-small" value="${st.saleAmounts}" name="sts[${st_index - 1}].saleAmounts">
+                  <input type="text"   class="input-small" value="${helper.Dates.scaleNumber(st.saleAmounts)}"
+                         name="sts[${st_index - 1}].saleAmounts">
                 #{/if}
                 #{else}
-                  <input type="text" class="input-small" value="" name="sts[${st_index - 1}].saleAmounts">
+                  <input type="text"   class="input-small" value="" name="sts[${st_index - 1}].saleAmounts">
                 #{/else}
               </td>
+
+              <td>
+                #{if st.saleAmountsLast>0}
+                  <input type="text" readonly="true"  class="input-small"
+                         value="${helper.Dates.scaleNumber(st.saleAmountsLast)}"
+                         name="sts[${st_index - 1}].saleAmountsLast">
+                #{/if}
+                #{else}
+                  <input type="text" readonly="true" class="input-small" value="" name="sts[${st_index - 1}].saleAmountsLast">
+                #{/else}
+              </td>
+
               <td>
                   #{power.ck "saleoptargets.marketsplit"}
-                    <a class="btn btn-primary" href="@{SaleOpTargets.marketSplit(st.id)}">市场分解</a>
+                    <a class="btn btn-primary" href="@{SaleOpTargets.marketSplit(st.id,yearSt.id)}">市场分解</a>
                   #{/power.ck}
+                  <a class="btn btn-primary" target="_blank" href="@{SaleOpTargets.marketView(st.id)}">查看</a>
               </td>
             </tr>
             <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">

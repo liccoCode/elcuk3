@@ -1,6 +1,7 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import helper.Dates;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
@@ -17,8 +18,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import models.market.M;
+import helper.Currency;
 
 /**
  * 运营销售目标
@@ -134,10 +137,36 @@ public class SaleOpTarget extends Model {
 
 
     /**
+     * 销售金额人民币
+     */
+    @Transient
+    public double saleAmountRmbs = 0d;
+
+
+    /**
      * 日销售数量
      */
     @Expose
     public Integer saleQty = 0;
+
+
+    /**
+     * 日销售数量修正值
+     */
+    @Expose
+    public Integer saleQtyLast = 0;
+
+    /**
+     * 销售金额修正值
+     */
+    @Expose
+    public double saleAmountsLast = 0d;
+
+    /**
+     * 销售金额人民币
+     */
+    @Transient
+    public double saleAmountsLastRmb = 0d;
 
 
     public SaleOpTarget() {
@@ -280,15 +309,61 @@ public class SaleOpTarget extends Model {
     }
 
     public void update(SaleOpTarget newSt, Long id) {
-        if (newSt.saleQty==null) newSt.saleQty  =0;
+        if(newSt.saleQty == null) newSt.saleQty = 0;
         this.beforeUpdateLog(newSt, id);
-        this.saleAmounts = newSt.saleAmounts;
+        this.saleAmounts = new BigDecimal(newSt.saleAmounts).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         this.saleQty = newSt.saleQty;
+
+        if(this.saleTargetType == T.MONTH || this.saleTargetType == T.SEASON || this.saleTargetType == T.MARKET) {
+            this.saleAmountsLast = newSt.saleAmountsLast;
+            this.saleQtyLast = newSt.saleQtyLast;
+        } else {
+            if(this.saleAmountsLast == 0) this.saleAmountsLast = newSt.saleAmounts;
+            if(this.saleQtyLast == 0) this.saleQtyLast = newSt.saleQty;
+        }
         if(newSt.targetMarket != null) this.targetMarket = newSt.targetMarket;
         this.validate();
         if(Validation.hasErrors()) return;
         this.save();
     }
+
+
+    public void updateCategory() {
+        SaleOpTarget target = SaleOpTarget.find("fid=? AND targetYear=? AND saleTargetType=? ",
+                this.fid, this.targetYear, T.CATEGORY).first();
+        List<SaleOpTarget> ts = SaleOpTarget
+                .find("fid=? AND targetYear=? AND saleTargetType=? ",
+                        this.fid,
+                        this.targetYear,
+                        T.MARKET).fetch();
+        updateTarget(target, ts);
+    }
+
+    public void updateYear() {
+        SaleOpTarget target = SaleOpTarget.find("targetYear=? AND saleTargetType=? ",
+                this.targetYear, T.YEAR).first();
+        List<SaleOpTarget> ts = SaleOpTarget
+                .find("targetYear=? AND saleTargetType=? ",
+                        this.targetYear,
+                        T.CATEGORY).fetch();
+        updateTarget(target, ts);
+    }
+
+    private void updateTarget(SaleOpTarget target, List<SaleOpTarget> ts) {
+        int sumqty = 0;
+        double sumamount = 0d;
+        for(SaleOpTarget t : ts) {
+            sumqty = sumqty + t.saleQtyLast;
+            sumamount = sumamount + t.saleAmountsLast;
+        }
+        if(sumqty != 0) {
+                target.saleQtyLast = sumqty;
+        }
+        if(sumamount != 0) target.saleAmountsLast = sumamount;
+
+        target.save();
+    }
+
 
     /**
      * 获取真实销量数据
@@ -402,4 +477,24 @@ public class SaleOpTarget extends Model {
         }
         return logMsg;
     }
+
+    public void usdToRmb() {
+        this.saleAmountRmbs = new BigDecimal(Currency.USD.toCNY(Double.valueOf(this.saleAmounts).floatValue()))
+                .setScale(2,
+                        BigDecimal.ROUND_HALF_UP).doubleValue();
+        this.saleAmountsLastRmb = new BigDecimal(Currency.USD.toCNY(Double.valueOf(this.saleAmountsLast).floatValue()))
+                .setScale(2,
+                        BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public static List<SaleOpTarget> salesToRbm(List<SaleOpTarget> sts) {
+        for(int i = 0; i < sts.size(); i++) {
+            SaleOpTarget target = sts.get(i);
+            target.usdToRmb();
+            sts.set(i, target);
+        }
+        return sts;
+    }
+
+
 }

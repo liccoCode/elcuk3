@@ -13,6 +13,7 @@
     <form action="@{SaleOpTargets.doMarketSplit(categorySt.id)}" method="POST" id="submitSaleOpTargetsForm">
     #{info_row title:'Category 年度目标'/}
       <table class="table table-bordered">
+        <input type="hidden" name="pid" value="${pid}">
         <tr>
           <th>年份</th>
           <td colspan="4">
@@ -34,7 +35,6 @@
 
 
         <tr>
-
           <th>目标日均销量</th>
           <td>
             <div class="input-append">
@@ -46,8 +46,29 @@
           <td>
             <div class="input-prepend input-append">
               <span class="add-on">$</span>
-              <input type="text" id="amount" value="${categorySt.saleAmounts}" disabled>
-              <input type="text" id="amountrmb" readonly placement="right" style="width:150px">
+              <input type="text" id="amount" value="${helper.Dates.scaleNumber(categorySt.saleAmounts)}" disabled>
+              <input type="text" readonly placement="right" style="width:150px"
+                     value="￥${helper.Dates.scaleNumber(categorySt.saleAmountRmbs)}">
+            </div>
+          </td>
+        </tr>
+
+
+        <tr>
+          <th>目标日均销量修正值</th>
+          <td>
+            <div class="input-append">
+              <input type="text" value="${categorySt.saleQtyLast}" disabled>
+            </div>
+          </td>
+
+          <th>年度销售额修正值</th>
+          <td>
+            <div class="input-prepend input-append">
+              <span class="add-on">$</span>
+              <input type="text" value="${helper.Dates.scaleNumber(categorySt.saleAmountsLast)}" disabled>
+              <input type="text" readonly placement="right" style="width:150px"
+                     value="￥${helper.Dates.scaleNumber(categorySt.saleAmountsLastRmb)}">
             </div>
           </td>
         </tr>
@@ -60,7 +81,9 @@
         <tr>
           <th>市场</th>
           <th>目标日均销量</th>
+          <th>日均销量修正值</th>
           <th>目标销售额($)</th>
+          <th>销售额修正值($)</th>
           <th>操作</th>
         </tr>
       <tr>
@@ -74,21 +97,25 @@
             <div class="input-append">
 
                 #{if st.saleQty>0}
-                  <input type="text" class="input-mini" value="${st.saleQty}" name="sts[${st_index - 1}].saleQty"
-                         id="categoryprofitMargin">
+                  <input type="text" class="input-mini" value="${st.saleQty}" name="sts[${st_index - 1}].saleQty" >
                 #{/if}
                 #{else}
-                  <input type="text" class="input-mini" value="" name="sts[${st_index - 1}].saleQty"
-                         id="categoryprofitMargin">
+                  <input type="text" class="input-mini" value="" name="sts[${st_index - 1}].saleQty" >
                 #{/else}
             </div>
+          </td>
+
+          <td>
+            <input type="text" style="width:90px;" readonly="true" class="input-qtylast" value="${st.saleQtyLast}"
+                   name="sts[${st_index-1}].saleQtyLast">
           </td>
 
           <td>
             <div>
 
                 #{if st.saleAmounts>0}
-                  <input type="text" class="input-small" value="${st.saleAmounts}" name="sts[${st_index - 1}].saleAmounts"
+                  <input type="text" class="input-small" value="${helper.Dates.scaleNumber(st.saleAmounts)}"
+                         name="sts[${st_index - 1}].saleAmounts"
                          data-old="${st.saleAmounts}">
                 #{/if}
                 #{else}
@@ -99,8 +126,15 @@
             </div>
           </td>
 
+
           <td>
-            <a class="btn btn-primary" href="@{SaleOpTargets.seasonSplit(st.id)}">季度分解</a>
+            <input type="text" style="width:90px;" readonly="true" class="input-amountlast"
+                   value="${helper.Dates.scaleNumber(st.saleAmountsLast)}"
+                   name="sts[${st_index-1}].saleAmountsLast">
+          </td>
+
+          <td>
+            <a class="btn btn-primary" href="@{SaleOpTargets.seasonSplit(st.id,categorySt.id)}">季度分解</a>
           </td>
 
         </tr>
@@ -111,9 +145,11 @@
           <td>
             <input type="text" style="width:90px;" id="saleMarketQtySUM">
           </td>
+          <td></td>
           <td>
             <input type="text" style="width:90px;" id="saleAmountsSUM">
           </td>
+          <td></td>
           <td></td>
         </tr>
         </tr>
@@ -122,6 +158,7 @@
 
     <div class="btn-toolbar">
       <button class="btn btn-primary" id="submit">更新</button>
+      <a class="btn btn-primary" href="@{SaleOpTargets.show(pid)}">返回</a>
     </div>
   #{records records:records/}
   </div>

@@ -14,7 +14,6 @@ $ ->
         saleAmountsSUM += parseFloat(value.value)
     )
     $("input[name='yearSt.saleAmounts']").val(saleAmountsSUM.toFixed(2))
-    amountRMB()
 
 
   $("#saleOpTargetsForm").on('blur', ".input-mini", (e) ->
@@ -37,10 +36,6 @@ $ ->
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0  or isNaN($input.val())) then $input.val("")
   )
-
-  amountRMB = ->
-    amount = $("#amount")
-    $("#amountrmb").val("￥"+(amount.val()*6.2203).toFixed(4))
 
 
 

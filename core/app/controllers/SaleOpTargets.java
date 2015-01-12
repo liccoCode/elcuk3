@@ -38,6 +38,7 @@ public class SaleOpTargets extends Controller {
     @Check("saleoptargets.index")
     public static void index() {
         List<SaleOpTarget> saleOpTargets = SaleOpTarget.find("saleTargetType=?", SaleOpTarget.T.YEAR).fetch();
+        saleOpTargets = SaleOpTarget.salesToRbm(saleOpTargets);
         render(saleOpTargets);
     }
 
@@ -47,6 +48,7 @@ public class SaleOpTargets extends Controller {
         List<Category> cates = User.getObjCategorys(user);
         SaleOpTarget yearSt = new SaleOpTarget();
         List<SaleOpTarget> sts = yearSt.loadCategorySaleTargets(cates);
+        sts = SaleOpTarget.salesToRbm(sts);
         render(yearSt, sts);
     }
 
@@ -77,6 +79,8 @@ public class SaleOpTargets extends Controller {
             sts = SaleOpTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
                     "= ? AND saleTargetType=?", yearSt.targetYear, SaleOpTarget.T.CATEGORY).fetch();
         }
+        sts = SaleOpTarget.salesToRbm(sts);
+        yearSt.usdToRmb();
         render(yearSt, sts);
     }
 
@@ -98,49 +102,57 @@ public class SaleOpTargets extends Controller {
      * 市场分解
      */
     @Check("saleoptargets.marketsplit")
-    public static void marketSplit(Long id) {
+    public static void marketSplit(Long id,Long pid) {
         User user = User.findByUserName(Secure.Security.connected());
         SaleOpTarget categorySt = SaleOpTarget.findById(id);
         List<SaleOpTarget> sts = SaleOpTarget
                 .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
                         SaleOpTarget.T.MARKET).fetch();
         if(sts == null || sts.size() == 0) sts = categorySt.loadMarketSaleTargets(user);
-        render(categorySt, sts);
+        categorySt.usdToRmb();
+        sts = SaleOpTarget.salesToRbm(sts);
+        render(categorySt, sts,pid);
     }
 
     @Check("saleoptargets.marketsplit")
-    public static void doMarketSplit(Long id, List<SaleOpTarget> sts) {
+    public static void doMarketSplit(Long id, List<SaleOpTarget> sts,Long pid) {
         for(SaleOpTarget st : sts) {
             SaleOpTarget manageSt = SaleOpTarget.findById(st.id);
             manageSt.update(st, id);
         }
-        if(Validation.hasErrors()) marketSplit(id);
+        if(Validation.hasErrors()) marketSplit(id,pid);
         flash.success("更新成功.");
-        marketSplit(id);
+        marketSplit(id,pid);
     }
 
 
     /**
      * 季度分解
      */
-    public static void seasonSplit(Long id) {
+    public static void seasonSplit(Long id,Long pid) {
         User user = User.findByUserName(Secure.Security.connected());
         SaleOpTarget categorySt = SaleOpTarget.findById(id);
         List<SaleOpTarget> seasons = SaleOpTarget
-                .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
-                        SaleOpTarget.T.SEASON).fetch();
+                .find("fid=? AND targetYear=? AND saleTargetType=? And targetMarket=?", categorySt.fid,
+                        categorySt.targetYear,
+                        SaleOpTarget.T.SEASON, categorySt.targetMarket).fetch();
         if(seasons == null || seasons.size() == 0) seasons = categorySt.loadSeasonSaleTargets(user);
 
         List<SaleOpTarget> months = SaleOpTarget
-                .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
-                        SaleOpTarget.T.MONTH).fetch();
+                .find("fid=? AND targetYear=? AND saleTargetType=? AND targetMarket=?", categorySt.fid,
+                        categorySt.targetYear,
+                        SaleOpTarget.T.MONTH, categorySt.targetMarket).fetch();
         if(months == null || months.size() == 0) months = categorySt.loadMonthSaleTargets(user);
-
-        render(categorySt, seasons, months);
+        categorySt.usdToRmb();
+        seasons = SaleOpTarget.salesToRbm(seasons);
+        months = SaleOpTarget.salesToRbm(months);
+        render(categorySt, seasons, months, pid);
     }
 
 
-    public static void doSeasonSplit(Long id, List<SaleOpTarget> ss, List<SaleOpTarget> ms) {
+    public static void doSeasonSplit(Long id, SaleOpTarget yt, List<SaleOpTarget> ss, List<SaleOpTarget> ms,Long pid) {
+        SaleOpTarget s = SaleOpTarget.findById(yt.id);
+        s.update(yt, id);
         for(SaleOpTarget st : ss) {
             SaleOpTarget manageSt = SaleOpTarget.findById(st.id);
             manageSt.update(st, id);
@@ -149,8 +161,53 @@ public class SaleOpTargets extends Controller {
             SaleOpTarget manageSt = SaleOpTarget.findById(st.id);
             manageSt.update(st, id);
         }
-        if(Validation.hasErrors()) seasonSplit(id);
+        //更新上级的数据
+        s.updateCategory();
+        s.updateYear();
+        if(Validation.hasErrors()) seasonSplit(id,pid);
         flash.success("更新成功.");
-        seasonSplit(id);
+        seasonSplit(id,pid);
     }
+
+    public static void marketView(Long id) {
+        User user = User.findByUserName(Secure.Security.connected());
+        SaleOpTarget categorySt = SaleOpTarget.findById(id);
+        categorySt.usdToRmb();
+        List<SaleOpTarget> sts = SaleOpTarget
+                .find("fid=? AND targetYear=? AND saleTargetType=?", categorySt.fid, categorySt.targetYear,
+                        SaleOpTarget.T.MARKET).fetch();
+        if(sts == null || sts.size() == 0) sts = categorySt.loadMarketSaleTargets(user);
+
+        List<SaleOpTarget> total = new ArrayList<SaleOpTarget>();
+
+        List<List<SaleOpTarget>> sales = new ArrayList<List<SaleOpTarget>>();
+        for(SaleOpTarget target : sts) {
+            List<SaleOpTarget> monthsts = SaleOpTarget
+                    .find("fid=? AND targetYear=? AND saleTargetType=? AND targetMarket=? order by targetMonth",
+                            target.fid,
+                            categorySt.targetYear,
+                            SaleOpTarget.T.MONTH, target.targetMarket).fetch();
+            if(monthsts == null || monthsts.size() == 0) monthsts = target.loadMonthSaleTargets(user);
+            sales.add(monthsts);
+
+            if(total == null || total.size() <= 0)
+                total = monthsts;
+            else {
+                for(int i = 0; i < monthsts.size(); i++) {
+                    SaleOpTarget totaltarget = total.get(i);
+                    SaleOpTarget monthtarget = monthsts.get(i);
+                    totaltarget.saleQty += monthtarget.saleQty;
+                    totaltarget.saleAmounts += monthtarget.saleAmounts;
+                    totaltarget.saleQtyLast += monthtarget.saleQtyLast;
+                    totaltarget.saleAmountsLast += monthtarget.saleAmountsLast;
+                    total.set(i, totaltarget);
+                }
+            }
+        }
+
+
+        render(categorySt, sts, sales, total);
+    }
+
+
 }

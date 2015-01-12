@@ -353,4 +353,11 @@ public class Dates {
         DateTime date = DateTime.now().withYear(year).withMonthOfYear(month);
         return monthEnd(date.toDate());
     }
+
+
+    public static String scaleNumber(double number) {
+        java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
+        df.setRoundingMode(java.math.RoundingMode.HALF_UP);
+        return df.format(number);
+    }
 }
