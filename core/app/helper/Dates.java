@@ -7,9 +7,7 @@ import org.joda.time.format.DateTimeFormat;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -294,6 +292,31 @@ public class Dates {
         return calendar.getTime();
     }
 
+    /**
+     * 获取当前时间的星期天时间
+     *
+     * @return
+     */
+    public static Date getSundayOfWeek() {
+        return Dates.getSundayOfSpecifyTime(DateTime.now().toDate());
+    }
+
+    public static Date getMondayOfSpecifyTime(Date time) {
+        Calendar calendar = Calendar.getInstance(Locale.CHINA);
+        calendar.setTime(time);
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        return calendar.getTime();
+    }
+
+    public static Date getSundayOfSpecifyTime(Date time) {
+        Calendar calendar = Calendar.getInstance(Locale.CHINA);
+        calendar.setTime(time);
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        return calendar.getTime();
+    }
+
     public static Date monthBegin(Date time) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(time);
@@ -352,5 +375,71 @@ public class Dates {
     public static Date getMonthLast(int year, int month) {
         DateTime date = DateTime.now().withYear(year).withMonthOfYear(month);
         return monthEnd(date.toDate());
+    }
+
+    /**
+     * 获取给定时间范围内每个完整的一周的周末
+     *
+     * @param begin
+     * @param end
+     */
+    public static List<Date> getAllSunday(Date begin, Date end) {
+        Date _begin = begin;
+        Date _end = end;
+        //日期数据的容错处理
+        if(Dates.getSundayOfSpecifyTime(begin).getTime() != _begin.getTime()) {
+            //开始日期不是星期日(end 无法构成完整的一周，所以加上 6 天重新计算) 之所以加上 6 天而不是加上 7 天是为了防止 begin 是星期一,加上 6 天还在当前星期内
+            DateTime nextWeek = new DateTime(begin).plusDays(6);
+            _begin = Dates.getSundayOfSpecifyTime(nextWeek.toDate());
+        }
+        if(Dates.getSundayOfSpecifyTime(end).getTime() != _end.getTime()) {
+            //结束日期不是星期日(end 无法构成完整的一周，所以减去 6 天重新计算)
+            DateTime lastWeek = new DateTime(_end).minusDays(6);
+            _end = Dates.getSundayOfSpecifyTime(lastWeek.toDate());
+        }
+        Calendar c = Calendar.getInstance();
+        List<Date> dates = new ArrayList<Date>();
+        while(_begin.getTime() <= _end.getTime()) {
+            dates.add(Dates.night(_begin));
+            c.setTime(_begin);
+            c.add(Calendar.DATE, 7); // 每次日期加7天
+            _begin = c.getTime();
+        }
+        return dates;
+    }
+
+    /**
+     * 获取给定时间范围内每个完整的一周的周一
+     *
+     * @param begin
+     * @param end
+     */
+    public static List<Date> getAllMonday(Date begin, Date end) {
+        Date _begin = begin;
+        Date _end = end;
+        //日期数据的容错处理
+        if(Dates.getMondayOfSpecifyTime(_begin).getTime() != _begin.getTime()) {
+            //开始日期不是星期一(end 无法构成完整的一周，所以加上 6 天重新计算)
+            DateTime nextWeek = new DateTime(_begin).plusDays(6);
+            _begin = Dates.getMondayOfSpecifyTime(nextWeek.toDate());
+        }
+        if(Dates.getMondayOfSpecifyTime(_end).getTime() != _end.getTime()) {
+            //开始日期不是星期一(end 无法构成完整的一周，所以往减去 6 天重新计算)
+            DateTime lastWeek = new DateTime(_end).minusDays(6);
+            _end = Dates.getMondayOfSpecifyTime(lastWeek.toDate());
+        }
+        Calendar c = Calendar.getInstance();
+        List<Date> dates = new ArrayList<Date>();
+        while(_begin.getTime() <= _end.getTime()) {
+            //这里还有一个问题 当结束日期刚好是周一时,由于无法找到对应的周日(超出了结束时间)来构成完整的一周,所以需要舍弃该日期
+            if(Dates.getSundayOfSpecifyTime(_begin).getTime() <= end.getTime()) {
+                //获取到对应的周末需要小于或等于结束日期才是一个合法的周一
+                dates.add(Dates.morning(_begin));
+            }
+            c.setTime(_begin);
+            c.add(Calendar.DATE, 7); // 每次日期加7天
+            _begin = c.getTime();
+        }
+        return dates;
     }
 }

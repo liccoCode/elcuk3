@@ -4,22 +4,29 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import notifiers.Mails;
+import models.product.Category;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 某一个 Listing 所拥有的 Review 消息
@@ -610,4 +617,189 @@ public class AmazonListingReview extends GenericModel {
         return reviewLeftClicks;
     }
 
+    /**
+     * 计算指定的产品线的 Listing 下所有的 Review 在一个时间段内的评分情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     * <p>
+     * (首先取得所选时间段范围内所有有效的周一与周日 List<Date> points)
+     * (然后取得系统内第一个 Review 产生的时间作为 begin)
+     * (分别用第一个 Review 产生的时间作为 begin, 循环出 points 内每一个元素作为 end, 这样去查询出当前时间范围内的 Review 评分情况)
+     * (组装成 HighChart 返回给前端绘制图形)
+     * </p>
+     *
+     * @param from     开始时间
+     * @param to       结束时间
+     * @param category 品线
+     * @return
+     */
+    @Cached("2h")
+    public static HighChart reviewRatingLine(Date from, Date to, String category) {
+        String cacked_key = Caches.Q.cacheKey("reviewRatingLine", from, to, category);
+        HighChart lineChart = Cache.get(cacked_key, HighChart.class);
+        if(lineChart != null) return lineChart;
+        synchronized(cacked_key.intern()) {
+            lineChart = Cache.get(cacked_key, HighChart.class);
+            if(lineChart != null) return lineChart;
+            lineChart = new HighChart(Series.LINE);
+            lineChart.title = "Review 星级趋势图";
+
+            //取得时间段范围内所有有效的周日
+            List<Date> points = Dates.getAllSunday(from, to);
+            Date begin = AmazonListingReview.firstReviewDate();
+            for(M m : M.values()) {
+                if(m.equals(M.EBAY_UK)) continue;
+                Series.Line line = new Series.Line(m.name());
+
+                for(Date end : points) {
+                    List<String> lids = AmazonListingReview.getListingIdsByDateRange(category, m, begin, end);
+                    float rating = AmazonListingReview.getRatingByDateRange(lids, begin, end);
+                    line.add(end, rating);
+                }
+                lineChart.series(line);
+            }
+            lineChart.series(lineChart.sumSeriesWithBigDecimal("星级"));
+            Cache.add(cacked_key, lineChart, "2h");
+        }
+        return Cache.get(cacked_key, HighChart.class);
+    }
+
+    /**
+     * 计算指定的产品线的 Listing 下所有的 Review 在一个时间段内的中差评情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     *
+     * @param from     开始时间
+     * @param to       结束时间
+     * @param category 品线
+     * @return
+     */
+    @Cached("2h")
+    public static HighChart poorRatingLine(Date from, Date to, String category) {
+        String cacked_key = Caches.Q.cacheKey("poorRatingLine", from, to, category);
+        HighChart lineChart = Cache.get(cacked_key, HighChart.class);
+        if(lineChart != null) return lineChart;
+        synchronized(cacked_key.intern()) {
+            lineChart = Cache.get(cacked_key, HighChart.class);
+            if(lineChart != null) return lineChart;
+            lineChart = new HighChart(Series.LINE);
+            lineChart.title = "产品线 Review 中差评率趋势图(单位: %)";
+            //取得时间段范围内所有有效的周一与周日
+            List<Date> mondayList = Dates.getAllMonday(from, to);
+            List<Date> sundayList = Dates.getAllSunday(from, to);
+            for(M m : M.values()) {
+                if(m.equals(M.EBAY_UK)) continue;
+                List<String> lids = Category.listingIds(category, m);
+                Series.Line line = new Series.Line(m.name());
+                for(int i = 0; i < mondayList.size(); i++) {
+                    Date monDay = mondayList.get(i);//星期一
+                    Date sunDay = sundayList.get(i);//星期天
+
+                    float rating = AmazonListingReview
+                            .getPoorRatingByDateRange(lids, monDay, sunDay);
+                    line.add(sunDay, rating);
+                }
+                lineChart.series(line);
+            }
+            lineChart.series(lineChart.sumSeriesWithBigDecimal("中差评"));
+            Cache.add(cacked_key, lineChart, "2h");
+        }
+        return Cache.get(cacked_key, HighChart.class);
+    }
+
+    /**
+     * 系统内第一个 Review 产生的时间
+     *
+     * @return
+     */
+    public static Date firstReviewDate() {
+        AmazonListingReview firstReview = AmazonListingReview.find("ORDER BY reviewDate ASC").first();
+        return firstReview.reviewDate;
+    }
+
+    /**
+     * 根据时间范围与 Listing ID 集合计算 Review 评分
+     * <p>
+     * 计算公式:
+     * (5 * 所有5星的Review数量 +  4 * 所有4星的Review数量 +  3 * 所有3星的Review数量 + 2 * 所有2星的Review数量  +  1 * 所有1星的Review数量)
+     * / 所有Review数量
+     * </p>
+     *
+     * @param lids
+     * @param begin
+     * @param end
+     * @return
+     */
+    public static float getRatingByDateRange(List<String> lids, Date begin, Date end) {
+        if(lids == null || lids.isEmpty()) return 0; //未找到合法的 Listing ID
+        long reviewCount = AmazonListingReview.count();
+        SqlSelect sql = new SqlSelect().select("count(*) as count, rating as review_rating").from("AmazonListingReview")
+                .where("reviewDate >= ?").param(begin)
+                .andWhere("reviewDate <= ?").param(end)
+                .andWhere("(rating = 1 OR rating = 2 OR rating = 3 OR rating = 4 OR rating = 5)")
+                .andWhere(SqlSelect.whereIn("listing_listingId", lids))
+                .groupBy("review_rating");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        int ratingSum = 0;
+        if(rows != null && rows.size() > 0) {
+            for(Map<String, Object> row : rows) {
+                if(row.get("review_rating").toString().equalsIgnoreCase("1.0")) {
+                    ratingSum += (NumberUtils.toInt(row.get("count").toString()) * 1);
+                }
+                if(row.get("review_rating").toString().equalsIgnoreCase("2.0")) {
+                    ratingSum += (NumberUtils.toInt(row.get("count").toString()) * 2);
+                }
+                if(row.get("review_rating").toString().equalsIgnoreCase("3.0")) {
+                    ratingSum += (NumberUtils.toInt(row.get("count").toString()) * 3);
+                }
+                if(row.get("review_rating").toString().equalsIgnoreCase("4.0")) {
+                    ratingSum += (NumberUtils.toInt(row.get("count").toString()) * 4);
+                }
+                if(row.get("review_rating").toString().equalsIgnoreCase("5.0")) {
+                    ratingSum += (NumberUtils.toInt(row.get("count").toString()) * 5);
+                }
+            }
+            float rating = (float) ratingSum / (float) reviewCount;
+            BigDecimal bd = new BigDecimal(rating);
+            return bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue(); // 四舍五入且保留两位小数
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 获取 Category 下在指定时间范围内未下架的 Listing ID
+     * 是否合法判断规则:
+     * 取得时间范围内的最后一条记录, 如果该记录为下架状态,则该 Listing 需要被删除
+     *
+     * @return
+     */
+    public static List<String> getListingIdsByDateRange(String categoryId, M market, Date from, Date to) {
+        List<String> listingIds = Category.listingIds(categoryId, market);
+        if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
+        for(int i = 0; i < listingIds.size(); i++) {
+            //查找出给定时间范围内的最后一条 ListingStateRecord 记录
+            ListingStateRecord record = ListingStateRecord.find(
+                    "listing_listingId =? AND changedDate >= ? AND changedDate <= ? ORDER BY changedDate ASC",
+                    listingIds.get(i), from, to).first();
+            //最后一条是 DOWN, 该 Listing ID 不合法
+            if(record == null || record.state == ListingStateRecord.S.DOWN) listingIds.remove(i);
+        }
+        return listingIds;
+    }
+
+    /**
+     * 根据时间范围与 Listing ID 集合计算 Review中差评率
+     *
+     * @param lids
+     * @param begin
+     * @param end
+     * @return
+     */
+    public static float getPoorRatingByDateRange(List<String> lids, Date begin, Date end) {
+        long reviewCount = AmazonListingReview.count("reviewDate >= ? AND reviewDate <= ?", begin, end);
+        if(lids == null || lids.isEmpty() || reviewCount == 0) return 0;
+        long poorReviewCount = AmazonListingReview.count(
+                "rating <= 3 AND reviewDate >= ? AND reviewDate <= ? AND listing_listingId IN " +
+                        SqlSelect.inlineParam(lids) + "", begin, end);
+        float poorRate = ((float) poorReviewCount / (float) reviewCount) * 100;
+        BigDecimal bd = new BigDecimal(poorRate);
+        return bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue(); // 四舍五入且保留两位小数
+    }
 }

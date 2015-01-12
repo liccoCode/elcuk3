@@ -12,6 +12,7 @@ import models.view.Ret;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
 import play.jobs.Job;
 import play.libs.F;
@@ -291,6 +292,8 @@ public class Sellings extends Controller {
             selling.save();
             //修改 Product 在系统内的状态
             Product.changeProductType(selling.merchantSKU);
+            //存储 Listing 状态变更记录
+            selling.listing.recordingListingState(DateTime.now().toDate());
             renderJSON(new Ret(true, sellingId));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
