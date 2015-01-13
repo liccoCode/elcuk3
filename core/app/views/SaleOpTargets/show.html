@@ -115,10 +115,11 @@
               <td>
                 <div class="input-append">
                   #{if st.saleQtyLast>0}
-                    <input type="text" readonly="true" class="input-mini" value="${st.saleQtyLast}" name="sts[${st_index-1}].saleQtyLast">
+                    <input type="text" readonly="true" value="${st.saleQtyLast}" name="sts[${st_index-1}]
+                    .saleQtyLast">
                   #{/if}
                   #{else}
-                    <input type="text" readonly="true" class="input-mini" value="" name="sts[${st_index - 1}].saleQty">
+                    <input type="text" readonly="true" value="" name="sts[${st_index - 1}].saleQty">
                   #{/else}
                 </div>
               </td>
@@ -136,12 +137,12 @@
 
               <td>
                 #{if st.saleAmountsLast>0}
-                  <input type="text" readonly="true"  class="input-small"
+                  <input type="text" readonly="true"
                          value="${helper.Dates.scaleNumber(st.saleAmountsLast)}"
                          name="sts[${st_index - 1}].saleAmountsLast">
                 #{/if}
                 #{else}
-                  <input type="text" readonly="true" class="input-small" value="" name="sts[${st_index - 1}].saleAmountsLast">
+                  <input type="text" readonly="true"   value="" name="sts[${st_index - 1}].saleAmountsLast">
                 #{/else}
               </td>
 
