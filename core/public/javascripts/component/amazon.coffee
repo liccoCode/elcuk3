@@ -83,8 +83,8 @@ $ ->
     $("[name='s.aps.brand']").val(json['brand'][0]).blur()
     $("[name='s.aps.standerPrice']").val(json['price'][0]).blur()
     $("[name='s.aps.itemType']").val(json['type'][0]).blur()
-
     $("[name='s.aps.title']").val(json['title'][0]).blur()
+
 
     # technical
     tech = json['t']
