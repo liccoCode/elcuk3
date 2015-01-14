@@ -103,7 +103,7 @@ public class SaleOpTargets extends Controller {
      * 市场分解
      */
     @Check("saleoptargets.marketsplit")
-    public static void marketSplit(Long id,Long pid) {
+    public static void marketSplit(Long id) {
         User user = User.findByUserName(Secure.Security.connected());
         SaleOpTarget categorySt = SaleOpTarget.findById(id);
         List<SaleOpTarget> sts = SaleOpTarget
@@ -112,18 +112,22 @@ public class SaleOpTargets extends Controller {
         if(sts == null || sts.size() == 0) sts = categorySt.loadMarketSaleTargets(user);
         categorySt.usdToRmb();
         sts = SaleOpTarget.salesToRbm(sts);
+        SaleOpTarget t =   SaleOpTarget.find("targetYear=? AND saleTargetType=?",
+                categorySt.targetYear,
+                                SaleOpTarget.T.YEAR).first();
+        Long pid = t.id;
         render(categorySt, sts,pid);
     }
 
     @Check("saleoptargets.marketsplit")
-    public static void doMarketSplit(Long id, List<SaleOpTarget> sts,Long pid) {
+    public static void doMarketSplit(Long id, List<SaleOpTarget> sts) {
         for(SaleOpTarget st : sts) {
             SaleOpTarget manageSt = SaleOpTarget.findById(st.id);
             manageSt.update(st, id);
         }
-        if(Validation.hasErrors()) marketSplit(id,pid);
+        if(Validation.hasErrors()) marketSplit(id);
         flash.success("更新成功.");
-        marketSplit(id,pid);
+        marketSplit(id);
     }
 
 

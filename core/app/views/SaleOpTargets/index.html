@@ -33,7 +33,7 @@
             </td>
             <td>${st.targetYear}</td>
             <td>${st.saleQty}</td>
-            <td>${new BigDecimal(st.saleAmounts).toString()}</td>
+            <td>${helper.Dates.scaleNumber(st.saleAmounts)}</td>
             <td>${st.createuser.username}</td>
             <td>${st.createDate}</td>
           </tr>
