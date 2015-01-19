@@ -436,7 +436,6 @@ public class Dates {
                 //获取到对应的周末需要小于或等于结束日期才是一个合法的周一
                 dates.add(Dates.morning(_begin));
             }
-            dates.add(Dates.morning(_begin));
             c.setTime(_begin);
             c.add(Calendar.DATE, 7); // 每次日期加7天
             _begin = c.getTime();
