@@ -320,7 +320,7 @@ public class Category extends GenericModel {
             rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         }
         for(Map<String, Object> row : rows) {
-            listingIds.add(row.get("asin").toString());
+            listingIds.add(row.get("asin").toString().toLowerCase());
         }
         return listingIds;
     }

@@ -19,6 +19,7 @@ import play.utils.FastRuntimeException;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -58,22 +59,25 @@ public class MetricReviewService {
         //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
+            List<String> asins = Category.asins(this.category, m);
+
             //市场的 aggregation 过滤
             FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(
                     String.format("%s_docs", m.nickName())).filter(
                     // market 过滤
                     FilterBuilders.termFilter("market", m)
             );
-
             // 每一个时间点作为一个单独的 Aggregation
             for(Date sunday : sundays) {
-                List<String> asins = getAsinsByDateRange(firstReviewDate, sunday, m);
-                if(asins == null || asins.isEmpty()) continue;  //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
+                List<String> filteredAsins = filterAsinsByDateRange(asins, sunday, m);
+                if(filteredAsins == null || filteredAsins.isEmpty()) {
+                    continue; //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
+                }
                 //时间过滤 begin(firstReviewDate) end(sunday)、ASIN 过滤
                 FilterAggregationBuilder dateAndAsinAggregation = AggregationBuilders.filter(
                         formatter.format(sunday)).filter(
                         FilterBuilders.andFilter(
-                                FilterBuilders.termsFilter("listing_asin", asins),
+                                FilterBuilders.termsFilter("listing_asin", filteredAsins),
                                 FilterBuilders.rangeFilter("review_date")
                                         .gte(formatter.format(firstReviewDate))
                                         .lte(formatter.format(sunday))
@@ -107,7 +111,6 @@ public class MetricReviewService {
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
             List<String> asins = Category.asins(this.category, m);
-            for(String asin : asins) Collections.replaceAll(asins, asin, asin.toLowerCase()); //转小写
             if(asins == null || asins.isEmpty()) continue; //未找到合法的 ASIN
             //市场、ASIN、from、to aggregation
             FilterAggregationBuilder marketAggregation = AggregationBuilders
@@ -149,19 +152,31 @@ public class MetricReviewService {
      *
      * @return
      */
-    public List<String> getAsinsByDateRange(Date begin, Date end, M market) {
-        List<String> asins = Category.asins(this.category, market);
+    public List<String> filterAsinsByDateRange(List<String> asins, Date end, M market) {
         if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
         for(int i = 0; i < asins.size(); i++) {
-            //查找出给定时间范围内的最后一条 ListingStateRecord 记录
-            ListingStateRecord record = ListingStateRecord.find(
-                    "SELECT DISTINCT ls FROM ListingStateRecord ls LEFT JOIN ls.listing li WHERE 1=1 AND " +
-                            "ls.changedDate <= ? AND li.asin = ? AND li.market = ? " +
-                            "ORDER BY ls.changedDate ASC", end, asins.get(i), market).first();
-            //最后一条是 DOWN, 该 Listing ID 不合法
-            if(record == null || record.state == ListingStateRecord.S.DOWN) asins.remove(i);
+            List<ListingStateRecord> records = ListingStateRecord.getCacheByAsinAndMarket(
+                    asins.get(i),
+                    market
+            );//取到对应的缓存
+
+            //排序
+            Collections.sort(records, new Comparator<ListingStateRecord>() {
+                @Override
+                public int compare(ListingStateRecord o1, ListingStateRecord o2) {
+                    return o1.changedDate.compareTo(o2.changedDate);
+                }
+            });
+
+            for(int j = records.size() - 1; j >= 0; j--) {//倒序循环
+                ListingStateRecord record = records.get(j);
+                //如果时间小于等于 end, 且 state 为 DOWN， 删除该 asin
+                if(record.changedDate.getTime() <= end.getTime() && record.state == ListingStateRecord.S.DOWN) {
+                    asins.remove(i);
+                    break;
+                }
+            }
         }
-        for(String asin : asins) Collections.replaceAll(asins, asin, asin.toLowerCase()); //转小写
         return asins;
     }
 }
