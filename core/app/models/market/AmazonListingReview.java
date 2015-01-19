@@ -704,14 +704,14 @@ public class AmazonListingReview extends GenericModel {
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "产品线 Review 中差评率趋势图(单位: %)";
 
-            List<Date> mondayList = Dates.getAllMonday(from, to);
+            List<Date> sundayList = Dates.getAllSunday(from, to);
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject aggregations = service.countPoorRatingByDateRange();
             for(M m : M.values()) {
                 if(m.equals(M.EBAY_UK)) continue;
                 Series.Line line = new Series.Line(m.name());
                 String marketKey = String.format("%s_docs", m.nickName());
-                List<Date> mondayListCopy = new ArrayList<Date>(mondayList);
+                List<Date> sundayListCopy = new ArrayList<Date>(sundayList);
 
                 if(aggregations != null) {
                     JSONObject countByMarket = aggregations.getJSONObject(marketKey);
@@ -720,16 +720,21 @@ public class AmazonListingReview extends GenericModel {
                         for(Object o : countByReviewDate.getJSONArray("buckets")) {
                             JSONObject entry = (JSONObject) o;
                             long reviewCount = entry.getLongValue("doc_count");
-                            Date point = Dates.date2JDate(entry.getDate("key"));
+                            Date point = Dates.night(
+                                    new DateTime(Dates.date2JDate(entry.getDate("key"))).plusDays(6).toDate());
+                            //由于 ES 返回的都是周一,因此需要加上 6 天得到周末
                             int poorReviewCount = entry.getJSONObject("poor_rating_review").getIntValue("doc_count");
                             float poorRate = ((float) poorReviewCount / (float) reviewCount) * 100;
                             BigDecimal bd = new BigDecimal(poorRate);
-                            line.add(point, bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue()); // 四舍五入且保留两位小数
-                            mondayListCopy.remove(point);
+                            if(sundayList.contains(point)) {
+                                line.add(point, bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue()); //
+                                // 四舍五入且保留两位小数
+                                sundayListCopy.remove(point);
+                            }
                         }
                     }
                 }
-                for(Date monday : mondayListCopy) line.add(monday, 0f); //补充没有数据的那些点
+                for(Date sunday : sundayListCopy) line.add(sunday, 0f); //补充没有数据的那些点
 
                 line.visible = false;
                 lineChart.series(line.sort());
