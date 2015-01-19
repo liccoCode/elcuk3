@@ -51,6 +51,8 @@ public class MetricReviewService {
      * @return
      */
     public JSONObject countReviewRating() {
+        if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
+
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -153,7 +155,6 @@ public class MetricReviewService {
      * @return
      */
     public List<String> filterAsinsByDateRange(List<String> asins, Date end, M market) {
-        if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
         for(int i = 0; i < asins.size(); i++) {
             List<ListingStateRecord> records = ListingStateRecord.getCacheByAsinAndMarket(
                     asins.get(i),
@@ -170,9 +171,9 @@ public class MetricReviewService {
 
             for(int j = records.size() - 1; j >= 0; j--) {//倒序循环
                 ListingStateRecord record = records.get(j);
-                //如果时间小于等于 end, 且 state 为 DOWN， 删除该 asin
-                if(record.changedDate.getTime() <= end.getTime() && record.state == ListingStateRecord.S.DOWN) {
-                    asins.remove(i);
+                //如果时间小于等于 end, 且 state 为 DOWN， 删除该 asin  找到时间小于 end 但是状态不为 SELLING 需要保留此 asin
+                if(record.changedDate.getTime() <= end.getTime()) {
+                    if(record.state == ListingStateRecord.S.DOWN) asins.remove(i);
                     break;
                 }
             }
