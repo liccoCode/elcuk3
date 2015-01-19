@@ -3,26 +3,24 @@
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
     #{script 'Pmdashboards/pmdashboards.coffee'/}
+    #{script 'Pmdashboards/reviewrecords.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}
 
-#{info_row title:'Pm Dashboard'}
-#{/info_row}
-
-<div class="row-fluid" id="orders">
+<div class="row-fluid search_form" id="orders">
   <div class="span12">
     <div class="input-prepend input-append inline">
-      <select name="team" style="width:130px;margin-left:20px;">
+      <select name="team" style="width:130px;margin-left:1px;">
       #{list items:teams, as:'t'}
         <option value="${t.teamId}">${t.name}</option>
       #{/list}
       </select>
     </div>
 
-    <div class="input-prepend input-append inline">
-      <span class="add-on">年份:</span>
-      <select year="${year}" name="year" style="width:130px;margin-left:20px;">
+    <div class="inline" style="margin-left:5px;">
+      年份:
+      <select year="${year}" name="year">
         <option value="${year}">${year}</option>
         <option value="${year-1}">${year-1}</option>
         <option value="${year-2}">${year-2}</option>
@@ -30,18 +28,17 @@
       </select>
     </div>
 
-    <div class="input-prepend input-append inline">
-      <span class="add-on">Category:</span>
-      <select name="cate" style="width:130px;margin-left:20px;">
+    <div class="inline" style="margin-left:5px;">
+      Category:
+      <select name="cate">
       #{list items:cates, as:'cate'}
         <option value="${cate.categoryId}">${cate.categoryId}</option>
       #{/list}
       </select>
     </div>
 
-    <div class="input-prepend input-append inline">
-      <span class="add-on"><i class="icon-search"></i></span>
-      <button class="btn btn-primary" name="search">搜索</button>
+    <div class="inline">
+      <button class="btn btn-primary" name="search">查询</button>
     </div>
 
     <input type="hidden" name="productvalue" value="0">
@@ -76,8 +73,11 @@
   <div class="tab-pane fade active in" id='product' data-method="ajaxFetchProductInfos">
   #{info_row title:'产品线状态'/}
     <div class="row-fluid">
-      <div class="span6" style="height:450px;" id='salefee_line' data-url="/pmdashboards/percent"></div>
-      <div class="span6" style="height:450px;" id='saleqty_line' data-url="/pmdashboards/percent"></div>
+      <div class="span6" style="height:450px;width:47%" id='salefee_line' data-url="/pmdashboards/percent"></div>
+      <div class="span6" style="height:450px;width:47%" id='saleqty_line' data-url="/pmdashboards/percent"></div>
+    </div>
+    <div id="reviewAnalyzes">
+    #{include 'Pmdashboards/reviewRecords.html'/}
     </div>
   </div>
 
