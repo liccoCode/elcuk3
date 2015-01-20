@@ -163,7 +163,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
+        return ProcureUnit.find(params._1 + " ORDER BY createAt DESC", params._2.toArray()).fetch();
     }
 
     @Override

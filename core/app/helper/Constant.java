@@ -73,4 +73,9 @@ public class Constant {
 
     public static final String ROOT_PATH = "http://e.easya.cc";
 
+    /**
+     * 系统中产生的 "数据" 类型的文件
+     */
+    public static final String REPORT_PATH = String.format("%s/elcuk2-report", Constant.HOME);
+
 }
