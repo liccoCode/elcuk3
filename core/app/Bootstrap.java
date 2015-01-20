@@ -6,6 +6,7 @@ import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
+import models.market.OperatorConfig;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
@@ -52,6 +53,7 @@ public class Bootstrap extends Job {
         JobsSetup.init();
         Account.initOfferIds();
         ElcukConfig.init();
+        OperatorConfig.init();
         Caches.clearRedisRunningKeys();
 
         /**
