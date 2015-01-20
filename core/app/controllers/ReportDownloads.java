@@ -53,4 +53,25 @@ public class ReportDownloads extends Controller {
         List<OperatorConfig> configurations = OperatorConfig.findAll();
         render(configurations);
     }
+
+    /**
+     * 报表相关参数设置
+     */
+    @Check("reportdownloads.config")
+    public static void editConfig(Long id) {
+        OperatorConfig config = OperatorConfig.findById(id);
+        render(config);
+    }
+
+    /**
+     * 报表相关参数设置
+     */
+    @Check("reportdownloads.config")
+    public static void updateConfig(Long id, String val) {
+        OperatorConfig config = OperatorConfig.findById(id);
+        config.val = val;
+        config.save();
+        flash.success("参数 %s 设置成功!", config.name);
+        config();
+    }
 }

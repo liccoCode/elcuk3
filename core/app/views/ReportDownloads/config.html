@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main.html'/}
 #{set title:"运营报表参数设置" /}
 #{set 'moreScripts'}
 #{/set}
@@ -21,7 +21,7 @@
       <td>${config.val}</td>
       <td>${config.updateAt}</td>
       <td>
-        <a href="javascript:void(0)" class="btn btn-info">修改</a>
+        <a href="@{ReportDownloads.editConfig(config.id)}" class="btn btn-info">修改</a>
       </td>
     </tr>
   #{/list}
