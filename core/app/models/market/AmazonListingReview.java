@@ -633,6 +633,7 @@ public class AmazonListingReview extends GenericModel {
      */
     @Cached("4h")
     public static HighChart reviewRatingLine(Date from, Date to, String category) {
+        if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
         String cacked_key = Caches.Q.cacheKey("reviewRatingLine", category, from, to);
         HighChart lineChart = Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;

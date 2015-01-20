@@ -51,8 +51,6 @@ public class MetricReviewService {
      * @return
      */
     public JSONObject countReviewRating() {
-        if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
-
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
