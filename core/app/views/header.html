@@ -59,6 +59,9 @@
       #{power.ck "amazonoperations"}
         <li><a href="@{AmazonOperations.index()}">Review 点击台</a></li>
       #{/power.ck}
+      #{power.ck "reportdownloads"}
+        <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
+      #{/power.ck}
   </ul>
 </li>
 #{/power.ck}
@@ -171,10 +174,9 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
   <ul class="dropdown-menu">
-      #{power.ck "saletargets.index"}
-        <li><a href="@{SaleTargets.index()}">年度销售目标</a></li>
+      #{power.ck "saleoptargets.index"}
+        <li><a href="@{SaleOpTargets.index()}">运营年度销售目标</a></li>
       #{/power.ck}
-
   </ul>
 </li>
 #{/power.ck}

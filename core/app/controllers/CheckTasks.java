@@ -296,11 +296,14 @@ public class CheckTasks extends Controller {
         String taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
 
         ProcureUnit managedUnit = ProcureUnit.findById(unitid);
-        managedUnit.update(unit, shipmentId, msg);
-        if(Validation.hasErrors()) {
-            flash.error(Validation.errors().toString());
-            unit.id = managedUnit.id;
-            CheckTasks.showactiviti(checkid);
+
+        if(managedUnit.stage != ProcureUnit.STAGE.CLOSE) {
+            managedUnit.update(unit, shipmentId, msg);
+            if(Validation.hasErrors()) {
+                flash.error(Validation.errors().toString());
+                unit.id = managedUnit.id;
+                CheckTasks.showactiviti(checkid);
+            }
         }
 
         CheckTask c = CheckTask.findById(checkid);

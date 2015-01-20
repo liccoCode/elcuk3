@@ -111,6 +111,7 @@ public class Sellings extends Controller {
                 .put("brand", Arrays.asList(s.aps.brand))
                 .put("price", Arrays.asList(s.aps.standerPrice.toString()))
                 .put("type", Arrays.asList(s.aps.itemType))
+                .put("title",Arrays.asList(s.aps.title))
                 .build()));
     }
 

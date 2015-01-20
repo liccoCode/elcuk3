@@ -275,7 +275,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         String feedate = doc.select("#transaction_date").text().split(":")[1].trim();
         String[] feedateformate = feedate.split("\\.");
         Logger.info("::::::" + feedateformate.length + "  " + feedate);
-        if(feedateformate != null && feedateformate.length > 0) {
+        if(feedateformate != null && feedateformate.length >= 3) {
             Calendar c = Calendar.getInstance();
             c.set(Integer.parseInt(feedateformate[2]),
                     Integer.parseInt(feedateformate[1]),
@@ -352,6 +352,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         text = text.toLowerCase();
         if(text.equals("commission:")) {
             return FeeType.findById("commission");
+        } else if(text.contains("referral fee")) {
+            return FeeType.findById("commission");
         } else if(text.contains("refund commission")) {
             return FeeType.findById("refundcommission");
         } else if(text.contains("cross-border")) {
@@ -409,7 +411,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public Float fee(String text) {
-        text = text.replace(",",".");
+        text = text.replace(",", ".");
         if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR, M.AMAZON_IT).contains(this.market)) {
             return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "€"), ","));
         } else if(M.AMAZON_UK == this.market) {

@@ -377,6 +377,11 @@ public class Dates {
         return monthEnd(date.toDate());
     }
 
+    public static String scaleNumber(double number) {
+        java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
+        df.setRoundingMode(java.math.RoundingMode.HALF_UP);
+        return df.format(number);
+    }
     /**
      * 获取给定时间范围内每个完整的一周的周末
      *
