@@ -4,6 +4,7 @@ import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
 import models.ReportRecord;
+import models.market.OperatorConfig;
 import models.view.Ret;
 import models.view.post.ReportPost;
 import play.mvc.Controller;
@@ -42,5 +43,14 @@ public class ReportDownloads extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
+
+    /**
+     * 报表相关参数设置
+     */
+    @Check("reportdownloads.config")
+    public static void config() {
+        List<OperatorConfig> configurations = OperatorConfig.findAll();
+        render(configurations);
     }
 }
