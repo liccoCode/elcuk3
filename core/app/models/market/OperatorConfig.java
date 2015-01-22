@@ -26,6 +26,7 @@ import java.util.Map;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class OperatorConfig extends Model {
     public static final Map<String, T> NAME_Type_MAPS;
+    public static final Map<String, String> VALUES_MAPS;
 
     static {
         NAME_Type_MAPS = Collections.unmodifiableMap(
@@ -35,6 +36,14 @@ public class OperatorConfig extends Model {
                         .put("采货天数", T.OPERATIONS)
                         .put("合理库存周转天数", T.OPERATIONS)
                         .put("运输天数", T.SHIPMENT)
+                        .build()
+        );
+        VALUES_MAPS = Collections.unmodifiableMap(
+                GTs.MapBuilder.map("在库库存周转天数(TOR)", "30")
+                        .put("安全库存", "7")
+                        .put("质检时间", "2")
+                        .put("采货天数", "14")
+                        .put("合理库存周转天数", "70")
                         .build()
         );
     }
@@ -90,7 +99,8 @@ public class OperatorConfig extends Model {
          * 运营报表参数初始化
          */
         for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
-            OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(), 0);
+            OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(),
+                    VALUES_MAPS.get(nameAndTypeEntry.getKey()));
             if(!config.exist()) config.save();
         }
     }

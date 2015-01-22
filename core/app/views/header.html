@@ -62,9 +62,6 @@
       #{power.ck "reportdownloads"}
         <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
       #{/power.ck}
-      #{power.ck "reportdownloads.config"}
-        <li><a href="@{ReportDownloads.config()}">报表参数设置</a></li>
-      #{/power.ck}
   </ul>
 </li>
 #{/power.ck}
@@ -208,7 +205,9 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
   <ul class="dropdown-menu">
-    <li><a href="@{Elcuk.index()}">全局参数</a></li>
+      #{power.ck "elcuk.index"}
+        <li><a href="@{Elcuk.index()}">全局参数</a></li>
+      #{/power.ck}
       #{power.ck "jobs.index"}
         <li><a href="@{Jobs.index()}">任务管理</a></li>
       #{/power.ck}

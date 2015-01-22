@@ -12,7 +12,7 @@
     <span class="label label-success">市场: ${market}</span>
     <span class="label label-success">运输方式: ${shipType}</span>
   </div>
-#{form @Elcuk.updateConfigs(), method: 'POST', class: 'search_form'}
+#{form @Elcuk.updateShipDayConfigs(), method: 'POST', class: 'search_form'}
   <table class="table table-condensed table-bordered">
     <tr>
       <th>阶段类型</th>
@@ -38,7 +38,7 @@
         <input type="hidden" name="operatorConfigId" value="${operatorConfigId}">
         <input type="hidden" name="market" value="${market}">
         <input type="hidden" name="shipType" value="${shipType}">
-        <a class="btn" href="@{ReportDownloads.editConfig(operatorConfigId)}">返回</a>
+        <a class="btn" href="@{Elcuk.edit(operatorConfigId)}">返回</a>
         <a class="btn btn-primary" id="submitBtn" href="javascript:void(0)" data-loading>更新</a>
       </td>
     </tr>

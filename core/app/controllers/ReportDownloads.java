@@ -4,7 +4,6 @@ import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
 import models.ReportRecord;
-import models.market.OperatorConfig;
 import models.view.Ret;
 import models.view.post.ReportPost;
 import play.mvc.Controller;
@@ -45,37 +44,4 @@ public class ReportDownloads extends Controller {
         }
     }
 
-    /**
-     * 报表相关参数设置
-     */
-    @Check("reportdownloads.config")
-    public static void config() {
-        List<OperatorConfig> configurations = OperatorConfig.findAll();
-        render(configurations);
-    }
-
-    /**
-     * 报表相关参数设置
-     */
-    @Check("reportdownloads.config")
-    public static void editConfig(Long id) {
-        OperatorConfig config = OperatorConfig.findById(id);
-        if(config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
-            render("ReportDownloads/marketShipDay.html", config);
-        } else {
-            render(config);
-        }
-    }
-
-    /**
-     * 报表相关参数设置
-     */
-    @Check("reportdownloads.config")
-    public static void updateConfig(Long id, String val) {
-        OperatorConfig config = OperatorConfig.findById(id);
-        config.val = val;
-        config.save();
-        flash.success("参数 %s 设置成功!", config.name);
-        config();
-    }
 }
