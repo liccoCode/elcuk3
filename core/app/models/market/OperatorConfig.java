@@ -1,15 +1,20 @@
 package models.market;
 
 import helper.GTs;
+import models.ElcukConfig;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.db.jpa.JPABase;
 import play.db.jpa.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,6 +72,7 @@ public class OperatorConfig extends Model {
      */
     public Date updateAt = DateTime.now().toDate();
 
+
     public Integer integerVal() {
         return NumberUtils.toInt(toStr());
     }
@@ -109,5 +115,17 @@ public class OperatorConfig extends Model {
         config.val = val;
         config.type = type;
         return config;
+    }
+
+    public String fullName() {
+        return String.format("%s_%s", this.type, this.name);
+    }
+
+    public <T extends JPABase> List<T> childs() {
+        if(this.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
+            return ElcukConfig.findAll();
+        } else {
+            return null;
+        }
     }
 }

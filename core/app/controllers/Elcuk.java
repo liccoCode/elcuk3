@@ -1,13 +1,17 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import jobs.driver.DriverJob;
 import models.ElcukConfig;
+import models.market.M;
+import models.procure.Shipment;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,10 +22,17 @@ import java.util.regex.Pattern;
  * Date: 1/14/13
  * Time: 3:27 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Elcuk extends Controller {
     public static void index() {
         render();
+    }
+
+    public static void editConfig(String market, Shipment.T shipType, long operatorConfigId) {
+
+        List<ElcukConfig> configs = ElcukConfig
+                .find("name like ?", M.val(market).sortName() + "_" + shipType.toString().toLowerCase() + "_%").fetch();
+        render(market, shipType, operatorConfigId, configs);
     }
 
     public static void updateConfig(String market, String shipType, String dayType, Integer val) {
@@ -74,5 +85,24 @@ public class Elcuk extends Controller {
 
     public static void startJob() {
         new DriverJob().now();
+    }
+
+    /**
+     * 批量更新 ElcukConfig
+     */
+    public static void updateConfigs(String vals, long operatorConfigId, String market, Shipment.T shipType) {
+        HashMap<String, String> valMaps = J.from(vals, HashMap.class);
+        List<String> errorMsg = ElcukConfig.multiUpdate(valMaps);
+        if(errorMsg.isEmpty()) {
+            flash.success("批量更新成功!");
+            ReportDownloads.editConfig(operatorConfigId);
+        } else {
+            StringBuffer msg = new StringBuffer();
+            for(String error : errorMsg) {
+                msg.append(error).append(" ");
+            }
+            flash.error(String.format("出现 %s 个非法字符: [%s]", errorMsg.size(), msg.toString()));
+            editConfig(market, shipType, operatorConfigId);
+        }
     }
 }

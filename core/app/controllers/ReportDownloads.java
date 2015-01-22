@@ -60,7 +60,11 @@ public class ReportDownloads extends Controller {
     @Check("reportdownloads.config")
     public static void editConfig(Long id) {
         OperatorConfig config = OperatorConfig.findById(id);
-        render(config);
+        if(config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
+            render("ReportDownloads/marketShipDay.html", config);
+        } else {
+            render(config);
+        }
     }
 
     /**
