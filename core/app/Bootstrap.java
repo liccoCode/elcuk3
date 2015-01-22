@@ -6,7 +6,7 @@ import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
-import models.market.OperatorConfig;
+import models.OperatorConfig;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;

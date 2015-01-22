@@ -1,7 +1,6 @@
-package models.market;
+package models;
 
 import helper.GTs;
-import models.ElcukConfig;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.JPABase;

@@ -5,7 +5,7 @@ import helper.J;
 import jobs.driver.DriverJob;
 import models.ElcukConfig;
 import models.market.M;
-import models.market.OperatorConfig;
+import models.OperatorConfig;
 import models.procure.Shipment;
 import play.mvc.Controller;
 import play.mvc.Util;
