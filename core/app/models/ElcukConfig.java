@@ -10,7 +10,9 @@ import play.db.jpa.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +34,7 @@ public class ElcukConfig extends Model {
     static {
         MARKETS = Collections.unmodifiableMap(
                 GTs.MapBuilder.map("uk", "英国").put("de", "德国").put("us", "美国").
-                        put("fr", "法国").put("it", "意大利").put("jp", "日本").put("ca", "加拿大").build());
+                        put("fr", "法国").put("it", "意大利").put("jp", "日本").put("ca", "加拿大").put("es", "西班牙").build());
 
         SHIP_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map(Shipment.T.SEA.name().toLowerCase(), "海运")
@@ -118,5 +120,28 @@ public class ElcukConfig extends Model {
         // 这样做会打破 Play 对 Class 的增强, 导致程序启动失败
         config.val = val;
         return config;
+    }
+
+    public String shipType() {
+        return DAY_TYPES.get(this.name.split("_")[2]);
+    }
+
+    public static List<String> multiUpdate(Map<String, String> valsMap) {
+        List<String> errorMsg = new ArrayList<String>();
+        for(String key : valsMap.keySet()) {
+            ElcukConfig config = ElcukConfig.findById(NumberUtils.toLong(key));
+            if(config != null) {
+                String val = valsMap.get(key);
+                try {
+                    Integer.parseInt(val);
+                } catch(NumberFormatException e) {
+                    errorMsg.add(val);
+                    continue;
+                }
+                config.val = valsMap.get(key);
+                config.save();
+            }
+        }
+        return errorMsg;
     }
 }

@@ -1,13 +1,18 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import jobs.driver.DriverJob;
 import models.ElcukConfig;
+import models.market.M;
+import models.OperatorConfig;
+import models.procure.Shipment;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,28 +23,55 @@ import java.util.regex.Pattern;
  * Date: 1/14/13
  * Time: 3:27 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Elcuk extends Controller {
+    /**
+     * 参数设置首页
+     */
+    @Check("elcuk.index")
     public static void index() {
-        render();
+        List<OperatorConfig> configurations = OperatorConfig.findAll();
+        render(configurations);
     }
 
-    public static void updateConfig(String market, String shipType, String dayType, Integer val) {
-        String name = String.format("%s_%s_%s", market, shipType, dayType);
-        ElcukConfig config = ElcukConfig.findByName(name);
-        if(config == null)
-            flash.error("所选择 运输参数 不存在.");
-        else {
-            config.val = val.toString();
-            config.save();
-            flash.success("运输参数 %s 修改成功", config.fullName);
+    /**
+     * 报表相关参数设置
+     */
+    @Check("elcuk.index")
+    public static void edit(Long id) {
+        OperatorConfig config = OperatorConfig.findById(id);
+        if(config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
+            render("Elcuk/showMarketShipDay.html", config);
+        } else {
+            render(config);
         }
+    }
+
+    /**
+     * 报表相关参数设置
+     */
+    @Check("elcuk.index")
+    public static void update(Long id, String val) {
+        OperatorConfig config = OperatorConfig.findById(id);
+        config.val = val;
+        config.save();
+        flash.success("参数 %s 设置成功!", config.name);
         index();
     }
 
-    public static void config(String name) {
-        ElcukConfig config = ElcukConfig.findByName(name);
-        renderJSON(config);
+    /**
+     * ElcukConfig 修改页面
+     *
+     * @param market
+     * @param shipType
+     * @param operatorConfigId
+     */
+    @Check("elcuk.index")
+    public static void editShipDayConfigs(String market, Shipment.T shipType, long operatorConfigId) {
+
+        List<ElcukConfig> configs = ElcukConfig
+                .find("name like ?", M.val(market).sortName() + "_" + shipType.toString().toLowerCase() + "_%").fetch();
+        render(market, shipType, operatorConfigId, configs);
     }
 
     /**
@@ -74,5 +106,25 @@ public class Elcuk extends Controller {
 
     public static void startJob() {
         new DriverJob().now();
+    }
+
+    /**
+     * 批量更新运输天数配置
+     */
+    @Check("elcuk.index")
+    public static void updateShipDayConfigs(String vals, long operatorConfigId, String market, Shipment.T shipType) {
+        HashMap<String, String> valMaps = J.from(vals, HashMap.class);
+        List<String> errorMsg = ElcukConfig.multiUpdate(valMaps);
+        if(errorMsg.isEmpty()) {
+            flash.success("批量更新成功!");
+            edit(operatorConfigId);
+        } else {
+            StringBuffer msg = new StringBuffer();
+            for(String error : errorMsg) {
+                msg.append(error).append(" ");
+            }
+            flash.error(String.format("出现 %s 个非法字符: [%s]", errorMsg.size(), msg.toString()));
+            editShipDayConfigs(market, shipType, operatorConfigId);
+        }
     }
 }

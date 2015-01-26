@@ -4,11 +4,13 @@ package models.market;
 import exception.NotSupportChangeRegionFastException;
 import helper.Currency;
 import helper.Dates;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 不同的 Market place
@@ -323,6 +325,31 @@ public enum M {
                 return "E_UK";
             default:
                 return "A_UK";
+        }
+    }
+
+    public String sortName() {
+        switch(this) {
+            case AMAZON_CA:
+                return "ca";
+            case AMAZON_UK:
+                return "uk";
+            case AMAZON_DE:
+                return "de";
+            case AMAZON_FR:
+                return "fr";
+            case AMAZON_IT:
+                return "it";
+            case AMAZON_JP:
+                return "jp";
+            case AMAZON_ES:
+                return "es";
+            case AMAZON_US:
+                return "us";
+            case EBAY_UK:
+                return "uk";
+            default:
+                return "uk";
         }
     }
 
@@ -879,7 +906,7 @@ public enum M {
             case AMAZON_US:
                 return String
                         .format("https://sellercentral.%s/gp/ssof/knights/items-list-xml.html/ref=ag_xx_cont_fbalist?searchType=genericQuery&genericQuery=%s",
-                               this.toString(), msku);
+                                this.toString(), msku);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -1015,5 +1042,8 @@ public enum M {
         }
     }
 
+    public static M[] amazonVals() {
+        return (M[]) ArrayUtils.removeElement(M.values(), M.EBAY_UK);
+    }
 
 }

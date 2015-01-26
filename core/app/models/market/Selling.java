@@ -455,10 +455,13 @@ public class Selling extends GenericModel {
         }
 
         Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
-        if(lst == null) lst = Listing.blankListing(asin, market, product).save();
+        if(lst == null) {
+            lst = Listing.blankListing(asin, market, product).save();
+            lst.recordingListingState(DateTime.now().toDate());
+        }
         this.listing = lst;
         this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-        if (!Selling.exist(this.sid()))
+        if(!Selling.exist(this.sid()))
             return this.save();
         else
             return this;
