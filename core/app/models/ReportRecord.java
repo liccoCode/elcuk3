@@ -68,10 +68,39 @@ public class ReportRecord extends Model {
         /**
          * 库存报表
          */
-        SKUINV {
+        SKUINVTOTAL {
             @Override
             public String label() {
-                return "库存报表";
+                return "库存报表汇总";
+            }
+        },
+
+        /**
+         * 库存报表
+         */
+        SKUINVSELLING {
+            @Override
+            public String label() {
+                return "库存报表明细";
+            }
+        },
+
+        /**
+         * 定期销售报表汇总
+         */
+        SALEYEARTOTAL {
+            @Override
+            public String label() {
+                return "定期销售报表汇总";
+            }
+        },
+        /**
+         * 库存报表
+         */
+        SALEYEARCATEGORY {
+            @Override
+            public String label() {
+                return "定期销售报表产品线";
             }
         };
 
