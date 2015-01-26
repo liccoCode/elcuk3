@@ -4,6 +4,10 @@
     Buyer : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
     VAT No. : DE 292695920<br>
   #{/if}
+  #{elseif country == 'FR'}
+    Buyer : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
+    VAT No. : FR63328387212<br>
+  #{/elseif}
   #{else}
     Buyer : Edeer Network Technology CO., LTD <br>
     VAT No. : GB117317336<br>
@@ -13,6 +17,9 @@
   #{if country == 'DE' }
     +4915211641438
   #{/if}
+  #{elseif country == 'FR'}
+    +33 605717467
+  #{/elseif}
   #{elseif country == 'GB'}
     00447466355519
   #{/elseif}
@@ -27,6 +34,9 @@
 #{if country == 'DE' }
   <td>1667318915</td>
 #{/if}
+#{elseif country == 'FR'}
+  <td>GB013190759000</td>
+#{/elseif}
 #{else}
   <td>GB117317336000</td>
 #{/else}
@@ -39,6 +49,9 @@
 #{if country == 'DE' }
   <td>DE 292695920</td>
 #{/if}
+#{elseif country == 'FR' }
+  <td>FR63328387212</td>
+#{/elseif}
 #{else}
   <td>GB117317336</td>
 #{/else}
