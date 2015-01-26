@@ -1,9 +1,11 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.User;
+import models.market.AmazonListingReview;
 import models.product.Category;
 import models.product.Team;
 import models.view.Ret;
@@ -11,12 +13,16 @@ import models.view.dto.AbnormalDTO;
 import models.view.highchart.HighChart;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.modules.excel.RenderExcel;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.PmDashboardESQuery;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -27,8 +33,16 @@ import java.util.Set;
  * Time: 下午2:44
  */
 
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Pmdashboards extends Controller {
+    @Before(only = {"index"})
+    public static void beforIndex() {
+        Date from = DateTime.now().minusMonths(6).toDate();
+        Date to = DateTime.now().toDate();
+        renderArgs.put("from", from);
+        renderArgs.put("to", to);
+    }
+
 
     @Check("pmdashboards.index")
     public static void index() {
@@ -187,6 +201,62 @@ public class Pmdashboards extends Controller {
     public static void ajaxCategorySalesProfit(String cateid, int year) {
         try {
             HighChart chart = PmDashboardESQuery.ajaxHighChartCategorySalesProfit(cateid, year);
+            renderJSON(J.json(chart));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
+     * Review 星级与中差评率趋势
+     */
+    public static void reviewRecords() {
+        List<String> categories = Category.categoryIds();
+        Date from = DateTime.now().minusMonths(6).toDate();
+        Date to = DateTime.now().toDate();
+        render(from, to, categories);
+    }
+
+    /**
+     * Review 星级与中差评率趋势导出
+     */
+    public static void exportReviewRecords(Date from, Date to, String category) {
+        HighChart reviewRatingLine = AmazonListingReview.reviewRatingLine(from, to, category);
+        HighChart poorRatingLine = AmazonListingReview.poorRatingLine(from, to, category);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        SimpleDateFormat fileNameFormatter = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("%s-%s品线Review星级与中差评.xls", fileNameFormatter.format(from), fileNameFormatter.format(to)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        renderArgs.put("dateFormat", formatter);
+        renderArgs.put("reviewRatingLine", reviewRatingLine);
+        renderArgs.put("poorRatingLine", poorRatingLine);
+        renderArgs.put("from", from);
+        renderArgs.put("to", to);
+        renderArgs.put("category", category);
+        renderArgs.put("dates", Dates.getAllSunday(from, to));
+        render();
+    }
+
+    /**
+     * Review 星级趋势图
+     */
+    public static void reviewRatingLine(Date from, Date to, String category) {
+        try {
+            HighChart chart = AmazonListingReview.reviewRatingLine(from, to, category);
+            renderJSON(J.json(chart));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
+     * Review 中差评趋势图
+     */
+    public static void poorRatingLine(Date from, Date to, String category) {
+        try {
+            HighChart chart = AmazonListingReview.poorRatingLine(from, to, category);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

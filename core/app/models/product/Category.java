@@ -296,4 +296,32 @@ public class Category extends GenericModel {
         }
         return listingIds;
     }
+
+    /**
+     * 获取 Category 的 ASIN
+     *
+     * @param categoryId
+     * @return
+     */
+    public static List<String> asins(String categoryId, M market) {
+        List<String> listingIds = new ArrayList<String>();
+        List<Map<String, Object>> rows = null;
+        if(StringUtils.isNotBlank(categoryId)) {
+            SqlSelect sql = new SqlSelect().select("Distinct l.asin AS asin").from("Listing l")
+                    .leftJoin("Product p ON  l.product_sku = p.sku")
+                    .leftJoin("Category c ON p.category_categoryId = c.categoryId")
+                    .leftJoin("Selling s ON l.listingId = s.listing_listingId");
+            if(!categoryId.equalsIgnoreCase("all")) {
+                sql.where("c.categoryId = ?").param(categoryId);
+            }
+            if(market != null) {
+                sql.where("l.market = ?").param(market.name());
+            }
+            rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        }
+        for(Map<String, Object> row : rows) {
+            listingIds.add(row.get("asin").toString().toLowerCase());
+        }
+        return listingIds;
+    }
 }

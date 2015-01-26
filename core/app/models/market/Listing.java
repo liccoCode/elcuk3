@@ -540,5 +540,6 @@ public class Listing extends GenericModel {
             record.state = ListingStateRecord.S.DOWN;
         }
         record.save();
+        record.pushRecordToCache();
     }
 }

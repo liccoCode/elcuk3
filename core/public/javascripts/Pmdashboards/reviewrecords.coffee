@@ -9,10 +9,10 @@ $ ->
 
   class LineChart
     constructor: (@container) ->
-    percent: (mask_selector) =>
+    percent: (mask_selector='#reviewAnalyzes') =>
       self = @
       $div = $("##{self.container}")
-      LoadMask.mask()
+      LoadMask.mask(mask_selector)
       $.get($div.data("url"), $('.search_form').serialize(), (r) ->
         $div.highcharts({
           title: { text: r.title },
@@ -35,7 +35,7 @@ $ ->
                   "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
           series: r['series']
         })
-        LoadMask.unmask()
+        LoadMask.unmask(mask_selector)
       )
 
   $(document).ready ->
