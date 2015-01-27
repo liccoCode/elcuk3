@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 public class ListingStateRecord extends Model {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     public Listing listing;
 
     public enum S {
@@ -48,35 +48,35 @@ public class ListingStateRecord extends Model {
      * 为所有 Listing 做一个状态的变化过程记录的初始化
      */
     public static void initAllListingRecords() {
-        Date firstReviewDate = AmazonListingReview.firstReviewDate();
-        for(Listing listing : Listing.<Listing>findAll()) {
-            listing.recordingListingState(firstReviewDate);
+        if(ListingStateRecord.count() == 0) {
+            Date firstReviewDate = AmazonListingReview.firstReviewDate();
+            for(Listing listing : Listing.<Listing>findAll()) {
+                listing.recordingListingState(firstReviewDate);
+            }
         }
     }
 
-    public static List<ListingStateRecord> getCacheByAsinAndMarket(String asin, M market) {
-        String cacheKey = ListingStateRecord.cacheKey(asin, market);
+    public static List<ListingStateRecord> getCacheByListingId(String listingId) {
+        String cacheKey = ListingStateRecord.cacheKey(listingId);
         List<ListingStateRecord> cachedRecords = Cache.get(cacheKey, List.class);
         if(cachedRecords != null) {
             return cachedRecords;
         } else {
-            ListingStateRecord.initRecordsByAsinAndMarket(asin, market); //初始化缓存
+            ListingStateRecord.initRecordsByAsinAndMarket(listingId); //初始化缓存
             return Cache.get(cacheKey, List.class);//重新获取缓存
         }
     }
 
-    public static void initRecordsByAsinAndMarket(String asin, M market) {
-        List<ListingStateRecord> records = ListingStateRecord
-                .find("SELECT DISTINCT ls FROM ListingStateRecord ls LEFT JOIN ls.listing li WHERE 1=1 AND li.asin = ?" +
-                        " AND li.market = ?", asin.toUpperCase(), market).fetch();
-        Cache.add(ListingStateRecord.cacheKey(asin, market), records, "8h");
+    public static void initRecordsByAsinAndMarket(String listingId) {
+        List<ListingStateRecord> records = ListingStateRecord.find("listing_listingId = ?", listingId).fetch();
+        Cache.add(ListingStateRecord.cacheKey(listingId), records, "8h");
     }
 
     /**
      * 增加单个到缓存中
      */
     public void pushRecordToCache() {
-        String cacheKey = ListingStateRecord.cacheKey(this.listing.asin, this.listing.market);
+        String cacheKey = ListingStateRecord.cacheKey(this.listing.listingId);
         List<ListingStateRecord> cachedRecords = Cache.get(cacheKey, List.class);
         if(cachedRecords != null) {
             cachedRecords.add(this);
@@ -87,9 +87,7 @@ public class ListingStateRecord extends Model {
         Cache.add(cacheKey, cachedRecords, "8h");
     }
 
-    public static String cacheKey(String asin, M market) {
-        return String.format("%s_%s_listing_state_record_cache",
-                asin, market.nickName().toLowerCase()
-        );
+    public static String cacheKey(String listingId) {
+        return String.format("%s_listing_state_record_cache", listingId);
     }
 }

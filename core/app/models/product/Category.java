@@ -6,7 +6,6 @@ import helper.Caches;
 import helper.DBUtils;
 import models.embedded.CategorySettings;
 import models.market.M;
-import models.market.Selling;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -18,7 +17,10 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 产品分层中第一级别的 Category 类别
@@ -304,24 +306,31 @@ public class Category extends GenericModel {
      * @return
      */
     public static List<String> asins(String categoryId, M market) {
-        List<String> listingIds = new ArrayList<String>();
+        return Category.asinsByCategories(Arrays.asList(categoryId), market);
+    }
+
+    /**
+     * 获取 Category 的 ASIN
+     *
+     * @return
+     */
+    public static List<String> asinsByCategories(List<String> categories, M market) {
+        List<String> asins = new ArrayList<String>();
         List<Map<String, Object>> rows = null;
-        if(StringUtils.isNotBlank(categoryId)) {
-            SqlSelect sql = new SqlSelect().select("Distinct l.asin AS asin").from("Listing l")
-                    .leftJoin("Product p ON  l.product_sku = p.sku")
-                    .leftJoin("Category c ON p.category_categoryId = c.categoryId")
-                    .leftJoin("Selling s ON l.listingId = s.listing_listingId");
-            if(!categoryId.equalsIgnoreCase("all")) {
-                sql.where("c.categoryId = ?").param(categoryId);
-            }
-            if(market != null) {
-                sql.where("l.market = ?").param(market.name());
-            }
-            rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        SqlSelect sql = new SqlSelect().select("Distinct l.asin AS asin").from("Listing l")
+                .leftJoin("Product p ON  l.product_sku = p.sku")
+                .leftJoin("Category c ON p.category_categoryId = c.categoryId")
+                .leftJoin("Selling s ON l.listingId = s.listing_listingId ");
+        if(!categories.isEmpty()) {
+            sql.where("c.categoryId IN " + SqlSelect.inlineParam(categories));
         }
+        if(market != null) {
+            sql.where("l.market = ?").param(market.name());
+        }
+        rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {
-            listingIds.add(row.get("asin").toString().toLowerCase());
+            asins.add(row.get("asin").toString().toLowerCase());
         }
-        return listingIds;
+        return asins;
     }
 }

@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.User;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
@@ -629,11 +630,11 @@ public class AmazonListingReview extends GenericModel {
      * @param from     开始时间
      * @param to       结束时间
      * @param category 品线
+     * @param user     用户(做权限判断)
      * @return
      */
     @Cached("4h")
-    public static HighChart reviewRatingLine(Date from, Date to, String category) {
-        if(ListingStateRecord.count() == 0) ListingStateRecord.initAllListingRecords(); // Listing 状态记录数据初始化
+    public static HighChart reviewRatingLine(Date from, Date to, String category, User user) {
         String cacked_key = Caches.Q.cacheKey("reviewRatingLine", category, from, to);
         HighChart lineChart = Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
@@ -644,24 +645,24 @@ public class AmazonListingReview extends GenericModel {
             lineChart = new HighChart(Series.LINE);
             lineChart.title = "Review 星级趋势图";
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            long reviewCount = AmazonListingReview.count();
             List<Date> sundays = Dates.getAllSunday(from, to);
 
             MetricReviewService service = new MetricReviewService(from, to, category);
-            JSONObject countByMarket = service.countReviewRating();
+            JSONObject countByMarket = service.countReviewRating(category, user);
 
-            for(M m : M.values()) {
-                if(m.equals(M.EBAY_UK)) continue;
-                Series.Line line = new Series.Line(m.name());
-                String marketKey = String.format("%s_docs", m.nickName());
-                JSONObject counByMarket = countByMarket.getJSONObject(marketKey);
+            List<String> jsonKeys = new ArrayList<String>();
+            for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
+            jsonKeys.add("SUM");
+            for(String jsonKey : jsonKeys) {
+                Series.Line line = new Series.Line(jsonKey);
+                JSONObject counByMarket = countByMarket.getJSONObject(jsonKey);
                 for(Date sunday : sundays) {
                     JSONObject sundayResult = counByMarket.getJSONObject(formatter.format(sunday));
                     if(sundayResult == null) {
                         line.add(sunday, 0f);// 未找到当前日期的数据, 直接下一个,赋值为 0
                         continue;
                     }
-
+                    float reviewTotalCount = sundayResult.getInteger("doc_count");
                     JSONArray buckets = sundayResult.getJSONObject("group_by_rating").getJSONArray("buckets");
                     int ratingSum = 0;
                     for(Object o : buckets) {
@@ -672,14 +673,13 @@ public class AmazonListingReview extends GenericModel {
                         if(entry.getIntValue("key") == 4) ratingSum += entry.getIntValue("doc_count") * 4;
                         if(entry.getIntValue("key") == 5) ratingSum += entry.getIntValue("doc_count") * 5;
                     }
-                    float rating = (float) ratingSum / (float) reviewCount;
+                    float rating = reviewTotalCount == 0 ? 0 : (float) ratingSum / (float) reviewTotalCount;
                     BigDecimal bd = new BigDecimal(rating);
                     line.add(sunday, bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue()); // 四舍五入且保留两位小数
                 }
-                line.visible = false;
+                line.visible = jsonKey.equalsIgnoreCase("sum");
                 lineChart.series(line);
             }
-            lineChart.series(lineChart.sumSeriesWithBigDecimal("星级"));
             Cache.add(cacked_key, lineChart, "4h");
         }
 
@@ -695,7 +695,7 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     @Cached("4h")
-    public static HighChart poorRatingLine(Date from, Date to, String category) {
+    public static HighChart poorRatingLine(Date from, Date to, String category, User user) {
         String cacked_key = Caches.Q.cacheKey("poorRatingLine", from, to, category);
         HighChart lineChart = Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
@@ -707,15 +707,17 @@ public class AmazonListingReview extends GenericModel {
 
             List<Date> sundayList = Dates.getAllSunday(from, to);
             MetricReviewService service = new MetricReviewService(from, to, category);
-            JSONObject aggregations = service.countPoorRatingByDateRange();
-            for(M m : M.values()) {
-                if(m.equals(M.EBAY_UK)) continue;
-                Series.Line line = new Series.Line(m.name());
-                String marketKey = String.format("%s_docs", m.nickName());
+            JSONObject aggregations = service.countPoorRatingByDateRange(category, user);
+            List<String> jsonKeys = new ArrayList<String>();
+            for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
+            jsonKeys.add("SUM");
+
+            for(String jsonKey : jsonKeys) {
+                Series.Line line = new Series.Line(jsonKey);
                 List<Date> sundayListCopy = new ArrayList<Date>(sundayList);
 
                 if(aggregations != null) {
-                    JSONObject countByMarket = aggregations.getJSONObject(marketKey);
+                    JSONObject countByMarket = aggregations.getJSONObject(jsonKey);
                     if(countByMarket != null) {
                         JSONObject countByReviewDate = countByMarket.getJSONObject("count_by_review_date");
                         for(Object o : countByReviewDate.getJSONArray("buckets")) {
@@ -736,11 +738,9 @@ public class AmazonListingReview extends GenericModel {
                     }
                 }
                 for(Date sunday : sundayListCopy) line.add(sunday, 0f); //补充没有数据的那些点
-
-                line.visible = false;
+                line.visible = jsonKey.equalsIgnoreCase("sum");
                 lineChart.series(line.sort());
             }
-            lineChart.series(lineChart.sumSeriesWithBigDecimal("中差评"));
             Cache.add(cacked_key, lineChart, "4h");
         }
         return Cache.get(cacked_key, HighChart.class);
