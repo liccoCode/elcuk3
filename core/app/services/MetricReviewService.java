@@ -56,10 +56,8 @@ public class MetricReviewService {
 
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
-
-        //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据
+        //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据)
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
             List<String> asins = new ArrayList<String>();
@@ -68,42 +66,75 @@ public class MetricReviewService {
             } else {
                 asins = Category.asins(category, m);
             }
-
-            //市场的 aggregation 过滤
-            FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(
-                    String.format("%s_docs", m.nickName())).filter(
-                    // market 过滤
-                    FilterBuilders.termFilter("market", m)
-            );
-            // 每一个时间点作为一个单独的 Aggregation
-            for(Date sunday : sundays) {
-                List<String> filteredAsins = filterAsinsByDateRange(asins, sunday, m);
-                if(filteredAsins == null || filteredAsins.isEmpty()) {
-                    continue; //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
-                }
-                //时间过滤 begin(firstReviewDate) end(sunday)、ASIN 过滤
-                FilterAggregationBuilder dateAndAsinAggregation = AggregationBuilders.filter(
-                        formatter.format(sunday)).filter(
-                        FilterBuilders.andFilter(
-                                FilterBuilders.termsFilter("listing_asin", filteredAsins),
-                                FilterBuilders.rangeFilter("review_date")
-                                        .gte(formatter.format(firstReviewDate))
-                                        .lte(formatter.format(sunday))
-                        )
-                );
-                // 按照 Review 的 rating 分组
-                TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
-                //groupByRatingAggregation 作为 dateAndAsinAggregation 的 子 Aggregation
-                dateAndAsinAggregation.subAggregation(groupByRatingAggregation);
-                //dateAndAsinAggregation 作为 marketAggregation 的 子 Aggregation
-                marketAggregation.subAggregation(dateAndAsinAggregation);
-            }
-            search.aggregation(marketAggregation);
+            //单独每个市场的 aggregation
+            search.aggregation(buildReviewRatingAggregation(m.name(), m, firstReviewDate, category, asins, sundays));
         }
+        //计算汇总的 aggregation
+        search.aggregation(buildReviewRatingAggregation(
+                "SUM",
+                null,
+                firstReviewDate,
+                category,
+                Category.asinsByCategories(categories, null),
+                sundays));
+
         Logger.info("countReviewRating:::" + search.toString());
         JSONObject result = ES.search("etracker", "review", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
+    }
+
+    /**
+     * @param name            用作最顶级 Aggregation 的名称
+     * @param m               市场
+     * @param firstReviewDate 第一个 Review 产生的时间
+     * @param category        产品线(用作获取 Listing ID 来进行 ASIN 过滤 需要过滤掉那些下架的 ASIN)
+     * @param asins
+     * @param sundays
+     * @return
+     */
+    public AggregationBuilder buildReviewRatingAggregation(String name, M m, Date firstReviewDate,
+                                                           String category, List<String> asins,
+                                                           List<Date> sundays) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        List<String> listingIds;
+        if(name.equalsIgnoreCase("SUM")) {
+            listingIds = Category.listingIds(category, null);
+        } else {
+            listingIds = Category.listingIds(category, m);
+        }
+
+        //市场的 aggregation 过滤
+        FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(name);
+        if(m == null) {
+            marketAggregation.filter(FilterBuilders.matchAllFilter());
+        } else {
+            marketAggregation.filter(FilterBuilders.termFilter("market", m));// market 过滤
+        }
+        // 每一个时间点作为一个单独的 Aggregation
+        for(Date sunday : sundays) {
+            List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday, m);
+            if(filteredAsins == null || filteredAsins.isEmpty()) {
+                continue; //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
+            }
+            //时间过滤 begin(firstReviewDate) end(sunday)、ASIN 过滤
+            FilterAggregationBuilder dateAndAsinAggregation = AggregationBuilders.filter(
+                    formatter.format(sunday)).filter(
+                    FilterBuilders.andFilter(
+                            FilterBuilders.termsFilter("listing_asin", filteredAsins),
+                            FilterBuilders.rangeFilter("review_date")
+                                    .gte(formatter.format(firstReviewDate))
+                                    .lte(formatter.format(sunday))
+                    )
+            );
+            // 按照 Review 的 rating 分组
+            TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
+            //groupByRatingAggregation 作为 dateAndAsinAggregation 的 子 Aggregation
+            dateAndAsinAggregation.subAggregation(groupByRatingAggregation);
+            //dateAndAsinAggregation 作为 marketAggregation 的 子 Aggregation
+            marketAggregation.subAggregation(dateAndAsinAggregation);
+        }
+        return marketAggregation;
     }
 
     /**
@@ -129,10 +160,10 @@ public class MetricReviewService {
             }
             if(asins == null || asins.isEmpty()) continue; //未找到合法的 ASIN
 
-            search.aggregation(buildMarketAggregation(m.name(), m, asins));
+            search.aggregation(buildPoorRatingAggregation(m.name(), m, asins));
         }
         //还有一个 统计的 Aggregation
-        search.aggregation(buildMarketAggregation("SUM", null, Category.asinsByCategories(categories, null)));
+        search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asinsByCategories(categories, null)));
         Logger.info("PoorRatingByDateRange:::" + search.toString());
 
         JSONObject result = ES.search("etracker", "review", search);
@@ -140,7 +171,7 @@ public class MetricReviewService {
         return result.getJSONObject("aggregations");
     }
 
-    public AggregationBuilder buildMarketAggregation(String name, M m, List<String> asins) {
+    public AggregationBuilder buildPoorRatingAggregation(String name, M m, List<String> asins) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         //市场、ASIN、from、to aggregation
         AndFilterBuilder andFilter = FilterBuilders.andFilter(
@@ -174,13 +205,9 @@ public class MetricReviewService {
      *
      * @return
      */
-    public List<String> filterAsinsByDateRange(List<String> asins, Date end, M market) {
-        for(int i = 0; i < asins.size(); i++) {
-            List<ListingStateRecord> records = ListingStateRecord.getCacheByAsinAndMarket(
-                    asins.get(i),
-                    market
-            );//取到对应的缓存
-
+    public List<String> filterAsinsByDateRange(List<String> asins, List<String> listingIds, Date end, M market) {
+        for(int i = 0; i < listingIds.size(); i++) {
+            List<ListingStateRecord> records = ListingStateRecord.getCacheByListingId(listingIds.get(i));//取到对应的缓存
             //排序
             Collections.sort(records, new Comparator<ListingStateRecord>() {
                 @Override
@@ -193,7 +220,7 @@ public class MetricReviewService {
                 ListingStateRecord record = records.get(j);
                 //如果时间小于等于 end, 且 state 为 DOWN， 删除该 asin  找到时间小于 end 但是状态不为 SELLING 需要保留此 asin
                 if(record.changedDate.getTime() <= end.getTime()) {
-                    if(record.state == ListingStateRecord.S.DOWN) asins.remove(i);
+                    if(record.state == ListingStateRecord.S.DOWN) asins.remove(record.listing.asin);
                     break;
                 }
             }

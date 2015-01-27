@@ -650,18 +650,19 @@ public class AmazonListingReview extends GenericModel {
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject countByMarket = service.countReviewRating(category, user);
 
-            for(M m : M.values()) {
-                if(m.equals(M.EBAY_UK)) continue;
-                Series.Line line = new Series.Line(m.name());
-                String marketKey = String.format("%s_docs", m.nickName());
-                JSONObject counByMarket = countByMarket.getJSONObject(marketKey);
+            List<String> jsonKeys = new ArrayList<String>();
+            for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
+            jsonKeys.add("SUM");
+            for(String jsonKey : jsonKeys) {
+                Series.Line line = new Series.Line(jsonKey);
+                JSONObject counByMarket = countByMarket.getJSONObject(jsonKey);
                 for(Date sunday : sundays) {
                     JSONObject sundayResult = counByMarket.getJSONObject(formatter.format(sunday));
                     if(sundayResult == null) {
                         line.add(sunday, 0f);// 未找到当前日期的数据, 直接下一个,赋值为 0
                         continue;
                     }
-
+                    float reviewTotalCount = sundayResult.getInteger("doc_count");
                     JSONArray buckets = sundayResult.getJSONObject("group_by_rating").getJSONArray("buckets");
                     int ratingSum = 0;
                     for(Object o : buckets) {
@@ -672,14 +673,13 @@ public class AmazonListingReview extends GenericModel {
                         if(entry.getIntValue("key") == 4) ratingSum += entry.getIntValue("doc_count") * 4;
                         if(entry.getIntValue("key") == 5) ratingSum += entry.getIntValue("doc_count") * 5;
                     }
-                    float rating = buckets.size() == 0 ? 0 : (float) ratingSum / (float) buckets.size();
+                    float rating = reviewTotalCount == 0 ? 0 : (float) ratingSum / (float) reviewTotalCount;
                     BigDecimal bd = new BigDecimal(rating);
                     line.add(sunday, bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue()); // 四舍五入且保留两位小数
                 }
-                line.visible = false;
+                line.visible = jsonKey.equalsIgnoreCase("sum");
                 lineChart.series(line);
             }
-            lineChart.series(lineChart.sumSeriesWithBigDecimal("星级"));
             Cache.add(cacked_key, lineChart, "4h");
         }
 
