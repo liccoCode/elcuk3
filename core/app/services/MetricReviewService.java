@@ -57,7 +57,7 @@ public class MetricReviewService {
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
-        //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据)
+        //使用嵌套的 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据) 具体参照 http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
             List<String> asins = new ArrayList<String>();
@@ -149,7 +149,7 @@ public class MetricReviewService {
         }
         // search
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
-        //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据)
+        //使用嵌套的 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据) 具体参照 http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
             List<String> asins = new ArrayList<String>();
