@@ -48,9 +48,11 @@ public class ListingStateRecord extends Model {
      * 为所有 Listing 做一个状态的变化过程记录的初始化
      */
     public static void initAllListingRecords() {
-        Date firstReviewDate = AmazonListingReview.firstReviewDate();
-        for(Listing listing : Listing.<Listing>findAll()) {
-            listing.recordingListingState(firstReviewDate);
+        if(ListingStateRecord.count() == 0) {
+            Date firstReviewDate = AmazonListingReview.firstReviewDate();
+            for(Listing listing : Listing.<Listing>findAll()) {
+                listing.recordingListingState(firstReviewDate);
+            }
         }
     }
 

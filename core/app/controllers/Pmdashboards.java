@@ -43,7 +43,6 @@ public class Pmdashboards extends Controller {
         renderArgs.put("to", to);
     }
 
-
     @Check("pmdashboards.index")
     public static void index() {
         int year = DateTime.now().getYear();
@@ -221,8 +220,9 @@ public class Pmdashboards extends Controller {
      * Review 星级与中差评率趋势导出
      */
     public static void exportReviewRecords(Date from, Date to, String category) {
-        HighChart reviewRatingLine = AmazonListingReview.reviewRatingLine(from, to, category);
-        HighChart poorRatingLine = AmazonListingReview.poorRatingLine(from, to, category);
+        User user = User.findByUserName(Secure.Security.connected());
+        HighChart reviewRatingLine = AmazonListingReview.reviewRatingLine(from, to, category, user);
+        HighChart poorRatingLine = AmazonListingReview.poorRatingLine(from, to, category, user);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
         SimpleDateFormat fileNameFormatter = new SimpleDateFormat("yyyyMMdd");
         request.format = "xls";
@@ -244,7 +244,8 @@ public class Pmdashboards extends Controller {
      */
     public static void reviewRatingLine(Date from, Date to, String category) {
         try {
-            HighChart chart = AmazonListingReview.reviewRatingLine(from, to, category);
+            User user = User.findByUserName(Secure.Security.connected());
+            HighChart chart = AmazonListingReview.reviewRatingLine(from, to, category, user);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -256,7 +257,8 @@ public class Pmdashboards extends Controller {
      */
     public static void poorRatingLine(Date from, Date to, String category) {
         try {
-            HighChart chart = AmazonListingReview.poorRatingLine(from, to, category);
+            User user = User.findByUserName(Secure.Security.connected());
+            HighChart chart = AmazonListingReview.poorRatingLine(from, to, category, user);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

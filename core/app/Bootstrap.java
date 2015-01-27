@@ -7,6 +7,7 @@ import models.User;
 import models.finance.FeeType;
 import models.market.Account;
 import models.OperatorConfig;
+import models.market.ListingStateRecord;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
@@ -60,6 +61,11 @@ public class Bootstrap extends Job {
          * 流程activiti的初始化
          */
         ActivitiEngine.initEngine();
+
+        /**
+         * 为所有 Listing 做一个状态的变化过程记录的初始化
+         */
+        ListingStateRecord.initAllListingRecords();
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.

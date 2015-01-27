@@ -14,26 +14,23 @@ $ ->
       $div = $("##{self.container}")
       LoadMask.mask(mask_selector)
       $.get($div.data("url"), $('.search_form').serialize(), (r) ->
-        $div.highcharts({
-          title: { text: r.title },
+        $div.highcharts('StockChart', {
+          credits:
+            text:'EasyAcc'
+            href:''
+          title:
+            text: r.title
           legend:
             enabled: true
-          xAxis:
-            type: "datetime"
+          navigator:
+            enabled: true
+          scrollbar:
+            enabled: false
+          type: 'datetime'
           yAxis: { min: 0 }
           tooltip:
-            shared: true
-            crosshairs: true
             xDateFormat: '%Y-%m-%d'
-          plotOptions:
-            pie:
-            #cursor: 'point'
-              dataLabels:
-                enabled: true
-              #color: '#000'
-                formatter: ->
-                  "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
-          series: r['series']
+        series: r['series']
         })
         LoadMask.unmask(mask_selector)
       )

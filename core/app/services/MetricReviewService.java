@@ -3,11 +3,14 @@ package services;
 import com.alibaba.fastjson.JSONObject;
 import helper.Dates;
 import helper.ES;
+import models.User;
 import models.market.AmazonListingReview;
 import models.market.ListingStateRecord;
 import models.market.M;
 import models.product.Category;
+import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
@@ -18,10 +21,7 @@ import play.Logger;
 import play.utils.FastRuntimeException;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,12 +32,10 @@ import java.util.List;
 public class MetricReviewService {
     public Date from;
     public Date to;
-    public String category;
 
     public MetricReviewService(Date from, Date to, String category) {
         this.from = from;
         this.to = to;
-        this.category = category;
     }
 
     /**
@@ -50,7 +48,12 @@ public class MetricReviewService {
      *
      * @return
      */
-    public JSONObject countReviewRating() {
+    public JSONObject countReviewRating(String category, User user) {
+        List<String> categories = User.getTeamCategorys(user);
+        if(!category.equalsIgnoreCase("all") && !categories.contains(category)) {
+            return null; //没有该 Category 权限, 不允许查看数据
+        }
+
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -59,7 +62,12 @@ public class MetricReviewService {
         //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
-            List<String> asins = Category.asins(this.category, m);
+            List<String> asins = new ArrayList<String>();
+            if(category.equalsIgnoreCase("all")) {
+                asins = Category.asinsByCategories(categories, m);
+            } else {
+                asins = Category.asins(category, m);
+            }
 
             //市场的 aggregation 过滤
             FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(
@@ -103,40 +111,28 @@ public class MetricReviewService {
      *
      * @return
      */
-    public JSONObject countPoorRatingByDateRange() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    public JSONObject countPoorRatingByDateRange(String category, User user) {
+        List<String> categories = User.getTeamCategorys(user);
+        if(!category.equalsIgnoreCase("all") && !categories.contains(category)) {
+            return null; //没有该 Category 权限, 不允许查看数据
+        }
         // search
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
-        //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据
+        //使用 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据)
         for(M m : M.values()) {
             if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
-            List<String> asins = Category.asins(this.category, m);
+            List<String> asins = new ArrayList<String>();
+            if(category.equalsIgnoreCase("all")) {
+                asins = Category.asinsByCategories(categories, m);
+            } else {
+                asins = Category.asins(category, m);
+            }
             if(asins == null || asins.isEmpty()) continue; //未找到合法的 ASIN
-            //市场、ASIN、from、to aggregation
-            FilterAggregationBuilder marketAggregation = AggregationBuilders
-                    .filter(String.format("%s_docs", m.nickName())).filter(
-                            FilterBuilders.andFilter(
-                                    FilterBuilders.termFilter("market", m),
-                                    FilterBuilders.termsFilter("listing_asin", asins),
-                                    FilterBuilders.rangeFilter("review_date")
-                                            .gte(formatter.format(this.from))
-                                            .lte(formatter.format(this.to))
 
-                            )
-                    );
-            //进行日期单位为 周 分组展现数据 aggregation
-            DateHistogramBuilder intervalAggregation = AggregationBuilders
-                    .dateHistogram("count_by_review_date")
-                    .field("review_date")
-                    .interval(DateHistogram.Interval.WEEK);
-            //负评分 aggregation
-            FilterAggregationBuilder poorRatingAggregation = AggregationBuilders.filter("poor_rating_review").filter(
-                    FilterBuilders.rangeFilter("rating").gte(1).lte(3)
-            );
-            intervalAggregation.subAggregation(poorRatingAggregation);
-            marketAggregation.subAggregation(intervalAggregation);
-            search.aggregation(marketAggregation);
+            search.aggregation(buildMarketAggregation(m.name(), m, asins));
         }
+        //还有一个 统计的 Aggregation
+        search.aggregation(buildMarketAggregation("SUM", null, Category.asinsByCategories(categories, null)));
         Logger.info("PoorRatingByDateRange:::" + search.toString());
 
         JSONObject result = ES.search("etracker", "review", search);
@@ -144,6 +140,32 @@ public class MetricReviewService {
         return result.getJSONObject("aggregations");
     }
 
+    public AggregationBuilder buildMarketAggregation(String name, M m, List<String> asins) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        //市场、ASIN、from、to aggregation
+        AndFilterBuilder andFilter = FilterBuilders.andFilter(
+                FilterBuilders.termsFilter("listing_asin", asins),
+                FilterBuilders.rangeFilter("review_date")
+                        .gte(formatter.format(this.from))
+                        .lte(formatter.format(this.to))
+
+        );
+        if(m != null) andFilter.add(FilterBuilders.termFilter("market", m));
+
+        FilterAggregationBuilder marketAggregation = AggregationBuilders
+                .filter(name).filter(andFilter);
+        //进行日期单位为 周 分组展现数据 aggregation
+        DateHistogramBuilder intervalAggregation = AggregationBuilders
+                .dateHistogram("count_by_review_date")
+                .field("review_date")
+                .interval(DateHistogram.Interval.WEEK);
+        //负评分 aggregation
+        FilterAggregationBuilder poorRatingAggregation = AggregationBuilders.filter("poor_rating_review").filter(
+                FilterBuilders.rangeFilter("rating").gte(1).lte(3)
+        );
+        intervalAggregation.subAggregation(poorRatingAggregation);
+        return marketAggregation.subAggregation(intervalAggregation);
+    }
 
     /**
      * 获取 Category 下在指定时间范围内未下架的 ASIN
