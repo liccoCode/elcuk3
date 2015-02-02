@@ -917,7 +917,7 @@ public enum M {
     public static M val(String str) {
         if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();
-        if(s.equals("cad") || s.equals("amazon_ca") || s.equals("amazon.ca") ||
+        if(s.equals("aca") || s.equals("amazon_ca") || s.equals("amazon.ca") ||
                 s.equals("www.amazon.ca")) {
             return AMAZON_CA;
         } else if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") ||
