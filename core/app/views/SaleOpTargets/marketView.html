@@ -10,7 +10,7 @@
 #{set team: categorySt.fetchTeam()/}
 <div class="row">
   <div class="span25">
-    <form action="@{SaleOpTargets.doMarketSplit(categorySt.id)}" method="POST" id="submitSaleOpTargetsForm">
+    <form method="POST" id="submitSaleOpTargetsForm">
     #{info_row title:'Category 年度目标'/}
       <table class="table table-bordered">
         <tr>
@@ -144,22 +144,24 @@
             目标
           </td>
 
-            #{list items:sales.get(st_index-1), as:'month'}
-              <td>
-                <div>
-                    #{if month.saleQty>0}
+            #{if st_index <= sales.size }
+                #{list items:sales.get(st_index-1), as:'month'}
+                  <td>
+                    <div>
+                        #{if month.saleQty>0}
                       ${month.saleQty}
                     #{/if}
-                </div>
-              </td>
-              <td>
-                <div>
-                    #{if month.saleAmounts>0}
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                        #{if month.saleAmounts>0}
                       ${helper.Dates.scaleNumber(month.saleAmounts)}
                     #{/if}
-                </div>
-              </td>
-            #{/list}
+                    </div>
+                  </td>
+                #{/list}
+            #{/if}
         </tr>
 
         <tr>
@@ -188,10 +190,6 @@
 
         <input type="hidden" name="sts[${st_index - 1}].id" value="${st.id}">
       #{/list}
-
-
-
-
 
         </tr>
       </table>
