@@ -224,7 +224,7 @@ public class SaleOpTarget extends Model {
             monthSt.targetYear = this.targetYear;
             monthSt.fid = this.fid;
             monthSt.saleTargetType = T.MONTH;
-            if(this.targetMarket != null) monthSt.targetMarket = this.targetMarket;
+            monthSt.targetMarket = null;
             monthSt.targetMonth = i;
             monthSt.createDate = new Date();
             monthSt.createuser = user;
@@ -240,18 +240,21 @@ public class SaleOpTarget extends Model {
      *
      * @return
      */
-    public List<SaleOpTarget> loadMarketSaleTargets(User user) {
+    public List<SaleOpTarget> loadMarketSaleTargets(User user, Integer month) {
         List<SaleOpTarget> saleOpTargets = new ArrayList<SaleOpTarget>();
         for(M m : M.values()) {
-            SaleOpTarget monthSt = new SaleOpTarget();
-            monthSt.targetYear = this.targetYear;
-            monthSt.fid = this.fid;
-            monthSt.saleTargetType = T.MARKET;
-            monthSt.targetMarket = m;
-            monthSt.createDate = new Date();
-            monthSt.createuser = user;
-            monthSt.save();
-            saleOpTargets.add(monthSt);
+            if(m != M.EBAY_UK) {
+                SaleOpTarget monthSt = new SaleOpTarget();
+                monthSt.targetYear = this.targetYear;
+                monthSt.fid = this.fid;
+                monthSt.saleTargetType = T.MARKET;
+                monthSt.targetMonth = month;
+                monthSt.targetMarket = m;
+                monthSt.createDate = new Date();
+                monthSt.createuser = user;
+                monthSt.save();
+                saleOpTargets.add(monthSt);
+            }
         }
         return saleOpTargets;
     }
@@ -269,7 +272,7 @@ public class SaleOpTarget extends Model {
             monthSt.targetYear = this.targetYear;
             monthSt.fid = this.fid;
             monthSt.saleTargetType = T.SEASON;
-            if(this.targetMarket != null) monthSt.targetMarket = this.targetMarket;
+            monthSt.targetMarket = null;
             monthSt.targetSeason = i;
             monthSt.createDate = new Date();
             monthSt.createuser = user;
@@ -317,13 +320,11 @@ public class SaleOpTarget extends Model {
         if(this.saleTargetType == T.MONTH || this.saleTargetType == T.SEASON || this.saleTargetType == T.MARKET) {
             this.saleAmountsLast = newSt.saleAmountsLast;
             this.saleQtyLast = newSt.saleQtyLast;
-        } else {
-            if(this.saleAmountsLast == 0) this.saleAmountsLast = newSt.saleAmounts;
-            if(this.saleQtyLast == 0) this.saleQtyLast = newSt.saleQty;
         }
+
+        if(this.saleAmountsLast == 0) this.saleAmountsLast = newSt.saleAmounts;
+        if(this.saleQtyLast == null || this.saleQtyLast == 0) this.saleQtyLast = newSt.saleQty;
         if(newSt.targetMarket != null) this.targetMarket = newSt.targetMarket;
-        this.validate();
-        if(Validation.hasErrors()) return;
         this.save();
     }
 
@@ -335,7 +336,7 @@ public class SaleOpTarget extends Model {
                 .find("fid=? AND targetYear=? AND saleTargetType=? ",
                         this.fid,
                         this.targetYear,
-                        T.MARKET).fetch();
+                        T.MONTH).fetch();
         updateTarget(target, ts);
     }
 
@@ -357,7 +358,7 @@ public class SaleOpTarget extends Model {
             sumamount = sumamount + t.saleAmountsLast;
         }
         if(sumqty != 0) {
-                target.saleQtyLast = sumqty;
+            target.saleQtyLast = sumqty;
         }
         if(sumamount != 0) target.saleAmountsLast = sumamount;
 
@@ -487,7 +488,7 @@ public class SaleOpTarget extends Model {
                         BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
-    public static List<SaleOpTarget> salesToRbm(List<SaleOpTarget> sts) {
+    public static List<SaleOpTarget> salesToRmb(List<SaleOpTarget> sts) {
         for(int i = 0; i < sts.size(); i++) {
             SaleOpTarget target = sts.get(i);
             target.usdToRmb();

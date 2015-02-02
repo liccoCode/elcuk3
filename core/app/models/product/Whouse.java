@@ -254,8 +254,8 @@ public class Whouse extends Model {
             M type = this.account.type;
             //英国的改在周一 2014-5-26
             if(nextBeginDate.getDayOfWeek() == 1) {
-                if(Arrays.asList(M.AMAZON_UK).contains(type))
-                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                //if(Arrays.asList(M.AMAZON_UK).contains(type))
+                //Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
             } else if(nextBeginDate.getDayOfWeek() == 2) {
                 if(Arrays.asList(M.AMAZON_US).contains(type))
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
@@ -269,13 +269,13 @@ public class Whouse extends Model {
                         M.AMAZON_JP).contains(type))
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
 
-            } //else if(nextBeginDate.getDayOfWeek() == 4) {
-                //if(Arrays.asList(M.AMAZON_DE, M.AMAZON_FR, M.AMAZON_UK, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_IT,
-                        //M.AMAZON_JP).contains(type))
-                    //Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
+            } else if(nextBeginDate.getDayOfWeek() == 5) {
+                //英国的改在周五 2015-1-29
+                if(Arrays.asList(M.AMAZON_UK).contains(type))
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                 //else
-                    //throw new FastRuntimeException("还不支持向 " + type.name() + " 仓库创建运输单");
-            //}
+                //throw new FastRuntimeException("还不支持向 " + type.name() + " 仓库创建运输单");
+            }
         }
     }
 
