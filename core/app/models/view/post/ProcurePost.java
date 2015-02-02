@@ -317,18 +317,22 @@ public class ProcurePost extends Post<ProcureUnit> {
      * @return
      */
     public String generatePayInfo(String id) {
-        String paymentInfo = "";
         ProcureUnit unit = ProcureUnit.<ProcureUnit>findById(NumberUtils.toLong(id));
-        PaymentUnit prePay = unit.fetchPrePay();
-        PaymentUnit tailPay = unit.fetchTailPay();
-        if(prePay != null) {
-            if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
-            if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+        if(unit == null) {
+            return "";
+        } else {
+            String paymentInfo = "";
+            PaymentUnit prePay = unit.fetchPrePay();
+            PaymentUnit tailPay = unit.fetchTailPay();
+            if(prePay != null) {
+                if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
+                if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+            }
+            if(tailPay != null) {
+                if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
+                if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
+            }
+            return paymentInfo;
         }
-        if(tailPay != null) {
-            if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
-            if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
-        }
-        return paymentInfo;
     }
 }
