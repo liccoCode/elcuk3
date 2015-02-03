@@ -347,6 +347,8 @@ public class FBA {
                         break;
                     case AMAZON_JP:
                         config.setServiceURL(MWSEndpoint.JP.toString());
+                    case AMAZON_CA:
+                        config.setServiceURL("https://mws.amazonservices.ca/FulfillmentInboundShipment/2010-10-01/");
                         break;
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
