@@ -122,7 +122,7 @@ public class Webs {
 //        }
 //        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
 //        return Mail.send(email);
-        rollbar(subject, content);
+//        rollbar(subject, content);
         return null;
     }
 
