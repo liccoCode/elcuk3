@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.util.Date;
 
 /**
@@ -40,6 +42,7 @@ public class ReportRecord extends Model {
     public String categoryid;
 
     @Expose
+    @Enumerated(EnumType.STRING)
     public RT reporttype;
 
 
