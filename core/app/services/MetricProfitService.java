@@ -261,14 +261,22 @@ public class MetricProfitService {
                 .from("Product pd")
                 .where("pd.sku='" + this.sku + "'");
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
-        float weight = 0;
+        float weight = 0, lengths = 0, width = 0, heigh = 0;
         float price = 0;
         if(rows.size() > 0) {
             //（长*宽*高）厘米/5000 与重量相比，哪个大取哪个
-            weight = (Float) rows.get(0).get("weight");
-            float lengths = (Float) rows.get(0).get("lengths");
-            float width = (Float) rows.get(0).get("width");
-            float heigh = (Float) rows.get(0).get("heigh");
+            Object w = rows.get(0).get("weight");
+            if(w != null)
+                weight = (Float) w;
+            Object l = rows.get(0).get("lengths");
+            if(l != null)
+                lengths = (Float) l;
+            Object wid = rows.get(0).get("width");
+            if(wid != null)
+                width = (Float) wid;
+            Object h = rows.get(0).get("heigh");
+            if(h != null)
+                heigh = (Float) h;
             float volume = lengths * width * heigh / 5000 / 1000;
             if(volume > weight) {
                 weight = volume;
@@ -566,10 +574,15 @@ public class MetricProfitService {
                 rowsku = rowobject.toString();
                 rowobject = row.get("qty");
                 if(rowobject != null) {
+                    float rowlengths = 0, rowwidth = 0, rowheigh = 0;
                     int rowqty = ((Number) rowobject).intValue();
-                    float rowlengths = ((Number) row.get("lengths")).floatValue();
-                    float rowwidth = ((Number) row.get("width")).floatValue();
-                    float rowheigh = ((Number) row.get("heigh")).floatValue();
+
+                    if(row.get("lengths") != null)
+                        rowlengths = ((Number) row.get("lengths")).floatValue();
+                    if(row.get("width") != null)
+                        rowwidth = ((Number) row.get("width")).floatValue();
+                    if(row.get("heigh") != null)
+                        rowheigh = ((Number) row.get("heigh")).floatValue();
 
                     float siglevolume = 0f;
                     //快递用重量计算比例
