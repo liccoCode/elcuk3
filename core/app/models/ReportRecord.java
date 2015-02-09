@@ -19,9 +19,9 @@ import java.util.Date;
 public class ReportRecord extends Model {
 
     @Expose
-    public int year;
+    public Integer year;
     @Expose
-    public int month;
+    public Integer month;
 
     /**
      * 创建时间, 也就是记录时间
