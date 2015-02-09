@@ -249,6 +249,7 @@ public class ProcureUnits extends Controller {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.update(unit, shipmentId, msg);
         if(Validation.hasErrors()) {
+            flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
