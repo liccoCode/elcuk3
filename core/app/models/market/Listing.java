@@ -321,8 +321,10 @@ public class Listing extends GenericModel {
      */
     public static Listing crawl(String asin, M market) {
         JsonElement listing = Crawl.crawlListing(market.toString(), asin);
-        if(listing.getAsJsonObject().get("is_remove").getAsBoolean()) {
-            return null;
+        if(listing.getAsJsonObject().get("is_remove") != null) {
+            if(listing.getAsJsonObject().get("is_remove").getAsBoolean()) {
+                return null;
+            }
         }
         return Listing.parseAndUpdateListingFromCrawl(listing, true);
     }
