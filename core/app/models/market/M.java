@@ -1046,4 +1046,34 @@ public enum M {
         return (M[]) ArrayUtils.removeElement(M.values(), M.EBAY_UK);
     }
 
+
+    public static M toM(String market) {
+        if(market.equals("amazon.ca")) {
+            return AMAZON_CA;
+        } else if(market.equals("amazon.co.uk")) {
+            return AMAZON_UK;
+        }
+        if(market.equals("amazon.de")) {
+            return AMAZON_DE;
+        }
+        if(market.equals("amazon.fr")) {
+            return AMAZON_FR;
+        }
+        if(market.equals("amazon.it")) {
+            return AMAZON_IT;
+        }
+        if(market.equals("amazon.es")) {
+            return AMAZON_ES;
+        }
+        if(market.equals("amazon.com")) {
+            return AMAZON_US;
+        }
+        if(market.equals("ebay.co.uk")) {
+            return EBAY_UK;
+        }
+        if(market.equals("amazon.co.jp")) {
+            return AMAZON_JP;
+        }
+        return AMAZON_UK;
+    }
 }

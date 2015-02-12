@@ -370,6 +370,7 @@ public class Listing extends GenericModel {
         tobeChangeed.reviews = lst.get("reviews").getAsInt();
         tobeChangeed.rating = lst.get("review_rating").getAsFloat();
         //tobeChangeed.technicalDetails = lst.get("technicalDetails").getAsString();
+
         tobeChangeed.productDescription = lst.get("product_desc").getAsString();
         //tobeChangeed.saleRank = lst.get("saleRank").getAsInt();
         //tobeChangeed.totalOffers = lst.get("totalOffers").getAsInt();
