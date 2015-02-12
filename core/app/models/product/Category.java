@@ -306,7 +306,13 @@ public class Category extends GenericModel {
      * @return
      */
     public static List<String> asins(String categoryId, M market) {
-        return Category.asinsByCategories(Arrays.asList(categoryId), market);
+        List<String> asins = null;
+        if(categoryId.equalsIgnoreCase("all")) {
+            asins = Category.asinsByCategories(null, market);
+        } else {
+            asins = Category.asinsByCategories(Arrays.asList(categoryId), market);
+        }
+        return asins;
     }
 
     /**
@@ -321,7 +327,7 @@ public class Category extends GenericModel {
                 .leftJoin("Product p ON  l.product_sku = p.sku")
                 .leftJoin("Category c ON p.category_categoryId = c.categoryId")
                 .leftJoin("Selling s ON l.listingId = s.listing_listingId ");
-        if(!categories.isEmpty()) {
+        if(categories != null && !categories.isEmpty()) {
             sql.where("c.categoryId IN " + SqlSelect.inlineParam(categories));
         }
         if(market != null) {

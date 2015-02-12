@@ -75,7 +75,7 @@ public class MetricReviewService {
                 null,
                 firstReviewDate,
                 category,
-                Category.asinsByCategories(categories, null),
+                Category.asins(category, null),
                 sundays));
 
         Logger.info("countReviewRating:::" + search.toString());
@@ -163,7 +163,7 @@ public class MetricReviewService {
             search.aggregation(buildPoorRatingAggregation(m.name(), m, asins));
         }
         //还有一个 统计的 Aggregation
-        search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asinsByCategories(categories, null)));
+        search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asins(category, null)));
         Logger.info("PoorRatingByDateRange:::" + search.toString());
 
         JSONObject result = ES.search("etracker", "review", search);
