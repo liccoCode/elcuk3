@@ -348,8 +348,11 @@ public class Listing extends GenericModel {
             return null;
         }
 
-        String listingId = lst.get("listingId").getAsString();
-        Listing oldListing = Listing.find("listingId=?", listingId).first();
+        //String listingId = lst.get("listingId").getAsString();
+        String asin = lst.get("asin").getAsString();
+        M market = M.toM(lst.get("market").getAsString());
+        Listing oldListing = Listing.find("asin=? and market=?", asin, market).first();
+
         Listing tobeChangeed;
         if(oldListing != null) {
             // 更新 OldListing 并保存更新
@@ -359,17 +362,18 @@ public class Listing extends GenericModel {
             tobeChangeed = new Listing();
         }
 
-        tobeChangeed.market = M.val(listingId.split("_")[1]);
+        tobeChangeed.market = market;
         tobeChangeed.asin = lst.get("asin").getAsString();
-        tobeChangeed.byWho = lst.get("byWho").getAsString();
+        tobeChangeed.setAsin(lst.get("asin").getAsString());
+        tobeChangeed.byWho = lst.get("by_who").getAsString();
         tobeChangeed.title = lst.get("title").getAsString();
         tobeChangeed.reviews = lst.get("reviews").getAsInt();
-        tobeChangeed.rating = lst.get("rating").getAsFloat();
-        tobeChangeed.technicalDetails = lst.get("technicalDetails").getAsString();
-        tobeChangeed.productDescription = lst.get("productDescription").getAsString();
-        tobeChangeed.saleRank = lst.get("saleRank").getAsInt();
-        tobeChangeed.totalOffers = lst.get("totalOffers").getAsInt();
-        tobeChangeed.picUrls = lst.get("picUrls").getAsString();
+        tobeChangeed.rating = lst.get("review_rating").getAsFloat();
+        //tobeChangeed.technicalDetails = lst.get("technicalDetails").getAsString();
+        tobeChangeed.productDescription = lst.get("product_desc").getAsString();
+        //tobeChangeed.saleRank = lst.get("saleRank").getAsInt();
+        //tobeChangeed.totalOffers = lst.get("totalOffers").getAsInt();
+        //tobeChangeed.picUrls = lst.get("picUrls").getAsString();
         tobeChangeed.likes = lst.get("likes").getAsInt();
 
         if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
