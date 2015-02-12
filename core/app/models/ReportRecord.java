@@ -69,7 +69,7 @@ public class ReportRecord extends Model {
             }
         },
         /**
-         * 库存报表
+         * 库存报表汇总
          */
         SKUINVTOTAL {
             @Override
@@ -79,7 +79,7 @@ public class ReportRecord extends Model {
         },
 
         /**
-         * 库存报表
+         * 库存报表明细
          */
         SKUINVSELLING {
             @Override
@@ -98,12 +98,21 @@ public class ReportRecord extends Model {
             }
         },
         /**
-         * 库存报表
+         * 定期销售报表产品线
          */
         SALEYEARCATEGORY {
             @Override
             public String label() {
                 return "定期销售报表产品线";
+            }
+        },
+        /**
+         * 库存合理性报表
+         */
+        INVENTORYRATIANALITY {
+            @Override
+            public String label() {
+                return "库存合理性报表";
             }
         };
 
