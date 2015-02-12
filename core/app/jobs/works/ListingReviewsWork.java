@@ -58,6 +58,11 @@ public class ListingReviewsWork extends Job<Listing> {
                     } else {
                         review.listing = Listing.findById(review.listingId);
                     }
+
+                    if (review.listing==null){
+                        review.listing = Listing.findById(listing.listingId);
+                    }
+
                     review.createDate = review.reviewDate;
                     review.isOwner = review.listing.product != null;
                     Orderr ord = review.tryToRelateOrderByUserId();
