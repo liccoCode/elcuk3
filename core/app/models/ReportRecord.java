@@ -6,6 +6,7 @@ import play.db.jpa.Model;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -125,4 +126,11 @@ public class ReportRecord extends Model {
                 + "&month=%s", this.year, this.month);
     }
 
+    /**
+     * 判断是否能够重新计算
+     * @return
+     */
+    public boolean canBeRecalculated() {
+        return !Arrays.asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY).contains(this.reporttype);
+    }
 }

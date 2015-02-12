@@ -63,7 +63,7 @@
             <td>${r.createAt}</td>
             <td>${r.downloadcount}</td>
             <td><a class="btn btn-primary" href="@{ReportDownloads.download(r.id)}">下载</a>
-                #{if r.reporttype != models.ReportRecord.RT.SKUINVSELLING && r.reporttype != models.ReportRecord.RT.SKUINVTOTAL && r.reporttype != models.ReportRecord.RT.INVENTORYRATIANALITY}
+                #{if r.canBeRecalculated()}
                   <a class="btn btn-primary" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
                 #{/if}
             </td>
