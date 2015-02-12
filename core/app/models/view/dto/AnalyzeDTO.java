@@ -200,6 +200,19 @@ public class AnalyzeDTO implements Serializable {
         );
     }
 
+    public F.T4<Float, Float, Float, Float> getSidTurnOverT4() {
+        float _ps = this.getPs_cal();
+        _ps = _ps < 1 ? 1f : _ps;
+        float ps = this.ps;
+        return new F.T4<Float, Float, Float, Float>(
+                Webs.scale2PointUp(this.qty / _ps),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
+                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
+                Webs.scale2PointUp(
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
+        );
+    }
+
     /**
      * 比较此 Selling 中自行设计的 ps 与计算出来的 _ps 之间的差值
      *
