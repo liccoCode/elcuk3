@@ -74,5 +74,5 @@ SQL = %q(SELECT oi.id, oi.createDate date, oi.selling_sellingId selling_id, s.me
 # =============================================================================================================
 pool = OrderItemActor.pool(size: 6)
 pool.init_mapping
-process(dataset: DB[SQL, Time.parse('2012-01-01')].stream, actor: pool)
+process(dataset: DB[SQL, Time.now()-4000000].stream, actor: pool)
 puts pool.clear_cache
