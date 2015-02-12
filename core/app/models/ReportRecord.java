@@ -6,6 +6,7 @@ import play.db.jpa.Model;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -19,9 +20,9 @@ import java.util.Date;
 public class ReportRecord extends Model {
 
     @Expose
-    public int year;
+    public Integer year;
     @Expose
-    public int month;
+    public Integer month;
 
     /**
      * 创建时间, 也就是记录时间
@@ -69,7 +70,7 @@ public class ReportRecord extends Model {
             }
         },
         /**
-         * 库存报表
+         * 库存报表汇总
          */
         SKUINVTOTAL {
             @Override
@@ -79,7 +80,7 @@ public class ReportRecord extends Model {
         },
 
         /**
-         * 库存报表
+         * 库存报表明细
          */
         SKUINVSELLING {
             @Override
@@ -98,12 +99,21 @@ public class ReportRecord extends Model {
             }
         },
         /**
-         * 库存报表
+         * 定期销售报表产品线
          */
         SALEYEARCATEGORY {
             @Override
             public String label() {
                 return "定期销售报表产品线";
+            }
+        },
+        /**
+         * 库存合理性报表
+         */
+        INVENTORYRATIANALITY {
+            @Override
+            public String label() {
+                return "库存合理性报表";
             }
         };
 
@@ -116,4 +126,11 @@ public class ReportRecord extends Model {
                 + "&month=%s", this.year, this.month);
     }
 
+    /**
+     * 判断是否能够重新计算
+     * @return
+     */
+    public boolean canBeRecalculated() {
+        return !Arrays.asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY).contains(this.reporttype);
+    }
 }
