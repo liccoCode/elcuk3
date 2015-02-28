@@ -437,10 +437,8 @@ public class AmazonProps implements Serializable {
         if(index > 0) {
             String fnsku = html.substring(html.indexOf("name=\"fnSku") - 19, html.indexOf("name=\"fnSku"));
             return fnsku.substring(fnsku.indexOf("value=") + 7, fnsku.length() - 2);
-        } else {
-            throw new FastRuntimeException(
-                    String.format("返回snSku列表为空!"));
         }
+        return "";
     }
 
 
