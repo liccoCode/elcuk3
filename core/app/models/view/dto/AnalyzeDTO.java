@@ -137,7 +137,7 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 断货天数
      */
-    public int outday;
+    public float outday;
 
     /**
      * 实时价格
