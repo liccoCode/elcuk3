@@ -4,10 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.Dates;
 import helper.ES;
+import helper.Promises;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.range.RangeFacetBuilder;
@@ -19,6 +23,7 @@ import play.utils.FastRuntimeException;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 通过向 ElasticSearch 进行搜索的 OrderItem Query
@@ -354,7 +359,7 @@ public class OrderItemESQuery {
      *
      * @return
      */
-    public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to,boolean issku) {
+    public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to, boolean issku) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
         if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
@@ -385,12 +390,53 @@ public class OrderItemESQuery {
         JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
 
         Series.Line line = new Series.Line(market.label() + " 滑动平均");
-        if (issku)
-            line = new Series.Line(market.label() + val+" 滑动平均");
+        if(issku)
+            line = new Series.Line(market.label() + val + " 滑动平均");
         for(Object o : movingAveRanges) {
             JSONObject range = (JSONObject) o;
             line.add(Dates.date2JDate(range.getDate("to")), range.getFloat("total") / 7);
         }
         return line;
+    }
+
+    /**
+     * 计算 SKU 的销量
+     *
+     * @param from
+     * @param to
+     * @param params
+     * @return
+     */
+    public JSONObject skuSales(Date from, Date to, List<String> params, String type) {
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
+        for(M m : Promises.MARKETS) {
+            search.aggregation(baseSalesAggregation(m, from, to, params, type));
+        }
+        Logger.info("countSkuSales:::" + search.toString());
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        if(result == null) throw new FastRuntimeException("ES连接异常!");
+        return result.getJSONObject("aggregations");
+    }
+
+    public AggregationBuilder baseSalesAggregation(M market, Date from, Date to, List<String> params, String type) {
+        FilterAggregationBuilder aggregation = AggregationBuilders.filter(market.name());
+
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+        //不同的市场需要考虑到时区的问题
+        DateTime fromD = market.withTimeZone(from);
+        DateTime toD = market.withTimeZone(to);
+
+        BoolFilterBuilder filter = FilterBuilders.boolFilter()
+                //市场
+                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                        //日期
+                .must(FilterBuilders.rangeFilter("date")
+                        .gte(fromD.toString(isoFormat))
+                        .lt(toD.toString(isoFormat)))
+                        //SKU
+                .must(FilterBuilders.termsFilter(type, params));
+        aggregation.filter(filter);
+        aggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
+        return aggregation;
     }
 }

@@ -1,19 +1,24 @@
 package models.market;
 
+import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import models.product.Product;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.OrFilterBuilder;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import query.OrderItemESQuery;
+import query.ProductQuery;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 订单的具体订单项
@@ -242,7 +247,7 @@ public class OrderItem extends GenericModel {
      * @param type units/sales
      * @param from
      * @param to
-     * @param acc  de/uk/us/all
+     * @param
      * @return
      */
     public static HighChart categoryPie(String type, final Date from, final Date to, M market) {
@@ -407,5 +412,53 @@ public class OrderItem extends GenericModel {
             Cache.add(cacked_key, highChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);
+    }
+
+    /**
+     * 查询传入的 SKU 的销量信息
+     */
+    public static List<F.T4<String, Long, Long, Float>> querySalesBySkus(Date from, Date to, String val) {
+        List<F.T4<String, Long, Long, Float>> sales = new ArrayList<F.T4<String, Long, Long, Float>>();
+
+        List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
+        List<String> categories = new ProductQuery().loadCategoriesBySkus(selectedSkus);
+        OrderItemESQuery service = new OrderItemESQuery();
+
+        for(int i = 0; i < selectedSkus.size(); i++) {
+            selectedSkus.set(i, StringUtils.join(selectedSkus.get(i).split("-"), "").toLowerCase());
+        }
+
+        //选择的 SKU 的销量汇总
+        JSONObject skusResult = service.skuSales(from, to, selectedSkus, "sku");
+        //Category 的销量汇总
+        JSONObject catgoriesResult = service.skuSales(from, to, categories, "category_id");
+
+        for(M m : Promises.MARKETS) {
+            //SKU
+            JSONObject marketResult = skusResult.getJSONObject(m.name());
+            Long skuSales = marketResult.getJSONObject("sum_sales").getLongValue("value");
+            //Category
+            JSONObject categoryResult = catgoriesResult.getJSONObject(m.name());
+            Long categorySales = categoryResult.getJSONObject("sum_sales").getLongValue("value");
+            Float rate = categorySales == 0 ? 0 : ((float) skuSales / (float) categorySales);
+            BigDecimal bd = new BigDecimal(rate);
+            sales.add(new F.T4<String, Long, Long, Float>(m.name(), skuSales, categorySales,
+                    bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue())
+            );
+        }
+
+        //最后汇总 ALL 数据
+        Long sumSkuSales = 0L;
+        Long sumCategorySales = 0L;
+        for(F.T4<String, Long, Long, Float> item : sales) {
+            sumSkuSales += item._2;
+            sumCategorySales += item._3;
+        }
+        Float sumRate = sumCategorySales == 0 ? 0 : ((float) sumSkuSales / (float) sumCategorySales);
+        BigDecimal bd = new BigDecimal(sumRate);
+        sales.add(new F.T4<String, Long, Long, Float>("ALL", sumSkuSales, sumCategorySales,
+                bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue())
+        );
+        return sales;
     }
 }
