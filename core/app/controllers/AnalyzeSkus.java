@@ -89,7 +89,7 @@ public class AnalyzeSkus extends Controller {
     @Check("analyzeskus.skusalesreport")
     public static void processSkuSalesReport(Date from, Date to, String val) {
         try {
-            List<F.T4<String, Long, Long, Float>> sales = OrderItem.querySalesBySkus(from, to, val);
+            List<F.T4<String, Long, Long, Double>> sales = OrderItem.querySalesBySkus(from, to, val);
             render(sales);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

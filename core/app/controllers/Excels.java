@@ -35,8 +35,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import models.view.post.LossRatePost;
-
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -316,7 +314,7 @@ public class Excels extends Controller {
 
 
     public static void skuSalesReport(Date from, Date to, String val) {
-        List<F.T4<String, Long, Long, Float>> sales = OrderItem.querySalesBySkus(from, to, val);
+        List<F.T4<String, Long, Long, Double>> sales = OrderItem.querySalesBySkus(from, to, val);
         if(sales != null && sales.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";

@@ -416,8 +416,8 @@ public class OrderItem extends GenericModel {
     /**
      * 查询传入的 SKU 的销量信息
      */
-    public static List<F.T4<String, Long, Long, Float>> querySalesBySkus(Date from, Date to, String val) {
-        List<F.T4<String, Long, Long, Float>> sales = new ArrayList<F.T4<String, Long, Long, Float>>();
+    public static List<F.T4<String, Long, Long, Double>> querySalesBySkus(Date from, Date to, String val) {
+        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<F.T4<String, Long, Long, Double>>();
 
         List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
         List<String> categories = new ProductQuery().loadCategoriesBySkus(selectedSkus);
@@ -432,7 +432,8 @@ public class OrderItem extends GenericModel {
         //Category 的销量汇总
         JSONObject catgoriesResult = service.skuSales(from, to, categories, "category_id");
 
-        for(M m : Promises.MARKETS) {
+        for(M m : M.values()) {
+            if(m == M.EBAY_UK) continue;
             //SKU
             JSONObject marketResult = skusResult.getJSONObject(m.name());
             Long skuSales = marketResult.getJSONObject("sum_sales").getLongValue("value");
@@ -440,21 +441,21 @@ public class OrderItem extends GenericModel {
             JSONObject categoryResult = catgoriesResult.getJSONObject(m.name());
             Long categorySales = categoryResult.getJSONObject("sum_sales").getLongValue("value");
             Float rate = categorySales == 0 ? 0 : ((float) skuSales / (float) categorySales);
-            sales.add(new F.T4<String, Long, Long, Float>(m.name(), skuSales, categorySales,
-                    Webs.scale2PointUp(rate * 100))
+            sales.add(new F.T4<String, Long, Long, Double>(m.name(), skuSales, categorySales,
+                    Webs.scale2Double(rate * 100))
             );
         }
 
         //最后汇总 ALL 数据
         Long sumSkuSales = 0L;
         Long sumCategorySales = 0L;
-        for(F.T4<String, Long, Long, Float> item : sales) {
+        for(F.T4<String, Long, Long, Double> item : sales) {
             sumSkuSales += item._2;
             sumCategorySales += item._3;
         }
         Float sumRate = sumCategorySales == 0 ? 0 : ((float) sumSkuSales / (float) sumCategorySales);
-        sales.add(new F.T4<String, Long, Long, Float>("ALL", sumSkuSales, sumCategorySales,
-                Webs.scale2PointUp(sumRate * 100))
+        sales.add(0, new F.T4<String, Long, Long, Double>("ALL", sumSkuSales, sumCategorySales,
+                Webs.scale2Double(sumRate * 100))
         );
         return sales;
     }
