@@ -23,7 +23,6 @@ import play.utils.FastRuntimeException;
 import services.MetricReviewService;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -674,8 +673,7 @@ public class AmazonListingReview extends GenericModel {
                         if(entry.getIntValue("key") == 5) ratingSum += entry.getIntValue("doc_count") * 5;
                     }
                     float rating = reviewTotalCount == 0 ? 0 : (float) ratingSum / (float) reviewTotalCount;
-                    BigDecimal bd = new BigDecimal(rating);
-                    line.add(sunday, bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue()); // 四舍五入且保留两位小数
+                    line.add(sunday, Webs.scale2PointUp(rating)); // 四舍五入且保留两位小数
                 }
                 line.visible = jsonKey.equalsIgnoreCase("sum");
                 lineChart.series(line);
@@ -728,9 +726,8 @@ public class AmazonListingReview extends GenericModel {
                             //由于 ES 返回的都是周一,因此需要加上 6 天得到周末
                             int poorReviewCount = entry.getJSONObject("poor_rating_review").getIntValue("doc_count");
                             float poorRate = ((float) poorReviewCount / (float) reviewCount) * 100;
-                            BigDecimal bd = new BigDecimal(poorRate);
                             if(sundayList.contains(point)) {
-                                line.add(point, bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue()); //
+                                line.add(point, Webs.scale2PointUp(poorRate)); //
                                 // 四舍五入且保留两位小数
                                 sundayListCopy.remove(point);
                             }

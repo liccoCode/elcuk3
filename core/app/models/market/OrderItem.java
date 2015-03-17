@@ -14,7 +14,6 @@ import query.OrderItemESQuery;
 import query.ProductQuery;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -441,9 +440,8 @@ public class OrderItem extends GenericModel {
             JSONObject categoryResult = catgoriesResult.getJSONObject(m.name());
             Long categorySales = categoryResult.getJSONObject("sum_sales").getLongValue("value");
             Float rate = categorySales == 0 ? 0 : ((float) skuSales / (float) categorySales);
-            BigDecimal bd = new BigDecimal(rate);
             sales.add(new F.T4<String, Long, Long, Float>(m.name(), skuSales, categorySales,
-                    bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue())
+                    Webs.scale2PointUp(rate * 100))
             );
         }
 
@@ -455,9 +453,8 @@ public class OrderItem extends GenericModel {
             sumCategorySales += item._3;
         }
         Float sumRate = sumCategorySales == 0 ? 0 : ((float) sumSkuSales / (float) sumCategorySales);
-        BigDecimal bd = new BigDecimal(sumRate);
         sales.add(new F.T4<String, Long, Long, Float>("ALL", sumSkuSales, sumCategorySales,
-                bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue())
+                Webs.scale2PointUp(sumRate * 100))
         );
         return sales;
     }
