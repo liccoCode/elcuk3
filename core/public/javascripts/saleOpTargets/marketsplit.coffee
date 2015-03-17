@@ -85,7 +85,7 @@ $ ->
   reallySaleAmountsSUM = ->
     reviseSaleAmountsSUM = 0.00
 
-    reallySaleAmountsList = $("input[name='reallySaleAmounts']")
+    reallySaleAmountsList = $("input[name='monthSaleAmounts']")
 
     amount1 = 0
     amount2 = 0
@@ -116,7 +116,7 @@ $ ->
     $("#reviseSeasonSaleAmounts4").val(amount4.toFixed(2))
 
     reviseSaleQtysSUM = 0
-    reallySaleQtysList = $("input[name='reallySaleQtys']")
+    reallySaleQtysList = $("input[name='monthSaleQtys']")
 
     qty1 = 0
     qty2 = 0
