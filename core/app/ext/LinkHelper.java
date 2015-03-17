@@ -17,7 +17,7 @@ public class LinkHelper extends JavaExtensions {
 
     public static String userReviewLink(AmazonListingReview r) {
         String baseAmazon = "http://www.%s/gp/pdp/profile/%s";
-        String[] args = r.listingId.split("_");
+        String[] args = r.listing.listingId.split("_");
         M market = M.val(args[1]);
         switch(market) {
             case AMAZON_CA:
