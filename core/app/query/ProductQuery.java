@@ -54,4 +54,22 @@ public class ProductQuery {
         }
         return products;
     }
+
+    /**
+     * 根据 SKU 返回对应的 Category
+     * @return
+     */
+    public List<String> loadCategoriesBySkus(List<String> skus) {
+        List<String> categories = new ArrayList<String>();
+        SqlSelect sql = new SqlSelect().select("DISTINCT category_categoryId as category").from("Product");
+        sql.where("sku IN " + SqlSelect.inlineParam(skus));
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        for(Map<String, Object> row : rows) {
+            Object category = row.get("category");
+            if(category != null) {
+                categories.add(category.toString());
+            }
+        }
+        return categories;
+    }
 }

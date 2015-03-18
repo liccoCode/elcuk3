@@ -7,6 +7,7 @@ import helper.Currency;
 import helper.Webs;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.product.Category;
@@ -21,21 +22,18 @@ import models.view.report.Profit;
 import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import models.view.post.LossRatePost;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -315,4 +313,18 @@ public class Excels extends Controller {
     }
 
 
+    public static void skuSalesReport(Date from, Date to, String val) {
+        List<F.T4<String, Long, Long, Double>> sales = OrderItem.querySalesBySkus(from, to, val);
+        if(sales != null && sales.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("自定义销售报表%s.xls", formatter.format(DateTime.now().toDate())));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(sales, from, to);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
 }

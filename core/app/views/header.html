@@ -36,10 +36,13 @@
         <li><a href="@{Analyzes.index()}">销量分析</a></li>
       #{/power.ck}
       #{power.ck "analyzeskus.index"}
-        <li><a href="@{AnalyzeSkus.index()}">SKU销量分析</a></li>
+        <li><a href="@{AnalyzeSkus.index()}">SKU 销量分析</a></li>
+      #{/power.ck}
+      #{power.ck "analyzeskus.skusalesreport"}
+        <li><a href="@{AnalyzeSkus.skuSalesReport()}">自定义销售报表</a></li>
       #{/power.ck}
       #{power.ck "analyzes.trafficrate"}
-        <li><a href="@{Analyzes.trafficRate()}">Selling流量转化率统计</a></li>
+        <li><a href="@{Analyzes.trafficRate()}">Selling 流量转化率统计</a></li>
       #{/power.ck}
       #{power.ck "categoryinfos.show"}
         <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>

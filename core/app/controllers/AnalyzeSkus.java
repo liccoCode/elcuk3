@@ -1,29 +1,21 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Dates;
 import helper.J;
 import helper.Webs;
-import models.market.*;
+import models.market.OrderItem;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
-import models.view.dto.AnalyzeDTO;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
-import models.view.post.TrafficRatePost;
-import models.view.report.TrafficRate;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
-import play.Logger;
-import play.Play;
-import play.cache.CacheFor;
-import play.jobs.Job;
-import play.mvc.After;
-import play.mvc.Before;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,7 +25,7 @@ import java.util.List;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class AnalyzeSkus extends Controller {
 
     @Check("analyzes.index")
@@ -75,8 +67,30 @@ public class AnalyzeSkus extends Controller {
             p.from = now.plusDays(-30).toDate();
             p.to = now.toDate();
 
-            HighChart chart = OrderItem.ajaxSkusMarketUnitOrder(p.val,p.market, p.type, p.from, p.to,p.ismoveing);
+            HighChart chart = OrderItem.ajaxSkusMarketUnitOrder(p.val, p.market, p.type, p.from, p.to, p.ismoveing);
             renderJSON(J.json(chart));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
+     * 自定义销售报表
+     */
+    @Check("analyzeskus.skusalesreport")
+    public static void skuSalesReport() {
+        Date from = Dates.startDayYear(DateTime.now().getYear());
+        Date to = DateTime.now().toDate();
+        List<String> products = Product.skus(true);
+        renderArgs.put("products", J.json(products));
+        render(from, to);
+    }
+
+    @Check("analyzeskus.skusalesreport")
+    public static void processSkuSalesReport(Date from, Date to, String val) {
+        try {
+            List<F.T4<String, Long, Long, Double>> sales = OrderItem.querySalesBySkus(from, to, val);
+            render(sales);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
