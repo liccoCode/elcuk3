@@ -38,19 +38,19 @@ public class Crawl {
 
     private static String marketurl(String market) {
         String key = "";
-        if(market.equals("amazon.co.uk") || market.equals("AMAZON_UK")) {
+        if(market.equals("amazon.co.uk") || market.equals("AMAZON_UK") || market.equals("uk")) {
             key = "uk";
-        } else if(market.equals("amazon.de") || market.equals("AMAZON_DE")) {
+        } else if(market.equals("amazon.de") || market.equals("AMAZON_DE") || market.equals("de")) {
             key = "de";
-        } else if(market.equals("amazon.fr") || market.equals("AMAZON_FR")) {
+        } else if(market.equals("amazon.fr") || market.equals("AMAZON_FR") || market.equals("fr")) {
             key = "fr";
-        } else if(market.equals("amazon.it") || market.equals("AMAZON_IT")) {
+        } else if(market.equals("amazon.it") || market.equals("AMAZON_IT") || market.equals("it")) {
             key = "it";
-        } else if(market.equals("amazon.es") || market.equals("AMAZON_ES")) {
+        } else if(market.equals("amazon.es") || market.equals("AMAZON_ES") || market.equals("es")) {
             key = "es";
-        } else if(market.equals("amazon.com") || market.equals("AMAZON_US")) {
+        } else if(market.equals("amazon.com") || market.equals("AMAZON_US") || market.equals("us")) {
             key = "us";
-        } else if(market.equals("amazon.co.jp") || market.equals("AMAZON_JP")) {
+        } else if(market.equals("amazon.co.jp") || market.equals("AMAZON_JP") || market.equals("jp")) {
             key = "jp";
         }
         return key;

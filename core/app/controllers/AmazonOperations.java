@@ -1,17 +1,23 @@
 package controllers;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import controllers.api.SystemOperation;
+import helper.Crawl;
 import helper.J;
 import helper.Webs;
 import jobs.works.ListingReviewsWork;
 import models.market.*;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Error;
+import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +28,7 @@ import java.util.Set;
  * Date: 7/19/12
  * Time: 11:59 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 @Check("amazonoperations")
 public class AmazonOperations extends Controller {
 
@@ -142,4 +148,33 @@ public class AmazonOperations extends Controller {
         renderJSON(success);
     }
 
+
+    /**
+     * 根据 Review ID 抓取 Review 存入 DB
+     * URL: http://e.easya.cc/amazonoperations/crawlreviewbyid?m=us&reviewId=RQCVG30N78NFJ
+     *
+     * @param m
+     * @param reviewId
+     */
+    public static void crawlReviewById(final String m, final String reviewId) {
+        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
+            @Override
+            public List<Error> doJobWithResult() throws Exception {
+                List<Error> errors = new ArrayList<Error>();
+                try {
+                    JsonElement reviewElement = Crawl.crawlReview(m, reviewId);
+                    JsonObject reviewObj = reviewElement.getAsJsonObject();
+                    AmazonListingReview.parseAmazonReviewJson(reviewObj).saveOrUpdate();
+                } catch(Exception e) {
+                    errors.add(new Error("", Webs.E(e), new String[]{}));
+                }
+                return errors;
+            }
+        }.now());
+        if(errors.size() > 0) {
+            renderJSON(new Ret(errors.toString()));
+        } else {
+            renderJSON(new Ret(true));
+        }
+    }
 }
