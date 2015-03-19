@@ -752,4 +752,32 @@ public class AmazonListingReview extends GenericModel {
         AmazonListingReview firstReview = AmazonListingReview.find("ORDER BY reviewDate ASC").first();
         return firstReview.reviewDate;
     }
+
+    /**
+     * 初始化一些 Review 参数，再根据 Review 来判断更新还是保存
+     */
+    public void saveOrUpdate() {
+        AmazonListingReview fromDB = AmazonListingReview.findById(this.alrId);
+        if(fromDB == null) {
+            if(StringUtils.isNotBlank(this.listingId)) {
+                Listing listing = Listing.findById(this.listingId);
+                if(listing == null) {
+                    F.T2<String, M> asinAndMarket = Listing.unLid(this.listingId);
+                    listing = Listing.crawl(asinAndMarket._1, asinAndMarket._2);
+                    listing.save();
+                }
+                this.listing = listing;
+                this.isOwner = this.listing.product != null;
+            }
+            this.createDate = this.reviewDate;
+            Orderr ord = this.tryToRelateOrderByUserId();
+            if(ord != null) this.orderr = ord;
+
+            this.createReview();// 创建新的
+            this.checkMailAndTicket();
+        } else {
+            fromDB.updateAttr(this); // 更新
+            fromDB.checkMailAndTicket();
+        }
+    }
 }
