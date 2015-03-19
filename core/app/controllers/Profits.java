@@ -4,6 +4,7 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
 import helper.Caches;
+import helper.Dates;
 import helper.J;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.M;
@@ -51,7 +52,7 @@ public class Profits extends Controller {
             p = new ProfitPost();
             render(profits, p);
         } else {
-
+            p.end = Dates.night(p.end);
             String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
             // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
 
