@@ -3,7 +3,7 @@ package services;
 import com.alibaba.fastjson.JSONObject;
 import helper.Dates;
 import helper.ES;
-import models.User;
+import helper.Promises;
 import models.market.AmazonListingReview;
 import models.market.ListingStateRecord;
 import models.market.M;
@@ -21,7 +21,10 @@ import play.Logger;
 import play.utils.FastRuntimeException;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,10 +35,12 @@ import java.util.*;
 public class MetricReviewService {
     public Date from;
     public Date to;
+    public String category;
 
     public MetricReviewService(Date from, Date to, String category) {
         this.from = from;
         this.to = to;
+        this.category = category;
     }
 
     /**
@@ -48,35 +53,18 @@ public class MetricReviewService {
      *
      * @return
      */
-    public JSONObject countReviewRating(String category, User user) {
-        List<String> categories = User.getTeamCategorys(user);
-        if(!category.equalsIgnoreCase("all") && !categories.contains(category)) {
-            return null; //没有该 Category 权限, 不允许查看数据
-        }
-
+    public JSONObject countReviewRating() {
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
-        //使用嵌套的 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据) 具体参照 http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html
-        for(M m : M.values()) {
-            if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
-            List<String> asins = new ArrayList<String>();
-            if(category.equalsIgnoreCase("all")) {
-                asins = Category.asinsByCategories(categories, m);
-            } else {
-                asins = Category.asins(category, m);
-            }
+        //使用嵌套的 Aggregation 构造出一个大的查询 Json, 一次性查询出所有市场的数据(
+        //http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html)
+        for(M m : Promises.MARKETS) {
             //单独每个市场的 aggregation
-            search.aggregation(buildReviewRatingAggregation(m.name(), m, firstReviewDate, category, asins, sundays));
+            search.aggregation(buildReviewRatingAggregation(m.name(), m, firstReviewDate, sundays));
         }
         //计算汇总的 aggregation
-        search.aggregation(buildReviewRatingAggregation(
-                "SUM",
-                null,
-                firstReviewDate,
-                category,
-                Category.asins(category, null),
-                sundays));
+        search.aggregation(buildReviewRatingAggregation("SUM", null, firstReviewDate, sundays));
 
         Logger.info("countReviewRating:::" + search.toString());
         JSONObject result = ES.search("etracker", "review", search);
@@ -88,21 +76,13 @@ public class MetricReviewService {
      * @param name            用作最顶级 Aggregation 的名称
      * @param m               市场
      * @param firstReviewDate 第一个 Review 产生的时间
-     * @param category        产品线(用作获取 Listing ID 来进行 ASIN 过滤 需要过滤掉那些下架的 ASIN)
-     * @param asins
      * @param sundays
      * @return
      */
-    public AggregationBuilder buildReviewRatingAggregation(String name, M m, Date firstReviewDate,
-                                                           String category, List<String> asins,
-                                                           List<Date> sundays) {
+    public AggregationBuilder buildReviewRatingAggregation(String name, M m, Date firstReviewDate, List<Date> sundays) {
+        List<String> asins = Category.asins(this.category, m);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        List<String> listingIds;
-        if(name.equalsIgnoreCase("SUM")) {
-            listingIds = Category.listingIds(category, null);
-        } else {
-            listingIds = Category.listingIds(category, m);
-        }
+        List<String> listingIds = Category.listingIds(this.category, m);
 
         //市场的 aggregation 过滤
         FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(name);
@@ -142,24 +122,12 @@ public class MetricReviewService {
      *
      * @return
      */
-    public JSONObject countPoorRatingByDateRange(String category, User user) {
-        List<String> categories = User.getTeamCategorys(user);
-        if(!category.equalsIgnoreCase("all") && !categories.contains(category)) {
-            return null; //没有该 Category 权限, 不允许查看数据
-        }
+    public JSONObject countPoorRatingByDateRange() {
         // search
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
-        //使用嵌套的 Aggregation 构造出一个巨大的查询 Json, 一次性查询出所有市场的数据(update: include 汇总数据) 具体参照 http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html
-        for(M m : M.values()) {
-            if(m.equals(M.EBAY_UK)) continue; // eBay 不参与计算
-            List<String> asins = new ArrayList<String>();
-            if(category.equalsIgnoreCase("all")) {
-                asins = Category.asinsByCategories(categories, m);
-            } else {
-                asins = Category.asins(category, m);
-            }
+        for(M m : Promises.MARKETS) {
+            List<String> asins = Category.asins(this.category, m);
             if(asins == null || asins.isEmpty()) continue; //未找到合法的 ASIN
-
             search.aggregation(buildPoorRatingAggregation(m.name(), m, asins));
         }
         //还有一个 统计的 Aggregation

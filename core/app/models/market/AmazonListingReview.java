@@ -647,7 +647,7 @@ public class AmazonListingReview extends GenericModel {
             List<Date> sundays = Dates.getAllSunday(from, to);
 
             MetricReviewService service = new MetricReviewService(from, to, category);
-            JSONObject countByMarket = service.countReviewRating(category, user);
+            JSONObject countByMarket = service.countReviewRating();
 
             List<String> jsonKeys = new ArrayList<String>();
             for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
@@ -705,7 +705,7 @@ public class AmazonListingReview extends GenericModel {
 
             List<Date> sundayList = Dates.getAllSunday(from, to);
             MetricReviewService service = new MetricReviewService(from, to, category);
-            JSONObject aggregations = service.countPoorRatingByDateRange(category, user);
+            JSONObject aggregations = service.countPoorRatingByDateRange();
             List<String> jsonKeys = new ArrayList<String>();
             for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
             jsonKeys.add("SUM");
