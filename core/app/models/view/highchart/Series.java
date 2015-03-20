@@ -25,6 +25,11 @@ public class Series {
             this.marker = new Marker();
         }
 
+        public Line(String name, boolean visible) {
+            super(name, LINE, visible);
+            this.marker = new Marker();
+        }
+
         public Line sort() {
             Collections.sort(this.data, new Comparator<Object[]>() {
                 @Override

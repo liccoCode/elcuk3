@@ -53,7 +53,7 @@ class OrderItemActor
   end
 
   def clear_cache 
-    HTTParty.get("http://e.easya.cc/api/CacheClear/esCacheClear?auth_token=baef851cab745d3441d4bc7ff6f27b28").body
+    HTTParty.get("http://rock.easya.cc:4567/selling_sale_analyze").body
   end
 end
 
