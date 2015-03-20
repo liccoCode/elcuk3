@@ -164,7 +164,7 @@ public class OrderItemESQuery {
                                 .must(FilterBuilders.rangeFilter("date")
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat))
-                                )
+                                ).mustNot(FilterBuilders.termFilter("state", "cancel"))
                         )
                 ).size(0);
 
@@ -434,7 +434,8 @@ public class OrderItemESQuery {
                         .gte(fromD.toString(isoFormat))
                         .lt(toD.toString(isoFormat)))
                         //SKU
-                .must(FilterBuilders.termsFilter(type, params));
+                .must(FilterBuilders.termsFilter(type, params))
+                .mustNot(FilterBuilders.termFilter("state", "cancel"));
         aggregation.filter(filter);
         aggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
         return aggregation;
