@@ -687,6 +687,7 @@ public class AmazonListingReview extends GenericModel {
                 float reviewTotalRating = reviewTotalCount == 0 ? 0 : (float) reviewTotalScore / reviewTotalCount;
                 sumLine.add(sunday, Webs.scale2PointUp(reviewTotalRating));
             }
+            for(Series.Line line : lines.values()) lineChart.series(line);
             Cache.add(cacked_key, lineChart, "4h");
         }
         return Cache.get(cacked_key, HighChart.class);
