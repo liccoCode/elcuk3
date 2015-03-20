@@ -1,6 +1,7 @@
 package models.view.post;
 
 import helper.DBUtils;
+import helper.Dates;
 import helper.Webs;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -258,6 +259,7 @@ public class ProfitPost extends Post<Profit> {
      */
     public Profit esProfit(Date begin, Date end, M market,
                            String prosku, String sellingId) {
+        end = Dates.night(end);
         MetricProfitService service = new MetricProfitService(begin, end, market, prosku, sellingId);
         Profit profit = service.calProfit();
 
