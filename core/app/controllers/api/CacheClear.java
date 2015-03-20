@@ -25,11 +25,6 @@ public class CacheClear extends Controller {
      * es执行完后清理缓存
      */
     public static void esCacheClear() {
-
-        /**删除与销量相关的redis信息**/
-        Cache.delete(SellingSaleAnalyzeJob.AnalyzeDTO_SKU_CACHE);
-        Cache.delete(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE);
-
         Date to = DateTime.now().toDate();
         Date from = DateTime.now().plusMonths(-1).toDate();
         String unitkey = ajaxUnitOrderKey("all", "sid", from, to);
