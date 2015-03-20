@@ -24,6 +24,12 @@ public abstract class AbstractSeries implements Serializable {
         this.type = type;
     }
 
+    public AbstractSeries(String name, String type, boolean visible) {
+        this(name);
+        this.type = type;
+        this.visible = visible;
+    }
+
     /**
      * Series 的数据为 [[key, value], [key, value]...] 的形式
      */

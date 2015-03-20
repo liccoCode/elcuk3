@@ -26,6 +26,7 @@ import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -649,38 +650,45 @@ public class AmazonListingReview extends GenericModel {
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject countByMarket = service.countReviewRating();
 
-            List<String> jsonKeys = new ArrayList<String>();
-            for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
-            jsonKeys.add("SUM");
-            for(String jsonKey : jsonKeys) {
-                Series.Line line = new Series.Line(jsonKey);
-                JSONObject counByMarket = countByMarket.getJSONObject(jsonKey);
-                for(Date sunday : sundays) {
-                    JSONObject sundayResult = counByMarket.getJSONObject(formatter.format(sunday));
-                    if(sundayResult == null) {
-                        line.add(sunday, 0f);// 未找到当前日期的数据, 直接下一个,赋值为 0
+            HashMap<String, Series.Line> lines = new HashMap<String, Series.Line>();
+            for(M m : Promises.MARKETS) lines.put(m.name(), new Series.Line(m.name(), false));
+            lines.put("SUM", new Series.Line("SUM", true));
+
+            for(Date sunday : sundays) {
+                Long reviewTotalCount = 0l;//Review 总个数
+                Long reviewTotalScore = 0l;//Review 总得分
+
+                JSONObject sundayResult = countByMarket.getJSONObject(formatter.format(sunday));
+                for(M m : Promises.MARKETS) {
+                    JSONObject marketResult = sundayResult.getJSONObject(m.name());
+                    Series.Line line = lines.get(m.name());
+                    if(marketResult == null) {
+                        line.add(sunday, 0f);
                         continue;
                     }
-                    float reviewTotalCount = sundayResult.getInteger("doc_count");
-                    JSONArray buckets = sundayResult.getJSONObject("group_by_rating").getJSONArray("buckets");
-                    int ratingSum = 0;
+
+                    float sumCount = marketResult.getInteger("doc_count");
+                    JSONArray buckets = marketResult.getJSONObject("group_by_rating").getJSONArray("buckets");
+                    int scoreSum = 0;
                     for(Object o : buckets) {
                         JSONObject entry = (JSONObject) o;
-                        if(entry.getIntValue("key") == 1) ratingSum += entry.getIntValue("doc_count") * 1;
-                        if(entry.getIntValue("key") == 2) ratingSum += entry.getIntValue("doc_count") * 2;
-                        if(entry.getIntValue("key") == 3) ratingSum += entry.getIntValue("doc_count") * 3;
-                        if(entry.getIntValue("key") == 4) ratingSum += entry.getIntValue("doc_count") * 4;
-                        if(entry.getIntValue("key") == 5) ratingSum += entry.getIntValue("doc_count") * 5;
+                        if(entry.getIntValue("key") == 1) scoreSum += entry.getIntValue("doc_count") * 1;
+                        if(entry.getIntValue("key") == 2) scoreSum += entry.getIntValue("doc_count") * 2;
+                        if(entry.getIntValue("key") == 3) scoreSum += entry.getIntValue("doc_count") * 3;
+                        if(entry.getIntValue("key") == 4) scoreSum += entry.getIntValue("doc_count") * 4;
+                        if(entry.getIntValue("key") == 5) scoreSum += entry.getIntValue("doc_count") * 5;
                     }
-                    float rating = reviewTotalCount == 0 ? 0 : (float) ratingSum / (float) reviewTotalCount;
+                    float rating = sumCount == 0 ? 0 : (float) scoreSum / sumCount;
                     line.add(sunday, Webs.scale2PointUp(rating)); // 四舍五入且保留两位小数
+                    reviewTotalCount += sumCount;
+                    reviewTotalScore += scoreSum;
                 }
-                line.visible = jsonKey.equalsIgnoreCase("sum");
-                lineChart.series(line);
+                Series.Line sumLine = lines.get("SUM");
+                float reviewTotalRating = reviewTotalCount == 0 ? 0 : (float) reviewTotalScore / reviewTotalCount;
+                sumLine.add(sunday, Webs.scale2PointUp(reviewTotalRating));
             }
             Cache.add(cacked_key, lineChart, "4h");
         }
-
         return Cache.get(cacked_key, HighChart.class);
     }
 
@@ -707,7 +715,7 @@ public class AmazonListingReview extends GenericModel {
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject aggregations = service.countPoorRatingByDateRange();
             List<String> jsonKeys = new ArrayList<String>();
-            for(M m : M.values()) if(!m.equals(M.EBAY_UK)) jsonKeys.add(m.name());
+            for(M m : Promises.MARKETS) jsonKeys.add(m.name());
             jsonKeys.add("SUM");
 
             for(String jsonKey : jsonKeys) {

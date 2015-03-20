@@ -56,65 +56,43 @@ public class MetricReviewService {
     public JSONObject countReviewRating() {
         Date firstReviewDate = AmazonListingReview.firstReviewDate();
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
-        SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
-        //使用嵌套的 Aggregation 构造出一个大的查询 Json, 一次性查询出所有市场的数据(
-        //http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html)
-        for(M m : Promises.MARKETS) {
-            //单独每个市场的 aggregation
-            search.aggregation(buildReviewRatingAggregation(m.name(), m, firstReviewDate, sundays));
-        }
-        //计算汇总的 aggregation
-        search.aggregation(buildReviewRatingAggregation("SUM", null, firstReviewDate, sundays));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
+        //Aggregation http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html)
+        for(Date sunday : sundays) {
+            FilterAggregationBuilder dateAggregation = AggregationBuilders.filter(formatter.format(sunday));
+            dateAggregation.filter(FilterBuilders.rangeFilter("review_date")
+                    .gte(formatter.format(firstReviewDate))
+                    .lte(formatter.format(sunday))
+            );
+            for(M m : Promises.MARKETS) {
+                //单独每个市场的 aggregation
+                List<String> asins = Category.asins(this.category, m);
+                List<String> listingIds = Category.listingIds(this.category, m);
+
+                List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday, m);
+                //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
+                if(filteredAsins == null || filteredAsins.isEmpty()) continue;
+
+                FilterAggregationBuilder marketAndAsinAggregation = AggregationBuilders.filter(m.name()).filter(
+                        FilterBuilders.andFilter(
+                                FilterBuilders.termFilter("market", m),
+                                FilterBuilders.termsFilter("listing_asin", filteredAsins)
+                        )
+                );
+
+                // 按照 Review 的 rating 分组
+                TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
+                marketAndAsinAggregation.subAggregation(groupByRatingAggregation);
+                dateAggregation.subAggregation(marketAndAsinAggregation);
+                search.aggregation(dateAggregation);
+            }
+        }
         Logger.info("countReviewRating:::" + search.toString());
         JSONObject result = ES.search("etracker", "review", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
-    }
-
-    /**
-     * @param name            用作最顶级 Aggregation 的名称
-     * @param m               市场
-     * @param firstReviewDate 第一个 Review 产生的时间
-     * @param sundays
-     * @return
-     */
-    public AggregationBuilder buildReviewRatingAggregation(String name, M m, Date firstReviewDate, List<Date> sundays) {
-        List<String> asins = Category.asins(this.category, m);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        List<String> listingIds = Category.listingIds(this.category, m);
-
-        //市场的 aggregation 过滤
-        FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(name);
-        if(m == null) {
-            marketAggregation.filter(FilterBuilders.matchAllFilter());
-        } else {
-            marketAggregation.filter(FilterBuilders.termFilter("market", m));// market 过滤
-        }
-        // 每一个时间点作为一个单独的 Aggregation
-        for(Date sunday : sundays) {
-            List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday, m);
-            if(filteredAsins == null || filteredAsins.isEmpty()) {
-                continue; //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
-            }
-            //时间过滤 begin(firstReviewDate) end(sunday)、ASIN 过滤
-            FilterAggregationBuilder dateAndAsinAggregation = AggregationBuilders.filter(
-                    formatter.format(sunday)).filter(
-                    FilterBuilders.andFilter(
-                            FilterBuilders.termsFilter("listing_asin", filteredAsins),
-                            FilterBuilders.rangeFilter("review_date")
-                                    .gte(formatter.format(firstReviewDate))
-                                    .lte(formatter.format(sunday))
-                    )
-            );
-            // 按照 Review 的 rating 分组
-            TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
-            //groupByRatingAggregation 作为 dateAndAsinAggregation 的 子 Aggregation
-            dateAndAsinAggregation.subAggregation(groupByRatingAggregation);
-            //dateAndAsinAggregation 作为 marketAggregation 的 子 Aggregation
-            marketAggregation.subAggregation(dateAndAsinAggregation);
-        }
-        return marketAggregation;
     }
 
     /**
