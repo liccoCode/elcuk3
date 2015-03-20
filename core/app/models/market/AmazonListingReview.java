@@ -648,17 +648,17 @@ public class AmazonListingReview extends GenericModel {
             List<Date> sundays = Dates.getAllSunday(from, to);
 
             MetricReviewService service = new MetricReviewService(from, to, category);
-            JSONObject countByMarket = service.countReviewRating();
+            JSONObject result = service.countReviewRating();
 
             HashMap<String, Series.Line> lines = new HashMap<String, Series.Line>();
             for(M m : Promises.MARKETS) lines.put(m.name(), new Series.Line(m.name(), false));
-            lines.put("SUM", new Series.Line("SUM", true));
+            Series.Line sumLine = new Series.Line("SUM", true);
 
             for(Date sunday : sundays) {
-                Long reviewTotalCount = 0l;//Review 总个数
-                Long reviewTotalScore = 0l;//Review 总得分
+                long reviewTotalCount = 0l;//Review 总个数
+                long reviewTotalScore = 0l;//Review 总得分
 
-                JSONObject sundayResult = countByMarket.getJSONObject(formatter.format(sunday));
+                JSONObject sundayResult = result.getJSONObject(formatter.format(sunday));
                 for(M m : Promises.MARKETS) {
                     JSONObject marketResult = sundayResult.getJSONObject(m.name());
                     Series.Line line = lines.get(m.name());
@@ -667,7 +667,7 @@ public class AmazonListingReview extends GenericModel {
                         continue;
                     }
 
-                    float sumCount = marketResult.getInteger("doc_count");
+                    int sumCount = marketResult.getInteger("doc_count");
                     JSONArray buckets = marketResult.getJSONObject("group_by_rating").getJSONArray("buckets");
                     int scoreSum = 0;
                     for(Object o : buckets) {
@@ -683,11 +683,11 @@ public class AmazonListingReview extends GenericModel {
                     reviewTotalCount += sumCount;
                     reviewTotalScore += scoreSum;
                 }
-                Series.Line sumLine = lines.get("SUM");
                 float reviewTotalRating = reviewTotalCount == 0 ? 0 : (float) reviewTotalScore / reviewTotalCount;
                 sumLine.add(sunday, Webs.scale2PointUp(reviewTotalRating));
             }
             for(Series.Line line : lines.values()) lineChart.series(line);
+            lineChart.series(sumLine);
             Cache.add(cacked_key, lineChart, "4h");
         }
         return Cache.get(cacked_key, HighChart.class);
