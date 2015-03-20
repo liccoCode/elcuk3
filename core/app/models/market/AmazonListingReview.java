@@ -630,11 +630,10 @@ public class AmazonListingReview extends GenericModel {
      * @param from     开始时间
      * @param to       结束时间
      * @param category 品线
-     * @param user     用户(做权限判断)
      * @return
      */
     @Cached("4h")
-    public static HighChart reviewRatingLine(Date from, Date to, String category, User user) {
+    public static HighChart reviewRatingLine(Date from, Date to, String category) {
         String cacked_key = Caches.Q.cacheKey("reviewRatingLine", category, from, to);
         HighChart lineChart = Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
@@ -702,7 +701,7 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     @Cached("4h")
-    public static HighChart poorRatingLine(Date from, Date to, String category, User user) {
+    public static HighChart poorRatingLine(Date from, Date to, String category) {
         String cacked_key = Caches.Q.cacheKey("poorRatingLine", from, to, category);
         HighChart lineChart = Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;

@@ -70,7 +70,6 @@ public class MetricReviewService {
                 //单独每个市场的 aggregation
                 List<String> asins = Category.asins(this.category, m);
                 List<String> listingIds = Category.listingIds(this.category, m);
-
                 List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday, m);
                 //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
                 if(filteredAsins == null || filteredAsins.isEmpty()) continue;
@@ -81,7 +80,6 @@ public class MetricReviewService {
                                 FilterBuilders.termsFilter("listing_asin", filteredAsins)
                         )
                 );
-
                 // 按照 Review 的 rating 分组
                 TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
                 marketAndAsinAggregation.subAggregation(groupByRatingAggregation);
