@@ -88,7 +88,7 @@ public class MetricReviewService {
             }
         }
         Logger.info("countReviewRating:::" + search.toString());
-        JSONObject result = ES.search("etracker", "review", search);
+        JSONObject result = ES.searchOnEtrackerES("etracker", "review", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
     }
@@ -110,7 +110,7 @@ public class MetricReviewService {
         search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asins(category, null)));
         Logger.info("PoorRatingByDateRange:::" + search.toString());
 
-        JSONObject result = ES.search("etracker", "review", search);
+        JSONObject result = ES.searchOnEtrackerES("etracker", "review", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
     }
