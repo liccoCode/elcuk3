@@ -68,9 +68,7 @@ public class MetricReviewService {
             );
             for(M m : Promises.MARKETS) {
                 //单独每个市场的 aggregation
-                List<String> asins = Category.asins(this.category, m);
-                List<String> listingIds = Category.listingIds(this.category, m);
-                List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday, m);
+                List<String> filteredAsins = filterAsinsByDateRange(sunday, m);
                 //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
                 if(filteredAsins == null || filteredAsins.isEmpty()) continue;
 
@@ -149,7 +147,9 @@ public class MetricReviewService {
      *
      * @return
      */
-    public List<String> filterAsinsByDateRange(List<String> asins, List<String> listingIds, Date end, M market) {
+    public List<String> filterAsinsByDateRange(Date end, M market) {
+        List<String> asins = Category.asins(this.category, market);
+        List<String> listingIds = Category.listingIds(this.category, market);
         for(int i = 0; i < listingIds.size(); i++) {
             List<ListingStateRecord> records = ListingStateRecord.getCacheByListingId(listingIds.get(i));//取到对应的缓存
             //排序
