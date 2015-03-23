@@ -57,8 +57,8 @@ public class MetricProfitService {
 
     public MetricProfitService(Date begin, Date end, M market,
                                String sku, String sellingId, String category) {
-        this.begin = begin;
-        this.end = end;
+        this.begin = Dates.morning(begin);
+        this.end = Dates.night(end);
         this.market = market;
         this.sku = sku;
         this.sellingId = ES.parseEsString(sellingId);
