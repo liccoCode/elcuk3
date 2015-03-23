@@ -423,8 +423,8 @@ public class OrderItemESQuery {
 
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         //不同的市场需要考虑到时区的问题
-        DateTime fromD = market.withTimeZone(from);
-        DateTime toD = market.withTimeZone(to);
+        DateTime fromD = market.withTimeZone(Dates.morning(from));
+        DateTime toD = market.withTimeZone(Dates.night(to));
 
         BoolFilterBuilder filter = FilterBuilders.boolFilter()
                 //市场
