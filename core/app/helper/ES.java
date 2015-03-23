@@ -13,14 +13,31 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ES_HOST = "http://gengar.easya.cc:9200";
+    public static final String ELCUK2_ES_HOST = "http://es.easya.cc:9200";
+    public static final String ETRACKER_ES_HOST = "http://gengar.easya.cc:9200";
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
-        return HTTP.postJson(ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
+        return processSearch(index, type, builder, ELCUK2_ES_HOST);
+    }
+
+    public static JSONObject searchOnEtrackerES(String index, String type, SearchSourceBuilder builder) {
+        return processSearch(index, type, builder, ETRACKER_ES_HOST);
+    }
+
+    public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
+        return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search", builder.toString());
     }
 
     public static JSONObject get(String index, String type, String id) {
-        return HTTP.getJson(ES_HOST + "/" + index + "/" + type + "/" + id);
+        return processGet(index, type, id, ELCUK2_ES_HOST);
+    }
+
+    public static JSONObject getOnEtrackerES(String index, String type, String id) {
+        return processGet(index, type, id, ETRACKER_ES_HOST);
+    }
+
+    public static JSONObject processGet(String index, String type, String id, String esHost) {
+        return HTTP.getJson(esHost + "/" + index + "/" + type + "/" + id);
     }
 
     /**
