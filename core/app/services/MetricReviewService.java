@@ -21,10 +21,7 @@ import play.Logger;
 import play.utils.FastRuntimeException;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -50,6 +47,7 @@ public class MetricReviewService {
      * (5 * 所有5星的Review数量 +  4 * 所有4星的Review数量 +  3 * 所有3星的Review数量 + 2 * 所有2星的Review数量  +  1 * 所有1星的Review数量)
      * / 所有Review数量
      * </p>
+     * 附 Aggregation API: (http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html)
      *
      * @return
      */
@@ -58,17 +56,27 @@ public class MetricReviewService {
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
+        HashMap<String, List<String>> asinsHash = new HashMap<String, List<String>>();
+        HashMap<String, List<String>> listingIdsHash = new HashMap<String, List<String>>();
+        for(M m : Promises.MARKETS) {
+            //这里的 ASIN(现在最大 3000 个) + ListingID(现在最大 3000 个)
+            asinsHash.put(m.name(), Category.asins(this.category, m));
+            listingIdsHash.put(m.name(), Category.listingIds(this.category, m));
+        }
+
         SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
-        //Aggregation http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html)
+        //由于计算 Review 评分 SUM 的时候需要分别获取到每个市场线的每个点的 Revie 个数与 总评分，所以采取先循环 sunDay 再循环 Market 的方式
         for(Date sunday : sundays) {
             FilterAggregationBuilder dateAggregation = AggregationBuilders.filter(formatter.format(sunday));
             dateAggregation.filter(FilterBuilders.rangeFilter("review_date")
                     .gte(formatter.format(firstReviewDate))
                     .lte(formatter.format(sunday))
             );
+            //单独每个市场的 aggregation
             for(M m : Promises.MARKETS) {
-                //单独每个市场的 aggregation
-                List<String> filteredAsins = filterAsinsByDateRange(sunday, m);
+                //进行 ASIN 的过滤
+                List<String> filteredAsins = filterAsinsByDateRange(sunday, m, asinsHash.get(m.name()),
+                        listingIdsHash.get(m.name()));
                 //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
                 if(filteredAsins == null || filteredAsins.isEmpty()) continue;
 
@@ -147,9 +155,7 @@ public class MetricReviewService {
      *
      * @return
      */
-    public List<String> filterAsinsByDateRange(Date end, M market) {
-        List<String> asins = Category.asins(this.category, market);
-        List<String> listingIds = Category.listingIds(this.category, market);
+    public List<String> filterAsinsByDateRange(Date end, M market, List<String> asins, List<String> listingIds) {
         for(int i = 0; i < listingIds.size(); i++) {
             List<ListingStateRecord> records = ListingStateRecord.getCacheByListingId(listingIds.get(i));//取到对应的缓存
             //排序
