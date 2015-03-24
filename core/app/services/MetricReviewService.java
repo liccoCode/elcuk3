@@ -56,42 +56,35 @@ public class MetricReviewService {
         List<Date> sundays = Dates.getAllSunday(this.from, this.to);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-        HashMap<String, List<String>> asinsHash = new HashMap<String, List<String>>();
-        HashMap<String, List<String>> listingIdsHash = new HashMap<String, List<String>>();
-        for(M m : Promises.MARKETS) {
-            //这里的 ASIN(现在最大 3000 个) + ListingID(现在最大 3000 个)
-            asinsHash.put(m.name(), Category.asins(this.category, m));
-            listingIdsHash.put(m.name(), Category.listingIds(this.category, m));
-        }
-
         SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
-        //由于计算 Review 评分 SUM 的时候需要分别获取到每个市场线的每个点的 Revie 个数与 总评分，所以采取先循环 sunDay 再循环 Market 的方式
-        for(Date sunday : sundays) {
-            FilterAggregationBuilder dateAggregation = AggregationBuilders.filter(formatter.format(sunday));
-            dateAggregation.filter(FilterBuilders.rangeFilter("review_date")
-                    .gte(formatter.format(firstReviewDate))
-                    .lte(formatter.format(sunday))
+        for(M m : Promises.MARKETS) {
+            List<String> asins = Category.asins(this.category, m);
+            List<String> listingIds = Category.listingIds(this.category, m);
+
+            //市场的 aggregation 过滤
+            FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name()).filter(
+                    FilterBuilders.termFilter("market", m)
             );
-            //单独每个市场的 aggregation
-            for(M m : Promises.MARKETS) {
-                //进行 ASIN 的过滤
-                List<String> filteredAsins = filterAsinsByDateRange(sunday, m, asinsHash.get(m.name()),
-                        listingIdsHash.get(m.name()));
+            // 每一个时间点作为一个单独的 Aggregation
+            for(Date sunday : sundays) {
+                List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday);
                 //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
                 if(filteredAsins == null || filteredAsins.isEmpty()) continue;
 
-                FilterAggregationBuilder marketAndAsinAggregation = AggregationBuilders.filter(m.name()).filter(
-                        FilterBuilders.andFilter(
-                                FilterBuilders.termFilter("market", m),
-                                FilterBuilders.termsFilter("listing_asin", filteredAsins)
-                        )
-                );
+                //时间过滤、ASIN 过滤
+                FilterAggregationBuilder dateAndAsinAggregation = AggregationBuilders.filter(formatter.format(sunday))
+                        .filter(FilterBuilders.andFilter(
+                                FilterBuilders.termsFilter("listing_asin", filteredAsins),
+                                FilterBuilders.rangeFilter("review_date")
+                                        .gte(formatter.format(firstReviewDate))
+                                        .lte(formatter.format(sunday)))
+                        );
                 // 按照 Review 的 rating 分组
                 TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
-                marketAndAsinAggregation.subAggregation(groupByRatingAggregation);
-                dateAggregation.subAggregation(marketAndAsinAggregation);
-                search.aggregation(dateAggregation);
+                dateAndAsinAggregation.subAggregation(groupByRatingAggregation);
+                marketAggregation.subAggregation(dateAndAsinAggregation);
             }
+            search.aggregation(marketAggregation);
         }
         Logger.info("countReviewRating:::" + search.toString());
         JSONObject result = ES.searchOnEtrackerES("etracker", "review", search);
@@ -104,6 +97,7 @@ public class MetricReviewService {
      *
      * @return
      */
+
     public JSONObject countPoorRatingByDateRange() {
         // search
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
@@ -155,7 +149,7 @@ public class MetricReviewService {
      *
      * @return
      */
-    public List<String> filterAsinsByDateRange(Date end, M market, List<String> asins, List<String> listingIds) {
+    public List<String> filterAsinsByDateRange(List<String> asins, List<String> listingIds, Date end) {
         for(int i = 0; i < listingIds.size(); i++) {
             List<ListingStateRecord> records = ListingStateRecord.getCacheByListingId(listingIds.get(i));//取到对应的缓存
             //排序
