@@ -116,7 +116,7 @@
         RDate: ${review.reviewDate.format("yyyy-MM-dd")} |
         CDate: ${review.createDate.format("yyyy-MM-dd")}
       </dt>
-      <dd>${review.comment.isEmpty() ? 'No Comment' : review.comment}</dd>
+      <dd>${review.comment?.isEmpty() ? 'No Comment' : review.comment}</dd>
     </dl>
   #{/list}
   </div>

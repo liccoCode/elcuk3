@@ -637,6 +637,7 @@ public class AmazonListingReview extends GenericModel {
         String cacked_key = Caches.Q.cacheKey("reviewRatingLine", category, from, to);
         HighChart lineChart = Cache.get(cacked_key, HighChart.class);
         if(lineChart != null) return lineChart;
+
         synchronized(cacked_key.intern()) {
             lineChart = Cache.get(cacked_key, HighChart.class);
             if(lineChart != null) return lineChart;
@@ -649,43 +650,52 @@ public class AmazonListingReview extends GenericModel {
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject result = service.countReviewRating();
 
-            HashMap<String, Series.Line> lines = new HashMap<String, Series.Line>();
-            for(M m : Promises.MARKETS) lines.put(m.name(), new Series.Line(m.name(), false));
-            Series.Line sumLine = new Series.Line("SUM", true);
+            HashMap<Date, F.T2<Long, Long>> sumResults = new HashMap<Date, F.T2<Long, Long>>();
+            for(M m : Promises.MARKETS) {
+                Series.Line line = new Series.Line(m.name(), false);
 
-            for(Date sunday : sundays) {
-                long reviewTotalCount = 0l;//Review 总个数
-                long reviewTotalScore = 0l;//Review 总得分
-
-                JSONObject sundayResult = result.getJSONObject(formatter.format(sunday));
-                for(M m : Promises.MARKETS) {
-                    JSONObject marketResult = sundayResult.getJSONObject(m.name());
-                    Series.Line line = lines.get(m.name());
-                    if(marketResult == null) {
-                        line.add(sunday, 0f);
-                        continue;
+                JSONObject marketResult = result.getJSONObject(m.name());
+                for(Date sunday : sundays) {
+                    JSONObject sundayResult = marketResult.getJSONObject(formatter.format(sunday));
+                    long scoreSum = 0l;
+                    long sumCount = 0l;
+                    if(sundayResult != null) {
+                        JSONArray buckets = sundayResult.getJSONObject("group_by_rating").getJSONArray("buckets");
+                        sumCount = sundayResult.getInteger("doc_count");
+                        for(Object o : buckets) {
+                            JSONObject entry = (JSONObject) o;
+                            if(entry.getIntValue("key") == 1) scoreSum += entry.getLongValue("doc_count") * 1;
+                            if(entry.getIntValue("key") == 2) scoreSum += entry.getLongValue("doc_count") * 2;
+                            if(entry.getIntValue("key") == 3) scoreSum += entry.getLongValue("doc_count") * 3;
+                            if(entry.getIntValue("key") == 4) scoreSum += entry.getLongValue("doc_count") * 4;
+                            if(entry.getIntValue("key") == 5) scoreSum += entry.getLongValue("doc_count") * 5;
+                        }
+                        float rating = sumCount == 0 ? 0 : (float) scoreSum / sumCount;
+                        line.add(sunday, Webs.scale2PointUp(rating)); // 四舍五入且保留两位小数
+                    } else {
+                        line.add(sunday, 0f);// 未找到当前日期的数据, 直接下一个,赋值为 0
                     }
-
-                    int sumCount = marketResult.getInteger("doc_count");
-                    JSONArray buckets = marketResult.getJSONObject("group_by_rating").getJSONArray("buckets");
-                    int scoreSum = 0;
-                    for(Object o : buckets) {
-                        JSONObject entry = (JSONObject) o;
-                        if(entry.getIntValue("key") == 1) scoreSum += entry.getIntValue("doc_count") * 1;
-                        if(entry.getIntValue("key") == 2) scoreSum += entry.getIntValue("doc_count") * 2;
-                        if(entry.getIntValue("key") == 3) scoreSum += entry.getIntValue("doc_count") * 3;
-                        if(entry.getIntValue("key") == 4) scoreSum += entry.getIntValue("doc_count") * 4;
-                        if(entry.getIntValue("key") == 5) scoreSum += entry.getIntValue("doc_count") * 5;
+                    //将此次计算出来的 Review 个数与 得分总数储存起来供给计算 SUM 线的时候使用
+                    if(sumResults.containsKey(sunday)) {
+                        F.T2<Long, Long> sunDayTotal = sumResults.get(sunday);
+                        sumResults.put(sunday, new F.T2<Long, Long>(
+                                (sunDayTotal._1 + scoreSum),
+                                (sunDayTotal._2 + sumCount))
+                        );
+                    } else {
+                        sumResults.put(sunday, new F.T2<Long, Long>(scoreSum, sumCount));
                     }
-                    float rating = sumCount == 0 ? 0 : (float) scoreSum / sumCount;
-                    line.add(sunday, Webs.scale2PointUp(rating)); // 四舍五入且保留两位小数
-                    reviewTotalCount += sumCount;
-                    reviewTotalScore += scoreSum;
                 }
-                float reviewTotalRating = reviewTotalCount == 0 ? 0 : (float) reviewTotalScore / reviewTotalCount;
-                sumLine.add(sunday, Webs.scale2PointUp(reviewTotalRating));
+                lineChart.series(line);
             }
-            for(Series.Line line : lines.values()) lineChart.series(line);
+
+            Series.Line sumLine = new Series.Line("SUM", true);
+            //计算 SUM
+            for(Date sunday : sundays) {
+                F.T2<Long, Long> sunDayTotal = sumResults.get(sunday);
+                float rating = sunDayTotal._2 == 0 ? 0 : (float) sunDayTotal._1 / sunDayTotal._2;
+                sumLine.add(sunday, Webs.scale2PointUp(rating));
+            }
             lineChart.series(sumLine);
             Cache.add(cacked_key, lineChart, "4h");
         }
