@@ -13,6 +13,7 @@ import models.view.dto.AbnormalDTO;
 import models.view.highchart.HighChart;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.jobs.Job;
 import play.modules.excel.RenderExcel;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -241,9 +242,14 @@ public class Pmdashboards extends Controller {
     /**
      * Review 星级趋势图
      */
-    public static void reviewRatingLine(Date from, Date to, String category) {
+    public static void reviewRatingLine(final Date from, final Date to, final String category) {
         try {
-            HighChart chart = AmazonListingReview.reviewRatingLine(from, to, category);
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return AmazonListingReview.reviewRatingLine(from, to, category);
+                }
+            }.now());
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -253,10 +259,14 @@ public class Pmdashboards extends Controller {
     /**
      * Review 中差评趋势图
      */
-    public static void poorRatingLine(Date from, Date to, String category) {
+    public static void poorRatingLine(final Date from, final Date to, final String category) {
         try {
-            User user = User.findByUserName(Secure.Security.connected());
-            HighChart chart = AmazonListingReview.poorRatingLine(from, to, category);
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return AmazonListingReview.poorRatingLine(from, to, category);
+                }
+            }.now());
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
