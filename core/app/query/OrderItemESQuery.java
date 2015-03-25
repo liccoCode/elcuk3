@@ -164,7 +164,7 @@ public class OrderItemESQuery {
                                 .must(FilterBuilders.rangeFilter("date")
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat))
-                                )
+                                ).mustNot(FilterBuilders.termFilter("state", "cancel"))
                         )
                 ).size(0);
 
@@ -423,8 +423,8 @@ public class OrderItemESQuery {
 
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         //不同的市场需要考虑到时区的问题
-        DateTime fromD = market.withTimeZone(from);
-        DateTime toD = market.withTimeZone(to);
+        DateTime fromD = market.withTimeZone(Dates.morning(from));
+        DateTime toD = market.withTimeZone(Dates.night(to));
 
         BoolFilterBuilder filter = FilterBuilders.boolFilter()
                 //市场
@@ -434,7 +434,8 @@ public class OrderItemESQuery {
                         .gte(fromD.toString(isoFormat))
                         .lt(toD.toString(isoFormat)))
                         //SKU
-                .must(FilterBuilders.termsFilter(type, params));
+                .must(FilterBuilders.termsFilter(type, params))
+                .mustNot(FilterBuilders.termFilter("state", "cancel"));
         aggregation.filter(filter);
         aggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
         return aggregation;
