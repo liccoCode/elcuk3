@@ -574,7 +574,7 @@ public class MetricProfitService {
                 rowsku = rowobject.toString();
                 rowobject = row.get("qty");
                 if(rowobject != null) {
-                    float rowlengths = 0, rowwidth = 0, rowheigh = 0;
+                    float rowlengths = 0, rowwidth = 0, rowheigh = 0, weight = 0;
                     int rowqty = ((Number) rowobject).intValue();
 
                     if(row.get("lengths") != null)
@@ -584,11 +584,14 @@ public class MetricProfitService {
                     if(row.get("heigh") != null)
                         rowheigh = ((Number) row.get("heigh")).floatValue();
 
+                    if(row.get("weight") != null)
+                        weight = ((Number) row.get("weight")).floatValue();
+
                     float siglevolume = 0f;
                     //快递用重量计算比例
                     if(shiptype.equals("express")) {
                         //重量
-                        siglevolume = rowheigh * rowqty;
+                        siglevolume = weight * rowqty;
                     } else {
                         //体积
                         siglevolume = rowlengths * rowwidth * rowheigh * rowqty;
