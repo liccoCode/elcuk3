@@ -275,9 +275,11 @@ public class Category extends GenericModel {
      * 获取 Category 的 Listing ID
      *
      * @param categoryId
+     * @param market     市场
+     * @param isOnlySelf 是否只包含自己的(Easyacc) Listing
      * @return
      */
-    public static List<String> listingIds(String categoryId, M market) {
+    public static List<String> listingIds(String categoryId, M market, boolean isOnlySelf) {
         List<String> listingIds = new ArrayList<String>();
         List<Map<String, Object>> rows = null;
         if(StringUtils.isNotBlank(categoryId)) {
@@ -291,6 +293,9 @@ public class Category extends GenericModel {
             if(market != null) {
                 sql.where("l.market = ?").param(market.name());
             }
+            if(isOnlySelf) {
+                sql.where("c.categoryId IS NOT NULL");
+            }
             rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         }
         for(Map<String, Object> row : rows) {
@@ -299,18 +304,21 @@ public class Category extends GenericModel {
         return listingIds;
     }
 
+
     /**
      * 获取 Category 的 ASIN
      *
      * @param categoryId
+     * @param market     市场
+     * @param isOnlySelf 是否是只包含自己的(Easyacc) Listing
      * @return
      */
-    public static List<String> asins(String categoryId, M market) {
+    public static List<String> asins(String categoryId, M market, boolean isOnlySelf) {
         List<String> asins = null;
         if(categoryId.equalsIgnoreCase("all")) {
-            asins = Category.asinsByCategories(null, market);
+            asins = Category.asinsByCategories(null, market, isOnlySelf);
         } else {
-            asins = Category.asinsByCategories(Arrays.asList(categoryId), market);
+            asins = Category.asinsByCategories(Arrays.asList(categoryId), market, isOnlySelf);
         }
         return asins;
     }
@@ -320,7 +328,7 @@ public class Category extends GenericModel {
      *
      * @return
      */
-    public static List<String> asinsByCategories(List<String> categories, M market) {
+    public static List<String> asinsByCategories(List<String> categories, M market, boolean isOnlySelf) {
         List<String> asins = new ArrayList<String>();
         List<Map<String, Object>> rows = null;
         SqlSelect sql = new SqlSelect().select("Distinct l.asin AS asin").from("Listing l")
@@ -332,6 +340,9 @@ public class Category extends GenericModel {
         }
         if(market != null) {
             sql.where("l.market = ?").param(market.name());
+        }
+        if(isOnlySelf) {
+            sql.where("c.categoryId IS NOT NULL");
         }
         rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {
