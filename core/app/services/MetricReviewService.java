@@ -58,8 +58,8 @@ public class MetricReviewService {
 
         SearchSourceBuilder search = new SearchSourceBuilder().size(0); // search
         for(M m : Promises.MARKETS) {
-            List<String> asins = Category.asins(this.category, m);
-            List<String> listingIds = Category.listingIds(this.category, m);
+            List<String> asins = Category.asins(this.category, m, true);
+            List<String> listingIds = Category.listingIds(this.category, m, true);
 
             //市场的 aggregation 过滤
             FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name()).filter(
@@ -102,12 +102,12 @@ public class MetricReviewService {
         // search
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
         for(M m : Promises.MARKETS) {
-            List<String> asins = Category.asins(this.category, m);
+            List<String> asins = Category.asins(this.category, m, true);
             if(asins == null || asins.isEmpty()) continue; //未找到合法的 ASIN
             search.aggregation(buildPoorRatingAggregation(m.name(), m, asins));
         }
         //还有一个 统计的 Aggregation
-        search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asins(category, null)));
+        search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asins(category, null, true)));
         Logger.info("PoorRatingByDateRange:::" + search.toString());
 
         JSONObject result = ES.searchOnEtrackerES("etracker", "review", search);
