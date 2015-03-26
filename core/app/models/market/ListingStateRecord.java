@@ -18,6 +18,7 @@ import java.util.List;
  */
 @Entity
 public class ListingStateRecord extends Model {
+    private static final long serialVersionUID = -7279223067180390522L;
 
     @ManyToOne
     public Listing listing;
