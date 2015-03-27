@@ -115,6 +115,13 @@ public class ReportRecord extends Model {
             public String label() {
                 return "库存合理性报表";
             }
+        },
+
+        SELLINGCYCLE {
+            @Override
+            public String label() {
+                return "Selling 状态汇总报表";
+            }
         };
 
         public abstract String label();
@@ -128,6 +135,7 @@ public class ReportRecord extends Model {
 
     /**
      * 判断是否能够重新计算
+     *
      * @return
      */
     public boolean canBeRecalculated() {
