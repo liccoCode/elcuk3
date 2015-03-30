@@ -375,26 +375,15 @@ public class SaleOpTarget extends Model {
         DateTime now = DateTime.now();
         int nowyear = now.getYear();
         int nowmonth = now.getMonthOfYear();
-        int startmonth = 1, endmonth = 12;
         boolean isafter = false;
-        switch(this.saleTargetType) {
-            case MONTH:
-                startmonth = this.targetMonth;
-                endmonth = this.targetMonth;
-                if(this.targetMonth >= nowmonth) isafter = true;
-                break;
-            case SEASON:
-                startmonth = this.targetSeason * 3 - 2;
-                endmonth = this.targetSeason * 3;
-                if(endmonth >= nowmonth) isafter = true;
-                break;
-        }
-
+        if(this.targetMonth >= nowmonth) isafter = true;
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
 
-        MetricProfitService me = new MetricProfitService(Dates.getMonthFirst(this.targetYear, startmonth),
-                Dates.getMonthLast(this.targetYear, endmonth), this.targetMarket, "", "", this.fid);
+        MetricProfitService me = new MetricProfitService(Dates.morning(Dates.getMonthFirst(this.targetYear,
+                this.targetMonth)),
+                Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)), this.targetMarket, "", "",
+                this.fid);
         return String.valueOf(me.esSaleFee());
     }
 
@@ -408,29 +397,20 @@ public class SaleOpTarget extends Model {
         DateTime now = DateTime.now();
         int nowyear = now.getYear();
         int nowmonth = now.getMonthOfYear();
-
-        int startmonth = 1, endmonth = 12;
         boolean isafter = false;
-        switch(this.saleTargetType) {
-            case MONTH:
-                startmonth = this.targetMonth;
-                endmonth = this.targetMonth;
-                if(this.targetMonth >= nowmonth) isafter = true;
-                break;
-            case SEASON:
-                startmonth = this.targetSeason * 3 - 2;
-                endmonth = this.targetSeason * 3;
-                if(endmonth >= nowmonth) isafter = true;
-                break;
-        }
-
+        if(this.targetMonth >= nowmonth) isafter = true;
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
 
-        MetricProfitService me = new MetricProfitService(Dates.getMonthFirst(this.targetYear, startmonth),
-                Dates.getMonthLast(this.targetYear, endmonth),
+        MetricProfitService me = new MetricProfitService(Dates.morning(Dates.getMonthFirst(this.targetYear,
+                this.targetMonth)),
+                Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)),
                 this.targetMarket, "", "", this.fid);
-        return String.valueOf(me.esSaleQty() / 30);
+
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set( this.targetYear, this.targetMonth, 1 );
+        int maxday = cal.getMaximum(java.util.Calendar.DAY_OF_MONTH);
+        return String.valueOf( new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday),4,2));
     }
 
 
