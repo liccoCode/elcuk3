@@ -281,7 +281,8 @@ public class MetricProfitService {
             if(volume > weight) {
                 weight = volume;
             }
-            if(this.market == null) {
+            if(this.market == null || (this.market!=M.AMAZON_US
+                && this.market!=M.AMAZON_UK && this.market!=M.AMAZON_DE)){
                 price = pricemap.get(M.AMAZON_US.toString());
             } else {
                 Object shipobject = pricemap.get(this.market.toString());
