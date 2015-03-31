@@ -15,10 +15,7 @@ import services.MetricProfitService;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import models.market.M;
 import helper.Currency;
@@ -401,16 +398,26 @@ public class SaleOpTarget extends Model {
         if(this.targetMonth >= nowmonth) isafter = true;
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
+        Date startdate = Dates.morning(Dates.getMonthFirst(this.targetYear,
+                this.targetMonth));
+        Date enddate = Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth));
 
-        MetricProfitService me = new MetricProfitService(Dates.morning(Dates.getMonthFirst(this.targetYear,
-                this.targetMonth)),
-                Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)),
+        MetricProfitService me = new MetricProfitService(startdate,
+                enddate,
                 this.targetMarket, "", "", this.fid);
 
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.set( this.targetYear, this.targetMonth, 1 );
-        int maxday = cal.getMaximum(java.util.Calendar.DAY_OF_MONTH);
-        return String.valueOf( new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday),4,2));
+        long maxday = date_days(startdate, enddate) + 1;
+        return String.valueOf(new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday), 4, 2));
+    }
+
+    private long date_days(Date startdate, Date enddate) {
+        long day = 0;
+        try {
+            day = enddate.getTime() - startdate.getTime();
+            day = day / 1000 / 60 / 60 / 24;
+        } catch(Exception e) {
+        }
+        return day;
     }
 
 
