@@ -407,7 +407,7 @@ public class SaleOpTarget extends Model {
                 this.targetMarket, "", "", this.fid);
 
         long maxday = date_days(startdate, enddate) + 1;
-        return String.valueOf(new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday), 4, 0));
+        return String.valueOf(new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday), 0, 2));
     }
 
     private long date_days(Date startdate, Date enddate) {
