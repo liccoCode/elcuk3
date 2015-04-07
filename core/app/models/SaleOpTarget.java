@@ -381,7 +381,7 @@ public class SaleOpTarget extends Model {
                 this.targetMonth)),
                 Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)), this.targetMarket, "", "",
                 this.fid);
-        return String.valueOf(me.esSaleFee());
+        return String.valueOf(new BigDecimal(me.esSaleFee()).setScale(2, BigDecimal.ROUND_HALF_UP));
     }
 
 

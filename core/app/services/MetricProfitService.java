@@ -210,7 +210,7 @@ public class MetricProfitService {
         }
 
         //如果运价为0，则直接从采购计划中获取
-        if(avgprice == 0) {
+        if(avgprice <= 0) {
             String sql = "select price,currency From ProcureUnit "
                     + " where sku='" + this.sku + "' "
                     + " order by createDate desc limit 1 ";
