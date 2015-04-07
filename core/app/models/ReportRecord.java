@@ -139,6 +139,7 @@ public class ReportRecord extends Model {
      * @return
      */
     public boolean canBeRecalculated() {
-        return !Arrays.asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY).contains(this.reporttype);
+        return !Arrays.asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY, RT.SELLINGCYCLE)
+                .contains(this.reporttype);
     }
 }
