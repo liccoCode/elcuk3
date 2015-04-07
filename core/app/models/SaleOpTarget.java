@@ -391,8 +391,9 @@ public class SaleOpTarget extends Model {
         if(this.targetMarket == null) {
             float monthfee = 0f;
             for(M market : M.values()) {
-                monthfee += getMonthFee(market);
+                monthfee = new BigDecimal(monthfee).add(new BigDecimal(getMonthFee(market))).floatValue();
             }
+            monthfee = new BigDecimal(monthfee).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
             Cache.add(key, String.valueOf(monthfee), "2h");
             return String.valueOf(monthfee);
         } else {
