@@ -9,6 +9,8 @@ import models.product.Category;
 import models.product.Team;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.cache.*;
+import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import services.MetricProfitService;
@@ -377,11 +379,39 @@ public class SaleOpTarget extends Model {
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
 
+        //获取缓存的数据
+        String key = helper.Caches.Q.cacheKey("reallySaleAmounts", this.fid, this.targetYear, this.targetMonth,
+                this.targetMarket);
+        String cache_str = play.cache.Cache.get(key, String.class);
+        if(!StringUtils.isBlank(cache_str)) {
+            return cache_str;
+        }
+
+        MetricProfitService me = null;
+        if(this.targetMarket == null) {
+            float monthfee = 0f;
+            for(M market : M.values()) {
+                monthfee += getMonthFee(market);
+            }
+            Cache.add(key, String.valueOf(monthfee), "2h");
+            return String.valueOf(monthfee);
+        } else {
+            return String.valueOf(getMonthFee(this.targetMarket));
+        }
+    }
+
+    //计算单个市场的销售额
+    private float getMonthFee(M market) {
         MetricProfitService me = new MetricProfitService(Dates.morning(Dates.getMonthFirst(this.targetYear,
                 this.targetMonth)),
-                Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)), this.targetMarket, "", "",
+                Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)), market, "", "",
                 this.fid);
-        return String.valueOf(new BigDecimal(me.esSaleFee()).setScale(2, BigDecimal.ROUND_HALF_UP));
+        float fee = new BigDecimal(me.esSaleFee()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+        String market_key = helper.Caches.Q.cacheKey("reallySaleAmounts", this.fid, this.targetYear,
+                this.targetMonth,
+                market);
+        Cache.add(market_key, String.valueOf(fee), "2h");
+        return fee;
     }
 
 
@@ -398,17 +428,44 @@ public class SaleOpTarget extends Model {
         if(this.targetMonth >= nowmonth) isafter = true;
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
+
+        //获取缓存的数据
+        String key = helper.Caches.Q.cacheKey("reallySaleQtys", this.fid, this.targetYear, this.targetMonth,
+                this.targetMarket);
+        String cache_str = play.cache.Cache.get(key, String.class);
+        if(!StringUtils.isBlank(cache_str)) {
+            return cache_str;
+        }
         Date startdate = Dates.morning(Dates.getMonthFirst(this.targetYear,
                 this.targetMonth));
         Date enddate = Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth));
+        long maxday = date_days(startdate, enddate) + 1;
+        MetricProfitService me = null;
+        if(this.targetMarket == null) {
+            int monthqty = 0;
+            for(M market : M.values()) {
+                monthqty += getMonthQty(market, maxday, startdate, enddate);
+            }
+            Cache.add(key, String.valueOf(monthqty), "2h");
+            return String.valueOf(monthqty);
+        } else {
+            return String.valueOf(getMonthQty(this.targetMarket, maxday, startdate, enddate));
+        }
+    }
 
+    //计算单个市场的销量
+    private int getMonthQty(M market, long maxday, Date startdate, Date enddate) {
         MetricProfitService me = new MetricProfitService(startdate,
                 enddate,
-                this.targetMarket, "", "", this.fid);
-
-        long maxday = date_days(startdate, enddate) + 1;
-        return String.valueOf(new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday), 0, 2));
+                market, "", "", this.fid);
+        int qty = new BigDecimal(me.esSaleQty()).divide(new BigDecimal(maxday), 0, 2).intValue();
+        String market_key = helper.Caches.Q.cacheKey("reallySaleQtys", this.fid, this.targetYear,
+                this.targetMonth,
+                market);
+        Cache.add(market_key, String.valueOf(qty), "2h");
+        return qty;
     }
+
 
     private long date_days(Date startdate, Date enddate) {
         long day = 0;
