@@ -634,7 +634,8 @@ public class Account extends Model {
      */
     public static Address address(M type) {
         // 统一为一个地址, 但接口参数预留
-        return new Address("EasyAcc", "26 Furley Road", null, null, "London", "LONDON", "GB", "SE15 5UQ");
+        return new Address("EasyAcc", "Rome 1-4,Bulding B,No. 42,Changzhen road, Guangming New District", null, null,
+                "Shenzhen", "China", "CN", "518000");
     }
 
 
