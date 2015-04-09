@@ -465,7 +465,10 @@ public class Deliveryment extends GenericModel {
             if(procureUnit.cooperator != null) {
                 CooperItem cooperItem = CooperItem.find("cooperator.id=? AND product.sku=?", procureUnit.cooperator.id,
                         procureUnit.product.sku).first();
-                cooperItems.add(cooperItem);
+                if(cooperItem == null)
+                    Validation.addError("getCopperItems", "SKU: " + procureUnit.product.sku + " 不在供应商生产产品列表下!");
+                else
+                    cooperItems.add(cooperItem);
             }
         }
         return cooperItems;
