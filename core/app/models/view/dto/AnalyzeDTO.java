@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -267,5 +268,15 @@ public class AnalyzeDTO implements Serializable {
         if(StringUtils.isBlank(this.sellingCycle))
             return "";
         return Selling.SC.valueOf(this.sellingCycle).label();
+    }
+
+    /**
+     * float 在 Excel 中会出现自动进位的处理，所以采取转成 Double 的形式
+     *
+     * @return
+     */
+    public String prettyDisplayPrice() {
+        DecimalFormat df = new DecimalFormat("#.00");
+        return df.format(displayPrice);
     }
 }

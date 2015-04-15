@@ -91,6 +91,7 @@ public class TrafficRatePost extends Post<TrafficRate> {
                 traffic.pageViews = rcd.pageViews;
                 traffic.sellDate = rcd.date;
                 traffic.orders = rcd.orders;
+                traffic.units = rcd.units;
                 traffic.market = rcd.market;
                 traffic.turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
                 traffics.add(traffic);

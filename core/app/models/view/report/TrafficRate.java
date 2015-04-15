@@ -26,4 +26,6 @@ public class TrafficRate implements Serializable {
 
     public float turnRatio;
 
+    public float units;
+
 }

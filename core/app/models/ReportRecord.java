@@ -122,6 +122,13 @@ public class ReportRecord extends Model {
             public String label() {
                 return "Selling 状态汇总报表";
             }
+        },
+
+        INVRNTORYCOST {
+            @Override
+            public String label() {
+                return "库存占用资金报表";
+            }
         };
 
         public abstract String label();
@@ -139,7 +146,8 @@ public class ReportRecord extends Model {
      * @return
      */
     public boolean canBeRecalculated() {
-        return !Arrays.asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY, RT.SELLINGCYCLE)
+        return !Arrays
+                .asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY, RT.SELLINGCYCLE, RT.INVRNTORYCOST)
                 .contains(this.reporttype);
     }
 }
