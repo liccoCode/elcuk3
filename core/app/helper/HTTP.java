@@ -217,7 +217,7 @@ public class HTTP {
         try {
             DefaultHttpClient httpClient = (DefaultHttpClient) cookieStore(cookieStore);
 
-            HttpHost proxy = new HttpHost("127.0.0.1", 8123);
+            HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
             httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 
             return EntityUtils.toString(httpClient.execute(post).getEntity());
