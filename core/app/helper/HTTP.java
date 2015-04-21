@@ -215,12 +215,12 @@ public class HTTP {
                                    Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
-            DefaultHttpClient httpClient = (DefaultHttpClient) cookieStore(cookieStore);
+            //DefaultHttpClient httpClient = (DefaultHttpClient) cookieStore(cookieStore);
 
-            HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
-            httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+            //HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
+            //httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 
-            return EntityUtils.toString(httpClient.execute(post).getEntity());
+            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
