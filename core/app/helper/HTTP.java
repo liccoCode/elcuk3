@@ -220,7 +220,7 @@ public class HTTP {
             HttpHost proxy = new HttpHost("127.0.0.1", 8123);
             httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 
-            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
+            return EntityUtils.toString(httpClient.execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
