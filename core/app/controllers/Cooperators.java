@@ -136,7 +136,7 @@ public class Cooperators extends Controller {
             renderJSON(new Ret(Webs.V(Validation.errors())));
 
         CooperItem copItem = CooperItem.find("sku=? AND cooperator.id=?", sku, id).first();
-        renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true).build());
+        renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true).put("period",copItem.period).build());
     }
 
     /**

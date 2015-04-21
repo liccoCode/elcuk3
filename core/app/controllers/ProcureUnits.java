@@ -20,7 +20,6 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Validation;
@@ -235,6 +234,7 @@ public class ProcureUnits extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        unit.setPeriod(unit);
         render(unit, oldPlanQty, whouses);
     }
 
