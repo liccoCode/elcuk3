@@ -113,6 +113,57 @@ public class HTTP {
         }
     }
 
+
+
+    public static void proxyinit() {
+         synchronized(HTTP.class) {
+             HttpParams params = new BasicHttpParams();
+             HttpProtocolParams.setContentCharset(params, "UTF-8");
+             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
+             HttpClientParams.setRedirecting(params, true);
+             // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
+             HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
+             HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
+
+             PoolingClientConnectionManager multipThread = new PoolingClientConnectionManager();
+             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
+             multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
+
+             proxyclient = new DefaultHttpClient(multipThread, params);
+             proxyclient.addRequestInterceptor(new RequestAcceptEncoding());
+             proxyclient.addResponseInterceptor(new ResponseContentEncoding());
+             proxyclient.setRedirectStrategy(new DefaultRedirectStrategy() {
+                 @Override
+                 public boolean isRedirected(HttpRequest request, HttpResponse response,
+                                             HttpContext context) throws ProtocolException {
+                     if(response == null) {
+                         throw new IllegalArgumentException("HTTP response may not be null");
+                     }
+
+                     int statusCode = response.getStatusLine().getStatusCode();
+                     String method = request.getRequestLine().getMethod();
+                     Header locationHeader = response.getFirstHeader("location");
+                     switch(statusCode) {
+                         case HttpStatus.SC_MOVED_TEMPORARILY:
+                             return (method.equalsIgnoreCase(HttpGet.METHOD_NAME)
+                                     || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
+                                     || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
+                                     locationHeader != null;
+                         case HttpStatus.SC_MOVED_PERMANENTLY:
+                         case HttpStatus.SC_TEMPORARY_REDIRECT:
+                             return method.equalsIgnoreCase(HttpGet.METHOD_NAME)
+                                     || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
+                                     || method.equalsIgnoreCase(HttpHead.METHOD_NAME);
+                         case HttpStatus.SC_SEE_OTHER:
+                             return true;
+                         default:
+                             return false;
+                     } //end of switch
+                 }
+             });
+         }
+     }
+
     public static synchronized void stop() {
         HTTP.client = null;
         HTTP.proxyclient = null;
@@ -124,7 +175,7 @@ public class HTTP {
     }
 
     public static DefaultHttpClient proxyclient() {
-        if(HTTP.proxyclient == null) HTTP.init();
+        if(HTTP.proxyclient == null) HTTP.proxyinit();
         return HTTP.proxyclient;
     }
 
@@ -241,8 +292,8 @@ public class HTTP {
         try {
             DefaultHttpClient httpClient = (DefaultHttpClient) proxycookieStore(cookieStore);
 
-            //HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
-            //httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+            HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
+            httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toString(httpClient.execute(post).getEntity());
         } catch(Exception e) {
