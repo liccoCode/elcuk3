@@ -57,6 +57,8 @@ import org.apache.http.conn.params.ConnRoutePNames;
  */
 public class HTTP {
     private static DefaultHttpClient client;
+
+    private static DefaultHttpClient proxyclient;
     /**
      * 默认的 Cookie Store
      */
@@ -113,11 +115,17 @@ public class HTTP {
 
     public static synchronized void stop() {
         HTTP.client = null;
+        HTTP.proxyclient = null;
     }
 
     public static DefaultHttpClient client() {
         if(HTTP.client == null) HTTP.init();
         return HTTP.client;
+    }
+
+    public static DefaultHttpClient proxyclient() {
+        if(HTTP.proxyclient == null) HTTP.init();
+        return HTTP.proxyclient;
     }
 
     /**
@@ -136,6 +144,22 @@ public class HTTP {
      */
     public static void clearExpiredCookie() {
         client().getCookieStore().clearExpired(new Date());
+    }
+
+    /**
+     * 可以设置不同的 Cookie 池
+     *
+     * @param cookieStore
+     */
+    public static HttpClient proxycookieStore(CookieStore cookieStore) {
+        if(cookieStore == null) {
+            proxyclient().setCookieStore(HTTP.COOKIE_STORE);
+            client().setCookieStore(HTTP.COOKIE_STORE);
+        } else {
+            proxyclient().setCookieStore(cookieStore);
+            client().setCookieStore(cookieStore);
+        }
+        return proxyclient();
     }
 
     /**
@@ -215,12 +239,12 @@ public class HTTP {
                                    Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
-            DefaultHttpClient httpClient = (DefaultHttpClient) cookieStore(cookieStore);
+            DefaultHttpClient httpClient = (DefaultHttpClient) proxycookieStore(cookieStore);
 
             HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
             httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
-            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
+            return EntityUtils.toString(httpClient.execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
