@@ -21,6 +21,7 @@
   #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}
       #{option ''}请选择#{/option}
   #{/select}
+      <input type="${unit.period?: 'hidden'}" style="width: 40px;" readonly value="${unit.period} 天" id="unit_period"/>
   </td>
 
   <th>价格</th>
