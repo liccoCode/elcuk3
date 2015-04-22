@@ -9,16 +9,15 @@ import models.product.Category;
 import models.product.Team;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.cache.*;
+import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import services.MetricProfitService;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import models.market.M;
 import helper.Currency;
@@ -375,27 +374,45 @@ public class SaleOpTarget extends Model {
         DateTime now = DateTime.now();
         int nowyear = now.getYear();
         int nowmonth = now.getMonthOfYear();
-        int startmonth = 1, endmonth = 12;
         boolean isafter = false;
-        switch(this.saleTargetType) {
-            case MONTH:
-                startmonth = this.targetMonth;
-                endmonth = this.targetMonth;
-                if(this.targetMonth >= nowmonth) isafter = true;
-                break;
-            case SEASON:
-                startmonth = this.targetSeason * 3 - 2;
-                endmonth = this.targetSeason * 3;
-                if(endmonth >= nowmonth) isafter = true;
-                break;
-        }
-
+        if(this.targetMonth >= nowmonth) isafter = true;
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
 
-        MetricProfitService me = new MetricProfitService(Dates.getMonthFirst(this.targetYear, startmonth),
-                Dates.getMonthLast(this.targetYear, endmonth), this.targetMarket, "", "", this.fid);
-        return String.valueOf(me.esSaleFee());
+        //获取缓存的数据
+        String key = helper.Caches.Q.cacheKey("reallySaleAmounts", this.fid, this.targetYear, this.targetMonth,
+                this.targetMarket);
+        String cache_str = play.cache.Cache.get(key, String.class);
+        if(!StringUtils.isBlank(cache_str)) {
+            return cache_str;
+        }
+
+        MetricProfitService me = null;
+        if(this.targetMarket == null) {
+            float monthfee = 0f;
+            for(M market : M.values()) {
+                monthfee = new BigDecimal(monthfee).add(new BigDecimal(getMonthFee(market))).floatValue();
+            }
+            monthfee = new BigDecimal(monthfee).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+            Cache.add(key, String.valueOf(monthfee), "2h");
+            return String.valueOf(monthfee);
+        } else {
+            return String.valueOf(getMonthFee(this.targetMarket));
+        }
+    }
+
+    //计算单个市场的销售额
+    private float getMonthFee(M market) {
+        MetricProfitService me = new MetricProfitService(Dates.morning(Dates.getMonthFirst(this.targetYear,
+                this.targetMonth)),
+                Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth)), market, "", "",
+                this.fid);
+        float fee = new BigDecimal(me.esSaleFee()).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+        String market_key = helper.Caches.Q.cacheKey("reallySaleAmounts", this.fid, this.targetYear,
+                this.targetMonth,
+                market);
+        Cache.add(market_key, String.valueOf(fee), "2h");
+        return fee;
     }
 
 
@@ -408,29 +425,60 @@ public class SaleOpTarget extends Model {
         DateTime now = DateTime.now();
         int nowyear = now.getYear();
         int nowmonth = now.getMonthOfYear();
-
-        int startmonth = 1, endmonth = 12;
         boolean isafter = false;
-        switch(this.saleTargetType) {
-            case MONTH:
-                startmonth = this.targetMonth;
-                endmonth = this.targetMonth;
-                if(this.targetMonth >= nowmonth) isafter = true;
-                break;
-            case SEASON:
-                startmonth = this.targetSeason * 3 - 2;
-                endmonth = this.targetSeason * 3;
-                if(endmonth >= nowmonth) isafter = true;
-                break;
-        }
-
+        if(this.targetMonth >= nowmonth) isafter = true;
         //如果此月份还没有到则为0
         if(this.targetYear == nowyear && isafter) return "";
 
-        MetricProfitService me = new MetricProfitService(Dates.getMonthFirst(this.targetYear, startmonth),
-                Dates.getMonthLast(this.targetYear, endmonth),
-                this.targetMarket, "", "", this.fid);
-        return String.valueOf(me.esSaleQty() / 30);
+        Date startdate = Dates.morning(Dates.getMonthFirst(this.targetYear,
+                this.targetMonth));
+        Date enddate = Dates.night(Dates.getMonthLast(this.targetYear, this.targetMonth));
+        long maxday = date_days(startdate, enddate) + 1;
+
+        //获取缓存的数据
+        String key = helper.Caches.Q.cacheKey("reallySaleQtys", this.fid, this.targetYear, this.targetMonth,
+                this.targetMarket);
+        String cache_str = play.cache.Cache.get(key, String.class);
+        if(!StringUtils.isBlank(cache_str)) {
+            return new BigDecimal(cache_str).divide(new BigDecimal(maxday), 0, BigDecimal.ROUND_HALF_UP).toString();
+        }
+
+        MetricProfitService me = null;
+        if(this.targetMarket == null) {
+            int monthqty = 0;
+            for(M market : M.values()) {
+                monthqty += getMonthQty(market, maxday, startdate, enddate);
+            }
+            Cache.add(key, String.valueOf(monthqty), "2h");
+            return new BigDecimal(monthqty).divide(new BigDecimal(maxday), 0, BigDecimal.ROUND_HALF_UP).toString();
+        } else {
+            float qty = getMonthQty(this.targetMarket, maxday, startdate, enddate);
+            return new BigDecimal(qty).divide(new BigDecimal(maxday), 0, BigDecimal.ROUND_HALF_UP).toString();
+        }
+    }
+
+    //计算单个市场的销量
+    private float getMonthQty(M market, long maxday, Date startdate, Date enddate) {
+        MetricProfitService me = new MetricProfitService(startdate,
+                enddate,
+                market, "", "", this.fid);
+        float qty = me.esSaleQty();
+        String market_key = helper.Caches.Q.cacheKey("reallySaleQtys", this.fid, this.targetYear,
+                this.targetMonth,
+                market);
+        Cache.add(market_key, String.valueOf(qty), "2h");
+        return qty;
+    }
+
+
+    private long date_days(Date startdate, Date enddate) {
+        long day = 0;
+        try {
+            day = enddate.getTime() - startdate.getTime();
+            day = day / 1000 / 60 / 60 / 24;
+        } catch(Exception e) {
+        }
+        return day;
     }
 
 

@@ -24,7 +24,7 @@ public class SystemOperation extends Controller {
     static void rollApi() throws Throwable {
         if(session.contains("username")) {
             if(Play.mode.isProd()) {
-                new SystemOperationsJob(request.actionMethod, request.url, request.controller).now();
+                //new SystemOperationsJob(request.actionMethod, request.url, request.controller).now();
             }
         }
     }

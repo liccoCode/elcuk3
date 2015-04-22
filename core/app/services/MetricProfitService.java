@@ -3,6 +3,7 @@ package services;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
+import helper.Currency;
 import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
@@ -209,14 +210,16 @@ public class MetricProfitService {
         }
 
         //如果运价为0，则直接从采购计划中获取
-        if(avgprice == 0) {
-            String sql = "select price From ProcureUnit "
+        if(avgprice <= 0) {
+            String sql = "select price,currency From ProcureUnit "
                     + " where sku='" + this.sku + "' "
                     + " order by createDate desc limit 1 ";
             List<Map<String, Object>> rows = DBUtils.rows(sql);
             if(rows != null && rows.size() > 0) {
                 Float price = (Float) rows.get(0).get("price");
-                avgprice = helper.Currency.CNY.toUSD(price);
+                String currency = (String) rows.get(0).get("currency");
+                if(currency == null || currency.equals("")) currency = "CNY";
+                avgprice = Currency.valueOf(currency).toUSD(price);
             }
         }
         return avgprice;
@@ -281,7 +284,8 @@ public class MetricProfitService {
             if(volume > weight) {
                 weight = volume;
             }
-            if(this.market == null) {
+            if(this.market == null || (this.market != M.AMAZON_US
+                    && this.market != M.AMAZON_UK && this.market != M.AMAZON_DE)) {
                 price = pricemap.get(M.AMAZON_US.toString());
             } else {
                 Object shipobject = pricemap.get(this.market.toString());

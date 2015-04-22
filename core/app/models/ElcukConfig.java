@@ -1,10 +1,12 @@
 package models;
 
+import helper.DBUtils;
 import helper.GTs;
 import models.procure.Shipment;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.Model;
 
@@ -140,8 +142,34 @@ public class ElcukConfig extends Model {
                 }
                 config.val = valsMap.get(key);
                 config.save();
+                config.editShipMentArriveDay();
             }
         }
         return errorMsg;
+    }
+
+    /**
+     * 系统改了某市场+某运输方式的市场天数后，对应已产生的运输单的预计到库时间都得重新按照此时长天数更改
+     */
+    private synchronized void editShipMentArriveDay() {
+        if(this.name != null && this.name.length() > 0) {
+            String[] names = this.name.split("_");
+            if(names != null && names.length >= 2) {
+                Shipment.T shipt = null;
+                for(Shipment.T t : Shipment.T.values()) {
+                    if(t.name().toLowerCase().equals(names[1])) {
+                        shipt = t;
+                        break;
+                    }
+                }
+                List<Shipment> ments = Shipment
+                        .find("lower(whouse.country)=? and type=? and dates.planBeginDate>=?", names[0],
+                                shipt, DateTime.now().toDate()).fetch();
+                for(Shipment ment : ments) {
+                    ment.calcuPlanArriveDate();
+                    ment.save();
+                }
+            }
+        }
     }
 }
