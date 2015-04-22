@@ -9,6 +9,8 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,6 +20,7 @@ import java.util.List;
  */
 public class ProcureUnitShipPost extends Post<ProcureUnit> {
     private static final long serialVersionUID = -8171825936576265590L;
+    private static Pattern SHIPITEMS_ALL_NUM_PATTERN = Pattern.compile("[0-9]*");
 
     public ProcureUnitShipPost() {
         DateTime now = new DateTime();
@@ -69,13 +72,19 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sql.append(" AND (f.shipmentId LIKE ?")
-                    .append(" OR p.sku LIKE ?")
-                    .append(" OR p.sid LIKE ?")
-                    .append(")");
+            Matcher matcher_all = SHIPITEMS_ALL_NUM_PATTERN.matcher(this.search);
+            if (matcher_all.find()){
+                sql.append(" AND p.id=?");
+                params.add(Long.parseLong(StringUtils.trim(this.search)));
+            } else {
+                sql.append(" AND (f.shipmentId LIKE ?")
+                        .append(" OR p.sku LIKE ?")
+                        .append(" OR p.sid LIKE ?")
+                        .append(")");
 
-            for(int i = 0; i < 3; i++) {
-                params.add(word);
+                for(int i = 0; i < 3; i++) {
+                    params.add(word);
+                }
             }
         }
 
