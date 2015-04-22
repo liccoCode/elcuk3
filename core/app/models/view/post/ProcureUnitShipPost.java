@@ -73,7 +73,7 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             Matcher matcher_all = SHIPITEMS_ALL_NUM_PATTERN.matcher(this.search);
-            if (matcher_all.find()){
+            if(matcher_all.find()) {
                 sql.append(" AND p.id=?");
                 params.add(Long.parseLong(StringUtils.trim(this.search)));
             } else {
