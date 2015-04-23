@@ -301,6 +301,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String trackNo = null;
 
     /**
+     * 工作号
+     */
+    @Expose
+    @Column
+    public String jobNumber;
+
+    /**
      * 国际快递商人
      */
     @Enumerated(EnumType.STRING)

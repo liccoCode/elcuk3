@@ -4,13 +4,18 @@ $ ->
     mask = $('#container')
     mask.mask('更新 Comment')
     $.post('/shipments/comment',
-      {id: $("input[name=shipid]").val(), cmt: $("#ship_memo").val().trim(), track: $("[name=ship\\.trackNo]").val()},
-    (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        alert('更新成功.')
-      mask.unmask()
+      {
+        id: $("input[name=shipid]").val(),
+        cmt: $("#ship_memo").val().trim(),
+        track: $("[name=ship\\.trackNo]").val(),
+        jobNumber: $("#jobNumber").val()
+      },
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('更新成功.')
+        mask.unmask()
     )
 
   fidCallBack = () ->
