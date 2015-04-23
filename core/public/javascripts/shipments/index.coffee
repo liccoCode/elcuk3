@@ -3,14 +3,6 @@ $ ->
     $('#search_form').attr('action', $(@).data('url'))
   )
 
-  $('#all_check').click (e) ->
-    e.preventDefault()
-    $("table [type='checkbox']").each(->
-      $(@).attr('checked', 'checked')
-    )
-
-  $('#un_check').click (e) ->
-    e.preventDefault()
-    $("table [type='checkbox']").each(->
-      $(@).attr('checked', !$(@).attr('checked'))
-    )
+  $(':checkbox[class=checkbox_all]').change (e) ->
+    o = $(@)
+    o.parents('table').find(':checkbox').not(':first').prop("checked", o.prop('checked'))
