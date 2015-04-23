@@ -7,15 +7,13 @@ import helper.Currency;
 import helper.Webs;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.product.Category;
 import models.product.Product;
-import models.view.dto.AnalyzeDTO;
-import models.view.dto.DeliveryExcel;
-import models.view.dto.SaleReportDTO;
-import models.view.dto.ShipmentWeight;
+import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.LossRate;
 import models.view.report.Profit;
@@ -323,6 +321,25 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(sales, from, to);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    public static void skuMonthlyDailySalesReports(Date from, Date to, M market, String category, String val) {
+        List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
+        int begin = new DateTime(from).getMonthOfYear();
+        int end = new DateTime(to).getMonthOfYear();
+
+        List<Integer> months = new ArrayList<Integer>();
+        for(int i = begin; i <= end; i++) months.add(i);
+        List<DailySalesReportsDTO> dtos = OrderItem.skuMonthlyDailySales(begin, end, market, category, selectedSkus);
+
+        if(dtos != null && dtos.size() != 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("SKU月度日均销量报表.xls"));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(dtos, months);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }

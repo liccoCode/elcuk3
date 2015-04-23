@@ -2,22 +2,25 @@ package models.market;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
+import helper.Currency;
+import models.product.Category;
 import models.product.Product;
+import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.cache.Cache;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import query.OrderItemESQuery;
 import query.ProductQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 订单的具体订单项
@@ -459,4 +462,52 @@ public class OrderItem extends GenericModel {
         );
         return sales;
     }
+
+    public static List<DailySalesReportsDTO> skuMonthlyDailySales(int from, int to, M market, String category,
+                                                                  List<String> skus) {
+        List<DailySalesReportsDTO> dtos = new ArrayList<DailySalesReportsDTO>();
+
+        if(StringUtils.isNotBlank(category)) skus.addAll(Category.getSKUs(category));
+        List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
+
+        HashMap<String, Float> units = new HashMap<String, Float>();
+        for(M m : markets) {
+            for(int i = from; i <= to; i++) {
+                Date month = DateTime.now().withMonthOfYear(i).toDate();
+
+                //时区转换
+                DateTime begin = m.withTimeZone(Dates.monthBegin(month));
+                DateTime end = m.withTimeZone(Dates.monthEnd(month));
+
+                SqlSelect sql = new SqlSelect().select("sum(oi.quantity) qty, oi.product_sku k").from("OrderItem oi")
+                        .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                        .where("o.createDate>=?").param(begin.toDate())
+                        .where("o.createDate<=?").param(end.toDate())
+                        .where("oi.market=?").param(m.name())
+                        .where("oi.product_sku IN " + SqlSelect.inlineParam(skus))
+                        .where("o.state IN ('PAYMENT', 'PENDING', 'SHIPPED')")
+                        .groupBy("oi.product_sku");
+                List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+                for(Map<String, Object> row : rows) {
+                    Float qty = row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString());
+                    Float unitAvg = qty / Dates.getDays(month);
+                    units.put(String.format("%s|%s|%s", row.get("k").toString(), m.name(), i), unitAvg);
+                }
+            }
+        }
+
+        for(String sku : skus) {
+            if(StringUtils.isBlank(sku)) continue;
+            for(M m : markets) {
+                DailySalesReportsDTO dto = new DailySalesReportsDTO(sku.substring(0, 2), sku, m);
+                for(int i = from; i <= to; i++) {
+                    Float unitAvg = units.get(String.format("%s|%s|%s", sku, m.name(), i));
+                    dto.sales.put(i, Webs.scalePointUp(1, unitAvg == null ? 0 : unitAvg));
+                }
+                dtos.add(dto);
+            }
+        }
+        return dtos;
+    }
+
 }
