@@ -1,7 +1,5 @@
 package models.view.dto;
 
-import models.market.M;
-
 import java.util.HashMap;
 
 /**
@@ -14,13 +12,13 @@ import java.util.HashMap;
 public class DailySalesReportsDTO {
     public String category;
     public String sku;
-    public M market;
+    public String market;
     public HashMap<Integer, Float> sales = new HashMap<Integer, Float>();
 
     public DailySalesReportsDTO() {
     }
 
-    public DailySalesReportsDTO(String category, String sku, M market) {
+    public DailySalesReportsDTO(String category, String sku, String market) {
         this.category = category;
         this.sku = sku;
         this.market = market;

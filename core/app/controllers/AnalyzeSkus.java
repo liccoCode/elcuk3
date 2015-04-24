@@ -114,10 +114,10 @@ public class AnalyzeSkus extends Controller {
         render(from, to, categories);
     }
 
-    public static void processSkuMonthlyDailySalesReports(Date from, Date to, final M market,
+    public static void processSkuMonthlyDailySalesReports(final Date from, final Date to, final M market,
                                                           final String category, final String val) {
         try {
-            final List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
+            final List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
             final int begin = new DateTime(from).getMonthOfYear();
             final int end = new DateTime(to).getMonthOfYear();
             List<Integer> months = new ArrayList<Integer>();
@@ -126,7 +126,7 @@ public class AnalyzeSkus extends Controller {
             List<DailySalesReportsDTO> dtos = await(new Job<List<DailySalesReportsDTO>>() {
                 @Override
                 public List<DailySalesReportsDTO> doJobWithResult() throws Exception {
-                    return OrderItem.skuMonthlyDailySales(begin, end, market, category, selectedSkus);
+                    return OrderItem.skuMonthlyDailySales(from, to, market, category, selectedSkus);
                 }
             }.now());
             render(months, dtos);

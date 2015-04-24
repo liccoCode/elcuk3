@@ -54,8 +54,11 @@ $ ->
     e.preventDefault()
     if checkVal()
       LoadMask.mask()
-      $('#sku_records').load('/AnalyzeSkus/processSkuMonthlyDailySalesReports', $('.search_form').serialize(), (r) ->)
-      LoadMask.unmask()
+      $.ajax("/AnalyzeSkus/processSkuMonthlyDailySalesReports", {type: 'POST', data: $('.search_form').serialize()})
+      .done((r) ->
+          $('#sku_records').html(r)
+          LoadMask.unmask()
+        )
   ).on("click", ".btn:contains(Export)", (e) ->
     if checkVal()
       $form = $("#click_param")

@@ -333,11 +333,13 @@ public class Excels extends Controller {
 
         List<Integer> months = new ArrayList<Integer>();
         for(int i = begin; i <= end; i++) months.add(i);
-        List<DailySalesReportsDTO> dtos = OrderItem.skuMonthlyDailySales(begin, end, market, category, selectedSkus);
+        List<DailySalesReportsDTO> dtos = OrderItem.skuMonthlyDailySales(from, to, market, category, selectedSkus);
 
         if(dtos != null && dtos.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME, String.format("SKU月度日均销量报表.xls"));
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("SKU月度日均销量报表%s.xls", formatter.format(DateTime.now().toDate())));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, months);
         } else {
