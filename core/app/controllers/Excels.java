@@ -327,7 +327,7 @@ public class Excels extends Controller {
     }
 
     public static void skuMonthlyDailySalesReports(Date from, Date to, M market, String category, String val) {
-        List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
+        List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
         int begin = new DateTime(from).getMonthOfYear();
         int end = new DateTime(to).getMonthOfYear();
 
