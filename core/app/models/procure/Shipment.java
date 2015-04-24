@@ -12,6 +12,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
+import models.market.M;
 import models.product.Whouse;
 import models.view.dto.ProductDTO;
 import notifiers.Mails;
@@ -1186,6 +1187,38 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new Shipment(planBeginDate, type, whouse).save();
     }
 
+    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<String, Integer>();
+
+    /**
+     * 初始化不同运输方式的标准运输量对应关系
+     */
+    static {
+        MINIMUM_TRAFFICMAP.put("AMAZON_DE_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_DE_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_UK_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_UK_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_US_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_US_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_IT_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_IT_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_FR_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_FR_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_JP_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_JP_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_CA_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_CA_AIR", 700);
+    }
+
+    public String minimumTrafficMapKey() {
+        return String.format("%s_%s", this.whouse.account.type.name(), this.type.name());
+    }
+
     /**
      * 获得不同运输方式的标准运输量
      *
@@ -1193,7 +1226,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float minimumTraffic() {
         //海运和空运暂时的最小运输量是500 而快递是不能超过500
-        return 700;
+        String key = this.minimumTrafficMapKey();
+        if(MINIMUM_TRAFFICMAP.containsKey(key)) {
+            return MINIMUM_TRAFFICMAP.get(key);
+        } else {
+            return 500;
+        }
     }
 
     public void sendMsgMail(Date planArrivDate, String username) {
