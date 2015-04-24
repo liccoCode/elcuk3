@@ -4,17 +4,26 @@ import controllers.api.SystemOperation;
 import helper.Dates;
 import helper.J;
 import helper.Webs;
+import models.market.Account;
+import models.market.M;
 import models.market.OrderItem;
+import models.market.SellingRecord;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
+import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.jobs.Job;
 import play.libs.F;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -27,12 +36,13 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class AnalyzeSkus extends Controller {
+    @Before(only = {"index", "skuSalesReport", "skuMonthlyDailySalesReports"})
+    public static void setupSkus() {
+        renderArgs.put("products", J.json(Product.skus(true)));
+    }
 
     @Check("analyzes.index")
     public static void index() {
-        List<String> products = Product.skus(true);
-        renderArgs.put("products", J.json(products));
-
         List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
         DateTime now = DateTime.now();
@@ -81,8 +91,6 @@ public class AnalyzeSkus extends Controller {
     public static void skuSalesReport() {
         Date from = Dates.startDayYear(DateTime.now().getYear());
         Date to = DateTime.now().toDate();
-        List<String> products = Product.skus(true);
-        renderArgs.put("products", J.json(products));
         render(from, to);
     }
 
@@ -93,6 +101,39 @@ public class AnalyzeSkus extends Controller {
             render(sales);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
+     * SKU 月度日均销量报表
+     */
+    @Check("analyzeskus.skumonthlydailysalesreports")
+    public static void skuMonthlyDailySalesReports() {
+        Date from = Dates.startDayYear(DateTime.now().getYear());
+        Date to = DateTime.now().toDate();
+        List<String> categories = Category.categoryIds();
+        render(from, to, categories);
+    }
+
+    @Check("analyzeskus.skumonthlydailysalesreports")
+    public static void processSkuMonthlyDailySalesReports(final Date from, final Date to, final M market,
+                                                          final String category, final String val) {
+        try {
+            final List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
+            final int begin = new DateTime(from).getMonthOfYear();
+            final int end = new DateTime(to).getMonthOfYear();
+            List<Integer> months = new ArrayList<Integer>();
+            for(int i = begin; i <= end; i++) months.add(i);
+
+            List<DailySalesReportsDTO> dtos = await(new Job<List<DailySalesReportsDTO>>() {
+                @Override
+                public List<DailySalesReportsDTO> doJobWithResult() throws Exception {
+                    return OrderItem.skuMonthlyDailySales(from, to, market, category, selectedSkus);
+                }
+            }.now());
+            render(months, dtos);
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.S(e)));
         }
     }
 }

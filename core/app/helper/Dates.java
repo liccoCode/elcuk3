@@ -382,6 +382,7 @@ public class Dates {
         df.setRoundingMode(java.math.RoundingMode.HALF_UP);
         return df.format(number);
     }
+
     /**
      * 获取给定时间范围内每个完整的一周的周末
      *
@@ -446,5 +447,18 @@ public class Dates {
             _begin = c.getTime();
         }
         return dates;
+    }
+
+    /**
+     * 获取给定时间月份的天数
+     *
+     * @return
+     */
+    public static int getDays(Date date) {
+        DateTime dateTime = new DateTime(date);
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, dateTime.getYear());
+        cal.set(Calendar.MONTH, dateTime.getMonthOfYear() - 1);
+        return cal.getActualMaximum(Calendar.DATE);
     }
 }
