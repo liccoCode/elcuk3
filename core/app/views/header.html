@@ -38,7 +38,9 @@
       #{power.ck "analyzeskus.index"}
         <li><a href="@{AnalyzeSkus.index()}">SKU 销量分析</a></li>
       #{/power.ck}
-      <li><a href="@{AnalyzeSkus.skuMonthlyDailySalesReports()}">SKU 月度日均销量报表</a></li>
+      #{power.ck "analyzeskus.skumonthlydailysalesreports"}
+        <li><a href="@{AnalyzeSkus.skuMonthlyDailySalesReports()}">SKU 月度日均销量报表</a></li>
+      #{/power.ck}
       #{power.ck "analyzeskus.skusalesreport"}
         <li><a href="@{AnalyzeSkus.skuSalesReport()}">自定义销售报表</a></li>
       #{/power.ck}

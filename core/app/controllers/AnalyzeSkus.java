@@ -107,6 +107,7 @@ public class AnalyzeSkus extends Controller {
     /**
      * SKU 月度日均销量报表
      */
+    @Check("analyzeskus.skumonthlydailysalesreports")
     public static void skuMonthlyDailySalesReports() {
         Date from = Dates.startDayYear(DateTime.now().getYear());
         Date to = DateTime.now().toDate();
@@ -114,6 +115,7 @@ public class AnalyzeSkus extends Controller {
         render(from, to, categories);
     }
 
+    @Check("analyzeskus.skumonthlydailysalesreports")
     public static void processSkuMonthlyDailySalesReports(final Date from, final Date to, final M market,
                                                           final String category, final String val) {
         try {
