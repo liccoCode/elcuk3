@@ -1193,7 +1193,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float minimumTraffic() {
         //海运和空运暂时的最小运输量是500 而快递是不能超过500
-        return 500;
+        return 700;
     }
 
     public void sendMsgMail(Date planArrivDate, String username) {
