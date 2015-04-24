@@ -154,7 +154,7 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 生命周期
      */
-    public String sellingCycle;
+    public Selling.SC sellingCycle;
 
 
     public float getPs_cal() {
@@ -267,12 +267,6 @@ public class AnalyzeDTO implements Serializable {
             }
         }
         return null;
-    }
-
-    public String cyclename() {
-        if(StringUtils.isBlank(this.sellingCycle))
-            return "";
-        return Selling.SC.valueOf(this.sellingCycle).label();
     }
 
     /**

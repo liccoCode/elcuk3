@@ -111,7 +111,7 @@ public class Sellings extends Controller {
                 .put("brand", Arrays.asList(s.aps.brand))
                 .put("price", Arrays.asList(s.aps.standerPrice.toString()))
                 .put("type", Arrays.asList(s.aps.itemType))
-                .put("title",Arrays.asList(s.aps.title))
+                .put("title", Arrays.asList(s.aps.title))
                 .build()));
     }
 
@@ -344,4 +344,21 @@ public class Sellings extends Controller {
                 "app/views/Sellings/uploadTemplate.xls"));
         renderBinary(template);
     }
+
+    /**
+     * 修改 Selling 的生命周期
+     */
+    public static void changeSellingCycle(String sellingId, Selling.SC cycle) {
+        try {
+            Selling selling = Selling.findById(sellingId);
+            if(selling != null) {
+                selling.sellingCycle = cycle;
+                selling.save();
+            }
+            renderJSON(new Ret(true, sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
 }
