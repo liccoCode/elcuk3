@@ -463,8 +463,12 @@ public class OrderItem extends GenericModel {
         return sales;
     }
 
+    public static final String SKUMONTHLYDAILYSALESRUNNINGKEY = "sku_monthly_daily_sales_running_key";
+
     public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
                                             String val) {
+        if(Cache.get(SKUMONTHLYDAILYSALESRUNNINGKEY, String.class) != null) return;//避免重复计算
+
         String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
         List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
         if(dtos != null && dtos.size() > 0) return;
@@ -472,6 +476,7 @@ public class OrderItem extends GenericModel {
         synchronized(cacheKey.intern()) {
             dtos = Cache.get(cacheKey, List.class);
             if(dtos != null && dtos.size() > 0) return;
+            Cache.add(SKUMONTHLYDAILYSALESRUNNINGKEY, SKUMONTHLYDAILYSALESRUNNINGKEY, "8h");
 
             List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
             int beginMonth = new DateTime(from).getMonthOfYear();
@@ -541,6 +546,7 @@ public class OrderItem extends GenericModel {
                 }
             }
             Cache.add(cacheKey, dtos, "4h");
+            Cache.delete(SKUMONTHLYDAILYSALESRUNNINGKEY);
         }
     }
 }
