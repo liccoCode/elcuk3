@@ -105,7 +105,7 @@
     <td>${dto.outday}</td>
     <td>${dto.displayPrice}</td>
     <td>
-      <select name="sellingCycle" size="1" class="span9" data-sellingid="${dto.fid}">
+      <select name="sellingCycle" size="1" data-sellingid="${dto.fid}">
         <option value="">生命周期</option>
           #{list items:models.market.Selling.SC.values(), as: 'cycle'}
             <option value="${cycle}" ${cycle == dto.sellingCycle? 'selected':''}>${cycle.label()}</option>
