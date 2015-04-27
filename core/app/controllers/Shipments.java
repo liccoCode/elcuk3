@@ -222,7 +222,8 @@ public class Shipments extends Controller {
     /**
      * 用来更新 Shipment 的 coment 与 trackNo
      */
-    public static void comment(String id, String cmt, String track, String jobNumber) {
+    public static void comment(String id, String cmt, String track, String jobNumber, Float totalWeightShipment,
+                               Float totalVolumeShipment, Float totalStockShipment) {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
         Shipment ship = Shipment.findById(id);

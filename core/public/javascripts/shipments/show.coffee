@@ -8,7 +8,10 @@ $ ->
         id: $("input[name=shipid]").val(),
         cmt: $("#ship_memo").val().trim(),
         track: $("[name=ship\\.trackNo]").val(),
-        jobNumber: $("#jobNumber").val()
+        jobNumber: $("#jobNumber").val(),
+        totalWeightShipment: $("#totalWeightShipment").val(),
+        totalVolumeShipment: $("#totalVolumeShipment").val(),
+        totalStockShipment: $("#totalStockShipment").val()
       },
       (r) ->
         if r.flag is false
