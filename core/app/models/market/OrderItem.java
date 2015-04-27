@@ -477,7 +477,7 @@ public class OrderItem extends GenericModel {
             dtos = Cache.get(cacheKey, List.class);
             if(dtos != null && dtos.size() > 0) return;
             Cache.add(runningkey, runningkey, "4h");
-            long begin = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
 
             List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
             int beginMonth = new DateTime(from).getMonthOfYear();
@@ -510,7 +510,7 @@ public class OrderItem extends GenericModel {
                     }
                 }
             }
-            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - begin);
+            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - start);
 
             dtos = new ArrayList<DailySalesReportsDTO>();
             for(String sku : selectedSkus) {
@@ -547,7 +547,7 @@ public class OrderItem extends GenericModel {
                     sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
                 }
             }
-            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - begin);
+            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - start);
             Cache.add(cacheKey, dtos, "4h");
             Cache.delete(runningkey);
         }
