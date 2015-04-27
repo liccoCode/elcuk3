@@ -1,5 +1,6 @@
 package models.view.dto;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
@@ -9,7 +10,9 @@ import java.util.HashMap;
  * Date: 15-4-23
  * Time: PM2:54
  */
-public class DailySalesReportsDTO {
+public class DailySalesReportsDTO implements Serializable {
+    private static final long serialVersionUID = -7307350998886959041L;
+
     public String category;
     public String sku;
     public String market;

@@ -463,75 +463,90 @@ public class OrderItem extends GenericModel {
         return sales;
     }
 
-    public static List<DailySalesReportsDTO> skuMonthlyDailySales(Date from, Date to, M market, String category,
-                                                                  List<String> skus) {
-        List<DailySalesReportsDTO> dtos = new ArrayList<DailySalesReportsDTO>();
-        int beginMonth = new DateTime(from).getMonthOfYear();
-        int endMonth = new DateTime(to).getMonthOfYear();
+    public static final String SKUMONTHLYDAILYSALESRUNNINGKEY = "sku_monthly_daily_sales_running_key";
 
-        if(StringUtils.isNotBlank(category)) skus.addAll(Category.getSKUs(category));
-        List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
+    public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
+                                            String val) {
+        if(Cache.get(SKUMONTHLYDAILYSALESRUNNINGKEY, String.class) != null) return;//避免重复计算
 
-        HashMap<String, Integer> units = new HashMap<String, Integer>();
-        for(M m : markets) {
-            for(int i = beginMonth; i <= endMonth; i++) {
-                Date month = new DateTime(from).withMonthOfYear(i).toDate();
+        String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
+        List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
+        if(dtos != null && dtos.size() > 0) return;
 
-                //时区转换
-                DateTime begin = m.withTimeZone(Dates.monthBegin(month));
-                DateTime end = m.withTimeZone(Dates.monthEnd(month));
+        synchronized(cacheKey.intern()) {
+            dtos = Cache.get(cacheKey, List.class);
+            if(dtos != null && dtos.size() > 0) return;
+            Cache.add(SKUMONTHLYDAILYSALESRUNNINGKEY, SKUMONTHLYDAILYSALESRUNNINGKEY, "8h");
 
-                SqlSelect sql = new SqlSelect().select("sum(oi.quantity) qty, oi.product_sku k").from("OrderItem oi")
-                        .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
-                        .where("o.createDate>=?").param(begin.toDate())
-                        .where("o.createDate<=?").param(end.toDate())
-                        .where("oi.market=?").param(m.name())
-                        .where("oi.product_sku IN " + SqlSelect.inlineParam(skus))
-                        .where("o.state IN ('PAYMENT', 'PENDING', 'SHIPPED')")
-                        .groupBy("oi.product_sku");
-                List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-                for(Map<String, Object> row : rows) {
-                    Integer unit = row.get("qty") == null ? 0 : NumberUtils.toInt(row.get("qty").toString());
-                    units.put(String.format("%s|%s|%s", row.get("k").toString(), m.name(), i), unit);
-                }
-            }
-        }
+            List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
+            int beginMonth = new DateTime(from).getMonthOfYear();
+            int endMonth = new DateTime(to).getMonthOfYear();
 
-        for(String sku : skus) {
-            if(StringUtils.isBlank(sku)) continue;
+            if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
+            List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
 
-            String cate = sku.substring(0, 2);
-            DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
-            if(market == null) dtos.add(sumDto);
-
+            HashMap<String, Integer> units = new HashMap<String, Integer>();
             for(M m : markets) {
-                DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
-
                 for(int i = beginMonth; i <= endMonth; i++) {
                     Date month = new DateTime(from).withMonthOfYear(i).toDate();
-                    int days = Dates.getDays(month);
 
-                    String key = String.format("%s|%s|%s", sku, m.name(), i);
-                    Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
-                    dto.sales.put(i, Webs.scalePointUp(0, unit / days));
+                    //时区转换
+                    DateTime begin = m.withTimeZone(Dates.monthBegin(month));
+                    DateTime end = m.withTimeZone(Dates.monthEnd(month));
 
-                    //使用 sumDto 对象临时储存一下汇总的数据
-                    if(sumDto.sales.containsKey(i)) {
-                        sumDto.sales.put(i, sumDto.sales.get(i) + unit);
-                    } else {
-                        sumDto.sales.put(i, unit);
+                    SqlSelect sql = new SqlSelect().select("sum(oi.quantity) qty, oi.product_sku k").from("OrderItem oi")
+                            .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                            .where("o.createDate>=?").param(begin.toDate())
+                            .where("o.createDate<=?").param(end.toDate())
+                            .where("oi.market=?").param(m.name())
+                            .where("oi.product_sku IN " + SqlSelect.inlineParam(selectedSkus))
+                            .where("o.state IN ('PAYMENT', 'PENDING', 'SHIPPED')")
+                            .groupBy("oi.product_sku");
+                    List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+                    for(Map<String, Object> row : rows) {
+                        Integer unit = row.get("qty") == null ? 0 : NumberUtils.toInt(row.get("qty").toString());
+                        units.put(String.format("%s|%s|%s", row.get("k").toString(), m.name(), i), unit);
                     }
                 }
-                dtos.add(dto);
             }
 
-            //最后在计算汇总的数据
-            for(int key : sumDto.sales.keySet()) {
-                Date month = new DateTime(from).withMonthOfYear(key).toDate();
-                sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
+            dtos = new ArrayList<DailySalesReportsDTO>();
+            for(String sku : selectedSkus) {
+                if(StringUtils.isBlank(sku)) continue;
+
+                String cate = sku.substring(0, 2);
+                DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
+                if(market == null) dtos.add(sumDto);
+
+                for(M m : markets) {
+                    DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
+
+                    for(int i = beginMonth; i <= endMonth; i++) {
+                        Date month = new DateTime(from).withMonthOfYear(i).toDate();
+                        int days = Dates.getDays(month);
+
+                        String key = String.format("%s|%s|%s", sku, m.name(), i);
+                        Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
+                        dto.sales.put(i, Webs.scalePointUp(0, unit / days));
+
+                        //使用 sumDto 对象临时储存一下汇总的数据
+                        if(sumDto.sales.containsKey(i)) {
+                            sumDto.sales.put(i, sumDto.sales.get(i) + unit);
+                        } else {
+                            sumDto.sales.put(i, unit);
+                        }
+                    }
+                    dtos.add(dto);
+                }
+
+                //最后在计算汇总的数据
+                for(int key : sumDto.sales.keySet()) {
+                    Date month = new DateTime(from).withMonthOfYear(key).toDate();
+                    sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
+                }
             }
+            Cache.add(cacheKey, dtos, "4h");
+            Cache.delete(SKUMONTHLYDAILYSALESRUNNINGKEY);
         }
-        return dtos;
     }
-
 }

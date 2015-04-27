@@ -74,6 +74,9 @@ $ ->
     if from.getFullYear() != to.getFullYear()
       alert('开始时间与结束时间必须在同一个年度内')
       return false
+    else if from > to
+      alert('开始时间必须小于结束时间')
+      return false
     else if $("#postVal").val() == '' && $("#category").val() == ''
       alert('请选择 Category 或添加 SKU')
       return false

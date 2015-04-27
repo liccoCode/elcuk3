@@ -149,7 +149,7 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 主要运输方式
      */
-    public String main_ship_type;
+    public String mainShipType;
 
     /**
      * 生命周期
