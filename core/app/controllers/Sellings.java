@@ -9,6 +9,7 @@ import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
 import models.view.Ret;
+import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -346,15 +347,13 @@ public class Sellings extends Controller {
     }
 
     /**
-     * 修改 Selling 的生命周期
+     * 修改 Selling 的生命周期,同时还要更新缓存
      */
     public static void changeSellingCycle(String sellingId, Selling.SC cycle) {
         try {
             Selling selling = Selling.findById(sellingId);
-            if(selling != null) {
-                selling.sellingCycle = cycle;
-                selling.save();
-            }
+            if(selling == null || !selling.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
+            selling.sellingCycle(cycle);
             renderJSON(new Ret(true, sellingId));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
