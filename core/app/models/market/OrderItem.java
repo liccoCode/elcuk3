@@ -18,6 +18,7 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 import query.OrderItemESQuery;
 import query.ProductQuery;
+import play.Logger;
 
 import javax.persistence.*;
 import java.util.*;
@@ -463,20 +464,20 @@ public class OrderItem extends GenericModel {
         return sales;
     }
 
-    public static final String SKUMONTHLYDAILYSALESRUNNINGKEY = "sku_monthly_daily_sales_running_key";
-
     public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
                                             String val) {
-        if(Cache.get(SKUMONTHLYDAILYSALESRUNNINGKEY, String.class) != null) return;//避免重复计算
-
         String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
+        String runningkey = String.format("%s_%s", cacheKey, "running_key");
+        if(Cache.get(runningkey, String.class) != null) return;//避免重复计算
+
         List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
         if(dtos != null && dtos.size() > 0) return;
 
         synchronized(cacheKey.intern()) {
             dtos = Cache.get(cacheKey, List.class);
             if(dtos != null && dtos.size() > 0) return;
-            Cache.add(SKUMONTHLYDAILYSALESRUNNINGKEY, SKUMONTHLYDAILYSALESRUNNINGKEY, "8h");
+            Cache.add(runningkey, runningkey, "4h");
+            long begin = System.currentTimeMillis();
 
             List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
             int beginMonth = new DateTime(from).getMonthOfYear();
@@ -509,6 +510,7 @@ public class OrderItem extends GenericModel {
                     }
                 }
             }
+            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - begin);
 
             dtos = new ArrayList<DailySalesReportsDTO>();
             for(String sku : selectedSkus) {
@@ -545,8 +547,9 @@ public class OrderItem extends GenericModel {
                     sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
                 }
             }
+            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - begin);
             Cache.add(cacheKey, dtos, "4h");
-            Cache.delete(SKUMONTHLYDAILYSALESRUNNINGKEY);
+            Cache.delete(runningkey);
         }
     }
 }
