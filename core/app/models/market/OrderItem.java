@@ -466,7 +466,7 @@ public class OrderItem extends GenericModel {
 
     public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
                                             String val) {
-        String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
+        String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
         String runningkey = String.format("%s_%s", cacheKey, "running_key");
         if(Cache.get(runningkey, String.class) != null) return;//避免重复计算
 
