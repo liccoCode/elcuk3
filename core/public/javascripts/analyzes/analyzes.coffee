@@ -96,7 +96,7 @@ $ ->
       $.ajax("/sellings/changeSellingCycle", data: {sellingId: $select.data('sellingid'), cycle: $select.val()}, dataType: 'json')
       .done((r)->
           msg = if r.flag is true
-            {text: "Selling #{r.message} 生命周期修改为 #{$select.val()}", type: 'success'}
+            {text: "Selling #{r.message} 生命周期修改为 #{$select.find("option:selected").text()}", type: 'success'}
           else
             {text: r.message, type: 'error'}
           noty(msg)

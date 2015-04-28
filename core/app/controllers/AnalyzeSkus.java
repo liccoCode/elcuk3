@@ -121,7 +121,7 @@ public class AnalyzeSkus extends Controller {
             final int end = new DateTime(to).getMonthOfYear();
             if(from.getTime() > to.getTime() || begin > end) renderJSON(new Ret("开始时间必须小于结束时间且必须在同一年份内!"));
 
-            String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
+            String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
             List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
             if(dtos == null || dtos.size() == 0) {
                 new Job() {
