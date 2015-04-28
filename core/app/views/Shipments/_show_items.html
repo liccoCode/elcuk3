@@ -155,6 +155,18 @@
       </div>
 
       <div class="control-group">
+        <label class="control-label">计费方式</label>
+
+        <div class="controls">
+          <select name="fee.chargingWay" class="input-small">
+              #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
+                <option value="${way}">${way.label()}</option>
+              #{/list}
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
         <label class="control-label">费用关系人</label>
 
         <div class="controls">
