@@ -2,8 +2,8 @@ package models.procure;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.*;
 import helper.Currency;
+import helper.*;
 import models.ElcukConfig;
 import models.ElcukRecord;
 import models.User;
@@ -12,32 +12,27 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.market.M;
 import models.product.Whouse;
-import models.view.dto.ProductDTO;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.F;
-import play.libs.Mail;
 import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-
-import helper.Webs;
-
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -328,6 +323,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @Lob
     public String memo = " ";
+
+    /**
+     * 发票编号
+     */
+    @Unique
+    @Column(unique = true)
+    @Expose
+    public String invoiceNo;
 
     /**
      * 多个traceno
@@ -1337,4 +1340,81 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return str;
     }
 
+    /**
+     * 生成 InvoiceNO
+     * <p/>
+     * 发票编号Invoice NO.规则:
+     * 1.快递: E + 当前日期年月日＋该运输单的CenterID+“-”+“两位数序号”(如01,02,03等依次变)
+     * 2.空运: A + 当前日期年月日＋该运输单的CenterID+“-”+“两位数序号”(如01,02,03等依次变)
+     * 3.海运: S + 当前日期年月日＋该运输单的CenterID+“-”+“两位数序号”(如01,02,03等依次变)
+     *
+     * @return
+     */
+    public String buildInvoiceNO() {
+        if(StringUtils.isNotBlank(this.invoiceNo)) return this.invoiceNo;
+
+        //特性: 相同运输方式 + 相同日期 + 相同 CenterID 共享两位数序号(才需要递增 01 02 03...，否则的话需要从 01 开始)
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        String now = formatter.format(DateTime.now().toDate());
+        String maxInvoiceNo = this.fetchMaxInvoiceNoForDB();
+        Integer invoiceNo = 0;
+        if(maxInvoiceNo != null) {
+            invoiceNo = NumberUtils.toInt(StringUtils.substring(maxInvoiceNo, maxInvoiceNo.length() - 2));
+        }
+        ++invoiceNo;
+        this.invoiceNo = String.format("%s%s%s-%s", this.invoiceNOTitle(), now, this.fetchCenterId(),
+                invoiceNo < 10 ? ("0" + invoiceNo) : invoiceNo);
+        this.save();
+        return this.invoiceNo;
+    }
+
+    public String fetchMaxInvoiceNoForDB() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        String now = formatter.format(DateTime.now().toDate());
+        List<Shipment> shipments = Shipment.find("invoiceNo like ?",
+                String.format("%s%s%s%s", this.invoiceNOTitle(), now, this.fetchCenterId(), "%")).fetch();
+        if(shipments == null || shipments.size() == 0) return null;
+
+        //开始排序 从小到大
+        Collections.sort(shipments, new Comparator<Shipment>() {
+            @Override
+            public int compare(Shipment o1, Shipment o2) {
+                Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
+                Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
+                return invoiceNo1.compareTo(invoiceNo2);
+            }
+        });
+        return shipments.get(shipments.size() - 1).invoiceNo;
+    }
+
+    public String invoiceNOTitle() {
+        switch(this.type) {
+            case EXPRESS:
+                return "E";
+            case AIR:
+                return "A";
+            case SEA:
+                return "S";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 获取运输单的 CenterId
+     * <p/>
+     * 一个运输单里 CenterID 都是一样的
+     *
+     * @return
+     */
+    public String fetchCenterId() {
+        for(ShipItem shipItem : this.items) {
+            if(shipItem.unit != null) {
+                if(shipItem.unit.fba != null) {
+                    return shipItem.unit.fba.centerId.toUpperCase();
+                }
+            }
+        }
+        return null;
+    }
 }
