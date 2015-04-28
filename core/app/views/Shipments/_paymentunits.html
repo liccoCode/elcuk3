@@ -14,6 +14,9 @@
           <th class="span2">(3m)均价</th>
           <th class="span2">(now)均价</th>
           <th class="span2">总价</th>
+        #{if isExpress}
+          <th class="span2">计费方式</th>
+        #{/if}
           <th class="span2">费用关系人</th>
           <th class="span3">备注</th>
           <th>申请人</th>
@@ -35,6 +38,9 @@
                 <i class="icon-search"></i>
               #{/if}
           </td>
+            #{if isExpress}
+              <th>${fee.chargingWay?.label()}</th>
+            #{/if}
           <td>${fee.cooperator?.name}</td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
@@ -84,11 +90,11 @@
         </label>
 
         <label>费用关系人
-           <select name="fee.cooperator.id" class="input-small">
-             #{list items:cooperators, as:'cooper'}
-              <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
-             #{/list}
-           </select>
+          <select name="fee.cooperator.id" class="input-small">
+              #{list items:cooperators, as:'cooper'}
+                <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
+              #{/list}
+          </select>
         </label>
 
         <label>备注
@@ -96,17 +102,17 @@
         </label>
 
         <button type="submit" class="btn btn-success" data-url='@{PaymentUnits.fromShipment(ship.id)}'>添加费用</button>
-      #{if ship.whouse.country.contains('DE') }
-        <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'>
-          计算剩余关税
-        </button>
-      #{/if}
+          #{if ship.whouse.country.contains('DE') }
+            <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'>
+              计算剩余关税
+            </button>
+          #{/if}
       </form>
-      #{if ship.whouse.country.contains('DE') }
-      <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}'>
-        计算预交关税
-      </a>
-      #{/if}
+        #{if ship.whouse.country.contains('DE') }
+          <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}'>
+            计算预交关税
+          </a>
+        #{/if}
     </div>
   </div>
 #{/power.ck}
@@ -230,5 +236,7 @@
 </script>
 
 <script type="text/template" id="statisticFee-template">
-  <tr><td colspan="13"><span style="margin-right:20px;">运输单费用统计</span> <%= msg %></td></tr>
+  <tr>
+    <td colspan="13"><span style="margin-right:20px;">运输单费用统计</span> <%= msg %></td>
+  </tr>
 </script>

@@ -176,6 +176,31 @@ public class PaymentUnit extends Model {
     @Enumerated(EnumType.STRING)
     public S state = S.APPLY;
 
+    public enum W {
+        WEIGHT {
+            @Override
+            public String label() {
+                return "实重";
+            }
+        },
+        VOLUME {
+            @Override
+            public String label() {
+                return "体积重";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 计费方式
+     * <p/>
+     * 快递运输方式，记录运费时是针对每个采购计划记录运费的，此字段用来标记当时快递是按照重量还是体积来计费的
+     */
+    @Enumerated(EnumType.STRING)
+    public W chargingWay;
+
     @PrePersist
     public void beforeSave() {
         if(this.feeType == null)
