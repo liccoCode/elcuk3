@@ -81,4 +81,10 @@ public class ShipmentDates implements Serializable {
     @Expose
     public Date arriveDate;
 
+    /**
+     * 计算准时率预计到库时间(用于计算准时率的到库时间)
+     */
+    @Expose
+    public Date planArrivDateForCountRate;
+
 }

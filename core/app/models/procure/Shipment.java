@@ -67,6 +67,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.dates.beginDate = shipment.dates.beginDate;
         this.dates.planBeginDate = shipment.dates.planBeginDate;
         this.dates.planArrivDate = shipment.dates.planArrivDate;
+        this.dates.planArrivDateForCountRate = shipment.dates.planArrivDate;
         // FBA 不做处理
         this.type = shipment.type;
         this.whouse = shipment.whouse;
@@ -371,6 +372,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         plusDay = shipDay();
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
+        this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
         return true;
     }
 

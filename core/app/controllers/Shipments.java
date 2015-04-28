@@ -199,6 +199,11 @@ public class Shipments extends Controller {
         if(dbship.dates.planArrivDate.compareTo(ship.dates.planArrivDate) != 0)
             dbship.dates.oldPlanArrivDate = dbship.dates.planArrivDate;
         dbship.dates.planArrivDate = ship.dates.planArrivDate;
+
+        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state)) {
+            dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
+        }
         dbship.updateShipment();
 
         if(Validation.hasErrors()) {
