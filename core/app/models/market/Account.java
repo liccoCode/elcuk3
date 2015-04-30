@@ -220,7 +220,7 @@ public class Account extends Model {
                      */
                     F.T2<List<NameValuePair>, String> params = loginAmazonSellerCenterStep1();
 
-                    body = HTTP.post(this.cookieStore(), params._2, params._1);
+                    body = HTTP.postProxy(this.cookieStore(), params._2, params._1);
                     if(Play.mode.isDev()) {
                         FileUtils.writeStringToFile(
                                 new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
