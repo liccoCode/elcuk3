@@ -506,6 +506,37 @@ public class Selling extends GenericModel {
         return this.save();
     }
 
+    public void sellingCycle(Selling.SC cycle) {
+        if(cycle == null) throw new FastRuntimeException("SellingCycle 格式错误");
+        this.sellingCycle = cycle;
+        // 如果缓存不为空则更新缓存
+        List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
+        if(dtos != null) {
+            boolean find = false;
+            for(AnalyzeDTO dto : dtos) {
+                if(!dto.fid.equals(this.sellingId)) continue;
+                dto.sellingCycle = cycle;
+                find = true;
+            }
+            if(!find) {
+                throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
+            } else {
+                Date expireTime;
+                String cache_str = Caches.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE + ".time");
+                if(StringUtils.isBlank(cache_str)) {
+                    expireTime = DateTime.now().plusHours(8).toDate();
+                } else {
+                    expireTime = DateTime.parse(cache_str, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z"))
+                            .withZone(Dates.CN).toDate();
+                }
+                long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
+                Caches.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, J.json(dtos),
+                        Time.parseDuration(diffSecond + "s"));
+            }
+        }
+        this.save();
+    }
+
     /**
      * 加载指定 Product 所属的 Family 下的所有 Selling 与 SellingId
      *

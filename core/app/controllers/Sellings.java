@@ -9,6 +9,7 @@ import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
 import models.view.Ret;
+import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -111,7 +112,7 @@ public class Sellings extends Controller {
                 .put("brand", Arrays.asList(s.aps.brand))
                 .put("price", Arrays.asList(s.aps.standerPrice.toString()))
                 .put("type", Arrays.asList(s.aps.itemType))
-                .put("title",Arrays.asList(s.aps.title))
+                .put("title", Arrays.asList(s.aps.title))
                 .build()));
     }
 
@@ -344,4 +345,19 @@ public class Sellings extends Controller {
                 "app/views/Sellings/uploadTemplate.xls"));
         renderBinary(template);
     }
+
+    /**
+     * 修改 Selling 的生命周期,同时还要更新缓存
+     */
+    public static void changeSellingCycle(String sellingId, Selling.SC cycle) {
+        try {
+            Selling selling = Selling.findById(sellingId);
+            if(selling == null || !selling.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
+            selling.sellingCycle(cycle);
+            renderJSON(new Ret(true, sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
 }
