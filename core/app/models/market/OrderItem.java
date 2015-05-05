@@ -2,22 +2,26 @@ package models.market;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
+import helper.Currency;
+import models.product.Category;
 import models.product.Product;
+import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.cache.Cache;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import query.OrderItemESQuery;
 import query.ProductQuery;
+import play.Logger;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 订单的具体订单项
@@ -458,5 +462,94 @@ public class OrderItem extends GenericModel {
                 Webs.scale2Double(sumRate * 100))
         );
         return sales;
+    }
+
+    public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
+                                            String val) {
+        String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
+        String runningkey = String.format("%s_%s", cacheKey, "running_key");
+        if(Cache.get(runningkey, String.class) != null) return;//避免重复计算
+
+        List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
+        if(dtos != null && dtos.size() > 0) return;
+
+        synchronized(cacheKey.intern()) {
+            dtos = Cache.get(cacheKey, List.class);
+            if(dtos != null && dtos.size() > 0) return;
+            Cache.add(runningkey, runningkey, "4h");
+            long start = System.currentTimeMillis();
+
+            List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
+            int beginMonth = new DateTime(from).getMonthOfYear();
+            int endMonth = new DateTime(to).getMonthOfYear();
+
+            if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
+            List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
+
+            HashMap<String, Integer> units = new HashMap<String, Integer>();
+            for(M m : markets) {
+                for(int i = beginMonth; i <= endMonth; i++) {
+                    Date month = new DateTime(from).withMonthOfYear(i).toDate();
+
+                    //时区转换
+                    DateTime begin = m.withTimeZone(Dates.monthBegin(month));
+                    DateTime end = m.withTimeZone(Dates.monthEnd(month));
+
+                    SqlSelect sql = new SqlSelect().select("sum(oi.quantity) qty, oi.product_sku k").from("OrderItem oi")
+                            .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                            .where("o.createDate>=?").param(begin.toDate())
+                            .where("o.createDate<=?").param(end.toDate())
+                            .where("oi.market=?").param(m.name())
+                            .where("oi.product_sku IN " + SqlSelect.inlineParam(selectedSkus))
+                            .where("o.state IN ('PAYMENT', 'PENDING', 'SHIPPED')")
+                            .groupBy("oi.product_sku");
+                    List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+                    for(Map<String, Object> row : rows) {
+                        Integer unit = row.get("qty") == null ? 0 : NumberUtils.toInt(row.get("qty").toString());
+                        units.put(String.format("%s|%s|%s", row.get("k").toString(), m.name(), i), unit);
+                    }
+                }
+            }
+            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - start);
+
+            dtos = new ArrayList<DailySalesReportsDTO>();
+            for(String sku : selectedSkus) {
+                if(StringUtils.isBlank(sku)) continue;
+
+                String cate = sku.substring(0, 2);
+                DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
+                if(market == null) dtos.add(sumDto);
+
+                for(M m : markets) {
+                    DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
+
+                    for(int i = beginMonth; i <= endMonth; i++) {
+                        Date month = new DateTime(from).withMonthOfYear(i).toDate();
+                        int days = Dates.getDays(month);
+
+                        String key = String.format("%s|%s|%s", sku, m.name(), i);
+                        Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
+                        dto.sales.put(i, Webs.scalePointUp(0, unit / days));
+
+                        //使用 sumDto 对象临时储存一下汇总的数据
+                        if(sumDto.sales.containsKey(i)) {
+                            sumDto.sales.put(i, sumDto.sales.get(i) + unit);
+                        } else {
+                            sumDto.sales.put(i, unit);
+                        }
+                    }
+                    dtos.add(dto);
+                }
+
+                //最后在计算汇总的数据
+                for(int key : sumDto.sales.keySet()) {
+                    Date month = new DateTime(from).withMonthOfYear(key).toDate();
+                    sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
+                }
+            }
+            Logger.info("SkuMonthlyDailySales calculate .... [%sms]", System.currentTimeMillis() - start);
+            Cache.add(cacheKey, dtos, "4h");
+            Cache.delete(runningkey);
+        }
     }
 }

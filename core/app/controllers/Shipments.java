@@ -39,7 +39,7 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 6/20/12
  * Time: 3:09 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Shipments extends Controller {
     @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
@@ -443,10 +443,11 @@ public class Shipments extends Controller {
                 fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
             fbaGroupUnits.get(centerId).add(item.unit);
         }
+        String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
         final PDF.Options options = new PDF.Options();
         options.filename = id;
         options.pageSize = IHtmlToPdfTransformer.A3P;
-        renderPDF(options, fbaGroupUnits);
+        renderPDF(options, fbaGroupUnits, invoiceNo);
     }
 
     public static void dates(String id) {
