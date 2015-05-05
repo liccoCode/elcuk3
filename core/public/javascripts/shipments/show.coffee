@@ -143,3 +143,13 @@ $ ->
       finally
         LoadMask.unmask()
     )
+
+  $('#all_check').click (e) ->
+    $("#shipitemTable [type='checkbox']").each(->
+      $(@).prop('checked', !$(@).prop('checked'))
+    )
+
+
+  $(':checkbox[class=checkbox_all]').change (e) ->
+    $o = $(@)
+    $o.parents('form').find(':checkbox[id*=checkbox]').prop("checked", $o.prop('checked'))
