@@ -181,7 +181,6 @@ public class Shipments extends Controller {
         dbship.memo = ship.memo;
         dbship.dates.planBeginDate = ship.dates.planBeginDate;
         dbship.internationExpress = ship.internationExpress;
-        System.out.println(ship.jobNumber+"***");
         dbship.jobNumber = ship.jobNumber;
         dbship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         checkAuthenticity();
