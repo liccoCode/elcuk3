@@ -1052,8 +1052,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float totalWeightQuaTest() {
         float weight = 0f;
-
-
         return weight;
     }
 
@@ -1065,8 +1063,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float totalVolumeQuaTest() {
         float volume = 0f;
-
-
         return volume;
     }
 
@@ -1077,8 +1073,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float totalUnitQuaTest() {
         float volume = 0f;
-
-
         return volume;
     }
 
