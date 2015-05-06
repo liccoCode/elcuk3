@@ -297,6 +297,35 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String trackNo = null;
 
     /**
+     * 工作号
+     */
+    @Expose
+    @Column
+    public String jobNumber;
+
+    /**
+     * 总重量(kg)货代
+     */
+
+    @Expose
+    @Column
+    public Float totalWeightShipment;
+
+    /**
+     * 总体积(m³)货代
+     */
+    @Expose
+    @Column
+    public Float totalVolumeShipment;
+
+    /**
+     * 总托盘数(货代)
+     */
+    @Expose
+    @Column
+    public Integer totalStockShipment;
+
+    /**
      * 国际快递商人
      */
     @Enumerated(EnumType.STRING)
@@ -1014,6 +1043,37 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             weight += itm.qty * itm.unit.product.weight;
         }
         return weight;
+    }
+
+    /**
+     * 通过产品数据计算出来的这份运输单的质检总重量
+     *
+     * @return
+     */
+    public float totalWeightQuaTest() {
+        float weight = 0f;
+        return weight;
+    }
+
+
+    /**
+     * 通过产品数据计算出来的这份运输单的质检总体积
+     *
+     * @return
+     */
+    public float totalVolumeQuaTest() {
+        float volume = 0f;
+        return volume;
+    }
+
+    /**
+     * 通过产品数据计算出来的这份运输单的质检总箱数
+     *
+     * @return
+     */
+    public float totalUnitQuaTest() {
+        float volume = 0f;
+        return volume;
     }
 
     /**
