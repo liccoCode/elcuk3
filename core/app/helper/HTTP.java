@@ -44,7 +44,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.conn.params.ConnRoutePNames;
 
 /**
  * 对 HttpClient 4 的封装 HTTP 请求
@@ -199,6 +202,31 @@ public class HTTP {
             return "";
         }
     }
+
+    /**
+     * 使用代理访问
+     *
+     * @param cookieStore
+     * @param url
+     * @param params
+     * @return
+     */
+    public static String postProxy(CookieStore cookieStore, String url,
+                                   Collection<? extends NameValuePair> params) {
+        HttpPost post = new HttpPost(url);
+        try {
+            DefaultHttpClient httpClient = (DefaultHttpClient) cookieStore(cookieStore);
+
+            HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
+            httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+            post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
+            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
+        } catch(Exception e) {
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            return "";
+        }
+    }
+
 
     public static JSONObject postJson(String url, Collection<? extends NameValuePair> params) {
         Logger.debug("HTTP.post Json [%s]", url);
