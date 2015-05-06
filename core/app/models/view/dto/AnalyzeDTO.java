@@ -3,6 +3,7 @@ package models.view.dto;
 import helper.Webs;
 import models.market.M;
 import models.market.Selling;
+import models.procure.Shipment;
 import models.view.post.AnalyzePost;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
@@ -145,11 +146,15 @@ public class AnalyzeDTO implements Serializable {
      */
     public float displayPrice;
 
+    /**
+     * 主要运输方式
+     */
+    public String main_ship_type;
 
     /**
      * 生命周期
      */
-    public String sellingCycle;
+    public Selling.SC sellingCycle;
 
 
     public float getPs_cal() {
@@ -262,12 +267,6 @@ public class AnalyzeDTO implements Serializable {
             }
         }
         return null;
-    }
-
-    public String cyclename() {
-        if(StringUtils.isBlank(this.sellingCycle))
-            return "";
-        return Selling.SC.valueOf(this.sellingCycle).label();
     }
 
     /**

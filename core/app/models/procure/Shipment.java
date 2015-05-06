@@ -2,8 +2,8 @@ package models.procure;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.*;
 import helper.Currency;
+import helper.*;
 import models.ElcukConfig;
 import models.ElcukRecord;
 import models.User;
@@ -13,30 +13,26 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
 import models.product.Whouse;
-import models.view.dto.ProductDTO;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.F;
-import play.libs.Mail;
 import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-
-import helper.Webs;
-
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -356,6 +352,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @Lob
     public String memo = " ";
+
+    /**
+     * 发票编号
+     */
+    @Unique
+    @Column(unique = true)
+    @Expose
+    public String invoiceNo;
 
     /**
      * 多个traceno
@@ -1252,6 +1256,38 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new Shipment(planBeginDate, type, whouse).save();
     }
 
+    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<String, Integer>();
+
+    /**
+     * 初始化不同运输方式的标准运输量对应关系
+     */
+    static {
+        MINIMUM_TRAFFICMAP.put("AMAZON_DE_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_DE_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_UK_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_UK_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_US_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_US_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_IT_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_IT_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_FR_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_FR_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_JP_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_JP_AIR", 700);
+
+        MINIMUM_TRAFFICMAP.put("AMAZON_CA_SEA", 500);
+        MINIMUM_TRAFFICMAP.put("AMAZON_CA_AIR", 700);
+    }
+
+    public String minimumTrafficMapKey() {
+        return String.format("%s_%s", this.whouse.account.type.name(), this.type.name());
+    }
+
     /**
      * 获得不同运输方式的标准运输量
      *
@@ -1259,7 +1295,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float minimumTraffic() {
         //海运和空运暂时的最小运输量是500 而快递是不能超过500
-        return 500;
+        String key = this.minimumTrafficMapKey();
+        if(MINIMUM_TRAFFICMAP.containsKey(key)) {
+            return MINIMUM_TRAFFICMAP.get(key);
+        } else {
+            return 500;
+        }
     }
 
     public void sendMsgMail(Date planArrivDate, String username) {
@@ -1365,4 +1406,81 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return str;
     }
 
+    /**
+     * 生成 InvoiceNO
+     * <p/>
+     * 发票编号Invoice NO.规则:
+     * 1.快递: E + 当前日期年月日＋该运输单的CenterID+“-”+“两位数序号”(如01,02,03等依次变)
+     * 2.空运: A + 当前日期年月日＋该运输单的CenterID+“-”+“两位数序号”(如01,02,03等依次变)
+     * 3.海运: S + 当前日期年月日＋该运输单的CenterID+“-”+“两位数序号”(如01,02,03等依次变)
+     *
+     * @return
+     */
+    public String buildInvoiceNO() {
+        if(StringUtils.isNotBlank(this.invoiceNo)) return this.invoiceNo;
+
+        //特性: 相同运输方式 + 相同日期 + 相同 CenterID 共享两位数序号(才需要递增 01 02 03...，否则的话需要从 01 开始)
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        String now = formatter.format(DateTime.now().toDate());
+        String maxInvoiceNo = this.fetchMaxInvoiceNoForDB();
+        Integer invoiceNo = 0;
+        if(maxInvoiceNo != null) {
+            invoiceNo = NumberUtils.toInt(StringUtils.substring(maxInvoiceNo, maxInvoiceNo.length() - 2));
+        }
+        ++invoiceNo;
+        this.invoiceNo = String.format("%s%s%s-%s", this.invoiceNOTitle(), now, this.fetchCenterId(),
+                invoiceNo < 10 ? ("0" + invoiceNo) : invoiceNo);
+        this.save();
+        return this.invoiceNo;
+    }
+
+    public String fetchMaxInvoiceNoForDB() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        String now = formatter.format(DateTime.now().toDate());
+        List<Shipment> shipments = Shipment.find("invoiceNo like ?",
+                String.format("%s%s%s%s", this.invoiceNOTitle(), now, this.fetchCenterId(), "%")).fetch();
+        if(shipments == null || shipments.size() == 0) return null;
+
+        //开始排序 从小到大
+        Collections.sort(shipments, new Comparator<Shipment>() {
+            @Override
+            public int compare(Shipment o1, Shipment o2) {
+                Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
+                Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
+                return invoiceNo1.compareTo(invoiceNo2);
+            }
+        });
+        return shipments.get(shipments.size() - 1).invoiceNo;
+    }
+
+    public String invoiceNOTitle() {
+        switch(this.type) {
+            case EXPRESS:
+                return "E";
+            case AIR:
+                return "A";
+            case SEA:
+                return "S";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 获取运输单的 CenterId
+     * <p/>
+     * 一个运输单里 CenterID 都是一样的
+     *
+     * @return
+     */
+    public String fetchCenterId() {
+        for(ShipItem shipItem : this.items) {
+            if(shipItem.unit != null) {
+                if(shipItem.unit.fba != null) {
+                    return shipItem.unit.fba.centerId.toUpperCase();
+                }
+            }
+        }
+        return null;
+    }
 }

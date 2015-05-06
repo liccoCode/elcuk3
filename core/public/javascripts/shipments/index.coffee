@@ -4,5 +4,5 @@ $ ->
   )
 
   $(':checkbox[class=checkbox_all]').change (e) ->
-    o = $(@)
-    o.parents('table').find(':checkbox').not(':first').prop("checked", o.prop('checked'))
+    $ck = $(@)
+    $ck.parents('table').find(':checkbox').not(':first').prop("checked", $ck.prop('checked'))

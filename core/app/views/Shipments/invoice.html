@@ -64,10 +64,10 @@
     </td>
   </tr>
     #{if country != 'US'}
-        #{render 'Shipments/_europe.html',address: address, country: country/}
+        #{render 'Shipments/_europe.html',address: address, country: country, invoiceNo: invoiceNo/}
     #{/if}
     #{else }
-        #{render 'Shipments/_us.html', address: address/}
+        #{render 'Shipments/_us.html', address: address, invoiceNo: invoiceNo/}
     #{/else}
   <tr>
     <td rowspan="2">Transport By ${firstUnit.shipType.name()}</td>

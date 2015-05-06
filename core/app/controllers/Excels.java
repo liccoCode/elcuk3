@@ -7,15 +7,14 @@ import helper.Currency;
 import helper.Webs;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.product.Category;
 import models.product.Product;
-import models.view.dto.AnalyzeDTO;
-import models.view.dto.DeliveryExcel;
-import models.view.dto.SaleReportDTO;
-import models.view.dto.ShipmentWeight;
+import models.view.Ret;
+import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.LossRate;
 import models.view.report.Profit;
@@ -26,6 +25,7 @@ import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.jobs.Job;
 import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
@@ -325,6 +325,38 @@ public class Excels extends Controller {
             render(sales, from, to);
         } else {
             renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    public static void skuMonthlyDailySalesReports(final Date from, final Date to, final M market,
+                                                   final String category, final String val) {
+        try {
+            final int begin = new DateTime(from).getMonthOfYear();
+            final int end = new DateTime(to).getMonthOfYear();
+            if(from.getTime() > to.getTime() || begin > end) renderJSON(new Ret("开始时间必须小于结束时间且必须在同一年份内!"));
+
+            String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
+            List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
+            if(dtos == null || dtos.size() == 0) {
+                new Job() {
+                    @Override
+                    public void doJob() throws Exception {
+                        OrderItem.skuMonthlyDailySales(from, to, market, category, val);
+                    }
+                }.now();
+                renderText("正在处理中...请稍后几分钟再来查看...");
+            } else {
+                List<Integer> months = new ArrayList<Integer>();
+                for(int i = begin; i <= end; i++) months.add(i);
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("SKU月度日均销量报表%s.xls", formatter.format(DateTime.now().toDate())));
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                render(dtos, months);
+            }
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.S(e)));
         }
     }
 }

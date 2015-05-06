@@ -154,12 +154,12 @@ $ ->
 
   $('#all_check').click (e) ->
     $("#shipitemTable [type='checkbox']").each(->
-      $(@).attr('checked', !$(@).attr('checked'))
+      $(@).prop('checked', !$(@).prop('checked'))
     )
 
   $(':checkbox[class=checkbox_all]').change (e) ->
-    o = $(@)
-    o.parents('form').find(':checkbox[id*=checkbox]').prop("checked", o.prop('checked'))
+    $o = $(@)
+    $o.parents('form').find(':checkbox[id*=checkbox]').prop("checked", $o.prop('checked'))
 
   $('#shipmentInfoBtn').click ->
     $("#fileManagerment").fadeOut()

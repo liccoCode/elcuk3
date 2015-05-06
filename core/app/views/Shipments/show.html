@@ -70,8 +70,9 @@
     </div>
   </div>
 
-  <!-- 请款信息 -->
-#{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators/}
+<!-- 请款信息 -->
+#{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type ==
+models.procure.Shipment.T.EXPRESS/}
 
 </div>
 
