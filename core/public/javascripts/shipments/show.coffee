@@ -4,13 +4,21 @@ $ ->
     mask = $('#container')
     mask.mask('更新 Comment')
     $.post('/shipments/comment',
-      {id: $("input[name=shipid]").val(), cmt: $("#ship_memo").val().trim(), track: $("[name=ship\\.trackNo]").val()},
-    (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        alert('更新成功.')
-      mask.unmask()
+      {
+        id: $("input[name=shipid]").val(),
+        cmt: $("#ship_memo").val().trim(),
+        track: $("[name=ship\\.trackNo]").val(),
+        jobNumber: $("#jobNumber").val(),
+        totalWeightShipment: $("#totalWeightShipment").val(),
+        totalVolumeShipment: $("#totalVolumeShipment").val(),
+        totalStockShipment: $("#totalStockShipment").val()
+      },
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('更新成功.')
+        mask.unmask()
     )
 
   fidCallBack = () ->
@@ -143,3 +151,20 @@ $ ->
       finally
         LoadMask.unmask()
     )
+
+  $('#all_check').click (e) ->
+    $("#shipitemTable [type='checkbox']").each(->
+      $(@).prop('checked', !$(@).prop('checked'))
+    )
+
+  $(':checkbox[class=checkbox_all]').change (e) ->
+    $o = $(@)
+    $o.parents('form').find(':checkbox[id*=checkbox]').prop("checked", $o.prop('checked'))
+
+  $('#shipmentInfoBtn').click ->
+    $("#fileManagerment").fadeOut()
+    $("#shipmentInfo").fadeIn()
+
+  $('#fileManagermentBtn').click ->
+    $("#fileManagerment").fadeIn()
+    $("#shipmentInfo").fadeOut()
