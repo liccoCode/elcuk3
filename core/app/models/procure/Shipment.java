@@ -319,6 +319,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public Float totalVolumeShipment;
 
     /**
+     * 货代计费方式
+     */
+    @Expose
+    @Column
+    public String shipmentTpye;
+
+    /**
      * 总托盘数(货代)
      */
     @Expose
