@@ -13,13 +13,13 @@ $ ->
             $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
             $("#unit_price").val(r.price)
             $("#unit_period").show()
-            $("#unit_period").val(r.period+" 天")
+            $("#unit_period").text('（生产周期：' + r.period+' 天）')
           LoadMask.unmask()
         )
       # 恢复默认
     else
       $("#unit_currency option:contains('CNY')").prop('selected', true)
-      $("#unit_price").val('')
+      $("#unit_price").text('')
       $("#unit_period").hide()
 
   $('#box_num').change (e) ->
