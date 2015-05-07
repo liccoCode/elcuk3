@@ -134,12 +134,12 @@
     <tr>
       <th>始发地</th>
       <td>${ship.source}</td>
-      <th>代货计费方式</th>
+      <th>货代计费方式</th>
       <td>
-        <select>
+        <select name="ship.shipmentTpye">
           <option value="">请选择</option>
-          <option value="1">重量</option>
-          <option value="2">体积</option>
+          <option value="weight" #{if 'weight'==ship.shipmentTpye}selected='selected'#{/if}>重量</option>
+          <option value="volume" #{if 'volume'==ship.shipmentTpye}selected='selected'#{/if}>体积</option>
         </select>
       </td>
     </tr>

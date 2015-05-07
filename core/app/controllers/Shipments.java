@@ -182,6 +182,10 @@ public class Shipments extends Controller {
         dbship.dates.planBeginDate = ship.dates.planBeginDate;
         dbship.internationExpress = ship.internationExpress;
         dbship.jobNumber = ship.jobNumber;
+        dbship.totalWeightShipment = ship.totalWeightShipment;
+        dbship.totalVolumeShipment = ship.totalVolumeShipment;
+        dbship.shipmentTpye = ship.shipmentTpye;
+        dbship.totalStockShipment = ship.totalStockShipment;
         dbship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         checkAuthenticity();
         validation.valid(dbship);
