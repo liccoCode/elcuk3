@@ -138,7 +138,9 @@ $ ->
 
 
   paintProcureUnitInTimeline = (type, val)->
-    LoadMask.mask()
+    $("#tl").show()
+    $time_line_home = $("#tl")
+    LoadMask.mask($time_line_home)
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
     (r) ->
       try
@@ -149,7 +151,7 @@ $ ->
           eventSource.clear()
           eventSource.loadJSON(r, '/')
       finally
-        LoadMask.unmask()
+        LoadMask.unmask($time_line_home)
     )
 
   $('#all_check').click (e) ->
@@ -168,3 +170,5 @@ $ ->
   $('#fileManagermentBtn').click ->
     $("#fileManagerment").fadeIn()
     $("#shipmentInfo").fadeOut()
+
+  $("#tl").hide()
