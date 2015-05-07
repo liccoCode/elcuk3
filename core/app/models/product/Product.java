@@ -1012,7 +1012,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public ProcureUnit recentlyUnit() {
-        ProcureUnit procureUnit = ProcureUnit.find("sku=? ORDER BY createDate", this.sku).first();
+        ProcureUnit procureUnit = ProcureUnit.find("sku=? and stage!=? ORDER BY createDate desc", this.sku,
+                ProcureUnit.STAGE.PLAN).first();
         if(procureUnit == null) return new ProcureUnit();
         return procureUnit;
     }
