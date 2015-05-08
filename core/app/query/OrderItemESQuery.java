@@ -8,10 +8,15 @@ import helper.Promises;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.OrFilterBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.range.RangeFacetBuilder;
@@ -410,7 +415,7 @@ public class OrderItemESQuery {
     public JSONObject skuSales(Date from, Date to, List<String> params, String type) {
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
         for(M m : Promises.MARKETS) {
-            search.aggregation(baseSalesAggregation(m, from, to, params, type));
+            search.aggregation(skuSalesBaseSalesAggregation(m, from, to, params, type));
         }
         Logger.info("countSkuSales:::" + search.toString());
         JSONObject result = ES.search("elcuk2", "orderitem", search);
@@ -418,7 +423,8 @@ public class OrderItemESQuery {
         return result.getJSONObject("aggregations");
     }
 
-    public AggregationBuilder baseSalesAggregation(M market, Date from, Date to, List<String> params, String type) {
+    public AggregationBuilder skuSalesBaseSalesAggregation(M market, Date from, Date to, List<String> params,
+                                                           String type) {
         FilterAggregationBuilder aggregation = AggregationBuilders.filter(market.name());
 
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
@@ -439,5 +445,50 @@ public class OrderItemESQuery {
         aggregation.filter(filter);
         aggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
         return aggregation;
+    }
+
+    /**
+     * SKU 月度总销量
+     *
+     * @return
+     */
+    public JSONObject skusMonthlyDailySale(Date from, Date to, List<String> skus, List<M> markets) {
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+        for(M m : markets) {
+            FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name());
+            BoolFilterBuilder filter = FilterBuilders.boolFilter()
+                    //市场
+                    .must(FilterBuilders.termFilter("market", m.name().toLowerCase()))
+                            //日期间隔
+                    .must(FilterBuilders.rangeFilter("date")
+                            .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
+                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
+                    ).mustNot(FilterBuilders.termFilter("state", "cancel"));
+            marketAggregation.filter(filter);
+            for(String sku : skus) {
+                if(StringUtils.isBlank(sku)) continue;
+                //SKU
+                String prettySku = ES.parseEsString(sku).toLowerCase();
+                FilterAggregationBuilder skuAggregation = AggregationBuilders.filter(prettySku);
+                skuAggregation.filter(FilterBuilders.termFilter("sku", prettySku));
+
+                //时间间隔为每个月
+                DateHistogramBuilder monthAvgAggregation = AggregationBuilders.dateHistogram("monthly_avg")
+                        .field("date")
+                        .preZone(Dates.timeZone(m).toString())
+                        .interval(DateHistogram.Interval.MONTH);
+
+                //求和 quantity 的数量
+                monthAvgAggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
+                skuAggregation.subAggregation(monthAvgAggregation);
+                marketAggregation.subAggregation(skuAggregation);
+            }
+            search.aggregation(marketAggregation);
+        }
+        Logger.info("SkusMonthlyDailySale:::" + search.toString());
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        if(result == null) throw new FastRuntimeException("ES连接异常!");
+        return result.getJSONObject("aggregations");
     }
 }
