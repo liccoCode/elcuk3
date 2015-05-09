@@ -107,6 +107,7 @@ public class CheckTasks extends Controller {
 
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -179,6 +180,7 @@ public class CheckTasks extends Controller {
             check = old;
             render("CheckTasks/show.html", check);
         }
+        check.arryParamSetUPForQtInfo(CheckTask.FLAG.ARRAY_TO_STR);
         old.update(check);
         flash.success("更新成功");
         redirect("/CheckTasks/show/" + id);
@@ -199,6 +201,7 @@ public class CheckTasks extends Controller {
             check = old;
             render("CheckTasks/show.html", check);
         }
+        check.arryParamSetUPForQtInfo(CheckTask.FLAG.ARRAY_TO_STR);
         old.fullUpdate(check, Secure.Security.connected());
         flash.success("更新成功");
         show(id);
