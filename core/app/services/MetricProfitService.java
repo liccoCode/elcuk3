@@ -309,7 +309,7 @@ public class MetricProfitService {
         TermsFilterBuilder orfilter = FilterBuilders.termsFilter("ship_type", "sea", "express", "air");
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .postFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
-                        this.parseEsSku().toLowerCase()))).size(100000)
+                        this.parseEsSku().toLowerCase())).must(this.filterbuilder(false))).size(100000)
                 .facet(FacetBuilders.termsStatsFacet("units")
                         .keyField("ship_type")
                         .valueField("cost_in_usd")
