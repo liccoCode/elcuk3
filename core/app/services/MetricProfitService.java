@@ -186,8 +186,8 @@ public class MetricProfitService {
                     + " and qty!='' and currency='CNY' ";
             List<Map<String, Object>> rows = DBUtils.rows(sql);
             if(rows != null && rows.size() > 0) {
-                Float price = (Float) rows.get(0).get("price");
-                avgprice = Currency.valueOf("CNY").toUSD(price);
+                Double price = (Double) rows.get(0).get("price");
+                avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
             }
 
             if(avgprice <= 0) {
@@ -196,8 +196,8 @@ public class MetricProfitService {
                         + " and qty!='' and currency='USD' ";
                 rows = DBUtils.rows(sql);
                 if(rows != null && rows.size() > 0) {
-                    Float price = (Float) rows.get(0).get("price");
-                    avgprice = price;
+                    Double price = (Double) rows.get(0).get("price");
+                    avgprice = price.floatValue();
                 }
             }
         }
