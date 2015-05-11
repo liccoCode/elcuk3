@@ -67,6 +67,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.dates.beginDate = shipment.dates.beginDate;
         this.dates.planBeginDate = shipment.dates.planBeginDate;
         this.dates.planArrivDate = shipment.dates.planArrivDate;
+        this.dates.planArrivDateForCountRate = shipment.dates.planArrivDate;
         // FBA 不做处理
         this.type = shipment.type;
         this.whouse = shipment.whouse;
@@ -407,6 +408,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         plusDay = shipDay();
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
+        this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
         return true;
     }
 
@@ -1419,7 +1421,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         //特性: 相同运输方式 + 相同日期 + 相同 CenterID 共享两位数序号(才需要递增 01 02 03...，否则的话需要从 01 开始)
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        String now = formatter.format(DateTime.now().toDate());
+        String now = formatter.format(this.dates.planBeginDate);
         String maxInvoiceNo = this.fetchMaxInvoiceNoForDB();
         Integer invoiceNo = 0;
         if(maxInvoiceNo != null) {
@@ -1434,7 +1436,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public String fetchMaxInvoiceNoForDB() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        String now = formatter.format(DateTime.now().toDate());
+        String now = formatter.format(this.dates.planBeginDate);
         List<Shipment> shipments = Shipment.find("invoiceNo like ?",
                 String.format("%s%s%s%s", this.invoiceNOTitle(), now, this.fetchCenterId(), "%")).fetch();
         if(shipments == null || shipments.size() == 0) return null;
