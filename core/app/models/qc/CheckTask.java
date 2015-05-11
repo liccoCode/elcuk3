@@ -699,7 +699,7 @@ public class CheckTask extends Model {
         if(newCt.result != null) this.result = newCt.result;
         if(newCt.isship != null) this.isship = newCt.isship;
         if(newCt.checknote != null) this.checknote = newCt.checknote;
-        if(newCt.standBoxQctInfos != null) this.standBoxQctInfos = newCt.standBoxQctInfos;
+        if(newCt.standBoxQctInfo != null) this.standBoxQctInfo = newCt.standBoxQctInfo;
         if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
         this.units.save();
         this.save();
