@@ -177,49 +177,28 @@ public class MetricProfitService {
      * 平均采购价
      */
     public Float esProcurePrice() {
-        /*cashpledge 采购的预付款, 一般为 30%
-          procurement 采购货物的货款
-        */
-        TermsFilterBuilder orfilter = FilterBuilders.termsFilter("fee_type", "cashpledge", "procurement");
-
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                        .field("cost_in_usd")
-                        .facetFilter(this.filterbuilder(false).must(orfilter))
-                ).size(0);
-        /**
-         * 采购总金额（美元)
-         */
-        float fee = getEsTermsTotal(search, "procurepayunit");
-
-        search = new SearchSourceBuilder()
-                .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                        .field("quantity")
-                        .facetFilter(this.filterbuilder(false).must(orfilter))
-                ).size(0);
-
-        /**
-         * 采购总数量
-         */
-        float qty = getEsTermsTotal(search, "procurepayunit");
         float avgprice = 0f;
-        if(qty != 0f) {
-            avgprice = fee / qty;
-        }
 
         //如果运价为0，则直接从采购计划中获取
         if(avgprice <= 0) {
-            String sql = "select price,currency From ProcureUnit "
+            String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
                     + " where sku='" + this.sku + "' "
-                    + " order by createDate desc limit 1 ";
+                    + " and qty!='' and currency='CNY' ";
             List<Map<String, Object>> rows = DBUtils.rows(sql);
             if(rows != null && rows.size() > 0) {
                 Float price = (Float) rows.get(0).get("price");
-                String currency = (String) rows.get(0).get("currency");
-                if(currency == null || currency.equals("")) currency = "CNY";
-                avgprice = Currency.valueOf(currency).toUSD(price);
+                avgprice = Currency.valueOf("CNY").toUSD(price);
+            }
+
+            if(avgprice <= 0) {
+                sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
+                        + " where sku='" + this.sku + "' "
+                        + " and qty!='' and currency='USD' ";
+                rows = DBUtils.rows(sql);
+                if(rows != null && rows.size() > 0) {
+                    Float price = (Float) rows.get(0).get("price");
+                    avgprice = price;
+                }
             }
         }
         return avgprice;
