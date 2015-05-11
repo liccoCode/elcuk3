@@ -201,8 +201,14 @@ public class Shipments extends Controller {
         dbship.dates.planArrivDate = ship.dates.planArrivDate;
 
         //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
-        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state)) {
-            dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state) &&
+                dbship.dates.planArrivDateForCountRate != ship.dates.planArrivDateForCountRate) {
+            if(StringUtils.isBlank(ship.reason)) {
+                Validation.addError("", "修改计算准时率预计到库时间必须填写原因!");
+            } else {
+                dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
+                dbship.reason = ship.reason;
+            }
         }
         dbship.updateShipment();
 
