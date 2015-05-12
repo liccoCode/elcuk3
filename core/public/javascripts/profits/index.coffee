@@ -19,7 +19,6 @@ $ ->
       ]
     )
 
-
   # Form 搜索功能
   $(".search_form").on("click", ".btn:contains(Excel)", (e) ->
     e.preventDefault()
