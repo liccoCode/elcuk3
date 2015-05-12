@@ -365,7 +365,7 @@ public class CheckTask extends Model {
     public String standBoxQctInfo;
 
     @Transient
-    public List<CheckTaskDTO> standBoxQctInfos ;
+    public List<CheckTaskDTO> standBoxQctInfos = new ArrayList<CheckTaskDTO>();
 
     /**
      * 尾箱尾箱质检信息
@@ -374,7 +374,7 @@ public class CheckTask extends Model {
     public String tailBoxQctInfo;
 
     @Transient
-    public List<CheckTaskDTO> tailBoxQctInfos;
+    public List<CheckTaskDTO> tailBoxQctInfos = new ArrayList<CheckTaskDTO>();
 
     public enum FLAG {
         ARRAY_TO_STR,
