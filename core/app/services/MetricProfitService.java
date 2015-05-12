@@ -184,29 +184,40 @@ public class MetricProfitService {
         if(avgprice <= 0) {
             Selling sell = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).first();
             if(sell != null) {
-                String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                        + " where selling_sellingid='" + sell.sellingId + "' "
-                        + " and qty!='' and currency='CNY' ";
-                List<Map<String, Object>> rows = DBUtils.rows(sql);
-                if(rows != null && rows.size() > 0) {
-                    Double price = (Double) rows.get(0).get("price");
-                    avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
-                }
-
+                avgprice = getPrice("selling_sellingid", sell.sellingId, "CNY");
                 if(avgprice <= 0) {
-                    sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                            + " where selling_sellingid='" + sell.sellingId + "' "
-                            + " and qty!='' and currency='USD' ";
-                    rows = DBUtils.rows(sql);
-                    if(rows != null && rows.size() > 0) {
-                        Double price = (Double) rows.get(0).get("price");
-                        avgprice = price.floatValue();
-                    }
+                    avgprice = getPrice("selling_sellingid", sell.sellingId, "USD");
                 }
+            }
+            if(avgprice <= 0) {
+                avgprice = getPrice("product_sku", this.sku, "CNY");
+            }
+            if(avgprice <= 0) {
+                avgprice = getPrice("product_sku", this.sku, "USD");
             }
         }
         return avgprice;
     }
+
+
+    private float getPrice(String fieldName, String fieldValue, String currency) {
+        float avgprice = 0;
+        String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
+                + " where " + fieldName + "='" + fieldValue + "' "
+                + " and qty!='' and currency='" + currency + "' ";
+        List<Map<String, Object>> rows = DBUtils.rows(sql);
+        if(rows != null && rows.size() > 0) {
+            Double price = (Double) rows.get(0).get("price");
+            if(price != null) {
+                if(currency.equals("CNY"))
+                    avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
+                else
+                    avgprice = price.floatValue();
+            }
+        }
+        return avgprice;
+    }
+
 
     /**
      * 平均运价
