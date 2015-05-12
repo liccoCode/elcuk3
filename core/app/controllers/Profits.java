@@ -127,12 +127,7 @@ public class Profits extends Controller {
             if(StringUtils.isBlank(cache_str) || dtos == null) {
                 renderJSON(new Ret("Analyze后台事务正在执行中,请稍候..."));
             }
-
-            List<Category> categorys = Category.all().fetch();
-            for(Category cate : categorys) {
-                p.category = cate.categoryId;
-                new ProfitInventorySearch(p).now();
-            }
+            new ProfitInventorySearch(p).now();
             renderJSON(new Ret("正在计算库存成本!"));
         }
     }

@@ -2,6 +2,7 @@ package jobs.analyze;
 
 
 import models.procure.CooperItem;
+import models.product.Category;
 import models.view.post.ProfitPost;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +24,6 @@ import models.ProfitInventory;
 @On("0 20 0,7,15 * * ?")
 public class ProfitInventorySearch extends Job {
 
-    private String RUNNING = "profitinventorysearch_running";
     private ProfitPost post;
 
     public ProfitInventorySearch(ProfitPost p) {
@@ -32,15 +32,21 @@ public class ProfitInventorySearch extends Job {
 
     @Override
     public void doJob() {
+        List<Category> categorys = Category.all().fetch();
+        for(Category cate : categorys) {
+            report(cate.categoryId);
+        }
+    }
+
+
+    public void report(String categoryid) {
+        post.category = categoryid;
         String skukey = "";
         String marketkey = "";
         String categorykey = "";
         if(post.sku != null) skukey = post.sku;
         if(post.pmarket != null) marketkey = post.pmarket;
         if(post.category != null) categorykey = post.category.toLowerCase();
-        String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey, marketkey);
-        if(isRnning(postkey)) return;
-        Cache.add(postkey + RUNNING, postkey + RUNNING);
         List<Profit> profits = new ArrayList<Profit>();
         //从ES查找SKU的利润
         profits = post.Inventory();
@@ -63,17 +69,5 @@ public class ProfitInventorySearch extends Job {
             }
             inv.save();
         }
-
-        Cache.add(postkey, profits, "2h");
-        Cache.delete(postkey + RUNNING);
-    }
-
-    /**
-     * 确保同一时间只有一个 analyzes 正在计算
-     *
-     * @return
-     */
-    public boolean isRnning(String postkey) {
-        return StringUtils.isNotBlank(Cache.get(postkey + RUNNING, String.class));
     }
 }
