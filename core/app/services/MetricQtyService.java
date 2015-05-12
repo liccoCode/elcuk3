@@ -39,8 +39,8 @@ public class MetricQtyService {
      * 计算利润对象
      */
     public Profit calProfit(Profit profit) {
-        Selling sell = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).first();
-        if(sell != null) {
+        List<Selling> sells = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).fetch();
+        for (Selling sell:sells){
             String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
             // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
             List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
@@ -50,7 +50,10 @@ public class MetricQtyService {
                         profit.workingqty = dto.plan + dto.working + dto.worked;
                         profit.wayqty = dto.way;
                         profit.inboundqty = dto.inbound + dto.qty;
-                        break;
+                        if (profit.workingqty!=0 ||  profit.wayqty!=0 || profit.inboundqty!=0){
+                            return profit;
+                        }
+
                     }
                 }
             }
