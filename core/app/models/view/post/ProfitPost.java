@@ -270,17 +270,11 @@ public class ProfitPost extends Post<Profit> {
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
             for(Product pro : cat.products) {
-
                 Logger.info("inventoryprofit:::" + pro.sku);
-
                 Profit inventoryprofit = inventoryProfit(begin, end, skumarket, pro.sku, sellingId);
                 if(inventoryprofit.workingqty != 0 || inventoryprofit.wayqty != 0 || inventoryprofit.inboundqty != 0) {
                     Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
-                    if(profit.totalfee != 0 || profit.amazonfee != 0
-                            || profit.fbafee != 0 || profit.quantity != 0
-                            || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
                         profitlist.add(profit);
-                    }
                 }
             }
         } else if(!StringUtils.isBlank(sku)) {
