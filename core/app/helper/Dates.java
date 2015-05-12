@@ -137,6 +137,8 @@ public class Dates {
                 return DateTimeZone.forOffsetHours(1);
             case AMAZON_US:
                 return DateTimeZone.forOffsetHours(-7);
+            case AMAZON_CA:
+                 return DateTimeZone.forOffsetHours(-8);
             default:
                 return Dates.CN;
         }

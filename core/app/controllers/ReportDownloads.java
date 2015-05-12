@@ -30,7 +30,6 @@ public class ReportDownloads extends Controller {
         record.downloadcount += 1;
         record.save();
         File file = new File(Constant.REPORT_PATH + "/" + record.filepath);
-        file.deleteOnExit();
         renderBinary(file);
     }
 

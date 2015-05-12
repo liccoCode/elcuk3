@@ -381,6 +381,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 变更 计算准时率预计到库时间(用于计算准时率的到库时间)的原因
+     */
+    @Lob
+    public String reason = " ";
+
+    /**
      * Shipment 的检查
      */
     public void validate() {

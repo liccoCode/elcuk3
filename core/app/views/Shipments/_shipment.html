@@ -36,11 +36,18 @@
     </tr>
 
     <tr>
-      <th>计算准时率预计到库时间</th>
+      <th>约定到货时间</th>
       <td colspan="4">
-        <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates.planArrivDateForCountRate
-        .date()}" rel="popover" content="用于计算准时到货率" placement="right">
+        <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates.planArrivDateForCountRate.date()}" rel="popover" content="用于计算准时到货率" placement="right">
       </td>
+
+      <!--<th>变更原因</th>
+      TODO 需求临时变更,暂时隐藏原因填写
+      <td>
+        <textarea rows="2" name="ship.reason" class="span8" rel="popover" content="变更“约定到货时间”时必填"
+                  placement="right">${ship.reason}</textarea>
+      </td>
+      -->
     </tr>
 
     <tr>

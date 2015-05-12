@@ -2,14 +2,15 @@ package services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import helper.*;
 import helper.Currency;
+import helper.*;
 import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.joda.time.DateTime;
@@ -20,7 +21,6 @@ import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.vo.OrderrVO;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 
 import java.util.*;
 
@@ -177,49 +177,28 @@ public class MetricProfitService {
      * 平均采购价
      */
     public Float esProcurePrice() {
-        /*cashpledge 采购的预付款, 一般为 30%
-          procurement 采购货物的货款
-        */
-        TermsFilterBuilder orfilter = FilterBuilders.termsFilter("fee_type", "cashpledge", "procurement");
-
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                        .field("cost_in_usd")
-                        .facetFilter(this.filterbuilder(false).must(orfilter))
-                ).size(0);
-        /**
-         * 采购总金额（美元)
-         */
-        float fee = getEsTermsTotal(search, "procurepayunit");
-
-        search = new SearchSourceBuilder()
-                .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                        .field("quantity")
-                        .facetFilter(this.filterbuilder(false).must(orfilter))
-                ).size(0);
-
-        /**
-         * 采购总数量
-         */
-        float qty = getEsTermsTotal(search, "procurepayunit");
         float avgprice = 0f;
-        if(qty != 0f) {
-            avgprice = fee / qty;
-        }
 
         //如果运价为0，则直接从采购计划中获取
         if(avgprice <= 0) {
-            String sql = "select price,currency From ProcureUnit "
+            String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
                     + " where sku='" + this.sku + "' "
-                    + " order by createDate desc limit 1 ";
+                    + " and qty!='' and currency='CNY' ";
             List<Map<String, Object>> rows = DBUtils.rows(sql);
             if(rows != null && rows.size() > 0) {
-                Float price = (Float) rows.get(0).get("price");
-                String currency = (String) rows.get(0).get("currency");
-                if(currency == null || currency.equals("")) currency = "CNY";
-                avgprice = Currency.valueOf(currency).toUSD(price);
+                Double price = (Double) rows.get(0).get("price");
+                avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
+            }
+
+            if(avgprice <= 0) {
+                sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
+                        + " where sku='" + this.sku + "' "
+                        + " and qty!='' and currency='USD' ";
+                rows = DBUtils.rows(sql);
+                if(rows != null && rows.size() > 0) {
+                    Double price = (Double) rows.get(0).get("price");
+                    avgprice = price.floatValue();
+                }
             }
         }
         return avgprice;
@@ -309,7 +288,7 @@ public class MetricProfitService {
         TermsFilterBuilder orfilter = FilterBuilders.termsFilter("ship_type", "sea", "express", "air");
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .postFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
-                        this.parseEsSku().toLowerCase()))).size(100000)
+                        this.parseEsSku().toLowerCase())).must(this.filterbuilder(false))).size(100000)
                 .facet(FacetBuilders.termsStatsFacet("units")
                         .keyField("ship_type")
                         .valueField("cost_in_usd")
@@ -811,7 +790,8 @@ public class MetricProfitService {
          * 求平均值
          */
         if(caltype.equals("avg")) {
-            builder.subAggregation(AggregationBuilders.avg("fieldvalue").field(fieldname));
+            builder.subAggregation(
+                    AggregationBuilders.avg("fieldvalue").script("doc['cost_in_usd'].value/doc['quantity'].value"));
         }
         /**
          * 求和
