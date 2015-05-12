@@ -2,14 +2,15 @@ package services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import helper.*;
 import helper.Currency;
+import helper.*;
 import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.joda.time.DateTime;
@@ -20,7 +21,6 @@ import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.vo.OrderrVO;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 
 import java.util.*;
 
@@ -811,7 +811,8 @@ public class MetricProfitService {
          * 求平均值
          */
         if(caltype.equals("avg")) {
-            builder.subAggregation(AggregationBuilders.avg("fieldvalue").field(fieldname));
+            builder.subAggregation(
+                    AggregationBuilders.avg("fieldvalue").script("doc['cost_in_usd'].value/doc['quantity'].value"));
         }
         /**
          * 求和

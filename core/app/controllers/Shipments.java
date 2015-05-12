@@ -206,9 +206,10 @@ public class Shipments extends Controller {
             if(StringUtils.isBlank(ship.reason)) {
                 Validation.addError("", "修改计算准时率预计到库时间必须填写原因!");
             } else {
-                dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
                 dbship.reason = ship.reason;
             }
+            //TODO 需求临时变更,暂时取消对原因的不为空校验,后期如果需求明确后将其挪到 209 行上方即可。
+            dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
         }
         dbship.updateShipment();
 
