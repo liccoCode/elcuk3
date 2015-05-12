@@ -125,7 +125,7 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 每个市场遍历
          */
-        M[] marray = getMarket();
+        M[] marray = models.market.M.values();
         for(M m : marray) {
             profitlist = searchInventoryList(profitlist, m);
         }
