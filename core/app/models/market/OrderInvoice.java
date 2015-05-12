@@ -284,7 +284,7 @@ public class OrderInvoice extends GenericModel {
         } else if(m == M.AMAZON_FR) {
             format.title = "Facture";
             format.date = "Data";
-            format.frominfo1 = "UGGLE ELECTRONIC COMMERCE CO.,LTD";
+            format.frominfo1 = "TUGGLE ELECTRONIC COMMERCE CO.,LTD";
             format.frominfo2 = "Unit A5, 9/F Silvercorp Int'l ";
             format.frominfo3 = "Tower 707-713 Nathan Rd";
             format.frominfo4 = "Mongkok, KL ";
