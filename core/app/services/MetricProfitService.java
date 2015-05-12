@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import helper.Currency;
 import models.market.M;
+import models.market.Selling;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
@@ -181,23 +182,26 @@ public class MetricProfitService {
 
         //如果运价为0，则直接从采购计划中获取
         if(avgprice <= 0) {
-            String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                    + " where sku='" + this.sku + "' "
-                    + " and qty!='' and currency='CNY' ";
-            List<Map<String, Object>> rows = DBUtils.rows(sql);
-            if(rows != null && rows.size() > 0) {
-                Double price = (Double) rows.get(0).get("price");
-                avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
-            }
-
-            if(avgprice <= 0) {
-                sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                        + " where sku='" + this.sku + "' "
-                        + " and qty!='' and currency='USD' ";
-                rows = DBUtils.rows(sql);
+            Selling sell = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).first();
+            if(sell != null) {
+                String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
+                        + " where selling_sellingid='" + sell.sellingId + "' "
+                        + " and qty!='' and currency='CNY' ";
+                List<Map<String, Object>> rows = DBUtils.rows(sql);
                 if(rows != null && rows.size() > 0) {
                     Double price = (Double) rows.get(0).get("price");
-                    avgprice = price.floatValue();
+                    avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
+                }
+
+                if(avgprice <= 0) {
+                    sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
+                            + " where selling_sellingid='" + sell.sellingId + "' "
+                            + " and qty!='' and currency='USD' ";
+                    rows = DBUtils.rows(sql);
+                    if(rows != null && rows.size() > 0) {
+                        Double price = (Double) rows.get(0).get("price");
+                        avgprice = price.floatValue();
+                    }
                 }
             }
         }
