@@ -57,7 +57,7 @@ public class ProfitInventorySearch extends Job {
             inv.workingfee = p.workingfee;
             inv.wayfee = p.wayfee;
             inv.inboundfee = p.inboundfee;
-            List<CooperItem> item = CooperItem.find("sky=?", inv.sku).fetch();
+            List<CooperItem> item = CooperItem.find("sku=?", inv.sku).fetch();
             if(item != null && item.size() > 0) {
                 inv.cooperator = item.get(0).cooperator.name;
             }
