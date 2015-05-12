@@ -108,7 +108,6 @@ public class Profits extends Controller {
     }
 
 
-    @Check("profits.index")
     public static void inventory(ProfitPost p) {
         List<Profit> profits = new ArrayList<Profit>();
         if(p == null) {
