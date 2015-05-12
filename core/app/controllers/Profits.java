@@ -126,7 +126,7 @@ public class Profits extends Controller {
             }
             // 用于提示后台正在运行计算
             if(StringUtils.isBlank(cache_str) || dtos == null) {
-                //renderJSON(new Ret("Analyze后台事务正在执行中,请稍候..."));
+                renderJSON(new Ret("Analyze后台事务正在执行中,请稍候..."));
             }
 
             List<Category> categorys = Category.all().fetch();
