@@ -298,6 +298,42 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String trackNo = null;
 
     /**
+     * 工作号
+     */
+    @Expose
+    @Column
+    public String jobNumber;
+
+    /**
+     * 总重量(kg)货代
+     */
+
+    @Expose
+    @Column
+    public Float totalWeightShipment;
+
+    /**
+     * 总体积(m³)货代
+     */
+    @Expose
+    @Column
+    public Float totalVolumeShipment;
+
+    /**
+     * 货代计费方式
+     */
+    @Expose
+    @Column
+    public String shipmentTpye;
+
+    /**
+     * 总托盘数(货代)
+     */
+    @Expose
+    @Column
+    public Integer totalStockShipment;
+
+    /**
      * 国际快递商人
      */
     @Enumerated(EnumType.STRING)
@@ -354,7 +390,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * Shipment 的检查
      */
     public void validate() {
-        if(StringUtils.isNotBlank(this.trackNo))
+        if(StringUtils.isNotBlank(this.trackNo) && !this.trackNo.equals("[]"))
             Validation.required("shipment.internationExpress", this.internationExpress);
 
         // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
@@ -1025,6 +1061,37 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 通过产品数据计算出来的这份运输单的质检总重量
+     *
+     * @return
+     */
+    public float totalWeightQuaTest() {
+        float weight = 0f;
+        return weight;
+    }
+
+
+    /**
+     * 通过产品数据计算出来的这份运输单的质检总体积
+     *
+     * @return
+     */
+    public float totalVolumeQuaTest() {
+        float volume = 0f;
+        return volume;
+    }
+
+    /**
+     * 通过产品数据计算出来的这份运输单的质检总箱数
+     *
+     * @return
+     */
+    public float totalUnitQuaTest() {
+        float volume = 0f;
+        return volume;
+    }
+
+    /**
      * 将运输单从其存在的运输请款单中剥离
      */
     public void departFromApply() {
@@ -1041,9 +1108,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .msgArgs(this.id, this.apply.serialNumber)
                 .fid(this.apply.id).save();
         this.apply = null;
-        for(PaymentUnit fee : this.fees) {
-            fee.delete();
-        }
         this.save();
     }
 
@@ -1287,7 +1351,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
             this.trackNo = this.listToStr(this.tracknolist);
-            if(this.trackNo.equals("{}") || this.trackNo.equals("[\"\"]")) {
+            if(this.trackNo.equals("{}") || this.trackNo.equals("[\"\"]") || this.trackNo.equals("[]")) {
                 this.trackNo = null;
             }
         } else {
