@@ -130,18 +130,8 @@ public class Profits extends Controller {
 
             List<Category> categorys = Category.all().fetch();
             for(Category cate : categorys) {
-                String skukey = "";
-                String marketkey = "";
-                String categorykey = "";
                 p.category = cate.categoryId;
-                String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey,
-                        marketkey);
-                profits = Cache.get(postkey, List.class);
-                if(profits != null) {
-                    render(profits, p);
-                } else {
-                    new ProfitInventorySearch(p).now();
-                }
+                new ProfitInventorySearch(p).now();
             }
             renderJSON(new Ret("正在计算库存成本!"));
         }
