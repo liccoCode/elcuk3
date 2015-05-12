@@ -143,17 +143,16 @@ public class Excels extends Controller {
     /**
      * 下载运输单明细Excel表格
      */
-    public static void shipmentDetail(List<String> shipmentId) {
+    public static void shipmentDetails(List<String> shipmentId) {
         if(shipmentId == null || shipmentId.size() == 0) {
-            renderText("!!!");
+            renderText("请选择需要打印的运输单！");
         } else {
             List<Shipment> dtos = Shipment.find("id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd:HHmmss");
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
                     String.format("运输单发货信息明细表格%s.xls", formatter.format(new Date())));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            renderArgs.put("dateFormat", formatter);
             render(dtos);
         }
     }

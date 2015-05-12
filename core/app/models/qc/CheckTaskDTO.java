@@ -1,9 +1,13 @@
 package models.qc;
 
+import java.io.Serializable;
+
 /**
  * Created by mac on 15-5-8.
  */
-public class CheckTaskDTO {
+public class CheckTaskDTO implements Serializable {
+
+    private static final long serialVersionUID = 654583576246678553L;
 
     /**
      * 箱数

@@ -1,11 +1,13 @@
 $ ->
   $('#search_form').on('click', '.btn', (e) ->
     $('#search_form').attr('action', $(@).data('url'))
-  ).on('click', '#download_excel', (e) ->
+  )
+
+  $("#download_excel").click((e) ->
+    e.preventDefault()
     $btn = $(@)
     $form = $("#search_form")
-    $form.attr('action', $btn.data('url'))
-    $form.submit()
+    window.open('/Excels/shipmentDetails?'+$form.serialize(),"_blank")
   )
 
   $(':checkbox[class=checkbox_all]').change (e) ->

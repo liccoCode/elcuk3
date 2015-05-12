@@ -365,7 +365,7 @@ public class CheckTask extends Model {
     public String standBoxQctInfo;
 
     @Transient
-    public List<CheckTaskDTO> standBoxQctInfos = new ArrayList<CheckTaskDTO>();
+    public List<CheckTaskDTO> standBoxQctInfos ;
 
     /**
      * 尾箱尾箱质检信息
@@ -374,7 +374,7 @@ public class CheckTask extends Model {
     public String tailBoxQctInfo;
 
     @Transient
-    public List<CheckTaskDTO> tailBoxQctInfos = new ArrayList<CheckTaskDTO>();
+    public List<CheckTaskDTO> tailBoxQctInfos;
 
     public enum FLAG {
         ARRAY_TO_STR,
@@ -959,6 +959,58 @@ public class CheckTask extends Model {
             }
         }
         return target;
+    }
+
+    /**
+     * 计算总箱数
+     *
+     * @return
+     */
+    public Integer totalBoxNum() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Integer totalBoxNum = 0;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+        }
+        return totalBoxNum;
+    }
+
+    /**
+     * 计算总体积
+     *
+     * @return
+     */
+    public Double totalVolume() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Double totalVolume = 0d;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height;
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
+                    (checkTaskDTO.boxNum);
+        }
+        return totalVolume;
+    }
+
+    /**
+     * 计算总重量
+     *
+     * @return
+     */
+    public Double totalWeight() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Double totalWeight = 0d;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+        }
+        return totalWeight;
     }
 
 }
