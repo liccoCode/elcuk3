@@ -41,26 +41,17 @@ public class MetricQtyService {
     public Profit calProfit(Profit profit) {
         Selling sell = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).first();
         if(sell != null) {
-            String AnalyzeDTO_SID_MAP_CACHE = "analyze_post_sid_map";
             String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
             // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
             List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
             if(dtos != null) {
-                java.util.Map<String, AnalyzeDTO> dtomap = Cache.get(AnalyzeDTO_SID_MAP_CACHE, java.util.Map.class);
-                if(dtomap == null) {
-                    dtomap = new HashMap<String, AnalyzeDTO>();
-                    if(dtos != null) {
-                        for(AnalyzeDTO dto : dtos) {
-                            dtomap.put(dto.fid, dto);
-                        }
+                for(AnalyzeDTO dto : dtos) {
+                    if(dto.fid.trim().equals(sell.sellingId.trim())) {
+                        profit.workingqty = dto.plan + dto.working + dto.worked;
+                        profit.wayqty = dto.way;
+                        profit.inboundqty = dto.inbound + dto.qty;
+                        break;
                     }
-                    Cache.add(AnalyzeDTO_SID_MAP_CACHE, dtomap, "4h");
-                }
-                AnalyzeDTO dto = dtomap.get(sell.sellingId);
-                if(dto != null) {
-                    profit.workingqty = dto.plan + dto.working + dto.worked;
-                    profit.wayqty = dto.way;
-                    profit.inboundqty = dto.inbound + dto.qty;
                 }
             }
         }
