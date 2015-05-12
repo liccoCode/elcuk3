@@ -1,10 +1,8 @@
 package models.qc;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.ActivitiEngine;
-import helper.DBUtils;
-import helper.Reflects;
-import helper.Webs;
+import helper.*;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -14,6 +12,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Whouse;
+import models.view.dto.ProductDTO;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -359,6 +358,24 @@ public class CheckTask extends Model {
     @OneToOne
     public PaymentUnit reworkPay;
 
+    /**
+     * 标准箱尾箱质检信息
+     */
+    @Lob
+    public String standBoxQctInfo;
+
+    @Transient
+    public List<CheckTaskDTO> standBoxQctInfos ;
+
+    /**
+     * 尾箱尾箱质检信息
+     */
+    @Lob
+    public String tailBoxQctInfo;
+
+    @Transient
+    public List<CheckTaskDTO> tailBoxQctInfos;
+
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
@@ -621,6 +638,8 @@ public class CheckTask extends Model {
      */
     public void fullUpdate(CheckTask newCt, String username) {
         this.units.attrs.qty = newCt.qty;
+        if(newCt.standBoxQctInfos != null) this.standBoxQctInfos = newCt.standBoxQctInfos;
+        if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
         switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
@@ -680,7 +699,8 @@ public class CheckTask extends Model {
         if(newCt.result != null) this.result = newCt.result;
         if(newCt.isship != null) this.isship = newCt.isship;
         if(newCt.checknote != null) this.checknote = newCt.checknote;
-
+        if(newCt.standBoxQctInfo != null) this.standBoxQctInfo = newCt.standBoxQctInfo;
+        if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
         this.units.save();
         this.save();
     }
@@ -905,6 +925,92 @@ public class CheckTask extends Model {
         if(oldplanDeliveryDate != null) map.put("oldplanDeliveryDate", oldplanDeliveryDate);
 
         return map;
+    }
+
+    /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成 List
+     *
+     * @param flag
+     */
+    public void arryParamSetUPForQtInfo(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.standBoxQctInfo = J.json(this.fixNullStr(this.standBoxQctInfos));
+            this.tailBoxQctInfo = J.json(this.fixNullStr(this.tailBoxQctInfos));
+        } else {
+            if(StringUtils.isNotBlank(this.standBoxQctInfo)) this.standBoxQctInfos = JSON.parseArray(this
+                    .standBoxQctInfo, CheckTaskDTO.class);
+            if(StringUtils.isNotBlank(this.tailBoxQctInfo)) this.tailBoxQctInfos = JSON.parseArray(this
+                    .tailBoxQctInfo, CheckTaskDTO.class);
+        }
+    }
+
+    /**
+     * 对空字符进行处理
+     *
+     * @return
+     */
+    private List<CheckTaskDTO> fixNullStr(List<CheckTaskDTO> target) {
+        Iterator<CheckTaskDTO> iterator = target.iterator();
+        while(iterator.hasNext()) {
+            CheckTaskDTO c = iterator.next();
+            if(null == c) {
+                iterator.remove();
+            }
+        }
+        return target;
+    }
+
+    /**
+     * 计算总箱数
+     *
+     * @return
+     */
+    public Integer totalBoxNum() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Integer totalBoxNum = 0;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+        }
+        return totalBoxNum;
+    }
+
+    /**
+     * 计算总体积
+     *
+     * @return
+     */
+    public Double totalVolume() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Double totalVolume = 0d;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height;
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
+                    (checkTaskDTO.boxNum);
+        }
+        return totalVolume;
+    }
+
+    /**
+     * 计算总重量
+     *
+     * @return
+     */
+    public Double totalWeight() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Double totalWeight = 0d;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+        }
+        return totalWeight;
     }
 
 }

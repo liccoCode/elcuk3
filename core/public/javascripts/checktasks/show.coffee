@@ -130,4 +130,29 @@ $ ->
     window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
     window.dropUpload.iniDropbox(fidCallBack, dropbox)
 
+  size = $("#addMultiBox").attr("data-listSize")
 
+  $('#addMultiBox').click ->
+    $btn = $(@)
+    $table = $("##{$btn.data("table")}")[0]
+    # 获取表格的行数
+    rowsCount = $table.rows.length
+    # 通过 js 克隆出一个新的行 需要减去上面的标题行
+    newRow = "<tr><th>箱数量：</th><td colspan='2'><input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].boxNum'/>箱 x "
+    newRow +=" <input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].num'/>个</td>"
+    newRow += "<th>单箱体积(m³)：</th><td colspan='3'><span></span></td></tr><tr><th>单箱重量(kg)：</th><td colspan='2'>"
+    newRow +="<input type='text' name='check.tailBoxQctInfos[#{size}].singleBoxWeight'></td><th>单箱长宽高(cm)：</th><td colspan='3'>"
+    newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].length'> x "
+    newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].width'> x "
+    newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].height'> x </td>"
+    newRow += "<td><a class='btn' name='delete_tailBoxQctInfos_row'>删除</a></td></tr>";
+    # 将生成的 row append 到表格的最下面
+    $("#tailBoxQctInfosTable").append(newRow)
+    size++
+
+  $("#update_form").on("click", "[name^='delete_tailBoxQctInfos_row']", () ->
+    $btn = $(@)
+    # remove 掉按钮所在的那一行
+    $btn.parent("td").parent().prev().remove()
+    $btn.parent("td").parent().remove()
+  )
