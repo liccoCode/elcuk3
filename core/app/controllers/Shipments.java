@@ -209,7 +209,7 @@ public class Shipments extends Controller {
         if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state) &&
                 dbship.dates.planArrivDateForCountRate != ship.dates.planArrivDateForCountRate) {
             if(StringUtils.isBlank(ship.reason)) {
-                Validation.addError("", "修改计算准时率预计到库时间必须填写原因!");
+                //Validation.addError("", "修改约定到货时间必须填写原因!");
             } else {
                 dbship.reason = ship.reason;
             }
