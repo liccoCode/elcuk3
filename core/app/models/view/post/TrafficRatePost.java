@@ -70,8 +70,8 @@ public class TrafficRatePost extends Post<TrafficRate> {
         params.add(Dates.night(this.to));
 
         if(StringUtils.isNotBlank(this.SellingId)) {
-            sbd.append(" AND selling.sellingId=?");
-            params.add(this.SellingId);
+            sbd.append(" AND selling.sellingId like ?");
+            params.add(this.SellingId + "%");
         }
         if(this.market != null) {
             sbd.append(" AND market=? ");
