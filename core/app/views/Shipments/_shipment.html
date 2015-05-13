@@ -38,7 +38,8 @@
     <tr>
       <th>约定到货时间</th>
       <td colspan="4">
-        <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates.planArrivDateForCountRate.date()}" rel="popover" content="用于计算准时到货率" placement="right">
+        <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates.planArrivDateForCountRate.date()}"
+               rel="popover" content="用于计算准时到货率(只有在 '计划' 与 '锁定准备运输' 状态下的运输单才允许修改该字段)" placement="right">
       </td>
 
       <!--<th>变更原因</th>
@@ -99,7 +100,7 @@
       <th>国际快递商</th>
       <td>
       #{select 'ship.internationExpress', items: models.procure.Shipment.Express(), value: ship.internationExpress}
-        #{option ''}选择快递商#{/option}
+          #{option ''}选择快递商#{/option}
       #{/select}
       </td>
       <th>总质量(kg)质检</th>
@@ -121,7 +122,7 @@
       <th>仓库</th>
       <td>
       #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse?.id}
-        #{option ''}选择仓库#{/option}
+          #{option ''}选择仓库#{/option}
       #{/select}
       </td>
       <th>总箱数(件)质检</th>
