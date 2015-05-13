@@ -344,4 +344,19 @@ public class ShipItem extends GenericModel {
                 .save();
     }
 
+    public Integer caluTotalUnitByCheckTask() {
+        CheckTask task = (CheckTask) CheckTask.find("units_id=?", this.unit.id).fetch().get(0);
+        return task.totalBoxNum();
+    }
+
+    public Double caluTotalVolumeByCheckTask() {
+        CheckTask task = (CheckTask) CheckTask.find("units_id=?", this.unit.id).fetch().get(0);
+        return task.totalVolume();
+    }
+
+    public Double caluTotalWeightByCheckTask() {
+        CheckTask task = (CheckTask) CheckTask.find("units_id=?", this.unit.id).fetch().get(0);
+        return task.totalWeight();
+    }
+
 }

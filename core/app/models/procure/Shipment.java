@@ -1065,19 +1065,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public float totalWeightQuaTest() {
-        float weight = 0f;
+    public Double totalWeightQuaTest() {
+        Double weight = 0d;
+        for(ShipItem itm : this.items) {
+            weight += itm.caluTotalWeightByCheckTask();
+        }
         return weight;
     }
-
 
     /**
      * 通过产品数据计算出来的这份运输单的质检总体积
      *
      * @return
      */
-    public float totalVolumeQuaTest() {
-        float volume = 0f;
+    public Double totalVolumeQuaTest() {
+        Double volume = 0d;
+        for(ShipItem itm : this.items) {
+            volume += itm.caluTotalVolumeByCheckTask();
+        }
         return volume;
     }
 
@@ -1086,9 +1091,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public float totalUnitQuaTest() {
-        float volume = 0f;
-        return volume;
+    public Integer totalUnitQuaTest() {
+        Integer totalUnit = 0;
+        for(ShipItem itm : this.items) {
+            totalUnit += itm.caluTotalUnitByCheckTask();
+        }
+        return totalUnit;
     }
 
     /**
