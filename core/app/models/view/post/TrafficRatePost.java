@@ -54,11 +54,7 @@ public class TrafficRatePost extends Post<TrafficRate> {
 
 
     public List<TrafficRate> query() {
-        String cacheKey = "trafficRate";
-        if(this.market != null) cacheKey = String.format("%s|%s", cacheKey, this.market.name());
-        if(StringUtils.isNotBlank(this.SellingId)) String.format("%s|%s", cacheKey, this.SellingId);
-
-        cacheKey = Caches.Q.cacheKey(cacheKey, from, to);
+        String cacheKey = Caches.Q.cacheKey("trafficRate", this.market, this.from, this.to, this.SellingId);
         List<TrafficRate> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null) return cacheElement;
 
