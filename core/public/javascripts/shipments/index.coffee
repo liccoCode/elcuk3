@@ -1,5 +1,10 @@
 $ ->
   $('#search_form').on('click', '.btn', (e) ->
+    #过滤掉apply为空的数据
+    $("#search_form [type='checkbox']:checked").each(->
+      if !$(@).attr("apply")
+        $(@).prop("checked", false)
+    )
     $('#search_form').attr('action', $(@).data('url'))
   )
 

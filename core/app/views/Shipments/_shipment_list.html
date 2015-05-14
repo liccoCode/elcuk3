@@ -17,9 +17,7 @@
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-        #{ifnot ship.apply}
-          <input type="checkbox" name="shipmentId" value="${ship.id}">
-        #{/ifnot}
+      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.apply}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
