@@ -191,7 +191,7 @@ public class MetricProfitService {
         float avgprice = 0;
         String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
                 + " where product_sku='" + fieldValue + "' "
-                + " and upper(selling_sellingid) like '%" + market + "%"
+                + " and upper(selling_sellingid) like '%" + market + "%'"
                 + " and qty!='' and currency='" + currency + "' ";
         List<Map<String, Object>> rows = DBUtils.rows(sql);
         if(rows != null && rows.size() > 0) {
