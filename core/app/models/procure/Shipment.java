@@ -383,7 +383,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * Shipment 的检查
      */
     public void validate() {
-        if(StringUtils.isNotBlank(this.trackNo) && !this.trackNo.equals("[]"))
+        if(StringUtils.isNotBlank(this.trackNo) && !this.trackNo.equals("[]") && this.type.label().equals("快递"))
             Validation.required("shipment.internationExpress", this.internationExpress);
 
         // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
