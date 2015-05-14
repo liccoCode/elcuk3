@@ -179,31 +179,19 @@ public class MetricProfitService {
      */
     public Float esProcurePrice() {
         float avgprice = 0f;
-
-        //如果运价为0，则直接从采购计划中获取
+        avgprice = getPrice(this.sku, "CNY", this.market.nickName());
         if(avgprice <= 0) {
-            Selling sell = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).first();
-            if(sell != null) {
-                avgprice = getPrice("selling_sellingid", sell.sellingId, "CNY");
-                if(avgprice <= 0) {
-                    avgprice = getPrice("selling_sellingid", sell.sellingId, "USD");
-                }
-            }
-            if(avgprice <= 0) {
-                avgprice = getPrice("product_sku", this.sku, "CNY");
-            }
-            if(avgprice <= 0) {
-                avgprice = getPrice("product_sku", this.sku, "USD");
-            }
+            avgprice = getPrice(this.sku, "USD", this.market.nickName());
         }
         return avgprice;
     }
 
 
-    private float getPrice(String fieldName, String fieldValue, String currency) {
+    private float getPrice(String fieldValue, String currency, String market) {
         float avgprice = 0;
         String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                + " where " + fieldName + "='" + fieldValue + "' "
+                + " where product_sku='" + fieldValue + "' "
+                + " and upper(selling_sellingid) like '%" + market + "%"
                 + " and qty!='' and currency='" + currency + "' ";
         List<Map<String, Object>> rows = DBUtils.rows(sql);
         if(rows != null && rows.size() > 0) {
