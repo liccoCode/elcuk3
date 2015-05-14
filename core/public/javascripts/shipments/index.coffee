@@ -1,11 +1,19 @@
 $ ->
   $('#search_form').on('click', '.btn', (e) ->
+    e.preventDefault()
     #过滤掉apply为空的数据
-    $("#search_form [type='checkbox']:checked").each(->
+    $ck = $("#search_form [type='checkbox']:checked")
+    size = $ck.length
+    i = 0
+    $ck.each(->
       if $(@).attr("apply")
         $(@).prop("checked", false)
+        i++
     )
-    $('#search_form').attr('action', $(@).data('url'))
+    if i == size
+      noty({text: "您选择的运输单全部都已经创建过请款单了，请重新选择！", type: 'warning'})
+    else
+      $('#search_form').attr('action', $(@).data('url'))
   )
 
   $("#download_excel").click((e) ->
