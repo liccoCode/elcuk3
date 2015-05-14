@@ -124,7 +124,6 @@ public class Applys extends Controller {
     public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
         if(shipmentId == null || shipmentId.size() == 0)
             Validation.addError("", "请选择需要创建请款单的运输单");
-
         TransportApply apply = null;
         if(!Validation.hasErrors())
             apply = TransportApply.buildTransportApply(shipmentId);
