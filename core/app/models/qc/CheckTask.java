@@ -987,11 +987,12 @@ public class CheckTask extends Model {
         this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Double totalVolume = 0d;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height/1000000;
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
+                    (checkTaskDTO.boxNum) / 1000000;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
             totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
-                    (checkTaskDTO.boxNum)/1000000;
+                    (checkTaskDTO.boxNum) / 1000000;
         }
         return totalVolume;
     }
