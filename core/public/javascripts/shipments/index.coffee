@@ -14,6 +14,7 @@ $ ->
       noty({text: "您选择的运输单全部都已经创建过请款单了，请重新选择！", type: 'warning'})
     else
       $('#search_form').attr('action', $(@).data('url'))
+      $('#search_form').submit()
   )
 
   $("#download_excel").click((e) ->
