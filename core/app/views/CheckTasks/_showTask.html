@@ -88,7 +88,7 @@
   <td colspan="11">
     <table class="table table-hover table-condensed table-bordered">
       <tr>
-        <td colspan="10" align="left">标准箱质检信息</td>
+        <td colspan="10" align="left" class="span12 alert alert-info">标准箱质检信息</td>
       </tr>
     #{if check.standBoxQctInfos.size()==0}
       <tr>
@@ -128,7 +128,7 @@
           .num}"/>个
         </td>
         <th>单箱体积(m³)：</th>
-        <td colspan="3"><span></span></td>
+        <td colspan="3">${(stand.length*stand.width*stand.height/1000000).format('#.##')}</td>
       </tr>
       <tr>
         <th>单箱重量(kg)：</th>
@@ -146,7 +146,6 @@
           x
           <input type="text" class="input-mini" name="check.standBoxQctInfos[${stand_index - 1}].height" value="${stand
           .height}">
-          x
         </td>
       </tr>
     #{/list}
@@ -158,7 +157,7 @@
   <td colspan="11">
     <table class="table table-hover table-condensed table-bordered" id="tailBoxQctInfosTable">
       <tr>
-        <td colspan="10" align="left">尾箱质检信息</td>
+        <td colspan="10" align="left" class="span12 alert alert-info">尾箱质检信息</td>
       </tr>
     #{list items:check.tailBoxQctInfos, as:'tail'}
       <tr>
@@ -169,7 +168,7 @@
           <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].num" value="${tail.num}"/>个
         </td>
         <th>单箱体积(m³)：</th>
-        <td colspan="4"><span></span></td>
+        <td colspan="4">${(tail.length*tail.width*tail.height/1000000).format('#.##')}</td>
       </tr>
       <tr>
         <th>单箱重量(kg)：</th>
@@ -183,7 +182,6 @@
           <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].width" value="${tail.width}">
           x
           <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].height" value="${tail.height}">
-          x
         </td>
         <td>
           <a class="btn" name='delete_tailBoxQctInfos_row'>删除</a>

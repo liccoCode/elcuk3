@@ -144,7 +144,7 @@ $ ->
     newRow +="<input type='text' name='check.tailBoxQctInfos[#{size}].singleBoxWeight'></td><th>单箱长宽高(cm)：</th><td colspan='3'>"
     newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].length'> x "
     newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].width'> x "
-    newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].height'> x </td>"
+    newRow += "<input type='text' class='input-mini' name='check.tailBoxQctInfos[#{size}].height'></td>"
     newRow += "<td><a class='btn' name='delete_tailBoxQctInfos_row'>删除</a></td></tr>";
     # 将生成的 row append 到表格的最下面
     $("#tailBoxQctInfosTable").append(newRow)
@@ -156,3 +156,4 @@ $ ->
     $btn.parent("td").parent().prev().remove()
     $btn.parent("td").parent().remove()
   )
+
