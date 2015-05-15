@@ -522,6 +522,7 @@ public class Listing extends GenericModel {
         if(this.sellings.size() > 0) {
             Webs.error("此 Listing 拥有 " + size + " 个 Selling 关联, 无法删除");
         }
+        for(ListingStateRecord record : this.stateRecords) record.delete();
         this.delete();
     }
 
