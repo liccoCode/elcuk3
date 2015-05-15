@@ -88,7 +88,7 @@
   <td colspan="11">
     <table class="table table-hover table-condensed table-bordered">
       <tr>
-        <td colspan="10" align="left">标准箱质检信息</td>
+        <td colspan="10" align="left" class="span12 alert alert-info">标准箱质检信息</td>
       </tr>
     #{if check.standBoxQctInfos.size()==0}
       <tr>
@@ -157,7 +157,7 @@
   <td colspan="11">
     <table class="table table-hover table-condensed table-bordered" id="tailBoxQctInfosTable">
       <tr>
-        <td colspan="10" align="left">尾箱质检信息</td>
+        <td colspan="10" align="left" class="span12 alert alert-info">尾箱质检信息</td>
       </tr>
     #{list items:check.tailBoxQctInfos, as:'tail'}
       <tr>
