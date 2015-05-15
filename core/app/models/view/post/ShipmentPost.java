@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
-    private static final Pattern NUM = Pattern.compile("^[0-9]*");
+    private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
 
     public ShipmentPost() {

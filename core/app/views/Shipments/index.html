@@ -83,12 +83,13 @@
     </div>
     <div class="btn-toolbar">
     #{power.ck 'applys.shipmenttoapply'}
-      <button class="btn btn-success" data-url='@{Applys.shipmentToApply()}' data-disable-with='创建请款单中...'>
+      <button id="createApplyBtn" class="btn btn-success" data-url='@{Applys.shipmentToApply()}'
+              data-disable-with='创建请款单中...'>
         创建运输请款单
       </button>
     #{/power.ck}
       <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary"
-         target="_blank">
+         >
         <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
     </div>
   </div>
