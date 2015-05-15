@@ -169,6 +169,6 @@ $ ->
     $td.find("input").each(()->
       value *= $(@).val()
     )
-    $returnValue.text((value/1000000).toFixed(2))
+    $returnValue.text((value / 1000000).toFixed(2))
   )
 
