@@ -314,7 +314,7 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 在途库存占用资金总金额(USD)
          */
-        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice + profit.wayqty*profit.vatprice;
         profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)
@@ -347,7 +347,8 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 在途库存占用资金总金额(USD)
          */
-        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice+
+                profit.wayqty * profit.vatprice;
         profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)
