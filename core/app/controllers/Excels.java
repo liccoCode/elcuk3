@@ -11,6 +11,7 @@ import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
@@ -136,6 +137,23 @@ public class Excels extends Controller {
             render(dtos, p);
         } else {
             renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 下载运输单明细Excel表格
+     */
+    public static void shipmentDetails(List<String> shipmentId) {
+        if(shipmentId == null || shipmentId.size() == 0) {
+            renderText("请选择需要打印的运输单！");
+        } else {
+            List<Shipment> dtos = Shipment.find("id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("运输单发货信息明细表格%s.xls", formatter.format(new Date())));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(dtos);
         }
     }
 
@@ -335,7 +353,7 @@ public class Excels extends Controller {
             final int end = new DateTime(to).getMonthOfYear();
             if(from.getTime() > to.getTime() || begin > end) renderJSON(new Ret("开始时间必须小于结束时间且必须在同一年份内!"));
 
-            String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, val);
+            String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
             List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
             if(dtos == null || dtos.size() == 0) {
                 new Job() {

@@ -19,9 +19,9 @@
   <th>供应商</th>
   <td>
   #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}
-      #{option ''}请选择#{/option}
+    #{option ''}请选择#{/option}
   #{/select}
-      <input type="${unit.period?: 'hidden'}" style="width: 40px;" readonly value="${unit.period} 天" id="unit_period"/>
+    <span style="display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
   </td>
 
   <th>价格</th>

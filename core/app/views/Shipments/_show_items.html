@@ -1,9 +1,14 @@
 <!-- 运输项目部分 -->
-#{success_row title:'运输项目' /}
+<div class="row-fluid">
+  <div class="span12 alert">
+    <h4 data-toggle="toggle" data-target="#tl">Timeline <i class="icon-reorder"></i></h4>
+  </div>
+</div>
 <div class="row-fluid">
   <div id="tl" class="span12" style="height:350px;"></div>
 </div>
 
+#{success_row title:'运输项目' /}
 <form action="@{ShipItems.adjust(ship.id, ship.id)}" method="POST" id="adjust_shipitems">
 
   <div class="row-fluid">

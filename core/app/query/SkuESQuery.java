@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.Caches;
 import helper.Dates;
+import helper.Webs;
 import models.market.M;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
@@ -146,7 +147,7 @@ public class SkuESQuery {
             if(lineChart != null) return lineChart;
             lineChart = new HighChart(Series.LINE);
             if(calType.equals("price")) {
-                lineChart.title = "采购价格";
+                lineChart.title = "采购价格($)";
                 lineChart.series(esProcureDate(Sku, "采购价格", "procurepayunit", "unit_price", "avg"));
             }
             if(calType.equals("qty")) {
@@ -178,7 +179,9 @@ public class SkuESQuery {
         if(buckets == null) return line;
         for(Object o : buckets) {
             JSONObject entry = (JSONObject) o;
-            line.add(Dates.date2JDate(entry.getDate("key")), entry.getJSONObject("fieldvalue").getFloat("value"));
+            Float resultNumber = entry.getJSONObject("fieldvalue").getFloat("value");
+            if(resultNumber == Float.POSITIVE_INFINITY) continue;
+            line.add(Dates.date2JDate(entry.getDate("key")), Webs.scale2PointUp(resultNumber));
         }
         line.sort();
         return line;

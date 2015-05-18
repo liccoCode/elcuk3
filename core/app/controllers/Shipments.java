@@ -181,6 +181,11 @@ public class Shipments extends Controller {
         dbship.memo = ship.memo;
         dbship.dates.planBeginDate = ship.dates.planBeginDate;
         dbship.internationExpress = ship.internationExpress;
+        dbship.jobNumber = ship.jobNumber;
+        dbship.totalWeightShipment = ship.totalWeightShipment;
+        dbship.totalVolumeShipment = ship.totalVolumeShipment;
+        dbship.shipmentTpye = ship.shipmentTpye;
+        dbship.totalStockShipment = ship.totalStockShipment;
         dbship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         checkAuthenticity();
         validation.valid(dbship);
@@ -199,6 +204,18 @@ public class Shipments extends Controller {
         if(dbship.dates.planArrivDate.compareTo(ship.dates.planArrivDate) != 0)
             dbship.dates.oldPlanArrivDate = dbship.dates.planArrivDate;
         dbship.dates.planArrivDate = ship.dates.planArrivDate;
+
+        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state) &&
+                dbship.dates.planArrivDateForCountRate != ship.dates.planArrivDateForCountRate) {
+            if(StringUtils.isBlank(ship.reason)) {
+                //Validation.addError("", "修改约定到货时间必须填写原因!");
+            } else {
+                dbship.reason = ship.reason;
+            }
+            //TODO 需求临时变更,暂时取消对原因的不为空校验,后期如果需求明确后将其挪到 209 行上方即可。
+            dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
+        }
         dbship.updateShipment();
 
         if(Validation.hasErrors()) {
@@ -220,13 +237,16 @@ public class Shipments extends Controller {
     /**
      * 用来更新 Shipment 的 coment 与 trackNo
      */
-    public static void comment(String id, String cmt, String track) {
+    public static void comment(String id, String cmt, String track, String jobNumber, Float totalWeightShipment,
+                               Float totalVolumeShipment, Float totalStockShipment) {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
         Shipment ship = Shipment.findById(id);
         ship.memo = cmt;
         if(StringUtils.isNotBlank(track))
             ship.trackNo = track;
+        if(StringUtils.isNotBlank(jobNumber))
+            ship.jobNumber = jobNumber;
         ship.save();
         renderJSON(new Ret(true, Webs.V(Validation.errors())));
     }

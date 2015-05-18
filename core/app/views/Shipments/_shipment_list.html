@@ -1,6 +1,6 @@
 <table class="table table-condensed table-bordered">
   <tr>
-    <th style="width:2%"></th>
+    <th style="width:2%"><input type="checkbox" class="checkbox_all"/></th>
     <th style="width:3%">#</th>
     <th style="width:15%">Track No.</th>
     <th style="width:5%">运输商</th>
@@ -17,9 +17,7 @@
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-        #{ifnot ship.apply}
-          <input type="checkbox" name="shipmentId" value="${ship.id}">
-        #{/ifnot}
+      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.apply}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>

@@ -10,14 +10,24 @@
     #{script 'shipments/paymentunits.coffee'/}
 #{/set}
 
+<ul class="nav nav-tabs" id="below_tab">
+  <li class="active">
+    <a href="#" id="shipmentInfoBtn" data-toggle='tab'>运输单信息</a>
+  </li>
+  <li>
+    <a href="#" id="fileManagermentBtn" data-toggle='tab'>附件管理</a>
+  </li>
+</ul>
+
 #{errorMsgs /}
 
+<div id="shipmentInfo">
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
-<div class="row-fluid">
-  <div class="span12">
-  #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+  <div class="row-fluid">
+    <div class="span12">
+    #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    </div>
   </div>
-</div>
 
 #{flash_alert /}
 
@@ -27,52 +37,56 @@
 
 #{render './_show_items.html', ship: ship, cooperators: cooperators/}
 
-<!-- 运输单记录信息 -->
-<div class="row-fluid" style="margin-top:20px;">
-  <div class="span6">
-  #{records_ul records: records/}
-  </div>
+  <!-- 运输单记录信息 -->
+  <div class="row-fluid" style="margin-top:20px;">
+    <div class="span6">
+    #{records_ul records: records/}
+    </div>
 
-  <div class="span6">
-    <div class="row-fluid">
-      <div class="span12">
-        <h4 class="text-warning">
-          运输进度
-          <i class="icon-sort-down"></i>
-          &nbsp;
-          <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-mini btn-danger" data-method='PUT'>
-            <i class="icon-refresh"></i>
-          </a>
-        </h4>
+    <div class="span6">
+      <div class="row-fluid">
+        <div class="span12">
+          <h4 class="text-warning">
+            运输进度
+            <i class="icon-sort-down"></i>
+            &nbsp;
+            <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-mini btn-danger" data-method='PUT'>
+              <i class="icon-refresh"></i>
+            </a>
+          </h4>
+        </div>
+      </div>
+
+      <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
+      #{set logEvents: ship.logEvents()/}
+      #{records_ul records: ship.logEvents()/}
+      #{if ship.iExpressHTML.trim().size() > 0}
+      ${ship.iExpressHTML.raw()}
+      #{/if}
+      #{elseif logEvents.size() == 0}
+        还没有跟踪信息
+      #{/elseif}
       </div>
     </div>
-
-    <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
-    #{set logEvents: ship.logEvents()/}
-    #{records_ul records: ship.logEvents()/}
-    #{if ship.iExpressHTML.trim().size() > 0}
-    ${ship.iExpressHTML.raw()}
-    #{/if}
-    #{elseif logEvents.size() == 0}
-      还没有跟踪信息
-    #{/elseif}
-    </div>
   </div>
-</div>
-
 
 <!-- 请款信息 -->
-#{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
+#{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type ==
+models.procure.Shipment.T.EXPRESS/}
+
+</div>
 
 <!-- 附件信息 -->
-<div class="row-fluid">
-  <div class="span12">
-    <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+<div id="fileManagerment" style="display: none;">
+  <div class="row-fluid">
+    <div class="span12">
+      <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+    </div>
   </div>
-</div>
-<div class="row-fluid">
-  <div style="min-height:300px;" class="span12 well" id="dropbox">
-    <ul class="thumbnails uploaded"></ul>
-    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  <div class="row-fluid">
+    <div style="min-height:300px;" class="span12 well" id="dropbox">
+      <ul class="thumbnails uploaded"></ul>
+      <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+    </div>
   </div>
 </div>

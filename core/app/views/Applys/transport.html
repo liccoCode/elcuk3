@@ -37,12 +37,20 @@
             <dt>运输方式</dt>
             <dd>${ship.type.label()}</dd>
             <dt>国际快递</dt>
-            <dd>${ship.internationExpress}</dd>
+            <dd>
+              #{if ship.internationExpress}
+                 ${ship.internationExpress}
+              #{/if}
+              #{else }&nbsp;#{/else}
+            </dd>
             <dt>TrackNo:</dt>
             <dd>${ship.trackNo}
-              <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank">
-                <i class="icon-external-link"></i>
-              </a>
+              #{if ship.trackNo}
+                <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank">
+                  <i class="icon-external-link"></i>
+                </a>
+              #{/if}
+              #{else }&nbsp;#{/else}
             </dd>
             <dt>FBAs:</dt>
             <dd>
