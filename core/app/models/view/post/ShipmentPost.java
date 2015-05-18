@@ -25,6 +25,7 @@ public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
+    private static final Pattern UNITID = Pattern.compile("^DL(|\\d{6}\\|\\d{2})$");
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -139,6 +140,15 @@ public class ShipmentPost extends Post {
     private F.T3<Boolean, String, List<Object>> deliverymentId() {
         if(StringUtils.isNotBlank(this.search)) {
             this.search = this.search.trim();
+
+            Matcher unitmatcher = UNITID.matcher(this.search);
+            if(unitmatcher.find()) {
+                String unitmentId = unitmatcher.group(1);
+                return new F.T3<Boolean, String, List<Object>>(true,
+                        "SELECT s FROM Shipment s WHERE s.items.unit.deliveryment_id=?",
+                        new ArrayList<Object>(Arrays.asList(unitmentId)));
+            }
+
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
@@ -146,6 +156,8 @@ public class ShipmentPost extends Post {
                         "SELECT s FROM Shipment s WHERE s.id=?",
                         new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
+
+
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);
     }
