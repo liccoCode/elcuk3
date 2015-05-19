@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import helper.Currency;
 import helper.*;
 import models.market.M;
+import models.market.Selling;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
@@ -178,31 +179,33 @@ public class MetricProfitService {
      */
     public Float esProcurePrice() {
         float avgprice = 0f;
-
-        //如果运价为0，则直接从采购计划中获取
+        avgprice = getPrice(this.sku, "CNY", this.market.nickName());
         if(avgprice <= 0) {
-            String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                    + " where sku='" + this.sku + "' "
-                    + " and qty!='' and currency='CNY' ";
-            List<Map<String, Object>> rows = DBUtils.rows(sql);
-            if(rows != null && rows.size() > 0) {
-                Double price = (Double) rows.get(0).get("price");
-                avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
-            }
+            avgprice = getPrice(this.sku, "USD", this.market.nickName());
+        }
+        return avgprice;
+    }
 
-            if(avgprice <= 0) {
-                sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
-                        + " where sku='" + this.sku + "' "
-                        + " and qty!='' and currency='USD' ";
-                rows = DBUtils.rows(sql);
-                if(rows != null && rows.size() > 0) {
-                    Double price = (Double) rows.get(0).get("price");
+
+    private float getPrice(String fieldValue, String currency, String market) {
+        float avgprice = 0;
+        String sql = "select sum(price*qty)/sum(qty) as price From ProcureUnit "
+                + " where product_sku='" + fieldValue + "' "
+                + " and upper(selling_sellingid) like '%" + market + "%'"
+                + " and qty!='' and currency='" + currency + "' ";
+        List<Map<String, Object>> rows = DBUtils.rows(sql);
+        if(rows != null && rows.size() > 0) {
+            Double price = (Double) rows.get(0).get("price");
+            if(price != null) {
+                if(currency.equals("CNY"))
+                    avgprice = Currency.valueOf("CNY").toUSD(price.floatValue());
+                else
                     avgprice = price.floatValue();
-                }
             }
         }
         return avgprice;
     }
+
 
     /**
      * 平均运价
