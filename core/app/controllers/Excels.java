@@ -377,4 +377,20 @@ public class Excels extends Controller {
             renderJSON(new Ret(Webs.S(e)));
         }
     }
+
+    public static void procureUnitSearchExcel(ProcurePost p) {
+        List<ProcureUnit> dtos = p.query();
+        if(dtos == null || dtos.size() == 0) {
+            renderText("没有数据无法生成Excel文件!");
+        } else {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("采购计划明细表%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dtos, p);
+        }
+    }
+
 }
