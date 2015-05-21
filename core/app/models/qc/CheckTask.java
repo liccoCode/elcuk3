@@ -970,10 +970,10 @@ public class CheckTask extends Model {
         this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Integer totalBoxNum = 0;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+            totalBoxNum += checkTaskDTO.boxNum;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+            totalBoxNum += checkTaskDTO.boxNum;
         }
         return totalBoxNum;
     }
@@ -987,12 +987,10 @@ public class CheckTask extends Model {
         this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Double totalVolume = 0d;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
-                    (checkTaskDTO.boxNum) / 1000000;
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
-                    (checkTaskDTO.boxNum) / 1000000;
+            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
         }
         return totalVolume;
     }
@@ -1006,10 +1004,10 @@ public class CheckTask extends Model {
         this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Double totalWeight = 0d;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+            totalWeight += checkTaskDTO.singleBoxWeight * checkTaskDTO.boxNum;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+            totalWeight += checkTaskDTO.singleBoxWeight * checkTaskDTO.boxNum;
         }
         return totalWeight;
     }
