@@ -203,6 +203,7 @@ $ ->
   $('table.paymentInfo').on('statisticFee', (e) ->
     e.preventDefault()
     $table = $(@)
+    isExpress = $table.find("tr:eq(0)").find("th:eq(5)").text() == '计费方式'
     #删除生成的TR 防止统计错误
     $table.find("tr td:contains(运输单费用统计)").remove()
     #根据币种的不同 统计总金额
@@ -213,10 +214,16 @@ $ ->
       isEditAble = $tr.find('select').size() > 0
       if isEditAble
         currency = $tr.find("td:eq(2) :selected").val()
-        total = $tr.find("td:eq(7) :input").val()
+        if isExpress
+          total = $tr.find("td:eq(8) :input").val()
+        else
+          total = $tr.find("td:eq(7) :input").val()
       else
         currency = $tr.find("td:eq(2)").text();
-        total = $tr.find("td:eq(7)").text().trim().split(' ')[1]
+        if isExpress
+          total = $tr.find("td:eq(8)").text().trim().split(' ')[1]
+        else
+          total = $tr.find("td:eq(7)").text().trim().split(' ')[1]
 
       if amountMap[currency]
         amountMap[currency] += parseFloat(total);
