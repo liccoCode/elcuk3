@@ -1,6 +1,7 @@
 package models.view.post;
 
 import models.ReportRecord;
+import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
@@ -18,7 +19,6 @@ public class ReportPost extends Post<ReportRecord> {
     public ReportPost() {
         this.perSize = 25;
         this.page = 1;
-        this.month = 0;
     }
 
     public ReportPost(int perSize) {
