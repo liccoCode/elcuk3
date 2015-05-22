@@ -79,11 +79,13 @@
         <input type="text" style="width:90px;" name="excel.sku" data-provide="typeahead" data-source="${skus}" data-items="15">
       </div>
 
+    #{power.ck "shipmentscost"}
       <div class="inline">
         <button class="btn btn-success" type="submit" content="根据条件导出单个 SKU 的运输重量到 Excel" placement='right' rel="popover">
           <i class="icon-download-alt"></i>下载 Excel
         </button>
       </div>
+    #{/power.ck}
     </form>
   </div>
 </div>

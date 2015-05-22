@@ -137,6 +137,7 @@ public class CheckTasks extends Controller {
     public static void showactiviti(Long id) {
         if(id == null) return;
         CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
