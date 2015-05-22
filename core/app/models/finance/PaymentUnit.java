@@ -9,10 +9,12 @@ import models.embedded.ERecordBuilder;
 import models.procure.*;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
+import query.PaymentUnitQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -480,5 +482,59 @@ public class PaymentUnit extends Model {
         }
         return this.save();
     }
+
+    /**
+     * 运输费用的均价, 没有运输项目. 统一币种为 CNY 则为单价(unitPrice)
+     *
+     * @return
+     */
+    public float averagePrice() {
+        if(this.feeType != FeeType.expressFee()) return this.currency.toCNY(this.unitPrice);
+        if(this.shipment != null) {
+            Shipment.T shipType = this.shipment.type;
+            PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
+            DateTime now = DateTime.now();
+            DateTime threeMonthAgo = now.minusMonths(3);
+
+            if(this.shipItem != null && shipType == Shipment.T.EXPRESS) {
+                String sku = this.shipItem.unit.sku;
+                Float price = aveFeeQuery.avgSkuExpressTransportshippingFee(threeMonthAgo.toDate(), now.toDate(), sku)
+                        .get(sku);
+                return price == null ? 0 : price;
+            } else if(shipType == Shipment.T.SEA) {
+                return aveFeeQuery.avgSkuSEATransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+            } else if(shipType == Shipment.T.AIR) {
+                return aveFeeQuery.avgSkuAIRTransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+            } else {
+                return this.currency.toCNY(this.unitPrice);
+            }
+        }
+        return this.currency.toCNY(this.unitPrice);
+    }
+
+    public float currentAvgPrice() {
+        if(this.feeType != FeeType.expressFee()) return this.currency.toCNY(this.unitPrice);
+        if(this.shipment != null) {
+            Shipment.T shipType = this.shipment.type;
+            DateTime now = DateTime.now();
+
+            if(this.shipItem != null && shipType == Shipment.T.EXPRESS) {
+                return this.shipItem.qty == 0 ? 0 : (this.currency.toCNY(this.amount()) / this.shipItem.qty);
+            } else if(Arrays.asList(Shipment.T.AIR, Shipment.T.SEA).contains(shipType)) {
+                // 总运输费用平摊到所有产品
+                int sumQty = 0;
+                for(ShipItem itm : this.shipment.items) sumQty += itm.qty;
+                return sumQty == 0 ? 0 : (this.currency.toCNY(this.amount()) / sumQty);
+            } else {
+                return this.currency.toCNY(this.unitPrice);
+            }
+        }
+        return this.currency.toCNY(this.unitPrice);
+    }
+
+    public String returnChargingWayValue(){
+        return this.chargingWay.label();
+    }
+
 }
 

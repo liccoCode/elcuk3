@@ -2,6 +2,7 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
+import ext.PaymentHelper;
 import helper.Caches;
 import helper.Currency;
 import helper.Webs;
@@ -292,6 +293,22 @@ public class Excels extends Controller {
                     String.format("%s-%s运输重量报表.xls", formatter.format(excel.from), formatter.format(excel.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(sws, excel);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    public static void exportShipmentCostAndWeightReport(ShipmentWeight excel) {
+        List<Shipment> dtos = excel.queryShipmentCostAndWeight();
+        if(dtos != null && dtos.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put("dateFormat", formatter);
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("运输单费用及重量统计报表%s-%s.xls", formatter.format(excel.from), formatter.format(excel.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("symbol", Currency.CNY.symbol());
+            render(dtos, excel);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
