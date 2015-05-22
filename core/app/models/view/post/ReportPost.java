@@ -1,7 +1,6 @@
 package models.view.post;
 
 import models.ReportRecord;
-import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
