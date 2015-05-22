@@ -89,7 +89,8 @@ $ ->
       .done((r) ->
         trDom = $(_.template($('#tr-edit-paymentunit-template').html(), {fee: r}))
           .find("[name='fee.currency']").val(r.currency).end()
-        trDom.find("[name='fee.chargingWay'] option:contains(#{r.chargingWay})").prop('selected', true)
+        if r.cchargingWay
+          trDom.find("[name='fee.chargingWay'] option:contains(#{r.chargingWay})").prop('selected', true)
         $tr.replaceWith(trDom)
         sessionStorage["tr-edit-paymentunit-template-#{id}"] = JSON.stringify(r)
         LoadMask.unmask()
