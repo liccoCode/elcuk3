@@ -7,6 +7,7 @@ import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.libs.F;
 
 import java.math.BigDecimal;
@@ -113,6 +114,20 @@ public class ProfitPost extends Post<Profit> {
         M[] marray = getMarket();
         for(M m : marray) {
             profitlist = searchProfitList(profitlist, m);
+        }
+        return profitlist;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public List<Profit> Inventory() {
+        List<Profit> profitlist = new ArrayList<Profit>();
+        /**
+         * 每个市场遍历
+         */
+        M[] marray = models.market.M.values();
+        for(M m : marray) {
+            profitlist = searchInventoryList(profitlist, m);
         }
         return profitlist;
     }
@@ -247,6 +262,29 @@ public class ProfitPost extends Post<Profit> {
         return profitlist;
     }
 
+
+    public List<Profit> searchInventoryList(List<Profit> profitlist, M skumarket) {
+        /**
+         * 如果有类别，没有SKU，则查询类别下所有SKU的利润
+         */
+        if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
+            Category cat = Category.findById(category);
+            for(Product pro : cat.products) {
+                Logger.info("inventoryprofit:::" + pro.sku);
+                Profit inventoryprofit = inventoryProfit(begin, end, skumarket, pro.sku, sellingId);
+                if(inventoryprofit.workingqty != 0 || inventoryprofit.wayqty != 0 || inventoryprofit.inboundqty != 0) {
+                    Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
+                        profitlist.add(profit);
+                }
+            }
+        } else if(!StringUtils.isBlank(sku)) {
+            Profit profit = esProfit(begin, end, skumarket, sku, sellingId);
+            profitlist.add(profit);
+        }
+        return profitlist;
+    }
+
+
     /**
      * 调用ES的API,获取利润Profit对象
      *
@@ -276,7 +314,41 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 在途库存占用资金总金额(USD)
          */
-        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice;
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice + profit.wayqty*profit.vatprice;
+        profit.wayfee = Webs.scale2Double(profit.wayfee);
+        /**
+         * (入库+在库)库存占用资金总金额(USD)
+         */
+        profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
+                + profit.inboundqty * profit.vatprice;
+        profit.inboundfee = Webs.scale2Double(profit.inboundfee);
+
+        return profit;
+    }
+
+    public Profit inventoryProfit(Date begin, Date end, M market,
+                                  String prosku, String sellingId) {
+        end = Dates.night(end);
+        MetricProfitService service = new MetricProfitService(begin, end, market, prosku, sellingId);
+        Profit profit = new Profit();
+        profit.sku = this.sku;
+        profit.sellingId = sellingId;
+        profit.market = market;
+
+        //增加库存数据
+        MetricQtyService qtyservice = new MetricQtyService(market, prosku);
+        profit = qtyservice.calProfit(profit);
+
+        /**
+         * (制作中+已交货)库存占用资金总金额(USD)
+         */
+        profit.workingfee = profit.workingqty * profit.procureprice;
+        profit.workingfee = Webs.scale2Double(profit.workingfee);
+        /**
+         * 在途库存占用资金总金额(USD)
+         */
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice+
+                profit.wayqty * profit.vatprice;
         profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)
