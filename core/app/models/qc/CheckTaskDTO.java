@@ -22,22 +22,22 @@ public class CheckTaskDTO implements Serializable {
     /**
      * 单箱重量
      */
-    public Double singleBoxWeight;
+    public double singleBoxWeight;
 
     /**
      * 长
      */
-    public Double length;
+    public double length;
 
     /**
      * 宽
      */
-    public Double width;
+    public double width;
 
     /**
      * 高
      */
-    public Double height;
+    public double height;
 
     public CheckTaskDTO(){
 
