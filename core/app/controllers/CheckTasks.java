@@ -107,7 +107,7 @@ public class CheckTasks extends Controller {
 
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -137,7 +137,7 @@ public class CheckTasks extends Controller {
     public static void showactiviti(Long id) {
         if(id == null) return;
         CheckTask check = CheckTask.findById(id);
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -181,7 +181,7 @@ public class CheckTasks extends Controller {
             check = old;
             render("CheckTasks/show.html", check);
         }
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.ARRAY_TO_STR);
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
         old.update(check);
         flash.success("更新成功");
         redirect("/CheckTasks/show/" + id);
@@ -202,7 +202,7 @@ public class CheckTasks extends Controller {
             check = old;
             render("CheckTasks/show.html", check);
         }
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.ARRAY_TO_STR);
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
         old.fullUpdate(check, Secure.Security.connected());
         flash.success("更新成功");
         show(id);
@@ -286,7 +286,6 @@ public class CheckTasks extends Controller {
      * 调整运营的数据并提交流程
      *
      * @param check
-     * @param id
      * @param unitid
      * @param checkid
      * @param oldPlanQty
@@ -322,7 +321,6 @@ public class CheckTasks extends Controller {
      * 还原结束流程
      *
      * @param check
-     * @param id
      */
     public static void endactiviti(CheckTask check, long checkid, long processid) {
         ActivitiProcess ap = ActivitiProcess.findById(processid);
