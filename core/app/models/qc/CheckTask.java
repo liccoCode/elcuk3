@@ -433,7 +433,7 @@ public class CheckTask extends Model {
     public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<CheckTaskAQLDTO>();
 
     @Lob
-    public String aqlBadDescs = "{}";
+    public String aqlBadDescs = "[]";
 
     public enum FLAG {
         ARRAY_TO_STR,
