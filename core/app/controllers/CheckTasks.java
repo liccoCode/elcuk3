@@ -197,9 +197,9 @@ public class CheckTasks extends Controller {
         check.validateRequired();
         check.validateRight();
         if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
-
         if(Validation.hasErrors()) {
             check = old;
+            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
             render("CheckTasks/show.html", check);
         }
         check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
