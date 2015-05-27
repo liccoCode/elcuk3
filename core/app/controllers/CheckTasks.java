@@ -3,16 +3,15 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.CategoryAssignManagement;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.product.Team;
 import models.product.Whouse;
 import models.qc.CheckTask;
-import models.qc.CheckTaskAssign;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -20,14 +19,11 @@ import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -100,48 +96,6 @@ public class CheckTasks extends Controller {
         List<CheckTask> checkRepeats = p.checkRepeat();
 
         render(p, checks, checkeds, checkRepeats, records);
-    }
-
-    /**
-     * 质检员任务分配
-     */
-    @Check("checktasks.taskassign")
-    public static void taskassign() {
-        CheckTaskAssign checkTaskAssign = new CheckTaskAssign();
-        User currUser = Login.current();
-        checkTaskAssign.query();
-        List<User> userList = User.findAll();
-        List<String> users = new ArrayList<String>();
-        for(User u : userList) users.add(u.username);
-        renderArgs.put("users", J.json(users));
-        List<ElcukRecord> records = ElcukRecord.find("action like '质检员任务分配' ORDER BY createAt DESC")
-                .fetch();
-        render(checkTaskAssign, records, currUser);
-    }
-
-    public static void createTaskAssign(CheckTaskAssign c) {
-        Validation.required("名称", c.userName);
-        if(!c.isNameCorrect(c.userName))
-            Validation.addError("姓名", "用户名输入错误");
-        if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        c.createTaskAssign();
-        renderJSON(true);
-    }
-
-    public static void updateTaskAssign(CheckTaskAssign c, Long id) {
-        Validation.required("名称", c.userName);
-        if(!c.isNameCorrect(c.userName))
-            Validation.addError("姓名", "用户名输入错误");
-        if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        CheckTaskAssign.updateTaskAssign(c, id);
-        renderJSON(true);
-    }
-
-    public static void deleteAssignById(Long assid) {
-        CheckTaskAssign.deleteAssignById(assid);
-        renderJSON(new Ret());
     }
 
     /**

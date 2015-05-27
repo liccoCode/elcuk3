@@ -1,40 +1,40 @@
 #{extends 'main.html'/}
 #{set title:'质检任务分配'/}
 #{set 'moreScripts'}
-    #{script 'checktasks/taskassign.coffee'/}
+    #{script 'categoryinfos/taskassign.coffee'/}
 #{/set}
 
 #{flash_alert /}
 #{info_row title:'质检任务分配' /}
 
 <div class="row-fluid">
-  <form action="@{CheckTasks.taskassign()}" id="data_table">
+  <form action="@{CategoryInfos.taskassign()}" id="data_table">
     <table class="table table-condensed table-bordered">
       <tr>
         <th width="30%">Team组</th>
         <th width="30%">Category</th>
         <th width="40%" colspan="3">负责人</th>
       </tr>
-    #{list items:checkTaskAssign.teamlist, as:'team'}
+    #{list items:categoryAssignManagement.teamlist, as:'team'}
     <tr>
-        #{if checkTaskAssign.buildCategory(team.id).size()==0}
+        #{if categoryAssignManagement.buildCategory(team.id).size()==0}
           <td>${team.name}</td>
           <td></td>
           <td colspan="3" align="right"><input type="button" class="btn btn-success" value="添加" id="create_btn"></td>
         </tr>
         #{/if}
-        #{if checkTaskAssign.buildCategory(team.id).size()>0}
-          <td rowspan="${checkTaskAssign.buildMaxCategoryLength(team.id)}">${team.name}</td>
-            #{list items:checkTaskAssign.buildCategory(team.id), as:'ca'}
-                #{if checkTaskAssign.buildUserList(team.id, ca.categoryId).size()==0}
+        #{if categoryAssignManagement.buildCategory(team.id).size()>0}
+          <td rowspan="${categoryAssignManagement.buildMaxCategoryLength(team.id)}">${team.name}</td>
+            #{list items:categoryAssignManagement.buildCategory(team.id), as:'ca'}
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()==0}
                 <td>
                 #{/if}
-                #{if checkTaskAssign.buildUserList(team.id, ca.categoryId).size()>0}
-                <td rowspan="${checkTaskAssign.buildUserList(team.id, ca.categoryId).size()}">
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()>0}
+                <td rowspan="${categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()}">
                 #{/if}
             ${ca.categoryId} ${ca.name}
             </td>
-                #{if checkTaskAssign.buildUserList(team.id, ca.categoryId).size()==0}
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()==0}
                   <td></td>
                   <td></td>
                   <td colspan="1" align="right">
@@ -43,8 +43,8 @@
                   </td>
                   </tr>
                 #{/if}
-                #{if checkTaskAssign.buildUserList(team.id, ca.categoryId).size()>0}
-                    #{list items:checkTaskAssign.buildUserList(team.id, ca.categoryId), as:'ass'}
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()>0}
+                    #{list items:categoryAssignManagement.buildUserList(team.id, ca.categoryId), as:'ass'}
                       <td>
                       ${ass.user.username}
                       </td>
@@ -93,7 +93,7 @@
     <h3>添加质检员</h3>
   </div>
   <div class="modal-body">
-  #{form @CheckTasks.createTaskAssign(), id:'create_form'}
+  #{form @CategoryInfos.createTaskAssign(), id:'create_form'}
     <dl class="dl-horizontal">
       <dt>名称</dt>
       <dd>
@@ -130,7 +130,7 @@
     <h3>修改质检员</h3>
   </div>
   <div class="modal-body">
-  #{form @CheckTasks.updateTaskAssign(), id:'update_form'}
+  #{form @CategoryInfos.updateTaskAssign(), id:'update_form'}
     <dl class="dl-horizontal">
       <dt>名称</dt>
       <dd>

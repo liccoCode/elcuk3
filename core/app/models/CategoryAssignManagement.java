@@ -1,10 +1,7 @@
-package models.qc;
+package models;
 
 import controllers.Login;
 import helper.DBUtils;
-import models.ElcukRecord;
-import models.Role;
-import models.User;
 import models.product.Category;
 import models.product.Team;
 import play.db.helper.SqlSelect;
@@ -23,7 +20,7 @@ import java.util.Map;
  * Created by licco on 15/5/25.
  */
 @Entity
-public class CheckTaskAssign extends Model {
+public class CategoryAssignManagement extends Model {
 
     private static final long serialVersionUID = 65458353246678553L;
 
@@ -47,7 +44,7 @@ public class CheckTaskAssign extends Model {
     public List<String> categorys;
 
     @Transient
-    public List<CheckTaskAssign> assigns;
+    public List<CategoryAssignManagement> assigns;
 
     @Transient
     public List<Team> teamlist;
@@ -58,7 +55,7 @@ public class CheckTaskAssign extends Model {
     public int buildMaxCategoryLength(Long teamId) {
         SqlSelect sql = new SqlSelect()
                 .select("c.categoryId").from("Category c")
-                .leftJoin("CheckTaskAssign a ON a.category_categoryId = c.categoryId")
+                .leftJoin("CategoryAssignManagement a ON a.category_categoryId = c.categoryId")
                 .where("c.team_id = ?")
                 .orderBy("c.categoryId")
                 .param(teamId);
@@ -72,8 +69,9 @@ public class CheckTaskAssign extends Model {
     }
 
 
-    public List<CheckTaskAssign> buildUserList(Long teamId, String categoryId) {
-        List<CheckTaskAssign> list = CheckTaskAssign.find("team.id=? AND category.categoryId=?", teamId, categoryId)
+    public List<CategoryAssignManagement> buildUserList(Long teamId, String categoryId) {
+        List<CategoryAssignManagement> list = CategoryAssignManagement
+                .find("team.id=? AND category.categoryId=?", teamId, categoryId)
                 .fetch();
         this.assigns = list;
         return list;
@@ -99,9 +97,9 @@ public class CheckTaskAssign extends Model {
     }
 
     public static List<Long> showCategoryByUserName(String userName) {
-        List<CheckTaskAssign> cList = CheckTaskAssign.find("user.username = ?", userName).fetch();
+        List<CategoryAssignManagement> cList = CategoryAssignManagement.find("user.username = ?", userName).fetch();
         List<Long> categoryList = new ArrayList<Long>();
-        for(CheckTaskAssign cassign : cList) {
+        for(CategoryAssignManagement cassign : cList) {
             categoryList.add(Long.parseLong(cassign.category.categoryId));
         }
         return categoryList;
@@ -122,7 +120,7 @@ public class CheckTaskAssign extends Model {
     }
 
     public static void deleteAssignById(Long assid) {
-        CheckTaskAssign c = CheckTaskAssign.findById(assid);
+        CategoryAssignManagement c = CategoryAssignManagement.findById(assid);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         new ElcukRecord("质检员任务分配",
                 "操作人:" + c.createrId.username + " 操作时间:" + sdf.format(c.createDate) + " 删除" + c.category.categoryId +
@@ -130,8 +128,8 @@ public class CheckTaskAssign extends Model {
         c.delete();
     }
 
-    public static void updateTaskAssign(CheckTaskAssign c, Long id) {
-        CheckTaskAssign old = CheckTaskAssign.findById(id);
+    public static void updateTaskAssign(CategoryAssignManagement c, Long id) {
+        CategoryAssignManagement old = CategoryAssignManagement.findById(id);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         StringBuilder message = new StringBuilder();
         if(!old.user.username.equals(c.userName)) {

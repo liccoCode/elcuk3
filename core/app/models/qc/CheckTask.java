@@ -3,6 +3,7 @@ package models.qc;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.CategoryAssignManagement;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -1089,11 +1090,12 @@ public class CheckTask extends Model {
 
     public String showChecktor() {
         String id = this.units.product.category.categoryId;
-        SqlSelect sql = new SqlSelect().select("CheckTaskAssign").from("CheckTaskAssign ct").leftJoin("");
+        SqlSelect sql = new SqlSelect().select("CategoryAssignManagement").from("CategoryAssignManagement ct").leftJoin("");
         String name = "";
-        List<CheckTaskAssign> checkTaskAssigns = CheckTaskAssign.find("category.categoryId=?", id).fetch();
-        if(checkTaskAssigns.size()>0){
-            for(CheckTaskAssign c : checkTaskAssigns){
+        List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
+                .find("category.categoryId=?", id).fetch();
+        if(categoryAssignManagements.size()>0){
+            for(CategoryAssignManagement c : categoryAssignManagements){
                 name += c.user.username + ",";
             }
             return name.substring(0, name.length()-1);
