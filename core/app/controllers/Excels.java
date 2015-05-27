@@ -2,12 +2,16 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
+<<<<<<< HEAD
 import ext.PaymentHelper;
 import helper.Caches;
+=======
+import helper.*;
+>>>>>>> 9100cd91d4acd36e71fa667ef66f7506127910a3
 import helper.Currency;
-import helper.Webs;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.RevenueAndCostDetail;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
@@ -395,6 +399,25 @@ public class Excels extends Controller {
         }
     }
 
+    /**
+     * 主营业务收入与成本报表(Amazon)
+     */
+    public static void revenueAndCostReport(Integer year, Integer month) {
+        Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
+        List<RevenueAndCostDetail> dtos = RevenueAndCostDetail
+                .find("create_at BETWEEN ? AND ?", Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        if(dtos != null && dtos.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "主营业务收入与成本报表(Amazon).xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(dtos, target, formatter);
+        } else {
+            HTTP.get(String.format("%s?year=%s&month=%s", RevenueAndCostDetail.CALCULATE_URL, year, month));
+            renderText("正在计算中...请稍后再来查看.");
+        }
+    }
+
     public static void procureUnitSearchExcel(ProcurePost p) {
         List<ProcureUnit> dtos = p.query();
         if(dtos == null || dtos.size() == 0) {
@@ -409,5 +432,4 @@ public class Excels extends Controller {
             render(dtos, p);
         }
     }
-
 }

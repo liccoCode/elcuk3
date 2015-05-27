@@ -3,6 +3,6 @@
 
   <option value="0" selected>月份</option>
 #{list items:1..12, as:'i'}
-  <option value="${i}">${i}</option>
+  <option ${_value ? (i == _value ? 'selected' : '') : ''} value="${i}">${i}</option>
 #{/list}
 </select>
