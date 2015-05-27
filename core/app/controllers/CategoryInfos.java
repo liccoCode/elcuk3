@@ -45,8 +45,8 @@ public class CategoryInfos extends Controller {
     /**
      * 质检员任务分配
      */
-    @Check("categoryinfos.taskassign")
-    public static void taskassign() {
+    @Check("categoryinfos.categoryassign")
+    public static void categoryassign() {
         CategoryAssignManagement categoryAssignManagement = new CategoryAssignManagement();
         User currUser = Login.current();
         categoryAssignManagement.query();

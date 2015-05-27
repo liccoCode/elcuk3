@@ -9,7 +9,7 @@ $ ->
     $('#create_modal').modal('show')
   ).on('click', '#delete_btn', ->
     return unless confirm("确认删除#{$(@).data('assname')}?")
-    $.post('/checktasks/deleteAssignById', {assid: $(@).data('assid')},
+    $.post('/categoryinfos/deleteAssignById', {assid: $(@).data('assid')},
       (r) ->
         if(r.flag)
           alert("删除成功.", $('#data_table').submit())

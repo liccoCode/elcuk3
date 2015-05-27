@@ -1,14 +1,14 @@
 #{extends 'main.html'/}
 #{set title:'质检任务分配'/}
 #{set 'moreScripts'}
-    #{script 'categoryinfos/taskassign.coffee'/}
+    #{script 'categoryinfos/categoryassign.coffee'/}
 #{/set}
 
 #{flash_alert /}
 #{info_row title:'质检任务分配' /}
 
 <div class="row-fluid">
-  <form action="@{CategoryInfos.taskassign()}" id="data_table">
+  <form action="@{CategoryInfos.categoryassign()}" id="data_table">
     <table class="table table-condensed table-bordered">
       <tr>
         <th width="30%">Team组</th>
