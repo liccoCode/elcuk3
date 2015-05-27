@@ -1090,10 +1090,9 @@ public class CheckTask extends Model {
 
     public String showChecktor() {
         String id = this.units.product.category.categoryId;
-        SqlSelect sql = new SqlSelect().select("CategoryAssignManagement").from("CategoryAssignManagement ct").leftJoin("");
         String name = "";
         List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
-                .find("category.categoryId=?", id).fetch();
+                .find("category.categoryId=? AND isCharge =1", id).fetch();
         if(categoryAssignManagements.size()>0){
             for(CategoryAssignManagement c : categoryAssignManagements){
                 name += c.user.username + ",";
