@@ -3,6 +3,7 @@ package models.qc;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.CategoryAssignManagement;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -19,6 +20,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -1084,6 +1086,22 @@ public class CheckTask extends Model {
             totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
         }
         return totalWeight;
+    }
+
+    public String showChecktor() {
+        String id = this.units.product.category.categoryId;
+        SqlSelect sql = new SqlSelect().select("CategoryAssignManagement").from("CategoryAssignManagement ct").leftJoin("");
+        String name = "";
+        List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
+                .find("category.categoryId=?", id).fetch();
+        if(categoryAssignManagements.size()>0){
+            for(CategoryAssignManagement c : categoryAssignManagements){
+                name += c.user.username + ",";
+            }
+            return name.substring(0, name.length()-1);
+        }else {
+            return "";
+        }
     }
 
 }
