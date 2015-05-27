@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -8,8 +9,10 @@ import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.product.Team;
 import models.product.Whouse;
 import models.qc.CheckTask;
+import models.qc.CheckTaskAssign;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -17,11 +20,15 @@ import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +100,93 @@ public class CheckTasks extends Controller {
         List<CheckTask> checkRepeats = p.checkRepeat();
 
         render(p, checks, checkeds, checkRepeats, records);
+    }
+
+    /**
+     * 质检员任务分配
+     */
+    @Check("checktasks.taskassign")
+    public static void taskassign() {
+        CheckTaskAssign checkTaskAssign = new CheckTaskAssign();
+        User currUser = Login.current();
+        checkTaskAssign.query();
+        List<User> userList = User.findAll();
+        List<String> users = new ArrayList<String>();
+        for(User u : userList) users.add(u.username);
+        renderArgs.put("users", J.json(users));
+        List<ElcukRecord> records = ElcukRecord.find("action like '质检员任务分配' ORDER BY createAt DESC")
+                .fetch();
+        render(checkTaskAssign, records, currUser);
+    }
+
+    public static void createTaskAssign(CheckTaskAssign c) {
+        Validation.required("名称", c.userName);
+        if(!c.isNameCorrect(c.userName))
+            Validation.addError("姓名", "用户名输入错误");
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        c.user = User.findByUserName(c.userName);
+        c.createDate = new Date();
+        c.createrId = Login.current();
+        c.save();
+        StringBuilder message = new StringBuilder("操作人:" + c.createrId.username + " 操作时间:" + formatter.format(c.createDate)
+                + " 添加" + c.category.categoryId + " (" + c.category.name + ") 品线负责人为：" + c.user.username);
+        if(c.isCharge)
+            message.append(",且为主要负责人。");
+        new ElcukRecord("质检员任务分配", message.toString(), String.valueOf(c.id)).save();
+        renderJSON(true);
+    }
+
+    public static void updateTaskAssign(CheckTaskAssign c, Long id) {
+        Validation.required("名称", c.userName);
+        if(!c.isNameCorrect(c.userName))
+            Validation.addError("姓名", "用户名输入错误");
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+
+        CheckTaskAssign old = CheckTaskAssign.findById(id);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        StringBuilder message = new StringBuilder();
+        if(!old.user.username.equals(c.userName)) {
+            message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
+                    c.category.categoryId + "(" + c.category.name + ") 品线负责人从：" + old.user.username + "改成 " +
+                    c.userName);
+        }
+        if(old.isCharge != c.isCharge) {
+            if(message.length() > 0) {
+                if(c.isCharge) {
+                    message.append(",且修改为主要负责人。");
+                } else {
+                    message.append(",且取消其主要负责人。");
+                }
+            } else {
+                if(c.isCharge) {
+                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
+                            c.category.categoryId + "(" + c.category.name + ") 品线 " + old.user.username + "为主要负责人。");
+                } else {
+                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
+                            c.category.categoryId + "(" + c.category.name + ") 品线" + old.user.username + " 取消其主要负责人。");
+                }
+            }
+        }
+        if(message.length() > 0) {
+            old.user = User.findByUserName(c.userName);
+            old.isCharge = c.isCharge;
+            old.save();
+            new ElcukRecord("质检员任务分配", message.toString(), String.valueOf(c.id)).save();
+        }
+        renderJSON(true);
+    }
+
+    public static void deleteAssignById(Long assid) {
+        CheckTaskAssign c = CheckTaskAssign.findById(assid);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        new ElcukRecord("质检员任务分配",
+                "操作人:" + c.createrId.username + " 操作时间:" + sdf.format(c.createDate) + " 删除" + c.category.categoryId +
+                        "(" + c.category.name + ") 品线负责人：" + c.user.username, String.valueOf(c.id)).save();
+        c.delete();
+        renderJSON(new Ret());
     }
 
     /**
@@ -286,7 +380,7 @@ public class CheckTasks extends Controller {
      * 调整运营的数据并提交流程
      *
      * @param check
-     * @param id
+     * @param processid
      * @param unitid
      * @param checkid
      * @param oldPlanQty
@@ -322,7 +416,7 @@ public class CheckTasks extends Controller {
      * 还原结束流程
      *
      * @param check
-     * @param id
+     * @param checkid
      */
     public static void endactiviti(CheckTask check, long checkid, long processid) {
         ActivitiProcess ap = ActivitiProcess.findById(processid);

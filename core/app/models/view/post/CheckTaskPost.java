@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.qc.CheckTask;
+import models.qc.CheckTaskAssign;
 import models.qc.SkuCheck;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -178,11 +179,14 @@ public class CheckTaskPost extends Post<CheckTask> {
             params.add(word);
         }
 
-        if(StringUtils.isNotBlank(this.checkor)) {
-            sbd.append(" AND c.shipwhouse.user.username=? ");
-            params.add(this.checkor);
+        if(StringUtils.isNotBlank(this.checkor)){
+            if(CheckTaskAssign.showCategoryByUserName(this.checkor).size() > 0) {
+                sbd.append(" AND c.units.product.category.categoryId IN " + SqlSelect.inlineParam(CheckTaskAssign
+                        .showCategoryByUserName(this.checkor)));
+            }else {
+                sbd.append(" AND c.units.product.category.categoryId = 0 ");
+            }
         }
-
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 
