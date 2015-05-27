@@ -597,4 +597,6 @@ public class User extends Model {
     public List<Notification> unNotifiedNotification() {
         return Notification.find("user=? AND state = 'UNCHECKED' ORDER BY createAt", this).fetch();
     }
+
+
 }
