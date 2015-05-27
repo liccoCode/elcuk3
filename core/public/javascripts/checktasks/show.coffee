@@ -170,5 +170,23 @@ $ ->
       value *= $(@).val()
     )
     $returnValue.text((value / 1000000).toFixed(2))
+  ).on('click', '#more_desc_btn',(r) ->
+    $btn = $(@)
+    size = $btn.data('descsize')
+    $table = $("#aqlTable")
+    $newRow = "<tr><td>#{size + 1}</td><td><input type='text' name='check.aqlBadDesc[#{size}].badDesc' value=''></td><td>"
+    $newRow += "<span class='span3'><input type='checkbox' name='check.aqlBadDesc[#{size}].inspectionResult[0]' value='CR'> CR</span>"
+    $newRow += "<span class='span3'><input type='checkbox' name='check.aqlBadDesc[#{size}].inspectionResult[1]' value='MAJ'> MAJ</span>"
+    $newRow += "<span class='span3'><input type='checkbox' name='check.aqlBadDesc[#{size}].inspectionResult[2]' value='MIN'> MIN</span>"
+    $newRow += "</span></td><td><a class='btn btn-danger' name='remove_desc_btn'><i class='icon-remove'></i> 删除</a></td></tr>"
+    $table.append($newRow)
+    $btn.data('descsize', size + 1)
+  ).on('click', '[name=remove_desc_btn]', (r) ->
+    $btn = $(@)
+    $btn.parent("td").parent().remove()
   )
+
+  $(document).ready ->
+    $('#more_desc_btn').trigger('click') if $("#aqlTable > tbody > tr").length == 1
+
 

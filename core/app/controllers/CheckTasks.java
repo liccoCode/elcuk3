@@ -125,16 +125,7 @@ public class CheckTasks extends Controller {
             Validation.addError("姓名", "用户名输入错误");
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        c.user = User.findByUserName(c.userName);
-        c.createDate = new Date();
-        c.createrId = Login.current();
-        c.save();
-        StringBuilder message = new StringBuilder("操作人:" + c.createrId.username + " 操作时间:" + formatter.format(c.createDate)
-                + " 添加" + c.category.categoryId + " (" + c.category.name + ") 品线负责人为：" + c.user.username);
-        if(c.isCharge)
-            message.append(",且为主要负责人。");
-        new ElcukRecord("质检员任务分配", message.toString(), String.valueOf(c.id)).save();
+        c.createTaskAssign();
         renderJSON(true);
     }
 
@@ -144,48 +135,12 @@ public class CheckTasks extends Controller {
             Validation.addError("姓名", "用户名输入错误");
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
-
-        CheckTaskAssign old = CheckTaskAssign.findById(id);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        StringBuilder message = new StringBuilder();
-        if(!old.user.username.equals(c.userName)) {
-            message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
-                    c.category.categoryId + "(" + c.category.name + ") 品线负责人从：" + old.user.username + "改成 " +
-                    c.userName);
-        }
-        if(old.isCharge != c.isCharge) {
-            if(message.length() > 0) {
-                if(c.isCharge) {
-                    message.append(",且修改为主要负责人。");
-                } else {
-                    message.append(",且取消其主要负责人。");
-                }
-            } else {
-                if(c.isCharge) {
-                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
-                            c.category.categoryId + "(" + c.category.name + ") 品线 " + old.user.username + "为主要负责人。");
-                } else {
-                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
-                            c.category.categoryId + "(" + c.category.name + ") 品线" + old.user.username + " 取消其主要负责人。");
-                }
-            }
-        }
-        if(message.length() > 0) {
-            old.user = User.findByUserName(c.userName);
-            old.isCharge = c.isCharge;
-            old.save();
-            new ElcukRecord("质检员任务分配", message.toString(), String.valueOf(c.id)).save();
-        }
+        CheckTaskAssign.updateTaskAssign(c, id);
         renderJSON(true);
     }
 
     public static void deleteAssignById(Long assid) {
-        CheckTaskAssign c = CheckTaskAssign.findById(assid);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        new ElcukRecord("质检员任务分配",
-                "操作人:" + c.createrId.username + " 操作时间:" + sdf.format(c.createDate) + " 删除" + c.category.categoryId +
-                        "(" + c.category.name + ") 品线负责人：" + c.user.username, String.valueOf(c.id)).save();
-        c.delete();
+        CheckTaskAssign.deleteAssignById(assid);
         renderJSON(new Ret());
     }
 
@@ -201,7 +156,7 @@ public class CheckTasks extends Controller {
 
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -231,7 +186,7 @@ public class CheckTasks extends Controller {
     public static void showactiviti(Long id) {
         if(id == null) return;
         CheckTask check = CheckTask.findById(id);
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -275,7 +230,7 @@ public class CheckTasks extends Controller {
             check = old;
             render("CheckTasks/show.html", check);
         }
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.ARRAY_TO_STR);
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
         old.update(check);
         flash.success("更新成功");
         redirect("/CheckTasks/show/" + id);
@@ -291,12 +246,12 @@ public class CheckTasks extends Controller {
         check.validateRequired();
         check.validateRight();
         if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
-
         if(Validation.hasErrors()) {
             check = old;
+            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
             render("CheckTasks/show.html", check);
         }
-        check.arryParamSetUPForQtInfo(CheckTask.FLAG.ARRAY_TO_STR);
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
         old.fullUpdate(check, Secure.Security.connected());
         flash.success("更新成功");
         show(id);
