@@ -40,6 +40,9 @@
        data-url="@{ShipmentReports.countShipWeightByMarket()}"></div>
 </div>
 
+<ul>
+  <li>导出单个 SKU 的运输重量报表</li>
+</ul>
 <div class="row-fluid pull-right">
   <div class="span12 bs-docs-form">
     <form class="search_form" action="@{Excels.exportShipmentWeighReport()}" target="_blank">
@@ -90,6 +93,10 @@
   </div>
 </div>
 
+
+<ul>
+  <li>运输重量与费用统计报表</li>
+</ul>
 <div class="row-fluid pull-right">
   <div class="span12 bs-docs-form">
     <form class="search_form" action="@{Excels.exportShipmentCostAndWeightReport()}" target="_blank">
@@ -131,7 +138,8 @@
 
     #{power.ck "shipmentscost"}
       <div class="inline">
-        <button class="btn btn-success" type="submit" content="根据条件导出单个 SKU 的运输重量到 Excel" placement='right' rel="popover">
+        <button class="btn btn-success" type="submit" content="根据条件导出运输单的费用及重量到 Excel" placement='right'
+                rel="popover">
           <i class="icon-download-alt"></i>下载 Excel
         </button>
       </div>
