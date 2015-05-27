@@ -2,7 +2,6 @@
 #{set title:"运营报表下载" /}
 #{set 'moreScripts'}
     #{script 'jquery.dataTables.js'/}
-    #{script 'profits/index.coffee'/}
     #{script 'ReportDownloads/index.coffee'/}
 #{/set}
 
@@ -25,7 +24,7 @@
     </div>
 
     <div class="inline">
-        #{select_enum name:'p.reporttype', items:models.ReportRecord.RT.values(), value:p.reporttype}
+        #{select_enum name:'p.reporttype', items:models.view.post.ReportPost.saleReportTypes(), value:p.reporttype}
           <option value="">报表类型</option>
         #{/select_enum}
     </div>
@@ -39,7 +38,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <table id="profit" class="table table-condensed table-bordered">
+    <table id="reports" class="table table-condensed table-bordered">
       <thead>
       <tr>
         <th>序号</th>

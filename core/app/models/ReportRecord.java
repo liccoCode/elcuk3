@@ -47,9 +47,9 @@ public class ReportRecord extends Model {
     public RT reporttype;
 
 
-    /*
-  * 报表类型
-  */
+    /**
+     * 报表类型
+     */
     public enum RT {
         /**
          * 月度销售报表汇总
@@ -129,9 +129,22 @@ public class ReportRecord extends Model {
             public String label() {
                 return "库存占用资金报表";
             }
+        },
+
+        REVENUEANDCOST {
+            @Override
+            public String label() {
+                return "主营业务收入与成本报表";
+            }
         };
 
         public abstract String label();
+        /**
+         * Warning:
+         * <p/>
+         * 为了复用 ReportPost 类, 请务必新将 新添加的报表类型 按照 报表类型 添加到 models.view.post.ReportPost 类当中的
+         * saleReportTypes(销售报表) 方法 或 applyReportTypes(财务) 方法内。
+         */
     }
 
 
