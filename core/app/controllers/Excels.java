@@ -2,12 +2,8 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-<<<<<<< HEAD
-import ext.PaymentHelper;
 import helper.Caches;
-=======
 import helper.*;
->>>>>>> 9100cd91d4acd36e71fa667ef66f7506127910a3
 import helper.Currency;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
