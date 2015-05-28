@@ -560,12 +560,11 @@ public class CheckTask extends Model {
                     //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
                     newtask.qcType = T.SELF;
                 }
-
+                newtask.checkor = newtask.showChecktor();
                 //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
                 Whouse wh = searchWarehouse(punit);
                 if(wh != null && wh.user != null) {
                     newtask.shipwhouse = wh;
-                    newtask.checkor = wh.user.username;
                 }
 
                 newtask.creatat = new Date();
