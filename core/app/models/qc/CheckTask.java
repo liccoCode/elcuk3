@@ -1092,12 +1092,14 @@ public class CheckTask extends Model {
         String name = "";
         List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
                 .find("category.categoryId=? AND isCharge =1", id).fetch();
-        if(categoryAssignManagements.size()>0){
-            for(CategoryAssignManagement c : categoryAssignManagements){
-                name += c.user.username + ",";
+        if(categoryAssignManagements.size() > 0) {
+            for(CategoryAssignManagement c : categoryAssignManagements) {
+                if(c.isQCrole()) {
+                    name += c.user.username + ",";
+                }
             }
-            return name.substring(0, name.length()-1);
-        }else {
+            return name.length() > 0 ? name.substring(0, name.length() - 1) : "";
+        } else {
             return "";
         }
     }

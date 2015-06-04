@@ -1,11 +1,11 @@
 #{extends 'main.html'/}
-#{set title:'各部门品线负责人管理'/}
+#{set title:'部门品线负责人管理'/}
 #{set 'moreScripts'}
     #{script 'categoryinfos/categoryassign.coffee'/}
 #{/set}
 
 #{flash_alert /}
-#{info_row title:'各部门品线负责人管理' /}
+#{info_row title:'部门品线负责人管理' /}
 
 <div class="row-fluid">
   <form action="@{CategoryInfos.categoryassign()}" id="data_table">
