@@ -71,7 +71,7 @@ public class CategoryAssignManagement extends Model {
 
     public List<CategoryAssignManagement> buildUserList(Long teamId, String categoryId) {
         List<CategoryAssignManagement> list = CategoryAssignManagement
-                .find("team.id=? AND category.categoryId=?", teamId, categoryId)
+                .find("team.id=? AND category.categoryId=? order by user.username", teamId, categoryId)
                 .fetch();
         this.assigns = list;
         return list;
@@ -116,13 +116,13 @@ public class CategoryAssignManagement extends Model {
                         + this.category.categoryId + " (" + this.category.name + ") 品线负责人为：" + this.user.username);
         if(this.isCharge)
             message.append(",且为主要负责人。");
-        new ElcukRecord("质检员任务分配", message.toString(), String.valueOf(this.id)).save();
+        new ElcukRecord("部门品线负责人管理", message.toString(), String.valueOf(this.id)).save();
     }
 
     public static void deleteAssignById(Long assid) {
         CategoryAssignManagement c = CategoryAssignManagement.findById(assid);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        new ElcukRecord("质检员任务分配",
+        new ElcukRecord("部门品线负责人管理",
                 "操作人:" + c.createrId.username + " 操作时间:" + sdf.format(c.createDate) + " 删除" + c.category.categoryId +
                         "(" + c.category.name + ") 品线负责人：" + c.user.username, String.valueOf(c.id)).save();
         c.delete();
@@ -158,7 +158,22 @@ public class CategoryAssignManagement extends Model {
             old.user = User.findByUserName(c.userName);
             old.isCharge = c.isCharge;
             old.save();
-            new ElcukRecord("质检员任务分配", message.toString(), String.valueOf(c.id)).save();
+            new ElcukRecord("部门品线负责人管理", message.toString(), String.valueOf(c.id)).save();
         }
+    }
+
+    /**
+     * 判断是否质检部门人员
+     *
+     * @return
+     */
+    public boolean isQCrole() {
+        boolean temp = false;
+        for(Role role : this.user.roles) {
+            if(role.roleName.indexOf("质检") >= 0) {
+                temp = true;
+            }
+        }
+        return temp;
     }
 }
