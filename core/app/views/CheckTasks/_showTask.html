@@ -1,5 +1,5 @@
 <tr>
-  <td colspan="11">
+  <td colspan="12">
   #{info_row}
     <li>基础信息</li>
   #{/info_row}
@@ -30,34 +30,38 @@
 </tr>
 <tr>
   <th>实际交货数量</th>
-  <td colspan="2">
+  <td colspan="3">
     <input type="text" name="check.qty" class="input-mini" value="${check.qty}">
   </td>
 
   <th>实际交货日期</th>
-  <td colspan="3">${check.units?.attrs.deliveryDate}</td>
+  <td colspan="2">${check.units?.attrs.deliveryDate}</td>
 
   <th>处理方式</th>
   <td colspan="4">${check.dealway?.label()}</td>
 </tr>
 <tr>
   <th>实际抽检数量</th>
-  <td colspan="2"><input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}"></td>
+  <td colspan="3">
+    <input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}">
+  </td>
 
   <th>不合格数量</th>
-  <td colspan="3"><input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}"></td>
+  <td colspan="2">
+    <input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}">
+  </td>
 
   <th>质检方式</th>
   <td colspan="4">${check.qcType?.label()}</td>
 </tr>
 <tr>
   <th>质检开始时间</th>
-  <td colspan="5">
+  <td colspan="3">
     <input size="16" type="text" value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" readonly class="form_datetime"
            name="from">
   </td>
   <th>质检完成时间</th>
-  <td colspan="6">
+  <td colspan="7">
     <input size="16" type="text" value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" readonly
            class="form_datetime" name="to">
   </td>
@@ -100,7 +104,7 @@
 </tr>
 
 <tr>
-  <td colspan="11">
+  <td colspan="12">
   #{info_row}
     <li>AQL 质检</li>
   #{/info_row}
@@ -166,7 +170,7 @@
 </tr>
 
 <tr>
-  <td colspan="11">
+  <td colspan="12">
     <table class="table table-hover table-condensed table-bordered" id="aqlTable">
       <tr>
         <th style="width: 10%">序号</th>
@@ -200,7 +204,7 @@
 </tr>
 
 <tr>
-  <td colspan="11">
+  <td colspan="12">
   #{info_row}
     <li>标准箱质检信息</li>
   #{/info_row}
@@ -268,7 +272,7 @@
 </tr>
 
 <tr>
-  <td colspan="11">
+  <td colspan="12">
   #{info_row}
     <li>尾箱质检信息</li>
   #{/info_row}
