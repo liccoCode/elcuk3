@@ -1,7 +1,9 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import helper.Webs;
+import models.CategoryAssignManagement;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
@@ -22,6 +24,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -287,6 +290,7 @@ public class CheckTasks extends Controller {
      * 调整运营的数据并提交流程
      *
      * @param check
+     * @param processid
      * @param unitid
      * @param checkid
      * @param oldPlanQty
@@ -322,6 +326,7 @@ public class CheckTasks extends Controller {
      * 还原结束流程
      *
      * @param check
+     * @param checkid
      */
     public static void endactiviti(CheckTask check, long checkid, long processid) {
         ActivitiProcess ap = ActivitiProcess.findById(processid);

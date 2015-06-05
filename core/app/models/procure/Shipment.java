@@ -1499,4 +1499,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         return null;
     }
+
+    public String showTrackNo() {
+        String showTrackNo = "";
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        for(String trackNo : this.tracknolist) {
+            showTrackNo += trackNo + ",";
+        }
+        return showTrackNo.substring(0, showTrackNo.length() - 1);
+    }
 }
