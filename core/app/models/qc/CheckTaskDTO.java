@@ -12,12 +12,12 @@ public class CheckTaskDTO implements Serializable {
     /**
      * 箱数
      */
-    public String boxNum;
+    public int boxNum;
 
     /**
      * 个数
      */
-    public String num;
+    public int num;
 
     /**
      * 单箱重量

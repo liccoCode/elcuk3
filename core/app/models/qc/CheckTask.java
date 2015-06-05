@@ -1035,18 +1035,36 @@ public class CheckTask extends Model {
     }
 
     /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成 List
+     *
+     * @param flag
+     */
+    public void arryParamSetUPForQtInfo(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.standBoxQctInfo = J.json(this.fixNullStr(this.standBoxQctInfos));
+            this.tailBoxQctInfo = J.json(this.fixNullStr(this.tailBoxQctInfos));
+        } else {
+            if(StringUtils.isNotBlank(this.standBoxQctInfo)) this.standBoxQctInfos = JSON.parseArray(this
+                    .standBoxQctInfo, CheckTaskDTO.class);
+            if(StringUtils.isNotBlank(this.tailBoxQctInfo)) this.tailBoxQctInfos = JSON.parseArray(this
+                    .tailBoxQctInfo, CheckTaskDTO.class);
+        }
+    }
+
+    /**
      * 计算总箱数
      *
      * @return
      */
     public Integer totalBoxNum() {
-        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Integer totalBoxNum = 0;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+            totalBoxNum += checkTaskDTO.boxNum;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalBoxNum += Integer.parseInt(checkTaskDTO.boxNum);
+            totalBoxNum += checkTaskDTO.boxNum;
         }
         return totalBoxNum;
     }
@@ -1057,15 +1075,15 @@ public class CheckTask extends Model {
      * @return
      */
     public Double totalVolume() {
-        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Double totalVolume = 0d;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
-                    (checkTaskDTO.boxNum) / 1000000;
+            totalVolume +=
+                    checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * Float.parseFloat
-                    (checkTaskDTO.boxNum) / 1000000;
+            totalVolume +=
+                    checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
         }
         return totalVolume;
     }
@@ -1076,13 +1094,13 @@ public class CheckTask extends Model {
      * @return
      */
     public Double totalWeight() {
-        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Double totalWeight = 0d;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+            totalWeight += checkTaskDTO.singleBoxWeight * checkTaskDTO.boxNum;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalWeight += checkTaskDTO.singleBoxWeight * Float.parseFloat(checkTaskDTO.boxNum);
+            totalWeight += checkTaskDTO.singleBoxWeight * checkTaskDTO.boxNum;
         }
         return totalWeight;
     }
@@ -1103,5 +1121,4 @@ public class CheckTask extends Model {
             return "";
         }
     }
-
 }

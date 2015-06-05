@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class ProcureUnitShipPost extends Post<ProcureUnit> {
     private static final long serialVersionUID = -8171825936576265590L;
-    private static Pattern SHIPITEMS_ALL_NUM_PATTERN = Pattern.compile("[0-9]*");
+    private static Pattern SHIPITEMS_ALL_NUM_PATTERN = Pattern.compile("^-?[1-9]\\d*$");
 
     public ProcureUnitShipPost() {
         DateTime now = new DateTime();

@@ -198,6 +198,12 @@ public class Selling extends GenericModel {
     @Column(length = 32)
     public String fnSku;
 
+    /**
+     * Amazon Seller 检查时间(检查有无被其他卖家绑 Listing)
+     */
+    @Expose
+    public Date lastSellerCheckDate = new Date();
+
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Embedded
     @Expose
