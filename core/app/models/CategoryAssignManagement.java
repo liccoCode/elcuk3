@@ -70,9 +70,16 @@ public class CategoryAssignManagement extends Model {
 
 
     public List<CategoryAssignManagement> buildUserList(Long teamId, String categoryId) {
-        List<CategoryAssignManagement> list = CategoryAssignManagement
-                .find("team.id=? AND category.categoryId=? order by user.username", teamId, categoryId)
-                .fetch();
+        List<Object> params = new ArrayList<Object>();
+        StringBuilder sql = new StringBuilder("select c from CategoryAssignManagement c " +
+                " LEFT JOIN c.user u "    +
+                " LEFT JOIN u.roles r "  +
+                " WHERE c.team.id=? AND c.category.categoryId=?" +
+                " GROUP BY c.id " +
+                " ORDER BY r.roleName");
+        params.add(teamId);
+        params.add(categoryId);
+        List<CategoryAssignManagement> list = CategoryAssignManagement.find(sql.toString(), params.toArray()).fetch();
         this.assigns = list;
         return list;
     }
