@@ -136,6 +136,13 @@ public class ReportRecord extends Model {
             public String label() {
                 return "主营业务收入与成本报表";
             }
+        },
+
+        SALESFEELIST {
+            @Override
+            public String label() {
+                return "销售费用明细报表";
+            }
         };
 
         public abstract String label();
@@ -159,8 +166,7 @@ public class ReportRecord extends Model {
      * @return
      */
     public boolean canBeRecalculated() {
-        return !Arrays
-                .asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY, RT.SELLINGCYCLE, RT.INVRNTORYCOST)
-                .contains(this.reporttype);
+        return !Arrays.asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY, RT.SELLINGCYCLE,
+                RT.INVRNTORYCOST, RT.REVENUEANDCOST, RT.SALESFEELIST).contains(this.reporttype);
     }
 }

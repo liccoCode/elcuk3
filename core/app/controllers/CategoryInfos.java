@@ -54,7 +54,7 @@ public class CategoryInfos extends Controller {
         List<String> users = new ArrayList<String>();
         for(User u : userList) users.add(u.username);
         renderArgs.put("users", J.json(users));
-        List<ElcukRecord> records = ElcukRecord.find("action like '质检员任务分配' ORDER BY createAt DESC")
+        List<ElcukRecord> records = ElcukRecord.find("action like '部门品线负责人管理' ORDER BY createAt DESC")
                 .fetch();
         render(categoryAssignManagement, records, currUser);
     }

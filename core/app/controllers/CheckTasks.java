@@ -176,6 +176,7 @@ public class CheckTasks extends Controller {
     public static void update(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
                               @As("yyyy-MM-dd HH:mm") Date to) {
         CheckTask old = CheckTask.findById(id);
+        old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
         check.startTime = from;
         check.endTime = to;
         check.checkor = old.shipwhouse.user.username;

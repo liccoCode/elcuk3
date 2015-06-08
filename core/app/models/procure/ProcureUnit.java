@@ -1051,7 +1051,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalWeight() {
-        return this.qty() * this.product.weight;
+        if (this.product.weight!=null)
+            return this.qty() * this.product.weight;
+        else
+            return 0f;
     }
 
     /**
