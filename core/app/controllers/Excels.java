@@ -18,6 +18,7 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
+import models.view.report.AreaGoodsAnalyze;
 import models.view.report.LossRate;
 import models.view.report.Profit;
 import models.view.report.TrafficRate;
@@ -426,6 +427,26 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(dtos, p);
+        }
+    }
+
+    public static void areaGoodsAnalyzeExcel(AreaGoodsAnalyze a) {
+        if(a == null) {
+            a = new AreaGoodsAnalyze();
+            a.from = DateTime.now().minusMonths(1).plusDays(1).toDate();
+            a.to = DateTime.now().toDate();
+        }
+        List<AreaGoodsAnalyze> dtos = a.query();
+        if(dtos != null && dtos.size() > 0) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("物流区域货量分析报表%s-%s.xls", dateFormat.format(a.from),
+                    dateFormat.format(a.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+
+            render(dtos, a, dateFormat);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
         }
     }
 }
