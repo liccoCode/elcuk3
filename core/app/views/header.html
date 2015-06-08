@@ -206,6 +206,7 @@
       #{power.ck "checktasks.checkerlist"}
         <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
       #{/power.ck}
+
   </ul>
 </li>
 #{/power.ck}
@@ -240,6 +241,9 @@
       #{/power.ck}
       #{power.ck "teams.show"}
         <li><a href="@{Teams.show()}">TEAM管理</a></li>
+      #{/power.ck}
+      #{power.ck "categoryinfos.categoryassign"}
+        <li><a href="@{CategoryInfos.categoryassign()}">部门品线负责人管理</a></li>
       #{/power.ck}
     <li><a href="@{Elcuk.index()}">系统状态</a></li>
   </ul>

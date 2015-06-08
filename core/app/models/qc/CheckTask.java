@@ -3,6 +3,7 @@ package models.qc;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.CategoryAssignManagement;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -559,12 +560,11 @@ public class CheckTask extends Model {
                     //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
                     newtask.qcType = T.SELF;
                 }
-
+                newtask.checkor = newtask.showChecktor();
                 //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
                 Whouse wh = searchWarehouse(punit);
                 if(wh != null && wh.user != null) {
                     newtask.shipwhouse = wh;
-                    newtask.checkor = wh.user.username;
                 }
 
                 newtask.creatat = new Date();
@@ -1078,10 +1078,12 @@ public class CheckTask extends Model {
         this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
         Double totalVolume = 0d;
         for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
+            totalVolume +=
+                    checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
         }
         for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
-            totalVolume += checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
+            totalVolume +=
+                    checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
         }
         return totalVolume;
     }
@@ -1103,5 +1105,20 @@ public class CheckTask extends Model {
         return totalWeight;
     }
 
-
+    public String showChecktor() {
+        String id = this.units.product.category.categoryId;
+        String name = "";
+        List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
+                .find("category.categoryId=? AND isCharge =1", id).fetch();
+        if(categoryAssignManagements.size() > 0) {
+            for(CategoryAssignManagement c : categoryAssignManagements) {
+                if(c.isQCrole()) {
+                    name += c.user.username + ",";
+                }
+            }
+            return name.length() > 0 ? name.substring(0, name.length() - 1) : "";
+        } else {
+            return "";
+        }
+    }
 }

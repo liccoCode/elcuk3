@@ -42,7 +42,8 @@ public class ReportPost extends Post<ReportRecord> {
     public static List<ReportRecord.RT> saleReportTypes() {
         return Arrays.asList(ReportRecord.RT.SKUMONTHALL, ReportRecord.RT.SKUMONTHCATEGORY, ReportRecord.RT.SKUINVTOTAL,
                 ReportRecord.RT.SKUINVSELLING, ReportRecord.RT.SALEYEARTOTAL, ReportRecord.RT.SALEYEARCATEGORY,
-                ReportRecord.RT.INVENTORYRATIANALITY, ReportRecord.RT.SELLINGCYCLE, ReportRecord.RT.INVRNTORYCOST);
+                ReportRecord.RT.INVENTORYRATIANALITY, ReportRecord.RT.SELLINGCYCLE, ReportRecord.RT.INVRNTORYCOST,
+                ReportRecord.RT.SALESFEELIST);
     }
 
     /**
