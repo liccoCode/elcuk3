@@ -21,7 +21,6 @@ $ ->
 
 $ ->
   $(document).on('click', '#reflush_lossrate', (e) ->
-    alert 'aaaaaaaaa'
     $btn = $(@)
     alert $btn.data('uri')
     $form = $("#search_form")
