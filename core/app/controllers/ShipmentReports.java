@@ -3,18 +3,24 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.procure.FBACenter;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
+import models.view.report.AreaGoodsAnalyze;
+import org.joda.time.DateTime;
+import org.jsoup.helper.StringUtil;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import query.ShipmentReportESQuery;
 
+import java.util.Date;
 import java.util.List;
 
 import models.view.post.LossRatePost;
@@ -128,9 +134,28 @@ public class ShipmentReports extends Controller {
             if(p == null) p = new LossRatePost();
             List<LossRate> lossrates = p.query();
             LossRate losstotal = p.querytotal();
-            render(lossrates,losstotal, p);
+            render(lossrates, losstotal, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
+        }
+    }
+
+    public static void areaGoodsAnalyze(AreaGoodsAnalyze a) {
+        if(a == null) {
+            a = new AreaGoodsAnalyze();
+            a.from = DateTime.now().minusMonths(1).plusDays(1).toDate();
+            a.to = DateTime.now().toDate();
+        }
+        List<AreaGoodsAnalyze> analyzes = a.query();
+        render(analyzes, a);
+    }
+
+    public static void queryCenterIdByCountryCode(AreaGoodsAnalyze a){
+        if(StringUtil.isBlank(a.countryCode)){
+            renderJSON(new Ret());
+        }else{
+            List<String> list = a.queryCenterIdByCountryCode(a.countryCode);
+            renderJSON(J.json(list));
         }
     }
 
