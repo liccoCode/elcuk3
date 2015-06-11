@@ -51,7 +51,8 @@ public class ReportPost extends Post<ReportRecord> {
      * @return
      */
     public static List<ReportRecord.RT> applyReportTypes() {
-        return Arrays.asList(ReportRecord.RT.REVENUEANDCOST, ReportRecord.RT.SALESFEELIST);
+        return Arrays
+                .asList(ReportRecord.RT.REVENUEANDCOST, ReportRecord.RT.SALESFEELIST, ReportRecord.RT.PAYBILLDETAIL);
     }
 
     @SuppressWarnings("unchecked")
