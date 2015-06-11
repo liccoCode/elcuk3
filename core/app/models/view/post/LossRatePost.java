@@ -149,8 +149,8 @@ public class LossRatePost extends Post<LossRate> {
     public List<ShipItem> queryShipItem() {
         StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
                 .append(" WHERE m.state = 'DONE' ")
-                .append("AND m.dates.planArrivDate >= '2015-01-01' AND m.dates.planArrivDate <= '2015-05-30' ")
+                .append("AND m.dates.beginDate >= ? AND m.dates.beginDate <= ? ")
                 .append(" AND s.qty <> s.recivedQty");
-        return ShipItem.find(sql.toString()).fetch();
+        return ShipItem.find(sql.toString(), this.from, this.to).fetch();
     }
 }
