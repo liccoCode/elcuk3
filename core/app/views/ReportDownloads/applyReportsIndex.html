@@ -27,8 +27,8 @@
 
     <span class="add-on">报表类型:</span>
     <select class="span1" name="p.reporttype">
+      <option value="">请选择</option>
         #{list items:models.view.post.ReportPost.applyReportTypes(), as: 'reportType'}
-          <option value="">请选择</option>
           <option ${p.reporttype == reportType ? 'selected=selected' : ''} value="${reportType.name()}">${reportType.label()}</option>
         #{/list}
     </select>
