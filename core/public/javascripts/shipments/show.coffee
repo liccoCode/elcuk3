@@ -71,9 +71,8 @@ $ ->
         id: $i.parents('tr').attr('id')
     $('#popLogModel').html(_.template($('#form-logfee-model-template').html(), params)).modal('show')
     false
-  ).on('dblclick', '[name=recivedQty]', (e) ->
+  ).on('dblclick', '[name=adjustQty]', (e) ->
     self = $(@)
-
     c = self.parents('tr').data('currency')
     type = self.parents('tr').data('compentype')
     params =
@@ -81,8 +80,8 @@ $ ->
       qty: self.text()
       lossqty: self.parents('tr').data('lossqty')
       compenamt: self.parents('tr').data('compenamt')
-    $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html(), params)).modal('show')
 
+    $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html(), params)).modal('show')
     $('#compentype').find('option').each((index, element)->
       if (element.text.toLowerCase() == type.toLowerCase())
         element.setAttribute('selected', 'selected')
@@ -91,7 +90,6 @@ $ ->
       if (element.text.toLowerCase() == c.toLowerCase())
         element.setAttribute('selected', 'selected')
     )
-
     false
   )
 

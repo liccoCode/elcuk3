@@ -3,7 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
-import models.procure.FBACenter;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
@@ -13,14 +13,13 @@ import models.view.highchart.HighChart;
 import models.view.report.AreaGoodsAnalyze;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
-import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import query.ShipmentReportESQuery;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import models.view.post.LossRatePost;
@@ -130,14 +129,17 @@ public class ShipmentReports extends Controller {
     }
 
     public static void lossRateReport(LossRatePost p) {
+        if(p == null) p = new LossRatePost();
+        List<LossRate> lossrates = new ArrayList<LossRate>();
+        List<ShipItem> shipItems = p.queryShipItem();
+        LossRate losstotal = new LossRate();
         try {
-            if(p == null) p = new LossRatePost();
-            List<LossRate> lossrates = p.query();
-            LossRate losstotal = p.querytotal();
-            render(lossrates, losstotal, p);
+            lossrates = p.query();
+            losstotal = p.buildTotalLossRate(lossrates);
         } catch(FastRuntimeException e) {
-            renderHtml("<h3>" + e.getMessage() + "</h3>");
+            flash.error(Webs.E(e));
         }
+        render(lossrates, losstotal, p, shipItems);
     }
 
     public static void areaGoodsAnalyze(AreaGoodsAnalyze a) {
