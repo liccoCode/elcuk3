@@ -12,6 +12,7 @@ import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
@@ -331,20 +332,36 @@ public class Excels extends Controller {
     }
 
 
-    public static void lossRateReport(LossRatePost p) {
+    public static void lossRateReport(LossRatePost p, String type) {
         if(p == null) p = new LossRatePost();
-        List<LossRate> lossrates = p.query();
-        LossRate losstotal = p.querytotal();
-        if(lossrates != null && lossrates.size() != 0) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
-            renderArgs.put(RenderExcel.RA_ASYNC, false);
-            renderArgs.put("dateFormat", formatter);
-            render(lossrates, losstotal, p);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        if(type != null && type.equals("pay")) {
+            List<LossRate> lossrates = p.query();
+            LossRate losstotal = p.buildTotalLossRate(lossrates);
+            if(lossrates != null && lossrates.size() != 0) {
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                renderArgs.put("dmt", formatter);
+                render(lossrates, losstotal, p);
+            } else {
+                renderText("没有数据无法生成Excel文件！");
+            }
         } else {
-            renderText("没有数据无法生成Excel文件！");
+            List<ShipItem> dtos = p.queryShipItem();
+            if(dtos != null && dtos.size() > 0) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("%s-%s未完全入库统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                renderArgs.put("dmt", formatter);
+                renderArgs.put("dft", dateFormat);
+                render("Excels/notFullyStorageReport.xls", dtos, p);
+            } else {
+                renderText("没有数据无法生成Excel文件！");
+            }
         }
     }
 

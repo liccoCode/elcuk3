@@ -92,6 +92,12 @@ public class ShipItem extends GenericModel {
     public Integer qty = 0;
 
     /**
+     * 调整修改运输的数量
+     */
+    @Expose
+    public Integer adjustQty = 0;
+
+    /**
      * Amazon 的 FBA ShipmentItem 具体接收的数量
      */
     @Expose
@@ -252,19 +258,19 @@ public class ShipItem extends GenericModel {
      *
      * @param msg
      */
-    public void receviedQty(int recivedQty, String msg, String compentype, Integer lossqty, Currency currency,
+    public void receviedQty(int adjustQty, String msg, String compentype, Integer lossqty, Currency currency,
                             Float compenamt) {
         if(lossqty == null) lossqty = 0;
         if(compenamt == null) compenamt = 0f;
-        float percent = ((float) Math.abs(recivedQty - this.qty) / this.qty);
+        float percent = ((float) Math.abs(adjustQty - this.qty) / this.qty);
         if(percent > 0.1)
             Validation.addError("", "入库库存与运输库存差据为 " + (percent * 100) + "百分比 大于 10 百分比 请检查数量.");
         if((lossqty != 0 && compenamt == 0) || (lossqty == 0 && compenamt != 0))
             Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
         if(Validation.hasErrors()) return;
 
-        int oldQty = this.recivedQty;
-        this.recivedQty = recivedQty;
+        int oldQty = this.adjustQty;
+        this.adjustQty = adjustQty;
         this.lossqty = lossqty;
         this.currency = currency;
         this.compenamt = compenamt;
@@ -272,7 +278,7 @@ public class ShipItem extends GenericModel {
         this.compentype = compentype;
         this.save();
         new ERecordBuilder("shipitem.receviedQty")
-                .msgArgs(msg, oldQty, recivedQty)
+                .msgArgs(msg, oldQty, adjustQty)
                 .fid(this.id)
                 .save();
     }
