@@ -63,14 +63,14 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
             average.overTimeShipNum += rate.overTimeShipNum;
             rate.earlyTimeShipNum = Long.parseLong(row.get("earlyTimeShipNum").toString());
             average.earlyTimeShipNum += rate.earlyTimeShipNum;
-            rate.onTimeRate = Float.parseFloat(df.format(rate.onTimeShipNum * 100 / rate.totalShipNum));
-            rate.overTimeRate = Float.parseFloat(df.format(rate.overTimeShipNum * 100 / rate.totalShipNum));
-            rate.earlyTimeRate = Float.parseFloat(df.format(rate.earlyTimeShipNum * 100 / rate.totalShipNum));
+            rate.onTimeRate = Float.parseFloat(df.format(rate.onTimeShipNum * 100 / isZero(rate.totalShipNum)));
+            rate.overTimeRate = Float.parseFloat(df.format(rate.overTimeShipNum * 100 / isZero(rate.totalShipNum)));
+            rate.earlyTimeRate = Float.parseFloat(df.format(rate.earlyTimeShipNum * 100 / isZero(rate.totalShipNum)));
             list.add(rate);
         }
-        average.onTimeRate = Float.parseFloat(df.format(average.onTimeShipNum * 100 / average.totalShipNum));
-        average.overTimeRate = Float.parseFloat(df.format(average.overTimeShipNum * 100 / average.totalShipNum));
-        average.earlyTimeRate = Float.parseFloat(df.format(average.earlyTimeShipNum * 100 / average.totalShipNum));
+        average.onTimeRate = Float.parseFloat(df.format(average.onTimeShipNum * 100 / isZero(average.totalShipNum)));
+        average.overTimeRate = Float.parseFloat(df.format(average.overTimeShipNum * 100 / isZero(average.totalShipNum)));
+        average.earlyTimeRate = Float.parseFloat(df.format(average.earlyTimeShipNum * 100 / isZero(average.totalShipNum)));
         list.add(average);
         return list;
     }
@@ -79,6 +79,10 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         return Shipment.find("FROM Shipment s WHERE s.dates.inbondDate > s.dates.planArrivDate " +
                         "AND s.dates.beginDate >= ? AND s.dates.beginDate <= ? ",
                 this.from, this.to).fetch();
+    }
+
+    public Long isZero(Long num) {
+        return num == 0 ? 1 : num;
     }
 
 }

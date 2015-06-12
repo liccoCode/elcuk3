@@ -331,7 +331,7 @@ public class Excels extends Controller {
     public static void arrivalRateReport(ArrivalRatePost p) {
         if(p == null) p = new ArrivalRatePost();
         List<ArrivalRate> dtos = p.query();
-        if(dtos != null && dtos.size() > 0) {
+        if(dtos != null && dtos.size() > 1) {
             List<Shipment> shipments = p.queryOverTimeShipment();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
