@@ -18,8 +18,8 @@ import java.util.Map;
 public class ArrivalRatePost extends Post<ArrivalRate> {
 
     public ArrivalRatePost() {
-        this.from = Dates.morning(Dates.monthBegin(DateTime.now().minusMonths(2).toDate()));
-        this.to = Dates.night(Dates.monthEnd(DateTime.now().minusMonths(2).toDate()));
+        this.from = Dates.morning(Dates.monthBegin(DateTime.now().minusMonths(1).toDate()));
+        this.to = Dates.night(Dates.monthEnd(DateTime.now().minusMonths(1).toDate()));
     }
 
     @Override
