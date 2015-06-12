@@ -25,7 +25,7 @@
       </select>
 
       <div class="input-prepend inline">
-        <span class="add-on">From:</span>
+        <span class="add-on">运输时间From:</span>
         <input type="date" name="a.from" value="${a.from.date()}">
       </div>
 
@@ -45,6 +45,7 @@
 
 <div class="row-fluid">
   <div class="span12">
+    <b2>总运输单${a.caluFeeNum}个，计算了费用的${a.caluFeeNum-a.nocaluFeeNum}个，未计算费用的${a.nocaluFeeNum}个</b2>
     <table id="losstotal" class="table table-condensed table-bordered">
       <thead>
       <tr>
@@ -55,15 +56,15 @@
       </tr>
       <tr>
         <th>center ID</th>
-        <th>总重量</th>
-        <th>总体积</th>
-        <th>海运重量</th>
-        <th>海运体积</th>
-        <th>空运重量</th>
-        <th>空运体积</th>
-        <th>快递重量</th>
-        <th>快递体积</th>
-        <th>总费用</th>
+        <th>总重量(kg)</th>
+        <th>总体积(m³)</th>
+        <th>海运重量(kg)</th>
+        <th>海运体积(m³)</th>
+        <th>空运重量(kg)</th>
+        <th>空运体积(m³)</th>
+        <th>快递重量(kg)</th>
+        <th>快递体积(m³)</th>
+        <th>总费用$</th>
         <th>空运$</th>
         <th>海运$</th>
         <th>快递$</th>
