@@ -52,12 +52,10 @@ $ ->
     $('#firstTab').click ->
       $('#activeprocess').fadeIn('fast')
       $("#runprocess").fadeOut('fast')
-      $('#exceldown').text('导出未完全入库统计Excel')
 
     $('#secondTab').click ->
       $('#runprocess').fadeIn('fast')
       $("#activeprocess").fadeOut('fast')
-      $('#exceldown').text('导出赔偿统计Excel')
 
     oTable = $("#shipmentTable").dataTable(
       sDom: "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
