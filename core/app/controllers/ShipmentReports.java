@@ -10,7 +10,9 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
+import models.view.post.ArrivalRatePost;
 import models.view.report.AreaGoodsAnalyze;
+import models.view.report.ArrivalRate;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.libs.F;
@@ -101,9 +103,14 @@ public class ShipmentReports extends Controller {
         }
     }
 
-
-    public static void arrivalRate() {
-        render();
+    /**
+     * 运输准时到货率报表
+     */
+    public static void arrivalRate(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<ArrivalRate> arrivals = p.query();
+        List<Shipment> shipments = p.queryOverTimeShipment();
+        render(arrivals, shipments, p);
     }
 
     /**

@@ -1,11 +1,8 @@
 package models.view.post;
 
 import helper.*;
-import helper.Currency;
 import jobs.LossRateJob;
-import models.market.M;
 import models.procure.ShipItem;
-import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
@@ -16,7 +13,6 @@ import models.view.report.LossRate;
 import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
-import services.MetricProfitService;
 
 import java.math.BigDecimal;
 
