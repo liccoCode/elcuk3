@@ -105,7 +105,7 @@ public class ShipmentWeight {
                 " LEFT JOIN s.items i" +
                 " LEFT JOIN i.unit u" +
                 " LEFT JOIN u.product p " +
-                " WHERE s.dates.arriveDate>=? AND s.dates.arriveDate<=? ");
+                " WHERE s.dates.beginDate>=? AND s.dates.beginDate<=? ");
         params.add(this.from);
         params.add(this.to);
         if(this.market != null) {
