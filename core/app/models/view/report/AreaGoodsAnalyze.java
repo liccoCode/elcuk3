@@ -3,6 +3,7 @@ package models.view.report;
 import helper.*;
 import helper.Currency;
 import models.procure.FBACenter;
+import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.jsoup.helper.StringUtil;
 import play.db.helper.SqlSelect;
@@ -53,6 +54,10 @@ public class AreaGoodsAnalyze implements Serializable {
 
     public int index;
 
+    public int nocaluFeeNum;
+
+    public int caluFeeNum;
+
     public List<AreaGoodsAnalyze> query() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<Object> list = new ArrayList<Object>();
@@ -63,12 +68,15 @@ public class AreaGoodsAnalyze implements Serializable {
                 .append(" IFNULL(SUM(case s.type when 'EXPRESS' then pu.fixValue+pu.amount else 0 end), 0) as expressCost, ")
                 .append(" pu.currency")
                 .append(" FROM Shipment s LEFT JOIN ShipItem si on si.shipment_id = s.id ")
+                .append(" AND s.beginDate >= ? AND s.beginDate <= ? ")
                 .append(" LEFT JOIN ProcureUnit p on si.unit_id = p.id ")
-                .append(" LEFT JOIN PaymentUnit pu on pu.procureUnit_id = p.id ")
+                .append(" LEFT JOIN PaymentUnit pu ON pu.shipment_id = s.id ")
                 .append(" LEFT JOIN CheckTask c on c.units_id = p.id ")
                 .append(" LEFT JOIN FBAShipment fs on p.fba_id = fs.id ")
                 .append(" LEFT JOIN FBACenter fc on fs.fbaCenter_id = fc.id ")
                 .append(" WHERE fc.countryCode IS NOT NULL AND pu.currency IS NOT NULL ");
+        list.add(Dates.morning(from));
+        list.add(Dates.night(to));
         if(!StringUtil.isBlank(this.countryCode)) {
             sql.append(" AND fc.countryCode = ? ");
             list.add(this.countryCode);
@@ -77,12 +85,8 @@ public class AreaGoodsAnalyze implements Serializable {
             sql.append(" AND fc.centerId = ? ");
             list.add(this.centerId);
         }
-        sql.append(" AND s.deliverDate >= ? ")
-                .append(" AND s.deliverDate <= ? ")
-                .append(" GROUP BY fc.countryCode, fc.centerId, pu.currency");
-        list.add(Dates.morning(from));
-        list.add(Dates.night(to));
 
+        sql.append(" GROUP BY fc.countryCode, fc.centerId, pu.currency");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), list.toArray());
         List<AreaGoodsAnalyze> analyzes = new ArrayList<AreaGoodsAnalyze>();
         Map<String, AreaGoodsAnalyze> map = new HashMap<String, AreaGoodsAnalyze>();
@@ -101,9 +105,10 @@ public class AreaGoodsAnalyze implements Serializable {
             if(map.containsKey(key)) {
                 analyze.index = sort;
                 AreaGoodsAnalyze exist = map.get(key);
-                exist.airCost = analyze.airCost;
-                exist.seaCost = analyze.seaCost;
-                exist.expressCost = analyze.expressCost;
+                exist.totalCost += analyze.totalCost;
+                exist.airCost += analyze.airCost;
+                exist.seaCost += analyze.seaCost;
+                exist.expressCost += analyze.expressCost;
             } else {
                 map.put(analyze.countryCode + "_" + analyze.centerId, analyze);
                 analyze.index = sort++;
@@ -120,7 +125,6 @@ public class AreaGoodsAnalyze implements Serializable {
                 return e1.index - e2.index;
             }
         });
-
 
         sql = new StringBuilder("SELECT fc.countryCode, fc.centerId,  c.standBoxQctInfo, c.tailBoxQctInfo, s.type ")
                 .append(" FROM Shipment s LEFT JOIN ShipItem si on si.shipment_id = s.id LEFT JOIN ProcureUnit p ")
@@ -184,7 +188,7 @@ public class AreaGoodsAnalyze implements Serializable {
     }
 
     public List<String> queryCenterIdByCountryCode(String countryCode) {
-        if(StringUtil.isBlank(countryCode)){
+        if(StringUtil.isBlank(countryCode)) {
             return null;
         }
         SqlSelect sql = new SqlSelect().select("centerId").from("FBACenter").where("countryCode=?").groupBy("centerId");
@@ -194,6 +198,14 @@ public class AreaGoodsAnalyze implements Serializable {
             centerId.add(row.get("centerId").toString());
         }
         return centerId;
+    }
+
+    public void queryTotalShipmentAnalyze() {
+        this.nocaluFeeNum = Shipment.find("SELECT s.id FROM Shipment s LEFT JOIN s.fees f WHERE s.dates.beginDate >= ?" +
+                " AND s.dates.beginDate <= ? GROUP BY s.id HAVING COUNT(f.id)=0 ", this.from, this.to).fetch().size();
+        this.caluFeeNum = Shipment
+                .find(" From Shipment s WHERE s.dates.beginDate >= ? AND s.dates.beginDate <= ? ", this.from, this.to)
+                .fetch().size();
     }
 
 }
