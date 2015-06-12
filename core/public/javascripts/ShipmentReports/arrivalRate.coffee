@@ -45,7 +45,6 @@ $ ->
   $(".search_form").on("click", ".btn:contains(Excel)", (e) ->
     e.preventDefault()
     $form = $('#search_form')
-    alert 1
     window.open('/Excels/arrivalRateReport?' + $form.serialize(), "_blank")
   )
 
