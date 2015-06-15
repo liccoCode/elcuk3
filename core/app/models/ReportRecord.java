@@ -150,6 +150,13 @@ public class ReportRecord extends Model {
             public String label() {
                 return "应付账款明细表";
             }
+        },
+
+        ANALYZEREPORT {
+            @Override
+            public String label() {
+                return "销售分析报表";
+            }
         };
 
         public abstract String label();
