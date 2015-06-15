@@ -438,6 +438,7 @@ public class Excels extends Controller {
         }
         List<AreaGoodsAnalyze> dtos = a.query();
         if(dtos != null && dtos.size() > 0) {
+            a.queryTotalShipmentAnalyze();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME, String.format("物流区域货量分析报表%s-%s.xls", dateFormat.format(a.from),

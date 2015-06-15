@@ -147,6 +147,7 @@ public class ShipmentReports extends Controller {
             a.to = DateTime.now().toDate();
         }
         List<AreaGoodsAnalyze> analyzes = a.query();
+        a.queryTotalShipmentAnalyze();
         render(analyzes, a);
     }
 
