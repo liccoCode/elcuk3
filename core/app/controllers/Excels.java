@@ -19,10 +19,7 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
-import models.view.report.AreaGoodsAnalyze;
-import models.view.report.LossRate;
-import models.view.report.Profit;
-import models.view.report.TrafficRate;
+import models.view.report.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -331,6 +328,23 @@ public class Excels extends Controller {
         }
     }
 
+    public static void arrivalRateReport(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<ArrivalRate> dtos = p.query();
+        if(dtos != null && dtos.size() > 1) {
+            List<Shipment> shipments = p.queryOverTimeShipment();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put("dmt", new SimpleDateFormat("yyyy-MM-dd"));
+            renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s运输准时到货统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(dtos, shipments, p);
+        } else {
+            renderText("没有数据无法生成Excel文件!");
+        }
+    }
 
     public static void lossRateReport(LossRatePost p, String type) {
         if(p == null) p = new LossRatePost();
