@@ -106,7 +106,7 @@ public class LossRateJob extends BaseJob {
         map.put("shipItems", shipItems);
         map.put("lossrate", lossrate);
 
-        Cache.add(buildKey(), map, "4h");
+        Cache.add(buildKey(), map, "24h");
         Cache.delete(runningKey);
         LogUtils.JOBLOG.info(String.format("LossRateJob execute with key: %s, Calculate time: %s", buildKey(),
                 System.currentTimeMillis() - begin));
