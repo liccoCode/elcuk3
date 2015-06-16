@@ -55,20 +55,30 @@ public class LossRatePost extends Post<LossRate> {
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
-    public List<LossRate> query() {
+    public Map queryDate() {
         String key = Caches.Q.cacheKey(this.from, this.to, "LossRateJob");
-        List<LossRate> dto = Cache.get(key, List.class);
-        if(dto == null) {
+        Map<String, Object> map = Cache.get(key, Map.class);
+        if(map == null || map.get("lossrate") == null || map.get("shipItems") == null) {
             if(!LossRateJob.isRunning(key)) {
                 F.T2<String, List<Object>> params = params();
-                new LossRateJob(this.from, this.to, params).now();
+                F.T2<String, List<Object>> shipParams = params();
+                new LossRateJob(this.from, this.to, params, shipParams()).now();
             }
             throw new FastRuntimeException("赔偿统计明细已经在后台计算中，请于 10min 后再来查看结果~");
-        } else {
-
         }
-        this.count = dto.size();
-        return dto;
+        List<LossRate> lossRates = (List<LossRate>) map.get("lossrate");
+        List<ShipItem> shipItems = (List<ShipItem>) map.get("shipItems");
+        this.count = lossRates.size();
+        return map;
+    }
+
+    public F.T2<String, List<Object>> shipParams() {
+        List<Object> params = new ArrayList<Object>();
+        StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
+                .append(" WHERE m.state = 'DONE' ")
+                .append("AND m.dates.beginDate >= ? AND m.dates.beginDate <= ? ")
+                .append(" AND s.qty <> s.recivedQty ");
+        return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
     public F.T2<String, List<Object>> totalparams() {
@@ -142,11 +152,4 @@ public class LossRatePost extends Post<LossRate> {
         return 0L;
     }
 
-    public List<ShipItem> queryShipItem() {
-        StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
-                .append(" WHERE m.state = 'DONE' ")
-                .append("AND m.dates.beginDate >= ? AND m.dates.beginDate <= ? ")
-                .append(" AND s.qty <> s.recivedQty");
-        return ShipItem.find(sql.toString(), this.from, this.to).fetch();
-    }
 }

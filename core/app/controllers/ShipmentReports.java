@@ -22,7 +22,9 @@ import play.mvc.With;
 import query.ShipmentReportESQuery;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import models.view.post.LossRatePost;
 import models.view.report.LossRate;
@@ -138,10 +140,12 @@ public class ShipmentReports extends Controller {
     public static void lossRateReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
         List<LossRate> lossrates = new ArrayList<LossRate>();
-        List<ShipItem> shipItems = p.queryShipItem();
+        List<ShipItem> shipItems = new ArrayList<ShipItem>();
         LossRate losstotal = new LossRate();
         try {
-            lossrates = p.query();
+            Map<String, Object> map = p.queryDate();
+            lossrates = (List<LossRate>) map.get("lossrate");
+            shipItems = (List<ShipItem>) map.get("shipItems");
             losstotal = p.buildTotalLossRate(lossrates);
         } catch(FastRuntimeException e) {
             flash.error(Webs.E(e));

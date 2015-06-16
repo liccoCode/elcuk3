@@ -350,7 +350,8 @@ public class Excels extends Controller {
         if(p == null) p = new LossRatePost();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         if(type != null && type.equals("pay")) {
-            List<LossRate> lossrates = p.query();
+            Map<String, Object> map = p.queryDate();
+            List<LossRate> lossrates = (List<LossRate>) map.get("lossrate");
             LossRate losstotal = p.buildTotalLossRate(lossrates);
             if(lossrates != null && lossrates.size() != 0) {
                 request.format = "xls";
@@ -363,7 +364,8 @@ public class Excels extends Controller {
                 renderText("没有数据无法生成Excel文件！");
             }
         } else {
-            List<ShipItem> dtos = p.queryShipItem();
+            Map<String, Object> map = p.queryDate();
+            List<ShipItem> dtos = (List<ShipItem>) map.get("shipItems");
             if(dtos != null && dtos.size() > 0) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 request.format = "xls";

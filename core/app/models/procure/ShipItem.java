@@ -18,6 +18,7 @@ import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -125,8 +126,25 @@ public class ShipItem extends GenericModel {
     public Currency currency;
     public Float compenamt;
     public Float compenusdamt;
-
     public String compentype;
+
+    /**
+     * 采购成本 用于运输丢失率统计报表
+     */
+    @Transient
+    public BigDecimal purchaseCost;
+
+    /**
+     * 运输成本 用于运输丢失率统计报表
+     */
+    @Transient
+    public BigDecimal shipmentCost;
+
+    /**
+     * 损失成本 用于运输丢失率统计报表
+     */
+    @Transient
+    public BigDecimal lossCost;
 
     /**
      * 在通过 FBA 更新了 FNsku 以后, 自动尝试更新 Unit 关联的 Selling 的 Fnsku
@@ -379,6 +397,11 @@ public class ShipItem extends GenericModel {
         } else {
             return 0d;
         }
+    }
+
+    public String showDeliverymentId(){
+        ShipItem shipItem = ShipItem.findById(this.id);
+        return shipItem.unit.deliveryment.id;
     }
 
 }

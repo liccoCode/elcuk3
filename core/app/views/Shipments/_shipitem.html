@@ -97,9 +97,20 @@
       ${itm.recivedQty}
       </td>
     #{/else}
-    <td name="adjustQty" placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
-    ${itm.adjustQty}<i class="icon-wrench"></i>
-    </td>
+
+    #{if itmRecord}
+      <td style="#{if itm.adjustQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
+          name='adjustQty' placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
+      ${itm.adjustQty}<i class="icon-wrench"></i>
+      </td>
+    #{/if}
+    #{else }
+      <td style="${itm.adjustQty != itm.qty ? 'background:#F2DEDE' : ''}" name="adjustQty"
+          content='#{records_ul records: itm.recivedLogs()/}'>
+      ${itm.adjustQty}<i class="icon-wrench"></i>
+      </td>
+    #{/else}
+
     <td>
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
       ${itm.unit.deliveryment?.id}
