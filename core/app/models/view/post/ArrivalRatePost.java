@@ -7,8 +7,10 @@ import models.view.report.ArrivalRate;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +54,7 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         DecimalFormat df = new DecimalFormat("##0.00");
         ArrivalRate average = new ArrivalRate();   //平均
         average.shipType = "总计";
+        Map<String, Object> map = new HashMap<String, Object>();
         for(Map<String, Object> row : rows) {
             ArrivalRate rate = new ArrivalRate();
             rate.shipType = row.get("type").toString();
@@ -63,16 +66,32 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
             average.overTimeShipNum += rate.overTimeShipNum;
             rate.earlyTimeShipNum = Long.parseLong(row.get("earlyTimeShipNum").toString());
             average.earlyTimeShipNum += rate.earlyTimeShipNum;
-            rate.onTimeRate = Float.parseFloat(df.format(rate.onTimeShipNum * 100 / isZero(rate.totalShipNum)));
-            rate.overTimeRate = Float.parseFloat(df.format(rate.overTimeShipNum * 100 / isZero(rate.totalShipNum)));
-            rate.earlyTimeRate = Float.parseFloat(df.format(rate.earlyTimeShipNum * 100 / isZero(rate.totalShipNum)));
+            rate.onTimeRate = showTwoFloat(rate.onTimeShipNum * 100f / isZero(rate.totalShipNum));
+            rate.overTimeRate = showTwoFloat(rate.overTimeShipNum * 100f / isZero(rate.totalShipNum));
+            rate.earlyTimeRate = showTwoFloat(rate.earlyTimeShipNum * 100f / isZero(rate.totalShipNum));
+            map.put(rate.shipType, rate);
             list.add(rate);
         }
-        average.onTimeRate = Float.parseFloat(df.format(average.onTimeShipNum * 100 / isZero(average.totalShipNum)));
-        average.overTimeRate = Float.parseFloat(df.format(average.overTimeShipNum * 100 / isZero(average.totalShipNum)));
-        average.earlyTimeRate = Float.parseFloat(df.format(average.earlyTimeShipNum * 100 / isZero(average.totalShipNum)));
+        for (int i =0; i<Shipment.T.values().length; i++){
+            String type = Shipment.T.values()[i].name();
+            if(!map.containsKey(type)){
+                ArrivalRate rate = new ArrivalRate();
+                rate.shipType = Shipment.T.values()[i].name();
+                list.add(rate);
+            }
+        }
+
+        average.onTimeRate = showTwoFloat(average.onTimeShipNum * 100f/ isZero(average.totalShipNum));
+        average.overTimeRate = showTwoFloat(average.overTimeShipNum * 100.0f / isZero(average.totalShipNum));
+        average.earlyTimeRate = showTwoFloat(average.earlyTimeShipNum * 100.0f / isZero(average.totalShipNum));
         list.add(average);
         return list;
+    }
+
+    public float showTwoFloat(float num){
+        BigDecimal n = new BigDecimal(num);
+        n = n.setScale(2, BigDecimal.ROUND_HALF_UP);
+        return n.floatValue();
     }
 
     public List<Shipment> queryOverTimeShipment() {

@@ -63,6 +63,9 @@
             <th>实际交货时间</th>
             <th>供应商</th>
             <th>少货数量</th>
+            <th>采购成本</th>
+            <th>物流成本</th>
+            <th>损失金额</th>
           </tr>
           </thead>
           <tbody>
@@ -74,12 +77,15 @@
             <td>${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})</td>
             <td>${itm.recivedQty}</td>
             <td>${itm.adjustQty}</td>
-            <td>${itm.unit.deliveryment?.id}</td>
+            <td>${itm.showDeliverymentId()}</td>
             <td>#{time_tooltip time: itm.unit.attrs.planShipDate/}</td>
             <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
             <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
             <td>${itm.unit.cooperator?.name}</td>
             <td>${itm.qty - (itm.adjustQty?:0)}</td>
+            <td>${itm.purchaseCost}</td>
+            <td>${itm.shipmentCost}</td>
+            <td>${itm.lossCost}</td>
           </tr>
           #{/list}
           </tbody>
