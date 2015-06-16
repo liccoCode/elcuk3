@@ -50,6 +50,7 @@ public class LossRateJob extends BaseJob {
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
         List<LossRate> lossrate = new ArrayList<LossRate>();
         DecimalFormat df = new DecimalFormat("0.00");
+        Map<String, MetricProfitService> existService = new HashMap<String, MetricProfitService>();
         for(Map<String, Object> row : rows) {
             LossRate loss = new LossRate();
             loss.sku = (String) row.get("sku");
@@ -62,9 +63,16 @@ public class LossRateJob extends BaseJob {
                 loss.totallossprice = Float.parseFloat(df.format(loss.currency.toUSD(loss.price) * loss.lossqty));
             }
             loss.market = M.valueOf(row.get("market").toString());
-            MetricProfitService service = new MetricProfitService(this.from, this.to, loss.market, loss.sku, null);
-            loss.totalShipmentprice = Float.parseFloat(
-                    df.format((service.esShipPrice() + service.esVatPrice()) * loss.lossqty));
+            MetricProfitService service;
+            String key = this.from + "_" + this.to + "_" + loss.market.toString() + "_" + loss.sku;
+            if(existService.containsKey(key)) {
+                service = existService.get(key);
+            } else {
+                service = new MetricProfitService(this.from, this.to, loss.market, loss.sku, null);
+                existService.put(key, service);
+            }
+            loss.totalShipmentprice = Float
+                    .parseFloat(df.format((service.esShipPrice() + service.esVatPrice()) * loss.lossqty));
             Object compenusdamt = row.get("compenusdamt");
             if(compenusdamt != null)
                 loss.compenusdamt = Float.parseFloat(df.format(row.get("compenusdamt")));
@@ -80,8 +88,15 @@ public class LossRateJob extends BaseJob {
         for(ShipItem ship : shipItems) {
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
-            MetricProfitService service = new MetricProfitService(this.from, this.to, ship.unit.selling.market,
-                    ship.unit.sku, null);
+
+            MetricProfitService service;
+            String key = this.from + "_" + this.to + "_" + ship.unit.selling.market.toString() + "_" + ship.unit.sku;
+            if(existService.containsKey(key)) {
+                service = existService.get(key);
+            } else {
+                service = new MetricProfitService(this.from, this.to, ship.unit.selling.market, ship.unit.sku, null);
+                existService.put(key, service);
+            }
             ship.shipmentCost = new BigDecimal((service.esShipPrice() + service.esVatPrice()) * lossNum)
                     .setScale(2, BigDecimal.ROUND_HALF_UP);
             ship.lossCost = ship.purchaseCost.add(ship.shipmentCost);
