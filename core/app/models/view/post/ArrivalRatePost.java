@@ -95,7 +95,8 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
     }
 
     public List<Shipment> queryOverTimeShipment() {
-        return Shipment.find("FROM Shipment s WHERE s.dates.inbondDate > s.dates.planArrivDate " +
+        return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.inbondDate, '%m-%d-%Y') > DATE_FORMAT" +
+                        "(s.dates.planArrivDate, '%m-%d-%Y')" +
                         "AND s.dates.beginDate >= ? AND s.dates.beginDate <= ? ",
                 this.from, this.to).fetch();
     }
