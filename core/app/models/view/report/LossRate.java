@@ -1,6 +1,9 @@
 package models.view.report;
 
 
+import helper.Currency;
+import models.market.M;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -51,5 +54,35 @@ public class LossRate implements Serializable {
      * 总赔偿金额
      */
     public Double totalamt;
+
+    /**
+     * 货币
+     */
+    public Currency currency;
+
+    /**
+     * sku单价
+     */
+    public float price;
+
+    /**
+     * sku丢失总价
+     */
+    public float totallossprice;
+
+    /**
+     * sku丢失物流成本总价
+     */
+    public float totalShipmentprice;
+
+    /**
+     * 市场
+     */
+    public M market;
+
+    /**
+     * 赔偿比例
+     */
+    public BigDecimal payrate;
 
 }

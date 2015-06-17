@@ -12,16 +12,14 @@ import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
-import models.view.report.AreaGoodsAnalyze;
-import models.view.report.LossRate;
-import models.view.report.Profit;
-import models.view.report.TrafficRate;
+import models.view.report.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -330,21 +328,56 @@ public class Excels extends Controller {
         }
     }
 
-
-    public static void lossRateReport(LossRatePost p) {
-        if(p == null) p = new LossRatePost();
-        List<LossRate> lossrates = p.query();
-        LossRate losstotal = p.querytotal();
-        if(lossrates != null && lossrates.size() != 0) {
+    public static void arrivalRateReport(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<ArrivalRate> dtos = p.query();
+        if(dtos != null && dtos.size() > 1) {
+            List<Shipment> shipments = p.queryOverTimeShipment();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
+            renderArgs.put("dmt", new SimpleDateFormat("yyyy-MM-dd"));
+            renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                    String.format("%s-%s运输准时到货统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            renderArgs.put("dateFormat", formatter);
-            render(lossrates, losstotal, p);
+            render(dtos, shipments, p);
         } else {
-            renderText("没有数据无法生成Excel文件！");
+            renderText("没有数据无法生成Excel文件!");
+        }
+    }
+
+    public static void lossRateReport(LossRatePost p, String type) {
+        if(p == null) p = new LossRatePost();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        if(type != null && type.equals("pay")) {
+            Map<String, Object> map = p.queryDate();
+            List<LossRate> lossrates = (List<LossRate>) map.get("lossrate");
+            LossRate losstotal = p.buildTotalLossRate(lossrates);
+            if(lossrates != null && lossrates.size() != 0) {
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                renderArgs.put("dmt", formatter);
+                render(lossrates, losstotal, p);
+            } else {
+                renderText("没有数据无法生成Excel文件！");
+            }
+        } else {
+            Map<String, Object> map = p.queryDate();
+            List<ShipItem> dtos = (List<ShipItem>) map.get("shipItems");
+            if(dtos != null && dtos.size() > 0) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("%s-%s未完全入库统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                renderArgs.put("dmt", formatter);
+                renderArgs.put("dft", dateFormat);
+                render("Excels/notFullyStorageReport.xls", dtos, p);
+            } else {
+                renderText("没有数据无法生成Excel文件！");
+            }
         }
     }
 
