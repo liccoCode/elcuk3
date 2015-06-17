@@ -32,13 +32,13 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
                 .append("(SELECT s.type, count(1) AS 'totalShipNum' FROM Shipment s WHERE s.state = 'DONE' ")
                 .append(" AND s.begindate >= ? AND s.begindate <= ? GROUP BY s.type ) t1 LEFT JOIN ")
                 .append("(SELECT COUNT(1) AS 'onTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND m.inbondDate <= m.planArrivDate ")
+                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') <= DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t2 ON t2.type = t1.type LEFT JOIN ")
                 .append("(SELECT COUNT(1) AS 'overTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND m.inbondDate > m.planArrivDate ")
+                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') > DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t3 ON t3.type = t1.type LEFT JOIN ")
                 .append("(SELECT COUNT(1) AS 'earlyTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND m.inbondDate < m.planArrivDate GROUP BY m.type) t4 ON t4.type = t1.type ");
+                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') < DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') GROUP BY m.type) t4 ON t4.type = t1.type ");
         List<Object> param = new ArrayList<Object>();
         for(int i = 0; i < 4; i++) {
             param.add(this.from);
@@ -72,23 +72,23 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
             map.put(rate.shipType, rate);
             list.add(rate);
         }
-        for (int i =0; i<Shipment.T.values().length; i++){
+        for(int i = 0; i < Shipment.T.values().length; i++) {
             String type = Shipment.T.values()[i].name();
-            if(!map.containsKey(type)){
+            if(!map.containsKey(type)) {
                 ArrivalRate rate = new ArrivalRate();
                 rate.shipType = Shipment.T.values()[i].name();
                 list.add(rate);
             }
         }
 
-        average.onTimeRate = showTwoFloat(average.onTimeShipNum * 100f/ isZero(average.totalShipNum));
+        average.onTimeRate = showTwoFloat(average.onTimeShipNum * 100f / isZero(average.totalShipNum));
         average.overTimeRate = showTwoFloat(average.overTimeShipNum * 100.0f / isZero(average.totalShipNum));
         average.earlyTimeRate = showTwoFloat(average.earlyTimeShipNum * 100.0f / isZero(average.totalShipNum));
         list.add(average);
         return list;
     }
 
-    public float showTwoFloat(float num){
+    public float showTwoFloat(float num) {
         BigDecimal n = new BigDecimal(num);
         n = n.setScale(2, BigDecimal.ROUND_HALF_UP);
         return n.floatValue();
