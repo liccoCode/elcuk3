@@ -282,7 +282,8 @@ public class ShipItem extends GenericModel {
         if(compenamt == null) compenamt = 0f;
         float percent = ((float) Math.abs(adjustQty - this.qty) / this.qty);
         if(percent > 0.1)
-            Validation.addError("", "入库库存与运输库存差据为 " + (percent * 100) + "百分比 大于 10 百分比 请检查数量.");
+            Validation.addError("", "入库库存与运输库存差据为 " + (percent * 100) + "百分比 大于 10 百分比 请检查数量.adjustQty:"+adjustQty+
+                    " qty:"+this.qty);
         if((lossqty != 0 && compenamt == 0) || (lossqty == 0 && compenamt != 0))
             Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
         if(Validation.hasErrors()) return;
