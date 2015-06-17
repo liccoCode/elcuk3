@@ -46,7 +46,7 @@
             <dt>TrackNo:</dt>
             <dd>${ship.trackNo}
               #{if ship.trackNo}
-                <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank">
+                <a href="${ship.internationExpress?.trackUrl(ship.trackNo)}" target="_blank">
                   <i class="icon-external-link"></i>
                 </a>
               #{/if}
