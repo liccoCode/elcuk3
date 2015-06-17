@@ -77,7 +77,7 @@ $ ->
     type = self.parents('tr').data('compentype')
     params =
       url: self.parents('tr').data('received-url')
-      qty: self.text()
+      qty: self.text().trim()
       lossqty: self.parents('tr').data('lossqty')
       compenamt: self.parents('tr').data('compenamt')
 
