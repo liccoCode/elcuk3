@@ -3,25 +3,28 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
-import models.procure.FBACenter;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
+import models.view.post.ArrivalRatePost;
 import models.view.report.AreaGoodsAnalyze;
+import models.view.report.ArrivalRate;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
-import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import query.ShipmentReportESQuery;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import models.view.post.LossRatePost;
 import models.view.report.LossRate;
@@ -102,9 +105,14 @@ public class ShipmentReports extends Controller {
         }
     }
 
-
-    public static void arrivalRate() {
-        render();
+    /**
+     * 运输准时到货率报表
+     */
+    public static void arrivalRate(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<ArrivalRate> arrivals = p.query();
+        List<Shipment> shipments = p.queryOverTimeShipment();
+        render(arrivals, shipments, p);
     }
 
     /**
@@ -130,14 +138,19 @@ public class ShipmentReports extends Controller {
     }
 
     public static void lossRateReport(LossRatePost p) {
+        if(p == null) p = new LossRatePost();
+        List<LossRate> lossrates = new ArrayList<LossRate>();
+        List<ShipItem> shipItems = new ArrayList<ShipItem>();
+        LossRate losstotal = new LossRate();
         try {
-            if(p == null) p = new LossRatePost();
-            List<LossRate> lossrates = p.query();
-            LossRate losstotal = p.querytotal();
-            render(lossrates, losstotal, p);
+            Map<String, Object> map = p.queryDate();
+            lossrates = (List<LossRate>) map.get("lossrate");
+            shipItems = (List<ShipItem>) map.get("shipItems");
+            losstotal = p.buildTotalLossRate(lossrates);
         } catch(FastRuntimeException e) {
-            renderHtml("<h3>" + e.getMessage() + "</h3>");
+            flash.error(Webs.E(e));
         }
+        render(lossrates, losstotal, p, shipItems);
     }
 
     public static void areaGoodsAnalyze(AreaGoodsAnalyze a) {
