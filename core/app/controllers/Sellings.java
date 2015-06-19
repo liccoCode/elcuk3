@@ -157,6 +157,13 @@ public class Sellings extends Controller {
 
 
     public static void imageUpload(final String sid, final String imgs) {
+
+        if(1 == 1) {
+            new ElcukRecord("selling.updateamzonimage",
+                    "修改amazon", Secure.Security.connected().toLowerCase()).save();
+            renderJSON(new Ret(false, "AMAZON错误,Error:请联系管理员!"));
+        }
+
         if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
         List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
             @Override
@@ -180,6 +187,7 @@ public class Sellings extends Controller {
 
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
+
     public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {
@@ -217,7 +225,7 @@ public class Sellings extends Controller {
 
             if(1 == 1) {
                 new ElcukRecord("selling.updateamzon",
-                               "修改amazon", Secure.Security.connected().toLowerCase()).save();
+                        "修改amazon", Secure.Security.connected().toLowerCase()).save();
                 throw new FastRuntimeException("AMAZON错误,Error:请联系管理员!");
             } else {
                 s.syncAndUpdateAmazon(p);
