@@ -53,7 +53,7 @@ public class LossRate implements Serializable {
     /**
      * 总赔偿金额
      */
-    public Double totalamt;
+    public Float totalamt;
 
     /**
      * 货币
@@ -84,5 +84,15 @@ public class LossRate implements Serializable {
      * 赔偿比例
      */
     public BigDecimal payrate;
+
+    public LossRate(){}
+
+    public LossRate(BigDecimal totalqty) {
+        this.totalqty = new BigDecimal(0);
+        this.shipqty = new BigDecimal(0);
+        this.lossrate = new BigDecimal(0.0);
+        this.totalamt = 0f;
+        this.payrate = new BigDecimal(0.0);
+    }
 
 }
