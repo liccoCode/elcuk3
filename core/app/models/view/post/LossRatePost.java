@@ -6,6 +6,7 @@ import models.procure.ShipItem;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -108,7 +109,7 @@ public class LossRatePost extends Post<LossRate> {
 
             Object totalamt = row.get("totalamt");
             if(totalamt != null)
-                losstotal.totalamt = new BigDecimal((Double) totalamt).setScale(4, 4).doubleValue();
+                losstotal.totalamt = new BigDecimal(75.565f).setScale(2, 4).floatValue();
             if(losstotal.shipqty != null && losstotal.shipqty.compareTo(new BigDecimal(0)) != 0) {
                 losstotal.lossrate = (losstotal.totalqty).divide(losstotal.shipqty, 4,
                         4).multiply(new BigDecimal(100));
@@ -127,7 +128,7 @@ public class LossRatePost extends Post<LossRate> {
             DecimalFormat df = new DecimalFormat("##0.00");
             lossRate.totallossprice = Float.parseFloat(df.format(lossRate.totallossprice));
             lossRate.totalShipmentprice = Float.parseFloat(df.format(lossRate.totalShipmentprice));
-            lossRate.totalamt = new BigDecimal(lossRate.totalamt).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            lossRate.totalamt = new BigDecimal(lossRate.totalamt).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
             lossRate.lossrate = lossRate.lossrate.setScale(2, BigDecimal.ROUND_HALF_UP);
             lossRate.payrate = new BigDecimal(lossRate.totalamt).divide(new BigDecimal(lossRate.totallossprice + lossRate
                     .totalShipmentprice), 4, 4).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
