@@ -75,7 +75,8 @@ public class LossRateJob extends BaseJob {
                     .parseFloat(df.format((service.esShipPrice() + service.esVatPrice()) * loss.lossqty));
             Object compenusdamt = row.get("compenusdamt");
             if(compenusdamt != null)
-                loss.compenusdamt = Float.parseFloat(df.format(row.get("compenusdamt")));
+                loss.compenusdamt = new BigDecimal(Float.parseFloat(compenusdamt.toString())).setScale(2,
+                        BigDecimal.ROUND_HALF_UP).floatValue();
             else
                 loss.compenusdamt = 0f;
 
