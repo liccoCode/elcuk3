@@ -109,7 +109,7 @@ public class LossRatePost extends Post<LossRate> {
 
             Object totalamt = row.get("totalamt");
             if(totalamt != null)
-                losstotal.totalamt = new BigDecimal(75.565f).setScale(2, 4).floatValue();
+                losstotal.totalamt = new BigDecimal((Float)totalamt).setScale(2, 4).floatValue();
             if(losstotal.shipqty != null && losstotal.shipqty.compareTo(new BigDecimal(0)) != 0) {
                 losstotal.lossrate = (losstotal.totalqty).divide(losstotal.shipqty, 4,
                         4).multiply(new BigDecimal(100));
