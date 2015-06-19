@@ -85,4 +85,14 @@ public class LossRate implements Serializable {
      */
     public BigDecimal payrate;
 
+    public LossRate(){}
+
+    public LossRate(BigDecimal totalqty) {
+        this.totalqty = new BigDecimal(0);
+        this.shipqty = new BigDecimal(0);
+        this.lossrate = new BigDecimal(0.0);
+        this.totalamt = 0d;
+        this.payrate = new BigDecimal(0.0);
+    }
+
 }

@@ -46,9 +46,9 @@ public class LossRatePost extends Post<LossRate> {
                         + " LEFT JOIN Selling l ON l.sellingId = p.sid "
                         + " left join Shipment m on s.shipment_id=m.id "
                         + " left join FBAShipment f on p.fba_id=f.id "
-                        + " where m.planArrivDate >= ? AND m.planArrivDate <= ? "
+                        + " where m.arriveDate >= ? AND m.arriveDate <= ? "
                         + " and s.lossqty!=0 "
-                        + " group by  p.fba_id,p.sku ");
+                        + " group by p.fba_id,p.sku ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
@@ -76,7 +76,7 @@ public class LossRatePost extends Post<LossRate> {
         List<Object> params = new ArrayList<Object>();
         StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
                 .append(" WHERE m.state = 'DONE' ")
-                .append("AND m.dates.beginDate >= ? AND m.dates.beginDate <= ? ")
+                .append("AND m.dates.arriveDate >= ? AND m.dates.arriveDate <= ? ")
                 .append(" AND s.qty <> s.recivedQty ");
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
@@ -85,11 +85,11 @@ public class LossRatePost extends Post<LossRate> {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<Object>();
         sql.append(
-                "select sum(s.qty) shipqty,sum(s.lossqty) totalqty,sum(s.compenusdamt) totalamt,p.currency, p.price From ShipItem s "
+                "select sum(s.qty) shipqty,sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s "
                         + " left join ProcureUnit p on s.unit_id=p.id "
                         + " left join Shipment m on s.shipment_id=m.id "
                         + " left join FBAShipment f on p.fba_id=f.id "
-                        + " where m.planArrivDate >= ? AND m.planArrivDate <= ? "
+                        + " where m.arriveDate >= ? AND m.arriveDate <= ? "
                         + " and s.lossqty!=0 ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
@@ -127,14 +127,14 @@ public class LossRatePost extends Post<LossRate> {
             DecimalFormat df = new DecimalFormat("##0.00");
             lossRate.totallossprice = Float.parseFloat(df.format(lossRate.totallossprice));
             lossRate.totalShipmentprice = Float.parseFloat(df.format(lossRate.totalShipmentprice));
-            lossRate.totalamt = Double.parseDouble(df.format(lossRate.totalamt));
+            lossRate.totalamt = new BigDecimal(lossRate.totalamt).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
             lossRate.lossrate = lossRate.lossrate.setScale(2, BigDecimal.ROUND_HALF_UP);
             lossRate.payrate = new BigDecimal(lossRate.totalamt).divide(new BigDecimal(lossRate.totallossprice + lossRate
                     .totalShipmentprice), 4, 4).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 
             return lossRate;
         }
-        return new LossRate();
+        return new LossRate(new BigDecimal(0));
     }
 
     private BigDecimal ifBlank(BigDecimal b) {
