@@ -32,13 +32,13 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
                 .append("(SELECT s.type, count(1) AS 'totalShipNum' FROM Shipment s WHERE s.state = 'DONE' ")
                 .append(" AND s.begindate >= ? AND s.begindate <= ? GROUP BY s.type ) t1 LEFT JOIN ")
                 .append("(SELECT COUNT(1) AS 'onTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') <= DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
+                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') <= DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t2 ON t2.type = t1.type LEFT JOIN ")
                 .append("(SELECT COUNT(1) AS 'overTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') > DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
+                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') > DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t3 ON t3.type = t1.type LEFT JOIN ")
                 .append("(SELECT COUNT(1) AS 'earlyTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') < DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') GROUP BY m.type) t4 ON t4.type = t1.type ");
+                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') < DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') GROUP BY m.type) t4 ON t4.type = t1.type ");
         List<Object> param = new ArrayList<Object>();
         for(int i = 0; i < 4; i++) {
             param.add(this.from);
@@ -95,7 +95,7 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
     }
 
     public List<Shipment> queryOverTimeShipment() {
-        return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.inbondDate, '%m-%d-%Y') > DATE_FORMAT" +
+        return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.receiptDate, '%m-%d-%Y') > DATE_FORMAT" +
                         "(s.dates.planArrivDate, '%m-%d-%Y')" +
                         "AND s.dates.beginDate >= ? AND s.dates.beginDate <= ? ",
                 this.from, this.to).fetch();
