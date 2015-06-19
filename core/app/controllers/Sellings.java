@@ -5,6 +5,7 @@ import helper.Constant;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
@@ -15,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.i18n.Messages;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
@@ -212,9 +214,17 @@ public class Sellings extends Controller {
         }
         try {
             s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-            s.syncAndUpdateAmazon(p);
-            s.save();
-            renderJSON(new Ret(true));
+
+            if(1 == 1) {
+                new ElcukRecord("selling.updateamzon",
+                               "修改amazon", Secure.Security.connected().toLowerCase()).save();
+                throw new FastRuntimeException("AMAZON错误,Error:请联系管理员!");
+                renderJSON(new Ret(Webs.E(e)));
+            } else {
+                s.syncAndUpdateAmazon(p);
+                s.save();
+                renderJSON(new Ret(true));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
