@@ -219,7 +219,6 @@ public class Sellings extends Controller {
                 new ElcukRecord("selling.updateamzon",
                                "修改amazon", Secure.Security.connected().toLowerCase()).save();
                 throw new FastRuntimeException("AMAZON错误,Error:请联系管理员!");
-                renderJSON(new Ret(Webs.E(e)));
             } else {
                 s.syncAndUpdateAmazon(p);
                 s.save();
