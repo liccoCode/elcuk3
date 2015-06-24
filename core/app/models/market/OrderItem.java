@@ -465,7 +465,10 @@ public class OrderItem extends GenericModel {
 
     public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
                                             String val) {
+        long begin = System.currentTimeMillis();
+
         String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
+        String runningKey = String.format("%s_running", cacheKey);
         List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
         if(dtos != null && dtos.size() > 0) return;
 
@@ -473,67 +476,79 @@ public class OrderItem extends GenericModel {
             dtos = Cache.get(cacheKey, List.class);
             if(dtos != null && dtos.size() > 0) return;
 
-            List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
-            if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
-            List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
+            try {
+                Cache.add(runningKey, runningKey, "4h");
+                List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
+                if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
+                List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
 
-            OrderItemESQuery service = new OrderItemESQuery();
-            JSONObject esResult = service.skusMonthlyDailySale(from, to, selectedSkus, markets);
+                OrderItemESQuery service = new OrderItemESQuery();
+                JSONObject esResult = service.skusMonthlyDailySale(from, to, selectedSkus, markets);
 
-            HashMap<String, Integer> units = new HashMap<String, Integer>();
+                LogUtils.JOBLOG.info(String
+                        .format("SkuMonthlyDailySales fetch es result.... [%sms]", System.currentTimeMillis() - begin));
+                begin = System.currentTimeMillis();
 
-
-            for(M m : markets) {
-                JSONObject marketResult = esResult.getJSONObject(m.name());
-                for(String sku : selectedSkus) {
-                    if(StringUtils.isBlank(sku)) continue;
-                    JSONObject skuResult = marketResult.getJSONObject(ES.parseEsString(sku).toLowerCase());
-                    JSONArray buckets = skuResult.getJSONObject("monthly_avg").getJSONArray("buckets");
-                    for(Object o : buckets) {
-                        JSONObject entry = (JSONObject) o;
-                        DateTime month = new DateTime(Dates.date2JDate(entry.getDate("key")));
-                        units.put(String.format("%s|%s|%s", sku, m.name(), month.getMonthOfYear()),
-                                entry.getJSONObject("sum_sales").getIntValue("value"));
-                    }
-                }
-            }
-
-            dtos = new ArrayList<DailySalesReportsDTO>();
-            int beginMonth = new DateTime(from).getMonthOfYear();
-            int endMonth = new DateTime(to).getMonthOfYear();
-            DateTime currentYear = new DateTime(from);
-            for(String sku : selectedSkus) {
-                if(StringUtils.isBlank(sku)) continue;
-                String cate = sku.substring(0, 2);
-                DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
-                if(market == null) dtos.add(sumDto);
-
+                HashMap<String, Integer> units = new HashMap<String, Integer>();
                 for(M m : markets) {
-                    DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
-
-                    for(int i = beginMonth; i <= endMonth; i++) {
-                        String key = String.format("%s|%s|%s", sku, m.name(), i);
-                        int days = Dates.getDays(currentYear.withMonthOfYear(i).toDate());
-                        Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
-                        dto.sales.put(i, Webs.scalePointUp(0, unit / days));
-
-                        //使用 sumDto 对象临时储存一下汇总的数据
-                        if(sumDto.sales.containsKey(i)) {
-                            sumDto.sales.put(i, sumDto.sales.get(i) + unit);
-                        } else {
-                            sumDto.sales.put(i, unit);
+                    JSONObject marketResult = esResult.getJSONObject(m.name());
+                    for(String sku : selectedSkus) {
+                        if(StringUtils.isBlank(sku)) continue;
+                        JSONObject skuResult = marketResult.getJSONObject(ES.parseEsString(sku).toLowerCase());
+                        JSONArray buckets = skuResult.getJSONObject("monthly_avg").getJSONArray("buckets");
+                        for(Object o : buckets) {
+                            JSONObject entry = (JSONObject) o;
+                            DateTime month = new DateTime(Dates.date2JDate(entry.getDate("key")));
+                            units.put(String.format("%s|%s|%s", sku, m.name(), month.getMonthOfYear()),
+                                    entry.getJSONObject("sum_sales").getIntValue("value"));
                         }
                     }
-                    dtos.add(dto);
                 }
 
-                //最后在计算汇总的数据
-                for(int key : sumDto.sales.keySet()) {
-                    Date month = new DateTime(from).withMonthOfYear(key).toDate();
-                    sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
+                dtos = new ArrayList<DailySalesReportsDTO>();
+                int beginMonth = new DateTime(from).getMonthOfYear();
+                int endMonth = new DateTime(to).getMonthOfYear();
+                DateTime currentYear = new DateTime(from);
+                for(String sku : selectedSkus) {
+                    if(StringUtils.isBlank(sku)) continue;
+                    String cate = sku.substring(0, 2);
+                    DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
+                    if(market == null) dtos.add(sumDto);
+
+                    for(M m : markets) {
+                        DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
+
+                        for(int i = beginMonth; i <= endMonth; i++) {
+                            String key = String.format("%s|%s|%s", sku, m.name(), i);
+                            int days = Dates.getDays(currentYear.withMonthOfYear(i).toDate());
+                            Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
+                            dto.sales.put(i, Webs.scalePointUp(0, unit / days));
+
+                            //使用 sumDto 对象临时储存一下汇总的数据
+                            if(sumDto.sales.containsKey(i)) {
+                                sumDto.sales.put(i, sumDto.sales.get(i) + unit);
+                            } else {
+                                sumDto.sales.put(i, unit);
+                            }
+                        }
+                        dtos.add(dto);
+                    }
+
+                    //最后在计算汇总的数据
+                    for(int key : sumDto.sales.keySet()) {
+                        Date month = new DateTime(from).withMonthOfYear(key).toDate();
+                        sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
+                    }
                 }
+
+                LogUtils.JOBLOG.info(String
+                        .format("SkuMonthlyDailySales calculate.... [%sms]", System.currentTimeMillis() - begin));
+
+                Cache.add(cacheKey, dtos, "4h");
+                Cache.delete(runningKey);
+            } catch(Exception e) {
+                Cache.delete(runningKey);
             }
-            Cache.add(cacheKey, dtos, "4h");
         }
     }
 }
