@@ -16,6 +16,7 @@ import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
 import query.ProductQuery;
 
@@ -477,7 +478,7 @@ public class OrderItem extends GenericModel {
             if(dtos != null && dtos.size() > 0) return;
 
             try {
-                Cache.add(runningKey, runningKey, "4h");
+                Cache.add(runningKey, runningKey);
                 List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
                 if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
                 List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
@@ -548,6 +549,7 @@ public class OrderItem extends GenericModel {
                 Cache.delete(runningKey);
             } catch(Exception e) {
                 Cache.delete(runningKey);
+                throw new FastRuntimeException(Webs.S(e));
             }
         }
     }
