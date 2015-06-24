@@ -470,6 +470,8 @@ public class OrderItem extends GenericModel {
 
         String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
         String runningKey = String.format("%s_running", cacheKey);
+        if(StringUtils.isNotBlank(Cache.get(runningKey, String.class))) return;
+
         List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
         if(dtos != null && dtos.size() > 0) return;
 
