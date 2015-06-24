@@ -274,7 +274,7 @@ public class ProfitPost extends Post<Profit> {
                 Profit inventoryprofit = inventoryProfit(begin, end, skumarket, pro.sku, sellingId);
                 if(inventoryprofit.workingqty != 0 || inventoryprofit.wayqty != 0 || inventoryprofit.inboundqty != 0) {
                     Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
-                        profitlist.add(profit);
+                    profitlist.add(profit);
                 }
             }
         } else if(!StringUtils.isBlank(sku)) {
@@ -297,32 +297,73 @@ public class ProfitPost extends Post<Profit> {
      */
     public Profit esProfit(Date begin, Date end, M market,
                            String prosku, String sellingId) {
-        end = Dates.night(end);
-        MetricProfitService service = new MetricProfitService(begin, end, market, prosku, sellingId);
-        Profit profit = service.calProfit();
+        try {
+            end = Dates.night(end);
+            MetricProfitService service = new MetricProfitService(begin, end, market, prosku, sellingId);
+            Profit profit = service.calProfit();
 
+            //增加库存数据
+            MetricQtyService qtyservice = new MetricQtyService(market, prosku);
+            profit = qtyservice.calProfit(profit);
 
-        //增加库存数据
-        MetricQtyService qtyservice = new MetricQtyService(market, prosku);
-        profit = qtyservice.calProfit(profit);
+            /**
+             * (制作中+已交货)库存占用资金总金额(USD)
+             */
+            profit.workingfee = profit.workingqty * profit.procureprice;
+            profit.workingfee = Webs.scale2Double(profit.workingfee);
+            /**
+             * 在途库存占用资金总金额(USD)
+             */
+            profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice +
+                    profit.wayqty * profit.vatprice;
+            profit.wayfee = Webs.scale2Double(profit.wayfee);
+            /**
+             * (入库+在库)库存占用资金总金额(USD)
+             */
+            profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
+                    + profit.inboundqty * profit.vatprice;
+            profit.inboundfee = Webs.scale2Double(profit.inboundfee);
 
-        /**
-         * (制作中+已交货)库存占用资金总金额(USD)
-         */
-        profit.workingfee = profit.workingqty * profit.procureprice;
-        profit.workingfee = Webs.scale2Double(profit.workingfee);
-        /**
-         * 在途库存占用资金总金额(USD)
-         */
-        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice + profit.wayqty*profit.vatprice;
-        profit.wayfee = Webs.scale2Double(profit.wayfee);
-        /**
-         * (入库+在库)库存占用资金总金额(USD)
-         */
-        profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
-                + profit.inboundqty * profit.vatprice;
-        profit.inboundfee = Webs.scale2Double(profit.inboundfee);
+            return profit;
+        } catch(Exception e) {
+            Logger.info("profit.esProfit:::" + e.toString());
+        }
+        return initProfit(market,
+                prosku, sellingId);
+    }
 
+    public Profit initProfit(M market,
+                             String prosku, String sellingId) {
+        Profit profit = new Profit();
+        profit.sku = prosku;
+        profit.sellingId = sellingId;
+        profit.market = market;
+        //总销售额
+        profit.totalfee = 0;
+        profit.totalfee = 0;
+        //亚马逊费用
+        profit.amazonfee = 0;
+        profit.amazonfee = 0;
+        //fba费用
+        profit.fbafee = 0;
+        profit.fbafee = 0;
+        //总销量
+        profit.quantity = 0;
+        //采购价格
+        profit.procureprice = 0;
+        profit.procureprice = 0;
+        //运输价格
+        profit.shipprice = 0;
+        profit.shipprice = 0;
+        //vat价格
+        profit.vatprice = 0;
+        profit.vatprice = 0;
+        //利润
+        profit.totalprofit = 0;
+        profit.totalprofit = 0;
+        //利润率
+        profit.profitrate = 0;
+        profit.profitrate = 0;
         return profit;
     }
 
@@ -347,7 +388,7 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 在途库存占用资金总金额(USD)
          */
-        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice+
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice +
                 profit.wayqty * profit.vatprice;
         profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
