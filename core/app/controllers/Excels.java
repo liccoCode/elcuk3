@@ -36,6 +36,20 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import java.io.FileOutputStream;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -405,9 +419,9 @@ public class Excels extends Controller {
             if(from.getTime() > to.getTime() || begin > end) renderJSON(new Ret("开始时间必须小于结束时间且必须在同一年份内!"));
 
             String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
-            LogUtils.JOBLOG.info("skumonthlydaily11111:"+System.currentTimeMillis());
+            LogUtils.JOBLOG.info("skumonthlydaily11111:" + System.currentTimeMillis());
             List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
-            LogUtils.JOBLOG.info("skumonthlydaily2222:"+System.currentTimeMillis()+"  ::"+dtos.size());
+            LogUtils.JOBLOG.info("skumonthlydaily2222:" + System.currentTimeMillis() + "  ::" + dtos.size());
 
             if(dtos == null || dtos.size() == 0) {
                 new Job() {
@@ -425,13 +439,48 @@ public class Excels extends Controller {
                 renderArgs.put(RenderExcel.RA_FILENAME,
                         String.format("SKU月度日均销量报表%s.xls", formatter.format(DateTime.now().toDate())));
                 renderArgs.put(RenderExcel.RA_ASYNC, false);
-                LogUtils.JOBLOG.info("skumonthlydaily33333:"+System.currentTimeMillis()+"  ::"+dtos.size());
+                LogUtils.JOBLOG.info("skumonthlydaily33333:" + System.currentTimeMillis() + "  ::" + dtos.size());
+                dtos = new ArrayList();
                 render(dtos, months);
             }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
     }
+
+    //使用POI创建excel工作簿
+    public static void createWorkBook(List<DailySalesReportsDTO> dtos, List<Integer> months) throws IOException {
+        //创建excel工作簿
+        Workbook wb = new HSSFWorkbook();
+        //创建第一个sheet（页），命名为 new sheet
+        Sheet sheet = wb.createSheet("new sheet");
+        for(int i = 0; i < dtos.size(); i++) {
+            DailySalesReportsDTO dto = dtos.get(i);
+            // 创建一行，在页sheet上
+            int count = i + 1;
+            Row row = sheet.createRow((short) count);
+            // Or do it on one line.
+            row.createCell(1).setCellValue(dto.category);
+            row.createCell(2).setCellValue(dto.sku);
+            row.createCell(3).setCellValue(dto.market);
+            int cell = 3;
+            for(int x = 0; x < months.size(); x++) {
+                cell++;
+                int month = months.get(x);
+                if(dto.sales != null) {
+                    row.createCell(cell).setCellValue(dto.sales.get(month));
+                }
+            }
+        }
+
+        //创建一个文件 命名为workbook.xls
+        FileOutputStream fileOut = new FileOutputStream("/root/elcuk2/skuMonthlyDaily.xls");
+        // 把上面创建的工作簿输出到文件中
+        wb.write(fileOut);
+        //关闭输出流
+        fileOut.close();
+    }
+
 
     /**
      * 主营业务收入与成本报表(Amazon)
