@@ -440,6 +440,7 @@ public class Excels extends Controller {
                         String.format("SKU月度日均销量报表%s.xls", formatter.format(DateTime.now().toDate())));
                 renderArgs.put(RenderExcel.RA_ASYNC, false);
                 LogUtils.JOBLOG.info("skumonthlydaily33333:" + System.currentTimeMillis() + "  ::" + dtos.size());
+                createWorkBook(dtos, months);
                 dtos = new ArrayList();
                 render(dtos, months);
             }
