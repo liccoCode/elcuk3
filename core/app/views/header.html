@@ -120,21 +120,23 @@
 
 
 #{power.ck "procure"}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "procures.index"}
-        <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
-      #{/power.ck}
-      #{power.ck "deliveryments.index"}
-        <li><a href="@{Deliveryments.index()}">采购单</a></li>
-      #{/power.ck}
-      #{power.ck "cooperators.index"}
-        <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
-      #{/power.ck}
-
-  </ul>
-</li>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
+    <ul class="dropdown-menu">
+        #{power.ck "procures.index"}
+          <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
+        #{/power.ck}
+        #{power.ck "deliveryments.index"}
+          <li><a href="@{Deliveryments.index()}">采购单</a></li>
+        #{/power.ck}
+        #{power.ck "cooperators.index"}
+          <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+        #{/power.ck}
+        #{power.ck "report.procurereports"}
+          <li><a href="@{ReportDownloads.procureReportsIndex()}">采购报表下载</a></li>
+        #{/power.ck}
+    </ul>
+  </li>
 #{/power.ck}
 
 #{power.ck "shipment"}

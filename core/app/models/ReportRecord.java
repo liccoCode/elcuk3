@@ -157,6 +157,12 @@ public class ReportRecord extends Model {
             public String label() {
                 return "销售分析报表";
             }
+        },
+        PROCURECOSTANALYSIS {
+            @Override
+            public String label() {
+                return "采购成本报表";
+            }
         };
 
         public abstract String label();
