@@ -79,6 +79,6 @@ public class ReportDownloads extends Controller {
         if(p == null) p = new ReportPost();
         p.reportTypes = ReportPost.procureReportTypes();
         List<ReportRecord> reports = p.query();
-        render(p);
+        render(p, reports);
     }
 }
