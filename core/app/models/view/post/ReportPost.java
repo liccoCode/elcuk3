@@ -56,6 +56,10 @@ public class ReportPost extends Post<ReportRecord> {
                         ReportRecord.RT.ANALYZEREPORT);
     }
 
+    public static List<ReportRecord.RT> procureReportTypes() {
+        return Arrays.asList(ReportRecord.RT.PROCURECOSTANALYSIS);
+    }
+
     @SuppressWarnings("unchecked")
     public List<ReportRecord> query() {
         F.T2<String, List<Object>> params = params();

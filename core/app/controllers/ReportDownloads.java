@@ -70,4 +70,15 @@ public class ReportDownloads extends Controller {
         List<ReportRecord> reports = p.query();
         render(p, reports);
     }
+
+    /**
+     * 采购报表
+     */
+    @Check("report.procurereports")
+    public static void procureReportsIndex(ReportPost p) {
+        if(p == null) p = new ReportPost();
+        p.reportTypes = ReportPost.procureReportTypes();
+        List<ReportRecord> reports = p.query();
+        render(p);
+    }
 }
