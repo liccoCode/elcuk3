@@ -405,7 +405,10 @@ public class Excels extends Controller {
             if(from.getTime() > to.getTime() || begin > end) renderJSON(new Ret("开始时间必须小于结束时间且必须在同一年份内!"));
 
             String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
+            LogUtils.JOBLOG.info("skumonthlydaily11111:"+System.currentTimeMillis());
             List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
+            LogUtils.JOBLOG.info("skumonthlydaily2222:"+System.currentTimeMillis()+"  ::"+dtos.size());
+
             if(dtos == null || dtos.size() == 0) {
                 new Job() {
                     @Override
@@ -422,6 +425,7 @@ public class Excels extends Controller {
                 renderArgs.put(RenderExcel.RA_FILENAME,
                         String.format("SKU月度日均销量报表%s.xls", formatter.format(DateTime.now().toDate())));
                 renderArgs.put(RenderExcel.RA_ASYNC, false);
+                LogUtils.JOBLOG.info("skumonthlydaily33333:"+System.currentTimeMillis()+"  ::"+dtos.size());
                 render(dtos, months);
             }
         } catch(Exception e) {
