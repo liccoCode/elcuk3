@@ -23,6 +23,8 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -421,10 +423,13 @@ public class Payment extends Model {
      */
     public float approvalAmount() {
         float approvalAmount = 0;
+        BigDecimal amount = new BigDecimal(0);
         for(PaymentUnit fee : this.units()) {
             if(PaymentUnit.S.DENY != fee.state)
-                approvalAmount += fee.amount();
+                amount = amount.add(new BigDecimal
+                        (Float.toString(fee.amount())));
         }
+        approvalAmount = amount.setScale(2, RoundingMode.HALF_UP).floatValue();
         return approvalAmount;
     }
 

@@ -18,6 +18,7 @@ import play.i18n.Messages;
 import query.PaymentUnitQuery;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -343,7 +344,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return this.amount + this.fixValue;
+        return new BigDecimal(this.amount).add(new BigDecimal(this.fixValue)).floatValue();
     }
 
     /**
@@ -497,7 +498,7 @@ public class PaymentUnit extends Model {
         return PaymentHelper.currentAvgPrice(this);
     }
 
-    public String returnChargingWayValue(){
+    public String returnChargingWayValue() {
         return this.chargingWay.label();
     }
 
