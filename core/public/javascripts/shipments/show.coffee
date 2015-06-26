@@ -11,7 +11,8 @@ $ ->
         jobNumber: $("#jobNumber").val(),
         totalWeightShipment: $("#totalWeightShipment").val(),
         totalVolumeShipment: $("#totalVolumeShipment").val(),
-        totalStockShipment: $("#totalStockShipment").val()
+        totalStockShipment: $("#totalStockShipment").val(),
+        reason: $("#reason").val()
       },
       (r) ->
         if r.flag is false
