@@ -501,17 +501,19 @@ public class OrderItem extends GenericModel {
                 begin = System.currentTimeMillis();
 
                 HashMap<String, Integer> units = new HashMap<String, Integer>();
-                for(M m : markets) {
-                    JSONObject marketResult = esResult.getJSONObject(m.name());
-                    for(String sku : selectedSkus) {
-                        if(StringUtils.isBlank(sku)) continue;
-                        JSONObject skuResult = marketResult.getJSONObject(ES.parseEsString(sku).toLowerCase());
-                        JSONArray buckets = skuResult.getJSONObject("monthly_avg").getJSONArray("buckets");
-                        for(Object o : buckets) {
-                            JSONObject entry = (JSONObject) o;
-                            DateTime month = new DateTime(Dates.date2JDate(entry.getDate("key")));
-                            units.put(String.format("%s|%s|%s", sku, m.name(), month.getMonthOfYear()),
-                                    entry.getJSONObject("sum_sales").getIntValue("value"));
+                if(esResult != null) {
+                    for(M m : markets) {
+                        JSONObject marketResult = esResult.getJSONObject(m.name());
+                        for(String sku : selectedSkus) {
+                            if(StringUtils.isBlank(sku)) continue;
+                            JSONObject skuResult = marketResult.getJSONObject(ES.parseEsString(sku).toLowerCase());
+                            JSONArray buckets = skuResult.getJSONObject("monthly_avg").getJSONArray("buckets");
+                            for(Object o : buckets) {
+                                JSONObject entry = (JSONObject) o;
+                                DateTime month = new DateTime(Dates.date2JDate(entry.getDate("key")));
+                                units.put(String.format("%s|%s|%s", sku, m.name(), month.getMonthOfYear()),
+                                        entry.getJSONObject("sum_sales").getIntValue("value"));
+                            }
                         }
                     }
                 }
@@ -596,7 +598,7 @@ public class OrderItem extends GenericModel {
             for(int m = 0; m < months.size(); m++) {
                 cell++;
                 int month = months.get(m);
-                if(dto.sales != null && dto.sales.get(month)!=null) {
+                if(dto.sales != null && dto.sales.get(month) != null) {
                     row.createCell(cell).setCellValue(dto.sales.get(month));
                 }
             }
