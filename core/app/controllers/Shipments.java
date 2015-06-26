@@ -175,7 +175,7 @@ public class Shipments extends Controller {
         dbship.cooper = ship.cooper;
         dbship.whouse = ship.whouse;
         dbship.title = ship.title;
-
+        dbship.reason = ship.reason;
         dbship.tracknolist = ship.tracknolist;
         dbship.trackNo = ship.trackNo;
         dbship.memo = ship.memo;
@@ -238,7 +238,7 @@ public class Shipments extends Controller {
      * 用来更新 Shipment 的 coment 与 trackNo
      */
     public static void comment(String id, String cmt, String track, String jobNumber, Float totalWeightShipment,
-                               Float totalVolumeShipment, Float totalStockShipment) {
+                               Float totalVolumeShipment, Float totalStockShipment, String reason) {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
         Shipment ship = Shipment.findById(id);
@@ -247,6 +247,8 @@ public class Shipments extends Controller {
             ship.trackNo = track;
         if(StringUtils.isNotBlank(jobNumber))
             ship.jobNumber = jobNumber;
+        if(StringUtils.isNotBlank(reason))
+            ship.reason = reason;
         ship.save();
         renderJSON(new Ret(true, Webs.V(Validation.errors())));
     }
