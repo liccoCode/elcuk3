@@ -20,11 +20,13 @@ import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.libs.Files;
 import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
 import query.ProductQuery;
 
 import javax.persistence.*;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -564,36 +566,52 @@ public class OrderItem extends GenericModel {
 
 
     //使用POI创建excel工作簿
-    public static void createWorkBook(List<DailySalesReportsDTO> dtos, List<Integer> months,
+    public static File createWorkBook(List<DailySalesReportsDTO> dtos, List<Integer> months,
                                       String cacheKey) throws IOException {
         //创建excel工作簿
         Workbook wb = new HSSFWorkbook();
         //创建第一个sheet（页），命名为 new sheet
         Sheet sheet = wb.createSheet("new sheet");
+        Row row = sheet.createRow((short) 0);
+        row.createCell(1).setCellValue("Category");
+        row.createCell(2).setCellValue("SKU");
+        row.createCell(3).setCellValue("Market");
+        int cell = 3;
+        for(int m = 0; m < months.size(); m++) {
+            cell++;
+            int month = months.get(m);
+            row.createCell(cell).setCellValue(month + "月份");
+        }
+
         for(int i = 0; i < dtos.size(); i++) {
             DailySalesReportsDTO dto = dtos.get(i);
             // 创建一行，在页sheet上
             int count = i + 1;
-            Row row = sheet.createRow((short) count);
+            row = sheet.createRow((short) count);
             // Or do it on one line.
             row.createCell(1).setCellValue(dto.category);
             row.createCell(2).setCellValue(dto.sku);
             row.createCell(3).setCellValue(dto.market);
-            int cell = 3;
-            for(int x = 0; x < months.size(); x++) {
+            cell = 3;
+            for(int m = 0; m < months.size(); m++) {
                 cell++;
-                int month = months.get(x);
-                if(dto.sales != null) {
+                int month = months.get(m);
+                if(dto.sales != null && dto.sales.get(month)!=null) {
                     row.createCell(cell).setCellValue(dto.sales.get(month));
                 }
             }
         }
 
         //创建一个文件 命名为workbook.xls
-        FileOutputStream fileOut = new FileOutputStream("/root/elcuk2/"+cacheKey+"sku.xls");
+        String path = "/root/elcuk2-report/TEMP/" + cacheKey + "sku.xls";
+        FileOutputStream fileOut = new FileOutputStream(path);
         // 把上面创建的工作簿输出到文件中
         wb.write(fileOut);
         //关闭输出流
         fileOut.close();
+
+        File file = new File(path);
+        file.deleteOnExit();
+        return file;
     }
 }
