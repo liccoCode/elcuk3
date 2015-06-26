@@ -13,8 +13,8 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ELCUK2_ES_HOST = "http://es.easya.cc:9200";
-    public static final String ETRACKER_ES_HOST = "http://gengar.easya.cc:9200";
+    public static final String ELCUK2_ES_HOST = "http://127.0.0.1:9200";
+    public static final String ETRACKER_ES_HOST = "http://127.0.0.1:9200";
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
         return processSearch(index, type, builder, ELCUK2_ES_HOST);
@@ -49,7 +49,7 @@ public class ES {
     public static String parseEsString(String esfield) {
         if(esfield == null)
             return null;
-        esfield = esfield.replace("-", "").replace(",", "").replace("|", "");
+        esfield = esfield.replace("-", "").replace(",", "").replace("|", "").replace(".", "");
         return esfield;
     }
 }
