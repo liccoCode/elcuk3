@@ -353,7 +353,8 @@ public class PaymentUnit extends Model {
      * @return
      */
     private boolean isApproval() {
-        return this.state == S.APPROVAL || this.state == S.PAID;
+        return this.state == S.APPROVAL
+                || this.state == S.PAID;
     }
 
     /**
