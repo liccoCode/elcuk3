@@ -8,6 +8,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import models.procure.Shipment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -424,9 +425,11 @@ public class Payment extends Model {
     public float approvalAmount() {
         float approvalAmount = 0;
         BigDecimal amount = new BigDecimal(0);
-        for(PaymentUnit fee : this.units()) {
-            if(PaymentUnit.S.DENY != fee.state)
-                amount = amount.add(new BigDecimal(Float.toString(fee.amount())));
+        for(Shipment ship : this.tApply.shipments) {
+            for(PaymentUnit payment : ship.fees) {
+                if(PaymentUnit.S.DENY != payment.state)
+                    amount = amount.add(new BigDecimal(Float.toString(payment.amount())));
+            }
         }
         approvalAmount = amount.setScale(2, RoundingMode.HALF_UP).floatValue();
         return approvalAmount;
