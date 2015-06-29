@@ -426,8 +426,7 @@ public class Payment extends Model {
         BigDecimal amount = new BigDecimal(0);
         for(PaymentUnit fee : this.units()) {
             if(PaymentUnit.S.DENY != fee.state)
-                amount = amount.add(new BigDecimal
-                        (Float.toString(fee.amount())));
+                amount = amount.add(new BigDecimal(Float.toString(fee.amount())));
         }
         approvalAmount = amount.setScale(2, RoundingMode.HALF_UP).floatValue();
         return approvalAmount;
