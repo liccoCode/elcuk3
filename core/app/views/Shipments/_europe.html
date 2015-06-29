@@ -1,12 +1,24 @@
 <tr>
   <td style="font-family:STXihei" colspan="3" rowspan="4" class="td1">
   #{if country == 'DE' }
-    Buyer : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
+    Sold to : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
+    Sold to:Rosenstrasse 5,24768 Rendsburg,Germany<br>
     VAT No. : DE 292695920<br>
   #{/if}
   #{elseif country == 'FR'}
-    Buyer : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
+    Sold to : SERF Europefides SAS<br>
+    Sold to:5.rue Denis Poisson 75017 Paris<br>
     VAT No. : FR63328387212<br>
+  #{/elseif}
+  #{elseif country == 'UK'}
+    Sold to : Edeer Network Technology CO., LTD<br>
+    Sold to:53A Woodgrange Road London E7 0EL United Kingdom<br>
+    VAT No. : GB117317336<br>
+  #{/elseif}
+  #{elseif country == 'IT'}
+    Sold to : ACIT S.R.L<br>
+    Sold to: Via Scarlatti 30,20124 Milano(MI),ITALY<br>
+    VAT No. : IT07289420965<br>
   #{/elseif}
   #{else}
     Buyer : Edeer Network Technology CO., LTD <br>
@@ -28,14 +40,17 @@
   #{/if}
     <br>
     Email: Jason@easyacceu.com <br>
-    Add : ${address}
+    Ship to: ${address}
   </td>
   <td>Buyer EORI NO.：</td>
 #{if country == 'DE' }
-  <td>GB013190759000</td>
+  <td>GB117317336000</td>
 #{/if}
 #{elseif country == 'FR'}
-  <td>GB013190759000</td>
+  <td>GB117317336000</td>
+#{/elseif}
+#{elseif country == 'IT'}
+  <td>GB117317336000</td>
 #{/elseif}
 #{else}
   <td>GB117317336000</td>
