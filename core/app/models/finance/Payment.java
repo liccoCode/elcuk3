@@ -424,11 +424,10 @@ public class Payment extends Model {
      */
     public String approvalAmount() {
         BigDecimal amount = new BigDecimal(0);
-        for(Shipment ship : this.tApply.shipments) {
-            for(PaymentUnit payment : ship.fees) {
-                if(PaymentUnit.S.DENY != payment.state)
-                    amount = amount.add(new BigDecimal(Float.toString(payment.amount())));
-            }
+        for(PaymentUnit fee : this.units()) {
+            if(PaymentUnit.S.DENY != fee.state)
+                amount = amount.add(new BigDecimal
+                        (Float.toString(fee.amount())));
         }
         return amount.setScale(2, RoundingMode.HALF_UP).toString();
     }
