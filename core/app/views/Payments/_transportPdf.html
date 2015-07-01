@@ -60,11 +60,12 @@
     <td>${payment.currency.symbol()} ${payment.approvalAmount()}</td>
     #{if payment.state != models.finance.Payment.S.PAID}
     <td>应付美金</td>
-    <td colspan="4">${helper.Currency.USD.symbol()}${(payment.currency.toUSD(payment.approvalAmount())).format('#.##')}</td>
+    <td colspan="4">${helper.Currency.USD.symbol()}${(payment.currency.toUSD(Float.parseFloat(payment.approvalAmount()))).format('#.##')}</td>
     #{/if}
     #{else}
     <td>应付${payment.actualCurrency.label()}</td>
-    <td colspan="4">${payment.actualCurrency.symbol()}${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+    <td colspan="4">${payment.actualCurrency.symbol()}${(payment.rate * Float.parseFloat(payment.approvalAmount()))
+    .format('#.##')}</td>
     #{/else}
   </tr>
 </table>
