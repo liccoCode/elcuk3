@@ -94,7 +94,7 @@ public class Login extends Secure.Security {
             Http.Response.current().setCookie("kod_name", "", "easyacc.com", "/", 0, false);
             Http.Response.current().setCookie("kod_token", "", "easyacc.com", "/", 0, false);
             Http.Response.current().setCookie("kod_user_language", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", "easyacc.com", "/", 0, false);
+            Http.Response.current().setCookie("kod_user_online_version", "", "easya.cc", "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
@@ -177,13 +177,12 @@ public class Login extends Secure.Security {
         File file = new File(Constant.TMP, fileName);
         file.delete(); // 删除原来的, 再写新的
         OutputStream out = new FileOutputStream(file);
-        BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_PNG, 600,
+        BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_JPEG, 600,
                 BufferedImage.TYPE_BYTE_BINARY, false, 0);
         bean.generateBarcode(canvas, shipmentId);
         canvas.finish();
         out.close();
         response.setContentTypeIfNotSet(MimeTypes.MIME_JPEG);
-        renderBinary(file);
         renderBinary(file.toURI().toURL().openStream());
     }
 
