@@ -62,8 +62,8 @@ public class LossRatePost extends Post<LossRate> {
         if(map == null || map.get("lossrate") == null || map.get("shipItems") == null) {
             if(!LossRateJob.isRunning(key)) {
                 F.T2<String, List<Object>> params = params();
-                F.T2<String, List<Object>> shipParams = params();
-                new LossRateJob(this.from, this.to, params, shipParams()).now();
+                F.T2<String, List<Object>> shipParams = shipParams();
+                new LossRateJob(this.from, this.to, params, shipParams).now();
             }
             throw new FastRuntimeException("赔偿统计明细已经在后台计算中，请于 10min 后再来查看结果~");
         }
@@ -107,9 +107,9 @@ public class LossRatePost extends Post<LossRate> {
             losstotal.shipqty = (BigDecimal) row.get("shipqty");
             losstotal.totalqty = (BigDecimal) row.get("totalqty");
 
-            Object totalamt = row.get("totalamt");
+            Float totalamt = Float.parseFloat(row.get("totalamt").toString());
             if(totalamt != null)
-                losstotal.totalamt = new BigDecimal((Float)totalamt).setScale(2, 4).floatValue();
+                losstotal.totalamt = new BigDecimal(totalamt).setScale(2, 4).floatValue();
             if(losstotal.shipqty != null && losstotal.shipqty.compareTo(new BigDecimal(0)) != 0) {
                 losstotal.lossrate = (losstotal.totalqty).divide(losstotal.shipqty, 4,
                         4).multiply(new BigDecimal(100));
