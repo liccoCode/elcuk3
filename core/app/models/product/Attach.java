@@ -307,7 +307,7 @@ public class Attach extends Model {
 
     public static BasicClientCookie cookie(String name, String value) {
         BasicClientCookie cookie = new BasicClientCookie(name, value);
-        cookie.setDomain("easya.cc");
+        cookie.setDomain("easyacc.com");
         cookie.setVersion(0);
         cookie.setPath("/");
         return cookie;
