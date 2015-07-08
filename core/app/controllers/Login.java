@@ -60,8 +60,8 @@ public class Login extends Secure.Security {
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easyacc.com", "/", 60 * 60 * 24 * 30,
+            Http.Response.current().setCookie("username", username, "easya.cc", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easya.cc", "/", 60 * 60 * 24 * 30,
                     false);
 
             Http.Response.current().setCookie("kod_name", "elcuk2", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
@@ -88,13 +88,13 @@ public class Login extends Secure.Security {
     static void onDisconnect() {
         try {
             Login.current().logout();
-            Http.Response.current().setCookie("username", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("usermd5", "", "easyacc.com", "/", 0, false);
+            Http.Response.current().setCookie("username", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("usermd5", "", "easya.cc", "/", 0, false);
 
             Http.Response.current().setCookie("kod_name", "", "easyacc.com", "/", 0, false);
             Http.Response.current().setCookie("kod_token", "", "easyacc.com", "/", 0, false);
             Http.Response.current().setCookie("kod_user_language", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("kod_user_online_version", "", "easyacc.com", "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
