@@ -29,20 +29,21 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT t1.type,t1.totalShipNum, IFNULL(t2.onTimeShipNum, 0) AS onTimeShipNum, ")
                 .append("IFNULL(t3.overTimeShipNum, 0) AS overTimeShipNum, IFNULL(t4.earlyTimeShipNum, 0) AS earlyTimeShipNum FROM ")
-                .append("(SELECT s.type, count(1) AS 'totalShipNum' FROM Shipment s WHERE s.state = 'DONE' ")
-                .append(" AND s.begindate >= ? AND s.begindate <= ? GROUP BY s.type ) t1 LEFT JOIN ")
-                .append("(SELECT COUNT(1) AS 'onTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') <= DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
+                .append(" (SELECT s.type, count(1) AS 'totalShipNum' FROM Shipment s WHERE s.state IN ('RECEIPTD','RECEIVING','DONE') ")
+                .append(" AND s.receiptDate >= ? AND s.receiptDate <= ? AND  GROUP BY s.type ) t1 LEFT JOIN ")
+                .append(" (SELECT COUNT(1) AS 'onTimeShipNum', m.type FROM Shipment m WHERE m.state IN ('RECEIPTD','RECEIVING','DONE') ")
+                .append(" AND m.receiptDate >= ? AND m.receiptDate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') <= DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t2 ON t2.type = t1.type LEFT JOIN ")
-                .append("(SELECT COUNT(1) AS 'overTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') > DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
+                .append("(SELECT COUNT(1) AS 'overTimeShipNum', m.type FROM Shipment m WHERE m.state IN ('RECEIPTD','RECEIVING','DONE') ")
+                .append(" AND m.receiptDate >= ? AND m.receiptDate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') > DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t3 ON t3.type = t1.type LEFT JOIN ")
-                .append("(SELECT COUNT(1) AS 'earlyTimeShipNum', m.type FROM Shipment m WHERE m.state = 'DONE' ")
-                .append(" AND m.begindate >= ? AND m.begindate <= ? AND DATE_FORMAT(m.inbondDate, '%m-%d-%Y') < DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') GROUP BY m.type) t4 ON t4.type = t1.type ");
+                .append(" (SELECT COUNT(1) AS 'earlyTimeShipNum', m.type FROM Shipment m WHERE m.state IN ('RECEIPTD','RECEIVING','DONE') ")
+                .append(" AND m.receiptDate >= ? AND m.receiptDate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') < DATE_FORMAT(m.planArrivDate, '%m-%d-%Y')")
+                .append(" GROUP BY m.type) t4 ON t4.type = t1.type ");
         List<Object> param = new ArrayList<Object>();
         for(int i = 0; i < 4; i++) {
-            param.add(this.from);
-            param.add(this.to);
+            param.add(Dates.morning(this.from));
+            param.add(Dates.night(this.to));
         }
         return new F.T2(sql.toString(), param);
     }
@@ -95,11 +96,11 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
     }
 
     public List<Shipment> queryOverTimeShipment() {
-           return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.inbondDate, '%m-%d-%Y') > DATE_FORMAT" +
-                           "(s.dates.planArrivDate, '%m-%d-%Y')" +
-                           "AND s.dates.beginDate >= ? AND s.dates.beginDate <= ? ",
-                   this.from, this.to).fetch();
-       }
+        return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.receiptDate, '%m-%d-%Y') > DATE_FORMAT" +
+                        "(s.dates.planArrivDate, '%m-%d-%Y') AND s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?" +
+                        " AND s.state IN (?,?,?) ", Dates.morning(this.from), Dates.night(this.to), Shipment.S.RECEIPTD,
+                Shipment.S.RECEIVING, Shipment.S.DONE).fetch();
+    }
 
     public Long isZero(Long num) {
         return num == 0 ? 1 : num;
