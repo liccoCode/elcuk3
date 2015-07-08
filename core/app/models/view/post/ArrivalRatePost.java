@@ -30,7 +30,7 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         sql.append("SELECT t1.type,t1.totalShipNum, IFNULL(t2.onTimeShipNum, 0) AS onTimeShipNum, ")
                 .append("IFNULL(t3.overTimeShipNum, 0) AS overTimeShipNum, IFNULL(t4.earlyTimeShipNum, 0) AS earlyTimeShipNum FROM ")
                 .append(" (SELECT s.type, count(1) AS 'totalShipNum' FROM Shipment s WHERE s.state IN ('RECEIPTD','RECEIVING','DONE') ")
-                .append(" AND s.receiptDate >= ? AND s.receiptDate <= ? AND  GROUP BY s.type ) t1 LEFT JOIN ")
+                .append(" AND s.receiptDate >= ? AND s.receiptDate <= ? GROUP BY s.type ) t1 LEFT JOIN ")
                 .append(" (SELECT COUNT(1) AS 'onTimeShipNum', m.type FROM Shipment m WHERE m.state IN ('RECEIPTD','RECEIVING','DONE') ")
                 .append(" AND m.receiptDate >= ? AND m.receiptDate <= ? AND DATE_FORMAT(m.receiptDate, '%m-%d-%Y') <= DATE_FORMAT(m.planArrivDate, '%m-%d-%Y') ")
                 .append(" GROUP BY m.type) t2 ON t2.type = t1.type LEFT JOIN ")
