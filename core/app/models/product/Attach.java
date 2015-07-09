@@ -320,7 +320,7 @@ public class Attach extends Model {
      * @return
      */
     public static String attachPathList(String sku) {
-        return "https://e.easyacc.com:8080/index.php?explorer/pathList&path=SKU/" + sku;
+        return "http://e.easyacc.com:8080/index.php?explorer/pathList&path=SKU/" + sku;
     }
 
     /**
@@ -331,7 +331,7 @@ public class Attach extends Model {
      * @return
      */
     public static String attachImage(String sku, String name) {
-        return "https://e.easyacc.com:8080/data/User/elcuk2/home/SKU/" + sku + "/" + name;
+        return "http://e.easyacc.com:8080/data/User/elcuk2/home/SKU/" + sku + "/" + name;
     }
 
     /**
