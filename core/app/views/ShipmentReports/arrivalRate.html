@@ -61,11 +61,11 @@
             <td>${arr.shipType}</td>
             <td>${arr.totalShipNum}</td>
             <td>${arr.onTimeShipNum}</td>
-            <td>${arr.onTimeRate}</td>
+            <td>${arr.onTimeRate}%</td>
             <td>${arr.overTimeShipNum}</td>
-            <td>${arr.overTimeRate}</td>
+            <td>${arr.overTimeRate}%</td>
             <td>${arr.earlyTimeShipNum}</td>
-            <td>${arr.earlyTimeRate}</td>
+            <td>${arr.earlyTimeRate}%</td>
           </tr>
           #{/list}
           </tbody>
@@ -99,8 +99,8 @@
             <td>${ship.fetchCenterId()}</td>
             <td>${ship.showTrackNo()}</td>
             <td>#{time_tooltip time: ship.dates.planBeginDate/}</td>
-            <td>#{time_tooltip time: ship.dates.planArrivDate/}</td>
-            <td>#{time_tooltip time: ship.dates.receiptDate, datetime: true/}</td>
+            <td>#{time_tooltip time: ship.dates.planArrivDateForCountRate/}</td>
+            <td>#{time_tooltip time: ship.dates.receiptDate/}</td>
             <td>${ship.reason}</td>
           </tr>
           #{/list}
