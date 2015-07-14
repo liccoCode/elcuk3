@@ -49,7 +49,7 @@ public class LossRatePost extends Post<LossRate> {
                         + " left join FBAShipment f on p.fba_id=f.id "
                         + " where m.arriveDate >= ? AND m.arriveDate <= ? "
                         + " and s.lossqty!=0 "
-                        + " group by p.fba_id,p.sku ");
+                        + " group by p.fba_id,p.sku order by l.sellingId desc ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
