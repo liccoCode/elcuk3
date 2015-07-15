@@ -62,10 +62,10 @@
             <th>预计到库时间</th>
             <th>实际交货时间</th>
             <th>供应商</th>
-            <th>少货数量</th>
-            <th>采购成本</th>
-            <th>物流成本</th>
-            <th>损失金额</th>
+            <th>少货数量(个)</th>
+            <th>采购成本(USD)</th>
+            <th>物流成本(USD)</th>
+            <th>损失金额(USD)</th>
           </tr>
           </thead>
           <tbody>
@@ -82,10 +82,10 @@
             <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
             <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
             <td>${itm.unit.cooperator?.name}</td>
-            <td>${itm.qty - (itm.adjustQty?:0)}</td>
-            <td>${itm.purchaseCost}</td>
-            <td>${itm.shipmentCost}</td>
-            <td>${itm.lossCost}</td>
+            <td>${itm.qty - (itm.adjustQty?:0)} (个)</td>
+            <td>$ ${itm.purchaseCost}</td>
+            <td>$ ${itm.shipmentCost}</td>
+            <td>$ ${itm.lossCost}</td>
           </tr>
           #{/list}
           </tbody>
