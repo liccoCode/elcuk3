@@ -113,7 +113,7 @@ public class Orders extends Controller {
 
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
         final PDF.Options options = new PDF.Options();
-        options.filename = invoiceformat.filename + invoice.orderid;
+        options.filename = invoiceformat.filename + invoice.orderid + ".pdf";
         options.pageSize = IHtmlToPdfTransformer.A3P;
         Float notaxamount = 0f;
         if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
