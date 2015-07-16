@@ -87,6 +87,11 @@ public class LossRateJob extends BaseJob {
 
         List<ShipItem> shipItems = ShipItem.find(shipParams._1, Dates.morning(this.from), Dates.night(this.to)).fetch();
         for(ShipItem ship : shipItems) {
+            if(ship.recivedLogs().size() == 0) {
+                ship.adjustQty = ship.recivedQty;
+                ship.save();
+            }
+
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
 

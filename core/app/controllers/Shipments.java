@@ -61,7 +61,7 @@ public class Shipments extends Controller {
             ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
             shipments.set(i, ship);
         }
-
+        Shipment.handleQty1(shipments);
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
     }
