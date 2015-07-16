@@ -232,7 +232,7 @@ $ ->
         amountMap[currency] = parseFloat(total);
     )
     #展示 统计结果
-    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v}</span>  ").join('&nbsp;')
+    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v.toFixed(2)}</span>  ").join('&nbsp;')
     $table.find('tbody').append(_.template($('#statisticFee-template').html(), {msg: message}))
   )
 
