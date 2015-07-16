@@ -1508,4 +1508,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         return showTrackNo.substring(0, showTrackNo.length() - 1);
     }
+
+    public static void handleQty1(List<Shipment> shipments) {
+        for(Shipment shipment : shipments) {
+            for(ShipItem shipItem : shipment.items) {
+                if(shipItem.recivedLogs().size() == 0) {
+                    shipItem.adjustQty = shipItem.recivedQty;
+                    shipItem.save();
+                }
+            }
+        }
+    }
 }
