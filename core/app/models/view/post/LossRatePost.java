@@ -77,8 +77,9 @@ public class LossRatePost extends Post<LossRate> {
         List<Object> params = new ArrayList<Object>();
         StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
                 .append(" WHERE m.state = 'DONE' ")
-                .append("AND m.dates.arriveDate >= ? AND m.dates.arriveDate <= ? ")
-                .append(" AND s.qty <> s.recivedQty ");
+                .append(" AND m.dates.arriveDate >= ? AND m.dates.arriveDate <= ? ")
+                .append(" AND s.qty <> s.recivedQty ")
+                .append(" ORDER BY s.unit.sid DESC ");
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
