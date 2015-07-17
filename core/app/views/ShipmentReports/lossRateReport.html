@@ -82,10 +82,10 @@
             <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
             <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
             <td>${itm.unit.cooperator?.name}</td>
-            <td>${itm.qty - (itm.adjustQty?:0)} (个)</td>
-            <td>$ ${itm.purchaseCost}</td>
-            <td>$ ${itm.shipmentCost}</td>
-            <td>$ ${itm.lossCost}</td>
+            <td>${itm.qty - (itm.adjustQty?:0)}</td>
+            <td>${itm.purchaseCost}</td>
+            <td>${itm.shipmentCost}</td>
+            <td>${itm.lossCost}</td>
           </tr>
           #{/list}
           </tbody>
@@ -119,7 +119,7 @@
             <td>${losstotal.totalamt}</td>
             <td>${losstotal.totallossprice}</td>
             <td>${losstotal.totalShipmentprice}</td>
-            <td>${losstotal.payrate}</td>
+            <td>${losstotal.payrate} %</td>
           </tr>
           </tbody>
         </table>
@@ -151,7 +151,7 @@
             <td>${loss.compenusdamt}</td>
             <td>${loss.totallossprice}</td>
             <td>${loss.totalShipmentprice}</td>
-            <td>${loss.payrate}</td>
+            <td>${loss.payrate} %</td>
           </tr>
           #{/list}
           </tbody>
