@@ -390,7 +390,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * Shipment 的检查
      */
     public void validate() {
-        if(StringUtils.isNotBlank(this.trackNo) && !this.trackNo.equals("[]"))
+        if(StringUtils.isNotBlank(this.trackNo) && !this.trackNo.equals("[]") && this.type.label().equals("快递"))
             Validation.required("shipment.internationExpress", this.internationExpress);
 
         // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
@@ -1055,7 +1055,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
         float weight = 0f;
         for(ShipItem itm : this.items) {
-            weight += itm.qty * itm.unit.product.weight;
+            Float product_weight = itm.unit.product.weight;
+            if(product_weight == null) continue;
+            weight += itm.qty * product_weight;
         }
         return weight;
     }
@@ -1065,19 +1067,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public float totalWeightQuaTest() {
-        float weight = 0f;
+    public Double totalWeightQuaTest() {
+        Double weight = 0d;
+        for(ShipItem itm : this.items) {
+            weight += itm.caluTotalWeightByCheckTask();
+        }
         return weight;
     }
-
 
     /**
      * 通过产品数据计算出来的这份运输单的质检总体积
      *
      * @return
      */
-    public float totalVolumeQuaTest() {
-        float volume = 0f;
+    public Double totalVolumeQuaTest() {
+        Double volume = 0d;
+        for(ShipItem itm : this.items) {
+            volume += itm.caluTotalVolumeByCheckTask();
+        }
         return volume;
     }
 
@@ -1086,9 +1093,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public float totalUnitQuaTest() {
-        float volume = 0f;
-        return volume;
+    public Integer totalUnitQuaTest() {
+        Integer totalUnit = 0;
+        for(ShipItem itm : this.items) {
+            totalUnit += itm.caluTotalUnitByCheckTask();
+        }
+        return totalUnit;
     }
 
     /**
@@ -1488,5 +1498,36 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         }
         return null;
+    }
+
+    public String showTrackNo() {
+        String showTrackNo = "";
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        for(String trackNo : this.tracknolist) {
+            showTrackNo += trackNo + ",";
+        }
+        return showTrackNo.substring(0, showTrackNo.length() - 1);
+    }
+
+    public static void handleQty1(List<Shipment> shipments, Shipment ship) {
+        if(shipments != null && shipments.size() > 0) {
+            for(Shipment shipment : shipments) {
+                for(ShipItem shipItem : shipment.items) {
+                    if(shipItem.recivedLogs().size() == 0) {
+                        shipItem.adjustQty = shipItem.recivedQty;
+                        shipItem.save();
+                    }
+                }
+            }
+        }
+        if(ship != null) {
+            for(ShipItem shipItem : ship.items) {
+                if(shipItem.recivedLogs().size() == 0) {
+                    shipItem.adjustQty = shipItem.recivedQty;
+                    shipItem.save();
+                }
+            }
+        }
+
     }
 }

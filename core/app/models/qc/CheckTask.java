@@ -1,10 +1,9 @@
 package models.qc;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.ActivitiEngine;
-import helper.DBUtils;
-import helper.Reflects;
-import helper.Webs;
+import helper.*;
+import models.CategoryAssignManagement;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -14,12 +13,14 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Whouse;
+import models.view.dto.CheckTaskAQLDTO;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -359,6 +360,83 @@ public class CheckTask extends Model {
     @OneToOne
     public PaymentUnit reworkPay;
 
+    /**
+     * 标准箱尾箱质检信息
+     */
+    @Lob
+    public String standBoxQctInfo;
+
+    @Transient
+    public List<CheckTaskDTO> standBoxQctInfos = new ArrayList<CheckTaskDTO>();
+
+    /**
+     * 尾箱尾箱质检信息
+     */
+    @Lob
+    public String tailBoxQctInfo;
+
+    @Transient
+    public List<CheckTaskDTO> tailBoxQctInfos = new ArrayList<CheckTaskDTO>();
+
+    /**
+     * 不合格数量
+     */
+    public int unqualifiedQty;
+
+    @Expose
+    public String ac;
+
+    @Expose
+    public String re;
+
+    /**
+     * 抽检方式
+     */
+    @Lob
+    @Expose
+    public String samplingTypes = "";
+
+    @Transient
+    public List<String> samplingType = new ArrayList<String>();
+
+    /**
+     * 送检次数
+     */
+    @Lob
+    @Expose
+    public String inspectionTimes = "";
+
+    @Transient
+    public List<String> inspectionTime = new ArrayList<String>();
+
+    /**
+     * AQL 严重
+     */
+    @Expose
+    public String cr;
+
+    /**
+     * AQL 主要
+     */
+    @Expose
+    public String ma;
+
+    /**
+     * AQL 次要
+     */
+    @Expose
+    public String mi;
+
+    /**
+     * AQL 不良描述
+     * JSON 格式: [{"badDesc": "aaa", inspectionResult: [检验结果1, 检验结果2]}]
+     */
+    @Transient
+    public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<CheckTaskAQLDTO>();
+
+    @Lob
+    public String aqlBadDescs = "[]";
+
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
@@ -373,16 +451,52 @@ public class CheckTask extends Model {
         if(flag.equals(FLAG.ARRAY_TO_STR)) {
             this.qcRequires = StringUtils.join(this.qcRequire, Webs.SPLIT);
             this.qcWays = StringUtils.join(this.qcWay, Webs.SPLIT);
+
+            this.standBoxQctInfo = J.json(this.fixNullStr(this.standBoxQctInfos));
+            this.tailBoxQctInfo = J.json(this.fixNullStr(this.tailBoxQctInfos));
+
+            this.samplingTypes = StringUtils.join(this.samplingType, Webs.SPLIT);
+            this.inspectionTimes = StringUtils.join(this.inspectionTime, Webs.SPLIT);
+            this.aqlBadDescs = J.json(this.fixNullStr(this.aqlBadDesc));
         } else {
             this.qcRequire = new ArrayList<String>();
             this.qcWay = new ArrayList<String>();
+            this.samplingType = new ArrayList<String>();
+            this.inspectionTime = new ArrayList<String>();
 
             String temp[] = StringUtils.splitByWholeSeparator(this.qcRequires, Webs.SPLIT);
             if(temp != null) Collections.addAll(this.qcRequire, temp);
 
             temp = StringUtils.splitByWholeSeparator(this.qcWays, Webs.SPLIT);
             if(temp != null) Collections.addAll(this.qcWay, temp);
+
+            temp = StringUtils.splitByWholeSeparator(this.samplingTypes, Webs.SPLIT);
+            if(temp != null) Collections.addAll(this.samplingType, temp);
+
+            temp = StringUtils.splitByWholeSeparator(this.inspectionTimes, Webs.SPLIT);
+            if(temp != null) Collections.addAll(this.inspectionTime, temp);
+
+            if(StringUtils.isNotBlank(this.standBoxQctInfo)) this.standBoxQctInfos = JSON.parseArray(this
+                    .standBoxQctInfo, CheckTaskDTO.class);
+            if(StringUtils.isNotBlank(this.tailBoxQctInfo)) this.tailBoxQctInfos = JSON.parseArray(this
+                    .tailBoxQctInfo, CheckTaskDTO.class);
+            if(StringUtils.isNotBlank(this.aqlBadDescs))
+                this.aqlBadDesc = JSON.parseArray(this.aqlBadDescs, CheckTaskAQLDTO.class);
         }
+    }
+
+    /**
+     * 对空字符进行处理
+     *
+     * @return
+     */
+    private List fixNullStr(List target) {
+        Iterator<Object> iterator = target.iterator();
+        while(iterator.hasNext()) {
+            Object o = iterator.next();
+            if(o == null) iterator.remove();
+        }
+        return target;
     }
 
     public void fetchSkucheck() {
@@ -442,16 +556,15 @@ public class CheckTask extends Model {
                 newtask.units = punit;
                 newtask.confirmstat = ConfirmType.UNCONFIRM;
                 newtask.checkstat = StatType.UNCHECK;
-                if(punit.cooperator!=null && punit.cooperator.qcLevel == Cooperator.L.MICRO) {
+                if(punit.cooperator != null && punit.cooperator.qcLevel == Cooperator.L.MICRO) {
                     //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
                     newtask.qcType = T.SELF;
                 }
-
+                newtask.checkor = newtask.showChecktor();
                 //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
                 Whouse wh = searchWarehouse(punit);
                 if(wh != null && wh.user != null) {
                     newtask.shipwhouse = wh;
-                    newtask.checkor = wh.user.username;
                 }
 
                 newtask.creatat = new Date();
@@ -464,7 +577,7 @@ public class CheckTask extends Model {
 
         //因为运输方式经常变化，需要重新检查一次
         List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where "
-                +"  units_id in (" +
+                + "  units_id in (" +
                 "  select unit_id from ShipItem where shipment_id in (" +
                 "  select id from Shipment where type='EXPRESS'" +
                 "  )" +
@@ -473,13 +586,13 @@ public class CheckTask extends Model {
             checkwarehouse(unchecktasks);
         }
         unchecktasks = DBUtils.rows("select id from CheckTask where "
-                        +" not exists (select 1 from ShipItem where ShipItem.unit_id=CheckTask.units_id)"
-                        +" and exists (select 1 from ProcureUnit where "
-                        +" ProcureUnit.id=CheckTask.units_id and shipType='EXPRESS')"
-                        +" and checkstat='UNCHECK'");
-                if(unchecktasks.size() > 0) {
-                    checkwarehouse(unchecktasks);
-                }
+                + " not exists (select 1 from ShipItem where ShipItem.unit_id=CheckTask.units_id)"
+                + " and exists (select 1 from ProcureUnit where "
+                + " ProcureUnit.id=CheckTask.units_id and shipType='EXPRESS')"
+                + " and checkstat='UNCHECK'");
+        if(unchecktasks.size() > 0) {
+            checkwarehouse(unchecktasks);
+        }
 
 
         List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
@@ -621,6 +734,8 @@ public class CheckTask extends Model {
      */
     public void fullUpdate(CheckTask newCt, String username) {
         this.units.attrs.qty = newCt.qty;
+        if(newCt.standBoxQctInfos != null) this.standBoxQctInfos = newCt.standBoxQctInfos;
+        if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
         switch(newCt.isship) {
             case SHIP:
                 this.checkstat = StatType.CHECKFINISH;
@@ -674,13 +789,28 @@ public class CheckTask extends Model {
         this.qty = newCt.qty;
         this.pickqty = newCt.pickqty;
         this.checkor = newCt.checkor;
+
+        this.unqualifiedQty = newCt.unqualifiedQty;
+        if(newCt.samplingTypes != null) this.samplingTypes = newCt.samplingTypes;
+        if(newCt.samplingTypes != null) this.inspectionTimes = newCt.inspectionTimes;
+        if(newCt.ac != null) this.ac = newCt.ac;
+        if(newCt.re != null) this.re = newCt.re;
+        if(newCt.cr != null) this.cr = newCt.cr;
+        if(newCt.ma != null) this.ma = newCt.ma;
+        if(newCt.mi != null) this.mi = newCt.mi;
+        if(newCt.aqlBadDescs != null) this.aqlBadDescs = newCt.aqlBadDescs;
+
         if(newCt.dealway != null) this.dealway = newCt.dealway;
         if(newCt.startTime != null) this.startTime = newCt.startTime;
         if(newCt.endTime != null) this.endTime = newCt.endTime;
         if(newCt.result != null) this.result = newCt.result;
         if(newCt.isship != null) this.isship = newCt.isship;
         if(newCt.checknote != null) this.checknote = newCt.checknote;
-
+        if(newCt.standBoxQctInfo != null) this.standBoxQctInfo = newCt.standBoxQctInfo;
+        if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
+        if(this.result == ResultType.AGREE) {
+            this.isship = ShipType.SHIP;
+        }
         this.units.save();
         this.save();
     }
@@ -907,4 +1037,91 @@ public class CheckTask extends Model {
         return map;
     }
 
+    /**
+     * 将产品定位属性转换成 String 存入DB
+     * 或者将 String 转换成 List
+     *
+     * @param flag
+     */
+    public void arryParamSetUPForQtInfo(FLAG flag) {
+        if(flag.equals(FLAG.ARRAY_TO_STR)) {
+            this.standBoxQctInfo = J.json(this.fixNullStr(this.standBoxQctInfos));
+            this.tailBoxQctInfo = J.json(this.fixNullStr(this.tailBoxQctInfos));
+        } else {
+            if(StringUtils.isNotBlank(this.standBoxQctInfo)) this.standBoxQctInfos = JSON.parseArray(this
+                    .standBoxQctInfo, CheckTaskDTO.class);
+            if(StringUtils.isNotBlank(this.tailBoxQctInfo)) this.tailBoxQctInfos = JSON.parseArray(this
+                    .tailBoxQctInfo, CheckTaskDTO.class);
+        }
+    }
+
+    /**
+     * 计算总箱数
+     *
+     * @return
+     */
+    public Integer totalBoxNum() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Integer totalBoxNum = 0;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalBoxNum += checkTaskDTO.boxNum;
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalBoxNum += checkTaskDTO.boxNum;
+        }
+        return totalBoxNum;
+    }
+
+    /**
+     * 计算总体积
+     *
+     * @return
+     */
+    public Double totalVolume() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Double totalVolume = 0d;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalVolume +=
+                    checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalVolume +=
+                    checkTaskDTO.length * checkTaskDTO.width * checkTaskDTO.height * checkTaskDTO.boxNum / 1000000;
+        }
+        return totalVolume;
+    }
+
+    /**
+     * 计算总重量
+     *
+     * @return
+     */
+    public Double totalWeight() {
+        this.arryParamSetUPForQtInfo(FLAG.STR_TO_ARRAY);
+        Double totalWeight = 0d;
+        for(CheckTaskDTO checkTaskDTO : this.standBoxQctInfos) {
+            totalWeight += checkTaskDTO.singleBoxWeight * checkTaskDTO.boxNum;
+        }
+        for(CheckTaskDTO checkTaskDTO : this.tailBoxQctInfos) {
+            totalWeight += checkTaskDTO.singleBoxWeight * checkTaskDTO.boxNum;
+        }
+        return totalWeight;
+    }
+
+    public String showChecktor() {
+        String id = this.units.product.category.categoryId;
+        String name = "";
+        List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
+                .find("category.categoryId=? AND isCharge =1", id).fetch();
+        if(categoryAssignManagements.size() > 0) {
+            for(CategoryAssignManagement c : categoryAssignManagements) {
+                if(c.isQCrole()) {
+                    name += c.user.username + ",";
+                }
+            }
+            return name.length() > 0 ? name.substring(0, name.length() - 1) : "";
+        } else {
+            return "";
+        }
+    }
 }

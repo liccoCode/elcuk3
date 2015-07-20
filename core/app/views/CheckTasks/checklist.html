@@ -150,13 +150,13 @@
         <td>${tl.units.selling?.fnSku}</td>
         <td><a href="@{Deliveryments.show(tl.units?.deliveryment?.id)}">${tl.units?.deliveryment?.id}</a></td>
         <td>${tl.shipwhouse?.name}</td>
-        <td>${tl.units.cooperator.name}</td>
+        <td>${tl.units.cooperator?.name}</td>
         <td>${tl.units.cooperator?.qcLevel?.label()}</td>
         <td>${tl.units.attrs.planQty}</td>
         <td>${tl.units.attrs.qty}</td>
         <td>${tl.qcType?.label()}</td>
         <td>${tl.checkstat?.label()}</td>
-        <td>${tl.checkor}</td>
+        <td>${tl.showChecktor()}</td>
         <td>${tl.result?.label()}</td>
         <td>${tl.isship?.label()}</td>
         <td>${tl.startTime?.datetime()}</td>

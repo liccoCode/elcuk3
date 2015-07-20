@@ -89,6 +89,8 @@ $ ->
       .done((r) ->
         trDom = $(_.template($('#tr-edit-paymentunit-template').html(), {fee: r}))
           .find("[name='fee.currency']").val(r.currency).end()
+        if r.cchargingWay
+          trDom.find("[name='fee.chargingWay'] option:contains(#{r.chargingWay})").prop('selected', true)
         $tr.replaceWith(trDom)
         sessionStorage["tr-edit-paymentunit-template-#{id}"] = JSON.stringify(r)
         LoadMask.unmask()
@@ -202,6 +204,7 @@ $ ->
   $('table.paymentInfo').on('statisticFee', (e) ->
     e.preventDefault()
     $table = $(@)
+    isExpress = $table.find("tr:eq(0)").find("th:eq(5)").text() == '计费方式'
     #删除生成的TR 防止统计错误
     $table.find("tr td:contains(运输单费用统计)").remove()
     #根据币种的不同 统计总金额
@@ -212,10 +215,16 @@ $ ->
       isEditAble = $tr.find('select').size() > 0
       if isEditAble
         currency = $tr.find("td:eq(2) :selected").val()
-        total = $tr.find("td:eq(7) :input").val()
+        if isExpress
+          total = $tr.find("td:eq(8) :input").val()
+        else
+          total = $tr.find("td:eq(7) :input").val()
       else
         currency = $tr.find("td:eq(2)").text();
-        total = $tr.find("td:eq(7)").text().trim().split(' ')[1]
+        if isExpress
+          total = $tr.find("td:eq(8)").text().trim().split(' ')[1]
+        else
+          total = $tr.find("td:eq(7)").text().trim().split(' ')[1]
 
       if amountMap[currency]
         amountMap[currency] += parseFloat(total);
@@ -223,7 +232,7 @@ $ ->
         amountMap[currency] = parseFloat(total);
     )
     #展示 统计结果
-    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v}</span>  ").join('&nbsp;')
+    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v.toFixed(2)}</span>  ").join('&nbsp;')
     $table.find('tbody').append(_.template($('#statisticFee-template').html(), {msg: message}))
   )
 

@@ -24,5 +24,6 @@
     },
     "payee": {
         "username": "${fee.payee.username}"
-    }
+    },
+    "chargingWay": "${fee.chargingWay?.label()}"
 }

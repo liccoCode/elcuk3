@@ -9,7 +9,6 @@ import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
 import models.view.Ret;
-import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -178,6 +177,7 @@ public class Sellings extends Controller {
 
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
+
     public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {

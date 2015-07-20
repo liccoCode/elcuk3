@@ -95,4 +95,31 @@ public class ShipmentWeight {
         }
         return sortedMap;
     }
+
+    public List<Shipment> queryShipmentCostAndWeight() {
+        List<String> skus = Category.getSKUs(this.categoryId);
+        if(this.sku != null && StringUtils.isNotBlank(this.sku)) skus.add(this.sku);
+        List<Object> params = new ArrayList<Object>();
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.whouse w " +
+                " LEFT JOIN s.fees f" +
+                " LEFT JOIN s.items i" +
+                " LEFT JOIN i.unit u" +
+                " LEFT JOIN u.product p " +
+                " WHERE s.dates.beginDate>=? AND s.dates.beginDate<=? ");
+        params.add(this.from);
+        params.add(this.to);
+        if(this.market != null) {
+            sql.append(" AND w.name=?");
+            params.add(this.market.marketAndWhouseMapping());
+        }
+        if(this.shipType != null) {
+            sql.append("s.type=?");
+            params.add(this.shipType.toString());
+        }
+        if(skus.size() > 0) {
+            sql.append("pro.sku IN " + SqlSelect.inlineParam(skus));
+        }
+        List<Shipment> list = Shipment.find(sql.toString(), params.toArray()).fetch();
+        return list;
+    }
 }

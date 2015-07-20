@@ -47,9 +47,9 @@ public class ReportRecord extends Model {
     public RT reporttype;
 
 
-    /*
-  * 报表类型
-  */
+    /**
+     * 报表类型
+     */
     public enum RT {
         /**
          * 月度销售报表汇总
@@ -129,9 +129,51 @@ public class ReportRecord extends Model {
             public String label() {
                 return "库存占用资金报表";
             }
+        },
+
+        REVENUEANDCOST {
+            @Override
+            public String label() {
+                return "主营业务收入与成本报表";
+            }
+        },
+
+        SALESFEELIST {
+            @Override
+            public String label() {
+                return "销售费用明细报表";
+            }
+        },
+
+        PAYBILLDETAIL {
+            @Override
+            public String label() {
+                return "应付账款明细表";
+            }
+        },
+
+        ANALYZEREPORT {
+            @Override
+            public String label() {
+                return "销售分析报表";
+            }
+        },
+        PROCURECOSTANALYSIS {
+            @Override
+            public String label() {
+                return "采购成本报表";
+            }
         };
 
         public abstract String label();
+        /**
+         * Warning:
+         * <p/>
+         * 1、为了复用 ReportPost 类, 请务必新将 新添加的报表类型 按照 报表类型 添加到 models.view.post.ReportPost 类当中的
+         * saleReportTypes(销售报表) 方法 或 applyReportTypes(财务) 方法内。
+         *
+         * 2、能够重新计算的报表类型请添加到下方的 canBeRecalculated 方法内。
+         */
     }
 
 
@@ -146,8 +188,7 @@ public class ReportRecord extends Model {
      * @return
      */
     public boolean canBeRecalculated() {
-        return !Arrays
-                .asList(RT.SKUINVSELLING, RT.SKUINVTOTAL, RT.INVENTORYRATIANALITY, RT.SELLINGCYCLE, RT.INVRNTORYCOST)
+        return Arrays.asList(RT.SKUMONTHALL, RT.SKUMONTHCATEGORY, RT.SALEYEARTOTAL, RT.SALEYEARCATEGORY)
                 .contains(this.reporttype);
     }
 }

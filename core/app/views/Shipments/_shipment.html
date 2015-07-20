@@ -37,18 +37,15 @@
 
     <tr>
       <th>约定到货时间</th>
-      <td colspan="4">
+      <td>
         <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates.planArrivDateForCountRate.date()}"
                rel="popover" content="用于计算准时到货率(只有在 '计划' 与 '锁定准备运输' 状态下的运输单才允许修改该字段)" placement="right">
       </td>
 
-      <!--<th>变更原因</th>
-      TODO 需求临时变更,暂时隐藏原因填写
+      <th>晚到货原因</th>
       <td>
-        <textarea rows="2" name="ship.reason" class="span8" rel="popover" content="变更“约定到货时间”时必填"
-                  placement="right">${ship.reason}</textarea>
+        <input name="ship.reason" class="span8" rel="popover" placement="right" value="${ship.reason}" id="reason"/>
       </td>
-      -->
     </tr>
 
     <tr>
@@ -115,7 +112,7 @@
       #{/select}
       </td>
       <th>总体积(m³)质检</th>
-      <td>${ship.totalVolumeQuaTest()}</td>
+      <td>${ship.totalVolumeQuaTest().format('#.##')}</td>
     </tr>
 
     <tr>

@@ -81,12 +81,16 @@
     <div class="span12">
     #{render 'Shipments/_shipment_list.html', shipments:shipments/}
     </div>
-  #{power.ck 'applys.shipmenttoapply'}
     <div class="btn-toolbar">
-      <button class="btn btn-success" data-url='@{Applys.shipmentToApply()}' data-disable-with='创建请款单中...'>
+    #{power.ck 'applys.shipmenttoapply'}
+      <button id="createApplyBtn" class="btn btn-success" data-url='@{Applys.shipmentToApply()}'
+              data-disable-with='创建请款单中...'>
         创建运输请款单
       </button>
+    #{/power.ck}
+      <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary"
+         >
+        <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
     </div>
-  #{/power.ck}
   </div>
 </form>

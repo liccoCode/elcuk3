@@ -11,12 +11,12 @@
           <th class="span1">币种</th>
           <th class="span2">单价</th>
           <th>数量</th>
-          <th class="span2">(3m)均价</th>
-          <th class="span2">(now)均价</th>
-          <th class="span2">总价</th>
         #{if isExpress}
           <th class="span2">计费方式</th>
         #{/if}
+          <th class="span2">(3m)均价</th>
+          <th class="span2">(now)均价</th>
+          <th class="span2">总价</th>
           <th class="span2">费用关系人</th>
           <th class="span3">备注</th>
           <th>申请人</th>
@@ -30,6 +30,9 @@
           <td>${fee.currency}</td>
           <td>${fee.currency.symbol()} ${fee.unitPrice.format('#.###')}</td>
           <td>${fee.unitQty}</td>
+            #{if isExpress}
+              <td>${fee.chargingWay?.label()}</td>
+            #{/if}
           <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}</td>
           <td>${helper.Currency.CNY.symbol()} ${fee.currentAvgPrice().format('#.###')}</td>
           <td data-shipitemid='${fee.shipItem?.id}'>
@@ -38,9 +41,6 @@
                 <i class="icon-search"></i>
               #{/if}
           </td>
-            #{if isExpress}
-              <th>${fee.chargingWay?.label()}</th>
-            #{/if}
           <td>${fee.cooperator?.name}</td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
@@ -148,6 +148,9 @@
     <td><%= fee.currency %></td>
     <td><%= fee.symbol %> <%= fee.unitPrice %></td>
     <td><%= fee.unitQty %></td>
+  #{if isExpress}
+    <td><%= fee.chargingWay %></td>
+  #{/if}
     <td><%= fee.averagePrice %></td>
     <td><%= fee.currentAvgPrice %></td>
     <td data-shipitemid='<%= fee.shipItem.id %>'>
@@ -190,6 +193,15 @@
     <td>
       <input type="number" step='any' class="input-mini" name="fee.unitQty" value="<%= fee.unitQty %>">
     </td>
+  #{if isExpress}
+    <td>
+      <select name="fee.chargingWay" class="input-small">
+          #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
+            <option value="${way}">${way.label()}</option>
+          #{/list}
+      </select>
+    </td>
+  #{/if}
     <td>系统计算得出</td>
     <td><%= fee.currentAvgPrice %></td>
     <td>
@@ -239,6 +251,6 @@
 
 <script type="text/template" id="statisticFee-template">
   <tr>
-    <td colspan="13"><span style="margin-right:20px;">运输单费用统计</span> <%= msg %></td>
+    <td colspan="14"><span style="margin-right:20px;">运输单费用统计</span> <%= msg %></td>
   </tr>
 </script>

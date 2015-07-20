@@ -307,7 +307,7 @@ public class Attach extends Model {
 
     public static BasicClientCookie cookie(String name, String value) {
         BasicClientCookie cookie = new BasicClientCookie(name, value);
-        cookie.setDomain("easya.cc");
+        cookie.setDomain("easyacc.com");
         cookie.setVersion(0);
         cookie.setPath("/");
         return cookie;
@@ -320,7 +320,7 @@ public class Attach extends Model {
      * @return
      */
     public static String attachPathList(String sku) {
-        return "http://pangoro.easya.cc:8080/index.php?explorer/pathList&path=SKU/" + sku;
+        return "http://kod.easyacc.com:8080/index.php?explorer/pathList&path=SKU/" + sku;
     }
 
     /**
@@ -331,7 +331,7 @@ public class Attach extends Model {
      * @return
      */
     public static String attachImage(String sku, String name) {
-        return "http://pangoro.easya.cc:8080/data/User/elcuk2/home/SKU/" + sku + "/" + name;
+        return "http://kod.easyacc.com:8080/data/User/elcuk2/home/SKU/" + sku + "/" + name;
     }
 
     /**

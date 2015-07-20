@@ -49,7 +49,7 @@ public class ES {
     public static String parseEsString(String esfield) {
         if(esfield == null)
             return null;
-        esfield = esfield.replace("-", "").replace(",", "").replace("|", "");
+        esfield = esfield.replace("-", "").replace(",", "").replace("|", "").replace(".", "");
         return esfield;
     }
 }

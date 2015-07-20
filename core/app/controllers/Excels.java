@@ -3,22 +3,23 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
 import helper.Caches;
+import helper.*;
 import helper.Currency;
-import helper.Webs;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.RevenueAndCostDetail;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
-import models.view.report.LossRate;
-import models.view.report.Profit;
-import models.view.report.TrafficRate;
+import models.view.report.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -27,13 +28,16 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
+import play.libs.Files;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -136,6 +140,23 @@ public class Excels extends Controller {
             render(dtos, p);
         } else {
             renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 下载运输单明细Excel表格
+     */
+    public static void shipmentDetails(List<String> shipmentId) {
+        if(shipmentId == null || shipmentId.size() == 0) {
+            renderText("请选择需要打印的运输单！");
+        } else {
+            List<Shipment> dtos = Shipment.find("id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("运输单发货信息明细表格%s.xls", formatter.format(new Date())));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(dtos);
         }
     }
 
@@ -279,6 +300,22 @@ public class Excels extends Controller {
         }
     }
 
+    public static void exportShipmentCostAndWeightReport(ShipmentWeight excel) {
+        List<Shipment> dtos = excel.queryShipmentCostAndWeight();
+        if(dtos != null && dtos.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put("dateFormat", formatter);
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("运输单费用及重量统计报表%s-%s.xls", formatter.format(excel.from), formatter.format(excel.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("symbol", Currency.CNY.symbol());
+            render(dtos, excel);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
     public static void exportProcureUnitsLogs(ProcurePost p) {
         List<HashMap<String, Object>> logs = p.queryLogs();
         if(logs != null && logs.size() > 0) {
@@ -294,21 +331,56 @@ public class Excels extends Controller {
         }
     }
 
-
-    public static void lossRateReport(LossRatePost p) {
-        if(p == null) p = new LossRatePost();
-        List<LossRate> lossrates = p.query();
-        LossRate losstotal = p.querytotal();
-        if(lossrates != null && lossrates.size() != 0) {
+    public static void arrivalRateReport(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<ArrivalRate> dtos = p.query();
+        if(dtos != null && dtos.size() > 1) {
+            List<Shipment> shipments = p.queryOverTimeShipment();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
+            renderArgs.put("dmt", new SimpleDateFormat("yyyy-MM-dd"));
+            renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                    String.format("%s-%s运输准时到货统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            renderArgs.put("dateFormat", formatter);
-            render(lossrates, losstotal, p);
+            render(dtos, shipments, p);
         } else {
-            renderText("没有数据无法生成Excel文件！");
+            renderText("没有数据无法生成Excel文件!");
+        }
+    }
+
+    public static void lossRateReport(LossRatePost p, String type) {
+        if(p == null) p = new LossRatePost();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        if(type != null && type.equals("pay")) {
+            Map<String, Object> map = p.queryDate();
+            List<LossRate> lossrates = (List<LossRate>) map.get("lossrate");
+            LossRate losstotal = p.buildTotalLossRate(lossrates);
+            if(lossrates != null && lossrates.size() != 0) {
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                renderArgs.put("dmt", formatter);
+                render(lossrates, losstotal, p);
+            } else {
+                renderText("没有数据无法生成Excel文件！");
+            }
+        } else {
+            Map<String, Object> map = p.queryDate();
+            List<ShipItem> dtos = (List<ShipItem>) map.get("shipItems");
+            if(dtos != null && dtos.size() > 0) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("%s-%s未完全入库统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
+                renderArgs.put("dmt", formatter);
+                renderArgs.put("dft", dateFormat);
+                render("Excels/notFullyStorageReport.xls", dtos, p);
+            } else {
+                renderText("没有数据无法生成Excel文件！");
+            }
         }
     }
 
@@ -334,7 +406,6 @@ public class Excels extends Controller {
             final int begin = new DateTime(from).getMonthOfYear();
             final int end = new DateTime(to).getMonthOfYear();
             if(from.getTime() > to.getTime() || begin > end) renderJSON(new Ret("开始时间必须小于结束时间且必须在同一年份内!"));
-
             String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
             List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
             if(dtos == null || dtos.size() == 0) {
@@ -353,10 +424,66 @@ public class Excels extends Controller {
                 renderArgs.put(RenderExcel.RA_FILENAME,
                         String.format("SKU月度日均销量报表%s.xls", formatter.format(DateTime.now().toDate())));
                 renderArgs.put(RenderExcel.RA_ASYNC, false);
-                render(dtos, months);
+                File fileOut = OrderItem.createWorkBook(dtos, months, cacheKey);
+                renderBinary(fileOut);
             }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
+        }
+    }
+
+    /**
+     * 主营业务收入与成本报表(Amazon)
+     */
+    public static void revenueAndCostReport(Integer year, Integer month) {
+        Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
+        List<RevenueAndCostDetail> dtos = RevenueAndCostDetail
+                .find("create_at BETWEEN ? AND ?", Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        if(dtos != null && dtos.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "主营业务收入与成本报表(Amazon).xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(dtos, target, formatter);
+        } else {
+            HTTP.get(String.format("%s?year=%s&month=%s", RevenueAndCostDetail.CALCULATE_URL, year, month));
+            renderText("正在计算中...请稍后再来查看.");
+        }
+    }
+
+    public static void procureUnitSearchExcel(ProcurePost p) {
+        List<ProcureUnit> dtos = p.query();
+        if(dtos == null || dtos.size() == 0) {
+            renderText("没有数据无法生成Excel文件!");
+        } else {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("采购计划明细表%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dtos, p);
+        }
+    }
+
+    public static void areaGoodsAnalyzeExcel(AreaGoodsAnalyze a) {
+        if(a == null) {
+            a = new AreaGoodsAnalyze();
+            a.from = DateTime.now().minusMonths(1).plusDays(1).toDate();
+            a.to = DateTime.now().toDate();
+        }
+        List<AreaGoodsAnalyze> dtos = a.query();
+        if(dtos != null && dtos.size() > 0) {
+            a.queryTotalShipmentAnalyze();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("物流区域货量分析报表%s-%s.xls", dateFormat.format(a.from),
+                    dateFormat.format(a.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+
+            render(dtos, a, dateFormat);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
         }
     }
 }

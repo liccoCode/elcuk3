@@ -40,6 +40,9 @@
        data-url="@{ShipmentReports.countShipWeightByMarket()}"></div>
 </div>
 
+<ul>
+  <li>导出单个 SKU 的运输重量报表</li>
+</ul>
 <div class="row-fluid pull-right">
   <div class="span12 bs-docs-form">
     <form class="search_form" action="@{Excels.exportShipmentWeighReport()}" target="_blank">
@@ -79,11 +82,68 @@
         <input type="text" style="width:90px;" name="excel.sku" data-provide="typeahead" data-source="${skus}" data-items="15">
       </div>
 
+    #{power.ck "shipmentscost"}
       <div class="inline">
         <button class="btn btn-success" type="submit" content="根据条件导出单个 SKU 的运输重量到 Excel" placement='right' rel="popover">
           <i class="icon-download-alt"></i>下载 Excel
         </button>
       </div>
+    #{/power.ck}
+    </form>
+  </div>
+</div>
+
+
+<ul>
+  <li>运输重量与费用统计报表</li>
+</ul>
+<div class="row-fluid pull-right">
+  <div class="span12 bs-docs-form">
+    <form class="search_form" action="@{Excels.exportShipmentCostAndWeightReport()}" target="_blank">
+      <div class="input-prepend inline">
+        <span class="add-on">运输时间From:</span>
+        <input type="date" style="width:90px;" name="excel.from" value="${excel.from.date()}">
+
+        <span class="add-on" style="margin-left:20px;">To:</span>
+        <input type="date" style="width:90px;" name="excel.to" value="${excel.to.date()}">
+      </div>
+
+      <div class="inline">
+        <select name="excel.market">
+          <option value="0">市场</option>
+        #{list items:models.market.M.values(), as:'m'}
+          <option value="${m.name()}">${m.name()}</option>
+        #{/list}
+        </select>
+      </div>
+
+      <div class="inline">
+        <select name="excel.shipType">
+          <option value="0">运输方式</option>
+        #{list items:models.procure.Shipment.T.values(), as:'t'}
+          <option value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+      </div>
+
+      <div class="input-prepend inline">
+        <span class="add-on">Category:</span>
+        <input type="text" style="width:90px;" name="excel.categoryId" data-provide="typeahead" data-source="${categorys}" data-items='15'>
+      </div>
+
+      <div class="input-prepend inline">
+        <span class="add-on">SKU:</span>
+        <input type="text" style="width:90px;" name="excel.sku" data-provide="typeahead" data-source="${skus}" data-items="15">
+      </div>
+
+    #{power.ck "shipmentscost"}
+      <div class="inline">
+        <button class="btn btn-success" type="submit" content="根据条件导出运输单的费用及重量到 Excel" placement='right'
+                rel="popover">
+          <i class="icon-download-alt"></i>下载 Excel
+        </button>
+      </div>
+    #{/power.ck}
     </form>
   </div>
 </div>

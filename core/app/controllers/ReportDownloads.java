@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.List;
 
 /**
+ * 各类报表控制器
  * Created by IntelliJ IDEA.
  * User: mac
  * Date: 15-1-16
@@ -19,12 +20,23 @@ import java.util.List;
  */
 public class ReportDownloads extends Controller {
 
+    /**
+     * 销售报表
+     *
+     * @param p
+     */
     public static void index(ReportPost p) {
         if(p == null) p = new ReportPost();
+        p.reportTypes = ReportPost.saleReportTypes();
         List<ReportRecord> reports = p.query();
         render(p, reports);
     }
 
+    /**
+     * 报表下载
+     *
+     * @param id
+     */
     public static void download(Long id) {
         ReportRecord record = ReportRecord.findById(id);
         record.downloadcount += 1;
@@ -33,6 +45,11 @@ public class ReportDownloads extends Controller {
         renderBinary(file);
     }
 
+    /**
+     * 重新计算
+     *
+     * @param id
+     */
     public static void repeatCalculate(Long id) {
         ReportRecord record = ReportRecord.findById(id);
         try {
@@ -43,4 +60,25 @@ public class ReportDownloads extends Controller {
         }
     }
 
+    /**
+     * 财务报表
+     */
+    @Check("reportdownloads.applyreportsindex")
+    public static void applyReportsIndex(ReportPost p) {
+        if(p == null) p = new ReportPost();
+        p.reportTypes = ReportPost.applyReportTypes();
+        List<ReportRecord> reports = p.query();
+        render(p, reports);
+    }
+
+    /**
+     * 采购报表
+     */
+    @Check("report.procurereports")
+    public static void procureReportsIndex(ReportPost p) {
+        if(p == null) p = new ReportPost();
+        p.reportTypes = ReportPost.procureReportTypes();
+        List<ReportRecord> reports = p.query();
+        render(p, reports);
+    }
 }

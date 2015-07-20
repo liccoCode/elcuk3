@@ -23,6 +23,7 @@
   #{/if}
     <th><abbr rel='tooltip' title='运输数量 (计划数量 | 交货数量)'>Qty</abbr></th>
     <th class="five">Receive</th>
+    <th>Qty1</th>
     <th>采购单</th>
     <th>预计发货时间</th>
     <th>预计到库时间</th>
@@ -85,18 +86,31 @@
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
-      #{if itmRecord}
-        <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
-            name='recivedQty' placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
-        ${itm.recivedQty}
-          <i class="icon-wrench"></i>
-        </td>
-      #{/if}
-      #{else }
-        <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}">
-        ${itm.recivedQty}
-        </td>
-      #{/else}
+    #{if itmRecord}
+      <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
+          name='recivedQty' placement='right' rel='popover'>
+      ${itm.recivedQty}
+      </td>
+    #{/if}
+    #{else }
+      <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}">
+      ${itm.recivedQty}
+      </td>
+    #{/else}
+
+    #{if itmRecord}
+      <td style="#{if itm.adjustQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
+          name='adjustQty' placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
+      ${itm.adjustQty}<i class="icon-wrench"></i>
+      </td>
+    #{/if}
+    #{else }
+      <td style="${itm.adjustQty != itm.qty ? 'background:#F2DEDE' : ''}" name="adjustQty"
+          content='#{records_ul records: itm.recivedLogs()/}'>
+      ${itm.adjustQty}<i class="icon-wrench"></i>
+      </td>
+    #{/else}
+
     <td>
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
       ${itm.unit.deliveryment?.id}

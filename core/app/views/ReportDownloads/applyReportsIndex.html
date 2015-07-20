@@ -1,0 +1,97 @@
+#{extends 'main_full.html'/}
+#{set title:"财务报表下载" /}
+#{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'ReportDownloads/index.coffee'/}
+#{/set}
+
+#{flash_alert /}
+#{errorMsgs /}
+
+#{success_row}
+<ul>
+  <li>已计算完成报表</li>
+</ul>
+#{/success_row}
+<br/>
+#{form @ReportDownloads.applyReportsIndex(), class:'search_form', id:'reports_form'}
+<div class="row-fluid">
+  <div class="span12">
+    <span>年份:</span>
+      #{select_year class:'span1', name:'p.year', value: p.year/}
+    &nbsp;
+
+    <span class="add-on">月份:</span>
+      #{select_all_month  class:'span1', name: "p.month", value: p.month/}
+    &nbsp;
+
+    <span class="add-on">报表类型:</span>
+    <select class="span1" name="p.reporttype">
+      <option value="">请选择</option>
+        #{list items:models.view.post.ReportPost.applyReportTypes(), as: 'reportType'}
+          <option ${p.reporttype == reportType ? 'selected=selected' : ''} value="${reportType.name()}">${reportType.label()}</option>
+        #{/list}
+    </select>
+    &nbsp;
+
+    <button class="btn" data-loading>Search</button>
+  </div>
+</div>
+#{/form}
+<div class="row-fluid">
+  <div class="span12">
+    <table id="reports" class="table table-condensed table-bordered">
+      <thead>
+      <tr>
+        <th>序号</th>
+        <th>报表类型</th>
+        <th>报表名称</th>
+        <th>年份</th>
+        <th>月份</th>
+        <th>生成时间</th>
+        <th>下载次数</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      #{list items:reports, as:'r'}
+      <tr>
+        <td>${r.id}</td>
+        <td>${r.reporttype?r.reporttype.label():''}</td>
+        <td>${r.filename}</td>
+        <td>${r.year}</td>
+        <td>${r.month}</td>
+        <td>${r.createAt}</td>
+        <td>${r.downloadcount}</td>
+        <td><a class="btn btn-primary" href="@{ReportDownloads.download(r.id)}">下载</a>
+            #{if r.canBeRecalculated()}
+              <a class="btn btn-primary" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
+            #{/if}
+        </td>
+      </tr>
+      #{/list}
+      </tbody>
+    </table>
+  </div>
+</div>
+<br/>
+
+#{success_row}
+<ul>
+  <li>主营收入与成本报表</li>
+</ul>
+#{/success_row}
+<div class="row-fluid pull-right">
+  <div class="span12 bs-docs-form">
+    <form class="search_form" action="@{Excels.revenueAndCostReport()}" target="_blank">
+      <span>年份:</span>
+    #{select_year class:'span1', name:'year', value: new org.joda.time.DateTime().getYear()/}
+      &nbsp;
+
+      <span class="add-on">月份:</span>
+    #{select_all_month  class:'span1', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
+      &nbsp;
+      <button class="btn">Export</button>
+    </form>
+  </div>
+</div>

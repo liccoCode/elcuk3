@@ -1,6 +1,7 @@
 package models.finance;
 
 import exception.PaymentException;
+import ext.PaymentHelper;
 import helper.Currency;
 import helper.Reflects;
 import models.ElcukRecord;
@@ -9,12 +10,15 @@ import models.embedded.ERecordBuilder;
 import models.procure.*;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
+import query.PaymentUnitQuery;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -340,7 +344,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return this.amount + this.fixValue;
+        return new BigDecimal(this.amount).add(new BigDecimal(this.fixValue)).floatValue();
     }
 
     /**
@@ -349,7 +353,8 @@ public class PaymentUnit extends Model {
      * @return
      */
     private boolean isApproval() {
-        return this.state == S.APPROVAL || this.state == S.PAID;
+        return this.state == S.APPROVAL
+                || this.state == S.PAID;
     }
 
     /**
@@ -468,6 +473,7 @@ public class PaymentUnit extends Model {
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
         logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
+        logs.addAll(Reflects.logFieldFade(this, "chargingWay", fee.chargingWay));
         if(this.payment == null) {
             logs.addAll(Reflects.logFieldFade(this, "currency", fee.currency));
         }
@@ -479,5 +485,23 @@ public class PaymentUnit extends Model {
         }
         return this.save();
     }
+
+    /**
+     * 运输费用的均价, 没有运输项目. 统一币种为 CNY 则为单价(unitPrice)
+     *
+     * @return
+     */
+    public float averagePrice() {
+        return PaymentHelper.averagePrice(this);
+    }
+
+    public float currentAvgPrice() {
+        return PaymentHelper.currentAvgPrice(this);
+    }
+
+    public String returnChargingWayValue() {
+        return this.chargingWay.label();
+    }
+
 }
 

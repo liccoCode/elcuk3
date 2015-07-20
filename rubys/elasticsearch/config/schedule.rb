@@ -175,4 +175,6 @@ every '0 0 16 * *' do
  command 'curl "http://rock.easya.cc:4567/profit_report_year"'
 end
 
-
+every '0 0 15 * *' do
+ command 'curl "http://rock.easya.cc:4567/pay_bill_detail_reports"'
+end

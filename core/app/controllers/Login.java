@@ -60,15 +60,15 @@ public class Login extends Secure.Security {
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, "easya.cc", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easya.cc", "/", 60 * 60 * 24 * 30,
+            Http.Response.current().setCookie("username", username, "easyacc.com", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easyacc.com", "/", 60 * 60 * 24 * 30,
                     false);
 
-            Http.Response.current().setCookie("kod_name", "elcuk2", "easya.cc", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), "easya.cc", "/",
+            Http.Response.current().setCookie("kod_name", "elcuk2", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), "easyacc.com", "/",
                     60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_language", "zh_CN", "easya.cc", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easya.cc", "/",
+            Http.Response.current().setCookie("kod_user_language", "zh_CN", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easyacc.com", "/",
                     60 * 60 * 24 * 30, false);
         }
         return iscorrect;
@@ -91,10 +91,10 @@ public class Login extends Secure.Security {
             Http.Response.current().setCookie("username", "", "easya.cc", "/", 0, false);
             Http.Response.current().setCookie("usermd5", "", "easya.cc", "/", 0, false);
 
-            Http.Response.current().setCookie("kod_name", "", "easya.cc", "/", 0, false);
-            Http.Response.current().setCookie("kod_token", "", "easya.cc", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_language", "", "easya.cc", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("kod_name", "", "easyacc.com", "/", 0, false);
+            Http.Response.current().setCookie("kod_token", "", "easyacc.com", "/", 0, false);
+            Http.Response.current().setCookie("kod_user_language", "", "easyacc.com", "/", 0, false);
+            Http.Response.current().setCookie("kod_user_online_version", "", "easyacc.com", "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
@@ -177,13 +177,12 @@ public class Login extends Secure.Security {
         File file = new File(Constant.TMP, fileName);
         file.delete(); // 删除原来的, 再写新的
         OutputStream out = new FileOutputStream(file);
-        BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_PNG, 600,
+        BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_JPEG, 600,
                 BufferedImage.TYPE_BYTE_BINARY, false, 0);
         bean.generateBarcode(canvas, shipmentId);
         canvas.finish();
         out.close();
         response.setContentTypeIfNotSet(MimeTypes.MIME_JPEG);
-        renderBinary(file);
         renderBinary(file.toURI().toURL().openStream());
     }
 

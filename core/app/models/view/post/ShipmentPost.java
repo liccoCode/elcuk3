@@ -24,8 +24,9 @@ import java.util.regex.Pattern;
 public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
-    private static final Pattern NUM = Pattern.compile("[0-9]*");
+    private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
+    private static final Pattern UNITID = Pattern.compile("^DL(|\\d{6}\\|\\d{2})$");
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -61,7 +62,8 @@ public class ShipmentPost extends Post {
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
-        return Shipment.find(params._1, params._2.toArray()).fetch();
+        List<Shipment> shipList = Shipment.find(params._1, params._2.toArray()).fetch();
+        return shipList;
     }
 
     @Override
@@ -114,6 +116,7 @@ public class ShipmentPost extends Post {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             Matcher matcher = SHIPITEMS_NUM_PATTERN.matcher(this.search);
+            Matcher num_matcher = NUM.matcher(this.search);
             if(matcher.matches()) {
                 int shipItemSize = NumberUtils.toInt(matcher.group(1), 1);
                 sbd.append(" AND SIZE(s.items)>").append(shipItemSize).append(" ");
@@ -122,8 +125,13 @@ public class ShipmentPost extends Post {
                         .append(" s.trackNo LIKE ? ")
                         .append(" OR it.unit.fba.shipmentId LIKE ?")
                         .append(" OR u.selling.sellingId LIKE ?")
-                        .append(")");
-                for(int i = 0; i < 3; i++) params.add(word);
+                        .append(" OR s.jobNumber LIKE ?");
+                if(num_matcher.matches()) sbd.append(" OR u.id =?");
+
+                sbd.append(")");
+                for(int i = 0; i < 4; i++) params.add(word);
+
+                if(num_matcher.matches()) params.add(Long.parseLong(this.search.trim()));
             }
         }
 
@@ -140,6 +148,15 @@ public class ShipmentPost extends Post {
     private F.T3<Boolean, String, List<Object>> deliverymentId() {
         if(StringUtils.isNotBlank(this.search)) {
             this.search = this.search.trim();
+
+            Matcher unitmatcher = UNITID.matcher(this.search);
+            if(unitmatcher.find()) {
+                String unitmentId = unitmatcher.group(1);
+                return new F.T3<Boolean, String, List<Object>>(true,
+                        "SELECT s FROM Shipment s WHERE s.items.unit.deliveryment_id=?",
+                        new ArrayList<Object>(Arrays.asList(unitmentId)));
+            }
+
             Matcher matcher = ID.matcher(this.search);
             Matcher matcher_num = NUM.matcher(this.search);
             if(matcher.find()) {
@@ -147,12 +164,9 @@ public class ShipmentPost extends Post {
                 return new F.T3<Boolean, String, List<Object>>(true,
                         "SELECT s FROM Shipment s WHERE s.id=?",
                         new ArrayList<Object>(Arrays.asList(deliverymentId)));
-            } else if(matcher_num.find()) {
-                Long unitId = Long.parseLong(matcher_num.group());
-                return new F.T3<Boolean, String, List<Object>>(true,
-                        "SELECT s FROM Shipment s join s.items as i join i.unit as u WHERE u.id=?",
-                        new ArrayList<Object>(Arrays.asList(unitId)));
             }
+
+
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);
     }

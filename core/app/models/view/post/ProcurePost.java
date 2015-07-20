@@ -3,11 +3,14 @@ package models.view.post;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.PaymentUnit;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import org.jsoup.helper.StringUtil;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
@@ -334,5 +337,40 @@ public class ProcurePost extends Post<ProcureUnit> {
             }
             return paymentInfo;
         }
+    }
+
+    public String returnDateType() {
+        if(StringUtil.isBlank(this.dateType)) return "";
+        for(F.T2<String, String> params : DATE_TYPES) {
+            if(dateType.equals(params._1)) return params._2;
+        }
+        return "";
+    }
+
+    public String returnWhouses() {
+        if(this.whouseId == 0) return "";
+        Whouse w = Whouse.findById(this.whouseId);
+        return w.name;
+    }
+
+    public String returnCooperatorName() {
+        if(this.cooperatorId == 0) return "供应商";
+        Cooperator cooperator = Cooperator.findById(this.cooperatorId);
+        return cooperator.name;
+    }
+
+    public String returnIsPlaced() {
+        if(this.isPlaced == null) return "";
+        return this.isPlaced.label();
+    }
+
+    public String returnShipType() {
+        if(this.shipType == null) return "运输方式";
+        return this.shipType.label();
+    }
+
+    public String returnShipStates() {
+        if(this.shipState == null) return "";
+        return this.shipState.label();
     }
 }

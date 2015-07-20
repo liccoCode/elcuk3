@@ -1,0 +1,163 @@
+#{extends 'main.html'/}
+#{set title:'部门品线负责人管理'/}
+#{set 'moreScripts'}
+    #{script 'categoryinfos/categoryassign.coffee'/}
+#{/set}
+
+#{flash_alert /}
+#{info_row title:'部门品线负责人管理' /}
+
+<div class="row-fluid">
+  <form action="@{CategoryInfos.categoryassign()}" id="data_table">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th width="30%">Team组</th>
+        <th width="30%">Category</th>
+        <th width="40%" colspan="3">负责人</th>
+      </tr>
+    #{list items:categoryAssignManagement.teamlist, as:'team'}
+    <tr>
+        #{if categoryAssignManagement.buildCategory(team.id).size()==0}
+          <td>${team.name}</td>
+          <td></td>
+          <td colspan="3" align="right"><input type="button" class="btn btn-success" value="添加" id="create_btn"></td>
+        </tr>
+        #{/if}
+        #{if categoryAssignManagement.buildCategory(team.id).size()>0}
+          <td rowspan="${categoryAssignManagement.buildMaxCategoryLength(team.id)}">${team.name}</td>
+            #{list items:categoryAssignManagement.buildCategory(team.id), as:'ca'}
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()==0}
+                <td>
+                #{/if}
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()>0}
+                <td rowspan="${categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()}">
+                #{/if}
+            ${ca.categoryId} ${ca.name}
+            </td>
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()==0}
+                  <td></td>
+                  <td></td>
+                  <td colspan="1" align="right">
+                    <input type="button" class="btn btn-mini btn-success" value="添加" id="create_btn" data-teamid="${team.id}"
+                           data-teamname="${team.name}" data-categoryId="${ca.categoryId}" data-categoryname="${ca.name}"/>
+                  </td>
+                  </tr>
+                #{/if}
+                #{if categoryAssignManagement.buildUserList(team.id, ca.categoryId).size()>0}
+                    #{list items:categoryAssignManagement.buildUserList(team.id, ca.categoryId), as:'ass'}
+                      <td>
+                      ${ass.user.username}
+                      </td>
+                      <td>角色：${ass.showAllRoleName()}</td>
+                    <td>
+                      <input type="checkbox" value="${ass.isCharge}" #{if ass.isCharge} checked #{/if}>是否主要负责人
+                        #{if ass.createrId.id == currUser.id}
+                          <input type="button" class="btn-mini btn-info" value="编辑" id="update_btn" data-teamid="${team.id}"
+                                 data-teamname="${team.name}" data-categoryId="${ca.categoryId}" data-categoryname="${ca.name}"
+                                 data-username="${ass.user.username}" data-ischarge="${ass.isCharge}" data-assid="${ass.id}">
+                          <input type="button" class="btn btn-mini btn-danger" value="删除" id="delete_btn"
+                                 data-assid="${ass.id}" data-assname="${ass.user.username}">
+                        #{/if}
+                        #{if !ass_isLast}
+                        </td>
+                          </tr>
+                        <tr>
+                        #{/if}
+                        #{if ass_isLast}
+                          <input type="button" class="btn-mini btn-success" value="添加" id="create_btn" data-teamid="${team.id}"
+                                 data-teamname="${team.name}" data-categoryId="${ca.categoryId}" data-categoryname="${ca.name}"/>
+                          </td>
+                        #{/if}
+                    #{/list}
+                #{/if}
+                #{if !ca_isLast}
+                </tr>
+                <tr>
+                #{/if}
+                #{if ca_isLast}
+                </tr>
+                #{/if}
+            #{/list}
+        #{/if}
+    #{/list}
+    </table>
+  </form>
+</div>
+
+#{records records:records/}
+
+
+<div id="create_modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>添加质检员</h3>
+  </div>
+  <div class="modal-body">
+  #{form @CategoryInfos.createTaskAssign(), id:'create_form'}
+    <dl class="dl-horizontal">
+      <dt>名称</dt>
+      <dd>
+        <input type="text" name="c.userName" autocomplete="off" data-provide="typeahead" id="target_userName"
+               data-items="5" data-source="${users}">
+      </dd>
+      <dt>Team组</dt>
+      <dd>
+        <input type="text" id="target_teamName" value="" readonly>
+        <input type="hidden" id="target_teamId" name="c.team.id" value="" readonly>
+      </dd>
+      <dt>Category</dt>
+      <dd>
+        <input type="text" id="target_CategoryName" readonly>
+        <input type="hidden" id="target_CategoryId" name="c.category.categoryId" value="" readonly>
+      </dd>
+      <dt>是否主要负责人</dt>
+      <dd>
+        <input type="checkbox" id="target_isCharge" name="c.isCharge" value="">
+      </dd>
+    </dl>
+  #{/form}
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <input type="submit" value="添加" class="btn btn-primary">
+  </div>
+</div>
+
+<div id="update_modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>修改质检员</h3>
+  </div>
+  <div class="modal-body">
+  #{form @CategoryInfos.updateTaskAssign(), id:'update_form'}
+    <dl class="dl-horizontal">
+      <dt>名称</dt>
+      <dd>
+        <input type="text" name="c.userName" autocomplete="off" data-provide="typeahead" id="update_userName"
+               data-items="5" data-source="${users}">
+        <input type="hidden" name="id" id="update_assid">
+      </dd>
+      <dt>Team组</dt>
+      <dd>
+        <input type="text" id="update_teamName" value="" readonly>
+        <input type="hidden" id="update_teamId" name="c.team.id" value="" readonly>
+      </dd>
+      <dt>Category</dt>
+      <dd>
+        <input type="text" id="update_CategoryName" readonly>
+        <input type="hidden" id="update_CategoryId" name="c.category.categoryId" value="" readonly>
+      </dd>
+      <dt>是否主要负责人</dt>
+      <dd>
+        <input type="checkbox" id="update_isCharge" name="c.isCharge" value="">
+      </dd>
+    </dl>
+  #{/form}
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <input type="submit" value="保存" class="btn btn-primary">
+  </div>
+</div>

@@ -8,6 +8,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import models.procure.Shipment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,8 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -336,7 +339,7 @@ public class Payment extends Model {
         this.actualAccountNumber = target.accountNumber;
         this.payer = User.current();
         this.state = S.PAID;
-        this.shouldPaid = Webs.scalePointUp(4, this.approvalAmount() * this.rate);
+        this.shouldPaid = Webs.scalePointUp(4, Float.parseFloat(this.approvalAmount()) * this.rate);
         this.save();
         new ERecordBuilder("payment.payit")
                 .msgArgs(this.target.toString(),
@@ -419,13 +422,14 @@ public class Payment extends Model {
      *
      * @return
      */
-    public float approvalAmount() {
-        float approvalAmount = 0;
+    public String approvalAmount() {
+        BigDecimal amount = new BigDecimal(0);
         for(PaymentUnit fee : this.units()) {
             if(PaymentUnit.S.DENY != fee.state)
-                approvalAmount += fee.amount();
+                amount = amount.add(new BigDecimal
+                        (Float.toString(fee.amount())));
         }
-        return approvalAmount;
+        return amount.setScale(2, RoundingMode.HALF_UP).toString();
     }
 
     public List<User> applyers() {

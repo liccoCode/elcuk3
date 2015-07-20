@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.qc.CheckTask;
+import models.CategoryAssignManagement;
 import models.qc.SkuCheck;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -10,7 +11,6 @@ import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -178,11 +178,14 @@ public class CheckTaskPost extends Post<CheckTask> {
             params.add(word);
         }
 
-        if(StringUtils.isNotBlank(this.checkor)) {
-            sbd.append(" AND c.shipwhouse.user.username=? ");
-            params.add(this.checkor);
+        if(StringUtils.isNotBlank(this.checkor)){
+            if(CategoryAssignManagement.showCategoryByUserName(this.checkor).size() > 0) {
+                sbd.append(" AND c.units.product.category.categoryId IN " + SqlSelect.inlineParam(
+                        CategoryAssignManagement.showCategoryByUserName(this.checkor)));
+            }else {
+                sbd.append(" AND c.units.product.category.categoryId = 0 ");
+            }
         }
-
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 

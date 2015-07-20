@@ -126,7 +126,7 @@ public class SellingSaleAnalyzeJob extends Job {
                         else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.INBOUND)
-                            dto.inbound += (unit.qty() - unit.inboundingQty());
+                            dto.inbound += unit.qty();
                         dto.way += countWay(unit);
 
                     }

@@ -120,21 +120,23 @@
 
 
 #{power.ck "procure"}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "procures.index"}
-        <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
-      #{/power.ck}
-      #{power.ck "deliveryments.index"}
-        <li><a href="@{Deliveryments.index()}">采购单</a></li>
-      #{/power.ck}
-      #{power.ck "cooperators.index"}
-        <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
-      #{/power.ck}
-
-  </ul>
-</li>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
+    <ul class="dropdown-menu">
+        #{power.ck "procures.index"}
+          <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
+        #{/power.ck}
+        #{power.ck "deliveryments.index"}
+          <li><a href="@{Deliveryments.index()}">采购单</a></li>
+        #{/power.ck}
+        #{power.ck "cooperators.index"}
+          <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+        #{/power.ck}
+        #{power.ck "report.procurereports"}
+          <li><a href="@{ReportDownloads.procureReportsIndex()}">采购报表下载</a></li>
+        #{/power.ck}
+    </ul>
+  </li>
 #{/power.ck}
 
 #{power.ck "shipment"}
@@ -154,6 +156,9 @@
       #{power.ck "shipmentreports.lossrate"}
         <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
       #{/power.ck}
+      #{power.ck "shipmentreports.areagoodsanalyze"}
+        <li><a href="@{ShipmentReports.areaGoodsAnalyze()}">物流区域货量分析</a></li>
+      #{/power.ck}
   </ul>
 </li>
 #{/power.ck}
@@ -171,6 +176,9 @@
       #{/power.ck}
       #{power.ck "feetypes.index"}
         <li><a href="@{FeeTypes.index()}">费用类型</a></li>
+      #{/power.ck}
+      #{power.ck "reportdownloads.applyreportsindex"}
+        <li><a href="@{ReportDownloads.applyReportsIndex()}">财务报表下载</a></li>
       #{/power.ck}
   </ul>
 </li>
@@ -203,6 +211,7 @@
       #{power.ck "checktasks.checkerlist"}
         <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
       #{/power.ck}
+
   </ul>
 </li>
 #{/power.ck}
@@ -237,6 +246,9 @@
       #{/power.ck}
       #{power.ck "teams.show"}
         <li><a href="@{Teams.show()}">TEAM管理</a></li>
+      #{/power.ck}
+      #{power.ck "categoryinfos.categoryassign"}
+        <li><a href="@{CategoryInfos.categoryassign()}">部门品线负责人管理</a></li>
       #{/power.ck}
     <li><a href="@{Elcuk.index()}">系统状态</a></li>
   </ul>

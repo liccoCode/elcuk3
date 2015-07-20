@@ -1,7 +1,9 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import helper.Webs;
+import models.CategoryAssignManagement;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
@@ -22,6 +24,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +110,7 @@ public class CheckTasks extends Controller {
 
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -136,6 +140,7 @@ public class CheckTasks extends Controller {
     public static void showactiviti(Long id) {
         if(id == null) return;
         CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
         Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
 
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
@@ -171,6 +176,7 @@ public class CheckTasks extends Controller {
     public static void update(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
                               @As("yyyy-MM-dd HH:mm") Date to) {
         CheckTask old = CheckTask.findById(id);
+        old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
         check.startTime = from;
         check.endTime = to;
         check.checkor = old.shipwhouse.user.username;
@@ -179,6 +185,7 @@ public class CheckTasks extends Controller {
             check = old;
             render("CheckTasks/show.html", check);
         }
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
         old.update(check);
         flash.success("更新成功");
         redirect("/CheckTasks/show/" + id);
@@ -194,11 +201,12 @@ public class CheckTasks extends Controller {
         check.validateRequired();
         check.validateRight();
         if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
-
         if(Validation.hasErrors()) {
             check = old;
+            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
             render("CheckTasks/show.html", check);
         }
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
         old.fullUpdate(check, Secure.Security.connected());
         flash.success("更新成功");
         show(id);
@@ -282,7 +290,7 @@ public class CheckTasks extends Controller {
      * 调整运营的数据并提交流程
      *
      * @param check
-     * @param id
+     * @param processid
      * @param unitid
      * @param checkid
      * @param oldPlanQty
@@ -318,7 +326,7 @@ public class CheckTasks extends Controller {
      * 还原结束流程
      *
      * @param check
-     * @param id
+     * @param checkid
      */
     public static void endactiviti(CheckTask check, long checkid, long processid) {
         ActivitiProcess ap = ActivitiProcess.findById(processid);
