@@ -51,15 +51,17 @@ public class OrderCheck extends Controller {
                 renderJSON(new Ret(false, "asin不存在!"));
             }
         } else if(checktype.equals("order")) {
-            OrderItem item = OrderItem.find("order.orderid=?", checkinfo).first();
+            OrderItem item = OrderItem.find("order.orderId=?", checkinfo).first();
             if(item != null) {
+                if (item.selling==null)
+                    renderJSON(new Ret(false, "selling不存在!"));
                 String category = item.selling.sellingId.substring(0, 2);
                 renderJSON(new Ret(true, category));
             } else {
                 renderJSON(new Ret(false, "order不存在!"));
             }
         } else if(checktype.equals("sku")) {
-            Listing listing = Listing.find("product_sku=?", checkinfo).first();
+            Listing listing = Listing.find("product.sku=?", checkinfo).first();
             if(listing != null) {
                 String category = listing.sellings.get(0).sellingId.substring(0, 2);
                 renderJSON(new Ret(true, category));
