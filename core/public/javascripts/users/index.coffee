@@ -65,4 +65,10 @@ $ ->
         )
   )
 
+  $(':checkbox').change (e) ->
+    $o = $(@)
+    id = $o.data("userid")
+    $o.parents('table').find(":checkbox[class='"+id+"menu"+$o.attr('value')+"']").prop("checked", $o.prop('checked'))
+
+
 

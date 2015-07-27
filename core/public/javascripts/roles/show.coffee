@@ -4,3 +4,7 @@ $ ->
   success: (r) ->
     alert(r.message)
   })
+
+  $(':checkbox').change (e) ->
+    $o = $(@)
+    $o.parents('div').find(":checkbox[class='menu"+$o.attr('value')+"']").prop("checked", $o.prop('checked'))
