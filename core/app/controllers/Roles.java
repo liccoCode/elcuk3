@@ -8,6 +8,7 @@ package controllers;
  */
 
 import controllers.api.SystemOperation;
+import helper.DBUtils;
 import helper.Webs;
 import models.Privilege;
 import models.Role;
@@ -19,6 +20,8 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 
 /**
@@ -27,15 +30,19 @@ import java.util.List;
  * Date: 3/4/14
  * Time: 11:05 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Roles extends Controller {
 
     @Before(only = {"show", "update", "delete"})
     public static void setUpShowPage() {
         List<Role> roles = Role.all().fetch();
+        List<Privilege> modules = Privilege.find("pid=0").fetch();
+        Map<Long, List<Privilege>> maps = Privilege.getMenuMap(modules);
         List<Privilege> privileges = Privilege.findAll();
         renderArgs.put("roles", roles);
         renderArgs.put("privileges", privileges);
+        renderArgs.put("maps", maps);
+        renderArgs.put("modules", modules);
     }
 
     @Check("teams.show")

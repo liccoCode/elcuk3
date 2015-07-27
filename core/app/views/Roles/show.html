@@ -71,35 +71,61 @@
         <div class="span12">
           <table class="table table-bordered table-condensed">
             <tr>
-              <td colspan="12">
-                <form method="post" action="@{Roles.addPrivileges()}" class="privilege_form">
-                  <table class="table table-bordered table-condensed">
+              <form method="post" action="@{Roles.addPrivileges()}" class="privilege_form">
+                <table class="table table-condensed table-bordered">
                   <tr>
-                      #{list items:privileges, as:'up'}
-                        <td colspan="${privileges.size() == up_index ? (privileges.size() - (up_index % 8)) : '1'}">
-                          <label class="checkbox">
-                            <input type="checkbox" name="privilegeId" value="${up.id}" ${role.isHavePrivilege(up) ?
-                            'checked' : ''}>
-                            <a href="javascript:;" rel="tooltip" title="${up.name}">${up.memo}</a>
-                          </label>
-                        </td>
-                          #{if up_index % 8 == 0}
-                          </tr>
-                          <tr>
-                          #{/if}
-                      #{/list}
+                    <th colspan="4">模块名称</th>
+                    <th colspan="4">菜单名称</th>
+                    <th colspan="4">权限</th>
                   </tr>
-                    <tr>
-                      <td colspan="8">
-                        <input type="hidden" name="id" value="${role.roleId}">
-                        <button class="btn btn-primary">提交</button>
-                      </td>
-                    </tr>
-                  </table>
-                </form>
-              </td>
-            </tr>
 
+                    #{list items:modules, as:'module'}
+                    <tr>
+                      <td colspan="4" rowspan="${((List)maps.get(module.id)).size+1}">
+                        <label class="checkbox">
+                          <input type="checkbox" name="privilegeId" value="${module.id}" ${role
+                          .isHavePrivilege(module) ?
+                          'checked' : ''}>
+                          <a href="javascript:;" rel="tooltip" title="${module.name}">${module.memo}</a>
+                        </label>
+                      </td>
+
+
+                        #{list items:maps.get(module.id), as:'function'}
+                          <tr  id="menu" >
+                            <td colspan="4" rowspan="${((List)maps.get(function.id)).size+1}">
+                              <label class="checkbox">
+                                <input type="checkbox" id="checkboxmenu" class="menu${module.id}"  name="privilegeId"
+                                       value="${function.id}"
+                                ${role.isHavePrivilege(function) ?
+                                'checked' : ''}>
+                                <a href="javascript:;" rel="tooltip" title="${function.name}">${function.memo}</a>
+                              </label>
+                            </td>
+                          <td colspan="6">
+                              #{list items:maps.get(function.id), as:'menu'}
+                                  <label class="checkbox">
+                                    <input type="checkbox" name="privilegeId" class="menu${function.id}"
+                                           value="${menu.id}" ${role.isHavePrivilege(menu) ?
+                                    'checked' : ''}>
+                                    <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
+                                  </label>
+                              #{/list}
+                            <td>
+                          </tr>
+                        #{/list}
+                      </tr>
+                    #{/list}
+
+                  <tr>
+                    <td colspan="14">
+                      <input type="hidden" name="id" value="${role.roleId}">
+                      <button class="btn btn-primary">提交</button>
+                    </td>
+                  </tr>
+                </table>
+              </form>
+            </tr>
 
           </table>
         </div>

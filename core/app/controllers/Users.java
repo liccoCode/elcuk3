@@ -20,6 +20,7 @@ import play.utils.FastRuntimeException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,7 +29,7 @@ import java.util.Set;
  * Date: 2/9/12
  * Time: 3:43 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Users extends Controller {
 
     @Check("users.index")
@@ -37,6 +38,13 @@ public class Users extends Controller {
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
         List<Role> roles = Role.findAll();
+
+
+        List<Privilege> modules = Privilege.find("pid=0").fetch();
+        Map<Long, List<Privilege>> maps = Privilege.getMenuMap(modules);
+        renderArgs.put("maps", maps);
+        renderArgs.put("modules", modules);
+
         render(users, privileges, teams, roles);
     }
 
@@ -87,7 +95,7 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
     }
 
-    public static void updates(User user,Long userid, String newPassword, String newPasswordConfirm) {
+    public static void updates(User user, Long userid, String newPassword, String newPasswordConfirm) {
 
         User dbuser = User.findById(userid);
         user.confirm = user.password;
@@ -233,7 +241,7 @@ public class Users extends Controller {
         if(user == null)
             renderJSON(new Ret("用户不存在，无法打开"));
         try {
-            Set<Privilege> privileges = Privilege.privileges(user.username,user.roles);
+            Set<Privilege> privileges = Privilege.privileges(user.username, user.roles);
             Privilege.updatePrivileges(user.username, privileges);
 
             Set<Team> teams = Team.teams(user.username);

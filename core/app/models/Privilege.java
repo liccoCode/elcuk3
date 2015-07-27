@@ -46,6 +46,10 @@ public class Privilege extends Model {
 
     public String memo;
 
+
+    public Long pid;
+
+
     /**
      * 用户权限的用户
      */
@@ -114,7 +118,6 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("attributes.index", "产品附加属性 页面"));
         privileges.add(new Privilege("templates.show", "附加属性模板 页面"));
-
 
 
         privileges.add(new Privilege("procure", "采购模块"));
@@ -299,5 +302,23 @@ public class Privilege extends Model {
             privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
         }
         return privileges;
+    }
+
+    /**
+     * 获取权限的树形MAP结构
+     * @param modules
+     * @return
+     */
+    public static Map<Long, List<Privilege>> getMenuMap(List<Privilege> modules) {
+        Map<Long, List<Privilege>> maps = new HashMap<Long, List<Privilege>>();
+        for(Privilege module : modules) {
+            List<Privilege> functions = Privilege.find("pid=?", module.id).fetch();
+            maps.put(module.id, functions);
+            for(Privilege function : functions) {
+                List<Privilege> menus = Privilege.find("pid=?", function.id).fetch();
+                maps.put(function.id, menus);
+            }
+        }
+        return maps;
     }
 }
