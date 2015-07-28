@@ -113,11 +113,11 @@ public class ShipmentWeight {
             params.add(this.market.marketAndWhouseMapping());
         }
         if(this.shipType != null) {
-            sql.append("s.type=?");
+            sql.append(" AND s.type=?");
             params.add(this.shipType.toString());
         }
         if(skus.size() > 0) {
-            sql.append("pro.sku IN " + SqlSelect.inlineParam(skus));
+            sql.append(" AND p.sku IN " + SqlSelect.inlineParam(skus));
         }
         List<Shipment> list = Shipment.find(sql.toString(), params.toArray()).fetch();
         return list;
