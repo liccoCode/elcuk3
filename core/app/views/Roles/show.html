@@ -3,7 +3,7 @@
 #{set 'moreScripts'}
     #{script 'roles/show.coffee'/}
 #{/set}
-<div class="row-fluid">
+<div class="row-fluid" xmlns="http://www.w3.org/1999/html">
 #{if roles.size() == 0}
   <div>
     等待添加新Role
@@ -81,7 +81,17 @@
 
                     #{list items:modules, as:'module'}
                     <tr>
-                      <td colspan="4" rowspan="${((List)maps.get(module.id)).size+1}">
+                        #{set menucount: maps.get(module.id).size/}
+                        #{list items:maps.get(module.id), as:'function'}
+                            #{if ((List)maps.get(function.id)).size>0}
+                                #{set menucount: menucount + ((List)maps.get(function.id)).size /}
+                            #{/if}
+                            #{else}
+                                #{set menucount: menucount + 1/}
+                            #{/else}
+                        #{/list}
+
+                      <td colspan="4" rowspan="${menucount+1}">
                         <label class="checkbox">
                           <input type="checkbox" name="privilegeId" value="${module.id}" ${role
                           .isHavePrivilege(module) ?
@@ -90,28 +100,50 @@
                         </label>
                       </td>
 
-
                         #{list items:maps.get(module.id), as:'function'}
-                          <tr  id="menu" >
+                        <tr id="menu">
+
+                            #{if    ((List)maps.get(function.id)).size>0}
                             <td colspan="4" rowspan="${((List)maps.get(function.id)).size+1}">
-                              <label class="checkbox">
-                                <input type="checkbox" id="checkboxmenu" class="menu${module.id}"  name="privilegeId"
-                                       value="${function.id}"
-                                ${role.isHavePrivilege(function) ?
-                                'checked' : ''}>
-                                <a href="javascript:;" rel="tooltip" title="${function.name}">${function.memo}</a>
-                              </label>
-                            </td>
-                          <td colspan="6">
-                              #{list items:maps.get(function.id), as:'menu'}
+                            #{/if}
+                            #{else}
+                            <td colspan="4" rowspan="${((List)maps.get(function.id)).size+2}">
+                            #{/else}
+
+                          <label class="checkbox">
+                            <input type="checkbox" id="checkboxmenu" class="menu${module.id}" name="privilegeId"
+                                   value="${function.id}"
+                            ${role.isHavePrivilege(function) ?
+                            'checked' : ''}>
+                            <a href="javascript:;" rel="tooltip" title="${function.name}">${function.memo}</a>
+                          </label>
+                        </td>
+
+                            #{if maps.get(function.id)!=null && maps.get(function.id).size()>0}
+                                #{list items:maps.get(function.id), as:'menu'}
+                                  <tr>
+                                    <td colspan="6">
+                                      <label class="checkbox">
+                                        <input type="checkbox" name="privilegeId" class="menu${function.id}"
+                                               value="${menu.id}" ${role.isHavePrivilege(menu) ?
+                                        'checked' : ''}>
+                                        <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
+                                      </label>
+                                    </td>
+                                  </tr>
+                                #{/list}
+                            #{/if}
+                            #{else}
+                              <tr>
+                                <td colspan="6">
                                   <label class="checkbox">
-                                    <input type="checkbox" name="privilegeId" class="menu${function.id}"
-                                           value="${menu.id}" ${role.isHavePrivilege(menu) ?
-                                    'checked' : ''}>
-                                    <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
+                                    <a href="javascript:;" rel="tooltip" title=""></a>
                                   </label>
-                              #{/list}
-                            <td>
+                                </td>
+                              </tr>
+                            #{/else}
+
+
                           </tr>
                         #{/list}
                       </tr>
