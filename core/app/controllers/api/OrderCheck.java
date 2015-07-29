@@ -53,7 +53,7 @@ public class OrderCheck extends Controller {
         } else if(checktype.equals("order")) {
             OrderItem item = OrderItem.find("order.orderId=?", checkinfo).first();
             if(item != null) {
-                if (item.selling==null)
+                if(item.selling == null)
                     renderJSON(new Ret(false, "selling不存在!"));
                 String category = item.selling.sellingId.substring(0, 2);
                 renderJSON(new Ret(true, category));
@@ -61,10 +61,15 @@ public class OrderCheck extends Controller {
                 renderJSON(new Ret(false, "order不存在!"));
             }
         } else if(checktype.equals("sku")) {
-            Listing listing = Listing.find("product.sku=?", checkinfo).first();
-            if(listing != null) {
-                String category = listing.sellings.get(0).sellingId.substring(0, 2);
-                renderJSON(new Ret(true, category));
+            List<Listing> listings = Listing.find("product.sku=?", checkinfo).fetch();
+            if(listings.size() > 0) {
+                for(Listing listing : listings) {
+                    if(listing.sellings != null) {
+                        String category = listing.sellings.get(0).sellingId.substring(0, 2);
+                        renderJSON(new Ret(true, category));
+                        break;
+                    }
+                }
             } else {
                 renderJSON(new Ret(false, "sku不存在!"));
             }
