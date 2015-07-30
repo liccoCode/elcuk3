@@ -56,6 +56,8 @@ public class Feed extends Model {
      * @return
      */
     public static boolean isFeedAvalible(Long accountId) {
+        int count = Feed.feedcount(accountId);
+        if(count < 15) return true;
         Feed feed = Feed.newest(accountId);
         if(feed == null) return true;
         if(feed.createdAt == null) {
@@ -72,6 +74,16 @@ public class Feed extends Model {
      */
     public static Feed newest(Long id) {
         return Feed.find("SUBSTRING_INDEX(fid,'|','-1') LIKE ? ORDER BY createdAt DESC", id).first();
+    }
+
+    /**
+     * 取10分钟内有多少个feed
+     * @param id
+     * @return
+     */
+    public static int feedcount(Long id) {
+        return Feed.find("SUBSTRING_INDEX(fid,'|','-1') LIKE ? and createdAt>=date_sub(now(), interval 10 minute) ",
+                id).fetch().size();
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {
