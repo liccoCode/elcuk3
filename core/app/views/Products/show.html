@@ -8,100 +8,97 @@
     #{script 'products/skulinechart.coffee'/}
 #{/set}
 
-<div class="span12 offset3">
 #{if pro == null}
-  读取的 Product 不存在!
+读取的 Product 不存在!
 #{/if}
 #{else }
     #{errorMsgs /}
     #{flash_alert /}
-  <ul class="nav nav-tabs">
-    <li class="active">
-      <a href="#basicinfo" data-toggle='tab'>基本信息</a>
-    </li>
-    <li>
-      <a href="#extends" data-toggle='tab'>扩展属性</a>
-    </li>
-    <li>
-      <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
-    </li>
+<ul class="nav nav-tabs">
+  <li class="active">
+    <a href="#basicinfo" data-toggle='tab'>基本信息</a>
+  </li>
+  <li>
+    <a href="#extends" data-toggle='tab'>扩展属性</a>
+  </li>
+  <li>
+    <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
+  </li>
 
-    <li>
-      <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
-    </li>
-    <li>
-      <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
-    </li>
-  </ul>
+  <li>
+    <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
+  </li>
+  <li>
+    <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
+  </li>
+</ul>
 
-  <div id="selling_tabs" class="tab-content">
-    <div class="tab-pane fade active in" id='basicinfo'>
-        #{include 'Products/_basicInfo.html'/}
-    </div>
-
-    <div class="tab-pane fade" id='extends'>
-      <div class="row-fluid">
-        <form class="search_form" id="select_template_form">
-          <select name="templateId" class="inline">
-            <option value="">请选择模板</option>
-              #{list items:templates, as:'template'}
-                <option value="${template.id}">${template.name}</option>
-              #{/list}
-          </select>
-          <input type="hidden" name="sku" value="${pro.sku}">
-          <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
-        </form>
-
-          #{info_row title:'Attributes'/}
-        <div id="extends_atts_home">
-            #{include 'Products/attrs.html'/}
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-pane fade" id='attach'>
-        #{include 'Products/_attach.html'/}
-    </div>
-
-    <div class="tab-pane fade" id='newattach'>
-            #{include 'Products/_newattach.html'/}
-        </div>
-
-    <div class="tab-pane fade" id='saleinfo'>
-      <input type="hidden" name="skuvalue" value="0">
-        #{info_row title:'销售额和销量'/}
-      <div class="row-fluid">
-        <div class="span6" style="height:450px;" id='skusalefee'></div>
-        <div class="span6" style="height:450px;" id='skusaleqty'></div>
-      </div>
-        #{info_row title:'利润'/}
-      <div class="row-fluid">
-        <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
-      </div>
-    </div>
-
-    <div class="tab-pane fade" id='procureinfo'>
-      <input type="hidden" name="skuprocurevalue" value="0">
-
-      <div class="row-fluid">
-        <table class="table table-bordered">
-          <tr>
-            <td class="span2" style="font:bold">总采购数量</td>
-            <td>${procureqty}</td>
-          </tr>
-        </table>
-      </div>
-        #{info_row title:'采购价格'/}
-      <div class="row-fluid">
-        <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
-      </div>
-        #{info_row title:'采购数量'/}
-      <div class="row-fluid">
-        <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
-      </div>
-    </div>
-
+<div id="selling_tabs" class="tab-content">
+  <div class="tab-pane fade active in" id='basicinfo'>
+      #{include 'Products/_basicInfo.html'/}
   </div>
+
+  <div class="tab-pane fade" id='extends'>
+    <div class="row-fluid">
+      <form class="search_form" id="select_template_form">
+        <select name="templateId" class="inline">
+          <option value="">请选择模板</option>
+            #{list items:templates, as:'template'}
+              <option value="${template.id}">${template.name}</option>
+            #{/list}
+        </select>
+        <input type="hidden" name="sku" value="${pro.sku}">
+        <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+      </form>
+
+        #{info_row title:'Attributes'/}
+      <div id="extends_atts_home">
+          #{include 'Products/attrs.html'/}
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id='attach'>
+      #{include 'Products/_attach.html'/}
+  </div>
+
+  <div class="tab-pane fade" id='newattach'>
+      #{include 'Products/_newattach.html'/}
+  </div>
+
+  <div class="tab-pane fade" id='saleinfo'>
+    <input type="hidden" name="skuvalue" value="0">
+      #{info_row title:'销售额和销量'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;" id='skusalefee'></div>
+      <div class="span6" style="height:450px;" id='skusaleqty'></div>
+    </div>
+      #{info_row title:'利润'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id='procureinfo'>
+    <input type="hidden" name="skuprocurevalue" value="0">
+
+    <div class="row-fluid">
+      <table class="table table-bordered">
+        <tr>
+          <td class="span2" style="font:bold">总采购数量</td>
+          <td>${procureqty}</td>
+        </tr>
+      </table>
+    </div>
+      #{info_row title:'采购价格'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
+    </div>
+      #{info_row title:'采购数量'/}
+    <div class="row-fluid">
+      <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
+    </div>
+  </div>
+
 </div>
 #{/else}
-</div>

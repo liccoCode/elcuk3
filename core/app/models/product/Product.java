@@ -382,6 +382,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Lob
     public String subtitle;
 
+    public String partNumber;
+
     @Transient
     public int iscopy = 0;
 
@@ -511,7 +513,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 + " lengths,width,heigh,weight,declaredvalue,productname,"
                 + " marketstate,procurestate,productstate,saleslevel,productlengths,"
                 + " productwidth,productheigh,productweight,declaredvalue,declarename,abbreviation,"
-                + " locates,sellingpoints,subtitle,markettime,delistingtime "
+                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber "
                 + " from Product where sku='" + sku + "'";
         Map<String, Object> map = DBUtils.rows(sql).get(0);
         dbpro.lengths = (Float) map.get("lengths");
@@ -544,6 +546,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         dbpro.subtitle = (String) map.get("subtitle");
         dbpro.marketTime = (Date) map.get("markettime");
         dbpro.delistingTime = (Date) map.get("delistingtime");
+        dbpro.partNumber = (String) map.get("partNumber");
         return dbpro;
     }
 

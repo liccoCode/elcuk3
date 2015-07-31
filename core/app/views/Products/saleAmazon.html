@@ -1,4 +1,5 @@
 #{extends 'main_full.html'/}
+#{set title: '提交 Feed 创建 Selling' /}
 #{set 'moreStyles'}
     #{stylesheet 'market.css'/}
 #{/set}
@@ -61,17 +62,18 @@
       #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
-      #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
+      #{text_field id:'partNumber',readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: product.partNumber /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
 
-      <label class="control-label" for="sellingCycle">生命周期</label>
-      <div class="controls">
-       <select name="s.sellingCycle" size="1">
-           #{list items:models.market.Selling.SC.values(), as: 'cycle'}
-             <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
-           #{/list}
-       </select>
-      </div>
+    <label class="control-label" for="sellingCycle">生命周期</label>
+
+    <div class="controls">
+      <select name="s.sellingCycle" size="1">
+          #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+            <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+          #{/list}
+      </select>
+    </div>
 
   </div>
   <div class="span12">

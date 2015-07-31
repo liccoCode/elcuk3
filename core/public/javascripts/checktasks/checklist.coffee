@@ -24,4 +24,4 @@ $ ->
       aaSorting: [[0, "desc"]]
     )
 
-
+    $("#select_cooper").selectize()
