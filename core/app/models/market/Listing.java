@@ -550,4 +550,16 @@ public class Listing extends GenericModel {
         record.save();
         record.pushRecordToCache();
     }
+
+    public static String handleAsinBySku(String sku) {
+        String asin = "";
+        Product product = Product.findById(sku);
+        if(product != null) {
+            List<Listing> listings = product.listings;
+            if(listings.size() > 0) {
+                asin = listings.get(0).asin;
+            }
+        }
+        return asin;
+    }
 }

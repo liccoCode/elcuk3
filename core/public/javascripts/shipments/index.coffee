@@ -21,7 +21,8 @@ $ ->
     e.preventDefault()
     $btn = $(@)
     $form = $("#search_form")
-    window.open('/Excels/shipmentDetails?'+$form.serialize(),"_blank")
+    window.open('/Excels/shipmentDetails?' + $form.serialize() + "&" + $("#shipmentTable input[name='shipmentId']:checked").serialize(),
+      "_blank")
   )
 
   $(':checkbox[class=checkbox_all]').change (e) ->

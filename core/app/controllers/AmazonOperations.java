@@ -8,6 +8,8 @@ import helper.J;
 import helper.Webs;
 import jobs.works.ListingReviewsWork;
 import models.market.*;
+import models.product.Family;
+import models.product.Product;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
@@ -34,7 +36,9 @@ public class AmazonOperations extends Controller {
 
     public static void index() {
         Set<String> allAsin = Listing.allASIN();
+        List<String> families = Family.familys(true);
         renderArgs.put("asins", J.json(allAsin));
+        renderArgs.put("families", J.json(families));
         render();
     }
 
@@ -44,16 +48,23 @@ public class AmazonOperations extends Controller {
      * @param asin
      * @param m
      */
-    public static void ajaxMagic(String asin, String m, String orderby) {
+    public static void ajaxMagic(String asin, String m, String orderby, String sku) {
         M market = M.val(m);
         if(StringUtils.isBlank(orderby)) orderby = "createDate";
-        List<AmazonListingReview> savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market), orderby);
+        if(StringUtils.isNotBlank(sku)) {
+            asin = Listing.handleAsinBySku(sku);
+        }
+        List<AmazonListingReview> savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market),
+                orderby, sku);
         Listing lst = Listing.findById(Listing.lid(asin, market));
         render(savedReviews, lst);
     }
 
-    public static void reviewTable(String asin, String m) {
+    public static void reviewTable(String asin, String m, String sku) {
         M market = M.val(m);
+        if(StringUtils.isNotBlank(sku)) {
+            asin = Listing.handleAsinBySku(sku);
+        }
         String lid = Listing.lid(asin, market);
         Listing lst = Listing.findById(lid);
         List<F.T2<Long, Integer>> rows = lst.reviewMonthTable();
@@ -122,8 +133,11 @@ public class AmazonOperations extends Controller {
      * @param asin
      * @param m
      */
-    public static void wishList(String asin, String m) {
+    public static void wishList(String asin, String m, String sku) {
         M market = M.val(m);
+        if(StringUtils.isNotBlank(sku)) {
+            asin = Listing.handleAsinBySku(sku);
+        }
         String lid = Listing.lid(asin, market);
         F.T2<Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
         Listing listing = Listing.findById(lid);

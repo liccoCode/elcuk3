@@ -125,7 +125,8 @@ $ ->
   $('#load_review_btn').click (e) ->
     loadAsin = $('#load_asin').val(-> @value.toUpperCase())
     #B007LE0UT4
-    return false if loadAsin.val().length isnt 10
+    if loadAsin.val().length isnt 10 && !$("#load_sku").val()
+      return false
     href = $('#tabs li[class=active] a').attr('href')
     if href is '#review_table'
       loadReviewTable()

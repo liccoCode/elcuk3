@@ -367,7 +367,7 @@ public class ShipItem extends GenericModel {
     }
 
     public List<CheckTask> checkTasks() {
-        return CheckTask.find("units_id=?", this.unit.id).fetch();
+        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
     }
 
     public Integer caluTotalUnitByCheckTask() {

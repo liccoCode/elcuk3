@@ -1006,7 +1006,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         }
         backupsku.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
         return backupsku;
-
     }
 
     /**
@@ -1021,5 +1020,15 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         return procureUnit;
     }
 
+    public void changePartNumber(String oldNumber) {
+        if(StringUtils.isNotBlank(this.partNumber) && !this.partNumber.equals(oldNumber)) {
+            for(Listing listing : this.listings) {
+                for(Selling selling : listing.sellings) {
+                    selling.aps.manufacturerPartNumber = this.partNumber;
+                    selling.save();
+                }
+            }
+        }
+    }
 
 }

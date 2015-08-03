@@ -103,6 +103,7 @@ public class Products extends Controller {
 
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
+            pro.changePartNumber(dbpro.partNumber);
             pro.save();
             List<String> logs = new ArrayList<String>();
             logs.addAll(dbpro.beforeDoneUpdate(pro));

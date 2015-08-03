@@ -1,6 +1,7 @@
 package models.view.dto;
 
 import helper.DBUtils;
+import models.finance.PaymentUnit;
 import models.market.M;
 import models.procure.Shipment;
 import models.product.Category;
@@ -120,6 +121,12 @@ public class ShipmentWeight {
             sql.append(" AND p.sku IN " + SqlSelect.inlineParam(skus));
         }
         List<Shipment> list = Shipment.find(sql.toString(), params.toArray()).fetch();
+        for(Shipment shipment : list) {
+            for(PaymentUnit paymentUnit : shipment.fees) {
+                paymentUnit.unitPrice = paymentUnit.currency.toUSD(paymentUnit.unitPrice);
+
+            }
+        }
         return list;
     }
 }
