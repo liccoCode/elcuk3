@@ -105,7 +105,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(this.filterDot2) CollectionUtils.filter(dtos, new UnContainsPredicate(",2"));
         if(StringUtils.isNotBlank(this.market))
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
-        if(StringUtils.isNotBlank(this.state))
+        if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
 
         //return this.programPager(dtos);
