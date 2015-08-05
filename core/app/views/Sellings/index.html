@@ -1,0 +1,62 @@
+#{extends 'main_full.html' /}
+#{set title:'Selling列表' /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+#{/set}
+
+#{flash_alert /}
+
+<form action="@{Sellings.index()}" method="POST" class="search_form" id='search_form'>
+  <div class="row-fluid">
+    <div class="span12">
+      <input type="hidden" name="p.page" value="${p.page}">
+    </div>
+  </div>
+</form>
+
+<div class="row-fluid" style="overflow-x:auto;">
+  <table class="table table-bordered table-condensed" style="width:1700px;">
+    <tr>
+      <th><label><input type="checkbox" class="checkall"></label></th>
+      <th>编号</th>
+      <th>SellingID</th>
+      <th>SKU</th>
+      <th>市场</th>
+      <th>实时价格</th>
+      <th>ASIN</th>
+      <th>生命周期</th>
+      <th>系统内上架</th>
+      <th>feed更新时间</th>
+      <th>feed更新状态</th>
+      <th>创建时间</th>
+      <th>系统内下架时间</th>
+      <th>操作</th>
+    </tr>
+  #{list items:sellings , as:'s'}
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>${s_index}</td>
+      <td>${s.sellingId}</td>
+      <td>${s.listing?.product.sku}</td>
+      <td>${s.market.label()}</td>
+      <td>${s.aps.salePrice}</td>
+      <td>${s.asin}</td>
+      <td>${s.sellingCycle?.label()}</td>
+      <td>
+          #{if s.state.name().equals("SELLING")}是#{/if}
+          #{else }否#{/else}
+      </td>
+      <td>${s.recentlyFeed()?.createdAt}</td>
+      <td></td>
+      <td></td>
+      <td>#{time_tooltip time:s.showDownDate()/}</td>
+      <td></td>
+    </tr>
+  #{/list}
+    <tr class="tb_footer">
+      <td colspan="14">
+      #{bootstrap_pager pi:p, url:'' /}
+      </td>
+    </tr>
+  </table>
+</div>

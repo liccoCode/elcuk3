@@ -10,6 +10,7 @@ import models.market.*;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.SellingAmzPost;
+import models.view.post.SellingPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -358,6 +359,12 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
+
+    public static void index(SellingPost p) {
+        if(p == null) p = new SellingPost();
+        List<Selling> sellings = p.query();
+        render(sellings, p);
     }
 
 }

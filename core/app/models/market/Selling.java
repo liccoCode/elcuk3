@@ -582,6 +582,31 @@ public class Selling extends GenericModel {
         return Feed.find("fid=? ORDER BY createdAt DESC", this.sellingId).fetch();
     }
 
+    public Feed recentlyFeed() {
+        Feed feed = Feed.find("fid=? ORDER BY createdAt DESC", this.sellingId).first();
+        return feed;
+    }
+
+    public String showFeedStatus() {
+        Feed feed = this.recentlyFeed();
+        if(feed!=null){
+            String result = feed.result;
+            if(StringUtils.isNotBlank(result)){
+               int index = result.indexOf("");
+            }
+
+        }
+        return "";
+    }
+
+    public Date showDownDate() {
+        Listing listing = this.listing;
+        ListingStateRecord record = ListingStateRecord.find("listing.listingId = ? AND state = ? " +
+                " ORDER BY changedDate DESC", listing.listingId, ListingStateRecord.S.DOWN).first();
+        if(record != null)
+            return record.changedDate;
+        return null;
+    }
 
     public Float salePriceWithCurrency() {
         if(this.aps.salePrice == null) return 0f;

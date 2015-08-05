@@ -42,13 +42,14 @@ public class LossRatePost extends Post<LossRate> {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<Object>();
         sql.append(
-                "select f.shipmentid,p.sku,s.qty,s.lossqty,s.compenusdamt,p.currency, p.price, l.market From ShipItem s "
+                "select f.shipmentid,p.sku,s.qty,s.lossqty,s.compenusdamt,p.currency, p.price, l.market, s.compentype "
+                        + " From ShipItem s "
                         + " left join ProcureUnit p on s.unit_id=p.id "
                         + " LEFT JOIN Selling l ON l.sellingId = p.sid "
                         + " left join Shipment m on s.shipment_id=m.id "
                         + " left join FBAShipment f on p.fba_id=f.id "
                         + " where m.arriveDate >= ? AND m.arriveDate <= ? "
-                        + " and s.lossqty!=0 "
+                        + " and s.lossqty!=0 and s.compenamt != 0 "
                         + " group by p.fba_id,p.sku order by l.sellingId desc ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");

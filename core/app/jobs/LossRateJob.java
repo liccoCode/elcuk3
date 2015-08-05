@@ -57,6 +57,7 @@ public class LossRateJob extends BaseJob {
             loss.fba = (String) row.get("shipmentid");
             loss.qty = (Integer) row.get("qty");
             loss.lossqty = (Integer) row.get("lossqty");
+            loss.compentype = row.get("compentype") == null ? "" : (String) row.get("compentype");
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");
