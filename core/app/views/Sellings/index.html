@@ -9,6 +9,50 @@
 <form action="@{Sellings.index()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
     <div class="span12">
+      <div class="input-prepend inline">
+        <span class="add-on">feed更新状态</span>
+        <select style="width:180px;">
+          <option value="">全部</option>
+          <option value="成功">成功</option>
+          <option value="失败">失败</option>
+          <option value="更新中">更新中</option>
+        </select>
+      </div>
+      <div class="input-prepend inline">
+        <span class="add-on">市场</span>
+        <select>
+          <option value="">ALL</option>
+        #{list items:models.market.M, as:'m'}
+          <option value="${m.name()}">${m.name()}</option>
+        #{/list}
+        </select>
+      </div>
+      <div class="input-prepend inline">
+        <span class="add-on">系统内上架</span>
+        <select>
+          <option value="">ALL</option>
+          <option value="是">是</option>
+          <option value="否">否</option>
+        </select>
+      </div>
+      <div class="input-prepend inline">
+        <span class="add-on">生命周期</span>
+        <select>
+          <option value="">ALL</option>
+        #{list items:models.market.Selling.SC, as:'s'}
+          <option value="${s.name()}">${s.label()}</option>
+        #{/list}
+        </select>
+      </div>
+      <div class="input-prepend inline">
+        <span class="add-on">关键字</span>
+        <input type="text" style="width:200px;" placeHolder="sellingID/SKU/ASIN"/>
+      </div>
+
+      <div class="input-append input-prepend inline">
+        <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
+      </div>
+
       <input type="hidden" name="p.page" value="${p.page}">
     </div>
   </div>
@@ -19,7 +63,7 @@
     <tr>
       <th><label><input type="checkbox" class="checkall"></label></th>
       <th>编号</th>
-      <th>SellingID</th>
+      <th width="380px;">SellingID</th>
       <th>SKU</th>
       <th>市场</th>
       <th>实时价格</th>
@@ -43,14 +87,20 @@
       <td>${s.asin}</td>
       <td>${s.sellingCycle?.label()}</td>
       <td>
-          #{if s.state.name().equals("SELLING")}是#{/if}
+          #{if !s.state.name().equals("DOWN")}是#{/if}
           #{else }否#{/else}
       </td>
-      <td>${s.recentlyFeed()?.createdAt}</td>
+      <td>#{time_tooltip time:s.recentlyFeed()?.createdAt, datetime:true/}</td>
+      <td>${s.recentlyFeed()?.status}</td>
       <td></td>
-      <td></td>
-      <td>#{time_tooltip time:s.showDownDate()/}</td>
-      <td></td>
+      <td>#{time_tooltip time:s.showDownDate(), datetime:true /}</td>
+      <td>
+        <button class="btn btn-mini btn-danger">删除</button>
+        <button class="btn btn-mini btn-info">编辑</button>
+          #{if !s.state.name().equals("DOWN")}
+            <button class="btn btn-mini btn-warning">同步</button>
+          #{/if}
+      </td>
     </tr>
   #{/list}
     <tr class="tb_footer">
