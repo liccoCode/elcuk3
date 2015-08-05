@@ -1,5 +1,6 @@
 package jobs.analyze;
 
+import helper.Caches;
 import models.view.post.ProfitPost;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
@@ -7,6 +8,7 @@ import play.cache.Cache;
 import play.jobs.Job;
 import play.jobs.On;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -36,13 +38,15 @@ public class SellingProfitSearch extends Job {
         if(post.sku != null) skukey = post.sku;
         if(post.pmarket != null) marketkey = post.pmarket;
         if(post.category != null) categorykey = post.category.toLowerCase();
-        String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey, marketkey);
+
+        String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey,
+                marketkey);
         if(isRnning(postkey)) return;
         Cache.add(postkey + RUNNING, postkey + RUNNING);
         List<Profit> profits = new ArrayList<Profit>();
         //从ES查找SKU的利润
         profits = post.query();
-        Cache.add(postkey, profits, "2h");
+        Cache.add(postkey, profits, "8h");
         Cache.delete(postkey + RUNNING);
     }
 

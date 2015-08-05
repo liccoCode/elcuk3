@@ -184,7 +184,6 @@ public class Excels extends Controller {
                     renderText("系统不存在sku:" + p.sku);
                 }
             }
-
             if(!StringUtils.isBlank(p.category)) {
                 if(!Category.exist(p.category)) {
                     renderText("系统不存在category:" + p.category);
@@ -195,34 +194,34 @@ public class Excels extends Controller {
             String categorykey = "";
             if(p.pmarket != null) marketkey = p.pmarket;
             if(p.category != null) categorykey = p.category.toLowerCase();
-            if(marketkey.equals("market")) marketkey = "ALL";
 
-            if(StringUtils.isNotBlank(p.sku)) {
-                categorykey = p.sku;
-            }
-
-            String postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
-                    + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
-                    + new SimpleDateFormat("yyyyMMdd").format(p.end);
-            String postvalue = Caches.get(postkey);
-            if(!StringUtils.isBlank(postvalue)) {
-                profits = p.query();
-                profits = p.calTotal(profits);
-            } else {
-                String categoryname = "";
-                int is_sku = 0;
+            String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
+                    "excel");
+            profits = Cache.get(postkey, List.class);
+            if(profits == null) {
                 if(StringUtils.isNotBlank(p.sku)) {
-                    categoryname = p.sku;
-                    is_sku = 1;
-                } else {
-                    categoryname = p.category.toLowerCase();
+                    categorykey = p.sku;
                 }
-                HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
-                        + "&market=" + marketkey + "&from="
-                        + new SimpleDateFormat("yyyyMMdd").format(p.begin)
-                        + "&to="
-                        + new SimpleDateFormat("yyyyMMdd").format(p.end)
-                        + "&is_sku=" + is_sku);
+                postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
+                        + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
+                        + new SimpleDateFormat("yyyyMMdd").format(p.end);
+                String postvalue = Caches.get(postkey);
+                if(StringUtils.isBlank(postvalue)) {
+                    String categoryname = "";
+                    int is_sku = 0;
+                    if(StringUtils.isNotBlank(p.sku)) {
+                        categoryname = p.sku;
+                        is_sku = 1;
+                    } else {
+                        categoryname = p.category.toLowerCase();
+                    }
+                    HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
+                            + "&market=" + marketkey + "&from="
+                            + new SimpleDateFormat("yyyyMMdd").format(p.begin)
+                            + "&to="
+                            + new SimpleDateFormat("yyyyMMdd").format(p.end)
+                            + "&is_sku=" + is_sku);
+                }
             }
         }
 
