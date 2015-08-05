@@ -95,7 +95,7 @@
       <td></td>
       <td>#{time_tooltip time:s.showDownDate(), datetime:true /}</td>
       <td>
-        <button class="btn btn-mini btn-danger">删除</button>
+        <a href="#" class="btn btn-mini btn-danger" action='remove' data-url='@{Sellings.destroy(s.sellingId)}'>删除</a>
         <button class="btn btn-mini btn-info">编辑</button>
           #{if !s.state.name().equals("DOWN")}
             <button class="btn btn-mini btn-warning">同步</button>
