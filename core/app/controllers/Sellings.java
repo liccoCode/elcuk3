@@ -12,6 +12,7 @@ import models.view.Ret;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
 import play.jobs.Job;
@@ -53,6 +54,7 @@ public class Sellings extends Controller {
         Listing listing = Listing.find("listingId=?", listingId).first();
         Validate.notNull(listing);
         selling.listing = listing;
+
         selling.save();
     }
 
