@@ -43,8 +43,12 @@ public class SellingProfitJob extends Job {
         if(isRnning(postkey)) return;
         Cache.add(postkey + RUNNING, postkey + RUNNING);
         List<Profit> profits = new ArrayList<Profit>();
+
+
         //从ES查找SKU的利润
         profits = post.query();
+
+
         //计算合计
         profits = post.calTotal(profits);
         Cache.add(postkey, profits, "2h");

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
 import helper.Caches;
 import helper.Dates;
+import helper.HTTP;
 import helper.J;
 import jobs.analyze.SellingSaleAnalyzeJob;
 
@@ -13,12 +14,13 @@ import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.ProfitPost;
 import org.apache.commons.lang.StringUtils;
-import play.cache.Cache;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import jobs.analyze.SellingProfitSearch;
+
+import java.text.SimpleDateFormat;
+
 import jobs.analyze.ProfitInventorySearch;
 
 import java.util.List;
@@ -86,19 +88,39 @@ public class Profits extends Controller {
                     }
                 }
 
-                String skukey = "";
                 String marketkey = "";
                 String categorykey = "";
-                if(p.sku != null) skukey = p.sku;
                 if(p.pmarket != null) marketkey = p.pmarket;
                 if(p.category != null) categorykey = p.category.toLowerCase();
-                String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey,
-                        marketkey);
-                profits = Cache.get(postkey, List.class);
-                if(profits != null) {
-                    render(profits, p);
+                if(marketkey.equals("market")) marketkey = "ALL";
+                if(p.sku != null) {
+                    categorykey = p.sku;
+                }
+
+                String postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
+                        + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
+                        + new SimpleDateFormat("yyyyMMdd").format(p.end);
+                String postvalue = Caches.get(postkey);
+                if(!StringUtils.isBlank(postvalue)) {
+                    profits = p.query();
+                    if(profits != null) {
+                        render(profits, p);
+                    }
                 } else {
-                    new SellingProfitSearch(p).now();
+                    String categoryname = "";
+                    int is_sku = 0;
+                    if(p.sku != null) {
+                        categoryname = p.sku;
+                        is_sku = 1;
+                    } else {
+                        categoryname = p.category.toLowerCase();
+                    }
+                    HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
+                            + "&market=" + marketkey + "&from="
+                            + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
+                            + "&to="
+                            + new SimpleDateFormat("yyyy-MM-dd").format(p.end)
+                            + "&is_sku=" + is_sku);
                     profits = new ArrayList<Profit>();
                     flash.error("后台事务正在计算中,请稍候...");
                 }

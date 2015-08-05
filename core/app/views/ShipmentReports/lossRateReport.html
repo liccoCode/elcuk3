@@ -72,7 +72,7 @@
           #{list items:shipItems, as:'itm'}
           <tr>
             <td>${itm.unit.sid}</td>
-            <td>${itm.unit.fba.shipmentId}</td>
+            <td>${itm.unit.fba?.shipmentId}</td>
             <td>${itm.unit.fba?.centerId}</td>
             <td>${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})</td>
             <td>${itm.recivedQty}</td>
