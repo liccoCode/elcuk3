@@ -193,10 +193,13 @@ public class Excels extends Controller {
             String skukey = "";
             String marketkey = "";
             String categorykey = "";
-            if(p.sku != null) skukey = p.sku;
             if(p.pmarket != null) marketkey = p.pmarket;
             if(p.category != null) categorykey = p.category.toLowerCase();
             if(marketkey.equals("market")) marketkey = "ALL";
+
+            if(StringUtils.isNotBlank(p.sku)) {
+                categorykey = p.sku;
+            }
 
             String postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
                     + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
@@ -208,7 +211,7 @@ public class Excels extends Controller {
             } else {
                 String categoryname = "";
                 int is_sku = 0;
-                if(p.sku != null) {
+                if(StringUtils.isNotBlank(p.sku)) {
                     categoryname = p.sku;
                     is_sku = 1;
                 } else {
@@ -216,7 +219,7 @@ public class Excels extends Controller {
                 }
                 HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
                         + "&market=" + marketkey + "&from="
-                        +new SimpleDateFormat("yyyyMMdd").format(p.begin)
+                        + new SimpleDateFormat("yyyyMMdd").format(p.begin)
                         + "&to="
                         + new SimpleDateFormat("yyyyMMdd").format(p.end)
                         + "&is_sku=" + is_sku);

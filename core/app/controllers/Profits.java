@@ -93,7 +93,7 @@ public class Profits extends Controller {
                 if(p.pmarket != null) marketkey = p.pmarket;
                 if(p.category != null) categorykey = p.category.toLowerCase();
                 if(marketkey.equals("market")) marketkey = "ALL";
-                if(p.sku != null) {
+                if(StringUtils.isNotBlank(p.sku)) {
                     categorykey = p.sku;
                 }
 
@@ -109,7 +109,7 @@ public class Profits extends Controller {
                 } else {
                     String categoryname = "";
                     int is_sku = 0;
-                    if(p.sku != null) {
+                    if(StringUtils.isNotBlank(p.sku)) {
                         categoryname = p.sku;
                         is_sku = 1;
                     } else {
