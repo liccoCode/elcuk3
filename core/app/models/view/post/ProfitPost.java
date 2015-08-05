@@ -393,7 +393,7 @@ public class ProfitPost extends Post<Profit> {
 
             //增加库存数据
             MetricQtyService qtyservice = new MetricQtyService(market, prosku);
-            // profit = qtyservice.calProfit(profit);
+            profit = qtyservice.calProfit(profit);
 
             /**
              * (制作中+已交货)库存占用资金总金额(USD)
