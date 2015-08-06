@@ -429,4 +429,15 @@ public class Products extends Controller {
         product.save();
         renderJSON(new Ret());
     }
+
+    /**
+     * 模糊匹配SKU
+     * @param sku
+     */
+    public static void sameSku(String sku) {
+        List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
+        List<String> skus = new ArrayList<String>();
+        for(Product p : products) skus.add(p.sku);
+        renderJSON(J.json(skus));
+    }
 }

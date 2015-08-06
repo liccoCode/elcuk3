@@ -40,9 +40,9 @@ public class Feed extends Model {
     public String result = " ";
 
     /**
-     * 状态，由ruby端解析回填而来
+     * 分析结果，由ruby端解析回填而来
      */
-    public String status;
+    public String analyzeResult;
 
     public Date createdAt;
 

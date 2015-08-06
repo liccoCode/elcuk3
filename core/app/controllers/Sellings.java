@@ -7,6 +7,7 @@ import helper.J;
 import helper.Webs;
 import models.embedded.AmazonProps;
 import models.market.*;
+import models.product.Family;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.SellingAmzPost;
@@ -363,8 +364,14 @@ public class Sellings extends Controller {
 
     public static void index(SellingPost p) {
         if(p == null) p = new SellingPost();
+        List<String> products = Product.skus(true);
+        renderArgs.put("products", J.json(products));
         List<Selling> sellings = p.query();
         render(sellings, p);
+    }
+
+    public static void create(Selling s) {
+
     }
 
 }

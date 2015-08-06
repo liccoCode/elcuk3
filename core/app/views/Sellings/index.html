@@ -2,6 +2,7 @@
 #{set title:'Selling列表' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
+    #{script 'sellings/index.coffee'/}
 #{/set}
 
 #{flash_alert /}
@@ -11,7 +12,7 @@
     <div class="span12">
       <div class="input-prepend inline">
         <span class="add-on">feed更新状态</span>
-        <select style="width:180px;">
+        <select style="width:180px;" name="p.analyzeResult">
           <option value="">全部</option>
           <option value="成功">成功</option>
           <option value="失败">失败</option>
@@ -20,37 +21,41 @@
       </div>
       <div class="input-prepend inline">
         <span class="add-on">市场</span>
-        <select>
+        <select name="p.market" style="width:120px;">
           <option value="">ALL</option>
         #{list items:models.market.M, as:'m'}
-          <option value="${m.name()}">${m.name()}</option>
+          <option value="${m.name()}" #{if m.name()==p.market?.name()} selected #{/if}>${m.name()}</option>
         #{/list}
         </select>
       </div>
       <div class="input-prepend inline">
         <span class="add-on">系统内上架</span>
-        <select>
+        <select name="p.systemUp">
           <option value="">ALL</option>
-          <option value="是">是</option>
-          <option value="否">否</option>
+          <option value="是" #{if "是".equals(p.systemUp)} selected #{/if}>是</option>
+          <option value="否" #{if "否".equals(p.systemUp)} selected #{/if}>否</option>
         </select>
       </div>
       <div class="input-prepend inline">
         <span class="add-on">生命周期</span>
-        <select>
+        <select name="p.sellingCycle">
           <option value="">ALL</option>
         #{list items:models.market.Selling.SC, as:'s'}
-          <option value="${s.name()}">${s.label()}</option>
+          <option value="${s.name()}" #{if s.name()==p.sellingCycle?.name()} selected #{/if}>${s.label()}</option>
         #{/list}
         </select>
       </div>
       <div class="input-prepend inline">
         <span class="add-on">关键字</span>
-        <input type="text" style="width:200px;" placeHolder="sellingID/SKU/ASIN"/>
+        <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="sellingID/SKU/ASIN"/>
       </div>
 
       <div class="input-append input-prepend inline">
         <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
+        &nbsp;
+      </div>
+      <div class="input-append input-prepend inline">
+        <a href="javascript:void(0);" id="createBtn" class="btn btn-success">创建Selling</a>
       </div>
 
       <input type="hidden" name="p.page" value="${p.page}">
@@ -91,12 +96,12 @@
           #{else }否#{/else}
       </td>
       <td>#{time_tooltip time:s.recentlyFeed()?.createdAt, datetime:true/}</td>
-      <td>${s.recentlyFeed()?.status}</td>
+      <td>${s.recentlyFeed()?.analyzeResult}</td>
       <td></td>
       <td>#{time_tooltip time:s.showDownDate(), datetime:true /}</td>
       <td>
-        <a href="#" class="btn btn-mini btn-danger" action='remove' data-url='@{Sellings.destroy(s.sellingId)}'>删除</a>
-        <button class="btn btn-mini btn-info">编辑</button>
+        <a href="javascript:void(0);" class="btn btn-mini btn-danger" name='remove' data-url='@{Sellings.destroy(s.sellingId)}'>删除</a>
+        <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-mini btn-info">编辑</a>
           #{if !s.state.name().equals("DOWN")}
             <button class="btn btn-mini btn-warning">同步</button>
           #{/if}
@@ -109,4 +114,30 @@
       </td>
     </tr>
   </table>
+</div>
+<a href="javascript:void(0);" id="batchDown" data-uri="" class="btn btn-warning">批量系统内下架</a>
+
+
+<div id='create_modal' class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>创建Selling</h3>
+  </div>
+  <div class="modal-body" style="height:250px;">
+    <table style="width:100%" class="table table-bordered">
+      <tr>
+        <td style="vertical-align:middle;">
+          SKU <input type="text" id="inputsku" autocomplete="on" required>
+          <input type="radio" name="createtype"><b>AMZ上架</b>
+          <input type="radio" name="createtype"><b>添加Selling</b>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align:right;">
+          <a href="#" data-dismiss='modal' class="btn">取消</a>
+          <a href="#" id="submitSale" class="btn btn-primary">AMZ上架</a>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>

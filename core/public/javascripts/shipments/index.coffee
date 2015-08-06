@@ -1,6 +1,6 @@
 $ ->
   $('#createApplyBtn').click((e) ->
-    e.preventDefault()
+
     #过滤掉apply为空的数据
     $ck = $("#search_form [type='checkbox']:checked")
     size = $ck.length
