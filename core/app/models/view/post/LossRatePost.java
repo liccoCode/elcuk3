@@ -171,7 +171,7 @@ public class LossRatePost extends Post<LossRate> {
         List<ProfitDto> dtos = null;
         M[] marray = models.market.M.values();
         for(M m : marray) {
-            String cacke_key = "lossrate_" + m.name() +
+            String cacke_key = "lossrate_" + m.name() + "_" +
                     new SimpleDateFormat("yyyyMMdd").format(this.from)
                     + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
             Logger.info("::::::xx:::::key:::" + cacke_key);
