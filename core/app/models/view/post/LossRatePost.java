@@ -198,7 +198,7 @@ public class LossRatePost extends Post<LossRate> {
             }
             loss.market = M.valueOf(row.get("market").toString());
 
-            String key = loss.sku + "_" + loss.market.toString();
+            String key = loss.sku + "_" + loss.market.name();
             ProfitDto dto = existMap.get(key);
             if(dto != null) {
                 loss.totalShipmentprice = Float
@@ -228,7 +228,7 @@ public class LossRatePost extends Post<LossRate> {
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-            String key = ship.unit.sku + "_" + ship.unit.selling.market.toString();
+            String key = ship.unit.sku + "_" + ship.unit.selling.market.name();
             ProfitDto dto = existMap.get(key);
             if(dto != null) {
                 ship.shipmentCost = new BigDecimal((dto.ship_price + dto.vat_price) * lossNum)
