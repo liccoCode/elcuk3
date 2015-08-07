@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import models.view.report.LossRate;
+import play.Logger;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -173,13 +174,13 @@ public class LossRatePost extends Post<LossRate> {
             String cacke_key = "lossrate_" + m.name() +
                     new SimpleDateFormat("yyyyMMdd").format(this.from)
                     + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
-            System.out.println("::::::xx:::::key:::"+cacke_key);
+            Logger.info("::::::xx:::::key:::" + cacke_key);
             String cache_str = Caches.get(cacke_key);
             if(!StringUtils.isBlank(cache_str)) {
                 dtos = JSON.parseArray(cache_str, ProfitDto.class);
                 if(dtos != null) {
                     for(ProfitDto dto : dtos) {
-                        System.out.println("::::::0:::::key:::"+dto.sku + "_" + m.name());
+                        Logger.info("::::::0:::::key:::"+dto.sku + "_" + m.name());
                         existMap.put(dto.sku + "_" + m.name(), dto);
                     }
                 }
@@ -201,8 +202,9 @@ public class LossRatePost extends Post<LossRate> {
             loss.market = M.valueOf(row.get("market").toString());
 
             String key = loss.sku + "_" + loss.market.name();
-            System.out.println("::::::1:::::key:::"+key);
+            Logger.info("::::::1:::::key:::" + key);
             ProfitDto dto = existMap.get(key);
+            Logger.info("::::::1:::::key:::xxx:::" + dto);
             if(dto != null) {
                 loss.totalShipmentprice = Float
                         .parseFloat(df.format((dto.ship_price + dto.vat_price) * loss.lossqty));
@@ -232,8 +234,9 @@ public class LossRatePost extends Post<LossRate> {
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
 
             String key = ship.unit.sku + "_" + ship.unit.selling.market.name();
-            System.out.println("::::::2:::::key:::"+key);
+            Logger.info("::::::2:::::key:::"+key);
             ProfitDto dto = existMap.get(key);
+            Logger.info("::::::2:::::key:::xxx:::" + dto);
             if(dto != null) {
                 ship.shipmentCost = new BigDecimal((dto.ship_price + dto.vat_price) * lossNum)
                         .setScale(2, BigDecimal.ROUND_HALF_UP);
