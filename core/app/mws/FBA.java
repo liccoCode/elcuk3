@@ -347,6 +347,7 @@ public class FBA {
                         break;
                     case AMAZON_JP:
                         config.setServiceURL(MWSEndpoint.JP.toString());
+                        break;
                     case AMAZON_CA:
                         config.setServiceURL("https://mws.amazonservices.ca/FulfillmentInboundShipment/2010-10-01/");
                         break;
