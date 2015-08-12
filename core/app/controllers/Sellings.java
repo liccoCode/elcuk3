@@ -174,7 +174,7 @@ public class Sellings extends Controller {
         if(errors.size() > 0) {
             renderJSON(new Ret(false, errors.toString()));
         } else {
-            renderJSON(new Ret(true, "正在处理,请查看页尾日志"));
+            renderJSON(new Ret(true, "正在处理,请查看更新日志"));
         }
     }
 
