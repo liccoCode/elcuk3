@@ -197,7 +197,7 @@ $ ->
       imgs: $('[name=s\\.aps\\.imageName]').val()
     $.post('/sellings/imageUpload', params, (r) ->
       if r.flag is true
-        alert "AMAZON图片更新成功!"
+        alert "AMAZON图片正在更新,请查看更新日志!"
       else
         alert(r.message)
       imgDiv.unmask()

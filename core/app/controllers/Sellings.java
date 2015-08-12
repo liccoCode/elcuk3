@@ -5,6 +5,7 @@ import helper.Constant;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
@@ -14,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
@@ -62,6 +64,13 @@ public class Sellings extends Controller {
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("feeds", s.feeds());
+        renderArgs.put("records", ElcukRecord.fid("selling.image").<ElcukRecord>fetch(50));
+        List<ElcukRecord> logs =
+                ElcukRecord.find("fid=? AND action=? " +
+                        " ORDER BY createAt DESC", id.toString(), "selling.image").fetch(4);
+
+        renderArgs.put("records", logs);
+
         SellingAmzPost p = new SellingAmzPost();
         render(s, p);
     }
@@ -155,23 +164,17 @@ public class Sellings extends Controller {
 
     public static void imageUpload(final String sid, final String imgs) {
         if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
-            @Override
-            public List<Error> doJobWithResult() throws Exception {
-                List<Error> errors = new ArrayList<Error>();
-                Selling s = Selling.findById(sid);
-                try {
-                    s.uploadAmazonImg(imgs, false);
-                } catch(Exception e) {
-                    errors.add(new Error("", Webs.E(e), new String[]{}));
-                }
-                return errors;
-            }
-        }.now());
+        Selling s = Selling.findById(sid);
+        List<Error> errors = new ArrayList<Error>();
+        try {
+            s.uploadFeedAmazonImg(imgs, false);
+        } catch(Exception e) {
+            errors.add(new Error("", Webs.E(e), new String[]{}));
+        }
         if(errors.size() > 0) {
             renderJSON(new Ret(false, errors.toString()));
         } else {
-            renderJSON(new Ret(true));
+            renderJSON(new Ret(true, "正在处理,请查看页尾日志"));
         }
     }
 
