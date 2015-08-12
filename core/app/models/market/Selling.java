@@ -18,6 +18,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.jsoup.nodes.Element;
+import org.w3c.dom.Text;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -29,8 +31,12 @@ import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerFactory;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.StringWriter;
 import java.util.*;
 
 import org.jsoup.Jsoup;
@@ -419,6 +425,143 @@ public class Selling extends GenericModel {
         HTTP.post("http://rock.easya.cc:4567/submit_feed", params);
         return feed;
     }
+
+
+    private org.w3c.dom.Document buildDoc() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch(Exception pce) {
+        }
+        org.w3c.dom.Document doc = builder.newDocument();
+        return doc;
+    }
+
+    private F.T2<org.w3c.dom.Document, org.w3c.dom.Element> buildHeader(org.w3c.dom.Document doc) {
+        org.w3c.dom.Element envelope = doc.createElement("AmazonEnvelope");
+        envelope.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        envelope.setAttribute("xsi:noNamespaceSchemaLocation", "amznenvelope.xsd");
+        doc.appendChild(envelope);
+        org.w3c.dom.Element header = doc.createElement("Header");
+        envelope.appendChild(header);
+        org.w3c.dom.Element version = doc.createElement("DocumentVersion");
+        header.appendChild(version);
+        org.w3c.dom.Element identifier = doc.createElement("MerchantIdentifier");
+        header.appendChild(identifier);
+        org.w3c.dom.Element messagetype = doc.createElement("MessageType");
+        envelope.appendChild(messagetype);
+
+        Text tversion = doc.createTextNode("1.01");
+        version.appendChild(tversion);
+        Text tidentifier = doc.createTextNode("M_SELLER_354577");
+        identifier.appendChild(tidentifier);
+        Text tmessagetype = doc.createTextNode("ProductImage");
+        messagetype.appendChild(tmessagetype);
+        return new F.T2<org.w3c.dom.Document, org.w3c.dom.Element>(doc, envelope);
+    }
+
+    private org.w3c.dom.Document buildNode(org.w3c.dom.Document doc,
+                                           org.w3c.dom.Element envelope,
+                                           int i, String fileParamName, String location, String action) {
+        org.w3c.dom.Element message = doc.createElement("Message");
+        envelope.appendChild(message);
+
+        org.w3c.dom.Element messageid = doc.createElement("MessageID");
+        message.appendChild(messageid);
+        org.w3c.dom.Element operationtype = doc.createElement("OperationType");
+        message.appendChild(operationtype);
+
+        Text tmessageid = doc.createTextNode(String.valueOf(i + 1));
+        messageid.appendChild(tmessageid);
+        Text toperationtype = doc.createTextNode(action);
+        operationtype.appendChild(toperationtype);
+
+        org.w3c.dom.Element product = doc.createElement("ProductImage");
+        message.appendChild(product);
+        //建立SKU元素
+        org.w3c.dom.Element sku = doc.createElement("SKU");
+        product.appendChild(sku);
+        //建立ImageType元素
+        org.w3c.dom.Element ImageType = doc.createElement("ImageType");
+        product.appendChild(ImageType);
+        //建立ImageLocation元素
+        org.w3c.dom.Element ImageLocation = doc.createElement("ImageLocation");
+        product.appendChild(ImageLocation);
+
+        Text tsku = doc.createTextNode(this.listing.product.sku);
+        sku.appendChild(tsku);
+        Text tname = doc.createTextNode(fileParamName);
+        ImageType.appendChild(tname);
+        Text tlocation = doc.createTextNode(location);
+        ImageLocation.appendChild(tlocation);
+        return doc;
+    }
+
+
+    public String getStringFromDoc(org.w3c.dom.Document doc) throws Exception {
+
+        javax.xml.transform.dom.DOMSource domSource = new javax.xml.transform.dom.DOMSource(doc);
+        StringWriter writer = new StringWriter();
+        javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        javax.xml.transform.Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(javax.xml.transform.OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "yes");
+        transformer.transform(domSource, result);
+        writer.flush();
+        return writer.toString();
+    }
+
+    /**
+     * 用Feed方式更新产品图片
+     */
+    public void uploadFeedAmazonImg(String imageName, boolean waterMark) {
+        //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        String dealImageNames = imageName;
+        if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
+        if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
+        String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
+        if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
+            images = Arrays.copyOfRange(images, 0, 9);
+        this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
+
+
+        org.w3c.dom.Document doc = buildDoc();
+        F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc);
+        doc = element._1;
+        org.w3c.dom.Element envelope = element._2;
+
+        Map<String, F.T2<String, BufferedInputStream>> uploadImages = new HashMap<String, F.T2<String, BufferedInputStream>>();
+        for(int i = 0; i < images.length; i++) {
+            String fileParamName;
+            if(i == 0) fileParamName = "Main";
+            else fileParamName = "PT" + i;
+            String location = Attach.attachImage(this.sellingId.split(",")[0], images[i]);
+            if(StringUtils.isBlank(location))
+                throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
+            doc = buildNode(doc, envelope, i, fileParamName, location, "Update");
+        }
+
+        for(int i = images.length; i < 9; i++) {
+            String fileParamName;
+            if(i == 0) fileParamName = "Main";
+            else fileParamName = "PT" + i;
+            doc = buildNode(doc, envelope, i, fileParamName, "", "Delete");
+        }
+        String content = "";
+        try {
+            content = getStringFromDoc(doc);
+        } catch(Exception e) {
+        }
+
+        Feed feed = Feed.updateSellingFeed(content, this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
+        HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);
+        this.save();
+    }
+
 
     /**
      * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值

@@ -62,6 +62,8 @@
     </div>
   </div>
 
+#{records records:records, row:true/}
+
 #{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
     <td> #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3,
