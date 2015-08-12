@@ -406,7 +406,7 @@ public class Selling extends GenericModel {
         Validate.notEmpty(this.sellingId);
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("account.id", this.account.id.toString()));// 使用哪一个账号
-        params.add(new BasicNameValuePair("marketId", this.market.amid().name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("marketId", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed.id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling.id", this.sellingId)); // 作用与哪一个 Selling
         return params;
