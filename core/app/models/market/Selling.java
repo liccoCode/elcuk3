@@ -368,8 +368,6 @@ public class Selling extends GenericModel {
                 M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
                         (args.length >= 2 ? args[1] : "")),
                 paramAndDocTuple._1);
-
-
         if(StringUtils.isBlank(html)) // 这个最先检查
             throw new FastRuntimeException(
                     "Selling update is failed! Return Content is Empty!");
@@ -384,23 +382,16 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
         synchronized(this.account.cookieStore()) {
-            // model: {"labelType":"ItemLabel_A4_27","mSku.0":"73SNZ2-BHSPU,700686512919","qty.0":"501","fnSku.0":"X0007XNAFZ"}
-            // labelType: ItemLabel_A4_27
             Map<String, String> params = GTs.MapBuilder
                     .map("labelType", "ItemLabel_A4_27")
                     .put("mSku.0", this.merchantSKU)
                     .put("qty.0", "27") // 一页打 44 个
                     .put("fnSku.0", this.fnSku).build();
             for(Cookie coo : this.account.cookieStore().getCookies()) {
-                Logger.info(" ===========" + coo.getName() + "=" + coo.getValue() + "============");
+                Logger.info(" ============" + coo.getName() + "=" + coo.getValue() + "============");
             }
-
-            List<NameValuePair> httpparams = new ArrayList<NameValuePair>();
-            httpparams.add(new BasicNameValuePair("model", J.json(params)));
-            httpparams.add(new BasicNameValuePair("labelType", "ItemLabel_A4_27"));
-
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
-                    httpparams);
+                    Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
     }
 
@@ -521,7 +512,7 @@ public class Selling extends GenericModel {
     /**
      * 用Feed方式更新产品图片
      */
-    public void uploadFeedAmazonImg(String imageName, boolean waterMark, String userName) {
+    public void uploadFeedAmazonImg(String imageName, boolean waterMark,String userName) {
         //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         String dealImageNames = imageName;
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
