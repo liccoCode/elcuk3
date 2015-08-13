@@ -384,8 +384,6 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
         synchronized(this.account.cookieStore()) {
-            // model: {"labelType":"ItemLabel_A4_27","mSku.0":"73SNZ2-BHSPU,700686512919","qty.0":"501","fnSku.0":"X0007XNAFZ"}
-            // labelType: ItemLabel_A4_27
             Map<String, String> params = GTs.MapBuilder
                     .map("labelType", "ItemLabel_A4_27")
                     .put("mSku.0", this.merchantSKU)
@@ -394,7 +392,6 @@ public class Selling extends GenericModel {
             for(Cookie coo : this.account.cookieStore().getCookies()) {
                 Logger.info(" ===========" + coo.getName() + "=" + coo.getValue() + "============");
             }
-
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
