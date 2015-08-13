@@ -370,8 +370,35 @@ public class Sellings extends Controller {
         render(sellings, p);
     }
 
-    public static void create(Selling s) {
+    public static void createSelling(Selling s) {
 
+        render(s);
+    }
+
+    public static void saleAmazon(String id) {
+        Product product = Product.findByMerchantSKU(id);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(product.sku);
+        Selling s = new Selling();
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
+        renderArgs.put("accs", Account.openedSaleAcc());
+        render("Sellings/_saleAmazon.html", product, s);
+    }
+
+    public static void batchDownSelling(String[] sellingIds) {
+        try {
+            for(int i = 0; i < sellingIds.length; i++) {
+                Selling selling = Selling.findById(sellingIds[i]);
+                selling.state = Selling.S.DOWN;
+                selling.save();
+                //修改 Product 在系统内的状态
+                Product.changeProductType(selling.merchantSKU);
+                //存储 Listing 状态变更记录
+                selling.listing.recordingListingState(DateTime.now().toDate());
+            }
+            renderJSON(new Ret(true, sellingIds.toString()));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
 }

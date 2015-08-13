@@ -6,6 +6,8 @@ u(rl): 方法
 }*
 #{set begin: ((_pi.page - 3) >= 1) ? (_pi.page - 3) : 1 /}
 #{set end: ((_pi.page + 3) <= _pi.totalPage) ? (_pi.page + 3) : _pi.totalPage/}
+#{set selectbegin: 1/}
+#{set selectend: _pi.totalPage/}
 <div class="pagination pagination-centered">
   <ul>
     <li><a page="1" href="${_url + "?p=1"}">首页</a></li>
@@ -27,5 +29,11 @@ u(rl): 方法
     <li>
       <a>总数据: ${_pi.totalCount}</a>
     </li>
+    <li>跳转</li>
+    <select style="width:50px;">
+    #{list items:selectbegin..selectend, as:'i'}
+      <option value="${i}" #{if i==_pi.page} selected #{/if}>${i}</option>
+    #{/list}
+    </select>
   </ul>
 </div>

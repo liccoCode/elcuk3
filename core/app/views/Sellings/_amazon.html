@@ -7,140 +7,120 @@
   </div>
 #{/if}
 #{else }
-  <div class="alert alert-block">
-    <p>
-      <strong><i class=" icon-volume-up"></i>&nbsp;&nbsp;温馨提示: &nbsp;Deploy 操作前请先进行 Sync 操作将 Amazon 的数据同步到系统内.</strong>
-    </p>
-  </div>
-
-  <div class="btn-toolbar" id='btns'>
-    <div class="btn-group">
-      <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}"
-              content="直接更新到数据库" placement='bottom' rel="popover" title="Local Update Button">
-        Update
-      </button>
-      <button class="btn btn-warning" id="amz-sync"
-              content="从 Amazon 同步回来更新到数据库" placement='bottom' rel="popover" title="Sync From Amazon Button">
-        Sync
-      </button>
-      <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.amazon_update()}"
-              content="AMZ局部更新" placement='bottom' rel="popover">
-        Deploy Part
-      </button>
-      <a class="btn btn-warning" href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnits
-      Button" content="创建此 Selling 相关采购计划" placement='bottom' rel="popover">采购计划</a>
-    </div>
-    <div class="btn-group">
-      <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">Listing : ${s.listing.listingId}</a>
-      <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">Product
-        : ${s.merchantSKU.split(",")[0]}</a>
-      <a class="btn btn-success" href="${s.showListingLink()}" target="_blank">Amazon : ${s.asin}</a>
-    </div>
-
-    <div class="btn-group">
-        #{power.ck "sellings.delete"}
-          <a href="javascript:;" class="btn btn-danger" action='remove'
-             data-url='@{Sellings.destroy(s.sellingId)}'>删除 Selling</a>
-          </td>
-        #{/power.ck}
-    </div>
+  <div class="btn-toolbar" id='btns' style="text-align:right;">
+    <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}" content="直接更新到数据库"
+            placement='bottom' rel="popover" title="Local Update Button">Update
+    </button>
+    <button class="btn btn-warning" id="amz-sync" content="从 Amazon 同步回来更新到数据库"
+            placement='bottom' rel="popover" title="Sync From Amazon Button">Sync
+    </button>
+    <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.amazon_update()}"
+            content="AMZ局部更新" placement='bottom' rel="popover">Deploy Part
+    </button>
+    <button class="btn btn-warning" id="img_cal" content="图片按照 0~8 设置好编号以后,点击此按钮更新到AMAZON." placement='bottom'
+            rel="popover">AMZ图片更新
+    </button>
   </div>
 #{/else}
 </div>
 
 <div class="row-fluid">
-  <div class="span11">
+  <div class="span12">
     <ul class="thumbnails" id="images" sku='${s.merchantSKU.split(",")[0]}'></ul>
     <div class="input-prepend span12">
-      <button class="btn btn-warning" id="img_cal"
-              content="图片按照 0~8 设置好编号以后,点击此按钮更新到AMAZON." placement='bottom'
-              rel="popover">
-        AMZ图片更新
-      </button>
-      </button>
-      <input type="text" class="span10" name="s.aps.imageName" readonly value="${s.aps.imageName}">
+      <input type="hidden" class="span10" name="s.aps.imageName" readonly value="${s.aps.imageName}">
     </div>
   </div>
 
 #{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
-  <div class="span10">
-    <td> #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3,
-      label: '标题', value: s.aps.title /} </td>
-  </div>
-  <div class="span5">
-    <input type="hidden" name="s.sellingId" value="${s.sellingId}">
-    <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
-      #{text_field id:'msku',name: 's.merchantSKU', readonly: true,
-      label: 'Merchant SKU',
-      value: s.merchantSKU/}
-      #{text_field id:'upc',name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
-      #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
-      #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
-      #{checkbox_text_field id:'standerPrice',checkboxname: 'p.standerprice', name: 's.aps.standerPrice',
-      label: '标准价格', value: s.aps.standerPrice /}
-      #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期', value: s.aps.startDate?.format('yyyy-MM-dd') /}
-      #{checkbox_text_field id:'RBN',checkboxname: 'p.rbns', name: 's.aps.rbns[0]', label: 'Recommanded Browser Nodes',
-      value: s.aps.rbns[0] /}
-      #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',
-      value: '' /}
-      #{checkbox_wrap id:'giftwrap', label: '附加选项'}
-        <label class="checkbox">
-          <input type="checkbox" id='giftwrap' ${s.aps.isGiftWrap?'checked':''} name="s.aps.isGiftWrap" value="true">
-          GiftWrap
-        </label>
-      #{/checkbox_wrap}
-      #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
 
-      #{checkbox_product_volume id:'productvolume',readonly:true,
-      checkboxname: 'p.productvolume', label:'长宽高(产品)',
-      id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
-      hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
-      name1: 'p.productLengths',
-      label1: '长(产品)', value1: s.listing.product.productLengths,
-      name2: 'p.productWidth',
-      label2: '宽(产品)', value2: s.listing.product.productWidth,
-      name3: 'p.productHeigh',
-      label3: '高(产品)', value3: s.listing.product.productHeigh /}
-
-  </div>
-  <div class="span5">
-      #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}
-      #{hidden_field id: 'accountId', name: 's.account.id', value: s.account.id /}
-      #{text_field id:'market', name: 's.market', readonly: true, label:'市场', value: s.market.name() /}
-      #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
-      'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Sports', 'Lighting'], value: s.aps.templateType/}
-      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps.feedProductType], value: s.aps.feedProductType /}
-      #{checkbox_text_field id:'salePrice',checkboxname: 'p.saleprice', name: 's.aps.salePrice', label: '优惠销售价格',
-      value: s.aps.salePrice /}
-      #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
-      #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: s.aps.manufacturerPartNumber /}
-      #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number',value: s.aps.modelNumber /}
-      #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
-
-      #{checkbox_product_weight readonly:true,sid:'sproductWeight',hid:'hproductWeight' , id:'productWeight',
-      unitname:'p.productWeightUnit',
-      checkboxname: 'p.productWeight',
-      name: 'p.proWeight',
-      label: '重量(产品)', value: s.listing.product.productWeight /}
-      #{checkbox_product_weight readonly:true,sid:'sweight',hid:'hweight', id:'weight',unitname:'p.weightUnit',
-      checkboxname: 'p.weight',
-      name: 'p.packWeight',
-      label: '重量(包材)', value: s.listing.product.weight /}
-
-    <label class="control-label" for="sellingCycle">生命周期</label>
-
-    <div class="controls">
-      <select name="s.sellingCycle" size="1">
-          #{list items:models.market.Selling.SC.values(), as: 'cycle'}
-            <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
-          #{/list}
-      </select>
-    </div>
-
-  </div>
   <div class="span12">
-      #{input_append /}
+    <div class="span5">
+      <input type="hidden" name="s.sellingId" value="${s.sellingId}">
+      <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
+        #{text_field id:'msku',name: 's.merchantSKU', readonly: true,
+        label: 'Merchant SKU',
+        value: s.merchantSKU/}
+        #{text_field id:'upc',name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
+        #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
+        #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
+        #{checkbox_text_field id:'standerPrice',checkboxname: 'p.standerprice', name: 's.aps.standerPrice',
+        label: '标准价格', value: s.aps.standerPrice /}
+        #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期', value: s.aps.startDate?.format('yyyy-MM-dd') /}
+        #{checkbox_text_field id:'RBN',checkboxname: 'p.rbns', name: 's.aps.rbns[0]', label: 'Recommanded Browser Nodes',
+        value: s.aps.rbns[0] /}
+        #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',
+        value: '' /}
+        #{checkbox_wrap id:'giftwrap', label: '附加选项'}
+          <label class="checkbox">
+            <input type="checkbox" id='giftwrap' ${s.aps.isGiftWrap?'checked':''} name="s.aps.isGiftWrap" value="true">
+            GiftWrap
+          </label>
+        #{/checkbox_wrap}
+        #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
+
+        #{checkbox_product_volume id:'productvolume',readonly:true,
+        checkboxname: 'p.productvolume', label:'长宽高(产品)',
+        id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
+        hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
+        name1: 'p.productLengths',
+        label1: '长(产品)', value1: s.listing.product.productLengths,
+        name2: 'p.productWidth',
+        label2: '宽(产品)', value2: s.listing.product.productWidth,
+        name3: 'p.productHeigh',
+        label3: '高(产品)', value3: s.listing.product.productHeigh /}
+
+    </div>
+    <div class="span5">
+        #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}
+        #{hidden_field id: 'accountId', name: 's.account.id', value: s.account.id /}
+        #{text_field id:'market', name: 's.market', readonly: true, label:'市场', value: s.market.name() /}
+        #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
+        'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Sports', 'Lighting'], value: s.aps.templateType/}
+        #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps.feedProductType], value: s.aps.feedProductType /}
+        #{checkbox_text_field id:'salePrice',checkboxname: 'p.saleprice', name: 's.aps.salePrice', label: '优惠销售价格',
+        value: s.aps.salePrice /}
+        #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
+        #{text_field id:'partNumber', readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number',
+        value: s.listing.product.partNumber /}
+        #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number',value: s.aps.modelNumber /}
+        #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+
+        #{checkbox_product_weight readonly:true,sid:'sproductWeight',hid:'hproductWeight' , id:'productWeight',
+        unitname:'p.productWeightUnit',
+        checkboxname: 'p.productWeight',
+        name: 'p.proWeight',
+        label: '重量(产品)', value: s.listing.product.productWeight /}
+        #{checkbox_product_weight readonly:true,sid:'sweight',hid:'hweight', id:'weight',unitname:'p.weightUnit',
+        checkboxname: 'p.weight',
+        name: 'p.packWeight',
+        label: '重量(包材)', value: s.listing.product.weight /}
+
+      <label class="control-label" for="sellingCycle">生命周期</label>
+
+      <div class="controls">
+        <select name="s.sellingCycle">
+            #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+              <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+            #{/list}
+        </select>
+      </div>
+    </div>
   </div>
+
+  <div class="row">
+    <span class="span8" style="text-align:right;">
+    </span>
+
+    <div class="span4">
+        #{input_append /}
+    </div>
+  </div>
+
+  <div class="span10">
+      #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3, label: '标题', value: s.aps.title /}
+  </div>
+
   <div class="span10">
     <div id="hardwarePlatformHome" style="display: none">
         #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
@@ -165,10 +145,12 @@
       #{text_field id:'searchTerms4', name: 's.aps.searchTermss[3]', label: '', value: s.aps.searchTermss[3]/}
       #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: s.aps.searchTermss[4]/}
 
-      #{checkbox_textarea_field id:'productDesc', checkboxname:'p.productdesc',name: 's.aps.productDesc', rows: 10,
-      label: '产品详细描述',
-      value: s.aps.productDesc /}
+      #{checkbox_textarea_field id:'productDesc', checkboxname:'p.productdesc',name: 's.aps.productDesc', rows: 15,
+      label: '产品详细描述', value: s.aps.productDesc, class: 'span10' /}
+
   </div>
+
+
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}
 #{include 'Sellings/_invalid_characters.html'/}

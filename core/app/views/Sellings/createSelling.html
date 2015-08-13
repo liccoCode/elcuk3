@@ -1,0 +1,54 @@
+#{extends 'main_full.html'/}
+#{set title:'添加 Selling'/}
+#{set 'moreStyles'}
+    #{stylesheet 'market.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'editor/kindeditor-min.js'/}
+    #{script 'editor/lang/zh_CN.js'/}
+    #{script 'component/amazon.coffee'/}
+    #{script 'products/saleAmazon.coffee'/}
+    #{script 'sellings/createSelling.coffee'/}
+#{/set}
+
+<div class="row-fluid">
+  <form>
+    <div class="span4"></div>
+    <div class="span2" style="text-align:left;">
+      <input type="text" id="inputsku" name="merchantSKU" placeholder="SKU">
+    </div>
+    <div class="span1"></div>
+
+    <label class="radio inline" id="amzradio">
+      <input type="radio" name="createtype" value="amz" class="radio"><b>AMZ上架</b>
+    </label>
+    <label class="radio inline">
+      <input type="radio" name="createtype" value="add" class="radio"><b>添加Selling</b>
+    </label>
+
+    <div class="span10" style="text-align:right;">
+      <a href="@{Sellings.index()}" data-dismiss='modal' class="btn">返回</a>
+      <a href="#" id="submitSaleBtn" class="btn btn-primary">AMZ上架</a>
+    </div>
+  </form>
+</div>
+<hr>
+
+<div class="row-fluid" style="display: none;" id="amzDiv">
+
+</div>
+
+<div class="row-fluid">
+  <div class="span10" id="addDiv" style="display: none; text-align:center;">
+    <form action="@{Sellings.create()}" class="form-horizontal" id='new_selling'>
+      <h4 class="text-center">手动添加 Selling</h4>
+
+    #{text_field id: 'addSellingSku', name: 'sku', label: 'SKU', readonly: true/}
+    #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code" /}
+    #{text_field id: 'asin', name: 'asin', label: 'ASIN', placeholder: "Amazon Standard Identification Number" /}
+    #{select_field id:'market', name: 'market', items: models.market.M.values(), label: 'Market' /}
+    #{select_field id:'acc.id', name: 'acc.id', items: models.market.Account.openedSaleAcc(), label: 'Account' /}
+
+    </form>
+  </div>
+</div>

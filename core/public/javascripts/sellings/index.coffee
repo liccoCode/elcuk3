@@ -29,26 +29,34 @@ $ ->
     $("#create_modal").modal('show')
   )
 
-  $("#create_modal").on("click", "#submitSale", (e) ->
-    e.preventDefault();
-    if $("[name='createtype']:checked").length == 0
-      noty({text: '请选择处理类型', type: 'error'})
-      return false;
-    if $("#sku").val()
-      $.ajax($form.attr('action'), {data: $form.serialize(), type: 'POST'})
-      .done((r) ->
-        if r.flag
-          noty({
-            text: "成功创建 Selling #{r.message}, Amazon 与系统正在处理中, 请等待 5~10 分钟后再查看",
-            layout: 'top',
-            type: 'success',
-            timeout: false
-          })
+  $("button[name='amz-sync']").click ->
+    return false if !confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")
+    sid = $(@).data("sid")
+    btnGroup = $(@).parent()
+    btnGroup.mask('同步中...')
+    $.post('/sellings/syncAmazon', sid: $('input[name="s.sellingId"]').val(),
+      (r) ->
+        if r.flag is true
+          alert('同步成功, 请刷新页面查看最新数据')
         else
-          noty({text: r.message, type: 'error'})
-        LoadMask.unmask()
-      )
+          alert(r.message)
+        btnGroup.unmask()
+    )
+
+  $("#batchDown").click(->
+    if $("input[type='checkbox']:checked").length == 0
+      noty({text: "请选择需要下架的Selling", type: 'error', timeout: 2000})
     else
-      noty({text: '请选择SKU', type: 'error'})
-      return false;
+      return false if !confirm("需要同时将"+$("input[type='checkbox']:checked").length+"个selling系统内下架？")
+      sellingIds = []
+      checkboxList = $("input[type='checkbox']:checked")
+      for checkbox in checkboxList when checkbox.checked then sellingIds.push(checkbox.value)
+      $.post('/sellings/batchDownSelling', sellingIds: sellingIds,
+        (r) ->
+          if r.flag is true
+            alert('同步成功, 请刷新页面查看最新数据!')
+          else
+            alert(r.message)
+          btnGroup.unmask()
+      )
   )

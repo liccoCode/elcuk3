@@ -1,6 +1,7 @@
 $ ->
   ALERT_TEMPLATE = "<div class='alert alert-success fade in' style='text-align:center;'><button class='close' data-dismiss='alert'>×</button><div id='replace_it'></div></div>"
-  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label><input style='width:95%;height:12px;text-align:center;'></li>"
+  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label>
+<input style='width:80%;height:17px;text-align:center;'>&nbsp;&nbsp;<a class='btn btn-mini btn-danger'><i class='icon-trash' style='width:22%;'></i></a></li>"
 
   # 图片初始化方法
   imageInit = ->
@@ -233,3 +234,18 @@ $ ->
       weight.val((weight.val() * 35.2739619).toFixed(2))
     else
       weight.val($('#hweight').val())
+
+  KindEditor.ready((K) ->
+    window.editor = K.create('#productDesc', {
+      resizeType: 1
+      allowPreviewEmoticons: false
+      allowImageUpload: false
+      afterChange: -> this.sync()
+      items: [
+        'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+        'removeformat']
+
+    });
+  )
+
+

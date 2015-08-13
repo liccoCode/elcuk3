@@ -55,7 +55,7 @@
         &nbsp;
       </div>
       <div class="input-append input-prepend inline">
-        <a href="javascript:void(0);" id="createBtn" class="btn btn-success">创建Selling</a>
+        <a href="@{Sellings.createSelling()}" class="btn btn-success">创建Selling</a>
       </div>
 
       <input type="hidden" name="p.page" value="${p.page}">
@@ -66,7 +66,7 @@
 <div class="row-fluid" style="overflow-x:auto;">
   <table class="table table-bordered table-condensed" style="width:1700px;">
     <tr>
-      <th><label><input type="checkbox" class="checkall"></label></th>
+      <th><input type="checkbox" class="checkall"></th>
       <th>编号</th>
       <th width="380px;">SellingID</th>
       <th>SKU</th>
@@ -83,7 +83,11 @@
     </tr>
   #{list items:sellings , as:'s'}
     <tr>
-      <td><input type="checkbox"></td>
+      <td>
+          #{if !s.state.name().equals("DOWN")}
+            <input type="checkbox" value="${s.sellingId}">
+          #{/if}
+      </td>
       <td>${s_index}</td>
       <td>${s.sellingId}</td>
       <td>${s.listing?.product.sku}</td>
@@ -100,10 +104,13 @@
       <td></td>
       <td>#{time_tooltip time:s.showDownDate(), datetime:true /}</td>
       <td>
-        <a href="javascript:void(0);" class="btn btn-mini btn-danger" name='remove' data-url='@{Sellings.destroy(s.sellingId)}'>删除</a>
-        <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-mini btn-info">编辑</a>
+        <a href="javascript:void(0);" class="btn btn-mini btn-danger" rel="popover" title="删除" name='remove'
+           data-url='@{Sellings.destroy(s.sellingId)}'>Del</a>
+        <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-mini btn-info">Edit</a>
           #{if !s.state.name().equals("DOWN")}
-            <button class="btn btn-mini btn-warning">同步</button>
+            <button class="btn btn-mini btn-warning" name="amz-sync" content="从 Amazon 同步回来更新到数据库" placement='bottom'
+                    data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
+            </button>
           #{/if}
       </td>
     </tr>
@@ -117,27 +124,3 @@
 </div>
 <a href="javascript:void(0);" id="batchDown" data-uri="" class="btn btn-warning">批量系统内下架</a>
 
-
-<div id='create_modal' class="modal hide fade">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>创建Selling</h3>
-  </div>
-  <div class="modal-body" style="height:250px;">
-    <table style="width:100%" class="table table-bordered">
-      <tr>
-        <td style="vertical-align:middle;">
-          SKU <input type="text" id="inputsku" autocomplete="on" required>
-          <input type="radio" name="createtype"><b>AMZ上架</b>
-          <input type="radio" name="createtype"><b>添加Selling</b>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align:right;">
-          <a href="#" data-dismiss='modal' class="btn">取消</a>
-          <a href="#" id="submitSale" class="btn btn-primary">AMZ上架</a>
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>

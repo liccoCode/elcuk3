@@ -24,13 +24,16 @@ $ ->
 
   valid_length = (element) ->
     if element.getAttribute('id').indexOf('bulletPoint') > -1
-        2000
-      else if element.getAttribute('id').indexOf('searchTerms') > -1
-        50
-      else if element.getAttribute('id').indexOf('productDesc') > -1
+      2000
+    else if element.getAttribute('id').indexOf('searchTerms') > -1
+      if $("#market").val() == 'AMAZON_FR'
         2000
       else
-        1000
+        50
+    else if element.getAttribute('id').indexOf('productDesc') > -1
+      2000
+    else
+      1000
 
   # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
   $('#saleAmazonForm').on('keyup blur', "[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss']", (e) ->
@@ -46,6 +49,8 @@ $ ->
     false
   ).on('change', "#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc", (e) ->
     replaceInvalidCharacters(@, e)
+  ).on('change', ".ke-content", (e) ->
+    alert 1
   )
 
   $(document).ready ->
