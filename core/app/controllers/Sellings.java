@@ -167,7 +167,7 @@ public class Sellings extends Controller {
         Selling s = Selling.findById(sid);
         List<Error> errors = new ArrayList<Error>();
         try {
-            s.uploadFeedAmazonImg(imgs, false);
+            s.uploadFeedAmazonImg(imgs, false,Secure.Security.connected().toLowerCase());
         } catch(Exception e) {
             errors.add(new Error("", Webs.E(e), new String[]{}));
         }
