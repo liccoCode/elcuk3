@@ -368,8 +368,6 @@ public class Selling extends GenericModel {
                 M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
                         (args.length >= 2 ? args[1] : "")),
                 paramAndDocTuple._1);
-
-
         if(StringUtils.isBlank(html)) // 这个最先检查
             throw new FastRuntimeException(
                     "Selling update is failed! Return Content is Empty!");
@@ -390,7 +388,7 @@ public class Selling extends GenericModel {
                     .put("qty.0", "27") // 一页打 44 个
                     .put("fnSku.0", this.fnSku).build();
             for(Cookie coo : this.account.cookieStore().getCookies()) {
-                Logger.info(" ===========" + coo.getName() + "=" + coo.getValue() + "============");
+                Logger.info(" ============" + coo.getName() + "=" + coo.getValue() + "============");
             }
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(new BasicNameValuePair("model", J.json(params))));
