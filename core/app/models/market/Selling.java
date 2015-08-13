@@ -441,7 +441,7 @@ public class Selling extends GenericModel {
     private F.T2<org.w3c.dom.Document, org.w3c.dom.Element> buildHeader(org.w3c.dom.Document doc) {
         org.w3c.dom.Element envelope = doc.createElement("AmazonEnvelope");
         envelope.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        envelope.setAttribute("xsi:noNamespaceSchemaLocation", "amznenvelope.xsd");
+        envelope.setAttribute("xsi:noNamespaceSchemaLocation", "amzn-envelope.xsd");
         doc.appendChild(envelope);
         org.w3c.dom.Element header = doc.createElement("Header");
         envelope.appendChild(header);
@@ -516,7 +516,7 @@ public class Selling extends GenericModel {
     /**
      * 用Feed方式更新产品图片
      */
-    public void uploadFeedAmazonImg(String imageName, boolean waterMark) {
+    public void uploadFeedAmazonImg(String imageName, boolean waterMark,String userName) {
         //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         String dealImageNames = imageName;
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
@@ -543,12 +543,12 @@ public class Selling extends GenericModel {
             doc = buildNode(doc, envelope, i, fileParamName, location, "Update");
         }
 
-        for(int i = images.length; i < 9; i++) {
+/*        for(int i = images.length; i < 9; i++) {
             String fileParamName;
             if(i == 0) fileParamName = "Main";
             else fileParamName = "PT" + i;
             doc = buildNode(doc, envelope, i, fileParamName, "", "Delete");
-        }
+        }*/
         String content = "";
         try {
             content = getStringFromDoc(doc);
@@ -558,6 +558,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
+        params.add(new BasicNameValuePair("user_name", userName));
         HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);
         this.save();
     }
