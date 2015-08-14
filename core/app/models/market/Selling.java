@@ -485,7 +485,7 @@ public class Selling extends GenericModel {
         org.w3c.dom.Element ImageLocation = doc.createElement("ImageLocation");
         product.appendChild(ImageLocation);
 
-        Text tsku = doc.createTextNode(this.listing.product.sku);
+        Text tsku = doc.createTextNode(this.merchantSKU);
         sku.appendChild(tsku);
         Text tname = doc.createTextNode(fileParamName);
         ImageType.appendChild(tname);
