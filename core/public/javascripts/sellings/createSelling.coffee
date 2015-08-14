@@ -24,17 +24,13 @@ $ ->
               resizeType: 1
               allowPreviewEmoticons: false
               allowImageUpload: false
-              afterChange: -> this.sync(); this.count();
               items: [
                 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
                 'removeformat']
+              afterChange: -> this.sync(); $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
             })
           )
-          $.getScript('../public/javascripts/component/amazon.coffee/')
-          $("#saleAmazonForm").on('change', ".ke-content", (e) ->
-            alert 1
-          )
-
+          $.getScript('../public/javascripts/component/amazon.coffee')
         )
         $("#addDiv").fadeOut()
         $("#submitSaleBtn").text("AMZ上架")
