@@ -251,7 +251,7 @@ public class Sellings extends Controller {
     }
 
     /**
-     * 下载 Selling 的 FBA_LABEL
+     * 下载 Selling 的 FBA_
      *
      * @param id sellingId
      */
