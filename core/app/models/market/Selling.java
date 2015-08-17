@@ -533,7 +533,7 @@ public class Selling extends GenericModel {
             String fileParamName;
             if(i == 0) fileParamName = "Main";
             else fileParamName = "PT" + i;
-            String location = Attach.attachImage(this.sellingId.split(",")[0], images[i]);
+            String location = Attach.attachImageSend(this.sellingId.split(",")[0], images[i]);
             if(StringUtils.isBlank(location))
                 throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
             doc = buildNode(doc, envelope, i, fileParamName, location, "Update");
