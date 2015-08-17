@@ -539,12 +539,12 @@ public class Selling extends GenericModel {
             doc = buildNode(doc, envelope, i, fileParamName, location, "Update");
         }
 
-/*        for(int i = images.length; i < 9; i++) {
+        for(int i = images.length; i < 9; i++) {
             String fileParamName;
             if(i == 0) fileParamName = "Main";
             else fileParamName = "PT" + i;
             doc = buildNode(doc, envelope, i, fileParamName, "", "Delete");
-        }*/
+        }
         String content = "";
         try {
             content = getStringFromDoc(doc);
