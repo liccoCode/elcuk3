@@ -450,7 +450,7 @@ public class Selling extends GenericModel {
 
         Text tversion = doc.createTextNode("1.01");
         version.appendChild(tversion);
-        Text tidentifier = doc.createTextNode("M_SELLER_354577");
+        Text tidentifier = doc.createTextNode("M_EASYACCDE_11449864");
         identifier.appendChild(tidentifier);
         Text tmessagetype = doc.createTextNode("ProductImage");
         messagetype.appendChild(tmessagetype);
