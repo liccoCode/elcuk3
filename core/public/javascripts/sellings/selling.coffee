@@ -240,12 +240,14 @@ $ ->
       resizeType: 1
       allowPreviewEmoticons: false
       allowImageUpload: false
-      afterChange: -> this.sync()
+      newlineTag: 'br'
+      afterChange: -> this.sync(); $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
       items: [
-        'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+        'source','|','fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
         'removeformat']
 
     });
   )
+
 
 
