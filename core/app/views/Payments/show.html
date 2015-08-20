@@ -1,9 +1,9 @@
 #{extends 'main_full.html'/}
 #{set title:"${payment.paymentNumber?:''}" /}
 #{set 'moreScripts'}
-    #{script 'jquery.filedrop.js'/}
-    #{script 'component/dropUpload.coffee'/}
-    #{script 'payments/show.coffee'/}
+    #{script_cdn name: 'jquery.filedrop.js'/}
+    #{script_cdn name: 'component/dropUpload.coffee'/}
+    #{script_cdn name: 'payments/show.coffee'/}
 #{/set}
 
 #{flash_alert /}

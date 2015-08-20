@@ -1,10 +1,10 @@
 #{extends 'main_full.html'/}
 #{set title:'Listing'/}
 #{set 'moreStyles'}
-    #{stylesheet 'market.css' /}
+    #{stylesheet_cdn name:'market.css' /}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'listings/listings.coffee'/}
+    ##{script_cdn name: 'listings/listings.coffee'/}
 #{/set}
 
 #{flash_alert /}

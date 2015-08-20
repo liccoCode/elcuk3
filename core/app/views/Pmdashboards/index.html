@@ -1,9 +1,9 @@
 #{extends 'main_full.html'/}
 #{set title:'Home' /}
 #{set 'moreScripts'}
-    #{script 'highstock.js'/}
-    #{script 'Pmdashboards/pmdashboards.coffee'/}
-    #{script 'Pmdashboards/reviewrecords.coffee'/}
+    #{script_cdn name: 'highstock.js'/}
+    #{script_cdn name: 'Pmdashboards/pmdashboards.coffee'/}
+    #{script_cdn name: 'Pmdashboards/reviewrecords.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}

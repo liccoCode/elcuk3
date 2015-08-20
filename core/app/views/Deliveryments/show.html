@@ -1,11 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:"采购单 #" + dmt.id /}
 #{set 'moreScripts'}
-    #{script 'jquery.filedrop.js'/}
-    #{script 'component/dropUpload.coffee'/}
-    #{script 'timeline/timeline_js/timeline-api.js'/}
-    #{script 'analyzes/timeline.coffee'/}
-    #{script 'deliveryments/show.coffee'/}
+    #{script_cdn name: 'jquery.filedrop.js'/}
+    #{script_cdn name: 'component/dropUpload.coffee'/}
+    #{script_cdn name: 'timeline/timeline_js/timeline-api.js'/}
+    #{script_cdn name: 'analyzes/timeline.coffee'/}
+    #{script_cdn name: 'deliveryments/show.coffee'/}
 #{/set}
 
 #{errorMsgs /}

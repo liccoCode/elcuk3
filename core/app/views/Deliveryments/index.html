@@ -1,11 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:"采购单列表 (${deliveryments.size()})" /}
 #{set 'moreStyles'}
-    #{stylesheet 'selectize.default.css'/}
+    #{stylesheet_cdn name:'selectize.default.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'deliveryments/index.coffee'/}
-    #{script 'selectize.min.js'/}
+    #{script_cdn name: 'deliveryments/index.coffee'/}
+    #{script_cdn name: 'selectize.min.js'/}
 #{/set}
 
 
