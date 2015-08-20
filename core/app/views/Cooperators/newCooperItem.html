@@ -1,8 +1,8 @@
 #{extends 'main.html'/}
 #{set title:"创建新的 CooperItem" /}
 #{set 'moreScripts'}
-    #{script 'cooperators/newCooperItem.coffee'/}
-    #{script 'jquery.validate.min.js'/}
+    #{script_cdn name: 'cooperators/newCooperItem.coffee'/}
+    #{script_cdn name: 'jquery.validate.min.js'/}
 #{/set}
 <style type="text/css">
     span.add-on select{

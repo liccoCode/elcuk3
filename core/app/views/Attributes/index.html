@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"产品附加属性 (${atts.size()})"/}
 #{set 'moreScripts'}
-    #{script 'Attributes/index.coffee'/}
+    #{script_cdn name: 'Attributes/index.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}

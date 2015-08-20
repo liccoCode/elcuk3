@@ -1,11 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
-    #{script 'highstock.js'/}
-    #{script 'jquery.filedrop.js' /}
-    #{script 'component/dropUpload.coffee'/}
-    #{script 'products/product_detail.coffee'/}
-    #{script 'products/skulinechart.coffee'/}
+    #{script_cdn name: 'highstock.js'/}
+    #{script_cdn name: 'jquery.filedrop.js' /}
+    #{script_cdn name: 'component/dropUpload.coffee'/}
+    #{script_cdn name: 'products/product_detail.coffee'/}
+    #{script_cdn name: 'products/skulinechart.coffee'/}
 #{/set}
 
 <div class="span12 offset3">
