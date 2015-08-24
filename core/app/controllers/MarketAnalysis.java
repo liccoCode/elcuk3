@@ -26,4 +26,11 @@ public class MarketAnalysis extends Controller {
     public static void tags() {
         render();
     }
+
+    /**
+     * 卖家分析
+     */
+    public static void reports() {
+        render();
+    }
 }
