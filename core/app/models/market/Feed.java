@@ -1,11 +1,15 @@
 package models.market;
 
+import helper.DBUtils;
 import models.User;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -83,12 +87,20 @@ public class Feed extends Model {
 
     /**
      * 取10分钟内有多少个feed
+     *
      * @param id
      * @return
      */
     public static int feedcount(Long id) {
-        return Feed.find("SUBSTRING_INDEX(fid,'|','-1') LIKE ? and createdAt>=date_sub(now(), interval 10 minute) ",
-                id).fetch().size();
+        SqlSelect countFeed = new SqlSelect().select("count(id) AS count").from("Feed")
+                .where("SUBSTRING_INDEX(fid,'|','-1') LIKE ? AND createdAt>=DATE_SUB(now(), INTERVAL 10 MINUTE)")
+                .param(id);
+        Map<String, Object> row = DBUtils.row(countFeed.toString(), countFeed.getParams().toArray());
+        if(row == null) {
+            return 0;
+        } else {
+            return NumberUtils.toInt(row.get("count").toString());
+        }
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {

@@ -2,7 +2,9 @@ package models.market;
 
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.*;
+import helper.Currency;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
@@ -18,6 +20,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.w3c.dom.Text;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -29,8 +32,13 @@ import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerFactory;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jsoup.Jsoup;
@@ -313,12 +321,26 @@ public class Selling extends GenericModel {
         if(StringUtils.isNotBlank(fnsku)) {
             this.fnSku = fnsku;
         }
+        //4.通过AMAZON,API形式同步数据回数据库
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("acc_id", this.account.id.toString()));
+        params.add(new BasicNameValuePair("asin", this.asin));
+        params.add(new BasicNameValuePair("market_id", this.market.name()));
+        params.add(new BasicNameValuePair("selling_id", this.sellingId));
+        params.add(new BasicNameValuePair("user_name", Login.current().username));
+        HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
+
         this.save();
     }
 
 
     public void syncAndUpdateAmazon(SellingAmzPost p) {
-        String html = "";
+        try {
+            this.uploadFeedToAmazonForProduct(p);
+        } catch(Exception e) {
+            throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
+        }
+/*        String html = "";
         Document doc = null;
         synchronized(this.account.cookieStore()) {
             // 1. 切换 Selling 所在区域
@@ -350,27 +372,22 @@ public class Selling extends GenericModel {
             this.account.changeRegion(this.account.type);
         }
 
-        F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps
-                .generateDeployAmazonProps(doc, this, p);
-        String[] args = StringUtils
-                .split(paramAndDocTuple._2.select("form[name=productForm]").first()
-                        .attr("action"), ";");
-        /**
+        F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(doc, this, p);
+        String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"),
+                ";");
+        *//**
          * 发送信息
-         */
-        html = HTTP.post(this.account.cookieStore(),
-                M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
-                        (args.length >= 2 ? args[1] : "")),
-                paramAndDocTuple._1);
-
-
+         *//*
+        html = HTTP.post(this.account.cookieStore(), M.listingPostPage(this.account.type*//*更新的链接需要账号所在地的 URL*//*,
+                (args.length >= 2 ? args[1] : "")), paramAndDocTuple._1);
         if(StringUtils.isBlank(html)) // 这个最先检查
-            throw new FastRuntimeException(
-                    "Selling update is failed! Return Content is Empty!");
+            throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
         Document rdoc = Jsoup.parse(html);
         Elements error = rdoc.select(".messageboxerror li");
         if(error.size() > 0)
-            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());
+            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());*/
+
+
     }
 
 
@@ -378,15 +395,13 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
         synchronized(this.account.cookieStore()) {
-            // model: {"labelType":"ItemLabel_A4_27","mSku.0":"73SNZ2-BHSPU,700686512919","qty.0":"501","fnSku.0":"X0007XNAFZ"}
-            // labelType: ItemLabel_A4_27
             Map<String, String> params = GTs.MapBuilder
                     .map("labelType", "ItemLabel_A4_27")
                     .put("mSku.0", this.merchantSKU)
                     .put("qty.0", "27") // 一页打 44 个
                     .put("fnSku.0", this.fnSku).build();
             for(Cookie coo : this.account.cookieStore().getCookies()) {
-                Logger.info(" ===========" + coo.getName() + "=" + coo.getValue() + "============");
+                Logger.info(" ============" + coo.getName() + "=" + coo.getValue() + "============");
             }
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(new BasicNameValuePair("model", J.json(params))));
@@ -400,7 +415,7 @@ public class Selling extends GenericModel {
         Validate.notEmpty(this.sellingId);
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("account.id", this.account.id.toString()));// 使用哪一个账号
-        params.add(new BasicNameValuePair("marketId", this.market.amid().name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("marketId", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed.id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling.id", this.sellingId)); // 作用与哪一个 Selling
         return params;
@@ -419,6 +434,154 @@ public class Selling extends GenericModel {
         HTTP.post("http://rock.easya.cc:4567/submit_feed", params);
         return feed;
     }
+
+
+    private org.w3c.dom.Document buildDoc() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch(Exception pce) {
+        }
+        org.w3c.dom.Document doc = builder.newDocument();
+        return doc;
+    }
+
+    private F.T2<org.w3c.dom.Document, org.w3c.dom.Element> buildHeader(org.w3c.dom.Document doc, String type) {
+        org.w3c.dom.Element envelope = doc.createElement("AmazonEnvelope");
+        envelope.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        envelope.setAttribute("xsi:noNamespaceSchemaLocation", "amzn-envelope.xsd");
+        doc.appendChild(envelope);
+        org.w3c.dom.Element header = doc.createElement("Header");
+        envelope.appendChild(header);
+        org.w3c.dom.Element version = doc.createElement("DocumentVersion");
+        header.appendChild(version);
+        org.w3c.dom.Element identifier = doc.createElement("MerchantIdentifier");
+        header.appendChild(identifier);
+        org.w3c.dom.Element messagetype = doc.createElement("MessageType");
+        envelope.appendChild(messagetype);
+
+        Text tversion = doc.createTextNode("1.01");
+        version.appendChild(tversion);
+        Text tidentifier = doc.createTextNode("M_EASYACCDE_11449864");
+        identifier.appendChild(tidentifier);
+
+        if(type.equals("Img")) {
+            Text tmessagetype = doc.createTextNode("ProductImage");
+            messagetype.appendChild(tmessagetype);
+        } else if(type.equals("Product")) {
+            Text tmessagetype = doc.createTextNode("Product");
+            messagetype.appendChild(tmessagetype);
+        } else if(type.equals("Price")) {
+            Text tmessagetype = doc.createTextNode("Price");
+            messagetype.appendChild(tmessagetype);
+        }
+
+        return new F.T2<org.w3c.dom.Document, org.w3c.dom.Element>(doc, envelope);
+    }
+
+    private org.w3c.dom.Document buildNode(org.w3c.dom.Document doc,
+                                           org.w3c.dom.Element envelope,
+                                           int i, String fileParamName, String location, String action) {
+        org.w3c.dom.Element message = doc.createElement("Message");
+        envelope.appendChild(message);
+
+        org.w3c.dom.Element messageid = doc.createElement("MessageID");
+        message.appendChild(messageid);
+        org.w3c.dom.Element operationtype = doc.createElement("OperationType");
+        message.appendChild(operationtype);
+
+        Text tmessageid = doc.createTextNode(String.valueOf(i + 1));
+        messageid.appendChild(tmessageid);
+        Text toperationtype = doc.createTextNode(action);
+        operationtype.appendChild(toperationtype);
+
+        org.w3c.dom.Element product = doc.createElement("ProductImage");
+        message.appendChild(product);
+        //建立SKU元素
+        org.w3c.dom.Element sku = doc.createElement("SKU");
+        product.appendChild(sku);
+        //建立ImageType元素
+        org.w3c.dom.Element ImageType = doc.createElement("ImageType");
+        product.appendChild(ImageType);
+        //建立ImageLocation元素
+        org.w3c.dom.Element ImageLocation = doc.createElement("ImageLocation");
+        product.appendChild(ImageLocation);
+
+        Text tsku = doc.createTextNode(this.merchantSKU);
+        sku.appendChild(tsku);
+        Text tname = doc.createTextNode(fileParamName);
+        ImageType.appendChild(tname);
+        Text tlocation = doc.createTextNode(location);
+        ImageLocation.appendChild(tlocation);
+        return doc;
+    }
+
+
+    public String getStringFromDoc(org.w3c.dom.Document doc) throws Exception {
+
+        javax.xml.transform.dom.DOMSource domSource = new javax.xml.transform.dom.DOMSource(doc);
+        StringWriter writer = new StringWriter();
+        javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        javax.xml.transform.Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(javax.xml.transform.OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "yes");
+        transformer.transform(domSource, result);
+        writer.flush();
+        return writer.toString();
+    }
+
+    /**
+     * 用Feed方式更新产品图片
+     */
+    public void uploadFeedAmazonImg(String imageName, boolean waterMark, String userName) {
+        //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        String dealImageNames = imageName;
+        if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
+        if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
+        String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
+        if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
+            images = Arrays.copyOfRange(images, 0, 9);
+        this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
+
+
+        org.w3c.dom.Document doc = buildDoc();
+        F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Img");
+        doc = element._1;
+        org.w3c.dom.Element envelope = element._2;
+
+        Map<String, F.T2<String, BufferedInputStream>> uploadImages = new HashMap<String, F.T2<String, BufferedInputStream>>();
+        for(int i = 0; i < images.length; i++) {
+            String fileParamName;
+            if(i == 0) fileParamName = "Main";
+            else fileParamName = "PT" + i;
+            String location = Attach.attachImageSend(this.sellingId.split(",")[0], images[i]);
+            if(StringUtils.isBlank(location))
+                throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
+            doc = buildNode(doc, envelope, i, fileParamName, location, "Update");
+        }
+
+        for(int i = images.length; i < 9; i++) {
+            String fileParamName;
+            if(i == 0) fileParamName = "Main";
+            else fileParamName = "PT" + i;
+            doc = buildNode(doc, envelope, i, fileParamName, "", "Delete");
+        }
+        String content = "";
+        try {
+            content = getStringFromDoc(doc);
+        } catch(Exception e) {
+        }
+
+        Feed feed = Feed.updateSellingFeed(content, this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
+        params.add(new BasicNameValuePair("user_name", userName));
+        HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);
+        this.save();
+    }
+
 
     /**
      * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值
@@ -589,10 +752,10 @@ public class Selling extends GenericModel {
 
     public String showFeedStatus() {
         Feed feed = this.recentlyFeed();
-        if(feed!=null){
+        if(feed != null) {
             String result = feed.result;
-            if(StringUtils.isNotBlank(result)){
-               int index = result.indexOf("");
+            if(StringUtils.isNotBlank(result)) {
+                int index = result.indexOf("");
             }
 
         }
@@ -693,7 +856,7 @@ public class Selling extends GenericModel {
      * @param market       String
      * @param action       String
      * @return String 生成的模板数据
-     *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
+     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
     public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
                                                   String action) {
@@ -904,4 +1067,159 @@ public class Selling extends GenericModel {
             this.account.changeRegion(this.market);
         }
     }
+
+    public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
+        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
+                p.productdesc) {
+            org.w3c.dom.Document doc = buildDoc();
+            F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Product");
+            doc = element._1;
+            org.w3c.dom.Element envelope = element._2;
+            doc = buildProductNode(doc, envelope, p, "Update");
+            String productContent = "";
+            productContent = getStringFromDoc(doc);
+            Feed feed = Feed.updateSellingFeed(productContent, this);
+            List<NameValuePair> productParams = this.submitJobParams(feed);
+            productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
+            productParams.add(new BasicNameValuePair("user_name", Login.current().username));
+            HTTP.post("http://rock.easya.cc:4567/amazon_submit_product_feed", productParams);
+        }
+
+        if(p.standerprice || p.saleprice) {
+            org.w3c.dom.Document priceDoc = buildDoc();
+            F.T2<org.w3c.dom.Document, org.w3c.dom.Element> price_element = buildHeader(priceDoc, "Price");
+            priceDoc = price_element._1;
+            org.w3c.dom.Element priceEnvelope = price_element._2;
+            priceDoc = this.buildPriceNode(priceDoc, priceEnvelope, p);
+            String priceContent = getStringFromDoc(priceDoc);
+            Feed pricefeed = Feed.updateSellingFeed(priceContent, this);
+            List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
+            priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
+            priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
+            HTTP.post("http://rock.easya.cc:4567/amazon_submit_price_feed", priceParams);
+        }
+    }
+
+
+    private org.w3c.dom.Document buildProductNode(org.w3c.dom.Document doc,
+                                                  org.w3c.dom.Element envelope,
+                                                  SellingAmzPost p, String action) {
+        org.w3c.dom.Element purgeAndReplace = doc.createElement("PurgeAndReplace");
+        envelope.appendChild(purgeAndReplace);
+        Text purgeValue = doc.createTextNode("false");
+        purgeAndReplace.appendChild(purgeValue);
+
+        org.w3c.dom.Element message = doc.createElement("Message");
+        envelope.appendChild(message);
+
+        org.w3c.dom.Element messageid = doc.createElement("MessageID");
+        message.appendChild(messageid);
+        org.w3c.dom.Element operationtype = doc.createElement("OperationType");
+        message.appendChild(operationtype);
+
+        Text tmessageid = doc.createTextNode(String.valueOf(1));
+        messageid.appendChild(tmessageid);
+        Text toperationtype = doc.createTextNode(action);
+        operationtype.appendChild(toperationtype);
+
+        org.w3c.dom.Element product = doc.createElement("Product");
+        message.appendChild(product);
+        //建立SKU元素
+        this.buildElement(doc, product, "SKU", this.merchantSKU, "", "");
+        //建立standardProductID元素
+        org.w3c.dom.Element standardProductID = doc.createElement("StandardProductID");
+        product.appendChild(standardProductID);
+        this.buildElement(doc, standardProductID, "Type", "ASIN", "", "");
+        this.buildElement(doc, standardProductID, "Value", this.asin, "", "");
+        //建立DescriptionData
+        org.w3c.dom.Element descriptionData = doc.createElement("DescriptionData");
+        product.appendChild(descriptionData);
+        //更新title
+        if(p.title) {
+            buildElement(doc, descriptionData, "Title", this.aps.title, "", "");
+        }
+        //更新productdesc
+        if(p.productdesc) {
+            buildElement(doc, descriptionData, "Description", this.aps.productDesc, "", "");
+        }
+        //更新BulletPoint 1~5
+        if(p.keyfeturess) {
+            for(String text : this.aps.keyFeturess) {
+                if(StringUtils.isNotBlank(text)) {
+                    buildElement(doc, descriptionData, "BulletPoint", text, "", "");
+                }
+            }
+        }
+        if(p.productvolume || p.productWeight) {
+            org.w3c.dom.Element itemDimensions = doc.createElement("ItemDimensions");
+            descriptionData.appendChild(itemDimensions);
+            if(p.productvolume) {
+                buildElement(doc, itemDimensions, "Length", p.productLengths.toString(), "unitOfMeasure",
+                        p.volumeunit);
+                buildElement(doc, itemDimensions, "Width", p.productWidth.toString(), "unitOfMeasure",
+                        p.volumeunit);
+                buildElement(doc, itemDimensions, "Height", p.productHeigh.toString(), "unitOfMeasure",
+                        p.volumeunit);
+            }
+/*            if(p.productWeight) {
+                buildElement(doc, itemDimensions, "Weight", p.proWeight.toString(), "unitOfMeasure",
+                        p.productWeightUnit);
+            }*/
+        }
+/*        if(p.weight) {
+            buildElement(doc, descriptionData, "PackageWeight", this.listing.product.weight.toString(), "unitOfMeasure",
+                    p.weightUnit);
+        }*/
+        if(p.searchtermss) {
+            for(String word : this.aps.searchTermss) {
+                if(StringUtils.isNotBlank(word)) {
+                    buildElement(doc, descriptionData, "SearchTerms", word, "", "");
+                }
+            }
+        }
+        if(p.rbns) {
+            if(this.aps.rbns != null && this.aps.rbns.size() >= 1) {
+                for(int i = 0; i < this.aps.rbns.size(); i++) {
+                    buildElement(doc, descriptionData, "ItemType", this.aps.rbns.get(i), "", "");
+                }
+            }
+        }
+        return doc;
+    }
+
+    private org.w3c.dom.Document buildPriceNode(org.w3c.dom.Document doc, org.w3c.dom.Element envelope,
+                                                SellingAmzPost p) {
+        org.w3c.dom.Element message = doc.createElement("Message");
+        envelope.appendChild(message);
+        this.buildElement(doc, message, "MessageID", "1", "", "");
+        org.w3c.dom.Element price = doc.createElement("Price");
+        message.appendChild(price);
+        this.buildElement(doc, price, "SKU", this.merchantSKU, "", "");
+        this.buildElement(doc, price, "StandardPrice", String.valueOf(this.aps.standerPrice), "currency", Currency.M
+                (this.market).toString());
+        if(p.saleprice) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            org.w3c.dom.Element sale = doc.createElement("Sale");
+            price.appendChild(sale);
+            DateTime start = this.market.withTimeZone(formatter.format(this.aps.startDate));
+            DateTime end = this.market.withTimeZone(formatter.format(this.aps.endDate));
+            this.buildElement(doc, sale, "StartDate", start.toString(), "", "");
+            this.buildElement(doc, sale, "EndDate", end.toString(), "", "");
+            this.buildElement(doc, sale, "SalePrice", String.valueOf(this.aps.standerPrice), "currency", Currency.M
+                    (this.market).toString());
+        }
+        return doc;
+    }
+
+    private void buildElement(org.w3c.dom.Document doc, org.w3c.dom.Element parentDoc, String elementName,
+                              String value, String attributeName, String attributeValue) {
+        org.w3c.dom.Element obj = doc.createElement(elementName);
+        parentDoc.appendChild(obj);
+        Text textNode = doc.createTextNode(value);
+        obj.appendChild(textNode);
+        if(StringUtils.isNotBlank(attributeName)) {
+            obj.setAttribute(attributeName, attributeValue);
+        }
+    }
+
 }

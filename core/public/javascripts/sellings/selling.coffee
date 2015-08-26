@@ -51,7 +51,7 @@ $ ->
     $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
     .done((r) ->
         msg = if r.flag is true
-          "#{r.message} AMAZON的Selling局部更新成功"
+          "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
         else
           r.message
         alert msg
@@ -198,7 +198,7 @@ $ ->
       imgs: $('[name=s\\.aps\\.imageName]').val()
     $.post('/sellings/imageUpload', params, (r) ->
       if r.flag is true
-        alert "AMAZON图片更新成功!"
+        alert "AMAZON图片正在更新,请查看更新日志!"
       else
         alert(r.message)
       imgDiv.unmask()

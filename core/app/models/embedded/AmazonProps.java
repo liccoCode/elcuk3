@@ -377,7 +377,7 @@ public class AmazonProps implements Serializable {
         List<String> searchTerms = new ArrayList<String>();
         List<String> rbns = new ArrayList<String>();
 
-        this.upc = doc.select("#external_id_display").text().trim();
+//        this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
         this.condition_ = doc.select("#offering_condition_display").text().trim()
                 .toUpperCase(); // 默认为 NEW
@@ -388,19 +388,19 @@ public class AmazonProps implements Serializable {
             String val = input.val();
             if("item_name".equals(name)) this.title = val;
             else if("manufacturer".equals(name)) this.manufacturer = val;
-            else if("brand_name".equals(name)) this.brand = val;
-            else if("part_number".equals(name)) this.manufacturerPartNumber = val;
-            else if("model".equals(name)) this.modelNumber = val;
+//            else if("brand_name".equals(name)) this.brand = val;
+//            else if("part_number".equals(name)) this.manufacturerPartNumber = val;
+//            else if("model".equals(name)) this.modelNumber = val;
             else if("Offer_Inventory_Quantity".equals(name))
                 this.quantity = NumberUtils.toInt(val, 0);
             else if("offering_start_date".equals(name))
                 this.launchDate = Dates.listingFromFmt(sell.market, val);
-            else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
+/*          else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
             else if("bullet_point[0]".equals(name)) bulletPoints.add(val);
             else if("bullet_point[1]".equals(name)) bulletPoints.add(val);
             else if("bullet_point[2]".equals(name)) bulletPoints.add(val);
             else if("bullet_point[3]".equals(name)) bulletPoints.add(val);
-            else if("bullet_point[4]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[4]".equals(name)) bulletPoints.add(val);*/
             else if("generic_keywords[0]".equals(name)) searchTerms.add(val);
             else if("generic_keywords[1]".equals(name)) searchTerms.add(val);
             else if("generic_keywords[2]".equals(name)) searchTerms.add(val);
@@ -408,18 +408,16 @@ public class AmazonProps implements Serializable {
             else if("generic_keywords[4]".equals(name)) searchTerms.add(val);
             else if("recommended_browse_nodes[0]".equals(name)) rbns.add(val);
             else if("recommended_browse_nodes[1]".equals(name)) rbns.add(val);
-            else if("our_price".equals(name))
-                this.standerPrice = Webs
-                        .amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
-            else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
-                this.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
+//          else if("our_price".equals(name))
+//             this.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
+//          else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
+//             this.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
             else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
                 this.startDate = Dates.listingFromFmt(sell.market, val);
             else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
                 this.endDate = Dates.listingFromFmt(sell.market, val);
-//            else ignore
         }
-        this.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
+//        this.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
         this.searchTerms = StringUtils.join(searchTerms, Webs.SPLIT);
         this.RBN = StringUtils.join(rbns, ",");
         this.arryParamSetUP(T.STR_TO_ARRAY); // 对 hibernate 3.6 的 Lob bug 兼容
@@ -549,15 +547,12 @@ public class AmazonProps implements Serializable {
     /**
      * 根据 Amazon Post Listing 的页面解析出参数, 并生成根据 aps 生成好的参数集合, 同时将解析的 document 原始文档也返回
      *
-     * @param html
+     * @param doc
      * @param sell
      * @return
      */
-    public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(Document doc,
-                                                                               Selling sell,
+    public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(Document doc, Selling sell,
                                                                                SellingAmzPost p) {
-
-
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
         if(inputs.size() == 0) {
@@ -572,8 +567,7 @@ public class AmazonProps implements Serializable {
             String name = el.attr("name").toLowerCase().trim();
 
             if("our_price".equals(name) && p.standerprice && this.standerPrice != null && this.standerPrice > 0)
-                params.add(new BasicNameValuePair(name,
-                        Webs.priceLocalNumberFormat(our_price._1, this.standerPrice)));
+                params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(our_price._1, this.standerPrice)));
             else if(StringUtils.startsWith(name, "generic_keywords") && p.searchtermss &&
                     StringUtils.isNotBlank(this.searchTerms))
                 this.searchTermsCheck(params);

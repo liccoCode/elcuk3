@@ -4,10 +4,17 @@ import helper.Constant;
 import models.ReportRecord;
 import models.view.Ret;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import java.io.File;
 import java.util.List;
+
+import jobs.analyze.SellingProfitJob;
+
+import models.view.post.ProfitPost;
+import jobs.analyze.SellingProfitSearch;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
@@ -29,5 +36,25 @@ public class ReportDeal extends Controller {
             record.delete();
         }
         renderJSON(new Ret(true, "清理销售分析文件成功!"));
+    }
+
+
+    public static void profitJob() {
+        ProfitPost p = new ProfitPost();
+        p.sku = request.params.get("sku");
+        p.pmarket = request.params.get("pmarket");
+        p.category = request.params.get("category");
+        String begin = request.params.get("begin");
+        String end = request.params.get("end");
+        p.begin = DateTime.parse(begin, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
+        p.end = DateTime.parse(end, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
+
+        System.out.println("sku:"+p.sku+" market:"+p.pmarket+" category:"+p.category+" begin:"+p.begin+" end:"+p.end);
+
+        //利润查询
+        new SellingProfitSearch(p).now();
+        //生成excel
+        new SellingProfitJob(p).now();
+        renderJSON(new Ret(true, "调用利润job成功!"));
     }
 }

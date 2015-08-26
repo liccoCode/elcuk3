@@ -32,6 +32,8 @@
     </div>
   </div>
 
+
+
 #{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
 
   <div class="span12">
@@ -87,14 +89,10 @@
         #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
 
         #{checkbox_product_weight readonly:true,sid:'sproductWeight',hid:'hproductWeight' , id:'productWeight',
-        unitname:'p.productWeightUnit',
-        checkboxname: 'p.productWeight',
-        name: 'p.proWeight',
+        ck:false, unitname:'p.productWeightUnit', checkboxname: 'p.productWeight',name: 'p.proWeight',
         label: '重量(产品)', value: s.listing.product.productWeight /}
         #{checkbox_product_weight readonly:true,sid:'sweight',hid:'hweight', id:'weight',unitname:'p.weightUnit',
-        checkboxname: 'p.weight',
-        name: 'p.packWeight',
-        label: '重量(包材)', value: s.listing.product.weight /}
+        ck:false, checkboxname: 'p.weight',name: 'p.packWeight',label: '重量(包材)', value: s.listing.product.weight /}
 
       <label class="control-label" for="sellingCycle">生命周期</label>
 
@@ -155,3 +153,5 @@
 #{/form}
 #{include 'Sellings/_invalid_characters.html'/}
 </div>
+
+#{records records:records, row:true/}

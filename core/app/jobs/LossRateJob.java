@@ -1,10 +1,12 @@
 package jobs;
 
+import com.alibaba.fastjson.JSON;
 import helper.*;
 import helper.Currency;
 import jobs.driver.BaseJob;
 import models.market.M;
 import models.procure.ShipItem;
+import models.view.dto.ProfitDto;
 import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
@@ -14,6 +16,7 @@ import services.MetricSaleReportService;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -40,7 +43,7 @@ public class LossRateJob extends BaseJob {
     }
 
     public static boolean isRunning(String key) {
-        return StringUtils.isNotBlank(Cache.get(key + "_running", String.class));
+        return StringUtils.isNotBlank(Caches.get(key));
     }
 
     public void doit() {
@@ -50,7 +53,26 @@ public class LossRateJob extends BaseJob {
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
         List<LossRate> lossrate = new ArrayList<LossRate>();
         DecimalFormat df = new DecimalFormat("0.00");
-        Map<String, MetricProfitService> existService = new HashMap<String, MetricProfitService>();
+
+        Map<String, ProfitDto> existMap = new HashMap<String, ProfitDto>();
+        List<ProfitDto> dtos = null;
+        M[] marray = models.market.M.values();
+        for(M m : marray) {
+            String cacke_key = "lossrate_" + m.name() +
+                    new SimpleDateFormat("yyyyMMdd").format(this.from)
+                    + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
+            String cache_str = Caches.get(cacke_key);
+            if(!StringUtils.isBlank(cache_str)) {
+                dtos = JSON.parseArray(cache_str, ProfitDto.class);
+                if(dtos != null) {
+                    for(ProfitDto dto : dtos) {
+                        existMap.put(dto.sku + "_" + m.name(), dto);
+                    }
+                }
+            }
+        }
+
+
         for(Map<String, Object> row : rows) {
             LossRate loss = new LossRate();
             loss.sku = (String) row.get("sku");
@@ -64,16 +86,14 @@ public class LossRateJob extends BaseJob {
                 loss.totallossprice = Float.parseFloat(df.format(loss.currency.toUSD(loss.price) * loss.lossqty));
             }
             loss.market = M.valueOf(row.get("market").toString());
-            MetricProfitService service;
-            String key = this.from + "_" + this.to + "_" + loss.market.toString() + "_" + loss.sku;
-            if(existService.containsKey(key)) {
-                service = existService.get(key);
-            } else {
-                service = new MetricProfitService(this.from, this.to, loss.market, loss.sku, null);
-                existService.put(key, service);
+
+            String key = loss.sku + "_" + loss.market.toString();
+            ProfitDto dto = existMap.get(key);
+            if(dto != null) {
+                loss.totalShipmentprice = Float
+                        .parseFloat(df.format((dto.ship_price + dto.vat_price) * loss.lossqty));
             }
-            loss.totalShipmentprice = Float
-                    .parseFloat(df.format((service.esShipPrice() + service.esVatPrice()) * loss.lossqty));
+
             Object compenusdamt = row.get("compenusdamt");
             if(compenusdamt != null)
                 loss.compenusdamt = new BigDecimal(Float.parseFloat(compenusdamt.toString())).setScale(2,
@@ -96,16 +116,13 @@ public class LossRateJob extends BaseJob {
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-            MetricProfitService service;
-            String key = this.from + "_" + this.to + "_" + ship.unit.selling.market.toString() + "_" + ship.unit.sku;
-            if(existService.containsKey(key)) {
-                service = existService.get(key);
-            } else {
-                service = new MetricProfitService(this.from, this.to, ship.unit.selling.market, ship.unit.sku, null);
-                existService.put(key, service);
+
+            String key = ship.unit.sku + "_" + ship.unit.selling.market.toString();
+            ProfitDto dto = existMap.get(key);
+            if(dto != null) {
+                ship.shipmentCost = new BigDecimal((dto.ship_price + dto.vat_price) * lossNum)
+                        .setScale(2, BigDecimal.ROUND_HALF_UP);
             }
-            ship.shipmentCost = new BigDecimal((service.esShipPrice() + service.esVatPrice()) * lossNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP);
             ship.lossCost = ship.purchaseCost.add(ship.shipmentCost);
         }
 

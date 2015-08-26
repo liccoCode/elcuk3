@@ -334,6 +334,10 @@ public class Attach extends Model {
         return "http://kod.easyacc.com:8080/data/User/elcuk2/home/SKU/" + sku + "/" + name;
     }
 
+    public static String attachImageSend(String sku, String name) {
+        return "http://kod.easyacc.com/data/User/elcuk2/home/SKU/" + sku + "/" + name;
+    }
+
     /**
      * 获取SKU下的图片列表
      *

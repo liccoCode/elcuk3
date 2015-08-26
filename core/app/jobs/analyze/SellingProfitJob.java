@@ -47,7 +47,7 @@ public class SellingProfitJob extends Job {
         profits = post.query();
         //计算合计
         profits = post.calTotal(profits);
-        Cache.add(postkey, profits, "2h");
+        Cache.add(postkey, profits, "8h");
         Cache.delete(postkey + RUNNING);
     }
 

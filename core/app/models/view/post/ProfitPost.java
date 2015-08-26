@@ -1,9 +1,13 @@
 package models.view.post;
 
+import com.alibaba.fastjson.JSON;
+import helper.Caches;
 import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.market.M;
+import models.view.dto.AnalyzeDTO;
+import models.view.dto.ProfitDto;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
@@ -11,6 +15,7 @@ import play.Logger;
 import play.libs.F;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import models.view.report.Profit;
@@ -113,7 +118,8 @@ public class ProfitPost extends Post<Profit> {
          */
         M[] marray = getMarket();
         for(M m : marray) {
-            profitlist = searchProfitList(profitlist, m);
+            profitlist = searchProfitList(profitlist, m, new SimpleDateFormat("yyyyMMdd").format(this.begin),
+                    new SimpleDateFormat("yyyyMMdd").format(this.end));
         }
         return profitlist;
     }
@@ -241,14 +247,29 @@ public class ProfitPost extends Post<Profit> {
     }
 
 
-    public List<Profit> searchProfitList(List<Profit> profitlist, M skumarket) {
+    public List<Profit> searchProfitList(List<Profit> profitlist, M skumarket, String redisfrom, String redisto) {
         /**
          * 如果有类别，没有SKU，则查询类别下所有SKU的利润
          */
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
+            List<ProfitDto> dtos = null;
+            String cacke_key = "profitmap_" + category + "_" + skumarket.name() + "_"
+                    + redisfrom
+                    + "_"
+                    + redisto;
+            String cache_str = Caches.get(cacke_key);
+            if(!StringUtils.isBlank(cache_str)) {
+                dtos = JSON.parseArray(cache_str, ProfitDto.class);
+            }
+            if(dtos == null) return profitlist;
+
+            Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
+            for(ProfitDto dto : dtos) {
+                profitmap.put(dto.sku, dto);
+            }
             Category cat = Category.findById(category);
             for(Product pro : cat.products) {
-                Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
+                Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                 if(profit.totalfee != 0 || profit.amazonfee != 0
                         || profit.fbafee != 0 || profit.quantity != 0
                         || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
@@ -331,6 +352,75 @@ public class ProfitPost extends Post<Profit> {
         return initProfit(market,
                 prosku, sellingId);
     }
+
+
+    /**
+     * 调用ES的API,获取利润Profit对象
+     *
+     * @param begin
+     * @param end
+     * @param market
+     * @param prosku
+     * @param sellingId
+     * @return
+     */
+    public Profit redisProfit(Map<String, ProfitDto> profitmap, Date begin, Date end, M market,
+                              String prosku, String sellingId) {
+        try {
+            ProfitDto dto = profitmap.get(prosku);
+            if(dto == null) return initProfit(market, prosku, sellingId);
+            Profit profit = new Profit();
+            profit.sku = prosku;
+            profit.market = market;
+            //总销售额
+            profit.totalfee = Webs.scale2Double(dto.fee);
+            //亚马逊费用
+            profit.amazonfee = Webs.scale2Double(dto.amazon_fee);
+            //fba费用
+            profit.fbafee = Webs.scale2Double(dto.fba_fee);
+            //总销量
+            profit.quantity = dto.qty;
+            //采购价格
+            profit.procureprice = Webs.scale2Double(dto.purchase_price);
+            //运输价格
+            profit.shipprice = Webs.scale2Double(dto.ship_price);
+            //vat价格
+            profit.vatprice = Webs.scale2Double(dto.vat_price);
+            //利润
+            profit.totalprofit = Webs.scale2Double(dto.total_profit);
+            //利润率
+            profit.profitrate = Webs.scale2Double(dto.profit_rate);
+
+            //增加库存数据
+            MetricQtyService qtyservice = new MetricQtyService(market, prosku);
+            profit = qtyservice.calProfit(profit);
+
+            /**
+             * (制作中+已交货)库存占用资金总金额(USD)
+             */
+            profit.workingfee = profit.workingqty * profit.procureprice;
+            profit.workingfee = Webs.scale2Double(profit.workingfee);
+            /**
+             * 在途库存占用资金总金额(USD)
+             */
+            profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice +
+                    profit.wayqty * profit.vatprice;
+            profit.wayfee = Webs.scale2Double(profit.wayfee);
+            /**
+             * (入库+在库)库存占用资金总金额(USD)
+             */
+            profit.inboundfee = profit.inboundqty * profit.procureprice + profit.inboundqty * profit.shipprice
+                    + profit.inboundqty * profit.vatprice;
+            profit.inboundfee = Webs.scale2Double(profit.inboundfee);
+            return profit;
+        } catch(Exception e) {
+            e.printStackTrace();
+            Logger.info("profit.esProfit:::" + e.toString());
+        }
+        return initProfit(market,
+                prosku, sellingId);
+    }
+
 
     public Profit initProfit(M market,
                              String prosku, String sellingId) {
