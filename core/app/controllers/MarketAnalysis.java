@@ -33,4 +33,12 @@ public class MarketAnalysis extends Controller {
     public static void reports() {
         render();
     }
+
+    /**
+     * 价格分析
+     */
+    public static void prices() {
+        render();
+    }
+
 }
