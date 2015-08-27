@@ -1,7 +1,7 @@
 $ ->
   ALERT_TEMPLATE = "<div class='alert alert-success fade in' style='text-align:center;'><button class='close' data-dismiss='alert'>×</button><div id='replace_it'></div></div>"
   IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label>
-<input style='width:80%;height:17px;text-align:center;'>&nbsp;&nbsp;<a class='btn btn-mini btn-danger'><i class='icon-trash' style='width:22%;'></i></a></li>"
+<input style='width:80%;height:17px;text-align:center;'>&nbsp;&nbsp;<button class='btn btn-mini btn-danger' name='delImage'><i class='icon-trash' style='width:22%;'></i></button></li>"
 
   # 图片初始化方法
   imageInit = ->
@@ -20,10 +20,28 @@ $ ->
           imgLI.find('img').attr('src', href)
           imgLI.find('input').val(imageNameObj[fName]) if fName of imageNameObj
           imgLI.appendTo(imagesUL)
+
+        $("button[name='delImage']").click ((e)->
+          e.preventDefault()
+          fileName = $(@).parent("li").attr("filename")
+          return false if !confirm("确认删除图片" + fileName + "吗?")
+          sku = $("#images").attr("sku")
+          params =
+            'sku': sku
+            'fileName': fileName
+          $.post('/sellings/deleteImage', params, (r) ->
+            if r.flag is true
+              $(@).parent("li").remove()
+            else
+              noty({text: "删除失败，原因(#{r.message})", type: 'success'})
+          )
+        )
     )
 
   # 初始化图片
   imageInit()
+
+
 
   # Update 按钮
   $('#amz-update').click ->

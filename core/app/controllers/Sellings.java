@@ -1,10 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Constant;
-import helper.GTs;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.market.*;
@@ -14,6 +11,8 @@ import models.view.post.SellingAmzPost;
 import models.view.post.SellingPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
 import play.jobs.Job;
@@ -396,6 +395,22 @@ public class Sellings extends Controller {
                 selling.listing.recordingListingState(DateTime.now().toDate());
             }
             renderJSON(new Ret(true, sellingIds.toString()));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void deleteImage(String sku, String fileName) {
+        try {
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("sku", sku));
+            params.add(new BasicNameValuePair("pic_name", fileName));
+            String message = HTTP.post("https://e.easyacc.com:8081/index.php?explorer/erpRemovePicApi", params);
+            if(message.equals("true")) {
+                renderJSON(new Ret(true));
+            } else {
+                renderJSON(new Ret(false, message));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

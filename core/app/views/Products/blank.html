@@ -6,17 +6,17 @@
 
 <div class="row-fluid">
   <div class="span12">
-    #{info_row title:'基础信息'}
-      <br/>
-      <ul>
-        <li class="text-error">请尽可能填写 长,宽,高,重量 这些参数, 因为这些参数是运输所需要的用到的计算参数!</li>
-        <li class="text-error">长(包材)、宽(包材)、高(包材)、重量(包材)：是指包装好包材后整个产品的长宽高重量</li>
-        <li class="text-error">长(产品)、宽(产品)、高(产品)、重量(产品)：是指还未包装的裸产品的长宽高重量</li>
-      </ul>
-    #{/info_row}
+  #{info_row title:'基础信息'}
+    <br/>
+    <ul>
+      <li class="text-error">请尽可能填写 长,宽,高,重量 这些参数, 因为这些参数是运输所需要的用到的计算参数!</li>
+      <li class="text-error">长(包材)、宽(包材)、高(包材)、重量(包材)：是指包装好包材后整个产品的长宽高重量</li>
+      <li class="text-error">长(产品)、宽(产品)、高(产品)、重量(产品)：是指还未包装的裸产品的长宽高重量</li>
+    </ul>
+  #{/info_row}
 
-    #{errorMsgs /}
-    #{flash_alert /}
+  #{errorMsgs /}
+  #{flash_alert /}
     <form action="@{Products.create()}" method="post" id="create_product_form">
       <table class="table table-bordered table-condensed">
         <tr>
@@ -135,7 +135,7 @@
         <tr>
           <th>销售等级</th>
           <td>
-          #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
+          #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel, class:".select" /}
           </td>
 
           <th>上架状态</th>
@@ -163,9 +163,12 @@
           </td>
 
           <th>退市时间</th>
-          <td colspan="3">
+          <td>
             <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
           </td>
+
+          <th><span style="color:red">*</span>UPC</th>
+          <td><input type="text" name="pro.upc" value="${pro.upc}" required></td>
         </tr>
 
         <tr>
@@ -174,7 +177,7 @@
             <input type="text" style="width:95%" id="pro_abbreviation" name="pro.abbreviation" value="${pro.abbreviation}"
                    required="required">
           </td>
-          <th style="">Part Number</th>
+          <th style=""><span style="color:red">*</span>Part Number</th>
           <td><input type="text" name="pro.partNumber" value="${pro.partNumber}" required></td>
         </tr>
 
