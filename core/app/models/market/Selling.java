@@ -640,7 +640,7 @@ public class Selling extends GenericModel {
         if(!Selling.exist(this.sid()))
             return this.save();
         else
-            return this;
+            throw new FastRuntimeException("Selling 已经存在！");
     }
 
 

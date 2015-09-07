@@ -10,6 +10,7 @@
         <th>Fid</th>
         <th>CreateAt</th>
         <th>UpdateAt</th>
+        <th>analyzeResult</th>
       </tr>
     #{list items:feeds, as:'feed'}
       <tr>
@@ -18,6 +19,7 @@
         <td>${feed.fid}</td>
         <td>${feed.createdAt}</td>
         <td>${feed.updatedAt}</td>
+        <td>${feed.analyzeResult}</td>
       </tr>
     #{/list}
     </table>
