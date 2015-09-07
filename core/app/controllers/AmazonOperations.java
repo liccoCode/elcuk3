@@ -54,8 +54,12 @@ public class AmazonOperations extends Controller {
         if(StringUtils.isNotBlank(sku)) {
             asin = Listing.handleAsinBySku(sku);
         }
-        List<AmazonListingReview> savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market),
-                orderby, sku);
+        List<AmazonListingReview> savedReviews;
+        if(StringUtils.isBlank(sku)){
+            savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market), orderby);
+        } else{
+            savedReviews = AmazonListingReview.listingReviewsBySKU(sku, orderby);
+        }
         Listing lst = Listing.findById(Listing.lid(asin, market));
         render(savedReviews, lst);
     }

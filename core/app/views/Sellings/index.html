@@ -88,9 +88,9 @@
             <input type="checkbox" value="${s.sellingId}">
           #{/if}
       </td>
-      <td>${s_index}</td>
+      <td>${(p.page-1)*p.perSize + s_index}</td>
       <td>${s.sellingId}</td>
-      <td>${s.listing?.product.sku}</td>
+      <td>${s.listing?.product?.sku}</td>
       <td>${s.market.label()}</td>
       <td>${s.aps.salePrice}</td>
       <td>${s.asin}</td>
@@ -101,7 +101,7 @@
       </td>
       <td>#{time_tooltip time:s.recentlyFeed()?.createdAt, datetime:true/}</td>
       <td>${s.recentlyFeed()?.analyzeResult}</td>
-      <td></td>
+      <td>#{time_tooltip time:s.createDate, datetime:true /}</td>
       <td>#{time_tooltip time:s.showDownDate(), datetime:true /}</td>
       <td>
         <a href="javascript:void(0);" class="btn btn-mini btn-danger" rel="popover" title="删除" name='remove'

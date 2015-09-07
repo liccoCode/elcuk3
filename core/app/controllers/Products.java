@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
@@ -439,5 +440,10 @@ public class Products extends Controller {
         List<String> skus = new ArrayList<String>();
         for(Product p : products) skus.add(p.sku);
         renderJSON(J.json(skus));
+    }
+
+    public static void findUPC(String sku) {
+        Product pro = Product.findById(sku);
+        renderJSON(J.json(GTs.MapBuilder.map("upc", pro.upc).build()));
     }
 }

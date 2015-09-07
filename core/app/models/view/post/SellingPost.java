@@ -41,15 +41,14 @@ public class SellingPost extends Post<Selling> {
             sql.append(" AND s.sellingCycle = ? ");
             params.add(sellingCycle);
         }
-        if(StringUtils.isNotBlank(systemUp)) {
-            if(systemUp.equals("是")) {
-                sql.append(" AND s.state IN(?, ?) ");
-                params.add(Selling.S.NEW);
-                params.add(Selling.S.SELLING);
-            } else {
-                sql.append(" AND s.state = ? ");
-                params.add(Selling.S.DOWN);
-            }
+        if(StringUtils.isBlank(systemUp) || systemUp.equals("是")) {
+            systemUp = "是";
+            sql.append(" AND s.state IN(?, ?) ");
+            params.add(Selling.S.NEW);
+            params.add(Selling.S.SELLING);
+        } else {
+            sql.append(" AND s.state = ? ");
+            params.add(Selling.S.DOWN);
         }
         if(StringUtils.isNotBlank(keywords)) {
             sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.listing.product.sku LIKE ? ) ");

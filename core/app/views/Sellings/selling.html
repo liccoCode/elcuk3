@@ -18,7 +18,7 @@
   </div>
   <!--<a href="@{Listings.listing(s.listing.listingId)}">Listing : ${s.listing.listingId}</a>-->
   <div class="6" style="text-align:right;">
-    SKU:<a href="@{Products.show()}/${s.merchantSKU.split(",")[0]}" style="text-decoration:underline;">Product: ${s.merchantSKU.split(",")[0]}</a>&nbsp;
+    SKU:<a href="@{Products.show()}/${s.merchantSKU.split(",")[0]}" style="text-decoration:underline;">${s.merchantSKU.split(",")[0]}</a>&nbsp;
     &nbsp;&nbsp;
     ASIN:<a href="${s.showListingLink()}" target="_blank" style="text-decoration:underline;">${s.asin}</a>&nbsp;&nbsp;&nbsp;
     <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnitsButton" style="text-decoration:underline;"

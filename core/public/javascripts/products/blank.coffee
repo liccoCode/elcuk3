@@ -82,4 +82,13 @@ $ ->
       textareas[1].name = "pro.sellingPoint[#{rowsCount - 1}].content"
       textareas[1].value = ""
 
+  validUpcAndPartNumber = () ->
+    flag = true
+    if !$("#upc").val()
+      noty({text: "UPC必须填写.", type: 'error', timeout: 5000})
+      flag = false
+    if !$("#partNumber").val()
+      noty({text: "Part Number必须填写.", type: 'error', timeout: 5000})
+      flag = false
+    flag
 

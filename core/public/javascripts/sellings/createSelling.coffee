@@ -7,14 +7,25 @@ $ ->
       .done((c) ->
         process(c)
       )
+    updater: (item) ->
+      $("input[name='createtype']:checked").attr("checked",false)
+      $("#amzDiv").fadeOut()
+      $("#addDiv").fadeOut()
+      $("#submitSaleBtn").hide()
+      item
   })
   $("input[name='createtype']").click((e) ->
     if $("#inputsku").val()
       if $(@).val() == 'add'
-        $("#addDiv").fadeIn()
-        $("#amzDiv").fadeOut()
-        $("#submitSaleBtn").text("添加Selling")
-        $("#addSellingSku").val($("#inputsku").val())
+        $.post('/products/findUPC', sku: $("#inputsku").val(),
+          (r) ->
+            $("#addDiv").fadeIn()
+            $("#amzDiv").fadeOut()
+            $("#submitSaleBtn").show()
+            $("#submitSaleBtn").text("添加Selling")
+            $("#addSellingSku").val($("#inputsku").val())
+            $("#upc").val(r.upc)
+        )
       else
         $("#amzDiv").load('/Sellings/saleAmazon', id: $("#inputsku").val(), (r) ->
           LoadMask.unmask()
@@ -34,6 +45,7 @@ $ ->
         )
         $("#addDiv").fadeOut()
         $("#submitSaleBtn").text("AMZ上架")
+        $("#submitSaleBtn").show()
     else
       noty({text: '请选择SKU', type: 'error'})
       $(@).prop("checked", false)

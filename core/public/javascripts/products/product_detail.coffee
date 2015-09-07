@@ -102,6 +102,8 @@ $ ->
   )
 
   $("#basicinfo").on("click", "#save_basic_btn",() ->
+    if !validUpcAndPartNumber()
+      return
     if $('input[name="pro.iscopy"]').val() is "2"
       return unless confirm('该SKU的产品名称与选择的SKU的产品名称一致,确定保存?')
     if $("#proabbreviation").val() is ""
@@ -152,3 +154,13 @@ $ ->
   _.each(inputs, (value) ->
     $(value).trigger("change")
   )
+
+  validUpcAndPartNumber = () ->
+    flag = true
+    if !$("#upc").val()
+      noty({text: "UPC必须填写.", type: 'error', timeout: 5000})
+      flag = false
+    if !$("#partNumber").val()
+      noty({text: "Part Number必须填写.", type: 'error', timeout: 5000})
+      flag = false
+    flag
