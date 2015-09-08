@@ -259,13 +259,23 @@ $ ->
       allowPreviewEmoticons: false
       allowImageUpload: false
       newlineTag: 'br'
-      afterChange: -> this.sync(); $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
-      items: [
-        'source','|','fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
-        'removeformat']
-
+      afterChange: ->
+        this.sync()
+        $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
+        previewBtn.call($("#productDesc"))
+      items: ['source','|', '|', 'forecolor', 'bold']
     });
   )
 
+  previewBtn = (e) ->
+    invalidTag = false
+    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
+      switch tag.nodeName.toString().toLowerCase()
+        when 'br','p','b','#text'
+          break
+        else
+          invalidTag = true
+          $(tag).css('background', 'yellow')
+    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
 
 

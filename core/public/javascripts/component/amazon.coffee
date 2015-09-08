@@ -49,8 +49,6 @@ $ ->
     false
   ).on('change', "#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc", (e) ->
     replaceInvalidCharacters(@, e)
-  ).on('change', ".ke-content", (e) ->
-    alert 1
   )
 
   $(document).ready ->
@@ -169,6 +167,8 @@ $ ->
     $("#feedProductType").trigger('adjust')
     # 市场变化时检查非法字符
     $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
+    # 改变字符长度
+    $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
   )
 
   # 模板 下拉项变化 feedProductType 跟着变化

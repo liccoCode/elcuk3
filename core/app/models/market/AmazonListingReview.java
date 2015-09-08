@@ -579,10 +579,13 @@ public class AmazonListingReview extends GenericModel {
                 ("rating".equals(orderBy) ? " ASC" : " DESC"));
     }
 
-    public static List<AmazonListingReview> listingReviews(String listingId, String orderBy,
-                                                           String desc) {
-        return AmazonListingReview
-                .find(String.format("listing.listingId=? ORDER BY %s %s", orderBy, desc), listingId)
+    public static List<AmazonListingReview> listingReviews(String listingId, String orderBy, String desc) {
+        return AmazonListingReview.find(String.format("listing.listingId=? ORDER BY %s %s", orderBy, desc), listingId)
+                .fetch();
+    }
+
+    public static List<AmazonListingReview> listingReviewsBySKU(String sku, String orderBy) {
+        return AmazonListingReview.find(String.format("listing.product.sku=? ORDER BY %s ", orderBy), sku)
                 .fetch();
     }
 

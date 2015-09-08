@@ -95,3 +95,31 @@ $ ->
 
   # 触发 document 绑定的事件（默认去加载了 UK 英国市场 Computer 模板的 FeedProductType）
   $("#feedProductType").trigger('adjust')
+
+
+  KindEditor.ready((K) ->
+    window.editor = K.create('#productDesc', {
+      resizeType: 1
+      allowPreviewEmoticons: false
+      allowImageUpload: false
+      newlineTag: 'br'
+      afterChange: ->
+        this.sync()
+        $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
+        previewBtn.call($("#productDesc"))
+      items: ['source','|', '|', 'forecolor', 'bold']
+    });
+  )
+
+  previewBtn = (e) ->
+    invalidTag = false
+    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
+      switch tag.nodeName.toString().toLowerCase()
+        when 'br','p','b','#text'
+          break
+        else
+          invalidTag = true
+          $(tag).css('background', 'yellow')
+    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
+
+

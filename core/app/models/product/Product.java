@@ -382,8 +382,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Lob
     public String subtitle;
 
+    @Required
     public String partNumber;
 
+    @Required
     public String upc;
 
     @Transient

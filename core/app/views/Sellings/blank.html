@@ -7,12 +7,12 @@
   #{script 'sellings/blank.coffee'/}
 #{/set}
 
-<div class="span12 offset3">
+<div class="span12">
   <form action="@{Sellings.create()}" class="form-horizontal" id='new_selling'>
     <h4 class="text-center">手动添加 Selling</h4>
 
   #{text_field id: 'sku', name: 'sku', label: 'SKU' /}
-  #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code" /}
+  #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code", readonly: true /}
   #{text_field id: 'asin', name: 'asin', label: 'ASIN', placeholder: "Amazon Standard Identification Number" /}
   #{select_field id:'market', name: 'market', items: models.market.M.values(), label: 'Market' /}
   #{select_field id:'acc.id', name: 'acc.id', items: models.market.Account.openedSaleAcc(), label: 'Account' /}

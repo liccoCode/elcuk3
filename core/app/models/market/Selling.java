@@ -67,6 +67,7 @@ public class Selling extends GenericModel {
     public Selling() {
         this.aps = new AmazonProps();
         this.state = S.NEW;
+        this.createDate = new Date();
     }
 
     /*
@@ -211,6 +212,12 @@ public class Selling extends GenericModel {
      */
     @Expose
     public Date lastSellerCheckDate = new Date();
+
+    /**
+     * 创建Selling时间
+     */
+    @Expose
+    public Date createDate;
 
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Embedded
@@ -633,7 +640,7 @@ public class Selling extends GenericModel {
         if(!Selling.exist(this.sid()))
             return this.save();
         else
-            return this;
+            throw new FastRuntimeException("Selling 已经存在！");
     }
 
 
