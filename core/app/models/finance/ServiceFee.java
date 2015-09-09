@@ -54,6 +54,11 @@ public class ServiceFee extends Model{
      */
     public Float usdCost;
 
+    /**
+     * 成功则为1
+     */
+    public int feeflag;
+
 
 
 }
