@@ -282,9 +282,12 @@ public class ShipItem extends GenericModel {
                             Float compenamt) {
         if(lossqty == null) lossqty = 0;
         if(compenamt == null) compenamt = 0f;
-        if(StringUtils.isNotBlank(compentype)) {
+        if(StringUtils.isNotBlank(compentype) && !compenamt.equals("easyacc")) {
             if((lossqty != 0 && compenamt.intValue() == 0) || (lossqty == 0 && compenamt.intValue() != 0))
                 Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
+        }
+        if(StringUtils.isNotBlank(compentype) && compenamt.equals("easyacc")) {
+
         }
         if(Validation.hasErrors()) return;
         int oldQty = this.adjustQty;

@@ -56,7 +56,7 @@ public class SellingPost extends Post<Selling> {
             params.add("%" + keywords + "%");
             params.add("%" + keywords + "%");
         }
-        sql.append(" ORDER BY sellingId DESC ");
+        sql.append(" ORDER BY s.createDate DESC ");
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 

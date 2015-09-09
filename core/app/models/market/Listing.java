@@ -539,13 +539,18 @@ public class Listing extends GenericModel {
      */
     public void recordingListingState(Date changedDate) {
         long count = Selling.count("state='SELLING' AND listing_listingId=?", this.listingId);
+        long num = Selling.count("listing_listingId=? ", this.listingId);
         ListingStateRecord record = new ListingStateRecord();
         record.listing = this;
         if(count > 0) {
             record.changedDate = changedDate;
             record.state = ListingStateRecord.S.SELLING;
         } else {
-            record.state = ListingStateRecord.S.DOWN;
+            if(num == 0) {
+                record.state = ListingStateRecord.S.NEW;
+            } else {
+                record.state = ListingStateRecord.S.DOWN;
+            }
         }
         record.save();
         record.pushRecordToCache();

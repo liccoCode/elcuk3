@@ -22,8 +22,9 @@ $ ->
           imgLI.appendTo(imagesUL)
 
         $("button[name='delImage']").click ((e)->
+          btn = $(@)
           e.preventDefault()
-          fileName = $(@).parent("li").attr("filename")
+          fileName = btn.parent("li").attr("filename")
           return false if !confirm("确认删除图片" + fileName + "吗?")
           sku = $("#images").attr("sku")
           params =
@@ -31,9 +32,10 @@ $ ->
             'fileName': fileName
           $.post('/sellings/deleteImage', params, (r) ->
             if r.flag is true
-              $(@).parent("li").remove()
+              btn.parent("li").remove()
+              noty({text: "删除成功", type: 'success'})
             else
-              noty({text: "删除失败，原因(#{r.message})", type: 'success'})
+              noty({text: "删除失败，原因(#{r.message})", type: 'error'})
           )
         )
     )
@@ -45,41 +47,43 @@ $ ->
 
   # Update 按钮
   $('#amz-update').click ->
-    return false unless imageIndexCal()
-    LoadMask.mask()
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-    .done((r) ->
-        msg = if r.flag is true
-          {text: "#{r.message} Selling 更新成功", type: 'success'}
-        else
-          {text: r.message, type: 'error'}
-        noty(msg)
-        LoadMask.unmask()
-      )
-    .fail((r) ->
-        noty({text: r.responseText, type: 'error'})
-        LoadMask.unmask()
-      )
-    false
+    if !previewBtn.call($("#productDesc"))
+      return false unless imageIndexCal()
+      LoadMask.mask()
+      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+      .done((r) ->
+          msg = if r.flag is true
+            {text: "#{r.message} Selling 更新成功", type: 'success'}
+          else
+            {text: r.message, type: 'error'}
+          noty(msg)
+          LoadMask.unmask()
+        )
+      .fail((r) ->
+          noty({text: r.responseText, type: 'error'})
+          LoadMask.unmask()
+        )
+      false
 
 
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
-    LoadMask.mask('#btns')
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
-    .done((r) ->
-        msg = if r.flag is true
-          "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
-        else
-          r.message
-        alert msg
-        LoadMask.unmask('#btns')
-      )
-    .fail((r) ->
-        alert r.responseText
-        LoadMask.unmask('#btns')
-      )
-    false
+    if !previewBtn.call($("#productDesc"))
+      LoadMask.mask('#btns')
+      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
+      .done((r) ->
+          msg = if r.flag is true
+            "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
+          else
+            r.message
+          alert msg
+          LoadMask.unmask('#btns')
+        )
+      .fail((r) ->
+          alert r.responseText
+          LoadMask.unmask('#btns')
+        )
+      false
 
 
 
@@ -262,7 +266,7 @@ $ ->
       afterChange: ->
         this.sync()
         $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
-        previewBtn.call($("#productDesc"))
+        $('#previewDesc').html($('#productDesc').val())
       items: ['source','|', '|', 'forecolor', 'bold']
     });
   )
@@ -277,5 +281,6 @@ $ ->
           invalidTag = true
           $(tag).css('background', 'yellow')
     noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
+    invalidTag
 
 
