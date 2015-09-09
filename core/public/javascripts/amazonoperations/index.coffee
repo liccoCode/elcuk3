@@ -48,20 +48,18 @@ $ ->
   reviewLoadFun = ->
     mask = $('#container')
     mask.mask('加载中...')
-    $('#reviews').load('/amazonOperations/ajaxMagic', $('#search_form :input').fieldSerialize(),
-    () ->
+    $('#reviews').load('/amazonOperations/ajaxMagic', $('#search_form :input').fieldSerialize(), () ->
       # 如果没有一个元素, 那么则需要重新抓取.
       mask.unmask()
       if $('#reviews tr').size() is 1
         alert('此 Listing 为全新的 Listing, 重新抓取 Listing 中...')
         mask.mask('重新抓取中...')
-        $.post('/amazonOperations/reCrawl', $('#search_form :input').fieldSerialize(),
-        (r) ->
-          mask.unmask()
-          if r.flag is false
-            alert(r.message)
-          else
-            $('#recrawl_review').click()
+        $.post('/amazonOperations/reCrawl', $('#search_form :input').fieldSerialize(), (r) ->
+            mask.unmask()
+            if r.flag is false
+              alert(r.message)
+            else
+              $('#recrawl_review').click()
         )
       else
         toggle_init()
@@ -123,6 +121,7 @@ $ ->
     e.preventDefault()
 
   $('#load_review_btn').click (e) ->
+    e.preventDefault()
     loadAsin = $('#load_asin').val(-> @value.toUpperCase())
     #B007LE0UT4
     if loadAsin.val().length isnt 10 && !$("#load_sku").val()
@@ -134,7 +133,7 @@ $ ->
       loadWishList()
     else
       reviewLoadFun()
-    e.preventDefault()
+
 
 
   # 解析 hash

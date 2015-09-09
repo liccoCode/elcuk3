@@ -31,7 +31,11 @@ public class ListingStateRecord extends Model {
         /**
          * 完全下架, 如果可以还能够重新上架
          */
-        DOWN
+        DOWN,
+        /**
+         * 新Listing
+         */
+        NEW
     }
 
     /**

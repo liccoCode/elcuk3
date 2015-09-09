@@ -8,7 +8,7 @@ $ ->
         process(c)
       )
     updater: (item) ->
-      $("input[name='createtype']:checked").attr("checked",false)
+      $("input[name='createtype']:checked").attr("checked", false)
       $("#amzDiv").fadeOut()
       $("#addDiv").fadeOut()
       $("#submitSaleBtn").hide()
@@ -31,7 +31,7 @@ $ ->
           LoadMask.unmask()
           $("#amzDiv").fadeIn()
           $.getScript('../public/javascripts/editor/kindeditor-min.js', ->
-            KindEditor.create('#productDesc',{
+            KindEditor.create('#productDesc', {
               resizeType: 1
               allowPreviewEmoticons: false
               allowImageUpload: false
@@ -55,7 +55,9 @@ $ ->
     e.preventDefault();
     if $("[name='createtype']:checked").length == 0
       noty({text: '请选择处理类型', type: 'error'})
-      return false;
+      return false
+    if previewBtn()
+      return false
     if $("#inputsku").val()
       if $("[name='createtype']:checked").val() == 'amz'
         $form = $('#saleAmazonForm')
@@ -95,4 +97,16 @@ $ ->
       noty({text: '请选择SKU', type: 'error'})
       return false;
   )
+
+  previewBtn = (e) ->
+    invalidTag = false
+    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
+      switch tag.nodeName.toString().toLowerCase()
+        when 'br','p','b','#text'
+          break
+        else
+          invalidTag = true
+          $(tag).css('background', 'yellow')
+    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
+    invalidTag
 

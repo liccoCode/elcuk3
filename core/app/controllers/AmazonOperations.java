@@ -101,23 +101,33 @@ public class AmazonOperations extends Controller {
         renderJSON(J.json(new F.T2<Integer, String>(accT2._2, J.G(t2._1))));
     }
 
-    public static void reCrawl(String asin, String m) {
+    public static void reCrawl(String asin, String m, String sku) {
         M market = M.val(m);
-        String lid = Listing.lid(asin, market);
-        try {
-            if(!Listing.exist(lid)) {
-                // 如果不存在, 先去抓取 Listing 然后再抓取 Review
-                Listing lst = Listing.crawl(asin, market);
-                if(lst != null) {
-                    lst.save();
-                    await(new ListingReviewsWork(lid).now());
-                } else
-                    renderJSON(new Ret(false, "Amazon 上 Listing 不存在或者已经被删除."));
-            } else {
-                await(new ListingReviewsWork(lid).now());
+        String lid = "";
+        if(StringUtils.isNotBlank(asin)) {
+            lid = Listing.lid(asin, market);
+        } else {
+            Listing listing = Listing.find("product.sku = ? AND market = ? ", sku, market).first();
+            if(listing != null) {
+                lid = listing.listingId;
             }
-        } catch(Exception e) {
-            throw new FastRuntimeException(Webs.S(e));
+        }
+        if(StringUtils.isNotBlank(lid)) {
+            try {
+                if(!Listing.exist(lid)) {
+                    // 如果不存在, 先去抓取 Listing 然后再抓取 Review
+                    Listing lst = Listing.crawl(asin, market);
+                    if(lst != null) {
+                        lst.save();
+                        await(new ListingReviewsWork(lid).now());
+                    } else
+                        renderJSON(new Ret(false, "Amazon 上 Listing 不存在或者已经被删除."));
+                } else {
+                    await(new ListingReviewsWork(lid).now());
+                }
+            } catch(Exception e) {
+                throw new FastRuntimeException(Webs.S(e));
+            }
         }
         renderJSON(new Ret(true, AmazonListingReview.countListingReview(Listing.lid(asin, market)) + ""));
     }
