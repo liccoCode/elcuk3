@@ -59,6 +59,8 @@ public class ServiceFee extends Model{
      */
     public int feeflag;
 
+    public String sku;
+
 
 
 }
