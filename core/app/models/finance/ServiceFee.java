@@ -35,6 +35,11 @@ public class ServiceFee extends Model{
      */
     public Date startDate;
 
+    /**
+     * group结束时间
+     */
+    public Date endDate;
+
     /***
      * 创建时间
      */
@@ -60,6 +65,8 @@ public class ServiceFee extends Model{
     public int feeflag;
 
     public String sku;
+
+    public String memo;
 
 
 
