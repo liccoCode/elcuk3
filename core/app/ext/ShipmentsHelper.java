@@ -102,19 +102,33 @@ public class ShipmentsHelper extends JavaExtensions {
         long diff = 0;
         String color = "";
         if(state == Shipment.S.CLEARANCE) {
-            diff = shipment.dates.atPortDate.getTime() - shipment.dates.beginDate.getTime();
+            if(shipment.dates.atPortDate != null && shipment.dates.beginDate != null) {
+                diff = shipment.dates.atPortDate.getTime() - shipment.dates.beginDate.getTime();
+            }
         } else if(state == Shipment.S.PACKAGE) {
-            diff = shipment.dates.pickGoodDate.getTime() - shipment.dates.atPortDate.getTime();
+            if(shipment.dates.pickGoodDate != null && shipment.dates.atPortDate != null) {
+                diff = shipment.dates.pickGoodDate.getTime() - shipment.dates.atPortDate.getTime();
+            }
         } else if(state == Shipment.S.BOOKED) {
-            diff = shipment.dates.bookDate.getTime() - shipment.dates.pickGoodDate.getTime();
+            if(shipment.dates.bookDate != null && shipment.dates.pickGoodDate != null) {
+                diff = shipment.dates.bookDate.getTime() - shipment.dates.pickGoodDate.getTime();
+            }
         } else if(state == Shipment.S.DELIVERYING) {
-            diff = shipment.dates.deliverDate.getTime() - shipment.dates.bookDate.getTime();
+            if(shipment.dates.deliverDate != null && shipment.dates.bookDate != null) {
+                diff = shipment.dates.deliverDate.getTime() - shipment.dates.bookDate.getTime();
+            }
         } else if(state == Shipment.S.RECEIPTD) {
-            diff = shipment.dates.receiptDate.getTime() - shipment.dates.deliverDate.getTime();
+            if(shipment.dates.deliverDate != null && shipment.dates.receiptDate != null) {
+                diff = shipment.dates.receiptDate.getTime() - shipment.dates.deliverDate.getTime();
+            }
         } else if(state == Shipment.S.RECEIVING) {
-            diff = shipment.dates.inbondDate.getTime() - shipment.dates.receiptDate.getTime();
+            if(shipment.dates.receiptDate != null && shipment.dates.inbondDate != null) {
+                diff = shipment.dates.inbondDate.getTime() - shipment.dates.receiptDate.getTime();
+            }
         } else if(state == Shipment.S.DONE) {
-            diff = shipment.dates.arriveDate.getTime() - shipment.dates.inbondDate.getTime();
+            if(shipment.dates.arriveDate != null && shipment.dates.inbondDate != null) {
+                diff = shipment.dates.arriveDate.getTime() - shipment.dates.inbondDate.getTime();
+            }
         }
 
         if(diff < TimeUnit.DAYS.toMillis(2) && diff > 0) {

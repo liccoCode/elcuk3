@@ -1,11 +1,11 @@
 #{extends 'main_full.html' /}
 #{set title:"采购单元列表 (${p.count()})"  /}
 #{set 'moreStyles'}
-    #{stylesheet 'selectize.default.css'/}
+    #{stylesheet_cdn name:'selectize.default.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'procureunits/index.coffee'/}
-    #{script 'selectize.min.js'/}
+    #{script_cdn name: 'procureunits/index.coffee'/}
+    #{script_cdn name: 'selectize.min.js'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}

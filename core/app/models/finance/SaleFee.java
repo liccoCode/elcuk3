@@ -73,6 +73,11 @@ public class SaleFee extends Model {
      */
     public String orderId;
 
+    /**
+     * 一个冗余字段, 用来标识一些在 Orderr 中找不到的订单, 用来处理新旧 SaleFee 更替的.
+     */
+    public String groupId;
+
     public Date date;
     /**
      * 费用, 系统内的费用使用 USD 结算

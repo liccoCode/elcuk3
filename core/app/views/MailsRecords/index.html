@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'Mail Records'/}
 #{set 'moreScripts'}
-    #{script 'highstock.js'/}
-    #{script 'mailsrecord/mailsrecord.coffee'/}
+    #{script_cdn name: 'highstock.js'/}
+    #{script_cdn name: 'mailsrecord/mailsrecord.coffee'/}
 #{/set}
 <div class="container">
   <form id="params" class="search_form">

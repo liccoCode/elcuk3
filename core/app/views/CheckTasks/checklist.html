@@ -1,12 +1,12 @@
 #{extends 'main_full.html'/}
 #{set title:"质检任务列表 (${tasklist.size()})" /}
 #{set 'moreStyles'}
-    #{stylesheet 'selectize.default.css'/}
+    #{stylesheet_cdn name: 'selectize.default.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'jquery.dataTables.js'/}
-    #{script 'selectize.min.js'/}
-    #{script 'checktasks/checklist.coffee'/}
+    #{script_cdn name: 'jquery.dataTables.js'/}
+    #{script_cdn name: 'selectize.min.js'/}
+    #{script_cdn name: 'checktasks/checklist.coffee'/}
 #{/set}
 
 #{info_row}

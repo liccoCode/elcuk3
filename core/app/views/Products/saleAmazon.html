@@ -1,13 +1,13 @@
 #{extends 'main_full.html'/}
 #{set title: '提交 Feed 创建 Selling' /}
 #{set 'moreStyles'}
-    #{stylesheet 'market.css'/}
+    #{stylesheet_cdn name:'market.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'editor/kindeditor-min.js'/}
-    #{script 'editor/lang/zh_CN.js'/}
-    #{script 'component/amazon.coffee'/}
-    #{script 'products/saleAmazon.coffee'/}
+    #{script_cdn name: 'editor/kindeditor-min.js'/}
+    #{script_cdn name: 'editor/lang/zh_CN.js'/}
+    #{script_cdn name: 'component/amazon.coffee'/}
+    #{script_cdn name: 'products/saleAmazon.coffee'/}
 #{/set}
 <div id='check_modal' class="modal hide fade">
   <div class="modal-header">
