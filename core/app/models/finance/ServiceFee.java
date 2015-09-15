@@ -15,7 +15,6 @@ import java.util.Date;
  * Created by licco on 15/9/7.
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class ServiceFee extends Model{
 
     public String groupId;
