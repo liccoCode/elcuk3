@@ -232,8 +232,8 @@ public class LossRatePost extends Post<LossRate> {
             }
 
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
-            ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
-
+            ship.purchaseCost = new BigDecimal(ship.unit.attrs.currency.toUSD(ship.unit.attrs.price) * lossNum)
+                    .setScale(2, BigDecimal.ROUND_HALF_UP);
             String key = ship.unit.sku + "_" + ship.unit.selling.market.name();
             Logger.info("::::::2:::::key:::"+key);
             ProfitDto dto = existMap.get(key);

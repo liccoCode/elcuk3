@@ -1,7 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:'运输单列表 (' + shipments.size() + ')' /}
 #{set 'moreScripts'}
-    #{script 'shipments/index.coffee'/}
+    #{script_cdn name: 'shipments/index.coffee'/}
 #{/set}
 
 #{info_row}

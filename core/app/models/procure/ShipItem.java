@@ -263,9 +263,9 @@ public class ShipItem extends GenericModel {
     public void adjustShipment(Shipment shipment) {
         if(shipment.state != Shipment.S.PLAN)
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
-        if(this.shipment.equals(shipment))
+        if(this.shipment != null && this.shipment.equals(shipment))
             Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
-        if(this.shipment.state != Shipment.S.PLAN)
+        if(this.shipment != null && this.shipment.state != Shipment.S.PLAN)
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;

@@ -251,9 +251,11 @@ public class ProfitPost extends Post<Profit> {
         /**
          * 如果有类别，没有SKU，则查询类别下所有SKU的利润
          */
-        if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
+        if(!StringUtils.isBlank(category) || !StringUtils.isBlank(sku)) {
             List<ProfitDto> dtos = null;
-            String cacke_key = "profitmap_" + category + "_" + skumarket.name() + "_"
+            String key = category;
+            if(!StringUtils.isBlank(sku)) key = sku;
+            String cacke_key = "profitmap_" + key + "_" + skumarket.name() + "_"
                     + redisfrom
                     + "_"
                     + redisto;
@@ -267,18 +269,24 @@ public class ProfitPost extends Post<Profit> {
             for(ProfitDto dto : dtos) {
                 profitmap.put(dto.sku, dto);
             }
-            Category cat = Category.findById(category);
-            for(Product pro : cat.products) {
-                Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
+            if(!StringUtils.isBlank(sku)) {
+                Profit profit = redisProfit(profitmap, begin, end, skumarket, sku, sellingId);
                 if(profit.totalfee != 0 || profit.amazonfee != 0
                         || profit.fbafee != 0 || profit.quantity != 0
                         || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
                     profitlist.add(profit);
                 }
+            } else {
+                Category cat = Category.findById(category);
+                for(Product pro : cat.products) {
+                    Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
+                    if(profit.totalfee != 0 || profit.amazonfee != 0
+                            || profit.fbafee != 0 || profit.quantity != 0
+                            || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
+                        profitlist.add(profit);
+                    }
+                }
             }
-        } else if(!StringUtils.isBlank(sku)) {
-            Profit profit = esProfit(begin, end, skumarket, sku, sellingId);
-            profitlist.add(profit);
         }
         return profitlist;
     }

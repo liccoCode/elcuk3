@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'Orders (' + p.count() + ')'/}
 #{set 'moreScripts'}
-    #{script 'orders/orders.coffee'/}
-    #{script 'component/pagination.coffee'/}
+    #{script_cdn name: 'orders/orders.coffee'/}
+    #{script_cdn name: 'component/pagination.coffee'/}
 #{/set}
 
 <div class="row-fluid">

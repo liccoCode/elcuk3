@@ -1,13 +1,16 @@
 #{extends 'main_full.html'/}
 #{set title:s.sellingId/}
 #{set 'moreStyles'}
-    #{stylesheet 'market.css'/}
+    #{stylesheet_cdn name:'market.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'editor/kindeditor-min.js'/}
-    #{script 'editor/lang/zh_CN.js'/}
-    #{script 'component/amazon.coffee'/}
-    #{script 'sellings/selling.coffee'/}
+    #{script_cdn name: 'editor/kindeditor-min.js'/}
+    #{script_cdn name: 'editor/lang/zh_CN.js'/}
+    #{script_cdn name: 'component/amazon.coffee'/}
+    #{script_cdn name: 'sellings/selling.coffee'/}
+#{/set}
+#{set 'moreStyles'}
+    #{stylesheet_cdn name: 'market.css'/}
 #{/set}
 #{if s.market.isAmazon()}
     #{flash_alert /}

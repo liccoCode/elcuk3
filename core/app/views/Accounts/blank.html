@@ -1,9 +1,8 @@
 #{extends 'main.html'/}
 #{set title:'添加新用户'/}
 #{set 'moreScripts'}
-    #{script 'accounts/index.coffee'/}
+    #{script_cdn name: 'accounts/index.coffee'/}
 #{/set}
-
 <div class="row">
 #{errorMsgs /}
 

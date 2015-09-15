@@ -1,9 +1,9 @@
 #{extends 'main_full.html'/}
 #{set title:'运输到货率统计'/}
 #{set 'moreScripts'}
-    #{script 'highstock.js'/}
-    #{script 'jquery.dataTables.js'/}
-    #{script 'ShipmentReports/arrivalRate.coffee'/}
+    #{script_cdn name: 'highstock.js'/}
+    #{script_cdn name: 'jquery.dataTables.js'/}
+    #{script_cdn name: 'ShipmentReports/arrivalRate.coffee'/}
 #{/set}
 
 <ul class="nav nav-tabs">
