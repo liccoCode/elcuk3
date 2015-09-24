@@ -1,9 +1,11 @@
 package models.view.post;
 
+import models.User;
 import models.market.M;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ public class SellingPost extends Post<Selling> {
     public String systemUp;
 
     public String keywords;
+
+    public String categoryid;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -49,6 +53,13 @@ public class SellingPost extends Post<Selling> {
         } else {
             sql.append(" AND s.state = ? ");
             params.add(Selling.S.DOWN);
+        }
+        if(StringUtils.isNotBlank(categoryid)) {
+            sql.append(" AND s.listing.product.category.categoryId = ? ");
+            params.add(categoryid);
+        } else {
+            sql.append(" AND s.listing.product.category.categoryId in " +
+                    SqlSelect.inlineParam(User.getTeamCategorys(User.current())));
         }
         if(StringUtils.isNotBlank(keywords)) {
             sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.listing.product.sku LIKE ? ) ");
