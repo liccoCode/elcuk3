@@ -46,6 +46,15 @@
         </select>
       </div>
       <div class="input-prepend inline">
+        <span class="add-on">品线</span>
+        <select name="p.categoryid">
+          <option value="">ALL</option>
+          #{list items:categorys, as:'c'}
+            <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
+          #{/list}
+        </select>
+      </div>
+      <div class="input-prepend inline">
         <span class="add-on">关键字</span>
         <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="sellingID/SKU/ASIN"/>
       </div>
@@ -91,7 +100,7 @@
       <td>${(p.page-1)*p.perSize + s_index}</td>
       <td>${s.sellingId}</td>
       <td>${s.listing?.product?.sku}</td>
-      <td>${s.market.label()}</td>
+      <td>${s.market.countryName()}</td>
       <td>${s.aps.salePrice}</td>
       <td>${s.asin}</td>
       <td>${s.sellingCycle?.label()}</td>

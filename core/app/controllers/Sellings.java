@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.*;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
@@ -365,6 +366,7 @@ public class Sellings extends Controller {
         if(p == null) p = new SellingPost();
         List<String> products = Product.skus(true);
         renderArgs.put("products", J.json(products));
+        renderArgs.put("categorys", User.getTeamCategorys(User.current()));
         List<Selling> sellings = p.query();
         render(sellings, p);
     }
