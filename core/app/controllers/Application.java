@@ -6,6 +6,7 @@ import helper.HTTP;
 import helper.J;
 import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.Privilege;
 import models.Role;
 import models.market.*;
 import models.product.Whouse;
@@ -24,15 +25,15 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
 
     public static void index() {
-        /**如果是PM角色则跳转到PM首页**/
-        if(Role.isPm(Login.current())) {
+        /**如果是有PM首页权限则跳转到PM首页**/
+        Privilege privilege = Privilege.find("name=?", "pmdashboards.index").first();
+        if(Login.current().isHavePrivilege(privilege)) {
             Pmdashboards.index();
         }
-
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
