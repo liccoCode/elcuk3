@@ -268,6 +268,9 @@ public class Category extends GenericModel {
     }
 
     public static List<String> getSKUs(String categoryId) {
+        if (StringUtils.isBlank(categoryId)){
+            return new ArrayList<String>();
+        }
         return getSKUs(Arrays.asList(categoryId));
     }
 
