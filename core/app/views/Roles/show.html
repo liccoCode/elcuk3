@@ -93,9 +93,8 @@
 
                       <td colspan="4" rowspan="${menucount+1}">
                         <label class="checkbox">
-                          <input type="checkbox" name="privilegeId" value="${module.id}" ${role
-                          .isHavePrivilege(module) ?
-                          'checked' : ''}>
+                          <input type="checkbox" name="privilegeId" value="${module.id}"
+                          ${role.isHavePrivilege(module) ?'checked' : ''}>
                           <a href="javascript:;" rel="tooltip" title="${module.name}">${module.memo}</a>
                         </label>
                       </td>
@@ -111,7 +110,8 @@
                             #{/else}
 
                           <label class="checkbox">
-                            <input type="checkbox" id="checkboxmenu" class="menu${module.id}" name="privilegeId"
+                            <input type="checkbox" id="checkboxmenu" class="menu${module.id}" pid="${module.id}"
+                                   name="privilegeId"
                                    value="${function.id}"
                             ${role.isHavePrivilege(function) ?
                             'checked' : ''}>
@@ -125,6 +125,7 @@
                                     <td colspan="6">
                                       <label class="checkbox">
                                         <input type="checkbox" name="privilegeId" class="menu${function.id}"
+                                               pid="${function.id}"
                                                value="${menu.id}" ${role.isHavePrivilege(menu) ?
                                         'checked' : ''}>
                                         <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
