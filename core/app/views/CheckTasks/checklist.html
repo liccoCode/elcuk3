@@ -1,7 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:"质检任务列表 (${tasklist.size()})" /}
+#{set 'moreStyles'}
+    #{stylesheet_cdn name: 'selectize.default.css'/}
+#{/set}
 #{set 'moreScripts'}
     #{script_cdn name: 'jquery.dataTables.js'/}
+    #{script_cdn name: 'selectize.min.js'/}
     #{script_cdn name: 'checktasks/checklist.coffee'/}
 #{/set}
 
@@ -37,10 +41,10 @@
         #{/list}
     </select>
 
-    <select name="p.cooperatorId" class="inline">
+    <select name="p.cooperatorId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
       <option value="0">供应商</option>
-        #{list items:cooperators, as:'cop'}
-          <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+        #{list items:cooperators, as:'sp'}
+          <option ${sp.id == p.cooperatorId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
         #{/list}
     </select>
 

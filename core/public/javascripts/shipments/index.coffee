@@ -1,6 +1,6 @@
 $ ->
   $('#createApplyBtn').click((e) ->
-    e.preventDefault()
+
     #过滤掉apply为空的数据
     $ck = $("#search_form [type='checkbox']:checked")
     size = $ck.length
@@ -21,7 +21,8 @@ $ ->
     e.preventDefault()
     $btn = $(@)
     $form = $("#search_form")
-    window.open('/Excels/shipmentDetails?'+$form.serialize(),"_blank")
+    window.open('/Excels/shipmentDetails?' + $form.serialize() + "&" + $("#shipmentTable input[name='shipmentId']:checked").serialize(),
+      "_blank")
   )
 
   $(':checkbox[class=checkbox_all]').change (e) ->

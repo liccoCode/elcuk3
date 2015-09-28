@@ -1,22 +1,21 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Constant;
-import helper.GTs;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.SellingAmzPost;
+import models.view.post.SellingPost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
-import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
@@ -66,13 +65,11 @@ public class Sellings extends Controller {
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("feeds", s.feeds());
-        renderArgs.put("records", ElcukRecord.fid("selling.image").<ElcukRecord>fetch(50));
+
         List<ElcukRecord> logs =
-                ElcukRecord.find("fid=? AND action=? " +
-                        " ORDER BY createAt DESC", id.toString(), "selling.image").fetch(4);
-
+                ElcukRecord.find("fid=? AND (action=? or action=?) ORDER BY createAt DESC", id.toString(),
+                        "selling.image", "selling.sync.back").fetch(4);
         renderArgs.put("records", logs);
-
         SellingAmzPost p = new SellingAmzPost();
         render(s, p);
     }
@@ -360,6 +357,62 @@ public class Sellings extends Controller {
             if(selling == null || !selling.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
             selling.sellingCycle(cycle);
             renderJSON(new Ret(true, sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void index(SellingPost p) {
+        if(p == null) p = new SellingPost();
+        List<String> products = Product.skus(true);
+        renderArgs.put("products", J.json(products));
+        renderArgs.put("categorys", User.getTeamCategorys(User.current()));
+        List<Selling> sellings = p.query();
+        render(sellings, p);
+    }
+
+    public static void createSelling(Selling s) {
+
+        render(s);
+    }
+
+    public static void saleAmazon(String id) {
+        Product product = Product.findByMerchantSKU(id);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(product.sku);
+        Selling s = new Selling();
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
+        renderArgs.put("accs", Account.openedSaleAcc());
+        render("Sellings/_saleAmazon.html", product, s);
+    }
+
+    public static void batchDownSelling(String[] sellingIds) {
+        try {
+            for(int i = 0; i < sellingIds.length; i++) {
+                Selling selling = Selling.findById(sellingIds[i]);
+                selling.state = Selling.S.DOWN;
+                selling.save();
+                //修改 Product 在系统内的状态
+                Product.changeProductType(selling.merchantSKU);
+                //存储 Listing 状态变更记录
+                selling.listing.recordingListingState(DateTime.now().toDate());
+            }
+            renderJSON(new Ret(true, sellingIds.toString()));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void deleteImage(String sku, String fileName) {
+        try {
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("sku", sku));
+            params.add(new BasicNameValuePair("pic_name", fileName));
+            String message = HTTP.post("https://e.easyacc.com:8081/index.php?explorer/erpRemovePicApi", params);
+            if(message.equals("true")) {
+                renderJSON(new Ret(true));
+            } else {
+                renderJSON(new Ret(false, message));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

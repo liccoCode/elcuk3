@@ -87,6 +87,13 @@ $ ->
       if (element.text.toLowerCase() == type.toLowerCase())
         element.setAttribute('selected', 'selected')
     )
+
+    $('#popLogModel').on('change', '#compentype',(e) ->
+      if $('#compentype').val() == 'easyacc'
+        if !$("#popLogModel input[name='compenamt']").val()
+          $("#popLogModel input[name='compenamt']").val('0')
+    )
+
     $('#currency').find('option').each((index, element)->
       if (element.text.toLowerCase() == c.toLowerCase())
         element.setAttribute('selected', 'selected')

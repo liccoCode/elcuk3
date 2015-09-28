@@ -33,6 +33,7 @@
     <th width="170">ReviewId</th>
     <th>Reviewer</th>
     <th>ReviewDate</th>
+    <th>SKU</th>
   </tr>
 #{list items:savedReviews, as:'r'}
   <tr drop="${r.reviewId}" style="${r.isRemove ? 'background:#C09853;': ''}">
@@ -63,6 +64,7 @@
     </td>
     <td>${r.username}</td>
     <td>${r.reviewDate.date()}</td>
+    <td>${r.listing.product?.sku}</td>
   </tr>
   <tr id="review_${r.reviewId}" style="display:none;">
     <td colspan="12">

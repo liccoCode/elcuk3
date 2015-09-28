@@ -793,8 +793,11 @@ public enum Currency {
             case AMAZON_UK:
                 return GBP;
             case AMAZON_DE:
+                return EUR;
             case AMAZON_ES:
+                return EUR;
             case AMAZON_FR:
+                return EUR;
             case AMAZON_JP:
                 return JPY;
             case AMAZON_IT:

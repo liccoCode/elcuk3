@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
@@ -103,6 +104,7 @@ public class Products extends Controller {
 
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
+            pro.changePartNumber(dbpro.partNumber);
             pro.save();
             List<String> logs = new ArrayList<String>();
             logs.addAll(dbpro.beforeDoneUpdate(pro));
@@ -427,5 +429,21 @@ public class Products extends Controller {
         product.salesLevel = salesLevel;
         product.save();
         renderJSON(new Ret());
+    }
+
+    /**
+     * 模糊匹配SKU
+     * @param sku
+     */
+    public static void sameSku(String sku) {
+        List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
+        List<String> skus = new ArrayList<String>();
+        for(Product p : products) skus.add(p.sku);
+        renderJSON(J.json(skus));
+    }
+
+    public static void findUPC(String sku) {
+        Product pro = Product.findById(sku);
+        renderJSON(J.json(GTs.MapBuilder.map("upc", pro.upc).build()));
     }
 }

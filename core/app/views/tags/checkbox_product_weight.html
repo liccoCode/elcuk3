@@ -1,6 +1,12 @@
 <div class="control-group">
-  <label style="color:red;" class="control-label" for="${_id}">
-    <input type="checkbox" name="${_checkboxname}" value="true">${_label}</label>
+  <label #{if _ck!=false}style="color:red;"#{/if} class="control-label" for="${_id}">
+  #{if _ck==false}
+  ${_label}
+  #{/if}
+  #{else }
+    <input type="checkbox" name="${_checkboxname}" value="true">${_label}
+  #{/else}
+  </label>
   <div class="controls">
     <input type="text" style="width:100px;" id="${_id}" ${_disabled ? 'disabled' : ''} ${_readonly ? 'readonly' : ''}
            class="${_span?:'span10'}" name="${_name}"
@@ -8,8 +14,8 @@
            value="${_value?:''}">
 
     <select style="width:100px;" id="${_sid}" name="${_unitname}">
-       <option value="KG">kg</option>
-       <option value="OZ">oz</option>
+      <option value="KG">kg</option>
+      <option value="OZ">oz</option>
     </select>
 
     <input type="hidden" id="${_hid}" value="${_value?:''}">

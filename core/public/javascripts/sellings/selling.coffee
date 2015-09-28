@@ -1,6 +1,7 @@
 $ ->
   ALERT_TEMPLATE = "<div class='alert alert-success fade in' style='text-align:center;'><button class='close' data-dismiss='alert'>×</button><div id='replace_it'></div></div>"
-  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label><input style='width:95%;height:12px;text-align:center;'></li>"
+  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label>
+<input style='width:80%;height:17px;text-align:center;'>&nbsp;&nbsp;<button class='btn btn-mini btn-danger' name='delImage'><i class='icon-trash' style='width:22%;'></i></button></li>"
 
   # 图片初始化方法
   imageInit = ->
@@ -19,48 +20,70 @@ $ ->
           imgLI.find('img').attr('src', href)
           imgLI.find('input').val(imageNameObj[fName]) if fName of imageNameObj
           imgLI.appendTo(imagesUL)
+
+        $("button[name='delImage']").click ((e)->
+          btn = $(@)
+          e.preventDefault()
+          fileName = btn.parent("li").attr("filename")
+          return false if !confirm("确认删除图片" + fileName + "吗?")
+          sku = $("#images").attr("sku")
+          params =
+            'sku': sku
+            'fileName': fileName
+          $.post('/sellings/deleteImage', params, (r) ->
+            if r.flag is true
+              btn.parent("li").remove()
+              noty({text: "删除成功", type: 'success'})
+            else
+              noty({text: "删除失败，原因(#{r.message})", type: 'error'})
+          )
+        )
     )
 
   # 初始化图片
   imageInit()
 
+
+
   # Update 按钮
   $('#amz-update').click ->
-    return false unless imageIndexCal()
-    LoadMask.mask()
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-    .done((r) ->
-        msg = if r.flag is true
-          {text: "#{r.message} Selling 更新成功", type: 'success'}
-        else
-          {text: r.message, type: 'error'}
-        noty(msg)
-        LoadMask.unmask()
-      )
-    .fail((r) ->
-        noty({text: r.responseText, type: 'error'})
-        LoadMask.unmask()
-      )
-    false
+    if !previewBtn.call($("#productDesc"))
+      return false unless imageIndexCal()
+      LoadMask.mask()
+      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+      .done((r) ->
+          msg = if r.flag is true
+            {text: "#{r.message} Selling 更新成功", type: 'success'}
+          else
+            {text: r.message, type: 'error'}
+          noty(msg)
+          LoadMask.unmask()
+        )
+      .fail((r) ->
+          noty({text: r.responseText, type: 'error'})
+          LoadMask.unmask()
+        )
+      false
 
 
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
-    LoadMask.mask('#btns')
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
-    .done((r) ->
-        msg = if r.flag is true
-          "#{r.message} AMAZON的Selling局部更新成功"
-        else
-          r.message
-        alert msg
-        LoadMask.unmask('#btns')
-      )
-    .fail((r) ->
-        alert r.responseText
-        LoadMask.unmask('#btns')
-      )
-    false
+    if !previewBtn.call($("#productDesc"))
+      LoadMask.mask('#btns')
+      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
+      .done((r) ->
+          msg = if r.flag is true
+            "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
+          else
+            r.message
+          alert msg
+          LoadMask.unmask('#btns')
+        )
+      .fail((r) ->
+          alert r.responseText
+          LoadMask.unmask('#btns')
+        )
+      false
 
 
 
@@ -233,3 +256,31 @@ $ ->
       weight.val((weight.val() * 35.2739619).toFixed(2))
     else
       weight.val($('#hweight').val())
+
+  KindEditor.ready((K) ->
+    window.editor = K.create('#productDesc', {
+      resizeType: 1
+      allowPreviewEmoticons: false
+      allowImageUpload: false
+      newlineTag: 'br'
+      afterChange: ->
+        this.sync()
+        $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
+        $('#previewDesc').html($('#productDesc').val())
+      items: ['source','|', '|', 'forecolor', 'bold']
+    });
+  )
+
+  previewBtn = (e) ->
+    invalidTag = false
+    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
+      switch tag.nodeName.toString().toLowerCase()
+        when 'br','p','b','#text'
+          break
+        else
+          invalidTag = true
+          $(tag).css('background', 'yellow')
+    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
+    invalidTag
+
+

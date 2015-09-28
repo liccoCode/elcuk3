@@ -32,6 +32,12 @@ public class LossRate implements Serializable {
      * 赔偿金额
      */
     public float compenusdamt;
+
+    /**
+     * 赔偿类型
+     */
+    public String compentype;
+
     /**
      * FBA
      */

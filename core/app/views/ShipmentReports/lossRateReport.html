@@ -63,9 +63,11 @@
             <th>实际交货时间</th>
             <th>供应商</th>
             <th>少货数量(个)</th>
+            <th>赔偿类型</th>
             <th>采购成本(USD)</th>
             <th>物流成本(USD)</th>
             <th>损失金额(USD)</th>
+            <th>备注</th>
           </tr>
           </thead>
           <tbody>
@@ -82,10 +84,12 @@
             <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
             <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
             <td>${itm.unit.cooperator?.name}</td>
-            <td>${itm.qty - (itm.adjustQty?:0)}</td>
+            <td>${itm.lossqty}</td>
+            <td>${itm.compentype}</td>
             <td>${itm.purchaseCost}</td>
             <td>${itm.shipmentCost}</td>
             <td>${itm.lossCost}</td>
+            <td>${itm.memo}</td>
           </tr>
           #{/list}
           </tbody>
@@ -135,6 +139,7 @@
             <th>SKU</th>
             <th>运输量</th>
             <th>丢失量</th>
+            <th>赔偿类型</th>
             <th>赔偿金额(单位: USD)</th>
             <th>丢失量的总采购成本金额（USD）</th>
             <th>丢失量的物流成本金额（USD）</th>
@@ -148,6 +153,7 @@
             <td>${loss.sku}</td>
             <td>${loss.qty}</td>
             <td>${loss.lossqty}</td>
+            <td>${loss.c}</td>
             <td>${loss.compenusdamt}</td>
             <td>${loss.totallossprice}</td>
             <td>${loss.totalShipmentprice}</td>

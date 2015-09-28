@@ -1,7 +1,7 @@
 <div class="control-group">
+  <label style="color:red;" class="control-label" for="${_id}">
+       <input type="checkbox" name="${_checkboxname}" value="true">${_label}</label>
   <div class="controls">
-    <label style="color:red;" class="checkbox" for="${_id}">
-      <input type="checkbox" name="${_checkboxname}" value="true">${_label}</label>
     <textarea rows="${_rows ? _rows : '5'}" id="${_id}" ${_disabled ? 'disabled' : ''}
               class="${_span ? _span : 'span10'}" name="${_name}"
               placeholder="${_label}">${_value ? _value : ''}</textarea>

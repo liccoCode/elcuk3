@@ -139,16 +139,20 @@
 </tr>
 
 <tr>
-  <th>State(运营)</th>
-  <td colspan="3" style="color:${pro.state?.fontcolor()}">${pro.state}</td>
+  <td>State(运营)</td>
+  <td style="color:${pro.state?.fontcolor()}">${pro.state}</td>
+  <td><span style="color:red">*</span>Part Number</td>
+  <td><input type="text" name="pro.partNumber" id="partNumber" value="${pro.partNumber}" required></td>
 </tr>
 
 <tr>
   <th>产品名称</th>
-  <td colspan="4">
+  <td colspan="1">
     <input type="hidden" style="width:95%" name="pro.iscopy" value="${pro.iscopy}">
     <input type="text" style="width:95%" id="proabbreviation" name="pro.abbreviation" value="${pro.abbreviation}">
   </td>
+  <th><span style="color:red">*</span>UPC</th>
+  <td><input type="text" name="pro.upc" id="upc" value="${pro.upc}" required></td>
 </tr>
 
 <tr>

@@ -3,3 +3,8 @@ $ ->
   $('.pagination a[page]').click (e) ->
     e.preventDefault()
     $('[name=p\\.page]').val($(@).attr('page')).parents('form').submit()
+
+  $('.pagination select').change((e)->
+    e.preventDefault()
+    $('[name=p\\.page]').val($(@).val()).parents('form').submit()
+  )

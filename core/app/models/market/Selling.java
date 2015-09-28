@@ -2,7 +2,9 @@ package models.market;
 
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.*;
+import helper.Currency;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
@@ -18,7 +20,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.jsoup.nodes.Element;
 import org.w3c.dom.Text;
 import play.Logger;
 import play.Play;
@@ -37,6 +38,7 @@ import javax.xml.transform.TransformerFactory;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jsoup.Jsoup;
@@ -65,6 +67,7 @@ public class Selling extends GenericModel {
     public Selling() {
         this.aps = new AmazonProps();
         this.state = S.NEW;
+        this.createDate = new Date();
     }
 
     /*
@@ -210,6 +213,12 @@ public class Selling extends GenericModel {
     @Expose
     public Date lastSellerCheckDate = new Date();
 
+    /**
+     * 创建Selling时间
+     */
+    @Expose
+    public Date createDate;
+
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Embedded
     @Expose
@@ -319,12 +328,26 @@ public class Selling extends GenericModel {
         if(StringUtils.isNotBlank(fnsku)) {
             this.fnSku = fnsku;
         }
+        //4.通过AMAZON,API形式同步数据回数据库
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("acc_id", this.account.id.toString()));
+        params.add(new BasicNameValuePair("asin", this.asin));
+        params.add(new BasicNameValuePair("market_id", this.market.name()));
+        params.add(new BasicNameValuePair("selling_id", this.sellingId));
+        params.add(new BasicNameValuePair("user_name", Login.current().username));
+        HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
+
         this.save();
     }
 
 
     public void syncAndUpdateAmazon(SellingAmzPost p) {
-        String html = "";
+        try {
+            this.uploadFeedToAmazonForProduct(p);
+        } catch(Exception e) {
+            throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
+        }
+/*        String html = "";
         Document doc = null;
         synchronized(this.account.cookieStore()) {
             // 1. 切换 Selling 所在区域
@@ -356,25 +379,22 @@ public class Selling extends GenericModel {
             this.account.changeRegion(this.account.type);
         }
 
-        F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps
-                .generateDeployAmazonProps(doc, this, p);
-        String[] args = StringUtils
-                .split(paramAndDocTuple._2.select("form[name=productForm]").first()
-                        .attr("action"), ";");
-        /**
+        F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(doc, this, p);
+        String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"),
+                ";");
+        *//**
          * 发送信息
-         */
-        html = HTTP.post(this.account.cookieStore(),
-                M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
-                        (args.length >= 2 ? args[1] : "")),
-                paramAndDocTuple._1);
+         *//*
+        html = HTTP.post(this.account.cookieStore(), M.listingPostPage(this.account.type*//*更新的链接需要账号所在地的 URL*//*,
+                (args.length >= 2 ? args[1] : "")), paramAndDocTuple._1);
         if(StringUtils.isBlank(html)) // 这个最先检查
-            throw new FastRuntimeException(
-                    "Selling update is failed! Return Content is Empty!");
+            throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
         Document rdoc = Jsoup.parse(html);
         Elements error = rdoc.select(".messageboxerror li");
         if(error.size() > 0)
-            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());
+            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());*/
+
+
     }
 
 
@@ -434,7 +454,7 @@ public class Selling extends GenericModel {
         return doc;
     }
 
-    private F.T2<org.w3c.dom.Document, org.w3c.dom.Element> buildHeader(org.w3c.dom.Document doc) {
+    private F.T2<org.w3c.dom.Document, org.w3c.dom.Element> buildHeader(org.w3c.dom.Document doc, String type) {
         org.w3c.dom.Element envelope = doc.createElement("AmazonEnvelope");
         envelope.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         envelope.setAttribute("xsi:noNamespaceSchemaLocation", "amzn-envelope.xsd");
@@ -452,8 +472,18 @@ public class Selling extends GenericModel {
         version.appendChild(tversion);
         Text tidentifier = doc.createTextNode("M_EASYACCDE_11449864");
         identifier.appendChild(tidentifier);
-        Text tmessagetype = doc.createTextNode("ProductImage");
-        messagetype.appendChild(tmessagetype);
+
+        if(type.equals("Img")) {
+            Text tmessagetype = doc.createTextNode("ProductImage");
+            messagetype.appendChild(tmessagetype);
+        } else if(type.equals("Product")) {
+            Text tmessagetype = doc.createTextNode("Product");
+            messagetype.appendChild(tmessagetype);
+        } else if(type.equals("Price")) {
+            Text tmessagetype = doc.createTextNode("Price");
+            messagetype.appendChild(tmessagetype);
+        }
+
         return new F.T2<org.w3c.dom.Document, org.w3c.dom.Element>(doc, envelope);
     }
 
@@ -512,7 +542,7 @@ public class Selling extends GenericModel {
     /**
      * 用Feed方式更新产品图片
      */
-    public void uploadFeedAmazonImg(String imageName, boolean waterMark,String userName) {
+    public void uploadFeedAmazonImg(String imageName, boolean waterMark, String userName) {
         //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         String dealImageNames = imageName;
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
@@ -524,7 +554,7 @@ public class Selling extends GenericModel {
 
 
         org.w3c.dom.Document doc = buildDoc();
-        F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc);
+        F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Img");
         doc = element._1;
         org.w3c.dom.Element envelope = element._2;
 
@@ -610,7 +640,7 @@ public class Selling extends GenericModel {
         if(!Selling.exist(this.sid()))
             return this.save();
         else
-            return this;
+            throw new FastRuntimeException("Selling 已经存在！");
     }
 
 
@@ -722,6 +752,31 @@ public class Selling extends GenericModel {
         return Feed.find("fid=? ORDER BY createdAt DESC", this.sellingId).fetch();
     }
 
+    public Feed recentlyFeed() {
+        Feed feed = Feed.find("fid=? ORDER BY createdAt DESC", this.sellingId).first();
+        return feed;
+    }
+
+    public String showFeedStatus() {
+        Feed feed = this.recentlyFeed();
+        if(feed != null) {
+            String result = feed.result;
+            if(StringUtils.isNotBlank(result)) {
+                int index = result.indexOf("");
+            }
+
+        }
+        return "";
+    }
+
+    public Date showDownDate() {
+        Listing listing = this.listing;
+        ListingStateRecord record = ListingStateRecord.find("listing.listingId = ? AND state = ? " +
+                " ORDER BY changedDate DESC", listing.listingId, ListingStateRecord.S.DOWN).first();
+        if(record != null)
+            return record.changedDate;
+        return null;
+    }
 
     public Float salePriceWithCurrency() {
         if(this.aps.salePrice == null) return 0f;
@@ -808,7 +863,7 @@ public class Selling extends GenericModel {
      * @param market       String
      * @param action       String
      * @return String 生成的模板数据
-     *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
+     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
     public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
                                                   String action) {
@@ -1019,4 +1074,159 @@ public class Selling extends GenericModel {
             this.account.changeRegion(this.market);
         }
     }
+
+    public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
+        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
+                p.productdesc) {
+            org.w3c.dom.Document doc = buildDoc();
+            F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Product");
+            doc = element._1;
+            org.w3c.dom.Element envelope = element._2;
+            doc = buildProductNode(doc, envelope, p, "Update");
+            String productContent = "";
+            productContent = getStringFromDoc(doc);
+            Feed feed = Feed.updateSellingFeed(productContent, this);
+            List<NameValuePair> productParams = this.submitJobParams(feed);
+            productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
+            productParams.add(new BasicNameValuePair("user_name", Login.current().username));
+            HTTP.post("http://rock.easya.cc:4567/amazon_submit_product_feed", productParams);
+        }
+
+        if(p.standerprice || p.saleprice) {
+            org.w3c.dom.Document priceDoc = buildDoc();
+            F.T2<org.w3c.dom.Document, org.w3c.dom.Element> price_element = buildHeader(priceDoc, "Price");
+            priceDoc = price_element._1;
+            org.w3c.dom.Element priceEnvelope = price_element._2;
+            priceDoc = this.buildPriceNode(priceDoc, priceEnvelope, p);
+            String priceContent = getStringFromDoc(priceDoc);
+            Feed pricefeed = Feed.updateSellingFeed(priceContent, this);
+            List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
+            priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
+            priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
+            HTTP.post("http://rock.easya.cc:4567/amazon_submit_price_feed", priceParams);
+        }
+    }
+
+
+    private org.w3c.dom.Document buildProductNode(org.w3c.dom.Document doc,
+                                                  org.w3c.dom.Element envelope,
+                                                  SellingAmzPost p, String action) {
+        org.w3c.dom.Element purgeAndReplace = doc.createElement("PurgeAndReplace");
+        envelope.appendChild(purgeAndReplace);
+        Text purgeValue = doc.createTextNode("false");
+        purgeAndReplace.appendChild(purgeValue);
+
+        org.w3c.dom.Element message = doc.createElement("Message");
+        envelope.appendChild(message);
+
+        org.w3c.dom.Element messageid = doc.createElement("MessageID");
+        message.appendChild(messageid);
+        org.w3c.dom.Element operationtype = doc.createElement("OperationType");
+        message.appendChild(operationtype);
+
+        Text tmessageid = doc.createTextNode(String.valueOf(1));
+        messageid.appendChild(tmessageid);
+        Text toperationtype = doc.createTextNode(action);
+        operationtype.appendChild(toperationtype);
+
+        org.w3c.dom.Element product = doc.createElement("Product");
+        message.appendChild(product);
+        //建立SKU元素
+        this.buildElement(doc, product, "SKU", this.merchantSKU, "", "");
+        //建立standardProductID元素
+        org.w3c.dom.Element standardProductID = doc.createElement("StandardProductID");
+        product.appendChild(standardProductID);
+        this.buildElement(doc, standardProductID, "Type", "ASIN", "", "");
+        this.buildElement(doc, standardProductID, "Value", this.asin, "", "");
+        //建立DescriptionData
+        org.w3c.dom.Element descriptionData = doc.createElement("DescriptionData");
+        product.appendChild(descriptionData);
+        //更新title
+        if(p.title) {
+            buildElement(doc, descriptionData, "Title", this.aps.title, "", "");
+        }
+        //更新productdesc
+        if(p.productdesc) {
+            buildElement(doc, descriptionData, "Description", this.aps.productDesc, "", "");
+        }
+        //更新BulletPoint 1~5
+        if(p.keyfeturess) {
+            for(String text : this.aps.keyFeturess) {
+                if(StringUtils.isNotBlank(text)) {
+                    buildElement(doc, descriptionData, "BulletPoint", text, "", "");
+                }
+            }
+        }
+        if(p.productvolume || p.productWeight) {
+            org.w3c.dom.Element itemDimensions = doc.createElement("ItemDimensions");
+            descriptionData.appendChild(itemDimensions);
+            if(p.productvolume) {
+                buildElement(doc, itemDimensions, "Length", p.productLengths.toString(), "unitOfMeasure",
+                        p.volumeunit);
+                buildElement(doc, itemDimensions, "Width", p.productWidth.toString(), "unitOfMeasure",
+                        p.volumeunit);
+                buildElement(doc, itemDimensions, "Height", p.productHeigh.toString(), "unitOfMeasure",
+                        p.volumeunit);
+            }
+/*            if(p.productWeight) {
+                buildElement(doc, itemDimensions, "Weight", p.proWeight.toString(), "unitOfMeasure",
+                        p.productWeightUnit);
+            }*/
+        }
+/*        if(p.weight) {
+            buildElement(doc, descriptionData, "PackageWeight", this.listing.product.weight.toString(), "unitOfMeasure",
+                    p.weightUnit);
+        }*/
+        if(p.searchtermss) {
+            for(String word : this.aps.searchTermss) {
+                if(StringUtils.isNotBlank(word)) {
+                    buildElement(doc, descriptionData, "SearchTerms", word, "", "");
+                }
+            }
+        }
+        if(p.rbns) {
+            if(this.aps.rbns != null && this.aps.rbns.size() >= 1) {
+                for(int i = 0; i < this.aps.rbns.size(); i++) {
+                    buildElement(doc, descriptionData, "ItemType", this.aps.rbns.get(i), "", "");
+                }
+            }
+        }
+        return doc;
+    }
+
+    private org.w3c.dom.Document buildPriceNode(org.w3c.dom.Document doc, org.w3c.dom.Element envelope,
+                                                SellingAmzPost p) {
+        org.w3c.dom.Element message = doc.createElement("Message");
+        envelope.appendChild(message);
+        this.buildElement(doc, message, "MessageID", "1", "", "");
+        org.w3c.dom.Element price = doc.createElement("Price");
+        message.appendChild(price);
+        this.buildElement(doc, price, "SKU", this.merchantSKU, "", "");
+        this.buildElement(doc, price, "StandardPrice", String.valueOf(this.aps.standerPrice), "currency", Currency.M
+                (this.market).toString());
+        if(p.saleprice) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            org.w3c.dom.Element sale = doc.createElement("Sale");
+            price.appendChild(sale);
+            DateTime start = this.market.withTimeZone(formatter.format(this.aps.startDate));
+            DateTime end = this.market.withTimeZone(formatter.format(this.aps.endDate));
+            this.buildElement(doc, sale, "StartDate", start.toString(), "", "");
+            this.buildElement(doc, sale, "EndDate", end.toString(), "", "");
+            this.buildElement(doc, sale, "SalePrice", String.valueOf(this.aps.standerPrice), "currency", Currency.M
+                    (this.market).toString());
+        }
+        return doc;
+    }
+
+    private void buildElement(org.w3c.dom.Document doc, org.w3c.dom.Element parentDoc, String elementName,
+                              String value, String attributeName, String attributeValue) {
+        org.w3c.dom.Element obj = doc.createElement(elementName);
+        parentDoc.appendChild(obj);
+        Text textNode = doc.createTextNode(value);
+        obj.appendChild(textNode);
+        if(StringUtils.isNotBlank(attributeName)) {
+            obj.setAttribute(attributeName, attributeValue);
+        }
+    }
+
 }

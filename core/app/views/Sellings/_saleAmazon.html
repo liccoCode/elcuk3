@@ -1,48 +1,8 @@
-#{extends 'main_full.html'/}
-#{set title: '提交 Feed 创建 Selling' /}
-#{set 'moreStyles'}
-    #{stylesheet_cdn name:'market.css'/}
-#{/set}
-#{set 'moreScripts'}
-    #{script_cdn name: 'editor/kindeditor-min.js'/}
-    #{script_cdn name: 'editor/lang/zh_CN.js'/}
-    #{script_cdn name: 'component/amazon.coffee'/}
-    #{script_cdn name: 'products/saleAmazon.coffee'/}
-#{/set}
-<div id='check_modal' class="modal hide fade">
-  <div class="modal-header">
-    <h3>使用 <span id="upc_num"></span> 上架的 Selling</h3>
-  </div>
-  <div class="modal-body">
-    <p class="text-error">当前 SKU 为: ${product.sku}</p>
-
-    <div class="innder-modal"></div>
-  </div>
-  <div class="modal-footer">
-    <a href="#" id='check_cancel' data-dismiss='modal' class="btn">取消</a>
-    <a href="#" id="check_apply" class="btn btn-primary">应用</a>
-  </div>
-  <blockquote class="template">
-    <p class='check_title'></p>
-    <small class='check_id'></small>
-  </blockquote>
-</div>
-
-
 <div class="row-fluid">
-  <div class="btn-toolbar" id="btns">
-    <div class="btn-group">
-      <button class="btn btn-success" id="submitSale" data-disable-with='提交请求中...'>提交 Feed 创建 Selling</button>
-    </div>
-  </div>
-
 #{form @Products.saleAmazonListing(), class: 'form-horizontal', id: 'saleAmazonForm'}
-  <div class="span10">
-      #{textarea_field id:'title', name: 's.aps.title', rows: 3, label: '标题', value: '' /}
-  </div>
   <div class="span5">
       #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku/}
-      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc, readonly:true /}
+      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc, readonly: true /}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: 'EasyAcc' /}
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: 'EasyAcc'/}
       #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: '' /}
@@ -66,21 +26,27 @@
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber',readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: product.partNumber /}
       #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+    <div class="control-group">
+      <label class="control-label" for="sellingCycle">生命周期</label>
 
-    <label class="control-label" for="sellingCycle">生命周期</label>
-
-    <div class="controls">
-      <select name="s.sellingCycle" size="1">
-          #{list items:models.market.Selling.SC.values(), as: 'cycle'}
-            <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
-          #{/list}
-      </select>
+      <div class="controls">
+        <select name="s.sellingCycle" class="span10">
+            #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+              <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+            #{/list}
+        </select>
+      </div>
     </div>
-
   </div>
-  <div class="span12">
+
+  <div class="span5" style="text-align:right;">
       #{input_append /}
   </div>
+
+  <div class="span10">
+      #{textarea_field id:'title', name: 's.aps.title', rows: 3, label: '标题', value: '' /}
+  </div>
+
   <div class="span10">
     <div id="hardwarePlatformHome" style="display: none">
         #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
@@ -105,8 +71,8 @@
   </div>
   <div class="offset1 span9" id="previewDesc"></div>
 #{/form}
+
 #{include 'Sellings/_invalid_characters.html'/}
 </div>
-
 
 #{tsp_show_template /}

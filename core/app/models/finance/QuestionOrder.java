@@ -17,7 +17,6 @@ import java.util.Date;
  * Created by licco on 15/9/11.
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class QuestionOrder extends Model {
 
     public String orderId;

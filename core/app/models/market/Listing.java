@@ -539,15 +539,32 @@ public class Listing extends GenericModel {
      */
     public void recordingListingState(Date changedDate) {
         long count = Selling.count("state='SELLING' AND listing_listingId=?", this.listingId);
+        long num = Selling.count("listing_listingId=? ", this.listingId);
         ListingStateRecord record = new ListingStateRecord();
         record.listing = this;
         if(count > 0) {
             record.changedDate = changedDate;
             record.state = ListingStateRecord.S.SELLING;
         } else {
-            record.state = ListingStateRecord.S.DOWN;
+            if(num == 0) {
+                record.state = ListingStateRecord.S.NEW;
+            } else {
+                record.state = ListingStateRecord.S.DOWN;
+            }
         }
         record.save();
         record.pushRecordToCache();
+    }
+
+    public static String handleAsinBySku(String sku) {
+        String asin = "";
+        Product product = Product.findById(sku);
+        if(product != null) {
+            List<Listing> listings = product.listings;
+            if(listings.size() > 0) {
+                asin = listings.get(0).asin;
+            }
+        }
+        return asin;
     }
 }

@@ -8,6 +8,8 @@ import helper.J;
 import helper.Webs;
 import jobs.works.ListingReviewsWork;
 import models.market.*;
+import models.product.Family;
+import models.product.Product;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
@@ -34,7 +36,9 @@ public class AmazonOperations extends Controller {
 
     public static void index() {
         Set<String> allAsin = Listing.allASIN();
+        List<String> families = Family.familys(true);
         renderArgs.put("asins", J.json(allAsin));
+        renderArgs.put("families", J.json(families));
         render();
     }
 
@@ -44,16 +48,27 @@ public class AmazonOperations extends Controller {
      * @param asin
      * @param m
      */
-    public static void ajaxMagic(String asin, String m, String orderby) {
+    public static void ajaxMagic(String asin, String m, String orderby, String sku) {
         M market = M.val(m);
         if(StringUtils.isBlank(orderby)) orderby = "createDate";
-        List<AmazonListingReview> savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market), orderby);
+        if(StringUtils.isNotBlank(sku)) {
+            asin = Listing.handleAsinBySku(sku);
+        }
+        List<AmazonListingReview> savedReviews;
+        if(StringUtils.isBlank(sku)){
+            savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market), orderby);
+        } else{
+            savedReviews = AmazonListingReview.listingReviewsBySKU(sku, orderby);
+        }
         Listing lst = Listing.findById(Listing.lid(asin, market));
         render(savedReviews, lst);
     }
 
-    public static void reviewTable(String asin, String m) {
+    public static void reviewTable(String asin, String m, String sku) {
         M market = M.val(m);
+        if(StringUtils.isNotBlank(sku)) {
+            asin = Listing.handleAsinBySku(sku);
+        }
         String lid = Listing.lid(asin, market);
         Listing lst = Listing.findById(lid);
         List<F.T2<Long, Integer>> rows = lst.reviewMonthTable();
@@ -86,23 +101,33 @@ public class AmazonOperations extends Controller {
         renderJSON(J.json(new F.T2<Integer, String>(accT2._2, J.G(t2._1))));
     }
 
-    public static void reCrawl(String asin, String m) {
+    public static void reCrawl(String asin, String m, String sku) {
         M market = M.val(m);
-        String lid = Listing.lid(asin, market);
-        try {
-            if(!Listing.exist(lid)) {
-                // 如果不存在, 先去抓取 Listing 然后再抓取 Review
-                Listing lst = Listing.crawl(asin, market);
-                if(lst != null) {
-                    lst.save();
-                    await(new ListingReviewsWork(lid).now());
-                } else
-                    renderJSON(new Ret(false, "Amazon 上 Listing 不存在或者已经被删除."));
-            } else {
-                await(new ListingReviewsWork(lid).now());
+        String lid = "";
+        if(StringUtils.isNotBlank(asin)) {
+            lid = Listing.lid(asin, market);
+        } else {
+            Listing listing = Listing.find("product.sku = ? AND market = ? ", sku, market).first();
+            if(listing != null) {
+                lid = listing.listingId;
             }
-        } catch(Exception e) {
-            throw new FastRuntimeException(Webs.S(e));
+        }
+        if(StringUtils.isNotBlank(lid)) {
+            try {
+                if(!Listing.exist(lid)) {
+                    // 如果不存在, 先去抓取 Listing 然后再抓取 Review
+                    Listing lst = Listing.crawl(asin, market);
+                    if(lst != null) {
+                        lst.save();
+                        await(new ListingReviewsWork(lid).now());
+                    } else
+                        renderJSON(new Ret(false, "Amazon 上 Listing 不存在或者已经被删除."));
+                } else {
+                    await(new ListingReviewsWork(lid).now());
+                }
+            } catch(Exception e) {
+                throw new FastRuntimeException(Webs.S(e));
+            }
         }
         renderJSON(new Ret(true, AmazonListingReview.countListingReview(Listing.lid(asin, market)) + ""));
     }
@@ -122,8 +147,11 @@ public class AmazonOperations extends Controller {
      * @param asin
      * @param m
      */
-    public static void wishList(String asin, String m) {
+    public static void wishList(String asin, String m, String sku) {
         M market = M.val(m);
+        if(StringUtils.isNotBlank(sku)) {
+            asin = Listing.handleAsinBySku(sku);
+        }
         String lid = Listing.lid(asin, market);
         F.T2<Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
         Listing listing = Listing.findById(lid);

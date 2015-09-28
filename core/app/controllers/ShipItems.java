@@ -76,11 +76,11 @@ public class ShipItems extends Controller {
      * @param qty
      */
     @Check("shipitems.received")
-    public static void received(Long id, Integer qty,String compentype, String msg,Integer lossqty,Currency currency,
+    public static void received(Long id, Integer qty, String compentype, String msg, Integer lossqty, Currency currency,
                                 Float compenamt) {
         if(qty == null) qty = 0;
         ShipItem itm = ShipItem.findById(id);
-        itm.receviedQty(qty, msg,compentype,lossqty,currency,compenamt);
+        itm.receviedQty(qty, msg, compentype, lossqty, currency, compenamt);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else

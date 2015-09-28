@@ -24,13 +24,16 @@ $ ->
 
   valid_length = (element) ->
     if element.getAttribute('id').indexOf('bulletPoint') > -1
-        2000
-      else if element.getAttribute('id').indexOf('searchTerms') > -1
-        50
-      else if element.getAttribute('id').indexOf('productDesc') > -1
+      2000
+    else if element.getAttribute('id').indexOf('searchTerms') > -1
+      if $("#market").val() == 'AMAZON_FR'
         2000
       else
-        1000
+        50
+    else if element.getAttribute('id').indexOf('productDesc') > -1
+      2000
+    else
+      1000
 
   # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
   $('#saleAmazonForm').on('keyup blur', "[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss']", (e) ->
@@ -164,6 +167,8 @@ $ ->
     $("#feedProductType").trigger('adjust')
     # 市场变化时检查非法字符
     $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
+    # 改变字符长度
+    $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
   )
 
   # 模板 下拉项变化 feedProductType 跟着变化

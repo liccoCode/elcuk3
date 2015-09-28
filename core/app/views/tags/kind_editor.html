@@ -1,0 +1,13 @@
+<script type="text/coffeescript" >
+  alert 1
+  KindEditor.ready (K) ->
+    window.editor = K.create('#productDesc', {
+      resizeType: 1,
+      allowPreviewEmoticons: false,
+      allowImageUpload: false,
+      afterChange: -> this.sync();
+      items: [
+        'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+        'removeformat']
+    })
+</script>

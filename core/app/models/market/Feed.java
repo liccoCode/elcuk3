@@ -43,6 +43,11 @@ public class Feed extends Model {
     @Lob
     public String result = " ";
 
+    /**
+     * 分析结果，由ruby端解析回填而来
+     */
+    public String analyzeResult;
+
     public Date createdAt;
 
     public Date updatedAt;
