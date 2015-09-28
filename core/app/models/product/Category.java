@@ -261,6 +261,7 @@ public class Category extends GenericModel {
                     .where(SqlSelect.whereIn("category_categoryId", categoryIds));
             rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         }
+        if(rows == null) return skus;
         for(Map<String, Object> row : rows) {
             skus.add(row.get("sku").toString());
         }
@@ -268,7 +269,7 @@ public class Category extends GenericModel {
     }
 
     public static List<String> getSKUs(String categoryId) {
-        if (StringUtils.isBlank(categoryId)){
+        if(StringUtils.isBlank(categoryId)) {
             return new ArrayList<String>();
         }
         return getSKUs(Arrays.asList(categoryId));
