@@ -58,8 +58,17 @@ public class SellingPost extends Post<Selling> {
             sql.append(" AND s.listing.product.category.categoryId = ? ");
             params.add(categoryid);
         } else {
-            sql.append(" AND s.listing.product.category.categoryId in " +
-                    SqlSelect.inlineParam(User.getTeamCategorys(User.current())));
+            List<String> categorys = User.getTeamCategorys(User.current());
+
+            if(categorys != null && categorys.size() > 0) {
+                sql.append(" AND s.listing.product.category.categoryId in " +
+                        SqlSelect.inlineParam(categorys));
+            } else {
+                categorys = new ArrayList<String>();
+                categorys.add("-1");
+                sql.append(" AND s.listing.product.category.categoryId in " +
+                                       SqlSelect.inlineParam(categorys));
+            }
         }
         if(StringUtils.isNotBlank(keywords)) {
             sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.listing.product.sku LIKE ? ) ");
