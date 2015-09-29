@@ -67,8 +67,8 @@ public class Sellings extends Controller {
         renderArgs.put("feeds", s.feeds());
 
         List<ElcukRecord> logs =
-                ElcukRecord.find("fid=? AND (action=? or action=?) ORDER BY createAt DESC", id.toString(),
-                        "selling.image", "selling.sync.back").fetch(4);
+                ElcukRecord.find("fid=? AND (action=? or action=? or action=?) ORDER BY createAt DESC", id.toString(),
+                        "selling.image", "selling.sync.back", "selling.update").fetch(4);
         renderArgs.put("records", logs);
         SellingAmzPost p = new SellingAmzPost();
         render(s, p);
