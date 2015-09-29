@@ -195,6 +195,29 @@ public enum M {
         }
     }
 
+    public String toMerchantIdentifier() {
+        switch(this) {
+            case AMAZON_CA:
+                return "AE1AM2BP4WMK9";
+            case AMAZON_US:
+                return "M_EASYACCAST_1160595";
+            case AMAZON_DE:
+                return "M_EASYACCDE_11449864";
+            case AMAZON_ES:
+                return "M_EASYACCDE_11449864";
+            case AMAZON_FR:
+                return "M_EASYACCFST_1493129";
+            case AMAZON_JP:
+                return "M_EASYACCJST_2396604";
+            case AMAZON_IT:
+                return "M_YEPINGXIE_14931284";
+            case AMAZON_UK:
+                return "M_EASYACC_104529564";
+            default:
+                return "";
+        }
+    }
+
 
     /**
      * Amazon MarketPlaceId, 在 Amazon 上用来区分 uk/de/us 等等市场的 ID

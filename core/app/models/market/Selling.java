@@ -470,7 +470,7 @@ public class Selling extends GenericModel {
 
         Text tversion = doc.createTextNode("1.01");
         version.appendChild(tversion);
-        Text tidentifier = doc.createTextNode(this.account.merchantId);
+        Text tidentifier = doc.createTextNode(this.market.toMerchantIdentifier());
         identifier.appendChild(tidentifier);
 
         if(type.equals("Img")) {
