@@ -470,7 +470,7 @@ public class Selling extends GenericModel {
 
         Text tversion = doc.createTextNode("1.01");
         version.appendChild(tversion);
-        Text tidentifier = doc.createTextNode("M_EASYACCDE_11449864");
+        Text tidentifier = doc.createTextNode(this.account.merchantId);
         identifier.appendChild(tidentifier);
 
         if(type.equals("Img")) {
@@ -1212,7 +1212,7 @@ public class Selling extends GenericModel {
             DateTime end = this.market.withTimeZone(formatter.format(this.aps.endDate));
             this.buildElement(doc, sale, "StartDate", start.toString(), "", "");
             this.buildElement(doc, sale, "EndDate", end.toString(), "", "");
-            this.buildElement(doc, sale, "SalePrice", String.valueOf(this.aps.standerPrice), "currency", Currency.M
+            this.buildElement(doc, sale, "SalePrice", String.valueOf(this.aps.salePrice), "currency", Currency.M
                     (this.market).toString());
         }
         return doc;
