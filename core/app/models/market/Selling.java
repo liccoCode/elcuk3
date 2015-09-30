@@ -1082,7 +1082,7 @@ public class Selling extends GenericModel {
             F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Product");
             doc = element._1;
             org.w3c.dom.Element envelope = element._2;
-            doc = buildProductNode(doc, envelope, p, "Update");
+            doc = buildProductNode(doc, envelope, p, "PartialUpdate");
             String productContent = "";
             productContent = getStringFromDoc(doc);
             Feed feed = Feed.updateSellingFeed(productContent, this);
