@@ -18,7 +18,9 @@ class ShipPayUnitActor
       "FBA_UK" => "AMAZON_UK",
       "FBA_IT" => "AMAZON_IT",
       "FBA_JP" => "AMAZON_JP",
-      "FBA_FR" => "AMAZON_FR"
+      "FBA_FR" => "AMAZON_FR",
+      "FBA_CA" => "AMAZON_CA",
+      "FBA_ES" => "AMAZON_ES"
     }
   end
 

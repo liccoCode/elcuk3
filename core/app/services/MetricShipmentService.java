@@ -69,18 +69,11 @@ public class MetricShipmentService {
     private BoolQueryBuilder filterbuilder() {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         BoolQueryBuilder qb = QueryBuilders.boolQuery();
-        DateTime fromD = null;
-        DateTime toD = null;
-        if(this.market == null) {
-            fromD = new DateTime(this.from);
-            toD = new DateTime(this.to);
-        } else {
-            fromD = this.market.withTimeZone(this.from);
-            toD = this.market.withTimeZone(this.to);
-            //market 不为空时做 market 过滤
+        DateTime fromD = new DateTime(this.from);
+        DateTime toD = new DateTime(this.to);
+        if(this.market != null) {
             qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
-
         //日期过滤
         qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat))
                 .lt(toD.toString(isoFormat)));
