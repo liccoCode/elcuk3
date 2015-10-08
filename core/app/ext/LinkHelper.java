@@ -173,8 +173,8 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_JP:
             case AMAZON_US:
                 return "https://sellercentral." + fba.account.type.toString() +
-                        "/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=" +
-                        fba.shipmentId;
+                        "/gp/fba/inbound-shipment-workflow/index.html#" +
+                        fba.shipmentId+"/summary/tracking";
             case EBAY_UK:
             default:
                 return "";
