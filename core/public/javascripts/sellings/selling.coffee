@@ -68,24 +68,21 @@ $ ->
 
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
-    if !previewBtn.call($("#productDesc"))
-      LoadMask.mask('#btns')
-      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
-      .done((r) ->
-          msg = if r.flag is true
-            "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
-          else
-            r.message
-          alert msg
-          LoadMask.unmask('#btns')
-        )
-      .fail((r) ->
-          alert r.responseText
-          LoadMask.unmask('#btns')
-        )
-      false
-
-
+    LoadMask.mask('#btns')
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
+    .done((r) ->
+        msg = if r.flag is true
+          "#{r.message} AMAZON的Selling局部更新成功"
+        else
+          r.message
+        alert msg
+        LoadMask.unmask('#btns')
+      )
+    .fail((r) ->
+        alert r.responseText
+        LoadMask.unmask('#btns')
+      )
+    false
 
 
   # Deploy 按钮
