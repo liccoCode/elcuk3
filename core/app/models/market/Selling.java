@@ -1085,7 +1085,7 @@ public class Selling extends GenericModel {
             List<NameValuePair> productParams = this.submitJobParams(feed);
             productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
             productParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://rock.easya.cc:4567/amazon_submit_product_feed", productParams);
+            HTTP.post("http://192.168.100.160:4567/amazon_submit_product_feed", productParams);
         }
 
         if(p.standerprice || p.saleprice) {
@@ -1099,7 +1099,7 @@ public class Selling extends GenericModel {
             List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
             priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
             priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://rock.easya.cc:4567/amazon_submit_price_feed", priceParams);
+            HTTP.post("http://192.168.100.160:4567/amazon_submit_price_feed", priceParams);
         }
     }
 
