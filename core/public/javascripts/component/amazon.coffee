@@ -236,8 +236,12 @@ $ ->
     market = $('#market').val()
     if market is 'AMAZON_JP'
       Invalid_Characters = JP_Invalid_Characters
+      $("#upc").val($("#upc_jp").val())
+      $("#partNumber").val($("#partNumber_jp").val())
     else
       Invalid_Characters = $.extend(EU_And_US_Invalid_Characters, JP_Invalid_Characters)
+      $("#upc").val($("#upc_init").val())
+      $("#partNumber").val($("#partNumber_jp").val())
     for key, value of Invalid_Characters
       if str.indexOf(key) >= 0
         reg = "/#{key}/g"

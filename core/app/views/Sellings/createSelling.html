@@ -6,7 +6,6 @@
 #{set 'moreScripts'}
     #{script 'editor/kindeditor-min.js'/}
     #{script 'editor/lang/zh_CN.js'/}
-    #{script 'component/amazon.coffee'/}
     #{script 'products/saleAmazon.coffee'/}
     #{script 'sellings/createSelling.coffee'/}
 #{/set}
@@ -46,9 +45,11 @@
     #{text_field id: 'addSellingSku', name: 'sku', label: 'SKU', readonly: true/}
     #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code", readonly: true/}
     #{text_field id: 'asin', name: 'asin', label: 'ASIN', placeholder: "Amazon Standard Identification Number" /}
-    #{select_field id:'market', name: 'market', items: models.market.M.values(), label: 'Market' /}
+    #{select_field id:'market_add', name: 'market', items: models.market.M.values(), label: 'Market' /}
     #{select_field id:'acc.id', name: 'acc.id', items: models.market.Account.openedSaleAcc(), label: 'Account' /}
 
     </form>
+    <input type="hidden" id="upc_jp"/>
+    <input type="hidden" id="upc_init"/>
   </div>
 </div>

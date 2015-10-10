@@ -20,11 +20,13 @@ $ ->
         $.post('/products/findUPC', sku: $("#inputsku").val(),
           (r) ->
             $("#addDiv").fadeIn()
-            $("#amzDiv").fadeOut()
+            $("#amzDiv").html("")
             $("#submitSaleBtn").show()
             $("#submitSaleBtn").text("添加Selling")
             $("#addSellingSku").val($("#inputsku").val())
             $("#upc").val(r.upc)
+            $("#upc_init").val(r.upc)
+            $("#upc_jp").val(r.upcJP)
         )
       else
         $("#amzDiv").load('/Sellings/saleAmazon', id: $("#inputsku").val(), (r) ->
@@ -41,7 +43,9 @@ $ ->
               afterChange: -> this.sync(); $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
             })
           )
-          $.getScript('../public/javascripts/component/amazon.coffee')
+          $.getScript('../public/javascripts/component/amazon.coffee', ->
+            $("#feedProductType").trigger('adjust')
+          )
         )
         $("#addDiv").fadeOut()
         $("#submitSaleBtn").text("AMZ上架")
@@ -110,3 +114,10 @@ $ ->
     noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
     invalidTag
 
+  $('#market_add').change(->
+    market = $(@).val()
+    if market is 'AMAZON_JP'
+      $("#upc").val($("#upc_jp").val())
+    else
+      $("#upc").val($("#upc_init").val())
+  )

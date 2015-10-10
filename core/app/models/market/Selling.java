@@ -6,6 +6,7 @@ import controllers.Login;
 import helper.*;
 import helper.Currency;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
 import models.product.Attach;
@@ -389,6 +390,7 @@ public class Selling extends GenericModel {
         Elements error = rdoc.select(".messageboxerror li");
         if(error.size() > 0)
             throw new FastRuntimeException("AMAZON错误,Error:" + error.text());
+        new ElcukRecord("selling.update", "执行模拟操作", this.sellingId).save();
     }
 
 

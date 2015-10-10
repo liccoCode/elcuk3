@@ -444,6 +444,6 @@ public class Products extends Controller {
 
     public static void findUPC(String sku) {
         Product pro = Product.findById(sku);
-        renderJSON(J.json(GTs.MapBuilder.map("upc", pro.upc).build()));
+        renderJSON(J.json(GTs.MapBuilder.map("upc", pro.upc).put("upcJP", pro.upcJP).build()));
     }
 }
