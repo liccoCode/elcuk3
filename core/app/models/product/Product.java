@@ -388,6 +388,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Required
     public String upc;
 
+    public String partNumberJP;
+
+    public String upcJP;
+
     @Transient
     public int iscopy = 0;
 

@@ -139,9 +139,11 @@
           </td>
 
           <th>上架状态</th>
-          <td colspan="3">
+          <td>
           #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
           </td>
+          <th>UPC</th>
+          <td><input type="text" name="pro.upc" value="${pro.upc}" required></td>
         </tr>
 
         <tr>
@@ -151,9 +153,11 @@
           </td>
 
           <th>产品的生命周期</th>
-          <td colspan="3">
+          <td>
           #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
           </td>
+          <th>Part Number</th>
+          <td><input type="text" name="pro.partNumber" value="${pro.partNumber}" required></td>
         </tr>
 
         <tr>
@@ -167,8 +171,8 @@
             <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
           </td>
 
-          <th>UPC</th>
-          <td><input type="text" name="pro.upc" value="${pro.upc}" required></td>
+          <th>UPC(JP)</th>
+          <td><input type="text" name="pro.upcJP" value="${pro.upcJP}" required></td>
         </tr>
 
         <tr>
@@ -177,8 +181,8 @@
             <input type="text" style="width:95%" id="pro_abbreviation" name="pro.abbreviation" value="${pro.abbreviation}"
                    required="required">
           </td>
-          <th>Part Number</th>
-          <td><input type="text" name="pro.partNumber" value="${pro.partNumber}" required></td>
+          <th>Part Number(JP)</th>
+          <td><input type="text" name="pro.partNumberJP" value="${pro.partNumberJP}" required></td>
         </tr>
 
         <tr>

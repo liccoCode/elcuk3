@@ -108,5 +108,9 @@
 #{include 'Sellings/_invalid_characters.html'/}
 </div>
 
+<input type="hidden" id="upc_init" value="${product.upc}"/>
+<input type="hidden" id="partNumber_init" value="${product.partNumber}"/>
+<input type="hidden" id="upc_jp" value="${product.upcJP}"/>
+<input type="hidden" id="partNumber_jp" value="${product.partNumberJP}"/>
 
 #{tsp_show_template /}

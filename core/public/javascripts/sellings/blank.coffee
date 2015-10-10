@@ -24,6 +24,17 @@ $ ->
       $.post('/products/findUPC', sku: item,
         (r) ->
           $("#upc").val(r.upc)
+          $("#upc_init").val(r.upc)
+          $("#upc_jp").val(r.upcJP)
       )
       item
   })
+
+
+  $('#market').change(->
+    market = $(@).val()
+    if market is 'AMAZON_JP'
+      $("#upc").val($("#upc_jp").val())
+    else
+      $("#upc").val($("#upc_init").val())
+  )
