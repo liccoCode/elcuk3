@@ -1,7 +1,10 @@
 package controllers;
 
 import helper.Constant;
-import jobs.analyze.SellingRecordCaculateJob;
+import helper.Dates;
+import helper.GTs;
+import helper.J;
+import models.ElcukRecord;
 import models.Privilege;
 import models.User;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,6 +18,7 @@ import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.krysalis.barcode4j.tools.MimeTypes;
 import play.Logger;
 import play.data.binding.As;
+import play.mvc.Http;
 import play.mvc.Util;
 
 import java.awt.image.BufferedImage;
@@ -27,10 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
-import play.mvc.Http;
-
-import java.net.HttpCookie;
 
 
 /**
@@ -67,9 +67,15 @@ public class Login extends Secure.Security {
             Http.Response.current().setCookie("kod_name", "elcuk2", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
             Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), "easyacc.com", "/",
                     60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_language", "zh_CN", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current()
+                    .setCookie("kod_user_language", "zh_CN", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
             Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easyacc.com", "/",
                     60 * 60 * 24 * 30, false);
+            new ElcukRecord("login", J.json(
+                    GTs.MapBuilder.map("Username", username).put("Ip", request.remoteAddress)
+                            .put("UserAgent", request.headers.get("user-agent").toString()).
+                            put("Date", Dates.date2DateTime(DateTime.now())).build()
+            ), username, null).save();
         }
         return iscorrect;
     }
