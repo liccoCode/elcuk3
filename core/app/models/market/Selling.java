@@ -1142,12 +1142,11 @@ public class Selling extends GenericModel {
         org.w3c.dom.Element descriptionData = doc.createElement("DescriptionData");
         product.appendChild(descriptionData);
         //更新title
-        if(p.title) {
-            buildElement(doc, descriptionData, "Title", this.aps.title, "", "");
-        }
+        buildElement(doc, descriptionData, "Title", this.aps.title, "", "");
         //更新productdesc
         if(p.productdesc) {
-            buildElement(doc, descriptionData, "Description", this.aps.productDesc, "", "");
+            String productDesc = this.aps.productDesc.replace("<br />", "<br>");
+            buildElement(doc, descriptionData, "Description", productDesc, "", "");
         }
         //更新BulletPoint 1~5
         if(p.keyfeturess) {
