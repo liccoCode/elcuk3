@@ -1146,6 +1146,7 @@ public class Selling extends GenericModel {
         //更新productdesc
         if(p.productdesc) {
             String productDesc = this.aps.productDesc.replace("<br />", "<br>");
+            productDesc = productDesc.replace("<span>", "</span>");
             buildElement(doc, descriptionData, "Description", productDesc, "", "");
         }
         //更新BulletPoint 1~5
@@ -1176,6 +1177,14 @@ public class Selling extends GenericModel {
             buildElement(doc, descriptionData, "PackageWeight", this.listing.product.weight.toString(), "unitOfMeasure",
                     p.weightUnit);
         }*/
+        if(StringUtils.isNotBlank(this.listing.product.partNumber)) {
+            if(this.market.toString().equals("AMAZON_JP") && StringUtils.isNotBlank(this.listing.product.partNumberJP)) {
+                buildElement(doc, descriptionData, "MfrPartNumber", this.listing.product.partNumberJP, "", "");
+            } else {
+                buildElement(doc, descriptionData, "MfrPartNumber", this.listing.product.partNumber, "", "");
+            }
+        }
+
         if(p.searchtermss) {
             for(String word : this.aps.searchTermss) {
                 if(StringUtils.isNotBlank(word)) {
