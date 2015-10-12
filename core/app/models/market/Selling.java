@@ -343,8 +343,13 @@ public class Selling extends GenericModel {
 
 
     public void syncAndUpdateAmazon(SellingAmzPost p) {
-        //this.uploadFeedToAmazonForProduct(p);
-        String html = "";
+        try {
+            this.uploadFeedToAmazonForProduct(p);
+            new ElcukRecord("selling.update", "执行模拟操作", this.sellingId).save();
+        } catch(Exception e) {
+            throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
+        }
+/*        String html = "";
         Document doc = null;
         synchronized(this.account.cookieStore()) {
             // 1. 切换 Selling 所在区域
@@ -379,18 +384,17 @@ public class Selling extends GenericModel {
         F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(doc, this, p);
         String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"),
                 ";");
-        /**
+        *//**
          * 发送信息
-         */
-        html = HTTP.post(this.account.cookieStore(), M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
+         *//*
+        html = HTTP.post(this.account.cookieStore(), M.listingPostPage(this.account.type*//*更新的链接需要账号所在地的 URL*//*,
                 (args.length >= 2 ? args[1] : "")), paramAndDocTuple._1);
         if(StringUtils.isBlank(html)) // 这个最先检查
             throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
         Document rdoc = Jsoup.parse(html);
         Elements error = rdoc.select(".messageboxerror li");
         if(error.size() > 0)
-            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());
-        new ElcukRecord("selling.update", "执行模拟操作", this.sellingId).save();
+            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());*/
     }
 
 
