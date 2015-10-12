@@ -2,6 +2,8 @@ package controllers;
 
 import helper.Constant;
 import helper.Dates;
+import helper.GTs;
+import helper.J;
 import models.ElcukRecord;
 import models.Privilege;
 import models.User;
@@ -69,9 +71,10 @@ public class Login extends Secure.Security {
                     .setCookie("kod_user_language", "zh_CN", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
             Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easyacc.com", "/",
                     60 * 60 * 24 * 30, false);
-            new ElcukRecord("login", String.format("Username: %s, Ip: %s, UserAgent: %s, Date: %s",
-                    username, request.remoteAddress, request.headers.get("user-agent").toString(),
-                    Dates.date2DateTime(DateTime.now())
+            new ElcukRecord("login", J.json(
+                    GTs.MapBuilder.map("Username", username).put("Ip", request.remoteAddress)
+                            .put("UserAgent", request.headers.get("user-agent").toString()).
+                            put("Date", Dates.date2DateTime(DateTime.now())).build()
             ), username, null).save();
         }
         return iscorrect;
