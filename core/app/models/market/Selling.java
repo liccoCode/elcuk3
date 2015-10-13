@@ -1207,6 +1207,7 @@ public class Selling extends GenericModel {
         org.w3c.dom.Element message = doc.createElement("Message");
         envelope.appendChild(message);
         this.buildElement(doc, message, "MessageID", "1", "", "");
+        this.buildElement(doc, message, "OperationType", "Update", "", "");
         org.w3c.dom.Element price = doc.createElement("Price");
         message.appendChild(price);
         this.buildElement(doc, price, "SKU", this.merchantSKU, "", "");
