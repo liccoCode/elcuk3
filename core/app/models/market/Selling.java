@@ -336,7 +336,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market_id", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
-        HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
+        HTTP.post("http://192.168.100.160:4567/amazon_product_sync_back", params);
 
         this.save();
     }
