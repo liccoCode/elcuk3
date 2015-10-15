@@ -1188,11 +1188,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
-            String namePDF = String.format("[%s][%s][%s][%s]",
+            String namePDF = String.format("[%s][%s][%s][%s][%s]",
                     this.selling.market.countryName(),
                     this.shipType.label(),
                     this.attrs.planQty,
-                    this.product.abbreviation
+                    this.product.abbreviation,
+                    this.id
             );
 
             Map<String, Object> map = new HashMap<String, Object>();
