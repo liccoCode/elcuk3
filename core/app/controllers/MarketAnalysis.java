@@ -41,4 +41,11 @@ public class MarketAnalysis extends Controller {
         render();
     }
 
+    /**
+     * 自定义 Category
+     */
+    public static void categories() {
+        render();
+    }
+
 }
