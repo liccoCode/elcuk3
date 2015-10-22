@@ -162,6 +162,8 @@ public class TransportApply extends Apply {
             ApplyPaymentDTO dto = new ApplyPaymentDTO();
             dto.currency = currency;
             for(Shipment ship : shipments) {
+                BigDecimal paidamount = new BigDecimal(0);
+                BigDecimal applyamount = new BigDecimal(0);
                 for(PaymentUnit payment : ship.fees) {
                     if(payment.currency == currency) {
                         dto.total_fee = dto.total_fee
@@ -169,16 +171,23 @@ public class TransportApply extends Apply {
                                         .amount())));
                         //已批准和已支付的
                         if(payment.state == PaymentUnit.S.APPROVAL || payment.state == PaymentUnit.S.PAID) {
-                            dto.approval_fee = dto.approval_fee.
-                                    add(new BigDecimal
-                                            (Float.toString(payment.amount())));
+                            paidamount = paidamount.add(new BigDecimal
+                                    (Float.toString(payment.amount())));
                         } else {
-                            dto.noapproval_fee = dto.noapproval_fee
-                                    .add(new BigDecimal(Float.toString(payment.amount())));
+                            applyamount = applyamount.add(new BigDecimal(Float.toString(payment.amount())));
+
                         }
 
                     }
                 }
+                paidamount = paidamount.setScale(2, RoundingMode.HALF_UP);
+                applyamount = applyamount.setScale(2, RoundingMode.HALF_UP);
+
+                dto.approval_fee = dto.approval_fee.
+                        add(paidamount);
+                dto.noapproval_fee = dto.noapproval_fee
+                        .add(applyamount);
+
             }
             dto.total_fee = dto.total_fee.setScale(2, RoundingMode.HALF_UP);
             dto.approval_fee = dto.approval_fee.setScale(2, RoundingMode.HALF_UP);
