@@ -68,22 +68,24 @@ $ ->
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
     if !previewBtn.call($("#productDesc"))
-      LoadMask.mask('#btns')
-      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-      .done((r) ->
-        msg = if r.flag is true
-          "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
-        else
-          r.message
-        alert msg
-        LoadMask.unmask('#btns')
-      )
-      .fail((r) ->
-        alert r.responseText
-        LoadMask.unmask('#btns')
-      )
-      false
-
+      if $("#saleAmazonForm input[type='checkbox']:checked").not("input[id='giftwrap']").length > 0
+        LoadMask.mask('#btns')
+        $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+        .done((r) ->
+          msg = if r.flag is true
+            "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
+          else
+            r.message
+          alert msg
+          LoadMask.unmask('#btns')
+        )
+        .fail((r) ->
+          alert r.responseText
+          LoadMask.unmask('#btns')
+        )
+        false
+      else
+        noty({text: "请选择需要同步的数据！", type: "error"})
 
   # Deploy 按钮
   $('#amz-deploy').click ->
