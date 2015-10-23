@@ -309,7 +309,8 @@ public class Selling extends GenericModel {
         synchronized(this.account.cookieStore()) {
             checkAmazonLogin();
             // 1. 切换 Selling 所在区域
-            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+            if(!this.market.toString().equals("AMAZON_JP"))
+                this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
             // 2. 获取修改 Selling 的页面, 获取参数
             html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
@@ -345,7 +346,7 @@ public class Selling extends GenericModel {
     public void syncAndUpdateAmazon(SellingAmzPost p) {
         try {
             this.uploadFeedToAmazonForProduct(p);
-            new ElcukRecord("selling.update", "执行模拟操作", this.sellingId).save();
+            new ElcukRecord("selling.update", "执行API操作", this.sellingId).save();
         } catch(Exception e) {
             throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
         }
