@@ -424,10 +424,33 @@ public class Payment extends Model {
      */
     public String approvalAmount() {
         BigDecimal amount = new BigDecimal(0);
+        ArrayList<String> shipments = new java.util.ArrayList<String>();
         for(PaymentUnit fee : this.units()) {
-            if(PaymentUnit.S.DENY != fee.state)
-                amount = amount.add(new BigDecimal
-                        (Float.toString(fee.amount())));
+            if(fee.shipment != null && !shipments.contains(fee.shipment.id)) {
+                shipments.add(fee.shipment.id);
+            }
+        }
+        /**
+         * 因为运输单的四舍五入的问题，需要先将shipment汇总再四舍五入
+         */
+        if(shipments.size() > 0) {
+            for(String shipmentid : shipments) {
+                BigDecimal unitamount = new BigDecimal(0);
+                for(PaymentUnit fee : this.units()) {
+                    if(shipmentid == fee.shipment.id) {
+                        if(PaymentUnit.S.DENY != fee.state)
+                            unitamount = unitamount.add(new BigDecimal
+                                    (Float.toString(fee.amount())));
+                    }
+                }
+                amount = amount.add(unitamount.setScale(2, RoundingMode.HALF_UP));
+            }
+        } else {
+            for(PaymentUnit fee : this.units()) {
+                if(PaymentUnit.S.DENY != fee.state)
+                    amount = amount.add(new BigDecimal
+                            (Float.toString(fee.amount())));
+            }
         }
         return amount.setScale(2, RoundingMode.HALF_UP).toString();
     }
