@@ -64,13 +64,28 @@
     </td>
   </tr>
     #{if country != 'US'}
-        #{render 'Shipments/_europe.html',address: address, country: country, invoiceNo: invoiceNo/}
+        #{if shipType == 'EXPRESS'}
+            #{render 'Shipments/_expresseurope.html',address: address, country: country, invoiceNo: invoiceNo/}
+        #{/if}
+        #{else}
+            #{render 'Shipments/_europe.html',address: address, country: country, invoiceNo: invoiceNo/}
+        #{/else}
+
     #{/if}
     #{else }
         #{render 'Shipments/_us.html', address: address, invoiceNo: invoiceNo/}
     #{/else}
   <tr>
-    <td rowspan="2">Transport By ${firstUnit.shipType.name()}</td>
+      #{if shipType == 'EXPRESS'}
+        <td rowspan="2">Transport By ${firstUnit.shipType.name()}</td>
+      #{/if}
+      #{else}
+        <td rowspan="2">
+          Transport By ${firstUnit.shipType.name()}<br>
+          DDU Terms
+        </td>
+      #{/else}
+
     <td>FROM:SHENZHEN</td>
     <td>Country of Origin</td>
     <td>Country of Export</td>
@@ -121,7 +136,6 @@
 </table>
 <yahp:pb/>
 #{/list}
-
 
 </body>
 </html>
