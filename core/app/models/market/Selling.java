@@ -586,7 +586,7 @@ public class Selling extends GenericModel {
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
         params.add(new BasicNameValuePair("user_name", userName));
-        HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);
+        HTTP.post("http://192.168.100.160:4567/submit_amazon_image_feed", params);
         this.save();
     }
 
