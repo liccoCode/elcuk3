@@ -59,7 +59,6 @@ public class ShipmentReports extends Controller {
     }
 
     public static void costReport(int year, int month) {
-
         List<CostReportDTO> dtos = CostReportDTO.setReportData(year, month);
         render("/ShipmentReports/costReport.html", year, month, dtos);
     }
