@@ -1,23 +1,29 @@
 $ ->
+  refreshReport = ->
+    $("#costReportDiv").mask("加载中...")
+    $("#costReportDiv").load("/ShipmentReports/costReport", {year: $("#select_year").val(), month: $("#select_month").val()}, (r) ->
+      $("#costReportDiv").unmask()
+    )
+
+
   $("#count_btn").click ->
     $("#column_home").trigger("flushColumnChart")
-
+    refreshReport()
 
   $(document).on("flushColumnChart", "#column_home", (r) ->
     year = $("#select_year").val()
     month = $("#select_month").val()
+    refreshReport()
     new PieChart("shipfee_by_type_column").percent(year, month, "#shipfee_by_type_column")
     new PieChart("shipweight_by_type_column").percent(year, month, "#shipweight_by_type_column")
-
   ).on("flushShipfeePieChart", "#shipfee_by_market_pie", (r, type) ->
-     year = $("#select_year").val()
-     month = $("#select_month").val()
-     new PercentChart("shipfee_by_market_pie").percent(year, month, type, "#shipfee_by_market_pie")
-
+    year = $("#select_year").val()
+    month = $("#select_month").val()
+    new PercentChart("shipfee_by_market_pie").percent(year, month, type, "#shipfee_by_market_pie")
   ).on("flushShipweightPieChart", "#shipweight_by_market_pie", (r, type) ->
-     year = $("#select_year").val()
-     month = $("#select_month").val()
-     new PercentChart("shipweight_by_market_pie").percent(year, month, type, "#shipweight_by_market_pie")
+    year = $("#select_year").val()
+    month = $("#select_month").val()
+    new PercentChart("shipweight_by_market_pie").percent(year, month, type, "#shipweight_by_market_pie")
   )
 
   class PieChart
@@ -30,9 +36,9 @@ $ ->
         title = if p.title == undefined then p['series'][0]['name'] else p.title
         $div.highcharts({
           credits:
-            text:'EasyAcc'
-            href:''
-          title: { text: title },
+            text: 'EasyAcc'
+            href: ''
+          title: {text: title},
           legend:
             enabled: true
           xAxis:
@@ -44,7 +50,7 @@ $ ->
             },
             minorTickLength: 0,
             tickLength: 0
-          yAxis: { min: 0 }
+          yAxis: {min: 0}
           plotOptions:
             series:
               cursor: 'pointer',
@@ -70,13 +76,13 @@ $ ->
       self = @
       $div = $("##{self.container}")
       LoadMask.mask(mask_selector)
-      $.get($div.data("url"), {year: @year, month: @month, type: @type }, (p) ->
+      $.get($div.data("url"), {year: @year, month: @month, type: @type}, (p) ->
         title = if p.title == undefined then p['series'][0]['name'] else p.title
         $div.highcharts({
           credits:
-            text:'EasyAcc'
-            href:''
-          title: { text: title },
+            text: 'EasyAcc'
+            href: ''
+          title: {text: title},
           legend:
             enabled: true
           tooltip:
@@ -95,4 +101,7 @@ $ ->
 
 
   $("#column_home").trigger("flushColumnChart")
+
+
+
 

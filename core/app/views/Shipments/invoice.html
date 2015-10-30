@@ -92,11 +92,11 @@
     #{set totalAmount: 0 /}
     #{list items: fbaGroupUnits.get(centerId),as : 'unit'}
         #{set amount: unit.amountUSD()/}
-        #{set totalCount: totalCount + unit.qty()/}
+        #{set totalCount: totalCount + unit.realQty()/}
         #{set totalAmount: totalAmount + amount._2/}
       <tr>
         <td colspan="2" style="height:50px">${unit.product.declareName}</td>
-        <td>${unit.qty()}</td>
+        <td>${unit.realQty()}</td>
         <td>${helper.Currency.USD.symbol()} ${amount._1.format('#.##')}
         </td>
         <td>${helper.Currency.USD.symbol()} ${amount._2.format('#.##')}</td>

@@ -20,6 +20,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -30,6 +31,7 @@ import play.jobs.Job;
 import play.libs.F;
 import play.libs.Files;
 import play.modules.excel.RenderExcel;
+import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -37,6 +39,8 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 
 /**
@@ -504,5 +508,23 @@ public class Excels extends Controller {
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
+    }
+
+    /**
+     * 报关要素下载
+     *
+     * @param id
+     */
+    public static void declare(String id) {
+        Shipment ship = Shipment.findById(id);
+        String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
+        String countryCode = ship.items.get(0).unit.fba.fbaCenter.countryCode;
+        DeclareDTO dto = DeclareDTO.changeCounty(countryCode);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s%s%s%s.xls",
+                dateFormat.format(new Date()), ship.items.get(0).unit.fba.centerId, ship.type.label(), "报关要素"));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(invoiceNo, ship, dto);
     }
 }

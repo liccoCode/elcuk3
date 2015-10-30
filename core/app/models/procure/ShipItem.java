@@ -2,16 +2,19 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.DBUtils;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
+import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
@@ -22,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 每一个运输单的运输项
@@ -403,9 +407,28 @@ public class ShipItem extends GenericModel {
         }
     }
 
-    public String showDeliverymentId(){
+    public String showDeliverymentId() {
         ShipItem shipItem = ShipItem.findById(this.id);
         return shipItem.unit.deliveryment.id;
+    }
+
+    public String showDeclare() {
+        List<Template> templates = this.unit.product.category.templates;
+        List<String> ids = new ArrayList<String>();
+        if(templates == null || templates.size() == 0) {
+            return "";
+        } else {
+            for(Template template : templates) {
+                ids.add(template.id.toString());
+            }
+        }
+        StringBuilder sql = new StringBuilder("SELECT group_concat(a.name) as declareName FROM Template_Attribute t ");
+        sql.append(" LEFT JOIN Attribute a ON a.id = t.attributes_id ");
+        sql.append(" WHERE t.templates_id IN " + JpqlSelect.inlineParam(ids));
+        Map<String, Object> row = DBUtils.row(sql.toString());
+        if(row.get("declareName") != null)
+            return row.get("declareName").toString();
+        return "";
     }
 
 }

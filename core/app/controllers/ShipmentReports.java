@@ -8,6 +8,7 @@ import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
+import models.view.dto.CostReportDTO;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
@@ -55,6 +56,12 @@ public class ShipmentReports extends Controller {
     @Check("shipmentreports.cost")
     public static void cost() {
         render();
+    }
+
+    public static void costReport(int year, int month) {
+
+        List<CostReportDTO> dtos = CostReportDTO.setReportData(year, month);
+        render("/ShipmentReports/costReport.html", year, month, dtos);
     }
 
     /**

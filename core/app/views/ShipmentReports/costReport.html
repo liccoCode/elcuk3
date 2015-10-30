@@ -1,0 +1,36 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <td colspan="10" style="text-align:center">运费与重量${month}月报表</td>
+  </tr>
+  <tr>
+    <td rowspan="2">市场</td>
+    <td colspan="3" style="text-align:center">海运</td>
+    <td colspan="3" style="text-align:center">空运</td>
+    <td colspan="3" style="text-align:center">快递</td>
+  </tr>
+  <tr>
+    <td style="text-align:center">运费(USD)</td>
+    <td style="text-align:center">重量(KG)</td>
+    <td style="text-align:center">单位运费(USD/KG)</td>
+    <td style="text-align:center">运费(USD)</td>
+    <td style="text-align:center">重量(KG)</td>
+    <td style="text-align:center">单位运费(USD/KG)</td>
+    <td style="text-align:center">运费(USD)</td>
+    <td style="text-align:center">重量(KG)</td>
+    <td style="text-align:center">单位运费(USD/KG)</td>
+  </tr>
+  #{list items:dtos, as:'dto'}
+  <tr>
+    <td>${dto.market}</td>
+    <td>${dto.seaFreight}</td>
+    <td>${dto.seaWeight}</td>
+    <td>${dto.seaUnit}</td>
+    <td>${dto.airFreight}</td>
+    <td>${dto.airWeight}</td>
+    <td>${dto.airUnit}</td>
+    <td>${dto.expressFreight}</td>
+    <td>${dto.expressWeight}</td>
+    <td>${dto.expressUnit}</td>
+  </tr>
+  #{/list}
+</table>

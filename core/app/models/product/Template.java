@@ -1,6 +1,7 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import models.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -13,8 +14,10 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Template 这个 Model 只是用来辅助创建 Attribute 和 Product 之间的关系，不与 Product 产生直接关系
@@ -87,9 +90,11 @@ public class Template extends Model {
      * @param attributeIds
      */
     public void bindAttributes(List<Long> attributeIds) {
-        List<Attribute> attributes = Attribute.find("id IN" + JpqlSelect.inlineParam(attributeIds)).fetch();
-        this.attributes.addAll(attributes);
-        this.save();
+        for(Long attributeId : attributeIds){
+            StringBuilder sql = new StringBuilder("insert into Template_Attribute (templates_id, attributes_id, isDeclare) " +
+                    "values (" + this.id + "," + attributeId  + ", true)");
+            DBUtils.execute(sql.toString());
+        }
     }
 
     /**
@@ -103,6 +108,35 @@ public class Template extends Model {
             this.attributes.remove(attribute);
         }
         this.save();
+    }
+
+    public void saveDeclare(Long id, List<String> isDeclares) {
+        StringBuilder sql = new StringBuilder(
+                "UPDATE Template_Attribute a SET a.isDeclare = false WHERE a.templates_id = " + id);
+        DBUtils.execute(sql.toString());
+        for(String isDeclare : isDeclares) {
+            sql = new StringBuilder("UPDATE Template_Attribute a SET a.isDeclare = true WHERE ");
+            sql.append("a.templates_id = " + id + " AND a.attributes_id = " + isDeclare.split("_")[0]);
+            DBUtils.execute(sql.toString());
+        }
+    }
+
+    public List<TemplateAttribute> findAttr() {
+        List<TemplateAttribute> list = new ArrayList<TemplateAttribute>();
+        StringBuilder sql = new StringBuilder("SELECT a.templates_id, a.attributes_id, a.isDeclare ");
+        sql.append(" FROM Template_Attribute a ");
+        sql.append(" WHERE a.templates_id = ? ");
+        List<Object> params = new ArrayList<Object>();
+        params.add(this.id);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
+        for(Map<String, Object> row : rows) {
+            TemplateAttribute templateAttribute = new TemplateAttribute();
+            templateAttribute.template = Template.findById(row.get("templates_id"));
+            templateAttribute.attribute = Attribute.findById(row.get("attributes_id"));
+            templateAttribute.isDeclare = Boolean.valueOf(row.get("isDeclare").toString());
+            list.add(templateAttribute);
+        }
+        return list;
     }
 
 
