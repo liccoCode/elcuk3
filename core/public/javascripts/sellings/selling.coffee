@@ -44,7 +44,6 @@ $ ->
   imageInit()
 
 
-
   # Update 按钮
   $('#amz-update').click ->
     if !previewBtn.call($("#productDesc"))
@@ -52,36 +51,36 @@ $ ->
       LoadMask.mask()
       $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
       .done((r) ->
-          msg = if r.flag is true
-            {text: "#{r.message} Selling 更新成功", type: 'success'}
-          else
-            {text: r.message, type: 'error'}
-          noty(msg)
-          LoadMask.unmask()
-        )
+        msg = if r.flag is true
+          {text: "#{r.message} Selling 更新成功", type: 'success'}
+        else
+          {text: r.message, type: 'error'}
+        noty(msg)
+        LoadMask.unmask()
+      )
       .fail((r) ->
-          noty({text: r.responseText, type: 'error'})
-          LoadMask.unmask()
-        )
+        noty({text: r.responseText, type: 'error'})
+        LoadMask.unmask()
+      )
       false
 
 
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
     LoadMask.mask('#btns')
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize() })
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
     .done((r) ->
-        msg = if r.flag is true
-          "#{r.message} AMAZON的Selling局部更新成功"
-        else
-          r.message
-        alert msg
-        LoadMask.unmask('#btns')
-      )
+      msg = if r.flag is true
+        "#{r.message} AMAZON的Selling局部更新成功"
+      else
+        r.message
+      alert msg
+      LoadMask.unmask('#btns')
+    )
     .fail((r) ->
-        alert r.responseText
-        LoadMask.unmask('#btns')
-      )
+      alert r.responseText
+      LoadMask.unmask('#btns')
+    )
     false
 
 
@@ -102,16 +101,16 @@ $ ->
     LoadMask.mask()
     $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
     .done((feed) ->
-        if feed.flag is false
-          noty({text: feed.message, type: 'error'})
-        else
-          noty({text: "成功创建 Feed(#{feed.id})", type: 'success'})
-        LoadMask.unmask()
-      )
+      if feed.flag is false
+        noty({text: feed.message, type: 'error'})
+      else
+        noty({text: "成功创建 Feed(#{feed.id})", type: 'success'})
+      LoadMask.unmask()
+    )
     .fail((r) ->
-        noty({text: r.responseText, type: 'error'})
-        LoadMask.unmask()
-      )
+      noty({text: r.responseText, type: 'error'})
+      LoadMask.unmask()
+    )
     false
 
   # Sync 按钮
@@ -176,19 +175,19 @@ $ ->
     else
       false
     $.ajax("/sellings/changeSellingType",
-    {type: 'POST', data: {sellingId: $("#sellingId").val(), flag: flag}, dataType: 'json'})
+      {type: 'POST', data: {sellingId: $("#sellingId").val(), flag: flag}, dataType: 'json'})
     .done((r) ->
-        msg = if r.flag is true and flag is true
-          $("#sellingState").val("SELLING")
-          {text: "#{r.message} 系统上架成功", type: 'success'}
-        else if r.flag is true and flag is false
-          $("#sellingState").val("DOWN")
-          {text: "#{r.message} 系统下架成功", type: 'warning'}
-        else
-          {text: r.message, type: 'error'}
-        noty(msg)
-        LoadMask.unmask()
-      )
+      msg = if r.flag is true and flag is true
+        $("#sellingState").val("SELLING")
+        {text: "#{r.message} 系统上架成功", type: 'success'}
+      else if r.flag is true and flag is false
+        $("#sellingState").val("DOWN")
+        {text: "#{r.message} 系统下架成功", type: 'warning'}
+      else
+        {text: r.message, type: 'error'}
+      noty(msg)
+      LoadMask.unmask()
+    )
   )
   # 刪除 Selling
   $('#btns').on('click', 'a[action=remove]', (li) ->
@@ -196,15 +195,15 @@ $ ->
     LoadMask.mask()
     $btn = $(@)
     $.ajax($btn.data('url'))
-      .done((r) ->
-        type = if r.flag
-          alert(r.message)
-          window.close()
-        else
-          noty({text: r.message, type: 'error'})
-        LoadMask.unmask()
-      )
+    .done((r) ->
+      type = if r.flag
+        alert(r.message)
+        window.close()
+      else
+        noty({text: r.message, type: 'error'})
+      LoadMask.unmask()
     )
+  )
 
   # 图片上传的按钮
   $('#img_cal').click ->
@@ -261,10 +260,18 @@ $ ->
       allowImageUpload: false
       newlineTag: 'br'
       afterChange: ->
-        this.sync()
-        $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
+        htmlCode = this.html().toString()
+        re = new RegExp("<span>", "g");
+        htmlCode = htmlCode.replace(re, "")
+        re = new RegExp("</span>", "g");
+        htmlCode = htmlCode.replace(re, "")
+        re = new RegExp("<br />", "g");
+        htmlCode = htmlCode.replace(re, "<br>")
+        count = htmlCode.length
+        $('#productDesc').val(htmlCode)
+        $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
         $('#previewDesc').html($('#productDesc').val())
-      items: ['source','|', '|', 'forecolor', 'bold']
+      items: ['source', '|', '|', 'forecolor', 'bold']
     });
   )
 
