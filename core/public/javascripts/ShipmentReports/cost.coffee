@@ -1,8 +1,16 @@
 $ ->
   refreshReport = ->
     $("#costReportDiv").mask("加载中...")
-    $("#costReportDiv").load("/ShipmentReports/costReport", {year: $("#select_year").val(), month: $("#select_month").val()}, (r) ->
+    from = $("#select_from").val()
+    to = $("#select_to").val()
+    $("#costReportDiv").load("/ShipmentReports/costReport", {from: from, to: to}, (r) ->
       $("#costReportDiv").unmask()
+      $("#exportFreightBtn").click(->
+        window.open('/Excels/downloadFreightReport?from=' + from + '&to=' + to, "_blank")
+      )
+      $("#exportVATbtn").click(->
+        window.open('/Excels/downloadVATReport?from=' + from + '&to=' + to, "_blank")
+      )
     )
 
 
@@ -11,28 +19,28 @@ $ ->
     refreshReport()
 
   $(document).on("flushColumnChart", "#column_home", (r) ->
-    year = $("#select_year").val()
-    month = $("#select_month").val()
+    from = $("#select_from").val()
+    to = $("#select_to").val()
     refreshReport()
-    new PieChart("shipfee_by_type_column").percent(year, month, "#shipfee_by_type_column")
-    new PieChart("shipweight_by_type_column").percent(year, month, "#shipweight_by_type_column")
+    new PieChart("shipfee_by_type_column").percent(from, to, "#shipfee_by_type_column")
+    new PieChart("shipweight_by_type_column").percent(from, to, "#shipweight_by_type_column")
   ).on("flushShipfeePieChart", "#shipfee_by_market_pie", (r, type) ->
-    year = $("#select_year").val()
-    month = $("#select_month").val()
-    new PercentChart("shipfee_by_market_pie").percent(year, month, type, "#shipfee_by_market_pie")
+    from = $("#select_from").val()
+    to = $("#select_to").val()
+    new PercentChart("shipfee_by_market_pie").percent(from, to, type, "#shipfee_by_market_pie")
   ).on("flushShipweightPieChart", "#shipweight_by_market_pie", (r, type) ->
-    year = $("#select_year").val()
-    month = $("#select_month").val()
-    new PercentChart("shipweight_by_market_pie").percent(year, month, type, "#shipweight_by_market_pie")
+    from = $("#select_from").val()
+    to = $("#select_to").val()
+    new PercentChart("shipweight_by_market_pie").percent(from, to, type, "#shipweight_by_market_pie")
   )
 
   class PieChart
     constructor: (@container) ->
-    percent: (@year, @month, mask_selector = '#column_home') =>
+    percent: (@from, @to, mask_selector = '#column_home') =>
       self = @
       $div = $("##{self.container}")
       LoadMask.mask(mask_selector)
-      $.get($div.data("url"), {year: @year, month: month}, (p) ->
+      $.get($div.data("url"), {from: @from, to: @to}, (p) ->
         title = if p.title == undefined then p['series'][0]['name'] else p.title
         $div.highcharts({
           credits:
@@ -72,11 +80,11 @@ $ ->
 
   class PercentChart
     constructor: (@container) ->
-    percent: (@year, @month, @type, mask_selector = '#pie_home') =>
+    percent: (@from, @to, @type, mask_selector = '#pie_home') =>
       self = @
       $div = $("##{self.container}")
       LoadMask.mask(mask_selector)
-      $.get($div.data("url"), {year: @year, month: @month, type: @type}, (p) ->
+      $.get($div.data("url"), {from: @from, to: @to, type: @type}, (p) ->
         title = if p.title == undefined then p['series'][0]['name'] else p.title
         $div.highcharts({
           credits:

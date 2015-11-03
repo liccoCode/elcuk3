@@ -521,10 +521,42 @@ public class Excels extends Controller {
         String countryCode = ship.items.get(0).unit.fba.fbaCenter.countryCode;
         DeclareDTO dto = DeclareDTO.changeCounty(countryCode);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String issueDate = Dates.date2Date();
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s%s%s%s.xls",
                 dateFormat.format(new Date()), ship.items.get(0).unit.fba.centerId, ship.type.label(), "报关要素"));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(invoiceNo, ship, dto);
+        render(invoiceNo, ship, dto, issueDate);
+    }
+
+    /**
+     * 运费与重量月报表报表
+     *
+     * @param from
+     * @param to
+     */
+    public static void downloadFreightReport(Date from, Date to) {
+        List<CostReportDTO> dtos = CostReportDTO.setReportData(from, to);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s至%s运费与重量报表报表.xls", dateFormat.format(from),
+                dateFormat.format(to)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, from, to, dateFormat);
+    }
+
+    /***
+     * 税金与重量报表
+     * @param from
+     * @param to
+     */
+    public static void downloadVATReport(Date from, Date to) {
+        List<CostReportDTO> dtos = CostReportDTO.setReportData(from, to);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s至%s运费与重量报表报表.xls", dateFormat.format(from),
+                dateFormat.format(to)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, from, to, dateFormat);
     }
 }
