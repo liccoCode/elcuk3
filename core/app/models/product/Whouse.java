@@ -260,6 +260,9 @@ public class Whouse extends Model {
                 if(Arrays.asList(M.AMAZON_US).contains(type))
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
+                if(Arrays.asList(M.AMAZON_IT).contains(type))
+                       Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+
             } else if(nextBeginDate.getDayOfWeek() == 3) {
                 if(Arrays.asList(M.AMAZON_DE).contains(type))
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
