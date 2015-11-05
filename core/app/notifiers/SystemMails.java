@@ -56,7 +56,7 @@ public class SystemMails extends Mailer {
     private static void mailBase() {
         SystemMails.setCharset("UTF-8");
         if(Play.mode.isProd()) {
-            SystemMails.setFrom("EasyAcc <support@easyacceu.com>");
+            SystemMails.setFrom(models.OperatorConfig.getVal("addressname")+" "+models.OperatorConfig.getVal("supportemail"));
         } else {
             // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
             SystemMails.setFrom("EasyAcc <1733913823@qq.com>");

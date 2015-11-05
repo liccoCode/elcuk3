@@ -59,17 +59,18 @@ public class Login extends Secure.Security {
         User user = User.findByUserName(username);
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
+        String domain = models.OperatorConfig.getVal("domain");
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easyacc.com", "/", 60 * 60 * 24 * 30,
+            Http.Response.current().setCookie("username", username, domain, "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("usermd5", User.userMd5(username), domain, "/", 60 * 60 * 24 * 30,
                     false);
 
-            Http.Response.current().setCookie("kod_name", "elcuk2", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), "easyacc.com", "/",
+            Http.Response.current().setCookie("kod_name", "elcuk2", domain, "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/",
                     60 * 60 * 24 * 30, false);
             Http.Response.current()
-                    .setCookie("kod_user_language", "zh_CN", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easyacc.com", "/",
+                    .setCookie("kod_user_language", "zh_CN", domain, "/", 60 * 60 * 24 * 30, false);
+            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", domain, "/",
                     60 * 60 * 24 * 30, false);
             new ElcukRecord("login", J.json(
                     GTs.MapBuilder.map("Username", username).put("Ip", request.remoteAddress)
@@ -92,15 +93,16 @@ public class Login extends Secure.Security {
      * 在用户登出以前做处理
      */
     static void onDisconnect() {
+        String domain = models.OperatorConfig.getVal("domain");
         try {
             Login.current().logout();
-            Http.Response.current().setCookie("username", "", "easya.cc", "/", 0, false);
-            Http.Response.current().setCookie("usermd5", "", "easya.cc", "/", 0, false);
+            Http.Response.current().setCookie("username", "", domain, "/", 0, false);
+            Http.Response.current().setCookie("usermd5", "", domain, "/", 0, false);
 
-            Http.Response.current().setCookie("kod_name", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_token", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_language", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", "easyacc.com", "/", 0, false);
+            Http.Response.current().setCookie("kod_name", "", domain, "/", 0, false);
+            Http.Response.current().setCookie("kod_token", "", domain, "/", 0, false);
+            Http.Response.current().setCookie("kod_user_language", "", domain, "/", 0, false);
+            Http.Response.current().setCookie("kod_user_online_version", "", domain, "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }

@@ -222,7 +222,7 @@ public class AmazonProps implements Serializable {
         if(StringUtils.isBlank(this.upc))
             Validation.addError("", "UPC 必须存在");
         if(StringUtils.isBlank(this.manufacturer))
-            this.manufacturer = "EasyAcc";
+            this.manufacturer = models.OperatorConfig.getVal("addressname");
         if(this.standerPrice == null || this.standerPrice <= 0)
             Validation.addError("", "产品标价必须大于 0");
         if(this.salePrice == null || this.salePrice <= 0)

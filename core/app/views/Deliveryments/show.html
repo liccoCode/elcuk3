@@ -128,7 +128,7 @@
     <div class="btn-toolbar">
     #{power.ck "products.edit"}
       <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
-         id="delunit_form_submit" rel="popover"content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+         id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
         解除
       </a>
     #{/power.ck}
@@ -150,7 +150,7 @@
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 
-  #{include 'Deliveryments/box_number_model.html'/}
+#{include 'Deliveryments/box_number_model.html'/}
 </form>
 *{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
 *{#{power.ck 'excels.deliveryment'}}*
@@ -225,7 +225,7 @@
 
           <th>买方</th>
           <td>
-            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="易智爱科技术有限公司">
+            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
           </td>
           <th>经办人</th>
           <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
@@ -244,7 +244,8 @@
           <th>移动电话</th>
           <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
           <th>固定电话</th>
-          <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185145965">
+          <td>
+            <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${models.OperatorConfig.getVal("buyertel")}">
           </td>
         </tr>
 
@@ -281,7 +282,7 @@
           <th>地址</th>
           <td colspan="3">
             <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
-            value="香港中环美国银行中心大厦25楼2508A室">
+                   value="${models.OperatorConfig.getVal("buyeraddress")}">
           </td>
         </tr>
         <tr>
