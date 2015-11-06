@@ -9,6 +9,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
+import models.product.ProductAttr;
 import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
@@ -422,13 +423,20 @@ public class ShipItem extends GenericModel {
                 ids.add(template.id.toString());
             }
         }
-        StringBuilder sql = new StringBuilder("SELECT group_concat(a.name) as declareName FROM Template_Attribute t ");
-        sql.append(" LEFT JOIN Attribute a ON a.id = t.attributes_id ");
-        sql.append(" WHERE t.templates_id IN " + JpqlSelect.inlineParam(ids));
-        Map<String, Object> row = DBUtils.row(sql.toString());
-        if(row.get("declareName") != null)
-            return row.get("declareName").toString();
-        return "";
+        String message = "";
+        StringBuilder sql = new StringBuilder("SELECT a.name AS declareName, p.value FROM ProductAttr p ");
+        sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
+        sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
+        sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");
+        sql.append(" AND t.templates_id IN " + JpqlSelect.inlineParam(ids));
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        if(rows != null && rows.size() > 1) {
+            for(Map<String, Object> map : rows) {
+                message += map.get("declareName").toString();
+                message += ":" + map.get("value") + " ";
+            }
+        }
+        return message;
     }
 
 }

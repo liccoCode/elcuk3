@@ -31,31 +31,31 @@ public class CostReportDTO implements Serializable {
 
     public float seaWeight;
 
-    public Float seaUnit;
+    public float seaUnit;
 
-    public Float seaVatPrice;
+    public float seaVatPrice;
 
-    public Float seaVatUnit;
+    public float seaVatUnit;
 
     public float airFreight;
 
     public float airWeight;
 
-    public Float airVatPrice;
+    public float airVatPrice;
 
-    public Float airUnit;
+    public float airUnit;
 
-    public Float airVatUnit;
+    public float airVatUnit;
 
     public float expressFreight;
 
     public float expressWeight;
 
-    public Float expressUnit;
+    public float expressUnit;
 
-    public Float expressVatPrice = 0f;
+    public float expressVatPrice = 0f;
 
-    public Float expressVatUnit;
+    public float expressVatUnit;
 
     public static List<CostReportDTO> setReportData(Date from, Date to) {
         String key = Caches.Q.cacheKey(from, to, "reportDate");
@@ -93,69 +93,86 @@ public class CostReportDTO implements Serializable {
                         dto.expressVatPrice = vatPrice;
                     }
                 }
-                if(dto.seaWeight > 0 && dto.seaFreight > 0) {
-                    dto.seaUnit = dto.seaFreight / dto.seaWeight;
-                    dto.seaUnit = new BigDecimal(dto.seaUnit.doubleValue()).setScale(2, BigDecimal.ROUND_HALF_UP)
-                            .floatValue();
-                } else {
-                    dto.seaUnit = 0.0f;
-                }
-                if(dto.airWeight > 0 && dto.airFreight > 0) {
-                    dto.airUnit = dto.airFreight / dto.airWeight;
-                    dto.airUnit = new BigDecimal(dto.airUnit.doubleValue()).setScale(2, BigDecimal.ROUND_HALF_UP)
-                            .floatValue();
-                } else {
-                    dto.airUnit = 0.0f;
-                }
-                if(dto.expressWeight > 0 && dto.expressFreight > 0) {
-                    dto.expressUnit = dto.expressFreight / dto.expressWeight;
-                    dto.expressUnit = new BigDecimal(dto.expressUnit.doubleValue()).setScale(2, BigDecimal.ROUND_HALF_UP)
-                            .floatValue();
-                } else {
-                    dto.expressUnit = 0.0f;
-                }
-
-                /**计算VAT+关税  与 重量 **/
-                if(dto.seaWeight > 0 && dto.seaVatPrice > 0) {
-                    dto.seaVatUnit = dto.seaVatPrice / dto.seaWeight;
-                    dto.seaVatUnit = new BigDecimal(dto.seaVatUnit.doubleValue()).setScale(2, BigDecimal.ROUND_HALF_UP)
-                            .floatValue();
-                } else {
-                    dto.seaVatUnit = 0.0f;
-                }
-                if(dto.airWeight > 0 && dto.airVatPrice > 0) {
-                    dto.airVatUnit = dto.airVatPrice / dto.airWeight;
-                    dto.airVatUnit = new BigDecimal(dto.airVatUnit.doubleValue()).setScale(2, BigDecimal.ROUND_HALF_UP)
-                            .floatValue();
-                } else {
-                    dto.airVatUnit = 0.0f;
-                }
-                if(dto.expressWeight > 0 && dto.expressVatPrice > 0) {
-                    dto.expressVatUnit = dto.expressVatPrice / dto.expressWeight;
-                    dto.expressVatUnit = new BigDecimal(dto.expressVatUnit.doubleValue())
-                            .setScale(2, BigDecimal.ROUND_HALF_UP)
-                            .floatValue();
-                } else {
-                    dto.expressVatUnit = 0.0f;
-                }
-                dto.seaWeight = new BigDecimal(Double.parseDouble(String.valueOf(dto.seaWeight)))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-                dto.seaFreight = new BigDecimal(Double.parseDouble(String.valueOf(dto.seaFreight)))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-                dto.airWeight = new BigDecimal(Double.parseDouble(String.valueOf(dto.airWeight)))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-                dto.airFreight = new BigDecimal(Double.parseDouble(String.valueOf(dto.airFreight)))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-                dto.expressWeight = new BigDecimal(Double.parseDouble(String.valueOf(dto.expressWeight)))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-                dto.expressFreight = new BigDecimal(Double.parseDouble(String.valueOf(dto.expressFreight)))
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+                caluUnit(dto);
                 dtos.add(dto);
             }
         }
+        CostReportDTO totalDTO = new CostReportDTO();
+        totalDTO.market = "合计";
+        for(CostReportDTO dto : dtos) {
+            totalDTO.seaWeight += dto.seaWeight;
+            totalDTO.seaFreight += dto.seaFreight;
+            totalDTO.seaVatPrice += dto.seaVatPrice;
+            totalDTO.airWeight += dto.airWeight;
+            totalDTO.airFreight += dto.airFreight;
+            totalDTO.airVatPrice += dto.airVatPrice;
+            totalDTO.expressWeight += dto.expressWeight;
+            totalDTO.expressFreight += dto.expressFreight;
+            totalDTO.expressVatPrice += dto.expressVatPrice;
+        }
+        caluUnit(totalDTO);
+        dtos.add(totalDTO);
         Cache.delete(key);
         Cache.add(key, dtos, "4h");
         return dtos;
+    }
+
+    public static void caluUnit(CostReportDTO dto) {
+        if(dto.seaWeight > 0 && dto.seaFreight > 0) {
+            dto.seaUnit = dto.seaFreight / dto.seaWeight;
+            dto.seaUnit = new BigDecimal(dto.seaUnit).setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        } else {
+            dto.seaUnit = 0.0f;
+        }
+        if(dto.airWeight > 0 && dto.airFreight > 0) {
+            dto.airUnit = dto.airFreight / dto.airWeight;
+            dto.airUnit = new BigDecimal(dto.airUnit).setScale(3, BigDecimal.ROUND_HALF_UP)
+                    .floatValue();
+        } else {
+            dto.airUnit = 0.0f;
+        }
+        if(dto.expressWeight > 0 && dto.expressFreight > 0) {
+            dto.expressUnit = dto.expressFreight / dto.expressWeight;
+            dto.expressUnit = new BigDecimal(dto.expressUnit).setScale(3, BigDecimal.ROUND_HALF_UP)
+                    .floatValue();
+        } else {
+            dto.expressUnit = 0.0f;
+        }
+
+        /**计算VAT+关税  与 重量 **/
+        if(dto.seaWeight > 0 && dto.seaVatPrice > 0) {
+            dto.seaVatUnit = dto.seaVatPrice / dto.seaWeight;
+            dto.seaVatUnit = new BigDecimal(dto.seaVatUnit).setScale(3, BigDecimal.ROUND_HALF_UP)
+                    .floatValue();
+        } else {
+            dto.seaVatUnit = 0.0f;
+        }
+        if(dto.airWeight > 0 && dto.airVatPrice > 0) {
+            dto.airVatUnit = dto.airVatPrice / dto.airWeight;
+            dto.airVatUnit = new BigDecimal(dto.airVatUnit).setScale(3, BigDecimal.ROUND_HALF_UP)
+                    .floatValue();
+        } else {
+            dto.airVatUnit = 0.0f;
+        }
+        if(dto.expressWeight > 0 && dto.expressVatPrice > 0) {
+            dto.expressVatUnit = dto.expressVatPrice / dto.expressWeight;
+            dto.expressVatUnit = new BigDecimal(dto.expressVatUnit)
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        } else {
+            dto.expressVatUnit = 0.0f;
+        }
+        dto.seaWeight = new BigDecimal(Double.parseDouble(String.valueOf(dto.seaWeight)))
+                .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        dto.seaFreight = new BigDecimal(Double.parseDouble(String.valueOf(dto.seaFreight)))
+                .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        dto.airWeight = new BigDecimal(Double.parseDouble(String.valueOf(dto.airWeight)))
+                .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        dto.airFreight = new BigDecimal(Double.parseDouble(String.valueOf(dto.airFreight)))
+                .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        dto.expressWeight = new BigDecimal(Double.parseDouble(String.valueOf(dto.expressWeight)))
+                .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+        dto.expressFreight = new BigDecimal(Double.parseDouble(String.valueOf(dto.expressFreight)))
+                .setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
     }
 
 }
