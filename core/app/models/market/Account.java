@@ -1,7 +1,5 @@
 package models.market;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
@@ -32,7 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import com.google.gson.reflect.TypeToken;
+import models.OperatorConfig;
+
 
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
@@ -634,8 +633,12 @@ public class Account extends Model {
      */
     public static Address address(M type) {
         // 统一为一个地址, 但接口参数预留
-        return new Address("EasyAcc", "Rome 1-4,Bulding B,No. 42,Changzhen road, Guangming New District", null, null,
-                "Shenzhen", "China", "CN", "518000");
+        return new Address(OperatorConfig.getVal("addressname"),
+                OperatorConfig.getVal("addressline1"), null, null,
+                OperatorConfig.getVal("addresscity"),
+                OperatorConfig.getVal("addressstate"),
+                OperatorConfig.getVal("addresscountrycode"),
+                OperatorConfig.getVal("addresspostalcode"));
     }
 
 

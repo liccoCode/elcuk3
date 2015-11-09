@@ -166,7 +166,7 @@ public class Webs {
                 email.addTo(address);
             }
 
-            email.setFrom("support@easyacceu.com", "EasyAcc");
+            email.setFrom(models.OperatorConfig.getVal("support"), models.OperatorConfig.getVal("addressname"));
             email.setHtmlMsg(content);
         } catch(EmailException e) {
             Logger.warn("Email error: " + e.getMessage());

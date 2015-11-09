@@ -13,8 +13,10 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ELCUK2_ES_HOST = "http://es.easya.cc:9200";
-    public static final String ETRACKER_ES_HOST = "http://gengar.easya.cc:9200";
+    public static final String ELCUK2_ES_HOST = "http://"+models.OperatorConfig.getVal("elcuk2es")+":9200";
+    public static final String ETRACKER_ES_HOST = "http://"+models.OperatorConfig.getVal("etrackeres")+":9200";
+
+
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
         return processSearch(index, type, builder, ELCUK2_ES_HOST);

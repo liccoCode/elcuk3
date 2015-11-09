@@ -73,10 +73,12 @@
       <div class="div1">
       #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ) || (ord.market==models
       .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
-        <img src="http://e.easya.cc/images/common/EDEER-logo.jpg" style="height:100%">
+        <img src="${models.OperatorConfig.getVal("elcuk2url")}/images/common/EDEER-logo.jpg"
+             style="height:100%">
       #{/if}
       #{if  (ord.market==models.market.M.AMAZON_DE) || (ord.market==models.market.M.AMAZON_FR) || (ord.market==models.market.M.AMAZON_IT && (invoice==null || invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
-        <img src="http://e.easya.cc/images/common/TUGGLE-logo.jpg" style="height:100%">
+        <img src="${models.OperatorConfig.getVal("elcuk2url")}/images/common/TUGGLE-logo.jpg"
+             style="height:100%">
       #{/if}
       </div>
     </td>

@@ -67,8 +67,8 @@ public class SellingFactory extends ModelFactory<Selling> {
     @Factory(name = "withListing")
     public Selling withListing() {
         Selling selling = uk();
-        selling.aps.manufacturer = "EasyAcc";
-        selling.aps.brand = "EasyAcc";
+        selling.aps.manufacturer = models.OperatorConfig.getVal("addressname");
+        selling.aps.brand = models.OperatorConfig.getVal("addressname");
         selling.aps.manufacturerPartNumber = "Part Number";
         selling.aps.rbns.add("1234");
         selling.aps.imageName = "123";

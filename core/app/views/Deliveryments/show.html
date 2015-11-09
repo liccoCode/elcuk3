@@ -128,7 +128,7 @@
     <div class="btn-toolbar">
     #{power.ck "products.edit"}
       <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
-         id="delunit_form_submit" rel="popover"content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+         id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
         解除
       </a>
     #{/power.ck}
@@ -150,7 +150,7 @@
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 
-  #{include 'Deliveryments/box_number_model.html'/}
+#{include 'Deliveryments/box_number_model.html'/}
 </form>
 *{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
 *{#{power.ck 'excels.deliveryment'}}*
@@ -167,131 +167,137 @@
 #{else }
 <div id="excel" class="row-fluid" style="display:none;">
   <div class="span12">
-    <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th>交货地址</th>
-          <td colspan="7">
-            <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
-              收货地址: 光明新区公明街道长圳长升路 42 号(美诚科技园)B 栋 1 楼 B 区 1—4 号门
+      #{if brandname=='EASYACC'}
+        <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
+      #{/if}
+      #{elseif brandname=='Brandworl'}
+        <form id="generate_excel" method="post" action="@{Excels.deliverymentbrandworl()}">
+      #{/elseif}
+    <table class="table table-bordered table-condensed">
+      <tr>
+        <th>交货地址</th>
+        <td colspan="7">
+          <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
+            收货地址: 光明新区公明街道长圳长升路 42 号(美诚科技园)B 栋 1 楼 B 区 1—4 号门
 
-              收货时间: 周一到周五 8:00—18:00 周六 08:00-17:00, 法定假日另行通知
+            收货时间: 周一到周五 8:00—18:00 周六 08:00-17:00, 法定假日另行通知
 
-              仓库联系人:
+            仓库联系人:
 
-              仓库座机: 0755-36931516
+            仓库座机: 0755-36931516
 
-              张先生手机: 136-3291-0503 QQ: 1365875257
+            张先生手机: 136-3291-0503 QQ: 1365875257
 
-              仓库文员 卿青 手机:18822846994 QQ: 2100604843
+            仓库文员 卿青 手机:18822846994 QQ: 2100604843
 
-              其他联系人: 伍先生手机号 15616621498
-            </textarea>
-          </td>
-        </tr>
+            其他联系人: 伍先生手机号 15616621498
+          </textarea>
+        </td>
+      </tr>
 
-        <tr>
-          <th>交易条款<br>(供应商)</th>
-          <td colspan="3">
-            <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
-            .tradingTerms}</textarea>
-          </td>
-          <th>产品要求<br>(产品线)</th>
-          <td colspan="3">
-            <div style="overflow:auto;height:150px;width:580px;">
-                #{list items:dmt.getCopperItems(), as:'cooperItem'}
-                  <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank" class="btn btn-small
+      <tr>
+        <th>交易条款<br>(供应商)</th>
+        <td colspan="3">
+          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
+          .tradingTerms}</textarea>
+        </td>
+        <th>产品要求<br>(产品线)</th>
+        <td colspan="3">
+          <div style="overflow:auto;height:150px;width:580px;">
+              #{list items:dmt.getCopperItems(), as:'cooperItem'}
+                <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank" class="btn btn-small
                     btn-info" rel="popover" content="${cooperItem.formatProductTerms()}">
-                  ${cooperItem.product.sku}
-                  </a>
-                #{/list}
-            </div>
-          </td>
-        </tr>
+                ${cooperItem.product.sku}
+                </a>
+              #{/list}
+          </div>
+        </td>
+      </tr>
 
-        <tr>
-          <th colspan="4"><h5 style="text-align:center">供货方信息</h5></th>
-          <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
-        </tr>
-        <tr>
-          <th>供货方</th>
-          <td>
-            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
-          </td>
-          <th>经办人</th>
-          <td>
-            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
-          </td>
+      <tr>
+        <th colspan="4"><h5 style="text-align:center">供货方信息</h5></th>
+        <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
+      </tr>
+      <tr>
+        <th>供货方</th>
+        <td>
+          <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
+        </td>
+        <th>经办人</th>
+        <td>
+          <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
+        </td>
 
-          <th>买方</th>
-          <td>
-            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="易智爱科技术有限公司">
-          </td>
-          <th>经办人</th>
-          <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
-        </tr>
+        <th>买方</th>
+        <td>
+          <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
+        </td>
+        <th>经办人</th>
+        <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
+      </tr>
 
-        <tr>
-          <th>移动电话</th>
-          <td>
-            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
-          </td>
-          <th>固定电话</th>
-          <td>
-            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
-          </td>
+      <tr>
+        <th>移动电话</th>
+        <td>
+          <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
+        </td>
+        <th>固定电话</th>
+        <td>
+          <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
+        </td>
 
-          <th>移动电话</th>
-          <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
-          <th>固定电话</th>
-          <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185145965">
-          </td>
-        </tr>
+        <th>移动电话</th>
+        <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
+        <th>固定电话</th>
+        <td>
+          <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${models.OperatorConfig.getVal("buyertel")}">
+        </td>
+      </tr>
 
-        <tr>
-          <th>传真</th>
-          <td>
-            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
-          </td>
-          <td colspan="2"></td>
+      <tr>
+        <th>传真</th>
+        <td>
+          <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
+        </td>
+        <td colspan="2"></td>
 
 
-          <th>传真</th>
-          <td><input type="text" name="excel.buyerFax" id="excel_buyerFax"></td>
+        <th>传真</th>
+        <td><input type="text" name="excel.buyerFax" id="excel_buyerFax"></td>
 
-          <th>选择经办人</th>
-          <td>
-            <select id="chosebuyer">
-              <option value="">请选择</option>
-                #{list items:buyers, as:'br'}
-                    #{ifnot br.username == 'wyatt'}
-                      <option value="${br.id}">${br.username}</option>
-                    #{/ifnot}
-                #{/list}
-            </select>
-          </td>
-        </tr>
+        <th>选择经办人</th>
+        <td>
+          <select id="chosebuyer">
+            <option value="">请选择</option>
+              #{list items:buyers, as:'br'}
+                  #{ifnot br.username == 'wyatt'}
+                    <option value="${br.id}">${br.username}</option>
+                  #{/ifnot}
+              #{/list}
+          </select>
+        </td>
+      </tr>
 
-        <tr>
-          <th>地址</th>
-          <td colspan="3">
-            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
-          </td>
+      <tr>
+        <th>地址</th>
+        <td colspan="3">
+          <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
+        </td>
 
-          <th>地址</th>
-          <td colspan="3">
-            <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
-            value="香港中环美国银行中心大厦25楼2508A室">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4">
-            <input type="hidden" name="id" value="${dmt.id}">
-            <button class="btn btn-success">生成采购单 Excel</button>
-          </td>
-        </tr>
-      </table>
-    </form>
+        <th>地址</th>
+        <td colspan="3">
+          <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
+                 value="${models.OperatorConfig.getVal("buyeraddress")}">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <input type="hidden" name="id" value="${dmt.id}">
+          <button class="btn btn-success">生成采购单 Excel</button>
+        </td>
+      </tr>
+    </table>
+  </form>
   </div>
 </div>
 #{/else}

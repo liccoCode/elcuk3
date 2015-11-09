@@ -48,9 +48,17 @@ import java.util.*;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Excels extends Controller {
 
-
     @Check("excels.deliveryment")
     public static void deliveryment(String id, DeliveryExcel excel) {
+        excel.dmt = Deliveryment.findById(id);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(excel);
+    }
+
+    @Check("excels.deliveryment")
+    public static void deliverymentbrandworl(String id, DeliveryExcel excel) {
         excel.dmt = Deliveryment.findById(id);
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");

@@ -1185,6 +1185,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param folder 指定PDF文件，生成的文件目录
      */
     public void fbaAsPDF(File folder, Long boxNumber) throws Exception {
+        System.out.println(this.selling.market);
+        System.out.println(this.shipType);
+        System.out.println(this.attrs.planQty);
+        System.out.println(this.product.abbreviation);
 
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
