@@ -771,6 +771,7 @@ public class AmazonListingReview extends GenericModel {
      */
     public static Date firstReviewDate() {
         AmazonListingReview firstReview = AmazonListingReview.find("ORDER BY reviewDate ASC").first();
+        if (firstReview==null) return new java.util.Date();
         return firstReview.reviewDate;
     }
 
