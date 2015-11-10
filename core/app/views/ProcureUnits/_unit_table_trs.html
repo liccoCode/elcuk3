@@ -6,11 +6,11 @@
 <tr>
   <th>SellingId</th>
   <td>
-    <input readonly="" type="text" name="unit.selling.sellingId" value="${unit.selling.sellingId}">
+    <input type="text" name="unit.selling.sellingId" id="sellingId" value="${unit.selling.sellingId}" readonly>
   </td>
   <th>SKU</th>
   <td>
-    <input readonly="" type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}">
+    <input type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}" readonly>
   </td>
 </tr>
 
@@ -37,7 +37,8 @@
   <th>采购数量</th>
   <td>
     <div class="input-append">
-      <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
+      <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
+             value="${unit.attrs.planQty}">
       <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
       <span class="add-on">箱</span>
     </div>
@@ -103,6 +104,6 @@
 <tr>
   <td colspan="4">
     <h4>Memo</h4>
-    <textarea rows="8" class="span12" name="unit.comment">${unit.comment.raw()}</textarea>
+    <textarea rows="8" class="span12" name="unit.comment" id="memo">${unit.comment.raw()}</textarea>
   </td>
 </tr>

@@ -17,6 +17,7 @@ import models.product.Product;
 import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
+import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -32,6 +33,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -135,7 +137,7 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void blank(String sid) {
+    public static void blank(String sid, int day, int totalFive) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
@@ -143,7 +145,7 @@ public class ProcureUnits extends Controller {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
         }
-        render(unit, whouses);
+        render(unit, whouses, day, totalFive);
     }
 
 
@@ -195,6 +197,22 @@ public class ProcureUnits extends Controller {
         }
 
         Deliveryments.show(unit.deliveryment.id);
+    }
+
+    public static void hasProcureUnitBySellings(String sellingId) {
+        boolean flag = ProcureUnit.hasProcureUnitBySellings(sellingId);
+        if(flag)
+            renderJSON(new Ret(true, "存在采购计划"));
+        renderJSON(new Ret(false, "当前selling不存在采购计划"));
+    }
+
+    public static void isNeedApprove(int total, int day) {
+        int needCompare = new BigDecimal(total / day).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+        int returnValue = AnalyzePost.setOutDayColor(null, needCompare);
+        if(returnValue > 0) {
+            renderJSON(new Ret(true, "该selling当前库存加上采购量除以Day30，超过了标准断货期天数，需要走采购计划审批流程，确定吗？"));
+        }
+        renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
     public static void create(ProcureUnit unit, String shipmentId) {
@@ -514,7 +532,7 @@ public class ProcureUnits extends Controller {
     /**
      * 修改采购计划的是否付款
      *
-     * @param id
+     * @param pid
      * @param applyId
      */
 

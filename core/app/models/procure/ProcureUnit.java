@@ -72,6 +72,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 阶段
      */
     public enum STAGE {
+        /***
+         * 审批中
+         */
+        APPROVE {
+            @Override
+            public String label() {
+                return "审批中";
+            }
+        },
         /**
          * 计划阶段; 创建一个新的采购计划
          */
@@ -994,6 +1003,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(fee.feeType == FeeType.cashpledge())
                 return true;
         }
+        return false;
+    }
+
+    /**
+     * 判断当前selling下面是否有unit
+     * @param sellingId
+     * @return
+     */
+    public static boolean hasProcureUnitBySellings(String sellingId) {
+        List<ProcureUnit> units = ProcureUnit.find("selling.sellingId = ? ", sellingId).fetch();
+        if(units != null && units.size() > 0)
+            return true;
         return false;
     }
 

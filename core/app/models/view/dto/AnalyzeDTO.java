@@ -156,6 +156,11 @@ public class AnalyzeDTO implements Serializable {
      */
     public Selling.SC sellingCycle;
 
+    /**
+     * 断货天数颜色区分
+     */
+    public String step;
+
 
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
