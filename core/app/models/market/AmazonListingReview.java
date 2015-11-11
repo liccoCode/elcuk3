@@ -652,6 +652,7 @@ public class AmazonListingReview extends GenericModel {
 
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject result = service.countReviewRating();
+            if(result == null) return new HighChart(Series.LINE);
 
             HashMap<Date, F.T2<Long, Long>> sumResults = new HashMap<Date, F.T2<Long, Long>>();
             for(M m : Promises.MARKETS) {
@@ -771,7 +772,7 @@ public class AmazonListingReview extends GenericModel {
      */
     public static Date firstReviewDate() {
         AmazonListingReview firstReview = AmazonListingReview.find("ORDER BY reviewDate ASC").first();
-        if (firstReview==null) return new java.util.Date();
+        if(firstReview == null) return new java.util.Date();
         return firstReview.reviewDate;
     }
 
