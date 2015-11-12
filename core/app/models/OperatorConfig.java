@@ -110,11 +110,11 @@ public class OperatorConfig extends Model {
         /**
          * 运营报表参数初始化
          */
-        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
+/*        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
             OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(),
                     VALUES_MAPS.get(nameAndTypeEntry.getKey()));
             if(!config.exist()) config.save();
-        }
+        }*/
 
         if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new java.util.HashMap<String, String>();
         List<OperatorConfig> configs = OperatorConfig.findAll();
