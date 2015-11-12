@@ -127,6 +127,7 @@ public class OperatorConfig extends Model {
     }
 
     public static String getVal(String param) {
+        if(VALUES_SYSPARAM == null) OperatorConfig.init();
         String sysval = VALUES_SYSPARAM.get(param);
         if(StringUtils.isBlank(sysval)) sysval = "";
         return sysval;
