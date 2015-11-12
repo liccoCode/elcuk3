@@ -15,7 +15,6 @@ import java.sql.Date;
  */
 @javax.persistence.Entity
 public class RevenueAndCostDetail extends GenericModel {
-    public static final String CALCULATE_URL = "http://"+models.OperatorConfig.getVal("rockendurl")+":4567/revenue_and_cost_calculator";
 
     @Id
     @GeneratedValue

@@ -473,7 +473,8 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, target, formatter);
         } else {
-            HTTP.get(String.format("%s?year=%s&month=%s", RevenueAndCostDetail.CALCULATE_URL, year, month));
+            HTTP.get(String.format("%s?year=%s&month=%s",
+                    "http://"+models.OperatorConfig.getVal("rockendurl")+":4567/revenue_and_cost_calculator", year, month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }
