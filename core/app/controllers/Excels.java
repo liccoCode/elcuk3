@@ -223,7 +223,7 @@ public class Excels extends Controller {
                     } else {
                         categoryname = p.category.toLowerCase();
                     }
-                    HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
+                    HTTP.get("http://"+models.OperatorConfig.getVal("companyname")+":4567/profit_batch_work?category=" + categoryname
                             + "&market=" + marketkey + "&from="
                             + new SimpleDateFormat("yyyyMMdd").format(p.begin)
                             + "&to="

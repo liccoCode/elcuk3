@@ -36,7 +36,7 @@ public class CacheClear extends Controller {
             Cache.delete(catekey);
         }
         /** 重新缓存最新的数据 **/
-        HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
+        HTTP.get("http://"+models.OperatorConfig.getVal("companyname")+":4567/selling_sale_analyze");
 
         renderJSON(new Ret(true, "清理缓存成功!"));
     }
