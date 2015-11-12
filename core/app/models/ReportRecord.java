@@ -178,7 +178,7 @@ public class ReportRecord extends Model {
 
 
     public String calUrl() {
-        return String.format("http://rock.easya.cc:4567/sku_month_profit_repeat?year=%s"
+        return String.format("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/sku_month_profit_repeat?year=%s"
                 + "&month=%s", this.year, this.month);
     }
 
