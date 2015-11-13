@@ -4,8 +4,10 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
-import models.Notification;
+import models.Role;
 import models.User;
+import models.activiti.ActivitiDefinition;
+import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
@@ -16,6 +18,10 @@ import models.product.Product;
 import models.product.Whouse;
 import models.qc.CheckTask;
 import mws.FBA;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Check;
@@ -272,13 +278,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public S shipState;
 
     /**
-     *生产周期
+     * 生产周期
      */
     @Transient
     public Integer period;
 
-    public void setPeriod(){
-        if (this.product.cooperators().size()>0){
+    public void setPeriod() {
+        if(this.product.cooperators().size() > 0) {
             Long cid = this.cooperator.id;
             CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", cid, this.sku).first();
             this.period = cooperItem.period;
@@ -335,6 +341,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     @Enumerated(EnumType.STRING)
     public QCCONFIRM qcConfirm;
+
+    @Transient
+    public static String ACTIVITINAME = "procureunit.create";
 
     /**
      * ProcureUnit 的检查
@@ -1008,6 +1017,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     /**
      * 判断当前selling下面是否有unit
+     *
      * @param sellingId
      * @return
      */
@@ -1072,7 +1082,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalWeight() {
-        if (this.product.weight!=null)
+        if(this.product.weight != null)
             return this.qty() * this.product.weight;
         else
             return 0f;
@@ -1338,4 +1348,94 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         return datedesc;
     }
+
+    public void startActiviti(String username) {
+        ActivitiDefinition definition = ActivitiDefinition.find("menuCode=?", ACTIVITINAME).first();
+        RuntimeService runtimeService = ActivitiEngine.processEngine.getRuntimeService();
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(definition.processid);
+        models.activiti.ActivitiProcess p = new models.activiti.ActivitiProcess();
+        p.definition = definition;
+        p.objectId = this.id;
+        p.billId = this.selling.sellingId;
+        p.objectUrl = "/procureunits/showactiviti/" + this.id;
+        p.processDefinitionId = processInstance.getProcessDefinitionId();
+        p.processInstanceId = processInstance.getProcessInstanceId();
+        p.createAt = new Date();
+        p.creator = username;
+        p.save();
+        ActivitiProcess.claimProcess(processInstance.getProcessInstanceId(), username);
+        //设置下一步审批人
+        taskclaim(processInstance.getProcessInstanceId(), username);
+    }
+
+
+    public void taskclaim(String processInstanceId, String username) {
+        //启动流程后设置各节点的审批人
+        TaskService taskService = ActivitiEngine.processEngine.getTaskService();
+        List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
+        for(Task task : tasks) {
+            if(task != null) {
+                if(task.getName().indexOf("运营专员") >= 0) {
+                    taskService.setAssignee(task.getId(), this.handler.username);
+                } else {
+                    Role role = Role.find("roleName=?", task.getName()).first();
+                    for(User user : role.users) {
+                        taskService.setAssignee(task.getId(), user.username);
+                        //taskService.claim(task.getId(), user.username);
+                    }
+                }
+            }
+        }
+    }
+
+    public Map<String, Object> showInfo(Long id, String username) {
+        ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?", ACTIVITINAME, id).first();
+        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
+        int issubmit = 0;
+        String taskname = "";
+        if(ap == null) {
+            ap = new ActivitiProcess();
+        } else {
+            //判断是否有权限提交流程
+            taskname = ActivitiProcess.privilegeProcess(ap.processInstanceId, username);
+            if(StringUtils.isNotBlank(taskname)) {
+                issubmit = 1;
+            }
+            //查找流程历史信息
+            infos = ActivitiProcess.processInfo(ap.processInstanceId);
+        }
+
+        Map<String, Object> map = new Hashtable<String, Object>();
+        map.put("ap", ap);
+        map.put("issubmit", issubmit);
+        if(taskname != null) map.put("taskname", taskname);
+        map.put("infos", infos);
+        return map;
+    }
+
+    public void submitActiviti(ActivitiProcess ap, String flow, String username, String opition) {
+        Map<String, Object> variableMap = new HashMap<String, Object>();
+        if(StringUtils.isNotBlank(flow)) variableMap.put("flow", flow);
+
+        //如果是最后异步判断是否是生效日期当天
+        TaskService taskService = ActivitiEngine.processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().processInstanceId(ap.processInstanceId).active().singleResult();
+
+        ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, opition);
+        //价格生效
+        if(ActivitiProcess.isEnded(ap.processInstanceId)) {
+            this.stage = STAGE.PLAN;
+            this.save();
+        }
+
+        //设置下一步审批人
+        taskclaim(ap.processInstanceId, ap.creator);
+    }
+
+    public void resetUnitByTerminalProcess() {
+        ShipItem item = ShipItem.find("unit.id = ?", this.id).first();
+        item.delete();
+        this.delete();
+    }
+
 }

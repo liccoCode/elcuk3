@@ -6,6 +6,7 @@ import helper.*;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
+import models.activiti.ActivitiProcess;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
@@ -215,7 +216,7 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
-    public static void create(ProcureUnit unit, String shipmentId) {
+    public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
         if(unit.shipType == Shipment.T.EXPRESS && StringUtils.isNotBlank(shipmentId))
@@ -223,10 +224,13 @@ public class ProcureUnits extends Controller {
 
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-            render("ProcureUnits/blank.html", unit, whouses);
+            render("ProcureUnits/blank.html", unit, whouses, totalFive, day);
         }
 
         if(unit.isCheck != 1) unit.isCheck = 0;
+        if(isNeedApply != null && isNeedApply.equals("need")) {
+            unit.stage = ProcureUnit.STAGE.APPROVE;
+        }
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
@@ -240,10 +244,15 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
-        flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-        new ElcukRecord(Messages.get("procureunit.save"),
-                Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        if(isNeedApply != null && isNeedApply.equals("need")) {
+            unit.startActiviti(unit.handler.username);
+            flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+        } else {
+            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+        }
 
+        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
+                .save();
         Analyzes.index();
     }
 
@@ -557,4 +566,46 @@ public class ProcureUnits extends Controller {
         if(p == null) p = new ProcurePost();
         render(p);
     }
+
+    public static void showactiviti(Long id) {
+        if(id == null) return;
+        ProcureUnit unit = ProcureUnit.findById(id);
+        Map<String, Object> map = unit.showInfo(id, Secure.Security.connected());
+        ActivitiProcess ap = (ActivitiProcess) map.get("ap");
+        int issubmit = (Integer) map.get("issubmit");
+        List<Map<String, String>> infos = (List<Map<String, String>>) map.get("infos");
+        String taskname = (String) map.get("taskname");
+        //不显示菜单栏
+        boolean isEnd = false;
+        if(taskname != null && taskname.equals("运营专员查看审核结果")) {
+            isEnd = true;
+        }
+        render(unit, ap, infos, issubmit, taskname, isEnd);
+    }
+
+    public static void submitactiviti(String processid, String submitstate, String opition, Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        ActivitiProcess ap = ActivitiProcess.find("id=?", Long.parseLong(processid)).first();
+        String taskname = ActivitiProcess.privilegeProcess(processid, Secure.Security.connected());
+        unit.submitActiviti(ap, submitstate, Secure.Security.connected(), opition);
+
+        if(taskname != null && taskname.equals("运营主管")) {
+
+        }
+        ProcureUnits.showactiviti(id);
+    }
+
+    /**
+     * 终止流程
+     *
+     * @param processId
+     * @param id
+     */
+    public static void terminateProcess(long processid, long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        ActivitiProcess.endTask(processid, "procureunit.stopactiviti");
+        unit.resetUnitByTerminalProcess();
+        redirect("/activitis/index");
+    }
+
 }
