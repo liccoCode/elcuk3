@@ -16,6 +16,8 @@ $ ->
 
   $("#count_btn").click ->
     $("#column_home").trigger("flushColumnChart")
+    $("#shipfee_by_market_pie").html('')
+    $("#shipweight_by_market_pie").html('')
     refreshReport()
 
   $(document).on("flushColumnChart", "#column_home", (r) ->
