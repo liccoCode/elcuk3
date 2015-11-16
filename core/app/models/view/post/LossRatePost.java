@@ -65,7 +65,7 @@ public class LossRatePost extends Post<LossRate> {
                 + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
         String postvalue = Caches.get(key);
         if(StringUtils.isBlank(postvalue)) {
-            HTTP.get("http://rock.easya.cc:4567/loss_rate_job?from="
+            HTTP.get("http://127.0.0.1:4567/loss_rate_job?from="
                     + new SimpleDateFormat("yyyy-MM-dd").format(this.from)
                     + "&to="
                     + new SimpleDateFormat("yyyy-MM-dd").format(this.to));

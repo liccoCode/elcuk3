@@ -429,6 +429,7 @@ public class ShipItem extends GenericModel {
         sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
         sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");
         sql.append(" AND t.templates_id IN " + JpqlSelect.inlineParam(ids));
+        sql.append(" AND t.isDeclare = true ");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         if(rows != null && rows.size() > 1) {
             for(Map<String, Object> map : rows) {
