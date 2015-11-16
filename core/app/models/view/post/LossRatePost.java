@@ -45,9 +45,11 @@ public class LossRatePost extends Post<LossRate> {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<Object>();
         sql.append(
-                "select f.shipmentid,p.sku,s.qty,s.lossqty,s.compenusdamt,p.currency, p.price, l.market, s.compentype "
+                "select f.shipmentid,p.sku,(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) as qty,"
+                        + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype "
                         + " From ShipItem s "
                         + " left join ProcureUnit p on s.unit_id=p.id "
+                        + " LEFT JOIN CheckTask c ON c.units_id = p.id"
                         + " LEFT JOIN Selling l ON l.sellingId = p.sid "
                         + " left join Shipment m on s.shipment_id=m.id "
                         + " left join FBAShipment f on p.fba_id=f.id "
