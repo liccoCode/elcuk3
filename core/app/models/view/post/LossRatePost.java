@@ -196,7 +196,7 @@ public class LossRatePost extends Post<LossRate> {
             loss.sku = (String) row.get("sku");
             loss.fba = (String) row.get("shipmentid");
             loss.qty = (Integer) row.get("qty");
-            loss.lossqty = (Integer) row.get("lossqty");
+            loss.lossqty = Integer.parseInt(row.get("lossqty").toString());
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");
