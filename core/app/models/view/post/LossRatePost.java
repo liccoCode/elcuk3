@@ -198,6 +198,7 @@ public class LossRatePost extends Post<LossRate> {
             loss.fba = (String) row.get("shipmentid");
             loss.qty = Integer.parseInt(row.get("qty").toString());
             loss.lossqty = Integer.parseInt(row.get("lossqty").toString());
+            loss.compentype = (String) row.get("compentype");
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");
