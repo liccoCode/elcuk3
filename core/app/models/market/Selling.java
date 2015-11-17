@@ -1077,7 +1077,12 @@ public class Selling extends GenericModel {
     }
 
     public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
-        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
+        String xml = MWSUtils.buildXMLBySelling(this, p);
+        Feed feed = Feed.updateSellingFeed(xml, this);
+
+
+
+/*        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
                 p.productdesc) {
             org.w3c.dom.Document doc = buildDoc();
             F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Product");
@@ -1105,7 +1110,7 @@ public class Selling extends GenericModel {
             priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
             priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
             HTTP.post("http://192.168.100.160:4567/amazon_submit_price_feed", priceParams);
-        }
+        }*/
     }
 
 

@@ -13,6 +13,7 @@ import models.view.post.SellingAmzPost;
 import mws.product.*;
 import org.apache.commons.lang.StringUtils;
 
+import javax.xml.bind.JAXB;
 import java.math.BigDecimal;
 
 /**
@@ -26,15 +27,18 @@ public class MWSUtils {
             public String toString() {
                 return "_POST_FLAT_FILE_LISTINGS_DATA_";
             }
+        },
+        UPDATE_PRODUCT {
+            @Override
+            public String toString() {
+                return "_POST_PRODUCT_DATA_";
+            }
         }
     }
 
-    private Account account;
-
-    public String submintFeedByXML(Feed feed, T feedType, M.MID marketId, Selling selling) {
+    public static String submintFeedByXML(Feed feed, T feedType, M.MID marketId, Account account) {
         MarketplaceWebService service = mws.MWSReports.client(account);
-        SubmitFeedRequest req = new SubmitFeedRequest().withMerchant(account.merchantId)
-                .withFeedType(feedType.toString());
+        SubmitFeedRequest req = new SubmitFeedRequest().withMerchant(account.merchantId).withFeedType(feedType.toString());
         if(marketId != null) {
             req.withMarketplaceIdList(new IdList(Lists.newArrayList(marketId.name())));
         }
@@ -48,7 +52,7 @@ public class MWSUtils {
         }
     }
 
-    public String buildXMLBySelling(Selling selling, SellingAmzPost p) {
+    public static String buildXMLBySelling(Selling selling, SellingAmzPost p) {
         Product product = new Product();
         product.setSKU(selling.merchantSKU);
         StandardProductID standardProductID = new StandardProductID();
@@ -69,21 +73,48 @@ public class MWSUtils {
             }
         }
         if(p.productvolume || p.productWeight) {
+            Dimensions dimensions = new Dimensions();
+            data.setItemDimensions(dimensions);
             if(p.productvolume) {
                 LengthDimension lengthDimension = new LengthDimension();
                 lengthDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
                 lengthDimension.setValue(new BigDecimal(p.productLengths));
                 data.getItemDimensions().setLength(lengthDimension);
-
+                LengthDimension widthDimension = new LengthDimension();
+                widthDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
+                widthDimension.setValue(new BigDecimal(p.productWidth));
+                data.getItemDimensions().setWidth(widthDimension);
+                LengthDimension heightDimension = new LengthDimension();
+                heightDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
+                heightDimension.setValue(new BigDecimal(p.productHeigh));
+                data.getItemDimensions().setHeight(heightDimension);
             }
-
-
+            if(p.weight) {
+                WeightDimension weightDimension = new WeightDimension();
+                weightDimension.setUnitOfMeasure(WeightUnitOfMeasure.fromValue(p.weightUnit));
+                weightDimension.setValue(new BigDecimal(p.proWeight));
+                data.getItemDimensions().setWeight(weightDimension);
+            }
         }
-
+        if(StringUtils.isNotBlank(selling.listing.product.partNumber)) {
+            if(selling.market.toString().equals("AMAZON_JP") &&
+                    StringUtils.isNotBlank(selling.listing.product.partNumberJP)) {
+                data.setMfrPartNumber(selling.listing.product.partNumberJP);
+            } else {
+                data.setMfrPartNumber(selling.listing.product.partNumber);
+            }
+        }
+        if(p.searchtermss) {
+            data.getSearchTerms().clear();
+            for(String word : selling.aps.searchTermss) {
+                if(StringUtils.isNotBlank(word)) {
+                    data.getSearchTerms().add(word);
+                }
+            }
+        }
         product.setDescriptionData(data);
-
-
-        return "";
+        String xml = JaxbUtil.convertToXml(product);
+        return xml;
     }
 
 
