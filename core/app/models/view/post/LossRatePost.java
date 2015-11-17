@@ -45,9 +45,11 @@ public class LossRatePost extends Post<LossRate> {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<Object>();
         sql.append(
-                "select f.shipmentid,p.sku,s.qty,s.lossqty,s.compenusdamt,p.currency, p.price, l.market, s.compentype "
+                "select f.shipmentid,p.sku,(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) as qty,"
+                        + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype "
                         + " From ShipItem s "
                         + " left join ProcureUnit p on s.unit_id=p.id "
+                        + " LEFT JOIN CheckTask c ON c.units_id = p.id"
                         + " LEFT JOIN Selling l ON l.sellingId = p.sid "
                         + " left join Shipment m on s.shipment_id=m.id "
                         + " left join FBAShipment f on p.fba_id=f.id "
@@ -94,13 +96,14 @@ public class LossRatePost extends Post<LossRate> {
     public F.T2<String, List<Object>> totalparams() {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<Object>();
-        sql.append(
-                "select sum(s.qty) shipqty,sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s "
-                        + " left join ProcureUnit p on s.unit_id=p.id "
-                        + " left join Shipment m on s.shipment_id=m.id "
-                        + " left join FBAShipment f on p.fba_id=f.id "
-                        + " where m.arriveDate >= ? AND m.arriveDate <= ? "
-                        + " and s.lossqty!=0 ");
+        sql.append("select sum(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) shipqty," +
+                " sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s " +
+                " left join ProcureUnit p on s.unit_id=p.id " +
+                " left join CheckTask c ON c.units_id = p.id" +
+                " left join Shipment m on s.shipment_id=m.id " +
+                " left join FBAShipment f on p.fba_id=f.id " +
+                " where m.arriveDate >= ? AND m.arriveDate <= ? " +
+                " and s.lossqty!=0 ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
@@ -181,7 +184,7 @@ public class LossRatePost extends Post<LossRate> {
                 dtos = JSON.parseArray(cache_str, ProfitDto.class);
                 if(dtos != null) {
                     for(ProfitDto dto : dtos) {
-                        Logger.info("::::::0:::::key:::"+dto.sku + "_" + m.name());
+                        Logger.info("::::::0:::::key:::" + dto.sku + "_" + m.name());
                         existMap.put(dto.sku + "_" + m.name(), dto);
                     }
                 }
@@ -193,8 +196,9 @@ public class LossRatePost extends Post<LossRate> {
             LossRate loss = new LossRate();
             loss.sku = (String) row.get("sku");
             loss.fba = (String) row.get("shipmentid");
-            loss.qty = (Integer) row.get("qty");
-            loss.lossqty = (Integer) row.get("lossqty");
+            loss.qty = Integer.parseInt(row.get("qty").toString());
+            loss.lossqty = Integer.parseInt(row.get("lossqty").toString());
+            loss.compentype = (String) row.get("compentype");
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");
@@ -235,7 +239,7 @@ public class LossRatePost extends Post<LossRate> {
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.currency.toUSD(ship.unit.attrs.price) * lossNum)
                     .setScale(2, BigDecimal.ROUND_HALF_UP);
             String key = ship.unit.sku + "_" + ship.unit.selling.market.name();
-            Logger.info("::::::2:::::key:::"+key);
+            Logger.info("::::::2:::::key:::" + key);
             ProfitDto dto = existMap.get(key);
             Logger.info("::::::2:::::key:::xxx:::" + dto);
             if(dto != null) {

@@ -4,7 +4,6 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
@@ -234,6 +233,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Lob
     @Expose
     public String comment = " ";
+
+    /**
+     * 采购取样
+     */
+    @Expose
+    public Integer purchaseSample;
 
     @Expose
     public int isCheck;
@@ -573,6 +578,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             logs.addAll(this.doneUpdate(unit));
         }
         this.comment = unit.comment;
+        this.purchaseSample = unit.purchaseSample;
         // 2
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
             this.changeShipItemShipment(
@@ -603,6 +609,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planQty = unit.attrs.planQty;
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+        this.purchaseSample = unit.purchaseSample;
     }
 
     public void noty(String sku, String content) {
@@ -823,6 +830,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public int qty() {
         if(this.attrs.qty != null) return this.attrs.qty;
         return this.attrs.planQty;
+    }
+
+    public int realQty() {
+        int qty = this.qty() - this.fetchCheckTaskQcSample().intValue();
+        if(purchaseSample!=null)
+            qty = qty - purchaseSample.intValue();
+        return qty;
     }
 
     /**
@@ -1267,6 +1281,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
         if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.id);
         return null;
+    }
+
+    public Integer fetchCheckTaskQcSample() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        if(tasks != null && tasks.size() > 0) {
+            if(tasks.get(0).qcSample != null)
+                return tasks.get(0).qcSample;
+        }
+        return 0;
+    }
+
+    public int returnPurchaseSample() {
+        return this.purchaseSample == null ? 0 : this.purchaseSample;
     }
 
     /**

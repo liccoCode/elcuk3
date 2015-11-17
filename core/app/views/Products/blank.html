@@ -133,6 +133,13 @@
         </tr>
 
         <tr>
+          <th>用途(运输)</th>
+          <td><input type="text" name="pro.useWay" value="${pro.useWay}"/></td>
+          <th>中文品名(运输)</th>
+          <td colspan="3"><input type="text" name="pro.chineseName" value="${pro.chineseName}"/></td>
+        </tr>
+
+        <tr>
           <th>销售等级</th>
           <td>
           #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel, class:".select" /}
