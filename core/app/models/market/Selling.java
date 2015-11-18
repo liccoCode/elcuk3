@@ -1,5 +1,10 @@
 package models.market;
 
+import com.amazonaws.mws.MarketplaceWebServiceClient;
+import com.amazonaws.mws.MarketplaceWebServiceConfig;
+import com.amazonaws.mws.model.IdList;
+import com.amazonaws.mws.model.SubmitFeedRequest;
+import com.amazonaws.mws.model.SubmitFeedResponse;
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
@@ -37,6 +42,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -1080,7 +1086,7 @@ public class Selling extends GenericModel {
         String xml = MWSUtils.buildXMLBySelling(this, p);
         Feed feed = Feed.updateSellingFeed(xml, this);
         this.account = Account.findById(this.account.id);
-        String id = MWSUtils.submintFeedByXML(feed, MWSUtils.T.UPDATE_PRODUCT, null, this.account);
+        String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.UPDATE_PRODUCT, null, this.account);
         Logger.info(id);
 
 /*        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
