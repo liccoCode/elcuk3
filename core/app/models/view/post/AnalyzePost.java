@@ -135,7 +135,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             for(AnalyzeDTO dto : dtos) {
                 int temp = 0;
                 if(dto.day30 != 0) {
-                    temp = new BigDecimal((dto.working + dto.worked + dto.way + dto.inbound + dto.qty) * 30 / dto.day30)
+                    temp = new BigDecimal((dto.working + dto.worked + dto.way + dto.inbound + dto.qty) / dto.day30)
                             .setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
                 }
                 if(temp < outDay) {
