@@ -14,7 +14,14 @@ import mws.product.*;
 import org.apache.commons.lang.StringUtils;
 
 import javax.xml.bind.JAXB;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.math.BigDecimal;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by licco on 15/11/16.
@@ -38,16 +45,34 @@ public class MWSUtils {
 
     public static String submintFeedByXML(Feed feed, T feedType, M.MID marketId, Account account) {
         MarketplaceWebService service = mws.MWSReports.client(account);
-        SubmitFeedRequest req = new SubmitFeedRequest().withMerchant(account.merchantId).withFeedType(feedType.toString());
+        SubmitFeedRequest req = new SubmitFeedRequest().withMerchant(account.merchantId)
+                .withFeedType(feedType.toString());
+
         if(marketId != null) {
             req.withMarketplaceIdList(new IdList(Lists.newArrayList(marketId.name())));
         }
-
+        InputStream content = new ByteArrayInputStream(feed.content.getBytes());
+        req.setFeedContent(content);
         try {
+            req.setContentMD5(MWSUtils.computeContentMD5Header(content));
             SubmitFeedResponse resp = service.submitFeed(req);
-
             return resp.getSubmitFeedResult().getFeedSubmissionInfo().getFeedSubmissionId();
         } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String computeContentMD5Header(InputStream inputStream) throws NoSuchAlgorithmException, IOException {
+        DigestInputStream s;
+        try {
+            s = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
+            byte[] buffer = new byte[8192];
+            while(s.read(buffer) > 0) ;
+            s.getMessageDigest().update(buffer);
+            return new String(org.apache.commons.codec.binary.Base64.encodeBase64(s.getMessageDigest().digest()));
+        } catch(NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }

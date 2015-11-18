@@ -1079,8 +1079,9 @@ public class Selling extends GenericModel {
     public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
         String xml = MWSUtils.buildXMLBySelling(this, p);
         Feed feed = Feed.updateSellingFeed(xml, this);
-
-
+        this.account = Account.findById(this.account.id);
+        String id = MWSUtils.submintFeedByXML(feed, MWSUtils.T.UPDATE_PRODUCT, null, this.account);
+        Logger.info(id);
 
 /*        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
                 p.productdesc) {
