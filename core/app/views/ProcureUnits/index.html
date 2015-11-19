@@ -42,7 +42,9 @@
       <select name="p.stage" class="inline" style="width:82px;">
         <option value="">阶段</option>
       #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
-        <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
+        #{if stage.label() != '审批中'}
+          <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
+        #{/if}
       #{/list}
       </select>
 
