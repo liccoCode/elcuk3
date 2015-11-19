@@ -208,7 +208,7 @@ public class ProcureUnits extends Controller {
     }
 
     public static void isNeedApprove(int total, int day) {
-        int needCompare = new BigDecimal(total / day).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+        int needCompare = new BigDecimal(Double.valueOf(total) / day).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
         int returnValue = AnalyzePost.setOutDayColor(null, needCompare);
         if(returnValue > 0) {
             renderJSON(new Ret(true, "该selling当前库存加上采购量除以Day30，超过了标准断货期天数，需要走采购计划审批流程，确定吗？"));
@@ -598,7 +598,7 @@ public class ProcureUnits extends Controller {
     /**
      * 终止流程
      *
-     * @param processId
+     * @param processid
      * @param id
      */
     public static void terminateProcess(long processid, long id) {
