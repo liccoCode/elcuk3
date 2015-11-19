@@ -21,6 +21,7 @@ import play.utils.FastRuntimeException;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -136,7 +137,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             for(AnalyzeDTO dto : dtos) {
                 int temp = 0;
                 if(dto.day30 != 0) {
-                    double day30ave = new BigDecimal(dto.day30 / 30).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    float day30ave = new BigDecimal(dto.day30 / 30.0).setScale(1, BigDecimal.ROUND_HALF_UP).floatValue();
                     if(day30ave > 0) {
                         temp = new BigDecimal((dto.working + dto.worked + dto.way + dto.inbound + dto.qty) / day30ave)
                                 .setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
@@ -162,6 +163,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         }
         return 0;
     }
+
 
     @Override
     public Long getTotalCount() {
