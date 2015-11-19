@@ -15,6 +15,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -135,26 +136,29 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             for(AnalyzeDTO dto : dtos) {
                 int temp = 0;
                 if(dto.day30 != 0) {
-                    temp = new BigDecimal((dto.working + dto.worked + dto.way + dto.inbound + dto.qty) / dto.day30)
-                            .setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-                }
-                if(temp < outDay) {
-                    dto.step = "";
-                }
-                if(temp >= area_one_first && temp <= area_one_second) {
-                    dto.step = "#FFDA68";
-                }
-                if(temp >= area_two_first && temp <= area_two_second) {
-                    dto.step = "#997A00";
-                }
-                if(temp >= area_three) {
-                    dto.step = "#FF6868";
+                    double day30ave = new BigDecimal(dto.day30 / 30).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    if(day30ave > 0) {
+                        temp = new BigDecimal((dto.working + dto.worked + dto.way + dto.inbound + dto.qty) / day30ave)
+                                .setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+                        if(temp < outDay) {
+                            dto.step = "";
+                        }
+                        if(temp >= area_one_first && temp <= area_one_second) {
+                            dto.step = "#FFDA68";
+                        }
+                        if(temp >= area_two_first && temp <= area_two_second) {
+                            dto.step = "#997A00";
+                        }
+                        if(temp >= area_three) {
+                            dto.step = "#FF6868";
+                        }
+                    }
                 }
             }
         } else {
-           if(needCompare.intValue() > outDay) {
-               return 1;
-           }
+            if(needCompare.intValue() > outDay) {
+                return 1;
+            }
         }
         return 0;
     }
