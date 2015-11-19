@@ -132,6 +132,16 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public String declareName;
 
     /**
+     * 中文品名
+     */
+    public String chineseName;
+
+    /**
+     * 用途
+     */
+    public String useWay;
+
+    /**
      * 产品简称
      */
     @Required

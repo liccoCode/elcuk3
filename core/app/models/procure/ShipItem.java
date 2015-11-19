@@ -2,16 +2,20 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.DBUtils;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
+import models.product.ProductAttr;
+import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
@@ -22,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 每一个运输单的运输项
@@ -66,7 +71,7 @@ public class ShipItem extends GenericModel {
      */
     public ShipItem(ProcureUnit unit) {
         this.unit = unit;
-        this.qty = unit.qty();
+        this.qty = unit.realQty();
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
     }
 
@@ -403,9 +408,36 @@ public class ShipItem extends GenericModel {
         }
     }
 
-    public String showDeliverymentId(){
+    public String showDeliverymentId() {
         ShipItem shipItem = ShipItem.findById(this.id);
         return shipItem.unit.deliveryment.id;
+    }
+
+    public String showDeclare() {
+        List<Template> templates = this.unit.product.category.templates;
+        List<String> ids = new ArrayList<String>();
+        if(templates == null || templates.size() == 0) {
+            return "";
+        } else {
+            for(Template template : templates) {
+                ids.add(template.id.toString());
+            }
+        }
+        String message = "";
+        StringBuilder sql = new StringBuilder("SELECT a.name AS declareName, p.value FROM ProductAttr p ");
+        sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
+        sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
+        sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");
+        sql.append(" AND t.templates_id IN " + JpqlSelect.inlineParam(ids));
+        sql.append(" AND t.isDeclare = true ");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        if(rows != null && rows.size() > 1) {
+            for(Map<String, Object> map : rows) {
+                message += map.get("declareName").toString();
+                message += ":" + map.get("value") + " ";
+            }
+        }
+        return message;
     }
 
 }

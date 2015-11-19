@@ -180,6 +180,7 @@ public class CheckTasks extends Controller {
         check.startTime = from;
         check.endTime = to;
         check.checkor = old.shipwhouse.user.username;
+
         check.validateRight();
         if(Validation.hasErrors()) {
             check = old;

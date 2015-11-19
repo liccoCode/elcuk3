@@ -25,7 +25,7 @@
   </td>
 
   <th>价格</th>
-  <td class="span3">
+  <td>
     <div class="input-append">
       <input type="text" class="span3" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
     #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
@@ -52,6 +52,21 @@
     .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
   #{/if}
     <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
+  </td>
+</tr>
+
+<tr>
+  <th>采购取样</th>
+  <td>
+    <div class="input-append">
+      <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}" /><span class="add-on">个</span>
+    </div>
+  </td>
+  <th>质检取样</th>
+  <td>
+    <div class="input-append">
+      <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
+    </div>
   </td>
 </tr>
 

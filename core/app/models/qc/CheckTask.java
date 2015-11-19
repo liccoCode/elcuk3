@@ -115,7 +115,7 @@ public class CheckTask extends Model {
      * 创建时间
      */
     @Expose
-    public java.util.Date creatat;
+    public Date creatat;
 
 
     /**
@@ -135,6 +135,12 @@ public class CheckTask extends Model {
      */
     @Expose
     public float workfee;
+
+    /**
+     * 质检取样
+     */
+    @Expose
+    public Integer qcSample;
 
     /**
      * 预计交货日期
@@ -789,6 +795,7 @@ public class CheckTask extends Model {
         this.qty = newCt.qty;
         this.pickqty = newCt.pickqty;
         this.checkor = newCt.checkor;
+        this.qcSample = newCt.qcSample;
 
         this.unqualifiedQty = newCt.unqualifiedQty;
         if(newCt.samplingTypes != null) this.samplingTypes = newCt.samplingTypes;

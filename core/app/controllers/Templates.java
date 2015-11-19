@@ -16,7 +16,7 @@ import java.util.List;
  * Date: 14-4-14
  * Time: PM2:50
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Templates extends Controller {
     @Before(only = {"show", "update", "delete", "attribute", "attribute", "unattribute", "category", "uncategory"})
     public static void beforeShow() {
@@ -98,6 +98,15 @@ public class Templates extends Controller {
         if(Validation.hasErrors()) render("Templates/show.html", temp);
         temp.unBindAttributes(attributeIds);
         flash.success("解除绑定成功");
+        redirect("/templates/show/" + id);
+    }
+
+    public static void saveDeclare(Long id, List<String> isDeclare) {
+        validation.required(isDeclare);
+        Template temp = Template.findById(id);
+        if(Validation.hasErrors()) render("Templates/show.html", temp);
+        temp.saveDeclare(id, isDeclare);
+        flash.success("保存成功");
         redirect("/templates/show/" + id);
     }
 

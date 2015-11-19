@@ -7,19 +7,18 @@
 #{flash_alert/}
 #{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
 
-#{set copers:unit.product.cooperators() /}
 <h4>手动单采购计划</h4>
 <table class="table table-condensed table-bordered">
   <tr>
     <th>SKU</th>
     <td>
       <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}"
-                 value="${unit.product.sku}" id="unit_sku" readonly= true>
+                 value="${unit.product?.sku}" id="unit_sku" readonly= true>
     </td>
 
     <th>供应商</th>
     <td>
-        #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}
+        #{select 'unit.cooperator.id', items: unit.product?.cooperators(), labelProperty: 'name', value: unit.cooperator?.id}
             #{option ''}请选择#{/option}
         #{/select}
     </td>
@@ -42,6 +41,21 @@
         <span class="add-on">箱</span>
       </div>
       <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+    </td>
+  </tr>
+
+  <tr>
+    <th>采购取样</th>
+    <td>
+      <div class="input-append">
+        <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/> <span class="add-on">个</span>
+      </div>
+    </td>
+    <th>质检取样</th>
+    <td>
+      <div class="input-append">
+        <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
+      </div>
     </td>
   </tr>
 

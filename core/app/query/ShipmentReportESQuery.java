@@ -28,15 +28,16 @@ public class ShipmentReportESQuery {
     /**
      * 运输费用统计柱状图(根据运输方式)
      */
-    public static HighChart shipFeeByTypeColumn(final int year, final int month) {
-        String key = Caches.Q.cacheKey(year, month, "shipFeeByType");
+    public static HighChart shipFeeByTypeColumn(final Date from, final Date to) {
+        String key = Caches.Q.cacheKey(from, to, "shipFeeByType");
         HighChart columnChart = Cache.get(key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(key.intern()) {
             columnChart = new HighChart(Series.COLUMN);
-            columnChart.title = String.format("[%s]年度[%s]月份运输费用统计(USD)", year, month);
+            columnChart.title = String
+                    .format("From:[%s] To:[%s]运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to));
             for(Shipment.T t : Shipment.T.values()) {
-                columnChart.series(shipColum(year, month, t, "shipFee"));
+                columnChart.series(shipColum(from, to, t, "shipFee"));
             }
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
@@ -48,14 +49,15 @@ public class ShipmentReportESQuery {
     /**
      * 运输费用统计饼图(根据市场)
      */
-    public static HighChart shipFeeByMarketPie(final int year, final int month, Shipment.T type) {
-        String key = Caches.Q.cacheKey(year, month, type, "shipFeeByMarket");
+    public static HighChart shipFeeByMarketPie(final Date from, final Date to, Shipment.T type) {
+        String key = Caches.Q.cacheKey(from, to, type, "shipFeeByMarket");
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
         synchronized(key.intern()) {
             pieChart = new HighChart(Series.PIE);
-            pieChart.title = String.format("[%s]年度[%s]月份[%s]各市场运输费用统计(USD)", year, month, type);
-            pieChart.series(shipPie(year, month, type, "shipFee"));
+            pieChart.title = String
+                    .format("From:[%s] To:[%s] [%s]各市场运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to), type);
+            pieChart.series(shipPie(from, to, type, "shipFee"));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -65,15 +67,15 @@ public class ShipmentReportESQuery {
     /**
      * 运输重量统计柱状图(根据运输方式)
      */
-    public static HighChart shipWeightByTypeColumn(final int year, final int month) {
-        String key = Caches.Q.cacheKey(year, month, "shipWeightByType");
+    public static HighChart shipWeightByTypeColumn(final Date from, final Date to) {
+        String key = Caches.Q.cacheKey(from, to, "shipWeightByType");
         HighChart columnChart = Cache.get(key, HighChart.class);
         if(columnChart != null) return columnChart;
         synchronized(key.intern()) {
             columnChart = new HighChart(Series.COLUMN);
-            columnChart.title = String.format("[%s]年度[%s]月份运输重量统计(Kg)", year, month);
+            columnChart.title = String.format("From:[%s] To:[%s]运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to));
             for(Shipment.T t : Shipment.T.values()) {
-                columnChart.series(shipColum(year, month, t, "shipWeight"));
+                columnChart.series(shipColum(from, to, t, "shipWeight"));
             }
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
@@ -84,14 +86,15 @@ public class ShipmentReportESQuery {
     /**
      * 运输重量统计饼图(根据市场)
      */
-    public static HighChart shipWeightByMarketPie(final int year, final int month, Shipment.T type) {
-        String key = Caches.Q.cacheKey(year, month, type, "shipWeightByMarket");
+    public static HighChart shipWeightByMarketPie(final Date from, final Date to, Shipment.T type) {
+        String key = Caches.Q.cacheKey(from, to, type, "shipWeightByMarket");
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
         synchronized(key.intern()) {
             pieChart = new HighChart(Series.PIE);
-            pieChart.title = String.format("[%s]年度[%s]月份[%s]各市场运输重量统计(Kg)", year, month, type);
-            pieChart.series(shipPie(year, month, type, "shipWeight"));
+            pieChart.title = String
+                    .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), type);
+            pieChart.series(shipPie(from, to, type, "shipWeight"));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -129,9 +132,9 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Column shipColum(int year, int month, Shipment.T type, String flag) {
-        Date from = Dates.getMonthFirst(year, month);
-        Date to = Dates.getMonthLast(year, month);
+    public static Series.Column shipColum(Date from, Date to, Shipment.T type, String flag) {
+        from = Dates.morning(from);
+        to = Dates.night(to);
         Series.Column column = new Series.Column(type.name());
         column.color = ProcuresHelper.rgb(type);
         float result = 0f;
@@ -146,10 +149,10 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Pie shipPie(int year, int month, Shipment.T type, String flag) {
-        Date from = Dates.getMonthFirst(year, month);
-        Date to = Dates.getMonthLast(year, month);
-        Series.Pie pie = new Series.Pie(String.format("[%s]年度[%s]月份[%s]各市场运输重量统计(Kg)", year, month, type));
+    public static Series.Pie shipPie(Date from, Date to, Shipment.T type, String flag) {
+        from = Dates.morning(from);
+        to = Dates.night(to);
+        Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, type));
         float result = 0f;
         for(M m : M.values()) {
             MetricShipmentService mes = new MetricShipmentService(from, to, type, m);
@@ -212,9 +215,11 @@ public class ShipmentReportESQuery {
                 .andWhere("sp.type=?")
                 .param(shipType.toString());
         if(StringUtils.equals(countType, "ReceiptDate")) {
-            sql.andWhere("sp.receiptDate>=?").param(Dates.morning(from)).where("sp.receiptDate<=?").param(Dates.night(to));
+            sql.andWhere("sp.receiptDate>=?").param(Dates.morning(from)).where("sp.receiptDate<=?")
+                    .param(Dates.night(to));
         } else {
-            sql.andWhere("sp.planBeginDate>=?").param(Dates.morning(from)).where("sp.planBeginDate<=?").param(Dates.night(to));
+            sql.andWhere("sp.planBeginDate>=?").param(Dates.morning(from)).where("sp.planBeginDate<=?")
+                    .param(Dates.night(to));
         }
         return sql;
     }
