@@ -207,7 +207,7 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "当前selling不存在采购计划"));
     }
 
-    public static void isNeedApprove(int total, int day) {
+    public static void isNeedApprove(int total, float day) {
         int needCompare = new BigDecimal(Double.valueOf(total) / day).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
         int returnValue = AnalyzePost.setOutDayColor(null, needCompare);
         if(returnValue > 0) {
