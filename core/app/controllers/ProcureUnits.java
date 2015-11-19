@@ -138,7 +138,7 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void blank(String sid, int day, int totalFive) {
+    public static void blank(String sid, float day, int totalFive) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
