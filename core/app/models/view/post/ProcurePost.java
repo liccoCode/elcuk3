@@ -229,6 +229,7 @@ public class ProcurePost extends Post<ProcureUnit> {
             sbd.append(" AND stage=? ");
             params.add(this.stage);
         }
+        sbd.append(" AND stage != 'APPROVE'");
 
         if(this.shipType != null) {
             sbd.append(" AND shipType=? ");

@@ -138,10 +138,12 @@ public class PaymentUnitQuery {
         // 2
         for(Currency crcy : currencyAvgFeeMap.keySet()) {
             SqlSelect sql = new SqlSelect()
-                    .select("sum(p.amount + p.fixValue) / sum(si.qty) as avgPrice", "u.sku", "p.currency")
+                    .select("sum(p.amount + p.fixValue) / sum(si.qty - IFNULL(u.purchaseSample,0) - " +
+                            "IFNULL(c.qcSample,0) ) as avgPrice", "u.sku", "p.currency")
                     .from("PaymentUnit p")
                     .leftJoin("ShipItem si ON si.id=p.shipItem_id")
                     .leftJoin("ProcureUnit u ON u.id=si.unit_id")
+                    .leftJoin("CheckTask c ON c.units_id = u.id")
                     .where("p.createdAt>=?").param(from)
                     .where("p.createdAt<=?").param(to)
                     .where(SqlSelect.whereIn("u.sku", skus))

@@ -126,11 +126,11 @@ $ ->
         if day == null || day == '0'
           $("#new_procureunit").submit()
         else
-          $.get('/procureunits/isNeedApprove', {total: totalFive + planQty, day: day})
+          $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day})
           .done((e)->
             if e.flag
               if confirm(e.message)
-                if $("#memo").val()
+                if $("#memo").val().trim()
                   $("#isNeedApply").val("need")
                   $("#new_procureunit").submit()
                 else

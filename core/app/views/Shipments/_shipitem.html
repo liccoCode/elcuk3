@@ -61,7 +61,6 @@
     <td>${itm.id}</td>
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
     <td><a id="unitbutton">${itm.unit.sid}</a></td>
-
       #{if useCheckbox}
           #{if itm.unit.fba}
             <td>
@@ -84,7 +83,8 @@
         <td>${itm.unit.fba?.centerId}</td>
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
-    ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
+    ${itm.qty - itm.unit.returnPurchaseSample() - itm.unit.fetchCheckTaskQcSample()}
+      (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
     #{if itmRecord}
       <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"

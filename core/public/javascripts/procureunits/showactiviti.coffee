@@ -1,14 +1,14 @@
 $ ->
-  $("#update_form").on("click", "#activiti_btn",(r) ->
+  $("#unitEditForm").on("click", "#activiti_btn",(r) ->
     $btn = $(@)
     if checkReview()
       return unless confirm('确认提交?')
-      $form = $("#update_form")
+      $form = $("#unitEditForm")
       $form.attr("action", "/procureunits/submitactiviti")
       $form.submit()
   ).on('click', 'a[name=terminateProcess]', (r) ->
     $btn = $(@)
-    $form = $('#update_form')
+    $form = $('#unitEditForm')
     if checkReview()
       return unless confirm('确定终止流程?')
       window.top.location.href = $btn.data('action') + "?" + $form.serialize()

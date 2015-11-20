@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'Template' /}
 #{set 'moreScripts'}
+  #{script_cdn name: 'template/show.coffee'/}
 #{/set}
 
 <div class="row-fluid">
@@ -87,22 +88,28 @@
           </form>
         </div>
         <div class="span6">
-          <form method="post" action="@{Templates.unattribute()}">
+          <form method="post" action="@{Templates.unattribute()}" id="attrForm">
             <div style="margin-bottom:10px;">
               <input type="hidden" name="id" value="${temp.id}">
-              <button class="btn btn-warning" data-loading>解除绑定</button>
+              <button class="btn btn-warning" data-url="@{Templates.unattribute()}" data-loading>解除绑定</button>
+              <button class="btn btn-warning" id="saveDeclareBtn" data-url="@{Templates.saveDeclare()}" data-loading>保存</button>
             </div>
             <table class="table table-bordered table-condensed">
               <tr>
                 <th></th>
                 <th>Name</th>
+                <th>是否报关要素</th>
               </tr>
-                #{list items:temp.attributes, as:'att'}
+                #{list items:temp.findAttr(), as:'att'}
                   <tr>
                     <td>
-                      <label><input type="checkbox" name="attributeIds" value="${att.id}"></label>
+                      <label><input type="checkbox" name="attributeIds" value="${att.attribute.id}"></label>
                     </td>
-                    <td>${att.name}</td>
+                    <td>${att.attribute.name}</td>
+                    <td style="text-align:center;">
+                      <input type="checkbox" name="isDeclare" value="${att.attribute.id}_${att.isDeclare}" #{if att.isDeclare}
+                             checked #{/if}>
+                    </td>
                   </tr>
                 #{/list}
             </table>
