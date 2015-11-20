@@ -591,7 +591,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "已经结束, 无法再修改");
 
         List<String> logs = new ArrayList<String>();
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
@@ -599,10 +599,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
         // 2
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
             this.changeShipItemShipment(
-                    StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId)
-            );
+                    StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId));
         }
         if(Validation.hasErrors()) return;
 
@@ -853,7 +852,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public int realQty() {
         int qty = this.qty() - this.fetchCheckTaskQcSample().intValue();
-        if(purchaseSample!=null)
+        if(purchaseSample != null)
             qty = qty - purchaseSample.intValue();
         return qty;
     }

@@ -4,7 +4,6 @@ import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.*;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.activiti.ActivitiProcess;
 import models.embedded.UnitAttrs;
@@ -23,7 +22,6 @@ import models.view.post.ProcurePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -243,16 +241,16 @@ public class ProcureUnits extends Controller {
             unit.remove();
             render("ProcureUnits/blank.html", unit, whouses);
         }
+        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
+                .save();
 
         if(isNeedApply != null && isNeedApply.equals("need")) {
             unit.startActiviti(unit.handler.username);
             flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+            ProcureUnits.showactiviti(unit.id);
         } else {
             flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
         }
-
-        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
-                .save();
         Analyzes.index();
     }
 
@@ -570,6 +568,8 @@ public class ProcureUnits extends Controller {
     public static void showactiviti(Long id) {
         if(id == null) return;
         ProcureUnit unit = ProcureUnit.findById(id);
+        int oldPlanQty = unit.attrs.planQty;
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         Map<String, Object> map = unit.showInfo(id, Secure.Security.connected());
         ActivitiProcess ap = (ActivitiProcess) map.get("ap");
         int issubmit = (Integer) map.get("issubmit");
@@ -580,18 +580,27 @@ public class ProcureUnits extends Controller {
         if(taskname != null && taskname.equals("运营专员查看审核结果")) {
             isEnd = true;
         }
-        render(unit, ap, infos, issubmit, taskname, isEnd);
+        render(unit, ap, infos, issubmit, taskname, isEnd, whouses, oldPlanQty);
     }
 
-    public static void submitactiviti(String processid, String submitstate, String opition, Long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
+    public static void submitactiviti(String processid, String submitstate, String opition, Long id,
+                                      Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
+        ProcureUnit old_unit = ProcureUnit.findById(id);
         ActivitiProcess ap = ActivitiProcess.find("id=?", Long.parseLong(processid)).first();
-        String taskname = ActivitiProcess.privilegeProcess(processid, Secure.Security.connected());
-        unit.submitActiviti(ap, submitstate, Secure.Security.connected(), opition);
-
-        if(taskname != null && taskname.equals("运营主管")) {
-
+        String taskName = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
+        /** 如果主管打回，则专员可以修改采购计划*/
+        if(taskName != null && taskName.equals("运营专员")) {
+            ProcureUnit managedUnit = ProcureUnit.findById(id);
+            managedUnit.update(unit, shipmentId, msg);
+            if(Validation.hasErrors()) {
+                flash.error(Validation.errors().toString());
+                unit.id = managedUnit.id;
+                ProcureUnits.showactiviti(id);
+            }
+            flash.success("成功修改采购计划,并提交审批!", id);
         }
+
+        old_unit.submitActiviti(ap, submitstate, Secure.Security.connected(), opition);
         ProcureUnits.showactiviti(id);
     }
 

@@ -24,10 +24,10 @@
 #{script_cdn name: 'jquery.filedrop.js'/}
 #{script_cdn name: 'component/dropUpload.coffee'/}
 #{script_cdn name: 'procureunits/showactiviti.coffee'/}
-
+#{script_cdn name: 'procureunits/blank.coffee'/}
 
 #{errorMsgs /}
 #{flash_alert/}
 
 #{render 'ProcureUnits/_activitishow.html', taskname: taskname, item: item, ap: ap, infos: infos,
-unit: unit, issubmit:issubmit, isEnd:isEnd/}
+unit: unit, issubmit:issubmit, isEnd:isEnd, whouses:whouses, oldPlanQty:oldPlanQty/}

@@ -4,11 +4,11 @@
 }*
 #{set product: unit.selling.listing.product/}
 <tr>
-  <th>SellingId</th>
-  <td>
+  <th style="width:100px;">SellingId</th>
+  <td style="width:650px;">
     <input type="text" name="unit.selling.sellingId" id="sellingId" value="${unit.selling.sellingId}" readonly>
   </td>
-  <th>SKU</th>
+  <th style="width:100px;">SKU</th>
   <td>
     <input type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}" readonly>
   </td>
@@ -18,30 +18,29 @@
 #{set copers:product.cooperators() /}
   <th>供应商</th>
   <td>
-  #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}
-    #{option ''}请选择#{/option}
-  #{/select}
-    <span style="display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
+    <select name="unit.cooperator.id">
+      <option>请选择</option>
+    #{list items:copers, as:'c'}
+      <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
+    #{/list}
+    </select>
+    <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
   </td>
 
   <th>价格</th>
   <td>
-    <div class="input-append">
-      <input type="text" class="span3" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
-    #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
-    </div>
+    <input type="text" class="span2" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+  #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span1', c:unit.attrs.currency?:helper.Currency.CNY /}
   </td>
 </tr>
 
 <tr>
   <th>采购数量</th>
   <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
-             value="${unit.attrs.planQty}">
-      <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-      <span class="add-on">箱</span>
-    </div>
+    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
+           value="${unit.attrs.planQty}">
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+    <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
   </td>
   <th>预计交货日期</th>
@@ -58,15 +57,11 @@
 <tr>
   <th>采购取样</th>
   <td>
-    <div class="input-append">
-      <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}" /><span class="add-on">个</span>
-    </div>
+    <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/><span class="add-on">个</span>
   </td>
   <th>质检取样</th>
   <td>
-    <div class="input-append">
-      <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
-    </div>
+    <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
   </td>
 </tr>
 
