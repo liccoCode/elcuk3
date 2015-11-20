@@ -1461,7 +1461,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public void resetUnitByTerminalProcess() {
         ShipItem item = ShipItem.find("unit.id = ?", this.id).first();
-        item.delete();
+        if(item != null) {
+            item.delete();
+        }
         this.delete();
     }
 
