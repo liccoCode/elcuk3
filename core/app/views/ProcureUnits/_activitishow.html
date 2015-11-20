@@ -16,7 +16,7 @@
             <input type="hidden" value="${isEnd}" id="isEnd">
           </td>
         </tr>
-        <tr style="#{if isEnd} display:none;#{/if}">
+        <tr style="#{if taskname=='运营专员'} display:none;#{/if}">
           <td>审批结果</td>
           <td>
             <select class="inline" style="width:100px;" name="submitstate">
