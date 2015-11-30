@@ -16,7 +16,7 @@
             <input type="hidden" value="${isEnd}" id="isEnd">
           </td>
         </tr>
-        <tr style="#{if taskname=='运营专员'} display:none;#{/if}">
+        <tr style="#{if taskname!='品线运营主管'} display:none;#{/if}">
           <td>审批结果</td>
           <td>
             <select class="inline" style="width:100px;" name="submitstate">
@@ -25,7 +25,6 @@
             </select>
           </td>
         </tr>
-      #{if issubmit==1}
         <tr>
           <td colspan="12">
             <a id="activiti_btn" href="javascript:void(0)" class="btn btn-info">下一步</a>
@@ -33,7 +32,7 @@
                name="terminateProcess">终止流程</a>
           </td>
         </tr>
-      #{/if}
+
       </div>
     </table>
     <h4 class="alert alert-success">采购计划信息</h4>

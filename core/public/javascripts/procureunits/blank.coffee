@@ -126,7 +126,8 @@ $ ->
         if day == null || day == '0'
           $("#new_procureunit").submit()
         else
-          $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day})
+          sellingId = $("#sellingId").val()
+          $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day, sellingId: sellingId})
           .done((e)->
             if e.flag
               if confirm(e.message)

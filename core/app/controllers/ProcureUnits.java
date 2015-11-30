@@ -205,8 +205,17 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "当前selling不存在采购计划"));
     }
 
-    public static void isNeedApprove(int total, float day) {
-        int needCompare = new BigDecimal(Double.valueOf(total) / day).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+    public static void isNeedApprove(int total, float day, String sellingId) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("sid = ? and stage = ? ", sellingId, ProcureUnit.STAGE.PLAN)
+                .fetch();
+        int plan_total = 0;
+        if(procureUnits != null && procureUnits.size() > 0) {
+            for(ProcureUnit unit : procureUnits) {
+                plan_total += unit.attrs.planQty;
+            }
+        }
+        int needCompare = new BigDecimal(Double.valueOf(total + plan_total) / day).setScale(0, BigDecimal.ROUND_HALF_UP)
+                .intValue();
         int returnValue = AnalyzePost.setOutDayColor(null, needCompare);
         if(returnValue > 0) {
             renderJSON(new Ret(true, "该selling当前库存加上采购量除以Day30，超过了标准断货期天数，需要走采购计划审批流程，确定吗？"));
