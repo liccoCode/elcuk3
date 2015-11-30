@@ -83,7 +83,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         }
         // 用于提示后台正在运行计算
         if(StringUtils.isBlank(cache_str) || dtos == null) {
-            HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
+            HTTP.get("http://127.0.0.1:4567/selling_sale_analyze");
             throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
         }
         return dtos;

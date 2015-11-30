@@ -559,8 +559,12 @@ public class Selling extends GenericModel {
             images = Arrays.copyOfRange(images, 0, 9);
         this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
 
+        String xml = MWSUtils.buildProductImageBySelling(this, images);
+        Feed feed = Feed.updateSellingFeed(xml, this);
+        String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
+        Logger.info(id);
 
-        org.w3c.dom.Document doc = buildDoc();
+/*        org.w3c.dom.Document doc = buildDoc();
         F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Img");
         doc = element._1;
         org.w3c.dom.Element envelope = element._2;
@@ -592,7 +596,7 @@ public class Selling extends GenericModel {
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
         params.add(new BasicNameValuePair("user_name", userName));
-        HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);
+        HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);*/
         this.save();
     }
 
@@ -1083,41 +1087,29 @@ public class Selling extends GenericModel {
     }
 
     public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
-        String xml = MWSUtils.buildXMLBySelling(this, p);
-        Feed feed = Feed.updateSellingFeed(xml, this);
         this.account = Account.findById(this.account.id);
-        String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.UPDATE_PRODUCT, null, this.account);
-        Logger.info(id);
-
-/*        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
+        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
                 p.productdesc) {
-            org.w3c.dom.Document doc = buildDoc();
-            F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Product");
-            doc = element._1;
-            org.w3c.dom.Element envelope = element._2;
-            doc = buildProductNode(doc, envelope, p, "PartialUpdate");
-            String productContent = "";
-            productContent = getStringFromDoc(doc);
-            Feed feed = Feed.updateSellingFeed(productContent, this);
-            List<NameValuePair> productParams = this.submitJobParams(feed);
-            productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
-            productParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://192.168.100.160:4567/amazon_submit_product_feed", productParams);
+            String xml = MWSUtils.buildProductXMLBySelling(this, p);
+            Feed feed = Feed.updateSellingFeed(xml, this);
+            String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
+            Logger.info(id);
+//            List<NameValuePair> productParams = this.submitJobParams(feed);
+//            productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
+//            productParams.add(new BasicNameValuePair("user_name", Login.current().username));
+//            HTTP.post("http://192.168.100.160:4567/amazon_submit_product_feed", productParams);
         }
 
         if(p.standerprice || p.saleprice) {
-            org.w3c.dom.Document priceDoc = buildDoc();
-            F.T2<org.w3c.dom.Document, org.w3c.dom.Element> price_element = buildHeader(priceDoc, "Price");
-            priceDoc = price_element._1;
-            org.w3c.dom.Element priceEnvelope = price_element._2;
-            priceDoc = this.buildPriceNode(priceDoc, priceEnvelope, p);
-            String priceContent = getStringFromDoc(priceDoc);
-            Feed pricefeed = Feed.updateSellingFeed(priceContent, this);
-            List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
-            priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
-            priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://192.168.100.160:4567/amazon_submit_price_feed", priceParams);
-        }*/
+            String xml = MWSUtils.buildPriceXMLBySelling(this, p);
+            Feed feed = Feed.updateSellingFeed(xml, this);
+            String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRICING_FEED, null, this.account);
+            Logger.info(id);
+//            List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
+//            priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
+//            priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
+//            HTTP.post("http://192.168.100.160:4567/amazon_submit_price_feed", priceParams);
+        }
     }
 
 
