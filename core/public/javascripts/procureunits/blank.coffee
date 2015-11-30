@@ -123,7 +123,7 @@ $ ->
         totalFive = $("#totalFive").val()
         day = $("#day").val()
         planQty = $("#planQty").val()
-        if day == null || day == '0'
+        if day == null || day == '0' || day == '0.0'
           $("#new_procureunit").submit()
         else
           sellingId = $("#sellingId").val()

@@ -1036,7 +1036,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public static boolean hasProcureUnitBySellings(String sellingId) {
-        List<ProcureUnit> units = ProcureUnit.find("selling.sellingId = ? ", sellingId).fetch();
+        List<ProcureUnit> units = ProcureUnit.find("selling.sellingId = ? and stage <> ? ",
+                sellingId, STAGE.APPROVE).fetch();
         if(units != null && units.size() > 0)
             return true;
         return false;
