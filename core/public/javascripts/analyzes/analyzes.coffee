@@ -20,13 +20,13 @@ $ ->
       )
       $('table.sortinfo').on('mouseenter', 'td:has(button.btn-info)', (e) ->
         $tr = $(@).parents('tr')
-        totalFive = $tr.attr("totalFive")
+        totalfive = $tr.attr("totalfive")
         day = $tr.attr("day")
 
         id = $tr.find('td:eq(0)').text().trim()
         tableParam =
           id: id
-        text = _.template($('#sidlabel-template').html(), {pam: tableParam, totalFive: totalFive, day: day})
+        text = _.template($('#sidlabel-template').html(), {pam: tableParam, total_five: totalfive, day: day})
 
         $td = $tr.find('td:eq(3)')
         $td.html(text)
