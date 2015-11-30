@@ -61,7 +61,7 @@
   </thead>
   <tbody>
   #{list items:dtos, as:'dto'}
-  <tr totalFive="${dto.working + dto.worked + dto.way + dto.inbound + dto.qty}" day="${(dto.day30 / 30).format('#.#')}">
+  <tr totalfive="${dto.working + dto.worked + dto.way + dto.inbound + dto.qty}" day="${(dto.day30 / 30).format('#.#')}">
     <td class="sid"><i class="icon-bolt"></i> ${dto.fid}</td>
     <td><a href="${dto.asinLink()}" target="_blank"><i class="icon-external-link"></i> ${dto.asin}</a></td>
     <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
