@@ -156,6 +156,11 @@ public class AnalyzeDTO implements Serializable {
      */
     public Selling.SC sellingCycle;
 
+    /**
+     * 保留库存
+     */
+    public int reserved = 0;
+
 
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
