@@ -148,7 +148,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                             dto.step = "#FFDA68";
                         }
                         if(temp >= area_two_first && temp <= area_two_second) {
-                            dto.step = "#997A00";
+                            dto.step = "#CC9900";
                         }
                         if(temp >= area_three) {
                             dto.step = "#FF6868";
