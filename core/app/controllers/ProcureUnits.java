@@ -214,7 +214,8 @@ public class ProcureUnits extends Controller {
                 plan_total += unit.attrs.planQty;
             }
         }
-        int needCompare = new BigDecimal(Double.valueOf(total + plan_total) / day).setScale(0, BigDecimal.ROUND_HALF_UP)
+        int temp = total + plan_total;
+        int needCompare = new BigDecimal(Double.valueOf(temp + "") / day).setScale(0, BigDecimal.ROUND_HALF_UP)
                 .intValue();
         int returnValue = AnalyzePost.setOutDayColor(null, needCompare);
         if(returnValue > 0) {
