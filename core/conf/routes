@@ -9,6 +9,7 @@
 
 
 # Home page
+GET     /robots.txt                                         Robots.index
 GET     /                                                   Application.index
 GET     /pass                                               Application.pwd
 GET     /cc                                                 Application.cc
