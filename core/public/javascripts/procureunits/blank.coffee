@@ -1,22 +1,22 @@
 $ ->
 
-  # 切换供应商, 自行寻找价格
+# 切换供应商, 自行寻找价格
   $("select[name='unit.cooperator.id']").change (e) ->
     id = $(@).val()
     if id
       LoadMask.mask()
       $.get('/Cooperators/price', {id: id, sku: $('#unit_sku').val()}, 'json')
-        .done((r) ->
-          if r.flag is false
-            alert(r.message)
-          else
-            $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
-            $("#unit_price").val(r.price)
-            $("#unit_period").show()
-            $("#unit_period").text('（生产周期：' + r.period+' 天）')
-          LoadMask.unmask()
-        )
-      # 恢复默认
+      .done((r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
+          $("#unit_price").val(r.price)
+          $("#unit_period").show()
+          $("#unit_period").text('（生产周期：' + r.period + ' 天）')
+        LoadMask.unmask()
+      )
+# 恢复默认
     else
       $("#unit_currency option:contains('CNY')").prop('selected', true)
       $("#unit_price").text('')
@@ -27,12 +27,12 @@ $ ->
     coperId = $("select[name='unit.cooperator.id']").val()
     if coperId
       $.post('/cooperators/boxSize', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()})
-        .done((r) ->
-          if r.flag is false
-            alert(r.message)
-          else
-            $("input[name='unit.attrs.planQty']").val(r['message'])
-        )
+      .done((r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          $("input[name='unit.attrs.planQty']").val(r['message'])
+      )
     else
       alert('请先选择 供应商')
 
@@ -46,13 +46,13 @@ $ ->
   $("[name='unit.attrs.planShipDate']").change () ->
     shipType = $("[name='unit.shipType']:checked").val()
     if shipType != 'EXPRESS'
-     return
+      return
     planShipDate = $("[name='unit.attrs.planShipDate']").val()
     warehouseid = $("[name='unit.whouse.id']").val()
-    $.get('/shipments/planArriveDate', {planShipDate: planShipDate, shipType: shipType,warehouseid})
-      .done((r) ->
-        $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
-      )
+    $.get('/shipments/planArriveDate', {planShipDate: planShipDate, shipType: shipType, warehouseid})
+    .done((r) ->
+      $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
+    )
 
   $(document).ready ->
     $shipType = $("[name='unit.shipType']")
@@ -70,10 +70,10 @@ $ ->
     else
       LoadMask.mask(shipment)
       $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
-        .done((html) ->
-          shipment.html(html)
-          LoadMask.unmask()
-        )
+      .done((html) ->
+        shipment.html(html)
+        LoadMask.unmask()
+      )
 
     if shipType != 'EXPRESS'
       return
@@ -81,21 +81,20 @@ $ ->
     if planShipDate == ''
       return
     warehouseid = $("[name='unit.whouse.id']").val()
-    $.get('/shipments/planArriveDate', {planShipDate: planShipDate, shipType: shipType,warehouseid})
-      .done((r) ->
-        $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
-      )
-
+    $.get('/shipments/planArriveDate', {planShipDate: planShipDate, shipType: shipType, warehouseid})
+    .done((r) ->
+      $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
+    )
   )
 
   $('#shipments').on('change', '[name=shipmentId]', (e) ->
     LoadMask.mask()
     $.get("/shipment/#{@getAttribute('value')}/dates")
-      .done((r) ->
-        $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
-        $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
-        LoadMask.unmask()
-      )
+    .done((r) ->
+      $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
+      $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
+      LoadMask.unmask()
+    )
   )
 
   $('#new_procureunit').on('change', "[name='unit.product.sku']", ->
@@ -105,12 +104,46 @@ $ ->
       LoadMask.mask()
       # Ajax 加载供应商列表
       $.get('/products/cooperators', {sku: this.value})
-        .done((r) ->
-          $cooperators.empty()
-          $cooperators.append("<option value=''>请选择</option>")
-          r.forEach (value) ->
-            $cooperators.append("<option value='#{value.id}'>#{value.name}</option>")
-          LoadMask.unmask()
-        )
+      .done((r) ->
+        $cooperators.empty()
+        $cooperators.append("<option value=''>请选择</option>")
+        r.forEach (value) ->
+          $cooperators.append("<option value='#{value.id}'>#{value.name}</option>")
+        LoadMask.unmask()
+      )
+  ).on('click', "#create_unit", (e) ->
+    e.preventDefault()
+    if !$("#planQty").val()
+      noty({text: "请先填写采购数量！", type: 'error'})
+      return false
+
+    $.get('/procureunits/hasProcureUnitBySellings', {sellingId: $("#sellingId").val()})
+    .done((r)->
+      if r.flag
+        totalFive = $("#totalFive").val()
+        day = $("#day").val()
+        planQty = $("#planQty").val()
+        if day == null || day == '0' || day == '0.0'
+          $("#new_procureunit").submit()
+        else
+          sellingId = $("#sellingId").val()
+          $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day, sellingId: sellingId})
+          .done((e)->
+            if e.flag
+              if confirm(e.message)
+                if $("#memo").val().trim()
+                  $("#isNeedApply").val("need")
+                  $("#new_procureunit").submit()
+                else
+                  noty({text: "请先填写备注！", type: 'error'})
+                  return false
+            else
+              $("#new_procureunit").submit()
+          )
+      else
+        if confirm('该selling第一次创建采购计划需走采购计划审批流程，确定吗?')
+          $("#isNeedApply").val("need")
+          $("#new_procureunit").submit()
+    )
   )
 

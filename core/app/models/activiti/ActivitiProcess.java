@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import javax.persistence.*;
 
 import helper.ActivitiEngine;
+import models.embedded.ERecordBuilder;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -336,5 +337,31 @@ public class ActivitiProcess extends Model {
             }
         }
         return processlist;
+    }
+
+    /**
+     * 判断流程是否结束
+     *
+     * @param processInstanceId
+     * @return
+     */
+    public static boolean isEnded(String processInstanceId) {
+        RuntimeService runtimeService = ActivitiEngine.processEngine.getRuntimeService();
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId).singleResult();
+        if(processInstance == null) return true;
+        return processInstance.isEnded();
+    }
+
+    public static void endTask(long processid, String type) {
+        RuntimeService runtimeService = ActivitiEngine.processEngine.getRuntimeService();
+        //当前 Task
+        ActivitiProcess ap = ActivitiProcess.findById(processid);
+        //挂起流程
+        runtimeService.suspendProcessInstanceById(ap.processInstanceId);
+        //删除activitiProcess的关系
+        ap.delete();
+        //log 记录activitiProcess的关系
+        new ERecordBuilder(type).msgArgs(processid, ap.objectId, ap.billId).fid(ap.objectId).save();
     }
 }

@@ -35,6 +35,8 @@ public class OperatorConfig extends Model {
                         .put("采货天数", T.OPERATIONS)
                         .put("合理库存周转天数", T.OPERATIONS)
                         .put("运输天数", T.SHIPMENT)
+                        .put("标准断货期天数", T.OPERATIONS)
+                        .put("标准断货期天数区间", T.OPERATIONS)
                         .build()
         );
         VALUES_MAPS = Collections.unmodifiableMap(
@@ -43,6 +45,8 @@ public class OperatorConfig extends Model {
                         .put("质检时间", "2")
                         .put("采货天数", "14")
                         .put("合理库存周转天数", "70")
+                        .put("标准断货期天数", "90")
+                        .put("标准断货期天数区间", "90-120,121-150,151")
                         .build()
         );
     }
