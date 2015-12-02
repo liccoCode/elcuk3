@@ -15,7 +15,7 @@ $ ->
         sDom: "<'row-fluid'<'span10'><'span2'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
         sPaginationType: "full_numbers"
         iDisplayLength: 50
-        aaSorting: [[15, "desc"]]
+        aaSorting: [[16, "desc"]]
         aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
       )
       $('table.sortinfo').on('mouseenter', 'td:has(button.btn-info)', (e) ->
