@@ -4,7 +4,6 @@ import com.amazonaws.mws.MarketplaceWebService;
 import com.amazonaws.mws.model.*;
 import com.elcuk.jaxb.*;
 import com.google.common.collect.Lists;
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import models.market.Account;
 import models.market.Feed;
 import models.market.M;
@@ -17,7 +16,6 @@ import play.utils.FastRuntimeException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.*;
 import java.lang.Override;
 import java.math.BigDecimal;
@@ -66,17 +64,21 @@ public class MWSUtils {
         SubmitFeedRequest req = new SubmitFeedRequest();
         req.setMerchant(account.merchantId);
         req.setFeedType(feedType.toString());
-
         if(marketId != null) {
             req.withMarketplaceIdList(new IdList(Lists.newArrayList(marketId.name())));
         }
         try {
-            ByteArrayInputStream content = new ByteArrayInputStream(feed.content.getBytes());
-            req.setFeedContent(content);
+            File file = new File("conf/res/content.txt");
+            if(!file.exists())
+                file.createNewFile();
+            FileOutputStream out = new FileOutputStream(file, false);
+            out.write(feed.content.getBytes());
+            req.setFeedContent(new FileInputStream(file));
             SubmitFeedResponse resp = service.submitFeedFromFile(req);
             String id = resp.getSubmitFeedResult().getFeedSubmissionInfo().getFeedSubmissionId();
             feed.feedId = id;
             feed.save();
+            out.close();
             return id;
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -180,7 +182,7 @@ public class MWSUtils {
         Price price = new Price();
         price.setSKU(selling.merchantSKU);
         OverrideCurrencyAmount amount = new OverrideCurrencyAmount();
-        amount.setValue(new BigDecimal(selling.aps.standerPrice));
+        amount.setValue(new BigDecimal(selling.aps.standerPrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
         amount.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
         price.setStandardPrice(amount);
         if(p.saleprice) {

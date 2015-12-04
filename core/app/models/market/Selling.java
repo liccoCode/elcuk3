@@ -343,7 +343,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market_id", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
-        HTTP.post("http://192.168.100.160:4567/amazon_product_sync_back", params);
+        HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
 
         this.save();
     }
@@ -561,8 +561,10 @@ public class Selling extends GenericModel {
 
         String xml = MWSUtils.buildProductImageBySelling(this, images);
         Feed feed = Feed.updateSellingFeed(xml, this);
-        String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
-        Logger.info(id);
+        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
+        Logger.info(feed_submission_id);
+        List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
+        HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", params);
 
 /*        org.w3c.dom.Document doc = buildDoc();
         F.T2<org.w3c.dom.Document, org.w3c.dom.Element> element = buildHeader(doc, "Img");
@@ -1086,29 +1088,40 @@ public class Selling extends GenericModel {
         }
     }
 
+    public List<NameValuePair> submitGetFeedParams(Feed feed, String feed_submission_id) {
+        Validate.notNull(feed);
+        Validate.notNull(this.account);
+        Validate.notNull(this.market);
+        Validate.notNull(feed_submission_id);
+        Validate.notEmpty(this.sellingId);
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
+        params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
+        params.add(new BasicNameValuePair("feed_submission_id", feed_submission_id));
+        return params;
+    }
+
+
     public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
         this.account = Account.findById(this.account.id);
         if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
                 p.productdesc) {
             String xml = MWSUtils.buildProductXMLBySelling(this, p);
             Feed feed = Feed.updateSellingFeed(xml, this);
-            String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
-            Logger.info(id);
-//            List<NameValuePair> productParams = this.submitJobParams(feed);
-//            productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
-//            productParams.add(new BasicNameValuePair("user_name", Login.current().username));
-//            HTTP.post("http://192.168.100.160:4567/amazon_submit_product_feed", productParams);
+            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
+            Logger.info(feed_submission_id);
+            List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
+            HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", productParams);
         }
 
         if(p.standerprice || p.saleprice) {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
-            Feed feed = Feed.updateSellingFeed(xml, this);
-            String id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRICING_FEED, null, this.account);
-            Logger.info(id);
-//            List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
-//            priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
-//            priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
-//            HTTP.post("http://192.168.100.160:4567/amazon_submit_price_feed", priceParams);
+            Feed price_feed = Feed.updateSellingFeed(xml, this);
+            String feed_submission_id = MWSUtils.submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
+            Logger.info(feed_submission_id);
+            List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
+            HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", priceParams);
         }
     }
 
