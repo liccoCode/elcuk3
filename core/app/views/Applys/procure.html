@@ -117,7 +117,8 @@
         </td>
         <td>${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}</td>
         <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
-        <td class="price">${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount()}</td>
+        <td class="price">${procureUnit.attrs.currency.symbol()} ${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,
+                                                      4).floatValue().format('#,###.##')}</td>
         <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
         <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
         <td>
@@ -208,7 +209,8 @@
                               <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
                             </td>
                             <td>${fee.feeType.nickName}</td>
-                            <td>${fee.currency.symbol()} ${fee.amount}</td>
+                            <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,
+                                                                          4).floatValue().format('#,###.##')}</td>
                             <td>
                               <div class="row-fluid">
                                   #{if fee.isApproval()}
