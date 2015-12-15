@@ -13,6 +13,12 @@ $ ->
     $('#model_title').text("驳回 #{$btn.parents('tr').find('td:eq(6)').text()} 请款项目")
     $('#model_form').attr('action', $btn.data('url'))
     false
+  ).on('click', '#check_all', (e) ->
+    $("#apply_table input[type='checkbox']").not(":first").each(->
+      $(@).prop("checked", !$(@).prop("checked"))
+    )
+  ).on('blur','#actualPaid', (e) ->
+    $(@).val(parseFloat($(@).val()).toFixed(2));
   )
 
   $('#pay_form').on('change', 'select[name=currency]',(e) ->

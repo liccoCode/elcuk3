@@ -4,12 +4,12 @@ $ ->
     $('#paymentUnit_destroy_form').attr('action', @getAttribute('url'))
     $('#paymentUnit_destroy').modal()
 
-  $(document).on("click", "#billing_rework_pay_btn",(r) ->
+  $(document).on("click", "#billing_rework_pay_btn", (r) ->
     $("#modal_home").load('/Procureunits/loadChecklist', id: $(@).data("pid"), (r) ->
       $('#reworkpay_modal').modal('show')
     )
-  ).on("click", "#sumbit_billing_btn",(r) ->
-    # 计算用户勾选的费用记录
+  ).on("click", "#sumbit_billing_btn", (r) ->
+# 计算用户勾选的费用记录
     checkids = []
     checkboxList = $('input[name="checkids"]')
     for checkbox in checkboxList when checkbox.checked then checkids.push(checkbox.value)
@@ -22,14 +22,13 @@ $ ->
   ).on("change", "#switch_pay", (r) ->
     self = $(@)
     feesize = self.parents('tr').find("input[name='feesize']").val()
-    if feesize>0
+    if feesize > 0
       alert '存在费用明细,不可以更改收款状态!'
       window.location.reload()
     else
       $('#edit_pay_form').attr('action', @getAttribute('url'))
       $('#edit_pay').modal()
   )
-
 
 
   # Form 搜索功能
@@ -79,10 +78,16 @@ $ ->
 
   calculateSumery = ->
     $('.table_summary').each ->
+      table_summary = $(@)
       cny_summery = 0
       usd_summery = 0
       unkown_summery = 0
-      $(@).parents('table').find('td.price').each ->
+      planQty = 0
+      qty = 0
+      table_summary.parent().find("td.qty").each ->
+        planQty += parseInt($(@).attr('planQty'))
+        qty += parseInt($(@).attr('qty'))
+      table_summary.parents('table').find('td.price').each ->
         text = @innerText
         if text.indexOf("$") >= 0
           usd_summery += parseFloat(text.split(' ')[1])
@@ -90,10 +95,25 @@ $ ->
           cny_summery += parseFloat(text.split(' ')[1])
         else
           unkown_summery += parseFloat(text.split(' ')[1])
-      $(@).find('.usd').text("$ #{usd_summery}").end()
-        .find('.cny').text("¥ #{cny_summery}").end()
-        .find('.unknow').text("? #{unkown_summery}")
+      table_summary.find('.totalNum').text("#{planQty} / #{qty}").end()
+      .find('.usd').text("$ #{usd_summery}").end()
+      .find('.cny').text("¥ #{cny_summery}").end()
+      .find('.unknow').text("? #{unkown_summery}")
 
+    pay_cny = 0
+    pay_usd = 0
+    pay_unknown = 0
+    $("#relate_payment_table").find("td.total_price").each ->
+      text = @innerText
+      if text.indexOf("$") >= 0
+        pay_usd += parseFloat(text.split(' ')[1])
+      else if text.indexOf('¥') >= 0
+        pay_cny += parseFloat(text.split(' ')[1])
+      else
+        pay_unknown += parseFloat(text.split(' ')[1])
+      $("#relate_payment_table").find('.usd').text("$ #{pay_usd}").end()
+        .find('.cny').text("¥ #{pay_cny}").end()
+        .find('.unknown').text("? #{pay_unknown}")
 
   # 处理 hash
   do ->
