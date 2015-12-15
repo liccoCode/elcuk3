@@ -115,7 +115,8 @@
               <label class="control-label">支付币种</label>
 
               <div class="controls">
-                  #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD], value:payment.currency}
+                  #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD,
+                  helper.Currency.EUR, helper.Currency.HKD, helper.Currency.GBP], value:payment.currency}
                       #{option ''}选择币种#{/option}
                   #{/select}
               </div>
@@ -131,8 +132,7 @@
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="submit" value="付款" class="btn btn-primary"
-                       data-confirm='请再次确认信息后付款'>
+                <input type="submit" value="付款" class="btn btn-primary" data-confirm='请再次确认信息后付款'>
               </div>
             </div>
           #{/form}

@@ -1,6 +1,6 @@
 #{warning_row title: '相关支付单' /}
 <div class="row-fluid">
-  <table class="table table-bordered table-condensed">
+  <table class="table table-bordered table-condensed" id="relate_payment_table">
     <tr>
       <th>支付单编号</th>
       <th>状态</th>
@@ -14,7 +14,7 @@
     <tr>
       <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
       <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
-      <td>
+      <td class="total_price">
         ${payment.currency.symbol()} ${payment.approvalAmount()}
       </td>
         #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
@@ -22,5 +22,13 @@
         #{/list}
     </tr>
   #{/list}
+    <tr>
+      <td></td>
+      <td>总额</td>
+      <td class="usd"></td>
+      <td class="cny"></td>
+      <td class="unknown"></td>
+      <td colspan="2"></td>
+    </tr>
   </table>
 </div>
