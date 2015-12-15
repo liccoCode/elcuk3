@@ -449,103 +449,6 @@ public class Selling extends GenericModel {
         return feed;
     }
 
-
-    private org.w3c.dom.Document buildDoc() {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = null;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch(Exception pce) {
-        }
-        org.w3c.dom.Document doc = builder.newDocument();
-        return doc;
-    }
-
-    private F.T2<org.w3c.dom.Document, org.w3c.dom.Element> buildHeader(org.w3c.dom.Document doc, String type) {
-        org.w3c.dom.Element envelope = doc.createElement("AmazonEnvelope");
-        envelope.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        envelope.setAttribute("xsi:noNamespaceSchemaLocation", "amzn-envelope.xsd");
-        doc.appendChild(envelope);
-        org.w3c.dom.Element header = doc.createElement("Header");
-        envelope.appendChild(header);
-        org.w3c.dom.Element version = doc.createElement("DocumentVersion");
-        header.appendChild(version);
-        org.w3c.dom.Element identifier = doc.createElement("MerchantIdentifier");
-        header.appendChild(identifier);
-        org.w3c.dom.Element messagetype = doc.createElement("MessageType");
-        envelope.appendChild(messagetype);
-
-        Text tversion = doc.createTextNode("1.01");
-        version.appendChild(tversion);
-        Text tidentifier = doc.createTextNode(this.market.toMerchantIdentifier());
-        identifier.appendChild(tidentifier);
-
-        if(type.equals("Img")) {
-            Text tmessagetype = doc.createTextNode("ProductImage");
-            messagetype.appendChild(tmessagetype);
-        } else if(type.equals("Product")) {
-            Text tmessagetype = doc.createTextNode("Product");
-            messagetype.appendChild(tmessagetype);
-        } else if(type.equals("Price")) {
-            Text tmessagetype = doc.createTextNode("Price");
-            messagetype.appendChild(tmessagetype);
-        }
-
-        return new F.T2<org.w3c.dom.Document, org.w3c.dom.Element>(doc, envelope);
-    }
-
-    private org.w3c.dom.Document buildNode(org.w3c.dom.Document doc,
-                                           org.w3c.dom.Element envelope,
-                                           int i, String fileParamName, String location, String action) {
-        org.w3c.dom.Element message = doc.createElement("Message");
-        envelope.appendChild(message);
-
-        org.w3c.dom.Element messageid = doc.createElement("MessageID");
-        message.appendChild(messageid);
-        org.w3c.dom.Element operationtype = doc.createElement("OperationType");
-        message.appendChild(operationtype);
-
-        Text tmessageid = doc.createTextNode(String.valueOf(i + 1));
-        messageid.appendChild(tmessageid);
-        Text toperationtype = doc.createTextNode(action);
-        operationtype.appendChild(toperationtype);
-
-        org.w3c.dom.Element product = doc.createElement("ProductImage");
-        message.appendChild(product);
-        //建立SKU元素
-        org.w3c.dom.Element sku = doc.createElement("SKU");
-        product.appendChild(sku);
-        //建立ImageType元素
-        org.w3c.dom.Element ImageType = doc.createElement("ImageType");
-        product.appendChild(ImageType);
-        //建立ImageLocation元素
-        org.w3c.dom.Element ImageLocation = doc.createElement("ImageLocation");
-        product.appendChild(ImageLocation);
-
-        Text tsku = doc.createTextNode(this.merchantSKU);
-        sku.appendChild(tsku);
-        Text tname = doc.createTextNode(fileParamName);
-        ImageType.appendChild(tname);
-        Text tlocation = doc.createTextNode(location);
-        ImageLocation.appendChild(tlocation);
-        return doc;
-    }
-
-
-    public String getStringFromDoc(org.w3c.dom.Document doc) throws Exception {
-
-        javax.xml.transform.dom.DOMSource domSource = new javax.xml.transform.dom.DOMSource(doc);
-        StringWriter writer = new StringWriter();
-        javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
-        TransformerFactory tf = TransformerFactory.newInstance();
-        javax.xml.transform.Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(javax.xml.transform.OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "yes");
-        transformer.transform(domSource, result);
-        writer.flush();
-        return writer.toString();
-    }
-
     /**
      * 用Feed方式更新产品图片
      */
@@ -1078,7 +981,7 @@ public class Selling extends GenericModel {
             String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
-            String temp = HTTP.post("http://127.0.0.1:4567/amazon_get_feed", productParams);
+            String temp = HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", productParams);
             if(!temp.equals("success"))
                 throw new Exception("连接Rockend出现问题，请联系相关技术人员!");
         }
@@ -1089,7 +992,7 @@ public class Selling extends GenericModel {
             String feed_submission_id = MWSUtils.submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
-            String temp = HTTP.post("http://127.0.0.1:4567/amazon_get_feed", priceParams);
+            String temp = HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", priceParams);
             if(!temp.equals("success"))
                 throw new Exception("连接Rockend出现问题，请联系相关技术人员!");
         }
