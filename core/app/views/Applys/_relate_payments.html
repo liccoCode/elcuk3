@@ -15,7 +15,8 @@
       <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
       <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
       <td class="total_price">
-        ${payment.currency.symbol()} ${payment.approvalAmount()}
+      ${payment.currency.symbol()} ${new java.math.BigDecimal(payment.approvalAmount()).setScale(2,4)
+      .floatValue().format('#,###.##')}
       </td>
         #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
           <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>

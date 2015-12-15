@@ -57,10 +57,14 @@
           <td><a href="@{Applys.procure(apply.id)}">${apply.serialNumber}</a></td>
           <td>${apply.cooperator.fullName}</td>
             #{set currency:apply.currency()/}
-          <td>${currency?.symbol()} ${apply.appliedAmount()}</td>
-          <td>${currency?.symbol()} ${apply.leftAmount()}</td>
-          <td>${currency?.symbol()} ${apply.totalAmount()}</td>
-          <td>${currency?.symbol()} ${apply.fixValueAmount()}</td>
+          <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.appliedAmount()).setScale(2,
+          4).floatValue().format('#,###.##')}</td>
+          <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.leftAmount()).setScale(2,
+                    4).floatValue().format('#,###.##')}</td>
+          <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()).setScale(2,
+                              4).floatValue().format('#,###.##')}</td>
+          <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmount()).setScale(2,
+                                        4).floatValue().format('#,###.##')}</td>
           <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
           <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
         </tr>
