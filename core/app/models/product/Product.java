@@ -460,8 +460,20 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(this.category == null)
             Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
+        this.checkUPCisRepeat();
         if(Validation.hasErrors()) return;
         this.save();
+    }
+
+    public void checkUPCisRepeat() {
+        if(Product.find("upc = ? ", this.upc).fetch().size() > 0)
+            Validation.addError("", "UPC已经存在，请重新填写！");
+        if(Product.find("partNumber = ? ", this.partNumber).fetch().size() > 0)
+            Validation.addError("", "PartNumber已经存在，请重新填写！");
+        if(Product.find("partNumberJP = ? ", this.partNumberJP).fetch().size() > 0)
+            Validation.addError("", "Part Number(JP)已经存在，请重新填写！");
+        if(Product.find("upcJP = ? ", this.upcJP).fetch().size() > 0)
+            Validation.addError("", "UPC(JP)已经存在，请重新填写！");
     }
 
     /**
