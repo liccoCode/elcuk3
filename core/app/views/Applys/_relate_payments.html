@@ -14,7 +14,7 @@
     <tr>
       <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
       <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
-      <td class="total_price">
+      <td class="total_price" symbol="${payment.currency.symbol()}" amount="${new java.math.BigDecimal(payment.approvalAmount()).setScale(2,4).floatValue()}">
       ${payment.currency.symbol()} ${new java.math.BigDecimal(payment.approvalAmount()).setScale(2,4)
       .floatValue().format('#,###.##')}
       </td>

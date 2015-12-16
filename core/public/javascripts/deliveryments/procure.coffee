@@ -104,13 +104,13 @@ $ ->
     pay_usd = 0
     pay_unknown = 0
     $("#relate_payment_table").find("td.total_price").each ->
-      text = @innerText
+      text = $(@).attr("symbol")
       if text.indexOf("$") >= 0
-        pay_usd += parseFloat(text.split(' ')[1])
+        pay_usd += parseFloat($(@).attr("amount"))
       else if text.indexOf('¥') >= 0
-        pay_cny += parseFloat(text.split(' ')[1])
+        pay_cny += parseFloat($(@).attr("amount"))
       else
-        pay_unknown += parseFloat(text.split(' ')[1])
+        pay_unknown += parseFloat($(@).attr("amount"))
       $("#relate_payment_table").find('.usd').text("$ #{pay_usd}").end()
         .find('.cny').text("¥ #{pay_cny}").end()
         .find('.unknown').text("? #{pay_unknown}")
