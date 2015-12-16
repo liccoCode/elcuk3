@@ -211,8 +211,7 @@
                                 <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
                               </td>
                               <td>${fee.feeType.nickName}</td>
-                              <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,
-                              4).floatValue().format('#,###.##')}</td>
+                              <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,4).floatValue().format('#,###.##')}</td>
                               <td>
                                 <div class="row-fluid">
                                     #{if fee.isApproval()}

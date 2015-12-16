@@ -77,17 +77,12 @@
           <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
           <td>
               #{set totalFees: pay.totalFees()/}
-            <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,
-            4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,
-            4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,
-            4).floatValue().format('#,###.##')}">
-            ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,
-            4).floatValue().format('#,###.##')}
+            <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
+            ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')}
             </a>
           </td>
           <td>
-          ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,
-          4).floatValue().format('#,###.##')}
+          ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,4).floatValue().format('#,###.##')}
             <i class="badge badge-info">${pay.units().size()}</i>
           </td>
           <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>

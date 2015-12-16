@@ -10,12 +10,9 @@
   #{list items:apply.currencyFees(), as:'fee'}
     <tr>
       <td>${fee.currency}</td>
-      <td>${new java.math.BigDecimal(fee.total_fee).setScale(2,
-                                              4).floatValue().format('#,###.##')}</td>
-      <td>${new java.math.BigDecimal(fee.approval_fee).setScale(2,
-                                               4).floatValue().format('#,###.##')}</td>
-      <td>${new java.math.BigDecimal(fee.noapproval_fee).setScale(2,
-                                                     4).floatValue().format('#,###.##')}</td>
+      <td>${new java.math.BigDecimal(fee.total_fee).setScale(2,4).floatValue().format('#,###.##')}</td>
+      <td>${new java.math.BigDecimal(fee.approval_fee).setScale(2,4).floatValue().format('#,###.##')}</td>
+      <td>${new java.math.BigDecimal(fee.noapproval_fee).setScale(2,4).floatValue().format('#,###.##')}</td>
     </tr>
   #{/list}
   </table>
