@@ -115,40 +115,12 @@
                 <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
               #{/list}
           </td>
-          <td>${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}</td>
-          <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
-          <td class="price">${procureUnit.attrs.currency.symbol()} ${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
-          <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
-          <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
-        <td>
-            #{if procureUnit.fba}
-            ${procureUnit.fba.shipmentId}
-            #{/if}
-            #{else}
-            <tr style="background:red">
-            #{/else}
-            #{set pid:procureUnit.id/}
-          <td>
-            <label class="checkbox"><input type="checkbox" name="unitids" value="${procureUnit.id}" class="${tr_key}" id="unitids"></label>
-          </td>
-          <td data-toggle="toggle" data-target="#unit_${pid}">
-            <i class="icon-reorder"></i>
-          ${procureUnit.id}
-          </td>
-          <td>
-            <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
-          </td>
-          <td>
-            <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
-              #{list items:procureUnit.fees(), as:'fee'}
-                <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
-              #{/list}
-          </td>
           <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}">
           ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
-          <td class="price">${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount()}</td>
+          <td class="price">${procureUnit.attrs.currency.symbol()} ${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,
+          4).floatValue().format('#,###.##')}</td>
           <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
           <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
           <td>
@@ -158,84 +130,6 @@
               #{else }
                 暂时还没有 FBA
               #{/else}
-            <div class="span10">
-                #{if procureUnit.fees().size() > 0}
-                  <table class="table table-condensed" style="margin-bottom:0">
-                    <tr>
-                      <th></th>
-                      <th>付款单</th>
-                      <th>#</th>
-                      <th>状态</th>
-                      <th>请款类型</th>
-                      <th>请款金额</th>
-                      <th>修正值</th>
-                    </tr>
-                      #{list items:procureUnit.fees(), as:'fee'}
-                        <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
-                          <td>
-                              #{power.ck 'paymentunits.destroy'}
-                                  #{ifnot fee.remove || fee.isApproval()}
-                                    <button class="paymentUnitCancel btn btn-danger"
-                                            url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>
-                                      取消
-                                    </button>
-                                  #{/ifnot}
-                              #{/power.ck}
-                          </td>
-                          <td>
-                            <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
-                            ${fee.payment.paymentNumber}
-                            </a>
-                          </td>
-                          <td>${fee.id}</td>
-                          <td>
-                            <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
-                          </td>
-                          <td>${fee.feeType.nickName}</td>
-                          <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,4).floatValue().format('#,###.##')}</td>
-                          <td>
-                            <div class="row-fluid">
-                                #{if fee.isApproval()}
-                                ${fee.currency.symbol()} ${fee.fixValue}
-                                #{/if}
-                                #{else }
-                                    #{form @PaymentUnits.fixValue(fee.id), class:'form-inline', method:'POST'}
-                                      <div class="input-prepend">
-                                        <span class="add-on">${fee.currency.symbol()}</span>
-                                        <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
-                                      </div>
-                                        #{power.ck 'paymentunits.fixvalue' }
-                                          <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
-                                          <input type="submit" value="修正" class="btn">
-                                        #{/power.ck}
-                                    #{/form}
-                                #{/else}
-                            </div>
-                          </td>
-                        </tr>
-                          #{set fixValueRecords: fee.fixValueRecords()/}
-                          #{set denyRecords: fee.denyRecords()/}
-                          #{if (denyRecords.size() + fixValueRecords.size()) > 0}
-                            <tr class="${fee.isApproval()? 'muted':''}">
-                              <td colspan="7">
-                                <div class="row-fluid">
-                                  <div class="span6">
-                                      #{records_ul records:denyRecords /}
-                                  </div>
-                                  <div class="span6">
-                                      #{records_ul records:fixValueRecords /}
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          #{/if}
-                      #{/list}
-                  </table>
-                #{/if}
-                #{else }
-                  <span class="text-center">没有请款记录</span>
-                #{/else}
-            </div>
           </td>
         </tr>
           <tr id="unit_${pid}" style="display:none">
@@ -317,7 +211,8 @@
                                 <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
                               </td>
                               <td>${fee.feeType.nickName}</td>
-                              <td>${fee.currency.symbol()} ${fee.amount}</td>
+                              <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,
+                              4).floatValue().format('#,###.##')}</td>
                               <td>
                                 <div class="row-fluid">
                                     #{if fee.isApproval()}
