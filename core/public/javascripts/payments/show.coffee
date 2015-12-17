@@ -18,7 +18,8 @@ $ ->
       $(@).prop("checked", !$(@).prop("checked"))
     )
   ).on('blur','#actualPaid', (e) ->
-    $(@).val(parseFloat($(@).val()).toFixed(2));
+    if $(@).val()
+      $(@).val(parseFloat($(@).val()).toFixed(2));
   )
 
   $('#pay_form').on('change', 'select[name=currency]',(e) ->
