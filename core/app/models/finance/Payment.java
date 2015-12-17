@@ -309,7 +309,7 @@ public class Payment extends Model {
                 break;
             }
         }
-        if(!Arrays.asList(Currency.CNY, Currency.USD).contains(currency))
+        if(!Arrays.asList(Currency.CNY, Currency.USD, Currency.EUR, Currency.GBP, Currency.HKD).contains(currency))
             Validation.addError("", "现在只支持美元与人民币两种支付币种");
 
         if(!Arrays.asList(S.WAITING, S.LOCKED).contains(this.state))
