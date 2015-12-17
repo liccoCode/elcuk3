@@ -1,4 +1,8 @@
 $ ->
+  format_Num = (num) ->
+    num = parseFloat(num).toFixed(2)
+    num.toString().replace(/(\d{1,3})(?=(\d{3})+(?:\.))/g, "$1,")
+
   $('.paymentUnitCancel').click (e) ->
     e.preventDefault()
     $('#paymentUnit_destroy_form').attr('action', @getAttribute('url'))
@@ -81,7 +85,7 @@ $ ->
       table_summary = $(@)
       cny_summery = 0
       usd_summery = 0
-      unkown_summery = 0
+      unknown_summery = 0
       planQty = 0
       qty = 0
       table_summary.parent().find("td.qty").each ->
@@ -89,16 +93,18 @@ $ ->
         qty += parseInt($(@).attr('qty'))
       table_summary.parents('table').find('td.price').each ->
         text = @innerText
+        $td = $(@)
         if text.indexOf("$") >= 0
-          usd_summery += parseFloat(text.split(' ')[1])
+          usd_summery += parseFloat($td.attr("amount"))
         else if text.indexOf('¥') >= 0
-          cny_summery += parseFloat(text.split(' ')[1])
+          cny_summery += parseFloat($td.attr("amount"))
         else
-          unkown_summery += parseFloat(text.split(' ')[1])
+          unknown_summery += parseFloat($td.attr("amount"))
+
       table_summary.find('.totalNum').text("#{planQty} / #{qty}").end()
-      .find('.usd').text("$ #{usd_summery}").end()
-      .find('.cny').text("¥ #{cny_summery}").end()
-      .find('.unknow').text("? #{unkown_summery}")
+      .find('.usd').text("$ #{format_Num(usd_summery)}").end()
+      .find('.cny').text("¥ #{format_Num(cny_summery)}").end()
+      .find('.unknow').text("? #{format_Num(unknown_summery)}")
 
     pay_cny = 0
     pay_usd = 0
@@ -111,9 +117,9 @@ $ ->
         pay_cny += parseFloat($(@).attr("amount"))
       else
         pay_unknown += parseFloat($(@).attr("amount"))
-      $("#relate_payment_table").find('.usd').text("$ #{pay_usd}").end()
-        .find('.cny').text("¥ #{pay_cny}").end()
-        .find('.unknown').text("? #{pay_unknown}")
+      $("#relate_payment_table").find('.usd').text("$ #{format_Num(pay_usd)}").end()
+      .find('.cny').text("¥ #{format_Num(pay_cny)}").end()
+      .find('.unknown').text("? #{format_Num(pay_unknown)}")
 
   # 处理 hash
   do ->
@@ -125,3 +131,4 @@ $ ->
       EF.colorAnimate(targetTr)
 
     calculateSumery()
+
