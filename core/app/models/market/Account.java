@@ -634,7 +634,7 @@ public class Account extends Model {
     public static Address address(M type) {
         // 统一为一个地址, 但接口参数预留
         return new Address(OperatorConfig.getVal("addressname"),
-                OperatorConfig.getVal("addressline1"), null, null,
+                OperatorConfig.getVal("addressline1"), OperatorConfig.getVal("addressline2"), null,
                 OperatorConfig.getVal("addresscity"),
                 OperatorConfig.getVal("addressstate"),
                 OperatorConfig.getVal("addresscountrycode"),
