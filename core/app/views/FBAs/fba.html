@@ -49,12 +49,8 @@
   <tr>
     <td align="center" colspan="3">
       <!-- 需要生成的 Bar Code -->
-    #{if isexpress=='1'}
-        #{set shipmentIdStr: shipmentId + boxNumber/}
-    #{/if}
-    #{else}
-        #{set shipmentIdStr: shipmentId/}
-    #{/else}
+
+      #{set shipmentIdStr: shipmentId + boxNumber/}
       <img src="${models.OperatorConfig.getVal("elcuk2url")}@{Login.code128(shipmentIdStr)}" width="260"
            height="72" border="0"
                      style="padding-left:30px">

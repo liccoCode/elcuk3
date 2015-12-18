@@ -1203,9 +1203,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Map<String, Object> map = new HashMap<String, Object>();
 
             String shipmentid = fba.shipmentId;
-            if(this.shipType == Shipment.T.EXPRESS) {
-                shipmentid = shipmentid.trim() + "U";
-            }
+
+            shipmentid = shipmentid.trim() + "U";
+
 
             map.put("shipmentId", shipmentid);
             map.put("shipFrom", Account.address(this.fba.account.type));
