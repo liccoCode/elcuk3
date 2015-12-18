@@ -84,11 +84,11 @@
       <dt>支付人</dt>
       <dd>${payment.payer?.username}</dd>
       <dt>(计算)应该支付</dt>
-      <dd>${payment.actualCurrency.symbol()} ${new java.math.BigDecimal(payment.shouldPaid).floatValue().format('#,###.##')}</dd>
+      <dd>${payment.actualCurrency.symbol()} ${new java.math.BigDecimal(payment.shouldPaid).format('#,###.##')}</dd>
       <dt>&nbsp;</dt>
       <dd>&nbsp;</dd>
       <dt>实际支付金额</dt>
-      <dd>${payment.actualCurrency.symbol()} ${new java.math.BigDecimal(payment.actualPaid).floatValue().format('#,###.##')}</dd>
+      <dd>${payment.actualCurrency.symbol()} ${new java.math.BigDecimal(payment.actualPaid).format('#,###.##')}</dd>
       <dt>实际支付对方账号</dt>
       <dd>${payment.actualUser}</dd>
       <dt>实际支付对方账户</dt>
