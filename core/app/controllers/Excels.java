@@ -109,6 +109,7 @@ public class Excels extends Controller {
                 String.format("%s出货计划.xls", pidstr.toString()));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
+        renderArgs.put("procurecompany",models.OperatorConfig.getVal("procurecompany"));
         renderArgs.put("dmt", Deliveryment.findById(id));
         render(units);
     }
