@@ -450,8 +450,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         }
         if(StringUtils.isBlank(this.sku))
             Validation.addError("", "SKU 必须存在");
-        if(!Product.validSKU(this.sku))
-            Validation.addError("", "SKU[ " + this.sku + " ] 不合法!");
+
+        if(models.OperatorConfig.getVal("brandname").equals("EASYACC")) {
+            if(!Product.validSKU(this.sku))
+                Validation.addError("", "SKU[ " + this.sku + " ] 不合法!");
+        }
+
         if(Product.unUsedSKU(this.sku))
             Validation.addError("", "SKU[ " + this.sku + " ] 为废弃 SKU, 不能使用!");
         if(this.family == null)

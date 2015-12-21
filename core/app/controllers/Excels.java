@@ -52,9 +52,17 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Excels extends Controller {
 
-
     @Check("excels.deliveryment")
     public static void deliveryment(String id, DeliveryExcel excel) {
+        excel.dmt = Deliveryment.findById(id);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(excel);
+    }
+
+    @Check("excels.deliveryment")
+    public static void deliverymentbrandworl(String id, DeliveryExcel excel) {
         excel.dmt = Deliveryment.findById(id);
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
@@ -105,6 +113,7 @@ public class Excels extends Controller {
                 String.format("%s出货计划.xls", pidstr.toString()));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
+        renderArgs.put("procurecompany",models.OperatorConfig.getVal("procurecompany"));
         renderArgs.put("dmt", Deliveryment.findById(id));
         render(units);
     }
@@ -219,7 +228,7 @@ public class Excels extends Controller {
                     } else {
                         categoryname = p.category.toLowerCase();
                     }
-                    HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
+                    HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/profit_batch_work?category=" + categoryname
                             + "&market=" + marketkey + "&from="
                             + new SimpleDateFormat("yyyyMMdd").format(p.begin)
                             + "&to="
@@ -469,7 +478,8 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, target, formatter);
         } else {
-            HTTP.get(String.format("%s?year=%s&month=%s", RevenueAndCostDetail.CALCULATE_URL, year, month));
+            HTTP.get(String.format("%s?year=%s&month=%s",
+                    "http://"+models.OperatorConfig.getVal("rockendurl")+":4567/revenue_and_cost_calculator", year, month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }

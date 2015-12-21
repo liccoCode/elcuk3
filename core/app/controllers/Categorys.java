@@ -9,6 +9,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
  * Date: 4/26/12
  * Time: 11:05 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Categorys extends Controller {
 
     @Before(only = {"show", "update", "brand", "unbrand", "delete"})
@@ -28,10 +29,16 @@ public class Categorys extends Controller {
 
     @Check("categorys.show")
     public static void show(String id) {
+        List<Category> cats = renderArgs.get("cates", List.class);
+        if(cats == null || cats.size() <= 0) {
+            Category cat = new Category();
+            List<Team> teams = new ArrayList<Team>();
+            render(cat, teams);
+        }
         Category cat = (Category) renderArgs.get("cates", List.class).get(0);
         if(StringUtils.isNotBlank(id)) cat = Category.findById(id);
         List<Team> teams = Team.Teams();
-        render(cat,teams);
+        render(cat, teams);
     }
 
     public static void update(Category cat) {
@@ -76,7 +83,7 @@ public class Categorys extends Controller {
     public static void blank() {
         Category cat = new Category();
         List<Team> teams = Team.Teams();
-        render(cat,teams);
+        render(cat, teams);
     }
 
     public static void create(Category cat) {

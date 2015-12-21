@@ -48,13 +48,13 @@ public class Bootstrap extends Job {
         /**
          * 初始化日志类
          */
+        OperatorConfig.init();
         LogUtils.initLog();
         HTTP.init();
         Privilege.init();
         JobsSetup.init();
         Account.initOfferIds();
         ElcukConfig.init();
-        OperatorConfig.init();
         Caches.clearRedisRunningKeys();
 
         /**

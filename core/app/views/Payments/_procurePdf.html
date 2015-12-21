@@ -70,7 +70,7 @@
 #{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
 #{if images}
   #{list items:images, as:'img'}
-  <img src="http://e.easya.cc/attachs/image?a.fileName=${img.fileName}">
+  <img src="${models.OperatorConfig.getVal("elcuk2url")}/attachs/image?a.fileName=${img.fileName}">
   #{/list}
 #{/if}
 #{else }
