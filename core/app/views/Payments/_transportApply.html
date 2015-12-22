@@ -12,6 +12,7 @@
       <th>数量</th>
       <th>均价</th>
       <th>总价</th>
+      <th>是否发货</th>
       <th class="span2">状态</th>
       <th class='span3'>#</th>
     </tr>
@@ -34,6 +35,7 @@
       <td>${fee.unitQty}</td>
       <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice()}</td>
       <td>${fee.amount()}</td>
+      <td>${fee.procureUnit?.isship()}</td>
       <td>
         <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
       </td>

@@ -61,9 +61,9 @@
   <td>${unit.whouse?.name()}</td>
   <td>${unit.cooperator?.name}</td>
   <td>${unit.attrs.planQty}</td>
-  <td>${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
-  <td>${unit.attrs.currency.symbol()} ${(unit.qty() * unit.attrs.price)}</td>
-  <td>${unit.attrs.currency.symbol()} ${unit.leftAmount()}</td>
+  <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
+  <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.qty() * unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
+  <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.leftAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
   <td>
     <!-- FnSku 下载 Label -->
       #{if unit.selling?.fnSku}

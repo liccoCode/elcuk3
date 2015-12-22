@@ -19,6 +19,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class Payments extends Controller {
      */
     @Check("payments.payforit")
     public static void payForIt(Long id, Long paymentTargetId,
-                                Currency currency, Float actualPaid,
+                                Currency currency, BigDecimal actualPaid,
                                 Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratio_publish_date) {
 
         Validation.required("供应商支付账号", paymentTargetId);
@@ -118,7 +119,7 @@ public class Payments extends Controller {
     }
 
     @Check("payments.shouldpaidupdate")
-    public static void shouldPaidUpdate(Long id, Float shouldPaid) {
+    public static void shouldPaidUpdate(Long id, BigDecimal shouldPaid) {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
         if(Validation.hasErrors()) {

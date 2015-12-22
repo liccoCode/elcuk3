@@ -464,8 +464,21 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(this.category == null)
             Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
+        this.checkUPCisRepeat();
         if(Validation.hasErrors()) return;
         this.save();
+    }
+
+    public void checkUPCisRepeat() {
+        if(Product.find("upc = ? ", this.upc).fetch().size() > 0)
+            Validation.addError("", "UPC已经存在，请重新填写！");
+        if(Product.find("partNumber = ? ", this.partNumber).fetch().size() > 0)
+            Validation.addError("", "PartNumber已经存在，请重新填写！");
+        if(StringUtils.isNotEmpty(this.partNumberJP) &&
+                Product.find("partNumberJP = ? ", this.partNumberJP).fetch().size() > 0)
+            Validation.addError("", "Part Number(JP)已经存在，请重新填写！");
+        if(StringUtils.isNotEmpty(this.upcJP) && Product.find("upcJP = ? ", this.upcJP).fetch().size() > 0)
+            Validation.addError("", "UPC(JP)已经存在，请重新填写！");
     }
 
     /**
@@ -521,7 +534,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Override
     public String to_log() {
         return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s] [上架状态:%s] " +
-                "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
+                        "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
                 this.lengths, this.width, this.heigh, this.weight, this.declaredValue,
                 this.productName, this.marketState.label(), this.procureState.label(), this.productState.label(),
                 this.salesLevel);
