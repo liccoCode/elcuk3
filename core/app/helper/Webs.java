@@ -166,7 +166,7 @@ public class Webs {
                 email.addTo(address);
             }
 
-            email.setFrom(models.OperatorConfig.getVal("support"), models.OperatorConfig.getVal("addressname"));
+            email.setFrom(models.OperatorConfig.getVal("supportemail"), models.OperatorConfig.getVal("addressname"));
             email.setHtmlMsg(content);
         } catch(EmailException e) {
             Logger.warn("Email error: " + e.getMessage());
