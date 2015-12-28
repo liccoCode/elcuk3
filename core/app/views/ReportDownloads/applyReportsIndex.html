@@ -110,9 +110,9 @@
 
         <div class="input-prepend input-append inline" style="margin-left:10px;">
           <span class="add-on">From:</span>
-          <input type="date" name="from">
+          <input type="date" name="from" value="${helper.Dates.aMonthAgo().date()}">
           <span class="add-on">To:</span>
-          <input type="date" name="to">
+          <input type="date" name="to" value="${new org.joda.time.DateTime()}">
         </div>
 
         <span class="add-on">市场:</span>
