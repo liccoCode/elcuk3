@@ -253,9 +253,6 @@ public class MetricAmazonFeeService {
                 .must(FilterBuilders.rangeFilter("date")
                         .gte(this.market.withTimeZone(Dates.morning(this.from)).toString(isoFormat))
                         .lt(this.market.withTimeZone(Dates.night(this.to)).toString(isoFormat))
-                )
-                .must(FilterBuilders.termsFilter("order_orderId",
-                        OrderrQuery.orderIds(this.from, this.to, this.market, Orderr.S.SHIPPED))
                 );
     }
 
