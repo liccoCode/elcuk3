@@ -1,18 +1,29 @@
 package services;
 
-import helper.Caches;
-import helper.DBUtils;
-import helper.Dates;
+import com.alibaba.fastjson.JSONObject;
+import helper.*;
 import models.finance.FeeType;
 import models.market.M;
+import models.market.Orderr;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.libs.F;
+import play.utils.FastRuntimeException;
+import query.OrderrQuery;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +34,20 @@ import java.util.concurrent.TimeUnit;
  * Time: 1:51 PM
  */
 public class MetricAmazonFeeService {
+
+    public Date from;
+    public Date to;
+    public M market;
+    private FilterAggregationBuilder dateAndMarketAggregation;
+
+    public MetricAmazonFeeService() {
+    }
+
+    public MetricAmazonFeeService(Date from, Date to, M market) {
+        this.from = from;
+        this.to = to;
+        this.market = market;
+    }
 
     /**
      * Selling 的 Amazon 消耗的费用;
@@ -153,5 +178,108 @@ public class MetricAmazonFeeService {
             sellingSales.put(sellingId, costObj == null ? 0 : NumberUtils.toFloat(costObj.toString()));
         }
         return sellingSales;
+    }
+
+    public String stateToFeeCategory(Orderr.S state) {
+        switch(state) {
+            case SHIPPED:
+                return "order";
+            case REFUNDED:
+                return "refunds";
+            default:
+                return "order";
+        }
+    }
+
+    public Map<String, Map<String, BigDecimal>> orderFeesCost() {
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
+        FilterAggregationBuilder dateAndMarketAggregation = AggregationBuilders.filter("date_and_market_filters")
+                .filter(dateAndmarketFilters());
+        //Orders & Refunds Fees
+        for(Orderr.S state : Arrays.asList(Orderr.S.SHIPPED, Orderr.S.REFUNDED)) {
+            FilterAggregationBuilder orderIdAggregation = AggregationBuilders.filter(stateToFeeCategory(state));
+            orderIdAggregation.filter(
+                    FilterBuilders.termsFilter(
+                            "order_orderId",
+                            OrderrQuery.orderIds(this.from, this.to, this.market, state)
+                    )
+            );
+            for(String feeType : Arrays.asList("productcharges", "promorebates", "commission")) {
+                FilterAggregationBuilder feeTypeAggregation = AggregationBuilders.filter(feeType);
+                feeTypeAggregation.filter(FilterBuilders.termFilter("fee_type", feeType));
+
+                feeTypeAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
+                orderIdAggregation.subAggregation(feeTypeAggregation);
+
+
+            }
+
+            FilterAggregationBuilder otherAggregation = AggregationBuilders.filter("other");
+            otherAggregation.filter(
+                    FilterBuilders.boolFilter().mustNot(
+                            FilterBuilders.termFilter("fee_type",
+                                    Arrays.asList("productcharges", "promorebates", "commission", "fbaweightbasedfee",
+                                            "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee")
+                            )
+                    )
+            );
+            otherAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
+            orderIdAggregation.subAggregation(otherAggregation);
+            dateAndMarketAggregation.subAggregation(orderIdAggregation);
+        }
+
+        //Selling Fees
+        FilterAggregationBuilder fbaFeeAggregation = AggregationBuilders.filter("selling_fees");
+        fbaFeeAggregation.filter(
+                FilterBuilders.termsFilter("fee_type",
+                        Arrays.asList("fbaweightbasedfee", "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee"))
+        );
+        fbaFeeAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
+        dateAndMarketAggregation.subAggregation(fbaFeeAggregation);
+
+        //Other Transactions
+        search.aggregation(dateAndMarketAggregation);
+        Logger.info("orderFeesCost:::" + search.toString());
+
+        JSONObject result = ES.search("elcuk2", "salefee", search);
+        if(result == null) throw new FastRuntimeException("ES 连接异常!");
+        return readFeesCostInESResult(result);
+    }
+
+    public BoolFilterBuilder dateAndmarketFilters() {
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+        return FilterBuilders.boolFilter()
+                .must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
+                .must(FilterBuilders.rangeFilter("date")
+                        .gte(this.market.withTimeZone(Dates.morning(this.from)).toString(isoFormat))
+                        .lt(this.market.withTimeZone(Dates.night(this.to)).toString(isoFormat))
+                )
+                .must(FilterBuilders.termsFilter("order_orderId",
+                        OrderrQuery.orderIds(this.from, this.to, this.market, Orderr.S.SHIPPED))
+                );
+    }
+
+    public Map<String, Map<String, BigDecimal>> readFeesCostInESResult(JSONObject esResult) {
+        Map<String, Map<String, BigDecimal>> feesCost = new HashMap<String, Map<String, BigDecimal>>();
+        JSONObject dateAndMarket = esResult.getJSONObject("aggregations").getJSONObject("date_and_market_filters");
+
+        //Orders & Refunds Fees
+        for(Orderr.S state : Arrays.asList(Orderr.S.SHIPPED, Orderr.S.REFUNDED)) {
+            String feeCategory = stateToFeeCategory(state);
+            JSONObject feeCategoryObj = dateAndMarket.getJSONObject(feeCategory);
+
+            Map<String, BigDecimal> feeCategoryMap = new HashMap<String, BigDecimal>();
+            for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
+                JSONObject feeTypeObj = feeCategoryObj.getJSONObject(feeType);
+                feeCategoryMap.put(feeType, feeTypeObj.getJSONObject("order_fees_cost").getBigDecimal("value"));
+            }
+            feesCost.put(feeCategory, feeCategoryMap);
+        }
+
+        //Selling Fees
+        JSONObject sellingFees = dateAndMarket.getJSONObject("selling_fees");
+        feesCost.put("selling_fees", GTs.MapBuilder.map("fba_fee", sellingFees.getJSONObject("order_fees_cost")
+                .getBigDecimal("value")).build());
+        return feesCost;
     }
 }
