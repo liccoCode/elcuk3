@@ -217,7 +217,7 @@ public class MetricAmazonFeeService {
             FilterAggregationBuilder otherAggregation = AggregationBuilders.filter("other");
             otherAggregation.filter(
                     FilterBuilders.boolFilter().mustNot(
-                            FilterBuilders.termFilter("fee_type",
+                            FilterBuilders.termsFilter("fee_type",
                                     Arrays.asList("productcharges", "promorebates", "commission", "fbaweightbasedfee",
                                             "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee")
                             )
