@@ -200,8 +200,8 @@ public class MetricAmazonFeeService {
             FilterAggregationBuilder orderIdAggregation = AggregationBuilders.filter(stateToFeeCategory(state));
             orderIdAggregation.filter(
                     FilterBuilders.termsFilter(
-                            "order_orderId",
-                            OrderrQuery.orderIds(this.from, this.to, this.market, state)
+                            "order_id",
+                            OrderrQuery.orderIds(this.from, this.to, this.market, state, true)
                     )
             );
             for(String feeType : Arrays.asList("productcharges", "promorebates", "commission")) {
