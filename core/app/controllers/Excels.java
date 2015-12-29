@@ -578,7 +578,7 @@ public class Excels extends Controller {
                     }
                 }.now());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME,
                 String.format("订单费用汇总报表%s.xls", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(
