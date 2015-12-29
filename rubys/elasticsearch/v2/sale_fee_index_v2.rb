@@ -49,8 +49,9 @@ class SaleFeeActor
 })
 
   def bulk_submit(rows)
-    async.submit(rows) do |row|
-      row[:order_id] = row[:order_id].gsub(/-/, '_')
+    submit(rows) do |row|
+      row[:order_id].gsub!(/-/, '_')
+      row
     end
   end
 end
