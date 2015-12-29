@@ -268,15 +268,16 @@ public class MetricAmazonFeeService {
             Map<String, BigDecimal> feeCategoryMap = new HashMap<String, BigDecimal>();
             for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
                 JSONObject feeTypeObj = feeCategoryObj.getJSONObject(feeType);
-                feeCategoryMap.put(feeType, feeTypeObj.getJSONObject("order_fees_cost").getBigDecimal("value"));
+                BigDecimal cost = feeTypeObj.getJSONObject("order_fees_cost").getBigDecimal("value");
+                feeCategoryMap.put(feeType, cost.setScale(2, BigDecimal.ROUND_HALF_UP));
             }
             feesCost.put(feeCategory, feeCategoryMap);
         }
 
         //Selling Fees
         JSONObject sellingFees = dateAndMarket.getJSONObject("selling_fees");
-        feesCost.put("selling_fees", GTs.MapBuilder.map("fba_fee", sellingFees.getJSONObject("order_fees_cost")
-                .getBigDecimal("value")).build());
+        BigDecimal cost = sellingFees.getJSONObject("order_fees_cost").getBigDecimal("value");
+        feesCost.put("selling_fees", GTs.MapBuilder.map("fba_fee", cost.setScale(2, BigDecimal.ROUND_HALF_UP)).build());
         return feesCost;
     }
 }
