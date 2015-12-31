@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -21,7 +22,6 @@ import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.OrderrQuery;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -38,7 +38,6 @@ public class MetricAmazonFeeService {
     public Date from;
     public Date to;
     public M market;
-    private FilterAggregationBuilder dateAndMarketAggregation;
 
     public MetricAmazonFeeService() {
     }
@@ -197,35 +196,36 @@ public class MetricAmazonFeeService {
                 .filter(dateAndmarketFilters());
         //Orders & Refunds Fees
         for(Orderr.S state : Arrays.asList(Orderr.S.SHIPPED, Orderr.S.REFUNDED)) {
-            FilterAggregationBuilder orderIdAggregation = AggregationBuilders.filter(stateToFeeCategory(state));
-            orderIdAggregation.filter(
-                    FilterBuilders.termsFilter(
-                            "order_id",
-                            OrderrQuery.orderIds(this.from, this.to, this.market, state, true)
-                    )
-            );
+            FilterAggregationBuilder feeCategoryAggregation = AggregationBuilders.filter(stateToFeeCategory(state));
+
+            //套上一层便于区分
+            feeCategoryAggregation.filter(FilterBuilders.matchAllFilter());
+
             for(String feeType : Arrays.asList("productcharges", "promorebates", "commission")) {
+                //使用 Cost 的正负来判断是属于 Order 还是 Refunds
                 FilterAggregationBuilder feeTypeAggregation = AggregationBuilders.filter(feeType);
-                feeTypeAggregation.filter(FilterBuilders.termFilter("fee_type", feeType));
+                feeTypeAggregation.filter(
+                        FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("fee_type", feeType))
+                                .must(costRangeFilter(state, feeType))
+                );
 
                 feeTypeAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
-                orderIdAggregation.subAggregation(feeTypeAggregation);
-
-
+                feeCategoryAggregation.subAggregation(feeTypeAggregation);
             }
 
             FilterAggregationBuilder otherAggregation = AggregationBuilders.filter("other");
             otherAggregation.filter(
-                    FilterBuilders.boolFilter().mustNot(
-                            FilterBuilders.termsFilter("fee_type",
-                                    Arrays.asList("productcharges", "promorebates", "commission", "fbaweightbasedfee",
-                                            "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee")
-                            )
-                    )
+                    FilterBuilders.boolFilter()
+                            .mustNot(
+                                    FilterBuilders.termsFilter("fee_type", Arrays.asList("productcharges",
+                                            "promorebates", "commission", "fbaweightbasedfee",
+                                            "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee"))
+                            ).must(costRangeFilter(state, "other"))
             );
             otherAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
-            orderIdAggregation.subAggregation(otherAggregation);
-            dateAndMarketAggregation.subAggregation(orderIdAggregation);
+            feeCategoryAggregation.subAggregation(otherAggregation);
+            dateAndMarketAggregation.subAggregation(feeCategoryAggregation);
         }
 
         //Selling Fees
@@ -254,6 +254,24 @@ public class MetricAmazonFeeService {
                         .gte(this.market.withTimeZone(Dates.morning(this.from)).toString(isoFormat))
                         .lt(this.market.withTimeZone(Dates.night(this.to)).toString(isoFormat))
                 );
+    }
+
+    public RangeFilterBuilder costRangeFilter(Orderr.S state, String feeType) {
+        RangeFilterBuilder costRangeFilter = FilterBuilders.rangeFilter("cost");
+        if(state == Orderr.S.SHIPPED) {
+            if("productcharges".equalsIgnoreCase(feeType) || "other".equalsIgnoreCase(feeType)) {
+                costRangeFilter.gt(0);
+            } else {
+                costRangeFilter.lt(0);
+            }
+        } else if(state == Orderr.S.REFUNDED) {
+            if("productcharges".equalsIgnoreCase(feeType) || "other".equalsIgnoreCase(feeType)) {
+                costRangeFilter.lt(0);
+            } else {
+                costRangeFilter.gt(0);
+            }
+        }
+        return costRangeFilter;
     }
 
     public Map<String, Map<String, BigDecimal>> readFeesCostInESResult(JSONObject esResult) {
