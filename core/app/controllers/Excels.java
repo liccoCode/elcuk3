@@ -242,6 +242,60 @@ public class Excels extends Controller {
         }
     }
 
+    public static void skuProfit(SkuProfitPost p) {
+        if(p == null) p = new SkuProfitPost();
+        if(StringUtils.isBlank(p.categories) && StringUtils.isBlank(p.sku)) {
+            renderText("未选择category或者sku!");
+        } else {
+            String sku_key = "";
+            String market_key = p.pmarket;
+            String categories_key = "";
+            if(StringUtils.isBlank(p.sku)) {
+                sku_key = p.categories;
+            } else {
+                sku_key = p.sku;
+            }
+            String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_" +
+                    new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_" +
+                    new SimpleDateFormat("yyyyMMdd").format(p.end);
+            String cache_str = Caches.get(cacke_key);
+
+            if(!StringUtils.isBlank(cache_str)) {
+                if(p.sku != null) sku_key = p.sku;
+                if(p.pmarket != null) market_key = p.pmarket;
+                if(p.categories != null) categories_key = p.categories.toLowerCase();
+                String post_key = Caches.Q.cacheKey("profitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                List<SkuProfit> dtos = Cache.get(post_key, List.class);
+                if(dtos == null) {
+                    renderText("Analyze后台事务正在执行中,请稍候...");
+                } else {
+                    SkuProfit total = SkuProfit.handleSkuProfit(dtos);
+
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+                    request.format = "xls";
+                    renderArgs.put(RenderExcel.RA_FILENAME,
+                            String.format("SKU销售库存利润报表%s.xls", formatter.format(new Date())));
+                    renderArgs.put(RenderExcel.RA_ASYNC, false);
+                    renderArgs.put("dateFormat", formatter);
+                    render(total, p, dtos);
+                }
+            } else {
+                String category_names = "";
+                int is_sku = 0;
+                if(StringUtils.isNotBlank(p.sku)) {
+                    category_names = p.sku;
+                    is_sku = 1;
+                } else {
+                    category_names = p.categories.toLowerCase();
+                }
+                HTTP.get("http://127.0.0.1:4567/sku_profit_batch_work?categories=" + category_names
+                        + "&market=" + market_key + "&from=" + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
+                        + "&to=" + new SimpleDateFormat("yyyy-MM-dd").format(p.end) + "&is_sku=" + is_sku);
+                renderText("后台事务正在计算中,请稍候...");
+            }
+        }
+    }
+
     public static void saleReport(SaleReportPost p) {
         List<SaleReportDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
@@ -547,6 +601,7 @@ public class Excels extends Controller {
 
     /***
      * 税金与重量报表
+     *
      * @param from
      * @param to
      */

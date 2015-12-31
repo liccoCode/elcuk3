@@ -167,6 +167,11 @@ public class Category extends GenericModel {
         return Category.count("categoryId=?", id) > 0;
     }
 
+    public static boolean is_exist_ids(String ids) {
+        Category.count("categoryId in (" + ids + ")");
+        return Category.count("categoryId in (" + ids + ")") > 0;
+    }
+
     /**
      * 通过 SKU 返回 Category
      *
