@@ -1,10 +1,13 @@
 package controllers.api;
 
 import helper.Constant;
+import jobs.analyze.SkuSaleProfitJob;
 import models.ReportRecord;
 import models.view.Ret;
+import models.view.post.SkuProfitPost;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -55,6 +58,23 @@ public class ReportDeal extends Controller {
         new SellingProfitSearch(p).now();
         //生成excel
         new SellingProfitJob(p).now();
+        renderJSON(new Ret(true, "调用利润job成功!"));
+    }
+
+    public static void skuSaleProfitJob() {
+        Logger.info("开始执行skuSaleProfitJob......");
+        SkuProfitPost p = new SkuProfitPost();
+        p.sku = request.params.get("sku");
+        p.pmarket = request.params.get("pmarket");
+        p.categories = request.params.get("categories");
+        String begin = request.params.get("begin");
+        String end = request.params.get("end");
+        p.begin = DateTime.parse(begin, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
+        p.end = DateTime.parse(end, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
+        Logger.debug("sku:"+p.sku+" market:"+p.pmarket+" category:" + p.categories + " begin:" +p.begin+" end:"+p.end);
+
+        new SkuSaleProfitJob(p).now();
+
         renderJSON(new Ret(true, "调用利润job成功!"));
     }
 }
