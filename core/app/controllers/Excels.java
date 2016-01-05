@@ -283,8 +283,7 @@ public class Excels extends Controller {
                     renderText("后台事务正在计算中,请稍候...");
                 } else {
                     SkuProfit total = SkuProfit.handleSkuProfit(dtos);
-
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
                     request.format = "xls";
                     renderArgs.put(RenderExcel.RA_FILENAME,
                             String.format("SKU销售库存利润报表%s.xls", formatter.format(new Date())));
