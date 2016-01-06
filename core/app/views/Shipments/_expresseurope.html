@@ -7,6 +7,7 @@
   #{/if}
   #{elseif country == 'FR'}
     Sold to : ${models.OperatorConfig.getVal("shipmenteuropefrsold")}<br>
+    (SERF Europefides SAS is the legal reprensentative of Tuggle in France)<br>
     Address:${models.OperatorConfig.getVal("shipmenteuropefrsold")}<br>
     VAT No. : ${models.OperatorConfig.getVal("shipmenteuropefrvat")}<br>
   #{/elseif}
@@ -17,6 +18,7 @@
   #{/elseif}
   #{elseif country == 'IT'}
     Sold to : ${models.OperatorConfig.getVal("shipmenteuropeitbuyer")}<br>
+    (ACIT S.R.L. is the legal reprensentative of Tuggle in France)<br>
     Address: ${models.OperatorConfig.getVal("shipmentexpresseuropeitaddress")}<br>
     VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeitvat")}<br>
   #{/elseif}
