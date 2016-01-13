@@ -23,11 +23,11 @@
     <input type="date" name="p.end" value="${p.end.date()}">
 
     市场:
-    <select id="market" style="width:150px;">
+    <select id="market" style="width:150px;" name="p.pmarket">
       <option value="market">Market</option>
       <option value="total">汇总</option>
         #{list items:models.market.M.values(), as:'m'}
-          <option value="${m.name()}">${m.label()}</option>
+          <option value="${m.name()}" #{if m.name()==p.pmarket} selected #{/if}>${m.label()}</option>
         #{/list}
     </select>
 
