@@ -19,6 +19,8 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
+import play.cache.*;
+import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
@@ -549,6 +551,11 @@ public class CheckTask extends Model {
      * 产生质检任务
      */
     public static void generateTask() {
+        String unitcache = "checktaskprocureunitcache";
+
+        if (StringUtils.isNotBlank(Cache.get(unitcache, String.class))) return;
+        String running = "running";
+        Cache.add(unitcache, running);
         List<Map<String, Object>> units = DBUtils
                 .rows("select id from ProcureUnit where isCheck=0 AND shipType is not null");
         for(Map<String, Object> unit : units) {
@@ -580,7 +587,6 @@ public class CheckTask extends Model {
             }
         }
 
-
         //因为运输方式经常变化，需要重新检查一次
         List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where "
                 + "  units_id in (" +
@@ -605,6 +611,7 @@ public class CheckTask extends Model {
         if(tasks.size() > 0) {
             checkwarehouse(tasks);
         }
+        Cache.delete(unitcache);
     }
 
     public static void checkwarehouse(List<Map<String, Object>> tasks) {
