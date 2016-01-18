@@ -117,7 +117,7 @@ public class Finances extends Controller {
                 if(p.pmarket != null) market_key = p.pmarket;
                 if(p.categories != null) categories_key = p.categories.toLowerCase();
 
-                String post_key = Caches.Q.cacheKey("profitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 skuProfits = Cache.get(post_key, List.class);
                 if(skuProfits != null) {
                     render(skuProfits, p);
