@@ -31,7 +31,7 @@ public class SkuSaleProfitJob extends Job {
         if(post.pmarket != null) market_key = post.pmarket;
         if(post.categories != null) categories_key = post.categories.toLowerCase();
 
-        String key = Caches.Q.cacheKey("profitpost", post.begin, post.end, categories_key, sku_key, market_key);
+        String key = Caches.Q.cacheKey("skuprofitpost", post.begin, post.end, categories_key, sku_key, market_key);
         if(isRunning(key)) return;
         Cache.add(key + RUNNING, key + RUNNING);
         //从ES查找SKU的利润

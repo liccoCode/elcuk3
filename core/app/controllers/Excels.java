@@ -266,7 +266,7 @@ public class Excels extends Controller {
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
                 if(p.categories != null) categories_key = p.categories.toLowerCase();
-                String post_key = Caches.Q.cacheKey("profitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
