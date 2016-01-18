@@ -26,7 +26,7 @@ public class OrderSearchTest extends UnitTest {
 
     @Test
     public void testClient() {
-        JSONObject obj = ES.get("elcuk2", "order", "203-8671889-8524331");
+        JSONObject obj = ES.get(models.OperatorConfig.getVal("esindex"), "order", "203-8671889-8524331");
         JSONObject source = obj.getJSONObject("_source");
         assertThat(source.getString("orderId"), is("203-8671889-8524331"));
 
@@ -73,7 +73,7 @@ public class OrderSearchTest extends UnitTest {
         post.promotion = true;
         SearchSourceBuilder builder = post.params();
 
-        JSONObject result = ES.search("elcuk2", "order_bak", builder);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order_bak", builder);
         JSONObject hits = result.getJSONObject("hits");
         JSONArray innerHits = hits.getJSONArray("hits");
 
@@ -88,7 +88,7 @@ public class OrderSearchTest extends UnitTest {
         post.promotion = false;
         SearchSourceBuilder builder = post.params();
 
-        JSONObject result = ES.search("elcuk2", "order_bak", builder);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order_bak", builder);
         JSONObject hits = result.getJSONObject("hits");
         JSONArray innerHits = hits.getJSONArray("hits");
 

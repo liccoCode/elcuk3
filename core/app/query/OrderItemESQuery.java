@@ -180,7 +180,7 @@ public class OrderItemESQuery {
         }
 
         Logger.info(search.toString());
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         Logger.info(result.toString());
         JSONObject facets = result.getJSONObject("facets");
         if(facets != null && facets.getJSONObject("units") != null) {
@@ -237,7 +237,7 @@ public class OrderItemESQuery {
             search.query(QueryBuilders.queryString(val).defaultField(type));
         }
 
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");
         JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
 
@@ -270,7 +270,7 @@ public class OrderItemESQuery {
                                 )
                         )
                 ).size(0);
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");
         JSONArray terms = facets.getJSONObject("units").getJSONArray("terms");
 
@@ -330,7 +330,7 @@ public class OrderItemESQuery {
                 ).size(0);
 
         Logger.info(search.toString());
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         Logger.info(result.toString());
         JSONObject facets = result.getJSONObject("facets");
         if(facets != null && facets.getJSONObject("units") != null) {
@@ -390,7 +390,7 @@ public class OrderItemESQuery {
                 .facet(facetBuilder)
                 .size(0);
 
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");
         JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
 
@@ -418,7 +418,7 @@ public class OrderItemESQuery {
             search.aggregation(skuSalesBaseSalesAggregation(m, from, to, params, type));
         }
         Logger.info("countSkuSales:::" + search.toString());
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
     }
@@ -487,7 +487,7 @@ public class OrderItemESQuery {
             search.aggregation(marketAggregation);
         }
         Logger.info("SkusMonthlyDailySale:::" + search.toString());
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
     }

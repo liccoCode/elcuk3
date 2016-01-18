@@ -1,7 +1,7 @@
 <div class="navbar navbar-fixed-top">
 <div class="navbar-inner">
 <div class="container">
-<a class="brand" href="@{Application.index()}">Elcuk2</a>
+<a class="brand" href="@{Application.index()}">${models.OperatorConfig.getVal("brandname")}</a>
 
 <div class="nav-collapse">
 <ul class="nav">
@@ -186,6 +186,9 @@
       #{power.ck "reportdownloads.applyreportsindex"}
         <li><a href="@{ReportDownloads.applyReportsIndex()}">财务报表下载</a></li>
       #{/power.ck}
+      #{power.ck "sku.salecostprofitanalyse"}
+        <li><a href="@{Finances.skuProfitAnalyse()}">SKU销售利润成本分析报表</a></li>
+      #{/power.ck}
   </ul>
 </li>
 #{/power.ck}
@@ -217,7 +220,6 @@
       #{power.ck "checktasks.checkerlist"}
         <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
       #{/power.ck}
-
   </ul>
 </li>
 #{/power.ck}
