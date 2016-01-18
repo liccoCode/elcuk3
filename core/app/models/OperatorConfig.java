@@ -1,6 +1,7 @@
 package models;
 
 import helper.GTs;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.JPABase;
@@ -26,6 +27,8 @@ import java.util.Map;
 public class OperatorConfig extends Model {
     public static final Map<String, T> NAME_Type_MAPS;
     public static final Map<String, String> VALUES_MAPS;
+
+    public static Map<String, String> VALUES_SYSPARAM;
 
     static {
         NAME_Type_MAPS = Collections.unmodifiableMap(
@@ -59,7 +62,11 @@ public class OperatorConfig extends Model {
         /**
          * 物流类型
          */
-        SHIPMENT
+        SHIPMENT,
+        /**
+         * 系统参数
+         */
+        SYSPARAM,
     }
 
     /**
@@ -67,6 +74,12 @@ public class OperatorConfig extends Model {
      */
     @Enumerated(EnumType.STRING)
     public T type;
+
+    /**
+     * 参数编码
+     */
+    @Column(unique = true)
+    public String paramcode;
 
     /**
      * 参数名称
@@ -101,11 +114,27 @@ public class OperatorConfig extends Model {
         /**
          * 运营报表参数初始化
          */
-        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
+/*        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
             OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(),
                     VALUES_MAPS.get(nameAndTypeEntry.getKey()));
             if(!config.exist()) config.save();
+        }*/
+
+        if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new java.util.HashMap<String, String>();
+        List<OperatorConfig> configs = OperatorConfig.findAll();
+        for(OperatorConfig config : configs) {
+            if(!StringUtils.isBlank(config.paramcode)) {
+                VALUES_SYSPARAM.put(config.paramcode, config.val);
+
+            }
         }
+    }
+
+    public static String getVal(String param) {
+        if(VALUES_SYSPARAM == null) OperatorConfig.init();
+        String sysval = VALUES_SYSPARAM.get(param);
+        if(StringUtils.isBlank(sysval)) sysval = "";
+        return sysval;
     }
 
     public boolean exist() {

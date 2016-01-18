@@ -104,7 +104,7 @@ public class Listing extends GenericModel {
      * title xxxx by [??]
      */
     @Expose
-    public String byWho = "EasyAcc";
+    public String byWho = models.OperatorConfig.getVal("addressname");
 
     @Expose
     public Integer reviews = 0;

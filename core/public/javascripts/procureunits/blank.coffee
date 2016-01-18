@@ -116,34 +116,37 @@ $ ->
     if !$("#planQty").val()
       noty({text: "请先填写采购数量！", type: 'error'})
       return false
-
-    $.get('/procureunits/hasProcureUnitBySellings', {sellingId: $("#sellingId").val()})
-    .done((r)->
-      if r.flag
-        totalFive = $("#totalFive").val()
-        day = $("#day").val()
-        planQty = $("#planQty").val()
-        if day == null || day == '0' || day == '0.0'
-          $("#new_procureunit").submit()
+    address_name = $("#addressName").val()
+    if address_name == 'EasyAcc'
+      $.get('/procureunits/hasProcureUnitBySellings', {sellingId: $("#sellingId").val()})
+      .done((r)->
+        if r.flag
+          totalFive = $("#totalFive").val()
+          day = $("#day").val()
+          planQty = $("#planQty").val()
+          if day == null || day == '0' || day == '0.0'
+            $("#new_procureunit").submit()
+          else
+            sellingId = $("#sellingId").val()
+            $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day, sellingId: sellingId})
+            .done((e)->
+              if e.flag
+                if confirm(e.message)
+                  if $("#memo").val().trim()
+                    $("#isNeedApply").val("need")
+                    $("#new_procureunit").submit()
+                  else
+                    noty({text: "请先填写备注！", type: 'error'})
+                    return false
+              else
+                $("#new_procureunit").submit()
+            )
         else
-          sellingId = $("#sellingId").val()
-          $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day, sellingId: sellingId})
-          .done((e)->
-            if e.flag
-              if confirm(e.message)
-                if $("#memo").val().trim()
-                  $("#isNeedApply").val("need")
-                  $("#new_procureunit").submit()
-                else
-                  noty({text: "请先填写备注！", type: 'error'})
-                  return false
-            else
-              $("#new_procureunit").submit()
-          )
-      else
-        if confirm('该selling第一次创建采购计划需走采购计划审批流程，确定吗?')
-          $("#isNeedApply").val("need")
-          $("#new_procureunit").submit()
-    )
+          if confirm('该selling第一次创建采购计划需走采购计划审批流程，确定吗?')
+            $("#isNeedApply").val("need")
+            $("#new_procureunit").submit()
+      )
+    else
+      $("#new_procureunit").submit()
   )
 

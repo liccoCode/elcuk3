@@ -1,8 +1,10 @@
 package query;
 
 import helper.DBUtils;
+import helper.Dates;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import play.db.helper.SqlSelect;
 import query.vo.OrderrVO;
 
@@ -44,5 +46,42 @@ public class OrderrQuery {
             vos.add(vo);
         }
         return vos;
+    }
+
+    /**
+     * 查询出符合条件的订单 ID
+     *
+     * @param from
+     * @param to
+     * @param market
+     * @param state
+     * @param esStyle 是否需要将 - 替换成 _
+     * @return
+     */
+    public static List<String> orderIds(Date from, Date to, M market, Orderr.S state, boolean esStyle) {
+        SqlSelect sql = new SqlSelect();
+        if(esStyle) {
+            sql.select("DISTINCT REPLACE(o.orderId, '-', '_') AS orderId");
+        } else {
+            sql.select("DISTINCT o.orderId AS orderId");
+        }
+        sql.from("Orderr o")
+                .where("o.market=?").param(market.name())
+                .where("o.createDate>=?").param(market.withTimeZone(Dates.morning(from)).toDate())
+                .where("o.createDate<=?").param(market.withTimeZone(Dates.morning(to)).toDate());
+        if(state != null) sql.where("o.state=?").param(state.name());
+
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+
+        List<String> orderIds = new ArrayList<String>();
+        for(Map<String, Object> row : rows) {
+            if(row != null) {
+                String orderId = row.get("orderId").toString();
+                if(StringUtils.isNotBlank(orderId)) {
+                    orderIds.add(orderId);
+                }
+            }
+        }
+        return orderIds;
     }
 }

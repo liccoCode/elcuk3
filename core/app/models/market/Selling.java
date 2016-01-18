@@ -336,7 +336,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market_id", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
-        HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
+        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_product_sync_back", params);
 
         this.save();
     }
@@ -434,7 +434,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
-        HTTP.post("http://rock.easya.cc:4567/submit_feed", params);
+        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/submit_feed", params);
         return feed;
     }
 
@@ -581,7 +581,7 @@ public class Selling extends GenericModel {
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
         params.add(new BasicNameValuePair("user_name", userName));
-        HTTP.post("http://rock.easya.cc:4567/submit_amazon_image_feed", params);
+        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/submit_amazon_image_feed", params);
         this.save();
     }
 
@@ -609,7 +609,7 @@ public class Selling extends GenericModel {
         patchToListing();
         Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
                 this.aps.templateType, this.market.toString()), this);
-        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
+        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/submit_feed", this.submitJobParams(feed));
         return this;
     }
 
@@ -1085,7 +1085,7 @@ public class Selling extends GenericModel {
             List<NameValuePair> productParams = this.submitJobParams(feed);
             productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
             productParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://rock.easya.cc:4567/amazon_submit_product_feed", productParams);
+            HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_submit_product_feed", productParams);
         }
 
         if(p.standerprice || p.saleprice) {
@@ -1099,7 +1099,7 @@ public class Selling extends GenericModel {
             List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
             priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
             priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://rock.easya.cc:4567/amazon_submit_price_feed", priceParams);
+            HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_submit_price_feed", priceParams);
         }
     }
 

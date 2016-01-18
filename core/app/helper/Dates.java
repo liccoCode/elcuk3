@@ -462,4 +462,8 @@ public class Dates {
         cal.set(Calendar.MONTH, dateTime.getMonthOfYear() - 1);
         return cal.getActualMaximum(Calendar.DATE);
     }
+
+    public static Date aMonthAgo() {
+        return DateTime.now().minusMonths(1).toDate();
+    }
 }

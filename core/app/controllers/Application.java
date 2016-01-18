@@ -119,7 +119,7 @@ public class Application extends Controller {
     }
 
     public static void aaa() {
-        HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
+        HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/selling_sale_analyze");
         renderText("成功执行, 请看后台 Command Line");
     }
 }

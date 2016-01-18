@@ -7,6 +7,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import helper.Dates;
 import helper.Webs;
+import models.OperatorConfig;
 import models.market.Account;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
@@ -354,7 +355,7 @@ public class FBA {
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
-                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, "elcuk2", "1.0",
+                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"), "1.0",
                         config);
                 CLIENT_CACHE.put(key, client);
             }
