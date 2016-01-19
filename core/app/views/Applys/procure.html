@@ -120,7 +120,7 @@
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
           <td class="price" amount="${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,4).floatValue()}">
-          ${procureUnit.attrs.currency.symbol()} ${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
+          ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalScaleAmount().format('#,###.##')}</td>
           <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
           <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
           <td>

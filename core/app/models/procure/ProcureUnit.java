@@ -1018,6 +1018,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 总共需要申请的金额,返回BigDecimal
+     *
+     * @return
+     */
+    public BigDecimal totalScaleAmount() {
+        return new BigDecimal(this.attrs.price).multiply(new BigDecimal(this.qty())).setScale(2,4);
+    }
+
+    /**
      * 是否拥有了 预付款
      *
      * @return
