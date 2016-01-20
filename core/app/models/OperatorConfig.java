@@ -40,6 +40,7 @@ public class OperatorConfig extends Model {
                         .put("运输天数", T.SHIPMENT)
                         .put("标准断货期天数", T.OPERATIONS)
                         .put("标准断货期天数区间", T.OPERATIONS)
+                        .put("退货率天数", T.OPERATIONS)
                         .build()
         );
         VALUES_MAPS = Collections.unmodifiableMap(
@@ -50,6 +51,7 @@ public class OperatorConfig extends Model {
                         .put("合理库存周转天数", "70")
                         .put("标准断货期天数", "90")
                         .put("标准断货期天数区间", "90-120,121-150,151")
+                        .put("退货率天数", "30")
                         .build()
         );
     }
@@ -114,11 +116,11 @@ public class OperatorConfig extends Model {
         /**
          * 运营报表参数初始化
          */
-/*        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
+        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
             OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(),
                     VALUES_MAPS.get(nameAndTypeEntry.getKey()));
             if(!config.exist()) config.save();
-        }*/
+        }
 
         if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new java.util.HashMap<String, String>();
         List<OperatorConfig> configs = OperatorConfig.findAll();
