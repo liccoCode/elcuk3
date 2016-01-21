@@ -2,10 +2,8 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-import helper.Caches;
 import helper.*;
 import helper.Currency;
-import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
 import models.market.M;
@@ -20,7 +18,6 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -29,18 +26,16 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
-import play.libs.Files;
 import play.modules.excel.RenderExcel;
-import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
+import services.MetricAmazonFeeService;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static play.modules.pdf.PDF.renderPDF;
 
 
 /**
@@ -608,7 +603,7 @@ public class Excels extends Controller {
         render(dtos, from, to, dateFormat);
     }
 
-    /***
+    /**
      * 税金与重量报表
      *
      * @param from
@@ -622,5 +617,36 @@ public class Excels extends Controller {
                 dateFormat.format(to)));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(dtos, from, to, dateFormat);
+    }
+
+    /**
+     * 订单费用汇总报表
+     *
+     * @param from
+     * @param to
+     * @param market
+     */
+    public static void orderFeesCostReport(final Date from, final Date to, final M market) {
+        Map<String, Map<String, BigDecimal>> feesCost = await(
+                new Job<Map<String, Map<String, BigDecimal>>>() {
+                    @Override
+                    public Map<String, Map<String, BigDecimal>> doJobWithResult() throws Exception {
+                        MetricAmazonFeeService service = new MetricAmazonFeeService(from, to, market);
+                        try {
+                            return service.orderFeesCost();
+                        } catch(Exception e) {
+                            renderText(Webs.S(e));
+                        }
+                        return null;
+                    }
+                }.now());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("订单费用汇总报表%s.xls", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(
+                        DateTime.now().toDate())));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(feesCost, from, to, dateFormat);
     }
 }
