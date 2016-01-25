@@ -26,7 +26,7 @@
       <dt>请款币种</dt>
       <dd id="request_currency">${payment.currency}</dd>
       <dt>批准后总金额(不含驳回)</dt>
-      <dd>${payment.currency.symbol()}<span id='finalAppied'>${new java.math.BigDecimal(payment.approvalAmount()).setScale(2,4).format('#,###.##')}</span></dd>
+      <dd>${payment.currency.symbol()}<span id='finalAppied'>${new java.math.BigDecimal(payment.approvalAmount()).format('#,###.##')}</span></dd>
       <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> ?</span></dt>
       <dd id='ratioTo'>0</dd>
       <dt>汇率 <span id='currencyToFrom'>? -> ${payment.currency}</span></dt>
