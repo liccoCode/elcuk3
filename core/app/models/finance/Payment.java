@@ -439,8 +439,7 @@ public class Payment extends Model {
                 for(PaymentUnit fee : this.units()) {
                     if(shipmentid == fee.shipment.id) {
                         if(PaymentUnit.S.DENY != fee.state)
-                            unitamount = unitamount.add(new BigDecimal
-                                    (Float.toString(fee.amount())));
+                            unitamount = unitamount.add(fee.decimalamount());
                     }
                 }
                 amount = amount.add(unitamount.setScale(2, RoundingMode.HALF_UP));
@@ -448,8 +447,7 @@ public class Payment extends Model {
         } else {
             for(PaymentUnit fee : this.units()) {
                 if(PaymentUnit.S.DENY != fee.state)
-                    amount = amount.add(new BigDecimal
-                            (Float.toString(fee.amount())));
+                    amount = amount.add(fee.decimalamount());
             }
         }
         return amount.setScale(2, RoundingMode.HALF_UP).toString();
