@@ -346,7 +346,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return new BigDecimal(this.amount).add(new BigDecimal(this.fixValue)).floatValue();
+        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue))).floatValue();
     }
 
     /**
