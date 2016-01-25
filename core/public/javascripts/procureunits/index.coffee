@@ -56,10 +56,8 @@ $ ->
 
   $("#create_deliverplan_btn").click (e) ->
     $form = $("#create_deliveryment")
-    alert '11111111111'
     window.open('/deliverplans/deliverplan?' + $form.serialize(), "_blank")
 
   $("#create_deliveryment_btn").click (e) ->
     $form = $("#create_deliveryment")
-    alert '22222'
     window.open('/deliveryments/create?' + $form.serialize(), "_blank")
