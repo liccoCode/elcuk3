@@ -89,11 +89,7 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
         List<Object> params = new ArrayList<Object>();
 
         if(this.dateType != null) {
-            if(this.dateType == DateType.DELIVERY) {
-                sbd.append(" u.attrs.planDeliveryDate>=? AND u.attrs.planDeliveryDate<=?");
-            } else {
-                sbd.append(" d.createDate>=? AND d.createDate<=?");
-            }
+            sbd.append(" d.createDate>=? AND d.createDate<=?");
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));
         }

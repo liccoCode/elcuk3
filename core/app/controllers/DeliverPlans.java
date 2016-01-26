@@ -2,6 +2,8 @@ package controllers;
 
 
 import models.ElcukRecord;
+import models.finance.ProcureApply;
+import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import helper.Webs;
 import models.User;
@@ -35,6 +37,12 @@ public class DeliverPlans extends Controller {
         if(dmt != null)
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
+    }
+
+    @Before(only = {"index"})
+    public static void beforeIndex(DeliveryPost p) {
+        List<Cooperator> suppliers = Cooperator.suppliers();
+        renderArgs.put("suppliers", suppliers);
     }
 
     /**
