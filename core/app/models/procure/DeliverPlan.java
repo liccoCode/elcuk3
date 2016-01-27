@@ -190,7 +190,8 @@ public class DeliverPlan extends GenericModel {
             return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND deliverplan is not null", cooperator)
+            return ProcureUnit.find("cooperator=? AND deliverplan!=?", cooperator,
+                    ProcureUnit.PLANSTAGE.DELIVERY)
                     .fetch();
         }
     }
