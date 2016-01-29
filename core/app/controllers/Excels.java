@@ -8,6 +8,7 @@ import helper.Currency;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
+import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
@@ -113,7 +114,7 @@ public class Excels extends Controller {
                 String.format("%s出货计划.xls", pidstr.toString()));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
-        renderArgs.put("procurecompany",models.OperatorConfig.getVal("procurecompany"));
+        renderArgs.put("procurecompany", models.OperatorConfig.getVal("procurecompany"));
         renderArgs.put("dmt", Deliveryment.findById(id));
         render(units);
     }
@@ -228,7 +229,8 @@ public class Excels extends Controller {
                     } else {
                         categoryname = p.category.toLowerCase();
                     }
-                    HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/profit_batch_work?category=" + categoryname
+                    HTTP.get("http://" + models.OperatorConfig.getVal("rockendurl") +
+                            ":4567/profit_batch_work?category=" + categoryname
                             + "&market=" + marketkey + "&from="
                             + new SimpleDateFormat("yyyyMMdd").format(p.begin)
                             + "&to="
@@ -275,7 +277,8 @@ public class Excels extends Controller {
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
                 if(p.categories != null) categories_key = p.categories.toLowerCase();
-                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                String post_key = Caches.Q
+                        .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -532,7 +535,8 @@ public class Excels extends Controller {
             render(dtos, target, formatter);
         } else {
             HTTP.get(String.format("%s?year=%s&month=%s",
-                    "http://"+models.OperatorConfig.getVal("rockendurl")+":4567/revenue_and_cost_calculator", year, month));
+                    "http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/revenue_and_cost_calculator", year,
+                    month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }
@@ -622,5 +626,16 @@ public class Excels extends Controller {
                 dateFormat.format(to)));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(dtos, from, to, dateFormat);
+    }
+
+    public static void btbOrderDetailReport(BtbOrderPost p) {
+        if(p == null) p = new BtbOrderPost();
+        List<BtbOrder> dtos = p.query();
+        p.totalCost(dtos);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("B2B销售订单明细%s.xls", dateFormat.format(new Date())));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, dateFormat, p);
     }
 }

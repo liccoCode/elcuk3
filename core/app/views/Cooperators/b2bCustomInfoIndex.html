@@ -1,10 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title></title>
-</head>
-<body>
+#{extends 'main_full.html' /}
+#{set title:'B2B客户信息列表' /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+#{/set}
 
-</body>
-</html>
+#{flash_alert /}
+
+<form action="@{Cooperators.b2bCustomInfoIndex()}" method="POST" class="search_form" id='search_form'>
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="input-prepend inline">
+        <span class="add-on">关键字</span>
+        <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="客户/公司名称模糊查询"/>
+      </div>
+
+      <div class="input-append input-prepend inline">
+        <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>查询</button>
+        &nbsp;
+      </div>
+      <div class="input-append input-prepend inline">
+        <a href="@{Cooperators.createB2BCustomInfoPage()}" class="btn btn-success">新增客户</a>
+      </div>
+
+      <input type="hidden" name="p.page" value="${p.page}">
+    </div>
+  </div>
+</form>
+
+<div class="row-fluid" style="overflow-x:auto;">
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th>序号</th>
+      <th width="380px;">客户/公司名称</th>
+      <th>联系人</th>
+      <th>联系电话</th>
+      <th>邮箱</th>
+      <th>操作</th>
+    </tr>
+  #{list items:dots, as:'b'}
+    <tr>
+      <td>${b_index}</td>
+      <td>${b.customName}</td>
+      <td>${b.contacts}</td>
+      <td>${b.contactPhone}</td>
+      <td>${b.email}</td>
+      <td>
+        <a href="@{Cooperators.createB2BCustomInfoPage(b.id)}" class="btn btn-mini btn-success">编辑</a>
+      </td>
+    </tr>
+  #{/list}
+
+    <tr class="tb_footer">
+      <td colspan="14">
+      #{bootstrap_pager pi:p, url:'' /}
+      </td>
+    </tr>
+  </table>
+</div>
+
