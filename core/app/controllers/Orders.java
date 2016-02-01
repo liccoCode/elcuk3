@@ -2,7 +2,7 @@ package controllers;
 
 import com.google.common.collect.Lists;
 import controllers.api.SystemOperation;
-import helper.DBUtils;
+import helper.HTTP;
 import helper.OrderInvoiceFormat;
 import jobs.promise.FinanceShippedPromise;
 import models.ElcukRecord;
@@ -16,9 +16,8 @@ import java.math.BigDecimal;
 import models.view.Ret;
 import models.view.post.OrderPOST;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.apache.commons.lang.StringUtils;
-import play.Logger;
-import play.db.helper.SqlSelect;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
@@ -83,13 +82,23 @@ public class Orders extends Controller {
         Orderr orderr = Orderr.findById(id);
         try {
             Account account = Account.findById(orderr.account.id);
-            List<SaleFee> fees = new FinanceShippedPromise(
-                    account, orderr.market, Lists.newArrayList(orderr.orderId)).now().get();
+            List<SaleFee> fees = new FinanceShippedPromise(account, orderr.market, Lists.newArrayList(orderr.orderId))
+                    .now().get();
             renderJSON(new Ret(true, "总共处理 " + fees.size() + " 个费用"));
         } catch(Exception e) {
             renderJSON(new Ret(e.getMessage()));
         }
+    }
 
+    public static void refreshFeeById(String id) {
+        Orderr orderr = Orderr.findById(id);
+        orderr.feeflag = 0;
+        orderr.save();
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("market", orderr.market.name()));
+        params.add(new BasicNameValuePair("order_id", orderr.orderId));
+        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_finance_find_by_order_id", params);
+        renderJSON(new Ret(true, "后台正在处理，请隔1分钟刷新此页面！"));
     }
 
 

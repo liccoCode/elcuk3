@@ -119,8 +119,8 @@
           ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
-          <td class="price" amount="${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,4).floatValue()}">
-          ${procureUnit.attrs.currency.symbol()} ${new java.math.BigDecimal(procureUnit.totalAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
+          <td class="price" amount="${procureUnit.totalAmount()}">
+          ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
           <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
           <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
           <td>

@@ -35,6 +35,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -1013,8 +1014,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalAmount() {
-        return this.qty() * this.attrs.price;
+        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2,4).floatValue();
     }
+
 
     /**
      * 是否拥有了 预付款

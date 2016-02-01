@@ -36,7 +36,11 @@
   #{/if}
   #{else }
     <div class="btn-toolbar" id='funcs'>
-      <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning  btn-small">重新抓取费用</button>
+      <!--
+      <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning btn-small" id="refreshFeeBtn">重新抓取费用</button>}
+      -->
+      <button data-url="@{Orders.refreshFeeById(ord.orderId)}" class="btn btn-warning btn-small">重新抓取费用</button>&nbsp;&nbsp;
+      <a href="@{Orders.show(ord.orderId)}" class="btn btn-success btn-small">刷新</a>
         #{if ord.feedback}
           <a href="@{Feedbacks.show(ord.orderId)}" class="btn btn-success btn-small">跳转到 Feedback</a>
         #{/if}

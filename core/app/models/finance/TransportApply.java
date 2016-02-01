@@ -167,15 +167,14 @@ public class TransportApply extends Apply {
                 BigDecimal totalamount = new BigDecimal(0);
                 for(PaymentUnit payment : ship.fees) {
                     if(payment.currency == currency) {
-                        totalamount = totalamount.add(new BigDecimal(Float.toString(payment
-                                .amount())));
+                        totalamount = totalamount.add(payment
+                                .decimalamount());
 
                         //已批准和已支付的
                         if(payment.state == PaymentUnit.S.APPROVAL || payment.state == PaymentUnit.S.PAID) {
-                            paidamount = paidamount.add(new BigDecimal
-                                    (Float.toString(payment.amount())));
+                            paidamount = paidamount.add(payment.decimalamount());
                         } else {
-                            applyamount = applyamount.add(new BigDecimal(Float.toString(payment.amount())));
+                            applyamount = applyamount.add(payment.decimalamount());
 
                         }
 
