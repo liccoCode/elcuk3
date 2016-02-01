@@ -13,6 +13,7 @@
 #{info_row}
 <ul>
   <li>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</li>
+  <li>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</li>
 </ul>
 #{/info_row}
 
@@ -123,7 +124,7 @@
   </form>
 </div>
 
-<form method="post" id="create_deliveryment" action="@{Deliveryments.create()}">
+<form method="post" id="create_deliveryment" >
   <div class="row-fluid">
     <div class="span12">
     #{render 'ProcureUnits/_unit_list.html', units: p.query(), checkbox:true/}
@@ -142,6 +143,18 @@
           </div>
         #{/power.ck}
     #{/if}
+
+    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+
+      <div class="input-append">
+        <input type="text" id="name_deliverplan" name="name" value="${name}" placeHolder="出货单的别名(必须)">
+        <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>
+          添加出货单
+        </button>
+      </div>
+
+    #{/if}
+
     </div>
   </div>
 </form>
