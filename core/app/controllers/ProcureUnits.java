@@ -153,6 +153,10 @@ public class ProcureUnits extends Controller {
      */
     public static void deliveryUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        if(unit.attrs.qty == null || unit.attrs.qty == 0)
+            unit.attrs.qty = unit.attrs.planQty;
+        if(unit.attrs.deliveryDate == null)
+            unit.attrs.deliveryDate = new Date();
         renderArgs.put("attrs", unit.attrs);
         render(unit);
     }
@@ -195,7 +199,14 @@ public class ProcureUnits extends Controller {
             render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
         }
 
-        Deliveryments.show(unit.deliveryment.id);
+        //抵达货代
+        if(unit.cooperator == null || unit.shipType == null) {
+            Validation.addError("", "[合作者] 或者 [运输方式] 需要填写完整.");
+        } else {
+            unit.isPlaced = true;
+            unit.save();
+        }
+        DeliverPlans.show(unit.deliverplan.id);
     }
 
     public static void hasProcureUnitBySellings(String sellingId) {

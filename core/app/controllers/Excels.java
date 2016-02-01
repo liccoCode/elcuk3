@@ -5,7 +5,6 @@ import controllers.api.SystemOperation;
 import helper.Caches;
 import helper.*;
 import helper.Currency;
-import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
 import models.market.M;
@@ -20,7 +19,6 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -29,9 +27,7 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
-import play.libs.Files;
 import play.modules.excel.RenderExcel;
-import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -39,8 +35,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static play.modules.pdf.PDF.renderPDF;
+import models.procure.DeliverPlan;
 
 
 /**
@@ -87,6 +82,28 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件！");
         }
     }
+
+    /**
+     * 下载出货单综合Excel表格
+     */
+    public static void deliverplans(String id) {
+        DeliverPlan dp = DeliverPlan.findById(id);
+
+        List<ProcureUnit> unitList = dp.units;
+
+        if(unitList != null && unitList.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s出仓单.xls", dp.id));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dp,unitList);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
 
     /**
      * 下载选定的采购计划的出货单
