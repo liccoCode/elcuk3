@@ -89,16 +89,15 @@ public class SkuProfit implements Serializable {
         SkuProfit totalSkuProfit = new SkuProfit();
         for(SkuProfit skuProfit : skuProfits) {
             if(skuProfitMap.containsKey(skuProfit.market)) {
-                SkuProfit profit = skuProfitMap.get(skuProfit.market);
-                SkuProfit.add_profit(profit, skuProfit);
+                totalSkuProfit = skuProfitMap.get(skuProfit.market);
+                SkuProfit.add_profit(totalSkuProfit, skuProfit);
             } else {
                 skuProfitMap.put(skuProfit.market, skuProfit);
             }
-            SkuProfit.add_profit(totalSkuProfit, skuProfit);
         }
 
         Iterator iterator = skuProfitMap.entrySet().iterator();
-        while (iterator.hasNext()) {
+        while(iterator.hasNext()) {
             Map.Entry entry = (Map.Entry) iterator.next();
             SkuProfit obj = (SkuProfit) entry.getValue();
             marketProfit.add(obj);

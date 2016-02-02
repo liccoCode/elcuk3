@@ -161,7 +161,7 @@ public class OrderInvoice extends GenericModel {
         int pricecount = ord.items.size();
         for(int i = 0; i < ord.fees.size(); i++) {
             SaleFee fee = ord.fees.get(i);
-            if(fee.type.name.equals("shipping") || fee.type.name.equals("giftwrap")) {
+            if(fee.type.name.equals("shipping")  || fee.type.name.equals("'shippingcharge'") || fee.type.name.equals("giftwrap")) {
                 pricecount++;
             }
         }

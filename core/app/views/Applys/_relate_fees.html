@@ -4,15 +4,15 @@
     <tr>
       <th>货币</th>
       <th>总请款金额</th>
-      <th>已批准总金额</th>
       <th>未批准总金额</th>
+      <th>已批准总金额</th>
     </tr>
   #{list items:apply.currencyFees(), as:'fee'}
     <tr>
       <td>${fee.currency}</td>
-      <td>${new java.math.BigDecimal(fee.total_fee).setScale(2,4).floatValue().format('#,###.##')}</td>
-      <td>${new java.math.BigDecimal(fee.approval_fee).setScale(2,4).floatValue().format('#,###.##')}</td>
-      <td>${new java.math.BigDecimal(fee.noapproval_fee).setScale(2,4).floatValue().format('#,###.##')}</td>
+      <td>${fee.total_fee.format('#,###.##')}</td>
+      <td>${fee.approval_fee.format('#,###.##')}</td>
+      <td>${fee.noapproval_fee.format('#,###.##')}</td>
     </tr>
   #{/list}
   </table>

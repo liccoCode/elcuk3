@@ -243,9 +243,9 @@
 
 #{set feecount:ord.items.size()/}
 #{list items:ord.fees, as:'fee'}
-    #{if (fee.type.name=='shipping' || fee.type.name=='giftwrap') && fee.cost>0}
+    #{if (fee.type.name=='shipping' || fee.type.name=='shippingcharge'  || fee.type.name=='giftwrap') && fee.cost>0}
       <tr>
-          #{if fee.type.name=='shipping'}
+          #{if fee.type.name=='shipping' || fee.type.name=='shippingcharge' }
             <td class="td3" style="width:50%">${invoiceformat.shipfee}</td>
           #{/if}
           #{if fee.type.name=='giftwrap'}
