@@ -206,7 +206,12 @@ public class ProcureUnits extends Controller {
             unit.isPlaced = true;
             unit.save();
         }
-        DeliverPlans.show(unit.deliverplan.id);
+
+        if(StringUtils.isNotBlank(unit.deliverplan.id)) {
+            DeliverPlans.show(unit.deliverplan.id);
+        } else
+            Deliveryments.show(unit.deliveryment.id);
+
     }
 
     public static void hasProcureUnitBySellings(String sellingId) {
