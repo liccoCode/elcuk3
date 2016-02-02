@@ -207,7 +207,7 @@ public class ProcureUnits extends Controller {
             unit.save();
         }
 
-        if(StringUtils.isNotBlank(unit.deliverplan.id)) {
+        if(unit.deliverplan!=null) {
             DeliverPlans.show(unit.deliverplan.id);
         } else
             Deliveryments.show(unit.deliveryment.id);
