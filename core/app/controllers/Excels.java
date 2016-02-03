@@ -20,6 +20,8 @@ import models.view.post.*;
 import models.view.report.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.data.validation.Validation;
@@ -36,6 +38,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 import models.procure.DeliverPlan;
 
 
@@ -99,7 +102,7 @@ public class Excels extends Controller {
                     String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
-            render(dp,unitList);
+            render(dp, unitList);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
@@ -131,7 +134,7 @@ public class Excels extends Controller {
                 String.format("%s出货计划.xls", pidstr.toString()));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
-        renderArgs.put("procurecompany",models.OperatorConfig.getVal("procurecompany"));
+        renderArgs.put("procurecompany", models.OperatorConfig.getVal("procurecompany"));
         renderArgs.put("dmt", Deliveryment.findById(id));
         render(units);
     }
@@ -246,7 +249,8 @@ public class Excels extends Controller {
                     } else {
                         categoryname = p.category.toLowerCase();
                     }
-                    HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/profit_batch_work?category=" + categoryname
+                    HTTP.get("http://" + models.OperatorConfig.getVal("rockendurl") +
+                            ":4567/profit_batch_work?category=" + categoryname
                             + "&market=" + marketkey + "&from="
                             + new SimpleDateFormat("yyyyMMdd").format(p.begin)
                             + "&to="
@@ -293,7 +297,8 @@ public class Excels extends Controller {
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
                 if(p.categories != null) categories_key = p.categories.toLowerCase();
-                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                String post_key = Caches.Q
+                        .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -304,9 +309,14 @@ public class Excels extends Controller {
                     } else {
                         category_names = p.categories.toLowerCase();
                     }
-                    HTTP.get("http://rock.easya.cc:4567/sku_profit_batch_work?categories=" + category_names
-                            + "&market=" + market_key + "&from=" + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
-                            + "&to=" + new SimpleDateFormat("yyyy-MM-dd").format(p.end) + "&is_sku=" + is_sku);
+
+                    List<NameValuePair> params = new ArrayList<NameValuePair>();
+                    params.add(new BasicNameValuePair("categories", category_names));
+                    params.add(new BasicNameValuePair("market", market_key));
+                    params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
+                    params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
+                    params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
+                    HTTP.post("http://rock.easya.cc:4567/sku_profit_batch_work", params);
                     renderText("后台事务正在计算中,请稍候...");
                 } else {
                     SkuProfit total = SkuProfit.handleSkuProfit(dtos);
@@ -550,7 +560,8 @@ public class Excels extends Controller {
             render(dtos, target, formatter);
         } else {
             HTTP.get(String.format("%s?year=%s&month=%s",
-                    "http://"+models.OperatorConfig.getVal("rockendurl")+":4567/revenue_and_cost_calculator", year, month));
+                    "http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/revenue_and_cost_calculator", year,
+                    month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }
