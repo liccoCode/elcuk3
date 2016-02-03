@@ -182,7 +182,6 @@ public class TransportApply extends Apply {
                 }
                 paidamount = paidamount.setScale(2, RoundingMode.HALF_UP);
                 applyamount = applyamount.setScale(2, RoundingMode.HALF_UP);
-                totalamount = totalamount.setScale(2, RoundingMode.HALF_UP);
                 dto.total_fee = dto.total_fee
                         .add(totalamount);
                 dto.approval_fee = dto.approval_fee.
