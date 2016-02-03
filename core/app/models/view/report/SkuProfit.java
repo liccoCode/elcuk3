@@ -94,6 +94,7 @@ public class SkuProfit implements Serializable {
                 skuProfitMap.put(skuProfit.market, p);
             } else {
                 SkuProfit temp = new SkuProfit();
+                temp.market = skuProfit.market;
                 SkuProfit.add_profit(temp, skuProfit);
                 skuProfitMap.put(skuProfit.market, temp);
             }
