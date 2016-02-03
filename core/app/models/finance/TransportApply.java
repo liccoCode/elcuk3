@@ -182,6 +182,7 @@ public class TransportApply extends Apply {
                 }
                 paidamount = paidamount.setScale(2, RoundingMode.HALF_UP);
                 applyamount = applyamount.setScale(2, RoundingMode.HALF_UP);
+                totalamount = totalamount.setScale(2, RoundingMode.HALF_UP);
                 dto.total_fee = dto.total_fee
                         .add(totalamount);
                 dto.approval_fee = dto.approval_fee.
@@ -192,7 +193,7 @@ public class TransportApply extends Apply {
             }
             dto.total_fee = dto.total_fee.setScale(2, RoundingMode.HALF_UP);
             dto.approval_fee = dto.approval_fee.setScale(2, RoundingMode.HALF_UP);
-            dto.noapproval_fee = dto.noapproval_fee.setScale(2, RoundingMode.HALF_UP);
+            dto.noapproval_fee = dto.total_fee.subtract(dto.approval_fee);
             if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
         }
         return apply;
