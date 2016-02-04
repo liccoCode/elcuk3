@@ -279,12 +279,16 @@ public class ProfitPost extends Post<Profit> {
                     profitlist.add(profit);
                 }
             } else {
+                Logger.info("searchprofit:2222::" + category);
                 Category cat = Category.findById(category);
+                if(cat == null) cat = Category.findById(category.toUpperCase());
                 for(Product pro : cat.products) {
+                    Logger.info("searchprofit:3333::" + pro.sku);
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                     if(profit.totalfee != 0 || profit.amazonfee != 0
                             || profit.fbafee != 0 || profit.quantity != 0
                             || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
+                        Logger.info("searchprofit:4444::" + pro.sku);
                         profitlist.add(profit);
                     }
                 }
