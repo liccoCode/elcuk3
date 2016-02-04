@@ -260,12 +260,10 @@ public class ProfitPost extends Post<Profit> {
                     + "_"
                     + redisto;
             String cache_str = Caches.get(cacke_key);
-            Logger.info("searchprofit:::" + cacke_key);
             if(!StringUtils.isBlank(cache_str)) {
                 dtos = JSON.parseArray(cache_str, ProfitDto.class);
             }
             if(dtos == null) return profitlist;
-            Logger.info("searchprofit:1111111::" + cacke_key);
 
             Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
             for(ProfitDto dto : dtos) {
@@ -279,15 +277,12 @@ public class ProfitPost extends Post<Profit> {
                     profitlist.add(profit);
                 }
             } else {
-                Logger.info("searchprofit:2222::" + category);
                 Category cat = Category.find("lower(categoryId)=?", category.toLowerCase()).first();
-                for(Product pro : cat.products) {
-                    Logger.info("searchprofit:3333::" + pro.sku);
+                for(Product pro : cat.products) { ;
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                     if(profit.totalfee != 0 || profit.amazonfee != 0
                             || profit.fbafee != 0 || profit.quantity != 0
                             || profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
-                        Logger.info("searchprofit:4444::" + pro.sku);
                         profitlist.add(profit);
                     }
                 }
@@ -304,7 +299,6 @@ public class ProfitPost extends Post<Profit> {
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
             for(Product pro : cat.products) {
-                Logger.info("inventoryprofit:::" + pro.sku);
                 Profit inventoryprofit = inventoryProfit(begin, end, skumarket, pro.sku, sellingId);
                 if(inventoryprofit.workingqty != 0 || inventoryprofit.wayqty != 0 || inventoryprofit.inboundqty != 0) {
                     Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);
