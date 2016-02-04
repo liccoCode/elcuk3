@@ -253,7 +253,7 @@ public class ProfitPost extends Post<Profit> {
          */
         if(!StringUtils.isBlank(category) || !StringUtils.isBlank(sku)) {
             List<ProfitDto> dtos = null;
-            String key = category;
+            String key = category.toLowerCase();
             if(!StringUtils.isBlank(sku)) key = sku;
             String cacke_key = "profitmap_" + key + "_" + skumarket.name() + "_"
                     + redisfrom
