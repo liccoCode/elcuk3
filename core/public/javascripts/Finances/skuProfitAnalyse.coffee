@@ -23,8 +23,6 @@ $ ->
     onSelectAll: ->
       if $("#category").next().find("button").attr("title") != 'Category'
         $("#category_hidden").val($("#category").next().find("button").attr("title"))
-      else
-        $("#category_hidden").val("")
   });
 
   $("#exceldown").click (e) ->
