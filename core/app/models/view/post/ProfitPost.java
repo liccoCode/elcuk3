@@ -280,8 +280,7 @@ public class ProfitPost extends Post<Profit> {
                 }
             } else {
                 Logger.info("searchprofit:2222::" + category);
-                Category cat = Category.findById(category);
-                if(cat == null) cat = Category.findById(category.toUpperCase());
+                Category cat = Category.find("lower(categoryId)=?", category.toLowerCase()).first();
                 for(Product pro : cat.products) {
                     Logger.info("searchprofit:3333::" + pro.sku);
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
