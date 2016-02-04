@@ -260,10 +260,12 @@ public class ProfitPost extends Post<Profit> {
                     + "_"
                     + redisto;
             String cache_str = Caches.get(cacke_key);
+            Logger.info("searchprofit:::" + cacke_key);
             if(!StringUtils.isBlank(cache_str)) {
                 dtos = JSON.parseArray(cache_str, ProfitDto.class);
             }
             if(dtos == null) return profitlist;
+            Logger.info("searchprofit:1111111::" + cacke_key);
 
             Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
             for(ProfitDto dto : dtos) {
