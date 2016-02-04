@@ -117,7 +117,7 @@ public class Finances extends Controller {
                 String categories_key = "";
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
-                if(p.categories != null) categories_key = p.categories.trim().toLowerCase();
+                if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
 
                 String post_key = Caches.Q
                         .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
@@ -131,7 +131,7 @@ public class Finances extends Controller {
                         category_names = p.sku;
                         is_sku = 1;
                     } else {
-                        category_names = p.categories.trim().toLowerCase();
+                        category_names = p.categories.replace(" ", "").toLowerCase();
                     }
                     List<NameValuePair> params = new ArrayList<NameValuePair>();
                     params.add(new BasicNameValuePair("categories", category_names));

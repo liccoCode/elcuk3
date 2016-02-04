@@ -282,7 +282,7 @@ public class Excels extends Controller {
             String market_key = p.pmarket;
             String categories_key = "";
             if(StringUtils.isBlank(p.sku)) {
-                sku_key = p.categories;
+                sku_key = p.categories.replace(" ", "");
             } else {
                 sku_key = p.sku;
             }
@@ -296,9 +296,8 @@ public class Excels extends Controller {
             } else {
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
-                if(p.categories != null) categories_key = p.categories.toLowerCase();
-                String post_key = Caches.Q
-                        .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
+                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -307,7 +306,7 @@ public class Excels extends Controller {
                         category_names = p.sku;
                         is_sku = 1;
                     } else {
-                        category_names = p.categories.toLowerCase();
+                        category_names = p.categories.replace(" ", "").toLowerCase();
                     }
 
                     List<NameValuePair> params = new ArrayList<NameValuePair>();
