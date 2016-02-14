@@ -1,0 +1,134 @@
+{
+  "default": {
+    "instances": {
+      "aggron": {
+        "ip": "198.74.53.216",
+        "name": "aggron",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "elzo": {
+        "ip": "188.166.183.180",
+        "name": "elzo",
+        "ssh_port": "22",
+        "ssh_key": "overcast.key",
+        "user": "root",
+        "password": ""
+      },
+      "es": {
+        "ip": "173.230.135.86",
+        "name": "es",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "etracker": {
+        "ip": "74.207.237.215",
+        "name": "etracker",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "etracker-job": {
+        "ip": "50.116.37.240",
+        "name": "etracker-job",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "gengar": {
+        "ip": "74.207.225.178",
+        "name": "gengar",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "gogoat": {
+        "ip": "50.116.33.194",
+        "name": "gogoat",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "jaws": {
+        "ip": "45.79.195.112",
+        "name": "jaws",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "orca": {
+        "ip": "45.56.116.26",
+        "name": "orca",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "osticket": {
+        "ip": "50.116.34.209",
+        "name": "osticket",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "pangoro": {
+        "ip": "50.116.32.140",
+        "name": "pangoro",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "rock": {
+        "ip": "74.207.224.254",
+        "name": "rock",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "rock2": {
+        "ip": "45.79.203.180",
+        "name": "rock2",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "ss1": {
+        "ip": "106.186.17.223",
+        "name": "ss1",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "tokudb": {
+        "ip": "198.74.52.244",
+        "name": "tokudb",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c19": {
+        "ip": "108.61.119.83",
+        "name": "c19",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      }
+    }
+  }
+}
