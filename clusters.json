@@ -120,9 +120,21 @@
         "ssh_key": "160.key",
         "user": "root",
         "password": ""
-      },
+      }
+    }
+  },
+  "crawls": {
+    "instances": {
       "c19": {
         "ip": "108.61.119.83",
+        "name": "c19",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c18": {
+        "ip": "108.61.119.224",
         "name": "c19",
         "ssh_port": "22",
         "ssh_key": "160.key",
