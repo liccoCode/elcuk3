@@ -1,23 +1,24 @@
 window.jQuery = window.$
 $ ->
   $(document).on('click', "#delunit_form_submit, #deployFBAs, #downloadProcureunitsOrder",
-  (e) ->
-    $btn = $(@)
-    return false unless confirm("确认 #{$btn.text().trim()} ?")
-    submitForm($btn)
-  ).on("blur", "input[name='boxNumbers']",(e) ->
-    # 确保用户填写的是大于零的数字
+    (e) ->
+      $btn = $(@)
+      return false unless confirm("确认 #{$btn.text().trim()} ?")
+      submitForm($btn)
+  ).on("blur", "input[name='boxNumbers']", (e) ->
+# 确保用户填写的是大于零的数字
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
-  ).on('click', '#sumbitDownloadFBAZIP',(e) ->
+  ).on('click', '#sumbitDownloadFBAZIP', (e) ->
     submitForm($("#downloadFBAZIP"))
     $('#box_number_modal').modal('hide')
-  ).on('click', '#downloadFBAZIP',(e) ->
-    checkboxList = $('input[name="pids"]')
-
+  ).on('click', '#downloadFBAZIP', (e) ->
+    checkboxList = $('input[name="pids"]:checked')
     expressid = $("input[name='expressid']").val()
     unitIds = []
-    for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    checkboxList.each(->
+      unitIds.push($(@).val() + "-" + $(@).attr("boxNum"))
+    )
     if unitIds.length is 0
       noty({text: '请选择需要下载的采购单元', type: 'error'})
       return false
@@ -28,10 +29,10 @@ $ ->
       $table.removeChild($table.lastChild)
     # 使用选择的采购单 ID 生成新的 tr
     _.each(unitIds, (value) ->
-      if expressid.indexOf(','+value+',') > 0
-        $tr = parseDom1("<tr><td>#{value}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='1' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
+      if expressid.indexOf(',' + value + ',') > 0
+        $tr = parseDom1("<tr><td>#{value.split('-')[0]}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='#{value.split('-')[1]}' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
       else
-        $tr = parseDom1("<tr><td>#{value}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='1' maxlength='3'/><span class='add-on'>箱(不加后缀)</span></div></td></tr>")
+        $tr = parseDom1("<tr><td>#{value.split('-')[0]}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='#{value.split('-')[1]}' maxlength='3'/><span class='add-on'>箱(不加后缀)</span></div></td></tr>")
       $table.appendChild($tr)
     )
     $('#box_number_modal').modal('show')
@@ -75,11 +76,11 @@ $ ->
     mask.mask('加载中...')
     $.ajax("/users/showJson", {type: 'POST', dataType: 'json', data: {id: $(@).val()}})
     .done((r)->
-        unless r.flag
-          $('#excel_buyer').val(r['username'])
-          $("#excel_buyerPhone").val(r['phone'])
-        mask.unmask()
-      )
+      unless r.flag
+        $('#excel_buyer').val(r['username'])
+        $("#excel_buyerPhone").val(r['phone'])
+      mask.unmask()
+    )
 
   $("#tl").hide() # 隐藏 Timeline DIV
   _.each($(".selling_id a"), (a) -> # 删除Selling 链接的 href、target 属性
@@ -87,7 +88,7 @@ $ ->
     a.removeAttribute("target")
   )
   $("#unit_list").on("mouseenter focus", "table td.selling_id a", (e) ->
-      $(@).css('cursor' : 'pointer')
+    $(@).css('cursor': 'pointer')
   ).on("click", "table td.selling_id a", (e) ->
     $("#tl").show()
     $td = $(@)
@@ -99,16 +100,16 @@ $ ->
     $time_line_home = $("#tl")
     LoadMask.mask($time_line_home)
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
-    (r) ->
-      try
-        if r.flag is false
-          alert(r.message)
-        else
-          eventSource = $('#tl').data('source')
-          eventSource.clear()
-          eventSource.loadJSON(r, '/')
-      finally
-        LoadMask.unmask($time_line_home)
+      (r) ->
+        try
+          if r.flag is false
+            alert(r.message)
+          else
+            eventSource = $('#tl').data('source')
+            eventSource.clear()
+            eventSource.loadJSON(r, '/')
+        finally
+          LoadMask.unmask($time_line_home)
     )
 
 

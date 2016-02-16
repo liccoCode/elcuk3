@@ -39,7 +39,10 @@
 <tr id="procureUnit_${unit.id}">
     #{if checkbox}
       <td>
-        <label class="checkbox"><input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"></label>
+        <label class="checkbox">
+          <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                 boxNum="${unit.recommendBoxNum()}">
+        </label>
       </td>
     #{/if}
   <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
