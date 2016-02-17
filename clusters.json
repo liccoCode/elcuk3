@@ -120,6 +120,22 @@
         "ssh_key": "160.key",
         "user": "root",
         "password": ""
+      },
+      "hk2": {
+        "ip": "119.81.159.146",
+        "name": "hk2",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "back": {
+        "ip": "204.145.72.64",
+        "name": "back",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
       }
     }
   },
@@ -136,6 +152,258 @@
       "c18": {
         "ip": "108.61.119.224",
         "name": "c18",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c16": {
+        "ip": "108.61.194.228",
+        "name": "c16",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "TEST": {
+        "ip": "107.191.45.144",
+        "name": "TEST",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "h1": {
+        "ip": "104.207.156.25",
+        "name": "h1",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "crawl": {
+        "ip": "108.61.217.46",
+        "name": "crawl",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c1": {
+        "ip": "108.61.205.97",
+        "name": "c1",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c6": {
+        "ip": "104.207.128.144",
+        "name": "c6",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c7": {
+        "ip": "107.191.51.229",
+        "name": "c7",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c8": {
+        "ip": "108.61.224.78",
+        "name": "c8",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c13": {
+        "ip": "108.61.224.94",
+        "name": "c13",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c14": {
+        "ip": "173.199.117.44",
+        "name": "c14",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c17": {
+        "ip": "108.61.242.193",
+        "name": "c17",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c20": {
+        "ip": "107.191.50.109",
+        "name": "c20",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c21": {
+        "ip": "108.61.229.62",
+        "name": "c21",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "indexer": {
+        "ip": "45.63.18.15",
+        "name": "indexer",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c22": {
+        "ip": "104.207.138.43",
+        "name": "c22",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "c33": {
+        "ip": "45.63.82.57",
+        "name": "c33",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "crawler1": {
+        "ip": "104.156.253.39",
+        "name": "crawler1",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "crawler2": {
+        "ip": "104.238.156.151",
+        "name": "crawler2",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "crawler3": {
+        "ip": "104.238.153.174",
+        "name": "crawler3",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      }
+    }
+  },
+  "aliyun": {
+    "instances": {
+      "ali": {
+        "ip": "123.56.136.74",
+        "name": "ali",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "a2": {
+        "ip": "121.43.105.16",
+        "name": "a2",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "a3": {
+        "ip": "120.24.159.114",
+        "name": "a3",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "git": {
+        "ip": "120.26.127.94",
+        "name": "git",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "youtrack": {
+        "ip": "120.24.159.114",
+        "name": "youtrack",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "elcuk2-j": {
+        "ip": "112.74.198.211",
+        "name": "elcuk2-j",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "rockend-j": {
+        "ip": "120.25.0.47",
+        "name": "rockend-j",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "es-j": {
+        "ip": "112.74.129.82",
+        "name": "es-j",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "brandworl": {
+        "ip": "47.88.8.182",
+        "name": "brandworl",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "simpeak": {
+        "ip": "47.88.25.20",
+        "name": "simpeak",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "reapow": {
+        "ip": "47.88.6.96",
+        "name": "reapow",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "es-us": {
+        "ip": "47.88.25.55",
+        "name": "es-us",
         "ssh_port": "22",
         "ssh_key": "160.key",
         "user": "root",
