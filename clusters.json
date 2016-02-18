@@ -9,14 +9,6 @@
         "user": "root",
         "password": ""
       },
-      "elzo": {
-        "ip": "188.166.183.180",
-        "name": "elzo",
-        "ssh_port": "22",
-        "ssh_key": "overcast.key",
-        "user": "root",
-        "password": ""
-      },
       "es": {
         "ip": "173.230.135.86",
         "name": "es",
