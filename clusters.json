@@ -1,6 +1,14 @@
 {
   "default": {
     "instances": {
+      "pac": {
+        "ip": "45.115.36.225",
+        "name": "pac",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
       "aggron": {
         "ip": "198.74.53.216",
         "name": "aggron",
