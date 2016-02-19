@@ -158,7 +158,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
 
-
     /**
      * 出货单阶段
      */
@@ -194,7 +193,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         public abstract String label();
     }
-
 
 
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
@@ -860,7 +858,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
 
-
     public void comment(String cmt) {
         this.comment = String.format("%s%n%s", cmt, this.comment).trim();
     }
@@ -1090,7 +1087,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalAmount() {
-        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2,4).floatValue();
+        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2, 4)
+                .floatValue();
     }
 
 
@@ -1545,6 +1543,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             item.delete();
         }
         this.delete();
+    }
+
+    public int recommendBoxNum() {
+        CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
+        int boxSize = item == null ? 1 : item.boxSize;
+        return (int)Math.ceil(this.attrs.planQty / boxSize);
     }
 
 }
