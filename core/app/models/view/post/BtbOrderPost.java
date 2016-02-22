@@ -1,6 +1,7 @@
 package models.view.post;
 
 import helper.Currency;
+import helper.Dates;
 import models.market.BtbOrder;
 import models.market.BtbOrderItem;
 import org.apache.commons.lang.StringUtils;
@@ -40,8 +41,8 @@ public class BtbOrderPost extends Post<BtbOrder> {
                 "WHERE  1 = 1 ");
         if(StringUtils.isNotEmpty(from.toString()) && StringUtils.isNotEmpty(to.toString())) {
             sql.append(" AND s.saleDate > ? AND s.saleDate < ? ");
-            params.add(from);
-            params.add(to);
+            params.add(Dates.morning(from));
+            params.add(Dates.night(to));
         }
         if(StringUtils.isNotEmpty(categoryId)) {
             sql.append(" AND i.product.sku like ? ");
@@ -58,6 +59,7 @@ public class BtbOrderPost extends Post<BtbOrder> {
             params.add("%" + keywords + "%");
         }
         sql.append(" GROUP BY s ");
+        sql.append(" ORDER BY s.saleDate DESC ");
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
@@ -111,10 +113,12 @@ public class BtbOrderPost extends Post<BtbOrder> {
                 }
             }
 
-            if(ship_map.containsKey(order.shipCostUnit)) {
-                ship_map.put(order.shipCostUnit, ship_map.get(order.shipCostUnit).add(order.shipCost));
-            } else {
-                ship_map.put(order.shipCostUnit, order.shipCost);
+            if(order.shipCost != null) {
+                if(ship_map.containsKey(order.shipCostUnit)) {
+                    ship_map.put(order.shipCostUnit, ship_map.get(order.shipCostUnit).add(order.shipCost));
+                } else {
+                    ship_map.put(order.shipCostUnit, order.shipCost);
+                }
             }
         }
         Iterator it = cost_map.entrySet().iterator();
