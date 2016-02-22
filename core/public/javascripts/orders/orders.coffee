@@ -1,4 +1,15 @@
 $ ->
+  $sku = $("#inputsku")
+  $sku.typeahead({
+    source: (query, process) ->
+      sku = $sku.val()
+      $.get('/products/sameSku', {sku: sku})
+      .done((c) ->
+        process(c)
+      )
+  })
+
+
   # 订单列表页面
   $('#order_list .sortable').click ->
     $('#orderBy').val($(@).attr('name'))
@@ -8,14 +19,14 @@ $ ->
   $('#funcs').on('click', 'button:contains(重新抓取费用)', (e) ->
     LoadMask.mask()
     $.ajax($(@).data('url'), {dataType: 'json', type: 'POST'})
-      .done((r) ->
-        type = if r.flag
-          "success"
-        else
-          "error"
-        noty({text: r.message, type: type, timeout: 3000})
-        LoadMask.unmask()
-      )
+    .done((r) ->
+      type = if r.flag
+        "success"
+      else
+        "error"
+      noty({text: r.message, type: type, timeout: 3000})
+      LoadMask.unmask()
+    )
     false
   )
 

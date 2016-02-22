@@ -659,4 +659,16 @@ public class Orderr extends GenericModel {
             return 0;
     }
 
+    public String showItemSku() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0 ) {
+            for(OrderItem item : items) {
+                show += item.product.sku + ";";
+            }
+
+        }
+        return show;
+    }
+
 }

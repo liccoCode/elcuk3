@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -59,13 +60,21 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public Boolean promotion = null;
 
+    public String sku;
+
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         SearchSourceBuilder builder = this.params();
         System.out.println(builder);
         try {
-            JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            JSONObject result;
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+
             JSONObject hits = result.getJSONObject("hits");
             this.count = hits.getLong("total");
             Set<String> orderIds = new HashSet<String>();
@@ -96,19 +105,18 @@ public class OrderPOST extends ESPost<Orderr> {
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.query(QueryBuilders
-                .queryString(this.search())
-                .field("selling_ids")
-                .field("buyer")
-                .field("email")
-                .field("address")
-                .field("order_id")
-                .field("userid")
-                .field("track_no")
-                .field("upc")
-                .field("asin")
-                .field("promotion_ids")
-        ).postFilter(boolFilter)
-                .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+                        .queryString(this.search())
+                        .field("selling_ids")
+                        .field("buyer")
+                        .field("email")
+                        .field("address")
+                        .field("order_id")
+                        .field("userid")
+                        .field("track_no")
+                        .field("upc")
+                        .field("asin")
+                        .field("promotion_ids")
+        ).postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
         if(this.promotion != null) {
             FilterBuilder boolBuilder;
@@ -139,4 +147,41 @@ public class OrderPOST extends ESPost<Orderr> {
         }
         return builder;
     }
+
+    public SearchSourceBuilder skuParams() {
+        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders
+                .queryString(this.search())
+                .field("selling_id")
+                .field("order_id"))
+                .postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+
+        if(this.market != null) {
+            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
+                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
+                            // 市场变更, 具体查询时间也需要变更
+                            .from(this.market.withTimeZone(this.begin).toDate())
+                            .to(this.market.withTimeZone(this.end).toDate()));
+        } else {
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
+        }
+
+
+        if(this.state != null) {
+            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+        }
+        /*        if(this.accountId != null) {
+            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
+        }*/
+        if(this.sku != null) {
+            String temp = sku.replace("-", "");
+            boolFilter.must(FilterBuilders.termFilter("sku", temp.toLowerCase()));
+//            builder.query(QueryBuilders.queryString(temp.toLowerCase()).defaultField("sku"));
+        }
+
+        return builder;
+    }
+
 }
