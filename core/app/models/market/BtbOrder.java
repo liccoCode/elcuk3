@@ -148,6 +148,12 @@ public class BtbOrder extends Model {
      * 运输方式
      */
     public enum SH {
+        NUL {
+            @Override
+            public String label() {
+                return "选择";
+            }
+        },
         UPS {
             @Override
             public String label() {
@@ -275,12 +281,12 @@ public class BtbOrder extends Model {
             }
         }
 
-        /**运输费用**/
+/*        *//**运输费用**//*
         if(map.containsKey(this.shipCostUnit)) {
             map.put(this.shipCostUnit, map.get(this.shipCostUnit).add(this.shipCost));
         } else {
             map.put(this.shipCostUnit, this.shipCost);
-        }
+        }*/
 
         if(btbOrderItemList != null && btbOrderItemList.size() > 0) {
             for(BtbOrderItem item : btbOrderItemList) {
