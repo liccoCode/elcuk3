@@ -208,6 +208,7 @@ public class ProcureUnits extends Controller {
         }
 
         if(unit.deliverplan!=null) {
+            unit.deliverplan.delivery();
             DeliverPlans.show(unit.deliverplan.id);
         } else
             Deliveryments.show(unit.deliveryment.id);

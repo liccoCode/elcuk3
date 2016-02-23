@@ -137,15 +137,18 @@
         批量创建 FBA
       </a>
     #{/power.ck}
+    #{power.ck 'fbas.procureunitsorder'}
+      <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
+         id="downloadProcureunitsOrder" class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
+        <i class="icon-download-alt"></i>下载出货单
+      </a>
+    #{/power.ck}
       <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
          id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
        进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
 
-      <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
-         id="downloadProcureunitsOrder" class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
-        <i class="icon-download-alt"></i>下载出货单
-      </a>
+
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
@@ -169,10 +172,10 @@
   <div class="span12">
 
       #{if brandname=='EASYACC'}
-        <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
+      <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
       #{/if}
       #{elseif brandname=='Brandworl'}
-        <form id="generate_excel" method="post" action="@{Excels.deliverymentbrandworl()}">
+      <form id="generate_excel" method="post" action="@{Excels.deliverymentbrandworl()}">
       #{/elseif}
     <table class="table table-bordered table-condensed">
       <tr>
@@ -181,7 +184,8 @@
           <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
             收货地址: 深圳市光明新区根玉路第七工业区汉海达高新科技园1栋6楼A区
 
-            收货时间: 周一到周五 8:00—18:00 周六 08:00-17:00 (法定假日另行通知 如需周天送货，请提前一天邮件通知，并于司机出发前 30 分钟电话确认再发货！特殊进仓请提前一天书面知会，视情况收取加班作业费！)
+            收货时间: 周一到周五 8:00—18:00 周六 08:00-17:00 (法定假日另行通知 如需周天送货，请提前一天邮件通知，并于司机出发前 30
+            分钟电话确认再发货！特殊进仓请提前一天书面知会，视情况收取加班作业费！)
 
             仓库联系人:
 
@@ -230,7 +234,9 @@
           <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
         </td>
         <th>经办人</th>
-        <td><input type="text" name="excel.buyer" id="excel_buyer" value="${models.OperatorConfig.getVal("buyerconcat")}"></td>
+        <td>
+          <input type="text" name="excel.buyer" id="excel_buyer" value="${models.OperatorConfig.getVal("buyerconcat")}">
+        </td>
       </tr>
 
       <tr>

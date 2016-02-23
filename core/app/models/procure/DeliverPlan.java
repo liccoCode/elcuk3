@@ -68,6 +68,38 @@ public class DeliverPlan extends GenericModel {
     @Lob
     public String memo = " ";
 
+    /**
+     * 此出仓单的状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    @Column(nullable = false)
+    public P state;
+
+    public enum P {
+        /**
+         * 已创建
+         */
+        CREATE {
+            @Override
+            public String label() {
+                return "已创建";
+            }
+        },
+
+        /**
+         * 已交货
+         */
+        DONE {
+            @Override
+            public String label() {
+                return "已交货";
+            }
+        };
+
+        public abstract String label();
+    }
+
 
     /**
      * 通过 ProcureUnit 来创建采购单
@@ -95,11 +127,12 @@ public class DeliverPlan extends GenericModel {
         deliverplan.name = name.trim();
         deliverplan.units.addAll(units);
         for(ProcureUnit unit : deliverplan.units) {
-            if (unit.deliverplan!=null)
-                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s",unit.id,unit.deliverplan.id));
+            if(unit.deliverplan != null)
+                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
             // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
             unit.toggleAssignTodeliverplan(deliverplan, true);
         }
+        deliverplan.state = P.CREATE;
         deliverplan.save();
 
         new ERecordBuilder("deliverplan.createFromProcures")
@@ -191,7 +224,7 @@ public class DeliverPlan extends GenericModel {
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
             return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
-                    ProcureUnit.PLANSTAGE.DELIVERY,ProcureUnit.STAGE.DELIVERY)
+                    ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY)
                     .fetch();
         }
     }
@@ -206,6 +239,22 @@ public class DeliverPlan extends GenericModel {
         return this.units.get(0).cooperator;
     }
 
+    /**
+     * 如果所有采购单都已经交货
+     */
+    public void delivery() {
+        if(this.units == null || this.units.size() <= 0) return;
+        boolean delivery = true;
+        for(ProcureUnit unit : this.units) {
+            if(unit.stage != ProcureUnit.STAGE.DONE) {
+                delivery = false;
+            }
+        }
+        if(delivery) {
+            this.state = P.DONE;
+            this.save();
+        }
+    }
 
 
 }
