@@ -247,3 +247,6 @@ checknote=\u5907\u6ce8
 
 checktask.update=[CheckTask]\u66f4\u65b0
 checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1 ID:%s]:%s
+
+btbOrder.update=\u0042\u0032\u0042\u8ba2\u5355\u7ba1\u7406
+btbOrder.update.msg=\u8ba2\u5355\u7f16\u53f7[%s], \u66f4\u65b0\u5185\u5bb9[%s]

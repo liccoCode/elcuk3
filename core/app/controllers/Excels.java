@@ -2,10 +2,13 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
+import helper.Caches;
 import helper.*;
 import helper.Currency;
+import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
+import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.Deliveryment;
@@ -18,28 +21,27 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
+import play.libs.Files;
 import play.modules.excel.RenderExcel;
+import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
-import services.MetricAmazonFeeService;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import models.procure.DeliverPlan;
+import static play.modules.pdf.PDF.renderPDF;
 
 
 /**
@@ -86,28 +88,6 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件！");
         }
     }
-
-    /**
-     * 下载出货单综合Excel表格
-     */
-    public static void deliverplans(String id) {
-        DeliverPlan dp = DeliverPlan.findById(id);
-
-        List<ProcureUnit> unitList = dp.units;
-
-        if(unitList != null && unitList.size() != 0) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s出仓单.xls", dp.id));
-            renderArgs.put(RenderExcel.RA_ASYNC, false);
-            renderArgs.put("dateFormat", formatter);
-            render(dp, unitList);
-        } else {
-            renderText("没有数据无法生成Excel文件！");
-        }
-    }
-
 
     /**
      * 下载选定的采购计划的出货单
@@ -282,7 +262,7 @@ public class Excels extends Controller {
             String market_key = p.pmarket;
             String categories_key = "";
             if(StringUtils.isBlank(p.sku)) {
-                sku_key = p.categories.replace(" ", "");
+                sku_key = p.categories;
             } else {
                 sku_key = p.sku;
             }
@@ -296,8 +276,9 @@ public class Excels extends Controller {
             } else {
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
-                if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
-                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                if(p.categories != null) categories_key = p.categories.toLowerCase();
+                String post_key = Caches.Q
+                        .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -306,16 +287,11 @@ public class Excels extends Controller {
                         category_names = p.sku;
                         is_sku = 1;
                     } else {
-                        category_names = p.categories.replace(" ", "").toLowerCase();
+                        category_names = p.categories.toLowerCase();
                     }
-
-                    List<NameValuePair> params = new ArrayList<NameValuePair>();
-                    params.add(new BasicNameValuePair("categories", category_names));
-                    params.add(new BasicNameValuePair("market", market_key));
-                    params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
-                    params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
-                    params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
-                    HTTP.post("http://rock.easya.cc:4567/sku_profit_batch_work", params);
+                    HTTP.get("http://rock.easya.cc:4567/sku_profit_batch_work?categories=" + category_names
+                            + "&market=" + market_key + "&from=" + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
+                            + "&to=" + new SimpleDateFormat("yyyy-MM-dd").format(p.end) + "&is_sku=" + is_sku);
                     renderText("后台事务正在计算中,请稍候...");
                 } else {
                     SkuProfit total = SkuProfit.handleSkuProfit(dtos);
@@ -636,7 +612,7 @@ public class Excels extends Controller {
         render(dtos, from, to, dateFormat);
     }
 
-    /**
+    /***
      * 税金与重量报表
      *
      * @param from
@@ -652,34 +628,14 @@ public class Excels extends Controller {
         render(dtos, from, to, dateFormat);
     }
 
-    /**
-     * 订单费用汇总报表
-     *
-     * @param from
-     * @param to
-     * @param market
-     */
-    public static void orderFeesCostReport(final Date from, final Date to, final M market) {
-        Map<String, Map<String, BigDecimal>> feesCost = await(
-                new Job<Map<String, Map<String, BigDecimal>>>() {
-                    @Override
-                    public Map<String, Map<String, BigDecimal>> doJobWithResult() throws Exception {
-                        MetricAmazonFeeService service = new MetricAmazonFeeService(from, to, market);
-                        try {
-                            return service.orderFeesCost();
-                        } catch(Exception e) {
-                            renderText(Webs.S(e));
-                        }
-                        return null;
-                    }
-                }.now());
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+    public static void btbOrderDetailReport(BtbOrderPost p) {
+        if(p == null) p = new BtbOrderPost();
+        List<BtbOrder> dtos = p.query();
+        p.totalCost(dtos);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME,
-                String.format("订单费用汇总报表%s.xls", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(
-                        DateTime.now().toDate())));
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("B2B销售订单明细%s.xls", dateFormat.format(new Date())));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(feesCost, from, to, dateFormat);
+        render(dtos, dateFormat, p);
     }
 }
