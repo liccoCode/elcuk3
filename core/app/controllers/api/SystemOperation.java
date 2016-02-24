@@ -6,6 +6,7 @@ import java.util.Date;
 
 import jobs.JobsSetup;
 import jobs.SystemOperationsJob;
+import play.Logger;
 import play.Play;
 import play.mvc.*;
 import play.data.validation.*;
@@ -27,5 +28,9 @@ public class SystemOperation extends Controller {
                 //new SystemOperationsJob(request.actionMethod, request.url, request.controller).now();
             }
         }
+        long freememory = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+        long totalmemory = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+        Logger.info("playurl: %s playpath:%s freememory:%s totalmemory:%s ", request.url, Play.ctxPath, freememory,
+                totalmemory);
     }
 }
