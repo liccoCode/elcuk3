@@ -1,6 +1,6 @@
 $ ->
   format_Num = (num) ->
-    n = parseFloat(num).toFixed(2);
+    n = parseFloat((Math.round( num * 100 ) / 100)).toFixed(2);
     re = /(\d{1,3})(?=(\d{3})+(?:\.))/g;
     n.replace(re, "$1,");
 
@@ -237,7 +237,7 @@ $ ->
         amountMap[currency] = parseFloat(total);
     )
     #展示 统计结果
-    message = _.map(amountMap,(v, k) -> "  <span class='label label-success'>#{k}: #{format_Num(v.toFixed(2))}</span>  ").join('&nbsp;')
+    message = _.map(amountMap,(v, k) -> "  <span class='label label-success'>#{k}: #{format_Num(v)}</span>  ").join('&nbsp;')
     $table.find('tbody').append(_.template($('#statisticFee-template').html(), {msg: message}))
   )
 

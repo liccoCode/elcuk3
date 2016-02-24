@@ -65,8 +65,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.handler = unit.handler;
         this.whouse = unit.whouse;
         this.deliveryment = unit.deliveryment;
+        this.deliverplan = unit.deliverplan;
         // 刚刚创建 ProcureUnit 为 PLAN 阶段
         this.stage = STAGE.PLAN;
+        this.planstage = PLANSTAGE.PLAN;
         this.shipType = unit.shipType;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.attrs.planShipDate = unit.attrs.planShipDate;
@@ -155,6 +157,44 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public abstract String label();
     }
 
+
+    /**
+     * 出货单阶段
+     */
+    public enum PLANSTAGE {
+
+        /**
+         * 计划阶段; 创建一个新的采购计划
+         */
+        PLAN {
+            @Override
+            public String label() {
+                return "计划中";
+            }
+        },
+        /**
+         * 采购阶段; 从采购计划列表添加进入采购单.
+         */
+        DELIVERY {
+            @Override
+            public String label() {
+                return "采购中";
+            }
+        },
+        /**
+         * 完成了, 全部交货了; 在采购单中进行交货
+         */
+        DONE {
+            @Override
+            public String label() {
+                return "已交货";
+            }
+        };
+
+        public abstract String label();
+    }
+
+
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
@@ -169,6 +209,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Deliveryment deliveryment;
+
+
+    /**
+     * 出货单
+     */
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    public DeliverPlan deliverplan;
 
     @ManyToOne
     public FBAShipment fba;
@@ -232,6 +279,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     public STAGE stage = STAGE.PLAN;
+
+
+    /**
+     * 此 Unit 的状态
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public PLANSTAGE planstage = PLANSTAGE.PLAN;
 
     public Date createDate = new Date();
 
@@ -785,6 +841,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+
+    /**
+     * 将 ProcureUnit 添加到/移出 出库单,状态改变
+     *
+     * @param deliverplan
+     */
+    public void toggleAssignTodeliverplan(DeliverPlan deliverplan, boolean assign) {
+        if(assign) {
+            this.deliverplan = deliverplan;
+            this.planstage = PLANSTAGE.DELIVERY;
+        } else {
+            this.deliverplan = null;
+            this.planstage = PLANSTAGE.PLAN;
+        }
+    }
+
+
     public void comment(String cmt) {
         this.comment = String.format("%s%n%s", cmt, this.comment).trim();
     }
@@ -1014,7 +1087,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalAmount() {
-        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2,4).floatValue();
+        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2, 4)
+                .floatValue();
     }
 
 
@@ -1469,6 +1543,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             item.delete();
         }
         this.delete();
+    }
+
+    public int recommendBoxNum() {
+        CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
+        int boxSize = item == null ? 1 : item.boxSize;
+        return (int)Math.ceil(this.attrs.planQty / boxSize);
     }
 
 }

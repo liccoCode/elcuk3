@@ -22,9 +22,7 @@ $ ->
       $("#category_hidden").val(categroys)
     onSelectAll: ->
       if $("#category").next().find("button").attr("title") != 'Category'
-        $("#category_hidden").val($("#category").next().find("button").attr("title"))($("#category").next().find("button").attr("title"))
-      else
-        $("#category_hidden").val("")
+        $("#category_hidden").val($("#category").next().find("button").attr("title"))
   });
 
   $("#exceldown").click (e) ->

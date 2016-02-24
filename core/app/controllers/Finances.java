@@ -22,6 +22,8 @@ import models.view.post.SkuProfitPost;
 import models.view.report.Profit;
 import models.view.report.SkuProfit;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import play.cache.Cache;
 import play.libs.F;
 import play.mvc.Before;
@@ -115,9 +117,10 @@ public class Finances extends Controller {
                 String categories_key = "";
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
-                if(p.categories != null) categories_key = p.categories.toLowerCase();
+                if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
 
-                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                String post_key = Caches.Q
+                        .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 skuProfits = Cache.get(post_key, List.class);
                 if(skuProfits != null) {
                     render(skuProfits, p);
@@ -128,11 +131,15 @@ public class Finances extends Controller {
                         category_names = p.sku;
                         is_sku = 1;
                     } else {
-                        category_names = p.categories.toLowerCase();
+                        category_names = p.categories.replace(" ", "").toLowerCase();
                     }
-                    HTTP.get("http://rock.easya.cc:4567/sku_profit_batch_work?categories=" + category_names
-                            + "&market=" + market_key + "&from=" + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
-                            + "&to=" + new SimpleDateFormat("yyyy-MM-dd").format(p.end) + "&is_sku=" + is_sku);
+                    List<NameValuePair> params = new ArrayList<NameValuePair>();
+                    params.add(new BasicNameValuePair("categories", category_names));
+                    params.add(new BasicNameValuePair("market", market_key));
+                    params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
+                    params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
+                    params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
+                    HTTP.post("http://rock.easya.cc:4567/sku_profit_batch_work", params);
                     skuProfits = new ArrayList<SkuProfit>();
                     flash.error("后台事务正在计算中,请稍候...");
                 }
