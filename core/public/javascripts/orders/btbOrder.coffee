@@ -43,3 +43,9 @@ $ ->
       tr.after("<tr><td colspan='8'><div id='sku#{order_id}'></div></td></tr>")
       $("#sku" + order_id).load("/Orders/btbOrderItemList", id: order_id)
   )
+
+  $("#download_excel").click((e) ->
+    e.preventDefault()
+    $form = $("#search_Form")
+    window.open('/Excels/btbOrderDetailReport?' + $form.serialize(), "_blank")
+  )
