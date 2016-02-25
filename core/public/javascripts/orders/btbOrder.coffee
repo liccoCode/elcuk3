@@ -46,6 +46,6 @@ $ ->
 
   $("#download_excel").click((e) ->
     e.preventDefault()
-    $form = $("#search_Form")
+    $form = $("#search_form")
     window.open('/Excels/btbOrderDetailReport?' + $form.serialize(), "_blank")
   )
