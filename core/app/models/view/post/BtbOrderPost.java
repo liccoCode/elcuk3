@@ -40,7 +40,7 @@ public class BtbOrderPost extends Post<BtbOrder> {
         StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbOrder s LEFT JOIN s.btbOrderItemList i " +
                 "WHERE  1 = 1 ");
         if(StringUtils.isNotEmpty(from.toString()) && StringUtils.isNotEmpty(to.toString())) {
-            sql.append(" AND s.saleDate > ? AND s.saleDate < ? ");
+            sql.append(" AND s.saleDate >= ? AND s.saleDate <= ? ");
             params.add(Dates.morning(from));
             params.add(Dates.night(to));
         }
