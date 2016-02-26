@@ -289,7 +289,7 @@ public class Excels extends Controller {
                     } else {
                         category_names = p.categories.toLowerCase();
                     }
-                    HTTP.get("http://rock.easya.cc:4567/sku_profit_batch_work?categories=" + category_names
+                    HTTP.get("http://" + models.OperatorConfig.getVal("rockendurl") +":4567/sku_profit_batch_work?categories=" + category_names
                             + "&market=" + market_key + "&from=" + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
                             + "&to=" + new SimpleDateFormat("yyyy-MM-dd").format(p.end) + "&is_sku=" + is_sku);
                     renderText("后台事务正在计算中,请稍候...");
