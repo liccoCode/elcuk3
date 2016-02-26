@@ -1,0 +1,32 @@
+<table class="table table-bordered table-condensed">
+  <tr>
+    <th>SKU</th>
+    <th style="width:50%">Name/方式</th>
+    <th>销量</th>
+    <th>售价</th>
+    <th>销售额</th>
+  </tr>
+#{list items:order.btbOrderItemList, as:'i'}
+  <tr>
+    <td>${i.product.sku}</td>
+    <td>${i.product.productName}</td>
+    <td>${i.qty}</td>
+    <td>${i.currency.symbol()} ${i.price}</td>
+    <td>${i.currency.symbol()} ${i.price * i.qty}</td>
+  </tr>
+#{/list}
+  <tr>
+    <td>客户运费</td>
+    <td>空</td>
+    <td>空</td>
+    <td>空</td>
+    <td>${order.customShipUnit.symbol()} ${order.customShipCost}</td>
+  </tr>
+  <tr>
+    <td>银行手续费</td>
+    <td>${order.bankCharges.label()} #{if order.bankCharges.name()=='Other'}${order.bankChargesOther}#{/if}</td>
+    <td>空</td>
+    <td>空</td>
+    <td>${order.bankChargesUnit.symbol()} ${order.bankChargesCost}</td>
+  </tr>
+</table>

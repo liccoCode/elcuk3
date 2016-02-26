@@ -1,3 +1,4 @@
+
 <div class="navbar navbar-fixed-top">
 <div class="navbar-inner">
 <div class="container">
@@ -144,6 +145,13 @@
       #{power.ck "report.procurereports"}
         <li><a href="@{ReportDownloads.procureReportsIndex()}">采购报表下载</a></li>
       #{/power.ck}
+      #{power.ck "procures.b2bcustominfoindex"}
+          <li><a href="@{Cooperators.b2bCustomInfoIndex()}">B2B客户基本信息</a></li>
+      #{/power.ck}
+      #{power.ck "procures.btborderindex"}
+          <li><a href="@{Orders.btbOrderIndex()}">B2B销售订单信息</a></li>
+      #{/power.ck}
+
   </ul>
 </li>
 #{/power.ck}

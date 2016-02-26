@@ -139,7 +139,7 @@ public class Finances extends Controller {
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
                     params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
                     params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
-                    HTTP.post("http://rock.easya.cc:4567/sku_profit_batch_work", params);
+                    HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/sku_profit_batch_work", params);
                     skuProfits = new ArrayList<SkuProfit>();
                     flash.error("后台事务正在计算中,请稍候...");
                 }
