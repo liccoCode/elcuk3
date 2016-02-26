@@ -11,10 +11,7 @@ import models.RevenueAndCostDetail;
 import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
@@ -84,6 +81,27 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(deliverymentList);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 下载出货单综合Excel表格
+     */
+    public static void deliverplans(String id) {
+        DeliverPlan dp = DeliverPlan.findById(id);
+
+        List<ProcureUnit> unitList = dp.units;
+
+        if(unitList != null && unitList.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s出仓单.xls", dp.id));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(dp,unitList);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
