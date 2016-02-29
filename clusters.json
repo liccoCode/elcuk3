@@ -136,6 +136,14 @@
         "ssh_key": "160.key",
         "user": "root",
         "password": ""
+      },
+      "hk3": {
+        "ip": "45.115.36.225",
+        "name": "hk3",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
       }
     }
   },
