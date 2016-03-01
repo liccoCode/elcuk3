@@ -2,22 +2,23 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
+import helper.Caches;
 import helper.*;
 import helper.Currency;
+import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
+import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -28,7 +29,9 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
+import play.libs.Files;
 import play.modules.excel.RenderExcel;
+import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 import services.MetricAmazonFeeService;
@@ -39,7 +42,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import models.procure.DeliverPlan;
+import static play.modules.pdf.PDF.renderPDF;
 
 
 /**
@@ -102,12 +105,11 @@ public class Excels extends Controller {
                     String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
-            render(dp, unitList);
+            render(dp,unitList);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
     }
-
 
     /**
      * 下载选定的采购计划的出货单
@@ -282,7 +284,7 @@ public class Excels extends Controller {
             String market_key = p.pmarket;
             String categories_key = "";
             if(StringUtils.isBlank(p.sku)) {
-                sku_key = p.categories.replace(" ", "");
+                sku_key = p.categories;
             } else {
                 sku_key = p.sku;
             }
@@ -297,7 +299,8 @@ public class Excels extends Controller {
                 if(p.sku != null) sku_key = p.sku;
                 if(p.pmarket != null) market_key = p.pmarket;
                 if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
-                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                String post_key = Caches.Q
+                        .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -308,14 +311,15 @@ public class Excels extends Controller {
                     } else {
                         category_names = p.categories.replace(" ", "").toLowerCase();
                     }
-
                     List<NameValuePair> params = new ArrayList<NameValuePair>();
                     params.add(new BasicNameValuePair("categories", category_names));
                     params.add(new BasicNameValuePair("market", market_key));
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
                     params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
                     params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
-                    HTTP.post("http://rock.easya.cc:4567/sku_profit_batch_work", params);
+                    HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/sku_profit_batch_work",
+                            params);
+                    renderText("后台事务正在计算中,请稍候...");
                     renderText("后台事务正在计算中,请稍候...");
                 } else {
                     SkuProfit total = SkuProfit.handleSkuProfit(dtos);
@@ -636,7 +640,7 @@ public class Excels extends Controller {
         render(dtos, from, to, dateFormat);
     }
 
-    /**
+    /***
      * 税金与重量报表
      *
      * @param from
@@ -650,6 +654,17 @@ public class Excels extends Controller {
                 dateFormat.format(to)));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(dtos, from, to, dateFormat);
+    }
+
+    public static void btbOrderDetailReport(BtbOrderPost p) {
+        if(p == null) p = new BtbOrderPost();
+        List<BtbOrder> dtos = p.query();
+        p.totalCost(dtos);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("B2B销售订单明细%s.xls", dateFormat.format(new Date())));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, dateFormat, p);
     }
 
     /**

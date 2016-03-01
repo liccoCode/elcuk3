@@ -72,6 +72,8 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
 
     public Long cooperId;
 
+    public DeliverPlan.P planState;
+
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -92,6 +94,11 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
             sbd.append(" d.createDate>=? AND d.createDate<=?");
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));
+        }
+
+        if(this.planState != null) {
+            sbd.append(" AND d.state=?");
+            params.add(this.planState);
         }
 
         if(specialSearch._1) {

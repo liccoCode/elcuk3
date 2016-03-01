@@ -1,6 +1,7 @@
 package controllers;
 
 
+import controllers.api.SystemOperation;
 import models.ElcukRecord;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.view.post.*;
+import play.mvc.With;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,6 +28,7 @@ import models.view.post.*;
  * Date: 16-1-21
  * Time: 上午10:40
  */
+@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class DeliverPlans extends Controller {
 
 

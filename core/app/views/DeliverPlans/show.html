@@ -32,17 +32,18 @@
 
         <tr>
           <th>Name</th>
-          <td colspan="2">
+          <td colspan="1">
             <input type="text" class="span10" name="dp.name" value="${dp.name}">
           </td>
 
           <th>User</th>
           <td>${dp.handler.username}</td>
-          <td></td>
         </tr>
         <tr>
           <th>供应商</th>
           <td>${dp.cooperator?.fullName}</td>
+          <th>状态</th>
+          <td>${dp.state.label()}</td>
         </tr>
 
         <tr>
@@ -75,7 +76,8 @@
 
   <div class="row-fluid">
     <div class="span12" id="unit_list">
-    #{render 'ProcureUnits/_unit_list.html', units:dp.units, checkbox:true, key:'delivery', delivery:true/}
+    #{render 'ProcureUnits/_unit_list.html', units:dp.units, checkbox:true, key:'delivery', delivery:true,
+    deliveryplan:true/}
     </div>
   </div>
   <div class="row-fluid">
@@ -97,7 +99,7 @@
 <div class="row-fluid">
   <div class="span12">
     <input type="hidden" name="dp.id" value="${dp.id}">
-      #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan'/}
+      #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan', deliveryplan:true/}
   </div>
 </div>
 <div class="row-fluid">
