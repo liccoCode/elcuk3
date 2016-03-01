@@ -133,7 +133,8 @@ $ ->
               if e.flag
                 if confirm(e.message)
                   if $("#memo").val().trim()
-                    $("#isNeedApply").val("need")
+#                    $("#isNeedApply").val("need")
+                    $("#isNeedApply").val("")
                     $("#new_procureunit").submit()
                   else
                     noty({text: "请先填写备注！", type: 'error'})
@@ -143,7 +144,8 @@ $ ->
             )
         else
           if confirm('该selling第一次创建采购计划需走采购计划审批流程，确定吗?')
-            $("#isNeedApply").val("need")
+#            $("#isNeedApply").val("need")
+            $("#isNeedApply").val("")
             $("#new_procureunit").submit()
       )
     else
