@@ -1,15 +1,18 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.DBUtils;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.Play;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
@@ -59,13 +62,23 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public Boolean promotion = null;
 
+    public String sku;
+
+    public float percent;
+
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         SearchSourceBuilder builder = this.params();
         System.out.println(builder);
         try {
-            JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            JSONObject result;
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+
             JSONObject hits = result.getJSONObject("hits");
             this.count = hits.getLong("total");
             Set<String> orderIds = new HashSet<String>();
@@ -75,8 +88,26 @@ public class OrderPOST extends ESPost<Orderr> {
             }
             if(orderIds.size() <= 0)
                 throw new FastRuntimeException("没有结果");
+            if(percent > 0) {
+                String sql = "SELECT r.orderId, sum(IF(f.usdCost > 0, f.usdCost, 0)) AS a, " +
+                        " sum(IF(f.usdCost<0, -usdCost, 0)) AS b FROM Orderr r LEFT JOIN SaleFee f " +
+                        " ON f .order_orderId = r.orderId " +
+                        " WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds) +
+                        " GROUP BY r.orderId HAVING b * 100 /a > ? ";
+                List<Object> params = new ArrayList<Object>();
+                params.add(percent);
+                List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
+                orderIds.clear();
+                if(rows.size() > 0) {
+                    this.count = rows.size();
+                    for(Map<String, Object> row : rows) {
+                        orderIds.add(row.get("orderId").toString());
+                    }
+                }
+            }
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
+            Logger.error(e.getMessage());
             return new ArrayList<Orderr>();
         }
     }
@@ -96,19 +127,18 @@ public class OrderPOST extends ESPost<Orderr> {
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.query(QueryBuilders
-                .queryString(this.search())
-                .field("selling_ids")
-                .field("buyer")
-                .field("email")
-                .field("address")
-                .field("order_id")
-                .field("userid")
-                .field("track_no")
-                .field("upc")
-                .field("asin")
-                .field("promotion_ids")
-        ).postFilter(boolFilter)
-                .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+                        .queryString(this.search())
+                        .field("selling_ids")
+                        .field("buyer")
+                        .field("email")
+                        .field("address")
+                        .field("order_id")
+                        .field("userid")
+                        .field("track_no")
+                        .field("upc")
+                        .field("asin")
+                        .field("promotion_ids")
+        ).postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
         if(this.promotion != null) {
             FilterBuilder boolBuilder;
@@ -139,4 +169,41 @@ public class OrderPOST extends ESPost<Orderr> {
         }
         return builder;
     }
+
+    public SearchSourceBuilder skuParams() {
+        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders
+                .queryString(this.search())
+                .field("selling_id")
+                .field("order_id"))
+                .postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+
+        if(this.market != null) {
+            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
+                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
+                            // 市场变更, 具体查询时间也需要变更
+                            .from(this.market.withTimeZone(this.begin).toDate())
+                            .to(this.market.withTimeZone(this.end).toDate()));
+        } else {
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
+        }
+
+
+        if(this.state != null) {
+            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+        }
+        /*        if(this.accountId != null) {
+            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
+        }*/
+        if(this.sku != null) {
+            String temp = sku.replace("-", "");
+            boolFilter.must(FilterBuilders.termFilter("sku", temp.toLowerCase()));
+//            builder.query(QueryBuilders.queryString(temp.toLowerCase()).defaultField("sku"));
+        }
+
+        return builder;
+    }
+
 }
