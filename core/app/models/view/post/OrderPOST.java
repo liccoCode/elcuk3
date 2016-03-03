@@ -1,6 +1,7 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.DBUtils;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
@@ -11,6 +12,7 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.Play;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
@@ -62,6 +64,8 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public String sku;
 
+    public float percent;
+
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
@@ -84,8 +88,26 @@ public class OrderPOST extends ESPost<Orderr> {
             }
             if(orderIds.size() <= 0)
                 throw new FastRuntimeException("没有结果");
+            if(percent > 0) {
+                String sql = "SELECT r.orderId, sum(IF(f.usdCost > 0, f.usdCost, 0)) AS a, " +
+                        " sum(IF(f.usdCost<0, -usdCost, 0)) AS b FROM Orderr r LEFT JOIN SaleFee f " +
+                        " ON f .order_orderId = r.orderId " +
+                        " WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds) +
+                        " GROUP BY r.orderId HAVING b * 100 /a > ? ";
+                List<Object> params = new ArrayList<Object>();
+                params.add(percent);
+                List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
+                orderIds.clear();
+                if(rows.size() > 0) {
+                    this.count = rows.size();
+                    for(Map<String, Object> row : rows) {
+                        orderIds.add(row.get("orderId").toString());
+                    }
+                }
+            }
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
+            Logger.error(e.getMessage());
             return new ArrayList<Orderr>();
         }
     }
