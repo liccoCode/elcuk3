@@ -234,24 +234,8 @@ public class Products extends Controller {
      * @param market 市场
      */
     public static void showRBNLink(String market) {
-        String suffix = "/catm/classifier/ProductClassifier.amzncatm/classifier/ProductClassifier.amzn?ref=ag_pclasshm_cont_invfile";
-        Ret ret = new Ret("#");
-        if(StringUtils.contains(market, "AMAZON_DE")) {
-            ret = new Ret("https://catalog-mapper-de.amazon.de" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_UK")) {
-            ret = new Ret("https://catalog-mapper-uk.amazon.co.uk" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_US")) {
-            ret = new Ret("https://catalog-mapper-na.amazon.com" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_IT")) {
-            ret = new Ret("https://catalog-mapper-it.amazon.it" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_JP")) {
-            ret = new Ret("https://catalog-mapper-jp.amazon.co.jp" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_FR")) {
-            ret = new Ret("https://catalog-mapper-fr.amazon.fr" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_CA")) {
-            ret = new Ret("https://catalog-mapper-ca.amazon.ca" + suffix);
-        }
-        renderJSON(ret);
+        renderJSON(new Ret(String.format("https://sellercentral.%s/hz/inventory/classify?ref=ag_pclasshm_cont_invfile&",
+                M.valueOf(market).toString())));
     }
 
     /**
@@ -433,6 +417,7 @@ public class Products extends Controller {
 
     /**
      * 模糊匹配SKU
+     *
      * @param sku
      */
     public static void sameSku(String sku) {
