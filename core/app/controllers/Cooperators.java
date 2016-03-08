@@ -13,6 +13,7 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ import java.util.List;
  * Date: 7/16/12
  * Time: 12:12 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Cooperators extends Controller {
 
     @Check("cooperators.index")
@@ -169,7 +170,7 @@ public class Cooperators extends Controller {
     public static void createB2BCustomInfoPage(Long id) {
         BtbCustom b = new BtbCustom();
         if(id != null) {
-           b = BtbCustom.findById(id);
+            b = BtbCustom.findById(id);
         }
         render(b);
     }
@@ -190,6 +191,15 @@ public class Cooperators extends Controller {
             old.save();
         }
         b2bCustomInfoIndex(new BtbCustomPost());
+    }
+
+    public static void findSameCooperator(String name) {
+        List<Cooperator> list = Cooperator.find("fullName like '%" + name + "%'").fetch();
+        List<String> names = new ArrayList<String>();
+        for(Cooperator coop : list) {
+            names.add(coop.fullName + "-" + coop.id);
+        }
+        renderJSON(J.json(names));
     }
 
 }

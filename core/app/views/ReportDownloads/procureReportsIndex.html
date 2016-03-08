@@ -73,3 +73,46 @@
   </div>
 </div>
 #{/form}
+
+
+<div class="row-fluid">
+  <div class="span12">
+    <div class="bs-docs-form">
+      <form class="search_form" action="@{Excels.purchaseOrderDetailReport()}" target="_blank">
+        <div class="inline" style="margin-top:4px;">
+          <span class="label label-info">采购订单明细报表:</span>
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${new org.joda.time.DateTime()}">
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">供应商:</span>
+          <input type="text" id="cooperator_input" autocomplete="off" style="width:150px;">
+          <input type="hidden" id="cooperator_id" name="p.cooperatorId" value="">
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">阶段:</span>
+          <select class="" name="p.stage" style="width:120px;">
+            <option value="">采购计划阶段</option>
+          #{list items: models.procure.ProcureUnit.STAGE, as: 'm'}
+            <option value="${m.name()}">${m.label()}</option>
+          #{/list}
+          </select>
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">关键字:</span>
+          <input type="text" name="p.search" autocomplete="off" style="width:150px;" placeholder="采购单号、SKU">
+        </div>
+        &nbsp;
+        <button class="btn">导出</button>
+      </form>
+    </div>
+  </div>
+</div>
