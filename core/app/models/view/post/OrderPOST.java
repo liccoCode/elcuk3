@@ -86,8 +86,7 @@ public class OrderPOST extends ESPost<Orderr> {
                 JSONObject hit = (JSONObject) obj;
                 orderIds.add(hit.getJSONObject("_source").getString("order_id"));
             }
-            if(orderIds.size() <= 0)
-                throw new FastRuntimeException("没有结果");
+
             if(percent > 0) {
                 String sql = "SELECT r.orderId, sum(IF(f.usdCost > 0, f.usdCost, 0)) AS a, " +
                         " sum(IF(f.usdCost<0, -usdCost, 0)) AS b FROM Orderr r LEFT JOIN SaleFee f " +
@@ -105,6 +104,8 @@ public class OrderPOST extends ESPost<Orderr> {
                     }
                 }
             }
+            if(orderIds.size() <= 0)
+                throw new FastRuntimeException("没有结果");
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
             Logger.error(e.getMessage());
