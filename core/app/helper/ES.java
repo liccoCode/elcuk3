@@ -13,7 +13,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ELCUK2_ES_HOST = models.OperatorConfig.getVal("elcuk2es");
+    public static final String ELCUK2_ES_HOST = "http://"+models.OperatorConfig.getVal("elcuk2es");
     public static final String ETRACKER_ES_HOST = "http://"+models.OperatorConfig.getVal("etrackeres")+":9200";
 
 
