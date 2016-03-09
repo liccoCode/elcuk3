@@ -266,6 +266,7 @@ public class MWSUtils {
         Header header = new Header();
         header.setDocumentVersion("1.01");
         header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
+        envelope.setHeader(header);
 
         envelope.setMessageType("Product");
         envelope.setPurgeAndReplace(false);
