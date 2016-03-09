@@ -372,7 +372,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
-        params.add(new BasicNameValuePair("feed_type", MWSFeeds.T.UPLOAD_PRODUCT.toString())); // 作用与哪一个 Selling
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString())); // 作用与哪一个 Selling
         return params;
     }
 
@@ -442,7 +442,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("type", "CreateListing"));
         params.add(new BasicNameValuePair("next_type", "AssignPrice"));
         params.add(new BasicNameValuePair("next_feed_id", assignPriceFeed.id.toString()));
-        params.add(new BasicNameValuePair("next_feed_type", MWSFeeds.T.UPLOAD_PRODUCT.toString()));
+        params.add(new BasicNameValuePair("next_feed_type", MWSUtils.T.PRICING_FEED.toString()));
 
         HTTP.post("http://rock.easya.cc:4567/amazon_submit_feed", params);
         return this;
