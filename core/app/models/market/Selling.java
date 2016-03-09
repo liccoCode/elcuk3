@@ -418,7 +418,7 @@ public class Selling extends GenericModel {
      *
      * @return
      */
-    public Selling buildFromProduct() throws DatatypeConfigurationException {
+    public Selling buildFromProduct() {
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");

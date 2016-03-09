@@ -324,7 +324,7 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
-    public static String assignPriceXml(Selling selling) throws DatatypeConfigurationException {
+    public static String assignPriceXml(Selling selling) {
         AmazonEnvelope envelope = new AmazonEnvelope();
 
         Header header = new Header();
@@ -346,7 +346,12 @@ public class MWSUtils {
 
 
         Price.Sale sale = new Price.Sale();
-        DatatypeFactory dataTypeFactory = DatatypeFactory.newInstance();
+        DatatypeFactory dataTypeFactory = null;
+        try {
+            dataTypeFactory = DatatypeFactory.newInstance();
+        } catch(DatatypeConfigurationException e) {
+            throw new FastRuntimeException(e);
+        }
 
         GregorianCalendar gc = new GregorianCalendar();
         gc.setTimeInMillis(selling.aps.startDate.getTime());

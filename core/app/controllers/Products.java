@@ -24,7 +24,9 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 产品模块的基本的类别的基本操作在此
@@ -433,6 +435,7 @@ public class Products extends Controller {
 
     /**
      * 模糊匹配SKU
+     *
      * @param sku
      */
     public static void sameSku(String sku) {
