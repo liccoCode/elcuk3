@@ -1,15 +1,11 @@
 package models.market;
 
-import com.amazonaws.mws.MarketplaceWebServiceClient;
-import com.amazonaws.mws.MarketplaceWebServiceConfig;
-import com.amazonaws.mws.model.IdList;
-import com.amazonaws.mws.model.SubmitFeedRequest;
-import com.amazonaws.mws.model.SubmitFeedResponse;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.*;
-import helper.Currency;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.ElcukRecord;
 import models.embedded.AmazonProps;
@@ -18,6 +14,7 @@ import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
+import mws.v2.MWSFeeds;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.NameValuePair;
@@ -26,37 +23,26 @@ import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.w3c.dom.Text;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.libs.Codec;
 import play.libs.F;
 import play.libs.IO;
 import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.util.*;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import play.libs.Codec;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -356,52 +342,6 @@ public class Selling extends GenericModel {
         } catch(Exception e) {
             throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
         }
-/*        String html = "";
-        Document doc = null;
-        synchronized(this.account.cookieStore()) {
-            // 1. 切换 Selling 所在区域
-            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
-            // 2. 获取修改 Selling 的页面, 获取参数
-            html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-            if(StringUtils.isBlank(html))
-                throw new FastRuntimeException(String.format("AMAZON页面超时,请重新更新! Visit %s page is empty.",
-                        M.listingEditPage(this)));
-            IO.writeContent(html,
-                    new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-
-            doc = Jsoup.parse(html);
-            // ----- Input 框框
-            Elements inputs = doc.select("form[name=productForm] input");
-            if(inputs.size() == 0) {
-                this.account.loginAmazonSellerCenter();
-                this.account.changeRegion(this.market);
-                html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                if(StringUtils.isBlank(html))
-                    throw new FastRuntimeException(String.format("AMAZON页面超时,请重新更新! Visit %s page is empty.",
-                            M.listingEditPage(this)));
-            }
-
-            if(Play.mode.isDev()) {
-                IO.writeContent(html,
-                        new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-            }
-            this.account.changeRegion(this.account.type);
-        }
-
-        F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(doc, this, p);
-        String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"),
-                ";");
-        *//**
-         * 发送信息
-         *//*
-        html = HTTP.post(this.account.cookieStore(), M.listingPostPage(this.account.type*//*更新的链接需要账号所在地的 URL*//*,
-                (args.length >= 2 ? args[1] : "")), paramAndDocTuple._1);
-        if(StringUtils.isBlank(html)) // 这个最先检查
-            throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
-        Document rdoc = Jsoup.parse(html);
-        Elements error = rdoc.select(".messageboxerror li");
-        if(error.size() > 0)
-            throw new FastRuntimeException("AMAZON错误,Error:" + error.text());*/
     }
 
 
@@ -428,10 +368,11 @@ public class Selling extends GenericModel {
         Validate.notNull(this.market);
         Validate.notEmpty(this.sellingId);
         List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("account.id", this.account.id.toString()));// 使用哪一个账号
-        params.add(new BasicNameValuePair("marketId", this.market.name()));// 向哪一个市场
-        params.add(new BasicNameValuePair("feed.id", feed.id.toString()));// 提交哪一个 Feed ?
-        params.add(new BasicNameValuePair("selling.id", this.sellingId)); // 作用与哪一个 Selling
+        params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
+        params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
+        params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString())); // 作用与哪一个 Selling
         return params;
     }
 
@@ -493,9 +434,17 @@ public class Selling extends GenericModel {
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
         patchToListing();
-        Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
-                this.aps.templateType, this.market.toString()), this);
-        HTTP.post("http://rock.easya.cc:4567/submit_feed", this.submitJobParams(feed));
+
+        Feed saleAmazonBasicFeed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
+        Feed assignPriceFeed = Feed.newSellingFeed(MWSUtils.assignPriceXml(this), this);
+
+        List<NameValuePair> params = this.submitJobParams(saleAmazonBasicFeed);
+        params.add(new BasicNameValuePair("type", "CreateListing"));
+        params.add(new BasicNameValuePair("next_type", "AssignPrice"));
+        params.add(new BasicNameValuePair("next_feed_id", assignPriceFeed.id.toString()));
+        params.add(new BasicNameValuePair("next_feed_type", MWSUtils.T.PRICING_FEED.toString()));
+
+        HTTP.post("http://rock.easya.cc:4567/amazon_submit_feed", params);
         return this;
     }
 
@@ -745,7 +694,7 @@ public class Selling extends GenericModel {
      * @param market       String
      * @param action       String
      * @return String 生成的模板数据
-     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
+     *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
     public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
                                                   String action) {
@@ -989,13 +938,13 @@ public class Selling extends GenericModel {
         if(p.standerprice || p.saleprice) {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
             Feed price_feed = Feed.updateSellingFeed(xml, this);
-            String feed_submission_id = MWSUtils.submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
+            String feed_submission_id = MWSUtils
+                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
             String temp = HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", priceParams);
             if(!temp.equals("success"))
-                throw new Exception("连接Rockend出现问题，请联系相关技术人员!");
+                throw new FastRuntimeException("连接Rockend出现问题，请联系相关技术人员!");
         }
     }
-
 }

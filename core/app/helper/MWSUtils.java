@@ -255,4 +255,121 @@ public class MWSUtils {
     }
 
 
+    /**
+     * 生成向 Amazon 上架时提交的 XML
+     *
+     * @return
+     */
+    public static String toSaleAmazonXml(Selling selling) {
+        AmazonEnvelope envelope = new AmazonEnvelope();
+
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
+        envelope.setHeader(header);
+
+        envelope.setMessageType("Product");
+        envelope.setPurgeAndReplace(false);
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
+        message.setOperationType("Update");
+
+        com.elcuk.jaxb.Product product = new com.elcuk.jaxb.Product();
+        //Merchant SKU
+        product.setSKU(selling.merchantSKU);
+        StandardProductID standardProductID = new StandardProductID();
+        standardProductID.setType("UPC");
+        //UPC
+        standardProductID.setValue(selling.aps.upc);
+
+        product.setStandardProductID(standardProductID);
+
+        ConditionInfo conditionInfo = new ConditionInfo();
+        conditionInfo.setConditionType("New");
+        product.setCondition(conditionInfo);
+
+        com.elcuk.jaxb.Product.DescriptionData descriptionData = new com.elcuk.jaxb.Product.DescriptionData();
+        //Title
+        descriptionData.setTitle(selling.aps.title);
+        //Description
+        descriptionData.setDescription(selling.aps.productDesc);
+        //Part Number
+        descriptionData.setMfrPartNumber(selling.aps.manufacturerPartNumber);
+        //GiftWrap
+        descriptionData.setIsGiftMessageAvailable(selling.aps.isGiftWrap);
+        //Brand
+        descriptionData.setBrand("EasyAcc");
+        //Manufacturer
+        descriptionData.setManufacturer(selling.aps.manufacturer);
+        //RBN
+        if(selling.market == M.AMAZON_US) {
+            descriptionData.getUsedFor().add(selling.aps.rbns.get(0));
+        } else {
+            descriptionData.getRecommendedBrowseNode().add(BigInteger.valueOf(Long.valueOf(selling.aps.rbns.get(0))));
+        }
+        // BulletPoints
+        for(String keyFeturess : selling.aps.keyFeturess) {
+            if(StringUtils.isNotBlank(keyFeturess)) descriptionData.getBulletPoint().add(keyFeturess);
+        }
+        //SearchTerms
+        for(String searchTerm : selling.aps.searchTermss) {
+            if(StringUtils.isNotBlank(searchTerm)) descriptionData.getSearchTerms().add(searchTerm);
+        }
+
+
+        product.setDescriptionData(descriptionData);
+
+        message.setProduct(product);
+        envelope.getMessage().add(message);
+        return JaxbUtil.convertToXml(envelope);
+    }
+
+    public static String assignPriceXml(Selling selling) {
+        AmazonEnvelope envelope = new AmazonEnvelope();
+
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
+
+        envelope.setHeader(header);
+        envelope.setMessageType("Price");
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
+
+        Price price = new Price();
+        price.setSKU(selling.merchantSKU);
+        OverrideCurrencyAmount amount = new OverrideCurrencyAmount();
+        amount.setValue(new BigDecimal(selling.aps.standerPrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
+        amount.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
+        price.setStandardPrice(amount);
+
+
+        Price.Sale sale = new Price.Sale();
+        DatatypeFactory dataTypeFactory = null;
+        try {
+            dataTypeFactory = DatatypeFactory.newInstance();
+        } catch(DatatypeConfigurationException e) {
+            throw new FastRuntimeException(e);
+        }
+
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTimeInMillis(selling.aps.startDate.getTime());
+
+        sale.setStartDate(dataTypeFactory.newXMLGregorianCalendar(gc));
+        gc = new GregorianCalendar();
+        gc.setTimeInMillis(selling.aps.endDate.getTime());
+        sale.setEndDate(dataTypeFactory.newXMLGregorianCalendar(gc));
+        OverrideCurrencyAmount salePrice = new OverrideCurrencyAmount();
+        salePrice.setValue(new BigDecimal(selling.aps.salePrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
+        salePrice.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
+        sale.setSalePrice(salePrice);
+        price.setSale(sale);
+
+        message.setPrice(price);
+        envelope.getMessage().add(message);
+
+        return JaxbUtil.convertToXml(envelope);
+    }
 }
