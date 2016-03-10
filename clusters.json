@@ -418,5 +418,25 @@
         "password": ""
       }
     }
+  },
+  "aws": {
+    "instances": {
+      "rockend": {
+        "ip": "52.79.85.229",
+        "name": "rockend",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "erp": {
+        "ip": "52.79.125.60",
+        "name": "erp",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      }
+    }
   }
 }
