@@ -930,7 +930,9 @@ public class Selling extends GenericModel {
             String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
-            HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", productParams);
+            String temp = HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", productParams);
+            if(!temp.equals("success"))
+                throw new Exception("连接Rockend出现问题，请联系相关技术人员!");
         }
 
         if(p.standerprice || p.saleprice) {
@@ -940,7 +942,9 @@ public class Selling extends GenericModel {
                     .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
-            HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", priceParams);
+            String temp = HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", priceParams);
+            if(!temp.equals("success"))
+                throw new FastRuntimeException("连接Rockend出现问题，请联系相关技术人员!");
         }
     }
 }

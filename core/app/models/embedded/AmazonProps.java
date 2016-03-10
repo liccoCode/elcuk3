@@ -368,7 +368,7 @@ public class AmazonProps implements Serializable {
             }
         }
         // 检查 merchant 参数
-        String msku = doc.select("#offering_sku_display").text().trim();
+        String msku = doc.select("#item_sku").val().trim();
         if(!StringUtils.equals(sell.merchantSKU.toUpperCase(),
                 msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
             throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
@@ -393,7 +393,7 @@ public class AmazonProps implements Serializable {
 //            else if("model".equals(name)) this.modelNumber = val;
             else if("Offer_Inventory_Quantity".equals(name))
                 this.quantity = NumberUtils.toInt(val, 0);
-            else if("offering_start_date".equals(name))
+            else if("offering_start_date".equals(name) && StringUtils.isNotBlank(val))
                 this.launchDate = Dates.listingFromFmt(sell.market, val);
 /*          else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
             else if("bullet_point[0]".equals(name)) bulletPoints.add(val);
