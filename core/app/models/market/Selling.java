@@ -322,6 +322,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isNotBlank(fnsku)) {
             this.fnSku = fnsku;
         }
+        this.save();
         //4.通过AMAZON,API形式同步数据回数据库
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("acc_id", this.account.id.toString()));
@@ -330,8 +331,6 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
         HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
-
-        this.save();
     }
 
 

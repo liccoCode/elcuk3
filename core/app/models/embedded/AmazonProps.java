@@ -379,10 +379,9 @@ public class AmazonProps implements Serializable {
 
 //        this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
-        this.condition_ = doc.select("#offering_condition_display").text().trim()
-                .toUpperCase(); // 默认为 NEW
-        F.T2<M, Float> our_price = Webs.amzPriceFormat(
-                doc.select("#our_price").val(), sell.account.type);
+        this.condition_ = doc.select("#offering_condition_display").text().trim().toUpperCase(); // 默认为 NEW
+        this.isGiftWrap = StringUtils.equals(doc.select("#offering_can_be_giftwrapped").attr("checked"), "checked");
+                F.T2 < M, Float > our_price = Webs.amzPriceFormat(doc.select("#standard_price").val(), sell.account.type);
         for(Element input : inputs) {
             String name = input.attr("name");
             String val = input.val();
@@ -391,9 +390,9 @@ public class AmazonProps implements Serializable {
 //            else if("brand_name".equals(name)) this.brand = val;
 //            else if("part_number".equals(name)) this.manufacturerPartNumber = val;
 //            else if("model".equals(name)) this.modelNumber = val;
-            else if("Offer_Inventory_Quantity".equals(name))
+            else if("quantity".equals(name))
                 this.quantity = NumberUtils.toInt(val, 0);
-            else if("offering_start_date".equals(name) && StringUtils.isNotBlank(val))
+            else if("product_site_launch_date".equals(name) && StringUtils.isNotBlank(val))
                 this.launchDate = Dates.listingFromFmt(sell.market, val);
 /*          else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
             else if("bullet_point[0]".equals(name)) bulletPoints.add(val);
@@ -401,20 +400,22 @@ public class AmazonProps implements Serializable {
             else if("bullet_point[2]".equals(name)) bulletPoints.add(val);
             else if("bullet_point[3]".equals(name)) bulletPoints.add(val);
             else if("bullet_point[4]".equals(name)) bulletPoints.add(val);*/
-            else if("generic_keywords[0]".equals(name)) searchTerms.add(val);
-            else if("generic_keywords[1]".equals(name)) searchTerms.add(val);
-            else if("generic_keywords[2]".equals(name)) searchTerms.add(val);
-            else if("generic_keywords[3]".equals(name)) searchTerms.add(val);
-            else if("generic_keywords[4]".equals(name)) searchTerms.add(val);
+            else if("model".equals(name)) this.modelNumber = val;
+            else if("part_number".equals(name)) this.manufacturerPartNumber = val;
+            else if("generic_keywords1".equals(name)) searchTerms.add(val);
+            else if("generic_keywords2".equals(name)) searchTerms.add(val);
+            else if("generic_keywords3".equals(name)) searchTerms.add(val);
+            else if("generic_keywords4".equals(name)) searchTerms.add(val);
+            else if("generic_keywords5".equals(name)) searchTerms.add(val);
             else if("recommended_browse_nodes[0]".equals(name)) rbns.add(val);
             else if("recommended_browse_nodes[1]".equals(name)) rbns.add(val);
-//          else if("our_price".equals(name))
-//             this.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
-//          else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
-//             this.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
-            else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
+            else if("standard_price".equals(name))
+                this.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
+            else if("sale_price".equals(name) && StringUtils.isNotBlank(val))
+                this.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
+            else if("sale_from_date".equals(name) && StringUtils.isNotBlank(val))
                 this.startDate = Dates.listingFromFmt(sell.market, val);
-            else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
+            else if("sale_end_date".equals(name) && StringUtils.isNotBlank(val))
                 this.endDate = Dates.listingFromFmt(sell.market, val);
         }
 //        this.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);

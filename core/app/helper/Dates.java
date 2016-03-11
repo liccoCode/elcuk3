@@ -186,6 +186,8 @@ public class Dates {
             case AMAZON_JP:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("yyyy/MM/dd").withZone(Dates.timeZone(m))).toDate();
+            case AMAZON_CA:
+                return DateTime.parse(dateStr).toDate();
             default:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
