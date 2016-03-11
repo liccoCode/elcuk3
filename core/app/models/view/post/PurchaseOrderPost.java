@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -36,6 +37,11 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         if(cooperatorId != null) {
             sql.append(" AND cooperator.id = ? ");
             params.add(cooperatorId);
+        }
+        if(StringUtils.isNotEmpty(this.search)) {
+            sql.append(" AND (sku = ? or deliveryment.id = ? )");
+            params.add(this.search);
+            params.add(this.search);
         }
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
