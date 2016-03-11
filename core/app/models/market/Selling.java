@@ -322,10 +322,10 @@ public class Selling extends GenericModel {
             html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
             if(StringUtils.isBlank(html))
                 throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
-/*            if(Play.mode.isDev()) {
+            if(Play.mode.isDev()) {
                 IO.writeContent(html,
                         new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-            }*/
+            }
             // 获取Fnsku
             fnskuhtml = HTTP.get(this.account.cookieStore(), this.market.listingfnSkuPage(this));
             this.account.changeRegion(this.account.type);
