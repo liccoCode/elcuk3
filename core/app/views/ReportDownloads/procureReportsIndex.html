@@ -101,7 +101,9 @@
           <select class="" name="p.stage" style="width:120px;">
             <option value="">采购计划阶段</option>
           #{list items: models.procure.ProcureUnit.STAGE, as: 'm'}
-            <option value="${m.name()}">${m.label()}</option>
+              #{if m.label() != '审批中'}
+                <option value="${m.name()}">${m.label()}</option>
+              #{/if}
           #{/list}
           </select>
         </div>
