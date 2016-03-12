@@ -197,7 +197,7 @@ public class Cooperators extends Controller {
         List<Cooperator> list = Cooperator.find("fullName like '%" + name + "%'").fetch();
         List<String> names = new ArrayList<String>();
         for(Cooperator coop : list) {
-            names.add(coop.fullName + "-" + coop.id);
+            names.add(coop.name + "-" + coop.id);
         }
         renderJSON(J.json(names));
     }
