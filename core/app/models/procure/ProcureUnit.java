@@ -1565,12 +1565,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(type.equals("lossqty")) {
                 return String.valueOf(item.lossqty);
             } else if(type.equals("recivedQty")) {
-                return item.recivedQty.toString();
+                return item.adjustQty.toString();
             }
-            if(item.compenusdamt==null || item.compenusdamt.intValue() == 0) {
+            if(item.compenamt==null || item.compenamt.intValue() == 0) {
                 return String.valueOf(0);
             }
-            return item.currency.symbol() + " " + item.compenusdamt;
+            return item.currency.symbol() + " " + item.compenamt;
         } else {
             return String.valueOf(0);
         }
