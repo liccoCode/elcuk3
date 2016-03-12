@@ -194,7 +194,7 @@ public class Cooperators extends Controller {
     }
 
     public static void findSameCooperator(String name) {
-        List<Cooperator> list = Cooperator.find("fullName like '%" + name + "%'").fetch();
+        List<Cooperator> list = Cooperator.find("name like '%" + name + "%'").fetch();
         List<String> names = new ArrayList<String>();
         for(Cooperator coop : list) {
             names.add(coop.name + "-" + coop.id);
