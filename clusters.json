@@ -419,6 +419,26 @@
       }
     }
   },
+  "linode": {
+    "instances": {
+      "elcuk2": {
+        "ip": "45.33.102.74",
+        "name": "elcuk2",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      },
+      "rocke": {
+        "ip": "23.239.19.203",
+        "name": "rocke",
+        "ssh_port": "22",
+        "ssh_key": "160.key",
+        "user": "root",
+        "password": ""
+      }
+    }
+  },
   "aws": {
     "instances": {
       "rockend": {
