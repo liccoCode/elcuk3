@@ -36,6 +36,7 @@ require:
     - org.activiti -> activiti-modeler 5.15.1
     - org.hibernate.javax.persistence -> hibernate-jpa-2.1-api 1.0.0.Final
     - javax.activation  -> activation 1.1.1
+    - org.apache.httpcomponents -> httpclient  4.2.3
     # 如果使用 squirrel 则需要指定 javassist 3.9
     - javassist -> javassist 3.9.0.GA
     - net.sf.barcode4j -> barcode4j 2.1:
