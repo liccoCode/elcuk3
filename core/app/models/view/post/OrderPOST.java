@@ -2,6 +2,7 @@ package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.DBUtils;
+import helper.Dates;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
@@ -86,24 +87,6 @@ public class OrderPOST extends ESPost<Orderr> {
                 JSONObject hit = (JSONObject) obj;
                 orderIds.add(hit.getJSONObject("_source").getString("order_id"));
             }
-
-            if(percent > 0) {
-                String sql = "SELECT r.orderId, sum(IF(f.usdCost > 0, f.usdCost, 0)) AS a, " +
-                        " sum(IF(f.usdCost<0, -usdCost, 0)) AS b FROM Orderr r LEFT JOIN SaleFee f " +
-                        " ON f .order_orderId = r.orderId " +
-                        " WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds) +
-                        " GROUP BY r.orderId HAVING b * 100 /a > ? ";
-                List<Object> params = new ArrayList<Object>();
-                params.add(percent);
-                List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
-                orderIds.clear();
-                if(rows.size() > 0) {
-                    this.count = rows.size();
-                    for(Map<String, Object> row : rows) {
-                        orderIds.add(row.get("orderId").toString());
-                    }
-                }
-            }
             if(orderIds.size() <= 0)
                 throw new FastRuntimeException("没有结果");
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
@@ -155,10 +138,11 @@ public class OrderPOST extends ESPost<Orderr> {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
                     .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
-                            .from(this.market.withTimeZone(this.begin).toDate())
-                            .to(this.market.withTimeZone(this.end).toDate()));
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+                    .to(Dates.night(this.end)).includeUpper(true));
         }
 
 

@@ -30,3 +30,11 @@ $ ->
     false
   )
 
+  $('#downExcel').click((e)->
+    e.preventDefault()
+    from = new Date($("#p_from").val())
+    to = new Date($("#p_to").val())
+    alert ((to - from)/ 1000 / 60 / 60 / 24 )
+
+  )
+

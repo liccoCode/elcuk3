@@ -79,8 +79,11 @@
         <input type="hidden" name="p.page" value="${p.page}">
         <!-- TODO  +2 销售数量大于 2 暂时不支持 -->
         <input type="text" style="width:160px;" name="p.search" placeholder="例 *cvd4hs8y6m, 可带 *" value="${p.search}">
-
         <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="inline input-append">
+        <input type="button" class="btn btn-success" id="downExcel" value="导出Excel">
       </div>
     </div>
   </form>
