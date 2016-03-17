@@ -109,7 +109,7 @@ public class Excels extends Controller {
                     String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
-            render(dp,unitList);
+            render(dp, unitList);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
@@ -701,5 +701,20 @@ public class Excels extends Controller {
                         DateTime.now().toDate())));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(feesCost, from, to, dateFormat);
+    }
+
+    /**
+     * 采购订单明细报表
+     */
+    public static void purchaseOrderDetailReport(PurchaseOrderPost p) {
+        if(p == null) p = new PurchaseOrderPost();
+        List<ProcureUnit> dtos = p.query();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        DecimalFormat df = new DecimalFormat("#.00");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("采购订单明细表%s.xls", format.format(new Date())));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, dateFormat, p, df);
     }
 }
