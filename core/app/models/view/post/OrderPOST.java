@@ -205,10 +205,11 @@ public class OrderPOST extends ESPost<Orderr> {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
                     .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
-                            .from(this.market.withTimeZone(this.begin).toDate())
-                            .to(this.market.withTimeZone(this.end).toDate()));
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+                                .to(Dates.night(this.end)).includeUpper(true));
         }
 
 
