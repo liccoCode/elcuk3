@@ -6,6 +6,7 @@ import helper.Dates;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
+import models.view.dto.OrderReportDTO;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -71,7 +72,6 @@ public class OrderPOST extends ESPost<Orderr> {
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         SearchSourceBuilder builder = this.params();
-        System.out.println(builder);
         try {
             JSONObject result;
             if(StringUtils.isEmpty(this.sku)) {
@@ -93,6 +93,42 @@ public class OrderPOST extends ESPost<Orderr> {
         } catch(Exception e) {
             Logger.error(e.getMessage());
             return new ArrayList<Orderr>();
+        }
+    }
+
+    public List<OrderReportDTO> queryForExcel() {
+        SearchSourceBuilder builder = this.params();
+        try {
+            JSONObject result;
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+
+            JSONObject hits = result.getJSONObject("hits");
+            this.count = hits.getLong("total");
+            /**先查出总共有多少条订单**/
+            this.perSize = hits.getInteger("total");
+            this.page = 1;
+            builder = this.params();
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+            hits = result.getJSONObject("hits");
+            Set<String> orderIds = new HashSet<String>();
+            for(Object obj : hits.getJSONArray("hits")) {
+                JSONObject hit = (JSONObject) obj;
+                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
+            }
+            if(orderIds.size() <= 0)
+                throw new FastRuntimeException("没有结果");
+            return OrderReportDTO.query(orderIds);
+        } catch(Exception e) {
+            Logger.error(e.getMessage());
+            return new ArrayList<OrderReportDTO>();
         }
     }
 
