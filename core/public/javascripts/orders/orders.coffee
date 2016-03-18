@@ -30,3 +30,15 @@ $ ->
     false
   )
 
+  $('#downExcel').click((e)->
+    e.preventDefault()
+    from = new Date($("#p_from").val())
+    to = new Date($("#p_to").val())
+    if (to - from)/ 1000 / 60 / 60 / 24 != 0
+      alert "只能导出一天之内的数据！"
+    else
+      $form = $("#search_form")
+      window.open('/Excels/orderReports?' + $form.serialize(), "_blank")
+
+  )
+

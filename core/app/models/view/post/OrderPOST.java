@@ -2,9 +2,11 @@ package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
 import helper.DBUtils;
+import helper.Dates;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
+import models.view.dto.OrderReportDTO;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -70,7 +72,6 @@ public class OrderPOST extends ESPost<Orderr> {
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         SearchSourceBuilder builder = this.params();
-        System.out.println(builder);
         try {
             JSONObject result;
             if(StringUtils.isEmpty(this.sku)) {
@@ -86,30 +87,48 @@ public class OrderPOST extends ESPost<Orderr> {
                 JSONObject hit = (JSONObject) obj;
                 orderIds.add(hit.getJSONObject("_source").getString("order_id"));
             }
-
-            if(percent > 0) {
-                String sql = "SELECT r.orderId, sum(IF(f.usdCost > 0, f.usdCost, 0)) AS a, " +
-                        " sum(IF(f.usdCost<0, -usdCost, 0)) AS b FROM Orderr r LEFT JOIN SaleFee f " +
-                        " ON f .order_orderId = r.orderId " +
-                        " WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds) +
-                        " GROUP BY r.orderId HAVING b * 100 /a > ? ";
-                List<Object> params = new ArrayList<Object>();
-                params.add(percent);
-                List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
-                orderIds.clear();
-                if(rows.size() > 0) {
-                    this.count = rows.size();
-                    for(Map<String, Object> row : rows) {
-                        orderIds.add(row.get("orderId").toString());
-                    }
-                }
-            }
             if(orderIds.size() <= 0)
                 throw new FastRuntimeException("没有结果");
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
             Logger.error(e.getMessage());
             return new ArrayList<Orderr>();
+        }
+    }
+
+    public List<OrderReportDTO> queryForExcel() {
+        SearchSourceBuilder builder = this.params();
+        try {
+            JSONObject result;
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+
+            JSONObject hits = result.getJSONObject("hits");
+            this.count = hits.getLong("total");
+            /**先查出总共有多少条订单**/
+            this.perSize = hits.getInteger("total");
+            this.page = 1;
+            builder = this.params();
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+            hits = result.getJSONObject("hits");
+            Set<String> orderIds = new HashSet<String>();
+            for(Object obj : hits.getJSONArray("hits")) {
+                JSONObject hit = (JSONObject) obj;
+                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
+            }
+            if(orderIds.size() <= 0)
+                throw new FastRuntimeException("没有结果");
+            return OrderReportDTO.query(orderIds);
+        } catch(Exception e) {
+            Logger.error(e.getMessage());
+            return new ArrayList<OrderReportDTO>();
         }
     }
 
@@ -155,10 +174,11 @@ public class OrderPOST extends ESPost<Orderr> {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
                     .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
-                            .from(this.market.withTimeZone(this.begin).toDate())
-                            .to(this.market.withTimeZone(this.end).toDate()));
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+                    .to(Dates.night(this.end)).includeUpper(true));
         }
 
 
