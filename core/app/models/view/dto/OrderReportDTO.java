@@ -49,8 +49,8 @@ public class OrderReportDTO {
             if(dto.positivePrice == 0) {
                 dto.percent = 0;
             } else {
-                dto.percent = new BigDecimal(dto.negativePrice*100).divide(new BigDecimal(dto.positivePrice), 2)
-                        .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+                dto.percent = new BigDecimal(dto.negativePrice).multiply(new BigDecimal(100)).divide(
+                        new BigDecimal(dto.positivePrice), 2).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
             }
             dtos.add(dto);
         }
