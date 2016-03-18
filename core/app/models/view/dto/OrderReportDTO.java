@@ -28,7 +28,7 @@ public class OrderReportDTO {
     public float percent;
 
     public static List<OrderReportDTO> query(Set<String> orderIds) {
-        StringBuffer sql = new StringBuffer("SELECT r.orderId,r.market,group_concat(i.product_sku) AS sku,");
+        StringBuffer sql = new StringBuffer("SELECT r.orderId,r.market,group_concat(DISTINCT i.product_sku) AS sku,");
         sql.append("DATE_FORMAT(r.paymentDate,'%Y-%m-%d %H:%i:%s') AS paymentDate,");
         sql.append("ROUND(sum(IF(f.usdCost>0, f.usdCost, 0)), 2) AS positivePrice, ");
         sql.append("ROUND(sum(IF(f.usdCost<0, f.usdCost, 0)), 2)  AS negativePrice ");
@@ -49,7 +49,7 @@ public class OrderReportDTO {
             if(dto.positivePrice == 0) {
                 dto.percent = 0;
             } else {
-                dto.percent = new BigDecimal(dto.negativePrice).divide(new BigDecimal(dto.positivePrice), 2)
+                dto.percent = new BigDecimal(dto.negativePrice*100).divide(new BigDecimal(dto.positivePrice), 2)
                         .setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
             }
             dtos.add(dto);
