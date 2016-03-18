@@ -1548,7 +1548,32 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public int recommendBoxNum() {
         CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
-        return (int)Math.ceil(this.attrs.planQty / (float) boxSize);
+        return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
+    }
+
+    public int fetchCheckTaskQty() {
+        CheckTask task = CheckTask.find("units_id=? ORDER BY id DESC", this.id).first();
+        if(task != null) {
+            return task.qty;
+        }
+        return 0;
+    }
+
+    public String fetchShipItem(String type) {
+        if(shipItems != null && shipItems.size() > 0) {
+            ShipItem item = shipItems.get(0);
+            if(type.equals("lossqty")) {
+                return String.valueOf(item.lossqty);
+            } else if(type.equals("recivedQty")) {
+                return item.adjustQty.toString();
+            }
+            if(item.compenamt==null || item.compenamt.intValue() == 0) {
+                return String.valueOf(0);
+            }
+            return item.currency.symbol() + " " + item.compenamt;
+        } else {
+            return String.valueOf(0);
+        }
     }
 
 }

@@ -371,7 +371,12 @@ public class AmazonProps implements Serializable {
         String msku = doc.select("#offering_sku_display").text().trim();
         if(!StringUtils.equals(sell.merchantSKU.toUpperCase(),
                 msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
-            throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
+        {
+            msku = doc.select("#Parent-item_sku-div").text().trim();
+            if(!StringUtils.equals(sell.merchantSKU.toUpperCase(),
+                    msku.toUpperCase()))
+                throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
+        }
 
         List<String> bulletPoints = new ArrayList<String>();
         List<String> searchTerms = new ArrayList<String>();
