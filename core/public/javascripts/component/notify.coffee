@@ -35,7 +35,7 @@ $ ->
       window.Notification and Notification.permission is "granted"
 
     # 轮询检查系统是否有消息发出
-    loopCheck: (interval = 15) ->
+    loopCheck: (interval = 180) ->
       self = @
       if self.isOn()
         setInterval(->

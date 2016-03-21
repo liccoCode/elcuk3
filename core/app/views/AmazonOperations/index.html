@@ -15,6 +15,7 @@
           <option value="aus">US</option>
           <option value="ait">IT</option>
           <option value="ajp">JP</option>
+          <option value="aca">CA</option>
         </select>
         <select name="orderby" style="width:80px;">
           <option value="rating">Rating</option>
@@ -41,36 +42,37 @@
       #{/info_row}
       </div>
     </div>
+  </div>
 
-    <div class="span10 well" style="min-height:750px;">
-      <ul id="tabs" class="nav nav-tabs">
-        <li class="active">
-          <a href="#review_list" data-toggle="tab">Review 列表</a>
-        </li>
-        <li>
-          <a href="#review_table" data-toggle="tab">Review 表格</a>
-        </li>
-        <li>
-          <a href="#wish_list" data-toggle="tab">WishList 列表</a>
-        </li>
-      </ul>
+  <div class="span10 well" style="min-height:750px;">
+    <ul id="tabs" class="nav nav-tabs">
+      <li class="active">
+        <a href="#review_list" data-toggle="tab">Review 列表</a>
+      </li>
+      <li>
+        <a href="#review_table" data-toggle="tab">Review 表格</a>
+      </li>
+      <li>
+        <a href="#wish_list" data-toggle="tab">WishList 列表</a>
+      </li>
+    </ul>
 
-      <div id="tab_content" class="tab-content">
-        <div id="review_list" class="tab-pane fade active in">
-          <div style="margin-bottom:5px;">
-            <button id="recrawl_review" class="btn btn-primary">Review 重抓</button>
-            <button id="recrawl_listing" class="btn btn-primary">Listing 重抓</button>
-            <button id="click_like" class="btn btn-primary">点击 Like</button>
-            <button id="check_left_clicks" data-loading-text="可点击数计算完成" class="btn btn-primary">检查
-              Review 可点击数
-            </button>
-          </div>
-          <div id="reviews">
-            Waiting for you  ^.^ 
-          </div>
+    <div id="tab_content" class="tab-content">
+      <div id="review_list" class="tab-pane fade active in">
+        <div style="margin-bottom:5px;">
+          <button id="recrawl_review" class="btn btn-primary">Review 重抓</button>
+          <button id="recrawl_listing" class="btn btn-primary">Listing 重抓</button>
+          <button id="click_like" class="btn btn-primary">点击 Like</button>
+          <button id="check_left_clicks" data-loading-text="可点击数计算完成" class="btn btn-primary">检查
+            Review 可点击数
+          </button>
         </div>
-        <div id="review_table" class="tab-pane fade in"></div>
-        <div id="wish_list" class="tab-pane fade in"></div>
+        <div id="reviews">
+          Waiting for you  ^.^ 
+        </div>
       </div>
+      <div id="review_table" class="tab-pane fade in"></div>
+      <div id="wish_list" class="tab-pane fade in"></div>
     </div>
   </div>
+</div>

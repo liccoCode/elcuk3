@@ -1,4 +1,9 @@
 $ ->
+  format_Num = (num) ->
+    n = parseFloat((Math.round( num * 100 ) / 100)).toFixed(2);
+    re = /(\d{1,3})(?=(\d{3})+(?:\.))/g;
+    n.replace(re, "$1,");
+
   feeStateLabel = (state) ->
     label = if state == 'APPLY'
       'inverse'
@@ -39,9 +44,9 @@ $ ->
     $btn = $(@)
     $form = $btn.parents('form')
     $.ajax({
-      url: $form.attr('action'),
-      type: 'DELETE',
-      data: $form.serialize()
+    url: $form.attr('action'),
+    type: 'DELETE',
+    data: $form.serialize()
     }).done((r) ->
       if r.flag == true
         $("#fee_#{$btn.data('id')}").remove()
@@ -116,9 +121,9 @@ $ ->
     id = $tr.find('td:eq(0)').text().trim()
     LoadMask.mask()
     $.ajax({
-      url: "/paymentunit/#{id}.json",
-      type: 'PUT',
-      data: $tr.find(':input').serialize()
+    url: "/paymentunit/#{id}.json",
+    type: 'PUT',
+    data: $tr.find(':input').serialize()
     }).done((r) ->
       if r.flag is false
         noty({text: r.message, type: 'warning'})
@@ -126,8 +131,8 @@ $ ->
         label = feeStateLabel(r['state'])
         $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
         noty({text: '更新成功', type: 'success', timeout: 3000})
-        #计算页面所有运输单费用信息的各种币种的总和
-        #$('table.paymentInfo').trigger("statisticFee")
+      #计算页面所有运输单费用信息的各种币种的总和
+      #$('table.paymentInfo').trigger("statisticFee")
       LoadMask.unmask()
     ).fail((r) ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
@@ -232,7 +237,7 @@ $ ->
         amountMap[currency] = parseFloat(total);
     )
     #展示 统计结果
-    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v.toFixed(2)}</span>  ").join('&nbsp;')
+    message = _.map(amountMap,(v, k) -> "  <span class='label label-success'>#{k}: #{format_Num(v)}</span>  ").join('&nbsp;')
     $table.find('tbody').append(_.template($('#statisticFee-template').html(), {msg: message}))
   )
 

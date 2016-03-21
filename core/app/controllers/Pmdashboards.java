@@ -64,6 +64,7 @@ public class Pmdashboards extends Controller {
     public static void percent(String type, int year, String team) {
         User user = User.findByUserName(Secure.Security.connected());
         Team teamobject = Team.find("teamId=?", team).first();
+        if (teamobject==null) teamobject = new Team();
 
         if(!teamobject.existUser(user)) {
             Validation.addError("", "没有TEAM" + teamobject.name + "权限");

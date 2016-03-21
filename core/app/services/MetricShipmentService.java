@@ -1,6 +1,7 @@
 package services;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import helper.ES;
@@ -19,6 +20,9 @@ import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 物流报表相关的 ES 计算
@@ -91,7 +95,7 @@ public class MetricShipmentService {
                 .query(filterbuilder())
                 .aggregation(builder)
                 .size(0);
-        JSONObject result = ES.search("elcuk2", "shippayunit", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "shippayunit", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
         return cost.getFloat("value");
@@ -119,5 +123,36 @@ public class MetricShipmentService {
         if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
         Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("weight");
         return result == null ? 0 : NumberUtils.toFloat(result.toString());
+    }
+
+    /**
+     * 统计运输关税和VAT(市场 或者 运输方式)
+     */
+    public Map<String, Float> countVAT() {
+        SqlSelect sql = new SqlSelect().select("w.name, s.type, p.currency, round(sum(p.unitPrice), 2) as vatPrice")
+                .from("Shipment s")
+                .leftJoin("Whouse w ON w.id=s.whouse_id")
+                .innerJoin("PaymentUnit p ON p.shipment_id = s.id AND p.feeType_name = 'dutyandvat'")
+                .where("s.planBeginDate>=?").param(this.from)
+                .andWhere("s.planBeginDate<=?").param(this.to);
+        if(this.type != null) sql.andWhere("s.type=?").param(this.type.toString());
+        if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
+        sql.groupBy("w.name, s.type, p.currency");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        Map<String, Float> vat = new HashMap<String, Float>();
+        for(Map<String, Object> objectMap : rows) {
+            String market = objectMap.get("name").toString().split("_")[1];
+            String type = objectMap.get("type").toString();
+            Currency currency = Currency.valueOf(objectMap.get("currency").toString());
+            Float vatPrice = Float.valueOf(objectMap.get("vatPrice").toString());
+            String key = market+"_"+type;
+            if(vat.containsKey(key)) {
+                Float existVatPrice = vat.get(key);
+                vat.put(key, currency.toUSD(vatPrice) + existVatPrice);
+            } else {
+                vat.put(key, currency.toUSD(vatPrice));
+            }
+        }
+        return vat;
     }
 }

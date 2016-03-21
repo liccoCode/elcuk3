@@ -104,7 +104,7 @@ public class Listing extends GenericModel {
      * title xxxx by [??]
      */
     @Expose
-    public String byWho = "EasyAcc";
+    public String byWho = models.OperatorConfig.getVal("addressname");
 
     @Expose
     public Integer reviews = 0;
@@ -169,6 +169,11 @@ public class Listing extends GenericModel {
      * 上一次做 Review Check 的时间
      */
     public Date lastReviewCheckDate = new Date();
+
+    /**
+     * Listing 的得分(重要程度)
+     */
+    public Integer score = 0;
 
     public void setAsin(String asin) {
         this.asin = asin;

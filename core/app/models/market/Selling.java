@@ -330,7 +330,8 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market_id", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
-        HTTP.post("http://rock.easya.cc:4567/amazon_product_sync_back", params);
+        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_product_sync_back", params);
+        this.save();
     }
 
 
@@ -385,7 +386,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
-        HTTP.post("http://rock.easya.cc:4567/submit_feed", params);
+        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/submit_feed", params);
         return feed;
     }
 
@@ -407,6 +408,7 @@ public class Selling extends GenericModel {
         String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
         Logger.info(feed_submission_id);
         List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
+        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed", params);
         HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", params);
         this.save();
     }
@@ -443,7 +445,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("next_feed_id", assignPriceFeed.id.toString()));
         params.add(new BasicNameValuePair("next_feed_type", MWSUtils.T.PRICING_FEED.toString()));
 
-        HTTP.post("http://rock.easya.cc:4567/amazon_submit_feed", params);
+        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_submit_feed", params);
         return this;
     }
 
@@ -929,7 +931,8 @@ public class Selling extends GenericModel {
             String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
-            String temp = HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", productParams);
+            String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
+                    productParams);
             if(!temp.equals("success"))
                 throw new Exception("连接Rockend出现问题，请联系相关技术人员!");
         }

@@ -3,9 +3,7 @@ package models.view.dto;
 import helper.Webs;
 import models.market.M;
 import models.market.Selling;
-import models.procure.Shipment;
 import models.view.post.AnalyzePost;
-import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.io.Serializable;
@@ -156,6 +154,15 @@ public class AnalyzeDTO implements Serializable {
      */
     public Selling.SC sellingCycle;
 
+    /**
+     * 保留库存
+     */
+    public int reserved = 0;
+
+    /**
+     * 断货天数颜色区分
+     */
+    public String step;
 
     public float getPs_cal() {
         if(this.ps_cal <= 0) {

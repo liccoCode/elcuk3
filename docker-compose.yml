@@ -1,0 +1,53 @@
+erp:
+  image: 192.168.100.170:5000/base
+  container_name: erp_scp
+  hostname: erp_scp
+  restart: always
+  volumes:
+   - /root/elcuk2-scp-docker:/root/elcuk2scp
+  ports:
+   - "9001:9000"
+  links:
+   - mysql:aggron.easya.cc
+   - redis:redis.easya.cc
+   - elasticsearch:es.easya.cc
+   - elasticsearch:gengar.easya.cc
+   - rockend:rock.easya.cc
+  expose:
+   - "9000"
+rockend:
+  image: 192.168.100.170:5000/base
+  container_name: erp_rockend_scp
+  volumes:
+   - /root/rockend-scp:/root/rockend-scp
+  links:
+   - mysql:aggron.easya.cc
+   - elasticsearch:es.easya.cc
+   - elasticsearch:gengar.easya.cc
+  restart: always
+  expose:
+   - "4567"
+
+elasticsearch:
+  image: 192.168.100.170:5000/elasticsearch:es201511
+  container_name: erp_es_scp
+  restart: always
+  expose:
+   - "9200"
+  command: es.sh
+
+mysql:
+  image: 192.168.100.170:5000/mysql:elcuk2orderr
+  container_name: erp_db_scp
+  restart: always
+  expose:
+   - "3306"
+
+redis:
+  image: 192.168.100.170:5000/redis 
+  container_name: erp_redis_scp
+  restart: always
+  expose:
+   - "6379"
+
+

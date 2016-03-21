@@ -39,7 +39,7 @@
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <input type="hidden" name="p.page" value="${p.page}">
-       <input type="text" style="width:120px;" name="p.search" placeholder="支付账号" value="${p.search}">
+      <input type="text" style="width:120px;" name="p.search" placeholder="支付账号" value="${p.search}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
 
@@ -77,12 +77,12 @@
           <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
           <td>
               #{set totalFees: pay.totalFees()/}
-            <a href="#" rel='tooltip' title="USD: ${totalFees._1};  CNY: ${totalFees._2};  ${pay.currency}: ${totalFees._3}">
-            ${helper.Currency.USD.symbol()} ${totalFees._1.format('#.##')}
+            <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
+            ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')}
             </a>
           </td>
           <td>
-          ${pay.actualCurrency?.symbol()} ${pay.actualPaid}
+          ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,4).floatValue().format('#,###.##')}
             <i class="badge badge-info">${pay.units().size()}</i>
           </td>
           <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
@@ -94,12 +94,12 @@
 </div>
 #{/form}
 <div class="row-fluid" id="order_list">
-    <div class="span12">
-    #{if payments.size() == 0}
-        暂时还没有付款单
-    #{/if}
-    #{else }
-        #{bootstrap_pager pi:p, url:'' /}
-    #{/else}
-    </div>
+  <div class="span12">
+  #{if payments.size() == 0}
+    暂时还没有付款单
+  #{/if}
+  #{else }
+      #{bootstrap_pager pi:p, url:'' /}
+  #{/else}
+  </div>
 </div>

@@ -8,7 +8,6 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.Shipment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -21,6 +20,7 @@ import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
+import java.math.BigDecimal;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
@@ -131,12 +131,12 @@ public class Payment extends Model {
     /**
      * 应该支付的金额
      */
-    public Float shouldPaid = 0f;
+    public BigDecimal shouldPaid = new BigDecimal(0);
 
     /**
      * 最终实际支付
      */
-    public Float actualPaid = 0f;
+    public BigDecimal actualPaid = new BigDecimal(0);
 
     /**
      * 最后支付的币种
@@ -288,7 +288,7 @@ public class Payment extends Model {
     }
 
     public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratio_publish_date,
-                      Float actualPaid) {
+                      BigDecimal actualPaid) {
         /**
          * 0. 验证
          *  - paymentTargetId 必须是当前 Payment 的 Cooperator 的某一个支付方式
@@ -309,7 +309,7 @@ public class Payment extends Model {
                 break;
             }
         }
-        if(!Arrays.asList(Currency.CNY, Currency.USD).contains(currency))
+        if(!Arrays.asList(Currency.CNY, Currency.USD, Currency.EUR, Currency.GBP, Currency.HKD).contains(currency))
             Validation.addError("", "现在只支持美元与人民币两种支付币种");
 
         if(!Arrays.asList(S.WAITING, S.LOCKED).contains(this.state))
@@ -339,7 +339,7 @@ public class Payment extends Model {
         this.actualAccountNumber = target.accountNumber;
         this.payer = User.current();
         this.state = S.PAID;
-        this.shouldPaid = Webs.scalePointUp(4, Float.parseFloat(this.approvalAmount()) * this.rate);
+        this.shouldPaid = new BigDecimal(Webs.scalePointUp(4, Float.parseFloat(this.approvalAmount()) * this.rate));
         this.save();
         new ERecordBuilder("payment.payit")
                 .msgArgs(this.target.toString(),
@@ -424,10 +424,31 @@ public class Payment extends Model {
      */
     public String approvalAmount() {
         BigDecimal amount = new BigDecimal(0);
+        ArrayList<String> shipments = new java.util.ArrayList<String>();
         for(PaymentUnit fee : this.units()) {
-            if(PaymentUnit.S.DENY != fee.state)
-                amount = amount.add(new BigDecimal
-                        (Float.toString(fee.amount())));
+            if(fee.shipment != null && !shipments.contains(fee.shipment.id)) {
+                shipments.add(fee.shipment.id);
+            }
+        }
+        /**
+         * 因为运输单的四舍五入的问题，需要先将shipment汇总再四舍五入
+         */
+        if(shipments.size() > 0) {
+            for(String shipmentid : shipments) {
+                BigDecimal unitamount = new BigDecimal(0);
+                for(PaymentUnit fee : this.units()) {
+                    if(shipmentid == fee.shipment.id) {
+                        if(PaymentUnit.S.DENY != fee.state)
+                            unitamount = unitamount.add(fee.decimalamount());
+                    }
+                }
+                amount = amount.add(unitamount.setScale(2, RoundingMode.HALF_UP));
+            }
+        } else {
+            for(PaymentUnit fee : this.units()) {
+                if(PaymentUnit.S.DENY != fee.state)
+                    amount = amount.add(fee.decimalamount());
+            }
         }
         return amount.setScale(2, RoundingMode.HALF_UP).toString();
     }
@@ -507,7 +528,7 @@ public class Payment extends Model {
      *
      * @param shouldPaid
      */
-    public void shouldPaid(Float shouldPaid) {
+    public void shouldPaid(BigDecimal shouldPaid) {
         if(shouldPaid == null)
             Validation.addError("", "应付金额必须填写");
         if(Validation.hasErrors()) return;
