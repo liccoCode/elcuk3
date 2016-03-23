@@ -28,9 +28,9 @@ public class SystemOperation extends Controller {
                 //new SystemOperationsJob(request.actionMethod, request.url, request.controller).now();
             }
         }
-        long freememory = Runtime.getRuntime().freeMemory() / 1024 / 1024;
-        long totalmemory = Runtime.getRuntime().totalMemory() / 1024 / 1024;
-        Logger.info("playurl: %s playpath:%s freememory:%s totalmemory:%s ", request.url, Play.ctxPath, freememory,
-                totalmemory);
+        //long freememory = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+        //long totalmemory = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+        //Logger.info("playurl: %s playpath:%s freememory:%s totalmemory:%s ", request.url, Play.ctxPath, freememory,
+               // totalmemory);
     }
 }
