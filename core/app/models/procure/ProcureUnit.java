@@ -419,6 +419,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.required("procureunit.whouse", this.whouse);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
+        Validation.required("procureunit.cooperator", this.cooperator);
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
