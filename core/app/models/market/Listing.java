@@ -170,6 +170,11 @@ public class Listing extends GenericModel {
      */
     public Date lastReviewCheckDate = new Date();
 
+    /**
+     * Listing 的得分(重要程度)
+     */
+    public Integer score = 0;
+
     public void setAsin(String asin) {
         this.asin = asin;
         if(this.market != null && this.asin != null)
