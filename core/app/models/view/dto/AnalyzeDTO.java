@@ -164,6 +164,21 @@ public class AnalyzeDTO implements Serializable {
      */
     public String step;
 
+    /**
+     * 退货数
+     */
+    public int returns = 0;
+
+    /**
+     * 正常销量数
+     */
+    public int sales = 0;
+
+    /**
+     * 退货率
+     */
+    public float returnRates;
+
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
