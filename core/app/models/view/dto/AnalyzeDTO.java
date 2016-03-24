@@ -177,7 +177,7 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 退货率
      */
-    public float returnRates;
+    public float returnRates = 0;
 
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
