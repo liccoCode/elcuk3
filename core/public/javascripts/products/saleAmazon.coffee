@@ -104,17 +104,12 @@ $ ->
       allowImageUpload: false
       newlineTag: 'br'
       afterChange: ->
-        htmlCode = this.html().toString()
-        re = new RegExp("<span>","g");
-        htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("</span>","g");
-        htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("<br />","g");
-        htmlCode = htmlCode.replace(re, "<br>")
+        htmlCode = this.html().toString().replace(/^<span\S*\s*\S*>/, "").replace(/<span>/, '')
+
         count = htmlCode.length
         $('#productDesc').val(htmlCode)
         $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
         $('#previewDesc').html($('#productDesc').val())
-      items: ['source','|', '|', 'forecolor', 'bold']
+      items: ['source','|', '|', 'bold']
     });
   )
