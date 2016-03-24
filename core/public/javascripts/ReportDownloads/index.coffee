@@ -11,7 +11,7 @@ $ ->
       ]
     )
 
-  $("table.table").on("click", "#repeatcalculate", (r) ->
+  $("#reports").on("click", "#repeatcalculate", (r) ->
     $.ajax($(@).data('url'), {type: 'POST', data: "" })
     .done((r) ->
       msg = if r.flag is true
