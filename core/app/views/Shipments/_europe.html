@@ -1,56 +1,56 @@
 <tr>
   <td style="font-family:STXihei" colspan="3" rowspan="4" class="td1">
   #{if country == 'DE' }
-    Buyer : TUGGLE ELECTRONIC COMMERCE CO.,LTD <br>
-    VAT No. : DE 292695920<br>
+    Buyer : ${models.OperatorConfig.getVal("shipmenteuropedebuyer")} <br>
+    VAT No. : DE ${models.OperatorConfig.getVal("shipmenteuropedevat")}<br>
   #{/if}
   #{elseif country == 'FR'}
-    Sold to : SERF Europefides SAS<br>
-    Address:5.rue Denis Poisson 75017 Paris<br>
-    VAT No. : FR63328387212<br>
+    Sold to : ${models.OperatorConfig.getVal("shipmenteuropefrsold")}<br>
+    Address:${models.OperatorConfig.getVal("shipmenteuropefraddress")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropefrvat")}<br>
   #{/elseif}
   #{elseif country == 'GB'}
-    Buyer : Edeer Network Technology CO., LTD<br>
-    VAT No. : GB117317336<br>
+    Buyer : ${models.OperatorConfig.getVal("shipmenteuropeukbuyer")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeukvat")}<br>
   #{/elseif}
   #{elseif country == 'IT'}
-    Buyer : ACIT S.R.L<br>
-    VAT No. : IT07289420965<br>
+    Buyer : ${models.OperatorConfig.getVal("shipmenteuropeitbuyer")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeitvat")}<br>
   #{/elseif}
   #{else}
-    Buyer : Edeer Network Technology CO., LTD <br>
-    VAT No. : GB117317336<br>
+    Buyer : ${models.OperatorConfig.getVal("shipmenteuropeotherbuyer")} <br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeothervat")}<br>
   #{/else}
-    Attn : Yeping Xie <br>
+    Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} <br>
     Tel :
   #{if country == 'DE' }
-    +4915211641438
+  ${models.OperatorConfig.getVal("shipmenteuropedetel")}
   #{/if}
   #{elseif country == 'FR'}
-    +33 605717467
+  ${models.OperatorConfig.getVal("shipmenteuropefrtel")}
   #{/elseif}
   #{elseif country == 'GB'}
-    00447466355519
+  ${models.OperatorConfig.getVal("shipmenteuropeuktel")}
   #{/elseif}
   #{if country == 'IT' }
-    +390707040008
+  ${models.OperatorConfig.getVal("shipmenteuropeittel")}
   #{/if}
     <br>
-    Email: Jason@easyacceu.com <br>
+    Email: ${models.OperatorConfig.getVal("shipmenteuropeemail")} <br>
     Add: ${address}
   </td>
   <td>Buyer EORI NO.：</td>
 #{if country == 'DE' }
-  <td>GB117317336000</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropedeeori")}</td>
 #{/if}
 #{elseif country == 'FR'}
-  <td>GB117317336000</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropefreori")}</td>
 #{/elseif}
 #{elseif country == 'IT'}
-  <td>GB117317336000</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropeiteori")}</td>
 #{/elseif}
 #{else}
-  <td>GB117317336000</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropeothereori")}</td>
 #{/else}
 </tr>
 
@@ -59,16 +59,16 @@
   <td>Buyer VAT No. :</td>
 
 #{if country == 'DE' }
-  <td>DE 292695920</td>
+  <td>DE ${models.OperatorConfig.getVal("shipmenteuropedevat")}</td>
 #{/if}
 #{elseif country == 'FR' }
-  <td>FR63328387212</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropefrvat")}</td>
 #{/elseif}
 #{elseif country == 'IT' }
-  <td>IT07289420965</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropeitvat")}</td>
 #{/elseif}
 #{else}
-  <td>GB117317336</td>
+  <td>${models.OperatorConfig.getVal("shipmenteuropeothervat")}</td>
 #{/else}
 </tr>
 <tr>

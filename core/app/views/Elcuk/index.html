@@ -9,6 +9,7 @@
   <table class="table table-condensed table-bordered">
     <tr>
       <th>参数类型</th>
+      <th>参数编码</th>
       <th>参数名称</th>
       <th>参数值</th>
       <th>最近更新时间</th>
@@ -17,6 +18,7 @@
   #{list items: configurations, as: 'config'}
     <tr>
       <td>${config.type}</td>
+      <td>${config.paramcode}</td>
       <td>${config.name}</td>
       <td>${config.val}</td>
       <td>${config.updateAt}</td>

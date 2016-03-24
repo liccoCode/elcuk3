@@ -603,7 +603,7 @@ public class MetricProfitService {
      * @return
      */
     private float getEsTermsTotal(SearchSourceBuilder search, String estype) {
-        JSONObject result = ES.search("elcuk2", estype, search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), estype, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
@@ -624,7 +624,7 @@ public class MetricProfitService {
      * @return
      */
     private F.T2<JSONObject, JSONArray> getEsShipTerms(SearchSourceBuilder search, String estype) {
-        JSONObject result = ES.search("elcuk2", estype, search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), estype, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
@@ -727,7 +727,7 @@ public class MetricProfitService {
 
         Logger.info("salefeeline:::" + search.toString());
 
-        JSONObject result = ES.search("elcuk2", tablename, search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
@@ -806,7 +806,7 @@ public class MetricProfitService {
                 .query(qb)
                 .aggregation(builder
                 ).size(0);
-        JSONObject result = ES.search("elcuk2", tablename, search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }

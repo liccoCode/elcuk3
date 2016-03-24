@@ -1,0 +1,168 @@
+<div class="row-fluid">
+#{if ap!=null && ap.id!=null}
+    #{info_row title:'流程'}
+    #{/info_row}
+    #{render 'Activitis/_process.html', infos:infos,pdId:ap.processDefinitionId,piId:ap.processInstanceId/}
+#{/if}
+  <form method="POST" name="activiti" id="unitEditForm">
+    <table class="table table-bordered table-striped account_list">
+      <div class="row-fluid">
+        <tr>
+          <td style="width:20%;">审批意见</td>
+          <td style="width:80%;">
+            <textarea style="width:98%;height:50px;" id="opition" name="opition" value=""></textarea>
+            <input type="hidden" value="${ap.id}" id="processid" name="processid">
+            <input type="hidden" value="${unit.id}" name="id">
+            <input type="hidden" value="${isEnd}" id="isEnd">
+          </td>
+        </tr>
+        <tr style="#{if taskname!='品线运营主管'} display:none;#{/if}">
+          <td>审批结果</td>
+          <td>
+            <select class="inline" style="width:100px;" name="submitstate">
+              <option value="1" selected> 通过</option>
+              <option value="2"> 驳回</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="12">
+            <a id="activiti_btn" href="javascript:void(0)" class="btn btn-info">下一步</a>
+            <a class="btn btn-danger" href="javascript:void(0);" data-action="@{ProcureUnits.terminateProcess()}"
+               name="terminateProcess">终止流程</a>
+          </td>
+        </tr>
+
+      </div>
+    </table>
+    <h4 class="alert alert-success">采购计划信息</h4>
+    <table class="table table-condensed table-bordered">
+    #{set product: unit.selling.listing.product/}
+      <tr>
+        <th style="width:100px;">SellingId</th>
+        <td style="width:600px;">
+          <input type="text" name="unit.selling.sellingId" id="sellingId" value="${unit.selling.sellingId}" readonly>
+        </td>
+        <th style="width:100px;">SKU</th>
+        <td>
+          <input type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}" readonly>
+        </td>
+      </tr>
+      <tr>
+      #{set copers:product.cooperators() /}
+        <th>供应商</th>
+        <td>
+          <select name="unit.cooperator.id">
+            <option>请选择</option>
+          #{list items:copers, as:'c'}
+            <option value="${c.id}" #{if unit.cooperator?.id==c.id}selected#{/if}>${c.name}</option>
+          #{/list}
+          </select>
+          <span style="display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
+        </td>
+        <th>价格</th>
+        <td>
+          <input type="text" class="span2" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+        #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
+        </td>
+      </tr>
+
+      <tr>
+        <th>采购数量</th>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
+                   value="${unit.attrs.planQty}">
+            <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+            <span class="add-on">箱</span>
+          </div>
+          <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+        </td>
+        <th>预计交货日期</th>
+        <td>
+          <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+        #{if oldplanDeliveryDate!=null}
+          <span class="add-on">比原预计交货日期${oldplanDeliveryDate.date()}推迟${(unit.attrs
+          .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
+        #{/if}
+          <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
+        </td>
+      </tr>
+
+      <tr>
+        <th>采购取样</th>
+        <td>
+          <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/><span class="add-on">个</span>
+        </td>
+        <th>质检取样</th>
+        <td>
+          <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
+        </td>
+      </tr>
+
+      <tr>
+        <th>预计运输时间</th>
+        <td>
+          <input type="date" name="unit.attrs.planShipDate" value="${unit.attrs.planShipDate.date()}">
+        </td>
+        <th>预计到库时间</th>
+        <td>
+          <div class="input-append">
+            <input type="date" name="unit.attrs.planArrivDate" value="${unit.attrs.planArrivDate.date()}">
+            <span class="add-on">? 天</span>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>去往仓库</th>
+        <td>
+        #{select 'unit.whouse.id', items: whouses, labelProperty: 'name', value: unit.whouse?.id}#{/select}
+        </td>
+        <th>阶段</th>
+        <td>
+          <span style="color:${unit.stage.rgb()}">${unit.stage.label()}</span>
+        </td>
+      </tr>
+
+      <tr>
+        <th>运输方式</th>
+        <td>
+        #{list items:models.procure.Shipment.T.values(), as:'t'}
+          <label class="radio">
+            <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>
+          ${t.label()}
+          </label>
+        #{/list}
+        </td>
+        <td colspan="2">
+        #{list items: unit.relateShipment()}
+          <div>
+            <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+            <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
+            <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
+          </div>
+        #{/list}
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="4">
+          <h4>Memo</h4>
+          <textarea rows="8" style="width:100%;" name="unit.comment" id="memo">${unit.comment.raw()}</textarea>
+        </td>
+      </tr>
+    </table>
+  #{success_row title:'选择运输单(Option)'}
+    <ul>
+      <li>带有 <i style="color:#C09853;" class="icon-star"></i> 符号表示此运输单为周期型的运输单</li>
+      <li>PM 的采购计划直接进入某一个周期型运输单, 具体运输计划由运输人员负责制作</li>
+    </ul>
+  #{/success_row}
+    <div id="shipments"></div>
+    <input type="text" name="msg" placeholder="简要填写变更的原因">
+    <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
+
+
+  </form>
+</div>

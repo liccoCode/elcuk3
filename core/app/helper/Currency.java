@@ -755,7 +755,15 @@ public enum Currency {
     private static Float ratio(String from, String to) {
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
-            String html = HTTP.get("https://www.google.com/finance/converter?a=1&from=" + from + "&to=" + to);
+
+            String html = "";
+            String proxyhost = models.OperatorConfig.getVal("proxyhost");
+            if(!proxyhost.equals("")) {
+                html = HTTP.getProxy(proxyhost, "https://www.google.com/finance/converter?a=1&from=" + from + "&to=" +
+                        to);
+            } else {
+                html = HTTP.get("https://www.google.com/finance/converter?a=1&from=" + from + "&to=" + to);
+            }
             Document doc = Jsoup.parse(html);
             String toStr = doc.select("#currency_converter_result .bld").text();
             Logger.info("[1 %s TO %s]", from, toStr);

@@ -12,9 +12,9 @@
       #{/elseif}
     <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
   </div>
-  <table class="table table-bordered table-condensed">
+  <table class="table table-bordered table-condensed" id="apply_table">
     <tr>
-      <th></th>
+      <th><label><input type="checkbox" id="check_all"></label></th>
       <th>采购计划</th>
       <th>交货日期</th>
       <th>SKU</th>
@@ -24,6 +24,7 @@
       <th>总额修正价</th>
       <th>付款金额</th>
       <th>请款人</th>
+      <th>是否发货</th>
       <th>状态</th>
       <th>#</th>
     </tr>
@@ -53,6 +54,7 @@
           <td>${payment.currency.symbol()} ${fee.fixValue}</td>
           <td>${payment.currency.symbol()} ${fee.amount()}</td>
           <td>${fee.payee.username}</td>
+          <td>${punit.isship()}</td>
           <td>
             <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
               #{power.ck 'paymentunits.deny'}

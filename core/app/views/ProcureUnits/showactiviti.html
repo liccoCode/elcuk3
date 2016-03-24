@@ -1,0 +1,33 @@
+#{stylesheet_cdn name:'bootstrap.min.css'/}
+#{stylesheet_cdn name:'font-awesome.css'/}
+#{stylesheet_cdn name: 'jquery.loadmask.css'/}
+#{stylesheet_cdn name: 'main.css'/}
+#{stylesheet_cdn name: 'dateinput.css'/}
+#{script_cdn name: 'jquery.1.7.2.min.js'/}
+#{get 'moreStyles' /}
+#{script_cdn name: 'underscore-min.js'/}
+#{script_cdn name: 'noty/jquery.noty.js'/}
+#{script_cdn name: 'noty/themes/default.js'/}
+#{script_cdn name: 'noty/layouts/top.js'/}
+#{script_cdn name: 'noty/layouts/topLeft.js'/}
+#{script_cdn name: 'noty/layouts/topRight.js'/}
+#{script_cdn name: 'rails.js'/}
+#{script_cdn name: 'jquery.animate-colors-min.js'/}
+#{script_cdn name: 'bootstrap.min.js'/}
+#{script_cdn name: 'jquery.loadmask.min.js'/}
+#{script_cdn name: 'jquery.highlight.js'/}
+#{script_cdn name: 'jquery.form.js'/}
+#{script_cdn name: 'jquery.tools.date.min.js'/}
+#{script_cdn name: 'component/notify.coffee'/}
+#{script_cdn name: 'component/popover.coffee'/}
+#{script_cdn name: 'main.js'/}
+#{script_cdn name: 'jquery.filedrop.js'/}
+#{script_cdn name: 'component/dropUpload.coffee'/}
+#{script_cdn name: 'procureunits/showactiviti.coffee'/}
+#{script_cdn name: 'procureunits/blank.coffee'/}
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{render 'ProcureUnits/_activitishow.html', taskname: taskname, item: item, ap: ap, infos: infos,
+unit: unit, issubmit:issubmit, isEnd:isEnd, whouses:whouses, oldPlanQty:oldPlanQty/}

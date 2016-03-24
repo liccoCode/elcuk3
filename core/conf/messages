@@ -175,6 +175,8 @@ procureunit.tailpay=\u7533\u8BF7\u5C3E\u6B3E
 procureunit.tailpay.msg=\u4E3A %s \u7533\u8BF7 %s \u5C3E\u6B3E
 procureunit.reworkpay=\u8fd4\u5de5\u8d39\u7528\u7533\u8bf7
 procureunit.reworkpay.msg=\u4E3A %s \u7533\u8BF7 %s \u8fd4\u5de5\u8d39\u7528
+procureunit.stopactiviti=\u7ec8\u6b62\u91c7\u8d2d\u8ba1\u5212\u6d41\u7a0b
+procureunit.stopactiviti.msg=\u91c7\u8d2d\u8ba1\u5212\u6d41\u7a0bID[%s],\u91c7\u8d2d\u5bf9\u8c61ID[%s],\u5355\u636eID[%s]
 
 shipment.update=\u66F4\u65B0[\u8FD0\u8F93\u5355]
 shipment.updateFBA=[\u8FD0\u8F93\u5355]\u66F4\u65B0 FBA

@@ -35,11 +35,11 @@ public class Application extends Controller {
     public static void index() {
         /**如果是有PM首页权限则跳转到PM首页**/
         models.User user = Login.current();
-        Set<Privilege> privileges = Privilege.privileges(user.username, user.roles);
-        Privilege privilege = Privilege.find("name=?", "pmdashboards.index").first();
-        if(privileges.contains(privilege)) {
-            Pmdashboards.index();
-        }
+        //Set<Privilege> privileges = Privilege.privileges(user.username, user.roles);
+        //Privilege privilege = Privilege.find("name=?", "pmdashboards.index").first();
+        //if(privileges.contains(privilege)) {
+            //Pmdashboards.index();
+        //}
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
@@ -119,7 +119,7 @@ public class Application extends Controller {
     }
 
     public static void aaa() {
-        HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
+        HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/selling_sale_analyze");
         renderText("成功执行, 请看后台 Command Line");
     }
 }

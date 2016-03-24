@@ -65,7 +65,7 @@ public class OrderPOST extends ESPost<Orderr> {
         SearchSourceBuilder builder = this.params();
         System.out.println(builder);
         try {
-            JSONObject result = ES.search("elcuk2", "order", builder);
+            JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
             JSONObject hits = result.getJSONObject("hits");
             this.count = hits.getLong("total");
             Set<String> orderIds = new HashSet<String>();

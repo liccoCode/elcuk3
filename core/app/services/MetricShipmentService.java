@@ -95,7 +95,7 @@ public class MetricShipmentService {
                 .query(filterbuilder())
                 .aggregation(builder)
                 .size(0);
-        JSONObject result = ES.search("elcuk2", "shippayunit", search);
+        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "shippayunit", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
         return cost.getFloat("value");

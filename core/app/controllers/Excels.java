@@ -47,9 +47,17 @@ import java.util.*;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Excels extends Controller {
 
-
     @Check("excels.deliveryment")
     public static void deliveryment(String id, DeliveryExcel excel) {
+        excel.dmt = Deliveryment.findById(id);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(excel);
+    }
+
+    @Check("excels.deliveryment")
+    public static void deliverymentbrandworl(String id, DeliveryExcel excel) {
         excel.dmt = Deliveryment.findById(id);
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
@@ -100,6 +108,7 @@ public class Excels extends Controller {
                 String.format("%s出货计划.xls", pidstr.toString()));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
+        renderArgs.put("procurecompany",models.OperatorConfig.getVal("procurecompany"));
         renderArgs.put("dmt", Deliveryment.findById(id));
         render(units);
     }
@@ -214,7 +223,7 @@ public class Excels extends Controller {
                     } else {
                         categoryname = p.category.toLowerCase();
                     }
-                    HTTP.get("http://rock.easya.cc:4567/profit_batch_work?category=" + categoryname
+                    HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/profit_batch_work?category=" + categoryname
                             + "&market=" + marketkey + "&from="
                             + new SimpleDateFormat("yyyyMMdd").format(p.begin)
                             + "&to="
@@ -234,6 +243,59 @@ public class Excels extends Controller {
             render(profits, p);
         } else {
             renderText("正在后台计算生成Excel文件！");
+        }
+    }
+
+    public static void skuProfit(SkuProfitPost p) {
+        if(p == null) p = new SkuProfitPost();
+        if(StringUtils.isBlank(p.categories) && StringUtils.isBlank(p.sku)) {
+            renderText("未选择category或者sku!");
+        } else {
+            String sku_key = "";
+            String market_key = p.pmarket;
+            String categories_key = "";
+            if(StringUtils.isBlank(p.sku)) {
+                sku_key = p.categories;
+            } else {
+                sku_key = p.sku;
+            }
+            String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_" +
+                    new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_" +
+                    new SimpleDateFormat("yyyyMMdd").format(p.end);
+            String cache_str = Caches.get(cacke_key);
+
+            if(!StringUtils.isBlank(cache_str)) {
+                renderText("Analyze后台事务正在执行中,请稍候...");
+            } else {
+                if(p.sku != null) sku_key = p.sku;
+                if(p.pmarket != null) market_key = p.pmarket;
+                if(p.categories != null) categories_key = p.categories.toLowerCase();
+                String post_key = Caches.Q.cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                List<SkuProfit> dtos = Cache.get(post_key, List.class);
+                if(dtos == null) {
+                    String category_names = "";
+                    int is_sku = 0;
+                    if(StringUtils.isNotBlank(p.sku)) {
+                        category_names = p.sku;
+                        is_sku = 1;
+                    } else {
+                        category_names = p.categories.toLowerCase();
+                    }
+                    HTTP.get("http://rock.easya.cc:4567/sku_profit_batch_work?categories=" + category_names
+                            + "&market=" + market_key + "&from=" + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
+                            + "&to=" + new SimpleDateFormat("yyyy-MM-dd").format(p.end) + "&is_sku=" + is_sku);
+                    renderText("后台事务正在计算中,请稍候...");
+                } else {
+                    SkuProfit total = SkuProfit.handleSkuProfit(dtos);
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                    request.format = "xls";
+                    renderArgs.put(RenderExcel.RA_FILENAME,
+                            String.format("SKU销售库存利润报表%s.xls", formatter.format(new Date())));
+                    renderArgs.put(RenderExcel.RA_ASYNC, false);
+                    renderArgs.put("dateFormat", formatter);
+                    render(total, p, dtos);
+                }
+            }
         }
     }
 
@@ -464,7 +526,8 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, target, formatter);
         } else {
-            HTTP.get(String.format("%s?year=%s&month=%s", RevenueAndCostDetail.CALCULATE_URL, year, month));
+            HTTP.get(String.format("%s?year=%s&month=%s",
+                    "http://"+models.OperatorConfig.getVal("rockendurl")+":4567/revenue_and_cost_calculator", year, month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }

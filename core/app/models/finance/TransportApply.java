@@ -143,8 +143,8 @@ public class TransportApply extends Apply {
         float cny = 0;
         for(Payment payment : this.payments) {
             if(payment.actualCurrency != null) {
-                usd += payment.actualCurrency.toUSD(payment.actualPaid);
-                cny += payment.actualCurrency.toCNY(payment.actualPaid);
+                usd += payment.actualCurrency.toUSD(payment.actualPaid.floatValue());
+                cny += payment.actualCurrency.toCNY(payment.actualPaid.floatValue());
             }
         }
         return new F.T2<Float, Float>(usd, cny);

@@ -27,7 +27,12 @@ public class Brands extends Controller {
 
     @Check("brands.index")
     public static void index(String id) {
-        Brand brand = (Brand) renderArgs.get("brands", List.class).get(0);
+        List<Brand> brands = renderArgs.get("brands", List.class);
+        if (brands==null || brands.size()<=0){
+            Brand brand = new Brand();
+            render(brand);
+        }
+        Brand brand = (Brand) brands.get(0);
         if(StringUtils.isNotBlank(id)) brand = Brand.findById(id);
         render(brand);
     }
