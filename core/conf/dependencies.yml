@@ -42,7 +42,6 @@ require:
           - org.apache.ant -> *
 
 
-
 repositories:
     - factoryBoy:
         type: HTTP
