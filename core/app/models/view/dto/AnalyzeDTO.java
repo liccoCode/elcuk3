@@ -7,6 +7,7 @@ import models.view.post.AnalyzePost;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -299,5 +300,13 @@ public class AnalyzeDTO implements Serializable {
     public String prettyDisplayPrice() {
         DecimalFormat df = new DecimalFormat("#.00");
         return df.format(displayPrice);
+    }
+
+    public int totalfive() {
+        return this.working + this.worked + this.way + this.inbound + this.qty;
+    }
+
+    public float day() {
+        return new BigDecimal(this.day30 / 30).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
     }
 }

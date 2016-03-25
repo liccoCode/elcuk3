@@ -1,10 +1,12 @@
 *{_turnOver: turnOver 值}*
 #{if _turnOver < 30 && _turnOver >= 0}
-<td rel="popover" title="估计卖完的时间" data-content="${_turnOver.intValue().dayAfter()}" placement="left" width="auto" style="color:red;">${_turnOver.format("#.#")}</td>
+<td rel="popover" data-content="预计卖完的时间: ${_turnOver.intValue().dayAfter()}" placement="left" width="auto"
+    style="color:red;">${_turnOver.format("#.#")}</td>
 #{/if}
 #{elseif _turnOver <= 0}
 <td style="color:purple;">7天内无销量!</td>
 #{/elseif}
 #{else }
-<td rel="popover" title="估计卖完的时间" data-content="${_turnOver.intValue().dayAfter()}" placement="left" width="auto">${_turnOver.format("#.#")}</td>
+<td rel="popover" data-content="预计卖完的时间: ${_turnOver.intValue().dayAfter()}" placement="left" width="auto">${_turnOver
+.format("#.#")}</td>
 #{/else}

@@ -1,28 +1,27 @@
 <!-- 生成 Analyzes 页面下方的 selling 信息 -->
-<table id="sorttable" class="table table-condensed table-bordered sortinfo">
+<table id="sorttable" class="table table-condensed table-bordered">
   <thead>
   <tr>
     <th title="可双击下面 MerchantSKU">SellingId</th>
-    <th>ASIN</th>
-    <th>计划中</th>
-    <th>采购</th>
-    <th>制作中</th>
-    <th>已交货</th>
-    <th>在途</th>
-    <th>入库</th>
-    <th>Reserved</th>
-    <th>在库</th>
-    <th>Reviews</th>
-    <th>Rating</th>
-    <th>PS</th>
+    <th>Action</th>
+    <th orderby='plan' name="plan">计划中 <i class="icon-sort"></i></th>
+    <th orderby='working' name="working">制作中 <i class="icon-sort"></i></th>
+    <th orderby='worked' name="worked">已交货 <i class="icon-sort"></i></th>
+    <th orderby='way' name="way">在途 <i class="icon-sort"></i></th>
+    <th orderby='inbound' name="inbound">入库 <i class="icon-sort"></i></th>
+    <th orderby='reserved' name="reserved">Reserved <i class="icon-sort"></i></th>
+    <th orderby='qty' name="qty">在库 <i class="icon-sort"></i></th>
+    <th orderby='reviewRatio' name="reviewRatio">Reviews <i class="icon-sort"></i></th>
+    <th orderby='rating' name="rating">Rating <i class="icon-sort"></i></th>
+    <th orderby='ps' name="ps">PS <i class="icon-sort"></i></th>
     <th>_PS</th>
-    <th>Day1</th>
-    <th>
+    <th orderby='day1' name="day1">Day1 <i class="icon-sort"></i></th>
+    <th orderby='difference' name="difference">
       <abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr>
     </th>
-    <th>Day7</th>
-    <th>Day7ave</th>
-    <th>Day30</th>
+    <th orderby='day7' name="day7">Day7<i class="icon-sort"></i></th>
+    <th >Day7ave</th>
+    <th orderby='day30' name="day30">Day30<i class="icon-sort"></i></th>
     <th>Day30ave</th>
     <th>
       <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天">
@@ -63,13 +62,17 @@
   </thead>
   <tbody>
   #{list items:dtos, as:'dto'}
-  <tr totalfive="${dto.working + dto.worked + dto.way + dto.inbound + dto.qty}" day="${(dto.day30 / 30).format('#.#')}">
-    <td class="sid"><i class="icon-bolt"></i> ${dto.fid}</td>
-    <td><a href="${dto.asinLink()}" target="_blank"><i class="icon-external-link"></i> ${dto.asin}</a></td>
-    <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
-    <td width="90px">
-      <button class="btn btn-mini btn-info">操作</button>
+  <tr>
+    <td class="sid"><i class="icon-bolt"></i>
+      <a href="@{Sellings.selling(dto.fid)}" target="_blank">${dto.fid}</a>
     </td>
+    <td style="min-width: 105px;">
+      <a href="${dto.asinLink()}" target="_blank"><i class="icon-link"></i> ${dto.asin}</a><br/>
+      <a href="@{ProcureUnits.blank(dto.fid, dto.totalfive(), dto.day())}" target="_blank">
+        <i class="icon-link"></i> 采购计划
+      </a>
+    </td>
+    <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
     <td class="text-warning">${dto.working}</td>
     <td style="color:#FE502A;">${dto.worked}</td>
     <td class="text-info">${dto.way}</td>
@@ -107,8 +110,8 @@
     <td style="background:${dto.step}">${dto.outday}</td>
     <td>${dto.displayPrice}</td>
     <td>
-      <select name="sellingCycle" size="1" data-sellingid="${dto.fid}" style="width: 85px;">
-        <option value="">生命周期</option>
+      <select name="sellingCycle" size="1" data-sellingid="${dto.fid}" style="width: 60px;">
+        <option value="">无</option>
           #{list items:models.market.Selling.SC.values(), as: 'cycle'}
             <option value="${cycle}" ${cycle == dto.sellingCycle? 'selected':''}>${cycle.label()}</option>
           #{/list}
@@ -120,5 +123,10 @@
     </td>
   </tr>
   #{/list}
+  <tr>
+    <td colspan="20">
+    #{bootstrap_pager pi:p, url:'#'/}
+    </td>
+  </tr>
   </tbody>
 </table>
