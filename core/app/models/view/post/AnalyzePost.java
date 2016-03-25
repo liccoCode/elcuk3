@@ -5,7 +5,6 @@ import helper.Caches;
 import helper.Dates;
 import helper.HTTP;
 import jobs.analyze.SellingSaleAnalyzeJob;
-import models.ElcukConfig;
 import models.OperatorConfig;
 import models.market.M;
 import models.procure.ProcureUnit;
@@ -15,17 +14,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 分析页面的 Post 请求
@@ -70,6 +64,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     public int ismoveing;
 
+    public boolean needPagination = true;
+
     @Override
     public F.T2<String, List<Object>> params() {
         // no use
@@ -87,9 +83,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
         }
         // 用于提示后台正在运行计算
-        if(StringUtils.isBlank(cache_str) || dtos == null) {
-            HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/selling_sale_analyze");
-            throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
+        if(StringUtils.isBlank(cache_str) || dtos == null || dtos.isEmpty()) {
+            HTTP.get("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/selling_sale_analyze");
+            throw new FastRuntimeException("正在计算中, 请稍后再来查看 ^_^");
         }
         return dtos;
     }
@@ -97,6 +93,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @Override
     public List<AnalyzeDTO> query() {
         List<AnalyzeDTO> dtos = this.analyzes();
+
         if(this.type.equals("sid")) {
             setOutDayColor(dtos, null);
         }
@@ -116,8 +113,11 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
 
-        //return this.programPager(dtos);
-        return dtos;
+        if(this.needPagination) {
+            return this.programPager(dtos);
+        } else {
+            return dtos;
+        }
     }
 
     public static int setOutDayColor(List<AnalyzeDTO> dtos, Integer needCompare) {
@@ -168,6 +168,24 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @Override
     public Long getTotalCount() {
         return (long) this.analyzes().size();
+    }
+
+    /**
+     * 使用程序自己对 List 集合进行分页操作
+     *
+     * @param dtos
+     * @return
+     */
+    public List<AnalyzeDTO> programPager(List<AnalyzeDTO> dtos) {
+        this.count = dtos.size();
+        List<AnalyzeDTO> afterPager = new ArrayList<AnalyzeDTO>();
+        int index = (this.page - 1) * this.perSize;
+        int end = index + this.perSize;
+        for(; index < end; index++) {
+            if(index >= this.count) break;
+            afterPager.add(dtos.get(index));
+        }
+        return afterPager;
     }
 
     private static class FieldComparator implements Comparator<AnalyzeDTO> {

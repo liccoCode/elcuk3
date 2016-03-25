@@ -2,10 +2,8 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-import helper.Caches;
 import helper.*;
 import helper.Currency;
-import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
 import models.market.BtbOrder;
@@ -18,7 +16,6 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -30,9 +27,7 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
-import play.libs.Files;
 import play.modules.excel.RenderExcel;
-import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 import services.MetricAmazonFeeService;
@@ -42,8 +37,6 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static play.modules.pdf.PDF.renderPDF;
 
 
 /**
@@ -150,6 +143,7 @@ public class Excels extends Controller {
      * 下载采购单综合Excel表格
      */
     public static void analyzes(AnalyzePost p) {
+        p.needPagination = false;
         List<AnalyzeDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
