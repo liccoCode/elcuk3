@@ -8,11 +8,15 @@ import models.finance.FeeType;
 import models.market.Account;
 import models.OperatorConfig;
 import models.market.ListingStateRecord;
+import org.apache.commons.lang3.StringUtils;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -23,8 +27,18 @@ import java.util.TimeZone;
  */
 @OnApplicationStart
 public class Bootstrap extends Job {
+    private static Map<String, String> ENV_MSG = new HashMap<>();
+
+    static {
+        ENV_MSG.put("DB_HOST", "无法连接数据库");
+        ENV_MSG.put("DB_NAME", "不知道数据库名称");
+        ENV_MSG.put("DB_PASS", "不知道数据库密码");
+        ENV_MSG.put("REDIS_HOST", "无法连接 Redis 实例");
+    }
+
     @Override
     public void doJob() throws Exception {
+        validElcuk2ENV();
         // 设置为 北京 时间;整个系统内的时间, 以北京时间为准
         TimeZone.setDefault(Dates.timeZone(null).toTimeZone());
 
@@ -72,7 +86,18 @@ public class Bootstrap extends Job {
             Account.initLogin();
             new ListingSchedulJob().now();
         }
+    }
 
+    public void validElcuk2ENV() throws Exception {
+        validENV("DB_HOST");
+        validENV("DB_NAME");
+        validENV("REDIS_HOST");
+        validENV("DB_PASS");
+    }
 
+    public void validENV(String env) throws Exception {
+        if(StringUtils.isBlank(System.getenv(env))) {
+            throw new Exception("环境变量 " + env + " 没有初始化, " + ENV_MSG.get(env) + ".");
+        }
     }
 }
