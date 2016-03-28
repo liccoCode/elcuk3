@@ -27,6 +27,7 @@ require:
     - org.jsoup -> jsoup 1.7.1
     - org.apache.httpcomponents -> httpclient 4.2.3
     - org.apache.httpcomponents -> httpmime 4.2.3
+    - com.google.guava -> guava 18.0
     - com.alibaba -> fastjson 1.1.19
     - net.sf.opencsv -> opencsv 2.3
     - org.activiti -> activiti-engine 5.15.1
@@ -36,7 +37,6 @@ require:
     - org.hibernate.javax.persistence -> hibernate-jpa-2.1-api 1.0.0.Final
     - org.hibernate -> hibernate-ehcache 4.1.0.Final
     - javax.activation  -> activation 1.1.1
-    - org.apache.httpcomponents -> httpclient  4.2.3
     - net.sf.barcode4j -> barcode4j 2.1:
         exclude:
          # apache ant 不需要, 我不需要构建
