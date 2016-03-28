@@ -30,11 +30,14 @@ require:
     - com.google.guava -> guava 18.0
     - com.alibaba -> fastjson 1.1.19
     - net.sf.opencsv -> opencsv 2.3
-    - org.activiti -> activiti-engine 5.15.1
-    - org.activiti -> activiti-spring 5.15.1
+    - org.activiti -> activiti-engine 5.15.1:
+        exclude:
+          - javax.persistence -> *
+    - org.activiti -> activiti-spring 5.15.1:
+        exclude:
+          - javax.persistence -> *
     - org.activiti -> activiti-bpmn-model 5.15.1
     - org.activiti -> activiti-modeler 5.15.1
-    - org.hibernate.javax.persistence -> hibernate-jpa-2.1-api 1.0.0.Final
     - org.hibernate -> hibernate-ehcache 4.1.0.Final
     - javax.activation  -> activation 1.1.1
     - net.sf.barcode4j -> barcode4j 2.1:
