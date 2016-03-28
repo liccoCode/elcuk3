@@ -62,6 +62,11 @@ repositories:
         artifact: "https://raw.github.com/wppurking/play-redis/master/dist/[module]-[revision].zip"
         contains:
             - redis -> *
+    - qiniu:
+        type: HTTP
+        artifact: "http://77g8qz.com1.z0.glb.clouddn.com/[module]-[revision].jar"
+        contains:
+            - elcuk -> *
     - My Local Repo Mac:
         type: iBiblio
         root: "file:///${user.home}/.m2/repository/"
