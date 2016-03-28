@@ -7,10 +7,14 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <span>日期选择:</span>
-  #{select_year class:'span1', id:'select_year'/}
-  #{select_month class:'span1', id:'select_month'/}
-    <input type="button" class="btn" value="Search" id="count_btn">
+    <div class="input-prepend inline">
+      <span class="add-on">运输时间From:</span>
+      <input type="date" style="width:90px;" id="select_from" value="${from}">
+
+      <span class="add-on" style="margin-left:20px;">To:</span>
+      <input type="date" style="width:90px;" id="select_to" value="${to}">&nbsp;
+      <input type="button" class="btn" value="Search" id="count_btn">
+    </div>
   </div>
 </div>
 <br/>
@@ -40,9 +44,21 @@
        data-url="@{ShipmentReports.countShipWeightByMarket()}"></div>
 </div>
 
+#{success_row}
+<ul>
+  <li>物流重量与费用统计</li>
+</ul>
+#{/success_row}
+<div class="row-fluid" id="costReportDiv" style="height:500px;">
+
+</div>
+<br/>
+
+#{success_row}
 <ul>
   <li>导出单个 SKU 的运输重量报表</li>
 </ul>
+#{/success_row}
 <div class="row-fluid pull-right">
   <div class="span12 bs-docs-form">
     <form class="search_form" action="@{Excels.exportShipmentWeighReport()}" target="_blank">

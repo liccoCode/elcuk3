@@ -46,46 +46,42 @@ $ ->
 
   # Update 按钮
   $('#amz-update').click ->
-    if !previewBtn.call($("#productDesc"))
-      return false unless imageIndexCal()
-      LoadMask.mask()
-      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-      .done((r) ->
-        msg = if r.flag is true
-          {text: "#{r.message} Selling 更新成功", type: 'success'}
-        else
-          {text: r.message, type: 'error'}
-        noty(msg)
-        LoadMask.unmask()
-      )
-      .fail((r) ->
-        noty({text: r.responseText, type: 'error'})
-        LoadMask.unmask()
-      )
-      false
+    return false unless imageIndexCal()
+    LoadMask.mask()
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+    .done((r) ->
+      msg = if r.flag is true
+        {text: "#{r.message} Selling 更新成功", type: 'success'}
+      else
+        {text: r.message, type: 'error'}
+      noty(msg)
+      LoadMask.unmask()
+    )
+    .fail((r) ->
+      noty({text: r.responseText, type: 'error'})
+      LoadMask.unmask()
+    )
+    false
 
 
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
-    if !previewBtn.call($("#productDesc"))
-      if $("#saleAmazonForm input[type='checkbox']:checked").not("input[id='giftwrap']").length > 0
-        LoadMask.mask('#btns')
-        $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-        .done((r) ->
-          msg = if r.flag is true
-            "#{r.message} 已经成功向AMAZON提交feed，请稍后查看feed状态。"
-          else
-            r.message
-          alert msg
-          LoadMask.unmask('#btns')
-        )
-        .fail((r) ->
-          alert r.responseText
-          LoadMask.unmask('#btns')
-        )
-        false
+    LoadMask.mask('#btns')
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+    .done((r) ->
+      msg = if r.flag is true
+        "#{r.message} AMAZON的Selling局部更新成功"
       else
-        noty({text: "请选择需要同步的数据！", type: "error"})
+        r.message
+      alert msg
+      LoadMask.unmask('#btns')
+    )
+    .fail((r) ->
+      alert r.responseText
+      LoadMask.unmask('#btns')
+    )
+    false
+
 
   # Deploy 按钮
   $('#amz-deploy').click ->
@@ -263,13 +259,12 @@ $ ->
       allowImageUpload: false
       newlineTag: 'br'
       afterChange: ->
-
         htmlCode = this.html().toString()
-        re = new RegExp("<span>","g");
+        re = new RegExp("<span>", "g");
         htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("</span>","g");
+        re = new RegExp("</span>", "g");
         htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("<br />","g");
+        re = new RegExp("<br />", "g");
         htmlCode = htmlCode.replace(re, "<br>")
         count = htmlCode.length
         $('#productDesc').val(htmlCode)
@@ -278,17 +273,3 @@ $ ->
       items: ['source', '|', '|', 'forecolor', 'bold']
     });
   )
-
-  previewBtn = (e) ->
-    invalidTag = false
-    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
-      switch tag.nodeName.toString().toLowerCase()
-        when 'br','p','b','#text'
-          break
-        else
-          invalidTag = true
-          $(tag).css('background', 'yellow')
-    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
-    invalidTag
-
-

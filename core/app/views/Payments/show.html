@@ -26,7 +26,7 @@
       <dt>请款币种</dt>
       <dd id="request_currency">${payment.currency}</dd>
       <dt>批准后总金额(不含驳回)</dt>
-      <dd>${payment.currency.symbol()}<span id='finalAppied'>${payment.approvalAmount()}</span></dd>
+      <dd>${payment.currency.symbol()}<span id='finalAppied'>${new java.math.BigDecimal(payment.approvalAmount()).format('#,###.##')}</span></dd>
       <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> ?</span></dt>
       <dd id='ratioTo'>0</dd>
       <dt>汇率 <span id='currencyToFrom'>? -> ${payment.currency}</span></dt>
@@ -83,11 +83,11 @@
       <dt>支付人</dt>
       <dd>${payment.payer?.username}</dd>
       <dt>(计算)应该支付</dt>
-      <dd>${payment.actualCurrency.symbol()} ${payment.shouldPaid}</dd>
+      <dd>${payment.actualCurrency.symbol()} ${new java.math.BigDecimal(payment.shouldPaid).format('#,###.##')}</dd>
       <dt>&nbsp;</dt>
       <dd>&nbsp;</dd>
       <dt>实际支付金额</dt>
-      <dd>${payment.actualCurrency.symbol()} ${payment.actualPaid}</dd>
+      <dd>${payment.actualCurrency.symbol()} ${new java.math.BigDecimal(payment.actualPaid).format('#,###.##')}</dd>
       <dt>实际支付对方账号</dt>
       <dd>${payment.actualUser}</dd>
       <dt>实际支付对方账户</dt>
@@ -115,7 +115,8 @@
               <label class="control-label">支付币种</label>
 
               <div class="controls">
-                  #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD], value:payment.currency}
+                  #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD,
+                  helper.Currency.EUR, helper.Currency.HKD, helper.Currency.GBP], value:payment.currency}
                       #{option ''}选择币种#{/option}
                   #{/select}
               </div>
@@ -131,8 +132,7 @@
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="submit" value="付款" class="btn btn-primary"
-                       data-confirm='请再次确认信息后付款'>
+                <input type="submit" value="付款" class="btn btn-primary" data-confirm='请再次确认信息后付款'>
               </div>
             </div>
           #{/form}

@@ -83,7 +83,8 @@ public class Deliveryments extends Controller {
                 expressid = expressid + unit.id + ",";
             }
         }
-        render(dmt, expressid);
+        String brandname = models.OperatorConfig.getVal("brandname");
+        render(brandname,dmt, expressid);
     }
 
     public static void update(Deliveryment dmt) {

@@ -209,9 +209,7 @@ $(function(){
     toggle_init();
     btn_loading_init();
     tableCheckBoxCheckAll();
-    $(':input').change(function(e){
-        $(this).val($(this).val().trim())
-    });
+
     LoadMask.clear();
 });
 

@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
 import models.Notification;
@@ -20,7 +21,7 @@ import java.util.List;
  * Date: 10/26/12
  * Time: 3:12 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Notifications extends Controller {
 
     // TODO 取消这个 @Check("notifications.notifys")

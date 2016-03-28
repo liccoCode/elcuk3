@@ -253,7 +253,7 @@ public class ProfitPost extends Post<Profit> {
          */
         if(!StringUtils.isBlank(category) || !StringUtils.isBlank(sku)) {
             List<ProfitDto> dtos = null;
-            String key = category;
+            String key = category.toLowerCase();
             if(!StringUtils.isBlank(sku)) key = sku;
             String cacke_key = "profitmap_" + key + "_" + skumarket.name() + "_"
                     + redisfrom
@@ -277,8 +277,8 @@ public class ProfitPost extends Post<Profit> {
                     profitlist.add(profit);
                 }
             } else {
-                Category cat = Category.findById(category);
-                for(Product pro : cat.products) {
+                Category cat = Category.find("lower(categoryId)=?", category.toLowerCase()).first();
+                for(Product pro : cat.products) { ;
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                     if(profit.totalfee != 0 || profit.amazonfee != 0
                             || profit.fbafee != 0 || profit.quantity != 0
@@ -299,7 +299,6 @@ public class ProfitPost extends Post<Profit> {
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
             for(Product pro : cat.products) {
-                Logger.info("inventoryprofit:::" + pro.sku);
                 Profit inventoryprofit = inventoryProfit(begin, end, skumarket, pro.sku, sellingId);
                 if(inventoryprofit.workingqty != 0 || inventoryprofit.wayqty != 0 || inventoryprofit.inboundqty != 0) {
                     Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);

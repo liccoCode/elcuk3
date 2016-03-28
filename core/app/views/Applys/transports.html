@@ -35,48 +35,51 @@
   </div>
 </div>
 
-#{if applyes.size() == 0}
-<div class="row-fluid" id="order_list">
-  <div class="span12">
-   暂时还没有物流请款单
-  </div>
-</div>
-#{/if}
-#{else }
-<div class="row-fluid">
-  <table class="table table-bordered table-condensed">
-     <tr>
-       <th>#</th>
-       <th>请款单编号</th>
-       <th>合作伙伴</th>
-       <th>总请款金额</th>
-       <th>总实际支付金额</th>
-       <th>最新更新时间</th>
-       <th>创建时间</th>
-     </tr>
-    #{list items:applyes, as:'apply'}
-     <tr>
-       <td>${apply.id}</td>
-       <td><a href="@{Applys.transport(apply.id)}">${apply.serialNumber}</a></td>
-       <td>${apply.cooperator.fullName}</td>
-       <td>
-          <a href="#" rel='tooltip' title="CNY: ${apply.totalFees()._2}">
-           ${helper.Currency.USD.symbol()} ${apply.totalFees()._1}
-          </a>
-       </td>
-       <td>
-          <a href="#" rel='tooltip' title="CNY: ${apply.totalActualPaid()._2}">
-           ${helper.Currency.USD.symbol()} ${apply.totalActualPaid()._1}
-          </a>
-       </td>
-       <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
-       <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
-     </tr>
-    #{/list}
-  </table>
-</div>
-#{bootstrap_pager pi:p, url:'' /}
-#{/else}
+    #{if applyes.size() == 0}
+    <div class="row-fluid" id="order_list">
+      <div class="span12">
+        暂时还没有物流请款单
+      </div>
+    </div>
+    #{/if}
+    #{else }
+    <div class="row-fluid">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <th>#</th>
+          <th>请款单编号</th>
+          <th>合作伙伴</th>
+          <th>总请款金额</th>
+          <th>总实际支付金额</th>
+          <th>最新更新时间</th>
+          <th>创建时间</th>
+        </tr>
+          #{list items:applyes, as:'apply'}
+            <tr>
+              <td>${apply.id}</td>
+              <td><a href="@{Applys.transport(apply.id)}">${apply.serialNumber}</a></td>
+              <td>${apply.cooperator.fullName}</td>
+              <td>
+                <a href="#" rel='tooltip' title="CNY: ${apply.totalFees()._2}">
+                ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(apply.totalFees()._1).setScale(2,
+                4).floatValue().format('#,###.##')}
+                </a>
+              </td>
+              <td>
+                <a href="#" rel='tooltip' title="CNY: ${new java.math.BigDecimal(apply.totalActualPaid()._2).setScale(2,
+                4).floatValue().format('#,###.##')}">
+                ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(apply.totalActualPaid()._1).setScale(2,
+                                4).floatValue().format('#,###.##')}
+                </a>
+              </td>
+              <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
+              <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
+            </tr>
+          #{/list}
+      </table>
+    </div>
+        #{bootstrap_pager pi:p, url:'' /}
+    #{/else}
 #{/form}
 
 

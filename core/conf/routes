@@ -9,6 +9,7 @@
 
 
 # Home page
+GET     /robots.txt                                         Robots.index
 GET     /                                                   Application.index
 GET     /pass                                               Application.pwd
 GET     /cc                                                 Application.cc
@@ -79,7 +80,7 @@ DELETE  /payment/{id}/lock                                  Payments.unlock
 # ProcureUnits
 GET     /procureunits                                       ProcureUnits.index
 POST    /procureunits                                       ProcureUnits.index
-GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
+GET     /sellings/{sid}/procureunit/new/{totalFive}/{day}   ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update

@@ -10,18 +10,6 @@ $ ->
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
-  # 预览 Desc 的方法
-  previewBtn = (e) ->
-    invalidTag = false
-    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
-      switch tag.nodeName.toString().toLowerCase()
-        when 'br','p','b','#text'
-          break
-        else
-          invalidTag = true
-          $(tag).css('background', 'yellow')
-    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
-
   valid_length = (element) ->
     if element.getAttribute('id').indexOf('bulletPoint') > -1
       2000
@@ -43,9 +31,7 @@ $ ->
     validateMaxLength(valid_length(@), @)
   ).on('blur', "[name='s.aps.productDesc']", (e) ->
     validateMaxLength(valid_length(@), @)
-    previewBtn.call(@, e)
   ).on('click', '.btn:contains(Preview)', (e) ->
-    previewBtn.call(@, e)
     false
   ).on('change', "#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc", (e) ->
     replaceInvalidCharacters(@, e)

@@ -71,7 +71,7 @@ public class Constant {
 
     public static final String TMP = System.getProperty("java.io.tmpdir");
 
-    public static final String ROOT_PATH = "http://e.easya.cc";
+    public static final String ROOT_PATH = models.OperatorConfig.getVal("elcuk2url");
 
     /**
      * 系统中产生的 "数据" 类型的文件

@@ -277,9 +277,9 @@ public class Deliveryment extends GenericModel {
          * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
          */
         for(ProcureUnit unit : this.units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
-                Validation.addError("deliveryment.units.cancel", "validation.required");
-            else
+         //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            //    Validation.addError("deliveryment.units.cancel", "validation.required");
+         //   else
                 unit.toggleAssignTodeliveryment(null, false);
         }
         if(Validation.hasErrors()) return;

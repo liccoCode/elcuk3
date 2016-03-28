@@ -222,7 +222,7 @@ public class AmazonProps implements Serializable {
         if(StringUtils.isBlank(this.upc))
             Validation.addError("", "UPC 必须存在");
         if(StringUtils.isBlank(this.manufacturer))
-            this.manufacturer = "EasyAcc";
+            this.manufacturer = models.OperatorConfig.getVal("addressname");
         if(this.standerPrice == null || this.standerPrice <= 0)
             Validation.addError("", "产品标价必须大于 0");
         if(this.salePrice == null || this.salePrice <= 0)
@@ -371,7 +371,12 @@ public class AmazonProps implements Serializable {
         String msku = doc.select("#item_sku").val().trim();
         if(!StringUtils.equals(sell.merchantSKU.toUpperCase(),
                 msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
-            throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
+        {
+            msku = doc.select("#Parent-item_sku-div").text().trim();
+            if(!StringUtils.equals(sell.merchantSKU.toUpperCase(),
+                    msku.toUpperCase()))
+                throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
+        }
 
         List<String> bulletPoints = new ArrayList<String>();
         List<String> searchTerms = new ArrayList<String>();

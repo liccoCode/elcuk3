@@ -18,9 +18,11 @@
       </select>
     </div>
     <div class="inline">
+    #{power.ck "pmdashboards.reviewrecords"}
       <a data-href="@{Pmdashboards.reviewRecords()}" class="btn btn-primary inline" id="reviewRecords">查询</a>
       <a data-href="@{Pmdashboards.exportReviewRecords()}" class="btn btn-primary inline" id="exportReviewRecords">导出
         Excel</a>
+    #{/power.ck}
     </div>
   </form>
 </div>

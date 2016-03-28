@@ -330,9 +330,14 @@ public class FBAShipment extends Model {
     }
 
     public String address() {
-        return String.format("%s %s %s %s %s",
-                this.fbaCenter.name, this.fbaCenter.addressLine1,
-                this.fbaCenter.postalCode, this.fbaCenter.city, codeToCounrty());
+        String line2 = this.fbaCenter.addressLine2;
+        if(StringUtils.isBlank(line2)) line2 = "";
+        String provincecode = this.fbaCenter.stateOrProvinceCode;
+        if(StringUtils.isBlank(provincecode)) provincecode = "";
+        return String.format("%s %s %s %s %s %s %s %s",
+                this.fbaCenter.name, this.fbaCenter.addressLine1, line2,
+                this.fbaCenter.city, provincecode,
+                this.fbaCenter.postalCode, this.fbaCenter.centerId, codeToCounrty());
     }
 
     public String codeToCounrty() {

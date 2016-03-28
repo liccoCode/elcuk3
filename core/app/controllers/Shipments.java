@@ -459,6 +459,7 @@ public class Shipments extends Controller {
      */
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
+        String shipType = ship.type.name();
         Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
         for(ShipItem item : ship.items) {
             String centerId = item.unit.fba.centerId;
@@ -470,7 +471,7 @@ public class Shipments extends Controller {
         final PDF.Options options = new PDF.Options();
         options.filename = id;
         options.pageSize = IHtmlToPdfTransformer.A3P;
-        renderPDF(options, fbaGroupUnits, invoiceNo);
+        renderPDF(options, fbaGroupUnits, invoiceNo, shipType);
     }
 
     public static void dates(String id) {

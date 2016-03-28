@@ -239,7 +239,6 @@ public class PaymentUnit extends Model {
     }
 
 
-
     /**
      * 在删除PaymentUnit的同时将对应的CheckTask质检任务内的关联删除
      */
@@ -346,12 +345,17 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return new BigDecimal(this.amount).add(new BigDecimal(this.fixValue)).floatValue();
+        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue))).floatValue();
+    }
+
+    public BigDecimal decimalamount() {
+        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue)));
     }
 
     /**
      * 计算 Amount 与 Fix 的合计
      * 用于报表统计，主要是为了统一显示美元
+     *
      * @return
      */
     public float amountForReport() {
@@ -509,9 +513,10 @@ public class PaymentUnit extends Model {
 
     /**
      * 运输费用的均价 报表显示 专用
+     *
      * @return
      */
-    public float averagePriceForReports(){
+    public float averagePriceForReports() {
         float price = PaymentHelper.averagePrice(this);
         return Currency.CNY.toUSD(price);
     }

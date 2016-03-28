@@ -302,7 +302,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
         String feedate = doc.select("#transaction_date").text().split(":")[1].trim();
         String[] feedateformate = feedate.split("\\.");
-        if(feedateformate != null && feedateformate.length > 0) {
+        if(feedateformate != null && feedateformate.length > 2) {
             Calendar c = Calendar.getInstance();
             c.set(Integer.parseInt(feedateformate[2]),
                     Integer.parseInt(feedateformate[1]),

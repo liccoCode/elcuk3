@@ -1,7 +1,9 @@
 package helper;
 
 import com.amazonaws.mws.MarketplaceWebService;
-import com.amazonaws.mws.model.*;
+import com.amazonaws.mws.model.IdList;
+import com.amazonaws.mws.model.SubmitFeedRequest;
+import com.amazonaws.mws.model.SubmitFeedResponse;
 import com.elcuk.jaxb.*;
 import com.google.common.collect.Lists;
 import models.market.Account;
@@ -10,14 +12,17 @@ import models.market.M;
 import models.market.Selling;
 import models.product.Attach;
 import models.view.post.SellingAmzPost;
-
 import org.apache.commons.lang.StringUtils;
 import play.utils.FastRuntimeException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.lang.Override;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
@@ -317,8 +322,10 @@ public class MWSUtils {
             if(StringUtils.isNotBlank(searchTerm)) descriptionData.getSearchTerms().add(searchTerm);
         }
 
-
+        Product.ProductData productData = new Product.ProductData();
+        new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
         product.setDescriptionData(descriptionData);
+        product.setProductData(productData);
 
         message.setProduct(product);
         envelope.getMessage().add(message);
@@ -371,5 +378,130 @@ public class MWSUtils {
         envelope.getMessage().add(message);
 
         return JaxbUtil.convertToXml(envelope);
+    }
+
+    public static class ProductTypeSetter {
+        public Product.ProductData productData;
+        public String templateType;
+        public String feedProductType;
+
+        public ProductTypeSetter(Product.ProductData productData, String templateType, String feedProductType) {
+            this.productData = productData;
+            this.templateType = templateType;
+            this.feedProductType = feedProductType;
+        }
+
+        public void doSet() {
+            if("Computers".equalsIgnoreCase(templateType)) {
+                setComputers();
+            } else if("ConsumerElectronics".equalsIgnoreCase(templateType)) {
+                setCE();
+            } else if("Wireless".equalsIgnoreCase(templateType)) {
+                setWireless();
+            } else if("HomeImprovement".equalsIgnoreCase(templateType)) {
+                setHomeImprovement();
+            } else if("Home".equalsIgnoreCase(templateType)) {
+                setHome();
+            } else if("Games".equalsIgnoreCase(templateType)) {
+                setGames();
+            } else if("Sports".equalsIgnoreCase(templateType)) {
+                setSports();
+            } else if("Lighting".equalsIgnoreCase(templateType)) {
+                setLighting();
+            } else {
+                setCE();
+            }
+        }
+
+        public Object getInstanceByFeedProductType() {
+            try {
+                Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
+                return clazz.newInstance();
+            } catch(ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch(InstantiationException e) {
+                e.printStackTrace();
+            } catch(IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        public void setType(Object setter, Object param) {
+            try {
+                Method method = setter.getClass().getDeclaredMethod(String.format("set%s", this.feedProductType),
+                        new Class[]{param.getClass()});
+                method.invoke(setter, param);
+            } catch(NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch(InvocationTargetException e) {
+                e.printStackTrace();
+            } catch(IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        public void setComputers() {
+            Computers computers = new Computers();
+            Computers.ProductType productType = new Computers.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            computers.setProductType(productType);
+            productData.setComputers(computers);
+        }
+
+        public void setCE() {
+            CE ce = new CE();
+            CE.ProductType productType = new CE.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            ce.setProductType(productType);
+            productData.setCE(ce);
+        }
+
+        public void setWireless() {
+            Wireless wireless = new Wireless();
+            Wireless.ProductType productType = new Wireless.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            wireless.setProductType(productType);
+            productData.setWireless(wireless);
+        }
+
+        public void setHomeImprovement() {
+            HomeImprovement homeImprovement = new HomeImprovement();
+            HomeImprovement.ProductType productType = new HomeImprovement.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            homeImprovement.setProductType(productType);
+            productData.setHomeImprovement(homeImprovement);
+        }
+
+        public void setHome() {
+            Home home = new Home();
+            Home.ProductType productType = new Home.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            home.setProductType(productType);
+            productData.setHome(home);
+        }
+
+        public void setGames() {
+            SoftwareVideoGames videoGames = new SoftwareVideoGames();
+            SoftwareVideoGames.ProductType productType = new SoftwareVideoGames.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            videoGames.setProductType(productType);
+            productData.setSoftwareVideoGames(videoGames);
+        }
+
+        public void setSports() {
+            Sports sports = new Sports();
+            sports.setProductType(this.feedProductType);
+            productData.setSports(sports);
+        }
+
+        public void setLighting() {
+            Lighting lighting = new Lighting();
+            Lighting.ProductType productType = new Lighting.ProductType();
+            setType(productType, getInstanceByFeedProductType());
+            lighting.setProductType(productType);
+            productData.setLighting(lighting);
+        }
     }
 }

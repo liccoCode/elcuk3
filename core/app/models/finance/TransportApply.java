@@ -143,8 +143,8 @@ public class TransportApply extends Apply {
         float cny = 0;
         for(Payment payment : this.payments) {
             if(payment.actualCurrency != null) {
-                usd += payment.actualCurrency.toUSD(payment.actualPaid);
-                cny += payment.actualCurrency.toCNY(payment.actualPaid);
+                usd += payment.actualCurrency.toUSD(payment.actualPaid.floatValue());
+                cny += payment.actualCurrency.toCNY(payment.actualPaid.floatValue());
             }
         }
         return new F.T2<Float, Float>(usd, cny);
@@ -162,27 +162,38 @@ public class TransportApply extends Apply {
             ApplyPaymentDTO dto = new ApplyPaymentDTO();
             dto.currency = currency;
             for(Shipment ship : shipments) {
+                BigDecimal paidamount = new BigDecimal(0);
+                BigDecimal applyamount = new BigDecimal(0);
+                BigDecimal totalamount = new BigDecimal(0);
                 for(PaymentUnit payment : ship.fees) {
                     if(payment.currency == currency) {
-                        dto.total_fee = dto.total_fee
-                                .add(new BigDecimal(Float.toString(payment
-                                        .amount())));
+                        totalamount = totalamount.add(payment
+                                .decimalamount());
+
                         //已批准和已支付的
                         if(payment.state == PaymentUnit.S.APPROVAL || payment.state == PaymentUnit.S.PAID) {
-                            dto.approval_fee = dto.approval_fee.
-                                    add(new BigDecimal
-                                            (Float.toString(payment.amount())));
+                            paidamount = paidamount.add(payment.decimalamount());
                         } else {
-                            dto.noapproval_fee = dto.noapproval_fee
-                                    .add(new BigDecimal(Float.toString(payment.amount())));
+                            applyamount = applyamount.add(payment.decimalamount());
+
                         }
 
                     }
                 }
+                paidamount = paidamount.setScale(2, RoundingMode.HALF_UP);
+                applyamount = applyamount.setScale(2, RoundingMode.HALF_UP);
+                totalamount = totalamount.setScale(2, RoundingMode.HALF_UP);
+                dto.total_fee = dto.total_fee
+                        .add(totalamount);
+                dto.approval_fee = dto.approval_fee.
+                        add(paidamount);
+                dto.noapproval_fee = dto.noapproval_fee
+                        .add(applyamount);
+
             }
             dto.total_fee = dto.total_fee.setScale(2, RoundingMode.HALF_UP);
             dto.approval_fee = dto.approval_fee.setScale(2, RoundingMode.HALF_UP);
-            dto.noapproval_fee = dto.noapproval_fee.setScale(2, RoundingMode.HALF_UP);
+            dto.noapproval_fee = dto.total_fee.subtract(dto.approval_fee);
             if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
         }
         return apply;

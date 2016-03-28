@@ -241,6 +241,11 @@ public class Orderr extends GenericModel {
      */
     public int feeflag;
 
+    /**
+     * 是否使用 MWS 同步过 SaleFee 数据
+     */
+    public boolean synced = false;
+
 
     /**
      * 此订单总共卖出的产品数量
@@ -501,7 +506,7 @@ public class Orderr extends GenericModel {
         }
 
         for(SaleFee fee : this.fees) {
-            if((fee.type.name.equals("shipping") || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
+            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
                 totalamount = totalamount + fee.cost;
                 itemamount = itemamount + new BigDecimal(fee.cost).divide(
                         new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).setScale(2, 4)
@@ -618,8 +623,8 @@ public class Orderr extends GenericModel {
             return OrderInvoice.itvat;
         }
         if(market == M.AMAZON_ES) {
-                    return OrderInvoice.esvat;
-                }
+            return OrderInvoice.esvat;
+        }
         return 0;
     }
 

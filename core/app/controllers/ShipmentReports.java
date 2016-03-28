@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.procure.ShipItem;
@@ -8,6 +9,7 @@ import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
+import models.view.dto.CostReportDTO;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
@@ -21,10 +23,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import query.ShipmentReportESQuery;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import models.view.post.LossRatePost;
 import models.view.report.LossRate;
@@ -54,15 +53,23 @@ public class ShipmentReports extends Controller {
      */
     @Check("shipmentreports.cost")
     public static void cost() {
-        render();
+        Date now = new Date();
+        String from = Dates.date2Date(Dates.monthBegin(now));
+        String to =   Dates.date2Date(now);
+        render(from, to);
+    }
+
+    public static void costReport(Date from, Date to) {
+        List<CostReportDTO> dtos = CostReportDTO.setReportData(from, to);
+        render("/ShipmentReports/costReport.html", from, to, dtos);
     }
 
     /**
      * 根据运输方式统计运输费用
      */
-    public static void countShipFeeByType(int year, int month) {
+    public static void countShipFeeByType(Date from, Date to) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipFeeByTypeColumn(year, month);
+            HighChart chart = ShipmentReportESQuery.shipFeeByTypeColumn(from, to);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -72,9 +79,9 @@ public class ShipmentReports extends Controller {
     /**
      * 根据市场统计运输费用
      */
-    public static void countShipFeeByMarket(int year, int month, Shipment.T type) {
+    public static void countShipFeeByMarket(Date from, Date to, Shipment.T type) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipFeeByMarketPie(year, month, type);
+            HighChart chart = ShipmentReportESQuery.shipFeeByMarketPie(from, to, type);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -84,9 +91,9 @@ public class ShipmentReports extends Controller {
     /**
      * 根据运输方式统计重量
      */
-    public static void countShipWeightByType(int year, int month) {
+    public static void countShipWeightByType(Date from, Date to) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipWeightByTypeColumn(year, month);
+            HighChart chart = ShipmentReportESQuery.shipWeightByTypeColumn(from, to);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -96,9 +103,9 @@ public class ShipmentReports extends Controller {
     /**
      * 根据市场统计运输重量
      */
-    public static void countShipWeightByMarket(int year, int month, Shipment.T type) {
+    public static void countShipWeightByMarket(Date from, Date to, Shipment.T type) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(year, month, type);
+            HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, type);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

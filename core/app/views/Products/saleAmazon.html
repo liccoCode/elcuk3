@@ -43,8 +43,9 @@
   <div class="span5">
       #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku/}
       #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc, readonly:true /}
-      #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: 'EasyAcc' /}
-      #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: 'EasyAcc'/}
+      #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer',
+      value: "${models.OperatorConfig.getVal("addressname")}" /}
+      #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: "${models.OperatorConfig.getVal("addressname")}"/}
       #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: '' /}
       #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期',  value: '2013-12-01' /}
       #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes',  value: '' /}

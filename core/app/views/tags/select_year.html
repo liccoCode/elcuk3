@@ -1,7 +1,7 @@
 <select name="${_name}" value="${_value}" id="${_id}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''}>
 #{set year: Integer.parseInt(new Date().format("yyyy"))/}
 
-#{list items:-1..1, as:'i'}
+#{list items:-3..1, as:'i'}
   <option ${_value ? (year + i == _value ? 'selected' : '') : year + i == year ? 'selected' : ''} value="${year + i}">${year + i}</option>
 #{/list}
 </select>
