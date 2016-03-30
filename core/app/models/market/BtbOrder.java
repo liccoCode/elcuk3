@@ -225,7 +225,7 @@ public class BtbOrder extends Model {
         }
         if(btbOrder.btbOrderItemList != null && btbOrder.btbOrderItemList.size() > 0) {
             for(BtbOrderItem item : btbOrder.btbOrderItemList) {
-                if(item != null && item.id == null) {
+                if(item != null && item.id == null && item.product.sku != null) {
                     item.btbOrder = btbOrder.id == null ? this : btbOrder;
                     logs.add("新增SKU" + item.product.sku);
                     item.save();
@@ -241,7 +241,16 @@ public class BtbOrder extends Model {
                     }
                 }
             }
+            /***删除的SKU明细**/
+            for(BtbOrderItem item : this.btbOrderItemList) {
+                if(!btbOrder.btbOrderItemList.contains(item)) {
+                    logs.add("删除SKU" + item.product.sku);
+                    item.delete();
+                }
+            }
         }
+
+
         if(logs.size() > 0) {
             new ERecordBuilder("btbOrder.update").msgArgs(this.orderNo, StringUtils.join(logs, "<br>"))
                     .fid(this.orderNo).save();

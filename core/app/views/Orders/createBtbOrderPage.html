@@ -44,7 +44,8 @@
           <tr>
             <td style="text-align:center">SKU<span style="color:red">*</span>:</td>
             <td>
-              <input type="text" id="inputsku" name="b.btbOrderItemList[${i_index-1}].product.sku" value="${i.product.sku}">
+              <input type="text" id="inputsku" name="b.btbOrderItemList[${i_index-1}].product.sku"
+                     value="${i.product.sku}" required>
               <input type="hidden" name="b.btbOrderItemList[${i_index-1}].id" value="${i.id}">
             </td>
             <td style="text-align:center">name：</td>
@@ -62,6 +63,9 @@
                     <option value="${c.name()}" #{if i.currency.name()==c.name()} selected #{/if}>${c.name()}</option>
                   #{/list}
               </select>
+            </td>
+            <td>
+              <input type="button" class="btn btn-danger" name="deleteBtn" value="删除"/>
             </td>
           </tr>
         #{/list}
@@ -88,10 +92,13 @@
               #{/list}
           </select>
         </td>
+        <td>
+          <input type="button" class="btn btn-danger" name="deleteBtn" value="删除"/>
+        </td>
       </tr>
     #{/else}
       <tr id="addSkuTr">
-        <td colspan="7" style="text-align:right;">
+        <td colspan="8" style="text-align:right;">
           <input type="button" class="btn btn-success" id="addSkuBtn" value="添加SKU">
         </td>
       </tr>
@@ -190,7 +197,7 @@
   <tr>
     <td style="text-align:center">SKU<span style="color:red">*</span>:</td>
     <td style="width: 150px;">
-      <input type="text" id="inputsku" name="b.btbOrderItemList[<%= index %>].product.sku" autocomplete="off">
+      <input type="text" id="inputsku" name="b.btbOrderItemList[<%= index %>].product.sku" autocomplete="off" required>
     </td>
     <td style="text-align:center">name：</td>
     <td style="width:200px;">
@@ -207,6 +214,9 @@
         <option value="${c.name()}" #{if c.name()=='USD'} selected #{/if}>${c.name()}</option>
       #{/list}
       </select>
+    </td>
+    <td>
+      <input type="button" class="btn btn-danger" name="deleteBtn" value="删除"/>
     </td>
   </tr>
 </script>
