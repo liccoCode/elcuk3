@@ -1,5 +1,7 @@
 # timeline/timeline_js/timeline-api.js 中覆盖了 JQuery对象，所以重置
 window.jQuery = window.$
+$.extend $.fn.dataTableExt.oStdClasses,
+  sWrapper: "dataTables_wrapper form-inline"
 $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
@@ -8,13 +10,15 @@ $ ->
     $div = $(@)
     $("#postType").val($div.attr("id"))
     LoadMask.mask($div)
+
     $div.load("/Analyzes/analyzes", $('.search_form').serialize(), (r) ->
-
-      # 设置 OrderBY th 的 class
-      $("th[orderby=#{$('#postOrderBy').val()}]").addClass('sortable').find('i').removeClass().addClass(
-        if $('#postDesc').val() == "true" then 'icon-sort-down' else 'icon-sort-up'
+      $div.find('table').dataTable(
+          sDom: if $div.attr("id") == 'sid' then "<'row-fluid'<'span10'><'span2'f>r>t<'row-fluid'<'span6'i><'span6'p>>" else "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
+          sPaginationType: "full_numbers"
+          iDisplayLength: 50
+          aaSorting: [[16, "desc"]]
+          aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
       )
-
       LoadMask.unmask($div)
     )
   # 分页事件
@@ -34,7 +38,7 @@ $ ->
     $('#postVal').val(sidOrSku)
     $postType = $('#postType')
 
-    #绘制单个Selling的曲线图时,去掉Category条件
+    # 绘制单个Selling的曲线图时,去掉Category条件
     $categoryNode = $('select[name|="p.categoryId"]')
     categoryId = $categoryNode.val()
     $categoryNode.val("")
