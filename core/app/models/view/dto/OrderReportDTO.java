@@ -28,12 +28,11 @@ public class OrderReportDTO {
     public float percent;
 
     public static List<OrderReportDTO> query(Set<String> orderIds) {
-        StringBuffer sql = new StringBuffer("SELECT r.orderId,r.market,group_concat(DISTINCT i.product_sku) AS sku,");
+        StringBuffer sql = new StringBuffer("SELECT r.orderId,r.market,group_concat(DISTINCT f.product_sku) AS sku,");
         sql.append("DATE_FORMAT(r.paymentDate,'%Y-%m-%d %H:%i:%s') AS paymentDate,");
         sql.append("ROUND(sum(IF(f.usdCost>0, f.usdCost, 0)), 2) AS positivePrice, ");
         sql.append("ROUND(sum(IF(f.usdCost<0, f.usdCost, 0)), 2)  AS negativePrice ");
         sql.append("FROM Orderr r LEFT JOIN SaleFee f ON f.order_orderId = r.orderId ");
-        sql.append("LEFT JOIN OrderItem i ON i.order_orderId = r.orderId ");
         sql.append("WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds));
         sql.append("GROUP BY r.orderId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
