@@ -64,8 +64,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     public int ismoveing;
 
-    public boolean needPagination = true;
-
     @Override
     public F.T2<String, List<Object>> params() {
         // no use
@@ -113,11 +111,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
 
-        if(this.needPagination) {
-            return this.programPager(dtos);
-        } else {
-            return dtos;
-        }
+        return dtos;
     }
 
     public static int setOutDayColor(List<AnalyzeDTO> dtos, Integer needCompare) {
@@ -168,24 +162,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @Override
     public Long getTotalCount() {
         return (long) this.analyzes().size();
-    }
-
-    /**
-     * 使用程序自己对 List 集合进行分页操作
-     *
-     * @param dtos
-     * @return
-     */
-    public List<AnalyzeDTO> programPager(List<AnalyzeDTO> dtos) {
-        this.count = dtos.size();
-        List<AnalyzeDTO> afterPager = new ArrayList<AnalyzeDTO>();
-        int index = (this.page - 1) * this.perSize;
-        int end = index + this.perSize;
-        for(; index < end; index++) {
-            if(index >= this.count) break;
-            afterPager.add(dtos.get(index));
-        }
-        return afterPager;
     }
 
     private static class FieldComparator implements Comparator<AnalyzeDTO> {
