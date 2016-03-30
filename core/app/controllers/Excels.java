@@ -57,16 +57,9 @@ public class Excels extends Controller {
 
         ProcureUnit unit = excel.dmt.units.get(0);
         String currency = unit.attrs.currency.symbol();
-        render(excel, currency);
-    }
 
-    @Check("excels.deliveryment")
-    public static void deliverymentbrandworl(String id, DeliveryExcel excel) {
-        excel.dmt = Deliveryment.findById(id);
-        request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
-        renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(excel);
+        String brandname = models.OperatorConfig.getVal("brandname");
+        render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
     /**
