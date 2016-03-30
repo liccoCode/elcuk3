@@ -44,6 +44,7 @@ require:
         exclude:
          # apache ant 不需要, 我不需要构建
           - org.apache.ant -> *
+    - org.activiti -> activiti-engine 5.15.1
 
 
 repositories:
