@@ -65,9 +65,9 @@
   <tr>
     <td class="sid">${dto.fid}</td>
     <td style="min-width: 105px;">
-      <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a><br/>
-      <a href="@{ProcureUnits.blank(dto.fid, dto.totalfive(), dto.day())}" target="_blank">采购计划</a><br/>
-      <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a>
+      <a href="@{ProcureUnits.blank(dto.fid, dto.totalfive(), dto.day())}" target="_blank">采购计划</a>&nbsp;
+      <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
+      <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
     </td>
     <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
     <td class="text-warning">${dto.working}</td>
