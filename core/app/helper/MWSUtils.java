@@ -29,7 +29,10 @@ import java.util.GregorianCalendar;
 
 
 /**
- * Created by licco on 15/11/16.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/11/16
+ * Time: 4:12 PM
  */
 public class MWSUtils {
 
@@ -170,8 +173,7 @@ public class MWSUtils {
         product.setDescriptionData(data);
         message.setProduct(product);
         envelope.getMessage().add(message);
-        String xml = JaxbUtil.convertToXml(envelope);
-        return xml;
+        return JaxbUtil.convertToXml(envelope);
     }
 
     public static String buildPriceXMLBySelling(Selling selling, SellingAmzPost p) {
@@ -212,8 +214,7 @@ public class MWSUtils {
         }
         message.setPrice(price);
         envelope.getMessage().add(message);
-        String xml = JaxbUtil.convertToXml(envelope);
-        return xml;
+        return JaxbUtil.convertToXml(envelope);
     }
 
     public static String buildProductImageBySelling(Selling selling, String[] images) {
@@ -255,8 +256,7 @@ public class MWSUtils {
             message.setProductImage(productImage);
             envelope.getMessage().add(message);
         }
-        String xml = JaxbUtil.convertToXml(envelope);
-        return xml;
+        return JaxbUtil.convertToXml(envelope);
     }
 
 
@@ -354,7 +354,7 @@ public class MWSUtils {
 
 
         Price.Sale sale = new Price.Sale();
-        DatatypeFactory dataTypeFactory = null;
+        DatatypeFactory dataTypeFactory;
         try {
             dataTypeFactory = DatatypeFactory.newInstance();
         } catch(DatatypeConfigurationException e) {
@@ -380,20 +380,20 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
-    public static class ProductTypeSetter {
-        public Product.ProductData productData;
-        public String templateType;
+    private static class ProductTypeSetter {
+        Product.ProductData productData;
+        String templateType;
         public String feedProductType;
 
-        public ProductTypeSetter(Product.ProductData productData, String templateType, String feedProductType) {
+        ProductTypeSetter(Product.ProductData productData, String templateType, String feedProductType) {
             this.productData = productData;
             this.templateType = templateType;
             this.feedProductType = feedProductType;
         }
 
-        public void doSet() {
+        void doSet() {
             if("Computers".equalsIgnoreCase(templateType)) {
-                setComputers();
+                //setComputers();
             } else if("ConsumerElectronics".equalsIgnoreCase(templateType)) {
                 setCE();
             } else if("Wireless".equalsIgnoreCase(templateType)) {
@@ -413,36 +413,27 @@ public class MWSUtils {
             }
         }
 
-        public Object getInstanceByFeedProductType() {
+        Object getInstanceByFeedProductType() {
             try {
                 Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
                 return clazz.newInstance();
-            } catch(ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch(InstantiationException e) {
-                e.printStackTrace();
-            } catch(IllegalAccessException e) {
+            } catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
             return null;
         }
 
-        public void setType(Object setter, Object param) {
+        void setType(Object setter, Object param) {
             try {
                 Method method = setter.getClass().getDeclaredMethod(String.format("set%s", this.feedProductType),
-                        new Class[]{param.getClass()});
+                        param.getClass());
                 method.invoke(setter, param);
-            } catch(NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch(InvocationTargetException e) {
-                e.printStackTrace();
-            } catch(IllegalAccessException e) {
+            } catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                 e.printStackTrace();
             }
-
         }
 
-        public void setComputers() {
+        void setComputers() {
             Computers computers = new Computers();
             Computers.ProductType productType = new Computers.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -450,7 +441,7 @@ public class MWSUtils {
             productData.setComputers(computers);
         }
 
-        public void setCE() {
+        void setCE() {
             CE ce = new CE();
             CE.ProductType productType = new CE.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -458,7 +449,7 @@ public class MWSUtils {
             productData.setCE(ce);
         }
 
-        public void setWireless() {
+        void setWireless() {
             Wireless wireless = new Wireless();
             Wireless.ProductType productType = new Wireless.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -466,7 +457,7 @@ public class MWSUtils {
             productData.setWireless(wireless);
         }
 
-        public void setHomeImprovement() {
+        void setHomeImprovement() {
             HomeImprovement homeImprovement = new HomeImprovement();
             HomeImprovement.ProductType productType = new HomeImprovement.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -474,7 +465,7 @@ public class MWSUtils {
             productData.setHomeImprovement(homeImprovement);
         }
 
-        public void setHome() {
+        void setHome() {
             Home home = new Home();
             Home.ProductType productType = new Home.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -482,7 +473,7 @@ public class MWSUtils {
             productData.setHome(home);
         }
 
-        public void setGames() {
+        void setGames() {
             SoftwareVideoGames videoGames = new SoftwareVideoGames();
             SoftwareVideoGames.ProductType productType = new SoftwareVideoGames.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -490,18 +481,29 @@ public class MWSUtils {
             productData.setSoftwareVideoGames(videoGames);
         }
 
-        public void setSports() {
+        void setSports() {
             Sports sports = new Sports();
             sports.setProductType(this.feedProductType);
             productData.setSports(sports);
         }
 
-        public void setLighting() {
+        void setLighting() {
             Lighting lighting = new Lighting();
             Lighting.ProductType productType = new Lighting.ProductType();
             setType(productType, getInstanceByFeedProductType());
             lighting.setProductType(productType);
             productData.setLighting(lighting);
+        }
+
+        /**
+         * 使用默认值填充 ProductType 对象中的必填属性
+         * 例如: NotebookComputer 中的 RAMSize 等,
+         * 且这些属性值不是业务所需要的.
+         *
+         * @param instance
+         */
+        void fillUpOtherRequiredAttrs(Object instance) {
+
         }
     }
 }
