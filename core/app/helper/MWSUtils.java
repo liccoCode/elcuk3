@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 
@@ -322,10 +323,12 @@ public class MWSUtils {
             if(StringUtils.isNotBlank(searchTerm)) descriptionData.getSearchTerms().add(searchTerm);
         }
 
-        Product.ProductData productData = new Product.ProductData();
-        new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
-        product.setDescriptionData(descriptionData);
-        if(!"NotebookComputer".equalsIgnoreCase(selling.aps.feedProductType)) product.setProductData(productData);
+        if(needSetProductData(selling.aps.feedProductType)) {
+            Product.ProductData productData = new Product.ProductData();
+            new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
+            product.setDescriptionData(descriptionData);
+            product.setProductData(productData);
+        }
 
         message.setProduct(product);
         envelope.getMessage().add(message);
@@ -378,6 +381,10 @@ public class MWSUtils {
         envelope.getMessage().add(message);
 
         return JaxbUtil.convertToXml(envelope);
+    }
+
+    public static boolean needSetProductData(String feedProductType) {
+        return !Arrays.asList("NotebookComputer").contains(feedProductType);
     }
 
     private static class ProductTypeSetter {
