@@ -495,16 +495,5 @@ public class MWSUtils {
             lighting.setProductType(productType);
             productData.setLighting(lighting);
         }
-
-        /**
-         * 使用默认值填充 ProductType 对象中的必填属性
-         * 例如: NotebookComputer 中的 RAMSize 等,
-         * 且这些属性值不是业务所需要的.
-         *
-         * @param instance
-         */
-        void fillUpOtherRequiredAttrs(Object instance) {
-
-        }
     }
 }
