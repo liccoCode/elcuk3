@@ -393,7 +393,7 @@ public class MWSUtils {
 
         void doSet() {
             if("Computers".equalsIgnoreCase(templateType)) {
-                //setComputers();
+                setComputers();
             } else if("ConsumerElectronics".equalsIgnoreCase(templateType)) {
                 setCE();
             } else if("Wireless".equalsIgnoreCase(templateType)) {
@@ -434,6 +434,7 @@ public class MWSUtils {
         }
 
         void setComputers() {
+            if("NotebookComputer".equalsIgnoreCase(this.feedProductType)) return;
             Computers computers = new Computers();
             Computers.ProductType productType = new Computers.ProductType();
             setType(productType, getInstanceByFeedProductType());
