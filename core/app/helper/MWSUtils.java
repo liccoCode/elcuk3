@@ -325,7 +325,7 @@ public class MWSUtils {
         Product.ProductData productData = new Product.ProductData();
         new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
         product.setDescriptionData(descriptionData);
-        product.setProductData(productData);
+        if(!"NotebookComputer".equalsIgnoreCase(selling.aps.feedProductType)) product.setProductData(productData);
 
         message.setProduct(product);
         envelope.getMessage().add(message);
@@ -434,7 +434,6 @@ public class MWSUtils {
         }
 
         void setComputers() {
-            if("NotebookComputer".equalsIgnoreCase(this.feedProductType)) return;
             Computers computers = new Computers();
             Computers.ProductType productType = new Computers.ProductType();
             setType(productType, getInstanceByFeedProductType());
