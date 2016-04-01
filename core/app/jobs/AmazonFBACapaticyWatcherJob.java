@@ -6,7 +6,7 @@ import helper.HTTP;
 import helper.LogUtils;
 import models.Jobex;
 import models.market.Account;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;

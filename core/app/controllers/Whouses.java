@@ -6,7 +6,7 @@ import models.User;
 import models.market.Account;
 import models.procure.Cooperator;
 import models.procure.FBACenter;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.view.Ret;
 import models.view.post.WhousePost;
 import play.data.validation.Validation;

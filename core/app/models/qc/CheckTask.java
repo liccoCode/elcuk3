@@ -12,17 +12,15 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.view.dto.CheckTaskAQLDTO;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
-import play.cache.*;
 import play.cache.Cache;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;

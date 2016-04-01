@@ -1,16 +1,14 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.J;
 import helper.Webs;
-import models.CategoryAssignManagement;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
@@ -24,7 +22,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

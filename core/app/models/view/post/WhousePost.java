@@ -1,6 +1,6 @@
 package models.view.post;
 
-import models.product.Whouse;
+import models.whouse.Whouse;
 import play.libs.F;
 
 import java.util.ArrayList;

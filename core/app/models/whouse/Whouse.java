@@ -1,4 +1,4 @@
-package models.product;
+package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
@@ -13,7 +13,6 @@ import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -124,6 +123,10 @@ public class Whouse extends Model {
      */
     @Expose
     public boolean isEXPRESS = false;
+
+    @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    public List<WhouseItem> items = new ArrayList<WhouseItem>();
 
     public void validate() {
         if(this.type == T.FBA) {
@@ -261,7 +264,7 @@ public class Whouse extends Model {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
                 if(Arrays.asList(M.AMAZON_IT).contains(type))
-                       Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
             } else if(nextBeginDate.getDayOfWeek() == 3) {
                 if(Arrays.asList(M.AMAZON_DE).contains(type))

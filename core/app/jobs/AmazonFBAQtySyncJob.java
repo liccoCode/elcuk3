@@ -8,7 +8,7 @@ import models.market.JobRequest;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.product.Product;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
