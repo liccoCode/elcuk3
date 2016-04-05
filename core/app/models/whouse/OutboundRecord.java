@@ -1,6 +1,7 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
 import play.db.jpa.Model;
@@ -60,7 +61,7 @@ public class OutboundRecord extends Model {
      * 从哪个仓库出货
      */
     @Expose
-    @OneToOne
+    @ManyToOne
     public Whouse whouse;
 
     /**
@@ -143,5 +144,17 @@ public class OutboundRecord extends Model {
             return Whouse.findById(Long.getLong(this.targetId));
         }
         throw new FastRuntimeException("类型(type)错误, 无法查询到仓库!");
+    }
+
+    /**
+     * 确认出库
+     */
+    public void confirm() {
+        this.state = S.Outbound;
+        new StockRecord(this).save();
+    }
+
+    public ElcukRecord buildRecord(String action, String message) {
+        return new ElcukRecord(action, message, this.handler.username, this.id.toString()).save();
     }
 }

@@ -57,7 +57,7 @@ public class InboundRecord extends Model {
      * 目标仓库
      */
     @Expose
-    @ManyToMany
+    @ManyToOne
     public Whouse targetWhouse;
 
     /**
@@ -119,4 +119,9 @@ public class InboundRecord extends Model {
 
     @Expose
     public Date updateDate = new Date();
+
+    //TODO 需要根据入库对象的类型与质检结果来自动匹配仓库
+    // SKU+合格->成品仓, SKU+不合格->不良品仓,
+    //产品物料+合格->裸机仓库, 产品物料+不合格->不良品仓
+    //包材物料+合格->包材仓库, 包材物料+不合格->不良品仓
 }

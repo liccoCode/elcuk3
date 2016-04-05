@@ -28,9 +28,14 @@ public class WhouseItem extends Model {
     @Expose
     public StockObj stockObj;
 
-    //TODO pending qty
     @Expose
     public Integer qty = 0;
+
+    /**
+     * 待处理库存数量
+     */
+    @Expose
+    public Integer pendingQty = 0;
 
     @Expose
     public Date createDate = new Date();
