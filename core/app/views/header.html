@@ -1,299 +1,308 @@
-
 <div class="navbar navbar-fixed-top">
-<div class="navbar-inner">
-<div class="container">
-<a class="brand" href="@{Application.index()}">${models.OperatorConfig.getVal("brandname")}</a>
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <a class="brand" href="@{Application.index()}">${models.OperatorConfig.getVal("brandname")}</a>
 
-<div class="nav-collapse">
-<ul class="nav">
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-  #{power.ck "pmdashboards.index"}
-    <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
-  #{/power.ck}
-    <li><a href="@{Application.oldDashBoard()}">DashBoard</a></li>
-    <li><a href="@{Activitis.index()}">待处理流程</a></li>
-    <li><a href="@{Users.home()}">Home</a></li>
-    <li><a href="@{Notifications.index()}">Notys</a></li>
-    <li><a href="@{Secure.logout()}">Logout</a></li>
-  </ul>
-</li>
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+            #{power.ck "pmdashboards.index"}
+              <li><a href="@{Pmdashboards.index()}">PmDashBoard</a></li>
+            #{/power.ck}
+              <li><a href="@{Application.oldDashBoard()}">DashBoard</a></li>
+              <li><a href="@{Activitis.index()}">待处理流程</a></li>
+              <li><a href="@{Users.home()}">Home</a></li>
+              <li><a href="@{Notifications.index()}">Notys</a></li>
+              <li><a href="@{Secure.logout()}">Logout</a></li>
+            </ul>
+          </li>
 
-#{power.ck "market"}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "listings.index"}
-        <li><a href="@{Listings.index()}">Listing</a></li>
-      #{/power.ck}
-      #{power.ck "listings.trackedlistings"}
-        <li><a href="@{Listings.trackedListings()}">Tracked Listing</a></li>
-      #{/power.ck}
-      #{power.ck "sellings.index"}
-        <li><a href="@{Sellings.index()}">Selling列表</a></li>
-      #{/power.ck}
-      #{power.ck "orders.index"}
-        <li><a href="@{Orders.index()}">订单</a></li>
-      #{/power.ck}
-      #{power.ck "analyzes.index"}
-        <li><a href="@{Analyzes.index()}">销量分析</a></li>
-      #{/power.ck}
-      #{power.ck "analyzeskus.index"}
-        <li><a href="@{AnalyzeSkus.index()}">SKU 销量分析</a></li>
-      #{/power.ck}
-      #{power.ck "analyzeskus.skumonthlydailysalesreports"}
-        <li><a href="@{AnalyzeSkus.skuMonthlyDailySalesReports()}">SKU 月度日均销量报表</a></li>
-      #{/power.ck}
-      #{power.ck "analyzeskus.skusalesreport"}
-        <li><a href="@{AnalyzeSkus.skuSalesReport()}">自定义销售报表</a></li>
-      #{/power.ck}
-      #{power.ck "analyzes.trafficrate"}
-        <li><a href="@{Analyzes.trafficRate()}">Selling 流量转化率统计</a></li>
-      #{/power.ck}
-      #{power.ck "categoryinfos.show"}
-        <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
-      #{/power.ck}
-      #{power.ck "profits.index"}
-        <li><a href="@{Profits.index()}">利润分析</a></li>
+        #{power.ck "market"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "listings.index"}
+                  <li><a href="@{Listings.index()}">Listing</a></li>
+                #{/power.ck}
+                #{power.ck "listings.trackedlistings"}
+                  <li><a href="@{Listings.trackedListings()}">Tracked Listing</a></li>
+                #{/power.ck}
+                #{power.ck "sellings.index"}
+                  <li><a href="@{Sellings.index()}">Selling列表</a></li>
+                #{/power.ck}
+                #{power.ck "orders.index"}
+                  <li><a href="@{Orders.index()}">订单</a></li>
+                #{/power.ck}
+                #{power.ck "analyzes.index"}
+                  <li><a href="@{Analyzes.index()}">销量分析</a></li>
+                #{/power.ck}
+                #{power.ck "analyzeskus.index"}
+                  <li><a href="@{AnalyzeSkus.index()}">SKU 销量分析</a></li>
+                #{/power.ck}
+                #{power.ck "analyzeskus.skumonthlydailysalesreports"}
+                  <li><a href="@{AnalyzeSkus.skuMonthlyDailySalesReports()}">SKU 月度日均销量报表</a></li>
+                #{/power.ck}
+                #{power.ck "analyzeskus.skusalesreport"}
+                  <li><a href="@{AnalyzeSkus.skuSalesReport()}">自定义销售报表</a></li>
+                #{/power.ck}
+                #{power.ck "analyzes.trafficrate"}
+                  <li><a href="@{Analyzes.trafficRate()}">Selling 流量转化率统计</a></li>
+                #{/power.ck}
+                #{power.ck "categoryinfos.show"}
+                  <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
+                #{/power.ck}
+                #{power.ck "profits.index"}
+                  <li><a href="@{Profits.index()}">利润分析</a></li>
 
-      #{/power.ck}
-      #{power.ck "sellingrecords.index"}
-        <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
-      #{/power.ck}
+                #{/power.ck}
+                #{power.ck "sellingrecords.index"}
+                  <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
+                #{/power.ck}
 
-      #{power.ck "salereports.salecount"}
-        <li><a href="@{SaleReports.saleCount()}">销售统计报表</a></li>
-      #{/power.ck}
+                #{power.ck "salereports.salecount"}
+                  <li><a href="@{SaleReports.saleCount()}">销售统计报表</a></li>
+                #{/power.ck}
 
-      #{power.ck "amazonoperations"}
-        <li><a href="@{AmazonOperations.index()}">Review 点击台</a></li>
-      #{/power.ck}
-      #{power.ck "reportdownloads"}
-        <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
-      #{/power.ck}
-  </ul>
-</li>
-#{/power.ck}
+                #{power.ck "amazonoperations"}
+                  <li><a href="@{AmazonOperations.index()}">Review 点击台</a></li>
+                #{/power.ck}
+                #{power.ck "reportdownloads"}
+                  <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck 'marketanalyze'}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场分析<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-    <li><a href="@{MarketAnalysis.channels()}">数据抓取任务</a></li>
-    <li><a href="@{MarketAnalysis.tags()}">属性</a></li>
-    <li><a href="@{MarketAnalysis.categories()}">自定义 Category</a></li>
-  </ul>
-</li>
-#{/power.ck}
+        #{power.ck 'marketanalyze'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场分析<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{MarketAnalysis.channels()}">数据抓取任务</a></li>
+              <li><a href="@{MarketAnalysis.tags()}">属性</a></li>
+              <li><a href="@{MarketAnalysis.categories()}">自定义 Category</a></li>
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck "product"}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "products.index"}
-        <li><a href="@{Products.index()}">产品</a></li>
-      #{/power.ck}
-      #{power.ck "whouses.index"}
-        <li><a href="@{Whouses.index()}">仓库</a></li>
-      #{/power.ck}
-    <li class="divider"></li>
-      #{power.ck "categorys.show"}
-        <li><a href="@{Categorys.show()}">产品类别</a></li>
-      #{/power.ck}
-      #{power.ck "brands.index"}
-        <li><a href="@{Brands.index()}">产品品牌</a></li>
-      #{/power.ck}
-      #{power.ck "familys.index"}
-        <li><a href="@{Familys.index()}">Family</a></li>
-      #{/power.ck}
-      #{power.ck "feeds.index"}
-        <li><a href="@{Feeds.index()}">Feed</a></li>
-      #{/power.ck}
-      #{power.ck "attributes.index"}
-        <li><a href="@{Attributes.index()}">附加属性</a></li>
-      #{/power.ck}
-      #{power.ck "templates.show"}
-        <li><a href="@{Templates.show()}">属性模板</a></li>
-      #{/power.ck}
-      #{power.ck "categoryinfos.show"}
-        <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
-      #{/power.ck}
-  </ul>
-</li>
-#{/power.ck}
+        #{power.ck "product"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "products.index"}
+                  <li><a href="@{Products.index()}">产品</a></li>
+                #{/power.ck}
+              <li class="divider"></li>
+                #{power.ck "categorys.show"}
+                  <li><a href="@{Categorys.show()}">产品类别</a></li>
+                #{/power.ck}
+                #{power.ck "brands.index"}
+                  <li><a href="@{Brands.index()}">产品品牌</a></li>
+                #{/power.ck}
+                #{power.ck "familys.index"}
+                  <li><a href="@{Familys.index()}">Family</a></li>
+                #{/power.ck}
+                #{power.ck "feeds.index"}
+                  <li><a href="@{Feeds.index()}">Feed</a></li>
+                #{/power.ck}
+                #{power.ck "attributes.index"}
+                  <li><a href="@{Attributes.index()}">附加属性</a></li>
+                #{/power.ck}
+                #{power.ck "templates.show"}
+                  <li><a href="@{Templates.show()}">属性模板</a></li>
+                #{/power.ck}
+                #{power.ck "categoryinfos.show"}
+                  <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
 
-#{power.ck "procure"}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "procures.index"}
-        <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
-      #{/power.ck}
-      #{power.ck "deliveryments.index"}
-        <li><a href="@{Deliveryments.index()}">采购单</a></li>
-      #{/power.ck}
-      #{power.ck "deliverplans.index"}
-        <li><a href="@{Deliverplans.index()}">出货单</a></li>
-      #{/power.ck}
-      #{power.ck "cooperators.index"}
-        <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
-      #{/power.ck}
-      #{power.ck "report.procurereports"}
-        <li><a href="@{ReportDownloads.procureReportsIndex()}">采购报表下载</a></li>
-      #{/power.ck}
-      #{power.ck "procures.b2bcustominfoindex"}
-          <li><a href="@{Cooperators.b2bCustomInfoIndex()}">B2B客户基本信息</a></li>
-      #{/power.ck}
-      #{power.ck "procures.btborderindex"}
-          <li><a href="@{Orders.btbOrderIndex()}">B2B销售订单信息</a></li>
-      #{/power.ck}
+        #{power.ck "procure"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "procures.index"}
+                  <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
+                #{/power.ck}
+                #{power.ck "deliveryments.index"}
+                  <li><a href="@{Deliveryments.index()}">采购单</a></li>
+                #{/power.ck}
+                #{power.ck "deliverplans.index"}
+                  <li><a href="@{Deliverplans.index()}">出货单</a></li>
+                #{/power.ck}
+                #{power.ck "cooperators.index"}
+                  <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+                #{/power.ck}
+                #{power.ck "report.procurereports"}
+                  <li><a href="@{ReportDownloads.procureReportsIndex()}">采购报表下载</a></li>
+                #{/power.ck}
+                #{power.ck "procures.b2bcustominfoindex"}
+                  <li><a href="@{Cooperators.b2bCustomInfoIndex()}">B2B客户基本信息</a></li>
+                #{/power.ck}
+                #{power.ck "procures.btborderindex"}
+                  <li><a href="@{Orders.btbOrderIndex()}">B2B销售订单信息</a></li>
+                #{/power.ck}
 
-  </ul>
-</li>
-#{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck "shipment"}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-    <li><a href="@{ShipItems.index()}">快递运输</a></li>
-      #{power.ck "shipments.index"}
-        <li><a href="@{Shipments.index()}">运输单</a></li>
-      #{/power.ck}
-      #{power.ck "shipmentreports.cost"}
-        <li><a href="@{ShipmentReports.cost()}">运输费用与重量报表</a></li>
-      #{/power.ck}
-      #{power.ck "shipmentreports.arrivalrate"}
-        <li><a href="@{ShipmentReports.arrivalRate()}">运输准时到货率统计</a></li>
-      #{/power.ck}
-      #{power.ck "shipmentreports.lossrate"}
-        <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
-      #{/power.ck}
-      #{power.ck "shipmentreports.areagoodsanalyze"}
-        <li><a href="@{ShipmentReports.areaGoodsAnalyze()}">物流区域货量分析</a></li>
-      #{/power.ck}
-  </ul>
-</li>
-#{/power.ck}
+        #{power.ck "shipment"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{ShipItems.index()}">快递运输</a></li>
+                #{power.ck "shipments.index"}
+                  <li><a href="@{Shipments.index()}">运输单</a></li>
+                #{/power.ck}
+                #{power.ck "shipmentreports.cost"}
+                  <li><a href="@{ShipmentReports.cost()}">运输费用与重量报表</a></li>
+                #{/power.ck}
+                #{power.ck "shipmentreports.arrivalrate"}
+                  <li><a href="@{ShipmentReports.arrivalRate()}">运输准时到货率统计</a></li>
+                #{/power.ck}
+                #{power.ck "shipmentreports.lossrate"}
+                  <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
+                #{/power.ck}
+                #{power.ck "shipmentreports.areagoodsanalyze"}
+                  <li><a href="@{ShipmentReports.areaGoodsAnalyze()}">物流区域货量分析</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck 'finances'}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">财务模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-    <li><a href="@{Applys.procures()}">采购请款单列表</a></li>
-    <li><a href="@{Applys.transports()}">物流请款单列表</a></li>
-    <li><a href="@{Payments.index()}">付款单列表</a></li>
-    <li><a href="@{PaymentTargets.index()}">支付方式</a></li>
-      #{power.ck "finances.index"}
-        <li><a href="@{Finances.index()}">系统内修复</a></li>
-      #{/power.ck}
-      #{power.ck "feetypes.index"}
-        <li><a href="@{FeeTypes.index()}">费用类型</a></li>
-      #{/power.ck}
-      #{power.ck "reportdownloads.applyreportsindex"}
-        <li><a href="@{ReportDownloads.applyReportsIndex()}">财务报表下载</a></li>
-      #{/power.ck}
-      #{power.ck "sku.salecostprofitanalyse"}
-        <li><a href="@{Finances.skuProfitAnalyse()}">SKU销售利润成本分析报表</a></li>
-      #{/power.ck}
-  </ul>
-</li>
-#{/power.ck}
+        #{power.ck 'finances'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">财务模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{Applys.procures()}">采购请款单列表</a></li>
+              <li><a href="@{Applys.transports()}">物流请款单列表</a></li>
+              <li><a href="@{Payments.index()}">付款单列表</a></li>
+              <li><a href="@{PaymentTargets.index()}">支付方式</a></li>
+                #{power.ck "finances.index"}
+                  <li><a href="@{Finances.index()}">系统内修复</a></li>
+                #{/power.ck}
+                #{power.ck "feetypes.index"}
+                  <li><a href="@{FeeTypes.index()}">费用类型</a></li>
+                #{/power.ck}
+                #{power.ck "reportdownloads.applyreportsindex"}
+                  <li><a href="@{ReportDownloads.applyReportsIndex()}">财务报表下载</a></li>
+                #{/power.ck}
+                #{power.ck "sku.salecostprofitanalyse"}
+                  <li><a href="@{Finances.skuProfitAnalyse()}">SKU销售利润成本分析报表</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck 'saletarget'}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "saleoptargets.index"}
-        <li><a href="@{SaleOpTargets.index()}">运营年度销售目标</a></li>
-      #{/power.ck}
-  </ul>
-</li>
-#{/power.ck}
+        #{power.ck 'saletarget'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">目标管理<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "saleoptargets.index"}
+                  <li><a href="@{SaleOpTargets.index()}">运营年度销售目标</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck 'qccheck'}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">质检管理<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "whouses.forwards"}
-        <li><a href="@{Whouses.forwards()}">质检员分配</a></li>
-      #{/power.ck}
-      #{power.ck "skuchecks.checklist"}
-        <li><a href="@{SkuChecks.checklist()}">CheckList列表</a></li>
-      #{/power.ck}
-      #{power.ck "checktasks.checklist"}
-        <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
-      #{/power.ck}
-      #{power.ck "checktasks.checkerlist"}
-        <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
-      #{/power.ck}
-  </ul>
-</li>
-#{/power.ck}
+        #{power.ck 'qccheck'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">质检管理<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "whouses.forwards"}
+                  <li><a href="@{Whouses.forwards()}">质检员分配</a></li>
+                #{/power.ck}
+                #{power.ck "skuchecks.checklist"}
+                  <li><a href="@{SkuChecks.checklist()}">CheckList列表</a></li>
+                #{/power.ck}
+                #{power.ck "checktasks.checklist"}
+                  <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
+                #{/power.ck}
+                #{power.ck "checktasks.checkerlist"}
+                  <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-#{power.ck 'system'}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
-  <ul class="dropdown-menu">
-      #{power.ck "elcuk.index"}
-        <li><a href="@{Elcuk.index()}">全局参数</a></li>
-      #{/power.ck}
-      #{power.ck "jobs.index"}
-        <li><a href="@{Jobs.index()}">任务管理</a></li>
-      #{/power.ck}
-      #{power.ck "servers.index"}
-        <li><a href="@{Servers.index()}">服务器管理</a></li>
-      #{/power.ck}
-      #{power.ck "accounts.index"}
-        <li><a href="@{Accounts.index()}">账户管理</a></li>
-      #{/power.ck}
-      #{power.ck "roles.show"}
-        <li><a href="@{Roles.show()}">角色管理</a></li>
-      #{/power.ck}
-      #{power.ck "users.index"}
-        <li><a href="@{Users.index()}">用户管理</a></li>
-      #{/power.ck}
-      #{power.ck "activitis.definition"}
-        <li><a href="@{Activitis.definition()}">流程定义</a></li>
-      #{/power.ck}
-      #{power.ck "mailsrecords.index"}
-        <li><a href="@{MailsRecords.index()}">邮件管理</a></li>
-      #{/power.ck}
-      #{power.ck "teams.show"}
-        <li><a href="@{Teams.show()}">TEAM管理</a></li>
-      #{/power.ck}
-      #{power.ck "categoryinfos.categoryassign"}
-        <li><a href="@{CategoryInfos.categoryassign()}">部门品线负责人管理</a></li>
-      #{/power.ck}
-    <li><a href="@{Elcuk.index()}">系统状态</a></li>
-  </ul>
-</li>
-#{/power.ck}
-</ul>
+        #{power.ck 'whouse'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">仓库模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "whouses.index"}
+                  <li><a href="@{Whouses.index()}">仓库</a></li>
+                #{/power.ck}
+              <li class="divider"></li>
 
-<ul class="nav pull-right">
-  <li class="divider-vertical"></li>
-  <li>
-    <a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
-  </li>
-  <li>
-    <a href="@{Activitis.index()}" target="_blank">
-      <b id="notifyimg"></b>
-      待处理流程(<b id="notifyNumber"></b>)
-    </a>
-  </li>
-  <li>
-    <a class="small" href="http://goo.gl/P2bwaJ" target="_blank">需求</a>
-  </li>
-  <li>
-    <a class="small" href="javascript:;" id="notification_btn">Notify</a>
-  </li>
-</ul>
-</div>
-</div>
-</div>
+            </ul>
+          </li>
+        #{/power.ck}
+
+        #{power.ck 'system'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "elcuk.index"}
+                  <li><a href="@{Elcuk.index()}">全局参数</a></li>
+                #{/power.ck}
+                #{power.ck "jobs.index"}
+                  <li><a href="@{Jobs.index()}">任务管理</a></li>
+                #{/power.ck}
+                #{power.ck "servers.index"}
+                  <li><a href="@{Servers.index()}">服务器管理</a></li>
+                #{/power.ck}
+                #{power.ck "accounts.index"}
+                  <li><a href="@{Accounts.index()}">账户管理</a></li>
+                #{/power.ck}
+                #{power.ck "roles.show"}
+                  <li><a href="@{Roles.show()}">角色管理</a></li>
+                #{/power.ck}
+                #{power.ck "users.index"}
+                  <li><a href="@{Users.index()}">用户管理</a></li>
+                #{/power.ck}
+                #{power.ck "activitis.definition"}
+                  <li><a href="@{Activitis.definition()}">流程定义</a></li>
+                #{/power.ck}
+                #{power.ck "mailsrecords.index"}
+                  <li><a href="@{MailsRecords.index()}">邮件管理</a></li>
+                #{/power.ck}
+                #{power.ck "teams.show"}
+                  <li><a href="@{Teams.show()}">TEAM管理</a></li>
+                #{/power.ck}
+                #{power.ck "categoryinfos.categoryassign"}
+                  <li><a href="@{CategoryInfos.categoryassign()}">部门品线负责人管理</a></li>
+                #{/power.ck}
+              <li><a href="@{Elcuk.index()}">系统状态</a></li>
+            </ul>
+          </li>
+        #{/power.ck}
+        </ul>
+
+        <ul class="nav pull-right">
+          <li class="divider-vertical"></li>
+          <li>
+            <a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
+          </li>
+          <li>
+            <a href="@{Activitis.index()}" target="_blank">
+              <b id="notifyimg"></b>
+              流程(<b id="notifyNumber"></b>)
+            </a>
+          </li>
+          <li>
+            <a class="small" href="http://goo.gl/P2bwaJ" target="_blank">需求</a>
+          </li>
+          <li>
+            <a class="small" href="javascript:;" id="notification_btn">Notify</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script type="text/template" id='news-notifications-model-template'>
