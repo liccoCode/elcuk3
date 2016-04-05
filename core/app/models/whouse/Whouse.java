@@ -38,19 +38,26 @@ public class Whouse extends Model {
     public Account account;
 
     public enum T {
-        /**
-         * FBA 仓库, 独立出来
-         */
-        FBA,
-        // 如果还有新的第三方仓库, 则再从代码中添加新类别
-        /**
-         * 自有仓库
-         */
-        SELF,
-        /**
-         * 货代
-         */
-        FORWARD
+        FBA {
+            @Override
+            public String label() {
+                return "FBA 仓库";
+            }
+        },
+        SELF {
+            @Override
+            public String label() {
+                return "自有仓库";
+            }
+        },
+        FORWARD {
+            @Override
+            public String label() {
+                return "货代仓库";
+            }
+        };
+
+        public abstract String label();
     }
 
 
@@ -124,21 +131,65 @@ public class Whouse extends Model {
     @Expose
     public boolean isEXPRESS = false;
 
+    public enum STY {
+        Product {
+            @Override
+            public String label() {
+                return "成品仓库";
+            }
+        },
+        BareProduct {
+            @Override
+            public String label() {
+                return "裸机仓库";
+            }
+        },
+        Package {
+            @Override
+            public String label() {
+                return "包材仓库";
+            }
+        },
+        Defective {
+            @Override
+            public String label() {
+                return "不良品仓库";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 仓库的分类
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public STY style;
+
     @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<WhouseItem> items = new ArrayList<WhouseItem>();
 
     public void validate() {
-        if(this.type == T.FBA) {
-            if(this.account == null) Validation.addError("", "wh.fba.account");
+        switch(this.type) {
+            case FBA:
+                if(this.account == null) {
+                    Validation.addError("", "wh.fba.account");
+                }
+            case FORWARD:
+                if(this.cooperator == null) {
+                    Validation.addError("", "货代不能为空");
+                }
+                if(!this.isAIR && !this.isEXPRESS && !this.isSEA) {
+                    Validation.addError("", "运输方式不能为空");
+                }
+                this.exist();
+            case SELF:
+                if(this.style == null) {
+                    Validation.addError("", "仓库种类不能为空!");
+                }
         }
-        if(this.type == T.FORWARD) {
-            if(this.cooperator == null) Validation.addError("", "货代不能为空");
-            if(this.isAIR == false && this.isEXPRESS == false && this.isSEA == false)
-                Validation.addError("", "运输方式不能为空");
-        }
-        if(Validation.hasErrors()) return;
-        if(this.type == T.FORWARD) this.exist();
     }
 
     public StringBuilder buildStringHead() {
