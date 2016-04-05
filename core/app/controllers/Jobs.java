@@ -20,6 +20,7 @@ import java.util.Date;
  * User: wyattpan
  * Date: 12/29/11
  * Time: 12:43 AM
+ * @deprecated 任务被放弃
  */
 @With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Jobs extends Controller {
