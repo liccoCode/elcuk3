@@ -1,6 +1,5 @@
 package models;
 
-import helper.DBUtils;
 import helper.GTs;
 import models.procure.Shipment;
 import org.apache.commons.lang.math.NumberUtils;
@@ -154,7 +153,7 @@ public class ElcukConfig extends Model {
     private synchronized void editShipMentArriveDay() {
         if(this.name != null && this.name.length() > 0) {
             String[] names = this.name.split("_");
-            if(names != null && names.length >= 2) {
+            if(names.length >= 2) {
                 Shipment.T shipt = null;
                 for(Shipment.T t : Shipment.T.values()) {
                     if(t.name().toLowerCase().equals(names[1])) {
@@ -163,8 +162,8 @@ public class ElcukConfig extends Model {
                     }
                 }
                 List<Shipment> ments = Shipment
-                        .find("lower(whouse.country)=? and type=? and dates.planBeginDate>=?", names[0],
-                                shipt, DateTime.now().toDate()).fetch();
+                        .find("lower(whouse.country)=? and type=? and dates.planBeginDate>=?", names[0], shipt,
+                                DateTime.now().toDate()).fetch();
                 for(Shipment ment : ments) {
                     ment.calcuPlanArriveDate();
                     ment.save();

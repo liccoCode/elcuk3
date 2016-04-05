@@ -105,14 +105,14 @@ public class ElcukRecord extends Model {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ElcukRecord");
-        sb.append("{message='").append(message).append('\'');
-        sb.append(", action='").append(action).append('\'');
-        sb.append(", fid='").append(fid).append('\'');
-        sb.append(", username='").append(username).append('\'');
-        sb.append(", createAt=").append(createAt);
-        sb.append('}');
+        final StringBuilder sb = new StringBuilder()
+                .append("ElcukRecord")
+                .append("{message='").append(message).append('\'')
+                .append(", action='").append(action).append('\'')
+                .append(", fid='").append(fid).append('\'')
+                .append(", username='").append(username).append('\'')
+                .append(", createAt=").append(createAt)
+                .append('}');
         return sb.toString();
     }
 }

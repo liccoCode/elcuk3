@@ -6,8 +6,8 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.jobs.Job;
-import play.libs.Time;
 import play.libs.CronExpression;
+import play.libs.Time;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +18,7 @@ import javax.persistence.Entity;
  * User: wyattpan
  * Date: 12/29/11
  * Time: 1:05 AM
+ * @deprecated
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
