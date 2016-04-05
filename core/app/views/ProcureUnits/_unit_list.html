@@ -101,6 +101,7 @@
   <td>#{if unit.fetchCheckTaskLink() != null}<a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>#{/if}</td>
   <td>#{time_tooltip time:unit.createDate/}</td>
 </tr>
+
 <tr id="${tr_key}_${unit.id}" style="display:none;">
   <td colspan="${checkbox ? '18' : '17'}">
     <div class="row-fluid" id="actions_${unit.id}">
@@ -219,5 +220,10 @@
   </td>
 </tr>
 #{/list}
+<tr class="tb_footer">
+  <td colspan="25">
+    #{bootstrap_pager pi:p, url:'' /}
+  </td>
+</tr>
 
 </table>

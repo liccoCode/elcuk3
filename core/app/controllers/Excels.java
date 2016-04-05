@@ -73,7 +73,7 @@ public class Excels extends Controller {
      * 下载采购单综合Excel表格
      */
     public static void deliveryments(DeliveryPost p) {
-        List<Deliveryment> deliverymentList = p.query();
+        List<Deliveryment> deliverymentList = p.queryForExcel();
         if(deliverymentList != null && deliverymentList.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
@@ -569,7 +569,7 @@ public class Excels extends Controller {
     }
 
     public static void procureUnitSearchExcel(ProcurePost p) {
-        List<ProcureUnit> dtos = p.query();
+        List<ProcureUnit> dtos = p.queryForExcel();
         if(dtos == null || dtos.size() == 0) {
             renderText("没有数据无法生成Excel文件!");
         } else {
