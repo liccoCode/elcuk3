@@ -13,6 +13,7 @@ import java.util.List;
  * User: Wyatt
  * Date: 12-1-7
  * Time: 上午1:58
+ * @deprecated Servers 已经无用
  */
 @With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class Servers extends Controller {
