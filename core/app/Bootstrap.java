@@ -2,20 +2,19 @@ import helper.*;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import models.ElcukConfig;
+import models.OperatorConfig;
 import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
-import models.OperatorConfig;
 import models.market.ListingStateRecord;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
