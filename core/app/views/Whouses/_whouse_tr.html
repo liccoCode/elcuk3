@@ -4,10 +4,16 @@
 
   <th>仓库类型</th>
   <td>
-    <select name="wh.type">
+    <select name="wh.type" style="width: 100px;">
       <option value="">选择类型</option>
-    #{list items:models.product.Whouse.T.values(), as:'t'}
-      <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t}</option>
+    #{list items:models.whouse.Whouse.T.values(), as:'t'}
+      <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+    #{/list}
+    </select>
+
+    <select style="display:none;width: 100px;" name="wh.style">
+    #{list items:models.whouse.Whouse.STY.values(), as:'t'}
+      <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
     #{/list}
     </select>
   </td>
@@ -25,7 +31,7 @@
 
 <tr>
   <th>Address</th>
-  <td><input readonly="" type="text" name="wh.address" value="${wh.address}"></td>
+  <td><input type="text" name="wh.address" value="${wh.address}"></td>
 
   <th>City</th>
   <td>
