@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import helper.Crawl;
 import helper.Dates;
 import helper.LogUtils;
-import helper.Webs;
 import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
@@ -24,6 +23,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 11/6/12
  * Time: 11:45 AM
+ * @deprecated
  */
 public class AmazonReviewCheckJob extends Job {
     @Override

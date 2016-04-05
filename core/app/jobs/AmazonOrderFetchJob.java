@@ -13,12 +13,10 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
 
-import javax.print.attribute.DateTimeSyntax;
 import javax.xml.bind.JAXB;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +29,7 @@ import java.util.List;
  * User: Wyatt                   Shipment Plan
  * Date: 12-1-8
  * Time: 上午5:59
+ * @deprecated
  */
 public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override

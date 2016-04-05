@@ -26,6 +26,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 8/9/12
  * Time: 3:44 PM
+ * @deprecated
  */
 public class FeedbackCheckJob extends Job {
     @Override

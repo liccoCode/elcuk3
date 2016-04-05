@@ -22,6 +22,7 @@ import java.util.List;
  * User: wyatt
  * Date: 12/17/13
  * Time: 4:01 PM
+ * @deprecated
  */
 public class GetFeedJob extends BaseJob {
     @SuppressWarnings("unchecked")

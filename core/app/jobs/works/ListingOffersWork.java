@@ -16,6 +16,7 @@ import java.util.ArrayList;
  * User: wyattpan
  * Date: 9/24/12
  * Time: 10:41 AM
+ * @deprecated
  */
 public class ListingOffersWork extends Job<Listing> {
     private Listing listing;

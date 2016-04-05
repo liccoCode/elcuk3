@@ -22,6 +22,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 8/24/12
  * Time: 12:22 PM
+ * @deprecated
  */
 public class CheckerProductCheckJob extends Job {
     @Override

@@ -1,7 +1,5 @@
 package jobs.promise;
 
-import jobs.SellingRecordCheckJob;
-import org.joda.time.DateTime;
 import play.jobs.Job;
 
 import java.util.Date;
@@ -11,6 +9,8 @@ import java.util.Date;
  * User: wyattpan
  * Date: 10/30/12
  * Time: 5:25 PM
+ *
+ * @deprecated
  */
 public class SellingRecordFixPromise extends Job {
     private Date begin;

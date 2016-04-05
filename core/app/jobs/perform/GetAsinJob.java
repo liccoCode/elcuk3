@@ -31,6 +31,7 @@ import java.util.Map;
  * User: wyatt
  * Date: 12/19/13
  * Time: 5:31 PM
+ * @deprecated
  */
 public class GetAsinJob extends BaseJob {
     // 计数器，记录该Job被执行了多少次
