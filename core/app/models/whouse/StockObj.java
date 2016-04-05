@@ -25,7 +25,8 @@ public class StockObj implements Serializable {
      * 存货条目 ID
      * (关联的对象的 ID -> SKU or 物料)
      */
-    private String stockObjId;
+    @Expose
+    public String stockObjId;
 
     /**
      * 类型
@@ -33,9 +34,9 @@ public class StockObj implements Serializable {
     @Enumerated(EnumType.STRING)
     @Required
     @Expose
-    private SOT stockObjType;
+    public SOT stockObjType;
 
-    private enum SOT {
+    public enum SOT {
         SKU {
             @Override
             public String label() {
@@ -74,6 +75,5 @@ public class StockObj implements Serializable {
             throw new FastRuntimeException("货物不能为空!");
         }
     }
-
     //TODO 支持产品物料与包材物料
 }
