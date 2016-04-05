@@ -45,7 +45,7 @@ public class SkuProfitPost extends Post<SkuProfit> {
 
 
     public List<SkuProfit> query() {
-        List<SkuProfit> skuProfits = new ArrayList<SkuProfit>();
+        List<SkuProfit> skuProfits = new ArrayList<>();
 
         /**
          * 每个市场遍历
@@ -72,7 +72,7 @@ public class SkuProfitPost extends Post<SkuProfit> {
             }
             if(dtos == null) return skuProfits;
 
-            Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
+            Map<String, ProfitDto> profitmap = new HashMap<>();
             for(ProfitDto dto : dtos) {
                 profitmap.put(dto.sku, dto);
             }

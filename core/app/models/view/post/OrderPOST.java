@@ -1,7 +1,6 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
-import helper.DBUtils;
 import helper.Dates;
 import helper.ES;
 import models.market.M;
@@ -216,13 +215,8 @@ public class OrderPOST extends ESPost<Orderr> {
         if(this.state != null) {
             boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
         }
-        /*        if(this.accountId != null) {
-            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
-        }*/
         if(this.sku != null) {
-            String temp = sku.replace("-", "");
-            boolFilter.must(FilterBuilders.termFilter("sku", temp.toLowerCase()));
-//            builder.query(QueryBuilders.queryString(temp.toLowerCase()).defaultField("sku"));
+            boolFilter.must(FilterBuilders.termFilter("sku", ES.parseEsString(sku).toLowerCase()));
         }
 
         return builder;

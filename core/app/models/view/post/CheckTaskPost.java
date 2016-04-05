@@ -1,8 +1,8 @@
 package models.view.post;
 
 import helper.Dates;
-import models.qc.CheckTask;
 import models.CategoryAssignManagement;
+import models.qc.CheckTask;
 import models.qc.SkuCheck;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -232,7 +232,7 @@ public class CheckTaskPost extends Post<CheckTask> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return new Long(CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch().size());
+        return (long) CheckTask.find(params._1 + "ORDER BY c.creatat DESC", params._2.toArray()).fetch().size();
     }
 
     @Override

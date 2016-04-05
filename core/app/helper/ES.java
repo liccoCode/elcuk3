@@ -1,6 +1,7 @@
 package helper;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 /**
@@ -14,8 +15,8 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  */
 public class ES {
     // TODO: 这里应该改变为环境变量, 而非数据库
-    public static final String ELCUK2_ES_HOST = "http://"+models.OperatorConfig.getVal("elcuk2es");
-    public static final String ETRACKER_ES_HOST = "http://"+models.OperatorConfig.getVal("etrackeres")+":9200";
+    public static final String ELCUK2_ES_HOST = "http://" + models.OperatorConfig.getVal("elcuk2es");
+    public static final String ETRACKER_ES_HOST = "http://" + models.OperatorConfig.getVal("etrackeres") + ":9200";
 
     public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
         return HTTP.postJson(ELCUK2_ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
@@ -53,9 +54,9 @@ public class ES {
      * @return
      */
     public static String parseEsString(String esfield) {
-        if(esfield == null)
-            return null;
-        esfield = esfield.replace("-", "").replace(",", "").replace("|", "").replace(".", "");
-        return esfield;
+        if(StringUtils.isBlank(esfield)) {
+            return "";
+        }
+        return StringUtils.replaceEach(esfield, new String[]{"-", ",", "|", "."}, new String[]{"", "", "", ""});
     }
 }

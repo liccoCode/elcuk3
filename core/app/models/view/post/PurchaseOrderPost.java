@@ -20,7 +20,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sql = new StringBuilder(" 1 = 1");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         if(from != null) {
             sql.append(" AND createDate>=? ");
             params.add(Dates.morning(this.from));
@@ -43,7 +43,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
             params.add(this.search);
             params.add(this.search);
         }
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<ProcureUnit> query() {

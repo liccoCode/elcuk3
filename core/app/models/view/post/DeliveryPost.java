@@ -148,7 +148,7 @@ public class DeliveryPost extends Post<Deliveryment> {
                         new ArrayList<Object>(Arrays.asList(size)));
             }
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 
     /**
@@ -167,7 +167,7 @@ public class DeliveryPost extends Post<Deliveryment> {
                         new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 
 }
