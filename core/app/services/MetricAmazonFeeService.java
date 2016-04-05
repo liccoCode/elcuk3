@@ -192,10 +192,13 @@ public class MetricAmazonFeeService {
 
     public static final Map<String, List<String>> TypeMaps = GTs.MapBuilder
             .map("productcharges", Arrays.asList("productcharges", "principal"))
-            .put("promorebates", Arrays.asList("promotionmetadatadefinitionvalue"))
-            .put("commission", Arrays.asList("fbaperorderfulfillmentfee", "fbaperunitfulfillmentfee",
-                    "fbaweightbasedfee", "commission"))
-            .put("other", Arrays.asList("shippingcharge"))
+            .put("promorebates", Arrays.asList("promorebates", "promotionmetadatadefinitionvalue"))
+            .put("commission", Arrays.asList("fbaperorderfulfillmentfee", "fbaperorderfulfilmentfee",
+                    "fbaperunitfulfillmentfee", "fbapickpackfeeperunit", "fbaweightbasedfee", "fbaweighthandlingfee",
+                    "fbaorderhandlingfeeperorder", "fulfillmentnetworkfee", "commission", "refundcommission",
+                    "crossborderfulfilmentfee", "shippingchargeback", "shippinghb"))
+            .put("other", Arrays.asList("shipping", "shippingcharge", "giftwrap", "giftwrapchargeback", "goodwill",
+                    "codchargeback", "paymentmethodfee", "restockingfee"))
             .build();
 
     public Map<String, Map<String, BigDecimal>> orderFeesCost() {
@@ -224,6 +227,8 @@ public class MetricAmazonFeeService {
             }
             dateAndMarketAggregation.subAggregation(feeCategoryAggregation);
         }
+        //Other transactionType: free_replacement_refund_items incorrect_fees_items reversalreimbursement
+        // REVERSAL_REIMBURSEMENT
 
         //TODO Selling Fees 好像 Amazon 统计的是 ServiceFees
         FilterAggregationBuilder fbaFeeAggregation = AggregationBuilders.filter("selling_fees");
