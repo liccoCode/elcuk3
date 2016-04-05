@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.krysalis.barcode4j.HumanReadablePlacement;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.impl.code128.Code128Constants;
@@ -18,7 +19,6 @@ import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.krysalis.barcode4j.tools.MimeTypes;
 import play.Logger;
 import play.data.binding.As;
-import play.mvc.Http;
 import play.mvc.Util;
 
 import java.awt.image.BufferedImage;
@@ -61,17 +61,15 @@ public class Login extends Secure.Security {
         boolean iscorrect = user.authenticate(password);
         String domain = models.OperatorConfig.getVal("domain");
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, domain, "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", User.userMd5(username), domain, "/", 60 * 60 * 24 * 30,
-                    false);
+            Duration leftTime = Duration.standardDays(30);
+            int timeInSeconds = leftTime.toStandardSeconds().getSeconds();
+            response.setCookie("username", username, domain, "/", timeInSeconds, false);
+            response.setCookie("usermd5", User.userMd5(username), domain, "/", timeInSeconds, false);
 
-            Http.Response.current().setCookie("kod_name", "elcuk2", domain, "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/",
-                    60 * 60 * 24 * 30, false);
-            Http.Response.current()
-                    .setCookie("kod_user_language", "zh_CN", domain, "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", domain, "/",
-                    60 * 60 * 24 * 30, false);
+            response.setCookie("kod_name", "elcuk2", domain, "/", timeInSeconds, false);
+            response.setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
+            response.setCookie("kod_user_language", "zh_CN", domain, "/", timeInSeconds, false);
+            response.setCookie("kod_user_online_version", "check-at-1418867695", domain, "/", timeInSeconds, false);
             new ElcukRecord("login", J.json(
                     GTs.MapBuilder.map("Username", username).put("Ip", request.remoteAddress)
                             .put("UserAgent", request.headers.get("user-agent").toString()).
@@ -96,13 +94,13 @@ public class Login extends Secure.Security {
         String domain = models.OperatorConfig.getVal("domain");
         try {
             Login.current().logout();
-            Http.Response.current().setCookie("username", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("usermd5", "", domain, "/", 0, false);
+            response.setCookie("username", "", domain, "/", 0, false);
+            response.setCookie("usermd5", "", domain, "/", 0, false);
 
-            Http.Response.current().setCookie("kod_name", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("kod_token", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("kod_user_language", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", domain, "/", 0, false);
+            response.setCookie("kod_name", "", domain, "/", 0, false);
+            response.setCookie("kod_token", "", domain, "/", 0, false);
+            response.setCookie("kod_user_language", "", domain, "/", 0, false);
+            response.setCookie("kod_user_online_version", "", domain, "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
