@@ -310,10 +310,7 @@ public class MetricProfitService {
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
         if(esresult._1 == null) {
-            return new F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>>
-                    (new F.T2<Float, Integer>(0f, 0),
-                            new F.T2<Float, Integer>(0f, 0),
-                            new F.T2<Float, Integer>(0f, 0));
+            return new F.T3<>(new F.T2<>(0f, 0), new F.T2<>(0f, 0), new F.T2<>(0f, 0));
         }
         JSONArray feearray = esresult._1.getJSONArray("terms");
         float seatotalfee = 0f;
@@ -507,9 +504,9 @@ public class MetricProfitService {
      * @return
      */
     private F.T3<Set<String>, Set<String>, Set<String>> getMentIds(JSONArray hits) {
-        Set<String> airMentIds = new HashSet<String>();
-        Set<String> seaMentIds = new HashSet<String>();
-        Set<String> expressMentIds = new HashSet<String>();
+        Set<String> airMentIds = new HashSet<>();
+        Set<String> seaMentIds = new HashSet<>();
+        Set<String> expressMentIds = new HashSet<>();
         if(hits != null && hits.size() > 0) {
             for(Object obj : hits) {
                 JSONObject hit = (JSONObject) obj;
@@ -525,7 +522,7 @@ public class MetricProfitService {
                 }
             }
         }
-        return new F.T3<Set<String>, Set<String>, Set<String>>(seaMentIds, airMentIds, expressMentIds);
+        return new F.T3<>(seaMentIds, airMentIds, expressMentIds);
     }
 
     /**
@@ -538,11 +535,11 @@ public class MetricProfitService {
     private F.T3<Float, Float, Integer> getShipmentInfo(Set<String> mentIds, String shiptype) {
 
         if(mentIds.size() <= 0) {
-            return new F.T3<Float, Float, Integer>(0f, 0f, 0);
+            return new F.T3<>(0f, 0f, 0);
         }
         String insql = SqlSelect.whereIn("sm.id", mentIds);
         if(insql == null || insql.length() <= 0) {
-            return new F.T3<Float, Float, Integer>(0f, 0f, 0);
+            return new F.T3<>(0f, 0f, 0);
         }
 
         //单个SKU的数量
@@ -603,7 +600,7 @@ public class MetricProfitService {
             }
         }
 
-        return new F.T3<Float, Float, Integer>(volume, totalvolume, qty);
+        return new F.T3<>(volume, totalvolume, qty);
     }
 
     /**
@@ -649,7 +646,7 @@ public class MetricProfitService {
         if(facets != null) {
             hitmentids = hits.getJSONArray("hits");
         }
-        return new F.T2<JSONObject, JSONArray>(units, hitmentids);
+        return new F.T2<>(units, hitmentids);
     }
 
     /**
