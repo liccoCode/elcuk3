@@ -71,12 +71,12 @@ public class BtbOrderPost extends Post<BtbOrder> {
 
     public Long getTotalCount() {
         F.T2<String, List<Object>> params = params();
-        return (long) BtbOrder.find(params._1, params._2.toArray()).fetch().size();
+        return new Long(BtbOrder.find(params._1, params._2.toArray()).fetch().size());
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return (long) BtbOrder.find(params._1, params._2.toArray()).fetch().size();
+        return new Long(BtbOrder.find(params._1, params._2.toArray()).fetch().size());
     }
 
     /**
