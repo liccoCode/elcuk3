@@ -20,7 +20,11 @@ require:
     - elcuk -> mws 1.1:
         exclude:
           - org.codehaus.woodstox -> *
-    - org.elasticsearch -> elasticsearch 1.1.0
+    # 取消 es 的所有依赖, 因为只使用到 es 的搜索 Builder API
+    - org.elasticsearch -> elasticsearch 1.1.0:
+        transitive: false
+    # 跟随 es 走的 lucene 版本
+    - org.apache.lucene -> lucene-core 4.7.0
     - org.jsoup -> jsoup 1.7.1
     - org.apache.httpcomponents -> httpclient 4.2.3
     - org.apache.httpcomponents -> httpmime 4.2.3
