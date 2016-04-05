@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import helper.Currency;
 import helper.*;
 import models.market.M;
-import models.market.Selling;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.*;
@@ -115,51 +114,59 @@ public class MetricProfitService {
 
     /**
      * SKU总销售额
+     *
+     * @deprecated facetFilter 查询需要替换
      */
     public Float esSaleFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
-                        .field("cost_in_usd")
-                        .facetFilter(this.filterbuilder(true)
-                                //销售费用项目
-                                .must(FilterBuilders.termFilter("fee_type", "productcharges")))
+                                .field("cost_in_usd")
+                                .facetFilter(this.filterbuilder(true)
+                                        //销售费用项目
+                                        .must(FilterBuilders.termFilter("fee_type", "productcharges")))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * SKU亚马逊费用
+     *
+     * @deprecated facetFilter 查询需要替换
      */
     public Float esAmazonFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
-                        .field("cost_in_usd")
-                        .facetFilter(this.filterbuilder(true)
-                                //FBA亚马逊项目
-                                .must(FilterBuilders.termFilter("fee_type", "commission")))
+                                .field("cost_in_usd")
+                                .facetFilter(this.filterbuilder(true)
+                                        //FBA亚马逊项目
+                                        .must(FilterBuilders.termFilter("fee_type", "commission")))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * SKUFBA费用
+     *
+     * @deprecated facetFilter 查询需要替换
      */
     public Float esFBAFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
-                        .field("cost_in_usd")
-                        .facetFilter(this.filterbuilder(true)
-                                //FBAFBA项目
-                                .must(FilterBuilders.prefixFilter("fee_type", "fba")))
+                                .field("cost_in_usd")
+                                .facetFilter(this.filterbuilder(true)
+                                        //FBAFBA项目
+                                        .must(FilterBuilders.prefixFilter("fee_type", "fba")))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * 总销量
+     *
+     * @deprecated facetFilter 查询需要替换
      */
     public Float esSaleQty() {
         BoolQueryBuilder qb = (BoolQueryBuilder) querybuilder();
@@ -168,8 +175,8 @@ public class MetricProfitService {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(qb)
                 .facet(FacetBuilders.statisticalFacet("units")
-                        .field("quantity")
-                        .facetFilter(this.filterbuilder(true))
+                                .field("quantity")
+                                .facetFilter(this.filterbuilder(true))
                 ).size(0);
         return getEsTermsTotal(search, "orderitem");
     }
@@ -283,6 +290,8 @@ public class MetricProfitService {
 
     /**
      * 不同运输方式运价
+     *
+     * @deprecated facetFilter 查询需要替换
      */
     public F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> shipTypePrice() {
         /**
@@ -296,7 +305,7 @@ public class MetricProfitService {
                         .keyField("ship_type")
                         .valueField("cost_in_usd")
                         .facetFilter(this.filterbuilder(false).must(orfilter
-                        ).must(FilterBuilders.termFilter("sku", this.parseEsSku().toLowerCase()))
+                                ).must(FilterBuilders.termFilter("sku", this.parseEsSku().toLowerCase()))
                         ));
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
@@ -358,6 +367,8 @@ public class MetricProfitService {
 
     /**
      * 关税和VAT单价
+     *
+     * @deprecated facetFilter 查询需要替换
      */
     public Float esVatPrice() {
         //关税
@@ -367,9 +378,9 @@ public class MetricProfitService {
                 .facet(FacetBuilders.statisticalFacet("units")
                         .field("cost_in_usd")
                         .facetFilter(this.filterbuilder(false).must(
-                                FilterBuilders.termsFilter("fee_type",
-                                        "banlancedutyandvat", "dutyandvat")
-                        )
+                                        FilterBuilders.termsFilter("fee_type",
+                                                "banlancedutyandvat", "dutyandvat")
+                                )
                         ));
         //总关税和VAT
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
@@ -828,13 +839,10 @@ public class MetricProfitService {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
                 .facet(FacetBuilders.statisticalFacet("units")
-                        .field("quantity")
+                                .field("quantity")
                 ).size(0);
         return getEsTermsTotal(search, "procurepayunit");
     }
-
-
-
 
 
     /**
@@ -873,15 +881,6 @@ public class MetricProfitService {
         profit.profitrate = Webs.scale2Double(profit.profitrate);
         return profit;
     }
-
-
-
-
-
-
-
-
-
 
 
 }
