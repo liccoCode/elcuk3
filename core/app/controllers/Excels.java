@@ -57,16 +57,9 @@ public class Excels extends Controller {
 
         ProcureUnit unit = excel.dmt.units.get(0);
         String currency = unit.attrs.currency.symbol();
-        render(excel, currency);
-    }
 
-    @Check("excels.deliveryment")
-    public static void deliverymentbrandworl(String id, DeliveryExcel excel) {
-        excel.dmt = Deliveryment.findById(id);
-        request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
-        renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(excel);
+        String brandname = models.OperatorConfig.getVal("brandname");
+        render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
     /**
@@ -143,7 +136,6 @@ public class Excels extends Controller {
      * 下载采购单综合Excel表格
      */
     public static void analyzes(AnalyzePost p) {
-        p.needPagination = false;
         List<AnalyzeDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
@@ -695,6 +687,16 @@ public class Excels extends Controller {
                         DateTime.now().toDate())));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(feesCost, from, to, dateFormat);
+    }
+
+    public static void orderReports(OrderPOST p) {
+        if(p == null) p = new OrderPOST();
+        List<OrderReportDTO> orders = p.queryForExcel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("订单汇总报表%s.xls", dateFormat.format(p.begin)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(orders, p.begin, p.end, dateFormat);
     }
 
     /**

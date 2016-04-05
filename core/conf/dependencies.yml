@@ -18,7 +18,7 @@ require:
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
-    - elcuk -> mws 1.0:
+    - elcuk -> mws 1.1:
         exclude:
           - org.codehaus.woodstox -> *
     - org.elasticsearch -> elasticsearch 1.1.0
@@ -27,16 +27,20 @@ require:
     - org.jsoup -> jsoup 1.7.1
     - org.apache.httpcomponents -> httpclient 4.2.3
     - org.apache.httpcomponents -> httpmime 4.2.3
+    - commons-httpclient -> commons-httpclient 3.1
+    - com.google.guava -> guava 18.0
     - com.alibaba -> fastjson 1.1.19
     - net.sf.opencsv -> opencsv 2.3
-    - org.activiti -> activiti-engine 5.15.1
-    - org.activiti -> activiti-spring 5.15.1
+    - org.activiti -> activiti-engine 5.15.1:
+        exclude:
+          - javax.persistence -> *
+    - org.activiti -> activiti-spring 5.15.1:
+        exclude:
+          - javax.persistence -> *
     - org.activiti -> activiti-bpmn-model 5.15.1
     - org.activiti -> activiti-modeler 5.15.1
-    - org.hibernate.javax.persistence -> hibernate-jpa-2.1-api 1.0.0.Final
     - org.hibernate -> hibernate-ehcache 4.1.0.Final
     - javax.activation  -> activation 1.1.1
-    - org.apache.httpcomponents -> httpclient  4.2.3
     - net.sf.barcode4j -> barcode4j 2.1:
         exclude:
          # apache ant 不需要, 我不需要构建
@@ -59,6 +63,11 @@ repositories:
         artifact: "https://raw.github.com/wppurking/play-redis/master/dist/[module]-[revision].zip"
         contains:
             - redis -> *
+    - qiniu:
+        type: HTTP
+        artifact: "http://77g8qz.com1.z0.glb.clouddn.com/[module]-[revision].jar"
+        contains:
+            - elcuk -> *
     - My Local Repo Mac:
         type: iBiblio
         root: "file:///${user.home}/.m2/repository/"

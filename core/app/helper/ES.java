@@ -16,6 +16,9 @@ public class ES {
     public static final String ELCUK2_ES_HOST = "http://"+models.OperatorConfig.getVal("elcuk2es");
     public static final String ETRACKER_ES_HOST = "http://"+models.OperatorConfig.getVal("etrackeres")+":9200";
 
+    public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
+        return HTTP.postJson(ELCUK2_ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
+    }
 
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {

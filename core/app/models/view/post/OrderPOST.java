@@ -1,15 +1,20 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.DBUtils;
+import helper.Dates;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
+import models.view.dto.OrderReportDTO;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.Play;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
@@ -59,13 +64,22 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public Boolean promotion = null;
 
+    public String sku;
+
+    public float percent;
+
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         SearchSourceBuilder builder = this.params();
-        System.out.println(builder);
         try {
-            JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            JSONObject result;
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+
             JSONObject hits = result.getJSONObject("hits");
             this.count = hits.getLong("total");
             Set<String> orderIds = new HashSet<String>();
@@ -77,7 +91,44 @@ public class OrderPOST extends ESPost<Orderr> {
                 throw new FastRuntimeException("没有结果");
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
+            Logger.error(e.getMessage());
             return new ArrayList<Orderr>();
+        }
+    }
+
+    public List<OrderReportDTO> queryForExcel() {
+        SearchSourceBuilder builder = this.params();
+        try {
+            JSONObject result;
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+
+            JSONObject hits = result.getJSONObject("hits");
+            this.count = hits.getLong("total");
+            /**先查出总共有多少条订单**/
+            this.perSize = hits.getInteger("total");
+            this.page = 1;
+            builder = this.params();
+            if(StringUtils.isEmpty(this.sku)) {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+            } else {
+                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+            }
+            hits = result.getJSONObject("hits");
+            Set<String> orderIds = new HashSet<String>();
+            for(Object obj : hits.getJSONArray("hits")) {
+                JSONObject hit = (JSONObject) obj;
+                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
+            }
+            if(orderIds.size() <= 0)
+                throw new FastRuntimeException("没有结果");
+            return OrderReportDTO.query(orderIds);
+        } catch(Exception e) {
+            Logger.error(e.getMessage());
+            return new ArrayList<OrderReportDTO>();
         }
     }
 
@@ -96,19 +147,18 @@ public class OrderPOST extends ESPost<Orderr> {
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.query(QueryBuilders
-                .queryString(this.search())
-                .field("selling_ids")
-                .field("buyer")
-                .field("email")
-                .field("address")
-                .field("order_id")
-                .field("userid")
-                .field("track_no")
-                .field("upc")
-                .field("asin")
-                .field("promotion_ids")
-        ).postFilter(boolFilter)
-                .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+                        .queryString(this.search())
+                        .field("selling_ids")
+                        .field("buyer")
+                        .field("email")
+                        .field("address")
+                        .field("order_id")
+                        .field("userid")
+                        .field("track_no")
+                        .field("upc")
+                        .field("asin")
+                        .field("promotion_ids")
+        ).postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
         if(this.promotion != null) {
             FilterBuilder boolBuilder;
@@ -124,10 +174,11 @@ public class OrderPOST extends ESPost<Orderr> {
             boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
                     .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
-                            .from(this.market.withTimeZone(this.begin).toDate())
-                            .to(this.market.withTimeZone(this.end).toDate()));
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(this.begin).to(this.end));
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+                    .to(Dates.night(this.end)).includeUpper(true));
         }
 
 
@@ -139,4 +190,42 @@ public class OrderPOST extends ESPost<Orderr> {
         }
         return builder;
     }
+
+    public SearchSourceBuilder skuParams() {
+        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders
+                .queryString(this.search())
+                .field("selling_id")
+                .field("order_id"))
+                .postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+
+        if(this.market != null) {
+            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
+                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
+                            // 市场变更, 具体查询时间也需要变更
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
+        } else {
+            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+                                .to(Dates.night(this.end)).includeUpper(true));
+        }
+
+
+        if(this.state != null) {
+            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+        }
+        /*        if(this.accountId != null) {
+            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
+        }*/
+        if(this.sku != null) {
+            String temp = sku.replace("-", "");
+            boolFilter.must(FilterBuilders.termFilter("sku", temp.toLowerCase()));
+//            builder.query(QueryBuilders.queryString(temp.toLowerCase()).defaultField("sku"));
+        }
+
+        return builder;
+    }
+
 }

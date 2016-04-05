@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'Analyze'/}
 #{set 'moreScripts'}
+    #{script_cdn name: 'jquery.dataTables.js'/}
     #{script_cdn name: 'highstock.js'/}
     #{script_cdn name: 'timeline/timeline_js/timeline-api.js'/}
     #{script_cdn name: 'analyzes/timeline.coffee'/}
@@ -26,6 +27,7 @@
             <button class="btn btn-small" data-market='amazon.co.uk'>英国</button>
             <button class="btn btn-small" data-market='amazon.it'>意大利</button>
             <button class="btn btn-small" data-market='amazon.jp'>日本</button>
+            <button class="btn btn-small" data-market='amazon.ca'>加拿大</button>
             <button class="btn btn-small" data-market=''>汇总</button>
           </div>
         </div>
