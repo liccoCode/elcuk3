@@ -501,7 +501,8 @@ public class Payment extends Model {
             payment.currency = currency;
             payment.generatePaymentNumber(apply).save();
             Logger.info("新增支付单:" + payment.paymentNumber + " totalUSD:" + payment.totalFees()._1 + currency.toUSD(amount)
-                + "totalCNY:" + payment.totalFees()._2 + currency.toCNY(amount) + "apply:" + apply);
+                + "totalCNY:" + payment.totalFees()._2 + currency.toCNY(amount) + "apply:" + apply
+                + "createdAt:>=" +now.minusHours(24).toDate() + "createdAt:<=" + now.toDate());
         }
         return payment;
     }
