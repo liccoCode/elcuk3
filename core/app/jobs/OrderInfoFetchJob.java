@@ -28,6 +28,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 4/20/12
  * Time: 5:17 PM
+ * @deprecated
  */
 public class OrderInfoFetchJob extends Job {
     @Override

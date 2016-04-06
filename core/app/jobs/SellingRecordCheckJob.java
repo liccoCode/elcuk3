@@ -1,15 +1,7 @@
 package jobs;
 
-import helper.LogUtils;
-import models.Jobex;
-import models.market.Account;
-import models.market.SellingRecord;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.jobs.Job;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * <pre>
@@ -22,6 +14,7 @@ import java.util.Set;
  * User: wyattpan
  * Date: 5/29/12
  * Time: 4:03 PM
+ * @deprecated
  */
 public class SellingRecordCheckJob extends Job {
 

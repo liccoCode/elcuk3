@@ -16,6 +16,7 @@ import java.util.List;
  * User: wyatt
  * Date: 5/16/13
  * Time: 10:18 AM
+ * @deprecated
  */
 public class ShipmentsMonitorJob extends Job {
 

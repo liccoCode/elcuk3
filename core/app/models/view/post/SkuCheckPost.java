@@ -2,6 +2,7 @@ package models.view.post;
 
 import models.qc.SkuCheck;
 import play.libs.F;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class SkuCheckPost extends Post<SkuCheck> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sql = new StringBuilder(" 1=1 ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             sql.append(" AND checkType=? ");
@@ -43,7 +44,7 @@ public class SkuCheckPost extends Post<SkuCheck> {
         sql.append(" AND lineType=? ");
         params.add(SkuCheck.LineType.HEAD);
 
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<SkuCheck> query() {

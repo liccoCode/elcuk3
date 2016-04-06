@@ -50,13 +50,13 @@ public class Dates {
     }
 
     /**
-     * 返回一个 Date 日期这一天的开始
+     * 返回一个 Date 日期这一天的开始, 2016-01-01 00:00:00
      *
      * @param date
      * @return
      */
     public static Date morning(Date date) {
-        return date2JDate(date);
+        return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -79,7 +79,7 @@ public class Dates {
     public static Date date2JDate(Date date) {
         Date tmp = date;
         if(tmp == null) tmp = new Date();
-        return new DateTime(date).withTimeAtStartOfDay().toDate();
+        return new DateTime(tmp).withTimeAtStartOfDay().toDate();
     }
 
     public static String date2Date() {

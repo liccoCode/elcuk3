@@ -39,11 +39,11 @@ public class ProductPost extends Post<Product> {
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = skuSearch();
         if(specialSearch._1) {
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3); //针对 SKU 的唯一搜索
+            return new F.T2<>(specialSearch._2, specialSearch._3); //针对 SKU 的唯一搜索
         }
 
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM Product p LEFT JOIN p.productAttrs a WHERE 1=1");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {
             String word = this.word();
             sbd.append("AND (")
@@ -61,7 +61,7 @@ public class ProductPost extends Post<Product> {
                 sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.DOWN)));
             }
         }
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ProductPost extends Post<Product> {
 
     private F.T3<Boolean, String, List<Object>> skuSearch() {
         if(StringUtils.isBlank(this.search))
-            return new F.T3<Boolean, String, List<Object>>(false, null, null);
+            return new F.T3<>(false, null, null);
 
         Matcher matcher = SKU.matcher(this.search);
         if(matcher.find()) {
@@ -82,6 +82,6 @@ public class ProductPost extends Post<Product> {
             return new F.T3<Boolean, String, List<Object>>(true, "sku=?",
                     new ArrayList<Object>(Arrays.asList(sku)));
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 }

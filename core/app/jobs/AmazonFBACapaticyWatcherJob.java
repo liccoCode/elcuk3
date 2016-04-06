@@ -22,6 +22,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 9/29/12
  * Time: 10:30 AM
+ * @deprecated
  */
 public class AmazonFBACapaticyWatcherJob extends Job {
     @Override

@@ -80,7 +80,7 @@ public class ShipmentPost extends Post {
                                 " LEFT JOIN s.items it" +
                                 " WHERE s.%s>=? AND s.%s<=?",
                         this.dateType, this.dateType));
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 
@@ -90,7 +90,7 @@ public class ShipmentPost extends Post {
         }
 
         if(this.states != null && this.states.size() > 0) {
-            List<String> states = new ArrayList<String>();
+            List<String> states = new ArrayList<>();
             for(Shipment.S state : this.states) {
                 if(state == null) continue;
                 states.add(state.name());

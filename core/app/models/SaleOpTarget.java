@@ -1,15 +1,15 @@
 package models;
 
 import com.google.gson.annotations.Expose;
-import helper.DBUtils;
+import helper.Currency;
 import helper.Dates;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.product.Category;
 import models.product.Team;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.cache.*;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -17,10 +17,9 @@ import services.MetricProfitService;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.*;
-
-import models.market.M;
-import helper.Currency;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 运营销售目标
@@ -29,6 +28,7 @@ import helper.Currency;
  * User: mac
  * Date: 14-3-11
  * Time: PM5:07
+ * @deprecated 已经无人使用
  */
 @Entity
 public class SaleOpTarget extends Model {

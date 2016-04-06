@@ -26,6 +26,7 @@ import java.util.*;
  * User: mac
  * Date: 14-3-21
  * Time: PM2:03
+ * @deprecated
  */
 public class AbnormalFetchJob extends Job {
     public static final String RUNNING = "anormalfetchjob_running";

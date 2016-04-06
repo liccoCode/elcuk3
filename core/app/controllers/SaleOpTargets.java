@@ -13,7 +13,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,11 +54,10 @@ public class SaleOpTargets extends Controller {
 
     @Check("saleoptargets.create")
     public static void create(SaleOpTarget yearSt, List<SaleOpTarget> sts) {
-        User user = User.findByUserName(Secure.Security.connected());
-        yearSt.createuser = user;
+        yearSt.createuser = User.findByUserName(Secure.Security.connected());
         if(yearSt.isExist()) Validation.addError("", String.format("已经存在 %s 年度的销售目标", yearSt.targetYear));
         //只有年度目标才会校验 name 不为空
-        validation.required("目标名称", yearSt.name);
+        Validation.required("目标名称", yearSt.name);
         yearSt.validate();
         yearSt.validateChild(sts);
         if(Validation.hasErrors()) render("SaleOpTargets/blank.html", yearSt, sts);
