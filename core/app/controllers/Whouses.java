@@ -7,13 +7,7 @@ import models.market.Account;
 import models.procure.Cooperator;
 import models.procure.FBACenter;
 import models.view.Ret;
-import models.view.post.InboundRecordPost;
-import models.view.post.OutboundRecordPost;
-import models.view.post.StockRecordPost;
 import models.view.post.WhousePost;
-import models.whouse.InboundRecord;
-import models.whouse.OutboundRecord;
-import models.whouse.StockRecord;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -103,46 +97,5 @@ public class Whouses extends Controller {
     public static void edit(long id) {
         Whouse wh = Whouse.findById(id);
         render(wh);
-    }
-
-    /**
-     * 入库记录
-     */
-    public static void inboundRecords(InboundRecordPost p) {
-        if(p == null) p = new InboundRecordPost();
-        List<InboundRecord> records = p.query();
-        render(p, records);
-    }
-
-    /**
-     * 出库记录
-     */
-    public static void outboundRecords(OutboundRecordPost p) {
-        if(p == null) p = new OutboundRecordPost();
-        List<OutboundRecord> records = p.query();
-        render(p, records);
-    }
-
-    /**
-     * 库存异动
-     */
-    public static void stockRecords(StockRecordPost p) {
-        if(p == null) p = new StockRecordPost();
-        List<StockRecord> records = p.query();
-        render(p, records);
-    }
-
-    /**
-     * 确认入库
-     */
-    public static void confirmInbound(List<Long> rids) {
-
-    }
-
-    /**
-     * 确认出库
-     */
-    public static void confirmOutbound(List<Long> rids) {
-
     }
 }
