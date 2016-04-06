@@ -5,20 +5,26 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.*;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
@@ -45,11 +51,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-
 
 /**
  * 对 HttpClient 4 的封装 HTTP 请求
@@ -66,103 +67,57 @@ public class HTTP {
      */
     public static final CookieStore COOKIE_STORE = new BasicCookieStore();
 
-    public static void init() {
-        synchronized(HTTP.class) {
-            HttpParams params = new BasicHttpParams();
-            HttpProtocolParams.setContentCharset(params, "UTF-8");
-            HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
-            HttpClientParams.setRedirecting(params, true);
-            // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
-            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
-
-            PoolingClientConnectionManager multipThread = new PoolingClientConnectionManager();
-            multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
-            multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
-
-            client = new DefaultHttpClient(multipThread, params);
-            client.addRequestInterceptor(new RequestAcceptEncoding());
-            client.addResponseInterceptor(new ResponseContentEncoding());
-            client.setRedirectStrategy(new DefaultRedirectStrategy() {
-                @Override
-                public boolean isRedirected(HttpRequest request, HttpResponse response,
-                                            HttpContext context) throws ProtocolException {
-                    if(response == null) {
-                        throw new IllegalArgumentException("HTTP response may not be null");
-                    }
-
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    String method = request.getRequestLine().getMethod();
-                    Header locationHeader = response.getFirstHeader("location");
-                    switch(statusCode) {
-                        case HttpStatus.SC_MOVED_TEMPORARILY:
-                            return (method.equalsIgnoreCase(HttpGet.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
-                                    locationHeader != null;
-                        case HttpStatus.SC_MOVED_PERMANENTLY:
-                        case HttpStatus.SC_TEMPORARY_REDIRECT:
-                            return method.equalsIgnoreCase(HttpGet.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpHead.METHOD_NAME);
-                        case HttpStatus.SC_SEE_OTHER:
-                            return true;
-                        default:
-                            return false;
-                    } //end of switch
-                }
-            });
-        }
+    public static synchronized void init() {
+        client = create();
+//        proxyclient = create(); // 暂时测试不需要两个 client 实例
     }
 
+    public static DefaultHttpClient create() {
+        HttpParams params = new BasicHttpParams();
+        HttpProtocolParams.setContentCharset(params, "UTF-8");
+        HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
+        HttpClientParams.setRedirecting(params, true);
+        // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
+        HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
+        HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
 
-    public static void proxyinit() {
-        synchronized(HTTP.class) {
-            HttpParams params = new BasicHttpParams();
-            HttpProtocolParams.setContentCharset(params, "UTF-8");
-            HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
-            HttpClientParams.setRedirecting(params, true);
-            // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
-            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
+        PoolingClientConnectionManager multipThread = new PoolingClientConnectionManager();
+        multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
+        multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
 
-            PoolingClientConnectionManager multipThread = new PoolingClientConnectionManager();
-            multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
-            multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
-
-            proxyclient = new DefaultHttpClient(multipThread, params);
-            proxyclient.addRequestInterceptor(new RequestAcceptEncoding());
-            proxyclient.addResponseInterceptor(new ResponseContentEncoding());
-            proxyclient.setRedirectStrategy(new DefaultRedirectStrategy() {
-                @Override
-                public boolean isRedirected(HttpRequest request, HttpResponse response,
-                                            HttpContext context) throws ProtocolException {
-                    if(response == null) {
-                        throw new IllegalArgumentException("HTTP response may not be null");
-                    }
-
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    String method = request.getRequestLine().getMethod();
-                    Header locationHeader = response.getFirstHeader("location");
-                    switch(statusCode) {
-                        case HttpStatus.SC_MOVED_TEMPORARILY:
-                            return (method.equalsIgnoreCase(HttpGet.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
-                                    locationHeader != null;
-                        case HttpStatus.SC_MOVED_PERMANENTLY:
-                        case HttpStatus.SC_TEMPORARY_REDIRECT:
-                            return method.equalsIgnoreCase(HttpGet.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpHead.METHOD_NAME);
-                        case HttpStatus.SC_SEE_OTHER:
-                            return true;
-                        default:
-                            return false;
-                    } //end of switch
+        DefaultHttpClient newClient = new DefaultHttpClient(multipThread, params);
+        newClient.addRequestInterceptor(new RequestAcceptEncoding());
+        newClient.addResponseInterceptor(new ResponseContentEncoding());
+        newClient.setRedirectStrategy(new DefaultRedirectStrategy() {
+            @Override
+            public boolean isRedirected(HttpRequest request, HttpResponse response,
+                                        HttpContext context) throws ProtocolException {
+                if(response == null) {
+                    throw new IllegalArgumentException("HTTP response may not be null");
                 }
-            });
-        }
+
+                int statusCode = response.getStatusLine().getStatusCode();
+                String method = request.getRequestLine().getMethod();
+                Header locationHeader = response.getFirstHeader("location");
+                switch(statusCode) {
+                    case HttpStatus.SC_MOVED_TEMPORARILY:
+                        return (method.equalsIgnoreCase(HttpGet.METHOD_NAME)
+                                || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
+                                || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
+                                locationHeader != null;
+                    case HttpStatus.SC_MOVED_PERMANENTLY:
+                    case HttpStatus.SC_TEMPORARY_REDIRECT:
+                        return method.equalsIgnoreCase(HttpGet.METHOD_NAME)
+                                || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
+                                || method.equalsIgnoreCase(HttpHead.METHOD_NAME);
+                    case HttpStatus.SC_SEE_OTHER:
+                        return true;
+                    default:
+                        return false;
+                } //end of switch
+            }
+        });
+        return newClient;
     }
 
     public static synchronized void stop() {
@@ -176,7 +131,7 @@ public class HTTP {
     }
 
     public static DefaultHttpClient proxyclient() {
-        if(HTTP.proxyclient == null) HTTP.proxyinit();
+        if(HTTP.proxyclient == null) HTTP.init();
         return HTTP.proxyclient;
     }
 
@@ -224,10 +179,16 @@ public class HTTP {
         return get(null, url);
     }
 
-    public static String getProxy(String proxyhost,String url) {
+    /**
+     * 拥有代理的 Get. (主要目的: 用于处理服务器在阿里云, 访问 google)
+     * @param proxyhost
+     * @param url
+     * @return
+     */
+    public static String proxyGet(String proxyhost, String url) {
         try {
             HttpGet get = new HttpGet(url);
-            DefaultHttpClient httpClient = (DefaultHttpClient) proxycookieStore(null);
+            DefaultHttpClient httpClient = (DefaultHttpClient) cookieStore(null);
 
             String[] args = proxyhost.split(",");
             String proxyHost = args[0];
@@ -235,15 +196,25 @@ public class HTTP {
             String userName = args[2];
             String password = args[3];
 
+            HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+            /*
+            TODO: 老代码, 如果下一次看新代码没有问题, 那么删除这里的老代码.
             httpClient.getCredentialsProvider().setCredentials(
                     new AuthScope(proxyHost, proxyPort),
                     new UsernamePasswordCredentials(userName, password));
-            HttpHost proxy = new HttpHost(proxyHost, proxyPort);
             httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+            */
 
-            return EntityUtils.toString(
-                    httpClient.execute(get).getEntity(),
-                    "UTF-8");
+            BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            provider.setCredentials(
+                    new AuthScope(proxyHost, proxyPort),
+                    new UsernamePasswordCredentials(userName, password));
+
+
+            HttpClientContext ctx = HttpClientContext.create();
+            ctx.setRequestConfig(RequestConfig.custom().setProxy(proxy).build());
+            ctx.setCredentialsProvider(provider);
+            return EntityUtils.toString(httpClient.execute(get, ctx).getEntity(), "UTF-8");
         } catch(IOException e) {
             e.printStackTrace();
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
@@ -305,31 +276,6 @@ public class HTTP {
             return "";
         }
     }
-
-    /**
-     * 使用代理访问
-     *
-     * @param cookieStore
-     * @param url
-     * @param params
-     * @return
-     */
-    public static String postProxy(CookieStore cookieStore, String url,
-                                   Collection<? extends NameValuePair> params) {
-        HttpPost post = new HttpPost(url);
-        try {
-            DefaultHttpClient httpClient = (DefaultHttpClient) proxycookieStore(cookieStore);
-
-            HttpHost proxy = new HttpHost("hk2.easya.cc", 8123);
-            httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-            post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
-            return EntityUtils.toString(httpClient.execute(post).getEntity());
-        } catch(Exception e) {
-            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
-            return "";
-        }
-    }
-
 
     public static JSONObject postJson(String url, Collection<? extends NameValuePair> params) {
         Logger.debug("HTTP.post Json [%s]", url);

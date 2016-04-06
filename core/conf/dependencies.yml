@@ -25,13 +25,14 @@ require:
         transitive: false
     # 跟随 es 走的 lucene 版本
     - org.apache.lucene -> lucene-core 4.7.0
-    - org.jsoup -> jsoup 1.7.1
-    - org.apache.httpcomponents -> httpclient 4.2.3
-    - org.apache.httpcomponents -> httpmime 4.2.3
+    - org.jsoup -> jsoup 1.8.3
+    - org.apache.httpcomponents -> httpclient 4.4.1
+    - org.apache.httpcomponents -> httpmime 4.4.1
     - commons-httpclient -> commons-httpclient 3.1
     - com.google.guava -> guava 18.0
-    - com.alibaba -> fastjson 1.1.19
-    - net.sf.opencsv -> opencsv 2.3
+    # fastjson 运行时不需要依赖
+    - com.alibaba -> fastjson 1.1.46:
+        transitive: false
     - org.activiti -> activiti-engine 5.15.1:
         exclude:
           - javax.persistence -> *
