@@ -4,6 +4,7 @@
     #{stylesheet_cdn name:'selectize.default.css'/}
 #{/set}
 #{set 'moreScripts'}
+    #{script_cdn name: 'component/pagination.coffee'/}
     #{script_cdn name: 'procureunits/index.coffee'/}
     #{script_cdn name: 'selectize.min.js'/}
 #{/set}
@@ -43,9 +44,9 @@
       <select name="p.stage" class="inline" style="width:82px;">
         <option value="">阶段</option>
       #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
-        #{if stage.label() != '审批中'}
-          <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
-        #{/if}
+          #{if stage.label() != '审批中'}
+            <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
+          #{/if}
       #{/list}
       </select>
 
@@ -94,6 +95,7 @@
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" class="input-medium" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+        <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
@@ -124,10 +126,10 @@
   </form>
 </div>
 
-<form method="post" id="create_deliveryment" >
+<form method="post" id="create_deliveryment">
   <div class="row-fluid">
     <div class="span12">
-    #{render 'ProcureUnits/_unit_list.html', units: p.query(), checkbox:true/}
+    #{render 'ProcureUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
     </div>
   </div>
 
