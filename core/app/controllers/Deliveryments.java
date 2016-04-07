@@ -268,7 +268,7 @@ public class Deliveryments extends Controller {
 
     @Check("deliveryments.manual")
     public static void manual() {
-        Deliveryment dmt = new Deliveryment(Deliveryment.id());
+        Deliveryment dmt = new Deliveryment();
         ProcureUnit unit = new ProcureUnit();
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
@@ -285,7 +285,7 @@ public class Deliveryments extends Controller {
     public static void createManual(Deliveryment dmt, ProcureUnit unit) {
         Validation.required("供应商", dmt.cooperator);
         Validation.required("采购单别名", dmt.name);
-
+        dmt.id = Deliveryment.id();
         User user = User.findByUserName(Secure.Security.connected());
         unit.cooperator = dmt.cooperator;
         unit.handler = user;
@@ -302,6 +302,7 @@ public class Deliveryments extends Controller {
             render("Deliveryments/manual.html", dmt, unit);
         }
         unit.save();
+
         dmt.save();
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);

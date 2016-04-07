@@ -157,7 +157,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.to = new Date();
         this.stage = ProcureUnit.STAGE.DONE;
         this.dateType = "createDate";
-        this.perSize = 25;
+        this.perSize = 70;
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {
