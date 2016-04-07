@@ -71,7 +71,7 @@ public class BtbOrderPost extends Post<BtbOrder> {
 
     public Long getTotalCount() {
         F.T2<String, List<Object>> params = params();
-        return BtbOrder.count(params._1, params._2.toArray());
+        return new Long(BtbOrder.find(params._1, params._2.toArray()).fetch().size());
     }
 
     @Override
