@@ -394,7 +394,7 @@ public class AmazonProps implements Serializable {
             else if("manufacturer".equals(name)) this.manufacturer = val;
 //            else if("brand_name".equals(name)) this.brand = val;
 //            else if("part_number".equals(name)) this.manufacturerPartNumber = val;
-//            else if("model".equals(name)) this.modelNumber = val;
+            else if("model".equals(name)) this.modelNumber = val;
             else if("quantity".equals(name))
                 this.quantity = NumberUtils.toInt(val, 0);
             else if("product_site_launch_date".equals(name) && StringUtils.isNotBlank(val))
@@ -412,8 +412,8 @@ public class AmazonProps implements Serializable {
             else if("generic_keywords3".equals(name)) searchTerms.add(val);
             else if("generic_keywords4".equals(name)) searchTerms.add(val);
             else if("generic_keywords5".equals(name)) searchTerms.add(val);
-            else if("recommended_browse_nodes[0]".equals(name)) rbns.add(val);
-            else if("recommended_browse_nodes[1]".equals(name)) rbns.add(val);
+            else if("recommended_browse_nodes".equals(name)) rbns.add(val);
+//          else if("recommended_browse_nodes[1]".equals(name)) rbns.add(val);
             else if("standard_price".equals(name))
                 this.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
             else if("sale_price".equals(name) && StringUtils.isNotBlank(val))
