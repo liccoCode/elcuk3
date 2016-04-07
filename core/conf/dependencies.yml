@@ -29,6 +29,7 @@ require:
     - org.apache.httpcomponents -> httpclient 4.4.1
     - org.apache.httpcomponents -> httpmime 4.4.1
     - commons-httpclient -> commons-httpclient 3.1
+    - xerces -> xercesImpl 2.10.0
     - com.google.guava -> guava 18.0
     # fastjson 运行时不需要依赖
     - com.alibaba -> fastjson 1.1.46:
