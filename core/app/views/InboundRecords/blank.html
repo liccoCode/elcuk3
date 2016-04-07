@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:'创建入库记录' /}
+#{set title:'添加其他入库' /}
 #{set 'moreScripts'}
     #{script_cdn name: 'inboundrecords/blank.coffee'/}
 #{/set}
@@ -7,9 +7,48 @@
 #{flash_alert/}
 
 #{form @InboundRecords.create(), method:'POST', id: 'new_inbound_record'}
+<h4 style="text-align:center" class="alert alert-info">添加其他入库</h4>
 <table class="table table-condensed table-bordered">
   <tr>
-    <td></td>
+    <th>物料编码</th>
+    <td>
+      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}">
+    </td>
+
+    <th>名称</th>
+    <td>
+      <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
+      <input type="text" name="stock_name" readonly="" value="${record.stockObj?.name()}">
+    </td>
+  </tr>
+  <tr>
+    <!-- TODO:: 到这里添加的入库是成品还是不良品,为何不良品不走质检流程?-->
+    <th>仓库</th>
+    <td colspan="4">
+      <!-- 仓库应该是由入库对象决定的,而不是手动选择的,手动选择的应该是是否发货(判断进入正常仓库还是不良品仓) -->
+      <input type="hidden" name="record.targetWhouse.id" value="${record.targetWhouse?.id}">
+      <input type="text" readonly="" value="${record.targetWhouse?.name}">
+    </td>
+  </tr>
+  <tr>
+    <th>实际入库数量</th>
+    <td>
+      <input type="text" name="record.qty" value="${record.qty}">
+    </td>
+
+    <th>不良品入库数量</th>
+    <td>
+      <input type="text" name="record.badQty" value="${record.qty}">
+    </td>
+  </tr>
+
+  <tr>
+    <th>备注</th>
+    <td colspan="4">
+      <textarea name="record.memo" rows="4" class="span10">
+        ${record.memo}
+      </textarea>
+    </td>
   </tr>
   <tr>
     <td colspan="4">

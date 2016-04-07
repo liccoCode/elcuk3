@@ -1,11 +1,13 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import helper.Webs;
 import models.User;
 import models.market.Account;
 import models.procure.Cooperator;
 import models.procure.FBACenter;
+import models.product.Product;
 import models.view.Ret;
 import models.view.post.WhousePost;
 import models.whouse.Whouse;
@@ -14,6 +16,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,5 +100,26 @@ public class Whouses extends Controller {
     public static void edit(long id) {
         Whouse wh = Whouse.findById(id);
         render(wh);
+    }
+
+    /**
+     * 根据字符模糊匹配出 SKU Or 物料编码
+     */
+    public static void sameCode(String search) {
+        List<Product> products = Product.find("sku like '" + search + "%'").fetch();
+        List<String> skus = new ArrayList<>();
+        for(Product p : products) skus.add(p.sku);
+        //TODO 物料编码查询
+        renderJSON(J.json(skus));
+    }
+
+    /**
+     * 根据 ID 查询出对应的对象(SKU 产品物料 包材物料)
+     *
+     * @param id
+     */
+    public static void loadStockObj(String id) {
+        //如何确认该 ID 属于谁?
+        //需要返回 name type whouse
     }
 }
