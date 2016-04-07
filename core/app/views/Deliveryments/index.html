@@ -4,10 +4,10 @@
     #{stylesheet_cdn name:'selectize.default.css'/}
 #{/set}
 #{set 'moreScripts'}
+    #{script_cdn name: 'component/pagination.coffee'/}
     #{script_cdn name: 'deliveryments/index.coffee'/}
     #{script_cdn name: 'selectize.min.js'/}
 #{/set}
-
 
 #{info_row}
 <ul>
@@ -18,131 +18,137 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-#{form @Deliveryments.index(), class:'search_form', id:'deliverys_form'}
-<div class="row-fluid">
-  <div class="span12">
-    <div class="input-prepend input-append inline">
-      <span class="add-on">From:</span>
-      <input type="date" name="p.from" value="${p.from.date()}">
-      <span class="add-on">To:</span>
-      <input type="date" name="p.to" value="${p.to.date()}">
-    </div>
+<form action="@{Deliveryments.index()}" class="search_form" id="deliverys_form">
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">From:</span>
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${p.to.date()}">
+      </div>
 
-      #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType,
-      class:'inline' /}
+    #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType,
+    class:'inline' /}
 
-      #{select_enum name:'p.state', items:models.procure.Deliveryment.S.values(), value:p.state, class:'inline'}
-        <option value="">状态</option>
-      #{/select_enum}
+    #{select_enum name:'p.state', items:models.procure.Deliveryment.S.values(), value:p.state, class:'inline'}
+      <option value="">状态</option>
+    #{/select_enum}
 
-      #{select_enum name: "p.deliveryType", items: models.procure.Deliveryment.T.values(), value: p.deliveryType, class:'inline'}
-        <option value="">类型</option>
-      #{/select_enum}
+    #{select_enum name: "p.deliveryType", items: models.procure.Deliveryment.T.values(), value: p.deliveryType, class:'inline'}
+      <option value="">类型</option>
+    #{/select_enum}
 
-    <select name="p.cooperId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
-      <option value="0">供应商</option>
-        #{list items:suppliers, as:'sp'}
-          <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
-        #{/list}
-    </select>
+      <select name="p.cooperId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
+        <option value="0">供应商</option>
+      #{list items:suppliers, as:'sp'}
+        <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+      #{/list}
+      </select>
 
-    <div class="input-prepend input-append inline">
-      <span class="add-on"><i class="icon-search"></i></span>
-      <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
-      <button class="btn btn-primary" data-loading>搜索</button>
-    </div>
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
 
-    <div class="inline">
-        #{power.ck "deliveryments.manual"}
-          <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
-            <i class="icon-plus"></i>新增手动单
-          </a>
-        #{/power.ck}
+      <div class="inline">
+      #{power.ck "deliveryments.manual"}
+        <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
+          <i class="icon-plus"></i>新增手动单
+        </a>
+      #{/power.ck}
 
-      <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
+        <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
+      </div>
     </div>
   </div>
-</div>
+  <input type="hidden" name="p.page" value="${p.page}">
 
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th></th>
-        <th>#</th>
-        <th>请款单</th>
-        <th>Name</th>
-        <th>State</th>
-        <th>单据类型</th>
-        <th>供应商</th>
-        <th>最先交货时间</th>
-        <th>最后交货时间</th>
-        <th>交货进度</th>
-        <th>User</th>
-        <th>Create</th>
-      </tr>
-        #{list items:deliveryments, as:'dmt'}
-            #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
-            #{set procress: dmt.deliveryProcress()/}
-          <tr>
-            <td>
-              <label>
-                  #{if dmt.apply == null}
-                    <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                           name="deliverymentIds" value="${dmt.id}">
-                  #{/if}
-              </label>
-            </td>
-            <td>
-              <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
-            </td>
-            <td>
-                #{if dmt.apply}
-                  <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
-                  <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th></th>
+          <th>#</th>
+          <th>请款单</th>
+          <th>Name</th>
+          <th>State</th>
+          <th>单据类型</th>
+          <th>供应商</th>
+          <th>最先交货时间</th>
+          <th>最后交货时间</th>
+          <th>交货进度</th>
+          <th>User</th>
+          <th>Create</th>
+        </tr>
+      #{list items:deliveryments, as:'dmt'}
+          #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+          #{set procress: dmt.deliveryProcress()/}
+        <tr>
+          <td>
+            <label>
+                #{if dmt.apply == null}
+                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
+                         name="deliverymentIds" value="${dmt.id}">
                 #{/if}
-                #{else }
-                  没有请款单
-                #{/else}
-            </td>
-            <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
-              <span><i class="icon-reorder"></i></span>
-              <span>${dmt.name}</span>
-              <span class="badge badge-info">${dmt.units.size()}</span>
-            </td>
-            <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
-            <td>${dmt.deliveryType?.label()}</td>
-            <td>${dmt.supplier()?.fullName}</td>
-            <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
-            <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
-            <td>
-              <div class="progress progress-striped" style="margin-bottom:0;">
-                <div class="bar" style="width: ${(procress._1 / procress._2).format('#%')};">
-                  <p class="text-error">
-                  ${procress._1} / ${procress._2}
-                  </p>
-                </div>
+            </label>
+          </td>
+          <td>
+            <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
+          </td>
+          <td>
+              #{if dmt.apply}
+                <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
+                <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
+              #{/if}
+              #{else }
+                没有请款单
+              #{/else}
+          </td>
+          <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+            <span><i class="icon-reorder"></i></span>
+            <span>${dmt.name}</span>
+            <span class="badge badge-info">${dmt.units.size()}</span>
+          </td>
+          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
+          <td>${dmt.deliveryType?.label()}</td>
+          <td>${dmt.supplier()?.fullName}</td>
+          <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
+          <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
+          <td>
+            <div class="progress progress-striped" style="margin-bottom:0;">
+              <div class="bar" style="width: ${(procress._1 / procress._2).format('#%')};">
+                <p class="text-error">
+                ${procress._1} / ${procress._2}
+                </p>
               </div>
-            </td>
-            <td>${dmt.handler.username}</td>
-            <td>#{time_tooltip time:dmt.createDate/}</td>
-          </tr>
-          <tr id="dmt_${dmt_index}" style="display:none;">
-            <td colspan="12" style="padding:0;border:none">
-                #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
-            </td>
-          </tr>
-        #{/list}
-    </table>
-    <div class="btn-toolbar">
-        #{power.ck 'deliveryments.deliverymenttoapply'}
-            #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber'}
-                #{option '0'}新请款单#{/option}
-            #{/select}
-          <input url='@{Deliveryments.deliverymentToApply()}'
-                 type="submit" id="goToDeliverymentApply" class="btn  btn-success" value="采购单请款">
-        #{/power.ck}
+            </div>
+          </td>
+          <td>${dmt.handler.username}</td>
+          <td>#{time_tooltip time:dmt.createDate/}</td>
+        </tr>
+        <tr id="dmt_${dmt_index}" style="display:none;">
+          <td colspan="12" style="padding:0;border:none">
+              #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
+          </td>
+        </tr>
+      #{/list}
+        <tr class="tb_footer">
+          <td colspan="12">
+          #{bootstrap_pager pi:p, url:'' /}
+          </td>
+        </tr>
+      </table>
+      <div class="btn-toolbar">
+      #{power.ck 'deliveryments.deliverymenttoapply'}
+          #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber'}
+              #{option '0'}新请款单#{/option}
+          #{/select}
+        <input url='@{Deliveryments.deliverymentToApply()}'
+               type="submit" id="goToDeliverymentApply" class="btn  btn-success" value="采购单请款">
+      #{/power.ck}
+      </div>
     </div>
   </div>
-</div>
-#{/form}
+</form>

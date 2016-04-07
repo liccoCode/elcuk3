@@ -27,6 +27,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 8/23/12
  * Time: 12:18 PM
+ * @deprecated
  */
 public class FAndRNotificationJob extends Job {
     @Override

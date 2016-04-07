@@ -26,7 +26,8 @@ public class OutboundRecords extends Controller {
     }
 
     public static void blank() {
-
+        OutboundRecord record = new OutboundRecord();
+        render(record);
     }
 
     public static void create(OutboundRecord record) {

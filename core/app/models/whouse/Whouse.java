@@ -2,11 +2,13 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.GTs;
 import models.User;
 import models.market.Account;
 import models.market.M;
 import models.procure.Cooperator;
 import models.procure.Shipment;
+import models.qc.CheckTask;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.joda.time.DateTime;
@@ -15,10 +17,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 不同的仓库的抽象
@@ -348,6 +347,27 @@ public class Whouse extends Model {
         public boolean evaluate(Object o) {
             Shipment ship = (Shipment) o;
             return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date));
+        }
+    }
+
+    private static final Map<StockObj.SOT, STY> WhouseStyleMap = GTs.MapBuilder
+            .map(StockObj.SOT.SKU, Whouse.STY.Product)
+            .put(StockObj.SOT.PRODUCT_MATERIEL, Whouse.STY.BareProduct)
+            .put(StockObj.SOT.PACKAGE_MATERIEL, Whouse.STY.Package)
+            .build();
+
+    /**
+     * 根据存货条目类型与质检结果来选择仓库的类型
+     *
+     * @return
+     */
+    public static STY selectStyle(CheckTask.ShipType checkResult, StockObj.SOT stockObjType) {
+        if(checkResult == CheckTask.ShipType.SHIP) {//发货时的处理
+            return WhouseStyleMap.get(stockObjType);
+        } else if(checkResult == CheckTask.ShipType.NOTSHIP) {//不发货时的处理
+            return Whouse.STY.Defective;
+        } else {
+            return STY.Product;
         }
     }
 }

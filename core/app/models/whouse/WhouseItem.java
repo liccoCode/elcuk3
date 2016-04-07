@@ -1,6 +1,7 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.qc.CheckTask;
 import play.db.jpa.Model;
 
 import javax.persistence.Embedded;
@@ -42,4 +43,12 @@ public class WhouseItem extends Model {
 
     @Expose
     public Date updateDate = new Date();
+
+    public WhouseItem() {
+    }
+
+    public WhouseItem(StockObj stockObj, CheckTask.ShipType st) {
+        this.stockObj = stockObj;
+        this.whouse = Whouse.find("style=?", Whouse.selectStyle(st, stockObj.stockObjType)).first();
+    }
 }

@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
  * User: wyattpan
  * Date: 9/24/12
  * Time: 10:42 AM
+ *
+ * @deprecated
  */
 public class ListingWork extends Job<Listing> {
     private String listingId;

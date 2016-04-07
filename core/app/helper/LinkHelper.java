@@ -1,7 +1,9 @@
 package helper;
 
 import models.market.Selling;
+import models.whouse.StockObj;
 import org.apache.commons.lang.StringUtils;
+import play.mvc.Router;
 import play.templates.JavaExtensions;
 
 /**
@@ -21,7 +23,7 @@ public class LinkHelper extends JavaExtensions {
         if(StringUtils.isBlank(s.asin) || StringUtils.isBlank(s.market.toString())) {
             return "#";
         }
-        switch (s.market) {
+        switch(s.market) {
             case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
@@ -33,5 +35,20 @@ public class LinkHelper extends JavaExtensions {
                 return String.format("http://www.%s/gp/product/%s", s.market, s.asin);
         }
         return "#";
+    }
+
+    public static String showStockObjLink(StockObj obj) {
+        switch(obj.stockObjType) {
+            case SKU:
+                return Router.getFullUrl("Products.show", GTs.newMap("id", obj.stockObjId).build());
+            case PRODUCT_MATERIEL:
+                //TODO
+                return "";
+            case PACKAGE_MATERIEL:
+                //TODO
+                return "";
+            default:
+                return "";
+        }
     }
 }

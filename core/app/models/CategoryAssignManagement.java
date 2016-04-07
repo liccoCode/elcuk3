@@ -177,7 +177,7 @@ public class CategoryAssignManagement extends Model {
     public boolean isQCrole() {
         boolean temp = false;
         for(Role role : this.user.roles) {
-            if(role.roleName.indexOf("质检") >= 0) {
+            if(role.roleName.contains("质检")) {
                 temp = true;
             }
         }

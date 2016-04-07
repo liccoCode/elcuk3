@@ -15,6 +15,7 @@ import java.util.List;
  * User: Wyatt
  * Date: 12-1-7
  * Time: 上午1:57
+ * @deprecated 无需使用
  */
 @Entity
 public class Server extends Model {

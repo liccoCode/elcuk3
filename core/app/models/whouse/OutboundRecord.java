@@ -151,6 +151,8 @@ public class OutboundRecord extends Model {
      */
     public void confirm() {
         this.state = S.Outbound;
+        this.outboundDate = new Date();
+        this.save();
         new StockRecord(this).save();
     }
 

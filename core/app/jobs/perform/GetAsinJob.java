@@ -7,16 +7,14 @@ import helper.HTTP;
 import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
-import models.Notification;
 import models.User;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
-import models.market.Listing;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.elasticsearch.common.joda.time.DateTime;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -33,6 +31,7 @@ import java.util.Map;
  * User: wyatt
  * Date: 12/19/13
  * Time: 5:31 PM
+ * @deprecated
  */
 public class GetAsinJob extends BaseJob {
     // 计数器，记录该Job被执行了多少次

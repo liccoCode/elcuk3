@@ -24,6 +24,7 @@ import java.util.List;
  * User: mac
  * Date: 14-3-11
  * Time: PM5:07
+ * @deprecated 已经无人使用
  */
 @Entity
 public class SaleTarget extends Model {

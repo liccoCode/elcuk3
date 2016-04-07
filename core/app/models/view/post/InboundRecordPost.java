@@ -1,8 +1,13 @@
 package models.view.post;
 
+import helper.Dates;
 import models.whouse.InboundRecord;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,8 +17,61 @@ import java.util.List;
  * Time: 5:57 PM
  */
 public class InboundRecordPost extends Post<InboundRecord> {
+    public Date from;
+    public Date to;
+
+    public InboundRecord.O origin;
+    public InboundRecord.S state;
+
+    public InboundRecordPost() {
+        DateTime now = DateTime.now().withTimeAtStartOfDay();
+        this.from = now.toDate();
+        this.to = now.minusMonths(1).toDate();
+        this.perSize = 25;
+        this.page = 1;
+    }
+
     @Override
     public F.T2<String, List<Object>> params() {
-        return null;
+        StringBuilder sbd = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        if(this.origin != null) {
+            sbd.append(" origin=?");
+            params.add(this.origin.name());
+        }
+
+        if(this.state != null) {
+            sbd.append(" AND state=?");
+            params.add(this.state.name());
+        }
+
+        if(this.from != null) {
+            sbd.append(" AND completeDate>=?");
+            params.add(Dates.morning(this.from));
+        }
+        if(this.to != null) {
+            sbd.append(" AND completeDate<=?");
+            params.add(Dates.morning(this.to));
+        }
+
+        if(StringUtils.isNotBlank(this.search)) {
+            sbd.append(" AND (id LIKE ? OR checkTask.id LIKE ? OR stockObjId LIKE ?)");
+            for(int i = 0; i < 3; i++) params.add(this.word());
+        }
+
+        return new F.T2<String, List<Object>>(sbd.toString(), params);
+    }
+
+    @Override
+    public List<InboundRecord> query() {
+        F.T2<String, List<Object>> params = params();
+        this.count = count(params);
+        return InboundRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return InboundRecord.count(params._1, params._2.toArray());
     }
 }

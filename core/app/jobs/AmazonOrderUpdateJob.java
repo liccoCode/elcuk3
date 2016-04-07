@@ -32,6 +32,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 6/11/12
  * Time: 2:44 PM
+ * @deprecated
  */
 public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override

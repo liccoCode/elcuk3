@@ -1,6 +1,9 @@
 package jobs.promise;
 
-import helper.*;
+import helper.Currency;
+import helper.Dates;
+import helper.HTTP;
+import helper.Webs;
 import jobs.AmazonFinanceCheckJob;
 import models.finance.FeeType;
 import models.finance.SaleFee;
@@ -20,19 +23,14 @@ import play.jobs.Job;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Calendar;
-
-import org.apache.http.cookie.Cookie;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
  * User: wyatt
  * Date: 6/4/13
  * Time: 10:45 AM
+ * @deprecated
  */
 public class FinanceShippedPromise extends Job<List<SaleFee>> {
     private Account account;

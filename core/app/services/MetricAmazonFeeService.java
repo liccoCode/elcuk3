@@ -166,7 +166,7 @@ public class MetricAmazonFeeService {
         SqlSelect sellFeesTemplate = new SqlSelect()
                 .select("sum(usdCost) as cost")
                 .from("SaleFee")
-                        // 需要统计 productcharges 销售价格, 和 shipping 加快快递(这个会在 amazon 中减去)
+                // 需要统计 productcharges 销售价格, 和 shipping 加快快递(这个会在 amazon 中减去)
                 .where(SqlSelect.whereIn("type_name", feeTypes));
         Map<String, Float> sellingSales = new HashMap<String, Float>();
         for(String sellingId : sellingOrders.keySet()) {
@@ -190,6 +190,17 @@ public class MetricAmazonFeeService {
         }
     }
 
+    public static final Map<String, List<String>> TypeMaps = GTs.MapBuilder
+            .map("productcharges", Arrays.asList("productcharges", "principal"))
+            .put("promorebates", Arrays.asList("promorebates", "promotionmetadatadefinitionvalue"))
+            .put("commission", Arrays.asList("fbaperorderfulfillmentfee", "fbaperorderfulfilmentfee",
+                    "fbaperunitfulfillmentfee", "fbapickpackfeeperunit", "fbaweightbasedfee", "fbaweighthandlingfee",
+                    "fbaorderhandlingfeeperorder", "fulfillmentnetworkfee", "commission", "refundcommission",
+                    "crossborderfulfilmentfee", "shippingchargeback", "shippinghb"))
+            .put("other", Arrays.asList("shipping", "shippingcharge", "giftwrap", "giftwrapchargeback", "goodwill",
+                    "codchargeback", "paymentmethodfee", "restockingfee"))
+            .build();
+
     public Map<String, Map<String, BigDecimal>> orderFeesCost() {
         SearchSourceBuilder search = new SearchSourceBuilder().size(0);
         FilterAggregationBuilder dateAndMarketAggregation = AggregationBuilders.filter("date_and_market_filters")
@@ -200,35 +211,26 @@ public class MetricAmazonFeeService {
 
             //套上一层便于区分
             feeCategoryAggregation.filter(FilterBuilders.matchAllFilter());
-
-            for(String feeType : Arrays.asList("productcharges", "principal", "promorebates", "commission")) {
-                //使用 Cost 的正负来判断是属于 Order 还是 Refunds
+            for(String feeType : Arrays
+                    .asList("productcharges", "promorebates", "commission", "other")) {
+                //使用 cost 的正负来判断是属于 Order 还是 Refunds
                 FilterAggregationBuilder feeTypeAggregation = AggregationBuilders.filter(feeType);
                 feeTypeAggregation.filter(
-                        FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("fee_type", feeType))
-                                .must(costRangeFilter(state, feeType))
+                        FilterBuilders.boolFilter().must(
+                                FilterBuilders.termsFilter("fee_type", TypeMaps.get(feeType)),
+                                costRangeFilter(state, feeType)
+                        )
                 );
 
                 feeTypeAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
                 feeCategoryAggregation.subAggregation(feeTypeAggregation);
             }
-
-            FilterAggregationBuilder otherAggregation = AggregationBuilders.filter("other");
-            otherAggregation.filter(
-                    FilterBuilders.boolFilter()
-                            .mustNot(
-                                    FilterBuilders.termsFilter("fee_type", Arrays.asList("productcharges", "principal",
-                                            "promorebates", "commission", "fbaweightbasedfee",
-                                            "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee"))
-                            ).must(costRangeFilter(state, "other"))
-            );
-            otherAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
-            feeCategoryAggregation.subAggregation(otherAggregation);
             dateAndMarketAggregation.subAggregation(feeCategoryAggregation);
         }
+        //Other transactionType: free_replacement_refund_items incorrect_fees_items reversalreimbursement
+        // REVERSAL_REIMBURSEMENT
 
-        //Selling Fees
+        //TODO Selling Fees 好像 Amazon 统计的是 ServiceFees
         FilterAggregationBuilder fbaFeeAggregation = AggregationBuilders.filter("selling_fees");
         fbaFeeAggregation.filter(
                 FilterBuilders.termsFilter("fee_type",
@@ -286,16 +288,11 @@ public class MetricAmazonFeeService {
             JSONObject feeCategoryObj = dateAndMarket.getJSONObject(feeCategory);
 
             Map<String, BigDecimal> feeCategoryMap = new HashMap<String, BigDecimal>();
-            for(String feeType : Arrays.asList("productcharges", "principal", "promorebates", "commission", "other")) {
+            for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
                 JSONObject feeTypeObj = feeCategoryObj.getJSONObject(feeType);
                 BigDecimal cost = feeTypeObj.getJSONObject("order_fees_cost").getBigDecimal("value");
 
-                if(feeType.equalsIgnoreCase("principal")) {
-                    feeCategoryMap.put("productcharges",
-                            feeCategoryMap.get("productcharges").add(cost.setScale(2, BigDecimal.ROUND_HALF_UP)));
-                } else {
-                    feeCategoryMap.put(feeType, cost.setScale(2, BigDecimal.ROUND_HALF_UP));
-                }
+                feeCategoryMap.put(feeType, cost.setScale(2, BigDecimal.ROUND_HALF_UP));
             }
             feesCost.put(feeCategory, feeCategoryMap);
         }

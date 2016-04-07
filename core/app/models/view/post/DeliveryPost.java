@@ -26,6 +26,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
         this.dateType = DateType.DELIVERY;
+        this.perSize = 25;
     }
 
     /**
@@ -132,10 +133,24 @@ public class DeliveryPost extends Post<Deliveryment> {
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 
+    public Long getTotalCount() {
+        return this.count();
+     }
+
+    public Long count(F.T2<String, List<Object>> params) {
+        this.count = Deliveryment.find(params._1, params._2.toArray()).fetch().size();
+        return this.count;
+    }
+
     public List<Deliveryment> query() {
         F.T2<String, List<Object>> params = params();
         return Deliveryment.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
-                .fetch();
+                .fetch(this.page, this.perSize);
+    }
+
+    public List<Deliveryment> queryForExcel() {
+        F.T2<String, List<Object>> params = params();
+        return Deliveryment.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray()).fetch();
     }
 
     public F.T3<Boolean, String, List<Object>> multiProcureUnit() {
@@ -148,7 +163,7 @@ public class DeliveryPost extends Post<Deliveryment> {
                         new ArrayList<Object>(Arrays.asList(size)));
             }
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 
     /**
@@ -167,7 +182,7 @@ public class DeliveryPost extends Post<Deliveryment> {
                         new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 
 }

@@ -103,7 +103,7 @@ public class Promises {
         public Connection getConnection() {
             if(connHolder.get() == null) {
                 try {
-                    connHolder.set(DB.datasource.getConnection());
+                    connHolder.set(DB.getDataSource().getConnection());
                 } catch(SQLException e) {
                     throw new FastRuntimeException(e);
                 }

@@ -32,6 +32,7 @@ import java.util.Map;
  * User: wyattpan
  * Date: 2/7/12
  * Time: 11:32 AM
+ * @deprecated
  */
 public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
 

@@ -2,6 +2,7 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import models.product.Product;
+import models.qc.CheckTask;
 import org.apache.commons.lang3.StringUtils;
 import play.data.validation.Required;
 import play.utils.FastRuntimeException;
@@ -72,8 +73,30 @@ public class StockObj implements Serializable {
             this.stockObjType = SOT.SKU;
             this.stockObjId = product.sku;
         } else {
-            throw new FastRuntimeException("货物不能为空!");
+            throw new FastRuntimeException("Product 不能为空!");
         }
     }
-    //TODO 支持产品物料与包材物料
+
+    public String name() {
+        switch(this.stockObjType) {
+            case SKU:
+                return getProduct().productName;
+            case PRODUCT_MATERIEL:
+            case PACKAGE_MATERIEL:
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * 根据实际存储的货物和质检结果来挑选一个仓库项, 用来接收货物
+     *
+     * @param st
+     * @return
+     */
+    public WhouseItem pickWhouseItem(CheckTask.ShipType st) {
+        WhouseItem whouseItem = WhouseItem.find("whouse.style=? AND stockObjId=? AND stockObjType=?",
+                Whouse.selectStyle(st, this.stockObjType).name(), this.stockObjId, this.stockObjType).first();
+        return whouseItem != null ? whouseItem : new WhouseItem(this, st).<WhouseItem>save();
+    }
 }

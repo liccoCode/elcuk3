@@ -12,6 +12,7 @@ import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -478,7 +479,7 @@ public class Payment extends Model {
         jpql.from("Payment")
                 .where("cooperator=?").param(cooper)
                 .where("createdAt>=?").param(now.minusHours(24).toDate())
-                .where("createdAt<=?").param(now.toDate())
+                .where("createdAt<=?").param(Dates.night(now.toDate()))
                 .where("state=?").param(S.WAITING)
                 .where("currency=?").param(currency);
         if(apply instanceof TransportApply)
@@ -499,6 +500,9 @@ public class Payment extends Model {
             payment.target = cooper.paymentMethods.get(0);
             payment.currency = currency;
             payment.generatePaymentNumber(apply).save();
+            Logger.info("新增支付单:" + payment.paymentNumber + " totalUSD:" + payment.totalFees()._1 + currency.toUSD(amount)
+                + "totalCNY:" + payment.totalFees()._2 + currency.toCNY(amount) + "apply:" + apply
+                + "createdAt:>=" +now.minusHours(24).toDate() + "createdAt:<=" + now.toDate());
         }
         return payment;
     }
