@@ -16,6 +16,7 @@ import java.util.List;
  * User: rose
  * Date: 13-4-3
  * Time: 下午1:48
+ * @deprecated 已经无用
  */
 @With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class MailsRecords extends Controller {

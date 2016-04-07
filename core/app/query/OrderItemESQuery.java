@@ -145,7 +145,7 @@ public class OrderItemESQuery {
     /**
      * @param val
      * @param type sku/msku/cat
-     * @return
+     * @deprecated facetFilter 查询需要替换
      */
     private Series.Line base(String val, String type, M market, Date from, Date to) {
 
@@ -160,17 +160,17 @@ public class OrderItemESQuery {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
-                        .keyField("date")
-                        .valueField("quantity")
-                        .interval("day")
-                        .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                        .facetFilter(FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("date")
-                                        .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat))
-                                ).mustNot(FilterBuilders.termFilter("state", "cancel"))
-                        )
+                                .keyField("date")
+                                .valueField("quantity")
+                                .interval("day")
+                                .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                                .facetFilter(FilterBuilders.boolFilter()
+                                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                                .must(FilterBuilders.rangeFilter("date")
+                                                                .gte(fromD.toString(isoFormat))
+                                                                .lt(toD.toString(isoFormat))
+                                                ).mustNot(FilterBuilders.termFilter("state", "cancel"))
+                                )
                 ).size(0);
 
         if(StringUtils.isBlank(val)) {
@@ -207,7 +207,7 @@ public class OrderItemESQuery {
     /**
      * 计算滑动平均
      *
-     * @return
+     * @deprecated facetFilter 查询需要替换
      */
     public Series.Line baseMoveingAve(String val, String type, M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -249,6 +249,12 @@ public class OrderItemESQuery {
         return line;
     }
 
+    /**
+     * @param market
+     * @param from
+     * @param to
+     * @deprecated facetFilter 查询需要替换
+     */
     public Series.Pie categoryPie(M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
 
@@ -259,16 +265,16 @@ public class OrderItemESQuery {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(QueryBuilders.matchAllQuery())
                 .facet(FacetBuilders.termsStatsFacet("units")
-                        .keyField("category_id")
-                        .valueField("quantity")
-                        .size(30) // category 数量
-                        .facetFilter(FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("date")
-                                        .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat))
+                                .keyField("category_id")
+                                .valueField("quantity")
+                                .size(30) // category 数量
+                                .facetFilter(FilterBuilders.boolFilter()
+                                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                                .must(FilterBuilders.rangeFilter("date")
+                                                                .gte(fromD.toString(isoFormat))
+                                                                .lt(toD.toString(isoFormat))
+                                                )
                                 )
-                        )
                 ).size(0);
         JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");
@@ -300,7 +306,7 @@ public class OrderItemESQuery {
     /**
      * @param val
      * @param type sku/msku/cat
-     * @return
+     * @deprecated facetFilter 查询需要替换
      */
     public Series.Line skusSearch(String type, String val, M market, Date from, Date to, boolean issku) {
 
@@ -316,17 +322,17 @@ public class OrderItemESQuery {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
-                        .keyField("date")
-                        .valueField("quantity")
-                        .interval("day")
-                        .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                        .facetFilter(FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("date")
-                                        .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat))
-                                ).must(skusfilter(type, val))
-                        )
+                                .keyField("date")
+                                .valueField("quantity")
+                                .interval("day")
+                                .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                                .facetFilter(FilterBuilders.boolFilter()
+                                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                                .must(FilterBuilders.rangeFilter("date")
+                                                                .gte(fromD.toString(isoFormat))
+                                                                .lt(toD.toString(isoFormat))
+                                                ).must(skusfilter(type, val))
+                                )
                 ).size(0);
 
         Logger.info(search.toString());
@@ -362,7 +368,7 @@ public class OrderItemESQuery {
     /**
      * 计算滑动平均
      *
-     * @return
+     * @deprecated facetFilter 查询需要替换
      */
     public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to, boolean issku) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -376,8 +382,8 @@ public class OrderItemESQuery {
         RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
                 .keyField("date").valueField("quantity")
                 .facetFilter(FilterBuilders.boolFilter()
-                        .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                        .must(skusfilter(type, val))
+                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                .must(skusfilter(type, val))
                 );
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
@@ -462,8 +468,8 @@ public class OrderItemESQuery {
                     .must(FilterBuilders.termFilter("market", m.name().toLowerCase()))
                             //日期间隔
                     .must(FilterBuilders.rangeFilter("date")
-                            .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
-                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
+                                    .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
+                                    .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
                     ).mustNot(FilterBuilders.termFilter("state", "cancel"));
             marketAggregation.filter(filter);
             for(String sku : skus) {

@@ -29,6 +29,7 @@ public class MarketAnalysis extends Controller {
 
     /**
      * 卖家分析
+     * @deprecated 这个被取消
      */
     public static void reports() {
         render();
@@ -36,6 +37,7 @@ public class MarketAnalysis extends Controller {
 
     /**
      * 价格分析
+     * @deprecated 这个被取消
      */
     public static void prices() {
         render();

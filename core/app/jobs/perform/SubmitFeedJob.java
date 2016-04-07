@@ -27,6 +27,7 @@ import java.util.Map;
  * User: wyatt
  * Date: 12/17/13
  * Time: 3:50 PM
+ * @deprecated
  */
 public class SubmitFeedJob extends BaseJob {
 

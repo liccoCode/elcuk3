@@ -16,6 +16,7 @@ import query.PmDashboardCache;
  * User: mac
  * Date: 14-3-21
  * Time: PM2:03
+ * @deprecated
  */
 public class PmDashboardFetchJob extends BaseJob {
 

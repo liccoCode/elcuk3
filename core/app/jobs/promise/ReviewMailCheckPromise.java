@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
  * User: wyattpan
  * Date: 10/29/12
  * Time: 9:55 AM
+ * @deprecated
  */
 public class ReviewMailCheckPromise extends Job {
     private String orderId;

@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * User: wyattpan
  * Date: 12/29/11
  * Time: 12:39 AM
+ * @deprecated
  */
 public class ListingSchedulJob extends Job {
     // 生产者

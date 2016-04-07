@@ -2,6 +2,7 @@ package helper;
 
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -753,16 +754,21 @@ public enum Currency {
 
     @SuppressWarnings("unchecked")
     private static Float ratio(String from, String to) {
+        // TODO: 或者使用三方的 API 服务,  一个月 1000 次请求:
+        // 1. https://www.exchangerate-api.com/app/subscription
+        // 2. https://openexchangerates.org/account
+        // 3. http://api.fixer.io/latest?base=USD (**** 免费, 只支持部分从银行获取)
+        // 银行服务: http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml?98b2e934ad0acf36299d44053f71a7a6
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
 
             String html = "";
             String proxyhost = models.OperatorConfig.getVal("proxyhost");
-            if(!proxyhost.equals("")) {
-                html = HTTP.getProxy(proxyhost, "https://www.google.com/finance/converter?a=1&from=" + from + "&to=" +
-                        to);
+            String url = "https://www.google.com/finance/converter?a=1&from=" + from + "&to=" + to;
+            if(StringUtils.isNotBlank(proxyhost)) {
+                html = HTTP.proxyGet(proxyhost, url);
             } else {
-                html = HTTP.get("https://www.google.com/finance/converter?a=1&from=" + from + "&to=" + to);
+                html = HTTP.get(url);
             }
             Document doc = Jsoup.parse(html);
             String toStr = doc.select("#currency_converter_result .bld").text();

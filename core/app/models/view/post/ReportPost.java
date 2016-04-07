@@ -32,7 +32,7 @@ public class ReportPost extends Post<ReportRecord> {
     /**
      * 在未指定具体某一种报表类型的情况下用来区分销售报表与财务报表大的报表类型
      */
-    public List<ReportRecord.RT> reportTypes = new ArrayList<ReportRecord.RT>();
+    public List<ReportRecord.RT> reportTypes = new ArrayList<>();
 
     /**
      * 所有销售报表的报表类型
@@ -96,7 +96,7 @@ public class ReportPost extends Post<ReportRecord> {
         } else {
             sbd.append("AND reporttype IN " + SqlSelect.inlineParam(this.reportTypes));
         }
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
 }

@@ -2,27 +2,22 @@ package models.view.post;
 
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
-import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.market.M;
-import models.view.dto.AnalyzeDTO;
+import models.product.Category;
+import models.product.Product;
 import models.view.dto.ProfitDto;
+import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.libs.F;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import models.view.report.Profit;
 import services.MetricProfitService;
 import services.MetricQtyService;
-import models.product.Product;
-import models.product.Category;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 利润页面的搜索,不进入数据库
@@ -112,7 +107,7 @@ public class ProfitPost extends Post<Profit> {
 
     @SuppressWarnings("unchecked")
     public List<Profit> query() {
-        List<Profit> profitlist = new ArrayList<Profit>();
+        List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
          */
@@ -127,7 +122,7 @@ public class ProfitPost extends Post<Profit> {
 
     @SuppressWarnings("unchecked")
     public List<Profit> Inventory() {
-        List<Profit> profitlist = new ArrayList<Profit>();
+        List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
          */
@@ -142,7 +137,7 @@ public class ProfitPost extends Post<Profit> {
     public List<Profit> calTotal(List<Profit> profits) {
 
 
-        List<Profit> newprofits = new ArrayList<Profit>();
+        List<Profit> newprofits = new ArrayList<>();
         /**
          * 计算每个SKU的合计
          */
