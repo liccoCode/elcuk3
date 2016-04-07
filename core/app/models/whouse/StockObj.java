@@ -82,7 +82,9 @@ public class StockObj implements Serializable {
             case SKU:
                 return getProduct().productName;
             case PRODUCT_MATERIEL:
+                //TODO
             case PACKAGE_MATERIEL:
+                //TODO
             default:
                 return "";
         }
