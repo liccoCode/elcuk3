@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import models.view.Ret;
 import models.view.post.InboundRecordPost;
 import models.whouse.InboundRecord;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -30,13 +31,21 @@ public class InboundRecords extends Controller {
         render(record);
     }
 
+    public static void create(InboundRecord record) {
+        validation.valid(record);
+        if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
+        record.save();
+        flash.success("创建成功!");
+        redirect("/InboundRecords/index");
+    }
+
     /**
      * 修改入库记录
      *
      * @param attr
      * @param value
      */
-    public static void updateInboundRecord(Long id, String attr, String value) {
+    public static void update(Long id, String attr, String value) {
         InboundRecord record = InboundRecord.findById(id);
         try {
             record.updateAttr(attr, value);
