@@ -25,19 +25,19 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
     public InboundRecordPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
-        this.from = now.toDate();
-        this.to = now.minusMonths(1).toDate();
+        this.from = now.minusMonths(1).toDate();
+        this.to = now.toDate();
         this.perSize = 25;
         this.page = 1;
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder();
+        StringBuilder sbd = new StringBuilder("1=1");
         List<Object> params = new ArrayList<>();
 
         if(this.origin != null) {
-            sbd.append(" origin=?");
+            sbd.append(" AND origin=?");
             params.add(this.origin.name());
         }
 
