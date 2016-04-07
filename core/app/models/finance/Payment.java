@@ -479,7 +479,7 @@ public class Payment extends Model {
         jpql.from("Payment")
                 .where("cooperator=?").param(cooper)
                 .where("createdAt>=?").param(now.minusHours(24).toDate())
-                .where("createdAt<=?").param(now.toDate())
+                .where("createdAt<=?").param(Dates.night(now.toDate()))
                 .where("state=?").param(S.WAITING)
                 .where("currency=?").param(currency);
         if(apply instanceof TransportApply)
