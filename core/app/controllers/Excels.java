@@ -2,10 +2,8 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-import helper.Caches;
 import helper.*;
 import helper.Currency;
-import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
 import models.market.BtbOrder;
@@ -18,20 +16,18 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
-import play.libs.Files;
 import play.modules.excel.RenderExcel;
-import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 import services.MetricAmazonFeeService;
@@ -41,8 +37,6 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static play.modules.pdf.PDF.renderPDF;
 
 
 /**
@@ -60,7 +54,10 @@ public class Excels extends Controller {
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(excel);
+
+        ProcureUnit unit = excel.dmt.units.get(0);
+        String currency = unit.attrs.currency.symbol();
+        render(excel, currency);
     }
 
     @Check("excels.deliveryment")
@@ -105,7 +102,7 @@ public class Excels extends Controller {
                     String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
-            render(dp,unitList);
+            render(dp, unitList);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
@@ -146,6 +143,7 @@ public class Excels extends Controller {
      * 下载采购单综合Excel表格
      */
     public static void analyzes(AnalyzePost p) {
+        p.needPagination = false;
         List<AnalyzeDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
@@ -301,6 +299,7 @@ public class Excels extends Controller {
                 if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
                 String post_key = Caches.Q
                         .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                Logger.info("skuprofitpost KEY: " + post_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -696,5 +695,30 @@ public class Excels extends Controller {
                         DateTime.now().toDate())));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(feesCost, from, to, dateFormat);
+    }
+
+    public static void orderReports(OrderPOST p) {
+        if(p == null) p = new OrderPOST();
+        List<OrderReportDTO> orders = p.queryForExcel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("订单汇总报表%s.xls", dateFormat.format(p.begin)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(orders, p.begin, p.end, dateFormat);
+    }
+
+    /**
+     * 采购订单明细报表
+     */
+    public static void purchaseOrderDetailReport(PurchaseOrderPost p) {
+        if(p == null) p = new PurchaseOrderPost();
+        List<ProcureUnit> dtos = p.query();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        DecimalFormat df = new DecimalFormat("#.00");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("采购订单明细表%s.xls", format.format(new Date())));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, dateFormat, p, df);
     }
 }

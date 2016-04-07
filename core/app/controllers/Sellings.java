@@ -80,10 +80,17 @@ public class Sellings extends Controller {
      * @param msku
      */
     public static void sameFamilySellings(String msku) {
-        List<Selling> sellings = Selling
-                .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
         List<String> sids = new ArrayList<String>();
-        for(Selling s : sellings) sids.add(s.sellingId);
+        Product product = Product.findByMerchantSKU(msku);
+        if(product != null && product.family != null) {
+            List<Selling> sellings = Selling.find("listing.product.family=?", product.family).fetch();
+            if(!sellings.isEmpty()) {
+                for(Selling s : sellings) {
+                    sids.add(s.sellingId);
+                }
+            }
+
+        }
         renderJSON(J.json(sids));
     }
 
@@ -166,7 +173,7 @@ public class Sellings extends Controller {
         Selling s = Selling.findById(sid);
         List<Error> errors = new ArrayList<Error>();
         try {
-            s.uploadFeedAmazonImg(imgs, false,Secure.Security.connected().toLowerCase());
+            s.uploadFeedAmazonImg(imgs, false, Secure.Security.connected().toLowerCase());
         } catch(Exception e) {
             errors.add(new Error("", Webs.E(e), new String[]{}));
         }

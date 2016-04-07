@@ -201,7 +201,7 @@ public class MetricAmazonFeeService {
             //套上一层便于区分
             feeCategoryAggregation.filter(FilterBuilders.matchAllFilter());
 
-            for(String feeType : Arrays.asList("productcharges", "promorebates", "commission")) {
+            for(String feeType : Arrays.asList("productcharges", "principal", "promorebates", "commission")) {
                 //使用 Cost 的正负来判断是属于 Order 还是 Refunds
                 FilterAggregationBuilder feeTypeAggregation = AggregationBuilders.filter(feeType);
                 feeTypeAggregation.filter(
@@ -218,7 +218,7 @@ public class MetricAmazonFeeService {
             otherAggregation.filter(
                     FilterBuilders.boolFilter()
                             .mustNot(
-                                    FilterBuilders.termsFilter("fee_type", Arrays.asList("productcharges",
+                                    FilterBuilders.termsFilter("fee_type", Arrays.asList("productcharges", "principal",
                                             "promorebates", "commission", "fbaweightbasedfee",
                                             "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee"))
                             ).must(costRangeFilter(state, "other"))
@@ -259,13 +259,15 @@ public class MetricAmazonFeeService {
     public RangeFilterBuilder costRangeFilter(Orderr.S state, String feeType) {
         RangeFilterBuilder costRangeFilter = FilterBuilders.rangeFilter("cost");
         if(state == Orderr.S.SHIPPED) {
-            if("productcharges".equalsIgnoreCase(feeType) || "other".equalsIgnoreCase(feeType)) {
+            if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType) ||
+                    "other".equalsIgnoreCase(feeType)) {
                 costRangeFilter.gt(0);
             } else {
                 costRangeFilter.lt(0);
             }
         } else if(state == Orderr.S.REFUNDED) {
-            if("productcharges".equalsIgnoreCase(feeType) || "other".equalsIgnoreCase(feeType)) {
+            if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType) ||
+                    "other".equalsIgnoreCase(feeType)) {
                 costRangeFilter.lt(0);
             } else {
                 costRangeFilter.gt(0);
@@ -284,10 +286,16 @@ public class MetricAmazonFeeService {
             JSONObject feeCategoryObj = dateAndMarket.getJSONObject(feeCategory);
 
             Map<String, BigDecimal> feeCategoryMap = new HashMap<String, BigDecimal>();
-            for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
+            for(String feeType : Arrays.asList("productcharges", "principal", "promorebates", "commission", "other")) {
                 JSONObject feeTypeObj = feeCategoryObj.getJSONObject(feeType);
                 BigDecimal cost = feeTypeObj.getJSONObject("order_fees_cost").getBigDecimal("value");
-                feeCategoryMap.put(feeType, cost.setScale(2, BigDecimal.ROUND_HALF_UP));
+
+                if(feeType.equalsIgnoreCase("principal")) {
+                    feeCategoryMap.put("productcharges",
+                            feeCategoryMap.get("productcharges").add(cost.setScale(2, BigDecimal.ROUND_HALF_UP)));
+                } else {
+                    feeCategoryMap.put(feeType, cost.setScale(2, BigDecimal.ROUND_HALF_UP));
+                }
             }
             feesCost.put(feeCategory, feeCategoryMap);
         }
