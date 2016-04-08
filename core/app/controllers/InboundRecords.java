@@ -69,14 +69,13 @@ public class InboundRecords extends Controller {
      * @param rids
      */
     public static void confirm(List<Long> rids) {
-        if(rids == null || rids.isEmpty()) renderJSON(new Ret(false, "未选中任何入库记录!"));
-        for(Long rid : rids) {
-            InboundRecord record = InboundRecord.findById(rid);
-            record.confirm();
+        if(!rids.isEmpty()) {
+            for(Long rid : rids) {
+                InboundRecord record = InboundRecord.findById(rid);
+                record.confirm();
+            }
         }
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-        }
+        if(Validation.hasErrors()) Webs.errorToFlash(flash);
         redirect("/InboundRecords/index");
     }
 }
