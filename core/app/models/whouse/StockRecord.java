@@ -119,6 +119,6 @@ public class StockRecord extends Model {
      * @return
      */
     public String recordOrigin() {
-        return String.format("%s%s", this.whouse.style.label(), this.type.label());
+        return String.format("%s%s", this.whouse.name, this.type.label());
     }
 }
