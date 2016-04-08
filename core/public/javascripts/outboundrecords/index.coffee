@@ -8,17 +8,17 @@ $ ->
     checkids = []
     for checkbox in $('input[name="rids"]') when checkbox.checked then checkids.push(checkbox.value)
     if checkids.length is 0
-      noty({text: '请选择入库记录！', type: 'error'})
+      noty({text: '请选择出库记录！', type: 'error'})
       return false
     else
       $("form[name=confirm_form]").submit()
   )
 
-  $("form.confirm_form").on('change', "input[name=qty], input[name=badQty], select[name=targetWhouse]", (e) ->
+  $("form.confirm_form").on('change', "input[name=qty], select[name=whouse]", (e) ->
     $(@).data('has_changed', 'true')
-  ).on('blur', "input[name=qty], input[name=badQty], select[name=targetWhouse]", (e) ->
+  ).on('blur', "input[name=qty], select[name=whouse]", (e) ->
     $input = $(@)
-    $.post("/InboundRecords/update", {id: $input.parents('tr').find('checkbox[name=rids]').val()},
+    $.post("/OutboundRecords/update", {id: $input.parents('tr').find('checkbox[name=rids]').val()},
       attr: $input.attr('name'),
       value: $input.val(),
       (r) ->

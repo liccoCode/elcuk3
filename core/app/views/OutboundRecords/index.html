@@ -1,0 +1,158 @@
+#{extends 'main.html'/}
+#{set title:'出库记录(' + records.size() + ')'/}
+#{set 'moreScripts'}
+    #{script_cdn name: 'outboundrecords/index.coffee'/}
+#{/set}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{OutboundRecords.index()}" method="get" class="search_form" id="search_form">
+    <div class="span12">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">From:</span>
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${p.to.date()}">
+      </div>
+
+      <select name="p.origin" class="inline">
+        <option value="">出库来源</option>
+      #{list items:models.whouse.OutboundRecord.O, as:'o'}
+        <option ${o == p.origin ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.state" class="inline">
+        <option value="">状态</option>
+      #{list items:models.whouse.OutboundRecord.S, as:'s'}
+        <option ${s == p.state ? 'selected' : ''} value="${s.name()}">${s.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.shipType" class="inline">
+        <option value="">状态</option>
+      #{list items:models.procure.Shipment.T, as:'t'}
+        <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.shipType" class="inline">
+        <option value="">去往国家</option>
+      #{list items:models.market.M, as:'m'}
+        <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.countryName()}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" name="p.search" placeholder="出库记录 ID Or 出库对象编码 Or FBA" value="${p.search}" style="width:
+              230px;">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="inline">
+        <a href="@{OutboundRecords.blank()}" target="_blank" class="btn btn-success inline">添加其他出库</a>
+        <a target="_blank" class="btn btn-info inline" name="confirm" data-confirm="确认出库?">确认出库</a>
+      </div>
+    </div>
+  </form>
+
+  <form action="@{OutboundRecords.confirm()}" name="confirm_form">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>
+            <label class="checkbox">
+              <input type="checkbox" id="outboundrecord_check_all" class="checkall">
+            </label>
+          </th>
+          <th>ID</th>
+          <th>仓库</th>
+          <th>来源</th>
+          <th>状态</th>
+          <th>出货计划 ID</th>
+          <th>成品编码</th>
+          <th>名称</th>
+          <th>FBA</th>
+          <th>去往国家</th>
+          <th>运输方式</th>
+          <th>预计运输时间</th>
+          <th>预计出货数量</th>
+          <th>实际出货数量</th>
+          <th>接收对象</th>
+          <th>创建时间</th>
+          <th>完成时间</th>
+          <th>备注</th>
+          <th></th>
+        </tr>
+      #{list items: records, as: 'r'}
+        <tr>
+          <td>
+            <label class="checkbox">
+              <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
+            </label>
+          </td>
+          <td>${r.id}</td>
+          <td>
+            <select name="whouse">
+              <option value="">仓库</option>
+                #{list items:whouses, as:'whouse'}
+                  <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
+                  ${whouse.name}
+                  </option>
+                #{/list}
+            </select>
+          </td>
+          <td>${r.origin.label()}</td>
+          <td>${r.state.label()}</td>
+          <td>${r.shipPlan.id}</td>
+          <td>${r.stockObj.showStockObjLink()}</td>
+          <td>${r.stockObj.name()}</td>
+          <td>
+            FBA
+          </td>
+          <td>
+            运输方式
+          </td>
+          <td>
+            运输方式
+          </td>
+          <td>
+            预计运输时间
+          </td>
+          <td>
+            <input type="text" name="planQty" value="${r.planQty}" style="width:45px;">
+          </td>
+          <td>
+            <input type="text" name="qty" value="${r.qty}" style="width:45px;">
+          </td>
+          <td>
+            <select name="targetId">
+              <option value="">运输商</option>
+                #{list items:shippers, as: 'ship'}
+                  <option value="${ship.id}">${ship.name}</option>
+                #{/list}
+            </select>
+          </td>
+          <td>#{time_tooltip time: r.createDate/}</td>
+          <td>#{time_tooltip time: r.completeDate/}</td>
+          <td>
+            <input type="text" name="memo" value="${r.memo}">
+          </td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </form>
+
+  <div class="row-fluid" id="order_list">
+    <div class="span12">
+    #{if records.size() == 0}
+      暂时还没有出库记录
+    #{/if}
+    #{else }
+        #{bootstrap_pager pi:p, url:'' /}
+    #{/else}
+    </div>
+  </div>
+</div>

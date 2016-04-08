@@ -136,8 +136,10 @@ public class InboundRecord extends Model {
         this.planQty = task.qty;
         this.badQty = task.unqualifiedQty;
         this.qty = this.planQty - this.badQty;
-
         this.checkTask = task;
+        this.origin = O.CheckTask;
+        this.state = S.Pending;
+        this.stockObj = new StockObj(task.sku);//TODO 添加物料的支持
     }
 
     public void updateAttr(String attr, String value) {
@@ -159,6 +161,7 @@ public class InboundRecord extends Model {
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
+        this.save();
     }
 
     /**
@@ -173,6 +176,7 @@ public class InboundRecord extends Model {
         if(Validation.hasErrors()) return;
 
         this.save();
+        new StockRecord(this).save();
         //更新库存
         this.updateWhouseQty();
     }
@@ -181,7 +185,7 @@ public class InboundRecord extends Model {
      * 更新库存
      */
     public void updateWhouseQty() {
-        //处理合格平的库存
+        //处理合格的库存
         WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.targetWhouse);
         if(whouseItem != null) {
             whouseItem.qty += this.qty;

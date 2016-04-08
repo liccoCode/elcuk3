@@ -13,12 +13,11 @@
     <th>物料编码</th>
     <td>
       <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}">
+      <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
     </td>
 
     <th>名称</th>
-    <td>
-      <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
-      <input type="text" name="stock_name" readonly="" value="${record.stockObj?.name()}">
+    <td name="stock_name" style="width: 40%;">
     </td>
   </tr>
   <tr>
@@ -32,12 +31,12 @@
     </td>
   </tr>
   <tr>
-    <th>实际入库数量</th>
+    <th>入库数量</th>
     <td>
       <input type="text" name="record.qty" value="${record.qty}">
     </td>
 
-    <th>不良品入库数量</th>
+    <th>不良品数量</th>
     <td>
       <input type="text" name="record.badQty" value="${record.qty}">
     </td>
@@ -46,15 +45,14 @@
   <tr>
     <th>备注</th>
     <td colspan="4">
-      <textarea name="record.memo" rows="4" class="span10">
-        ${record.memo}
-      </textarea>
+      <textarea name="record.memo" rows="4" class="span10">${record.memo}</textarea>
     </td>
   </tr>
   <tr>
     <td colspan="4">
       <input type="hidden" name="record.origin" value="Other">
       <button class="btn btn-primary" name="create_record">创建</button>
+      <a href="@{InboundRecords.index()}" class="btn btn-success">取消</a>
     </td>
   </tr>
 </table>
