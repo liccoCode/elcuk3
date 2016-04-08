@@ -11,6 +11,7 @@ import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -130,42 +131,6 @@ public class Whouse extends Model {
     @Expose
     public boolean isEXPRESS = false;
 
-    public enum STY {
-        Product {
-            @Override
-            public String label() {
-                return "成品仓库";
-            }
-        },
-        BareProduct {
-            @Override
-            public String label() {
-                return "裸机仓库";
-            }
-        },
-        Package {
-            @Override
-            public String label() {
-                return "包材仓库";
-            }
-        },
-        Defective {
-            @Override
-            public String label() {
-                return "不良品仓库";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
-     * 仓库的分类
-     */
-    @Expose
-    @Enumerated(EnumType.STRING)
-    public STY style;
-
     @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<WhouseItem> items = new ArrayList<WhouseItem>();
@@ -176,6 +141,7 @@ public class Whouse extends Model {
                 if(this.account == null) {
                     Validation.addError("", "wh.fba.account");
                 }
+                break;
             case FORWARD:
                 if(this.cooperator == null) {
                     Validation.addError("", "货代不能为空");
@@ -184,10 +150,9 @@ public class Whouse extends Model {
                     Validation.addError("", "运输方式不能为空");
                 }
                 this.exist();
-            case SELF:
-                if(this.style == null) {
-                    Validation.addError("", "仓库种类不能为空!");
-                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -350,24 +315,23 @@ public class Whouse extends Model {
         }
     }
 
-    private static final Map<StockObj.SOT, STY> WhouseStyleMap = GTs.MapBuilder
-            .map(StockObj.SOT.SKU, Whouse.STY.Product)
-            .put(StockObj.SOT.PRODUCT_MATERIEL, Whouse.STY.BareProduct)
-            .put(StockObj.SOT.PACKAGE_MATERIEL, Whouse.STY.Package)
-            .build();
+    public static List<Whouse> selfWhouses(String search) {
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT w FROM Whouse w LEFT JOIN w.items i WHERE w.type=?");
+        List<Object> params = new ArrayList<>();
+        params.add(T.SELF);
+        if(StringUtils.isNotBlank(search)) {
+            sql.append(" AND i.stockObjId LIKE ?");
+            params.add("%" + search + "%");
+        }
+        return Whouse.find(sql.toString(), params.toArray()).fetch();
+    }
 
     /**
-     * 根据存货条目类型与质检结果来选择仓库的类型
+     * 不良品仓库
      *
      * @return
      */
-    public static STY selectStyle(CheckTask.ShipType checkResult, StockObj.SOT stockObjType) {
-        if(checkResult == CheckTask.ShipType.SHIP) {//发货时的处理
-            return WhouseStyleMap.get(stockObjType);
-        } else if(checkResult == CheckTask.ShipType.NOTSHIP) {//不发货时的处理
-            return Whouse.STY.Defective;
-        } else {
-            return STY.Product;
-        }
+    public static Whouse defectiveWhouse() {
+        return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
     }
 }
