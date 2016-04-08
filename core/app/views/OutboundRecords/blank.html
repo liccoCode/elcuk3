@@ -7,9 +7,34 @@
 #{flash_alert/}
 
 #{form @OutboundRecords.create(), method:'POST', id: 'new_outbound_record'}
+<h4 style="text-align:center" class="alert alert-info">添加其他出库</h4>
 <table class="table table-condensed table-bordered">
   <tr>
-    <td></td>
+    <th>物料编码</th>
+    <td>
+      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}">
+    </td>
+
+    <th>名称</th>
+    <td>
+      <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
+      <input type="text" name="stock_name" readonly="" value="${record.stockObj?.name()}">
+    </td>
+  </tr>
+  <tr>
+    <th>仓库</th>
+    <td>
+      <select name="record.whouse.id">
+          #{list items:whouses, as:'whouse'}
+            <option value="${whouse.id}">${whouse.name}</option>
+          #{/list}
+      </select>
+    </td>
+
+    <th>数量</th>
+    <td>
+      <input type="text" name="record.qty" value="${record.qty}">
+    </td>
   </tr>
   <tr>
     <td colspan="4">

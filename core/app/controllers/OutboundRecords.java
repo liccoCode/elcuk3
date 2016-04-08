@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import models.view.Ret;
 import models.view.post.OutboundRecordPost;
 import models.whouse.OutboundRecord;
+import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -27,6 +28,7 @@ public class OutboundRecords extends Controller {
 
     public static void blank() {
         OutboundRecord record = new OutboundRecord();
+        List<Whouse> whouses = Whouse.selfWhouses(null);
         render(record);
     }
 

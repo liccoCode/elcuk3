@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -60,6 +61,7 @@ public class OutboundRecord extends Model {
     /**
      * 从哪个仓库出货
      */
+    @Required
     @Expose
     @ManyToOne
     public Whouse whouse;
