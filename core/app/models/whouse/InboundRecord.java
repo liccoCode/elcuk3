@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.qc.CheckTask;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -152,6 +153,9 @@ public class InboundRecord extends Model {
             case "memo":
                 this.memo = value;
                 break;
+            case "targetWhouse":
+                this.targetWhouse = Whouse.findById(Long.getLong(value));
+                break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
@@ -163,26 +167,33 @@ public class InboundRecord extends Model {
     public void confirm() {
         this.state = S.Inbound;
         this.completeDate = new Date();
+
+        if(this.qty == 0) Validation.addError("", String.format("入库计划: [%s] 的实际良品数量为 0!", this.id));
+        if(this.targetWhouse == null) Validation.addError("", String.format("入库计划: [%s] 的目标仓库为空!", this.id));
+        if(Validation.hasErrors()) return;
+
         this.save();
-        //处理库存
+        //更新库存
         this.updateWhouseQty();
     }
 
+    /**
+     * 更新库存
+     */
     public void updateWhouseQty() {
         //处理合格平的库存
-        WhouseItem whouseItem = this.stockObj.pickWhouseItem(CheckTask.ShipType.SHIP);
-        whouseItem.qty += this.qty;
-        whouseItem.save();
+        WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.targetWhouse);
+        if(whouseItem != null) {
+            whouseItem.qty += this.qty;
+            whouseItem.save();
+        }
         //处理不合格的库存
         if(this.badQty > 0) {
-            WhouseItem defectiveWhouseItem = this.stockObj.pickWhouseItem(CheckTask.ShipType.NOTSHIP);
-            defectiveWhouseItem.qty += this.badQty;
-            defectiveWhouseItem.save();
+            WhouseItem defectiveWhouseItem = WhouseItem.findItem(this.stockObj, Whouse.defectiveWhouse());
+            if(defectiveWhouseItem != null) {
+                defectiveWhouseItem.qty += this.badQty;
+                defectiveWhouseItem.save();
+            }
         }
     }
-
-    //TODO 需要根据入库对象的类型与质检结果来自动匹配仓库
-    // SKU+合格->成品仓, SKU+不合格->不良品仓,
-    //产品物料+合格->裸机仓库, 产品物料+不合格->不良品仓
-    //包材物料+合格->包材仓库, 包材物料+不合格->不良品仓
 }

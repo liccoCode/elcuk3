@@ -1,11 +1,13 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Webs;
 import models.view.Ret;
 import models.view.post.InboundRecordPost;
 import models.whouse.InboundRecord;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -21,6 +23,11 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class InboundRecords extends Controller {
+    @Before(only = {"index", "blank"})
+    public static void setWhouses() {
+        renderArgs.put("whouses", Whouse.selfWhouses(null));
+    }
+
     public static void index(InboundRecordPost p) {
         if(p == null) p = new InboundRecordPost();
         List<InboundRecord> records = p.query();
@@ -29,8 +36,7 @@ public class InboundRecords extends Controller {
 
     public static void blank() {
         InboundRecord record = new InboundRecord();
-        List<Whouse> whouses = Whouse.selfWhouses(null);
-        render(record, whouses);
+        render(record);
     }
 
     public static void create(InboundRecord record) {
@@ -68,6 +74,9 @@ public class InboundRecords extends Controller {
             InboundRecord record = InboundRecord.findById(rid);
             record.confirm();
         }
-        renderJSON(new Ret());
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        }
+        redirect("/InboundRecords/index");
     }
 }

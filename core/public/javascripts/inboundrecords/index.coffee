@@ -14,18 +14,17 @@ $ ->
       $("form[name=confirm_form]").submit()
   )
 
-  $("form.confirm_form").on('change', "input[name=qty], input[name=badQty]", (e) ->
+  $("form.confirm_form").on('change', "input[name=qty], input[name=badQty], select[name=targetWhouse]", (e) ->
     $(@).data('has_changed', 'true')
-  ).on('blur', "input[name=qty], input[name=badQty]", (e) ->
+  ).on('blur', "input[name=qty], input[name=badQty], select[name=targetWhouse]", (e) ->
     $input = $(@)
-
-    if $input.data('has_changed') == 'true'
-      $.post("/InboundRecords/update", {id: $input.parents('tr').find('checkbox[name=rids]').val()}, attr: $input.attr('name'), value: $input.val(),
-        (r) ->
-          if r.flag is false
-            noty({text: r.message, type: 'error'})
-          else
-            noty({text: "更新 #{$input.attr('name')} 成功!", type: 'success'})
-      )
-
+    $.post("/InboundRecords/update", {id: $input.parents('tr').find('checkbox[name=rids]').val()},
+      attr: $input.attr('name'),
+      value: $input.val(),
+      (r) ->
+        if r.flag is false
+          noty({text: r.message, type: 'error'})
+        else
+          noty({text: "更新 #{$input.attr('name')} 成功!", type: 'success'})
+    )
   )

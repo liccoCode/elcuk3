@@ -87,7 +87,13 @@
           <td>
             <input type="text" name="badQty" value="${r.badQty}" style="width:45px;">
           </td>
-          <td>${r.targetWhouse.name}</td>
+          <td>
+            <select name="targetWhouse">
+                #{list items:whouses, as:'whouse'}
+                  <option value="${whouse.id}">${whouse.name}</option>
+                #{/list}
+            </select>
+          </td>
           <td>#{time_tooltip time: r.createDate/}</td>
           <td>#{time_tooltip time: r.completeDate/}</td>
           <td>
