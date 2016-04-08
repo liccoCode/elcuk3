@@ -10,12 +10,6 @@
       <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
     #{/list}
     </select>
-
-    <select style="display:none;width: 100px;" name="wh.style">
-    #{list items:models.whouse.Whouse.STY.values(), as:'t'}
-      <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
-    #{/list}
-    </select>
   </td>
 
   <th>Account</th>

@@ -2,17 +2,11 @@ $ ->
   $(document).on("showOrHide", "select[name=wh.type]", (r) ->
     $self = $(@)
     $tr = $("#forward_shipment_tr")
-    $style_select = $("select[name='wh.style']")
 
     if $self.val() is "FORWARD"
       $tr.show("slow")
-      $style_select.hide('slow')
-    else if $self.val() is "SELF"
-      $tr.hide('slow')
-      $style_select.show('slow')
     else
       $tr.hide('slow')
-      $style_select.hide('slow')
   )
 
   $(document).on("change", "select[name=wh.type]", (r) ->
