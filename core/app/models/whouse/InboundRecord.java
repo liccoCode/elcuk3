@@ -3,6 +3,7 @@ package models.whouse;
 import com.google.gson.annotations.Expose;
 import models.qc.CheckTask;
 import org.apache.commons.lang.math.NumberUtils;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -58,6 +59,7 @@ public class InboundRecord extends Model {
     /**
      * 目标仓库
      */
+    @Required
     @Expose
     @ManyToOne
     public Whouse targetWhouse;

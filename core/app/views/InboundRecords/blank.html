@@ -22,12 +22,13 @@
     </td>
   </tr>
   <tr>
-    <!-- TODO:: 到这里添加的入库是成品还是不良品,为何不良品不走质检流程?-->
     <th>仓库</th>
     <td colspan="4">
-      <!-- 仓库应该是由入库对象决定的,而不是手动选择的,手动选择的应该是是否发货(判断进入正常仓库还是不良品仓) -->
-      <input type="hidden" name="record.targetWhouse.id" value="${record.targetWhouse?.id}">
-      <input type="text" readonly="" value="${record.targetWhouse?.name}">
+      <select name="record.targetWhouse.id">
+          #{list items:whouses, as:'whouse'}
+            <option value="${whouse.id}">${whouse.name}</option>
+          #{/list}
+      </select>
     </td>
   </tr>
   <tr>

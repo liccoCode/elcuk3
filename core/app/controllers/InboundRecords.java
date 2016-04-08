@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import models.view.Ret;
 import models.view.post.InboundRecordPost;
 import models.whouse.InboundRecord;
+import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -28,7 +29,8 @@ public class InboundRecords extends Controller {
 
     public static void blank() {
         InboundRecord record = new InboundRecord();
-        render(record);
+        List<Whouse> whouses = Whouse.selfWhouses(null);
+        render(record, whouses);
     }
 
     public static void create(InboundRecord record) {
