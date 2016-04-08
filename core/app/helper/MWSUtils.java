@@ -136,21 +136,21 @@ public class MWSUtils {
             if(p.productvolume) {
                 LengthDimension lengthDimension = new LengthDimension();
                 lengthDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
-                lengthDimension.setValue(new BigDecimal(p.productLengths));
+                lengthDimension.setValue(new BigDecimal(p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
                 data.getItemDimensions().setLength(lengthDimension);
                 LengthDimension widthDimension = new LengthDimension();
                 widthDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
-                widthDimension.setValue(new BigDecimal(p.productWidth));
+                widthDimension.setValue(new BigDecimal(p.productWidth).setScale(2, BigDecimal.ROUND_HALF_UP));
                 data.getItemDimensions().setWidth(widthDimension);
                 LengthDimension heightDimension = new LengthDimension();
                 heightDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
-                heightDimension.setValue(new BigDecimal(p.productHeigh));
+                heightDimension.setValue(new BigDecimal(p.productHeigh).setScale(2, BigDecimal.ROUND_HALF_UP));
                 data.getItemDimensions().setHeight(heightDimension);
             }
             if(p.weight) {
                 WeightDimension weightDimension = new WeightDimension();
                 weightDimension.setUnitOfMeasure(WeightUnitOfMeasure.fromValue(p.weightUnit));
-                weightDimension.setValue(new BigDecimal(p.proWeight));
+                weightDimension.setValue(new BigDecimal(p.proWeight).setScale(2, BigDecimal.ROUND_HALF_UP));
                 data.getItemDimensions().setWeight(weightDimension);
             }
         }
