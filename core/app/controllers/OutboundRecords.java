@@ -1,13 +1,17 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Webs;
+import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.OutboundRecordPost;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -20,6 +24,12 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class OutboundRecords extends Controller {
+    @Before(only = {"index", "blank"})
+    public static void setWhouses() {
+        renderArgs.put("whouses", Whouse.selfWhouses(null));
+        renderArgs.put("shippers", Cooperator.shippers());
+    }
+
     public static void index(OutboundRecordPost p) {
         if(p == null) p = new OutboundRecordPost();
         List<OutboundRecord> records = p.query();
@@ -28,17 +38,28 @@ public class OutboundRecords extends Controller {
 
     public static void blank() {
         OutboundRecord record = new OutboundRecord();
-        List<Whouse> whouses = Whouse.selfWhouses(null);
         render(record);
     }
 
     public static void create(OutboundRecord record) {
         validation.valid(record);
+        record.stockObj.valid();
         if(Validation.hasErrors()) render("OutboundRecords/blank.html", record);
         record.save();
         flash.success("创建成功!");
         redirect("/OutboundRecords/index");
     }
+
+    public static void update(Long id, String attr, String value) {
+        OutboundRecord record = OutboundRecord.findById(id);
+        try {
+            record.updateAttr(attr, value);
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(false, e.getMessage()));
+        }
+        renderJSON(new Ret());
+    }
+
 
     /**
      * 确认出库
@@ -46,11 +67,13 @@ public class OutboundRecords extends Controller {
      * @param rids
      */
     public static void confirm(List<Long> rids) {
-        if(rids == null || rids.isEmpty()) renderJSON(new Ret(false, "未选中任何出库记录!"));
-        for(Long rid : rids) {
-            OutboundRecord record = OutboundRecord.findById(rid);
-            record.confirm();
+        if(!rids.isEmpty()) {
+            for(Long rid : rids) {
+                OutboundRecord record = OutboundRecord.findById(rid);
+                record.confirm();
+            }
         }
-        renderJSON(new Ret());
+        if(Validation.hasErrors()) Webs.errorToFlash(flash);
+        redirect("/OutboundRecords/index");
     }
 }
