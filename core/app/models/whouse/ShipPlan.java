@@ -5,6 +5,7 @@ import models.market.M;
 import models.procure.Shipment;
 import play.db.jpa.Model;
 
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import java.util.Date;
@@ -23,6 +24,13 @@ public class ShipPlan extends Model {
      */
     @OneToOne
     public Shipment shipment;
+
+    /**
+     * 出货对象(SKU or 物料)
+     */
+    @Embedded
+    @Expose
+    public StockObj stockObj;
 
     @Expose
     public M market;
