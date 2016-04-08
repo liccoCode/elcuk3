@@ -2,9 +2,7 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import models.product.Product;
-import models.qc.CheckTask;
-import org.apache.commons.lang3.StringUtils;
-import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.Embeddable;
@@ -33,7 +31,6 @@ public class StockObj implements Serializable {
      * 类型
      */
     @Enumerated(EnumType.STRING)
-    @Required
     @Expose
     public SOT stockObjType;
 
@@ -68,16 +65,22 @@ public class StockObj implements Serializable {
         }
     }
 
-    public void setProduct(Product product) {
-        if(product != null && StringUtils.isNotBlank(product.sku)) {
-            this.stockObjType = SOT.SKU;
-            this.stockObjId = product.sku;
-        } else {
-            throw new FastRuntimeException("Product 不能为空!");
-        }
+    public StockObj() {
+    }
+
+    public StockObj(String sku) {
+        this.stockObjType = SOT.SKU;
+        this.stockObjId = sku;
+    }
+
+    public StockObj(String stockObjId, SOT stockObjType) {
+        this.stockObjId = stockObjId;
+        this.stockObjType = stockObjType;
     }
 
     public String name() {
+        if(this.stockObjType == null) return "";
+
         switch(this.stockObjType) {
             case SKU:
                 return getProduct().productName;
@@ -90,15 +93,13 @@ public class StockObj implements Serializable {
         }
     }
 
-    /**
-     * 根据实际存储的货物和质检结果来挑选一个仓库项, 用来接收货物
-     *
-     * @param st
-     * @return
-     */
-    public WhouseItem pickWhouseItem(CheckTask.ShipType st) {
-        WhouseItem whouseItem = WhouseItem.find("whouse.style=? AND stockObjId=? AND stockObjType=?",
-                Whouse.selectStyle(st, this.stockObjType).name(), this.stockObjId, this.stockObjType).first();
-        return whouseItem != null ? whouseItem : new WhouseItem(this, st).<WhouseItem>save();
+    public void valid() {
+        Validation.required("StockObj.stockObjId", this.stockObjId);
+        Validation.required("StockObj.stockObjType", this.stockObjType);
+    }
+
+    public static SOT guessType(String id) {
+        return SOT.SKU;
+        //产品物料与包材物料需要注意 ID 的统一
     }
 }
