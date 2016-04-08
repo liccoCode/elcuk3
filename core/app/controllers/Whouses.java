@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.User;
@@ -10,6 +11,7 @@ import models.procure.FBACenter;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.WhousePost;
+import models.whouse.StockObj;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -119,7 +121,15 @@ public class Whouses extends Controller {
      * @param id
      */
     public static void loadStockObj(String id) {
-        //如何确认该 ID 属于谁?
-        //需要返回 name type whouse
+        StockObj stockObj = new StockObj(id, StockObj.guessType(id));
+        renderJSON(GTs.newMap("type", stockObj.stockObjType).put("name", stockObj.name()).build());
+    }
+
+    /**
+     * 自有仓库
+     */
+    public static void selfWhouses(String search) {
+        List<Whouse> whouses = Whouse.selfWhouses(search);
+        render(whouses);
     }
 }

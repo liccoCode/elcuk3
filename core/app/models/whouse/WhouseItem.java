@@ -47,8 +47,14 @@ public class WhouseItem extends Model {
     public WhouseItem() {
     }
 
-    public WhouseItem(StockObj stockObj, CheckTask.ShipType st) {
+    public WhouseItem(StockObj stockObj, Whouse whouse) {
         this.stockObj = stockObj;
-        this.whouse = Whouse.find("style=?", Whouse.selectStyle(st, stockObj.stockObjType)).first();
+        this.whouse = whouse;
+    }
+
+    public static WhouseItem findItem(StockObj stockObj, Whouse whouse) {
+        return WhouseItem
+                .find("stockObjId=? AND stockObjType=? AND whouse=?", stockObj.stockObjId, stockObj.stockObjType, whouse)
+                .first();
     }
 }
