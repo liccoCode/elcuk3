@@ -4,7 +4,9 @@ import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -66,9 +68,13 @@ public class OutboundRecord extends Model {
     @ManyToOne
     public Whouse whouse;
 
+    @Expose
+    public Integer planQty;
+
     /**
      * 数量
      */
+    @Expose
     public Integer qty;
 
     /**
@@ -113,6 +119,29 @@ public class OutboundRecord extends Model {
     public String memo = " ";
 
     /**
+     * 出库来源
+     * 该字段仅用来方便前台过滤, 无其他实际意义
+     */
+    public O origin;
+
+    public enum O {
+        Normal {
+            @Override
+            public String label() {
+                return "正常出库"; //系统自动生成的
+            }
+        },
+        Other {
+            @Override
+            public String label() {
+                return "其他出库"; //手动添加的
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
      * 出库时间
      */
     @Expose
@@ -123,6 +152,17 @@ public class OutboundRecord extends Model {
 
     @Expose
     public Date updateDate = new Date();
+
+    public OutboundRecord() {
+    }
+
+    public OutboundRecord(ShipPlan plan) {
+        this.planQty = plan.qty;
+        this.qty = this.planQty;
+        this.origin = O.Normal;
+        this.state = S.Pending;
+        this.stockObj = plan.stockObj;
+    }
 
     /**
      * 出货目标(货代)
@@ -141,7 +181,7 @@ public class OutboundRecord extends Model {
      *
      * @return
      */
-    public Whouse getWhouse() {
+    public Whouse getSelfWhouse() {
         if(this.type == T.InternalTrans) {
             return Whouse.findById(Long.getLong(this.targetId));
         }
@@ -154,8 +194,29 @@ public class OutboundRecord extends Model {
     public void confirm() {
         this.state = S.Outbound;
         this.outboundDate = new Date();
+
+        if(this.qty == 0) Validation.addError("", String.format("出库计划: [%s] 的实际出库数量为 0!", this.id));
+        if(this.whouse == null) Validation.addError("", String.format("出库计划: [%s] 的仓库为空!", this.id));
+        if(Validation.hasErrors()) return;
+
         this.save();
         new StockRecord(this).save();
+    }
+
+    public void updateAttr(String attr, String value) {
+        switch(attr) {
+            case "qty":
+                this.qty = NumberUtils.toInt(value);
+                break;
+            case "memo":
+                this.memo = value;
+                break;
+            case "whouse":
+                this.whouse = Whouse.findById(Long.getLong(value));
+                break;
+            default:
+                throw new FastRuntimeException("不支持的属性类型!");
+        }
     }
 
     public ElcukRecord buildRecord(String action, String message) {
