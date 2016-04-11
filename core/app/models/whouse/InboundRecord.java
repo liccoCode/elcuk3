@@ -86,6 +86,7 @@ public class InboundRecord extends Model {
     /**
      * 不良品入库数量(该数量会直接入库到不良品仓)
      */
+    @Min(0)
     @Required
     @Expose
     public Integer badQty;
@@ -163,11 +164,13 @@ public class InboundRecord extends Model {
         switch(attr) {
             case "qty":
                 this.qty = NumberUtils.toInt(value);
-                this.badQty = this.planQty - this.qty;
+                //预计数量 >= 实际数量才去计算 不合格数量(允许 实际数量 > 预计数量, 但不自动计算不合格数量)
+                if(this.planQty >= this.qty) this.badQty = this.planQty - this.qty;
                 break;
             case "badQty":
                 this.badQty = NumberUtils.toInt(value);
-                this.qty = this.planQty - this.badQty;
+                //预计数量 > 不合格数量才去计算 实际数量
+                if(this.planQty > this.badQty) this.qty = this.planQty - this.badQty;
                 break;
             case "memo":
                 this.memo = value;
