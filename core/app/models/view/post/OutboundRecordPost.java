@@ -37,6 +37,7 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
 
     @Override
     public List<OutboundRecord> query() {
+        this.count = this.count();
         F.T2<String, List<Object>> params = params();
         return OutboundRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }

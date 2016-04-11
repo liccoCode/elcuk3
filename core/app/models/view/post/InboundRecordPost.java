@@ -70,6 +70,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
     @Override
     public List<InboundRecord> query() {
+        this.count = this.count();
         F.T2<String, List<Object>> params = params();
         return InboundRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
