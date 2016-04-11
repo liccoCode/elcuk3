@@ -135,15 +135,15 @@ public class DeliveryPost extends Post<Deliveryment> {
 
     public Long getTotalCount() {
         return this.count();
-     }
+    }
 
     public Long count(F.T2<String, List<Object>> params) {
-        this.count = Deliveryment.find(params._1, params._2.toArray()).fetch().size();
-        return this.count;
+        return (long) Deliveryment.find(params._1, params._2.toArray()).fetch().size();
     }
 
     public List<Deliveryment> query() {
         F.T2<String, List<Object>> params = params();
+        this.count = this.count();
         return Deliveryment.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
                 .fetch(this.page, this.perSize);
     }
