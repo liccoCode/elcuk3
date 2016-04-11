@@ -23,7 +23,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class InboundRecords extends Controller {
-    @Before(only = {"index", "blank"})
+    @Before(only = {"index", "blank", "create"})
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses(null));
     }
@@ -40,6 +40,7 @@ public class InboundRecords extends Controller {
     }
 
     public static void create(InboundRecord record) {
+        record.beforeCreate();
         validation.valid(record);
         record.stockObj.valid();
         if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
