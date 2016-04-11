@@ -78,7 +78,7 @@
           <td>${r.state.label()}</td>
           <td>${r.origin.label()}</td>
           <td>
-            #{if r.checkTask != null}
+              #{if r.checkTask != null}
               @{CheckTasks.show(r.checkTask)}
             #{/if}
           </td>
@@ -124,4 +124,6 @@
     #{/else}
     </div>
   </div>
+
+#{records records: elcukRecords/}
 </div>

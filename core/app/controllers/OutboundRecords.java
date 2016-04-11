@@ -2,17 +2,21 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Webs;
+import models.ElcukRecord;
 import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.OutboundRecordPost;
+import models.whouse.InboundRecord;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,6 +37,10 @@ public class OutboundRecords extends Controller {
     public static void index(OutboundRecordPost p) {
         if(p == null) p = new OutboundRecordPost();
         List<OutboundRecord> records = p.query();
+        List<ElcukRecord> elcukRecords = ElcukRecord.records(Arrays.asList(
+                Messages.get("outboundrecord.confirm"),
+                Messages.get("outboundrecord.update")
+        ), 50);
         render(p, records);
     }
 
@@ -67,10 +75,7 @@ public class OutboundRecords extends Controller {
      */
     public static void confirm(List<Long> rids) {
         if(!rids.isEmpty()) {
-            for(Long rid : rids) {
-                OutboundRecord record = OutboundRecord.findById(rid);
-                record.confirm();
-            }
+            InboundRecord.batchConfirm(rids);
         }
         if(Validation.hasErrors()) Webs.errorToFlash(flash);
         redirect("/OutboundRecords/index");

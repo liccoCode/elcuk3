@@ -1,9 +1,12 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -12,7 +15,9 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 出库记录
@@ -208,19 +213,31 @@ public class OutboundRecord extends Model {
         throw new FastRuntimeException("类型(type)错误, 无法查询到仓库!");
     }
 
+    public static void batchConfirm(List<Long> rids) {
+        List<Long> confirmed = new ArrayList<>();
+        for(Long rid : rids) {
+            OutboundRecord record = OutboundRecord.findById(rid);
+            if(record.confirm()) confirmed.add(rid);
+        }
+        if(!confirmed.isEmpty()) new ElcukRecord("inboundrecord.confirm", StringUtils.join(confirmed, ",")).save();
+    }
+
     /**
      * 确认出库
      */
-    public void confirm() {
+    public boolean confirm() {
         this.state = S.Outbound;
         this.outboundDate = new Date();
 
         if(this.qty == 0) Validation.addError("", String.format("出库计划: [%s] 的实际出库数量为 0!", this.id));
         if(this.whouse == null) Validation.addError("", String.format("出库计划: [%s] 的仓库为空!", this.id));
-        if(Validation.hasErrors()) return;
-
-        this.save();
-        new StockRecord(this).save();
+        if(Validation.hasErrors()) {
+            return false;
+        } else {
+            this.save();
+            new StockRecord(this).save();
+            return true;
+        }
     }
 
     public void updateAttr(String attr, String value) {
@@ -240,6 +257,11 @@ public class OutboundRecord extends Model {
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
+
+        List<String> logs = Reflects.logFieldFade(this, attr, value);
+        new ERecordBuilder("outboundrecord.update")
+                .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
+                .save();
         this.save();
     }
 

@@ -1,7 +1,11 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import helper.Reflects;
+import models.ElcukRecord;
+import models.embedded.ERecordBuilder;
 import models.qc.CheckTask;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -10,7 +14,9 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 入库记录
@@ -163,6 +169,7 @@ public class InboundRecord extends Model {
     }
 
     public void updateAttr(String attr, String value) {
+        String changelog = "";
         switch(attr) {
             case "qty":
                 this.qty = NumberUtils.toInt(value);
@@ -178,29 +185,53 @@ public class InboundRecord extends Model {
                 this.memo = value;
                 break;
             case "targetWhouse":
+                attr = "targetWhouse.id";
                 this.targetWhouse = Whouse.findById(NumberUtils.toLong(value));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
+
+        List<String> logs = Reflects.logFieldFade(this, attr, value);
+        new ERecordBuilder("inboundrecord.update")
+                .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
+                .save();
         this.save();
+    }
+
+
+    /**
+     * 批量确认入库
+     *
+     * @param rids
+     */
+    public static void batchConfirm(List<Long> rids) {
+        List<Long> confirmed = new ArrayList<>();
+        for(Long rid : rids) {
+            InboundRecord record = InboundRecord.findById(rid);
+            if(record.confirm()) confirmed.add(rid);
+        }
+        if(!confirmed.isEmpty()) new ElcukRecord("outboundrecord.confirm", StringUtils.join(confirmed, ",")).save();
     }
 
     /**
      * 确认入库
      */
-    public void confirm() {
+    public boolean confirm() {
         this.state = S.Inbound;
         this.completeDate = new Date();
 
         if(this.qty == 0) Validation.addError("", String.format("入库计划: [%s] 的实际良品数量为 0!", this.id));
         if(this.targetWhouse == null) Validation.addError("", String.format("入库计划: [%s] 的目标仓库为空!", this.id));
-        if(Validation.hasErrors()) return;
 
-        this.save();
-        new StockRecord(this).save();
-        //更新库存
-        this.updateWhouseQty();
+        if(Validation.hasErrors()) {
+            return false;
+        } else {
+            this.save();
+            new StockRecord(this).save();
+            this.updateWhouseQty(); //更新库存
+            return true;
+        }
     }
 
     /**

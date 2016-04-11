@@ -116,4 +116,24 @@ public class ERecordBuilder implements Serializable {
         return new ERecordBuilder("email.record", "email.record.msg");
     }
 
+    /**
+     * 生成更新时的 changelog
+     * <p>
+     * 备注: Reflects.logFieldFade 那种方式使用 message 文件来定义字段对应的中文名称会存在比较多的重复的可能
+     * 例如: qty 字段比较通用
+     * 所以这里采取了手动来生成 chaneglog 的方式
+     *
+     * @param attrName
+     * @param oldVal
+     * @param newVal
+     * @return
+     */
+    public static String changelog(String attrName, Object oldVal, Object newVal) {
+        return String.format("%s 从 %s 变更为 %s",
+                attrName,
+                oldVal == null ? "空" : oldVal.toString(),
+                newVal == null ? "空" : newVal.toString()
+        );
+    }
+
 }
