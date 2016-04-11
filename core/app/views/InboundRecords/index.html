@@ -82,7 +82,9 @@
               @{CheckTasks.show(r.checkTask)}
             #{/if}
           </td>
-          <td><a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a></td>
+          <td>
+            <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
+          </td>
           <td>${r.stockObj.name()}</td>
           <td>${r.planQty}</td>
           <td>

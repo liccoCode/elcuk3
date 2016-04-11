@@ -105,8 +105,10 @@
           </td>
           <td>${r.origin.label()}</td>
           <td>${r.state.label()}</td>
-          <td>${r.shipPlan.id}</td>
-          <td>${r.stockObj.showStockObjLink()}</td>
+          <td>${r.shipPlan?.id}</td>
+          <td>
+            <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
+          </td>
           <td>${r.stockObj.name()}</td>
           <td>
             FBA
@@ -135,7 +137,7 @@
             </select>
           </td>
           <td>#{time_tooltip time: r.createDate/}</td>
-          <td>#{time_tooltip time: r.completeDate/}</td>
+          <td>#{time_tooltip time: r.outboundDate/}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
           </td>
