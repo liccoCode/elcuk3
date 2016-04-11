@@ -58,11 +58,11 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         }
 
         if(this.from != null) {
-            sbd.append(" AND outboundDate>=?");
+            sbd.append(" AND createDate>=?");
             params.add(Dates.morning(this.from));
         }
         if(this.to != null) {
-            sbd.append(" AND outboundDate<=?");
+            sbd.append(" AND createDate<=?");
             params.add(Dates.morning(this.to));
         }
 
@@ -76,5 +76,10 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
     @Override
     public Long count(F.T2<String, List<Object>> params) {
         return OutboundRecord.count(params._1, params._2.toArray());
+    }
+
+    @Override
+    public Long getTotalCount() {
+        return OutboundRecord.count();
     }
 }

@@ -47,11 +47,11 @@ public class InboundRecordPost extends Post<InboundRecord> {
         }
 
         if(this.from != null) {
-            sbd.append(" AND completeDate>=?");
+            sbd.append(" AND createDate>=?");
             params.add(Dates.morning(this.from));
         }
         if(this.to != null) {
-            sbd.append(" AND completeDate<=?");
+            sbd.append(" AND createDate<=?");
             params.add(Dates.morning(this.to));
         }
 
@@ -61,6 +61,11 @@ public class InboundRecordPost extends Post<InboundRecord> {
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
+    }
+
+    @Override
+    public Long getTotalCount() {
+        return InboundRecord.count();
     }
 
     @Override
