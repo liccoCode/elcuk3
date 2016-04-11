@@ -37,7 +37,7 @@ public class OutboundRecords extends Controller {
     }
 
     public static void blank() {
-        OutboundRecord record = new OutboundRecord();
+        OutboundRecord record = new OutboundRecord(OutboundRecord.S.Pending, OutboundRecord.O.Other);
         render(record);
     }
 

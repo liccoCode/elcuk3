@@ -156,6 +156,11 @@ public class OutboundRecord extends Model {
     public OutboundRecord() {
     }
 
+    public OutboundRecord(S state, O origin) {
+        this.state = state;
+        this.origin = origin;
+    }
+
     public OutboundRecord(ShipPlan plan) {
         this.planQty = plan.qty;
         this.qty = this.planQty;
