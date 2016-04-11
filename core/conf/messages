@@ -256,4 +256,5 @@ StockObj.stockObjId=\u7269\u6599 ID
 StockObj.stockObjType=\u7269\u6599类型
 record.whouse=\u4ed3\u5e93
 record.targetWhouse=\u4ed3\u5e93
+record.qty=\u5165\u5e93\u6570\u91cf
 
