@@ -14,12 +14,16 @@ $ ->
       $("form[name=confirm_form]").submit()
   )
 
-  $("form.confirm_form").on('change', "input[name=qty], select[name=whouse]", (e) ->
+  $("form[name=confirm_form]").on('change', "input[name=qty], input[name=memo], select[name=whouse],
+ select[name=targetId]", (e) ->
     $input = $(@)
+    value = $input.val()
+    return if value == null || value == undefined || value == ""
+
     $.post("/OutboundRecords/update", {
-      id: $input.parents('tr').find('checkbox[name=rids]').val(),
+      id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
       attr: $input.attr('name'),
-      value: $input.val()
+      value: value
     },
       (r) ->
         if r.flag is false

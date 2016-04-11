@@ -122,19 +122,31 @@
           <td>
             预计运输时间
           </td>
-          <td>
-            <input type="text" name="planQty" value="${r.planQty}" style="width:45px;">
-          </td>
+          <td>${r.planQty}</td>
           <td>
             <input type="text" name="qty" value="${r.qty}" style="width:45px;">
           </td>
           <td>
-            <select name="targetId">
-              <option value="">运输商</option>
-                #{list items:shippers, as: 'ship'}
-                  <option value="${ship.id}">${ship.name}</option>
-                #{/list}
-            </select>
+              #{if r.type == models.whouse.OutboundRecord.T.Normal}
+                <select name="targetId">
+                  <option value="">运输商</option>
+                    #{list items:shippers, as: 'ship'}
+                      <option ${ship.id.toString() == r.targetId ? 'selected' : ''} value="${ship.id}">
+                      ${ship.name}
+                      </option>
+                    #{/list}
+                </select>
+              #{/if}
+              #{elseif r.type == models.whouse.OutboundRecord.T.InternalTrans}
+                <select name="targetId">
+                  <option value="">仓库</option>
+                    #{list items:whouses, as:'whouse'}
+                      <option ${whouse.id.toString() == r.targetId ? 'selected' : ''} value="${whouse.id}">
+                      ${whouse.name}
+                      </option>
+                    #{/list}
+                </select>
+              #{/elseif}
           </td>
           <td>#{time_tooltip time: r.createDate/}</td>
           <td>#{time_tooltip time: r.outboundDate/}</td>

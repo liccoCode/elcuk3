@@ -189,7 +189,7 @@ public class OutboundRecord extends Model {
      */
     public Cooperator getCooperator() {
         if(this.type == T.Normal) {
-            return Cooperator.findById(Long.getLong(this.targetId));
+            return Cooperator.findById(NumberUtils.toLong(this.targetId));
         }
         throw new FastRuntimeException("类型(type)错误, 无法查询到合作伙伴!");
     }
@@ -201,7 +201,7 @@ public class OutboundRecord extends Model {
      */
     public Whouse getSelfWhouse() {
         if(this.type == T.InternalTrans) {
-            return Whouse.findById(Long.getLong(this.targetId));
+            return Whouse.findById(NumberUtils.toLong(this.targetId));
         }
         throw new FastRuntimeException("类型(type)错误, 无法查询到仓库!");
     }
@@ -230,11 +230,15 @@ public class OutboundRecord extends Model {
                 this.memo = value;
                 break;
             case "whouse":
-                this.whouse = Whouse.findById(Long.getLong(value));
+                this.whouse = Whouse.findById(NumberUtils.toLong(value));
+                break;
+            case "targetId":
+                this.targetId = value;
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
+        this.save();
     }
 
     public ElcukRecord buildRecord(String action, String message) {

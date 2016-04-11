@@ -24,7 +24,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class OutboundRecords extends Controller {
-    @Before(only = {"index", "blank", "create"})
+    @Before(only = {"index", "blank", "create", "update"})
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses(null));
         renderArgs.put("shippers", Cooperator.shippers());
