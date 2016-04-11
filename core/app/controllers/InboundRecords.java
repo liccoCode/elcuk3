@@ -40,6 +40,7 @@ public class InboundRecords extends Controller {
     }
 
     public static void create(InboundRecord record) {
+        record.setUpAttrs();
         validation.valid(record);
         record.stockObj.valid();
         if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
