@@ -35,12 +35,11 @@ public class InboundRecords extends Controller {
     }
 
     public static void blank() {
-        InboundRecord record = new InboundRecord();
+        InboundRecord record = new InboundRecord(InboundRecord.S.Pending, InboundRecord.O.Other);
         render(record);
     }
 
     public static void create(InboundRecord record) {
-        record.setUpAttrs();
         validation.valid(record);
         record.stockObj.valid();
         if(Validation.hasErrors()) render("InboundRecords/blank.html", record);

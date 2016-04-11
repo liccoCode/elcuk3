@@ -132,6 +132,11 @@ public class InboundRecord extends Model {
     public InboundRecord() {
     }
 
+    public InboundRecord(S state, O origin) {
+        this.state = state;
+        this.origin = origin;
+    }
+
     public InboundRecord(CheckTask task) {
         this.planQty = task.qty;
         this.badQty = task.unqualifiedQty;
@@ -199,13 +204,5 @@ public class InboundRecord extends Model {
                 defectiveWhouseItem.save();
             }
         }
-    }
-
-    /**
-     * 为手动添加的其他类型的入库单初始化一些字段
-     */
-    public void setUpAttrs() {
-        this.state = S.Pending;
-        this.origin = O.Other;
     }
 }
