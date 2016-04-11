@@ -3,6 +3,7 @@ package models.whouse;
 import com.google.gson.annotations.Expose;
 import models.qc.CheckTask;
 import org.apache.commons.lang.math.NumberUtils;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -30,6 +31,8 @@ public class InboundRecord extends Model {
     /**
      * 入库来源
      */
+    @Required
+    @Expose
     public O origin;
 
     public enum O {
@@ -68,24 +71,29 @@ public class InboundRecord extends Model {
     /**
      * 预计入库数量
      */
+    @Required
     @Expose
     public Integer planQty;
 
     /**
      * 实际入库数量
      */
+    @Min(1)
+    @Required
     @Expose
     public Integer qty;
 
     /**
      * 不良品入库数量(该数量会直接入库到不良品仓)
      */
+    @Required
     @Expose
     public Integer badQty;
 
     /**
      * 状态
      */
+    @Required
     @Expose
     @Enumerated(EnumType.STRING)
     public S state;
@@ -135,6 +143,8 @@ public class InboundRecord extends Model {
     public InboundRecord(S state, O origin) {
         this.state = state;
         this.origin = origin;
+        this.qty = 0;
+        this.badQty = 0;
     }
 
     public InboundRecord(CheckTask task) {
@@ -204,5 +214,9 @@ public class InboundRecord extends Model {
                 defectiveWhouseItem.save();
             }
         }
+    }
+
+    public void beforeCreate() {
+        this.planQty = this.qty + this.badQty;
     }
 }
