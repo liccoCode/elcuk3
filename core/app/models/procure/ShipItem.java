@@ -425,7 +425,7 @@ public class ShipItem extends GenericModel {
             }
         }
         String message = "";
-        StringBuilder sql = new StringBuilder("SELECT a.name AS declareName, p.value FROM ProductAttr p ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");
         sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
         sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
         sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");
