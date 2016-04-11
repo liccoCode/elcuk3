@@ -138,13 +138,15 @@ public class InboundRecord extends Model {
     public Date updateDate = new Date();
 
     public InboundRecord() {
-    }
-
-    public InboundRecord(S state, O origin) {
-        this.state = state;
-        this.origin = origin;
+        this.state = S.Pending;
+        this.planQty = 0;
         this.qty = 0;
         this.badQty = 0;
+    }
+
+    public InboundRecord(O origin) {
+        this();
+        this.origin = origin;
     }
 
     public InboundRecord(CheckTask task) {

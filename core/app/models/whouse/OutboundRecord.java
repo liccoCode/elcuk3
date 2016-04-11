@@ -5,6 +5,7 @@ import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
 import org.apache.commons.lang.math.NumberUtils;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -34,6 +35,8 @@ public class OutboundRecord extends Model {
      */
     public String targetId;
 
+    @Required
+    @Expose
     public T type;
 
     public enum T {
@@ -74,12 +77,15 @@ public class OutboundRecord extends Model {
     /**
      * 数量
      */
+    @Required
     @Expose
+    @Min(1)
     public Integer qty;
 
     /**
      * 状态
      */
+    @Required
     @Expose
     @Enumerated(EnumType.STRING)
     public S state = S.Pending;
@@ -154,11 +160,13 @@ public class OutboundRecord extends Model {
     public Date updateDate = new Date();
 
     public OutboundRecord() {
+        this.state = S.Pending;
     }
 
-    public OutboundRecord(S state, O origin) {
-        this.state = state;
+    public OutboundRecord(T type, O origin) {
+        this();
         this.origin = origin;
+        this.type = type;
     }
 
     public OutboundRecord(ShipPlan plan) {

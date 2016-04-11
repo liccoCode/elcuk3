@@ -24,7 +24,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class OutboundRecords extends Controller {
-    @Before(only = {"index", "blank"})
+    @Before(only = {"index", "blank", "create"})
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses(null));
         renderArgs.put("shippers", Cooperator.shippers());
@@ -37,7 +37,7 @@ public class OutboundRecords extends Controller {
     }
 
     public static void blank() {
-        OutboundRecord record = new OutboundRecord(OutboundRecord.S.Pending, OutboundRecord.O.Other);
+        OutboundRecord record = new OutboundRecord(OutboundRecord.T.Normal, OutboundRecord.O.Other);
         render(record);
     }
 

@@ -35,7 +35,7 @@ public class InboundRecords extends Controller {
     }
 
     public static void blank() {
-        InboundRecord record = new InboundRecord(InboundRecord.S.Pending, InboundRecord.O.Other);
+        InboundRecord record = new InboundRecord(InboundRecord.O.Other);
         render(record);
     }
 
