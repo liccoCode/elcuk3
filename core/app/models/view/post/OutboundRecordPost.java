@@ -38,7 +38,6 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
     @Override
     public List<OutboundRecord> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = count(params);
         return OutboundRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
@@ -80,6 +79,6 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
 
     @Override
     public Long getTotalCount() {
-        return OutboundRecord.count();
+        return this.count();
     }
 }

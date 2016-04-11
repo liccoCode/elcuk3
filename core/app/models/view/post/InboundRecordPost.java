@@ -65,13 +65,12 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
     @Override
     public Long getTotalCount() {
-        return InboundRecord.count();
+        return this.count();
     }
 
     @Override
     public List<InboundRecord> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = count(params);
         return InboundRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
