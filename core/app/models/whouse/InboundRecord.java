@@ -33,6 +33,7 @@ public class InboundRecord extends Model {
      */
     @Required
     @Expose
+    @Enumerated(EnumType.STRING)
     public O origin;
 
     public enum O {

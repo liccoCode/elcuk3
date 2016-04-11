@@ -38,12 +38,12 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
         if(this.origin != null) {
             sbd.append(" AND origin=?");
-            params.add(this.origin.name());
+            params.add(this.origin);
         }
 
         if(this.state != null) {
             sbd.append(" AND state=?");
-            params.add(this.state.name());
+            params.add(this.state);
         }
 
         if(this.from != null) {

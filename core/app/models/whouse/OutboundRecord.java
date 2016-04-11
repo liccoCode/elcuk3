@@ -35,6 +35,7 @@ public class OutboundRecord extends Model {
      */
     public String targetId;
 
+    @Enumerated(EnumType.STRING)
     @Required
     @Expose
     public T type;
@@ -130,6 +131,7 @@ public class OutboundRecord extends Model {
      * 出库来源
      * 该字段仅用来方便前台过滤, 无其他实际意义
      */
+    @Enumerated(EnumType.STRING)
     @Expose
     public O origin;
 
