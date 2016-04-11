@@ -71,6 +71,7 @@ public class InboundRecord extends Model {
     /**
      * 预计入库数量
      */
+    @Min(0)
     @Required
     @Expose
     public Integer planQty;
@@ -223,5 +224,21 @@ public class InboundRecord extends Model {
 
     public void beforeCreate() {
         this.planQty = this.qty + this.badQty;
+    }
+
+    public void valid() {
+        Validation.required("仓库", this.targetWhouse);
+        Validation.required("入库来源", this.origin);
+
+        Validation.required("预计入库数量", this.planQty);
+        Validation.required("实际入库数量", this.qty);
+        Validation.required("不良品入库数量", this.badQty);
+        Validation.required("状态", this.state);
+
+        Validation.min("预计入库数量", this.planQty, 0);
+        Validation.min("实际入库数量", this.qty, 1);
+        Validation.min("不良品入库数量", this.badQty, 0);
+
+        this.stockObj.valid();
     }
 }

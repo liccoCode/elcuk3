@@ -11,7 +11,7 @@ $ ->
       item
   })
 
-  $("#new_inbound_record").on('loadStockObj', "input[name='record.stockObj.stockObjId']", (e) ->
+  $("#new_outbound_record").on('loadStockObj', "input[name='record.stockObj.stockObjId']", (e) ->
     loadStockObj($(@).val())
   )
 

@@ -71,7 +71,9 @@ public class OutboundRecord extends Model {
     @ManyToOne
     public Whouse whouse;
 
+    @Required
     @Expose
+    @Min(0)
     public Integer planQty;
 
     /**
@@ -79,7 +81,7 @@ public class OutboundRecord extends Model {
      */
     @Required
     @Expose
-    @Min(1)
+    @Min(0)
     public Integer qty;
 
     /**
@@ -128,6 +130,7 @@ public class OutboundRecord extends Model {
      * 出库来源
      * 该字段仅用来方便前台过滤, 无其他实际意义
      */
+    @Expose
     public O origin;
 
     public enum O {
@@ -160,6 +163,8 @@ public class OutboundRecord extends Model {
     public Date updateDate = new Date();
 
     public OutboundRecord() {
+        this.qty = 0;
+        this.planQty = 0;
         this.state = S.Pending;
     }
 
@@ -234,5 +239,15 @@ public class OutboundRecord extends Model {
 
     public ElcukRecord buildRecord(String action, String message) {
         return new ElcukRecord(action, message, this.handler.username, this.id.toString()).save();
+    }
+
+    public void valid() {
+        Validation.required("类型", this.type);
+        Validation.required("仓库", this.whouse);
+        Validation.required("预计出库数量", this.planQty);
+        Validation.required("实际出库数量", this.qty);
+        Validation.required("状态", this.state);
+        Validation.min("预计出库数量", this.planQty, 1);
+        this.stockObj.valid();
     }
 }

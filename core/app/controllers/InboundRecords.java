@@ -41,8 +41,7 @@ public class InboundRecords extends Controller {
 
     public static void create(InboundRecord record) {
         record.beforeCreate();
-        validation.valid(record);
-        record.stockObj.valid();
+        record.valid();
         if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
         record.save();
         flash.success("创建成功!");

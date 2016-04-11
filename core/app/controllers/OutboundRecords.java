@@ -42,8 +42,7 @@ public class OutboundRecords extends Controller {
     }
 
     public static void create(OutboundRecord record) {
-        validation.valid(record);
-        record.stockObj.valid();
+        record.valid();
         if(Validation.hasErrors()) render("OutboundRecords/blank.html", record);
         record.save();
         flash.success("创建成功!");

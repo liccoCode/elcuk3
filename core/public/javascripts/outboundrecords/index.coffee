@@ -15,12 +15,12 @@ $ ->
   )
 
   $("form.confirm_form").on('change', "input[name=qty], select[name=whouse]", (e) ->
-    $(@).data('has_changed', 'true')
-  ).on('blur', "input[name=qty], select[name=whouse]", (e) ->
     $input = $(@)
-    $.post("/OutboundRecords/update", {id: $input.parents('tr').find('checkbox[name=rids]').val()},
+    $.post("/OutboundRecords/update", {
+      id: $input.parents('tr').find('checkbox[name=rids]').val(),
       attr: $input.attr('name'),
-      value: $input.val(),
+      value: $input.val()
+    },
       (r) ->
         if r.flag is false
           noty({text: r.message, type: 'error'})

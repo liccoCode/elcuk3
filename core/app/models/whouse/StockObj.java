@@ -94,8 +94,8 @@ public class StockObj implements Serializable {
     }
 
     public void valid() {
-        Validation.required("StockObj.stockObjId", this.stockObjId);
-        Validation.required("StockObj.stockObjType", this.stockObjType);
+        Validation.required("物料编码", this.stockObjId);
+        Validation.required("物料编码类型", this.stockObjType);
     }
 
     public static SOT guessType(String id) {
