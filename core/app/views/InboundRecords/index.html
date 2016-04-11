@@ -1,4 +1,4 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'入库记录(' + records.size() + ')'/}
 #{set 'moreScripts'}
     #{script_cdn name: 'inboundrecords/index.coffee'/}
@@ -77,8 +77,12 @@
           <td>${r.id}</td>
           <td>${r.state.label()}</td>
           <td>${r.origin.label()}</td>
-          <td>@{CheckTasks.show(r.checkTask)}</td>
-          <td>${r.stockObj.showStockObjLink()}</td>
+          <td>
+            #{if r.checkTask != null}
+              @{CheckTasks.show(r.checkTask)}
+            #{/if}
+          </td>
+          <td><a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a></td>
           <td>${r.stockObj.name()}</td>
           <td>${r.planQty}</td>
           <td>
