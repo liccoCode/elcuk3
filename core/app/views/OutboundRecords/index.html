@@ -94,7 +94,7 @@
           </td>
           <td>${r.id}</td>
           <td>
-            <select name="whouse">
+            <select name="whouse" style="width: 100px;">
               <option value="">仓库</option>
                 #{list items:whouses, as:'whouse'}
                   <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
@@ -128,7 +128,7 @@
           </td>
           <td>
               #{if r.type == models.whouse.OutboundRecord.T.Normal}
-                <select name="targetId">
+                <select name="targetId" style="width: 150px;">
                   <option value="">运输商</option>
                     #{list items:shippers, as: 'ship'}
                       <option ${ship.id.toString() == r.targetId ? 'selected' : ''} value="${ship.id}">
@@ -138,7 +138,7 @@
                 </select>
               #{/if}
               #{elseif r.type == models.whouse.OutboundRecord.T.InternalTrans}
-                <select name="targetId">
+                <select name="targetId" style="width: 150px;">
                   <option value="">仓库</option>
                     #{list items:whouses, as:'whouse'}
                       <option ${whouse.id.toString() == r.targetId ? 'selected' : ''} value="${whouse.id}">
