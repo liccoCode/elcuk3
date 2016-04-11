@@ -55,8 +55,8 @@ public class InboundRecords extends Controller {
      * @param value
      */
     public static void update(Long id, String attr, String value) {
-        InboundRecord record = InboundRecord.findById(id);
         try {
+            InboundRecord record = InboundRecord.findById(id);
             record.updateAttr(attr, value);
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(false, e.getMessage()));

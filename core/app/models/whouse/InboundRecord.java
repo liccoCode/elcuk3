@@ -161,7 +161,7 @@ public class InboundRecord extends Model {
                 this.memo = value;
                 break;
             case "targetWhouse":
-                this.targetWhouse = Whouse.findById(Long.getLong(value));
+                this.targetWhouse = Whouse.findById(NumberUtils.toLong(value));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");

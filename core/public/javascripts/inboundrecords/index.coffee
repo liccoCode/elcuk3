@@ -14,13 +14,17 @@ $ ->
       $("form[name=confirm_form]").submit()
   )
 
-  $("form.confirm_form").on('change', "input[name=qty], input[name=badQty], select[name=targetWhouse]", (e) ->
-    $(@).data('has_changed', 'true')
-  ).on('blur', "input[name=qty], input[name=badQty], select[name=targetWhouse]", (e) ->
+  $("form[name=confirm_form]").on('change', "input[name=qty], input[name=badQty], input[name=memo],
+ select[name=targetWhouse]", (e) ->
     $input = $(@)
-    $.post("/InboundRecords/update", {id: $input.parents('tr').find('checkbox[name=rids]').val()},
+    value = $input.val()
+    return if value == null || value == undefined || value == ""
+
+    $.post("/InboundRecords/update", {
+      id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
       attr: $input.attr('name'),
-      value: $input.val(),
+      value: value
+    },
       (r) ->
         if r.flag is false
           noty({text: r.message, type: 'error'})
