@@ -52,7 +52,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
         }
         if(this.to != null) {
             sbd.append(" AND createDate<=?");
-            params.add(Dates.morning(this.to));
+            params.add(Dates.night(this.to));
         }
 
         if(StringUtils.isNotBlank(this.search)) {
