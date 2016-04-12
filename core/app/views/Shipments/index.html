@@ -27,20 +27,20 @@
 
       <select name="p.dateType" class="inline">
       #{list items:dateTypes, as:'t'}
-        <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+        <option value="${t._1}" ${t._1 == p.dateType ? 'selected' : ''}>${t._2}</option>
       #{/list}
       </select>
 
       <select name="p.type" class="inline">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
-        <option ${t == p.type ? 'selected' : ''} value="${t.name()}">${t}</option>
+        <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t}</option>
       #{/list}
       </select>
 
       <select name="p.states" class="inline" multiple="multiple" size="6">
       #{list items:models.procure.Shipment.S.values(), as:'state'}
-        <option ${p.states.contains(state) ? 'selected' : ''} value="${state.name()}">${state.label()}</option>
+        <option value="${state.name()}" ${p.states.contains(state) ? 'selected' : ''}>${state.label()}</option>
       #{/list}
       </select>
 

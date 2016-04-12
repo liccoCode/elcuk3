@@ -38,6 +38,7 @@ require:
         exclude:
           - javax.persistence -> *
           - org.eclipse.jdt.core.compiler -> *
+    - xml-apis -> xml-apis 1.4.01
     - org.activiti -> activiti-spring 5.15.1:
         exclude:
           - javax.persistence -> *

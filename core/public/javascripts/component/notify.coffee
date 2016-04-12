@@ -58,12 +58,11 @@ $ ->
 
   #统计当前用户的 新通知记录的条数
   newsCount = ->
-    htmlobj = $.ajax({url: "/Notifications/amount", async: false},{type: 'POST', dataType: 'json'})
-          .done((r) ->
-            if r.count>0
-              $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
-            $("#notifyNumber").html(r.count)
-          )
+    htmlobj = $.ajax({url: "/Notifications/amount"},{type: 'POST', dataType: 'json'}).done((r) ->
+      if r.count>0
+        $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
+      $("#notifyNumber").html(r.count)
+    )
   newsCount()
 
   #将选中的通知状态更改成已读
