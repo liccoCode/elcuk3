@@ -17,9 +17,20 @@ window.$ui =
       else
         $input.dateinput(format: $input.attr('format'))
 
+  selectize: ->
+    for select in $('select')
+      $select = $(select)
+      return if $select.attr('native') != undefined
+      options = {plugins: ['remove_button']}
+      for key in ['create', 'sortField', 'maxItems']
+        options[key] = $select.data(key) if $select.data(key) != undefined
+      $select.selectize(options)
+
+
 # 初始化 popover, tooltip, dateinput
   init: ->
     @dateinput()
+    @selectize()
 
 # popover 与 tooltip 的基础方法
   relBase: (event, func)->

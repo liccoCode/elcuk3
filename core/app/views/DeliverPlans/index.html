@@ -1,11 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"出货单列表 (${deliverplans.size()})" /}
-#{set 'moreStyles'}
-    #{stylesheet_cdn name:'selectize.default.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script_cdn name: 'deliveryments/index.coffee'/}
-    #{script_cdn name: 'selectize.min.js'/}
 #{/set}
 
 
