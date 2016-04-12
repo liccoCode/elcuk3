@@ -14,10 +14,8 @@ window.$ui =
       return if $input.attr('native') != undefined
       if $input.attr('format') is undefined
         $input.dateinput(format: 'yyyy-mm-dd')
-#        $input.datepicker(format: 'yyyy-mm-dd')
       else
         $input.dateinput(format: $input.attr('format'))
-#        $input.datepicker(format: $input.attr('format'))
 
 # 初始化 popover, tooltip, dateinput
   init: ->
