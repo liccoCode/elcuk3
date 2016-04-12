@@ -67,8 +67,8 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND (id LIKE ? OR stockObjId LIKE ?)");
-            for(int i = 0; i < 2; i++) params.add(this.word());
+            sbd.append(String.format(" AND (id = %s OR stockObjId LIKE ?)", this.search));
+            params.add(this.word());
         }
         return new F.T2<>(sbd.toString(), params);
     }

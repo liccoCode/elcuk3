@@ -56,8 +56,8 @@ public class InboundRecordPost extends Post<InboundRecord> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND (id LIKE ? OR checkTask.id LIKE ? OR stockObjId LIKE ?)");
-            for(int i = 0; i < 3; i++) params.add(this.word());
+            sbd.append(String.format(" AND (id=%s OR checkTask.id=%s OR stockObjId LIKE ?)", this.search, this.search));
+            params.add(this.word());
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
