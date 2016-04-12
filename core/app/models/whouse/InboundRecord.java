@@ -170,7 +170,6 @@ public class InboundRecord extends Model {
     }
 
     public void updateAttr(String attr, String value) {
-        //TODO message
         List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
