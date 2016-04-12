@@ -18,15 +18,15 @@
 <div class="row-fluid">
   <div class="span12">
     <span>年份:</span>
-      #{select_year class:'span1', name:'p.year', value: p.year/}
+      #{select_year class:'span1', name:'p.year', value: p.year, native: true/}
     &nbsp;
 
     <span class="add-on">月份:</span>
-      #{select_all_month  class:'span1', name: "p.month", value: p.month/}
+      #{select_all_month  class:'span1', name: "p.month", value: p.month, native: true/}
     &nbsp;
 
     <span class="add-on">报表类型:</span>
-    <select class="span1" name="p.reporttype">
+    <select class="span1" name="p.reporttype" native>
       <option value="">请选择</option>
         #{list items:models.view.post.ReportPost.applyReportTypes(), as: 'reportType'}
           <option ${p.reporttype == reportType ? 'selected=selected' : ''} value="${reportType.name()}">${reportType.label()}</option>

@@ -1048,9 +1048,9 @@
 			if (!value && placeholder) {
 				value = placeholder;
 			}
-	
-			width = measureString(value, $input) + 4;
+
 			width = minLength(width);
+			width = measureString(value, $input) + 4;
 			if (width !== currentWidth) {
 				currentWidth = width;
 				$input.width(width);
@@ -2792,9 +2792,9 @@
 			var $control = this.$control;
 			var offset = this.settings.dropdownParent === 'body' ? $control.offset() : $control.position();
 			offset.top += $control.outerHeight(true);
-	
+
 			this.$dropdown.css({
-				width : minLength($control.outerWidth()),
+				width : $control.outerWidth(),
 				top   : offset.top,
 				left  : offset.left
 			});

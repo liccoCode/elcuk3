@@ -1,9 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.J;
 import helper.Webs;
-import models.CategoryAssignManagement;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
@@ -24,7 +22,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +87,7 @@ public class CheckTasks extends Controller {
             p.from = DateTime.now().minusDays(1).toDate();
             p.to = new Date();
         }
-        List<ElcukRecord> records = ElcukRecord.find("action like '%CheckTask%' ORDER BY createAt DESC LIMIT 50").fetch();
+        List<ElcukRecord> records = ElcukRecord.find("action like '[CheckTask%' ORDER BY createAt DESC").fetch(50);
         List<CheckTask> checks = p.check();
         List<CheckTask> checkeds = p.checked();
         List<CheckTask> checkRepeats = p.checkRepeat();
