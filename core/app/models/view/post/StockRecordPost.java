@@ -59,7 +59,11 @@ public class StockRecordPost extends Post<StockRecord> {
     public List<StockRecord> query() {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
-        return StockRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        if(this.pagination) {
+            return StockRecord.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        } else {
+            return StockRecord.find(params._1, params._2.toArray()).fetch();
+        }
     }
 
     @Override

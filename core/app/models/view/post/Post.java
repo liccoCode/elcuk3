@@ -31,6 +31,10 @@ public abstract class Post<T> implements Serializable, Cloneable {
     public int page = 1;
     public int perSize = 50;
     public long count = 1;
+    /**
+     * 是否需要翻页
+     */
+    public boolean pagination = true;
 
     /**
      * 用来计算搜索的条件
