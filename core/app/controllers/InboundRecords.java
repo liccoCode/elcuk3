@@ -1,12 +1,12 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Webs;
 import models.ElcukRecord;
 import models.view.Ret;
 import models.view.post.InboundRecordPost;
 import models.whouse.InboundRecord;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -78,9 +78,9 @@ public class InboundRecords extends Controller {
      */
     public static void confirm(List<Long> rids) {
         if(!rids.isEmpty()) {
-            InboundRecord.batchConfirm(rids);
+            List<String> errors = InboundRecord.batchConfirm(rids);
+            if(!errors.isEmpty()) flash.error(StringUtils.join(errors, "<br/>"));
         }
-        if(Validation.hasErrors()) Webs.errorToFlash(flash);
         redirect("/InboundRecords/index");
     }
 }

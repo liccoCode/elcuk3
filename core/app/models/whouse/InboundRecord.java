@@ -7,6 +7,7 @@ import models.embedded.ERecordBuilder;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -169,30 +170,33 @@ public class InboundRecord extends Model {
     }
 
     public void updateAttr(String attr, String value) {
-        String changelog = "";
+        //TODO message
+        List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
-                this.qty = NumberUtils.toInt(value);
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 //预计数量 >= 实际数量才去计算 不合格数量(允许 实际数量 > 预计数量, 但不自动计算不合格数量)
-                if(this.planQty >= this.qty) this.badQty = this.planQty - this.qty;
+                if(this.planQty >= this.qty) {
+                    logs.addAll(Reflects.logFieldFade(this, "badQty", this.planQty - this.qty));
+                }
                 break;
             case "badQty":
-                this.badQty = NumberUtils.toInt(value);
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 //预计数量 > 不合格数量才去计算 实际数量
-                if(this.planQty > this.badQty) this.qty = this.planQty - this.badQty;
+                if(this.planQty > this.badQty) {
+                    logs.addAll(Reflects.logFieldFade(this, "qty", this.planQty - this.badQty));
+                }
                 break;
             case "memo":
-                this.memo = value;
+                logs.addAll(Reflects.logFieldFade(this, attr, value));
                 break;
             case "targetWhouse":
-                attr = "targetWhouse.id";
-                this.targetWhouse = Whouse.findById(NumberUtils.toLong(value));
+                Whouse whouse = Whouse.findById(NumberUtils.toLong(value));
+                logs.addAll(Reflects.logFieldFade(this, "targetWhouse", whouse != null ? whouse : null));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
-
-        List<String> logs = Reflects.logFieldFade(this, attr, value);
         new ERecordBuilder("inboundrecord.update")
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();
@@ -205,13 +209,25 @@ public class InboundRecord extends Model {
      *
      * @param rids
      */
-    public static void batchConfirm(List<Long> rids) {
+    public static List<String> batchConfirm(List<Long> rids) {
+        List<String> errors = new ArrayList<>();
         List<Long> confirmed = new ArrayList<>();
+
         for(Long rid : rids) {
             InboundRecord record = InboundRecord.findById(rid);
-            if(record.confirm()) confirmed.add(rid);
+            if(record.state == S.Inbound) continue;
+
+            if(record.confirm()) {
+                confirmed.add(rid);
+            } else {
+                for(Error error : Validation.errors()) {
+                    errors.add(String.format("ID: [%s] %s", rid.toString(), error.message()));
+                }
+                Validation.clear();
+            }
         }
         if(!confirmed.isEmpty()) new ElcukRecord("outboundrecord.confirm", StringUtils.join(confirmed, ",")).save();
+        return errors;
     }
 
     /**
@@ -220,10 +236,7 @@ public class InboundRecord extends Model {
     public boolean confirm() {
         this.state = S.Inbound;
         this.completeDate = new Date();
-
-        if(this.qty == 0) Validation.addError("", String.format("入库计划: [%s] 的实际良品数量为 0!", this.id));
-        if(this.targetWhouse == null) Validation.addError("", String.format("入库计划: [%s] 的目标仓库为空!", this.id));
-
+        this.valid();
         if(Validation.hasErrors()) {
             return false;
         } else {
