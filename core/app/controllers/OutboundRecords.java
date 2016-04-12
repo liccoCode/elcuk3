@@ -29,7 +29,7 @@ import java.util.List;
 public class OutboundRecords extends Controller {
     @Before(only = {"index", "blank", "create", "update"})
     public static void setWhouses() {
-        renderArgs.put("whouses", Whouse.selfWhouses(null));
+        renderArgs.put("whouses", Whouse.selfWhouses());
         renderArgs.put("shippers", Cooperator.shippers());
     }
 

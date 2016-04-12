@@ -315,15 +315,8 @@ public class Whouse extends Model {
         }
     }
 
-    public static List<Whouse> selfWhouses(String search) {
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT w FROM Whouse w LEFT JOIN w.items i WHERE w.type=?");
-        List<Object> params = new ArrayList<>();
-        params.add(T.SELF);
-        if(StringUtils.isNotBlank(search)) {
-            sql.append(" AND i.stockObjId LIKE ?");
-            params.add("%" + search + "%");
-        }
-        return Whouse.find(sql.toString(), params.toArray()).fetch();
+    public static List<Whouse> selfWhouses() {
+        return Whouse.find("type=?", T.SELF).fetch();
     }
 
     /**

@@ -124,12 +124,4 @@ public class Whouses extends Controller {
         StockObj stockObj = new StockObj(id, StockObj.guessType(id));
         renderJSON(GTs.newMap("type", stockObj.stockObjType).put("name", stockObj.name()).build());
     }
-
-    /**
-     * 自有仓库
-     */
-    public static void selfWhouses(String search) {
-        List<Whouse> whouses = Whouse.selfWhouses(search);
-        render(whouses);
-    }
 }

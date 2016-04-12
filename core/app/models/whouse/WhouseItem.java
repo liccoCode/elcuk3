@@ -53,8 +53,11 @@ public class WhouseItem extends Model {
     }
 
     public static WhouseItem findItem(StockObj stockObj, Whouse whouse) {
-        return WhouseItem
-                .find("stockObjId=? AND stockObjType=? AND whouse=?", stockObj.stockObjId, stockObj.stockObjType, whouse)
-                .first();
+        WhouseItem whouseItem = WhouseItem.find("stockObjId=? AND stockObjType=? AND whouse=?",
+                stockObj.stockObjId, stockObj.stockObjType, whouse).first();
+        if(whouseItem == null) {
+            return new WhouseItem(stockObj, whouse).save();
+        }
+        return whouseItem;
     }
 }

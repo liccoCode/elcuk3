@@ -1,9 +1,9 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import models.view.post.StockRecordPost;
-import models.whouse.StockRecord;
+import models.view.post.WhouseItemPost;
 import models.whouse.Whouse;
+import models.whouse.WhouseItem;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -11,22 +11,21 @@ import play.mvc.With;
 import java.util.List;
 
 /**
- * 库存异动控制器
  * Created by IntelliJ IDEA.
  * User: duan
- * Date: 4/6/16
- * Time: 5:08 PM
+ * Date: 4/12/16
+ * Time: 5:34 PM
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
-public class StockRecords extends Controller {
+public class WhouseItems extends Controller {
     @Before(only = {"index"})
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses());
     }
 
-    public static void index(StockRecordPost p) {
-        if(p == null) p = new StockRecordPost();
-        List<StockRecord> records = p.query();
-        render(p, records);
+    public static void index(WhouseItemPost p) {
+        if(p == null) p = new WhouseItemPost();
+        List<WhouseItem> items = p.query();
+        render(p, items);
     }
 }
