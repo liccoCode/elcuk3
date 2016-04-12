@@ -148,8 +148,8 @@
                 </select>
               #{/elseif}
           </td>
-          <td>#{time_tooltip time: r.createDate/}</td>
-          <td>#{time_tooltip time: r.outboundDate/}</td>
+          <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
+          <td>#{time_tooltip time: r.outboundDate, datetime: true/}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}" style="width: 150px;">
             <input type="hidden" name="state" value="${r.state.name()}">

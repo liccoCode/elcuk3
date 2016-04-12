@@ -106,7 +106,7 @@ public class StockRecord extends Model {
     }
 
     public OutboundRecord getOutboundRecord() {
-        if(this.type == T.Inbound) {
+        if(this.type == T.Outbound) {
             return OutboundRecord.findById(this.recordId);
         }
         throw new FastRuntimeException("类型(type) 错误, 无法找到对应的出库记录.");

@@ -60,7 +60,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
             params.add(this.word());
         }
 
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     @Override

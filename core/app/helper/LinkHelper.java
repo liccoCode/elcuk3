@@ -2,6 +2,7 @@ package helper;
 
 import models.market.Selling;
 import models.whouse.StockObj;
+import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import play.mvc.Router;
 import play.templates.JavaExtensions;
@@ -49,6 +50,19 @@ public class LinkHelper extends JavaExtensions {
                 return "";
             default:
                 return "";
+        }
+    }
+
+    public static String showRecordLink(StockRecord stockRecord) {
+        switch(stockRecord.type) {
+            case Inbound:
+                return Router.getFullUrl("InboundRecords.index", GTs.newMap("p.search", stockRecord.recordId).build());
+            case Outbound:
+                return Router.getFullUrl("OutboundRecords.index", GTs.newMap("p.search", stockRecord.recordId).build());
+            case Stocktaking:
+
+            default:
+                return "#";
         }
     }
 }

@@ -103,8 +103,8 @@
                 #{/list}
             </select>
           </td>
-          <td>#{time_tooltip time: r.createDate/}</td>
-          <td>#{time_tooltip time: r.completeDate/}</td>
+          <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
+          <td>#{time_tooltip time: r.completeDate, datetime: true/}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
             <input type="hidden" name="state" value="${r.state.name()}">
