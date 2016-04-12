@@ -33,8 +33,9 @@ $ ->
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
-      state = $('input[name=state]').val()
-      $(tr).find(":input[name]").prop("disabled", true) if state != 'Pending'
+      $tr = $(tr)
+      state = $tr.find('input[name=state]').val()
+      $tr.find(":input[name]").prop("disabled", true) if state != 'Pending'
     )
   )
 
