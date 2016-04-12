@@ -169,6 +169,8 @@ public class InboundRecord extends Model {
     }
 
     public void updateAttr(String attr, String value) {
+        if(this.isLocked()) throw new FastRuntimeException("已经入库或取消状态下的入库记录不允许修改!");
+
         List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
@@ -213,7 +215,7 @@ public class InboundRecord extends Model {
 
         for(Long rid : rids) {
             InboundRecord record = InboundRecord.findById(rid);
-            if(record.state == S.Inbound) continue;
+            if(record.isLocked()) continue;
 
             if(record.confirm()) {
                 confirmed.add(rid);
@@ -285,5 +287,9 @@ public class InboundRecord extends Model {
         Validation.min("不良品入库数量", this.badQty, 0);
 
         this.stockObj.valid();
+    }
+
+    public boolean isLocked() {
+        return this.state != S.Pending;
     }
 }

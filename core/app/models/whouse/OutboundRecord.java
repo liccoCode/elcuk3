@@ -220,7 +220,7 @@ public class OutboundRecord extends Model {
 
         for(Long rid : rids) {
             OutboundRecord record = OutboundRecord.findById(rid);
-            if(record.state == S.Outbound) continue;
+            if(record.isLocked()) continue;
 
             if(record.confirm()) {
                 confirmed.add(rid);
@@ -254,6 +254,8 @@ public class OutboundRecord extends Model {
     }
 
     public void updateAttr(String attr, String value) {
+        if(this.isLocked()) throw new FastRuntimeException("已经入库或取消状态下的出库记录不允许修改!");
+
         List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
@@ -290,5 +292,9 @@ public class OutboundRecord extends Model {
         Validation.required("状态", this.state);
         Validation.min("预计出库数量", this.planQty, 1);
         this.stockObj.valid();
+    }
+
+    public boolean isLocked() {
+        return this.state != S.Pending;
     }
 }
