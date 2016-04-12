@@ -1,14 +1,13 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Webs;
 import models.ElcukRecord;
 import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.OutboundRecordPost;
-import models.whouse.InboundRecord;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -41,7 +40,7 @@ public class OutboundRecords extends Controller {
                 Messages.get("outboundrecord.confirm"),
                 Messages.get("outboundrecord.update")
         ), 50);
-        render(p, records);
+        render(p, records, elcukRecords);
     }
 
     public static void blank() {
@@ -75,9 +74,9 @@ public class OutboundRecords extends Controller {
      */
     public static void confirm(List<Long> rids) {
         if(!rids.isEmpty()) {
-            InboundRecord.batchConfirm(rids);
+            List<String> errors = OutboundRecord.batchConfirm(rids);
+            if(!errors.isEmpty()) flash.error(StringUtils.join(errors, "<br/>"));
         }
-        if(Validation.hasErrors()) Webs.errorToFlash(flash);
         redirect("/OutboundRecords/index");
     }
 }

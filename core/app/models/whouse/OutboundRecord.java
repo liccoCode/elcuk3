@@ -8,6 +8,7 @@ import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -213,13 +214,27 @@ public class OutboundRecord extends Model {
         throw new FastRuntimeException("类型(type)错误, 无法查询到仓库!");
     }
 
-    public static void batchConfirm(List<Long> rids) {
+    public static List<String> batchConfirm(List<Long> rids) {
+        List<String> errors = new ArrayList<>();
         List<Long> confirmed = new ArrayList<>();
+
         for(Long rid : rids) {
             OutboundRecord record = OutboundRecord.findById(rid);
-            if(record.confirm()) confirmed.add(rid);
+            if(record.state == S.Outbound) continue;
+
+            if(record.confirm()) {
+                confirmed.add(rid);
+            } else {
+                for(Error error : Validation.errors()) {
+                    errors.add(String.format("ID: [%s] %s", rid.toString(), error.message()));
+                }
+                Validation.clear();
+            }
         }
-        if(!confirmed.isEmpty()) new ElcukRecord("inboundrecord.confirm", StringUtils.join(confirmed, ",")).save();
+        if(!confirmed.isEmpty()) {
+            new ERecordBuilder("outboundrecord.confirm").msgArgs(StringUtils.join(confirmed, ",")).fid("1").save();
+        }
+        return errors;
     }
 
     /**
@@ -228,9 +243,7 @@ public class OutboundRecord extends Model {
     public boolean confirm() {
         this.state = S.Outbound;
         this.outboundDate = new Date();
-
-        if(this.qty == 0) Validation.addError("", String.format("出库计划: [%s] 的实际出库数量为 0!", this.id));
-        if(this.whouse == null) Validation.addError("", String.format("出库计划: [%s] 的仓库为空!", this.id));
+        this.valid();
         if(Validation.hasErrors()) {
             return false;
         } else {
@@ -241,24 +254,24 @@ public class OutboundRecord extends Model {
     }
 
     public void updateAttr(String attr, String value) {
+        List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
-                this.qty = NumberUtils.toInt(value);
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "memo":
-                this.memo = value;
+                logs.addAll(Reflects.logFieldFade(this, attr, value));
                 break;
             case "whouse":
-                this.whouse = Whouse.findById(NumberUtils.toLong(value));
+                Whouse whouse = Whouse.findById(NumberUtils.toLong(value));
+                logs.addAll(Reflects.logFieldFade(this, "whouse", whouse != null ? whouse : null));
                 break;
             case "targetId":
-                this.targetId = value;
+                logs.addAll(Reflects.logFieldFade(this, attr, value));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
-
-        List<String> logs = Reflects.logFieldFade(this, attr, value);
         new ERecordBuilder("outboundrecord.update")
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();

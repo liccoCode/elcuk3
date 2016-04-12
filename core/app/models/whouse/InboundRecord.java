@@ -2,7 +2,6 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import helper.Reflects;
-import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
@@ -225,7 +224,9 @@ public class InboundRecord extends Model {
                 Validation.clear();
             }
         }
-        if(!confirmed.isEmpty()) new ElcukRecord("outboundrecord.confirm", StringUtils.join(confirmed, ",")).save();
+        if(!confirmed.isEmpty()) {
+            new ERecordBuilder("inboundrecord.confirm").msgArgs(StringUtils.join(confirmed, ",")).fid("1").save();
+        }
         return errors;
     }
 
