@@ -50,7 +50,7 @@
         <tr>
           <th>
             <label class="checkbox">
-              <input type="checkbox" id="inboundrecord_check_all" class="checkall">
+              <input type="checkbox" id="inboundrecord_check_all">
             </label>
           </th>
           <th>ID</th>
@@ -107,6 +107,7 @@
           <td>#{time_tooltip time: r.completeDate/}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
+            <input type="hidden" name="state" value="${r.state.name()}">
           </td>
         </tr>
       #{/list}

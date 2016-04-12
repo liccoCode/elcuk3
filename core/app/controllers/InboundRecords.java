@@ -77,7 +77,7 @@ public class InboundRecords extends Controller {
      * @param rids
      */
     public static void confirm(List<Long> rids) {
-        if(!rids.isEmpty()) {
+        if(rids != null && !rids.isEmpty()) {
             List<String> errors = InboundRecord.batchConfirm(rids);
             if(!errors.isEmpty()) flash.error(StringUtils.join(errors, "<br/>"));
         }

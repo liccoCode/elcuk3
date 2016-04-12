@@ -1,8 +1,8 @@
 $ ->
-  $('checkbox.inboundrecord_check_all').change ->
+  $('#inboundrecord_check_all').change ->
     o = $(@)
     region = o.attr('id').split('_')[0].trim()
-    $("input:checkbox.#{region}").prop("checked", o.prop("checked"))
+    $("input:checkbox:not(:disabled).#{region}").prop("checked", o.prop("checked"))
 
   $("form.search_form").on('click', 'a[name=confirm]', (e) ->
     checkids = []
@@ -31,4 +31,11 @@ $ ->
         else
           noty({text: "更新 #{$input.attr('name')} 成功!", type: 'success'})
     )
+  ).on('disabledInput', "table", (e) ->
+    _.each($(@).find("tr"), (tr) ->
+      state = $('input[name=state]').val()
+      $(tr).find(":input[name]").prop("disabled", true) if state != 'Pending'
+    )
   )
+
+  $("form[name=confirm_form] table").trigger("disabledInput")
