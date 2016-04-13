@@ -1,13 +1,18 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 库存异动记录
@@ -21,6 +26,7 @@ public class StockRecord extends Model {
     /**
      * 仓库
      */
+    @Required
     @Expose
     @ManyToOne
     public Whouse whouse;
@@ -28,6 +34,7 @@ public class StockRecord extends Model {
     /**
      * 数量
      */
+    @Required
     @Expose
     public Integer qty;
 
@@ -77,15 +84,32 @@ public class StockRecord extends Model {
     @Expose
     public Date updateDate;
 
+    /**
+     * 更新相关仓库的库存数据
+     */
+    @PrePersist
+    public void updateWhouseQty() {
+        WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.whouse);
+        if(whouseItem != null) {
+            whouseItem.qty += this.qty;
+            whouseItem.save();
+        }
+    }
+
     public StockRecord() {
     }
 
-    public StockRecord(InboundRecord in) {
+    public StockRecord(InboundRecord in, boolean normal) {
+        if(normal) {
+            this.qty = in.qty;
+            this.whouse = in.targetWhouse;
+        } else {
+            this.qty = in.badQty;
+            this.whouse = Whouse.defectiveWhouse();
+        }
         this.type = T.Inbound;
-        this.qty = in.qty;
         this.stockObj = in.stockObj;
         this.recordId = in.id;
-        this.whouse = in.targetWhouse;
         this.updateDate = new Date();
     }
 
@@ -120,5 +144,20 @@ public class StockRecord extends Model {
      */
     public String recordOrigin() {
         return String.format("%s%s", this.whouse.name, this.type.label());
+    }
+
+    public void valid() {
+        Validation.required("仓库", this.whouse);
+        Validation.required("数量", this.qty);
+        this.stockObj.valid();
+    }
+
+    public static List<StockRecord> recordsForInbound(InboundRecord inboundRecord) {
+        List<StockRecord> records = new ArrayList<>();
+        records.add(new StockRecord(inboundRecord, true));//正常
+        if(inboundRecord.badQty > 0) {
+            records.add(new StockRecord(inboundRecord, false));//不良品
+        }
+        return records;
     }
 }

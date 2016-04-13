@@ -242,30 +242,11 @@ public class InboundRecord extends Model {
         if(Validation.hasErrors()) {
             return false;
         } else {
+            List<StockRecord> records = StockRecord.recordsForInbound(this);
+            for(StockRecord record : records) record.validateAndSave();
+            if(Validation.hasErrors()) return false;
             this.save();
-            new StockRecord(this).save();
-            this.updateWhouseQty(); //更新库存
             return true;
-        }
-    }
-
-    /**
-     * 更新库存
-     */
-    public void updateWhouseQty() {
-        //处理合格的库存
-        WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.targetWhouse);
-        if(whouseItem != null) {
-            whouseItem.qty += this.qty;
-            whouseItem.save();
-        }
-        //处理不合格的库存
-        if(this.badQty > 0) {
-            WhouseItem defectiveWhouseItem = WhouseItem.findItem(this.stockObj, Whouse.defectiveWhouse());
-            if(defectiveWhouseItem != null) {
-                defectiveWhouseItem.qty += this.badQty;
-                defectiveWhouseItem.save();
-            }
         }
     }
 
