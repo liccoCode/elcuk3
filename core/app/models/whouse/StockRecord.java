@@ -115,7 +115,7 @@ public class StockRecord extends Model {
 
     public StockRecord(OutboundRecord out) {
         this.type = T.Outbound;
-        this.qty = out.qty;
+        this.qty = -out.qty;
         this.stockObj = out.stockObj;
         this.recordId = out.id;
         this.whouse = out.whouse;
