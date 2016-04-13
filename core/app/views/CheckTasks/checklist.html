@@ -30,7 +30,7 @@
       <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
     </div>
 
-    <select name="p.shipwhouseId" class="inline" style="min-width:100px;">
+    <select name="p.shipwhouseId" class="inline">
       <option value="0">仓库</option>
         #{list items:shipwhouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>

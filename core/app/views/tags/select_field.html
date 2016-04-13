@@ -2,7 +2,7 @@
   <label class="control-label" for="${_id}">${_label}</label>
 
   <div class="controls">
-    <select id="${_id}" name="${_name}" class="${_span ? _span : 'span10'}">
+    <select id="${_id}" name="${_name}" class="${_span ? _span : 'span10'}" ${_native ? "native=" + _native : ''}>
     #{if _blank}
       <option value="">请选择</option>
     #{/if}
