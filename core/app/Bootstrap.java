@@ -38,6 +38,8 @@ public class Bootstrap extends Job {
         ENV_MSG.put(Constant.ROCKEND_HOST, "无法连接后端任务 Rockend 实例");
         // ex: http://47.88.6.96:9000
         ENV_MSG.put(Constant.ROOT_URL, "没有指明系统的 HOST URL");
+        // ex: http://47.88.6.96:8080
+        ENV_MSG.put(Constant.KOD_HOST, "没有指明系统的附件服务器 Kod 实例 HOST");
     }
 
     @Override
@@ -99,6 +101,7 @@ public class Bootstrap extends Job {
         validENV("DB_PASS");
         validENV(Constant.ROCKEND_HOST);
         validENV(Constant.ES_INDEX);
+        validENV(Constant.KOD_HOST);
     }
 
     public void validENV(String env) throws Exception {

@@ -87,7 +87,13 @@ public class Constant {
     public static final String ROCKEND_HOST = "ROCKEND_HOST";
 
     /**
+     * Elcuk2 所使用的附件系统 Kod 的 Host
+     */
+    public static final String KOD_HOST = "KOD_HOST";
+
+    /**
      * Elcuk2 在 ElasticSearch 中的索引 Index 名称.
      */
     public static final String ES_INDEX = "ES_INDEX";
+
 }
