@@ -2,13 +2,13 @@ package elasticsearch;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import helper.Constant;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
 import models.view.post.OrderPOST;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class OrderSearchTest extends UnitTest {
 
     @Test
     public void testClient() {
-        JSONObject obj = ES.get(models.OperatorConfig.getVal("esindex"), "order", "203-8671889-8524331");
+        JSONObject obj = ES.get(System.getenv(Constant.ES_INDEX), "order", "203-8671889-8524331");
         JSONObject source = obj.getJSONObject("_source");
         assertThat(source.getString("orderId"), is("203-8671889-8524331"));
 
@@ -73,7 +73,7 @@ public class OrderSearchTest extends UnitTest {
         post.promotion = true;
         SearchSourceBuilder builder = post.params();
 
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order_bak", builder);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "order_bak", builder);
         JSONObject hits = result.getJSONObject("hits");
         JSONArray innerHits = hits.getJSONArray("hits");
 
@@ -88,7 +88,7 @@ public class OrderSearchTest extends UnitTest {
         post.promotion = false;
         SearchSourceBuilder builder = post.params();
 
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "order_bak", builder);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "order_bak", builder);
         JSONObject hits = result.getJSONObject("hits");
         JSONArray innerHits = hits.getJSONArray("hits");
 

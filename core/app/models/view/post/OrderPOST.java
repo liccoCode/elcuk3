@@ -1,6 +1,7 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.Constant;
 import helper.Dates;
 import helper.ES;
 import models.market.M;
@@ -74,9 +75,9 @@ public class OrderPOST extends ESPost<Orderr> {
         try {
             JSONObject result;
             if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
             } else {
-                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
             }
 
             JSONObject hits = result.getJSONObject("hits");
@@ -100,9 +101,9 @@ public class OrderPOST extends ESPost<Orderr> {
         try {
             JSONObject result;
             if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
             } else {
-                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
             }
 
             JSONObject hits = result.getJSONObject("hits");
@@ -112,9 +113,9 @@ public class OrderPOST extends ESPost<Orderr> {
             this.page = 1;
             builder = this.params();
             if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(models.OperatorConfig.getVal("esindex"), "order", builder);
+                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
             } else {
-                result = ES.search(models.OperatorConfig.getVal("esindex"), "orderitem", this.skuParams());
+                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
             }
             hits = result.getJSONObject("hits");
             Set<String> orderIds = new HashSet<String>();

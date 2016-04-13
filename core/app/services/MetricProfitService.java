@@ -2,8 +2,8 @@ package services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import helper.Currency;
 import helper.*;
+import helper.Currency;
 import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
@@ -611,7 +611,7 @@ public class MetricProfitService {
      * @return
      */
     private float getEsTermsTotal(SearchSourceBuilder search, String estype) {
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), estype, search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), estype, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
@@ -632,7 +632,7 @@ public class MetricProfitService {
      * @return
      */
     private F.T2<JSONObject, JSONArray> getEsShipTerms(SearchSourceBuilder search, String estype) {
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), estype, search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), estype, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
@@ -735,7 +735,7 @@ public class MetricProfitService {
 
         Logger.info("salefeeline:::" + search.toString());
 
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), tablename, search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }
@@ -814,7 +814,7 @@ public class MetricProfitService {
                 .query(qb)
                 .aggregation(builder
                 ).size(0);
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), tablename, search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
         }

@@ -97,6 +97,8 @@ public class Bootstrap extends Job {
         validENV("DB_NAME");
         validENV("REDIS_HOST");
         validENV("DB_PASS");
+        validENV(Constant.ROCKEND_HOST);
+        validENV(Constant.ES_INDEX);
     }
 
     public void validENV(String env) throws Exception {
