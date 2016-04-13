@@ -15,16 +15,15 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  */
 public class ES {
     // TODO: 这里应该改变为环境变量, 而非数据库
-    public static final String ELCUK2_ES_HOST = "http://" + models.OperatorConfig.getVal("elcuk2es");
     public static final String ETRACKER_ES_HOST = "http://" + models.OperatorConfig.getVal("etrackeres") + ":9200";
 
     public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
-        return HTTP.postJson(ELCUK2_ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
+        return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_search", builder.toString());
     }
 
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
-        return processSearch(index, type, builder, ELCUK2_ES_HOST);
+        return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
     }
 
     public static JSONObject searchOnEtrackerES(String index, String type, SearchSourceBuilder builder) {
@@ -36,7 +35,7 @@ public class ES {
     }
 
     public static JSONObject get(String index, String type, String id) {
-        return processGet(index, type, id, ELCUK2_ES_HOST);
+        return processGet(index, type, id, System.getenv(Constant.ES_HOST));
     }
 
     public static JSONObject getOnEtrackerES(String index, String type, String id) {

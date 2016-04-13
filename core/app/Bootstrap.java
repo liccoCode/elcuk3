@@ -39,7 +39,10 @@ public class Bootstrap extends Job {
         // ex: http://47.88.6.96:9000
         ENV_MSG.put(Constant.ROOT_URL, "没有指明系统的 HOST URL");
         // ex: http://47.88.6.96:8080
-        ENV_MSG.put(Constant.KOD_HOST, "没有指明系统的附件服务器 Kod 实例 HOST");
+        ENV_MSG.put(Constant.KOD_HOST, "没有指明系统的附件服务器 Kod 实例 Host");
+        ENV_MSG.put(Constant.ETRACKER_HOST, "没有指定所使用的 Etracker 服务器");
+        ENV_MSG.put(Constant.ES_INDEX, "没有指明系统在 ElasticSearch 中所使用的索引名字(Index)");
+        ENV_MSG.put(Constant.ES_HOST, "没有指明系统在 ElasticSearch 实例 Host");
     }
 
     @Override
@@ -100,8 +103,10 @@ public class Bootstrap extends Job {
         validENV("REDIS_HOST");
         validENV("DB_PASS");
         validENV(Constant.ROCKEND_HOST);
+        validENV(Constant.ROOT_URL);
         validENV(Constant.ES_INDEX);
         validENV(Constant.KOD_HOST);
+        validENV(Constant.ETRACKER_HOST);
     }
 
     public void validENV(String env) throws Exception {

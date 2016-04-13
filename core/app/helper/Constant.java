@@ -90,6 +90,15 @@ public class Constant {
      * Elcuk2 所使用的附件系统 Kod 的 Host
      */
     public static final String KOD_HOST = "KOD_HOST";
+    /**
+     * Elcuk2 在 ElasticSearch 的 Host 地址
+     */
+    public static final String ES_HOST = "ES_HOST";
+    /**
+     * Elcuk2 所使用的 Etracker Host
+     * TODO: 这个真的需要吗?
+     */
+    public static final String ETRACKER_HOST = "ETRACKER_HOST";
 
     /**
      * Elcuk2 在 ElasticSearch 中的索引 Index 名称.
