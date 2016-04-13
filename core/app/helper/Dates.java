@@ -175,22 +175,12 @@ public class Dates {
             case AMAZON_FR:
             case AMAZON_ES:
             case AMAZON_IT:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
             case AMAZON_DE:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd.MM.yyyy").withZone(Dates.timeZone(m))).toDate();
             case AMAZON_US:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
             case AMAZON_JP:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("yyyy/MM/dd").withZone(Dates.timeZone(m))).toDate();
             case AMAZON_CA:
-                return DateTime.parse(dateStr).toDate();
             default:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
+                return DateTime.parse(dateStr).toDate();
         }
     }
 

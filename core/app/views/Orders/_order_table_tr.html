@@ -8,6 +8,7 @@
     </th>
     <th>UserId</th>
     <th>Buyer</th>
+    <th>SKU</th>
     <th>Phone</th>
     <th>Email</th>
     <th name="createDate" class="sortable">Create <i class="icon-sort"></i></th>
@@ -39,6 +40,7 @@
     </td>
     <td>${ord.userid}</td>
     <td>${ord.buyer}</td>
+    <td>${ord.showItemSku()}</td>
     <td>${ord.phone}</td>
     <td>
         <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>

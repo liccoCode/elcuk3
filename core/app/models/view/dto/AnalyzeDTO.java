@@ -7,6 +7,7 @@ import models.view.post.AnalyzePost;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -164,6 +165,21 @@ public class AnalyzeDTO implements Serializable {
      */
     public String step;
 
+    /**
+     * 退货数
+     */
+    public int returns = 0;
+
+    /**
+     * 正常销量数
+     */
+    public int sales = 0;
+
+    /**
+     * 退货率
+     */
+    public float returnRates = 0;
+
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
@@ -284,5 +300,13 @@ public class AnalyzeDTO implements Serializable {
     public String prettyDisplayPrice() {
         DecimalFormat df = new DecimalFormat("#.00");
         return df.format(displayPrice);
+    }
+
+    public int totalfive() {
+        return this.working + this.worked + this.way + this.inbound + this.qty;
+    }
+
+    public float day() {
+        return new BigDecimal(this.day30 / 30).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
     }
 }

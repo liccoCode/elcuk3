@@ -24,6 +24,7 @@ import models.view.report.SkuProfit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
 import play.mvc.Before;
@@ -121,6 +122,7 @@ public class Finances extends Controller {
 
                 String post_key = Caches.Q
                         .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                Logger.info("skuprofitpost query KEY: " + post_key);
                 skuProfits = Cache.get(post_key, List.class);
                 if(skuProfits != null) {
                     render(skuProfits, p);

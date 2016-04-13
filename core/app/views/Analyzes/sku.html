@@ -3,23 +3,23 @@
   <thead>
   <tr>
     <th title="可双击下面 SKU">SKU</th>
-    <th>计划中</th>
-    <th>制作中</th>
-    <th>交货</th>
-    <th>在途</th>
-    <th>入库</th>
-    <th>在库</th>
-    <th>Reviews</th>
-    <th>Rating</th>
+    <th orderby='plan' name="plan" class="sortable">计划中 <i class="icon-sort"></i></th>
+    <th orderby='working' name="working" class="sortable">制作中 <i class="icon-sort"></i></th>
+    <th orderby='worked' name="worked" class="sortable">交货 <i class="icon-sort"></i></th>
+    <th orderby='way' name="way" class="sortable">在途 <i class="icon-sort"></i></th>
+    <th orderby='inbound' name="inbound" class="sortable">入库 <i class="icon-sort"></i></th>
+    <th orderby='qty' name="qty" class="sortable">在库 <i class="icon-sort"></i></th>
+    <th orderby='reviewRatio' name="reviewRatio" class="sortable">Reviews <i class="icon-sort"></i></th>
+    <th orderby='rating' name="rating" class="sortable">Rating <i class="icon-sort"></i></th>
     <th>评分趋势</th>
     <th>PS</th>
-    <th>Day1</th>
-    <th>
+    <th orderby='day1' name="day1" class="sortable">Day1 <i class="icon-sort"></i></th>
+    <th orderby='difference' name="difference" class="sortable">
       <abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr>
     </th>
-    <th >Day7</th>
+    <th orderby='day7' name="day7" class="sortable">Day7<i class="icon-sort"></i></th>
     <th >Day7ave</th>
-    <th >Day30</th>
+    <th orderby='day30' name="day30" class="sortable">Day30<i class="icon-sort"></i></th>
     <th >Day30ave</th>
     <th>_TOR</th>
     <th>_TOR1</th>
@@ -54,5 +54,10 @@
     <td>${dto.turnOverT4._3} )</td>
   </tr>
 #{/list}
+    <tr>
+      <td colspan="20">
+      #{bootstrap_pager pi:p, url:'#'/}
+      </td>
+  </tr>
  </tbody>
 </table>

@@ -7,6 +7,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.jobs.Job;
 import play.libs.Time;
+import play.libs.CronExpression;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -99,7 +100,7 @@ public class Jobex extends Model {
         if(njob.className != null && !njob.className.trim().isEmpty())
             this.className = njob.className;
         if(njob.duration != null && !njob.duration.trim().isEmpty()) {
-            if(!Time.CronExpression.isValidExpression(njob.duration))
+            if(!CronExpression.isValidExpression(njob.duration))
                 Time.parseDuration(njob.duration);
             this.duration = njob.duration;
         }
