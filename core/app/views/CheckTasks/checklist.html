@@ -1,11 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"质检任务列表 (${tasklist.size()})" /}
-#{set 'moreStyles'}
-    #{stylesheet_cdn name: 'selectize.default.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script_cdn name: 'jquery.dataTables.js'/}
-    #{script_cdn name: 'selectize.min.js'/}
     #{script_cdn name: 'checktasks/checklist.coffee'/}
 #{/set}
 
@@ -21,7 +17,7 @@
 <div class="row-fluid">
   <div class="span12">
 
-    <select name="p.dateType" style="width:130px;" class="inline">
+    <select name="p.dateType" class="inline">
         #{list items:models.view.post.CheckTaskPost.DATE_TYPES, as:'t'}
           <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
         #{/list}
@@ -34,7 +30,7 @@
       <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
     </div>
 
-    <select name="p.shipwhouseId" class="inline">
+    <select name="p.shipwhouseId" class="inline" style="min-width:100px;">
       <option value="0">仓库</option>
         #{list items:shipwhouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>

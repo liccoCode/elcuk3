@@ -24,12 +24,13 @@
             <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
           #{/list}
       </select>
+    </div>
+    <div class="input-append input-prepend inline">
       <span class="add-on">From:</span>
       <input type="date" style="width:90px;" name="p.from" value="${p.from.date()}">
       <span class="add-on" style="margin-left:20px;">To:</span>
       <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
     </div>
-
 
     <div class="input-append input-prepend inline">
       <a class="btn btn_small" href="@{CheckTasks.checkerList(p,3)}">3天内</a>

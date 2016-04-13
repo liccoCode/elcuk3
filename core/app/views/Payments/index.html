@@ -21,19 +21,21 @@
 
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.PaymentsPost.DateType.values() , value: p.dateType /}
-
-        #{select_enum name:'p.states', items:models.finance.Payment.S.values()}
-          <option value="">状态</option>
-        #{/select_enum}
-
-        #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
-            #{option ''}合作伙伴#{/option}
-        #{/select}
-
-        #{select name:'p.actualCurrency', items:helper.Currency.values() , value: p.actualCurrency }
-            #{option ''}支付币种#{/option}
-        #{/select}
-
+    </div>
+    <div class="inline">
+      #{select_enum name:'p.states', items:models.finance.Payment.S.values()}
+        <option value="">状态</option>
+      #{/select_enum}
+    </div>
+    <div class="inline">
+      #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
+          #{option ''}合作伙伴#{/option}
+      #{/select}
+    </div>
+    <div class="inline">
+      #{select name:'p.actualCurrency', items:helper.Currency.values() , value: p.actualCurrency }
+          #{option ''}支付币种#{/option}
+      #{/select}
     </div>
 
     <div class="input-prepend input-append inline">
