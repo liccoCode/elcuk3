@@ -176,12 +176,6 @@ public class ReportRecord extends Model {
          */
     }
 
-
-    public String calUrl() {
-        return String.format("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/sku_month_profit_repeat?year=%s"
-                + "&month=%s", this.year, this.month);
-    }
-
     /**
      * 判断是否能够重新计算
      *

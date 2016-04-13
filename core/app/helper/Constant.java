@@ -71,11 +71,14 @@ public class Constant {
 
     public static final String TMP = System.getProperty("java.io.tmpdir");
 
-    public static final String ROOT_PATH = models.OperatorConfig.getVal("elcuk2url");
+    // 系统自己的 url
+    public static final String ROOT_URL = "ROOT_URL";
 
     /**
      * 系统中产生的 "数据" 类型的文件
      */
     public static final String REPORT_PATH = String.format("%s/elcuk2-report", Constant.HOME);
 
+    // Rockend HOST 环境变量
+    public static final String ROCKEND_HOST = "ROCKEND_HOST";
 }

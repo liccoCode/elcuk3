@@ -33,6 +33,11 @@ public class Bootstrap extends Job {
         ENV_MSG.put("DB_NAME", "不知道数据库名称");
         ENV_MSG.put("DB_PASS", "不知道数据库密码");
         ENV_MSG.put("REDIS_HOST", "无法连接 Redis 实例");
+
+        // ex: http://10.129.129.23:4567
+        ENV_MSG.put(Constant.ROCKEND_HOST, "无法连接后端任务 Rockend 实例");
+        // ex: http://47.88.6.96:9000
+        ENV_MSG.put(Constant.ROOT_URL, "没有指明系统的 HOST URL");
     }
 
     @Override

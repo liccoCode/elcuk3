@@ -2,17 +2,12 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Dates;
-import helper.HTTP;
 import helper.J;
 import helper.Webs;
-import jobs.analyze.SellingSaleAnalyzeJob;
-import models.Privilege;
-import models.Role;
 import models.market.*;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.dto.DashBoard;
-import org.h2.engine.User;
 import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
@@ -25,9 +20,6 @@ import play.utils.FastRuntimeException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
-import static models.Role.*;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
@@ -118,8 +110,4 @@ public class Application extends Controller {
         renderJSON(Orderr.frontPageOrderTable(9));
     }
 
-    public static void aaa() {
-        HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/selling_sale_analyze");
-        renderText("成功执行, 请看后台 Command Line");
-    }
 }

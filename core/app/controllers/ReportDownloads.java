@@ -56,7 +56,8 @@ public class ReportDownloads extends Controller {
     public static void repeatCalculate(Long id) {
         ReportRecord record = ReportRecord.findById(id);
         try {
-            HTTP.get(record.calUrl());
+            HTTP.get(String.format("%s/sku_month_profit_repeat?year=%s&month=%s",
+                    System.getenv(Constant.ROCKEND_HOST), record.year, record.month));
             renderJSON(new Ret(true, String.valueOf("重新计算请求成功,请稍候!")));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

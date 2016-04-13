@@ -77,11 +77,11 @@
       </tr>
     #{list items: units, as:'unit'}
       <tr>
-          #{set relateShipments: unit.relateShipment()/}
+        #{set relateShipments: unit.relateShipment()/}
         <td>
-            #{ifnot relateShipments.size() > 0}
-              <label><input type="checkbox" name="units" value="${unit.id}"></label>
-            #{/ifnot}
+          #{ifnot relateShipments.size() > 0}
+            <label><input type="checkbox" name="units" value="${unit.id}"></label>
+          #{/ifnot}
         </td>
         <td>
           <a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a>
@@ -104,9 +104,9 @@
         <td>${unit.result()}</td>
         <td>${unit.isship()}</td>
         <td>
-            #{if unit.fetchCheckTaskLink() != null}
-              <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
-            #{/if}
+          #{if unit.fetchCheckTaskLink() != null}
+            <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
+          #{/if}
         </td>
       </tr>
     #{/list}

@@ -1,8 +1,8 @@
 package controllers.api;
 
 import helper.Caches;
+import helper.Constant;
 import helper.HTTP;
-import models.OperatorConfig;
 import models.product.Category;
 import models.view.Ret;
 import org.joda.time.DateTime;
@@ -36,7 +36,7 @@ public class CacheClear extends Controller {
             Cache.delete(catekey);
         }
         /** 重新缓存最新的数据 **/
-        HTTP.get("http://" + OperatorConfig.getVal("rockendurl") + ":4567/selling_sale_analyze");
+        HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
 
         renderJSON(new Ret(true, "清理缓存成功!"));
     }

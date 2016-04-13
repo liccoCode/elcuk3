@@ -1,6 +1,8 @@
 package models.market;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.*;
@@ -21,12 +23,16 @@ import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Text;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.libs.Codec;
 import play.libs.F;
 import play.libs.IO;
 import play.libs.Time;
@@ -41,16 +47,7 @@ import java.io.File;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import play.libs.Codec;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -336,7 +333,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market_id", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
-        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_product_sync_back", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_product_sync_back", params);
 
         this.save();
     }
@@ -434,7 +431,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
-        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/submit_feed", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
         return feed;
     }
 
@@ -581,7 +578,7 @@ public class Selling extends GenericModel {
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_IMAGE_DATA_"));
         params.add(new BasicNameValuePair("user_name", userName));
-        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/submit_amazon_image_feed", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_amazon_image_feed", params);
         this.save();
     }
 
@@ -609,7 +606,7 @@ public class Selling extends GenericModel {
         patchToListing();
         Feed feed = Feed.newSellingFeed(Selling.generateUpdateFeedTemplateFile(Lists.newArrayList(this),
                 this.aps.templateType, this.market.toString()), this);
-        HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/submit_feed", this.submitJobParams(feed));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", this.submitJobParams(feed));
         return this;
     }
 
@@ -1085,7 +1082,8 @@ public class Selling extends GenericModel {
             List<NameValuePair> productParams = this.submitJobParams(feed);
             productParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_DATA_"));
             productParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_submit_product_feed", productParams);
+            HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_product_feed",
+                    productParams);
         }
 
         if(p.standerprice || p.saleprice) {
@@ -1099,7 +1097,8 @@ public class Selling extends GenericModel {
             List<NameValuePair> priceParams = this.submitJobParams(pricefeed);
             priceParams.add(new BasicNameValuePair("feedtype", "_POST_PRODUCT_PRICING_DATA_"));
             priceParams.add(new BasicNameValuePair("user_name", Login.current().username));
-            HTTP.post("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/amazon_submit_price_feed", priceParams);
+            HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_price_feed",
+                    priceParams);
         }
     }
 
