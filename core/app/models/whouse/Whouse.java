@@ -2,23 +2,23 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.GTs;
 import models.User;
 import models.market.Account;
 import models.market.M;
 import models.procure.Cooperator;
 import models.procure.Shipment;
-import models.qc.CheckTask;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 不同的仓库的抽象
@@ -133,7 +133,7 @@ public class Whouse extends Model {
 
     @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
-    public List<WhouseItem> items = new ArrayList<WhouseItem>();
+    public List<WhouseItem> items = new ArrayList<>();
 
     public void validate() {
         switch(this.type) {
