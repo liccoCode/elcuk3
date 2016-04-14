@@ -12,8 +12,9 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.whouse.Whouse;
 import models.view.dto.CheckTaskAQLDTO;
+import models.whouse.InboundRecord;
+import models.whouse.Whouse;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -446,6 +447,16 @@ public class CheckTask extends Model {
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
+    }
+
+    /**
+     * 自动生成入库记录
+     */
+    @PostPersist
+    public void buidingInboundRecord() {
+        if(this.isship == ShipType.SHIP && !InboundRecord.exist(this)) {
+            new InboundRecord(this).save();
+        }
     }
 
     /**

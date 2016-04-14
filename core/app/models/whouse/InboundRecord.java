@@ -273,4 +273,8 @@ public class InboundRecord extends Model {
     public boolean isLocked() {
         return this.state != S.Pending;
     }
+
+    public static boolean exist(CheckTask task) {
+        return InboundRecord.count("checkTask=?", task) != 0;
+    }
 }
