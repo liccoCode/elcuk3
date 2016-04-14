@@ -13,7 +13,7 @@ $ ->
 
   fidCallBack = ->
     sku = $('#p_sku').val()
-    if(sku is undefined || sku is '')
+    if _.isEmpty(sku)
       alert("没有 SKU, 错误页面!")
       return false
     {fid: sku, p: 'SKU'}
