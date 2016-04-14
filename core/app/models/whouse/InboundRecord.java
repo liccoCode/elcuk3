@@ -1,6 +1,8 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import helper.GTs;
+import helper.J;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
 import models.qc.CheckTask;
@@ -135,6 +137,13 @@ public class InboundRecord extends Model {
     public String memo = "";
 
     /**
+     * 冗余属性(存成 JSON), 只为了把采购计划相关信息带过来方便查询
+     */
+    @Expose
+    @Lob
+    public String attributes = "{}";
+
+    /**
      * 完成时间
      */
     @Expose
@@ -166,6 +175,12 @@ public class InboundRecord extends Model {
         this.origin = O.CheckTask;
         this.state = S.Pending;
         this.stockObj = new StockObj(task.sku);//TODO 添加物料的支持
+        //把采购计划一些自身属性带入到入库记录,方便后期查询
+        if(task.units != null) {
+            GTs.MapBuilder<String, Object> attrs = GTs.newMap("procureunit_id", task.units.id.toString());
+            if(checkTask.units.fba != null) attrs.put("fba", task.units.fba.shipmentId);
+            this.attributes = J.json(attrs.build());
+        }
     }
 
     public void updateAttr(String attr, String value) {
