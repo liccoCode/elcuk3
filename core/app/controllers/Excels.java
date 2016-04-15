@@ -17,6 +17,7 @@ import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
 import models.whouse.StockRecord;
+import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -724,5 +725,15 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_FILENAME, "库存异动明细.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(records, dateFormat);
+    }
+
+    public static void whouseItems(WhouseItemPost p) {
+        if(p == null) p = new WhouseItemPost();
+        p.pagination = false;
+        List<WhouseItem> items = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(items);
     }
 }

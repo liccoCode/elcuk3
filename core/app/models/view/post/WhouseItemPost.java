@@ -44,7 +44,11 @@ public class WhouseItemPost extends Post<WhouseItem> {
     public List<WhouseItem> query() {
         this.count = this.count();
         F.T2<String, List<Object>> params = params();
-        return WhouseItem.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        if(this.pagination) {
+            return WhouseItem.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        } else {
+            return WhouseItem.find(params._1, params._2.toArray()).fetch();
+        }
     }
 
     @Override
