@@ -25,34 +25,34 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.dateType" class="inline">
+      <select name="p.dateType" style="width: 150px;" class="inline selectize">
       #{list items:dateTypes, as:'t'}
         <option value="${t._1}" ${t._1 == p.dateType ? 'selected' : ''}>${t._2}</option>
       #{/list}
       </select>
 
-      <select name="p.type" class="inline">
+      <select name="p.type" style="width: 100px;" class="inline selectize">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
         <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t}</option>
       #{/list}
       </select>
 
-      <select name="p.iExpress" class="inline">
+      <select name="p.iExpress" style="width: 80px;" class="inline selectize">
         <option value="">国际快递商</option>
       #{list items:models.procure.Shipment.Express(), as:'express'}
         <option ${express == p.iExpress ? 'selected' : ''} value="${express.name()}">${express}</option>
       #{/list}
       </select>
 
-      <select name="p.whouseId" class="inline">
+      <select name="p.whouseId" style="width: 150px;" class="inline selectize">
         <option value="">运往仓库</option>
       #{list items:whouses, as:'wh'}
         <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
       #{/list}
       </select>
 
-      <select name="p.cooperId" class="inline">
+      <select name="p.cooperId" style="width: 150px;" class="inline selectize">
         <option value="">运输商</option>
       #{list items:cooperators, as:'cooper'}
         <option ${p.cooperId == cooper.id ? 'selected' : ''} value="${cooper.id}">${cooper.name}</option>
@@ -62,7 +62,7 @@
   </div>
   <div class="row-fluid">
     <div class="span12">
-      <select name="p.states" class="inline" multiple="multiple" size="6">
+      <select name="p.states" class="inline selectize" multiple="multiple" size="6">
       #{list items:models.procure.Shipment.S.values(), as:'state'}
         <option value="${state.name()}" ${p.states.contains(state) ? 'selected' : ''}>${state.label()}</option>
       #{/list}
