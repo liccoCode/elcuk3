@@ -37,7 +37,7 @@
         #{/list}
     </select>
 
-    <select name="p.cooperatorId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
+    <select name="p.cooperatorId" class="inline">
       <option value="0">供应商</option>
         #{list items:cooperators, as:'sp'}
           <option ${sp.id == p.cooperatorId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>

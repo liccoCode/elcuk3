@@ -39,7 +39,7 @@
         </select>
 
         <select name="p.stage" class="inline" style="width:82px;">
-          <option value="0">阶段</option>
+          <option value="">阶段</option>
         #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
             #{if stage.label() != '审批中'}
               <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
@@ -81,8 +81,8 @@
         #{/list}
         </select>
 
-        <select name="p.cooperatorId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
-          <option value="0">供应商</option>
+        <select name="p.cooperatorId" class="inline">
+          <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
         #{/list}
