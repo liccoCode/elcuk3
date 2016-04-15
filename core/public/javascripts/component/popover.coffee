@@ -20,7 +20,7 @@ window.$ui =
   selectize: ->
     for select in $('select')
       $select = $(select)
-      continue if $select.attr('native') != undefined
+      continue unless $select.hasClass('selectize')
       options = {plugins: ['remove_button']}
       for key in ['create', 'sortField', 'maxItems']
         options[key] = $select.data(key) if $select.data(key) != undefined
