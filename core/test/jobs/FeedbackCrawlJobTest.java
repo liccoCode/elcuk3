@@ -1,16 +1,11 @@
 package jobs;
 
-import com.alibaba.fastjson.JSONObject;
 import factory.FactoryBoy;
 import helper.Dates;
-import helper.HTTP;
-import helper.Jitbit;
 import helper.Webs;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.M;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,7 +17,6 @@ import play.libs.IO;
 import play.test.UnitTest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -195,23 +189,5 @@ public class FeedbackCrawlJobTest extends UnitTest {
         assertThat(feedback.email, is("t84hk24d89hc12f@marketplace.amazon.com"));
         assertThat(Dates.date2Date(feedback.createDate), is("2013-09-19"));
         assertThat(feedback.isRemove, is(false));
-    }
-
-    @Test
-    public void testOpenTicket() {
-        String html = IO.readContentAsString(Play.getFile("test/jobs/feedback_us.131.html"));
-        List<Feedback> feedbacks = FeedbackCrawlJob.parseFeedBackFromHTML(html);
-
-        Feedback feedback = feedbacks.get(46);
-        String ticketId = feedback.openTicket(null);
-
-        List<NameValuePair> param = new ArrayList<NameValuePair>();
-        param.add(new BasicNameValuePair("sharedSecret", Jitbit.SHAREDSECRET));
-//        param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
-        param.add(new BasicNameValuePair("id", ticketId));
-
-        JSONObject jsonObject = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
-
-        assertThat(jsonObject.toString(), is(containsString(ticketId)));
     }
 }
