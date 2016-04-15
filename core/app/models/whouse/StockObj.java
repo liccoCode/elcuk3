@@ -1,6 +1,10 @@
 package models.whouse;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import helper.GTs;
+import helper.J;
+import models.procure.ProcureUnit;
 import models.product.Product;
 import play.data.validation.Validation;
 import play.utils.FastRuntimeException;
@@ -8,7 +12,9 @@ import play.utils.FastRuntimeException;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Lob;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 抽象出来的仓库实际存储的货物, 可以是 Product Or 物料等
@@ -57,6 +63,13 @@ public class StockObj implements Serializable {
         public abstract String label();
     }
 
+    /**
+     * 冗余属性(存成 JSON), 只为了把采购计划相关信息带过来方便查询
+     */
+    @Expose
+    @Lob
+    public String attributes = "{}";
+
     public Product getProduct() {
         if(this.stockObjType != SOT.SKU) {
             throw new FastRuntimeException("货物类型(stockObjType)错误, 无法找到对应 Product!");
@@ -101,5 +114,20 @@ public class StockObj implements Serializable {
     public static SOT guessType(String id) {
         return SOT.SKU;
         //产品物料与包材物料需要注意 ID 的统一
+    }
+
+    public Map attributes() {
+        return (Map) JSON.parse(this.attributes);
+    }
+
+    public void setAttributes(ProcureUnit unit) {
+        //把采购计划一些自身属性带入到入库记录,方便后期查询
+        if(unit != null) {
+            GTs.MapBuilder<String, Object> attrs = GTs.newMap("procureunitId", unit.id);
+            if(unit.fba != null) attrs.put("fba", unit.fba.shipmentId);
+            if(unit.shipType != null) attrs.put("shipType", unit.shipType.name());
+            if(unit.whouse != null) attrs.put("whouse", unit.whouse.id);
+            this.attributes = J.json(attrs);
+        }
     }
 }

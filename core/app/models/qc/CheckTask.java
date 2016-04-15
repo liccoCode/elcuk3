@@ -452,7 +452,7 @@ public class CheckTask extends Model {
     /**
      * 自动生成入库记录
      */
-    @PostPersist
+    @PostUpdate
     public void buidingInboundRecord() {
         if(this.isship == ShipType.SHIP && !InboundRecord.exist(this)) {
             new InboundRecord(this).save();
