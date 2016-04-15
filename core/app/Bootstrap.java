@@ -31,6 +31,7 @@ public class Bootstrap extends Job {
     static {
         ENV_MSG.put("DB_HOST", "无法连接数据库");
         ENV_MSG.put("DB_NAME", "不知道数据库名称");
+        ENV_MSG.put("DB_USER", "不知道数据库用户名");
         ENV_MSG.put("DB_PASS", "不知道数据库密码");
         ENV_MSG.put("REDIS_HOST", "无法连接 Redis 实例");
 
@@ -99,14 +100,22 @@ public class Bootstrap extends Job {
 
     public void validElcuk2ENV() throws Exception {
         validENV("DB_HOST");
+        validENV("DB_USER");
+        validENV("DB_PASS");
         validENV("DB_NAME");
         validENV("REDIS_HOST");
-        validENV("DB_PASS");
-        validENV(Constant.ROCKEND_HOST);
+        // 当前应用
         validENV(Constant.ROOT_URL);
-        validENV(Constant.ES_INDEX);
+        // 后端任务
+        validENV(Constant.ROCKEND_HOST);
+        // 附件
         validENV(Constant.KOD_HOST);
+        // Etracker host
         validENV(Constant.ETRACKER_HOST);
+        // ES 外部服务
+        validENV(Constant.ES_INDEX);
+        validENV(Constant.ES_HOST);
+        validENV(Constant.ETRACKER_ES_HOST);
     }
 
     public void validENV(String env) throws Exception {

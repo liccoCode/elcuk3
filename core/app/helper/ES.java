@@ -14,9 +14,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    // TODO: 这里应该改变为环境变量, 而非数据库
-    public static final String ETRACKER_ES_HOST = "http://" + models.OperatorConfig.getVal("etrackeres") + ":9200";
-
     public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
         return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_search", builder.toString());
     }
@@ -27,7 +24,7 @@ public class ES {
     }
 
     public static JSONObject searchOnEtrackerES(String index, String type, SearchSourceBuilder builder) {
-        return processSearch(index, type, builder, ETRACKER_ES_HOST);
+        return processSearch(index, type, builder, System.getenv(Constant.ETRACKER_ES_HOST));
     }
 
     public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
@@ -39,7 +36,7 @@ public class ES {
     }
 
     public static JSONObject getOnEtrackerES(String index, String type, String id) {
-        return processGet(index, type, id, ETRACKER_ES_HOST);
+        return processGet(index, type, id, System.getenv(Constant.ETRACKER_ES_HOST));
     }
 
     public static JSONObject processGet(String index, String type, String id, String esHost) {
