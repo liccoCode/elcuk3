@@ -104,7 +104,7 @@ public class StockRecord extends Model {
             this.qty = in.qty;
             this.whouse = in.targetWhouse;
         } else {
-            this.qty = in.badQty;
+            this.qty = -in.badQty;
             this.whouse = Whouse.defectiveWhouse();
         }
         this.type = T.Inbound;
