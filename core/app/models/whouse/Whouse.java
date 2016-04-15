@@ -136,6 +136,7 @@ public class Whouse extends Model {
     public List<WhouseItem> items = new ArrayList<>();
 
     public void validate() {
+        if(this.type == null) return;
         switch(this.type) {
             case FBA:
                 if(this.account == null) {
