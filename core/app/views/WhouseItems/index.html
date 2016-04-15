@@ -1,12 +1,12 @@
 #{extends 'main_full.html'/}
-#{set title:'库存报表'/}
+#{set title:'库存'/}
 #{set 'moreScripts'}
     #{script_cdn name: 'whouseitems/index.coffee'/}
 #{/set}
 #{flash_alert /}
 
-<div class="row-fluid">
-  <form action="@{WhouseItems.index()}" method="get" class="search_form" id="search_form">
+<form action="@{WhouseItems.index()}" method="get" class="search_form" id="search_form">
+  <div class="row-fluid">
     <div class="span12">
       <select name="p.whouse.id" class="inline">
         <option value="">仓库</option>
@@ -20,7 +20,7 @@
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" name="p.search" placeholder="物料编码" value="${p.search}" style="width:
-        100px;">
+              100px;">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
@@ -28,28 +28,41 @@
         <a href="" target="_blank" class="btn btn-info inline">导出</a>
       </div>
     </div>
-  </form>
-
-  <div class="span12">
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th>仓库名称</th>
-        <th>物料编码</th>
-        <th>名称</th>
-        <th>当前库存</th>
-        <th>操作</th>
-      </tr>
-    #{list items:items, as: 'item'}
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    #{/list}
-    </table>
   </div>
 
-  <div class="row-fluid" id="order_list">
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>仓库名称</th>
+          <th>物料编码</th>
+          <th>名称</th>
+          <th>当前库存</th>
+          <th>操作</th>
+        </tr>
+      #{list items:items, as: 'item'}
+          #{set whouseName: item_isFirst ? '' : items.get(item_index - 2).whouse.name/}
+        <tr>
+          <td>
+              #{if item.whouse.name != whouseName}
+                ${item.whouse.name}
+              #{/if}
+          </td>
+          <td>
+            <a href="${item.stockObj.showStockObjLink()}" target="_blank">${item.stockObj.stockObjId}</a>
+          </td>
+          <td>${item.stockObj.name()}</td>
+          <td>${item.qty}</td>
+          <td>
+            <a target="_blank" href="/StockRecords/index?p.search=${item.stockObj.stockObjId}">查看明细</a>
+          </td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </div>
+
+  <div class="row-fluid">
     <div class="span12">
     #{if items.size() == 0}
       暂时还没有库存数据
@@ -59,4 +72,4 @@
     #{/else}
     </div>
   </div>
-</div>
+</form>
