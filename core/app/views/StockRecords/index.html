@@ -45,18 +45,25 @@
             <th>仓库</th>
             <th>物料编码</th>
             <th>名称</th>
+            <th>FBA</th>
+            <th>FBA 仓库</th>
+            <th>运输方式</th>
             <th>异动时间</th>
             <th>异动数量</th>
             <th>异动来源</th>
             <th>记录 ID</th>
           </tr>
         #{list items: records, as: 'r'}
+            #{set atts: r.stockObj.attributes()/}
           <tr>
             <td>${r.whouse.name}</td>
             <td>
               <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
             </td>
             <td>${r.stockObj.name()}</td>
+            <td>${atts.get('fba')}</td>
+            <td>${atts.get('whouseName')}</td>
+            <td>${atts.get('shipType')}</td>
             <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
             <td>${r.qty}</td>
             <td>${r.recordOrigin()}</td>

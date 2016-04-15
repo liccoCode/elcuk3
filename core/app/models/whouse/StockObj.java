@@ -6,6 +6,7 @@ import helper.GTs;
 import helper.J;
 import models.procure.ProcureUnit;
 import models.product.Product;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.utils.FastRuntimeException;
 
@@ -117,7 +118,7 @@ public class StockObj implements Serializable {
     }
 
     public Map attributes() {
-        return (Map) JSON.parse(this.attributes);
+        return (Map) JSON.parse(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}");
     }
 
     public void setAttributes(ProcureUnit unit) {
@@ -126,7 +127,10 @@ public class StockObj implements Serializable {
             GTs.MapBuilder<String, Object> attrs = GTs.newMap("procureunitId", unit.id);
             if(unit.fba != null) attrs.put("fba", unit.fba.shipmentId);
             if(unit.shipType != null) attrs.put("shipType", unit.shipType.name());
-            if(unit.whouse != null) attrs.put("whouse", unit.whouse.id);
+            if(unit.whouse != null) {
+                attrs.put("whouseId", unit.whouse.id);
+                attrs.put("whouseName", unit.whouse.name());
+            }
             this.attributes = J.json(attrs);
         }
     }
