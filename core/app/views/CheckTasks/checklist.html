@@ -30,14 +30,14 @@
       <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
     </div>
 
-    <select name="p.shipwhouseId" class="inline" style="min-width:100px;">
+    <select name="p.shipwhouseId" class="inline">
       <option value="0">仓库</option>
         #{list items:shipwhouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
         #{/list}
     </select>
 
-    <select name="p.cooperatorId" id="select_cooper" placeholder="手动输入供应商" class="input-medium inline">
+    <select name="p.cooperatorId" class="inline">
       <option value="0">供应商</option>
         #{list items:cooperators, as:'sp'}
           <option ${sp.id == p.cooperatorId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
