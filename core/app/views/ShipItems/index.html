@@ -25,17 +25,16 @@
         <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
       </div>
 
-    #{select 'p.dateType', items: p.dateTypes, labelProperty: '_2', valueProperty: '_1', value: p.dateType, class: 'inline' /}
+    #{select 'p.dateType', items: p.dateTypes, labelProperty: '_2', valueProperty: '_1', value: p.dateType, class: 'inline selectize' /}
 
-    #{select 'p.whouseId', items: whouses, labelProperty: 'name', valueProperty: 'id', value:p.whouseId,class:'inline'}
-        #{option ''}FBA_ALL#{/option}
+    #{select 'p.whouseId', items: whouses, labelProperty: 'name', valueProperty: 'id', style:'width:120px', value:p.whouseId, class:'inline selectize'}
+      #{option ''}FBA_ALL#{/option}
     #{/select}
 
-    #{select 'p.centerId', items: centers, labelProperty: 'centerId', valueProperty: 'centerId', value: p.centerId, class:'inline'}
-        #{option ''}FBA Center#{/option}
+    #{select 'p.centerId', items: centers, labelProperty: 'centerId', valueProperty: 'centerId', value: p.centerId, style:'width:110px', class:'inline selectize'}
+      #{option ''}FBA Center#{/option}
     #{/select}
 
-      </select>
       <label class="checkbox inline">
         <input type="checkbox" ${p.isHaveShipment ? 'checked' : ''} value="true" name="p.isHaveShipment">
         包含运输单
