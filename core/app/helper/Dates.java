@@ -169,19 +169,8 @@ public class Dates {
         }
     }
 
-    public static Date listingFromFmt(M m, String dateStr) {
-        switch(m) {
-            case AMAZON_UK:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-            case AMAZON_DE:
-            case AMAZON_US:
-            case AMAZON_JP:
-            case AMAZON_CA:
-            default:
-                return DateTime.parse(dateStr).toDate();
-        }
+    public static Date listingFromFmt(String dateStr) {
+        return DateTime.parse(dateStr).toDate();
     }
 
     public static Date transactionDate(M m, String dateStr) {
