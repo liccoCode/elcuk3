@@ -169,27 +169,8 @@ public class Dates {
         }
     }
 
-    public static Date listingFromFmt(M m, String dateStr) {
-        switch(m) {
-            case AMAZON_UK:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_DE:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd.MM.yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_US:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_JP:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
-            default:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
-        }
+    public static Date listingFromFmt(String dateStr) {
+        return DateTime.parse(dateStr).toDate();
     }
 
     public static Date transactionDate(M m, String dateStr) {

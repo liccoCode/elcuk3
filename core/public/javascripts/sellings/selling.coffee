@@ -46,23 +46,22 @@ $ ->
 
   # Update 按钮
   $('#amz-update').click ->
-    if !previewBtn.call($("#productDesc"))
-      return false unless imageIndexCal()
-      LoadMask.mask()
-      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-      .done((r) ->
-        msg = if r.flag is true
-          {text: "#{r.message} Selling 更新成功", type: 'success'}
-        else
-          {text: r.message, type: 'error'}
-        noty(msg)
-        LoadMask.unmask()
-      )
-      .fail((r) ->
-        noty({text: r.responseText, type: 'error'})
-        LoadMask.unmask()
-      )
-      false
+    return false unless imageIndexCal()
+    LoadMask.mask()
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+    .done((r) ->
+      msg = if r.flag is true
+        {text: "#{r.message} Selling 更新成功", type: 'success'}
+      else
+        {text: r.message, type: 'error'}
+      noty(msg)
+      LoadMask.unmask()
+    )
+    .fail((r) ->
+      noty({text: r.responseText, type: 'error'})
+      LoadMask.unmask()
+    )
+    false
 
 
   # AMA局部更新 按钮
@@ -274,17 +273,3 @@ $ ->
       items: ['source', '|', '|', 'forecolor', 'bold']
     });
   )
-
-  previewBtn = (e) ->
-    invalidTag = false
-    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
-      switch tag.nodeName.toString().toLowerCase()
-        when 'br','p','b','#text'
-          break
-        else
-          invalidTag = true
-          $(tag).css('background', 'yellow')
-    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
-    invalidTag
-
-
