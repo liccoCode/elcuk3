@@ -3,16 +3,15 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-import helper.Caches;
-import helper.Dates;
-import helper.HTTP;
-import helper.J;
+import helper.*;
+import jobs.analyze.ProfitInventorySearch;
 import jobs.analyze.SellingSaleAnalyzeJob;
-
+import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.ProfitPost;
+import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.libs.F;
@@ -21,16 +20,8 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
-
-import jobs.analyze.ProfitInventorySearch;
-
-import java.util.List;
-
-import models.view.report.Profit;
-
 import java.util.ArrayList;
-
-import models.product.Category;
+import java.util.List;
 
 /**
  * 利润计算
@@ -119,7 +110,7 @@ public class Profits extends Controller {
                         } else {
                             categoryname = p.category.toLowerCase();
                         }
-                        HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/profit_batch_work?category=" + categoryname
+                        HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/profit_batch_work?category=" + categoryname
                                 + "&market=" + marketkey + "&from="
                                 + new SimpleDateFormat("yyyy-MM-dd").format(p.begin)
                                 + "&to="

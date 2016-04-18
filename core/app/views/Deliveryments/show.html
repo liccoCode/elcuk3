@@ -171,136 +171,131 @@
 <div id="excel" class="row-fluid" style="display:none;">
   <div class="span12">
 
-      #{if brandname=='EASYACC'}
-      <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
-      #{/if}
-      #{elseif brandname=='Brandworl'}
-      <form id="generate_excel" method="post" action="@{Excels.deliverymentbrandworl()}">
-      #{/elseif}
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <th>交货地址</th>
-        <td colspan="7">
+    <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <th>交货地址</th>
+          <td colspan="7">
           <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
-            收货地址: 深圳市光明新区根玉路第七工业区汉海达高新科技园1栋6楼A区
+            收货时间：法定工作日8：30-12：00   13：30-18：00，工作日其他时间到货请提前1小时联系。
 
-            收货时间: 周一到周五 8:00—18:00 周六 08:00-17:00 (法定假日另行通知 如需周天送货，请提前一天邮件通知，并于司机出发前 30
-            分钟电话确认再发货！特殊进仓请提前一天书面知会，视情况收取加班作业费！)
+            仓库地址：深圳市光明新区玉律村汉海达科技创新园1栋A区6楼
 
-            仓库联系人:
+            电      话：0755-21383192-8060/8061
 
-            仓库座机: 0755-36931516
-            旷杰Jie 18692275630 jie@easya.cc
-            夏艳红Vivian 18098906612 vivian@easya.cc
+            收货联系人：杨上德：13724219910（保护类、蓝牙类）
+                      陈静林：15711961308（电源、充电器类、瑞能，布兰德沃）
+                      旷   杰：18692275630（仓管）
+                      方   圆：15974143832（经理）
           </textarea>
-        </td>
-      </tr>
+          </td>
+        </tr>
 
-      <tr>
-        <th>交易条款<br>(供应商)</th>
-        <td colspan="3">
+        <tr>
+          <th>交易条款<br>(供应商)</th>
+          <td colspan="3">
           <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
           .tradingTerms}</textarea>
-        </td>
-        <th>产品要求<br>(产品线)</th>
-        <td colspan="3">
-          <div style="overflow:auto;height:150px;width:580px;">
-              #{list items:dmt.getCopperItems(), as:'cooperItem'}
-                <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank" class="btn btn-small btn-info"
-                   rel="popover" content="${cooperItem.formatProductTerms()}">
-                ${cooperItem.product.sku}
-                </a>
-              #{/list}
-          </div>
-        </td>
-      </tr>
+          </td>
+          <th>产品要求<br>(产品线)</th>
+          <td colspan="3">
+            <div style="overflow:auto;height:150px;width:580px;">
+                #{list items:dmt.getCopperItems(), as:'cooperItem'}
+                  <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank" class="btn btn-small btn-info"
+                     rel="popover" content="${cooperItem.formatProductTerms()}">
+                  ${cooperItem.product.sku}
+                  </a>
+                #{/list}
+            </div>
+          </td>
+        </tr>
 
-      <tr>
-        <th colspan="4"><h5 style="text-align:center">供货方信息</h5></th>
-        <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
-      </tr>
-      <tr>
-        <th>供货方</th>
-        <td>
-          <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
-        </td>
-        <th>经办人</th>
-        <td>
-          <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
-        </td>
+        <tr>
+          <th colspan="4"><h5 style="text-align:center">供货方信息</h5></th>
+          <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
+        </tr>
+        <tr>
+          <th>供货方</th>
+          <td>
+            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
+          </td>
+          <th>经办人</th>
+          <td>
+            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
+          </td>
 
-        <th>买方</th>
-        <td>
-          <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
-        </td>
-        <th>经办人</th>
-        <td>
-          <input type="text" name="excel.buyer" id="excel_buyer" value="${models.OperatorConfig.getVal("buyerconcat")}">
-        </td>
-      </tr>
+          <th>买方</th>
+          <td>
+            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
+          </td>
+          <th>经办人</th>
+          <td>
+            <input type="text" name="excel.buyer" id="excel_buyer" value="${models.OperatorConfig.getVal("buyerconcat")}">
+          </td>
+        </tr>
 
-      <tr>
-        <th>移动电话</th>
-        <td>
-          <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
-        </td>
-        <th>固定电话</th>
-        <td>
-          <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
-        </td>
+        <tr>
+          <th>移动电话</th>
+          <td>
+            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
+          </td>
+          <th>固定电话</th>
+          <td>
+            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
+          </td>
 
-        <th>移动电话</th>
-        <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
-        <th>固定电话</th>
-        <td>
-          <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${models.OperatorConfig.getVal("buyertel")}">
-        </td>
-      </tr>
+          <th>移动电话</th>
+          <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
+          <th>固定电话</th>
+          <td>
+            <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${models.OperatorConfig.getVal("buyertel")}">
+          </td>
+        </tr>
 
-      <tr>
-        <th>传真</th>
-        <td>
-          <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
-        </td>
-        <td colspan="2"></td>
+        <tr>
+          <th>传真</th>
+          <td>
+            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
+          </td>
+          <td colspan="2"></td>
 
 
-        <th>传真</th>
-        <td><input type="text" name="excel.buyerFax" id="excel_buyerFax"></td>
+          <th>传真</th>
+          <td><input type="text" name="excel.buyerFax" id="excel_buyerFax"></td>
 
-        <th>选择经办人</th>
-        <td>
-          <select id="chosebuyer">
-            <option value="">请选择</option>
-              #{list items:buyers, as:'br'}
-                  #{ifnot br.username == 'wyatt'}
-                    <option value="${br.id}">${br.username}</option>
-                  #{/ifnot}
-              #{/list}
-          </select>
-        </td>
-      </tr>
+          <th>选择经办人</th>
+          <td>
+            <select id="chosebuyer">
+              <option value="">请选择</option>
+                #{list items:buyers, as:'br'}
+                    #{ifnot br.username == 'wyatt'}
+                      <option value="${br.id}">${br.username}</option>
+                    #{/ifnot}
+                #{/list}
+            </select>
+          </td>
+        </tr>
 
-      <tr>
-        <th>地址</th>
-        <td colspan="3">
-          <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
-        </td>
+        <tr>
+          <th>地址</th>
+          <td colspan="3">
+            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
+          </td>
 
-        <th>地址</th>
-        <td colspan="3">
-          <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
-                 value="${models.OperatorConfig.getVal("buyeraddress")}">
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4">
-          <input type="hidden" name="id" value="${dmt.id}">
-          <button class="btn btn-success">生成采购单 Excel</button>
-        </td>
-      </tr>
-    </table>
-  </form>
+          <th>地址</th>
+          <td colspan="3">
+            <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
+                   value="${models.OperatorConfig.getVal("buyeraddress")}">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <input type="hidden" name="id" value="${dmt.id}">
+            <button class="btn btn-success">生成采购单 Excel</button>
+          </td>
+        </tr>
+      </table>
+    </form>
   </div>
 </div>
 #{/else}

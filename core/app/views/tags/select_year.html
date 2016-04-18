@@ -1,4 +1,8 @@
-<select name="${_name}" value="${_value}" id="${_id}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''}>
+<select
+#{if _native}
+    native="native"
+#{/if}
+    name="${_name}" value="${_value}" id="${_id}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''}>
 #{set year: Integer.parseInt(new Date().format("yyyy"))/}
 
 #{list items:-3..1, as:'i'}

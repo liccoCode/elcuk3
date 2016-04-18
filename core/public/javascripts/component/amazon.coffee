@@ -45,7 +45,7 @@ $ ->
 
   # 方便提供自动加载其他 Selling 的功能
   $('#sellingPreview').on('click', '#sid_preview',(e) ->
-    noty({text: _.template($('#tsp-show-template').html(), {tsp: $(@).data('tsp')})})
+    noty({text: _.template($('#tsp-show-template').html())({tsp: $(@).data('tsp')})})
     false
   ).on('change', 'input',(e) ->
     #  自动补全的 sid 的功能条

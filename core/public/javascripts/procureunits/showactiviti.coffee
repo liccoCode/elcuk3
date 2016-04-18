@@ -21,7 +21,7 @@ $ ->
   checkReview = ->
     review = $('#opition').val()
     if !$("#isEnd").val()
-      if review == "" || review == undefined
+      if _.isEmpty(review)
         alert "审批意见必填！"
         false
       else

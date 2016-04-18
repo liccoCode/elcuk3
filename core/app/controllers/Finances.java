@@ -1,14 +1,9 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-import helper.Caches;
-import helper.Dates;
-import helper.HTTP;
-import helper.J;
+import helper.*;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
-import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.promise.FinanceShippedPromise;
 import models.finance.SaleFee;
 import models.market.Account;
@@ -16,10 +11,7 @@ import models.market.JobRequest;
 import models.market.M;
 import models.product.Category;
 import models.product.Product;
-import models.view.dto.AnalyzeDTO;
-import models.view.post.ProfitPost;
 import models.view.post.SkuProfitPost;
-import models.view.report.Profit;
 import models.view.report.SkuProfit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
@@ -141,8 +133,8 @@ public class Finances extends Controller {
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
                     params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
                     params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
-                    HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/sku_profit_batch_work", params);
-                    skuProfits = new ArrayList<SkuProfit>();
+                    HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/sku_profit_batch_work", params);
+                    skuProfits = new ArrayList<>();
                     flash.error("后台事务正在计算中,请稍候...");
                 }
             }

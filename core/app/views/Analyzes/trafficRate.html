@@ -25,7 +25,7 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.market" class="inline span1">
+      <select name="p.market" class="inline">
         <option value="">Market</option>
       #{list items:models.market.M.values(), as:'m'}
         <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.name()}</option>

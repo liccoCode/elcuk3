@@ -21,7 +21,8 @@
       #{select_field id:'market', name: 's.market', label:'市场', blank: true, items: models.market.M.values() /}
       #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
       'ConsumerElectronics', 'Wireless', 'HomeImprovement','Home', 'Games', 'Sports', 'Lighting']/}
-      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null /}
+      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null,
+      native: true /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber',readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: product.partNumber /}

@@ -7,8 +7,8 @@
 <div class="row-fluid">
   <div class="span2 well">
     <div>
-      <div id='search_form'>
-        <select name="m" style="width:60px;">
+      <div id='search_form' class="search_form">
+        <select name="m" class="inline">
           <option value="ade">DE</option>
           <option value="auk">UK</option>
           <option value="afr">FR</option>
@@ -17,12 +17,12 @@
           <option value="ajp">JP</option>
           <option value="aca">CA</option>
         </select>
-        <select name="orderby" style="width:80px;">
+        <select name="orderby" class="inline">
           <option value="rating">Rating</option>
           <option value="reviewDate">Date</option>
         </select>
 
-        <div class="input-append">
+        <div class="input-append inline">
           <input id="load_asin" data-provide="typeahead" data-source="${asins}" name="asin" class="span8" type="text" placeHolder="输入 ASIN"/>
           <br><br>
           <input type="text" id="load_sku" data-provide="typeahead" data-source="${families}" class="span8" name="sku" placeHolder="搜索 SKU"/>

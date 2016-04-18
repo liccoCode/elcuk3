@@ -6,19 +6,17 @@ import helper.Currency;
 import models.market.M;
 import models.procure.ShipItem;
 import models.view.dto.ProfitDto;
+import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import models.view.report.LossRate;
 import play.Logger;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,7 +65,7 @@ public class LossRatePost extends Post<LossRate> {
                 + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
         String postvalue = Caches.get(key);
         if(StringUtils.isBlank(postvalue)) {
-            HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/loss_rate_job?from="
+            HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/loss_rate_job?from="
                     + new SimpleDateFormat("yyyy-MM-dd").format(this.from)
                     + "&to="
                     + new SimpleDateFormat("yyyy-MM-dd").format(this.to));
@@ -90,7 +88,7 @@ public class LossRatePost extends Post<LossRate> {
                 .append(" AND m.dates.arriveDate >= ? AND m.dates.arriveDate <= ? ")
                 .append(" AND s.qty <> s.recivedQty ")
                 .append(" ORDER BY s.unit.sid DESC ");
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public F.T2<String, List<Object>> totalparams() {
@@ -107,7 +105,7 @@ public class LossRatePost extends Post<LossRate> {
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public LossRate querytotal() {
@@ -150,11 +148,6 @@ public class LossRatePost extends Post<LossRate> {
         return new LossRate(new BigDecimal(0));
     }
 
-    private BigDecimal ifBlank(BigDecimal b) {
-        return b == null ? new BigDecimal(0) : b;
-    }
-
-
     @Override
     public Long count(F.T2<String, List<Object>> params) {
         return 0L;
@@ -167,6 +160,7 @@ public class LossRatePost extends Post<LossRate> {
 
 
     public Map<String, Object> lossRateMap(F.T2<String, List<Object>> params, F.T2<String, List<Object>> shipParams) {
+        //TODO: 这里的日志 Logger.info 需要集中清理.
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
         List<LossRate> lossrate = new ArrayList<LossRate>();
         DecimalFormat df = new DecimalFormat("0.00");

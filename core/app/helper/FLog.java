@@ -12,6 +12,7 @@ import java.io.IOException;
  * User: wyattpan
  * Date: 5/20/12
  * Time: 3:13 PM
+ * @deprecated 舍弃
  */
 public class FLog {
     public enum T {

@@ -18,13 +18,13 @@
   <div class="span12">
     <div class="input-prepend input-append inline">
       <span class="add-on">年:</span>
-        #{select_year  name: "p.year", value: p.year/}
+        #{select_year  name: "p.year", value: p.year, native: true/}
       <span class="add-on">月:</span>
-        #{select_all_month  name: "p.month", value: p.month/}
+        #{select_all_month  name: "p.month", value: p.month, native: true/}
     </div>
 
     <div class="inline">
-        #{select_enum name:'p.reporttype', items:models.view.post.ReportPost.procureReportTypes(), value:p.reporttype}
+        #{select_enum name:'p.reporttype', items:models.view.post.ReportPost.procureReportTypes(), value:p.reporttype, native: true}
           <option value="">报表类型</option>
         #{/select_enum}
     </div>

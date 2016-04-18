@@ -11,7 +11,6 @@ import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.libs.F;
-import services.MetricProfitService;
 import services.MetricSaleReportService;
 
 import java.math.BigDecimal;
@@ -20,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ * TODO: 需要补充注释
  * Created by licco on 15/6/10.
  */
 public class LossRateJob extends BaseJob {

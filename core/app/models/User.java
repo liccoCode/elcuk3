@@ -12,6 +12,7 @@ import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
 import models.product.Whouse;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -24,7 +25,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.security.MessageDigest;
 
 /**
  * 系统中的用户
@@ -568,25 +568,9 @@ public class User extends Model {
     }
 
 
+    //TODO MD5 的计算, 应该抽取到共拥有的 Util 方法中
     public  static String Md5(String plainText) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(plainText.getBytes());
-            byte b[] = md.digest();
-            int i;
-            StringBuffer buf = new StringBuffer("");
-            for(int offset = 0; offset < b.length; offset++) {
-                i = b[offset];
-                if(i < 0) i += 256;
-                if(i < 16)
-                    buf.append("0");
-                buf.append(Integer.toHexString(i));
-            }
-            return buf.toString();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return "";
+        return DigestUtils.md5Hex(plainText);
     }
 
     /**

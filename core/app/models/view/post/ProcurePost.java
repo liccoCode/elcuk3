@@ -157,6 +157,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.to = new Date();
         this.stage = ProcureUnit.STAGE.DONE;
         this.dateType = "createDate";
+        this.perSize = 70;
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {
@@ -164,16 +165,25 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.stage = stage;
     }
 
+    public Long getTotalCount() {
+        return this.count();
+    }
+
     public List<ProcureUnit> query() {
+        F.T2<String, List<Object>> params = params();
+        this.count = this.count();
+        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray())
+                .fetch(this.page, this.perSize);
+    }
+
+    public List<ProcureUnit> queryForExcel() {
         F.T2<String, List<Object>> params = params();
         return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureUnit.count("SELECT COUNT(*) FROM ProcureUnit WHERE " + params._1,
-                params._2.toArray()
-        );
+        return ProcureUnit.count(params._1, params._2.toArray());
     }
 
     public F.T2<String, List<Object>> params() {
@@ -374,4 +384,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.shipState == null) return "";
         return this.shipState.label();
     }
+
+
 }

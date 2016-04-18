@@ -1,10 +1,13 @@
 $ ->
+  index = $("#skuDetailTable input[name$='sku']").length - 1
   $("#addSkuBtn").click(->
+    index++
     params =
-      index: $("#skuDetailTable input[name$='sku']").length
-    tr = _.template($('#copy-table-template').html(), params)
+      index: index
+    tr = _.template($('#copy-table-template').html())(params)
     $("#addSkuTr").before(tr)
     bindSkuSame()
+    bindDeleteBtn()
   )
 
   bindSkuSame = () ->
@@ -25,7 +28,14 @@ $ ->
       })
     )
 
+  bindDeleteBtn = () ->
+    $("#skuDetailTable input[name='deleteBtn']").click(->
+      $btn = $(@)
+      $btn.parent().parent().remove()
+    )
+
   bindSkuSame()
+  bindDeleteBtn()
 
   $("#bankChargeSelect").change(->
     if $(@).val() == 'Other'

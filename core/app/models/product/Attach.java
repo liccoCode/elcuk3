@@ -24,18 +24,17 @@ import play.utils.FastRuntimeException;
 import sun.misc.BASE64Decoder;
 
 import javax.persistence.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import java.io.BufferedInputStream;
-import java.net.URL;
-import java.net.HttpURLConnection;
 
 /**
  * 系统中, 可以附加的附件; 这个 Model 存在这里, 其自己不知道自己附属与谁, 但其拥有者知道(单项关系), 但并非使用 DB 的
@@ -320,7 +319,7 @@ public class Attach extends Model {
      * @return
      */
     public static String attachPathList(String sku) {
-        return "http://"+models.OperatorConfig.getVal("kodurl")+":8080/index.php?explorer/pathList&path=SKU/" + sku;
+        return "http://" + System.getenv(Constant.KOD_HOST) + "/index.php?explorer/pathList&path=SKU/" + sku;
     }
 
     /**
@@ -331,12 +330,12 @@ public class Attach extends Model {
      * @return
      */
     public static String attachImage(String sku, String name) {
-        return "http://"+models.OperatorConfig.getVal("kodurl")+":8080/data/User/elcuk2/home/SKU/" + sku
+        return "http://" + System.getenv(Constant.KOD_HOST) + "/data/User/elcuk2/home/SKU/" + sku
                 + "/" + name;
     }
 
     public static String attachImageSend(String sku, String name) {
-        return "http://"+models.OperatorConfig.getVal("kodurl")+"/data/User/elcuk2/home/SKU/" + sku + "/" + name;
+        return "http://" + System.getenv(Constant.KOD_HOST) + "/data/User/elcuk2/home/SKU/" + sku + "/" + name;
     }
 
     /**
@@ -384,7 +383,7 @@ public class Attach extends Model {
      * @throws IOException
      */
 
-    public static F.T2<String, BufferedInputStream> urlToFile(String destUrl,String imagename){
+    public static F.T2<String, BufferedInputStream> urlToFile(String destUrl, String imagename) {
         try {
             URL url = null;
             BufferedInputStream bis = null;
@@ -397,7 +396,7 @@ public class Attach extends Model {
             // 获取网络输入流
             bis = new BufferedInputStream(httpUrl.getInputStream());
 
-            return new F.T2<String,BufferedInputStream>(imagename, bis);
+            return new F.T2<String, BufferedInputStream>(imagename, bis);
         } catch(Exception e) {
 
         }

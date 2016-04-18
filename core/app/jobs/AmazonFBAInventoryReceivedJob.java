@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * User: wyatt
  * Date: 5/14/13
  * Time: 4:20 PM
+ * @deprecated
  */
 public class AmazonFBAInventoryReceivedJob extends Job implements JobRequest.AmazonJob {
     @Override

@@ -17,7 +17,7 @@
         #{/list}
       </select>
 
-      <select name="a.centerId" class="inline" style="width:110px;" id="select_centerId">
+      <select name="a.centerId" class="inline" style="width:110px;" id="select_centerId" native>
         <option value="" selected="selected">centerID</option>
         #{list items: a.queryCenterIdByCountryCode(a.countryCode), as: 'center'}
           <option value="${center}" ${center==a.centerId? 'selected' : ''}>${center}</option>

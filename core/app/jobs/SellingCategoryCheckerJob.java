@@ -26,6 +26,7 @@ import java.util.*;
  * User: wyattpan
  * Date: 6/6/12
  * Time: 3:45 PM
+ * @deprecated
  */
 public class SellingCategoryCheckerJob extends Job {
 

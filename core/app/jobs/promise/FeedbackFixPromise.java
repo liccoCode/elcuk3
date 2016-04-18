@@ -13,6 +13,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 11/9/12
  * Time: 6:09 PM
+ * @deprecated
  */
 public class FeedbackFixPromise extends Job<List<Feedback>> {
     private long aid;

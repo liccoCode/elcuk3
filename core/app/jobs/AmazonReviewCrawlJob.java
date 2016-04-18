@@ -17,6 +17,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 9/25/12
  * Time: 9:12 PM
+ * @deprecated
  */
 public class AmazonReviewCrawlJob extends Job {
     @Override

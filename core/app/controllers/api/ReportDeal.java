@@ -1,9 +1,13 @@
 package controllers.api;
 
 import helper.Constant;
+import helper.J;
+import jobs.analyze.SellingProfitJob;
+import jobs.analyze.SellingProfitSearch;
 import jobs.analyze.SkuSaleProfitJob;
 import models.ReportRecord;
 import models.view.Ret;
+import models.view.post.ProfitPost;
 import models.view.post.SkuProfitPost;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -13,11 +17,6 @@ import play.mvc.With;
 
 import java.io.File;
 import java.util.List;
-
-import jobs.analyze.SellingProfitJob;
-
-import models.view.post.ProfitPost;
-import jobs.analyze.SellingProfitSearch;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
@@ -51,8 +50,7 @@ public class ReportDeal extends Controller {
         String end = request.params.get("end");
         p.begin = DateTime.parse(begin, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
         p.end = DateTime.parse(end, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
-
-        System.out.println("sku:"+p.sku+" market:"+p.pmarket+" category:"+p.category+" begin:"+p.begin+" end:"+p.end);
+        Logger.info("ProfitPost json: %s", J.json(p));
 
         //利润查询
         new SellingProfitSearch(p).now();
@@ -71,7 +69,7 @@ public class ReportDeal extends Controller {
         String end = request.params.get("end");
         p.begin = DateTime.parse(begin, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
         p.end = DateTime.parse(end, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
-        Logger.debug("sku:"+p.sku+" market:"+p.pmarket+" category:" + p.categories + " begin:" +p.begin+" end:"+p.end);
+        Logger.debug("ProfitPost json: %s", J.json(p));
 
         new SkuSaleProfitJob(p).now();
 

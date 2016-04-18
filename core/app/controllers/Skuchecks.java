@@ -4,6 +4,8 @@ import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.J;
 import helper.Webs;
+import models.product.Category;
+import models.product.Product;
 import models.qc.SkuCheck;
 import models.view.Ret;
 import models.view.post.SkuCheckPost;
@@ -12,14 +14,11 @@ import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import models.product.Category;
-import models.product.Product;
-import play.utils.FastRuntimeException;
 
 /**
  * sku_check列表
@@ -126,7 +125,7 @@ public class Skuchecks extends Controller {
             sc.updateAt = new Date();
             sc.updator = Secure.Security.connected();
             sc.save();
-            renderJSON(new Ret(true, String.format("CheckList更新成功")));
+            renderJSON(new Ret(true, "CheckList更新成功"));
         } catch(Exception e) {
             renderJSON(new Ret(false, e.getMessage()));
         }

@@ -18,7 +18,7 @@
 #{set copers:product.cooperators() /}
   <th>供应商</th>
   <td>
-    <select name="unit.cooperator.id">
+    <select name="unit.cooperator.id" native='true'>
       <option>请选择</option>
     #{list items:copers, as:'c'}
       <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>

@@ -32,6 +32,7 @@ import java.util.List;
  * User: wyatt
  * Date: 5/24/13
  * Time: 12:54 PM
+ * @deprecated
  */
 public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
     @Override

@@ -21,6 +21,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 2/28/12
  * Time: 10:02 AM
+ * @deprecated
  */
 public class OrderMailCheck extends Job {
 

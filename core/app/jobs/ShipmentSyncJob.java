@@ -18,6 +18,7 @@ import java.util.List;
  * - Duration:  4h
  * User: wyattpan
  * Date: 8/15/12
+ * @deprecated
  * Time: 6:04 PM
  */
 public class ShipmentSyncJob extends Job {

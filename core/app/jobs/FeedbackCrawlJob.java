@@ -36,6 +36,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 3/15/12
  * Time: 9:34 AM
+ * @deprecated
  */
 public class FeedbackCrawlJob extends Job {
     /**

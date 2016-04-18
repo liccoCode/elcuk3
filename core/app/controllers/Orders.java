@@ -2,17 +2,18 @@ package controllers;
 
 import com.google.common.collect.Lists;
 import controllers.api.SystemOperation;
+import helper.Constant;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
 import jobs.promise.FinanceShippedPromise;
 import models.ElcukRecord;
 import models.finance.SaleFee;
-import models.market.*;
-
-import java.math.BigDecimal;
-
+import models.market.Account;
+import models.market.BtbOrder;
+import models.market.OrderInvoice;
+import models.market.Orderr;
 import models.procure.BtbCustom;
-import models.product.*;
+import models.product.Category;
 import models.view.Ret;
 import models.view.post.BtbOrderPost;
 import models.view.post.OrderPOST;
@@ -26,10 +27,12 @@ import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import query.SkuESQuery;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -103,8 +106,7 @@ public class Orders extends Controller {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("market", orderr.market.name()));
         params.add(new BasicNameValuePair("order_id", orderr.orderId));
-        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_finance_find_by_order_id",
-                params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_finance_find_by_order_id", params);
         renderJSON(new Ret(true, "后台正在处理，请隔1分钟刷新此页面！"));
     }
 

@@ -29,6 +29,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 4/6/12
  * Time: 4:29 PM
+ * @deprecated
  */
 public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
 

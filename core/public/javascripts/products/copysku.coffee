@@ -40,7 +40,7 @@ $ ->
     $("#back_sku").val(id)
     $("#back_families").val(family)
     $('#backup_modal').modal('show')
-  ).on("change", "select[name=pro.state], select[name=pro.salesLevel]",(r) ->
+  ).on("change", "select[name='pro.state'], select[name='pro.salesLevel']",(r) ->
     $select = $(@)
     firstTd = $select.parents('tr').children('td')[0]
     sku = $(firstTd).children('a')[0].innerHTML

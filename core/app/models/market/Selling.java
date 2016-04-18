@@ -14,7 +14,6 @@ import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
-import mws.v2.MWSFeeds;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.NameValuePair;
@@ -38,7 +37,6 @@ import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.*;
@@ -330,7 +328,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market_id", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
-        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_product_sync_back", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_product_sync_back", params);
         this.save();
     }
 
@@ -386,7 +384,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
-        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/submit_feed", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
         return feed;
     }
 
@@ -408,8 +406,7 @@ public class Selling extends GenericModel {
         String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
         Logger.info(feed_submission_id);
         List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
-        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed", params);
-        HTTP.post("http://rock.easya.cc:4567/amazon_get_feed", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_get_feed", params);
         this.save();
     }
 
@@ -445,7 +442,7 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("next_feed_id", assignPriceFeed.id.toString()));
         params.add(new BasicNameValuePair("next_feed_type", MWSUtils.T.PRICING_FEED.toString()));
 
-        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_submit_feed", params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
         return this;
     }
 
@@ -453,7 +450,7 @@ public class Selling extends GenericModel {
      * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
      */
     public Selling patchToListing() {
-        //if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
+        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
         Product product = Product.findByMerchantSKU(this.merchantSKU);
         if(product == null) Webs.error("SKU 产品不存在");
 

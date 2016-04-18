@@ -18,6 +18,7 @@ import play.jobs.Job;
  * User: wyattpan
  * Date: 2/9/12
  * Time: 7:04 PM
+ * @deprecated
  */
 public class ListingDriverlJob extends Job {
     // 消费者
