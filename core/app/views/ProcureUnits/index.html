@@ -81,7 +81,7 @@
         #{/list}
         </select>
 
-        <select name="p.cooperatorId" class="inline">
+        <select name="p.cooperatorId" class="inline selectize">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>

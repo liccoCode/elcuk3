@@ -25,8 +25,8 @@
     </div>
 
 
-    <select name="p.cooperId" class="inline">
-      <option value="0">供应商</option>
+    <select name="p.cooperId" class="inline selectize">
+      <option value="">供应商</option>
         #{list items:suppliers, as:'sp'}
           <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
         #{/list}
