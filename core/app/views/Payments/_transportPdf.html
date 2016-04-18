@@ -72,7 +72,7 @@
 #{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
 #{if images}
   #{list items:images, as:'img'}
-  <img src="${System.getenv(Constant.ROOT_URL)}/attachs/image?a.fileName=${img.fileName}">
+  <img src="${System.getenv(helper.Constant.ROOT_URL)}/attachs/image?a.fileName=${img.fileName}">
   #{/list}
 #{/if}
 #{else }
