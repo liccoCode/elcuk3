@@ -256,7 +256,6 @@ public class MWSReports {
                         config.setServiceURL("https://mws.amazonservices.ca");
                         break;
                 }
-
                 client = new MarketplaceWebServiceClient(account.accessKey, account.token, "elcuk2", "1.0", config);
                 cached.put(key, client);
             }

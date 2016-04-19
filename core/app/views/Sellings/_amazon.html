@@ -84,8 +84,8 @@
         #{checkbox_text_field id:'salePrice',checkboxname: 'p.saleprice', name: 's.aps.salePrice', label: '优惠销售价格',
         value: s.aps.salePrice /}
         #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
-        #{text_field id:'partNumber', readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number',
-        value: s.listing.product.partNumber /}
+        #{text_field id:'manufacturerPartNumber', readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number',
+        value: s.aps.manufacturerPartNumber /}
         #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number',value: s.aps.modelNumber /}
         #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
 
@@ -146,7 +146,6 @@
 
       #{checkbox_textarea_field id:'productDesc', checkboxname:'p.productdesc',name: 's.aps.productDesc', rows: 15,
       label: '产品详细描述', value: s.aps.productDesc, class: 'span10' /}
-
   </div>
 
 

@@ -34,7 +34,7 @@
       <option value="">类型</option>
     #{/select_enum}
 
-      <select name="p.cooperId" class="inline">
+      <select name="p.cooperId" class="inline selectize">
         <option value="">供应商</option>
       #{list items:suppliers, as:'sp'}
         <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
