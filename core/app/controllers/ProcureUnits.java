@@ -207,7 +207,7 @@ public class ProcureUnits extends Controller {
             unit.save();
         }
 
-        if(unit.deliverplan!=null) {
+        if(unit.deliverplan != null) {
             unit.deliverplan.delivery();
             DeliverPlans.show(unit.deliverplan.id);
         } else
@@ -244,8 +244,12 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
-        if(unit.shipType == Shipment.T.EXPRESS && StringUtils.isNotBlank(shipmentId))
-            Validation.addError("", "快递运输方式, 不需要指定运输单");
+
+        if(unit.shipType == Shipment.T.EXPRESS) {
+            if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
+        } else {
+            Validation.required("运输单", shipmentId);
+        }
 
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
