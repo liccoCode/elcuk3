@@ -49,8 +49,7 @@ public abstract class BaseJob extends Job {
             doit();
             del();
         } catch(Exception e) {
-            LogUtils.JOBLOG
-                    .info(e.toString());
+            LogUtils.JOBLOG.info(e.toString());
             e.printStackTrace();
             end(e.getMessage());
         }

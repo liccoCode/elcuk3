@@ -1,6 +1,5 @@
 import helper.*;
 import jobs.JobsSetup;
-import jobs.ListingSchedulJob;
 import models.ElcukConfig;
 import models.OperatorConfig;
 import models.Privilege;
@@ -95,7 +94,6 @@ public class Bootstrap extends Job {
         Currency.initCurrency();
         if(Play.mode.isProd()) {
             Account.initLogin();
-            new ListingSchedulJob().now();
         }
     }
 

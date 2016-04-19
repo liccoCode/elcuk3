@@ -1,48 +1,18 @@
 package jobs;
 
 import helper.HTTP;
-import helper.LogUtils;
-import models.Jobex;
 import models.market.Account;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.joda.time.DateTime;
 import play.Logger;
-import play.jobs.Job;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
- * 检查 Feedback 是否被删除.
- * * 被 Amazon 划掉
- * * 被 Amazon 删除
- * * 被用户删除
- * 周期:
- * - 轮询周期: 5mn
- * - Duration: 40mn
- * </pre>
- * User: wyattpan
- * Date: 8/9/12
- * Time: 3:44 PM
- * @deprecated
+ * @deprecated 已经为工具方法
  */
-public class FeedbackCheckJob extends Job {
-    @Override
-    public void doJob() {
-        long begin = System.currentTimeMillis();
-        if(!Jobex.findByClassName(FeedbackCheckJob.class.getName()).isExcute()) return;
-        List<Feedback> feedbacks = Feedback.find("isRemove=? AND createDate>=? ORDER BY updateAt ASC",
-                false, DateTime.now().minusDays(70).toDate()).fetch(20);
-        for(Feedback feedback : feedbacks) {
-            FeedbackCheckJob.ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
-        }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"FeedbackCheckJob")) {
-            LogUtils.JOBLOG
-                    .info(String.format("FeedbackCheckJob calculate.... [%sms]", System.currentTimeMillis() - begin));
-        }
-    }
+public class FeedbackCheckJob {
 
     /**
      * 检查一次 Feedback

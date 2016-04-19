@@ -2,10 +2,7 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import jobs.FeedbackCheckJob;
-import jobs.FeedbackCrawlJob;
-import models.market.Account;
 import models.market.Feedback;
-import models.market.M;
 import models.product.Category;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -40,12 +37,5 @@ public class Feedbacks extends Controller {
         else
             flash.error("刷新失败. [%s -> %s]", feedback.orderId, feedback.isRemove);
         redirect("/feedbacks/show/" + feedback.orderId);
-    }
-
-    public static void fixOnePage(long aid, M m, int p) {
-        long begin = System.currentTimeMillis();
-        Account account = Account.findById(aid);
-        List<Feedback> feedbacks = FeedbackCrawlJob.fetchAccountFeedbackOnePage(account, m, p);
-        renderText("Success: %s, passed: %s ms", feedbacks.size(), System.currentTimeMillis() - begin);
     }
 }
