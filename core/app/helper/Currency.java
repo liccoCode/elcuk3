@@ -2,12 +2,12 @@ package helper;
 
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
+import play.jobs.Job;
 
 /**
  * 不同货币单位的枚举类
@@ -240,15 +240,16 @@ public enum Currency {
 
         @Override
         public Float toCNY(Float value) {
-            return value * USD_CNY;
+            return value * CAD_CNY;
         }
 
         @Override
         public float ratio(Currency currency) {
             switch(currency) {
                 case CNY:
-                    return USD_CNY;
+                    return CAD_CNY;
                 case USD:
+                    return CAD_USD;
                 default:
                     return 1;
             }
@@ -359,32 +360,34 @@ public enum Currency {
 
     public static void updateCRY() {
         synchronized(Currency.class) { // 与 Google 同步汇率的时候阻塞所有与 Currency 有关的操作.
-            //http://www.google.com/ig/calculator?hl=en&q=1USD=?EUR
+            // 1. https://openexchangerates.org/account (6*7=42 次一组, 1000 / 42 = 23.8 组)
+            CNY_USD = ratio("CNY", "USD");
+            EUR_USD = ratio("EUR", "USD");
+            GBP_USD = ratio("GBP", "USD");
+            HKD_USD = ratio("HKD", "USD");
+            JPY_USD = ratio("JPY", "USD");
+            CAD_USD = ratio("CAD", "USD");
+
+            EUR_CNY = ratio("EUR", "CNY");
+            GBP_CNY = ratio("GBP", "CNY");
+            HKD_CNY = ratio("HKD", "CNY");
+            USD_CNY = ratio("USD", "CNY");
+            JPY_CNY = ratio("JPY", "CNY");
+            CAD_CNY = ratio("CAD", "CNY");
         }
     }
 
     @SuppressWarnings("unchecked")
     private static Float ratio(String from, String to) {
-        // TODO: 或者使用三方的 API 服务,  一个月 1000 次请求:
-        // 1. https://www.exchangerate-api.com/app/subscription
-        // 2. https://openexchangerates.org/account (6*7=42 次一组, 1000 / 42 = 23.8 组)
-        // 3. http://api.fixer.io/latest?base=USD (**** 免费, 只支持部分从银行获取)
-        // 银行服务: http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml?98b2e934ad0acf36299d44053f71a7a6
+        // 使用三方的 API 服务,  一个月 1000 次请求:
+        // 1. https://openexchangerates.org/account (6*2=12 次一组, 1000 / 12 = 83 组)
+        // 2. http://api.fixer.io/latest?base=USD (**** 免费, 只支持部分从银行获取)
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
-
-            String html = "";
-            String proxyhost = models.OperatorConfig.getVal("proxyhost");
-            String url = "https://www.google.com/finance/converter?a=1&from=" + from + "&to=" + to;
-            if(StringUtils.isNotBlank(proxyhost)) {
-                html = HTTP.proxyGet(proxyhost, url);
-            } else {
-                html = HTTP.get(url);
-            }
-            Document doc = Jsoup.parse(html);
-            String toStr = doc.select("#currency_converter_result .bld").text();
-            Logger.info("[1 %s TO %s]", from, toStr);
-            return NumberUtils.toFloat(toStr.split(" ")[0].trim());
+            String body = HTTP.get(String.format("https://www.exchangerate-api.com/%s/%s?k=%s", from, to,
+                    System.getenv(Constant.EXCHANGERATE_TOKEN)));
+            Logger.info("[1 %s TO %s %s]", from, body, to);
+            return NumberUtils.toFloat(body.trim());
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
         }
@@ -468,6 +471,17 @@ public enum Currency {
             if(!find) tr.remove();
         }
         return doc.select("#historicalRateTbl").outerHtml();
+    }
+
+    public static void initCurrency() {
+        Job job = new Job<Currency>() {
+            @Override
+            public void doJob() throws Exception {
+                Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
+            }
+        };
+        job.every("8h");
+        job.now();
     }
 }
 

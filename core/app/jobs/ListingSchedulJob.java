@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * User: wyattpan
  * Date: 12/29/11
  * Time: 12:39 AM
- * @deprecated
+ * @deprecated 这个还需要吗? 不需要删除了.
  */
 public class ListingSchedulJob extends Job {
     // 生产者
