@@ -10,16 +10,13 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * 不同的 Market place
  * ps:
  * 添加一个新市场需要:
  * 1. M 中的 Market Type
- * 2. FeedbackCrawlJob Feedback 抓取
- * 3. KeepSessionJob 保持网站登陆的任务
- * 4. 订单抓取
+ * 2. KeepSessionJob 保持网站登陆的任务
  */
 public enum M {
     AMAZON_UK {
