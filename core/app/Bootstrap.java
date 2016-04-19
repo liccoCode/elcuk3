@@ -1,6 +1,5 @@
 import helper.*;
 import jobs.JobsSetup;
-import jobs.ListingSchedulJob;
 import models.ElcukConfig;
 import models.OperatorConfig;
 import models.Privilege;
@@ -94,7 +93,6 @@ public class Bootstrap extends Job {
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
             Account.initLogin();
-            new ListingSchedulJob().now();
         }
     }
 
