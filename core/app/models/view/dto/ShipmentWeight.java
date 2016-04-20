@@ -118,7 +118,7 @@ public class ShipmentWeight {
             params.add(this.shipType.toString());
         }
         if(skus.size() > 0) {
-            sql.append(" AND p.sku IN " + SqlSelect.inlineParam(skus));
+            sql.append(" AND p.sku IN ").append(SqlSelect.inlineParam(skus));
         }
         List<Shipment> list = Shipment.find(sql.toString(), params.toArray()).fetch();
         for(Shipment shipment : list) {

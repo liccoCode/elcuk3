@@ -109,4 +109,9 @@ public class Constant {
      */
     public static final String ES_INDEX = "ES_INDEX";
 
+    /**
+     * Exchangerate-api Token
+     */
+    public static final String EXCHANGERATE_TOKEN = "EXCHANGERATE_TOKEN";
+
 }
