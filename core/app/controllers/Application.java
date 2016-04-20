@@ -2,7 +2,6 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Dates;
-import helper.HTTP;
 import helper.J;
 import helper.Webs;
 import models.market.*;
@@ -111,8 +110,4 @@ public class Application extends Controller {
         renderJSON(Orderr.frontPageOrderTable(9));
     }
 
-    public static void aaa() {
-        HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/selling_sale_analyze");
-        renderText("成功执行, 请看后台 Command Line");
-    }
 }

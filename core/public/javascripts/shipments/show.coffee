@@ -70,7 +70,7 @@ $ ->
       select_currency: $("[name='fee.currency']")[0].outerHTML
       itm:
         id: $i.parents('tr').attr('id')
-    $('#popLogModel').html(_.template($('#form-logfee-model-template').html(), params)).modal('show')
+    $('#popLogModel').html(_.template($('#form-logfee-model-template').html())(params)).modal('show')
     false
   ).on('dblclick', '[name=adjustQty]', (e) ->
     self = $(@)
@@ -82,7 +82,7 @@ $ ->
       lossqty: self.parents('tr').data('lossqty')
       compenamt: self.parents('tr').data('compenamt')
 
-    $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html(), params)).modal('show')
+    $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html())(params)).modal('show')
     $('#compentype').find('option').each((index, element)->
       if (element.text.toLowerCase() == type.toLowerCase())
         element.setAttribute('selected', 'selected')

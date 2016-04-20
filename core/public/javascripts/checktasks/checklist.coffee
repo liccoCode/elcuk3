@@ -23,5 +23,3 @@ $ ->
       iDisplayLength: 50
       aaSorting: [[0, "desc"]]
     )
-
-    $("#select_cooper").selectize()

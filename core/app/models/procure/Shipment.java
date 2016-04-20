@@ -2,8 +2,8 @@ package models.procure;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.Currency;
 import helper.*;
+import helper.Currency;
 import models.ElcukConfig;
 import models.ElcukRecord;
 import models.User;
@@ -1326,9 +1326,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
             subject = String.format("更改运输单[%s]预计到库时间", this.id);
-            content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:"+models.OperatorConfig.getVal("elcuk2url")+"/shipment/%s"
-                    , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate), username,
-                    this.id);
+            content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:%s/shipment/%s"
+                    , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate),
+                    username, System.getenv(Constant.ROOT_URL), this.id);
             List<ProcureUnit> punits = ProcureUnit.find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
                     "  LEFT JOIN " +
                     " si.shipment " +

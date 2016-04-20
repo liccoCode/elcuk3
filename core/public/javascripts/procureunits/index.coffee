@@ -38,8 +38,6 @@ $ ->
     $('#box_number_modal').modal('hide')
   )
 
-  $("#select_cooper").selectize()
-
   # 将字符串转化成Dom元素
   parseDom1 = (arg) ->
     objE = document.createElement("table")

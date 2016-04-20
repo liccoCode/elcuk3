@@ -133,7 +133,7 @@ public class OrderInvoiceFormat {
         format.qty = "Quantità";
         format.price = "prezzo unitario(€)";
         format.itemamount = "Ammontare(€)";
-        format.notaxamount = "Sottotale";
+        format.notaxamount = "Subtotale";
         format.taxamount = "IVA";
         format.totalamount = "Totale";
         format.taxamountper = "IVA(22%)";

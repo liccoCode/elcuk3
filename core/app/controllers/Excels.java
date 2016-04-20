@@ -230,9 +230,10 @@ public class Excels extends Controller {
                 if(StringUtils.isNotBlank(p.sku)) {
                     categorykey = p.sku;
                 }
+                SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
                 postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
-                        + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
-                        + new SimpleDateFormat("yyyyMMdd").format(p.end);
+                        + formater.format(p.begin) + "_"
+                        + formater.format(p.end);
                 String postvalue = Caches.get(postkey);
                 if(StringUtils.isBlank(postvalue)) {
                     String categoryname = "";
@@ -243,13 +244,14 @@ public class Excels extends Controller {
                     } else {
                         categoryname = p.category.toLowerCase();
                     }
-                    HTTP.get("http://" + models.OperatorConfig.getVal("rockendurl") +
-                            ":4567/profit_batch_work?category=" + categoryname
-                            + "&market=" + marketkey + "&from="
-                            + new SimpleDateFormat("yyyyMMdd").format(p.begin)
-                            + "&to="
-                            + new SimpleDateFormat("yyyyMMdd").format(p.end)
-                            + "&is_sku=" + is_sku);
+                    String url = String.format("%s/profit_batch_work?category=%s&&market=%s&from=%s&to=%s&is_sku=%s",
+                            System.getenv(Constant.ROCKEND_HOST),
+                            categoryname,
+                            marketkey,
+                            formater.format(p.begin),
+                            formater.format(p.end),
+                            is_sku);
+                    HTTP.get(url);
                 }
             }
         }
@@ -310,8 +312,7 @@ public class Excels extends Controller {
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
                     params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
                     params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
-                    HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/sku_profit_batch_work",
-                            params);
+                    HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/sku_profit_batch_work", params);
                     renderText("后台事务正在计算中,请稍候...");
                     renderText("后台事务正在计算中,请稍候...");
                 } else {
@@ -555,9 +556,8 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, target, formatter);
         } else {
-            HTTP.get(String.format("%s?year=%s&month=%s",
-                    "http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/revenue_and_cost_calculator", year,
-                    month));
+            HTTP.get(String.format("%s/revenue_and_cost_calculator?year=%s&month=%s",
+                    System.getenv(Constant.ROCKEND_HOST), year, month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }

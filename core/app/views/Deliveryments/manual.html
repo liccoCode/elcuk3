@@ -9,7 +9,7 @@
 #{form @Deliveryments.createManual(), method: 'POST',id: 'new_procureunit'}
 <h4>手动添加采购单</h4>
 
-#{set copers:unit.product?.cooperators() /}
+    #{set copers:unit.product?.cooperators() /}
 
 <table class="table table-condensed table-bordered">
   <tr>
@@ -21,24 +21,25 @@
     <th>SKU</th>
     <td>
       <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${skus}"
-        value="${unit.product?.sku}" id="unit_sku">
+             value="${unit.product?.sku}" id="unit_sku">
     </td>
   </tr>
 
   <tr>
     <th>供应商</th>
     <td>
-      #{select 'dmt.cooperator.id', items: copers, labelProperty: 'name', value: dmt.cooperator?.id}
-        #{option ''}请选择#{/option}
-      #{/select}
+        #{select 'dmt.cooperator.id', items: copers, labelProperty: 'name', value: dmt.cooperator?.id, native: true}
+            #{option ''}请选择#{/option}
+        #{/select}
       <input type="hidden" name="dmt.id" value="${dmt.id}">
     </td>
 
     <th>价格</th>
     <td>
-      <div class="input-append">
-        <input type="text" class="span1" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
-          #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
+      <div class="input-append inline">
+        <input type="text" class="span1 inline" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+          #{pickCurrency id:'unit_currency', name:'unit.attrs.currency',class: 'span1 inline',
+          c:unit.attrs.currency?:helper.Currency.CNY, native: 'aaa'/}
       </div>
     </td>
   </tr>

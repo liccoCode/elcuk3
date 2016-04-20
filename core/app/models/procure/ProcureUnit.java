@@ -699,9 +699,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         if(content.contains("运输时间") || content.contains("shipType"))
             notyUsers.addAll(User.shipoperations());
-        //Notification.newSystemNoty(content, String.format("%s/procureunits?p.search=id:%s", Constant.ROOT_PATH,
-        //        this.id))
-        //        .notifySomeone(notyUsers.toArray(new User[notyUsers.size()]));
     }
 
     /**

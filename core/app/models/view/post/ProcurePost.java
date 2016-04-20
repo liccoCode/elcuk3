@@ -171,7 +171,9 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch(this.page,this.perSize);
+        this.count = this.count();
+        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray())
+                .fetch(this.page, this.perSize);
     }
 
     public List<ProcureUnit> queryForExcel() {
@@ -181,8 +183,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        this.count = ProcureUnit.count("SELECT COUNT(*) FROM ProcureUnit WHERE " + params._1, params._2.toArray());
-        return this.count;
+        return ProcureUnit.count(params._1, params._2.toArray());
     }
 
     public F.T2<String, List<Object>> params() {

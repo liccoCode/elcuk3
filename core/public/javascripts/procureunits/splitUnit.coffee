@@ -83,7 +83,7 @@ $ ->
   $sellingId.typeahead({
     source: (query, process) ->
       msku = $("#unit_sku").val()
-      return if msku is null || msku is "" || msku is undefined
+      return if _.isEmpty(msku)
 
       $.get('/sellings/sameFamilySellings', {msku: msku})
       .done((c) ->

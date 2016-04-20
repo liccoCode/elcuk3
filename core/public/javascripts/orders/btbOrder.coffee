@@ -4,7 +4,7 @@ $ ->
     index++
     params =
       index: index
-    tr = _.template($('#copy-table-template').html(), params)
+    tr = _.template($('#copy-table-template').html())(params)
     $("#addSkuTr").before(tr)
     bindSkuSame()
     bindDeleteBtn()

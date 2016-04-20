@@ -11,10 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -122,7 +119,7 @@ public class OperatorConfig extends Model {
             if(!config.exist()) config.save();
         }
 
-        if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new java.util.HashMap<String, String>();
+        if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new HashMap<>();
         List<OperatorConfig> configs = OperatorConfig.findAll();
         for(OperatorConfig config : configs) {
             if(!StringUtils.isBlank(config.paramcode)) {

@@ -87,7 +87,7 @@ public class CheckTasks extends Controller {
             p.from = DateTime.now().minusDays(1).toDate();
             p.to = new Date();
         }
-        List<ElcukRecord> records = ElcukRecord.find("action like '%CheckTask%' ORDER BY createAt DESC LIMIT 50").fetch();
+        List<ElcukRecord> records = ElcukRecord.find("action like '[CheckTask%' ORDER BY createAt DESC").fetch(50);
         List<CheckTask> checks = p.check();
         List<CheckTask> checkeds = p.checked();
         List<CheckTask> checkRepeats = p.checkRepeat();
