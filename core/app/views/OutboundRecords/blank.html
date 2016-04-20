@@ -1,0 +1,58 @@
+#{extends 'main.html' /}
+#{set title:'创建出库记录' /}
+#{set 'moreScripts'}
+    #{script_cdn name: 'outboundrecords/blank.coffee'/}
+#{/set}
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @OutboundRecords.create(), method:'POST', id: 'new_outbound_record'}
+<h4 style="text-align:center" class="alert alert-info">添加其他出库</h4>
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>物料编码</th>
+    <td>
+      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}">
+      <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
+    </td>
+
+    <th>名称</th>
+    <td name="stock_name" style="width: 40%;">
+    </td>
+  </tr>
+  <tr>
+    <th>仓库</th>
+    <td>
+      <select name="record.whouse.id">
+          #{list items:whouses, as:'whouse'}
+            <option ${whouse.id == record.whouse?.id ? 'selected' : ''} value="${whouse.id}">
+            ${whouse.name}
+            </option>
+          #{/list}
+      </select>
+    </td>
+
+    <th>预计出库数量</th>
+    <td>
+      <input type="text" name="record.planQty" value="${record.planQty}">
+    </td>
+  </tr>
+  <tr>
+    <th>备注</th>
+    <td colspan="4">
+      <textarea name="record.memo" rows="4" class="span10">${record.memo}</textarea>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      <input type="hidden" name="record.origin" value="${record.origin}">
+      <input type="hidden" name="record.state" value="${record.state}">
+      <input type="hidden" name="record.type" value="${record.type}">
+      <input type="hidden" name="record.qty" value="${record.qty}">
+
+      <button class="btn btn-primary" name="create_record">创建</button>
+      <a href="@{OutboundRecords.index()}" class="btn btn-success">取消</a>
+    </td>
+  </tr>
+</table>
+#{/form}

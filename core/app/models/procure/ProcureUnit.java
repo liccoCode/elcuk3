@@ -15,7 +15,7 @@ import models.finance.PaymentUnit;
 import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.qc.CheckTask;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;

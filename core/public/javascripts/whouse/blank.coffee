@@ -2,8 +2,11 @@ $ ->
   $(document).on("showOrHide", "select[name=wh.type]", (r) ->
     $self = $(@)
     $tr = $("#forward_shipment_tr")
-    if $self.val() is "FORWARD" then $tr.show("slow")
-    else $tr.hide('slow')
+
+    if $self.val() is "FORWARD"
+      $tr.show("slow")
+    else
+      $tr.hide('slow')
   )
 
   $(document).on("change", "select[name=wh.type]", (r) ->

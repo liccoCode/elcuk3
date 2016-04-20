@@ -8,7 +8,7 @@ import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;

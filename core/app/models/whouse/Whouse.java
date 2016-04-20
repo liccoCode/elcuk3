@@ -1,4 +1,4 @@
-package models.product;
+package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
@@ -13,7 +13,6 @@ import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -39,19 +38,26 @@ public class Whouse extends Model {
     public Account account;
 
     public enum T {
-        /**
-         * FBA 仓库, 独立出来
-         */
-        FBA,
-        // 如果还有新的第三方仓库, 则再从代码中添加新类别
-        /**
-         * 自有仓库
-         */
-        SELF,
-        /**
-         * 货代
-         */
-        FORWARD
+        FBA {
+            @Override
+            public String label() {
+                return "FBA 仓库";
+            }
+        },
+        SELF {
+            @Override
+            public String label() {
+                return "自有仓库";
+            }
+        },
+        FORWARD {
+            @Override
+            public String label() {
+                return "货代仓库";
+            }
+        };
+
+        public abstract String label();
     }
 
 
@@ -125,17 +131,30 @@ public class Whouse extends Model {
     @Expose
     public boolean isEXPRESS = false;
 
+    @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    public List<WhouseItem> items = new ArrayList<>();
+
     public void validate() {
-        if(this.type == T.FBA) {
-            if(this.account == null) Validation.addError("", "wh.fba.account");
+        if(this.type == null) return;
+        switch(this.type) {
+            case FBA:
+                if(this.account == null) {
+                    Validation.addError("", "wh.fba.account");
+                }
+                break;
+            case FORWARD:
+                if(this.cooperator == null) {
+                    Validation.addError("", "货代不能为空");
+                }
+                if(!this.isAIR && !this.isEXPRESS && !this.isSEA) {
+                    Validation.addError("", "运输方式不能为空");
+                }
+                this.exist();
+                break;
+            default:
+                break;
         }
-        if(this.type == T.FORWARD) {
-            if(this.cooperator == null) Validation.addError("", "货代不能为空");
-            if(this.isAIR == false && this.isEXPRESS == false && this.isSEA == false)
-                Validation.addError("", "运输方式不能为空");
-        }
-        if(Validation.hasErrors()) return;
-        if(this.type == T.FORWARD) this.exist();
     }
 
     public StringBuilder buildStringHead() {
@@ -261,7 +280,7 @@ public class Whouse extends Model {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
                 if(Arrays.asList(M.AMAZON_IT).contains(type))
-                       Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
             } else if(nextBeginDate.getDayOfWeek() == 3) {
                 if(Arrays.asList(M.AMAZON_DE).contains(type))
@@ -295,5 +314,18 @@ public class Whouse extends Model {
             Shipment ship = (Shipment) o;
             return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date));
         }
+    }
+
+    public static List<Whouse> selfWhouses() {
+        return Whouse.find("type=?", T.SELF).fetch();
+    }
+
+    /**
+     * 不良品仓库
+     *
+     * @return
+     */
+    public static Whouse defectiveWhouse() {
+        return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
     }
 }

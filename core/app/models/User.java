@@ -11,7 +11,7 @@ import models.market.Listing;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;

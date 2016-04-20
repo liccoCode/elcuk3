@@ -5,7 +5,7 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.market.*;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.view.Ret;
 import models.view.dto.DashBoard;
 import org.joda.time.DateTime;
