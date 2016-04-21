@@ -18,22 +18,22 @@
 
         <tr>
           <th>手机</th>
-          <td><input type="text" name="user.phone" value="${user.phone}"></td>
+          <td><input type="text" name="wuser.phone" value="${user.phone}"></td>
 
           <th>固定电话</th>
-          <td><input type="text" value="${user.tel}" name="user.tel"></td>
+          <td><input type="text" value="${user.tel}" name="wuser.tel"></td>
         </tr>
 
         <tr>
           <th>QQ</th>
-          <td><input type="text" value="${user.qq}" name="user.qq"></td>
+          <td><input type="text" value="${user.qq}" name="wuser.qq"></td>
 
           <th>阿里旺旺</th>
-          <td><input type="text" value="${user.wangwang}" name="user.wangwang"></td>
+          <td><input type="text" value="${user.wangwang}" name="wuser.wangwang"></td>
         </tr>
         <tr>
           <th>密码</th>
-          <td colspan="4"><input type="password" name="user.password" placeHolder="更新需要填写正确的密码">
+          <td colspan="4"><input type="password" name="wuser.password" placeHolder="更新需要填写正确的密码">
           </td>
         </tr>
         <tr>
@@ -58,7 +58,7 @@
 </div>
 
 #{power.ck "notifications.notifysall"}
-    #{success_row title:'发送全局 Notification'/}
+  #{success_row title:'发送全局 Notification'/}
 <div class="row">
   <div class="span12">
     <form action="@{Notifications.notifysAll()}" method="post">

@@ -69,7 +69,7 @@ public class TransportApplyPost extends Post<TransportApply> {
     public F.T2<String, List<Object>> params() {
 
         StringBuffer sql = new StringBuffer(" 1=1 ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
@@ -96,7 +96,7 @@ public class TransportApplyPost extends Post<TransportApply> {
             params.add(this.word());
         }
 
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<TransportApply> query() {

@@ -10,7 +10,7 @@
 
 #{success_row}
 <ul>
-  <li>已计算完成报表</li>
+  <li>已完成报表(可直接下载)</li>
 </ul>
 #{/success_row}
 <br/>
@@ -18,15 +18,15 @@
 <div class="row-fluid">
   <div class="span12">
     <span>年份:</span>
-      #{select_year class:'span1', name:'p.year', value: p.year/}
+      #{select_year class:'span1', name:'p.year', value: p.year, native: true/}
     &nbsp;
 
     <span class="add-on">月份:</span>
-      #{select_all_month  class:'span1', name: "p.month", value: p.month/}
+      #{select_all_month  class:'span1', name: "p.month", value: p.month, native: true/}
     &nbsp;
 
     <span class="add-on">报表类型:</span>
-    <select class="span1" name="p.reporttype">
+    <select class="span1" name="p.reporttype" native>
       <option value="">请选择</option>
         #{list items:models.view.post.ReportPost.applyReportTypes(), as: 'reportType'}
           <option ${p.reporttype == reportType ? 'selected=selected' : ''} value="${reportType.name()}">${reportType.label()}</option>
@@ -74,24 +74,56 @@
     </table>
   </div>
 </div>
-<br/>
+<br/><br/>
 
 #{success_row}
 <ul>
-  <li>主营收入与成本报表</li>
+  <li>实时计算报表(需要等待计算完成后才能下载)</li>
 </ul>
 #{/success_row}
-<div class="row-fluid pull-right">
-  <div class="span12 bs-docs-form">
-    <form class="search_form" action="@{Excels.revenueAndCostReport()}" target="_blank">
-      <span>年份:</span>
-    #{select_year class:'span1', name:'year', value: new org.joda.time.DateTime().getYear()/}
-      &nbsp;
+<div class="row-fluid">
+  <div class="span12">
+    <div class="bs-docs-form">
+      <form class="search_form" action="@{Excels.revenueAndCostReport()}" target="_blank">
+        <span class="label label-info">主营收入与成本报表:</span>
 
-      <span class="add-on">月份:</span>
-    #{select_all_month  class:'span1', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
-      &nbsp;
-      <button class="btn">Export</button>
-    </form>
+        <span style="margin-left:10px;">年份:</span>
+      #{select_year class:'span1', name:'year', value: new org.joda.time.DateTime().getYear()/}
+        &nbsp;
+
+        <span class="add-on">月份:</span>
+      #{select_all_month  class:'span1', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
+        &nbsp;
+        <button class="btn">导出</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <div class="bs-docs-form">
+      <form class="search_form" action="@{Excels.orderFeesCostReport()}" target="_blank">
+        <div class="inline" style="margin-top:4px;">
+          <span class="label label-info">订单费用汇总报表:</span>
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">From:</span>
+          <input type="date" name="from" value="${helper.Dates.aMonthAgo().date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="to" value="${new org.joda.time.DateTime()}">
+        </div>
+
+        <span class="add-on">市场:</span>
+        <select class="inline" name="market">
+        #{list items: models.market.M, as: 'm'}
+          <option value="${m.name()}">${m}</option>
+        #{/list}
+        </select>
+        &nbsp;
+        <button class="btn">导出</button>
+      </form>
+    </div>
   </div>
 </div>

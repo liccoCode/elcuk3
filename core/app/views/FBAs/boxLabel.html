@@ -12,9 +12,18 @@
 <table border="0" style="border: none;margin:0 0 0 0;" cellpadding="0" cellspacing="0" width="100%" height="100%">
 #{list items:1..boxNumber, as: 'i'}
   <tr>
+
     <td width="49%">
-        #{render './shipmentDetail.html', procureUnit: procureUnit/}
+    #{if models.OperatorConfig.getVal("addressname")=='Brandworl'}
+        #{render './brandworlShipmentDetail.html', procureUnit: procureUnit/}
+    #{/if}
+    #{else}
+       #{render './shipmentDetail.html', procureUnit: procureUnit/}
+    #{/else}
+
     </td>
+
+
     <td width="2%">
     </td>
     <td width="49%">

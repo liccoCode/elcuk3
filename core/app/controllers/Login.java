@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.krysalis.barcode4j.HumanReadablePlacement;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.impl.code128.Code128Constants;
@@ -18,7 +19,6 @@ import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.krysalis.barcode4j.tools.MimeTypes;
 import play.Logger;
 import play.data.binding.As;
-import play.mvc.Http;
 import play.mvc.Util;
 
 import java.awt.image.BufferedImage;
@@ -59,18 +59,17 @@ public class Login extends Secure.Security {
         User user = User.findByUserName(username);
         if(user == null) return false;
         boolean iscorrect = user.authenticate(password);
+        String domain = models.OperatorConfig.getVal("domain");
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", User.userMd5(username), "easyacc.com", "/", 60 * 60 * 24 * 30,
-                    false);
+            Duration leftTime = Duration.standardDays(30);
+            int timeInSeconds = leftTime.toStandardSeconds().getSeconds();
+            response.setCookie("username", username, domain, "/", timeInSeconds, false);
+            response.setCookie("usermd5", User.userMd5(username), domain, "/", timeInSeconds, false);
 
-            Http.Response.current().setCookie("kod_name", "elcuk2", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), "easyacc.com", "/",
-                    60 * 60 * 24 * 30, false);
-            Http.Response.current()
-                    .setCookie("kod_user_language", "zh_CN", "easyacc.com", "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", "easyacc.com", "/",
-                    60 * 60 * 24 * 30, false);
+            response.setCookie("kod_name", "elcuk2", domain, "/", timeInSeconds, false);
+            response.setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
+            response.setCookie("kod_user_language", "zh_CN", domain, "/", timeInSeconds, false);
+            response.setCookie("kod_user_online_version", "check-at-1418867695", domain, "/", timeInSeconds, false);
             new ElcukRecord("login", J.json(
                     GTs.MapBuilder.map("Username", username).put("Ip", request.remoteAddress)
                             .put("UserAgent", request.headers.get("user-agent").toString()).
@@ -92,15 +91,16 @@ public class Login extends Secure.Security {
      * 在用户登出以前做处理
      */
     static void onDisconnect() {
+        String domain = models.OperatorConfig.getVal("domain");
         try {
             Login.current().logout();
-            Http.Response.current().setCookie("username", "", "easya.cc", "/", 0, false);
-            Http.Response.current().setCookie("usermd5", "", "easya.cc", "/", 0, false);
+            response.setCookie("username", "", domain, "/", 0, false);
+            response.setCookie("usermd5", "", domain, "/", 0, false);
 
-            Http.Response.current().setCookie("kod_name", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_token", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_language", "", "easyacc.com", "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", "easyacc.com", "/", 0, false);
+            response.setCookie("kod_name", "", domain, "/", 0, false);
+            response.setCookie("kod_token", "", domain, "/", 0, false);
+            response.setCookie("kod_user_language", "", domain, "/", 0, false);
+            response.setCookie("kod_user_online_version", "", domain, "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
@@ -169,6 +169,8 @@ public class Login extends Secure.Security {
      * @throws java.io.IOException
      */
     public static void code128(String shipmentId) throws IOException {
+        //TODO: 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
+        // 核心使用到两个 API: MatrixToImageWriter, Code128Writer
         Code128Bean bean = new Code128Bean();
 
         // 尽可能调整到与 Amazon 的规格一样

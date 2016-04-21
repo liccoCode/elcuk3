@@ -25,3 +25,4 @@ server.pid
 *.ids
 /out
 core/test/*.json
+core/lib

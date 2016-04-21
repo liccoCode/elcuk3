@@ -156,7 +156,7 @@ $ ->
 
 
   # -------- Review 表格
-  $('a[href=#review_table]').on('shown',
+  $("a[href='#review_table']").on('shown',
   (e) ->
     if $("#search_form [name=asin]").val() == ""
       alert("请输入 ASIN")
@@ -169,7 +169,7 @@ $ ->
     $('#review_table').load("/AmazonOperations/reviewTable", $('#search_form :input').fieldSerialize())
 
   #---------Wish List列表
-  $('a[href=#wish_list]').on('shown',
+  $("a[href='#wish_list']").on('shown',
   (e) ->
     if $("#search_form [name=asin]").val() == ""
       alert("请输入 ASIN")

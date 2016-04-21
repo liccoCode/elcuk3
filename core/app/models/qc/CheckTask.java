@@ -12,15 +12,16 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
 import models.view.dto.CheckTaskAQLDTO;
+import models.whouse.InboundRecord;
+import models.whouse.Whouse;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
+import play.cache.Cache;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -449,6 +450,16 @@ public class CheckTask extends Model {
     }
 
     /**
+     * 自动生成入库记录
+     */
+    @PostUpdate
+    public void buidingInboundRecord() {
+        if(this.isship == ShipType.SHIP && !InboundRecord.exist(this)) {
+            new InboundRecord(this).save();
+        }
+    }
+
+    /**
      * List 和 String 之间的转换
      *
      * @param flag
@@ -549,61 +560,71 @@ public class CheckTask extends Model {
      * 产生质检任务
      */
     public static void generateTask() {
-        List<Map<String, Object>> units = DBUtils
-                .rows("select id from ProcureUnit where isCheck=0 AND shipType is not null");
-        for(Map<String, Object> unit : units) {
-            Long unitid = (Long) unit.get("id");
-            CheckTask task = CheckTask.find("units.id=?", unitid).first();
+        String unitcache = "checktaskprocureunitcache";
 
-            if(task == null) {
-                CheckTask newtask = new CheckTask();
-                ProcureUnit punit = ProcureUnit.findById(unitid);
+        if(StringUtils.isNotBlank(Cache.get(unitcache, String.class))) return;
+        String running = "running";
+        try {
+            Cache.add(unitcache, running);
+            List<Map<String, Object>> units = DBUtils
+                    .rows("select id from ProcureUnit where isCheck=0 AND shipType is not null");
+            for(Map<String, Object> unit : units) {
+                Long unitid = (Long) unit.get("id");
+                CheckTask task = CheckTask.find("units.id=?", unitid).first();
 
-                newtask.units = punit;
-                newtask.confirmstat = ConfirmType.UNCONFIRM;
-                newtask.checkstat = StatType.UNCHECK;
-                if(punit.cooperator != null && punit.cooperator.qcLevel == Cooperator.L.MICRO) {
-                    //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
-                    newtask.qcType = T.SELF;
+                if(task == null) {
+                    CheckTask newtask = new CheckTask();
+                    ProcureUnit punit = ProcureUnit.findById(unitid);
+
+                    newtask.units = punit;
+                    newtask.confirmstat = ConfirmType.UNCONFIRM;
+                    newtask.checkstat = StatType.UNCHECK;
+                    if(punit.cooperator != null && punit.cooperator.qcLevel == Cooperator.L.MICRO) {
+                        //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
+                        newtask.qcType = T.SELF;
+                    }
+                    newtask.checkor = newtask.showChecktor();
+                    //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
+                    Whouse wh = searchWarehouse(punit);
+                    if(wh != null && wh.user != null) {
+                        newtask.shipwhouse = wh;
+                    }
+
+                    newtask.creatat = new Date();
+                    newtask.finishStat = ConfirmType.UNCONFIRM;
+                    newtask.save();
+                    DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
                 }
-                newtask.checkor = newtask.showChecktor();
-                //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
-                Whouse wh = searchWarehouse(punit);
-                if(wh != null && wh.user != null) {
-                    newtask.shipwhouse = wh;
-                }
-
-                newtask.creatat = new Date();
-                newtask.finishStat = ConfirmType.UNCONFIRM;
-                newtask.save();
-                DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
             }
-        }
+
+            //因为运输方式经常变化，需要重新检查一次
+            List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where "
+                    + "  units_id in (" +
+                    "  select unit_id from ShipItem where shipment_id in (" +
+                    "  select id from Shipment where type='EXPRESS'" +
+                    "  )" +
+                    "  ) and checkstat='UNCHECK'");
+            if(unchecktasks.size() > 0) {
+                checkwarehouse(unchecktasks);
+            }
+            unchecktasks = DBUtils.rows("select id from CheckTask where "
+                    + " not exists (select 1 from ShipItem where ShipItem.unit_id=CheckTask.units_id)"
+                    + " and exists (select 1 from ProcureUnit where "
+                    + " ProcureUnit.id=CheckTask.units_id and shipType='EXPRESS')"
+                    + " and checkstat='UNCHECK'");
+            if(unchecktasks.size() > 0) {
+                checkwarehouse(unchecktasks);
+            }
 
 
-        //因为运输方式经常变化，需要重新检查一次
-        List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where "
-                + "  units_id in (" +
-                "  select unit_id from ShipItem where shipment_id in (" +
-                "  select id from Shipment where type='EXPRESS'" +
-                "  )" +
-                "  ) and checkstat='UNCHECK'");
-        if(unchecktasks.size() > 0) {
-            checkwarehouse(unchecktasks);
-        }
-        unchecktasks = DBUtils.rows("select id from CheckTask where "
-                + " not exists (select 1 from ShipItem where ShipItem.unit_id=CheckTask.units_id)"
-                + " and exists (select 1 from ProcureUnit where "
-                + " ProcureUnit.id=CheckTask.units_id and shipType='EXPRESS')"
-                + " and checkstat='UNCHECK'");
-        if(unchecktasks.size() > 0) {
-            checkwarehouse(unchecktasks);
-        }
-
-
-        List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
-        if(tasks.size() > 0) {
-            checkwarehouse(tasks);
+            List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
+            if(tasks.size() > 0) {
+                checkwarehouse(tasks);
+            }
+        } catch(Exception e) {
+            Cache.delete(unitcache);
+        } finally {
+            Cache.delete(unitcache);
         }
     }
 

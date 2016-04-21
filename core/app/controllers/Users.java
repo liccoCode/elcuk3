@@ -95,31 +95,33 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
     }
 
-    public static void updates(User user, Long userid, String newPassword, String newPasswordConfirm) {
+    public static void updates(User wuser, Long userid, String newPassword, String newPasswordConfirm) {
 
-        User dbuser = User.findById(userid);
-        user.confirm = user.password;
-        //validation.valid(user);
-
+        User user = User.findById(userid);
+        if(!user.authenticate(wuser.password)) {
+            Validation.addError("", "用户密码错误, 请确认当前用户的密码正确");
+        }
         // 如果填写了新密码, 那么则需要修改密码
         if(StringUtils.isNotBlank(newPassword)) {
-            validation.equals(newPassword, newPasswordConfirm);
+            Validation.equals("Password", newPassword, "Confirm Password", newPasswordConfirm);
         }
         if(Validation.hasErrors())
-            render("Users/home.html", dbuser);
+            render("Users/home.html", user);
 
         try {
-            dbuser.tel = user.tel;
-            dbuser.wangwang = user.wangwang;
-            dbuser.phone = user.phone;
-            dbuser.qq = user.qq;
-            dbuser.update();
-            if(StringUtils.isNotBlank(newPassword))
-                dbuser.changePasswd(newPassword);
+            user.tel = wuser.tel;
+            user.wangwang = wuser.wangwang;
+            user.phone = wuser.phone;
+            user.qq = wuser.qq;
+            if(StringUtils.isNotBlank(newPassword)) {
+                user.changePasswd(newPassword);
+            } else {
+                user.update();
+            }
         } catch(Exception e) {
             e.printStackTrace();
             Validation.addError("", Webs.E(e));
-            render("Users/home.html", dbuser);
+            render("Users/home.html", user);
         }
         flash.success("修改成功.");
         redirect("/users/home");

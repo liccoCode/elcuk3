@@ -287,11 +287,12 @@ public class ShipItem extends GenericModel {
                             Float compenamt) {
         if(lossqty == null) lossqty = 0;
         if(compenamt == null) compenamt = 0f;
-        if(StringUtils.isNotBlank(compentype) && !compentype.equals("easyacc")) {
+        if(StringUtils.isNotBlank(compentype) && !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname")
+                .toLowerCase())) {
             if((lossqty != 0 && compenamt.intValue() == 0) || (lossqty == 0 && compenamt.intValue() != 0))
                 Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
         }
-        if(StringUtils.isNotBlank(compentype) && compenamt.equals("easyacc")) {
+        if(StringUtils.isNotBlank(compentype) && compenamt.equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
 
         }
         if(Validation.hasErrors()) return;
@@ -424,7 +425,7 @@ public class ShipItem extends GenericModel {
             }
         }
         String message = "";
-        StringBuilder sql = new StringBuilder("SELECT a.name AS declareName, p.value FROM ProductAttr p ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");
         sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
         sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
         sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");

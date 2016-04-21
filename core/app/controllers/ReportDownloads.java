@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
@@ -7,6 +8,7 @@ import models.ReportRecord;
 import models.view.Ret;
 import models.view.post.ReportPost;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.io.File;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
  * Date: 15-1-16
  * Time: 下午4:40
  */
+@With({SystemOperation.class})
 public class ReportDownloads extends Controller {
 
     /**
@@ -53,7 +56,8 @@ public class ReportDownloads extends Controller {
     public static void repeatCalculate(Long id) {
         ReportRecord record = ReportRecord.findById(id);
         try {
-            HTTP.get(record.calUrl());
+            HTTP.get(String.format("%s/sku_month_profit_repeat?year=%s&month=%s",
+                    System.getenv(Constant.ROCKEND_HOST), record.year, record.month));
             renderJSON(new Ret(true, String.valueOf("重新计算请求成功,请稍候!")));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

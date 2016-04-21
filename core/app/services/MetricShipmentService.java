@@ -1,10 +1,7 @@
 package services;
 
 import com.alibaba.fastjson.JSONObject;
-import helper.Currency;
-import helper.DBUtils;
-import helper.Dates;
-import helper.ES;
+import helper.*;
 import models.market.M;
 import models.procure.Shipment;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -95,7 +92,7 @@ public class MetricShipmentService {
                 .query(filterbuilder())
                 .aggregation(builder)
                 .size(0);
-        JSONObject result = ES.search("elcuk2", "shippayunit", search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "shippayunit", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
         return cost.getFloat("value");

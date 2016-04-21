@@ -1,12 +1,11 @@
 package controllers.api;
 
 import jobs.PmDashboard.AbnormalFetchJob;
-import jobs.categoryInfo.CategoryInfoFetchJob;
 import jobs.PmDashboard.PmDashboardFetchJob;
+import jobs.categoryInfo.CategoryInfoFetchJob;
 import jobs.driver.GJob;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
-
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -19,6 +18,7 @@ import java.util.Map;
  * User: mac
  * Date: 14-4-2
  * Time: AM9:51
+ * @deprecated 系统内无人调用
  */
 @With(APIChecker.class)
 public class JobsInitialize extends Controller {

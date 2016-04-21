@@ -25,17 +25,16 @@
         <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
       </div>
 
-    #{select 'p.dateType', items: p.dateTypes, labelProperty: '_2', valueProperty: '_1', value: p.dateType, class: 'inline' /}
+    #{select 'p.dateType', items: p.dateTypes, labelProperty: '_2', valueProperty: '_1', value: p.dateType, class: 'inline selectize' /}
 
-    #{select 'p.whouseId', items: whouses, labelProperty: 'name', valueProperty: 'id', value:p.whouseId,class:'inline'}
-        #{option ''}FBA_ALL#{/option}
+    #{select 'p.whouseId', items: whouses, labelProperty: 'name', valueProperty: 'id', style:'width:120px', value:p.whouseId, class:'inline selectize'}
+      #{option ''}FBA_ALL#{/option}
     #{/select}
 
-    #{select 'p.centerId', items: centers, labelProperty: 'centerId', valueProperty: 'centerId', value: p.centerId, class:'inline'}
-        #{option ''}FBA Center#{/option}
+    #{select 'p.centerId', items: centers, labelProperty: 'centerId', valueProperty: 'centerId', value: p.centerId, style:'width:110px', class:'inline selectize'}
+      #{option ''}FBA Center#{/option}
     #{/select}
 
-      </select>
       <label class="checkbox inline">
         <input type="checkbox" ${p.isHaveShipment ? 'checked' : ''} value="true" name="p.isHaveShipment">
         包含运输单
@@ -77,11 +76,11 @@
       </tr>
     #{list items: units, as:'unit'}
       <tr>
-          #{set relateShipments: unit.relateShipment()/}
+        #{set relateShipments: unit.relateShipment()/}
         <td>
-            #{ifnot relateShipments.size() > 0}
-              <label><input type="checkbox" name="units" value="${unit.id}"></label>
-            #{/ifnot}
+          #{ifnot relateShipments.size() > 0}
+            <label><input type="checkbox" name="units" value="${unit.id}"></label>
+          #{/ifnot}
         </td>
         <td>
           <a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a>
@@ -104,9 +103,9 @@
         <td>${unit.result()}</td>
         <td>${unit.isship()}</td>
         <td>
-            #{if unit.fetchCheckTaskLink() != null}
-              <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
-            #{/if}
+          #{if unit.fetchCheckTaskLink() != null}
+            <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
+          #{/if}
         </td>
       </tr>
     #{/list}

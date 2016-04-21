@@ -11,8 +11,8 @@ import org.activiti.engine.repository.DeploymentBuilder;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * Date: 5/10/14
  * Time: 4:25 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Activitis extends Controller {
 
     public static void index(Long id) {

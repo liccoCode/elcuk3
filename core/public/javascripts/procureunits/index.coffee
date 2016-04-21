@@ -38,8 +38,6 @@ $ ->
     $('#box_number_modal').modal('hide')
   )
 
-  $("#select_cooper").selectize()
-
   # 将字符串转化成Dom元素
   parseDom1 = (arg) ->
     objE = document.createElement("table")
@@ -52,3 +50,12 @@ $ ->
     $form = $("#search_Form")
     window.open('/Excels/procureUnitSearchExcel?' + $form.serialize(), "_blank")
   )
+
+
+  $("#create_deliverplan_btn").click (e) ->
+    $form = $("#create_deliveryment")
+    window.open('/deliverplans/deliverplan?' + $form.serialize(), "_blank")
+
+  $("#create_deliveryment_btn").click (e) ->
+    $form = $("#create_deliveryment")
+    window.open('/deliveryments/create?' + $form.serialize(), "_blank")

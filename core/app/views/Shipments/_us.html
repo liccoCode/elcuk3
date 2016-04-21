@@ -1,13 +1,13 @@
 <tr>
   <td style="font-family:STXihei" colspan="3" rowspan="3" class="td1">
-    Buyer : Searay LLC <br>
-    Attn : Yeping Xie <br>
-    Tel : +1 8314802307 <br>
-    Email：Jason@easyacceu.com <br>
+    Buyer : ${models.OperatorConfig.getVal("shipmentusbuyer")}<br>
+    Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} <br>
+    Tel : ${models.OperatorConfig.getVal("shipmentustel")} <br>
+    Email：${models.OperatorConfig.getVal("shipmenteuropeemail")} <br>
     Add :${address}
   </td>
   <td>Buyer TAX ID.：</td>
-  <td>99-0378641</td>
+  <td>${models.OperatorConfig.getVal("shipmentustaxid")}</td>
 </tr>
 <tr>
   <td>INVOICE NO.:</td>

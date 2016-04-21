@@ -24,6 +24,7 @@ import java.util.*;
  * User: rose
  * Date: 13-4-2
  * Time: 下午3:16
+ * @deprecated
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)

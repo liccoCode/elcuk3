@@ -1,0 +1,90 @@
+#{extends 'main_full.html'/}
+#{set title:"SKU销售利润成本分析报表" /}
+#{set 'moreScripts'}
+    #{script_cdn name: 'jquery.dataTables.js'/}
+    #{script_cdn name: 'bootstrap-multiselect.js'/}
+    #{stylesheet_cdn name:'bootstrap-multiselect.css'/}
+    #{script_cdn name: 'Finances/skuProfitAnalyse.coffee'/}
+#{/set}
+
+#{info_row}
+<ul>
+  <li><strong>[SKU销售利润成本分析报表]</strong></li>
+</ul>
+#{/info_row}
+#{flash_alert /}
+#{errorMsgs /}
+
+#{form @Finances.skuProfitAnalyse(), class:'search_form', id:'profits_form'}
+<div class="row-fluid">
+  <div class="span12">
+    时间：
+    <input type="date" name="p.begin" value="${p.begin.date()}">~
+    <input type="date" name="p.end" value="${p.end.date()}">
+
+    市场:
+    <select id="market" style="width:150px;" name="p.pmarket">
+      <option value="market">Market</option>
+      <option value="total">汇总</option>
+        #{list items:models.market.M.values(), as:'m'}
+          <option value="${m.name()}" #{if m.name()==p.pmarket} selected #{/if}>${m.label()}</option>
+        #{/list}
+    </select>
+
+    Category:
+    <select id="category" style="width:150px;" multiple="multiple">
+        #{list items:categorys, as:'c'}
+          <option value="${c}" #{if p.categories !=null && p.categories.indexOf(c) >= 0} selected #{/if}>${c}</option>
+        #{/list}
+    </select>
+    <input type="hidden" id="category_hidden" name="p.categories" value="${p.categories}">
+    <input type="hidden" value="${p.categories}">
+    SKU:
+    <input type="text" name="p.sku" data-provide="typeahead" data-source="${skus}" value="${p?.sku}" id="unit_sku">
+
+    <button class="btn btn-primary" data-loading>搜索</button>
+    <button class="btn btn-primary" id="exceldown">导出Excel</button>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <table id="profit" class="table table-condensed table-bordered">
+      <thead>
+      <tr>
+        <th>SKU</th>
+        <th>市场</th>
+        <th>SKU销量</th>
+        <th>SKU销售额(USD)</th>
+        <th>销售成本(USD)</th>
+        <th>采购成本</th>
+        <th>物流成本</th>
+        <th>税金成本</th>
+        <th>销售费用(USD)</th>
+        <th>亚马逊费用(USD)</th>
+        <th>FBA费用(USD)</th>
+        <th>SKU总利润(USD)</th>
+      </tr>
+      </thead>
+      <tbody>
+          #{list items:skuProfits, as:'pro'}
+          <tr>
+            <td>${pro.sku}</td>
+            <td>${pro.market?pro.market.label():"汇总"}</td>
+            <td>${pro.quantity}</td>
+            <td>${pro.totalfee}</td>
+            <td>${pro.skuSaleCost.format('#.##')}</td>
+            <td>${pro.purchaseCost.format('#.##')}</td>
+            <td>${pro.shipCost.format('#.##')}</td>
+            <td>${pro.taxCost.format('#.##')}</td>
+            <td>${pro.saleFee.format('#.##')}</td>
+            <td>${pro.amazonfee.format('#.##')}</td>
+            <td>${pro.fbafee.format('#.##')}</td>
+            <td>${pro.totalprofit.format('#.##')}</td>
+          </tr>
+          #{/list}
+      </tbody>
+    </table>
+  </div>
+</div>
+#{/form}

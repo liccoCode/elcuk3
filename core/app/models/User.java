@@ -11,7 +11,8 @@ import models.market.Listing;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
-import models.product.Whouse;
+import models.whouse.Whouse;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -24,7 +25,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.security.MessageDigest;
 
 /**
  * 系统中的用户
@@ -59,7 +59,7 @@ public class User extends Model {
     /**
      * 用户所拥有的ROLE
      */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     public Set<Role> roles = new HashSet<Role>();
 
 
@@ -90,6 +90,7 @@ public class User extends Model {
     @Password
     public String passwordDigest;
 
+    @Transient
     public String password;
 
     @Transient
@@ -173,7 +174,7 @@ public class User extends Model {
         if(!this.authenticate(this.password))
             throw new FastRuntimeException("密码错误");
         this.save();
-        //Login.updateUserCache(this);
+        Login.updateUserCache(this);
     }
 
     public List<Notification> notificationFeeds(int page) {
@@ -281,14 +282,13 @@ public class User extends Model {
     /**
      * 修改密码
      *
-     * @param passwd
+     * @param password
      */
-    public void changePasswd(String passwd) {
+    public void changePasswd(String password) {
         //  由于 User 会被保存在 Cache 中, 那么 User 则处于游离状态, 为了保持缓存中游离对象, 所以需要将缓存中的游离对象进行一次更新
-        this.password = passwd;
-        this.passwordDigest = Crypto.encryptAES(this.password);
+        this.passwordDigest = Crypto.encryptAES(password);
         this.save();
-        //Login.updateUserCache(this);
+        Login.updateUserCache(this);
     }
 
     /**
@@ -377,15 +377,6 @@ public class User extends Model {
         return User.find("closed=?", false).fetch();
     }
 
-    /**
-     * TODO: @duan 这里你删除了 isProcure 但是没有搜索到这个地方使用了他, 致使采购页面无法访问, 请思考如何处理.
-     * 思考：考虑采用角色 对用户分配角色 对角色分配属性
-     *
-     * @return
-     */
-    public static List<User> procurers() {
-        return User.find("isProcure=?", true).fetch();
-    }
 
     /**
      * 链接用户(登陆)
@@ -407,6 +398,7 @@ public class User extends Model {
      * 初始化产品线人员
      *
      * @return
+     * @deprecated 这段代码还需要吗?
      */
     public static JsonObject getUsercategor() {
         if(User.USER_CATEGORY == null || User.USER_CATEGORY.isJsonNull()) {
@@ -513,9 +505,7 @@ public class User extends Model {
      */
     public static List<Category> getObjCategorys(User user) {
         List<Category> categories = new ArrayList<Category>();
-        Iterator<Team> iterator = user.teams.iterator();
-        while(iterator.hasNext()) {
-            Team team = iterator.next();
+        for(Team team : user.teams) {
             List<Category> categoryList = team.getObjCategorys();
             categories.addAll(categoryList);
         }
@@ -568,25 +558,9 @@ public class User extends Model {
     }
 
 
-    public  static String Md5(String plainText) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(plainText.getBytes());
-            byte b[] = md.digest();
-            int i;
-            StringBuffer buf = new StringBuffer("");
-            for(int offset = 0; offset < b.length; offset++) {
-                i = b[offset];
-                if(i < 0) i += 256;
-                if(i < 16)
-                    buf.append("0");
-                buf.append(Integer.toHexString(i));
-            }
-            return buf.toString();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return "";
+    //TODO MD5 的计算, 应该抽取到共拥有的 Util 方法中
+    public static String Md5(String plainText) {
+        return DigestUtils.md5Hex(plainText);
     }
 
     /**

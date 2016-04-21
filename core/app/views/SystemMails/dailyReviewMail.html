@@ -38,7 +38,7 @@
     <td>${rv.username}</td>
     <td>${rv.reviewDate?.since()}</td>
     <td><a href="${rv.reviewLink()}" target="_blank">${rv.reviewId}</a></td>
-    <td><a href="http://e.easya.cc/reviews/show?rid=${rv.reviewId}">${rv.length()}</a></td>
+    <td><a href="${System.getenv(helper.Constant.ROOT_URL)}/reviews/show?rid=${rv.reviewId}">${rv.length()}</a></td>
     <td style="color:${ext.ReviewHelper.color(rv.rating)}">${rv.rating}</td>
     <td>${rv.helpUp} / ${rv.helpClick}</td>
     <td>#{yesOrNo f:rv.purchased /}</td>

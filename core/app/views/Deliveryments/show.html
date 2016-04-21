@@ -128,7 +128,7 @@
     <div class="btn-toolbar">
     #{power.ck "products.edit"}
       <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
-         id="delunit_form_submit" rel="popover"content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+         id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
         解除
       </a>
     #{/power.ck}
@@ -137,20 +137,23 @@
         批量创建 FBA
       </a>
     #{/power.ck}
+    #{power.ck 'fbas.procureunitsorder'}
+      <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
+         id="downloadProcureunitsOrder" class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
+        <i class="icon-download-alt"></i>下载出货单
+      </a>
+    #{/power.ck}
       <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
          id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
        进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
 
-      <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
-         id="downloadProcureunitsOrder" class="btn btn-success" rel="popover" content="下载选定的采购单元的出货单">
-        <i class="icon-download-alt"></i>下载出货单
-      </a>
+
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 
-  #{include 'Deliveryments/box_number_model.html'/}
+#{include 'Deliveryments/box_number_model.html'/}
 </form>
 *{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
 *{#{power.ck 'excels.deliveryment'}}*
@@ -167,41 +170,39 @@
 #{else }
 <div id="excel" class="row-fluid" style="display:none;">
   <div class="span12">
+
     <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
       <table class="table table-bordered table-condensed">
         <tr>
           <th>交货地址</th>
           <td colspan="7">
-            <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
-              收货地址: 光明新区公明街道长圳长升路 42 号(美诚科技园)B 栋 1 楼 B 区 1—4 号门
+          <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
+            收货时间：法定工作日8：30-12：00   13：30-18：00，工作日其他时间到货请提前1小时联系。
 
-              收货时间: 周一到周五 8:00—18:00 周六 08:00-17:00, 法定假日另行通知
+            仓库地址：深圳市光明新区玉律村汉海达科技创新园1栋A区6楼
 
-              仓库联系人:
+            电      话：0755-21383192-8060/8061
 
-              仓库座机: 0755-36931516
-
-              张先生手机: 136-3291-0503 QQ: 1365875257
-
-              仓库文员 卿青 手机:18822846994 QQ: 2100604843
-
-              其他联系人: 伍先生手机号 15616621498
-            </textarea>
+            收货联系人：杨上德：13724219910（保护类、蓝牙类）
+                      陈静林：15711961308（电源、充电器类、瑞能，布兰德沃）
+                      旷   杰：18692275630（仓管）
+                      方   圆：15974143832（经理）
+          </textarea>
           </td>
         </tr>
 
         <tr>
           <th>交易条款<br>(供应商)</th>
           <td colspan="3">
-            <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
-            .tradingTerms}</textarea>
+          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
+          .tradingTerms}</textarea>
           </td>
           <th>产品要求<br>(产品线)</th>
           <td colspan="3">
             <div style="overflow:auto;height:150px;width:580px;">
                 #{list items:dmt.getCopperItems(), as:'cooperItem'}
-                  <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank" class="btn btn-small
-                    btn-info" rel="popover" content="${cooperItem.formatProductTerms()}">
+                  <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank" class="btn btn-small btn-info"
+                     rel="popover" content="${cooperItem.formatProductTerms()}">
                   ${cooperItem.product.sku}
                   </a>
                 #{/list}
@@ -225,10 +226,12 @@
 
           <th>买方</th>
           <td>
-            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="易智爱科技术有限公司">
+            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
           </td>
           <th>经办人</th>
-          <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
+          <td>
+            <input type="text" name="excel.buyer" id="excel_buyer" value="${models.OperatorConfig.getVal("buyerconcat")}">
+          </td>
         </tr>
 
         <tr>
@@ -244,7 +247,8 @@
           <th>移动电话</th>
           <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
           <th>固定电话</th>
-          <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185145965">
+          <td>
+            <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${models.OperatorConfig.getVal("buyertel")}">
           </td>
         </tr>
 
@@ -281,7 +285,7 @@
           <th>地址</th>
           <td colspan="3">
             <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
-            value="香港中环美国银行中心大厦25楼2508A室">
+                   value="${models.OperatorConfig.getVal("buyeraddress")}">
           </td>
         </tr>
         <tr>

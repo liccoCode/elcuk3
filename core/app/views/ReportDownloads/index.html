@@ -18,9 +18,9 @@
   <div class="span12">
     <div class="input-prepend input-append inline">
       <span class="add-on">年:</span>
-        #{select_year  name: "p.year", value: p.year/}
+        #{select_year  name: "p.year", value: p.year, native: true/}
       <span class="add-on">月:</span>
-        #{select_all_month  name: "p.month", value: p.month/}
+        #{select_all_month  name: "p.month", value: p.month, native: true/}
     </div>
 
     <div class="inline">

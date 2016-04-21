@@ -1,6 +1,7 @@
 package services;
 
 import com.alibaba.fastjson.JSONObject;
+import helper.Constant;
 import helper.Dates;
 import helper.ES;
 import models.market.M;
@@ -57,7 +58,7 @@ public class MetricSaleReportService {
                 .query(filterbuilder(Dates.morning(from), Dates.night(to), market, sellingId))
                 .aggregation(builder)
                 .size(0);
-        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("quantity");
         return cost.getFloat("value");
@@ -75,7 +76,7 @@ public class MetricSaleReportService {
                         .must(QueryBuilders.termQuery("fee_type", "productcharges")))
                 .aggregation(builder)
                 .size(0);
-        JSONObject result = ES.search("elcuk2", "salefee", search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "salefee", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
         return cost.getFloat("value");

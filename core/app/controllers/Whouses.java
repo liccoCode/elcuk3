@@ -1,19 +1,24 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.GTs;
+import helper.J;
 import helper.Webs;
 import models.User;
 import models.market.Account;
 import models.procure.Cooperator;
 import models.procure.FBACenter;
-import models.product.Whouse;
+import models.product.Product;
 import models.view.Ret;
 import models.view.post.WhousePost;
+import models.whouse.StockObj;
+import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +27,7 @@ import java.util.List;
  * Date: 9/26/12
  * Time: 11:34 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Whouses extends Controller {
 
     @Before(only = {"index", "blank", "create", "edit", "update"})
@@ -97,5 +102,26 @@ public class Whouses extends Controller {
     public static void edit(long id) {
         Whouse wh = Whouse.findById(id);
         render(wh);
+    }
+
+    /**
+     * 根据字符模糊匹配出 SKU Or 物料编码
+     */
+    public static void sameCode(String search) {
+        List<Product> products = Product.find("sku like '" + search + "%'").fetch();
+        List<String> skus = new ArrayList<>();
+        for(Product p : products) skus.add(p.sku);
+        //TODO 物料编码查询
+        renderJSON(J.json(skus));
+    }
+
+    /**
+     * 根据 ID 查询出对应的对象(SKU 产品物料 包材物料)
+     *
+     * @param id
+     */
+    public static void loadStockObj(String id) {
+        StockObj stockObj = new StockObj(id, StockObj.guessType(id));
+        renderJSON(GTs.newMap("type", stockObj.stockObjType).put("name", stockObj.name()).build());
     }
 }

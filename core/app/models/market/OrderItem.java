@@ -209,7 +209,7 @@ public class OrderItem extends GenericModel {
             if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length() >= 6) {
                 for(int i = 0; i < highChart.series.size(); i++) {
                     AbstractSeries serie = highChart.series.get(i);
-                    if(serie.name.indexOf("汇总") == -1) {
+                    if(!serie.name.contains("汇总")) {
                         serie.visible = false;
                         highChart.series.set(i, serie);
                     }

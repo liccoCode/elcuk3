@@ -2,27 +2,22 @@ package models.view.post;
 
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
-import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.market.M;
-import models.view.dto.AnalyzeDTO;
+import models.product.Category;
+import models.product.Product;
 import models.view.dto.ProfitDto;
+import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.libs.F;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import models.view.report.Profit;
 import services.MetricProfitService;
 import services.MetricQtyService;
-import models.product.Product;
-import models.product.Category;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 利润页面的搜索,不进入数据库
@@ -112,7 +107,7 @@ public class ProfitPost extends Post<Profit> {
 
     @SuppressWarnings("unchecked")
     public List<Profit> query() {
-        List<Profit> profitlist = new ArrayList<Profit>();
+        List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
          */
@@ -127,7 +122,7 @@ public class ProfitPost extends Post<Profit> {
 
     @SuppressWarnings("unchecked")
     public List<Profit> Inventory() {
-        List<Profit> profitlist = new ArrayList<Profit>();
+        List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
          */
@@ -142,7 +137,7 @@ public class ProfitPost extends Post<Profit> {
     public List<Profit> calTotal(List<Profit> profits) {
 
 
-        List<Profit> newprofits = new ArrayList<Profit>();
+        List<Profit> newprofits = new ArrayList<>();
         /**
          * 计算每个SKU的合计
          */
@@ -253,7 +248,7 @@ public class ProfitPost extends Post<Profit> {
          */
         if(!StringUtils.isBlank(category) || !StringUtils.isBlank(sku)) {
             List<ProfitDto> dtos = null;
-            String key = category;
+            String key = category.toLowerCase();
             if(!StringUtils.isBlank(sku)) key = sku;
             String cacke_key = "profitmap_" + key + "_" + skumarket.name() + "_"
                     + redisfrom
@@ -277,8 +272,8 @@ public class ProfitPost extends Post<Profit> {
                     profitlist.add(profit);
                 }
             } else {
-                Category cat = Category.findById(category);
-                for(Product pro : cat.products) {
+                Category cat = Category.find("lower(categoryId)=?", category.toLowerCase()).first();
+                for(Product pro : cat.products) { ;
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                     if(profit.totalfee != 0 || profit.amazonfee != 0
                             || profit.fbafee != 0 || profit.quantity != 0
@@ -299,7 +294,6 @@ public class ProfitPost extends Post<Profit> {
         if(!StringUtils.isBlank(category) && StringUtils.isBlank(sku)) {
             Category cat = Category.findById(category);
             for(Product pro : cat.products) {
-                Logger.info("inventoryprofit:::" + pro.sku);
                 Profit inventoryprofit = inventoryProfit(begin, end, skumarket, pro.sku, sellingId);
                 if(inventoryprofit.workingqty != 0 || inventoryprofit.wayqty != 0 || inventoryprofit.inboundqty != 0) {
                     Profit profit = esProfit(begin, end, skumarket, pro.sku, sellingId);

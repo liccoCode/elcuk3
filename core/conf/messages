@@ -68,6 +68,7 @@ procureunit.sku=\u91C7\u8D2D\u5355\u5143\u7684 SKU
 procureunit.planQty=\u9884\u8BA1\u91C7\u8D2D\u6570\u91CF
 procureunit.split.state=%s \u72B6\u6001\u4E0D\u5141\u8BB8\u8FDB\u884C[\u91C7\u8D2D\u8BA1\u5212]\u5206\u62C6
 procureunit.validate.whouse=Selling \u4E0D\u5C5E\u4E8E\u76EE\u6807 FBA \u4ED3\u5E93
+procureunit.cooperator=\u4f9b\u5e94\u5546
 procureunit.nextStage.leftQty=\u5269\u4F59\u8FD0\u8F93\u6570\u91CF\u7ADF\u7136\u5C0F\u4E8E 0, \u8BF7\u5C06\u8D1F\u7684\u8FD0\u8F93\u6570\u91CF\u8FDB\u884C\u4FEE\u6B63.
 
 
@@ -175,6 +176,8 @@ procureunit.tailpay=\u7533\u8BF7\u5C3E\u6B3E
 procureunit.tailpay.msg=\u4E3A %s \u7533\u8BF7 %s \u5C3E\u6B3E
 procureunit.reworkpay=\u8fd4\u5de5\u8d39\u7528\u7533\u8bf7
 procureunit.reworkpay.msg=\u4E3A %s \u7533\u8BF7 %s \u8fd4\u5de5\u8d39\u7528
+procureunit.stopactiviti=\u7ec8\u6b62\u91c7\u8d2d\u8ba1\u5212\u6d41\u7a0b
+procureunit.stopactiviti.msg=\u91c7\u8d2d\u8ba1\u5212\u6d41\u7a0bID[%s],\u91c7\u8d2d\u5bf9\u8c61ID[%s],\u5355\u636eID[%s]
 
 shipment.update=\u66F4\u65B0[\u8FD0\u8F93\u5355]
 shipment.updateFBA=[\u8FD0\u8F93\u5355]\u66F4\u65B0 FBA
@@ -240,8 +243,22 @@ endTime=\u8d28\u68c0\u5b8c\u6210\u65f6\u95f4
 isship=\u662f\u5426\u53d1\u8d27
 result=\u662f\u5426\u5408\u683c
 pickqty=\u5b9e\u9645\u62bd\u68c0\u6570\u91cf
-qty=\u5b9e\u9645\u4ea4\u8d27\u6570\u91cf
 checknote=\u5907\u6ce8
 
 checktask.update=[CheckTask]\u66f4\u65b0
 checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1 ID:%s]:%s
+
+btbOrder.update=\u0042\u0032\u0042\u8ba2\u5355\u7ba1\u7406
+btbOrder.update.msg=\u8ba2\u5355\u7f16\u53f7[%s], \u66f4\u65b0\u5185\u5bb9[%s]
+
+
+inboundrecord.update=\u66f4\u65b0[\u5165\u5e93\u8bb0\u5f55]
+inboundrecord.update.msg=\u66f4\u65b0\u5165\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+inboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u5165\u5e93
+inboundrecord.confirm.msg=ID[%s]
+
+
+outboundrecord.update=\u66f4\u65b0[\u51fa\u5e93\u8bb0\u5f55]
+outboundrecord.update.msg=\u66f4\u65b0\u51fa\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+outboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u51fa\u5e93
+outboundrecord.confirm.msg=ID[%s]

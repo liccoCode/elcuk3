@@ -4,17 +4,17 @@
   <th>#</th>
   <td>&nbsp;</td>
 
+  <th>SKU</th>
+    <td>
+      <input type="text" name="newUnit.product.sku" data-provide="typeahead" data-source="${skus}"
+                 value="${newUnit.product?.sku}" id="unit_sku" rel="popover"content="允许拆分出 SKU 为新的采购计划（同类产品但规格不同导致 SKU
+                 不同）"placement="right">
+  </td>
+
   <th>Selling</th>
   <td>
     <input type="text" name="newUnit.selling.sellingId" data-provide="typeahead" data-source="${sids}" data-items='15'
            value="${newUnit.selling?.sellingId}" rel="popover"content="SellingId 需要与 SKU 和仓库对应" placement="right">
-  </td>
-
-  <th>SKU</th>
-  <td>
-    <input type="text" name="newUnit.product.sku" data-provide="typeahead" data-source="${skus}"
-               value="${newUnit.product?.sku}" id="unit_sku" rel="popover"content="允许拆分出 SKU 为新的采购计划（同类产品但规格不同导致 SKU
-               不同）"placement="right">
   </td>
 </tr>
 

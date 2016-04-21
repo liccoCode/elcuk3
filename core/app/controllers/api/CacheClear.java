@@ -1,8 +1,8 @@
 package controllers.api;
 
 import helper.Caches;
+import helper.Constant;
 import helper.HTTP;
-import jobs.analyze.SellingSaleAnalyzeJob;
 import models.product.Category;
 import models.view.Ret;
 import org.joda.time.DateTime;
@@ -36,15 +36,14 @@ public class CacheClear extends Controller {
             Cache.delete(catekey);
         }
         /** 重新缓存最新的数据 **/
-        HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
+        HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
 
         renderJSON(new Ret(true, "清理缓存成功!"));
     }
 
 
     public static String ajaxUnitOrderKey(String val, String type, Date from, Date to) {
-        String key = Caches.Q.cacheKey("unit", val, type, from, to);
-        return key;
+        return Caches.Q.cacheKey("unit", val, type, from, to);
     }
 
 }

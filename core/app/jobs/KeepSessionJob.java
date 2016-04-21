@@ -28,7 +28,7 @@ public class KeepSessionJob extends BaseJob {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
             ac.loginAmazonSellerCenter();
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"KeepSessionJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "KeepSessionJob")) {
             LogUtils.JOBLOG
                     .info(String.format("KeepSessionJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

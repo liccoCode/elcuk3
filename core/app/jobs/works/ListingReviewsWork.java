@@ -3,7 +3,6 @@ package jobs.works;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import helper.Crawl;
-import helper.DBUtils;
 import helper.J;
 import helper.Webs;
 import models.market.AmazonListingReview;
@@ -21,6 +20,7 @@ import java.util.Date;
  * User: wyattpan
  * Date: 9/24/12
  * Time: 10:42 AM
+ * @deprecated
  */
 public class ListingReviewsWork extends Job<Listing> {
     /**

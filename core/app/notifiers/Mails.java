@@ -1,19 +1,16 @@
 package notifiers;
 
 import helper.Webs;
-import jobs.promise.ReviewMailCheckPromise;
 import models.MailsRecord;
 import models.market.*;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
-import play.exceptions.MailException;
 import play.libs.F;
 import play.mvc.Mailer;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * Created by IntelliJ IDEA.
@@ -94,63 +91,6 @@ public class Mails extends Mailer {
                 mr.save();
         }
     }
-
-    // ------------------- Review 邮件 --------------------------------
-
-    /**
-     * 给 Amazon UK 的卖家发送邀请留 Review 的邮件;
-     *
-     * @param order
-     */
-    public static void amazonUK_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order, REVIEW_UK);
-    }
-
-    public static void amazonDE_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order, REVIEW_DE);
-    }
-
-    public static void amazonUS_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order, REVIEW_US);
-    }
-
-    /**
-     * 发送 Review 邮件的基本方法, 其他的仅仅是套用一个方法对应一个模板
-     *
-     * @param order
-     */
-    private static void reviewMailBase(Orderr order, String template) {
-        if(StringUtils.isBlank(order.email)) {
-            Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
-            return;
-        }
-        // 避免系统内删除而 Amazon 还存在的 Selling 出现问题.
-        for(OrderItem oi : order.items) {
-            if(oi.selling == null) {
-                return;
-            }
-        }
-
-        String title = order.reviewMailTitle();
-        if(StringUtils.isBlank(title)) {
-            Logger.error("!!!! Order[" + order.orderId + "] Mail can not be send !!!!");
-            return;
-        }
-        setSubject(title);
-        mailBase();
-        if(Play.mode.isProd()) addRecipient(order.email);
-        else addRecipient("wppurking@gmail.com");
-        MailsRecord mr = null;
-        try {
-            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, template);
-            final Future<Boolean> future = send(order, title);
-            new ReviewMailCheckPromise(order.orderId, future, mr).now();
-        } catch(MailException e) {
-            Logger.warn("Order[" + order.orderId + "] Send Error! " + e.getMessage());
-        }
-    }
-
-    // -----------------------------------------------------------------
 
     /**
      * 系统内部使用, 当抓取到的 Feedback 为
@@ -236,7 +176,7 @@ public class Mails extends Mailer {
     private static void mailBase() {
         setCharset("UTF-8");
         if(Play.mode.isProd()) {
-            setFrom("EasyAcc <support@easyacceu.com>");
+            setFrom(models.OperatorConfig.getVal("addressname") + " " + models.OperatorConfig.getVal("supportemail"));
         } else {
             setFrom("EasyAcc <support@easyacceu.com>"); // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
         }

@@ -1,5 +1,5 @@
 $ ->
-  $(document).on("change", "select[name^=check.result]", (r) ->
+  $(document).on("change", "select[name^='check.result']", (r) ->
     $select = $(@)
     $ship = $("select[name='check.isship']")
     if($select.val() == 'AGREE')

@@ -1,4 +1,9 @@
 $ ->
+  format_Num = (num) ->
+    n = parseFloat((Math.round( num * 100 ) / 100)).toFixed(2);
+    re = /(\d{1,3})(?=(\d{3})+(?:\.))/g;
+    n.replace(re, "$1,");
+
   feeStateLabel = (state) ->
     label = if state == 'APPLY'
       'inverse'
@@ -39,9 +44,9 @@ $ ->
     $btn = $(@)
     $form = $btn.parents('form')
     $.ajax({
-      url: $form.attr('action'),
-      type: 'DELETE',
-      data: $form.serialize()
+    url: $form.attr('action'),
+    type: 'DELETE',
+    data: $form.serialize()
     }).done((r) ->
       if r.flag == true
         $("#fee_#{$btn.data('id')}").remove()
@@ -70,7 +75,7 @@ $ ->
       else
         label = feeStateLabel(r['state'])
         $form.parents('div.top').find('.paymentInfo tr:last')
-          .after(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
+          .after(_.template($('#tr-paymentunit-template').html())({fee: r, label: label}))
         $form.trigger('reset')
         #计算页面所有运输单费用信息的各种币种的总和
         $('table.paymentInfo').trigger("statisticFee")
@@ -87,7 +92,7 @@ $ ->
     LoadMask.mask()
     $.get("/paymentunit/#{id}.json")
       .done((r) ->
-        trDom = $(_.template($('#tr-edit-paymentunit-template').html(), {fee: r}))
+        trDom = $(_.template($('#tr-edit-paymentunit-template').html())({fee: r}))
           .find("[name='fee.currency']").val(r.currency).end()
         if r.cchargingWay
           trDom.find("[name='fee.chargingWay'] option:contains(#{r.chargingWay})").prop('selected', true)
@@ -104,8 +109,8 @@ $ ->
     fee = JSON.parse(sessionStorage["tr-edit-paymentunit-template-#{id}"])
     label = feeStateLabel(fee['state'])
     trHtml = _.template(
-      $('#tr-paymentunit-template').html(), {fee: fee, label: label}
-    )
+      $('#tr-paymentunit-template').html()
+    )({fee: fee, label: label})
     $tr.replaceWith(trHtml)
     delete sessionStorage["tr-edit-paymentunit-template-#{id}"]
 
@@ -116,18 +121,18 @@ $ ->
     id = $tr.find('td:eq(0)').text().trim()
     LoadMask.mask()
     $.ajax({
-      url: "/paymentunit/#{id}.json",
-      type: 'PUT',
-      data: $tr.find(':input').serialize()
+    url: "/paymentunit/#{id}.json",
+    type: 'PUT',
+    data: $tr.find(':input').serialize()
     }).done((r) ->
       if r.flag is false
         noty({text: r.message, type: 'warning'})
       else
         label = feeStateLabel(r['state'])
-        $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
+        $tr.replaceWith(_.template($('#tr-paymentunit-template').html())({fee: r, label: label}))
         noty({text: '更新成功', type: 'success', timeout: 3000})
-        #计算页面所有运输单费用信息的各种币种的总和
-        #$('table.paymentInfo').trigger("statisticFee")
+      #计算页面所有运输单费用信息的各种币种的总和
+      #$('table.paymentInfo').trigger("statisticFee")
       LoadMask.unmask()
     ).fail((r) ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
@@ -140,7 +145,7 @@ $ ->
     params =
       id: id
       url: "/paymentunit/#{id}/shipment",
-    $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
+    $('#popModal').html(_.template($('#form-destroyfee-model-template').html())({fee: params})).modal('show')
 
     # 批准
   ).on('click', 'button.btn-success:contains(批准)',(e) ->
@@ -180,20 +185,20 @@ $ ->
       id: id
 
     $('#popModal')
-      .html(_.template($('#form-deny-paymentunit-template').html(), {form: formParam}))
+      .html(_.template($('#form-deny-paymentunit-template').html())({form: formParam}))
       .modal('show')
   ).on('mouseenter', 'td:has(.icon-search)', (e) ->
     $td = $(@)
     if $td.data('shipitemid')
       if $td.data('shipItem')
-        text = _.template($('#shipItem-template').html(), {itm: $td.data('shipItem')})
+        text = _.template($('#shipItem-template').html())({itm: $td.data('shipItem')})
         $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
       else
         LoadMask.mask()
         $.ajax("/shipitem/#{$td.data('shipitemid')}.json", {dataType: 'json', type: 'GET'})
           .done((r) ->
             $td.data('shipItem', r)
-            text = _.template($('#shipItem-template').html(), {itm: r})
+            text = _.template($('#shipItem-template').html())({itm: r})
             $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
             LoadMask.unmask()
           )
@@ -232,8 +237,8 @@ $ ->
         amountMap[currency] = parseFloat(total);
     )
     #展示 统计结果
-    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v.toFixed(2)}</span>  ").join('&nbsp;')
-    $table.find('tbody').append(_.template($('#statisticFee-template').html(), {msg: message}))
+    message = _.map(amountMap,(v, k) -> "  <span class='label label-success'>#{k}: #{format_Num(v)}</span>  ").join('&nbsp;')
+    $table.find('tbody').append(_.template($('#statisticFee-template').html())({msg: message}))
   )
 
   #计算页面所有运输单费用信息的各种币种的总和

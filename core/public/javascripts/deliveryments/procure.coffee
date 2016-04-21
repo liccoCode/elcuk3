@@ -1,15 +1,19 @@
 $ ->
+  format_Num = (num) ->
+    num = parseFloat(num).toFixed(2)
+    num.toString().replace(/(\d{1,3})(?=(\d{3})+(?:\.))/g, "$1,")
+
   $('.paymentUnitCancel').click (e) ->
     e.preventDefault()
     $('#paymentUnit_destroy_form').attr('action', @getAttribute('url'))
     $('#paymentUnit_destroy').modal()
 
-  $(document).on("click", "#billing_rework_pay_btn",(r) ->
+  $(document).on("click", "#billing_rework_pay_btn", (r) ->
     $("#modal_home").load('/Procureunits/loadChecklist', id: $(@).data("pid"), (r) ->
       $('#reworkpay_modal').modal('show')
     )
-  ).on("click", "#sumbit_billing_btn",(r) ->
-    # 计算用户勾选的费用记录
+  ).on("click", "#sumbit_billing_btn", (r) ->
+# 计算用户勾选的费用记录
     checkids = []
     checkboxList = $('input[name="checkids"]')
     for checkbox in checkboxList when checkbox.checked then checkids.push(checkbox.value)
@@ -22,14 +26,13 @@ $ ->
   ).on("change", "#switch_pay", (r) ->
     self = $(@)
     feesize = self.parents('tr').find("input[name='feesize']").val()
-    if feesize>0
+    if feesize > 0
       alert '存在费用明细,不可以更改收款状态!'
       window.location.reload()
     else
       $('#edit_pay_form').attr('action', @getAttribute('url'))
       $('#edit_pay').modal()
   )
-
 
 
   # Form 搜索功能
@@ -79,21 +82,44 @@ $ ->
 
   calculateSumery = ->
     $('.table_summary').each ->
+      table_summary = $(@)
       cny_summery = 0
       usd_summery = 0
-      unkown_summery = 0
-      $(@).parents('table').find('td.price').each ->
+      unknown_summery = 0
+      planQty = 0
+      qty = 0
+      table_summary.parent().find("td.qty").each ->
+        planQty += parseInt($(@).attr('planQty'))
+        qty += parseInt($(@).attr('qty'))
+      table_summary.parents('table').find('td.price').each ->
         text = @innerText
+        $td = $(@)
         if text.indexOf("$") >= 0
-          usd_summery += parseFloat(text.split(' ')[1])
+          usd_summery += parseFloat($td.attr("amount"))
         else if text.indexOf('¥') >= 0
-          cny_summery += parseFloat(text.split(' ')[1])
+          cny_summery += parseFloat($td.attr("amount"))
         else
-          unkown_summery += parseFloat(text.split(' ')[1])
-      $(@).find('.usd').text("$ #{usd_summery}").end()
-        .find('.cny').text("¥ #{cny_summery}").end()
-        .find('.unknow').text("? #{unkown_summery}")
+          unknown_summery += parseFloat($td.attr("amount"))
 
+      table_summary.find('.totalNum').text("#{planQty} / #{qty}").end()
+      .find('.usd').text("$ #{format_Num(usd_summery)}").end()
+      .find('.cny').text("¥ #{format_Num(cny_summery)}").end()
+      .find('.unknow').text("? #{format_Num(unknown_summery)}")
+
+    pay_cny = 0
+    pay_usd = 0
+    pay_unknown = 0
+    $("#relate_payment_table").find("td.total_price").each ->
+      text = $(@).attr("symbol")
+      if text.indexOf("$") >= 0
+        pay_usd += parseFloat($(@).attr("amount"))
+      else if text.indexOf('¥') >= 0
+        pay_cny += parseFloat($(@).attr("amount"))
+      else
+        pay_unknown += parseFloat($(@).attr("amount"))
+      $("#relate_payment_table").find('.usd').text("$ #{format_Num(pay_usd)}").end()
+      .find('.cny').text("¥ #{format_Num(pay_cny)}").end()
+      .find('.unknown').text("? #{format_Num(pay_unknown)}")
 
   # 处理 hash
   do ->
@@ -105,3 +131,4 @@ $ ->
       EF.colorAnimate(targetTr)
 
     calculateSumery()
+

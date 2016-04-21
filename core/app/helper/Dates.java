@@ -50,13 +50,13 @@ public class Dates {
     }
 
     /**
-     * 返回一个 Date 日期这一天的开始
+     * 返回一个 Date 日期这一天的开始, 2016-01-01 00:00:00
      *
      * @param date
      * @return
      */
     public static Date morning(Date date) {
-        return date2JDate(date);
+        return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -79,7 +79,7 @@ public class Dates {
     public static Date date2JDate(Date date) {
         Date tmp = date;
         if(tmp == null) tmp = new Date();
-        return new DateTime(date).withTimeAtStartOfDay().toDate();
+        return new DateTime(tmp).withTimeAtStartOfDay().toDate();
     }
 
     public static String date2Date() {
@@ -169,27 +169,8 @@ public class Dates {
         }
     }
 
-    public static Date listingFromFmt(M m, String dateStr) {
-        switch(m) {
-            case AMAZON_UK:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_DE:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd.MM.yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_US:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_JP:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
-            default:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
-        }
+    public static Date listingFromFmt(String dateStr) {
+        return DateTime.parse(dateStr).toDate();
     }
 
     public static Date transactionDate(M m, String dateStr) {
@@ -461,5 +442,9 @@ public class Dates {
         cal.set(Calendar.YEAR, dateTime.getYear());
         cal.set(Calendar.MONTH, dateTime.getMonthOfYear() - 1);
         return cal.getActualMaximum(Calendar.DATE);
+    }
+
+    public static Date aMonthAgo() {
+        return DateTime.now().minusMonths(1).toDate();
     }
 }

@@ -2,9 +2,11 @@ package models.view.post;
 
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
+import helper.Constant;
 import helper.Dates;
 import helper.HTTP;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.OperatorConfig;
 import models.market.M;
 import models.procure.ProcureUnit;
 import models.view.dto.AnalyzeDTO;
@@ -17,6 +19,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -82,9 +85,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
         }
         // 用于提示后台正在运行计算
-        if(StringUtils.isBlank(cache_str) || dtos == null) {
-            HTTP.get("http://rock.easya.cc:4567/selling_sale_analyze");
-            throw new FastRuntimeException("正在后台计算中, 请 10 mn 后再尝试");
+        if(StringUtils.isBlank(cache_str) || dtos == null || dtos.isEmpty()) {
+            HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
+            throw new FastRuntimeException("正在计算中, 请稍后再来查看 ^_^");
         }
         return dtos;
     }
@@ -92,6 +95,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @Override
     public List<AnalyzeDTO> query() {
         List<AnalyzeDTO> dtos = this.analyzes();
+
+        if(this.type.equals("sid")) {
+            setOutDayColor(dtos, null);
+        }
 
         // 过滤各种条件
         if(StringUtils.isNotBlank(this.categoryId))
@@ -108,9 +115,53 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
 
-        //return this.programPager(dtos);
         return dtos;
     }
+
+    public static int setOutDayColor(List<AnalyzeDTO> dtos, Integer needCompare) {
+        OperatorConfig outDays_config = OperatorConfig.find("name = ? ", "标准断货期天数").first();
+        int outDay = Integer.parseInt(outDays_config.val);
+        OperatorConfig out_day_area = OperatorConfig.find("name = ? ", "标准断货期天数区间").first();
+        String area = out_day_area.val;
+
+        int area_one_first = Integer.parseInt(area.split(",")[0].split("-")[0]);
+        int area_one_second = Integer.parseInt(area.split(",")[0].split("-")[1]);
+
+        int area_two_first = Integer.parseInt(area.split(",")[1].split("-")[0]);
+        int area_two_second = Integer.parseInt(area.split(",")[1].split("-")[1]);
+
+        int area_three = Integer.parseInt(area.split(",")[2]);
+        if(needCompare == null) {
+            for(AnalyzeDTO dto : dtos) {
+                int temp = 0;
+                if(dto.day30 != 0) {
+                    float day30ave = new BigDecimal(dto.day30 / 30.0).setScale(1, BigDecimal.ROUND_HALF_UP).floatValue();
+                    if(day30ave > 0) {
+                        temp = new BigDecimal((dto.working + dto.worked + dto.way + dto.inbound + dto.qty) / day30ave)
+                                .setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+                        if(temp < outDay) {
+                            dto.step = "";
+                        }
+                        if(temp >= area_one_first && temp <= area_one_second) {
+                            dto.step = "#FFDA68";
+                        }
+                        if(temp >= area_two_first && temp <= area_two_second) {
+                            dto.step = "#CC9900";
+                        }
+                        if(temp >= area_three) {
+                            dto.step = "#FF6868";
+                        }
+                    }
+                }
+            }
+        } else {
+            if(needCompare.intValue() > outDay) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
 
     @Override
     public Long getTotalCount() {

@@ -28,8 +28,8 @@ class MonitActor
         @close = true unless @close
         print ""
         print "Wait for complete, left #{@backlog} jobs.\r"
-        # sleep 为的是 1. 流出一小片 CPU 时间片给其他方法运行, 2. 不至于让 CPU 空跑满
-        sleep(0.5)
+        # sleep 为的是 5. 流出一小片 CPU 时间片给其他方法运行, 2. 不至于让 CPU 空跑满
+        sleep(5)
       end
       puts "All Task Complete."
     end

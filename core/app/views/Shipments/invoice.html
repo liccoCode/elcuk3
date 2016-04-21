@@ -59,7 +59,8 @@
   <tr>
     <td colspan="5" class="td1">
       <div class="div1">
-        <img src="http://e.easya.cc/images/common/LANTO.png" style="height:100%">
+        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/${models.OperatorConfig.getVal("companyphoto")}"
+             style="height:100%">
       </div>
     </td>
   </tr>
@@ -80,10 +81,18 @@
         <td rowspan="2">Transport By ${firstUnit.shipType.name()}</td>
       #{/if}
       #{else}
-        <td rowspan="2">
-          Transport By ${firstUnit.shipType.name()}<br>
-          DDU Terms
-        </td>
+          #{if country != 'US'}
+            <td rowspan="2">
+              Transport By ${firstUnit.shipType.name()}<br>
+              DDU Terms
+            </td>
+          #{/if}
+          #{else }
+            <td rowspan="2">
+              Transport By ${firstUnit.shipType.name()}<br>
+              DDP Terms
+            </td>
+          #{/else}
       #{/else}
 
     <td>FROM:SHENZHEN</td>
@@ -126,10 +135,10 @@
   <tr>
     <td colspan="5">
       <div class="div2">
-        <p>LANTO Electronic Commerce Co., Ltd</p>
+        <p>${models.OperatorConfig.getVal("companyname")}</p>
 
         <p>SIGNATURE</p>
-        <img src="http://e.easya.cc/images/common/signature.png">
+        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/${models.OperatorConfig.getVal("signature")}">
       </div>
     </td>
   </tr>

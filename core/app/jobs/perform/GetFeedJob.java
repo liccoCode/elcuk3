@@ -8,9 +8,9 @@ import models.market.Account;
 import models.market.Feed;
 import mws.v2.MWSFeeds;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.elasticsearch.common.joda.time.DateTime;
+import org.joda.time.DateTime;
 import play.utils.FastRuntimeException;
 
 import java.io.File;
@@ -22,6 +22,7 @@ import java.util.List;
  * User: wyatt
  * Date: 12/17/13
  * Time: 4:01 PM
+ * @deprecated
  */
 public class GetFeedJob extends BaseJob {
     @SuppressWarnings("unchecked")

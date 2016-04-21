@@ -1,6 +1,6 @@
 package models.view.post;
 
-import models.product.Whouse;
+import models.whouse.Whouse;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class WhousePost extends Post<Whouse> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("1=1");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.type != null) {
             sbd.append("AND type=?");
@@ -48,6 +48,6 @@ public class WhousePost extends Post<Whouse> {
             sbd.append("AND user_id=?");
             params.add(this.userId);
         }
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 }

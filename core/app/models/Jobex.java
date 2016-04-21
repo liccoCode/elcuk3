@@ -6,6 +6,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.jobs.Job;
+import play.libs.CronExpression;
 import play.libs.Time;
 
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ import javax.persistence.Entity;
  * User: wyattpan
  * Date: 12/29/11
  * Time: 1:05 AM
+ * @deprecated
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
@@ -99,7 +101,7 @@ public class Jobex extends Model {
         if(njob.className != null && !njob.className.trim().isEmpty())
             this.className = njob.className;
         if(njob.duration != null && !njob.duration.trim().isEmpty()) {
-            if(!Time.CronExpression.isValidExpression(njob.duration))
+            if(!CronExpression.isValidExpression(njob.duration))
                 Time.parseDuration(njob.duration);
             this.duration = njob.duration;
         }

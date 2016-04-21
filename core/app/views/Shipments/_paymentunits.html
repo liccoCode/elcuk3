@@ -90,7 +90,7 @@
         </label>
 
         <label>费用关系人
-          <select name="fee.cooperator.id" class="input-small">
+          <select name="fee.cooperator.id" class="input-small" native>
               #{list items:cooperators, as:'cooper'}
                 <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
               #{/list}
@@ -185,7 +185,7 @@
     <td><%= fee.id %></td>
     <td><%= fee.feeType.nickName %></td>
     <td>
-    #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small'}#{/select}
+    #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', native: true}#{/select}
     </td>
     <td>
       <input type="number" step='any' class="input-mini" name='fee.unitPrice' value="<%= fee.unitPrice %>">
@@ -195,7 +195,7 @@
     </td>
   #{if isExpress}
     <td>
-      <select name="fee.chargingWay" class="input-small">
+      <select name="fee.chargingWay" class="input-small" native>
           #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
             <option value="${way}">${way.label()}</option>
           #{/list}

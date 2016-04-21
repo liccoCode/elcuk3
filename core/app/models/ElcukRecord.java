@@ -98,6 +98,14 @@ public class ElcukRecord extends Model {
                 " ORDER BY createAt DESC", fid).fetch();
     }
 
+    public static List<ElcukRecord> records(List<String> actions, int size) {
+        List<String> actionMsgs = new ArrayList<String>();
+        for(String action : actions) {
+            actionMsgs.add(Messages.get(action));
+        }
+        return ElcukRecord.find(JpqlSelect.whereIn("action", actionMsgs) + " ORDER BY createAt DESC").fetch(size);
+    }
+
     public static JPAQuery fid(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid);
     }
@@ -105,14 +113,14 @@ public class ElcukRecord extends Model {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ElcukRecord");
-        sb.append("{message='").append(message).append('\'');
-        sb.append(", action='").append(action).append('\'');
-        sb.append(", fid='").append(fid).append('\'');
-        sb.append(", username='").append(username).append('\'');
-        sb.append(", createAt=").append(createAt);
-        sb.append('}');
+        final StringBuilder sb = new StringBuilder()
+                .append("ElcukRecord")
+                .append("{message='").append(message).append('\'')
+                .append(", action='").append(action).append('\'')
+                .append(", fid='").append(fid).append('\'')
+                .append(", username='").append(username).append('\'')
+                .append(", createAt=").append(createAt)
+                .append('}');
         return sb.toString();
     }
 }
