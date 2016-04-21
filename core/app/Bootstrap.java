@@ -1,6 +1,5 @@
 import helper.*;
 import jobs.JobsSetup;
-import jobs.ListingSchedulJob;
 import models.ElcukConfig;
 import models.OperatorConfig;
 import models.Privilege;
@@ -44,6 +43,8 @@ public class Bootstrap extends Job {
         ENV_MSG.put(Constant.ETRACKER_HOST, "没有指定所使用的 Etracker 服务器");
         ENV_MSG.put(Constant.ES_INDEX, "没有指明系统在 ElasticSearch 中所使用的索引名字(Index)");
         ENV_MSG.put(Constant.ES_HOST, "没有指明系统在 ElasticSearch 实例 Host");
+        ENV_MSG.put(Constant.ETRACKER_ES_HOST, "没有指明系统所使用的 Etracker 的 ElasticSearch 实例 Host");
+        ENV_MSG.put(Constant.EXCHANGERATE_TOKEN, "没有指定所依赖的 Currency 获取的 API Token");
     }
 
     @Override
@@ -90,11 +91,9 @@ public class Bootstrap extends Job {
          * 为所有 Listing 做一个状态的变化过程记录的初始化
          */
         ListingStateRecord.initAllListingRecords();
-
+        Currency.initCurrency();
         if(Play.mode.isProd()) {
-            Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
             Account.initLogin();
-            new ListingSchedulJob().now();
         }
     }
 
@@ -116,6 +115,7 @@ public class Bootstrap extends Job {
         validENV(Constant.ES_INDEX);
         validENV(Constant.ES_HOST);
         validENV(Constant.ETRACKER_ES_HOST);
+        validENV(Constant.EXCHANGERATE_TOKEN);
     }
 
     public void validENV(String env) throws Exception {
