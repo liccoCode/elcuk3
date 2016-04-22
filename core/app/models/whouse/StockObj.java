@@ -92,6 +92,16 @@ public class StockObj implements Serializable {
         this.stockObjType = stockObjType;
     }
 
+    public StockObj(Map<String, Object> attrs) {
+        if(attrs != null) {
+            if(attrs.containsKey("stockObjId") && attrs.containsKey("stockObjType")) {
+                this.stockObjId = attrs.get("stockObjId").toString();
+                this.stockObjType = SOT.valueOf(attrs.get("stockObjType").toString());
+            }
+            if(attrs.containsKey("attributes")) this.attributes = attrs.get("attributes").toString();
+        }
+    }
+
     public String name() {
         if(this.stockObjType == null) return "";
 

@@ -2,6 +2,7 @@ package models.view.post;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import play.libs.F;
 
 import java.io.Serializable;
@@ -117,5 +118,17 @@ public abstract class Post<T> implements Serializable, Cloneable {
             afterPager.add(dtos.get(index));
         }
         return afterPager;
+    }
+
+    /**
+     * 开始与结束日期相差的天数
+     *
+     * @return
+     */
+    public long dateRange() {
+        DateTime fromD = new DateTime(this.from);
+        DateTime toD = new DateTime(this.to);
+        Duration duration = new Duration(fromD, toD);
+        return duration.getStandardDays();
     }
 }
