@@ -11,8 +11,6 @@
 <div class="row-fluid">
   <div class="btn-toolbar">
     <a class="btn" id="reload_tree">重新加载左侧树</a>
-    <a class="btn" href="@{Sellings.blank()}">添加 Selling</a>
-    <a href="#uploadFile" class="btn" data-toggle="modal">批量导入 Selling</a>
   </div>
 </div>
 <div class="row-fluid">
@@ -67,25 +65,4 @@
       <h4>请点击左侧加载 SKU 的 Listing</h4>
     </div>
   </div>
-</div>
-
-<div id="uploadFile" class="modal hide fade">
-#{form @Sellings.bulkImport(), method: 'POST', enctype :'multipart/form-data', target: '_blank'}
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>批量导入 Selling</h3>
-  </div>
-  <div class="modal-body">
-      <input type="file" class="input-small" name="sellingFile"><br/><br/>
-      <p><i class="icon-volume-up"></i>&nbsp;<strong>Tips:  Excel 模板中第一行数据不可删除, 第二行为测试数据需要在编辑正式数据前删除</strong></p>
-      <p>1. 请参考模板文件的格式并在 Excel 内编辑好需要上传的 Selling 数据</p>
-      <p>2. 将其另存为使用 制表符 分割的 TXT 文档<p>
-      <p>3. 上传给 ERP 进行 Selling 导入处理</p>
-  </div>
-  <div class="modal-footer">
-    <input type="submit" class="btn btn-primary" value="确认上传">
-    <a href="@{Sellings.sellingTemplate()}" class="btn btn-info">下载模板文件</a>
-    <button class="btn btn-success" data-dismiss="modal" aria-hidden="true">取消上传</button>
-  </div>
-#{/form}
 </div>
