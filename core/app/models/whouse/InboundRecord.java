@@ -162,7 +162,7 @@ public class InboundRecord extends Model {
         this.planQty = task.qty;
         this.badQty = task.unqualifiedQty;
         this.qty = this.planQty - this.badQty;
-        //this.checkTask = task;
+        this.checkTask = task;
         this.origin = O.CheckTask;
         this.state = S.Pending;
         this.stockObj = new StockObj(task.sku);//TODO 添加物料的支持
