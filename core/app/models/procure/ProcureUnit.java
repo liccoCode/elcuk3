@@ -15,8 +15,8 @@ import models.finance.PaymentUnit;
 import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
-import models.whouse.Whouse;
 import models.qc.CheckTask;
+import models.whouse.Whouse;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -404,6 +404,31 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     @Enumerated(EnumType.STRING)
     public QCCONFIRM qcConfirm;
+
+    public enum OST {
+        Pending {
+            @Override
+            public String label() {
+                return "未出库";
+            }
+        },
+        Outbound {
+            @Override
+            public String label() {
+                return "已出库";
+            }
+        };
+
+        public abstract String label();
+
+    }
+
+    /**
+     * 是否出库
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public OST isOut = OST.Pending;
 
     @Transient
     public static String ACTIVITINAME = "procureunit.create";

@@ -152,6 +152,8 @@ public class ProcurePost extends Post<ProcureUnit> {
      */
     public QCCONFIRM qcConfirm;
 
+    public ProcureUnit.OST isOut;
+
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
@@ -249,6 +251,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.isPlaced != null) {
             sbd.append(" AND isPlaced=? ");
             params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
+        }
+
+        if(this.isOut != null) {
+            sbd.append(" AND isOut=?");
+            params.add(this.isOut);
         }
 
         if(StringUtils.isNotBlank(this.search)) {

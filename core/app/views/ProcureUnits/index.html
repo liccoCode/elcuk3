@@ -81,6 +81,13 @@
         #{/list}
         </select>
 
+        <select name="p.isOut" class="inline">
+          <option value="">是否出库</option>
+        #{list items:models.procure.ProcureUnit.OST.values(), as:'o'}
+          <option ${o == p.isOut ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
+        #{/list}
+        </select>
+
         <select name="p.cooperatorId" class="inline selectize">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
