@@ -122,7 +122,7 @@ public class StockObj implements Serializable {
     }
 
     public void setAttributes(ProcureUnit unit) {
-        //把采购计划一些自身属性带入到入库记录,方便后期查询
+        //把采购计划一些自身属性存入到 DB,方便后期查询
         if(unit != null) {
             GTs.MapBuilder<String, Object> attrs = GTs.newMap("procureunitId", unit.id);
             if(unit.fba != null) attrs.put("fba", unit.fba.shipmentId);
@@ -131,7 +131,7 @@ public class StockObj implements Serializable {
                 attrs.put("whouseId", unit.whouse.id);
                 attrs.put("whouseName", unit.whouse.name());
             }
-            this.attributes = J.json(attrs);
+            this.attributes = J.json(attrs.build());
         }
     }
 }
