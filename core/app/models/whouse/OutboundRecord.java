@@ -6,6 +6,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Error;
@@ -248,6 +249,7 @@ public class OutboundRecord extends Model {
             return false;
         } else {
             this.save();
+            this.outboundProcureUnit();
             new StockRecord(this).save();
             return true;
         }
@@ -296,5 +298,19 @@ public class OutboundRecord extends Model {
 
     public boolean isLocked() {
         return this.state != S.Pending;
+    }
+
+    /**
+     * 设置采购计划是否出库状态为已出库
+     */
+    public void outboundProcureUnit() {
+        String procureunitId = this.stockObj.attributes().get("procureunitId").toString();
+        if(StringUtils.isNotBlank(procureunitId)) {
+            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId));
+            if(procureUnit != null) {
+                procureUnit.isOut = ProcureUnit.OST.Outbound;
+                procureUnit.save();
+            }
+        }
     }
 }
