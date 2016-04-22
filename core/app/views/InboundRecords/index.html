@@ -78,8 +78,8 @@
           <td>${r.state.label()}</td>
           <td>${r.origin.label()}</td>
           <td>
-              #{if r.checkTask != null}
-              @{CheckTasks.show(r.checkTask)}
+              #{if r.taskId != null}
+              @{CheckTasks.show(r.taskId)}
             #{/if}
           </td>
           <td>
