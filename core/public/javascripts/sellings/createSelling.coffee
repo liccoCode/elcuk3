@@ -37,10 +37,15 @@ $ ->
               resizeType: 1
               allowPreviewEmoticons: false
               allowImageUpload: false
-              items: [
-                'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
-                'removeformat']
-              afterChange: -> this.sync(); $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
+              newlineTag: 'br'
+              afterChange: ->
+                htmlCode = this.html().toString().replace(/^<span\S*\s*\S*>/, "").replace(/<span>/, '')
+
+                count = htmlCode.length
+                $('#productDesc').val(htmlCode)
+                $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
+                $('#previewDesc').html($('#productDesc').val())
+              items: ['source','|', '|', 'bold']
             })
           )
           $.getScript('../public/javascripts/component/amazon.coffee', ->

@@ -417,9 +417,11 @@ public class Selling extends GenericModel {
      * @return
      */
     public Selling buildFromProduct() {
+        if(this.account == null) Webs.error("上架账户不能为空");
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
+        if(this.market == null) Webs.error("Market 不能为空");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
         if(!isMSkuValid()) Webs.error("Merchant SKU 不合法. [SKU],[UPC]");
         if(StringUtils.isBlank(this.aps.title)) Webs.error("Selling Title 必须存在");
@@ -427,7 +429,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
         if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
         if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
-        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("所属模板的 Product Type 必须填写");
+        if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("Feed Product Type 必须填写");
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
@@ -692,7 +694,7 @@ public class Selling extends GenericModel {
      * @param market       String
      * @param action       String
      * @return String 生成的模板数据
-     *         注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
+     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
      */
     public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
                                                   String action) {
