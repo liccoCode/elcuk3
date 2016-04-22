@@ -59,11 +59,13 @@ public class InboundRecord extends Model {
         public abstract String label();
     }
 
+
     /**
-     * 质检任务 ID
+     * 质检任务
      */
     @Expose
-    public Long taskId;
+    @OneToOne
+    public CheckTask checkTask;
 
     /**
      * 目标仓库
@@ -160,7 +162,7 @@ public class InboundRecord extends Model {
         this.planQty = task.qty;
         this.badQty = task.unqualifiedQty;
         this.qty = this.planQty - this.badQty;
-        this.taskId = task.id;
+        this.checkTask = task;
         this.origin = O.CheckTask;
         this.state = S.Pending;
         this.stockObj = new StockObj(task.sku);//TODO 添加物料的支持
@@ -272,9 +274,5 @@ public class InboundRecord extends Model {
 
     public boolean isLocked() {
         return this.state != S.Pending;
-    }
-
-    public static boolean exist(CheckTask task) {
-        return InboundRecord.count("attributes LIKE ?", String.format("\"procureunitId\":%s", task.units.id)) != 0;
     }
 }

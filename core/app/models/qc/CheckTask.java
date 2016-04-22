@@ -22,6 +22,7 @@ import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Validation;
+import play.db.jpa.JPABase;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -447,16 +448,6 @@ public class CheckTask extends Model {
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
-    }
-
-    /**
-     * 自动生成入库记录
-     */
-    @PostUpdate
-    public void buidingInboundRecord() {
-        if(this.isship == ShipType.SHIP && !InboundRecord.exist(this)) {
-            new InboundRecord(this).save();
-        }
     }
 
     /**
@@ -1151,5 +1142,22 @@ public class CheckTask extends Model {
         } else {
             return "";
         }
+    }
+
+    @Override
+    public <T extends JPABase> T save() {
+        if(this.isship == ShipType.SHIP) {
+            //自动生成入库记录
+            InboundRecord inboundRecord = InboundRecord
+                    .find("attributes LIKE ?", String.format("\"procureunitId\":%s", this.units.id)).first();
+            if(inboundRecord == null) {
+                new InboundRecord(this).save();
+            } else {
+                inboundRecord.checkTask = this;
+                inboundRecord.save();
+            }
+
+        }
+        return super.save();
     }
 }
