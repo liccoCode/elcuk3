@@ -40,7 +40,7 @@ namespace :deploy do
 
   task :restart do
     on roles(:web) do
-      execute("cd #{current_path}/core && play deps --sync")
+      execute("cd #{current_path}/core && /opt/play-1.4.2/play deps --sync")
       execute(:supervisorctl, 'restart', 'erp')
     end
   end
