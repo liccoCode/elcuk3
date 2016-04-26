@@ -189,6 +189,7 @@ public class OutboundRecord extends Model {
         this.origin = O.Normal;
         this.state = S.Pending;
         this.stockObj = plan.stockObj;
+        this.type = T.Normal;
     }
 
     /**
@@ -244,7 +245,7 @@ public class OutboundRecord extends Model {
     public boolean confirm() {
         this.state = S.Outbound;
         this.outboundDate = new Date();
-        this.valid();
+        this.confirmValid();
         if(Validation.hasErrors()) {
             return false;
         } else {
@@ -296,6 +297,11 @@ public class OutboundRecord extends Model {
         this.stockObj.valid();
     }
 
+    public void confirmValid() {
+        Validation.required("接收对象", this.targetId);
+        this.valid();
+    }
+
     public boolean isLocked() {
         return this.state != S.Pending;
     }
@@ -312,5 +318,14 @@ public class OutboundRecord extends Model {
                 procureUnit.save();
             }
         }
+    }
+
+    public boolean exist() {
+        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        if(procureunitId != null) {
+            return OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%")
+                    != 0;
+        }
+        return false;
     }
 }

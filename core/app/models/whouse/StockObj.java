@@ -72,12 +72,6 @@ public class StockObj implements Serializable {
     @Transient
     public Map<String, Object> attrs = new HashMap<>();
 
-    @PrePersist
-    @PreUpdate
-    public void preUpdate() {
-        this.attributes = J.json(this.attrs);
-    }
-
     public Product getProduct() {
         if(this.stockObjType != SOT.SKU) {
             throw new FastRuntimeException("货物类型(stockObjType)错误, 无法找到对应 Product!");
@@ -141,6 +135,10 @@ public class StockObj implements Serializable {
         return this.attrs;
     }
 
+    public void setAttributes() {
+        this.attributes = J.json(this.attrs);
+    }
+
     public void setAttributes(ProcureUnit unit) {
         //把采购计划一些自身属性存入到 DB,方便后期查询
         if(unit != null) {
@@ -152,6 +150,7 @@ public class StockObj implements Serializable {
                 this.attrs.put("whouseName", unit.whouse.name());
             }
         }
+        this.setAttributes();
     }
 
     public void setAttributes(ShipItem item) {
@@ -160,5 +159,6 @@ public class StockObj implements Serializable {
             this.attrs.put("shipItemId", item.id);
             this.attrs.put("planBeginDate", item.shipment.dates.planBeginDate);
         }
+        this.setAttributes();
     }
 }
