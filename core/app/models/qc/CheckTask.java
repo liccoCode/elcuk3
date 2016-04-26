@@ -1149,7 +1149,7 @@ public class CheckTask extends Model {
         if(this.isship == ShipType.SHIP) {
             //自动生成入库记录
             InboundRecord inboundRecord = InboundRecord
-                    .find("attributes LIKE ?", String.format("\"procureunitId\":%s", this.units.id)).first();
+                    .find("attributes LIKE ?", "%\"procureunitId\":" + this.units.id.toString() + "%").first();
             if(inboundRecord == null) {
                 new InboundRecord(this).save();
             } else {

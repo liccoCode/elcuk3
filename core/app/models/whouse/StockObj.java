@@ -135,7 +135,10 @@ public class StockObj implements Serializable {
     }
 
     public Map attributes() {
-        return (Map) JSON.parse(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}");
+        if(this.attrs == null || this.attrs.isEmpty()) {
+            this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
+        }
+        return this.attrs;
     }
 
     public void setAttributes(ProcureUnit unit) {
