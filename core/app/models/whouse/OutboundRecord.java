@@ -299,6 +299,9 @@ public class OutboundRecord extends Model {
 
     public void confirmValid() {
         Validation.required("接收对象", this.targetId);
+        if(!this.checkWhouseItemQty()){
+            Validation.addError("", String.format("仓库 [%s] 中 [%s] 可用库存不足", this.whouse.name, this.stockObj.stockObjId));
+        }
         this.valid();
     }
 
@@ -327,5 +330,15 @@ public class OutboundRecord extends Model {
                     != 0;
         }
         return false;
+    }
+
+    /**
+     * 检查仓库中的库存是否能够满足当前出库的数量
+     *
+     * @return
+     */
+    public boolean checkWhouseItemQty() {
+        WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
+        return item != null && item.qty >= Math.abs(this.qty);
     }
 }
