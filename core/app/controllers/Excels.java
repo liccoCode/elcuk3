@@ -16,7 +16,6 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
-import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -718,13 +717,15 @@ public class Excels extends Controller {
 
     public static void stockRecords(StockRecordPost p) {
         if(p == null) p = new StockRecordPost();
+        if(p.dateRange() > 90) renderText("时间区间过大!");
+
         p.pagination = false;
-        List<StockRecord> records = p.query();
+        List<Map<String, Object>> records = p.checkRecords();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME, "库存异动明细.xls");
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存异动盘点.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(records, dateFormat);
+        render(records, dateFormat, p);
     }
 
     public static void whouseItems(WhouseItemPost p) {

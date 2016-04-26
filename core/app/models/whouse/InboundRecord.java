@@ -165,7 +165,7 @@ public class InboundRecord extends Model {
         this.checkTask = task;
         this.origin = O.CheckTask;
         this.state = S.Pending;
-        this.stockObj = new StockObj(task.sku);//TODO 添加物料的支持
+        this.stockObj = new StockObj(task.units.product.sku);//TODO 添加物料的支持
         //把采购计划一些自身属性带入到入库记录,方便后期查询
         this.stockObj.setAttributes(task.units);
     }

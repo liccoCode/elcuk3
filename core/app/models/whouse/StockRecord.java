@@ -6,10 +6,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +45,8 @@ public class StockRecord extends Model {
     /**
      * 类型
      */
+    @Enumerated(EnumType.STRING)
+    @Expose
     public T type;
 
     public enum T {

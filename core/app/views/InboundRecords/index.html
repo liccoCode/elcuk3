@@ -78,9 +78,7 @@
           <td>${r.state.label()}</td>
           <td>${r.origin.label()}</td>
           <td>
-              #{if r.checkTask != null}
-              @{CheckTasks.show(r.checkTask)}
-            #{/if}
+            <a href="@{CheckTasks.show(r.checkTask?.id)}">${r.checkTask?.id}</a>
           </td>
           <td>
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>

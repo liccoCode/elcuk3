@@ -81,6 +81,7 @@ public class InboundRecords extends Controller {
             List<String> errors = InboundRecord.batchConfirm(rids);
             if(!errors.isEmpty()) flash.error(StringUtils.join(errors, "<br/>"));
         }
+        flash.success("入库成功!");
         redirect("/InboundRecords/index");
     }
 }

@@ -33,7 +33,7 @@
       </div>
 
       <div class="inline">
-        <a href="@{Excels.stockRecords(p)}" target="_blank" class="btn btn-info inline">导出</a>
+        <a href="@{Excels.stockRecords(p)}" target="_blank" class="btn btn-info inline">盘点</a>
       </div>
     </div>
 
@@ -54,14 +54,21 @@
             <th>记录 ID</th>
           </tr>
         #{list items: records, as: 'r'}
+            #{set preRecord: r_isFirst ? null : records.get(r_index - 2)/}
             #{set atts: r.stockObj.attributes()/}
-          <tr>
-            <td>${r.whouse.name}</td>
+          <tr class="${atts.get('fba') != null && atts.get('fba') != preRecord?.stockObj?.attributes()?.get('fba')? 'striped' : ''}">
+            <td>
+                #{if r.whouse.name != preRecord?.whouse?.name}
+                  ${r.whouse.name}
+                #{/if}
+            </td>
             <td>
               <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
             </td>
             <td>${r.stockObj.name()}</td>
-            <td>${atts.get('fba')}</td>
+            <td>
+            ${atts.get('fba')}
+            </td>
             <td>${atts.get('whouseName')}</td>
             <td>${atts.get('shipType')}</td>
             <td>#{time_tooltip time: r.createDate, datetime: true/}</td>

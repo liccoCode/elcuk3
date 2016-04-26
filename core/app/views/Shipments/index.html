@@ -92,7 +92,11 @@
     #{/power.ck}
       <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary">
         <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
+
+      <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" data-target="_blank" class="btn btn-primary"
+         id="outboundBtn">
+        创建出库
+      </a>
     </div>
   </div>
-
 </form>

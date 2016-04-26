@@ -2,19 +2,17 @@ package models.whouse;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.GTs;
 import helper.J;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.utils.FastRuntimeException;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Lob;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -71,6 +69,9 @@ public class StockObj implements Serializable {
     @Lob
     public String attributes = "{}";
 
+    @Transient
+    public Map<String, Object> attrs = new HashMap<>();
+
     public Product getProduct() {
         if(this.stockObjType != SOT.SKU) {
             throw new FastRuntimeException("货物类型(stockObjType)错误, 无法找到对应 Product!");
@@ -90,6 +91,16 @@ public class StockObj implements Serializable {
     public StockObj(String stockObjId, SOT stockObjType) {
         this.stockObjId = stockObjId;
         this.stockObjType = stockObjType;
+    }
+
+    public StockObj(Map<String, Object> attrs) {
+        if(attrs != null) {
+            if(attrs.containsKey("stockObjId") && attrs.containsKey("stockObjType")) {
+                this.stockObjId = attrs.get("stockObjId").toString();
+                this.stockObjType = SOT.valueOf(attrs.get("stockObjType").toString());
+            }
+            if(attrs.containsKey("attributes")) this.attributes = attrs.get("attributes").toString();
+        }
     }
 
     public String name() {
@@ -118,20 +129,36 @@ public class StockObj implements Serializable {
     }
 
     public Map attributes() {
-        return (Map) JSON.parse(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}");
+        if(this.attrs == null || this.attrs.isEmpty()) {
+            this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
+        }
+        return this.attrs;
+    }
+
+    public void setAttributes() {
+        this.attributes = J.json(this.attrs);
     }
 
     public void setAttributes(ProcureUnit unit) {
-        //把采购计划一些自身属性带入到入库记录,方便后期查询
+        //把采购计划一些自身属性存入到 DB,方便后期查询
         if(unit != null) {
-            GTs.MapBuilder<String, Object> attrs = GTs.newMap("procureunitId", unit.id);
-            if(unit.fba != null) attrs.put("fba", unit.fba.shipmentId);
-            if(unit.shipType != null) attrs.put("shipType", unit.shipType.name());
+            this.attrs.put("procureunitId", unit.id);
+            if(unit.fba != null) this.attrs.put("fba", unit.fba.shipmentId);
+            if(unit.shipType != null) this.attrs.put("shipType", unit.shipType.name());
             if(unit.whouse != null) {
-                attrs.put("whouseId", unit.whouse.id);
-                attrs.put("whouseName", unit.whouse.name());
+                this.attrs.put("whouseId", unit.whouse.id);
+                this.attrs.put("whouseName", unit.whouse.name());
             }
-            this.attributes = J.json(attrs);
         }
+        this.setAttributes();
+    }
+
+    public void setAttributes(ShipItem item) {
+        if(item != null) {
+            if(item.unit != null) this.setAttributes(item.unit);
+            this.attrs.put("shipItemId", item.id);
+            this.attrs.put("planBeginDate", item.shipment.dates.planBeginDate);
+        }
+        this.setAttributes();
     }
 }

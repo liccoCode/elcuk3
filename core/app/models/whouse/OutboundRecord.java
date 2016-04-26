@@ -6,6 +6,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Error;
@@ -188,6 +189,7 @@ public class OutboundRecord extends Model {
         this.origin = O.Normal;
         this.state = S.Pending;
         this.stockObj = plan.stockObj;
+        this.type = T.Normal;
     }
 
     /**
@@ -243,11 +245,12 @@ public class OutboundRecord extends Model {
     public boolean confirm() {
         this.state = S.Outbound;
         this.outboundDate = new Date();
-        this.valid();
+        this.confirmValid();
         if(Validation.hasErrors()) {
             return false;
         } else {
             this.save();
+            this.outboundProcureUnit();
             new StockRecord(this).save();
             return true;
         }
@@ -294,7 +297,48 @@ public class OutboundRecord extends Model {
         this.stockObj.valid();
     }
 
+    public void confirmValid() {
+        Validation.required("接收对象", this.targetId);
+        if(!this.checkWhouseItemQty()){
+            Validation.addError("", String.format("仓库 [%s] 中 [%s] 可用库存不足", this.whouse.name, this.stockObj.stockObjId));
+        }
+        this.valid();
+    }
+
     public boolean isLocked() {
         return this.state != S.Pending;
+    }
+
+    /**
+     * 设置采购计划是否出库状态为已出库
+     */
+    public void outboundProcureUnit() {
+        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        if(procureunitId != null) {
+            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
+            if(procureUnit != null) {
+                procureUnit.isOut = ProcureUnit.OST.Outbound;
+                procureUnit.save();
+            }
+        }
+    }
+
+    public boolean exist() {
+        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        if(procureunitId != null) {
+            return OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%")
+                    != 0;
+        }
+        return false;
+    }
+
+    /**
+     * 检查仓库中的库存是否能够满足当前出库的数量
+     *
+     * @return
+     */
+    public boolean checkWhouseItemQty() {
+        WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
+        return item != null && item.qty >= Math.abs(this.qty);
     }
 }

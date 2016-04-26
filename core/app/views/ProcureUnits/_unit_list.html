@@ -31,9 +31,7 @@
     <th>实际交货时间</th>
     <th>阶段</th>
     <th>抵达货代</th>
-    <th>不发货处理</th>
-    <th>运营确认</th>
-    <th>质检员确认</th>
+    <th>是否出库</th>
     <th>是否发货</th>
     <th>质检信息</th>
     <th>创建时间</th>
@@ -94,9 +92,7 @@
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
-    <td>#{if unit.shipState != null}#{yesOrNo f:unit.shipState == models.procure.ProcureUnit.S.NOSHIPWAIT/}#{/if}</td>
-    <td>#{if unit.opConfirm != null}#{yesOrNo f:unit.opConfirm == models.procure.ProcureUnit.OPCONFIRM.CONFIRMED/}#{/if}</td>
-    <td>#{if unit.qcConfirm != null}#{yesOrNo f:unit.qcConfirm == models.procure.ProcureUnit.QCCONFIRM.CONFIRMED/}#{/if}</td>
+    <td>${unit.isOut?.label()}</td>
     <td>${unit.isship()}</td>
     <td>#{if unit.fetchCheckTaskLink() != null}<a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>#{/if}</td>
     <td>#{time_tooltip time:unit.createDate/}</td>
