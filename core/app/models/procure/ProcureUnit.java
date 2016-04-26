@@ -1603,7 +1603,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public OutboundRecord outboundRecord() {
-        return OutboundRecord.find("attributes LIKE ?", String.format("\"procureunitId\":%s", this.id)).first();
+        return OutboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + this.id.toString() + "%").first();
     }
 
     /**
