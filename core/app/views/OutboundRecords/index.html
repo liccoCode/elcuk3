@@ -110,18 +110,11 @@
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
           <td>${r.stockObj.name()}</td>
-          <td>
-            FBA
-          </td>
-          <td>
-            运输方式
-          </td>
-          <td>
-            运输方式
-          </td>
-          <td>
-            预计运输时间
-          </td>
+            #{set attrs: r.stockObj.attributes()/}
+          <td>${attrs.get('fba')}</td>
+          <td>${attrs.get('whouseName')}</td>
+          <td>${attrs.get('shipType')}</td>
+          <td>#{time_tooltip time: attrs.get('planBeginDate')/}</td>
           <td>${r.planQty}</td>
           <td>
             <input type="text" name="qty" value="${r.qty}" style="width:45px;">
