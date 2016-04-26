@@ -53,31 +53,11 @@
           <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
         #{/list}
         </select>
+
         <select name="p.isPlaced" class="inline">
           <option value="">是否抵达货代处</option>
         #{list items:models.view.post.ProcurePost.PLACEDSTATE, as:'t'}
           <option ${t == p.isPlaced  ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
-        #{/list}
-        </select>
-
-        <select name="p.shipState" class="inline">
-          <option value="">不发货处理</option>
-        #{list items:models.view.post.ProcurePost.S.values(), as:'s'}
-          <option ${s == p.shipState ? 'selected' : ''} value="${s.name()}">${s.label()}</option>
-        #{/list}
-        </select>
-
-        <select name="p.opConfirm" class="inline" style="width:82px;">
-          <option value="">运营确认</option>
-        #{list items:models.view.post.ProcurePost.OPCONFIRM.values(), as:'o'}
-          <option ${o == p.opConfirm ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
-        #{/list}
-        </select>
-
-        <select name="p.qcConfirm" class="inline">
-          <option value="">质检员确认</option>
-        #{list items:models.view.post.ProcurePost.QCCONFIRM.values(), as:'q'}
-          <option ${q == p.qcConfirm ? 'selected' : ''} value="${q.name()}">${q.label()}</option>
         #{/list}
         </select>
 

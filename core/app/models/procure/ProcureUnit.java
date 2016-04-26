@@ -16,6 +16,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
+import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;
@@ -36,6 +37,7 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -1595,4 +1597,30 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 尝试找出对应的出库记录
+     *
+     * @return
+     */
+    public OutboundRecord outboundRecord() {
+        return OutboundRecord.find("attributes LIKE ?", String.format("\"procureunitId\":%s", this.id)).first();
+    }
+
+    /**
+     * 出库信息
+     *
+     * @return
+     */
+    public String outboundMsg() {
+        if(this.isOut == OST.Outbound) {
+            OutboundRecord outboundRecord = this.outboundRecord();
+            if(outboundRecord != null && outboundRecord.state == OutboundRecord.S.Outbound) {
+                return String.format("出库数量: %s, 出库时间: %s",
+                        outboundRecord.qty,
+                        new SimpleDateFormat("yyyy-MM-dd").format(outboundRecord.outboundDate)
+                );
+            }
+        }
+        return "暂无出库信息.";
+    }
 }
