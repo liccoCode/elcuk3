@@ -108,7 +108,7 @@ public class StockObj implements Serializable {
 
         switch(this.stockObjType) {
             case SKU:
-                return getProduct().productName;
+                return getProduct().abbreviation;
             case PRODUCT_MATERIEL:
                 //TODO
             case PACKAGE_MATERIEL:
