@@ -31,16 +31,16 @@
       </select>
 
       <select name="p.shipType" class="inline">
-        <option value="">状态</option>
+        <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T, as:'t'}
         <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.shipType" class="inline">
+      <select name="p.market" class="inline">
         <option value="">去往国家</option>
       #{list items:models.market.M, as:'m'}
-        <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.countryName()}</option>
+        <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.toString()}</option>
       #{/list}
       </select>
 
