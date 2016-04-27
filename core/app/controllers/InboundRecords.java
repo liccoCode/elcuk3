@@ -31,6 +31,7 @@ public class InboundRecords extends Controller {
         renderArgs.put("whouses", Whouse.selfWhouses());
     }
 
+    @Check("inboundrecords.index")
     public static void index(InboundRecordPost p) {
         if(p == null) p = new InboundRecordPost();
         List<InboundRecord> records = p.query();
@@ -41,11 +42,13 @@ public class InboundRecords extends Controller {
         render(p, records, elcukRecords);
     }
 
+    @Check("inboundrecords.index")
     public static void blank() {
         InboundRecord record = new InboundRecord(InboundRecord.O.Other);
         render(record);
     }
 
+    @Check("inboundrecords.index")
     public static void create(InboundRecord record) {
         record.beforeCreate();
         record.valid();
@@ -61,6 +64,7 @@ public class InboundRecords extends Controller {
      * @param attr
      * @param value
      */
+    @Check("inboundrecords.index")
     public static void update(Long id, String attr, String value) {
         try {
             InboundRecord record = InboundRecord.findById(id);
@@ -76,6 +80,7 @@ public class InboundRecords extends Controller {
      *
      * @param rids
      */
+    @Check("inboundrecords.index")
     public static void confirm(List<Long> rids) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = InboundRecord.batchConfirm(rids);

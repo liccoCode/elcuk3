@@ -33,6 +33,7 @@ public class OutboundRecords extends Controller {
         renderArgs.put("shippers", Cooperator.shippers());
     }
 
+    @Check("outboundrecords.index")
     public static void index(OutboundRecordPost p) {
         if(p == null) p = new OutboundRecordPost();
         List<OutboundRecord> records = p.query();
@@ -43,11 +44,13 @@ public class OutboundRecords extends Controller {
         render(p, records, elcukRecords);
     }
 
+    @Check("outboundrecords.index")
     public static void blank() {
         OutboundRecord record = new OutboundRecord(OutboundRecord.T.Normal, OutboundRecord.O.Other);
         render(record);
     }
 
+    @Check("outboundrecords.index")
     public static void create(OutboundRecord record) {
         record.valid();
         if(Validation.hasErrors()) render("OutboundRecords/blank.html", record);
@@ -56,6 +59,7 @@ public class OutboundRecords extends Controller {
         redirect("/OutboundRecords/index");
     }
 
+    @Check("outboundrecords.index")
     public static void update(Long id, String attr, String value) {
         OutboundRecord record = OutboundRecord.findById(id);
         try {
@@ -72,6 +76,7 @@ public class OutboundRecords extends Controller {
      *
      * @param rids
      */
+    @Check("outboundrecords.index")
     public static void confirm(List<Long> rids) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = OutboundRecord.batchConfirm(rids);
