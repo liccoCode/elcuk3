@@ -244,8 +244,7 @@ public class InboundRecord extends Model {
         if(Validation.hasErrors()) {
             return false;
         } else {
-            List<StockRecord> records = StockRecord.recordsForInbound(this);
-            for(StockRecord record : records) record.validateAndSave();
+            StockRecord.recordsForInbound(this);
             if(Validation.hasErrors()) return false;
             this.save();
             return true;
