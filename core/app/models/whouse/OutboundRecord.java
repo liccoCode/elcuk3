@@ -251,7 +251,7 @@ public class OutboundRecord extends Model {
         } else {
             this.save();
             this.outboundProcureUnit();
-            new StockRecord(this).save();
+            new StockRecord(this).doCerate();
             return true;
         }
     }

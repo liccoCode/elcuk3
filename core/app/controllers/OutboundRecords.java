@@ -75,7 +75,12 @@ public class OutboundRecords extends Controller {
     public static void confirm(List<Long> rids) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = OutboundRecord.batchConfirm(rids);
-            if(!errors.isEmpty()) flash.error(StringUtils.join(errors, "<br/>"));
+            if(errors.isEmpty()) {
+                flash.success("出库成功!");
+            } else {
+                flash.error(StringUtils.join(errors, "<br/>"));
+            }
+
         }
         redirect("/OutboundRecords/index");
     }

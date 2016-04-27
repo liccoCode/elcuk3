@@ -79,10 +79,10 @@ public class InboundRecords extends Controller {
     public static void confirm(List<Long> rids) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = InboundRecord.batchConfirm(rids);
-            if(!errors.isEmpty()) {
-                flash.error(StringUtils.join(errors, "<br/>"));
-            } else {
+            if(errors.isEmpty()) {
                 flash.success("入库成功!");
+            } else {
+                flash.error(StringUtils.join(errors, "<br/>"));
             }
         }
         redirect("/InboundRecords/index");
