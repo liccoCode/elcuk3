@@ -298,11 +298,13 @@ public class OutboundRecord extends Model {
     }
 
     public void confirmValid() {
+        this.valid();
         Validation.required("接收对象", this.targetId);
-        if(!this.checkWhouseItemQty()){
+
+        if(Validation.hasErrors()) return;
+        if(!this.checkWhouseItemQty()) {
             Validation.addError("", String.format("仓库 [%s] 中 [%s] 可用库存不足", this.whouse.name, this.stockObj.stockObjId));
         }
-        this.valid();
     }
 
     public boolean isLocked() {
