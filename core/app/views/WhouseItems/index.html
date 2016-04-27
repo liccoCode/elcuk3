@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'库存'/}
 #{set 'moreScripts'}
+    #{script_cdn name: 'component/pagination.coffee'/}
     #{script_cdn name: 'whouseitems/index.coffee'/}
 #{/set}
 #{flash_alert /}
@@ -21,6 +22,7 @@
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" name="p.search" placeholder="物料编码" value="${p.search}" style="width:
               100px;">
+        <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
@@ -51,7 +53,7 @@
           <td>
             <a href="${item.stockObj.showStockObjLink()}" target="_blank">${item.stockObj.stockObjId}</a>
           </td>
-          <td>${item.stockObj.name()}</td>
+          <td style="max-width: 280px;">${item.stockObj.name()}</td>
           <td>${item.qty}</td>
           <td>
             <a target="_blank" href="/StockRecords/index?p.search=${item.stockObj.stockObjId}">查看明细</a>

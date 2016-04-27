@@ -30,7 +30,7 @@ u(rl): 方法
       <a>总数据: ${_pi.totalCount}</a>
     </li>
     <li>跳转</li>
-    <select style="width:50px;" native>
+    <select style="width:50px;">
     #{list items:selectbegin..selectend, as:'i'}
       <option value="${i}" #{if i==_pi.page} selected #{/if}>${i}</option>
     #{/list}

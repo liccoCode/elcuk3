@@ -9,7 +9,6 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,8 +18,6 @@ import java.util.List;
  * Time: 5:57 PM
  */
 public class OutboundRecordPost extends Post<OutboundRecord> {
-    public Date from;
-    public Date to;
     public OutboundRecord.T type;
     public OutboundRecord.S state;
     public OutboundRecord.O origin;
@@ -66,9 +63,36 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
             params.add(Dates.night(this.to));
         }
 
+        if(this.type != null) {
+            sbd.append(" AND type=?");
+            params.add(this.type);
+        }
+
+        if(this.state != null) {
+            sbd.append(" AND state=?");
+            params.add(this.state);
+        }
+
+        if(this.origin != null) {
+            sbd.append(" AND origin=?");
+            params.add(this.origin);
+            ;
+        }
+
+        if(this.shipType != null) {
+            sbd.append(" AND attributes LIKE ?");
+            params.add("%\"shipType\":\"" + this.shipType.name() + "\"%");
+        }
+
+        if(this.market != null) {
+            sbd.append(" AND attributes LIKE ?");
+            params.add("%\"whouseName\":\"FBA: " + this.market.marketAndWhouseMapping() + "\"%");
+        }
+
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(String.format(" AND (id = %s OR stockObjId LIKE ?)", this.search));
+            sbd.append(String.format(" AND (id = '%s' OR stockObjId LIKE ? OR attributes LIKE ?)", this.search));
             params.add(this.word());
+            params.add("%\"fba\":\"" + this.search + "\"%");
         }
         return new F.T2<>(sbd.toString(), params);
     }
