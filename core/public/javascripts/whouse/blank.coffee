@@ -1,5 +1,5 @@
 $ ->
-  $(document).on("showOrHide", "select[name=wh.type]", (r) ->
+  $(document).on("showOrHide", "select[name='wh.type']", (r) ->
     $self = $(@)
     $tr = $("#forward_shipment_tr")
 
@@ -9,7 +9,7 @@ $ ->
       $tr.hide('slow')
   )
 
-  $(document).on("change", "select[name=wh.type]", (r) ->
+  $(document).on("change", "select[name='wh.type']", (r) ->
     $(@).trigger('showOrHide')
   )
 
