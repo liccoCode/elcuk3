@@ -37,7 +37,8 @@ $ ->
       state = $tr.find('input[name=state]').val()
       if state != 'Pending'
         _.each($tr.find(":input[name]"), (input) ->
-          $(input).parent().text(input.val())
+          $input = $(input)
+          $input.parent().text($input.val())
         )
     )
   )
