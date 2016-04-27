@@ -35,7 +35,10 @@ $ ->
     _.each($(@).find("tr"), (tr) ->
       $tr = $(tr)
       state = $tr.find('input[name=state]').val()
-      $tr.find(":input[name]").prop("disabled", true) if state != 'Pending'
+      if state != 'Pending'
+        _.each($tr.find(":input[name]"), (input) ->
+          $(input).parent().text(input.val())
+        )
     )
   )
 
