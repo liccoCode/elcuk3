@@ -36,8 +36,8 @@ public class StockRecordPost extends Post<StockRecord> {
         List<Object> params = new ArrayList<>();
 
         if(this.whouse != null && this.whouse.id != null) {
-            sbd.append(" AND whouse=?");
-            params.add(this.whouse);
+            sbd.append(" AND whouse_id=?");
+            params.add(this.whouse.id);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
@@ -89,10 +89,10 @@ public class StockRecordPost extends Post<StockRecord> {
         F.T2<String, List<Object>> params = this.params();
 
         String sql = String.format(
-                "SELECT SUM(s.qty) as qty,s.stockObjId,s.stockObjType,w.name as whouse,s.attributes" +
+                "SELECT SUM(s.qty) as qty,s.stockObjId,s.stockObjType,w.name as whouse_name,s.attributes" +
                         " FROM StockRecord s " +
                         " LEFT JOIN Whouse w ON s.whouse_id=w.id" +
-                        " WHERE %s AND qty!=0" +
+                        " WHERE %s AND s.qty!=0" +
                         " GROUP BY s.whouse_id,s.stockObjType,s.stockObjId,s.attributes",
                 //如何处理多种类型的 StockObj(SKU 物料)
                 params._1);

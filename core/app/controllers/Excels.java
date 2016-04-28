@@ -721,6 +721,8 @@ public class Excels extends Controller {
 
         p.pagination = false;
         List<Map<String, Object>> records = p.checkRecords();
+        if(records == null || records.isEmpty()) renderText("未找到任何数据!");
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "库存异动盘点.xls");
