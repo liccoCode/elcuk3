@@ -2,7 +2,7 @@
 #{set title:'库存异动记录(' + records.size() + ')'/}
 #{set 'moreScripts'}
     #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'inboundrecords/index.coffee'/}
+    #{script_cdn name: 'stockrecords/index.coffee'/}
 #{/set}
 #{flash_alert /}
 
@@ -34,8 +34,11 @@
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
+      <a href="javascript:void(0)" data-url="@{Excels.stockRecords(p)}" data-target="_blank" class="btn btn-info
+      inline" id="exportBtn">
+        开始盘点
+      </a>
       <div class="inline">
-        <a href="@{Excels.stockRecords(p)}" target="_blank" class="btn btn-info inline">开始盘点</a>
       </div>
     </div>
 
