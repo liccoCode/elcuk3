@@ -52,6 +52,7 @@ public class OutboundRecords extends Controller {
 
     @Check("outboundrecords.index")
     public static void create(OutboundRecord record) {
+        record.stockObj.setAttributes(record);
         record.valid();
         if(Validation.hasErrors()) render("OutboundRecords/blank.html", record);
         record.save();

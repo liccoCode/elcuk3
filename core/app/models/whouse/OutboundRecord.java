@@ -5,8 +5,10 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.format.DateTimeFormat;
@@ -171,6 +173,26 @@ public class OutboundRecord extends Model {
 
     @Expose
     public Date updateDate = new Date();
+
+    /**
+     * 这些属性字段全部都是为了前台传递数据的
+     ***/
+    @Transient
+    public Date planBeginDate;
+
+    @Transient
+    public String fba;
+
+    @Transient
+    public Shipment.T shipType;
+
+    @Transient
+    public M market;
+
+    @Transient
+    public String productCode;
+
+    /**************************************/
 
     public OutboundRecord() {
         this.qty = 0;
@@ -347,5 +369,11 @@ public class OutboundRecord extends Model {
     public boolean checkWhouseItemQty() {
         WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
         return item != null && item.qty >= Math.abs(this.qty);
+    }
+
+    public void transAttrs() {
+        if(this.origin == O.Other) {
+
+        }
     }
 }

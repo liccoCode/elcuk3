@@ -149,8 +149,8 @@ public class StockObj implements Serializable {
                 this.attrs.put("whouseId", unit.whouse.id);
                 this.attrs.put("whouseName", unit.whouse.name);
             }
+            this.setAttributes();
         }
-        this.setAttributes();
     }
 
     public void setAttributes(ShipItem item) {
@@ -158,7 +158,19 @@ public class StockObj implements Serializable {
             if(item.unit != null) this.setAttributes(item.unit);
             this.attrs.put("shipItemId", item.id);
             this.attrs.put("planBeginDate", item.shipment.dates.planBeginDate);
+            this.setAttributes();
         }
-        this.setAttributes();
+    }
+
+    public void setAttributes(OutboundRecord outboundRecord) {
+        if(outboundRecord != null) {
+            if(outboundRecord.planBeginDate != null) this.attrs.put("planBeginDate", outboundRecord.planBeginDate);
+            if(StringUtils.isNotBlank(outboundRecord.fba)) this.attrs.put("fba", outboundRecord.fba);
+            if(outboundRecord.shipType != null) this.attrs.put("shipType", outboundRecord.shipType.name());
+            if(outboundRecord.market != null) this.attrs.put("whouseName", outboundRecord.market
+                    .marketAndWhouseMapping());
+            if(outboundRecord.productCode != null) this.attrs.put("productCode", outboundRecord.productCode);
+            this.setAttributes();
+        }
     }
 }

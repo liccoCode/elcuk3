@@ -17,12 +17,11 @@
     </td>
 
     <th>名称</th>
-    <td name="stock_name" style="width: 40%;">
-    </td>
+    <td name="stock_name" style="width: 40%;"></td>
   </tr>
   <tr>
     <th>仓库</th>
-    <td>
+    <td colspan="3">
       <select name="record.whouse.id">
           #{list items:whouses, as:'whouse'}
             <option ${whouse.id == record.whouse?.id ? 'selected' : ''} value="${whouse.id}">
@@ -31,10 +30,66 @@
           #{/list}
       </select>
     </td>
+  </tr>
+  <tr>
+    <th>FBA</th>
+    <td>
+      <input type="text" name="record.fba" value="${record.fba}">
+    </td>
 
+    <th>产品条码</th>
+    <td>
+      <input type="text" name="record.productCode" value="${record.planBeginDate}">
+    </td>
+  </tr>
+  <tr>
+    <th>去往国家</th>
+    <td>
+      <select name="record.market" class="inline" name="record.market">
+        <option value="">去往国家</option>
+          #{list items:models.market.M.amazonVals(), as:'m'}
+            <option ${m == record.market ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()}</option>
+          #{/list}
+      </select>
+    </td>
+
+    <th>出库对象</th>
+    <td>
+      <select name="record.targetId" style="width: 150px;">
+        <option value="">运输商</option>
+          #{list items:shippers, as: 'ship'}
+            <option ${ship.id.toString() == record.targetId ? 'selected' : ''} value="${ship.id}">
+            ${ship.name}
+            </option>
+          #{/list}
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <th>运输方式</th>
+    <td>
+      <select name="record.shipType" class="inline">
+        <option value="">运输方式</option>
+          #{list items:models.procure.Shipment.T, as:'t'}
+            <option ${t == record.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+          #{/list}
+      </select>
+    </td>
+
+    <th>预计运输时间</th>
+    <td>
+      <input type="date" name="record.planBeginDate" value="${record.planBeginDate.date()}">
+    </td>
+  </tr>
+  <tr>
     <th>预计出库数量</th>
     <td>
       <input type="text" name="record.planQty" value="${record.planQty}">
+    </td>
+
+    <th>实际出库数量</th>
+    <td>
+      <input type="text" name="record.qty" value="${record.qty}">
     </td>
   </tr>
   <tr>
