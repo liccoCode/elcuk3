@@ -91,6 +91,7 @@ public class StockRecord extends Model {
         } else {
             this.qty = -in.badQty;
             this.whouse = Whouse.defectiveWhouse();
+            if(this.whouse == null) throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
         }
         this.type = T.Inbound;
         this.stockObj = in.stockObj;
@@ -143,16 +144,17 @@ public class StockRecord extends Model {
      * @param inboundRecord
      */
     public static void recordsForInbound(InboundRecord inboundRecord) {
-        new StockRecord(inboundRecord, true).doCerate();
-        if(inboundRecord.badQty > 0) new StockRecord(inboundRecord, false).doCerate();//不良品
+        try {
+            new StockRecord(inboundRecord, true).doCerate();
+            if(inboundRecord.badQty > 0) new StockRecord(inboundRecord, false).doCerate();//不良品
+        } catch(FastRuntimeException e) {
+            Validation.addError("", e.getMessage());
+        }
     }
 
     public void doCerate() {
-        this.valid();
-        if(!Validation.hasErrors()) {
-            this.save();
-            this.updateWhouseQty();
-        }
+        this.validateAndSave();
+        if(!Validation.hasErrors()) this.updateWhouseQty();
     }
 
     /**

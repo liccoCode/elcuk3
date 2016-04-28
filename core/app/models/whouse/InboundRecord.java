@@ -224,14 +224,15 @@ public class InboundRecord extends Model {
         for(Long rid : rids) {
             InboundRecord record = InboundRecord.findById(rid);
             if(record.isLocked()) continue;
+            record.confirm();
 
-            if(record.confirm()) {
-                confirmed.add(rid);
-            } else {
+            if(Validation.hasErrors()) {
                 for(Error error : Validation.errors()) {
                     errors.add(String.format("ID: [%s] %s", rid.toString(), error.message()));
                 }
                 Validation.clear();
+            } else {
+                confirmed.add(rid);
             }
         }
         if(!confirmed.isEmpty()) {
@@ -243,18 +244,11 @@ public class InboundRecord extends Model {
     /**
      * 确认入库
      */
-    public boolean confirm() {
+    public void confirm() {
         this.state = S.Inbound;
         if(this.completeDate == null) this.completeDate = new Date();
-        this.valid();
-        if(Validation.hasErrors()) {
-            return false;
-        } else {
-            StockRecord.recordsForInbound(this);
-            if(Validation.hasErrors()) return false;
-            this.save();
-            return true;
-        }
+        this.validateAndSave();
+        StockRecord.recordsForInbound(this);
     }
 
     public void beforeCreate() {
