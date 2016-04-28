@@ -111,24 +111,19 @@
                 }
 
                 options = {
-                    type: method || 'GET', data: data, dataType: dataType,
-                    // stopping the "ajax:beforeSend" event will cancel the ajax request
+                    type: method || 'GET', data: data, dataType: dataType, // stopping the "ajax:beforeSend" event will cancel the ajax request
                     beforeSend: function(xhr, settings){
                         if(settings.dataType === undefined){
                             xhr.setRequestHeader('accept', '*/*;q=0.5, ' + settings.accepts.script);
                         }
                         return rails.fire(element, 'ajax:beforeSend', [xhr, settings]);
-                    },
-                    success: function(data, status, xhr){
+                    }, success: function(data, status, xhr){
                         element.trigger('ajax:success', [data, status, xhr]);
-                    },
-                    complete: function(xhr, status){
+                    }, complete: function(xhr, status){
                         element.trigger('ajax:complete', [xhr, status]);
-                    },
-                    error: function(xhr, status, error){
+                    }, error: function(xhr, status, error){
                         element.trigger('ajax:error', [xhr, status, error]);
-                    },
-                    crossDomain: crossDomain
+                    }, crossDomain: crossDomain
                 };
 
                 // There is no withCredentials for IE6-8 when
@@ -155,7 +150,11 @@
         handleMethod: function(link){
             var href = rails.href(link), method = link.data('method'), target = link.attr('target'), csrf_token = $('meta[name=csrf-token]').attr('content'), csrf_param = $('meta[name=csrf-param]').attr('content');
             method = method.toLocaleLowerCase();
-            if(method == 'delete' || method == 'put') href += '?x-http-method-override=' + method.toUpperCase();
+            if(method == 'delete' || method == 'put'){
+                var sufix = '?';
+                if(href.indexOf('?') >= 0 && href.indexOf('=') >= 0) sufix = '&';
+                href += sufix + 'x-http-method-override=' + method.toUpperCase()
+            }
             var form = $('<form method="post" action="' + href + '"></form>'), metadata_input = '<input name="_method" value="' + method + '" type="hidden" />';
 
             if(csrf_param !== undefined && csrf_token !== undefined){
