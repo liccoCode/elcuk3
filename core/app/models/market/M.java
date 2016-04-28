@@ -992,6 +992,8 @@ public enum M {
                 return "FBA_JP";
             case AMAZON_FR:
                 return "FBA_FR";
+            case AMAZON_ES:
+                return "FBA_ES";
             default:
                 return null;
         }

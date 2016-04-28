@@ -33,6 +33,7 @@ public class OutboundRecords extends Controller {
         renderArgs.put("shippers", Cooperator.shippers());
     }
 
+    @Check("outboundrecords.index")
     public static void index(OutboundRecordPost p) {
         if(p == null) p = new OutboundRecordPost();
         List<OutboundRecord> records = p.query();
@@ -43,12 +44,15 @@ public class OutboundRecords extends Controller {
         render(p, records, elcukRecords);
     }
 
+    @Check("outboundrecords.index")
     public static void blank() {
         OutboundRecord record = new OutboundRecord(OutboundRecord.T.Normal, OutboundRecord.O.Other);
         render(record);
     }
 
+    @Check("outboundrecords.index")
     public static void create(OutboundRecord record) {
+        record.stockObj.setAttributes(record);
         record.valid();
         if(Validation.hasErrors()) render("OutboundRecords/blank.html", record);
         record.save();
@@ -56,6 +60,7 @@ public class OutboundRecords extends Controller {
         redirect("/OutboundRecords/index");
     }
 
+    @Check("outboundrecords.index")
     public static void update(Long id, String attr, String value) {
         OutboundRecord record = OutboundRecord.findById(id);
         try {
@@ -72,10 +77,16 @@ public class OutboundRecords extends Controller {
      *
      * @param rids
      */
+    @Check("outboundrecords.index")
     public static void confirm(List<Long> rids) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = OutboundRecord.batchConfirm(rids);
-            if(!errors.isEmpty()) flash.error(StringUtils.join(errors, "<br/>"));
+            if(errors.isEmpty()) {
+                flash.success("出库成功!");
+            } else {
+                flash.error(StringUtils.join(errors, "<br/>"));
+            }
+
         }
         redirect("/OutboundRecords/index");
     }

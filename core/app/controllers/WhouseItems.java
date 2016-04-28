@@ -23,6 +23,7 @@ public class WhouseItems extends Controller {
         renderArgs.put("whouses", Whouse.selfWhouses());
     }
 
+    @Check("whouseitems.index")
     public static void index(WhouseItemPost p) {
         if(p == null) p = new WhouseItemPost();
         List<WhouseItem> items = p.query();

@@ -5,10 +5,13 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.format.DateTimeFormat;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -171,6 +174,26 @@ public class OutboundRecord extends Model {
     @Expose
     public Date updateDate = new Date();
 
+    /**
+     * 这些属性字段全部都是为了前台传递数据的
+     ***/
+    @Transient
+    public Date planBeginDate;
+
+    @Transient
+    public String fba;
+
+    @Transient
+    public Shipment.T shipType;
+
+    @Transient
+    public M market;
+
+    @Transient
+    public String productCode;
+
+    /**************************************/
+
     public OutboundRecord() {
         this.qty = 0;
         this.planQty = 0;
@@ -244,14 +267,14 @@ public class OutboundRecord extends Model {
      */
     public boolean confirm() {
         this.state = S.Outbound;
-        this.outboundDate = new Date();
+        if(this.outboundDate == null) this.outboundDate = new Date();
         this.confirmValid();
         if(Validation.hasErrors()) {
             return false;
         } else {
             this.save();
             this.outboundProcureUnit();
-            new StockRecord(this).save();
+            new StockRecord(this).doCerate();
             return true;
         }
     }
@@ -273,6 +296,10 @@ public class OutboundRecord extends Model {
                 break;
             case "targetId":
                 logs.addAll(Reflects.logFieldFade(this, attr, value));
+                break;
+            case "outboundDate":
+                logs.addAll(Reflects.logFieldFade(this, "outboundDate", org.joda.time.DateTime
+                        .parse(value, DateTimeFormat.forPattern("yyyy-MM-dd hh:mm:ss")).toDate()));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
@@ -342,5 +369,11 @@ public class OutboundRecord extends Model {
     public boolean checkWhouseItemQty() {
         WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
         return item != null && item.qty >= Math.abs(this.qty);
+    }
+
+    public void transAttrs() {
+        if(this.origin == O.Other) {
+
+        }
     }
 }

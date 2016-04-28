@@ -7,9 +7,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 库存异动记录
@@ -83,18 +81,6 @@ public class StockRecord extends Model {
     @Expose
     public Date updateDate;
 
-    /**
-     * 更新相关仓库的库存数据
-     */
-    @PrePersist
-    public void updateWhouseQty() {
-        WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.whouse);
-        if(whouseItem != null) {
-            whouseItem.qty += this.qty;
-            whouseItem.save();
-        }
-    }
-
     public StockRecord() {
     }
 
@@ -151,12 +137,32 @@ public class StockRecord extends Model {
         this.stockObj.valid();
     }
 
-    public static List<StockRecord> recordsForInbound(InboundRecord inboundRecord) {
-        List<StockRecord> records = new ArrayList<>();
-        records.add(new StockRecord(inboundRecord, true));//正常
-        if(inboundRecord.badQty > 0) {
-            records.add(new StockRecord(inboundRecord, false));//不良品
+    /**
+     * 确认入库记录时记录两个库存异动(正常与不良品)
+     *
+     * @param inboundRecord
+     */
+    public static void recordsForInbound(InboundRecord inboundRecord) {
+        new StockRecord(inboundRecord, true).doCerate();
+        if(inboundRecord.badQty > 0) new StockRecord(inboundRecord, false).doCerate();//不良品
+    }
+
+    public void doCerate() {
+        this.valid();
+        if(!Validation.hasErrors()) {
+            this.save();
+            this.updateWhouseQty();
         }
-        return records;
+    }
+
+    /**
+     * 更新相关仓库的库存数据
+     */
+    public void updateWhouseQty() {
+        WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.whouse);
+        if(whouseItem != null) {
+            whouseItem.qty += this.qty;
+            whouseItem.save();
+        }
     }
 }

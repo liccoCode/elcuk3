@@ -6,6 +6,20 @@
 #{/set}
 #{flash_alert /}
 
+#{info_row}
+<ul>
+  <li>
+    通过 <strong>[ID]</strong> 搜索出库记录时请使用匹配器:  <strong>id:{ID}</strong>
+  </li>
+  <li>
+    <p class="text-error">
+      <strong>示例:</strong> id:123, 表示搜索 ID 为 123 的入库记录
+      &nbsp;&nbsp;<a href="javascript:void(0)" name="tryIdMatch"><i class="icon-hand-right"></i>试一下</a>
+    </p>
+  </li>
+</ul>
+#{/info_row}
+
 <div class="row-fluid">
   <form action="@{InboundRecords.index()}" method="get" class="search_form" id="search_form">
     <div class="span12">
@@ -32,8 +46,8 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" placeholder="入库记录 ID Or 质检任务 Or SKU" value="${p.search}" style="width:
-        200px;">
+        <input type="text" name="p.search" placeholder="质检任务 ID Or 物料 ID" value="${p.search}" style="width:
+        240px;">
         <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
@@ -94,7 +108,7 @@
             <input type="text" name="badQty" value="${r.badQty}" style="width:45px;">
           </td>
           <td>
-            <select name="targetWhouse">
+            <select name="targetWhouse" data-value="${r.targetWhouse?.name}">
               <option value="">仓库</option>
                 #{list items:whouses, as:'whouse'}
                   <option ${whouse.id == r.targetWhouse?.id ? 'selected' : ''} value="${whouse.id}">
@@ -103,8 +117,10 @@
                 #{/list}
             </select>
           </td>
-          <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
-          <td>#{time_tooltip time: r.completeDate, datetime: true/}</td>
+          <td>${r.createDate.datetime()}</td>
+          <td>
+            <input type="datetime" name="completeDate" value="${r.completeDate.datetime()}">
+          </td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
             <input type="hidden" name="state" value="${r.state.name()}">

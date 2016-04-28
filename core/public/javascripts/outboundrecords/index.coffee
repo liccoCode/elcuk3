@@ -14,22 +14,24 @@ $ ->
       $("form[name=confirm_form]").submit()
   )
 
-  $("form[name=confirm_form]").on('change', "input[name=qty], input[name=memo], select[name=whouse],
- select[name=targetId]", (e) ->
+  $("form[name=confirm_form]").on('change', "td>:input[name]", (e) -> #"input[name=qty],input[name=memo],select[name=whouse],select[name=targetId]"
     $input = $(@)
+    attr = $input.attr('name')
     value = $input.val()
-    return if value == null || value == undefined || value == ""
+
+    return if _.isEmpty(value)
 
     $.post("/OutboundRecords/update", {
       id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
-      attr: $input.attr('name'),
+      attr: attr,
       value: value
     },
       (r) ->
         if r.flag is false
           noty({text: r.message, type: 'error'})
         else
-          noty({text: "更新 #{$input.attr('name')} 成功!", type: 'success'})
+          msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
+          noty({text: "更新#{msg}成功!", type: 'success'})
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
@@ -38,10 +40,33 @@ $ ->
       if state != 'Pending'
         _.each($tr.find(":input[name]"), (input) ->
           $input = $(input)
-          $input.parent().text($input.val())
+          if $input.is(':checkbox')
+            $input.remove()
+          else if $input.is('select')
+            $input.parent().text($input.data('value'))
+          else
+            $input.parent().text($input.val())
         )
     )
   )
+
+  $(document).on('click', 'a[name=tryIdMatch]', (e) ->
+    $form = $('form.search_form')
+    $searchInput = $form.find("input[name='p.search']")
+    $searchInput.val('id:123')
+    EF.colorAnimate($searchInput)
+    setTimeout(->
+      $form.submit()
+    , 1000)
+  )
+
+  AttrsFormat = {
+    "qty": "实际入库",
+    "memo": "备注",
+    "whouse": "仓库",
+    "targetId": "出库对象",
+    "outboundDate": "完成时间"
+  }
 
   $("form[name=confirm_form] table").trigger("disabledInput")
 

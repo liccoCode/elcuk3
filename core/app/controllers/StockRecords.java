@@ -24,6 +24,7 @@ public class StockRecords extends Controller {
         renderArgs.put("whouses", Whouse.selfWhouses());
     }
 
+    @Check("stockrecords.index")
     public static void index(StockRecordPost p) {
         if(p == null) p = new StockRecordPost();
         List<StockRecord> records = p.query();
