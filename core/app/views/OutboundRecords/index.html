@@ -89,6 +89,7 @@
         </tr>
       #{list items: records, as: 'r'}
         <tr>
+          #{set attrs: r.stockObj.attributes()/}
           <td>
             <label class="checkbox">
               <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
@@ -96,7 +97,7 @@
           </td>
           <td>${r.id}</td>
           <td>
-            <select name="whouse" style="width: 100px;">
+            <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
               <option value="">仓库</option>
                 #{list items:whouses, as:'whouse'}
                   <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
@@ -107,12 +108,11 @@
           </td>
           <td>${r.origin.label()}</td>
           <td>${r.state.label()}</td>
-          <td>${r.shipPlan?.id}</td>
+          <td>${attrs.get('procureunitId')}</td>
           <td>
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
           <td style="max-width: 280px;">${r.stockObj.name()}</td>
-            #{set attrs: r.stockObj.attributes()/}
           <td>${attrs.get('fba')}</td>
           <td>${attrs.get('whouseName')}</td>
           <td>${attrs.get('shipType')}</td>
@@ -123,7 +123,7 @@
           </td>
           <td>
               #{if r.type == models.whouse.OutboundRecord.T.Normal}
-                <select name="targetId" style="width: 150px;">
+                <select name="targetId" style="width: 150px;" data-value="${r.getCooperator()?.name}">
                   <option value="">运输商</option>
                     #{list items:shippers, as: 'ship'}
                       <option ${ship.id.toString() == r.targetId ? 'selected' : ''} value="${ship.id}">
@@ -133,7 +133,7 @@
                 </select>
               #{/if}
               #{elseif r.type == models.whouse.OutboundRecord.T.InternalTrans}
-                <select name="targetId" style="width: 150px;">
+                <select name="targetId" style="width: 150px;" data-value="${r.getSelfWhouse()?.name}">
                   <option value="">仓库</option>
                     #{list items:whouses, as:'whouse'}
                       <option ${whouse.id.toString() == r.targetId ? 'selected' : ''} value="${whouse.id}">

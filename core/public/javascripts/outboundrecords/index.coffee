@@ -40,8 +40,10 @@ $ ->
       if state != 'Pending'
         _.each($tr.find(":input[name]"), (input) ->
           $input = $(input)
-          if $input.is(':checkbox')
+          if $input.is('checkbox')
             $input.remove()
+          else if $input.is('select')
+            $input.parent().text($input.data('value'))
           else
             $input.parent().text($input.val())
         )

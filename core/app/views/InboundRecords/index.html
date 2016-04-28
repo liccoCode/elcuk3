@@ -94,7 +94,7 @@
             <input type="text" name="badQty" value="${r.badQty}" style="width:45px;">
           </td>
           <td>
-            <select name="targetWhouse">
+            <select name="targetWhouse" data-value="${r.targetWhouse?.name}">
               <option value="">仓库</option>
                 #{list items:whouses, as:'whouse'}
                   <option ${whouse.id == r.targetWhouse?.id ? 'selected' : ''} value="${whouse.id}">
