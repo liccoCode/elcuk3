@@ -132,29 +132,16 @@ public class StockRecord extends Model {
         return String.format("%s-%s", this.whouse.name, this.type.label());
     }
 
-    public void valid() {
+    public StockRecord valid() {
         Validation.required("仓库", this.whouse);
         Validation.required("数量", this.qty);
         this.stockObj.valid();
-    }
-
-    /**
-     * 确认入库记录时记录两个库存异动(正常与不良品)
-     *
-     * @param inboundRecord
-     */
-    public static void recordsForInbound(InboundRecord inboundRecord) {
-        try {
-            new StockRecord(inboundRecord, true).doCerate();
-            if(inboundRecord.badQty > 0) new StockRecord(inboundRecord, false).doCerate();//不良品
-        } catch(FastRuntimeException e) {
-            Validation.addError("", e.getMessage());
-        }
+        return this;
     }
 
     public void doCerate() {
-        this.validateAndSave();
-        if(!Validation.hasErrors()) this.updateWhouseQty();
+        this.save();
+        this.updateWhouseQty();
     }
 
     /**
