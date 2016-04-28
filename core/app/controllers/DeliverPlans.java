@@ -122,17 +122,17 @@ public class DeliverPlans extends Controller {
      * 将 ProcureUnit 从 Deliverplan 中解除
      */
     public static void delunits(String id, List<Long> pids) {
-        DeliverPlan dmt = DeliverPlan.findById(id);
+        DeliverPlan dp = DeliverPlan.findById(id);
         Validation.required("deliverplans.delunits", pids);
         if(Validation.hasErrors())
-            render("DeliverPlans/show.html", dmt);
-        dmt.unassignUnitToDeliverplan(pids);
+            render("DeliverPlans/show.html", dp);
+        dp.unassignUnitToDeliverplan(pids);
 
         if(Validation.hasErrors())
-            render("DeliverPlans/show.html", dmt);
+            render("DeliverPlans/show.html", dp);
 
         flash.success("成功将 %s 采购计划从当前采购单中移除.", StringUtils.join(pids, ","));
-        show(dmt.id);
+        show(dp.id);
     }
 
 

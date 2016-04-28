@@ -150,11 +150,7 @@
         handleMethod: function(link){
             var href = rails.href(link), method = link.data('method'), target = link.attr('target'), csrf_token = $('meta[name=csrf-token]').attr('content'), csrf_param = $('meta[name=csrf-param]').attr('content');
             method = method.toLocaleLowerCase();
-            if(method == 'delete' || method == 'put'){
-                var sufix = '?';
-                if(href.indexOf('?') >= 0 && href.indexOf('=') >= 0) sufix = '&';
-                href += sufix + 'x-http-method-override=' + method.toUpperCase()
-            }
+            if(method == 'delete' || method == 'put') href += rails.salefySufix(href) + 'x-http-method-override=' + method.toUpperCase()
             var form = $('<form method="post" action="' + href + '"></form>'), metadata_input = '<input name="_method" value="' + method + '" type="hidden" />';
 
             if(csrf_param !== undefined && csrf_token !== undefined){
@@ -278,6 +274,14 @@
                 element.removeData('ujs:enable-with'); // clean up cache
             }
             element.unbind('click.railsDisable'); // enable element
+        },
+
+        salefySufix: function(url){
+            if(url.indexOf('?') >= 0 && url.indexOf('=') >= 0){
+                return "&"
+            }else{
+                return "?"
+            }
         }
 
     };
@@ -327,7 +331,7 @@
             var method = form.data('method'), action = form.attr('action');
             if(method) method = method.toLowerCase();
             if(method == 'delete' || method == 'put'){
-                form.attr('action', function(i, val){ return val + "?x-http-method-override=" + method.toUpperCase();})
+                form.attr('action', function(i, val){ return val + rails.salefySufix(val) + "x-http-method-override=" + method.toUpperCase();})
             }
 
             if(!rails.allowAction(form)) return rails.stopEverything(e);
