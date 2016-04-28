@@ -2,25 +2,24 @@ package controllers;
 
 
 import controllers.api.SystemOperation;
+import helper.Webs;
 import models.ElcukRecord;
-import models.finance.ProcureApply;
+import models.User;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
-import helper.Webs;
-import models.User;
 import models.procure.ProcureUnit;
 import models.view.Ret;
+import models.view.post.DeliverPlanPost;
+import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import models.view.post.*;
-import play.mvc.With;
 
 /**
  * Created by IntelliJ IDEA.
@@ -107,13 +106,13 @@ public class DeliverPlans extends Controller {
         DeliverPlan dp = DeliverPlan.findById(id);
         Validation.required("deliverplans.addunits", pids);
         if(Validation.hasErrors())
-            render("Deliverplans/show.html", dp);
+            render("DeliverPlans/show.html", dp);
         dp.assignUnitToDeliverplan(pids);
 
         // 再一次检查, 是否有错误
         if(Validation.hasErrors()) {
             renderArgs.put("plan_units", dp.availableInPlanStageProcureUnits());
-            render("Deliverplans/show.html", dp);
+            render("DeliverPlans/show.html", dp);
         }
         flash.success("成功将 %s 采购计划添加到当前采购单.", StringUtils.join(pids, ","));
         show(dp.id);
@@ -123,17 +122,17 @@ public class DeliverPlans extends Controller {
      * 将 ProcureUnit 从 Deliverplan 中解除
      */
     public static void delunits(String id, List<Long> pids) {
-        DeliverPlan dmt = DeliverPlan.findById(id);
+        DeliverPlan dp = DeliverPlan.findById(id);
         Validation.required("deliverplans.delunits", pids);
         if(Validation.hasErrors())
-            render("Deliverplans/show.html", dmt);
-        dmt.unassignUnitToDeliverplan(pids);
+            render("DeliverPlans/show.html", dp);
+        dp.unassignUnitToDeliverplan(pids);
 
         if(Validation.hasErrors())
-            render("Deliverplans/show.html", dmt);
+            render("DeliverPlans/show.html", dp);
 
         flash.success("成功将 %s 采购计划从当前采购单中移除.", StringUtils.join(pids, ","));
-        show(dmt.id);
+        show(dp.id);
     }
 
 
