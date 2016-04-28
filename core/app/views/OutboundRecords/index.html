@@ -89,7 +89,7 @@
         </tr>
       #{list items: records, as: 'r'}
         <tr>
-          #{set attrs: r.stockObj.attributes()/}
+            #{set attrs: r.stockObj.attributes()/}
           <td>
             <label class="checkbox">
               <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
@@ -108,7 +108,13 @@
           </td>
           <td>${r.origin.label()}</td>
           <td>${r.state.label()}</td>
-          <td>${attrs.get('procureunitId')}</td>
+          <td>
+              #{if attrs.containsKey('procureunitId')}
+                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
+                ${attrs.get('procureunitId')}
+                </a>
+              #{/if}
+          </td>
           <td>
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
