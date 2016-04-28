@@ -40,7 +40,7 @@ $ ->
       if state != 'Pending'
         _.each($tr.find(":input[name]"), (input) ->
           $input = $(input)
-          if $input.is('checkbox')
+          if $input.is(':checkbox')
             $input.remove()
           else if $input.is('select')
             $input.parent().text($input.data('value'))
@@ -48,6 +48,16 @@ $ ->
             $input.parent().text($input.val())
         )
     )
+  )
+
+  $(document).on('click', 'a[name=tryIdMatch]', (e) ->
+    $form = $('form.search_form')
+    $searchInput = $form.find("input[name='p.search']")
+    $searchInput.val('id:123')
+    EF.colorAnimate($searchInput)
+    setTimeout(->
+      $form.submit()
+    , 1000)
   )
 
   AttrsFormat = {
