@@ -57,13 +57,11 @@
 <tr>
   <th>质检开始时间</th>
   <td colspan="3">
-    <input size="16" type="text" value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" readonly class="form_datetime"
-           name="from">
+    <input type="datetime" size="16" value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" name="from" readonly>
   </td>
   <th>质检完成时间</th>
   <td colspan="7">
-    <input size="16" type="text" value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" readonly
-           class="form_datetime" name="to">
+    <input type="datetime" size="16" value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" name="to" readonly>
   </td>
 </tr>
 <tr>
