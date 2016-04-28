@@ -39,8 +39,8 @@
 
       <select name="p.market" class="inline">
         <option value="">去往国家</option>
-      #{list items:models.market.M, as:'m'}
-        <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.toString()}</option>
+      #{list items:models.market.M.amazonVals(), as:'m'}
+        <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()}</option>
       #{/list}
       </select>
 

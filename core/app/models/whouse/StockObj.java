@@ -147,7 +147,7 @@ public class StockObj implements Serializable {
             if(unit.shipType != null) this.attrs.put("shipType", unit.shipType.name());
             if(unit.whouse != null) {
                 this.attrs.put("whouseId", unit.whouse.id);
-                this.attrs.put("whouseName", unit.whouse.name());
+                this.attrs.put("whouseName", unit.whouse.name);
             }
         }
         this.setAttributes();
