@@ -14,22 +14,24 @@ $ ->
       $("form[name=confirm_form]").submit()
   )
 
-  $("form[name=confirm_form]").on('change', "input[name=qty], input[name=badQty], input[name=memo],
- select[name=targetWhouse]", (e) ->
+  $("form[name=confirm_form]").on('change', "td>:input[name]", (e) -> #"input[name=qty],input[name=badQty],input[name=memo],select[name=targetWhouse], "
     $input = $(@)
+    attr = $input.attr('name')
     value = $input.val()
-    return if value == null || value == undefined || value == ""
+
+    return if _.isEmpty(value)
 
     $.post("/InboundRecords/update", {
       id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
-      attr: $input.attr('name'),
+      attr: attr,
       value: value
     },
       (r) ->
         if r.flag is false
           noty({text: r.message, type: 'error'})
         else
-          noty({text: "更新 #{$input.attr('name')} 成功!", type: 'success'})
+          msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
+          noty({text: "更新#{msg}成功!", type: 'success'})
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
@@ -45,5 +47,13 @@ $ ->
         )
     )
   )
+
+  AttrsFormat = {
+    "qty": "实际入库",
+    "badQty": "不良品入库",
+    "memo": "备注",
+    "targetWhouse": "目标仓库",
+    "completeDate": "完成时间"
+  }
 
   $("form[name=confirm_form] table").trigger("disabledInput")

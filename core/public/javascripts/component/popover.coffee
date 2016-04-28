@@ -22,7 +22,7 @@ window.$ui =
       $input = $(input)
       return if $input.attr('native') != undefined
       if $input.attr('format') is undefined
-        $input.datetimepicker(format: 'yyyy-mm-dd hh:ii')
+        $input.datetimepicker(format: 'yyyy-mm-dd hh:ii:ss')
       else
         $input.datetimepicker(format: $input.attr('format'))
   selectize: ->

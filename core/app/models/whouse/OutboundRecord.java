@@ -9,6 +9,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.format.DateTimeFormat;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -244,7 +245,7 @@ public class OutboundRecord extends Model {
      */
     public boolean confirm() {
         this.state = S.Outbound;
-        this.outboundDate = new Date();
+        if(this.outboundDate == null) this.outboundDate = new Date();
         this.confirmValid();
         if(Validation.hasErrors()) {
             return false;
@@ -273,6 +274,10 @@ public class OutboundRecord extends Model {
                 break;
             case "targetId":
                 logs.addAll(Reflects.logFieldFade(this, attr, value));
+                break;
+            case "outboundDate":
+                logs.addAll(Reflects.logFieldFade(this, "outboundDate", org.joda.time.DateTime
+                        .parse(value, DateTimeFormat.forPattern("yyyy-MM-dd hh:mm:ss")).toDate()));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");

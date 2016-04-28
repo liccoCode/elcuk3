@@ -6,6 +6,8 @@ import models.embedded.ERecordBuilder;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -196,6 +198,10 @@ public class InboundRecord extends Model {
                 Whouse whouse = Whouse.findById(NumberUtils.toLong(value));
                 logs.addAll(Reflects.logFieldFade(this, "targetWhouse", whouse != null ? whouse : null));
                 break;
+            case "completeDate":
+                logs.addAll(Reflects.logFieldFade(this, "completeDate",
+                        DateTime.parse(value, DateTimeFormat.forPattern("yyyy-MM-dd hh:mm:ss")).toDate()));
+                break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
@@ -239,7 +245,7 @@ public class InboundRecord extends Model {
      */
     public boolean confirm() {
         this.state = S.Inbound;
-        this.completeDate = new Date();
+        if(this.completeDate == null) this.completeDate = new Date();
         this.valid();
         if(Validation.hasErrors()) {
             return false;
