@@ -247,8 +247,13 @@ public class InboundRecord extends Model {
     public void confirm() {
         this.state = S.Inbound;
         if(this.completeDate == null) this.completeDate = new Date();
-        this.validateAndSave();
-        StockRecord.recordsForInbound(this);
+        this.valid();
+        List<StockRecord> stockRecords = this.buildStockRecords();
+
+        if(!Validation.hasErrors()) {
+            this.save();
+            for(StockRecord record : stockRecords) record.doCerate();
+        }
     }
 
     public void beforeCreate() {
@@ -273,5 +278,22 @@ public class InboundRecord extends Model {
 
     public boolean isLocked() {
         return this.state != S.Pending;
+    }
+
+    /**
+     * 确认入库记录时记录两个库存异动(正常与不良品)
+     *
+     * @return
+     */
+    public List<StockRecord> buildStockRecords() {
+        List<StockRecord> records = new ArrayList();
+        try {
+            records.add(new StockRecord(this, true).valid());
+            if(this.badQty > 0) records.add(new StockRecord(this, false).valid());//不良品
+            return records;
+        } catch(FastRuntimeException e) {
+            Validation.addError("", e.getMessage());
+        }
+        return records;
     }
 }
