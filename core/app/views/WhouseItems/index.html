@@ -56,7 +56,10 @@
           <td style="max-width: 280px;">${item.stockObj.name()}</td>
           <td>${item.qty}</td>
           <td>
-            <a target="_blank" href="/StockRecords/index?p.search=${item.stockObj.stockObjId}">查看明细</a>
+            <a target="_blank"
+               href="/StockRecords/index?p.search=${item.stockObj?.stockObjId}&p.whouse.id=${item.whouse?.id}">
+              查看明细
+            </a>
           </td>
         </tr>
       #{/list}
