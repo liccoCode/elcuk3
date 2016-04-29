@@ -276,7 +276,7 @@ public class ProcureUnits extends Controller {
         new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
                 .save();
 
-        if(StringUtils.equals("isNeedApply", "need")) {
+        if(StringUtils.equals(isNeedApply, "need")) {
             unit.startActiviti(unit.handler.username);
             flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
             ProcureUnits.showactiviti(unit.id);
