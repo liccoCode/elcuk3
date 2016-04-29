@@ -1617,7 +1617,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(outboundRecord != null && outboundRecord.state == OutboundRecord.S.Outbound) {
                 return String.format("出库数量: %s, 出库时间: %s",
                         outboundRecord.qty,
-                        new SimpleDateFormat("yyyy-MM-dd").format(outboundRecord.outboundDate)
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(outboundRecord.outboundDate)
                 );
             }
         }
