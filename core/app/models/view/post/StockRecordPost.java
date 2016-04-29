@@ -93,7 +93,7 @@ public class StockRecordPost extends Post<StockRecord> {
                         " FROM StockRecord s " +
                         " LEFT JOIN Whouse w ON s.whouse_id=w.id" +
                         " WHERE %s AND s.qty!=0" +
-                        " GROUP BY s.whouse_id,s.stockObjType,s.stockObjId,s.attributes",
+                        " GROUP BY s.whouse_id,s.stockObjType,s.stockObjId,s.attributes", //whouseName fba shipType
                 //如何处理多种类型的 StockObj(SKU 物料)
                 params._1);
 
