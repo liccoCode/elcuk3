@@ -1146,7 +1146,7 @@ public class CheckTask extends Model {
 
     @Override
     public <T extends JPABase> T save() {
-        if(this.isship == ShipType.SHIP) {
+        if(this.isship == ShipType.SHIP && this.units != null) {
             //自动生成入库记录
             InboundRecord inboundRecord = InboundRecord
                     .find("attributes LIKE ?", "%\"procureunitId\":" + this.units.id.toString() + "%").first();
@@ -1156,7 +1156,6 @@ public class CheckTask extends Model {
                 inboundRecord.checkTask = this;
                 inboundRecord.save();
             }
-
         }
         return super.save();
     }
