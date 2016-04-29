@@ -496,6 +496,7 @@ public class Shipments extends Controller {
     /**
      * 创建出库
      */
+    @Check("outboundrecords.index")
     public static void outbound(List<String> shipmentId) {
         if(shipmentId != null && !shipmentId.isEmpty()) {
             for(String sid : shipmentId) {
