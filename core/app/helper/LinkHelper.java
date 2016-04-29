@@ -54,11 +54,12 @@ public class LinkHelper extends JavaExtensions {
     }
 
     public static String showRecordLink(StockRecord stockRecord) {
+        String idMatch = String.format("id:%s", stockRecord.recordId);
         switch(stockRecord.type) {
             case Inbound:
-                return Router.getFullUrl("InboundRecords.index", GTs.newMap("p.search", stockRecord.recordId).build());
+                return Router.getFullUrl("InboundRecords.index", GTs.newMap("p.search", idMatch).build());
             case Outbound:
-                return Router.getFullUrl("OutboundRecords.index", GTs.newMap("p.search", stockRecord.recordId).build());
+                return Router.getFullUrl("OutboundRecords.index", GTs.newMap("p.search", idMatch).build());
             case Stocktaking:
 
             default:
