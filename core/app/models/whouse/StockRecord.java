@@ -1,5 +1,7 @@
 package models.whouse;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -7,6 +9,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -82,9 +85,17 @@ public class StockRecord extends Model {
     public Date updateDate;
 
     public StockRecord() {
+        this.updateDate = new Date();
+    }
+
+    public StockRecord(StockObj stockObj) {
+        this();
+        this.stockObj = stockObj;
+        this.pickAttrs();
     }
 
     public StockRecord(InboundRecord in, boolean normal) {
+        this(in.stockObj);
         if(normal) {
             this.qty = in.qty;
             this.whouse = in.targetWhouse;
@@ -94,18 +105,15 @@ public class StockRecord extends Model {
             if(this.whouse == null) throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
         }
         this.type = T.Inbound;
-        this.stockObj = in.stockObj;
         this.recordId = in.id;
-        this.updateDate = new Date();
     }
 
     public StockRecord(OutboundRecord out) {
+        this(out.stockObj);
         this.type = T.Outbound;
         this.qty = -out.qty;
-        this.stockObj = out.stockObj;
         this.recordId = out.id;
         this.whouse = out.whouse;
-        this.updateDate = new Date();
     }
 
     public InboundRecord getInboundRecord() {
@@ -152,6 +160,20 @@ public class StockRecord extends Model {
         if(whouseItem != null) {
             whouseItem.qty += this.qty;
             whouseItem.save();
+        }
+    }
+
+    /**
+     * 库存异动的 attributes 只存储 fba shipType 信息
+     *
+     * @return
+     */
+    public void pickAttrs() {
+        if(this.stockObj != null && !this.stockObj.attributes().isEmpty()) {
+            this.stockObj.attrs = Maps
+                    .filterKeys(this.stockObj.attrs, Predicates.in(Arrays.asList("fba", "shipType", "whouseName"
+                    )));
+            this.stockObj.setAttributes();
         }
     }
 }
