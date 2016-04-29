@@ -5,12 +5,11 @@ $ ->
     $("input:checkbox:not(:disabled).#{region}").prop("checked", o.prop("checked"))
 
   $("form.search_form").on('click', 'a[name=confirm]', (e) ->
-    checkids = []
-    for checkbox in $('input[name="rids"]') when checkbox.checked then checkids.push(checkbox.value)
-    if checkids.length is 0
+    if $('input[name="rids"]:checked').size() is 0
       noty({text: '请选择出库记录！', type: 'error'})
       return false
     else
+      return unless confirm("确认入库?")
       $("form[name=confirm_form]").submit()
   )
 
