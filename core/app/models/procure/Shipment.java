@@ -534,6 +534,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void updateShipment() {
         if(this.creater == null) this.creater = User.current();
         this.save();
+        //更新货代仓库
+        for(ShipItem item : this.items) item.unit.flushTask();
     }
 
     public void setTrackNo(String trackNo) {
@@ -560,7 +562,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
         this.items.add(shipitem.<ShipItem>save());
-        //TODO c: 添加日志
+        unit.flushTask();//更新相关的质检任务
     }
 
 
@@ -1529,5 +1531,46 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         }
 
+    }
+
+    /**
+     * 修改运输单
+     *
+     * @param newShip
+     */
+    public void update(Shipment newShip) {
+        this.cooper = newShip.cooper;
+        this.whouse = newShip.whouse;
+        this.title = newShip.title;
+        this.reason = newShip.reason;
+        this.tracknolist = newShip.tracknolist;
+        this.trackNo = newShip.trackNo;
+        this.memo = newShip.memo;
+        this.dates.planBeginDate = newShip.dates.planBeginDate;
+        this.internationExpress = newShip.internationExpress;
+        this.jobNumber = newShip.jobNumber;
+        this.totalWeightShipment = newShip.totalWeightShipment;
+        this.totalVolumeShipment = newShip.totalVolumeShipment;
+        this.shipmentTpye = newShip.shipmentTpye;
+        this.totalStockShipment = newShip.totalStockShipment;
+        this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
+
+        //日期发生改变则记录旧的日期
+        if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0)
+            this.dates.oldPlanArrivDate = newShip.dates.planArrivDate;
+        this.dates.planArrivDate = newShip.dates.planArrivDate;
+
+        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) &&
+                this.dates.planArrivDateForCountRate != newShip.dates.planArrivDateForCountRate) {
+            if(StringUtils.isBlank(newShip.reason)) {
+                //Validation.addError("", "修改约定到货时间必须填写原因!");
+            } else {
+                this.reason = newShip.reason;
+            }
+            this.dates.planArrivDateForCountRate = newShip.dates.planArrivDateForCountRate;
+        }
+        this.validate();
+        Validation.current().valid(this);
     }
 }
