@@ -23,7 +23,7 @@ import java.util.Map;
  * Time: 2:19 PM
  */
 @Embeddable
-public class StockObj implements Serializable {
+public class StockObj implements Serializable, Cloneable {
 
     /**
      * 存货条目 ID
@@ -173,4 +173,13 @@ public class StockObj implements Serializable {
             this.setAttributes();
         }
     }
+
+    public StockObj dump() {
+        try {
+            return (StockObj) this.clone();
+        } catch(CloneNotSupportedException e) {
+            throw new FastRuntimeException(e);
+        }
+    }
+
 }
