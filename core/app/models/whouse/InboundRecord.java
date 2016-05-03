@@ -1,13 +1,12 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -199,8 +198,7 @@ public class InboundRecord extends Model {
                 logs.addAll(Reflects.logFieldFade(this, "targetWhouse", whouse != null ? whouse : null));
                 break;
             case "completeDate":
-                logs.addAll(Reflects.logFieldFade(this, "completeDate",
-                        DateTime.parse(value, DateTimeFormat.forPattern("yyyy-MM-dd hh:mm:ss")).toDate()));
+                logs.addAll(Reflects.logFieldFade(this, "completeDate", Dates.cn(value).toDate()));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
