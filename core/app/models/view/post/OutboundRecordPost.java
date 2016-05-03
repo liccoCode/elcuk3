@@ -102,10 +102,11 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(String.format(" AND (stockObjId LIKE ? OR attributes LIKE ?)", this.search));
+            sbd.append(" AND (stockObjId LIKE ? OR attributes LIKE ?");
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");
         }
+        sbd.append(" ORDER BY createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
 

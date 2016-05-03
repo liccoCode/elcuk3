@@ -71,7 +71,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
                     String.format(" AND (checkTask.id='%s' OR stockObjId LIKE ?)", this.search, this.search));
             params.add(this.word());
         }
-
+        sbd.append(" ORDER BY createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
 

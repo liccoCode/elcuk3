@@ -36,7 +36,7 @@ public class WhouseItemPost extends Post<WhouseItem> {
             sbd.append(" AND stockObjId LIKE ?");
             params.add(this.word());
         }
-        sbd.append(" order by whouse.id");
+        sbd.append(" ORDER BY whouse.id");
         return new F.T2<>(sbd.toString(), params);
     }
 
