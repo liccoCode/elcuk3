@@ -1,6 +1,7 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
@@ -11,7 +12,6 @@ import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.joda.time.format.DateTimeFormat;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -298,8 +298,7 @@ public class OutboundRecord extends Model {
                 logs.addAll(Reflects.logFieldFade(this, attr, value));
                 break;
             case "outboundDate":
-                logs.addAll(Reflects.logFieldFade(this, "outboundDate", org.joda.time.DateTime
-                        .parse(value, DateTimeFormat.forPattern("yyyy-MM-dd hh:mm:ss")).toDate()));
+                logs.addAll(Reflects.logFieldFade(this, "outboundDate", Dates.cn(value).toDate()));
                 break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
