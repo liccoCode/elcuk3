@@ -260,41 +260,33 @@ public class Whouse extends Model {
     public void checkWhouseNewShipment(List<Shipment> planShipments) {
         /**
          * 1. 处理 60 天内的运输单;
-         * 2. 规则: 空运每周 4; 海运 UK/US 每周 2, DE 每周 3
+         * 2. 规则:
+         *  空运: 每周三;
+         *  海运: DE/US 周一, IT 周五, UK 周五
          */
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime nextBeginDate = now.plusDays(i);
-            Object exist = CollectionUtils
-                    .find(planShipments, new PlanDateEqual(nextBeginDate.toDate()));
-            if(exist != null)
-                continue;
+            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate()));
+            if(exist != null) continue;
 
             M type = this.account.type;
-            //英国的改在周一 2014-5-26
+
             if(nextBeginDate.getDayOfWeek() == 1) {
-                //if(Arrays.asList(M.AMAZON_UK).contains(type))
-                //Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                if(Arrays.asList(M.AMAZON_DE, M.AMAZON_US).contains(type)) {
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                }
             } else if(nextBeginDate.getDayOfWeek() == 2) {
-                if(Arrays.asList(M.AMAZON_US).contains(type))
-                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
-
-                if(Arrays.asList(M.AMAZON_IT).contains(type))
-                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
-
+                //Nothing
             } else if(nextBeginDate.getDayOfWeek() == 3) {
-                if(Arrays.asList(M.AMAZON_DE).contains(type))
-                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
-
-                //空运改为每周3
                 if(Arrays.asList(M.AMAZON_DE, M.AMAZON_FR, M.AMAZON_UK, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_IT,
-                        M.AMAZON_JP).contains(type))
+                        M.AMAZON_JP).contains(type)) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
-
+                }
             } else if(nextBeginDate.getDayOfWeek() == 5) {
-                //英国的改在周五 2015-1-29
-                if(Arrays.asList(M.AMAZON_UK).contains(type))
+                if(Arrays.asList(M.AMAZON_UK, M.AMAZON_IT).contains(type)) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                }
                 //else
                 //throw new FastRuntimeException("还不支持向 " + type.name() + " 仓库创建运输单");
             }

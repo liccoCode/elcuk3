@@ -55,7 +55,7 @@ $ ->
   submitForm = (btn)->
     $('#form_method').val(btn.data('method'))
     $form = btn.parents('form')
-    $form.attr('action', btn.data('url')).submit()
+    $form.data('method', btn.data('method')).attr('action', btn.data('url')).submit()
 
   # 为两个 table 的全选 checkbox:label 添加功能
   $('input:checkbox[id*=checkbox_all]').each ->
@@ -95,7 +95,6 @@ $ ->
     loadTimeLine('sid', $td.text().trim())
   )
 
-
   loadTimeLine = (type, val)->
     $time_line_home = $("#tl")
     LoadMask.mask($time_line_home)
@@ -111,7 +110,6 @@ $ ->
         finally
           LoadMask.unmask($time_line_home)
     )
-
 
   do ->
     procureUntiId = window.location.hash[1..-1]
