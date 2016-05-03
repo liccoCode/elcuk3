@@ -22,7 +22,6 @@ import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Validation;
-import play.db.jpa.JPABase;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -767,6 +766,7 @@ public class CheckTask extends Model {
                 startActiviti(username);
                 break;
         }
+        this.buildInboundRecord();
         this.update(newCt);
     }
 
@@ -1144,8 +1144,10 @@ public class CheckTask extends Model {
         }
     }
 
-    @Override
-    public <T extends JPABase> T save() {
+    /**
+     * 生成入库记录
+     */
+    public void buildInboundRecord() {
         if(this.isship == ShipType.SHIP && this.units != null) {
             //自动生成入库记录
             InboundRecord inboundRecord = InboundRecord
@@ -1157,6 +1159,5 @@ public class CheckTask extends Model {
                 inboundRecord.save();
             }
         }
-        return super.save();
     }
 }
