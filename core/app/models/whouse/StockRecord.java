@@ -90,7 +90,7 @@ public class StockRecord extends Model {
 
     public StockRecord(StockObj stockObj) {
         this();
-        this.stockObj = stockObj;
+        this.stockObj = stockObj.dump();
         this.pickAttrs();
     }
 

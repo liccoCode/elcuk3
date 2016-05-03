@@ -47,7 +47,7 @@ public class WhouseItem extends Model {
     }
 
     public WhouseItem(StockObj stockObj, Whouse whouse) {
-        this.stockObj = stockObj;
+        this.stockObj = stockObj.dump();
         this.whouse = whouse;
     }
 

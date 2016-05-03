@@ -211,7 +211,7 @@ public class OutboundRecord extends Model {
         this.qty = this.planQty;
         this.origin = O.Normal;
         this.state = S.Pending;
-        this.stockObj = plan.stockObj;
+        this.stockObj = plan.stockObj.dump();
         this.type = T.Normal;
     }
 
