@@ -766,8 +766,8 @@ public class CheckTask extends Model {
                 startActiviti(username);
                 break;
         }
-        this.buildInboundRecord();
         this.update(newCt);
+        this.buildInboundRecord();
     }
 
     /**
