@@ -11,14 +11,15 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
@@ -28,8 +29,6 @@ import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.*;
-
-import org.joda.time.DateTime;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -494,4 +493,18 @@ public class Shipments extends Controller {
         renderJSON(dates);
     }
 
+    /**
+     * 创建出库
+     */
+    @Check("outboundrecords.index")
+    public static void outbound(List<String> shipmentId) {
+        if(shipmentId != null && !shipmentId.isEmpty()) {
+            for(String sid : shipmentId) {
+                Shipment shipment = Shipment.findById(sid);
+                shipment.initOutbound();
+            }
+        }
+        flash.success("创建出库成功!");
+        redirect("/OutboundRecords/index");
+    }
 }

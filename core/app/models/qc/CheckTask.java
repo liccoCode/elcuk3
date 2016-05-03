@@ -12,17 +12,16 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
 import models.view.dto.CheckTaskAQLDTO;
+import models.whouse.InboundRecord;
+import models.whouse.Whouse;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
-import play.cache.*;
 import play.cache.Cache;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -768,6 +767,7 @@ public class CheckTask extends Model {
                 break;
         }
         this.update(newCt);
+        this.buildInboundRecord();
     }
 
     /**
@@ -1141,6 +1141,23 @@ public class CheckTask extends Model {
             return name.length() > 0 ? name.substring(0, name.length() - 1) : "";
         } else {
             return "";
+        }
+    }
+
+    /**
+     * 生成入库记录
+     */
+    public void buildInboundRecord() {
+        if(this.isship == ShipType.SHIP && this.units != null) {
+            //自动生成入库记录
+            InboundRecord inboundRecord = InboundRecord
+                    .find("attributes LIKE ?", "%\"procureunitId\":" + this.units.id.toString() + "%").first();
+            if(inboundRecord == null) {
+                new InboundRecord(this).save();
+            } else {
+                inboundRecord.checkTask = this;
+                inboundRecord.save();
+            }
         }
     }
 }

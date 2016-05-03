@@ -6,7 +6,7 @@ import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -84,73 +84,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         public abstract String label();
     }
 
-    public enum S {
-        NOSHIPED {
-            @Override
-            public String label() {
-                return "不发货已处理";
-            }
-        },
-        NOSHIPWAIT {
-            @Override
-            public String label() {
-                return "不发货待处理";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
-     * 采购计划的不发货处理状态
-     */
-    public S shipState;
-
-    public enum OPCONFIRM {
-        CONFIRM {
-            @Override
-            public String label() {
-                return "待确认";
-            }
-        },
-
-        CONFIRMED {
-            @Override
-            public String label() {
-                return "已确认";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
-     * 运营确认
-     */
-    public OPCONFIRM opConfirm;
-
-    public enum QCCONFIRM {
-        CONFIRM {
-            @Override
-            public String label() {
-                return "待确认";
-            }
-        },
-
-        CONFIRMED {
-            @Override
-            public String label() {
-                return "已确认";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
-     * 质检员确认
-     */
-    public QCCONFIRM qcConfirm;
+    public ProcureUnit.OST isOut;
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -210,21 +144,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 
-        if(this.shipState != null) {
-            sbd.append("AND shipState=?");
-            params.add(ProcureUnit.S.valueOf(this.shipState.name()));
-        }
-
-        if(this.opConfirm != null) {
-            sbd.append("AND opConfirm=?");
-            params.add(ProcureUnit.OPCONFIRM.valueOf(this.opConfirm.name()));
-        }
-
-        if(this.qcConfirm != null) {
-            sbd.append("AND qcConfirm=?");
-            params.add(ProcureUnit.QCCONFIRM.valueOf(this.qcConfirm.name()));
-        }
-
         if(this.whouseId > 0) {
             sbd.append(" AND whouse.id=?");
             params.add(this.whouseId);
@@ -249,6 +168,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.isPlaced != null) {
             sbd.append(" AND isPlaced=? ");
             params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
+        }
+
+        if(this.isOut != null) {
+            sbd.append(" AND isOut=?");
+            params.add(this.isOut);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
@@ -379,11 +303,4 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.shipType == null) return "运输方式";
         return this.shipType.label();
     }
-
-    public String returnShipStates() {
-        if(this.shipState == null) return "";
-        return this.shipState.label();
-    }
-
-
 }

@@ -16,6 +16,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -712,5 +713,30 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("采购订单明细表%s.xls", format.format(new Date())));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(dtos, dateFormat, p, df);
+    }
+
+    public static void stockRecords(StockRecordPost p) {
+        if(p == null) p = new StockRecordPost();
+        if(p.dateRange() > 90) renderText("时间区间过大!");
+
+        p.pagination = false;
+        List<Map<String, Object>> records = p.checkRecords();
+        if(records == null || records.isEmpty()) renderText("未找到任何数据!");
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存异动盘点.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(records, dateFormat, p);
+    }
+
+    public static void whouseItems(WhouseItemPost p) {
+        if(p == null) p = new WhouseItemPost();
+        p.pagination = false;
+        List<WhouseItem> items = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(items);
     }
 }

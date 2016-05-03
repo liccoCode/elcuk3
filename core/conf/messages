@@ -243,7 +243,6 @@ endTime=\u8d28\u68c0\u5b8c\u6210\u65f6\u95f4
 isship=\u662f\u5426\u53d1\u8d27
 result=\u662f\u5426\u5408\u683c
 pickqty=\u5b9e\u9645\u62bd\u68c0\u6570\u91cf
-qty=\u5b9e\u9645\u4ea4\u8d27\u6570\u91cf
 checknote=\u5907\u6ce8
 
 checktask.update=[CheckTask]\u66f4\u65b0
@@ -251,3 +250,15 @@ checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1 ID:%s]:%s
 
 btbOrder.update=\u0042\u0032\u0042\u8ba2\u5355\u7ba1\u7406
 btbOrder.update.msg=\u8ba2\u5355\u7f16\u53f7[%s], \u66f4\u65b0\u5185\u5bb9[%s]
+
+
+inboundrecord.update=\u66f4\u65b0[\u5165\u5e93\u8bb0\u5f55]
+inboundrecord.update.msg=\u66f4\u65b0\u5165\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+inboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u5165\u5e93
+inboundrecord.confirm.msg=ID[%s]
+
+
+outboundrecord.update=\u66f4\u65b0[\u51fa\u5e93\u8bb0\u5f55]
+outboundrecord.update.msg=\u66f4\u65b0\u51fa\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+outboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u51fa\u5e93
+outboundrecord.confirm.msg=ID[%s]

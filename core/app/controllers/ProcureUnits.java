@@ -14,7 +14,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;

@@ -102,11 +102,6 @@ $ ->
     $form.submit()
   )
 
-  $(".form_datetime").datetimepicker({
-    format: 'yyyy-mm-dd hh:ii',
-    startDate: new Date().getFullYear() - 4 + "-01-01"
-  })
-
   lr = new LocalResize(document.getElementById('file_home'), {})
   lr.success (stop, data) ->
     $file_home = $('#file_home')

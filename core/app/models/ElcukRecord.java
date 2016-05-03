@@ -98,6 +98,14 @@ public class ElcukRecord extends Model {
                 " ORDER BY createAt DESC", fid).fetch();
     }
 
+    public static List<ElcukRecord> records(List<String> actions, int size) {
+        List<String> actionMsgs = new ArrayList<String>();
+        for(String action : actions) {
+            actionMsgs.add(Messages.get(action));
+        }
+        return ElcukRecord.find(JpqlSelect.whereIn("action", actionMsgs) + " ORDER BY createAt DESC").fetch(size);
+    }
+
     public static JPAQuery fid(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid);
     }

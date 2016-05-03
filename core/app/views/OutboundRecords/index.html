@@ -1,0 +1,192 @@
+#{extends 'main_full.html'/}
+#{set title:'出库记录(' + records.size() + ')'/}
+#{set 'moreScripts'}
+    #{script_cdn name: 'component/pagination.coffee'/}
+    #{script_cdn name: 'outboundrecords/index.coffee'/}
+#{/set}
+#{flash_alert /}
+
+#{info_row}
+<ul>
+  <li>
+    通过 <strong>[ID]</strong> 搜索出库记录时请使用匹配器: <strong>id:{ID}</strong>
+  </li>
+  <li>
+    <p class="text-error">
+      <strong>示例:</strong> id:123, 表示搜索 ID 为 123 的出库记录
+      &nbsp;&nbsp;<a href="javascript:void(0)" name="tryIdMatch"><i class="icon-hand-right"></i>试一下</a>
+    </p>
+  </li>
+</ul>
+#{/info_row}
+
+<div class="row-fluid">
+  <form action="@{OutboundRecords.index()}" method="get" class="search_form" id="search_form">
+    <div class="span12">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">From:</span>
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${p.to.date()}">
+      </div>
+
+      <select name="p.origin" class="inline">
+        <option value="">出库来源</option>
+      #{list items:models.whouse.OutboundRecord.O, as:'o'}
+        <option ${o == p.origin ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.state" class="inline">
+        <option value="">状态</option>
+      #{list items:models.whouse.OutboundRecord.S, as:'s'}
+        <option ${s == p.state ? 'selected' : ''} value="${s.name()}">${s.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.shipType" class="inline">
+        <option value="">运输方式</option>
+      #{list items:models.procure.Shipment.T, as:'t'}
+        <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.name()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.market" class="inline">
+        <option value="">去往国家</option>
+      #{list items:models.market.M.amazonVals(), as:'m'}
+        <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" name="p.search" placeholder="出库对象编码 Or FBA" value="${p.search}" style="width:
+              230px;">
+        <input type="hidden" name="p.page" value="${p.page}">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="inline">
+        <a href="@{OutboundRecords.blank()}" target="_blank" class="btn btn-success inline">添加其他出库</a>
+        <a target="_blank" class="btn btn-info inline" name="confirm">确认出库</a>
+      </div>
+    </div>
+  </form>
+
+  <form action="@{OutboundRecords.confirm()}" name="confirm_form">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>
+            <label class="checkbox">
+              <input type="checkbox" id="outboundrecord_check_all">
+            </label>
+          </th>
+          <th>ID</th>
+          <th>仓库</th>
+          <th>来源</th>
+          <th>状态</th>
+          <th>出货计划 ID</th>
+          <th>成品编码</th>
+          <th>名称</th>
+          <th>FBA</th>
+          <th>去往国家</th>
+          <th>运输方式</th>
+          <th>预计运输时间</th>
+          <th>预计出货数量</th>
+          <th>实际出货数量</th>
+          <th>出库对象</th>
+          <th>创建时间</th>
+          <th>完成时间</th>
+          <th>备注</th>
+          <th></th>
+        </tr>
+      #{list items: records, as: 'r'}
+        <tr>
+            #{set attrs: r.stockObj.attributes()/}
+          <td>
+            <label class="checkbox">
+              <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
+            </label>
+          </td>
+          <td>${r.id}</td>
+          <td>
+            <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
+              <option value="">仓库</option>
+                #{list items:whouses, as:'whouse'}
+                  <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
+                  ${whouse.name}
+                  </option>
+                #{/list}
+            </select>
+          </td>
+          <td>${r.origin.label()}</td>
+          <td>${r.state.label()}</td>
+          <td>
+              #{if attrs.containsKey('procureunitId')}
+                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
+                ${attrs.get('procureunitId')}
+                </a>
+              #{/if}
+          </td>
+          <td>
+            <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
+          </td>
+          <td style="max-width: 280px;">${r.stockObj.name()}</td>
+          <td>${attrs.get('fba')}</td>
+          <td>${attrs.get('whouseName')}</td>
+          <td>${attrs.get('shipType')}</td>
+          <td>${attrs.get('planBeginDate')}</td>
+          <td>${r.planQty}</td>
+          <td>
+            <input type="text" name="qty" value="${r.qty}" style="width:45px;">
+          </td>
+          <td>
+              #{if r.type == models.whouse.OutboundRecord.T.Normal}
+                <select name="targetId" style="width: 150px;" data-value="${r.getCooperator()?.name}">
+                  <option value="">运输商</option>
+                    #{list items:shippers, as: 'ship'}
+                      <option ${ship.id.toString() == r.targetId ? 'selected' : ''} value="${ship.id}">
+                      ${ship.name}
+                      </option>
+                    #{/list}
+                </select>
+              #{/if}
+              #{elseif r.type == models.whouse.OutboundRecord.T.InternalTrans}
+                <select name="targetId" style="width: 150px;" data-value="${r.getSelfWhouse()?.name}">
+                  <option value="">仓库</option>
+                    #{list items:whouses, as:'whouse'}
+                      <option ${whouse.id.toString() == r.targetId ? 'selected' : ''} value="${whouse.id}">
+                      ${whouse.name}
+                      </option>
+                    #{/list}
+                </select>
+              #{/elseif}
+          </td>
+          <td>${r.createDate.datetime()}</td>
+          <td>
+            <input type="datetime" name="outboundDate" value="${r.outboundDate.datetime()}">
+          </td>
+          <td>
+            <input type="text" name="memo" value="${r.memo}" style="width: 150px;">
+            <input type="hidden" name="state" value="${r.state.name()}">
+          </td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </form>
+
+  <div class="row-fluid" id="order_list">
+    <div class="span12">
+    #{if records.size() == 0}
+      暂时还没有出库记录
+    #{/if}
+    #{else }
+        #{bootstrap_pager pi:p, url:'' /}
+    #{/else}
+    </div>
+  </div>
+
+#{records records: elcukRecords/}
+</div>
