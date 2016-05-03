@@ -62,7 +62,7 @@ public class StockRecordPost extends Post<StockRecord> {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
 
-        String sql = params._1 + " ORDER BY whouse.id";
+        String sql = params._1 + " ORDER BY whouse.id, createDate DESC";
         if(this.pagination) {
             return StockRecord.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
         } else {
