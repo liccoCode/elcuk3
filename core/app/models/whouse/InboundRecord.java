@@ -226,7 +226,8 @@ public class InboundRecord extends Model {
 
             if(Validation.hasErrors()) {
                 for(Error error : Validation.errors()) {
-                    errors.add(String.format("ID: [%s] %s", rid.toString(), error.message()));
+                    String errMsg = String.format("ID: [%s] %s", rid.toString(), error.message());
+                    if(!errors.contains(errMsg)) errors.add(errMsg);
                 }
                 Validation.clear();
             } else {
