@@ -932,8 +932,6 @@ public class Selling extends GenericModel {
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
                     productParams);
-            if(!temp.equals("success"))
-                throw new Exception("连接Rockend出现问题，请联系相关技术人员!");
         }
 
         if(p.standerprice || p.saleprice) {
@@ -945,8 +943,6 @@ public class Selling extends GenericModel {
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
                     priceParams);
-            if(!temp.equals("success"))
-                throw new FastRuntimeException("连接Rockend出现问题，请联系相关技术人员!");
         }
     }
 }
