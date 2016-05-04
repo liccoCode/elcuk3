@@ -11,9 +11,9 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -444,4 +444,18 @@ public class Shipments extends Controller {
         renderJSON(dates);
     }
 
+    /**
+     * 创建出库
+     */
+    @Check("outboundrecords.index")
+    public static void outbound(List<String> shipmentId) {
+        if(shipmentId != null && !shipmentId.isEmpty()) {
+            for(String sid : shipmentId) {
+                Shipment shipment = Shipment.findById(sid);
+                shipment.initOutbound();
+            }
+        }
+        flash.success("创建出库成功!");
+        redirect("/OutboundRecords/index");
+    }
 }

@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
 import models.product.Product;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.hibernate.annotations.Cache;

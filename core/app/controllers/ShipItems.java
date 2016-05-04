@@ -6,7 +6,7 @@ import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import models.view.post.ProcureUnitShipPost;
 import play.data.validation.Validation;
 import play.mvc.Before;

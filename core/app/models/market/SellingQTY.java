@@ -3,7 +3,7 @@ package models.market;
 import exception.SellingQTYAttachNoWhouseException;
 import models.ElcukRecord;
 import models.product.Product;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.lang.Validate;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;

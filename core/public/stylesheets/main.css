@@ -25,6 +25,10 @@ span.highlight{
     background:#F5F5F5;
 }
 
+tr.striped{
+    background:#F5F5F5;
+}
+
 #sku .sku, #sid .sid{
     cursor:pointer;
 }

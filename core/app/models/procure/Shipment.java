@@ -12,7 +12,8 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.product.Whouse;
+import models.whouse.ShipPlan;
+import models.whouse.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -1534,6 +1535,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * <<<<<<< HEAD
      * 修改运输单
      *
      * @param newShip
@@ -1572,5 +1574,21 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.validate();
         Validation.current().valid(this);
+    }
+
+    /**
+     * 初始化出库信息
+     */
+    public void initOutbound() {
+        if(this.items != null && !this.items.isEmpty()) {
+            for(ShipItem item : this.items) {
+                ShipPlan plan = new ShipPlan(item);
+                plan.valid();
+                if(!plan.exist() && !Validation.hasErrors()) {
+                    plan.save();
+                    plan.triggerRecord();
+                }
+            }
+        }
     }
 }

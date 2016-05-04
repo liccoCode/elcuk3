@@ -11,8 +11,9 @@ import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.product.Whouse;
 import models.view.dto.CheckTaskAQLDTO;
+import models.whouse.InboundRecord;
+import models.whouse.Whouse;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -612,6 +613,7 @@ public class CheckTask extends Model {
                 break;
         }
         this.update(newCt);
+        this.buildInboundRecord();
     }
 
     /**
@@ -1000,5 +1002,22 @@ public class CheckTask extends Model {
             Logger.warn(String.format("CheckTask#matchChecktor: %s", e.getMessage()));
         }
         return name;
+    }
+
+    /**
+     * 生成入库记录
+     */
+    public void buildInboundRecord() {
+        if(this.isship == ShipType.SHIP && this.units != null) {
+            //自动生成入库记录
+            InboundRecord inboundRecord = InboundRecord
+                    .find("attributes LIKE ?", "%\"procureunitId\":" + this.units.id.toString() + "%").first();
+            if(inboundRecord == null) {
+                new InboundRecord(this).save();
+            } else {
+                inboundRecord.checkTask = this;
+                inboundRecord.save();
+            }
+        }
     }
 }

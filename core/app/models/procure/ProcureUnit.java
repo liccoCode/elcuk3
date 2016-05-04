@@ -16,8 +16,9 @@ import models.finance.PaymentUnit;
 import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
-import models.product.Whouse;
 import models.qc.CheckTask;
+import models.whouse.OutboundRecord;
+import models.whouse.Whouse;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -37,6 +38,7 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -408,6 +410,31 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     @Enumerated(EnumType.STRING)
     public QCCONFIRM qcConfirm;
+
+    public enum OST {
+        Pending {
+            @Override
+            public String label() {
+                return "未出库";
+            }
+        },
+        Outbound {
+            @Override
+            public String label() {
+                return "已出库";
+            }
+        };
+
+        public abstract String label();
+
+    }
+
+    /**
+     * 是否出库
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public OST isOut = OST.Pending;
 
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
@@ -1625,5 +1652,41 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
         }
+    }
+
+    /**
+     * 尝试找出对应的出库记录
+     *
+     * @return
+     */
+    public OutboundRecord outboundRecord() {
+        return OutboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + this.id.toString() + "%").first();
+    }
+
+    /**
+     * 出库信息
+     *
+     * @return
+     */
+    public String outboundMsg() {
+        if(this.isOut == OST.Outbound) {
+            OutboundRecord outboundRecord = this.outboundRecord();
+            if(outboundRecord != null && outboundRecord.state == OutboundRecord.S.Outbound) {
+                StringBuilder msg = new StringBuilder();
+                msg.append(String.format("出库数量: %s, ", outboundRecord.qty));
+
+                List<CheckTask> tasks = CheckTask.find("units_id=? and checkstat!=? ORDER BY creatat DESC",
+                        this.id, CheckTask.StatType.REPEATCHECK).fetch();
+                if(tasks != null && !tasks.isEmpty()) {
+                    msg.append(String.format("箱数: %s, ", tasks.get(0).totalBoxNum()));
+                } else {
+                    msg.append("箱数: 未知, ");
+                }
+                msg.append(String.format("出库时间: %s",
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(outboundRecord.outboundDate)));
+                return msg.toString();
+            }
+        }
+        return "暂无出库信息.";
     }
 }

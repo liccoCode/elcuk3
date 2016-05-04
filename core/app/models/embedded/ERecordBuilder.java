@@ -115,5 +115,4 @@ public class ERecordBuilder implements Serializable {
     public ERecordBuilder mail() {
         return new ERecordBuilder("email.record", "email.record.msg");
     }
-
 }
