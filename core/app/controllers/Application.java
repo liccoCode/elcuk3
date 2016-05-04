@@ -4,10 +4,11 @@ import controllers.api.SystemOperation;
 import helper.Dates;
 import helper.J;
 import helper.Webs;
+import models.User;
 import models.market.*;
-import models.whouse.Whouse;
 import models.view.Ret;
 import models.view.dto.DashBoard;
+import models.whouse.Whouse;
 import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
@@ -26,11 +27,11 @@ public class Application extends Controller {
 
     public static void index() {
         /**如果是有PM首页权限则跳转到PM首页**/
-        models.User user = Login.current();
+        User user = Login.current();
         //Set<Privilege> privileges = Privilege.privileges(user.username, user.roles);
         //Privilege privilege = Privilege.find("name=?", "pmdashboards.index").first();
         //if(privileges.contains(privilege)) {
-            //Pmdashboards.index();
+        //Pmdashboards.index();
         //}
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息

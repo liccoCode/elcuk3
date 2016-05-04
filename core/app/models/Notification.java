@@ -184,9 +184,11 @@ public class Notification extends GenericModel {
      * @return
      */
     public static F.Option<Notification> next(User user) {
-        if(!USER_QUEUE_CACHE.containsKey(user.username))
-            Notification.initUserNotificationQueue(user);
+        if(user == null) return F.Option.None();
 
+        if(!USER_QUEUE_CACHE.containsKey(user.username)) {
+            Notification.initUserNotificationQueue(user);
+        }
         Notification note = USER_QUEUE_CACHE.get(user.username).poll();
         if(note == null) return F.Option.None();
         else {
