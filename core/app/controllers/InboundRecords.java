@@ -28,7 +28,7 @@ import java.util.List;
 public class InboundRecords extends Controller {
     @Before(only = {"index", "blank", "create"})
     public static void setWhouses() {
-        renderArgs.put("whouses", Whouse.selfWhouses());
+        renderArgs.put("whouses", Whouse.selfWhouses(false));
     }
 
     @Check("inboundrecords.index")
