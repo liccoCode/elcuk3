@@ -14,8 +14,19 @@ import models.embedded.ERecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
@@ -308,7 +319,7 @@ public class Attach extends Model {
         BasicClientCookie cookie = new BasicClientCookie(name, value);
         cookie.setDomain(models.OperatorConfig.getVal("domain"));
         cookie.setVersion(0);
-        cookie.setPath("/");
+        cookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true");
         return cookie;
     }
 
@@ -351,7 +362,8 @@ public class Attach extends Model {
         store.addCookie(Attach.cookie("kod_name", "elcuk2"));
         store.addCookie(Attach.cookie("kod_token", User.Md5(User.userMd5("elcuk2"))));
         store.addCookie(Attach.cookie("kod_user_language", "zh_CN"));
-        store.addCookie(Attach.cookie("kod_user_online_version", "check-at-1418867696"));
+        store.addCookie(Attach.cookie("kod_user_online_version", "check-at-1418867695"));
+
         String rtJson = HTTP.get(store, url);
         JsonObject data = null;
         try {
@@ -379,7 +391,7 @@ public class Attach extends Model {
      * 图片网址转为文件
      *
      * @param destUrl
-     * @param fileName
+     * @param imagename
      * @throws IOException
      */
 
