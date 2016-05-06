@@ -68,6 +68,8 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public float percent;
 
+    public String invoiceState;
+
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
@@ -89,6 +91,9 @@ public class OrderPOST extends ESPost<Orderr> {
             }
             if(orderIds.size() <= 0)
                 throw new FastRuntimeException("没有结果");
+            if(StringUtils.isNotEmpty(invoiceState)) {
+                return Orderr.find("invoiceState=? and " + SqlSelect.whereIn("orderId", orderIds), invoiceState).fetch();
+            }
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
             Logger.error(e.getMessage());

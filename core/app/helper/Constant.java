@@ -114,4 +114,9 @@ public class Constant {
      */
     public static final String EXCHANGERATE_TOKEN = "EXCHANGERATE_TOKEN";
 
+    /**
+     * 保存发票地址
+     */
+    public static final String SAVE_INVOICE_PATH = "SAVE_INVOICE_PATH";
+
 }

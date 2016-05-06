@@ -15,6 +15,7 @@
     <th name="shipDate" class="sortable">ShipDate <i class="icon-sort"></i></th>
     <th name="paymentDate" class="sortable">Payment <i class="icon-sort"></i></th>
     <th>State</th>
+    <th>Invoice</th>
 </tr>
 #{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
@@ -49,9 +50,17 @@
     <td>#{time_tooltip time:ord.shipDate/}</td>
     <td>#{time_tooltip time:ord.paymentDate/}</td>
     <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
+    <td>
+    #{if ord.invoiceState=='yes'}
+        <b>sent</b>
+    #{/if}
+    #{else }
+        unsent
+    #{/else}
+    </td>
 </tr>
 <tr style="display:none" id="order_index_${ord_index}">
-    <td colspan="12">
+    <td colspan="15">
         #{render './_order_fees.html', fees: ord.fees/}
     </td>
 </tr>

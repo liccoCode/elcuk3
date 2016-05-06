@@ -246,6 +246,12 @@ public class Orderr extends GenericModel {
      */
     public boolean synced = false;
 
+    /**
+     * 发票状态(已发送yes,未发送no) 默认no
+     */
+    @Column(columnDefinition = "varchar(10) DEFAULT 'no'")
+    public String invoiceState;
+
 
     /**
      * 此订单总共卖出的产品数量
