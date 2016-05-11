@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
+import models.market.M;
+import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -87,7 +89,7 @@ public class InboundRecord extends Model {
     /**
      * 实际入库数量
      */
-    @Min(1)
+    @Min(0)
     @Required
     @Expose
     public Integer qty;
@@ -146,6 +148,26 @@ public class InboundRecord extends Model {
 
     @Expose
     public Date updateDate = new Date();
+
+    /**
+     * 这些属性字段全部都是为了前台传递数据的
+     */
+    @Transient
+    public String fba;
+
+    @Transient
+    public Shipment.T shipType;
+
+    @Transient
+    public String productCode;
+
+    @Transient
+    public M market;
+
+    @Transient
+    public String procureunitId;
+
+    /**************************************/
 
     public InboundRecord() {
         this.state = S.Pending;
@@ -256,7 +278,9 @@ public class InboundRecord extends Model {
     }
 
     public void beforeCreate() {
-        this.planQty = this.qty + this.badQty;
+        if(this.planQty == 0) {
+            this.planQty = this.qty + this.badQty;
+        }
     }
 
     public void valid() {
@@ -269,7 +293,7 @@ public class InboundRecord extends Model {
         Validation.required("状态", this.state);
 
         Validation.min("预计入库数量", this.planQty, 0);
-        Validation.min("实际入库数量", this.qty, 1);
+        Validation.min("实际入库数量", this.qty, 0);
         Validation.min("不良品入库数量", this.badQty, 0);
 
         this.stockObj.valid();
@@ -287,7 +311,7 @@ public class InboundRecord extends Model {
     public List<StockRecord> buildStockRecords() {
         List<StockRecord> records = new ArrayList();
         try {
-            records.add(new StockRecord(this, true).valid());
+            if(this.qty > 0) records.add(new StockRecord(this, true).valid());
             if(this.badQty > 0) records.add(new StockRecord(this, false).valid());//不良品
             return records;
         } catch(FastRuntimeException e) {

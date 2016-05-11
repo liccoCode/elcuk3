@@ -308,8 +308,23 @@ public class Whouse extends Model {
         }
     }
 
+    /**
+     * 自有仓
+     *
+     * @return
+     */
     public static List<Whouse> selfWhouses() {
-        return Whouse.find("type=?", T.SELF).fetch();
+        return selfWhouses(true);
+    }
+
+    /**
+     * @param includeDefective
+     * @return
+     */
+    public static List<Whouse> selfWhouses(boolean includeDefective) {
+        String sql = "type=?";
+        if(!includeDefective) sql += " AND name NOT LIKE '%不良品仓%'";
+        return Whouse.find(sql, T.SELF).fetch();
     }
 
     /**
