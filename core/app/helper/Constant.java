@@ -117,6 +117,6 @@ public class Constant {
     /**
      * 保存发票地址
      */
-    public static final String SAVE_INVOICE_PATH = "SAVE_INVOICE_PATH";
+    public static final String INVOICE_PATH = String.format("%s/elcuk2-data/invoces", Constant.HOME);
 
 }
