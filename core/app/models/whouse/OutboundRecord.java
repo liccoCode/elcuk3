@@ -176,7 +176,7 @@ public class OutboundRecord extends Model {
 
     /**
      * 这些属性字段全部都是为了前台传递数据的
-     ***/
+     */
     @Transient
     public Date planBeginDate;
 
@@ -191,7 +191,6 @@ public class OutboundRecord extends Model {
 
     @Transient
     public String productCode;
-
     /**************************************/
 
     public OutboundRecord() {
@@ -368,11 +367,5 @@ public class OutboundRecord extends Model {
     public boolean checkWhouseItemQty() {
         WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
         return item != null && item.qty >= Math.abs(this.qty);
-    }
-
-    public void transAttrs() {
-        if(this.origin == O.Other) {
-
-        }
     }
 }
