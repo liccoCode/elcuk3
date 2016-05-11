@@ -54,6 +54,7 @@ public class InboundRecords extends Controller {
         record.valid();
         if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
         record.save();
+        record.stockObj.setAttributes(record);
         flash.success("创建成功!");
         redirect("/InboundRecords/index");
     }

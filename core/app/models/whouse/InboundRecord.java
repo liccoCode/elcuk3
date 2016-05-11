@@ -278,7 +278,9 @@ public class InboundRecord extends Model {
     }
 
     public void beforeCreate() {
-        this.planQty = this.qty + this.badQty;
+        if(this.planQty == 0) {
+            this.planQty = this.qty + this.badQty;
+        }
     }
 
     public void valid() {

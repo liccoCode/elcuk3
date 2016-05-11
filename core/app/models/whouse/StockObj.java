@@ -178,6 +178,19 @@ public class StockObj implements Serializable, Cloneable {
         }
     }
 
+    public void setAttributes(InboundRecord inboundRecord) {
+        if(inboundRecord != null) {
+            if(StringUtils.isNotBlank(inboundRecord.procureunitId))
+                this.attrs.put("procureunitId", inboundRecord.procureunitId);
+            if(StringUtils.isNotBlank(inboundRecord.fba)) this.attrs.put("fba", inboundRecord.fba);
+            if(inboundRecord.shipType != null) this.attrs.put("shipType", inboundRecord.shipType.name());
+            if(inboundRecord.market != null) this.attrs.put("whouseName", inboundRecord.market
+                    .marketAndWhouseMapping());
+            if(inboundRecord.productCode != null) this.attrs.put("productCode", inboundRecord.productCode);
+            this.setAttributes();
+        }
+    }
+
     public StockObj dump() {
         try {
             return (StockObj) this.clone();

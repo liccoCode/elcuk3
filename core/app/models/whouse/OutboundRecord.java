@@ -368,10 +368,4 @@ public class OutboundRecord extends Model {
         WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
         return item != null && item.qty >= Math.abs(this.qty);
     }
-
-    public void transAttrs() {
-        if(this.origin == O.Other) {
-
-        }
-    }
 }
