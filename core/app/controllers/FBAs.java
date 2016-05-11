@@ -59,6 +59,22 @@ public class FBAs extends Controller {
     }
 
     /**
+     * 更换FBA
+     * @param procureUnitId
+     */
+    public static void changeFBA(Long procureUnitId) {
+        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
+        unit.fba.removeFBAShipment();
+        unit.postFbaShipment();
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("FBA %s 更换成功.", unit.fba.shipmentId);
+        }
+        Deliveryments.show(unit.deliveryment.id);
+    }
+
+    /**
      * 箱內麦
      *
      * @param id

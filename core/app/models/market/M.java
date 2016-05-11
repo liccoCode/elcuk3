@@ -877,6 +877,9 @@ public enum M {
                         .format("https://catalog-sc.amazon.ca/abis/product/DisplayEditProduct?sku=%s&asin=%s",
                                 msku, sell.asin);
             case AMAZON_ES:
+                return String
+                        .format("https://catalog-sc.amazon.it/abis/product/DisplayEditProduct?marketplaceID=A1RKKUPIHCS9HS&ref=xx_myiedit_cont_myifba&sku=%s&asin=%s",
+                                msku, sell.asin);
             case AMAZON_DE:
                 return String
                         .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
@@ -886,8 +889,6 @@ public enum M {
                         .format("https://catalog-sc.amazon.fr/abis/edit/RelistProduct.amzn?sku=%s&asin=%s",
                                 msku, sell.asin);
             case AMAZON_JP:
-
-
                 return String
                         .format("https://catalog-sc.amazon.co.jp/abis/product/DisplayEditProduct?marketplaceID=A1VC38T7YXB528&ref=xx_myiedit_cont_myifba&sku=%s&asin=%s",
                                 msku, sell.asin);
