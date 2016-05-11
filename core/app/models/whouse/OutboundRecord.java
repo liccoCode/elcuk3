@@ -176,7 +176,7 @@ public class OutboundRecord extends Model {
 
     /**
      * 这些属性字段全部都是为了前台传递数据的
-     ***/
+     */
     @Transient
     public Date planBeginDate;
 
@@ -191,7 +191,6 @@ public class OutboundRecord extends Model {
 
     @Transient
     public String productCode;
-
     /**************************************/
 
     public OutboundRecord() {

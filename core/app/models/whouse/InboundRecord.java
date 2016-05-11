@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
+import models.market.M;
+import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -146,6 +148,26 @@ public class InboundRecord extends Model {
 
     @Expose
     public Date updateDate = new Date();
+
+    /**
+     * 这些属性字段全部都是为了前台传递数据的
+     */
+    @Transient
+    public String fba;
+
+    @Transient
+    public Shipment.T shipType;
+
+    @Transient
+    public String productCode;
+
+    @Transient
+    public M market;
+
+    @Transient
+    public String procureunitId;
+
+    /**************************************/
 
     public InboundRecord() {
         this.state = S.Pending;
