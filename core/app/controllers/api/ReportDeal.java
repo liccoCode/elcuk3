@@ -24,7 +24,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -120,14 +119,8 @@ public class ReportDeal extends Controller {
         Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         Date returndate = ord.returndate();
 
-        String path = System.getenv(Constant.SAVE_INVOICE_PATH);
-        File folder = new File(path);
-        try {
-            if(!folder.exists())
-                folder.createNewFile();
-        } catch(IOException e) {
-            Logger.error(e.getMessage());
-        }
+        File folder = new File(Constant.INVOICE_PATH);
+        if(!folder.exists()) folder.mkdir();
 
         String pdfName = invoiceformat.filename + orderId + ".pdf";
         String template = "Orders/invoiceTaxNumberPDF.html";
@@ -142,7 +135,7 @@ public class ReportDeal extends Controller {
         args.put("taxNumber", taxNumber);
         PDFs.templateAsPDF(folder, pdfName, template, options, args);
 
-        /**订单状态改为已发送**/
+        //订单状态改为已发送
         ord.invoiceState = "yes";
         ord.save();
         if(StringUtils.isNotEmpty(taxNumber)) {
@@ -150,7 +143,7 @@ public class ReportDeal extends Controller {
             invoice.save();
         }
 
-        File file = new File(path + "/" + pdfName);
+        File file = new File(folder + "/" + pdfName);
         renderBinary(file);
     }
 }
