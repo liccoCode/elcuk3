@@ -87,7 +87,6 @@
           <th>目标仓库</th>
           <th>创建时间</th>
           <th>入库时间</th>
-          <th>超时</th>
           <th>备注</th>
         </tr>
       #{list items: records, as: 'r'}
@@ -143,7 +142,6 @@
           </td>
           <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
           <td>#{time_tooltip time: r.completeDate, datetime: true/}</td>
-          <td></td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
             <input type="hidden" name="state" value="${r.state.name()}">
