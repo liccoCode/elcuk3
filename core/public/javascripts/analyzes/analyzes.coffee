@@ -5,8 +5,6 @@ $.extend $.fn.dataTableExt.oStdClasses,
 $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
-  DATA_TABLE =
-
   # table 数据列表
   $("#below_tabContent").on("ajaxFresh", "#sid,#sku", () ->
     $data_table = $("#below_tabContent")
