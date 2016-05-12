@@ -5,11 +5,13 @@ $.extend $.fn.dataTableExt.oStdClasses,
 $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
+  DATA_TABLE = $("#below_tabContent")
+
   # table 数据列表
-  $("#below_tabContent").on("ajaxFresh", "#sid,#sku", () ->
+  DATA_TABLE.on("ajaxFresh", "#sid,#sku", () ->
     $div = $(@)
     $("#postType").val($div.attr("id"))
-    LoadMask.mask($div)
+    LoadMask.mask(DATA_TABLE)
 
     $div.load("/Analyzes/analyzes", $('.search_form').serialize(), (r) ->
       $div.find('table').dataTable(
@@ -19,7 +21,7 @@ $ ->
           aaSorting: [[16, "desc"]]
           aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
       )
-      LoadMask.unmask($div)
+      LoadMask.unmask(DATA_TABLE)
     )
   # 分页事件
   ).on("click", ".pagination a[page]", (e) ->
@@ -33,6 +35,8 @@ $ ->
     ajaxFreshAcitveTableTab()
   # SKU | SID 项目的详细查看事件
   ).on("click", ".sid,.sku", (e) ->
+    LoadMask.mask(DATA_TABLE)
+
     $td = $(@)
     sidOrSku = $td.text().trim()
     $('#postVal').val(sidOrSku)
@@ -59,6 +63,7 @@ $ ->
     $td.parents('table').find('tr').removeClass('selected')
     $td.parents('tr').addClass('selected')
 
+    LoadMask.unmask(DATA_TABLE)
   # 列排序事件
   ).on('click', 'th[orderby]', (e) ->
     $td = $(@)
@@ -141,7 +146,6 @@ $ ->
   # headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
   $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
     $div = $(@)
-    LoadMask.mask($div)
     $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
     .done((r) ->
       if r.flag == false
@@ -187,7 +191,6 @@ $ ->
         })
       else
         $div.html(noDataDisplayMessage)
-      LoadMask.unmask($div)
     )
     .fail((xhr, text, error) ->
       noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
