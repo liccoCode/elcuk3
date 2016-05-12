@@ -36,34 +36,36 @@ $ ->
   # SKU | SID 项目的详细查看事件
   ).on("click", ".sid,.sku", (e) ->
     LoadMask.mask(DATA_TABLE)
+    try
+      $td = $(@)
+      sidOrSku = $td.text().trim()
+      $('#postVal').val(sidOrSku)
+      $postType = $('#postType')
 
-    $td = $(@)
-    sidOrSku = $td.text().trim()
-    $('#postVal').val(sidOrSku)
-    $postType = $('#postType')
+      # 绘制单个Selling的曲线图时,去掉Category条件
+      $categoryNode = $('select[name|="p.categoryId"]')
+      categoryId = $categoryNode.val()
+      $categoryNode.val("")
+      ajaxSaleUnitLines()
+      $categoryNode.val(categoryId)
 
-    # 绘制单个Selling的曲线图时,去掉Category条件
-    $categoryNode = $('select[name|="p.categoryId"]')
-    categoryId = $categoryNode.val()
-    $categoryNode.val("")
-    ajaxSaleUnitLines()
-    $categoryNode.val(categoryId)
+      # 转换率与 PageView
+      if $postType.val() == "sid"
+        ajaxSessionLine()
+        ajaxTurnOverLine()
+      else
+        pageViewDefaultContent()
 
-    # 转换率与 PageView
-    if $postType.val() == "sid"
-      ajaxSessionLine()
-      ajaxTurnOverLine()
-    else
-      pageViewDefaultContent()
+      #timeline
+      paintProcureUnitInTimeline($postType.val(), sidOrSku)
 
-    #timeline
-    paintProcureUnitInTimeline($postType.val(), sidOrSku)
-
-    # 选中 效果
-    $td.parents('table').find('tr').removeClass('selected')
-    $td.parents('tr').addClass('selected')
-
-    LoadMask.unmask(DATA_TABLE)
+      # 选中 效果
+      $td.parents('table').find('tr').removeClass('selected')
+      $td.parents('tr').addClass('selected')
+    catch error
+      Console.log(error)
+    finally
+      LoadMask.unmask(DATA_TABLE)
   # 列排序事件
   ).on('click', 'th[orderby]', (e) ->
     $td = $(@)
