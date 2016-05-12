@@ -7,6 +7,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
 import play.utils.FastRuntimeException;
 
@@ -145,6 +146,9 @@ public class StockObj implements Serializable, Cloneable {
             this.attrs.put("procureunitId", unit.id);
             if(unit.fba != null) this.attrs.put("fba", unit.fba.shipmentId);
             if(unit.shipType != null) this.attrs.put("shipType", unit.shipType.name());
+            if(unit.selling != null && StringUtils.isNotBlank(unit.selling.fnSku)) {
+                this.attrs.put("fnsku", unit.selling.fnSku);
+            }
             if(unit.whouse != null) {
                 this.attrs.put("whouseId", unit.whouse.id);
                 this.attrs.put("whouseName", unit.whouse.name);
@@ -174,6 +178,19 @@ public class StockObj implements Serializable, Cloneable {
         }
     }
 
+    public void setAttributes(InboundRecord inboundRecord) {
+        if(inboundRecord != null) {
+            if(StringUtils.isNotBlank(inboundRecord.procureunitId))
+                this.attrs.put("procureunitId", inboundRecord.procureunitId);
+            if(StringUtils.isNotBlank(inboundRecord.fba)) this.attrs.put("fba", inboundRecord.fba);
+            if(inboundRecord.shipType != null) this.attrs.put("shipType", inboundRecord.shipType.name());
+            if(inboundRecord.market != null) this.attrs.put("whouseName", inboundRecord.market
+                    .marketAndWhouseMapping());
+            if(inboundRecord.productCode != null) this.attrs.put("productCode", inboundRecord.productCode);
+            this.setAttributes();
+        }
+    }
+
     public StockObj dump() {
         try {
             return (StockObj) this.clone();
@@ -182,4 +199,26 @@ public class StockObj implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * 由于前期数据没有存储 fnsku 数据,所以在这里弥补一下
+     *
+     * @return
+     */
+    public String fnsku() {
+        this.attributes();
+        if(!this.attrs.isEmpty()) {
+            if(this.attrs.containsKey("fnsku")) {
+                return this.attrs.get("fnsku").toString();
+            } else if(this.attrs.containsKey("procureunitId")) {
+                ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(this.attrs.get("procureunitId")
+                        .toString()));
+                if(procureUnit != null && procureUnit.selling != null) {
+                    this.attrs.put("fnsku", procureUnit.selling.fnSku);
+                    this.setAttributes();
+                    return this.attrs.get("fnsku").toString();
+                }
+            }
+        }
+        return "";
+    }
 }

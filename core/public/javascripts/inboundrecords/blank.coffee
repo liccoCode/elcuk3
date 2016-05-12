@@ -19,7 +19,7 @@ $ ->
     return if stock_obj_id == "" || stock_obj_id == undefined
     $.get('/whouses/loadStockObj', {id: stock_obj_id},
       (r) ->
-        $('td[name=stock_name]').text(r.name)
+        $('input[name=stock_name]').val(r.name)
         $("input[name='record.stockObj.stockObjType']").val(r.type)
     )
 

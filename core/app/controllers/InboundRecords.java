@@ -28,7 +28,7 @@ import java.util.List;
 public class InboundRecords extends Controller {
     @Before(only = {"index", "blank", "create"})
     public static void setWhouses() {
-        renderArgs.put("whouses", Whouse.selfWhouses());
+        renderArgs.put("whouses", Whouse.selfWhouses(false));
     }
 
     @Check("inboundrecords.index")
@@ -54,6 +54,7 @@ public class InboundRecords extends Controller {
         record.valid();
         if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
         record.save();
+        record.stockObj.setAttributes(record);
         flash.success("创建成功!");
         redirect("/InboundRecords/index");
     }
