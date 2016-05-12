@@ -1,9 +1,6 @@
 package controllers;
 
-import helper.Constant;
-import helper.Dates;
-import helper.GTs;
-import helper.J;
+import helper.*;
 import models.ElcukRecord;
 import models.Privilege;
 import models.User;
@@ -67,7 +64,7 @@ public class Login extends Secure.Security {
             response.setCookie("usermd5", User.userMd5(username), domain, "/", timeInSeconds, false);
 
             response.setCookie("kod_name", "elcuk2", domain, "/", timeInSeconds, false);
-            response.setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
+            response.setCookie("kod_token", Webs.Md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
             response.setCookie("kod_user_language", "zh_CN", domain, "/", timeInSeconds, false);
             response.setCookie("kod_user_online_version", "check-at-1418867695", domain, "/", timeInSeconds, false);
             new ElcukRecord("login", J.json(
