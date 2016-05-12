@@ -3,7 +3,11 @@ package models.market;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
-import helper.*;
+import helper.Constant;
+import helper.FLog;
+import helper.HTTP;
+import helper.Webs;
+import models.OperatorConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -29,8 +33,6 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-
-import models.OperatorConfig;
 
 
 /**
@@ -230,7 +232,7 @@ public class Account extends Model {
 
                     if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
-                        HTTP.clearExpiredCookie();
+                        this.cookieStore().clearExpired(new Date());
                     } else {
                         Logger.warn("%s Seller Central Login Failed!", this.prettyName());
                     }
@@ -271,8 +273,8 @@ public class Account extends Model {
 
         if(Play.mode.isDev()) {
             FileUtils.writeStringToFile(new File(
-                    Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
-                            ".homepage.html"),
+                            Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
+                                    ".homepage.html"),
                     body
             );
         }
@@ -357,7 +359,7 @@ public class Account extends Model {
                             FLog.T.HTTP_ERROR);
                     loginSucc = false;
                 }
-                HTTP.client().getCookieStore().clearExpired(new Date());
+                this.cookieStore(market).clearExpired(new Date());
                 return loginSucc;
             default:
                 Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market +

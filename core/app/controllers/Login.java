@@ -1,9 +1,6 @@
 package controllers;
 
-import helper.Constant;
-import helper.Dates;
-import helper.GTs;
-import helper.J;
+import helper.*;
 import models.ElcukRecord;
 import models.Privilege;
 import models.User;
@@ -67,7 +64,7 @@ public class Login extends Secure.Security {
             response.setCookie("usermd5", User.userMd5(username), domain, "/", timeInSeconds, false);
 
             response.setCookie("kod_name", "elcuk2", domain, "/", timeInSeconds, false);
-            response.setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
+            response.setCookie("kod_token", Webs.Md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
             response.setCookie("kod_user_language", "zh_CN", domain, "/", timeInSeconds, false);
             response.setCookie("kod_user_online_version", "check-at-1418867695", domain, "/", timeInSeconds, false);
             new ElcukRecord("login", J.json(
@@ -114,12 +111,16 @@ public class Login extends Secure.Security {
          * 将用户信息缓存到 User Cache.
          */
         // 初始化用户缓存中的用户;
-        if(USER_CACHE.get(Secure.Security.connected()) == null) {
-            User user = User.findByUserName(Secure.Security.connected().toLowerCase());
-            user.login();
-            USER_CACHE.put(user.username, user);
+        String username = Secure.Security.connected();
+        if(StringUtils.isNotBlank(username)) {
+            if(USER_CACHE.get(username) == null) {
+                User user = User.findByUserName(username.toLowerCase());
+                user.login();
+                USER_CACHE.put(user.username, user);
+            }
+            return USER_CACHE.get(username.toLowerCase());
         }
-        return USER_CACHE.get(Secure.Security.connected().toLowerCase());
+        return null;
     }
 
     @SuppressWarnings("unchecked")

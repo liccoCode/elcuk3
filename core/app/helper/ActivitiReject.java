@@ -1,16 +1,5 @@
 package helper;
 
-/**
- * Created by IntelliJ IDEA.
- * User: mac
- * Date: 14-5-21
- * Time: 下午5:58
- */
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.ProcessEngineImpl;
@@ -18,40 +7,24 @@ import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.db.DbSqlSession;
 import org.activiti.engine.impl.db.DbSqlSessionFactory;
 import org.activiti.engine.impl.db.ListQueryParameterObject;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
-import org.activiti.engine.impl.persistence.entity.HistoricTaskInstanceEntity;
-import org.activiti.engine.impl.persistence.entity.IdentityLinkEntity;
-import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
-import org.activiti.engine.impl.persistence.entity.TaskEntity;
+import org.activiti.engine.impl.persistence.entity.*;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-/*
-*
-*
-* 任务回退
-*
-* 需求：从当前任务 任意回退至已审批任务
-* 方法：通过activiti源代码里的sqlSession直接修改数据库
-*
-* 第一步 完成历史TASK覆盖当前TASK
-* 用hi_taskinst修改当前ru_task
-* ru_task.ID_=hi_taskinst.ID_
-* ru_task.NAME_=hi_taskinst.NAME_
-* ru_task.TASK_DEF_KEY_=hi_taskinst.TASK_DEF_KEY_
-*
-* 第二步
-* 修改当前任务参与人列表
-* ru_identitylink 用ru_task.ID_去ru_identitylink 索引
-* ru_identitylink.TASK_ID_=hi_taskinst.ID_
-* ru_identitylink.USER_ID=hi_taskinst.ASSIGNEE_
-*
-* 第三步修改流程记录节点 把ru_execution的ACT_ID_ 改为hi_taskinst.TASK_DEF_KEY_
-*
-* author:pvii007
-* version:1.0
-*/
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: mac
+ * Date: 14-5-21
+ * Time: 下午5:58
+ *
+ * @deprecated 无人使用
+ */
 public class ActivitiReject {
     public static final int I_NO_OPERATION = 0;
     public static final int I_DONE = 1;

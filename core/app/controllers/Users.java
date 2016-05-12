@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.Notification;
 import models.Privilege;
 import models.Role;
 import models.User;
@@ -18,10 +19,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User 相关的操作
@@ -51,7 +49,12 @@ public class Users extends Controller {
     @Before(only = {"home", "updates"})
     public static void setHomePage() {
         int page = NumberUtils.toInt(request.params.get("page"), 1);
-        renderArgs.put("notifications", Login.current().notificationFeeds(page));
+        List<Notification> notifications = new ArrayList<>();
+        User user = Login.current();
+        if(user != null) {
+            notifications = user.notificationFeeds(page);
+        }
+        renderArgs.put("notifications", notifications);
     }
 
     public static void home() {
