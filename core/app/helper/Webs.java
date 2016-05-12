@@ -1,13 +1,11 @@
 package helper;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import models.market.Account;
 import models.market.M;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import play.Logger;
 import play.Play;
@@ -110,44 +108,8 @@ public class Webs {
      * @return
      */
     public static Future<Boolean> systemMail(String subject, String content) {
-//        HtmlEmail email = new HtmlEmail();
-//        try {
-//            email.setCharset("UTF-8");
-//            email.setSubject(subject);
-//            email.addTo("wppurking@gmail.com");
-//            email.setFrom("support@easyacceu.com", "EasyAcc");
-//            email.setHtmlMsg(content);
-//        } catch(EmailException e) {
-//            Logger.warn("Email error: " + e.getMessage());
-//        }
-//        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
-//        return Mail.send(email);
-//        rollbar(subject, content);
         return null;
     }
-
-
-    public static void rollbar(String message, String context) {
-        String x = "{\"access_token\":\"380247fd2c4f4845ad511e3544b2e15e\"," +
-                "\"data\":{\"body\":{\"message\":{\"body\":\"" + message + "\"" +
-                "}},\"environment\":\"production\","
-                + "\"timestamp\": " + (System.currentTimeMillis() / 1000) + ","
-                + " \"platform\": \"linux\", \"language\": \"java\",\"framework\": \"play\", "
-                + "\"level\": \"warning\","
-                + "  \"request\": { \"url\": \"http://job.easya.cc\",\"method\": \"GET\","
-                + "   \"headers\": {\"Accept\": \"text/html\", \"Referer\": \"http://job.easya.cc/\"},   "
-                + "   \"params\": {\"controller\": \"project\",\"action\": \"index\"},      "
-                + "    \"GET\": {},\"query_string\": \"\",\"POST\": {},     "
-                + "     \"body\": \"" + context + "\",  "
-                + "     \"user_ip\": \"\" },  "
-
-                + "  \"server\": {\"host\": \"job.easya.cc\",  \"root\": \"/Users/\",\"branch\": \"master\", "
-                + "   \"code_version\": \"\","
-                + " \"sha\": \"\" } "
-                + "} }";
-        JSONObject post = HTTP.postJson("https://api.rollbar.com/api/1/item/", x);
-    }
-
 
     /**
      * 简单的发送 HTML 的系统邮件
@@ -442,5 +404,9 @@ public class Webs {
             Logger.error("Not support price format.");
             return new F.T2<M, Float>(defaultMarket, 999f);
         }
+    }
+
+    public static String Md5(String str) {
+        return DigestUtils.md5Hex(str);
     }
 }
