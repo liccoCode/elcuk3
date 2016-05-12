@@ -63,7 +63,7 @@ $ ->
       $td.parents('table').find('tr').removeClass('selected')
       $td.parents('tr').addClass('selected')
     catch error
-      Console.log(error)
+      console.log(error)
     finally
       LoadMask.unmask(DATA_TABLE)
   # 列排序事件
