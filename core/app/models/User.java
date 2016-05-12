@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.DBUtils;
+import helper.Webs;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.market.Listing;
@@ -12,7 +13,6 @@ import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
 import models.whouse.Whouse;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -553,14 +553,7 @@ public class User extends Model {
      * @return
      */
     public static String userMd5(String username) {
-        String userkey = "playelcuk2userauthenticate" + username;
-        return Md5(userkey);
-    }
-
-
-    //TODO MD5 的计算, 应该抽取到共拥有的 Util 方法中
-    public static String Md5(String plainText) {
-        return DigestUtils.md5Hex(plainText);
+        return Webs.Md5(String.format("playelcuk2userauthenticate%s", username));
     }
 
     /**
