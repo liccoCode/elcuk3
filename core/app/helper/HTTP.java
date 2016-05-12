@@ -15,6 +15,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.config.ConnectionConfig;
+import org.apache.http.cookie.ClientCookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -22,6 +23,7 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import play.Logger;
@@ -367,4 +369,23 @@ public class HTTP {
         }
     }
 
+    public static JSONObject getJson(CookieStore cookieStore, String url) {
+        Logger.debug("HTTP.get Json [%s]", url);
+        String json = get(cookieStore, url);
+        try {
+            return JSON.parseObject(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
+    public static BasicClientCookie buildCrossDomainCookie(String cookieName, String cookieValue) {
+        BasicClientCookie cookie = new BasicClientCookie(cookieName, cookieValue);
+        String domain = String.format(".%s", models.OperatorConfig.getVal("domain"));
+        cookie.setDomain(domain);
+        cookie.setAttribute(ClientCookie.DOMAIN_ATTR, domain);
+        cookie.setAttribute(ClientCookie.PATH_ATTR, "/");
+        return cookie;
+    }
 }
