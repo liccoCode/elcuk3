@@ -5,13 +5,14 @@ $.extend $.fn.dataTableExt.oStdClasses,
 $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
-  DATA_TABLE = $("#below_tabContent")
+  DATA_TABLE =
 
   # table 数据列表
-  DATA_TABLE.on("ajaxFresh", "#sid,#sku", () ->
+  $("#below_tabContent").on("ajaxFresh", "#sid,#sku", () ->
+    $data_table = $("#below_tabContent")
     $div = $(@)
     $("#postType").val($div.attr("id"))
-    LoadMask.mask(DATA_TABLE)
+    LoadMask.mask($data_table)
 
     $div.load("/Analyzes/analyzes", $('.search_form').serialize(), (r) ->
       $div.find('table').dataTable(
@@ -21,7 +22,7 @@ $ ->
           aaSorting: [[16, "desc"]]
           aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
       )
-      LoadMask.unmask(DATA_TABLE)
+      LoadMask.unmask($data_table)
     )
   # 分页事件
   ).on("click", ".pagination a[page]", (e) ->
@@ -35,7 +36,8 @@ $ ->
     ajaxFreshAcitveTableTab()
   # SKU | SID 项目的详细查看事件
   ).on("click", ".sid,.sku", (e) ->
-    LoadMask.mask(DATA_TABLE)
+    $data_table = $("#below_tabContent")
+    LoadMask.mask($data_table)
     try
       $td = $(@)
       sidOrSku = $td.text().trim()
@@ -63,7 +65,7 @@ $ ->
       $td.parents('table').find('tr').removeClass('selected')
       $td.parents('tr').addClass('selected')
     finally
-      LoadMask.unmask(DATA_TABLE)
+      LoadMask.unmask($data_table)
   # 列排序事件
   ).on('click', 'th[orderby]', (e) ->
     $td = $(@)
