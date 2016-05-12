@@ -26,13 +26,8 @@ import java.util.List;
 public class Application extends Controller {
 
     public static void index() {
-        /**如果是有PM首页权限则跳转到PM首页**/
+        //如果是有PM首页权限则跳转到PM首页
         User user = Login.current();
-        //Set<Privilege> privileges = Privilege.privileges(user.username, user.roles);
-        //Privilege privilege = Privilege.find("name=?", "pmdashboards.index").first();
-        //if(privileges.contains(privilege)) {
-        //Pmdashboards.index();
-        //}
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
