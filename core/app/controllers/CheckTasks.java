@@ -176,7 +176,7 @@ public class CheckTasks extends Controller {
         old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
         check.startTime = from;
         check.endTime = to;
-        check.checkor = old.shipwhouse.user.username;
+        check.checkor = old.checkor;
 
         check.validateRight();
         if(Validation.hasErrors()) {
@@ -195,7 +195,7 @@ public class CheckTasks extends Controller {
         CheckTask old = CheckTask.findById(id);
         check.startTime = from;
         check.endTime = to;
-        check.checkor = old.shipwhouse.user.username;
+        check.checkor = old.checkor;
         check.validateRequired();
         check.validateRight();
         if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
