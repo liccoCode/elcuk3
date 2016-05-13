@@ -34,36 +34,31 @@ $ ->
     ajaxFreshAcitveTableTab()
   # SKU | SID 项目的详细查看事件
   ).on("click", ".sid,.sku", (e) ->
-    $data_table = $("#below_tabContent")
-    LoadMask.mask($data_table)
-    try
-      $td = $(@)
-      sidOrSku = $td.text().trim()
-      $('#postVal').val(sidOrSku)
-      $postType = $('#postType')
+    $td = $(@)
+    sidOrSku = $td.text().trim()
+    $('#postVal').val(sidOrSku)
+    $postType = $('#postType')
 
-      # 绘制单个Selling的曲线图时,去掉Category条件
-      $categoryNode = $('select[name|="p.categoryId"]')
-      categoryId = $categoryNode.val()
-      $categoryNode.val("")
-      ajaxSaleUnitLines()
-      $categoryNode.val(categoryId)
+    # 绘制单个Selling的曲线图时,去掉Category条件
+    $categoryNode = $('select[name|="p.categoryId"]')
+    categoryId = $categoryNode.val()
+    $categoryNode.val("")
+    ajaxSaleUnitLines()
+    $categoryNode.val(categoryId)
 
-      # 转换率与 PageView
-      if $postType.val() == "sid"
-        ajaxSessionLine()
-        ajaxTurnOverLine()
-      else
-        pageViewDefaultContent()
+    # 转换率与 PageView
+    if $postType.val() == "sid"
+      ajaxSessionLine()
+      ajaxTurnOverLine()
+    else
+      pageViewDefaultContent()
 
-      #timeline
-      paintProcureUnitInTimeline($postType.val(), sidOrSku)
+    #timeline
+    paintProcureUnitInTimeline($postType.val(), sidOrSku)
 
-      # 选中 效果
-      $td.parents('table').find('tr').removeClass('selected')
-      $td.parents('tr').addClass('selected')
-    finally
-      LoadMask.unmask($data_table)
+    # 选中 效果
+    $td.parents('table').find('tr').removeClass('selected')
+    $td.parents('tr').addClass('selected')
   # 列排序事件
   ).on('click', 'th[orderby]', (e) ->
     $td = $(@)
@@ -146,6 +141,7 @@ $ ->
   # headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
   $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
     $div = $(@)
+    LoadMask.mask($div)
     $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
     .done((r) ->
       if r.flag == false
@@ -191,6 +187,7 @@ $ ->
         })
       else
         $div.html(noDataDisplayMessage)
+      LoadMask.unmask($div)
     )
     .fail((xhr, text, error) ->
       noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
