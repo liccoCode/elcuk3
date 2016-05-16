@@ -9,7 +9,7 @@
 #{info_row}
 <ul>
   <li>
-    通过 <strong>[ID]</strong> 搜索入库记录时请使用匹配器:  <strong>id:{ID}</strong>
+    通过 <strong>[ID]</strong> 搜索入库记录时请使用匹配器: <strong>id:{ID}</strong>
   </li>
   <li>
     <p class="text-error">
@@ -46,8 +46,8 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" placeholder="质检任务 ID Or 物料 ID" value="${p.search}" style="width:
-        240px;">
+        <input type="text" name="p.search" placeholder="质检任务 ID Or 物料采购 ID Or FBA Or 物料 ID" value="${p.search}"
+               style="width:280px;">
         <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
@@ -73,33 +73,56 @@
           <th>状态</th>
           <th>来源</th>
           <th>质检任务 ID</th>
-          <th>入库对象</th>
-          <th>名称</th>
-          <th>预计入库</th>
-          <th>实际入库</th>
-          <th>不良品入库</th>
+          <th>物料采购 ID</th>
+          <th>产品编码</th>
+          <th>产品名称</th>
+          <th>FBA</th>
+          <th>FnSKU</th>
+          <th>FBA 仓库</th>
+          <th>运输方式</th>
+          <th>质检结果</th>
+          <th>预计入库数</th>
+          <th>良品入库数</th>
+          <th>不良品入库数</th>
           <th>目标仓库</th>
           <th>创建时间</th>
-          <th>完成时间</th>
+          <th>入库时间</th>
           <th>备注</th>
         </tr>
       #{list items: records, as: 'r'}
         <tr>
+            #{set attrs: r.stockObj.attributes()/}
           <td>
             <label class="checkbox">
               <input type="checkbox" name="rids" value="${r.id}" class="inboundrecord">
             </label>
           </td>
           <td>${r.id}</td>
-          <td>${r.state.label()}</td>
-          <td>${r.origin.label()}</td>
+          <td>${r.state?.label()}</td>
+          <td>${r.origin?.label()}</td>
           <td>
             <a href="@{CheckTasks.show(r.checkTask?.id)}">${r.checkTask?.id}</a>
           </td>
           <td>
-            <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
+              #{if attrs.containsKey('procureunitId')}
+                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
+                ${attrs.get('procureunitId')}
+                </a>
+              #{/if}
           </td>
-          <td style="max-width: 280px;">${r.stockObj.name()}</td>
+          <td>
+            <a href="${r.stockObj?.showStockObjLink()}" target="_blank">${r.stockObj?.stockObjId}</a>
+          </td>
+          <td style="max-width: 280px;">${r.stockObj?.name()}</td>
+          <td>${attrs.get('fba')}</td>
+          <td style="min-width:130px;">
+            <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
+            ${r.stockObj?.fnsku()} <i class="icon-download-alt"></i>
+            </a>
+          </td>
+          <td>${attrs.get('whouseName')}</td>
+          <td>${attrs.get('shipType')}</td>
+          <td>${r.checkTask?.result?.label()}</td>
           <td>${r.planQty}</td>
           <td>
             <input type="text" name="qty" value="${r.qty}" style="width:45px;">
@@ -108,7 +131,7 @@
             <input type="text" name="badQty" value="${r.badQty}" style="width:45px;">
           </td>
           <td>
-            <select name="targetWhouse" data-value="${r.targetWhouse?.name}">
+            <select name="targetWhouse" data-value="${r.targetWhouse?.name}" style="max-width: 100px;">
               <option value="">仓库</option>
                 #{list items:whouses, as:'whouse'}
                   <option ${whouse.id == r.targetWhouse?.id ? 'selected' : ''} value="${whouse.id}">
@@ -117,10 +140,8 @@
                 #{/list}
             </select>
           </td>
-          <td>${r.createDate.datetime()}</td>
-          <td>
-            <input type="datetime" name="completeDate" value="${r.completeDate.datetime()}">
-          </td>
+          <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
+          <td>#{time_tooltip time: r.completeDate, datetime: true/}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
             <input type="hidden" name="state" value="${r.state.name()}">

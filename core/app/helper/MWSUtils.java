@@ -121,13 +121,13 @@ public class MWSUtils {
         Product.DescriptionData data = new Product.DescriptionData();
         data.setTitle(selling.aps.title);
         if(p.productdesc) {
-            data.setDescription(selling.aps.productDesc);
+            data.setDescription(selling.aps.productDesc.trim());
         }
         if(p.keyfeturess) {
             data.getBulletPoint().clear();
             for(String text : selling.aps.keyFeturess) {
                 if(StringUtils.isNotBlank(text)) {
-                    data.getBulletPoint().add(text);
+                    data.getBulletPoint().add(text.trim());
                 }
             }
         }
@@ -167,7 +167,7 @@ public class MWSUtils {
             data.getSearchTerms().clear();
             for(String word : selling.aps.searchTermss) {
                 if(StringUtils.isNotBlank(word)) {
-                    data.getSearchTerms().add(word);
+                    data.getSearchTerms().add(word.trim());
                 }
             }
         }

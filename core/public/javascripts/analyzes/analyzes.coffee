@@ -7,9 +7,10 @@ $ ->
 
   # table 数据列表
   $("#below_tabContent").on("ajaxFresh", "#sid,#sku", () ->
+    $data_table = $("#below_tabContent")
     $div = $(@)
     $("#postType").val($div.attr("id"))
-    LoadMask.mask($div)
+    LoadMask.mask($data_table)
 
     $div.load("/Analyzes/analyzes", $('.search_form').serialize(), (r) ->
       $div.find('table').dataTable(
@@ -19,7 +20,7 @@ $ ->
           aaSorting: [[16, "desc"]]
           aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
       )
-      LoadMask.unmask($div)
+      LoadMask.unmask($data_table)
     )
   # 分页事件
   ).on("click", ".pagination a[page]", (e) ->
@@ -58,7 +59,6 @@ $ ->
     # 选中 效果
     $td.parents('table').find('tr').removeClass('selected')
     $td.parents('tr').addClass('selected')
-
   # 列排序事件
   ).on('click', 'th[orderby]', (e) ->
     $td = $(@)

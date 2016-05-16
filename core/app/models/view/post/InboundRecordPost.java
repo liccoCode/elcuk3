@@ -46,17 +46,14 @@ public class InboundRecordPost extends Post<InboundRecord> {
             params.add(recordId);
             return new F.T2<>(sbd.toString(), params);
         }
-
         if(this.origin != null) {
             sbd.append(" AND origin=?");
             params.add(this.origin);
         }
-
         if(this.state != null) {
             sbd.append(" AND state=?");
             params.add(this.state);
         }
-
         if(this.from != null) {
             sbd.append(" AND createDate>=?");
             params.add(Dates.morning(this.from));
@@ -65,11 +62,14 @@ public class InboundRecordPost extends Post<InboundRecord> {
             sbd.append(" AND createDate<=?");
             params.add(Dates.night(this.to));
         }
-
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(
-                    String.format(" AND (checkTask.id='%s' OR stockObjId LIKE ?)", this.search, this.search));
+            sbd.append(String.format(
+                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
+                    this.search, this.search)
+            );
             params.add(this.word());
+            params.add("%\"fba\":\"" + this.search + "\"%");
+            params.add("%\"procureunitId\":" + this.search + "%");
         }
         sbd.append(" ORDER BY createDate DESC");
         return new F.T2<>(sbd.toString(), params);
