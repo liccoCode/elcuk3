@@ -63,6 +63,12 @@
         <option value="false" ${p.promotion == false ? 'selected' : ''}>不是促销订单</option>
       </select>
 
+      <select name="p.invoiceState" class="inline">
+        <option value="">发票状态(ALL)</option>
+        <option value="yes"  ${p.invoiceState == 'yes' ? 'selected' : ''}>发票已发送</option>
+        <option value="no" ${p.invoiceState == 'no' ? 'selected' : ''}>发票未发送</option>
+      </select>
+
       <div class="input-prepend inline">
         <span class="add-on">SKU:</span>
         <input type="text" style="width:160px;" id="inputsku" name="p.sku" placeholder="SKU" autocomplete="off" value="${p.sku}">
@@ -98,7 +104,7 @@
     <table class="table table-condensed table-bordered">
         #{render 'Orders/_order_table_tr.html', items:orders/}
       <tr class="tb_footer">
-        <td colspan="12">
+        <td colspan="15">
             #{bootstrap_pager pi:p, url:'' /}
         </td>
       </tr>

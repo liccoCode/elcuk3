@@ -114,4 +114,9 @@ public class Constant {
      */
     public static final String EXCHANGERATE_TOKEN = "EXCHANGERATE_TOKEN";
 
+    /**
+     * 保存发票地址
+     */
+    public static final String INVOICE_PATH = String.format("%s/elcuk2-data/invoces", Constant.HOME);
+
 }
