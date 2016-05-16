@@ -99,7 +99,7 @@
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '18' : '17'}">
+    <td colspan="${checkbox ? '23' : '22'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
@@ -152,7 +152,7 @@
           </table>
         </div>
 
-        <div class="span2">
+        <div class="span3">
           <div class="btn-toolbar">
             <!-- 普通修改 -->
               #{if unit.selling}
@@ -183,7 +183,7 @@
                       分拆
                     </a>
                   #{/power.ck}
-                <!-- 确认到货代处 -->
+                  <!-- 确认到货代处 -->
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
                         <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
@@ -193,14 +193,21 @@
                       #{/ifnot}
                   #{/if}
               </div>
+              #{if unit.fba}
+                #{power.ck 'fbas.update'}
+                  <div class="btn-toolbar">
+                    <!-- <a href="@{FBAs.update(unit.id)}" class="btn btn-small btn-warning" data-method='PUT'
+                  data-disable-with='更新中...'>
+                    更新 ${unit.fba?.shipmentId}
+                  </a>  -->
+                    <a href="@{FBAs.changeFBA(unit.id)}" class="btn btn-small btn-warning" data-disable-with='处理中...'
+                       title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
+                    </a>
+                  </div>
+                #{/power.ck}
+              #{/if}
               <div class="btn-toolbar">
                   #{if unit.fba}
-                      #{power.ck 'fbas.update'}
-                        <a href="@{FBAs.update(unit.id)}" class="btn btn-small btn-warning"
-                           data-method='PUT' data-disable-with='更新中...'>
-                          更新 ${unit.fba.shipmentId}
-                        </a>
-                      #{/power.ck}
                     <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
                     <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
                   #{/if}
