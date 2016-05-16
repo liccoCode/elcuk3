@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'用户管理界面 (' + users.size() + ')'/}
 #{set 'moreScripts'}
-    #{script name: 'users/index.coffee'/}
-    #{script name: 'component/notify.coffee'/}
+    #{script 'users/index.coffee'/}
+    #{script 'component/notify.coffee'/}
 #{/set}
 
 #{flash_alert /}

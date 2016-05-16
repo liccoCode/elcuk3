@@ -1,12 +1,12 @@
 #{extends 'main_full.html'/}
 #{set title:"出货单 #" + dp.id /}
 #{set 'moreScripts'}
-    #{script name: 'jquery.filedrop.js'/}
-    #{script name: 'component/dropUpload.coffee'/}
-    #{script name: 'timeline/timeline_js/timeline-api.js'/}
-    #{script name: 'analyzes/timeline.coffee'/}
-    #{script name: 'deliveryments/show.coffee'/}
-    #{script name: 'deliverplans/show.coffee'/}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'timeline/timeline_js/timeline-api.js'/}
+    #{script 'analyzes/timeline.coffee'/}
+    #{script 'deliveryments/show.coffee'/}
+    #{script 'deliverplans/show.coffee'/}
 #{/set}
 
 #{errorMsgs /}
