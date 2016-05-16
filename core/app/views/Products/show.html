@@ -1,11 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
-    #{script name: 'highstock.js'/}
-    #{script name: 'jquery.filedrop.js' /}
-    #{script name: 'component/dropUpload.coffee'/}
-    #{script name: 'products/product_detail.coffee'/}
-    #{script name: 'products/skulinechart.coffee'/}
+    #{script 'highstock.js'/}
+    #{script 'jquery.filedrop.js' /}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'products/product_detail.coffee'/}
+    #{script 'products/skulinechart.coffee'/}
 #{/set}
 
 #{if pro == null}

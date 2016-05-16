@@ -1,13 +1,13 @@
 #{extends 'main_full.html' /}
 #{set title:"运输单 #" + ship.id /}
 #{set 'moreScripts'}
-    #{script name: 'jquery.filedrop.js'/}
-    #{script name: 'component/dropUpload.coffee'/}
-    #{script name: 'highstock.js'/}
-    #{script name: 'timeline/timeline_js/timeline-api.js'/}
-    #{script name: 'analyzes/timeline.coffee'/}
-    #{script name: 'shipments/show.coffee'/}
-    #{script name: 'shipments/paymentunits.coffee'/}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'highstock.js'/}
+    #{script 'timeline/timeline_js/timeline-api.js'/}
+    #{script 'analyzes/timeline.coffee'/}
+    #{script 'shipments/show.coffee'/}
+    #{script 'shipments/paymentunits.coffee'/}
 #{/set}
 
 <ul class="nav nav-tabs" id="below_tab">
