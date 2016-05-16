@@ -10,7 +10,6 @@ import models.procure.Cooperator;
 import models.procure.FBACenter;
 import models.product.Product;
 import models.view.Ret;
-import models.view.post.WhousePost;
 import models.whouse.StockObj;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
@@ -37,7 +36,7 @@ public class Whouses extends Controller {
         renderArgs.put("cooperators", Cooperator.find("type = ?", Cooperator.T.SHIPPER).fetch());
     }
 
-    @Before(only = {"forwards", "updates"})
+    @Before(only = {"updates"})
     public static void setUpSelectData() {
         List<Whouse> cooperators = Cooperator.find("type = ?", Cooperator.T.SHIPPER).fetch();
         List<User> users = User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
@@ -51,14 +50,6 @@ public class Whouses extends Controller {
     public static void index() {
         List<Whouse> whs = Whouse.all().fetch();
         render(whs);
-    }
-
-    @Check("whouses.forwards")
-    public static void forwards(WhousePost p) {
-        if(p == null) p = new WhousePost(Whouse.T.FORWARD);
-
-        List<Whouse> whs = p.query();
-        render(p, whs);
     }
 
     public static void blank() {
