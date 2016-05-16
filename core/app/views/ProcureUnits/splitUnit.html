@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"分拆采购计划 #" + unit.id /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'procureunits/splitUnit.coffee'/}
+    #{script name: 'procureunits/splitUnit.coffee'/}
 #{/set}
 
 #{errorMsgs /}

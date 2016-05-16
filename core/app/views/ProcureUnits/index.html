@@ -1,8 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:"采购单元列表 (${p.count()})"  /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'procureunits/index.coffee'/}
+    #{script name: 'component/pagination.coffee'/}
+    #{script name: 'procureunits/index.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}

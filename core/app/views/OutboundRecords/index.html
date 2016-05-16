@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'出库记录(' + records.size() + ')'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'outboundrecords/index.coffee'/}
+    #{script name: 'component/pagination.coffee'/}
+    #{script name: 'outboundrecords/index.coffee'/}
 #{/set}
 #{flash_alert /}
 

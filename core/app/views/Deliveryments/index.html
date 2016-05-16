@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"采购单列表 (${deliveryments.size()})" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'deliveryments/index.coffee'/}
+    #{script name: 'component/pagination.coffee'/}
+    #{script name: 'deliveryments/index.coffee'/}
 #{/set}
 
 #{info_row}

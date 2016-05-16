@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"Cooperators(${coopers.size()})" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'cooperators/index.coffee'/}
-    #{script_cdn name: 'jquery.validate.min.js'/}
+    #{script name: 'cooperators/index.coffee'/}
+    #{script name: 'jquery.validate.min.js'/}
 #{/set}
 
 #{if flash.success}
