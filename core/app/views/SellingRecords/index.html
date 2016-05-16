@@ -1,11 +1,11 @@
 #{extends 'main_full.html' /}
 #{set title:"销售财务分析"  /}
 #{set 'moreStyles'}
-    #{stylesheet_cdn name:'payments.css'/}
+    #{stylesheet name:'payments.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script_cdn name: 'sellingrecords/index.coffee'/}
-    #{script_cdn name: 'highstock.js'/}
+    #{script name: 'sellingrecords/index.coffee'/}
+    #{script name: 'highstock.js'/}
 #{/set}
 
 <div class="row-fluid" id='chartsDiv'>

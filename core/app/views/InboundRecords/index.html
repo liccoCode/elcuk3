@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'入库记录(' + records.size() + ')'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'inboundrecords/index.coffee'/}
+    #{script name: 'component/pagination.coffee'/}
+    #{script name: 'inboundrecords/index.coffee'/}
 #{/set}
 #{flash_alert /}
 
