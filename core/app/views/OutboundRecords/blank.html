@@ -59,8 +59,7 @@
       <select name="record.market" name="record.market" style="width: 230px;" required>
         <option value="">去往国家</option>
           #{list items:models.market.M.amazonVals(), as:'m'}
-            <option ${m.name().equals(record.market) ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()
-            }</option>
+            <option ${m.name().equals(record.market) ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()}</option>
           #{/list}
       </select>
     </td>

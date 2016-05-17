@@ -152,16 +152,6 @@
                     #{/list}
                 </select>
               #{/if}
-              #{elseif r.type == models.whouse.OutboundRecord.T.InternalTrans}
-                <select name="targetId" style="width: 150px;" data-value="${r.getSelfWhouse()?.name}">
-                  <option value="">仓库</option>
-                    #{list items:whouses, as:'whouse'}
-                      <option ${whouse.id.toString() == r.targetId ? 'selected' : ''} value="${whouse.id}">
-                      ${whouse.name}
-                      </option>
-                    #{/list}
-                </select>
-              #{/elseif}
           </td>
           <td>${r.createDate.datetime()}</td>
           <td>
