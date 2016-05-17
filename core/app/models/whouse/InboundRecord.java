@@ -1,10 +1,12 @@
 package models.whouse;
 
+import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.Reflects;
 import models.embedded.ERecordBuilder;
 import models.market.M;
+import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
@@ -318,5 +320,24 @@ public class InboundRecord extends Model {
             Validation.addError("", e.getMessage());
         }
         return records;
+    }
+
+    /**
+     * 供应商
+     *
+     * @return
+     */
+    public Cooperator cooperator() {
+        this.stockObj.attributes();
+        if(!this.stockObj.attrs.containsKey("cooperatorId")) {
+            this.stockObj.resetAttrs();
+            this.save();
+        }
+        Optional cooperatorId = Optional.fromNullable(this.stockObj.attrs.get("cooperatorId"));
+        if(cooperatorId.isPresent()) {
+            return Cooperator.findById(NumberUtils.toLong(cooperatorId.get().toString()));
+        } else {
+            return null;
+        }
     }
 }

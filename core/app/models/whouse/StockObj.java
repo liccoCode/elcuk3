@@ -1,6 +1,7 @@
 package models.whouse;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.J;
 import models.procure.ProcureUnit;
@@ -76,9 +77,8 @@ public class StockObj implements Serializable, Cloneable {
     public Product getProduct() {
         if(this.stockObjType != SOT.SKU) {
             throw new FastRuntimeException("货物类型(stockObjType)错误, 无法找到对应 Product!");
-        } else {
-            return Product.find("sku=?", stockObjId).first();
         }
+        return Product.find("sku=?", stockObjId).first();
     }
 
     public StockObj() {
@@ -109,7 +109,8 @@ public class StockObj implements Serializable, Cloneable {
 
         switch(this.stockObjType) {
             case SKU:
-                return getProduct().abbreviation;
+                Product product = getProduct();
+                if(product != null) return product.abbreviation;
             case PRODUCT_MATERIEL:
                 //TODO
             case PACKAGE_MATERIEL:
@@ -153,6 +154,7 @@ public class StockObj implements Serializable, Cloneable {
                 this.attrs.put("whouseId", unit.whouse.id);
                 this.attrs.put("whouseName", unit.whouse.name);
             }
+            if(unit.cooperator != null) this.attrs.put("cooperatorId", unit.cooperator);
             this.setAttributes();
         }
     }
@@ -206,19 +208,27 @@ public class StockObj implements Serializable, Cloneable {
      */
     public String fnsku() {
         this.attributes();
-        if(!this.attrs.isEmpty()) {
-            if(this.attrs.containsKey("fnsku")) {
-                return this.attrs.get("fnsku").toString();
-            } else if(this.attrs.containsKey("procureunitId")) {
-                ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(this.attrs.get("procureunitId")
-                        .toString()));
-                if(procureUnit != null && procureUnit.selling != null) {
-                    this.attrs.put("fnsku", procureUnit.selling.fnSku);
-                    this.setAttributes();
-                    return this.attrs.get("fnsku").toString();
-                }
+        if(!this.attrs.containsKey("fnsku")) this.resetAttrs();
+        Optional fnsku = Optional.fromNullable(this.attrs.get("fnsku"));
+        if(fnsku.isPresent()) {
+            return fnsku.get().toString();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * 重新加载 attributes 属性到 attrs
+     */
+    public void resetAttrs() {
+        if(this.attrs.containsKey("procureunitId")) {
+            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(this.attrs.get("procureunitId")
+                    .toString()));
+            if(procureUnit != null && procureUnit.selling != null) {
+                this.attrs.put("fnsku", procureUnit.selling.fnSku);
+                this.attrs.put("cooperatorId", procureUnit.cooperator.id);
+                this.setAttributes();
             }
         }
-        return "";
     }
 }
