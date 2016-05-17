@@ -115,15 +115,15 @@
             <a href="${r.stockObj?.showStockObjLink()}" target="_blank">${r.stockObj?.stockObjId}</a>
           </td>
           <td style="max-width: 280px;">${r.stockObj?.name()}</td>
-          <td>${attrs.get('fba')}</td>
           <td>
               #{set cooperator: r.cooperator()/}
-              #{if cooperator == null}
-                <a href="@{Cooperators.show(cooperator)}">
+              #{if cooperator != null}
+                <a href="@{Cooperators.show(cooperator.id)}">
                 ${cooperator.name}
                 </a>
               #{/if}
           </td>
+          <td>${attrs.get('fba')}</td>
           <td style="min-width:130px;">
             <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
             ${r.stockObj?.fnsku()} <i class="icon-download-alt"></i>
