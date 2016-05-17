@@ -713,13 +713,12 @@ public class Orderr extends GenericModel {
         if(this.fees != null && this.fees.size() > 0) {
             for(SaleFee fee : this.fees) {
                 if(fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") ||
-                        fee.type.name.equals("giftwrap"))  {
-                    invoice.price.add(new BigDecimal(fee.cost).divide(new BigDecimal(this.orderrate()),2,
-                                BigDecimal.ROUND_HALF_DOWN).floatValue());
+                        fee.type.name.equals("giftwrap") && fee.cost > 0) {
+                    invoice.price.add(new BigDecimal(fee.cost).divide(new BigDecimal(this.orderrate()), 2,
+                            BigDecimal.ROUND_HALF_DOWN).floatValue());
                 }
             }
         }
-
 
         invoice.saveprice();
         invoice.europevat = OrderInvoice.VAT.NORMAL;
