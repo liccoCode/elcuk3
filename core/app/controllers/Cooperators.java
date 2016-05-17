@@ -193,6 +193,11 @@ public class Cooperators extends Controller {
         b2bCustomInfoIndex(new BtbCustomPost());
     }
 
+    /**
+     * TODO:: 支持类型查询(运输商 供应商)
+     * 模糊匹配合作伙伴
+     * @param name
+     */
     public static void findSameCooperator(String name) {
         List<Cooperator> list = Cooperator.find("name like '%" + name + "%'").fetch();
         List<String> names = new ArrayList<String>();

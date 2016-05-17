@@ -142,6 +142,7 @@
             <input type="text" name="qty" value="${r.qty}" style="width:45px;">
           </td>
           <td>
+            <!-- TODO:: 根据 type 来自动匹配下拉项 -->
               #{if r.type == models.whouse.OutboundRecord.T.Normal}
                 <select name="targetId" style="width: 150px;" data-value="${r.getCooperator()?.name}">
                   <option value="">运输商</option>
