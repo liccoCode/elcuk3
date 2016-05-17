@@ -697,14 +697,26 @@ public class Orderr extends GenericModel {
         invoice.totalamount = amt._1;
         invoice.price = new ArrayList<>();
 
-        for(OrderItem item : this.items) {
-            if(item.quantity.intValue() > 0) {
-                invoice.price.add(new BigDecimal(item.price - item.discountPrice)
-                        .divide(new BigDecimal(item.quantity), 2, 4)
-                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).floatValue());
+        if(this.items != null && this.items.size() > 0) {
+            for(OrderItem item : this.items) {
+                if(item.quantity.intValue() > 0) {
+                    invoice.price.add(new BigDecimal(item.price - item.discountPrice)
+                            .divide(new BigDecimal(item.quantity), 2, 4)
+                            .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).floatValue());
 
-            } else {
-                invoice.price.add(0f);
+                } else {
+                    invoice.price.add(0f);
+                }
+            }
+        }
+
+        if(this.fees != null && this.fees.size() > 0) {
+            for(SaleFee fee : this.fees) {
+                if(fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") ||
+                        fee.type.name.equals("giftwrap") && fee.cost > 0) {
+                    invoice.price.add(new BigDecimal(fee.cost).divide(new BigDecimal(this.orderrate()), 2,
+                            BigDecimal.ROUND_HALF_DOWN).floatValue());
+                }
             }
         }
 

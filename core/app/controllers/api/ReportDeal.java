@@ -106,12 +106,10 @@ public class ReportDeal extends Controller {
 
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
 
-
         OrderInvoice invoice = OrderInvoice.findById(orderId);
         if(invoice == null) {
             invoice = ord.createOrderInvoice();
         }
-
         invoice.setprice();
 
         final PDF.Options options = new PDF.Options();
