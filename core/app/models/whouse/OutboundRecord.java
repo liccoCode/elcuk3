@@ -6,7 +6,6 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
-import models.market.M;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -41,7 +40,7 @@ public class OutboundRecord extends Model {
     public StockObj stockObj;
 
     /**
-     * 出库目标(货代 Or 仓库 的 ID)
+     * 出库目标(货代 Or 供应商 Or 其他)
      */
     public String targetId;
 
@@ -54,13 +53,37 @@ public class OutboundRecord extends Model {
         Normal {
             @Override
             public String label() {
-                return "正常出库";
+                return "Amazon 出库";
             }
         },
-        InternalTrans {
+        B2B {
             @Override
             public String label() {
-                return "内部调拨";
+                return "B2B 出库";
+            }
+        },
+        Refund {
+            @Override
+            public String label() {
+                return "退回工厂";
+            }
+        },
+        Process {
+            @Override
+            public String label() {
+                return "品拓生产";
+            }
+        },
+        Sample {
+            @Override
+            public String label() {
+                return "取样";
+            }
+        },
+        Other {
+            @Override
+            public String label() {
+                return "其他出库";
             }
         };
 
@@ -187,15 +210,16 @@ public class OutboundRecord extends Model {
     public Shipment.T shipType;
 
     @Transient
-    public M market;
+    public String market;
 
     @Transient
     public String productCode;
+
     /**************************************/
 
     public OutboundRecord() {
         this.qty = 0;
-        this.planQty = 0;
+        this.planQty = 1;
         this.state = S.Pending;
     }
 
@@ -224,18 +248,6 @@ public class OutboundRecord extends Model {
             return Cooperator.findById(NumberUtils.toLong(this.targetId));
         }
         throw new FastRuntimeException("类型(type)错误, 无法查询到合作伙伴!");
-    }
-
-    /**
-     * 出货目标(内部仓库)
-     *
-     * @return
-     */
-    public Whouse getSelfWhouse() {
-        if(this.type == T.InternalTrans) {
-            return Whouse.findById(NumberUtils.toLong(this.targetId));
-        }
-        throw new FastRuntimeException("类型(type)错误, 无法查询到仓库!");
     }
 
     public static List<String> batchConfirm(List<Long> rids) {

@@ -201,5 +201,4 @@ public class Cooperators extends Controller {
         }
         renderJSON(J.json(names));
     }
-
 }
