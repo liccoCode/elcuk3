@@ -132,9 +132,12 @@
           </td>
           <td>${attrs.get('fba')}</td>
           <td style="min-width:130px;">
-            <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
-            ${r.stockObj?.fnsku()} <i class="icon-download-alt"></i>
-            </a>
+              #{set fnsku: r.stockObj?.fnsku()/}
+              #{if fnsku != null && fnsku != ""}
+                <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
+                ${} <i class="icon-download-alt"></i>
+                </a>
+              #{/if}
           </td>
           <td>${attrs.get('whouseName')}</td>
           <td>${attrs.get('shipType')}</td>
