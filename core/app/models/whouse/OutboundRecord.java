@@ -342,18 +342,21 @@ public class OutboundRecord extends Model {
      * 根据 type 来校验 market 和 targetId 字段
      */
     public void typeValid() {
-        if(StringUtils.isBlank(this.targetId)) Validation.addError("", "出库对象不能为空!");
+        if(StringUtils.isBlank(this.targetId)) Validation.addError("", "出库对象不能为空.");
+        Optional whouseName = Optional.fromNullable(this.stockObj.attributes().get("whouseName"));
         switch(this.type) {
             case Normal:
-                Optional whouseName = Optional.fromNullable(this.stockObj.attributes().get("whouseName"));
-                if(!whouseName.isPresent()) {
+                this.targetIdValidByCT(Cooperator.T.SHIPPER);
+                if(whouseName.isPresent()) {
+                    if(M.val(whouseName.get().toString()) == null) {
+                        Validation.addError("", "去往国家必须为一个正常的 Market(例: FBA_DE).");
+                    }
+                } else {
                     Validation.addError("", "去往国家不能为空.");
-                } else if(M.val(whouseName.get().toString()) == null) {
-                    Validation.addError("", "去往国家必须为一个正常的 Market(例: FBA_DE).");
-                    this.targetIdValidByCT(Cooperator.T.SHIPPER);
                 }
                 break;
             case B2B:
+                if(!whouseName.isPresent()) Validation.addError("", "去往国家不能为空.");
                 this.targetIdValidByCT(Cooperator.T.SHIPPER);
                 break;
             case Refund:
@@ -361,15 +364,16 @@ public class OutboundRecord extends Model {
                 break;
             case Process:
                 if(StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
-                    Validation.addError("", "出库对象只能为品拓生产部!");
+                    Validation.addError("", "出库对象只能为品拓生产部.");
                 }
                 break;
             case Sample:
                 if(!Arrays.asList("质检部", "采购部", "运营部", "研发部", "生产部").contains(this.targetId)) {
-                    Validation.addError("", "出库对象错误!");
+                    Validation.addError("", "出库对象错误.");
                 }
                 break;
         }
+
     }
 
     /**
