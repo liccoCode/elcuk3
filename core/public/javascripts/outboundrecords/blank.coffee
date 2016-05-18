@@ -52,7 +52,7 @@ $ ->
         url: '/Cooperators/findSameCooperator',
         type: 'GET',
         dataType: 'json',
-        data: {name: query},
+        data: {name: query, type: if type == 'Refund' then 'SUPPLIER' else 'SHIPPER'},
         error: ->
           callback()
         success: (res) ->
