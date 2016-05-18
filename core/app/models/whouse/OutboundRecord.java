@@ -242,15 +242,15 @@ public class OutboundRecord extends Model {
     }
 
     /**
-     * 出货目标(货代)
+     * 出货目标(货代 Or 供应商)
      *
      * @return
      */
     public Cooperator getCooperator() {
-        if(this.type == T.Normal) {
+        if(Arrays.asList(T.Normal, T.B2B, T.Refund).contains(this.type)) {
             return Cooperator.findById(NumberUtils.toLong(this.targetId));
         }
-        throw new FastRuntimeException("类型(type)错误, 无法查询到合作伙伴!");
+        return null;
     }
 
     public static List<String> batchConfirm(List<Long> rids) {
@@ -434,5 +434,14 @@ public class OutboundRecord extends Model {
     public boolean checkWhouseItemQty() {
         WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
         return item != null && item.qty >= Math.abs(this.qty);
+    }
+
+    public String targetName() {
+        if(Arrays.asList(T.Normal, T.B2B, T.Refund).contains(this.type) && StringUtils.isNotBlank(this.targetId)) {
+            Cooperator cooperator = Cooperator.findById(NumberUtils.toLong(this.targetId));
+            return cooperator.name;
+        } else {
+            return targetId;
+        }
     }
 }
