@@ -9,7 +9,7 @@ $ ->
       noty({text: '请选择出库记录！', type: 'error'})
       return false
     else
-      return unless confirm("确认入库?")
+      return unless confirm("确认出库?")
       $("form[name=confirm_form]").submit()
   )
 
