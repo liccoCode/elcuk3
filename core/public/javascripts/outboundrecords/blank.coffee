@@ -29,7 +29,6 @@ $ ->
         )
         $targetSelectize.addItem('质检部')
       else # Other
-        console.log($targetSelectize.settings)
         $targetSelectize.settings.create = true
   )
 
@@ -40,7 +39,6 @@ $ ->
         $('input[name=stock_name]').val(r.name)
         $("input[name='record.stockObj.stockObjType']").val(r.type)
     )
-  $("input[name='record.stockObj.stockObjId']").trigger('loadStockObj')
 
   $targetIdSelect = $("select[name='record.targetId']").selectize({
     persist: false,
@@ -73,3 +71,7 @@ $ ->
         text: input
       }
   })
+
+  $(document).ready ->
+    $("input[name='record.stockObj.stockObjId']").trigger('loadStockObj')
+    $("select[name='record.type']").trigger("change")
