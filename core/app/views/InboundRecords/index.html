@@ -74,8 +74,9 @@
           <th>来源</th>
           <th>质检任务 ID</th>
           <th>物料采购 ID</th>
-          <th>产品编码</th>
+          <th>SKU</th>
           <th>产品名称</th>
+          <th>供应商</th>
           <th>FBA</th>
           <th>FnSKU</th>
           <th>FBA 仓库</th>
@@ -114,6 +115,14 @@
             <a href="${r.stockObj?.showStockObjLink()}" target="_blank">${r.stockObj?.stockObjId}</a>
           </td>
           <td style="max-width: 280px;">${r.stockObj?.name()}</td>
+          <td>
+              #{set cooperator: r.cooperator()/}
+              #{if cooperator != null}
+                <a href="@{Cooperators.show(cooperator.id)}">
+                ${cooperator.name}
+                </a>
+              #{/if}
+          </td>
           <td>${attrs.get('fba')}</td>
           <td style="min-width:130px;">
             <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">

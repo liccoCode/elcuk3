@@ -30,10 +30,10 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.origin" class="inline">
-        <option value="">出库来源</option>
-      #{list items:models.whouse.OutboundRecord.O, as:'o'}
-        <option ${o == p.origin ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
+      <select name="p.type" class="inline">
+        <option value="">出库类别</option>
+      #{list items:models.whouse.OutboundRecord.T, as:'t'}
+        <option ${t == p.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
       #{/list}
       </select>
 
@@ -84,11 +84,11 @@
           </th>
           <th>ID</th>
           <th>仓库</th>
-          <th>来源</th>
+          <th>出库类别</th>
           <th>状态</th>
           <th>出货计划 ID</th>
-          <th>成品编码</th>
-          <th>名称</th>
+          <th>SKU</th>
+          <th>产品名称</th>
           <th>FBA</th>
           <th>去往国家</th>
           <th>运输方式</th>
@@ -120,7 +120,7 @@
                 #{/list}
             </select>
           </td>
-          <td>${r.origin.label()}</td>
+          <td>${r.type.label()}</td>
           <td>${r.state.label()}</td>
           <td>
               #{if attrs.containsKey('procureunitId')}
@@ -142,31 +142,37 @@
             <input type="text" name="qty" value="${r.qty}" style="width:45px;">
           </td>
           <td>
-              #{if r.type == models.whouse.OutboundRecord.T.Normal}
-                <select name="targetId" style="width: 150px;" data-value="${r.getCooperator()?.name}">
-                  <option value="">运输商</option>
+            <select name="targetId" style="width: 150px;" data-value="${r.targetName()}" data-type="${r.type?.name()}">
+              <option value=""></option>
+                #{if r.type.name() ==  'Normal' || r.type.name() == 'B2B'}
                     #{list items:shippers, as: 'ship'}
                       <option ${ship.id.toString() == r.targetId ? 'selected' : ''} value="${ship.id}">
                       ${ship.name}
                       </option>
                     #{/list}
-                </select>
-              #{/if}
-              #{elseif r.type == models.whouse.OutboundRecord.T.InternalTrans}
-                <select name="targetId" style="width: 150px;" data-value="${r.getSelfWhouse()?.name}">
-                  <option value="">仓库</option>
-                    #{list items:whouses, as:'whouse'}
-                      <option ${whouse.id.toString() == r.targetId ? 'selected' : ''} value="${whouse.id}">
-                      ${whouse.name}
+                #{/if}
+                #{elseif r.type.name() == 'Refund'}
+                  <!-- 等待用户输入自动加载-->
+                #{/elseif}
+                #{elseif r.type.name() == 'Process'}
+                  <option ${r.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
+                    品拓生产部
+                  </option>
+                #{/elseif}
+                #{elseif r.type.name() == 'Sample'}
+                    #{list items: ["质检部", "采购部", "运营部", "研发部", "生产部"], as: 'target'}
+                      <option ${r.targetId == target ? 'selected' : ''} value="${target}">
+                      ${target}
                       </option>
                     #{/list}
-                </select>
-              #{/elseif}
+                #{/elseif}
+                #{elseif r.type.name() == 'Other'}
+                  <option selected value="${r.targetId}">${r.targetId}</option>
+                #{/elseif}
+            </select>
           </td>
           <td>${r.createDate.datetime()}</td>
-          <td>
-            <input type="datetime" name="outboundDate" value="${r.outboundDate.datetime()}">
-          </td>
+          <td>${r.outboundDate.datetime()}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}" style="width: 150px;">
             <input type="hidden" name="state" value="${r.state.name()}">

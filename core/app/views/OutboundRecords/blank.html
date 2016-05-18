@@ -12,21 +12,54 @@
   <tr>
     <th>物料编码</th>
     <td>
-      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}">
+      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}" required>
       <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
     </td>
 
-    <th>名称</th>
-    <td name="stock_name" style="width: 40%;"></td>
+    <th>产品名称</th>
+    <td style="width: 40%;">
+      <input type="text" name="stock_name" value="${record.stockObj?.name()}" class="input-xxlarge" required>
+    </td>
   </tr>
   <tr>
-    <th>仓库</th>
-    <td colspan="3">
+    <th>仓库名称</th>
+    <td>
       <select name="record.whouse.id">
           #{list items:whouses, as:'whouse'}
             <option ${whouse.id == record.whouse?.id ? 'selected' : ''} value="${whouse.id}">
             ${whouse.name}
             </option>
+          #{/list}
+      </select>
+    </td>
+
+    <th>出库类别</th>
+    <td>
+      <select name="record.type">
+          #{list items: models.whouse.OutboundRecord.T.values(), as: 't'}
+            <option value="${t.name()}" ${record.type == t ? 'selected' : ''}>${t.label()}</option>
+          #{/list}
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <th>出库对象</th>
+    <td>
+      <select name="record.targetId" style="width: 230px;">
+          #{list items:shippers, as: 'ship'}
+            <option ${ship.id.toString() == record.targetId ? 'selected' : ''} value="${ship.id}">
+            ${ship.name}
+            </option>
+          #{/list}
+      </select>
+    </td>
+
+    <th>去往国家</th>
+    <td>
+      <select name="record.market" name="record.market" style="width: 230px;">
+        <option value="">去往国家</option>
+          #{list items:models.market.M.amazonVals(), as:'m'}
+            <option ${m.name().equals(record.market) ? 'selected' : ''} value="${m.marketAndWhouseMapping()}">${m.marketAndWhouseMapping()}</option>
           #{/list}
       </select>
     </td>
@@ -40,29 +73,6 @@
     <th>产品条码</th>
     <td>
       <input type="text" name="record.productCode" value="${record.productCode}">
-    </td>
-  </tr>
-  <tr>
-    <th>去往国家</th>
-    <td>
-      <select name="record.market" class="inline" name="record.market">
-        <option value="">去往国家</option>
-          #{list items:models.market.M.amazonVals(), as:'m'}
-            <option ${m == record.market ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()}</option>
-          #{/list}
-      </select>
-    </td>
-
-    <th>出库对象</th>
-    <td>
-      <select name="record.targetId" style="width: 150px;">
-        <option value="">运输商</option>
-          #{list items:shippers, as: 'ship'}
-            <option ${ship.id.toString() == record.targetId ? 'selected' : ''} value="${ship.id}">
-            ${ship.name}
-            </option>
-          #{/list}
-      </select>
     </td>
   </tr>
   <tr>
@@ -84,18 +94,18 @@
   <tr>
     <th>预计出库数量</th>
     <td>
-      <input type="text" name="record.planQty" value="${record.planQty}">
+      <input type="text" name="record.planQty" value="${record.planQty}" class="input-mini" required>
     </td>
 
     <th>实际出库数量</th>
     <td>
-      <input type="text" name="record.qty" value="${record.qty}">
+      <input type="text" name="record.qty" value="${record.qty}" class="input-mini">
     </td>
   </tr>
   <tr>
     <th>备注</th>
     <td colspan="4">
-      <textarea name="record.memo" rows="4" class="span10">${record.memo}</textarea>
+      <textarea name="record.memo" rows="4" class="input-block-level">${record.memo}</textarea>
     </td>
   </tr>
   <tr>

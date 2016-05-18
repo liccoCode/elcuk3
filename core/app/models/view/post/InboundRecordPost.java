@@ -64,12 +64,13 @@ public class InboundRecordPost extends Post<InboundRecord> {
         }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(String.format(
-                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
+                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
                     this.search, this.search)
             );
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");
             params.add("%\"procureunitId\":" + this.search + "%");
+            params.add("%\"cooperatorId\":" + this.search + "%");
         }
         sbd.append(" ORDER BY createDate DESC");
         return new F.T2<>(sbd.toString(), params);
