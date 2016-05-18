@@ -1,11 +1,13 @@
 package models.whouse;
 
+import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -20,6 +22,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -331,8 +334,56 @@ public class OutboundRecord extends Model {
         Validation.required("实际出库数量", this.qty);
         Validation.required("状态", this.state);
         Validation.min("预计出库数量", this.planQty, 1);
+        this.typeValid();
         this.stockObj.valid();
     }
+
+    /**
+     * 根据 type 来校验 market 和 targetId 字段
+     */
+    public void typeValid() {
+        if(StringUtils.isBlank(this.targetId)) Validation.addError("", "出库对象不能为空!");
+        switch(this.type) {
+            case Normal:
+                Optional whouseName = Optional.fromNullable(this.stockObj.attributes().get("whouseName"));
+                if(!whouseName.isPresent()) {
+                    Validation.addError("", "去往国家不能为空.");
+                } else if(M.val(whouseName.get().toString()) == null) {
+                    Validation.addError("", "去往国家必须为一个正常的 Market(例: FBA_DE).");
+                    this.targetIdValidByCT(Cooperator.T.SHIPPER);
+                }
+                break;
+            case B2B:
+                this.targetIdValidByCT(Cooperator.T.SHIPPER);
+                break;
+            case Refund:
+                this.targetIdValidByCT(Cooperator.T.SUPPLIER);
+                break;
+            case Process:
+                if(StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
+                    Validation.addError("", "出库对象只能为品拓生产部!");
+                }
+                break;
+            case Sample:
+                if(!Arrays.asList("质检部", "采购部", "运营部", "研发部", "生产部").contains(this.targetId)) {
+                    Validation.addError("", "出库对象错误!");
+                }
+                break;
+        }
+    }
+
+    /**
+     * 根据供应商类别来校验 targetId 是否正确对应到 Cooperator
+     *
+     * @param cooperatorType
+     */
+    public void targetIdValidByCT(Cooperator.T cooperatorType) {
+        if(StringUtils.isNotBlank(this.targetId) && cooperatorType != null &&
+                Cooperator.find("id=? AND type=?", NumberUtils.toLong(this.targetId), cooperatorType) == null) {
+            Validation.addError("", String.format("出库类别为 %s 的时候, 出库对象应该为 %s", this.type.label(), cooperatorType.to_s()));
+        }
+    }
+
 
     public void confirmValid() {
         this.valid();
