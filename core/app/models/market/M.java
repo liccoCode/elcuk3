@@ -665,21 +665,21 @@ public enum M {
                 // 在 DE 使用了 英文页面以后与 UK 一样了. 可 US 得另外设置日期字符串格式 - -||
                 return String
                         .format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
-                                "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
+                                        "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
                                 this.toString(),
                                 Dates.listingUpdateFmt(AMAZON_UK, from),
                                 Dates.listingUpdateFmt(AMAZON_UK, to), currentPage);
             case AMAZON_US:
                 return String
                         .format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
-                                "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
+                                        "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
                                 this.toString(),
                                 Dates.listingUpdateFmt(AMAZON_US, from),
                                 Dates.listingUpdateFmt(AMAZON_US, to), currentPage);
             case AMAZON_JP:
                 return String
                         .format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
-                                "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
+                                        "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
                                 this.toString(),
                                 Dates.listingUpdateFmt(AMAZON_JP, from),
                                 Dates.listingUpdateFmt(AMAZON_JP, to), currentPage);
@@ -941,28 +941,28 @@ public enum M {
         if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();
         if(s.equals("aca") || s.equals("amazon_ca") || s.equals("amazon.ca") ||
-                s.equals("www.amazon.ca")) {
+                s.equals("www.amazon.ca") || s.equals("fba_ca")) {
             return AMAZON_CA;
         } else if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") ||
-                s.equals("www.amazon.co.uk")) {
+                s.equals("www.amazon.co.uk") || s.equals("fba_uk")) {
             return AMAZON_UK;
         } else if(s.equals("afr") || s.equals("amazon_fr") || s.equals("amazon.fr") ||
-                s.equals("www.amazon.fr")) {
+                s.equals("www.amazon.fr") || s.equals("fba_fr")) {
             return AMAZON_FR;
         } else if(s.equals("aes") || s.equals("amazon_es") || s.equals("amazon.es") ||
-                s.equals("www.amazon.es")) {
+                s.equals("www.amazon.es") || s.equals("fba_es")) {
             return AMAZON_ES;
         } else if(s.equals("ade") || s.equals("amazon_de") || s.equals("amazon.de") ||
-                s.equals("www.amazon.de")) {
+                s.equals("www.amazon.de") || s.equals("fba_de")) {
             return AMAZON_DE;
         } else if(s.equals("ait") || s.equals("amazon_it") || s.equals("amazon.it") ||
-                s.equals("www.amazon.it")) {
+                s.equals("www.amazon.it") || s.equals("fba_it")) {
             return AMAZON_IT;
         } else if(s.equals("ajp") || s.equals("amazon_jp") || s.equals("amazon.jp") || s.equals("amazon.co.jp") ||
-                s.equals("www.amazon.co.jp")) {
+                s.equals("www.amazon.co.jp") || s.equals("fba_jp")) {
             return AMAZON_JP;
         } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") ||
-                s.equals("www.amazon.com")) {
+                s.equals("www.amazon.com") || s.equals("fba_us")) {
             return AMAZON_US;
         } else if(s.equals("euk") || s.equals("ebay_uk") || s.equals("ebay.co.uk") ||
                 s.equals("www.ebay.co.uk")) {
