@@ -142,7 +142,6 @@ public class ReportDeal extends Controller {
             invoice.invoiceto += "," + taxNumber;
             invoice.save();
         }
-
         File file = new File(folder + "/" + pdfName);
         renderBinary(file);
     }

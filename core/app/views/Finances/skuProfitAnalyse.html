@@ -1,10 +1,10 @@
 #{extends 'main_full.html'/}
 #{set title:"SKU销售利润成本分析报表" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.dataTables.js'/}
-    #{script_cdn name: 'bootstrap-multiselect.js'/}
-    #{stylesheet_cdn name:'bootstrap-multiselect.css'/}
-    #{script_cdn name: 'Finances/skuProfitAnalyse.coffee'/}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'bootstrap-multiselect.js'/}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+    #{script 'Finances/skuProfitAnalyse.coffee'/}
 #{/set}
 
 #{info_row}

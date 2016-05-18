@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'库存'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'whouseitems/index.coffee'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'whouseitems/index.coffee'/}
 #{/set}
 #{flash_alert /}
 

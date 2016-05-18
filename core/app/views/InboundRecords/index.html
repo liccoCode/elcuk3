@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'入库记录(' + records.size() + ')'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'inboundrecords/index.coffee'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'inboundrecords/index.coffee'/}
 #{/set}
 #{flash_alert /}
 
@@ -46,8 +46,8 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" placeholder="质检任务 ID Or 物料 ID" value="${p.search}" style="width:
-        240px;">
+        <input type="text" name="p.search" placeholder="质检任务 ID Or 物料采购 ID Or FBA Or 物料 ID" value="${p.search}"
+               style="width:280px;">
         <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
