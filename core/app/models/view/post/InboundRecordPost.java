@@ -27,6 +27,8 @@ public class InboundRecordPost extends Post<InboundRecord> {
     public InboundRecord.O origin;
     public InboundRecord.S state;
 
+    public Long cooperatorId;
+
     public InboundRecordPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
         this.from = now.minusMonths(1).toDate();
@@ -62,6 +64,10 @@ public class InboundRecordPost extends Post<InboundRecord> {
             sbd.append(" AND createDate<=?");
             params.add(Dates.night(this.to));
         }
+        if(this.cooperatorId != null) {
+            sbd.append(" AND attributes LIKE ?");
+            params.add("%\"cooperatorId\":" + this.cooperatorId + "%");
+        }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(String.format(
                     " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
@@ -70,7 +76,6 @@ public class InboundRecordPost extends Post<InboundRecord> {
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");
             params.add("%\"procureunitId\":" + this.search + "%");
-            params.add("%\"cooperatorId\":" + this.search + "%");
         }
         sbd.append(" ORDER BY createDate DESC");
         return new F.T2<>(sbd.toString(), params);
