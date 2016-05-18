@@ -45,12 +45,19 @@ $ ->
     create: false,
     load: (query, callback) ->
       type = $("select[name='record.type']").val()
-      return callback() if !query.length || !type.length || !$.inArray(type, ["Process", "Sample", "Other"])
+      return callback() if !query.length || !type.length || $.inArray(type, ["Process", "Sample"]) > -1
+
+      dataType = if $.inArray(type, ["Normal", "B2B"]) > -1
+        'SHIPPER'
+      else if type == 'Refund'
+        'SUPPLIER'
+      else
+        null
       $.ajax({
         url: '/Cooperators/findSameCooperator',
         type: 'GET',
         dataType: 'json',
-        data: {name: query, type: if type == 'Refund' then 'SUPPLIER' else 'SHIPPER'},
+        data: {name: query, type: dataType},
         error: ->
           callback()
         success: (res) ->
