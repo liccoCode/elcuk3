@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import models.ElcukRecord;
+import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.InboundRecordPost;
 import models.whouse.InboundRecord;
@@ -39,7 +40,8 @@ public class InboundRecords extends Controller {
                 Messages.get("inboundrecord.confirm"),
                 Messages.get("inboundrecord.update")
         ), 50);
-        render(p, records, elcukRecords);
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        render(p, records, elcukRecords, cooperators);
     }
 
     @Check("inboundrecords.index")
