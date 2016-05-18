@@ -135,7 +135,7 @@
               #{set fnsku: r.stockObj?.fnsku()/}
               #{if fnsku != null && fnsku != ""}
                 <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
-                ${} <i class="icon-download-alt"></i>
+                ${fnsku} <i class="icon-download-alt"></i>
                 </a>
               #{/if}
           </td>
