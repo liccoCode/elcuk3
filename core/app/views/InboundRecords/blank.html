@@ -33,7 +33,7 @@
 
     <th>预计入库数</th>
     <td>
-      <input type="text" name="record.planQty" value="${record.planQty}" required>
+      <input type="text" name="record.planQty" value="${record.planQty}" class="input-mini" required>
     </td>
   </tr>
   <tr>
@@ -61,7 +61,7 @@
       <select name="record.market" class="inline" name="record.market">
         <option value="">请选择</option>
           #{list items:models.market.M.amazonVals(), as:'m'}
-            <option ${m == record.market ? 'selected' : ''} value="${m.name()}">${m.marketAndWhouseMapping()}</option>
+            <option ${m == record.market ? 'selected' : ''} value="${m.marketAndWhouseMapping()}">${m.marketAndWhouseMapping()}</option>
           #{/list}
       </select>
     </td>
@@ -80,12 +80,12 @@
   <tr>
     <th>良品入库数</th>
     <td>
-      <input type="text" name="record.qty" value="${record.qty}" required>
+      <input type="text" name="record.qty" value="${record.qty}" class="input-mini" required>
     </td>
 
     <th>不良品入库数</th>
     <td>
-      <input type="text" name="record.badQty" value="${record.badQty}" required>
+      <input type="text" name="record.badQty" value="${record.badQty}" class="input-mini" required>
     </td>
   </tr>
 

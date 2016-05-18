@@ -44,6 +44,13 @@
       #{/list}
       </select>
 
+      <select name="p.cooperatorId" class="inline selectize" style="width: 100px;">
+        <option value="">供应商</option>
+      #{list items: cooperators, as:'c'}
+        <option ${c.id == p.cooperatorId ? 'selected' : ''} value="${c.id}">${c.name}</option>
+      #{/list}
+      </select>
+
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" name="p.search" placeholder="质检任务 ID Or 物料采购 ID Or FBA Or 物料 ID" value="${p.search}"
@@ -74,8 +81,9 @@
           <th>来源</th>
           <th>质检任务 ID</th>
           <th>物料采购 ID</th>
-          <th>产品编码</th>
+          <th>SKU</th>
           <th>产品名称</th>
+          <th>供应商</th>
           <th>FBA</th>
           <th>FnSKU</th>
           <th>FBA 仓库</th>
@@ -114,11 +122,22 @@
             <a href="${r.stockObj?.showStockObjLink()}" target="_blank">${r.stockObj?.stockObjId}</a>
           </td>
           <td style="max-width: 280px;">${r.stockObj?.name()}</td>
+          <td>
+              #{set cooperator: r.cooperator()/}
+              #{if cooperator != null}
+                <a href="@{Cooperators.show(cooperator.id)}">
+                ${cooperator.name}
+                </a>
+              #{/if}
+          </td>
           <td>${attrs.get('fba')}</td>
           <td style="min-width:130px;">
-            <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
-            ${r.stockObj?.fnsku()} <i class="icon-download-alt"></i>
-            </a>
+              #{set fnsku: r.stockObj?.fnsku()/}
+              #{if fnsku != null && fnsku != ""}
+                <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
+                ${fnsku} <i class="icon-download-alt"></i>
+                </a>
+              #{/if}
           </td>
           <td>${attrs.get('whouseName')}</td>
           <td>${attrs.get('shipType')}</td>
