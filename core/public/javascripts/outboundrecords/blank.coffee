@@ -14,22 +14,61 @@ $ ->
   $("#new_outbound_record").on('loadStockObj', "input[name='record.stockObj.stockObjId']", (e) ->
     loadStockObj($(@).val())
   ).on('change', "select[name='record.type']", (e) ->
-    $targetSelectize = $targetIdSelect[0].selectize
-    $targetSelectize.clearOptions()
+    $typeSelect = $(@)
+    $marketSelect = $("select[name='record.market']")
+    $targetSelect = $("select[name='record.targetId']")
 
-    switch $(@).val()
-      when 'Normal', 'B2B', 'Refund'
-        $targetSelectize.settings.create = false
-      when 'Process'
-        $targetSelectize.addOption({value: '品拓生产部', text: '品拓生产部'})
-        $targetSelectize.addItem('品拓生产部')
-      when 'Sample'
-        _.each(["质检部", "采购部", "运营部", "研发部", "生产部"], (v) ->
-          $targetSelectize.addOption({value: v, text: v})
+    $targetSelectize = $targetSelect[0].selectize
+    $marketSelectize = $marketSelect[0].selectize
+
+    # 删除 Selectize 化
+    $targetSelectize.destroy() unless _.isEmpty($targetSelectize)
+    # 默认去往国家不允许自定义添加
+    $marketSelectize.settings.create = false
+
+    $targetSelect.empty()
+    type = $typeSelect.val()
+    switch type
+      when 'Normal', 'B2B'
+        _.each($('#shipperOptions').find('option').clone(), (option) ->
+          $targetSelect.append(option)
         )
-        $targetSelectize.addItem('质检部')
-      else # Other
-        $targetSelectize.settings.create = true
+      when 'Refund'
+        _.each($('#supplierOptions').find('option').clone(), (option) ->
+          $targetSelect.append(option)
+        )
+      when 'Process'
+        _.each($('#processOptions').find('option').clone(), (option) ->
+          $targetSelect.append(option)
+        )
+      when 'Sample'
+        _.each($('#sampleOptions').find('option').clone(), (option) ->
+          $targetSelect.append(option)
+        )
+      else
+        $marketSelectize.settings.create = true
+
+    $targetSelect.selectize({
+      persist: false,
+      create: type == 'Other',
+      load: (query, callback) ->
+        return callback() if !query.length || !type.length || type != 'Other'
+        $.ajax({
+          url: '/Cooperators/findSameCooperator',
+          type: 'GET',
+          dataType: 'json',
+          data: {name: query},
+          error: ->
+            callback()
+          success: (res) ->
+            coopers = []
+            _.each(res, (cooper) ->
+              [t, v] = cooper.split('-')
+              coopers.push({value: v, text: t})
+            )
+            callback(coopers)
+        })
+    })
   )
 
   loadStockObj = (stock_obj_id) ->
@@ -39,36 +78,6 @@ $ ->
         $('input[name=stock_name]').val(r.name)
         $("input[name='record.stockObj.stockObjType']").val(r.type)
     )
-
-  $targetIdSelect = $("select[name='record.targetId']").selectize({
-    persist: false,
-    create: false,
-    load: (query, callback) ->
-      type = $("select[name='record.type']").val()
-      return callback() if !query.length || !type.length || $.inArray(type, ["Process", "Sample"]) > -1
-
-      dataType = if $.inArray(type, ["Normal", "B2B"]) > -1
-        'SHIPPER'
-      else if type == 'Refund'
-        'SUPPLIER'
-      else
-        null
-      $.ajax({
-        url: '/Cooperators/findSameCooperator',
-        type: 'GET',
-        dataType: 'json',
-        data: {name: query, type: dataType},
-        error: ->
-          callback()
-        success: (res) ->
-          coopers = []
-          _.each(res, (cooper) ->
-            [t, v] = cooper.split('-')
-            coopers.push({value: v, text: t})
-          )
-          callback(coopers)
-      })
-  })
 
   $("select[name='record.market']").selectize({
     persist: false,

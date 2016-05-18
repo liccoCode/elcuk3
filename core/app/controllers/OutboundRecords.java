@@ -31,6 +31,7 @@ public class OutboundRecords extends Controller {
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses());
         renderArgs.put("shippers", Cooperator.shippers());
+        renderArgs.put("suppliers", Cooperator.suppliers());
     }
 
     @Check("outboundrecords.index")

@@ -91,7 +91,7 @@ $ ->
   )
 
   AttrsFormat = {
-    "qty": "实际入库",
+    "qty": "实际出货数量",
     "memo": "备注",
     "whouse": "仓库",
     "targetId": "出库对象",

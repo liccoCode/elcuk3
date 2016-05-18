@@ -45,12 +45,36 @@
   <tr>
     <th>出库对象</th>
     <td>
-      <select name="record.targetId" style="width: 230px;">
+      <!-------------------------- targetId 备选项 ---------------------------------------------------------->
+      <select style="display:none;" id="shipperOptions">
           #{list items:shippers, as: 'ship'}
             <option ${ship.id.toString() == record.targetId ? 'selected' : ''} value="${ship.id}">
             ${ship.name}
             </option>
           #{/list}
+      </select>
+      <select style="display:none;" id="supplierOptions">
+          #{list items:suppliers, as: 'sup'}
+            <option ${sup.id.toString() == record.targetId ? 'selected' : ''} value="${sup.id}">
+            ${sup.name}
+            </option>
+          #{/list}
+      </select>
+      <select style="display:none;" id="sampleOptions">
+          #{list items: ["质检部", "采购部", "运营部", "研发部", "生产部"], as: 'target'}
+            <option ${record.targetId == target ? 'selected' : ''} value="${target}">
+            ${target}
+            </option>
+          #{/list}
+      </select>
+      <select style="display:none;" id="processOptions">
+        <option ${record.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
+          品拓生产部
+        </option>
+      </select>
+      <!--------------------------------------------------------------------------------------------------->
+
+      <select name="record.targetId" style="width: 230px;">
       </select>
     </td>
 

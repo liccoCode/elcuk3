@@ -152,7 +152,11 @@
                     #{/list}
                 #{/if}
                 #{elseif r.type.name() == 'Refund'}
-                  <!-- 等待用户输入自动加载-->
+                    #{list items:suppliers, as: 'ship'}
+                      <option ${ship.id.toString() == r.targetId ? 'selected' : ''} value="${ship.id}">
+                      ${ship.name}
+                      </option>
+                    #{/list}
                 #{/elseif}
                 #{elseif r.type.name() == 'Process'}
                   <option ${r.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
