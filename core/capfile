@@ -1,29 +1,27 @@
-role :e, 'root@pangoro.easya.cc'
-namespace :play do
+# Load DSL and set up stages
+require "capistrano/setup"
 
-  desc "Push Code"
-  task :push do
-    `git push origin`
+# Include default deployment tasks
+require "capistrano/deploy"
 
-  end
+# Include tasks from other gems included in your Gemfile
+#
+# For documentation on these, see for example:
+#
+#   https://github.com/capistrano/rvm
+#   https://github.com/capistrano/rbenv
+#   https://github.com/capistrano/chruby
+#   https://github.com/capistrano/bundler
+#   https://github.com/capistrano/rails
+#   https://github.com/capistrano/passenger
+#
+# require 'capistrano/rvm'
+# require 'capistrano/rbenv'
+# require 'capistrano/chruby'
+# require 'capistrano/bundler'
+# require 'capistrano/rails/assets'
+# require 'capistrano/rails/migrations'
+# require 'capistrano/passenger'
 
-  desc "部署 Play 代码到服务器"
-  task :deploy, roles: :e do
-    branch = `git branch | grep \\*`.split(' ')[1]
-    if branch != 'master'
-      puts "请确认 git 分支在 master 分支 (now:#{branch})"
-      exit
-    end
-    puts '---- push to unfuddle ----'
-    `git push ufd`
-    puts '---- push to bitbucket ----'
-    `git push origin`
-    # 最后多查看两次 logs
-    look = "sleep 3;tail logs/elcuk2.log;"
-    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;sleep 2;#{play_start};#{look * 3}"
-  end
-
-  def play_start
-    'play start --%prod -javaagent:/root/elcuk2/core/newrelic/newrelic.jar'
-  end
-end
+# Load custom tasks from `lib/capistrano/tasks` if you have any defined
+Dir.glob("config/lib/capistrano/tasks/*.rake").each { |r| import r }

@@ -6,7 +6,13 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-server '47.88.8.182', user: 'root', roles: %w{web}
+
+# 三个子项目的部署
+server '47.88.6.96', user: 'root', roles: %w{app}
+server '47.88.25.20', user: 'root', roles: %w{app}
+server '47.88.8.182', user: 'root', roles: %w{app}
+
+
 
 
 # role-based syntax
