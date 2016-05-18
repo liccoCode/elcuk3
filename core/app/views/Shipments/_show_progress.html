@@ -143,7 +143,9 @@
         </div>
         <div class="block">
           <label>实际<abbr>总运输</abbr></label>
-          <span>${ship.dates.arriveDate - ship.dates.beginDate} 天</span>
+            #{if ship.dates.beginDate}
+              <span>${ship.dates.arriveDate - ship.dates.beginDate} 天</span>
+            #{/if}
         </div>
       </li>
     #{/if}
@@ -154,7 +156,7 @@
 <div class="row-fluid" id="btnFucs">
   <div class="btn-toolbar">
   #{if ship.apply}
-  <a href="@{Applys.transport(ship.apply.id)}" class="btn btn-success">${ship.apply.serialNumber}</a>
+    <a href="@{Applys.transport(ship.apply.id)}" class="btn btn-success">${ship.apply.serialNumber}</a>
   #{/if}
   #{if ship.state == models.procure.Shipment.S.PLAN}
     <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"
@@ -170,7 +172,7 @@
   #{/if}
   #{power.ck "shipments.beginship"}
       #{if ship.state == models.procure.Shipment.S.CONFIRM}
-        <button class="btn btn-success func" url="@{Shipments.beginShip(ship.id)}">
+        <button class="btn btn-success func" url="@{Shipments.begiShip(ship.id)}">
           开始运输
         </button>
       #{/if}
