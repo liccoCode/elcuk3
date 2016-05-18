@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
@@ -315,8 +316,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public Integer purchaseSample;
 
+    /**
+     * 是否生成了质检任务
+     */
     @Expose
-    public int isCheck;
+    public int isCheck = 0;
 
     public enum S {
         NOSHIPED {
@@ -792,7 +796,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return;
         }
         if(this.shipItems.size() == 0) {
-            CheckTask.updateExpressWarehouse(this.id);
             // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
             if(shipment == null) return;
             shipment.addToShip(this);
@@ -815,12 +818,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
         }
-
-        //更新快递单的货代仓库
-        for(ShipItem item : this.shipItems) {
-            CheckTask.updateExpressWarehouse(item.unit.id);
-        }
-
     }
 
     /**
@@ -920,7 +917,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
 
             //删除 质检任务相关
-            List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+            List<CheckTask> tasks = this.tasks();
             for(CheckTask task : tasks) {
                 task.delete();
             }
@@ -1376,7 +1373,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String isship() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        List<CheckTask> tasks = this.tasks();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).isship != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
                 return tasks.get(0).isship.label();
@@ -1390,7 +1387,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String result() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        List<CheckTask> tasks = this.tasks();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).result != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
                 return tasks.get(0).result.label();
@@ -1414,7 +1411,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public Integer fetchCheckTaskQcSample() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        List<CheckTask> tasks = this.tasks();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).qcSample != null)
                 return tasks.get(0).qcSample;
@@ -1573,7 +1570,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int fetchCheckTaskQty() {
-        CheckTask task = CheckTask.find("units_id=? ORDER BY id DESC", this.id).first();
+        CheckTask task = this.tasks().get(0);
         if(task != null) {
             return task.qty;
         }
@@ -1594,6 +1591,66 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return item.currency.symbol() + " " + item.compenamt;
         } else {
             return String.valueOf(0);
+        }
+    }
+
+    /**
+     * 生成质检任务
+     */
+    public void triggerCheck() {
+        if(this.isPersistent() && this.shipType != null && this.isCheck == 0) {
+            new CheckTask(this).validateAndSave();
+            this.isCheck = 1;
+            this.save();
+        }
+    }
+
+    /**
+     * 根据 运输方式+运输单中的运输商 去匹配对应的货代仓库
+     *
+     * @return
+     */
+    public Whouse matchWhouse() {
+        Shipment.T shiptype = null;
+        Cooperator cooperator = null;
+        if(this.shipItems != null && !this.shipItems.isEmpty()) {
+            Shipment shipment = this.shipItems.get(0).shipment;
+            shiptype = shipment.type;
+            cooperator = shipment.cooper;
+        }
+        return Whouse.findByCooperatorAndShipType(
+                Optional.of(cooperator).or((Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first()),
+                Optional.of(shiptype).or(this.shipType)
+        );
+    }
+
+    /**
+     * 相关联的质检任务
+     *
+     * @return
+     */
+    public List<CheckTask> tasks() {
+        return CheckTask.find("units_id=?", this.id).fetch();
+    }
+
+    /**
+     * 更新相关的质检任务的仓库
+     */
+    public void flushTask() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? AND checkstat='UNCHECK'", this.id).fetch();
+        if(tasks != null && !tasks.isEmpty()) {
+            Whouse wh = this.matchWhouse();
+
+            if(wh != null && wh.user != null) {
+                for(CheckTask task : tasks) {
+                    if(StringUtils.isBlank(task.checkor) ||
+                            !StringUtils.equalsIgnoreCase(task.checkor, wh.user.username)) {
+                        task.shipwhouse = wh;
+                        task.checkor = wh.user.username;
+                        this.save();
+                    }
+                }
+            }
         }
     }
 
