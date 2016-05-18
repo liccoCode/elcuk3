@@ -391,7 +391,7 @@ public class OutboundRecord extends Model {
 
     public void confirmValid() {
         this.valid();
-        Validation.required("接收对象", this.targetId);
+        Validation.min("实际出库", this.qty, (double) 1);
 
         if(Validation.hasErrors()) return;
         if(!this.checkWhouseItemQty()) {
