@@ -18,6 +18,7 @@
 环境变量列别:
 
 * ROOT_URL: 当前项目在互联网上访问的根路径
+* JVM_MEM: 在 application.conf 中的 jvm.memory 的变量, 控制 JVM 的内存使用.
 * EXCHANGERATE_TOKEN: 使用了 EXCHANGERATE 的汇率变化服务, 需要的 Token. ex: nnsYEb2gv6r69qYT5849g9N9X4J63M0r
 * DB_USER: 数据库名称. ex: elcuk2
 * DB_NAME: 登陆数据库用户名. ex: user

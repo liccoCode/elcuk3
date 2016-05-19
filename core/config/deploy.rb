@@ -36,14 +36,22 @@ set :deploy_to, '/root/cap_elcuk2'
 # set :keep_releases, 5
 set :keep_releases, 3
 
+
+# 注册 play 命令
+SSHKit.config.command_map[:play] = "/opt/play-1.4.2/play"
+
+
 namespace :deploy do
 
   task :restart do
-    on roles(:web) do
-      execute("cd #{current_path}/core && /opt/play-1.4.2/play deps --sync")
-      execute(:supervisorctl, 'restart', 'erp')
+    on roles(:app) do
+      within("#{current_path}/core") do
+        execute(:play, "deps --sync")
+        execute(:supervisorctl, 'restart', 'erp')
+      end
     end
   end
   
-  after 'deploy:publishing', :restart
+  # 在完成发布之后
+  after 'deploy:published', :restart
 end
