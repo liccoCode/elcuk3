@@ -172,7 +172,7 @@
   #{/if}
   #{power.ck "shipments.beginship"}
       #{if ship.state == models.procure.Shipment.S.CONFIRM}
-        <button class="btn btn-success func" url="@{Shipments.begiShip(ship.id)}">
+        <button class="btn btn-success func" url="@{Shipments.beginShip(ship.id)}">
           开始运输
         </button>
       #{/if}
