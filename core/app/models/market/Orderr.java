@@ -498,15 +498,11 @@ public class Orderr extends GenericModel {
             if(item.quantity == null) item.quantity = 0;
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
-                itemamount =
-                        itemamount +
+                itemamount = itemamount +
                                 new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new
-                                                        BigDecimal
-                                                        (item.quantity), 2,
-                                                4).divide(new BigDecimal(this.orderrate()), 2,
-                                                java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
-                                        .floatValue();
+                                        .divide(new BigDecimal(item.quantity), 2, 4)
+                                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                        .setScale(2, 4).floatValue();
             }
         }
 
