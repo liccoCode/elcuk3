@@ -68,7 +68,7 @@ application.session.maxAge=24h
 # Define which port is used by JPDA when application is in debug mode (default is set to 8000)
 # jpda.port=8000
 %test.jpda.port=8001
-%prod.jvm.memory=-XX:PermSize=128m -XX:MaxPermSize=128m -Xms1536m -Xmx1536m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2
+%prod.jvm.memory=<%= @jvm_opts %>
 # use 1.8 PermSize was removed
 # 开发环境请使用 JAVA_OPT="-XX:PermSize=128m" 来代替
 jvm.memory=-XX:PermSize=128m -XX:MaxPermSize=128m

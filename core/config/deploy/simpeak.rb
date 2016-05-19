@@ -6,6 +6,7 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
+set :jvm_opts, "-XX:PermSize=128m -XX:MaxPermSize=128m -Xms1024m -Xmx1024m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
 server '47.88.25.20', user: 'root', roles: %w{app}
 
 

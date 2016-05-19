@@ -54,5 +54,6 @@ namespace :deploy do
   end
   
   # 在完成发布之后
+  after 'deploy:publishing', "conf:application"
   after 'deploy:published', :restart
 end

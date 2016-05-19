@@ -8,6 +8,7 @@
 # server 'db.example.com', user: 'deploy', roles: %w{db}
 
 # 三个子项目的部署
+set :jvm_opts, "-XX:PermSize=128m -XX:MaxPermSize=128m -Xms1024m -Xmx1024m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
 server '47.88.6.96', user: 'root', roles: %w{app}
 server '47.88.25.20', user: 'root', roles: %w{app}
 server '47.88.8.182', user: 'root', roles: %w{app}
