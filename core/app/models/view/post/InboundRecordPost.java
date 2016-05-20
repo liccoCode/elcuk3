@@ -70,7 +70,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
         }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(String.format(
-                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
+                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
                     this.search, this.search)
             );
             params.add(this.word());

@@ -14,10 +14,8 @@ import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
-import play.jobs.On;
 import play.libs.F;
 import query.*;
 
@@ -32,7 +30,8 @@ import java.util.*;
  * Date: 8/13/13
  * Time: 3:06 PM
  */
-@On("0 20 0,7,15 * * ?")
+@Deprecated
+//@On("0 20 0,7,15 * * ?")
 public class SellingSaleAnalyzeJob extends Job {
     public static final String RUNNING = "analyze_running";
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";

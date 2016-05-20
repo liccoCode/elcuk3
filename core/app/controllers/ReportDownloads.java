@@ -5,6 +5,7 @@ import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
 import models.ReportRecord;
+import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.ReportPost;
 import play.mvc.Controller;
@@ -72,7 +73,8 @@ public class ReportDownloads extends Controller {
         if(p == null) p = new ReportPost();
         p.reportTypes = ReportPost.applyReportTypes();
         List<ReportRecord> reports = p.query();
-        render(p, reports);
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        render(p, reports, cooperators);
     }
 
     /**

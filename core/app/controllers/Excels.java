@@ -690,6 +690,19 @@ public class Excels extends Controller {
         render(feesCost, from, to, dateFormat);
     }
 
+    /**
+     * 采购付款明细报表
+     */
+    public static void purchasePaymentReport(PurchaseOrderPost p) {
+        List<PurchasePaymentDTO> dtos = p.downloadReport();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("采购付款明细报表%s.xls", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(
+                        DateTime.now().toDate())));
+        render(dtos, dateFormat);
+    }
+
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
         List<OrderReportDTO> orders = p.queryForExcel();
