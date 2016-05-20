@@ -217,8 +217,8 @@ public class Account extends Model {
                      * 1. Visit the website, fetch the new Cookie.
                      * 2. With the website params and user/password to login.
                      */
+                    this.cookieStore().clear();
                     F.T2<List<NameValuePair>, String> params = loginAmazonSellerCenterStep1();
-
                     body = HTTP.post(this.cookieStore(), params._2, params._1);
                     if(Play.mode.isDev()) {
                         FileUtils.writeStringToFile(new File(
@@ -266,8 +266,8 @@ public class Account extends Model {
         List<NameValuePair> params = new ArrayList<>();
 
         if(Play.mode.isDev()) {
-            FileUtils.writeStringToFile(new File(
-                            Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+            FileUtils.writeStringToFile(
+                    new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
                     body
             );
         }
