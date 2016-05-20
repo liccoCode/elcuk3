@@ -212,10 +212,10 @@ public class HTTP {
                               Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
-            post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), "UTF-8"));
+            post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
             return EntityUtils.toString(
                     client().execute(post, getContextWithCookieStore(cookieStore)).getEntity(),
-                    "UTF-8"
+                    Consts.UTF_8
             );
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
