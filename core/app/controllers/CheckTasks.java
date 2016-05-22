@@ -52,7 +52,6 @@ public class CheckTasks extends Controller {
 
     @Check("checktasks.checklist")
     public static void checklist(CheckTaskPost p, int day) {
-        CheckTask.generateTask();
         List<CheckTask> tasklist = null;
         if(p == null) p = new CheckTaskPost();
         if(day == 3) {
@@ -74,7 +73,6 @@ public class CheckTasks extends Controller {
      */
     @Check("checktasks.checkerList")
     public static void checkerList(CheckTaskPost p, int day) {
-        CheckTask.generateTask();
         String username = Secure.Security.connected();
         if(p == null) p = new CheckTaskPost(username);
         if(day == 3) {

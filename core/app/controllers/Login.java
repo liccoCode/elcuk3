@@ -111,12 +111,16 @@ public class Login extends Secure.Security {
          * 将用户信息缓存到 User Cache.
          */
         // 初始化用户缓存中的用户;
-        if(USER_CACHE.get(Secure.Security.connected()) == null) {
-            User user = User.findByUserName(Secure.Security.connected().toLowerCase());
-            user.login();
-            USER_CACHE.put(user.username, user);
+        String username = Secure.Security.connected();
+        if(StringUtils.isNotBlank(username)) {
+            if(USER_CACHE.get(username) == null) {
+                User user = User.findByUserName(username.toLowerCase());
+                user.login();
+                USER_CACHE.put(user.username, user);
+            }
+            return USER_CACHE.get(username.toLowerCase());
         }
-        return USER_CACHE.get(Secure.Security.connected().toLowerCase());
+        return null;
     }
 
     @SuppressWarnings("unchecked")
