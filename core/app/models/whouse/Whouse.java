@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -309,15 +310,35 @@ public class Whouse extends Model {
     }
 
     /**
-     * 自有仓
+     * 根据运输商与运输方式来查找仓库
      *
      * @return
      */
+    public static Whouse findByCooperatorAndShipType(Cooperator cooperator, Shipment.T shiptype) {
+        StringBuilder sbd = new StringBuilder("cooperator=?");
+        switch(shiptype) {
+            case SEA:
+                sbd.append(" AND isSEA=true");
+                break;
+            case EXPRESS:
+                sbd.append(" AND isEXPRESS=true");
+                break;
+            case AIR:
+                sbd.append(" AND isAIR=true");
+                break;
+            default:
+                throw new FastRuntimeException("不支持的 ShipType");
+        }
+        return Whouse.find(sbd.toString(), cooperator).first();
+    }
+
     public static List<Whouse> selfWhouses() {
         return selfWhouses(true);
     }
 
     /**
+     * 自有仓
+     *
      * @param includeDefective
      * @return
      */

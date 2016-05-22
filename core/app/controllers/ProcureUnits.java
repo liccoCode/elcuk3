@@ -261,6 +261,8 @@ public class ProcureUnits extends Controller {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
         unit.save();
+        //生成质检任务
+        unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);
@@ -275,7 +277,7 @@ public class ProcureUnits extends Controller {
         new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
                 .save();
 
-        if(isNeedApply != null && isNeedApply.equals("need")) {
+        if(StringUtils.equals(isNeedApply, "need")) {
             unit.startActiviti(unit.handler.username);
             flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
             ProcureUnits.showactiviti(unit.id);
@@ -343,10 +345,6 @@ public class ProcureUnits extends Controller {
             p.search = "id:" + id;
             index(p);
         }
-        //通知当前操作用户 和采购计划创建人，发送删除成功的通知
-        String notifiMessage = String.format("采购计划 %s 删除", id);
-        //Notification.newSystemNoty(notifiMessage, Notification.INDEX, users.iterator().next())
-        //        .notifySomeone(users.toArray(new User[users.size()]));
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         index(null);
     }
@@ -619,7 +617,7 @@ public class ProcureUnits extends Controller {
         ProcureUnit old_unit = ProcureUnit.findById(id);
         ActivitiProcess ap = ActivitiProcess.find("id=?", Long.parseLong(processid)).first();
         String taskName = ActivitiProcess.privilegeProcess(ap.processInstanceId, Secure.Security.connected());
-        /** 如果主管打回，则专员可以修改采购计划*/
+        //如果主管打回，则专员可以修改采购计划
         if(taskName != null && taskName.equals("运营专员")) {
             ProcureUnit managedUnit = ProcureUnit.findById(id);
             managedUnit.update(unit, shipmentId, msg);

@@ -178,11 +178,11 @@ public class CheckTaskPost extends Post<CheckTask> {
             params.add(word);
         }
 
-        if(StringUtils.isNotBlank(this.checkor)){
+        if(StringUtils.isNotBlank(this.checkor)) {
             if(CategoryAssignManagement.showCategoryByUserName(this.checkor).size() > 0) {
                 sbd.append(" AND c.units.product.category.categoryId IN " + SqlSelect.inlineParam(
                         CategoryAssignManagement.showCategoryByUserName(this.checkor)));
-            }else {
+            } else {
                 sbd.append(" AND c.units.product.category.categoryId = 0 ");
             }
         }
@@ -269,5 +269,16 @@ public class CheckTaskPost extends Post<CheckTask> {
             }
         }
         return null;
+    }
+
+    public void initDateRange(int day) {
+        this.to = new Date();
+        if(day == 3) {
+            this.from = DateTime.now().minusDays(3).toDate();
+        } else if(day == 2) {
+            this.from = DateTime.now().minusDays(2).toDate();
+        } else if(day == 1) {
+            this.from = DateTime.now().minusDays(1).toDate();
+        }
     }
 }

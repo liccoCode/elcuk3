@@ -26,7 +26,7 @@ $ ->
       aaSorting: [[0, "desc"]]
     )
 
-  $(document).on("change", "select[name=check.qcType], select[name=cr.qcType]", (r) ->
+  $(document).on("change", "select[name='check.qcType'], select[name='cr.qcType']", (r) ->
     mask = $("#check_table")
     $select = $(@)
     mask.mask()
