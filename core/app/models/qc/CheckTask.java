@@ -573,23 +573,11 @@ public class CheckTask extends Model {
      * 产生重检任务
      */
     public static void generateRepeatTask(CheckTask.DealType dt, long chechtaskid, long unitid) {
-        CheckTask newtask = new CheckTask();
-        ProcureUnit punit = ProcureUnit.findById(unitid);
-        newtask.units = punit;
-        newtask.confirmstat = ConfirmType.UNCONFIRM;
-        //重检
-        newtask.checkstat = StatType.REPEATCHECK;
-        newtask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
-        newtask.creatat = new Date();
-        newtask.finishStat = ConfirmType.UNCONFIRM;
-
-        //查找仓库
-        Whouse wh = punit.matchWhouse();
-        if(wh != null && wh.user != null) {
-            newtask.shipwhouse = wh;
-            newtask.checkor = wh.user.username;
-        }
-        newtask.save();
+        ProcureUnit unit = ProcureUnit.findById(unitid);
+        CheckTask checkTask = new CheckTask(unit);
+        checkTask.checkstat = StatType.REPEATCHECK;
+        checkTask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
+        checkTask.save();
     }
 
     /**

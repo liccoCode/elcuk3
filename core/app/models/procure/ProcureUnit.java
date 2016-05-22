@@ -569,6 +569,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.save();
+        //生成质检任务
+        newUnit.triggerCheck();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
@@ -1598,8 +1600,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 生成质检任务
      */
     public void triggerCheck() {
-        if(this.isPersistent() && this.shipType != null && this.isCheck == 0) {
-            new CheckTask(this).validateAndSave();
+        if(this.isPersistent() && this.shipType != null && this.isCheck == 0 && this.selling != null) {
+            new CheckTask(this).save();
             this.isCheck = 1;
             this.save();
         }
@@ -1640,16 +1642,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<CheckTask> tasks = CheckTask.find("units_id=? AND checkstat='UNCHECK'", this.id).fetch();
         if(tasks != null && !tasks.isEmpty()) {
             Whouse wh = this.matchWhouse();
-
-            if(wh != null && wh.user != null) {
-                for(CheckTask task : tasks) {
-                    if(StringUtils.isBlank(task.checkor) ||
-                            !StringUtils.equalsIgnoreCase(task.checkor, wh.user.username)) {
-                        task.shipwhouse = wh;
-                        task.checkor = wh.user.username;
-                        this.save();
-                    }
-                }
+            if(wh != null) {
+                for(CheckTask task : tasks) task.shipwhouse = wh;
             }
         }
     }

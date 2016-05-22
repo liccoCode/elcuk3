@@ -54,16 +54,7 @@ public class CheckTasks extends Controller {
     public static void checklist(CheckTaskPost p, int day) {
         List<CheckTask> tasklist = null;
         if(p == null) p = new CheckTaskPost();
-        if(day == 3) {
-            p.from = DateTime.now().minusDays(3).toDate();
-            p.to = new Date();
-        } else if(day == 2) {
-            p.from = DateTime.now().minusDays(2).toDate();
-            p.to = new Date();
-        } else if(day == 1) {
-            p.from = DateTime.now().minusDays(1).toDate();
-            p.to = new Date();
-        }
+        p.initDateRange(day);
         tasklist = p.query();
         render(tasklist, p);
     }
@@ -75,21 +66,12 @@ public class CheckTasks extends Controller {
     public static void checkerList(CheckTaskPost p, int day) {
         String username = Secure.Security.connected();
         if(p == null) p = new CheckTaskPost(username);
-        if(day == 3) {
-            p.from = DateTime.now().minusDays(3).toDate();
-            p.to = new Date();
-        } else if(day == 2) {
-            p.from = DateTime.now().minusDays(2).toDate();
-            p.to = new Date();
-        } else if(day == 1) {
-            p.from = DateTime.now().minusDays(1).toDate();
-            p.to = new Date();
-        }
+
+        p.initDateRange(day);
         List<ElcukRecord> records = ElcukRecord.find("action like '[CheckTask%' ORDER BY createAt DESC").fetch(50);
         List<CheckTask> checks = p.check();
         List<CheckTask> checkeds = p.checked();
         List<CheckTask> checkRepeats = p.checkRepeat();
-
         render(p, checks, checkeds, checkRepeats, records);
     }
 
