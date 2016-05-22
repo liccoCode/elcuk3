@@ -8,12 +8,11 @@ import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.CheckTaskPost;
+import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
@@ -52,10 +51,9 @@ public class CheckTasks extends Controller {
 
     @Check("checktasks.checklist")
     public static void checklist(CheckTaskPost p, int day) {
-        List<CheckTask> tasklist = null;
         if(p == null) p = new CheckTaskPost();
         p.initDateRange(day);
-        tasklist = p.query();
+        List<CheckTask> tasklist = p.query();
         render(tasklist, p);
     }
 
