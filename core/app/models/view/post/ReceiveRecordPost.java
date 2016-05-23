@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
  */
 public class ReceiveRecordPost extends Post<ReceiveRecord> {
     public static Pattern NUMBER_PATTEN = Pattern.compile("^\\d+$");
+    public static final List<F.T2<String, String>> DATE_TYPES;
 
     public Date from;
     public Date to;
@@ -40,6 +41,12 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
         this.state = ReceiveRecord.S.Pending;
         this.perSize = 25;
         this.page = 1;
+    }
+
+    static {
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
+        DATE_TYPES.add(new F.T2<>("confirmDate", "确认时间"));
     }
 
     @Override
