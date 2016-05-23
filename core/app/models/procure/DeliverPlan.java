@@ -100,6 +100,8 @@ public class DeliverPlan extends GenericModel {
         public abstract String label();
     }
 
+    @OneToMany(mappedBy = "deliverPlan")
+    public List<ReceiveRecord> receiveRecords = new ArrayList<>();
 
     /**
      * 通过 ProcureUnit 来创建采购单

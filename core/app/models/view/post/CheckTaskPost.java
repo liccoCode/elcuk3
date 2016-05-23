@@ -23,9 +23,6 @@ import java.util.regex.Pattern;
  * Time: 3:25 PM
  */
 public class CheckTaskPost extends Post<CheckTask> {
-
-
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
     private static final Pattern SKU = Pattern.compile("^sku:(\\S*)$");
 
 
@@ -238,22 +235,6 @@ public class CheckTaskPost extends Post<CheckTask> {
     @Override
     public Long getTotalCount() {
         return SkuCheck.count();
-    }
-
-
-    /**
-     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
-     *
-     * @return
-     */
-    private Long isSearchForId() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) {
-                return NumberUtils.toLong(matcher.group(1));
-            }
-        }
-        return null;
     }
 
     /**
