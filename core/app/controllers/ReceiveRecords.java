@@ -34,6 +34,7 @@ public class ReceiveRecords extends Controller {
                 Arrays.asList(Messages.get("inboundrecord.confirm"), Messages.get("inboundrecord.update")), 50));
     }
 
+    @Check("receiverecords.index")
     public static void index(ReceiveRecordPost p) {
         if(p == null) p = new ReceiveRecordPost();
         List<ReceiveRecord> records = p.query();
@@ -43,6 +44,7 @@ public class ReceiveRecords extends Controller {
     /**
      * 确认收货记录
      */
+    @Check("receiverecords.index")
     public static void confirm(List<String> rids) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = ReceiveRecord.batchConfirm(rids);
@@ -65,6 +67,7 @@ public class ReceiveRecords extends Controller {
      * @param attr  字段名称
      * @param value 值
      */
+    @Check("receiverecords.index")
     public static void update(Long id, String attr, String value) {
         try {
             ReceiveRecord record = ReceiveRecord.findById(id);
