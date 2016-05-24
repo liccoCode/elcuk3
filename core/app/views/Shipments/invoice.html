@@ -46,8 +46,6 @@
       padding-top:20px;
       width:99.7%;
     }
-
-
   </style>
 </head>
 <body>
@@ -70,7 +68,6 @@
         #{else}
             #{render 'Shipments/_europe.html',address: address, country: country, invoiceNo: invoiceNo/}
         #{/else}
-
     #{/if}
     #{else }
         #{render 'Shipments/_us.html', address: address, invoiceNo: invoiceNo/}
