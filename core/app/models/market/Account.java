@@ -10,10 +10,12 @@ import helper.Webs;
 import models.OperatorConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -218,8 +220,10 @@ public class Account extends Model {
                      * 2. With the website params and user/password to login.
                      */
                     this.cookieStore().clear();
-                    F.T2<List<NameValuePair>, String> params = loginAmazonSellerCenterStep1();
-                    body = HTTP.post(this.cookieStore(), params._2, params._1);
+                    this.loginAmazonSellerCenterStep1();
+                    this.loginAmazonSellerCenterStep2();
+                    F.T3<List<NameValuePair>, List<BasicHeader>, String> params = loginAmazonSellerCenterStep3();
+                    body = HTTP.post(this.cookieStore(), params._3, params._2, params._1);
                     if(Play.mode.isDev()) {
                         FileUtils.writeStringToFile(new File(
                                 Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body
@@ -261,7 +265,27 @@ public class Account extends Model {
                 StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
-    public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
+    public void loginAmazonSellerCenterStep1() {
+        HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
+    }
+
+    public void loginAmazonSellerCenterStep2() {
+        HTTP.get(this.cookieStore(), String.format("%s/%s", this.type.sellerCentralHomePage(), "gp/uedata/unsticky"));
+    }
+
+    public F.T3<List<NameValuePair>, List<BasicHeader>, String> loginAmazonSellerCenterStep3() throws IOException {
+        List<BasicHeader> headers = new ArrayList<>();
+        headers.add(new BasicHeader(HttpHeaders.CACHE_CONTROL, "max-age=0"));
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT,
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"));
+        headers.add(new BasicHeader("Origin", this.type.sellerCentralHomePage()));
+        headers.add(new BasicHeader("Upgrade-Insecure-Requests", "1"));
+        headers.add(new BasicHeader(HttpHeaders.USER_AGENT,
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36"));
+        headers.add(new BasicHeader(HttpHeaders.REFERER, String.format("%s/%s", this.type.sellerCentralHomePage(),
+                "gp/homepage.html")));
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4"));
+
         String body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
         List<NameValuePair> params = new ArrayList<>();
 
@@ -277,7 +301,7 @@ public class Account extends Model {
 
         if(inputs.size() == 0) {
             Logger.info("WebSite [%s] Still have the Session with User [%s].", this.type.toString(), this.username);
-            return new F.T2<>(params, "");
+            return new F.T3<>(params, headers, "");
         }
 
         for(Element el : inputs) {
@@ -289,7 +313,10 @@ public class Account extends Model {
             else
                 params.add(new BasicNameValuePair(att, el.val()));
         }
-        return new F.T2<>(params, doc.select("form:eq(0)").attr("action"));
+        params.add(new BasicNameValuePair("sign-in-button", ""));
+
+
+        return new F.T3<>(params, headers, doc.select("form:eq(0)").attr("action"));
     }
 
     /**
