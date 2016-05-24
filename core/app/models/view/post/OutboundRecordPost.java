@@ -110,7 +110,11 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
 
         this.setupDateRange(sbd, params);
 
-        sbd.append(" ORDER BY substring_index(substring_index(attributes, 'planBeginDate\":\"', -1), '\"', 1) DESC");
+        if(StringUtils.equalsIgnoreCase(this.dateType, "createDate")) {
+            sbd.append(" ORDER BY createDate DESC");
+        } else if(StringUtils.equalsIgnoreCase(this.dateType, "planBeginDate")) {
+            sbd.append(" ORDER BY substring_index(substring_index(attributes, 'planBeginDate\":\"', -1), '\"', 1) DESC");
+        }
         return new F.T2<>(sbd.toString(), params);
     }
 
