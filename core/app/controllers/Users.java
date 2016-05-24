@@ -9,6 +9,7 @@ import models.Role;
 import models.User;
 import models.product.Team;
 import models.view.Ret;
+import models.view.post.UserPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -31,8 +32,9 @@ import java.util.*;
 public class Users extends Controller {
 
     @Check("users.index")
-    public static void index() {
-        List<User> users = User.findAll();
+    public static void index(UserPost p) {
+        if(p == null) p = new UserPost();
+        List<User> users = p.query();
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
         List<Role> roles = Role.findAll();
@@ -43,7 +45,7 @@ public class Users extends Controller {
         renderArgs.put("maps", maps);
         renderArgs.put("modules", modules);
 
-        render(users, privileges, teams, roles);
+        render(users, privileges, teams, roles, p);
     }
 
     @Before(only = {"home", "updates"})
