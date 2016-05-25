@@ -967,7 +967,7 @@ public class CheckTask extends Model {
      * @return
      */
     public String matchChecktor() {
-        String name = "";
+        List<String> names = new ArrayList<>();
         try {
             List<Map<String, Object>> rows = DBUtils.rows(
                     "SELECT DISTINCT u.username AS username FROM CategoryAssignManagement c" +
@@ -982,14 +982,14 @@ public class CheckTask extends Model {
             if(rows != null && !rows.isEmpty()) {
                 for(Map<String, Object> row : rows) {
                     if(row != null && row.containsKey("username")) {
-                        if(row.get("username") != null) name += row.get("username");
+                        if(row.get("username") != null) names.add(row.get("username").toString());
                     }
                 }
             }
         } catch(NullPointerException e) {
             Logger.warn(String.format("CheckTask#matchChecktor: %s", e.getMessage()));
         }
-        return name;
+        return StringUtils.join(names, ",");
     }
 
     /**
