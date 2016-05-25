@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * Date: 9/8/12
  * Time: 11:06 AM
  */
-public class ShipmentPost extends Post {
+public class ShipmentPost extends Post<Shipment> {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
@@ -35,6 +35,7 @@ public class ShipmentPost extends Post {
         this.states = Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM, Shipment.S.SHIPPING,
                 Shipment.S.CLEARANCE, Shipment.S.PACKAGE, Shipment.S.BOOKED, Shipment.S.DELIVERYING,
                 Shipment.S.RECEIPTD, Shipment.S.RECEIVING, Shipment.S.DONE);
+        this.perSize = 50;
     }
 
     static {
@@ -61,9 +62,19 @@ public class ShipmentPost extends Post {
 
     @Override
     public List<Shipment> query() {
+        this.count = this.count();
         F.T2<String, List<Object>> params = this.params();
-        List<Shipment> shipList = Shipment.find(params._1, params._2.toArray()).fetch();
-        return shipList;
+        return Shipment.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+    }
+
+    @Override
+    public Long getTotalCount() {
+        return this.count();
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return (long) Shipment.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
@@ -71,7 +82,7 @@ public class ShipmentPost extends Post {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
 
         if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+            return new F.T2<>(specialSearch._2, specialSearch._3);
 
         StringBuilder sbd = new StringBuilder(
                 // 几个表使用 left join 级联...
@@ -137,7 +148,7 @@ public class ShipmentPost extends Post {
 
         // 因为需要使用 deliverymentId() 方法, 不能够在 param 的地方添加 fba.centerId 路径
         sbd.append(" ORDER BY s.createDate DESC");
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     /**
@@ -168,6 +179,6 @@ public class ShipmentPost extends Post {
 
 
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 }

@@ -49,10 +49,8 @@ public class Shipments extends Controller {
 
     @Check("shipments.index")
     public static void index(ShipmentPost p) {
-        List<Shipment> shipments = null;
-        if(p == null)
-            p = new ShipmentPost();
-        shipments = p.query();
+        if(p == null) p = new ShipmentPost();
+        List<Shipment> shipments = p.query();
 
         for(int i = 0; i < shipments.size(); i++) {
             Shipment ship = shipments.get(i);
