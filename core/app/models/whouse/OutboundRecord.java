@@ -239,8 +239,6 @@ public class OutboundRecord extends Model {
         this.state = S.Pending;
         this.stockObj = plan.stockObj.dump();
         this.type = T.Normal;
-        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        if(cooperator != null) this.targetId = cooperator.id.toString();
     }
 
     /**

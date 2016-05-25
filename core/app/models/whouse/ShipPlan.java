@@ -3,6 +3,7 @@ package models.whouse;
 import com.google.gson.annotations.Expose;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -98,8 +99,9 @@ public class ShipPlan extends Model {
         this.state = S.Confirmd;
     }
 
-    public ShipPlan triggerRecord() {
+    public ShipPlan triggerRecord(String targetId) {
         OutboundRecord outboundRecord = new OutboundRecord(this);
+        if(StringUtils.isNotBlank(targetId)) outboundRecord.targetId = targetId;
         if(!outboundRecord.exist()) outboundRecord.save();
         return this;
     }
