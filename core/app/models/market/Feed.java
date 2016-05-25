@@ -23,9 +23,6 @@ import java.util.concurrent.TimeUnit;
 public class Feed extends Model {
     private static final long serialVersionUID = 370209511312724644L;
 
-    public Feed() {
-    }
-
     public String feedId;
 
     /**
@@ -56,6 +53,21 @@ public class Feed extends Model {
      * Feed 的创建者
      */
     public String byWho;
+
+    /**
+     * 描述信息
+     */
+    public String memo;
+
+    public Feed() {
+    }
+
+    public Feed(String content, String memo, Selling selling) {
+        this.content = content;
+        this.fid = selling.sellingId;
+        this.memo = memo;
+        this.byWho = User.username();
+    }
 
     /**
      * 因 API 的限制, 所以每一个 Selling 不可以无限制的上传 Feed.
@@ -104,15 +116,15 @@ public class Feed extends Model {
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {
-        Feed feed = new Feed();
-        feed.content = content;
-        feed.fid = selling.sellingId;
-        feed.byWho = User.username();
-        return feed.save();
+        return new Feed(content, "上架 Listing 到 Amazon", selling);
+    }
+
+    public static Feed newAssignPriceFeed(String content, Selling selling) {
+        return new Feed(content, "更新 Listing 的 Price 属性", selling);
     }
 
     public static Feed updateSellingFeed(String content, Selling selling) {
-        return newSellingFeed(content, selling);
+        return new Feed(content, "更新 Listing 属性", selling);
     }
 
     @PrePersist

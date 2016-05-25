@@ -436,7 +436,7 @@ public class Selling extends GenericModel {
         patchToListing();
 
         Feed saleAmazonBasicFeed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
-        Feed assignPriceFeed = Feed.newSellingFeed(MWSUtils.assignPriceXml(this), this);
+        Feed assignPriceFeed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
 
         List<NameValuePair> params = this.submitJobParams(saleAmazonBasicFeed);
         params.add(new BasicNameValuePair("type", "CreateListing"));
@@ -936,7 +936,7 @@ public class Selling extends GenericModel {
 
         if(p.standerprice || p.saleprice) {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
-            Feed price_feed = Feed.updateSellingFeed(xml, this);
+            Feed price_feed = Feed.newAssignPriceFeed(xml, this);
             String feed_submission_id = MWSUtils
                     .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
             Logger.info(feed_submission_id);
