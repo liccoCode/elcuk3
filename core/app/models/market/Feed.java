@@ -116,19 +116,19 @@ public class Feed extends Model {
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {
-        return new Feed(content, "上架 Listing 到 Amazon", selling);
+        return new Feed(content, "上架 Listing 到 Amazon", selling).save();
     }
 
     public static Feed newAssignPriceFeed(String content, Selling selling) {
-        return new Feed(content, "更新 Listing 的 Price 属性", selling);
+        return new Feed(content, "更新 Listing 的 Price 属性", selling).save();
     }
 
     public static Feed setFulfillmentByAmazonFeed(String content, Selling selling) {
-        return new Feed(content, "设置 Listing Fulfillment By Amazon", selling);
+        return new Feed(content, "设置 Listing Fulfillment By Amazon", selling).save();
     }
 
     public static Feed updateSellingFeed(String content, Selling selling) {
-        return new Feed(content, "更新 Listing 属性", selling);
+        return new Feed(content, "更新 Listing 属性", selling).save();
     }
 
     @PrePersist
