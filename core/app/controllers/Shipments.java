@@ -182,7 +182,7 @@ public class Shipments extends Controller {
 
         new ElcukRecord(Messages.get("shipment.update"),
                 Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
-        redirect("/Shipments/show", shipid);
+        Shipments.show(shipid);
     }
 
     /**
