@@ -403,7 +403,8 @@ public class Selling extends GenericModel {
 
         String xml = MWSUtils.buildProductImageBySelling(this, images);
         Feed feed = Feed.updateSellingFeed(xml, this);
-        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
+        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, this.market.amid(),
+                this.account);
         Logger.info(feed_submission_id);
         List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_get_feed", params);
@@ -951,7 +952,8 @@ public class Selling extends GenericModel {
                 p.productdesc) {
             String xml = MWSUtils.buildProductXMLBySelling(this, p);
             Feed feed = Feed.updateSellingFeed(xml, this);
-            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
+            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, this.market.amid(),
+                    this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
@@ -962,7 +964,7 @@ public class Selling extends GenericModel {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
             Feed price_feed = Feed.newAssignPriceFeed(xml, this);
             String feed_submission_id = MWSUtils
-                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
+                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, this.market.amid(), this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
