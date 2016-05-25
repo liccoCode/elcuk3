@@ -3,7 +3,10 @@ package models.qc;
 import java.io.Serializable;
 
 /**
- * Created by mac on 15-5-8.
+ * Created by IntelliJ IDEA.
+ * User: mac
+ * Date: 15-5-8
+ * Time: 3:37 PM
  */
 public class CheckTaskDTO implements Serializable {
 

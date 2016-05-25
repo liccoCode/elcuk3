@@ -21,7 +21,7 @@
 #{/info_row}
 
 <div class="row-fluid">
-  <form action="@{InboundRecords.index()}" method="post" class="search_form" id="search_form">
+  <form action="@{ReceiveRecords.index()}" method="post" class="search_form" id="search_form">
     <div class="span12">
       <div class="input-prepend input-append inline">
         <span class="add-on">From:</span>
@@ -73,17 +73,141 @@
       </div>
 
       <div class="inline">
-        <a href="@{InboundRecords.blank()}" target="_blank" class="btn btn-success inline">添加其他入库</a>
         <a target="_blank" class="btn btn-info inline" name="confirm">确认入库</a>
       </div>
     </div>
   </form>
 
 
-  <form action="@{InboundRecords.confirm()}" name="confirm_form">
+  <form action="@{ReceiveRecords.confirm()}" name="confirm_form">
     <div class="span12">
       <table class="table table-condensed table-bordered">
+        <tr>
+          <th rowspan="2">
+            <label class="checkbox">
+              <input type="checkbox" id="check_all">
+            </label>
+          </th>
+          <th rowspan="2">ID</th>
+          <th rowspan="2">状态</th>
+          <th rowspan="2">出货单ID</th>
+          <th rowspan="2">物料计划ID</th>
+          <th rowspan="2">供应商</th>
+          <th rowspan="2">SKU</th>
+          <th rowspan="2">产品名称</th>
+          <th rowspan="2">FnSku</th>
+          <th rowspan="2">FBA</th>
+          <th rowspan="2">去往仓库</th>
+          <th rowspan="2">运输方式</th>
+          <th rowspan="2">预计数量</th>
+          <th rowspan="2">实际数量</th>
 
+          <th colspan="6" style="text-align:center;">主箱</th>
+          <th colspan="6" style="text-align:center;">尾箱</th>
+
+          <th rowspan="2">创建时间</th>
+          <th rowspan="2">确认时间</th>
+          <th rowspan="2">确认人</th>
+        </tr>
+        <tr>
+          <td>箱数</td>
+          <td>数量</td>
+          <td>重量</td>
+          <td>长</td>
+          <td>宽</td>
+          <td>高</td>
+          <td>箱数</td>
+          <td>数量</td>
+          <td>重量</td>
+          <td>长</td>
+          <td>宽</td>
+          <td>高</td>
+        </tr>
+      #{list items: records, as: 'r'}
+        <tr>
+            #{set attrs: r.stockObj.attributes()/}
+          <td>
+            <label class="checkbox">
+              <input type="checkbox" name="rids" value="${r.id}">
+            </label>
+          </td>
+          <td>${r.id}</td>
+          <td>${r.state?.label()}</td>
+          <td>
+            <a href="@{DeliverPlans.show(r.deliverPlan?.id)}" target="_blank">${r.deliverPlan?.id}</a>
+          </td>
+          <td>
+            <a href="/ProcureUnits/index?p.search=id:${r.procureUnit?.id}" target="_blank">
+            ${r.procureUnit?.id}
+            </a>
+          </td>
+          <td>
+            <a href="@{Cooperators.show(r.procureUnit?.cooperator?.id)}" target="_blank">
+            ${r.procureUnit?.cooperator?.name}
+            </a>
+          </td>
+          <td>
+            <a href="@{Products.show(r.procureUnit?.product?.sku)}" target="_blank">
+            ${r.procureUnit?.product?.sku}
+            </a>
+          </td>
+          <td style="max-width: 280px;">${r.procureUnit?.product?.abbreviation}</td>
+          <td>
+              #{set fnsku: r.procureUnit?.selling?.fnSku/}
+              #{if fnsku != null && fnsku != ""}
+                <a href="${Sellings.sellingLabel(r.procureUnit?.selling?.sellingId)}" class="btn btn-success">
+                ${fnsku} <i class="icon-download-alt"></i>
+                </a>
+              #{/if}
+          </td>
+          <td>${r.procureUnit?.fba}</td>
+          <td>${r.procureUnit?.whouse?.name}</td>
+          <td>${r.procureUnit?.shipType?.label()}</td>
+          <td>${r.procureUnit?.qty()}</td>
+          <td>
+            <input type="text" name="qty" value="${r.qty}">
+          </td>
+          <td>
+            <input type="text" name="mainBox.boxNum" value="${r.mainBox?.boxNum}">
+          </td>
+          <td>
+            <input type="text" name="mainBox.num" value="${r.mainBox?.num}">
+          </td>
+          <td>
+            <input type="text" name="mainBox.singleBoxWeight" value="${r.mainBox?.singleBoxWeight}">
+          </td>
+          <td>
+            <input type="text" name="mainBox.length" value="${r.mainBox?.length}">
+          </td>
+          <td>
+            <input type="text" name="mainBox.width" value="${r.mainBox?.width}">
+          </td>
+          <td>
+            <input type="text" name="mainBox.height" value="${r.mainBox?.height}">
+          </td>
+          <td>
+            <input type="text" name="lastBoxInfo.boxNum" value="${r.lastBoxInfo?.boxNum}">
+          </td>
+          <td>
+            <input type="text" name="lastBoxInfo.num" value="${r.lastBoxInfo?.num}">
+          </td>
+          <td>
+            <input type="text" name="lastBoxInfo.singleBoxWeight" value="${r.lastBoxInfo?.singleBoxWeight}">
+          </td>
+          <td>
+            <input type="text" name="lastBoxInfo.length" value="${r.lastBoxInfo?.length}">
+          </td>
+          <td>
+            <input type="text" name="lastBoxInfo.width" value="${r.lastBoxInfo?.width}">
+          </td>
+          <td>
+            <input type="text" name="lastBoxInfo.height" value="${r.lastBoxInfo?.height}">
+          </td>
+          <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
+          <td>#{time_tooltip time: r.confirmDate, datetime: true/}</td>
+          <td>${r.confirmer?.username}</td>
+        </tr>
+      #{/list}
       </table>
     </div>
   </form>

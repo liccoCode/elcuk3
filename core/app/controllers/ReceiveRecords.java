@@ -31,14 +31,14 @@ public class ReceiveRecords extends Controller {
         renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
         renderArgs.put("elcukRecords", ElcukRecord.records(
-                Arrays.asList(Messages.get("inboundrecord.confirm"), Messages.get("inboundrecord.update")), 50));
+                Arrays.asList(Messages.get("receiverecord.confirm"), Messages.get("receiverecord.update")), 50));
     }
 
     @Check("receiverecords.index")
     public static void index(ReceiveRecordPost p) {
         if(p == null) p = new ReceiveRecordPost();
         List<ReceiveRecord> records = p.query();
-        render(records);
+        render(p, records);
     }
 
     /**

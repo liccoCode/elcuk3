@@ -64,7 +64,7 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
         }
         if(this.state != null) {
             sbd.append(" AND r.state=?");
-            params.add(this.state.label());
+            params.add(this.state);
         }
         if(this.whouseId != null) {
             sbd.append(" AND p.whouse.id=?");
@@ -95,7 +95,12 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
                     .append(")");
             for(int i = 0; i < 4; i++) params.add(word);
         }
-        sbd.append(" ORDER BY createDate DESC");
+        if(StringUtils.equalsIgnoreCase(this.dateType, "createDate")) {
+            sbd.append(" ORDER BY r.createDate DESC");
+        } else if(StringUtils.equalsIgnoreCase(this.dateType, "confirmDate")){
+            sbd.append(" ORDER BY r.confirmDate DESC");
+        }
+
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -113,6 +118,6 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ReceiveRecord.count(params._1, params._2.toArray());
+        return (long) ReceiveRecord.find(params._1, params._2.toArray()).fetch().size();
     }
 }

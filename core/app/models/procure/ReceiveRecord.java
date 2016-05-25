@@ -1,10 +1,13 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import helper.J;
 import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -98,6 +101,36 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
      */
     @Expose
     public Date confirmDate;
+
+    /**
+     * 主箱信息
+     */
+    @Lob
+    public String mainBoxInfo;
+
+    @Transient
+    public CheckTaskDTO mainBox;
+
+    /**
+     * 尾箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+    @Transient
+    public CheckTaskDTO lastBox;
+
+    @PreUpdate
+    public void beforeSave() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
+    }
+
+    @PostLoad
+    public void postPersist() {
+        this.mainBox = JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
 
     public ReceiveRecord() {
         this.createDate = new Date();
