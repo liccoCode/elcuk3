@@ -370,7 +370,6 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString())); // 作用与哪一个 Selling
         return params;
     }
 
@@ -384,6 +383,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
         return feed;
     }
@@ -446,6 +446,7 @@ public class Selling extends GenericModel {
         Feed saleAmazonBasicFeed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
         List<NameValuePair> params = this.submitJobParams(saleAmazonBasicFeed);
         params.add(new BasicNameValuePair("type", "CreateListing"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
     }
 
@@ -453,20 +454,22 @@ public class Selling extends GenericModel {
      * 通过 XML 来设置 Amazon Listing 的 Price 属性
      */
     public void assignAmazonListingPrice() {
-        Feed assignPriceFeed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
-        List<NameValuePair> assignPriceParams = this.submitJobParams(assignPriceFeed);
-        assignPriceParams.add(new BasicNameValuePair("type", "AssignPrice"));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", assignPriceParams);
+        Feed feed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRICING_FEED.toString()));
+        params.add(new BasicNameValuePair("type", "AssignPrice"));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
     }
 
     /**
      * 通过 XML 来设置 Amazon Listing 为 Fulfillment By Amazon
      */
     public void setFulfillmentByAmazon() {
-        Feed assignPriceFeed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
-        List<NameValuePair> assignPriceParams = this.submitJobParams(assignPriceFeed);
-        assignPriceParams.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", assignPriceParams);
+        Feed feed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_INVENTORY_FEED.toString()));
+        params.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
     }
 
     /**
