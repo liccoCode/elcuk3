@@ -382,6 +382,31 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
+    public static String fulfillmentByAmazonXml(Selling selling) {
+        AmazonEnvelope envelope = new AmazonEnvelope();
+
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
+
+        envelope.setHeader(header);
+        envelope.setMessageType("Inventory");
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
+        message.setOperationType("Update");
+
+        Inventory inventory = new Inventory();
+        inventory.setSKU(selling.merchantSKU);
+        inventory.setFulfillmentCenterID("AMAZON_NA");//TODO 确认 CenterId
+        inventory.setLookup("FulfillmentNetwork");
+        inventory.setSwitchFulfillmentTo("AFN");
+
+        message.setInventory(inventory);
+        envelope.getMessage().add(message);
+        return JaxbUtil.convertToXml(envelope);
+    }
+
     public static boolean needSetProductData(String feedProductType) {
         return !Arrays.asList("NotebookComputer").contains(feedProductType);
     }

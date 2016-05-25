@@ -123,6 +123,10 @@ public class Feed extends Model {
         return new Feed(content, "更新 Listing 的 Price 属性", selling);
     }
 
+    public static Feed setFulfillmentByAmazonFeed(String content, Selling selling) {
+        return new Feed(content, "设置 Listing Fulfillment By Amazon", selling);
+    }
+
     public static Feed updateSellingFeed(String content, Selling selling) {
         return new Feed(content, "更新 Listing 属性", selling);
     }
