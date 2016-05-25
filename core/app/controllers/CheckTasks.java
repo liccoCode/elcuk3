@@ -51,8 +51,10 @@ public class CheckTasks extends Controller {
 
     @Check("checktasks.checklist")
     public static void checklist(CheckTaskPost p, int day) {
-        if(p == null) p = new CheckTaskPost();
-        p.initDateRange(day);
+        if(p == null) {
+            p = new CheckTaskPost();
+            p.initDateRange(day);
+        }
         List<CheckTask> tasklist = p.query();
         render(tasklist, p);
     }
@@ -63,9 +65,10 @@ public class CheckTasks extends Controller {
     @Check("checktasks.checkerList")
     public static void checkerList(CheckTaskPost p, int day) {
         String username = Secure.Security.connected();
-        if(p == null) p = new CheckTaskPost(username);
-
-        p.initDateRange(day);
+        if(p == null) {
+            p = new CheckTaskPost();
+            p.initDateRange(day);
+        }
         List<ElcukRecord> records = ElcukRecord.find("action like '[CheckTask%' ORDER BY createAt DESC").fetch(50);
         List<CheckTask> checks = p.check();
         List<CheckTask> checkeds = p.checked();
