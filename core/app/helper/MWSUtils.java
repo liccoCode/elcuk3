@@ -322,14 +322,13 @@ public class MWSUtils {
         for(String searchTerm : selling.aps.searchTermss) {
             if(StringUtils.isNotBlank(searchTerm)) descriptionData.getSearchTerms().add(searchTerm);
         }
+        product.setDescriptionData(descriptionData);
 
         if(needSetProductData(selling.aps.feedProductType)) {
             Product.ProductData productData = new Product.ProductData();
             new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
-            product.setDescriptionData(descriptionData);
             product.setProductData(productData);
         }
-
         message.setProduct(product);
         envelope.getMessage().add(message);
         return JaxbUtil.convertToXml(envelope);
