@@ -65,6 +65,12 @@ public class MWSUtils {
             public String toString() {
                 return "_POST_PRODUCT_IMAGE_DATA_";
             }
+        },
+        PRODUCT_INVENTORY_FEED {
+            @Override
+            public String toString() {
+                return "_POST_INVENTORY_AVAILABILITY_DATA_";
+            }
         }
     }
 
@@ -379,6 +385,31 @@ public class MWSUtils {
         message.setPrice(price);
         envelope.getMessage().add(message);
 
+        return JaxbUtil.convertToXml(envelope);
+    }
+
+    public static String fulfillmentByAmazonXml(Selling selling) {
+        AmazonEnvelope envelope = new AmazonEnvelope();
+
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
+
+        envelope.setHeader(header);
+        envelope.setMessageType("Inventory");
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
+        message.setOperationType("Update");
+
+        Inventory inventory = new Inventory();
+        inventory.setSKU(selling.merchantSKU);
+        inventory.setFulfillmentCenterID("AMAZON_NA");//TODO 确认 CenterId
+        inventory.setLookup("FulfillmentNetwork");
+        inventory.setSwitchFulfillmentTo("AFN");
+
+        message.setInventory(inventory);
+        envelope.getMessage().add(message);
         return JaxbUtil.convertToXml(envelope);
     }
 

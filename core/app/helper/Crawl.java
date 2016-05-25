@@ -10,6 +10,7 @@ import play.Logger;
  * Date: 5/12/12
  * Time: 3:32 PM
  */
+@Deprecated
 public class Crawl {
     public static JsonElement crawlListing(String market, String asin) {
         Logger.info("crawlListing %s", crawlUrl("listing", market, asin));

@@ -370,7 +370,6 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString())); // 作用与哪一个 Selling
         return params;
     }
 
@@ -384,6 +383,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
         return feed;
     }
@@ -392,7 +392,7 @@ public class Selling extends GenericModel {
      * 用Feed方式更新产品图片
      */
     public void uploadFeedAmazonImg(String imageName, boolean waterMark, String userName) {
-        //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         String dealImageNames = imageName;
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
@@ -419,7 +419,6 @@ public class Selling extends GenericModel {
     public Selling buildFromProduct() {
         if(this.account == null) Webs.error("上架账户不能为空");
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
-        // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.market == null) Webs.error("Market 不能为空");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
@@ -434,18 +433,43 @@ public class Selling extends GenericModel {
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
         patchToListing();
+        this.saleAmazon();
+        this.assignAmazonListingPrice();
+        this.setFulfillmentByAmazon();
+        return this;
+    }
 
+    /**
+     * 提交 Listing 上架的 XML
+     */
+    public void saleAmazon() {
         Feed saleAmazonBasicFeed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
-        Feed assignPriceFeed = Feed.newSellingFeed(MWSUtils.assignPriceXml(this), this);
-
         List<NameValuePair> params = this.submitJobParams(saleAmazonBasicFeed);
         params.add(new BasicNameValuePair("type", "CreateListing"));
-        params.add(new BasicNameValuePair("next_type", "AssignPrice"));
-        params.add(new BasicNameValuePair("next_feed_id", assignPriceFeed.id.toString()));
-        params.add(new BasicNameValuePair("next_feed_type", MWSUtils.T.PRICING_FEED.toString()));
-
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
-        return this;
+    }
+
+    /**
+     * 通过 XML 来设置 Amazon Listing 的 Price 属性
+     */
+    public void assignAmazonListingPrice() {
+        Feed feed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRICING_FEED.toString()));
+        params.add(new BasicNameValuePair("type", "AssignPrice"));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
+    }
+
+    /**
+     * 通过 XML 来设置 Amazon Listing 为 Fulfillment By Amazon
+     */
+    public void setFulfillmentByAmazon() {
+        Feed feed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_INVENTORY_FEED.toString()));
+        params.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
     }
 
     /**
@@ -936,7 +960,7 @@ public class Selling extends GenericModel {
 
         if(p.standerprice || p.saleprice) {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
-            Feed price_feed = Feed.updateSellingFeed(xml, this);
+            Feed price_feed = Feed.newAssignPriceFeed(xml, this);
             String feed_submission_id = MWSUtils
                     .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
             Logger.info(feed_submission_id);
