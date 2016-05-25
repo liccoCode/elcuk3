@@ -59,7 +59,7 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
         Long recordId = isSearchForId();
         if(recordId != null) {
             sbd.append(" AND r.id=?");
-            params.add(recordId);
+            params.add(recordId.toString());
             return new F.T2<>(sbd.toString(), params);
         }
         if(this.state != null) {
