@@ -47,6 +47,19 @@ $ ->
             $input.parent().text($input.val())
         )
     )
+  ).on('change', "input[name^='boxNum'], input[name^='num']", (e) ->
+    $input = $(@)
+    $tr = $input.parents('tr')
+    mainBoxNum = parseInt($tr.find("input[name='mainBox.boxNum']").val())
+    mainNum = parseInt($tr.find("input[name='mainBox.num']").val())
+
+    lastBoxNum = parseInt($tr.find("input[name='lastBoxInfo.boxNum']").val())
+    lastNum = parseInt($tr.find("input[name='lastBoxInfo.num']").val())
+
+    tmpSum = 0
+    tmpSum += mainBoxNum * mainNum if _.isInteger(mainBoxNum) && _.isInteger(mainNum)
+    tmpSum += lastBoxNum * lastNum if _.isInteger(lastBoxNum) && _.isInteger(lastNum)
+    $tr.find("input[name='qty']").val(tmpSum)
   )
 
   $(document).on('click', 'a[name=tryIdMatch]', (e) ->
