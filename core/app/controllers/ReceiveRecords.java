@@ -29,7 +29,7 @@ public class ReceiveRecords extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex() {
         renderArgs.put("cooperators", Cooperator.suppliers());
-        renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("elcukRecords", ElcukRecord.records(
                 Arrays.asList(Messages.get("receiverecord.confirm"), Messages.get("receiverecord.update")), 50));
     }
@@ -68,7 +68,7 @@ public class ReceiveRecords extends Controller {
      * @param value 值
      */
     @Check("receiverecords.index")
-    public static void update(Long id, String attr, String value) {
+    public static void update(String id, String attr, String value) {
         try {
             ReceiveRecord record = ReceiveRecord.findById(id);
             record.updateAttr(attr, value);
