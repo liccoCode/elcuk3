@@ -270,4 +270,8 @@ public class DeliverPlan extends GenericModel {
             if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
         }
     }
+
+    public boolean isLocked() {
+        return this.state == P.DONE;
+    }
 }

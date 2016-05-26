@@ -104,6 +104,7 @@ public class DeliverPlans extends Controller {
      */
     public static void addunits(String id, List<Long> pids) {
         DeliverPlan dp = DeliverPlan.findById(id);
+        if(dp.isLocked()) Validation.addError("", "出库单已经确认!");
         Validation.required("deliverplans.addunits", pids);
         if(Validation.hasErrors())
             render("DeliverPlans/show.html", dp);
@@ -123,6 +124,7 @@ public class DeliverPlans extends Controller {
      */
     public static void delunits(String id, List<Long> pids) {
         DeliverPlan dp = DeliverPlan.findById(id);
+        if(dp.isLocked()) Validation.addError("", "出库单已经确认!");
         Validation.required("deliverplans.delunits", pids);
         if(Validation.hasErrors())
             render("DeliverPlans/show.html", dp);
@@ -139,7 +141,9 @@ public class DeliverPlans extends Controller {
         if(ids != null && !ids.isEmpty()) {
             for(String id : ids) {
                 DeliverPlan deliverPlan = DeliverPlan.findById(id);
-                if(deliverPlan != null) deliverPlan.triggerReceiveRecords();
+                if(deliverPlan != null && deliverPlan.state == DeliverPlan.P.CREATE) {
+                    deliverPlan.triggerReceiveRecords();
+                }
             }
         }
         redirect("/ReceiveRecords/index");
