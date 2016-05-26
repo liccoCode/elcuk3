@@ -73,7 +73,7 @@
       </div>
 
       <div class="inline">
-        <a target="_blank" class="btn btn-info inline" name="confirm">确认入库</a>
+        <a target="_blank" class="btn btn-info inline" name="confirm">确认收货</a>
       </div>
     </div>
   </form>
@@ -131,8 +131,7 @@
             </label>
           </td>
           <td>${r.id}</td>
-          <td>
-            <input type="hidden" name="state" value="${r.state.name()}">
+          <td data-name="state">
             ${r.state?.label()}
           </td>
           <td>
@@ -188,22 +187,22 @@
             <input type="text" name="mainBox.height" value="${r.mainBox?.height}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.boxNum" value="${r.lastBoxInfo?.boxNum}" style="width:20px;">
+            <input type="text" name="lastBox.boxNum" value="${r.lastBox?.boxNum}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.num" value="${r.lastBoxInfo?.num}" style="width:20px;">
+            <input type="text" name="lastBox.num" value="${r.lastBox?.num}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.singleBoxWeight" value="${r.lastBoxInfo?.singleBoxWeight}" style="width:20px;">
+            <input type="text" name="lastBox.singleBoxWeight" value="${r.lastBox?.singleBoxWeight}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.length" value="${r.lastBoxInfo?.length}" style="width:20px;">
+            <input type="text" name="lastBox.length" value="${r.lastBox?.length}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.width" value="${r.lastBoxInfo?.width}" style="width:20px;">
+            <input type="text" name="lastBox.width" value="${r.lastBox?.width}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.height" value="${r.lastBoxInfo?.height}" style="width:20px;">
+            <input type="text" name="lastBox.height" value="${r.lastBox?.height}" style="width:20px;">
           </td>
           <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
           <td>#{time_tooltip time: r.confirmDate, datetime: true/}</td>

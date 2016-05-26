@@ -262,6 +262,9 @@ public class DeliverPlan extends GenericModel {
      * 生成收货记录
      */
     public void triggerReceiveRecords() {
+        if(this.units == null && this.units.isEmpty()) return;
+        this.state = P.DONE;
+        this.save();
         for(ProcureUnit unit : this.units) {
             ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
             if(!receiveRecord.isExists()) receiveRecord.validateAndSave();

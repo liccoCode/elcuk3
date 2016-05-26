@@ -7,6 +7,7 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -113,7 +114,7 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     public String mainBoxInfo;
 
     @Transient
-    public CheckTaskDTO mainBox;
+    public CheckTaskDTO mainBox = new CheckTaskDTO();
 
     /**
      * 尾箱信息
@@ -122,12 +123,11 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     public String lastBoxInfo;
 
     @Transient
-    public CheckTaskDTO lastBox;
+    public CheckTaskDTO lastBox = new CheckTaskDTO();
 
-    @PreUpdate
+    @PrePersist
     public void beforeSave() {
-        this.mainBoxInfo = J.json(this.mainBox);
-        this.lastBoxInfo = J.json(this.lastBox);
+        this.marshalBoxs();
     }
 
     @PostLoad
@@ -190,18 +190,15 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
         this.confirmDate = new Date();
         this.confirmer = User.current();
         this.valid();
-        //TODO 生成质检任务
-        //List<StockRecord> stockRecords = this.buildStockRecords();
-
         if(Validation.hasErrors()) return;
         this.save();
+        this.triggerCheck();
     }
 
     public void valid() {
         Validation.required("出货单", this.deliverPlan);
         Validation.required("物料计划", this.procureUnit);
-        Validation.required("实际数量", this.qty);
-        //TODO 校验主箱与尾箱
+        Validation.min("实际数量", this.qty, 0);
     }
 
     public boolean isLocked() {
@@ -210,17 +207,16 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
 
     public void updateAttr(String attr, String value) {
         if(this.isLocked()) throw new FastRuntimeException("已收货收货记录不允许修改!");
-
         List<String> logs = new ArrayList<>();
-        switch(attr) {
-            case "qty":
-                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
-                break;
-            //TODO: 主箱与尾箱
-            default:
-                throw new FastRuntimeException("不支持的属性类型!");
+
+        if(StringUtils.containsIgnoreCase(attr, "mainBox.") || StringUtils.containsIgnoreCase(attr, "lastBox.")) {
+            logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+            logs.addAll(Reflects.logFieldFade(this, "qty", this.mainBox.qty() + this.lastBox.qty()));
+            this.marshalBoxs();
+        } else {
+            throw new FastRuntimeException("不支持的属性类型!");
         }
-        new ERecordBuilder("inboundrecord.update")
+        new ERecordBuilder("receiverecord.update")
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();
         this.save();
@@ -228,6 +224,18 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
 
     public boolean isExists() {
         return ReceiveRecord.find("procureUnit=?", this.procureUnit).fetch().size() != 0;
+    }
+
+    public void marshalBoxs() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
+    }
+
+    /**
+     * 生成质检任务
+     */
+    public void triggerCheck() {
+        if(this.isPersistent() && this.state == S.Received) new CheckTask(this).save();
     }
 
     @Override

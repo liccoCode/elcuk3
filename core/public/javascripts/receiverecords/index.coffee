@@ -1,5 +1,5 @@
 $ ->
-  $('#check_all').change ->
+  $('#receiverecord_check_all').change ->
     o = $(@)
     region = o.attr('id').split('_')[0].trim()
     $("input:checkbox:not(:disabled).#{region}").prop("checked", o.prop("checked"))
@@ -13,11 +13,10 @@ $ ->
       $("form[name=confirm_form]").submit()
   )
 
-  $("form[name=confirm_form]").on('change', "td>:input[name]", (e) ->
+  $("form[name=confirm_form]").on('change', "td>:input[name*='Box']", (e) ->
     $input = $(@)
     attr = $input.attr('name')
     value = $input.val()
-
     return if _.isEmpty(value)
 
     $.post("/ReceiveRecords/update", {
@@ -29,14 +28,13 @@ $ ->
         if r.flag is false
           noty({text: r.message, type: 'error'})
         else
-          msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
-          noty({text: "更新#{msg}成功!", type: 'success'})
+          noty({text: "更新#{attr}成功!", type: 'success'})
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
       $tr = $(tr)
-      state = $tr.find('input[name=state]').val()
-      if state != 'Pending'
+      state = $tr.find('td[data-name=state]').text().trim()
+      if state == '已收货'
         _.each($tr.find(":input[name]"), (input) ->
           $input = $(input)
           if $input.is(':checkbox')
@@ -47,14 +45,14 @@ $ ->
             $input.parent().text($input.val())
         )
     )
-  ).on('change', "input[name^='boxNum'], input[name^='num']", (e) ->
+  ).on('change', "td>:input[name*='um']", (e) ->
     $input = $(@)
     $tr = $input.parents('tr')
     mainBoxNum = parseInt($tr.find("input[name='mainBox.boxNum']").val())
     mainNum = parseInt($tr.find("input[name='mainBox.num']").val())
 
-    lastBoxNum = parseInt($tr.find("input[name='lastBoxInfo.boxNum']").val())
-    lastNum = parseInt($tr.find("input[name='lastBoxInfo.num']").val())
+    lastBoxNum = parseInt($tr.find("input[name='lastBox.boxNum']").val())
+    lastNum = parseInt($tr.find("input[name='lastBox.num']").val())
 
     tmpSum = 0
     tmpSum += mainBoxNum * mainNum if _.isInteger(mainBoxNum) && _.isInteger(mainNum)
