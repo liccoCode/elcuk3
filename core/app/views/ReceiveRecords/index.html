@@ -85,7 +85,7 @@
         <tr>
           <th rowspan="2">
             <label class="checkbox">
-              <input type="checkbox" id="check_all">
+              <input type="checkbox" id="receiverecord_check_all">
             </label>
           </th>
           <th rowspan="2">ID</th>
@@ -125,14 +125,16 @@
         </tr>
       #{list items: records, as: 'r'}
         <tr>
-            #{set attrs: r.stockObj.attributes()/}
           <td>
             <label class="checkbox">
-              <input type="checkbox" name="rids" value="${r.id}">
+              <input type="checkbox" name="rids" value="${r.id}" class="receiverecord">
             </label>
           </td>
           <td>${r.id}</td>
-          <td>${r.state?.label()}</td>
+          <td>
+            <input type="hidden" name="state" value="${r.state.name()}">
+            ${r.state?.label()}
+          </td>
           <td>
             <a href="@{DeliverPlans.show(r.deliverPlan?.id)}" target="_blank">${r.deliverPlan?.id}</a>
           </td>
@@ -155,7 +157,7 @@
           <td>
               #{set fnsku: r.procureUnit?.selling?.fnSku/}
               #{if fnsku != null && fnsku != ""}
-                <a href="${Sellings.sellingLabel(r.procureUnit?.selling?.sellingId)}" class="btn btn-success">
+                <a href="@{Sellings.sellingLabel(r.procureUnit?.selling?.sellingId)}" class="btn btn-success">
                 ${fnsku} <i class="icon-download-alt"></i>
                 </a>
               #{/if}
@@ -165,43 +167,43 @@
           <td>${r.procureUnit?.shipType?.label()}</td>
           <td>${r.procureUnit?.qty()}</td>
           <td>
-            <input type="text" name="qty" value="${r.qty}" style="width:10px;">
+            <input type="text" name="qty" value="${r.qty}" style="width:30px;">
           </td>
           <td>
-            <input type="text" name="mainBox.boxNum" value="${r.mainBox?.boxNum}" style="width:10px;">
+            <input type="text" name="mainBox.boxNum" value="${r.mainBox?.boxNum}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="mainBox.num" value="${r.mainBox?.num}" style="width:10px;">
+            <input type="text" name="mainBox.num" value="${r.mainBox?.num}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="mainBox.singleBoxWeight" value="${r.mainBox?.singleBoxWeight}" style="width:10px;">
+            <input type="text" name="mainBox.singleBoxWeight" value="${r.mainBox?.singleBoxWeight}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="mainBox.length" value="${r.mainBox?.length}" style="width:10px;">
+            <input type="text" name="mainBox.length" value="${r.mainBox?.length}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="mainBox.width" value="${r.mainBox?.width}" style="width:10px;">
+            <input type="text" name="mainBox.width" value="${r.mainBox?.width}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="mainBox.height" value="${r.mainBox?.height}" style="width:10px;">
+            <input type="text" name="mainBox.height" value="${r.mainBox?.height}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.boxNum" value="${r.lastBoxInfo?.boxNum}" style="width:10px;">
+            <input type="text" name="lastBoxInfo.boxNum" value="${r.lastBoxInfo?.boxNum}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.num" value="${r.lastBoxInfo?.num}" style="width:10px;">
+            <input type="text" name="lastBoxInfo.num" value="${r.lastBoxInfo?.num}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.singleBoxWeight" value="${r.lastBoxInfo?.singleBoxWeight}" style="width:10px;">
+            <input type="text" name="lastBoxInfo.singleBoxWeight" value="${r.lastBoxInfo?.singleBoxWeight}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.length" value="${r.lastBoxInfo?.length}" style="width:10px;">
+            <input type="text" name="lastBoxInfo.length" value="${r.lastBoxInfo?.length}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.width" value="${r.lastBoxInfo?.width}" style="width:10px;">
+            <input type="text" name="lastBoxInfo.width" value="${r.lastBoxInfo?.width}" style="width:20px;">
           </td>
           <td>
-            <input type="text" name="lastBoxInfo.height" value="${r.lastBoxInfo?.height}" style="width:10px;">
+            <input type="text" name="lastBoxInfo.height" value="${r.lastBoxInfo?.height}" style="width:20px;">
           </td>
           <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
           <td>#{time_tooltip time: r.confirmDate, datetime: true/}</td>
