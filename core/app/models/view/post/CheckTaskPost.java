@@ -47,11 +47,11 @@ public class CheckTaskPost extends Post<CheckTask> {
     public static final List<F.T2<String, String>> DATE_TYPES;
 
     static {
-        DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("u.attrs.planShipDate", "预计 [运输] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("u.attrs.planDeliveryDate", "预计 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("u.attrs.deliveryDate", "实际 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("c.endTime", "质检完成时间"));
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("u.attrs.planShipDate", "预计 [运输] 时间"));
+        DATE_TYPES.add(new F.T2<>("u.attrs.planDeliveryDate", "预计 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("u.attrs.deliveryDate", "实际 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("c.endTime", "质检完成时间"));
     }
 
     /**
@@ -104,7 +104,7 @@ public class CheckTaskPost extends Post<CheckTask> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT c FROM CheckTask c LEFT JOIN c.units u WHERE 1=1 AND ");
@@ -113,14 +113,14 @@ public class CheckTaskPost extends Post<CheckTask> {
         if(procrueId != null) {
             sbd.append("c.id=?");
             params.add(procrueId);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+            return new F.T2<>(sbd.toString(), params);
         }
 
         String sku = isSearchForSKU();
         if(StringUtils.isNotBlank(sku)) {
             sbd.append("u.product.sku=?");
             params.add(sku);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+            return new F.T2<>(sbd.toString(), params);
         }
 
         if(StringUtils.isBlank(this.dateType)) this.dateType = "u.attrs.planDeliveryDate";
@@ -183,7 +183,7 @@ public class CheckTaskPost extends Post<CheckTask> {
                 sbd.append(" AND c.units.product.category.categoryId = 0 ");
             }
         }
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     /**
@@ -203,7 +203,7 @@ public class CheckTaskPost extends Post<CheckTask> {
                     CheckTask.StatType.REPEATCHECK};
             sbd += " AND c.checkstat IN " + SqlSelect.inlineParam(checkstats) + "";
         }
-        return new F.T2<String, List<Object>>(sbd, params._2);
+        return new F.T2<>(sbd, params._2);
     }
 
     public List<CheckTask> query() {

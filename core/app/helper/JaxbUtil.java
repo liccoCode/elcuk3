@@ -7,7 +7,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 /**
- * Created by licco on 15/11/17.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/11/17
+ * Time: 10:42 AM
  */
 public class JaxbUtil {
 

@@ -7,9 +7,11 @@ import models.whouse.OutboundRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,6 +20,16 @@ import java.util.List;
  * Time: 5:57 PM
  */
 public class OutboundRecordPost extends Post<OutboundRecord> {
+    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
+    public static final List<F.T2<String, String>> DATE_TYPES;
+
+    static {
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
+        DATE_TYPES.add(new F.T2<>("planBeginDate", "预计运输时间"));
+    }
+
+    public String dateType;
     public OutboundRecord.T type;
     public OutboundRecord.S state;
     public OutboundRecord.O origin;
@@ -30,6 +42,7 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         this.to = now.toDate();
         this.perSize = 30;
         this.page = 1;
+        this.dateType = "planBeginDate";
     }
 
     @Override
@@ -61,15 +74,6 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
             params.add(this.state);
         }
 
-        if(this.from != null) {
-            sbd.append(" AND createDate>=?");
-            params.add(Dates.morning(this.from));
-        }
-        if(this.to != null) {
-            sbd.append(" AND createDate<=?");
-            params.add(Dates.night(this.to));
-        }
-
         if(this.type != null) {
             sbd.append(" AND type=?");
             params.add(this.type);
@@ -97,12 +101,49 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND (stockObjId LIKE ? OR attributes LIKE ?");
+            sbd.append(" AND (stockObjId LIKE ? OR attributes LIKE ?)");
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");
         }
-        sbd.append(" ORDER BY createDate DESC");
+
+        this.setupDateRange(sbd, params);
+
+        if(StringUtils.equalsIgnoreCase(this.dateType, "createDate")) {
+            sbd.append(" ORDER BY createDate DESC");
+        } else if(StringUtils.equalsIgnoreCase(this.dateType, "planBeginDate")) {
+            sbd.append(" ORDER BY substring_index(substring_index(attributes, 'planBeginDate\":\"', -1), '\"', 1) DESC");
+        }
         return new F.T2<>(sbd.toString(), params);
+    }
+
+    /**
+     * 设置时间区间过滤条件
+     *
+     * @param sql
+     * @param params
+     */
+    public void setupDateRange(StringBuilder sql, List<Object> params) {
+        String dateRangeSql = null;
+        if(StringUtils.equalsIgnoreCase(this.dateType, "createDate")) {
+            dateRangeSql = " AND createDate";
+        } else if(StringUtils.equalsIgnoreCase(this.dateType, "planBeginDate")) {
+            dateRangeSql = " AND STR_TO_DATE(" +
+                    "substring_index(" +
+                    "substring_index(attributes, 'planBeginDate\":\"', -1)," +
+                    "'\"', 1)," +
+                    "'%Y-%m-%d %H:%i:%s'" +
+                    ")";
+        } else {
+            throw new FastRuntimeException("非法的 dateType!");
+        }
+        if(this.from != null) {
+            sql.append(dateRangeSql).append(">=?");
+            params.add(Dates.morning(this.from));
+        }
+        if(this.to != null) {
+            sql.append(dateRangeSql).append("<=?");
+            params.add(Dates.night(this.to));
+        }
     }
 
     @Override
