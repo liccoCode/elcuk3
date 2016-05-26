@@ -14,11 +14,11 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
-import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
+import models.whouse.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -261,8 +261,6 @@ public class ProcureUnits extends Controller {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
         unit.save();
-        //生成质检任务
-        unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);
@@ -436,7 +434,7 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
-            if(unit.isNeedPay == false)
+            if(!unit.isNeedPay)
                 renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingPrePay();

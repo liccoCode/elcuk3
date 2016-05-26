@@ -1,7 +1,6 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
-import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
@@ -569,8 +568,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.save();
-        //生成质检任务
-        newUnit.triggerCheck();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
@@ -1593,17 +1590,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return item.currency.symbol() + " " + item.compenamt;
         } else {
             return String.valueOf(0);
-        }
-    }
-
-    /**
-     * 生成质检任务
-     */
-    public void triggerCheck() {
-        if(this.isPersistent() && this.shipType != null && this.isCheck == 0 && this.selling != null) {
-            new CheckTask(this).save();
-            this.isCheck = 1;
-            this.save();
         }
     }
 
