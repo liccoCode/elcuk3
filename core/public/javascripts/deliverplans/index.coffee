@@ -12,7 +12,7 @@ $ ->
     else
       return unless confirm("确认发货?")
       $btn = $(@)
-      form = $('<form method="post" action="' + $btn.data('url') + '"></form>')
+      form = $('<form method="post" target="_blank" action="' + $btn.data('url') + '"></form>')
       form.hide().append(idCheckboxs.clone()).appendTo('body')
       form.submit()
   )
