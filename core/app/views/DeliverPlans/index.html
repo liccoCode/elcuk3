@@ -1,19 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:"出货单列表 (${deliverplans.size()})" /}
 #{set 'moreScripts'}
-    #{script 'deliveryments/index.coffee'/}
+    #{script 'deliverplans/index.coffee'/}
 #{/set}
 
-
-#{info_row}
-<ul>
-  <li><strong>[最先交货时间]</strong>为采购单有交货情况后, 记录的第一次交货时间</li>
-  <li><strong>[最后交货时间]</strong>为采购单有交货情况后, 记录的第后一次交货时间</li>
-</ul>
-#{/info_row}
 #{flash_alert /}
 #{errorMsgs /}
-
 #{form @DeliverPlans.index(), class:'search_form', id:'deliverys_form'}
 <div class="row-fluid">
   <div class="span12">
@@ -23,7 +15,6 @@
       <span class="add-on">To:</span>
       <input type="date" name="p.to" value="${p.to.date()}">
     </div>
-
 
     <select name="p.cooperId" class="inline">
       <option value="">供应商</option>
@@ -42,6 +33,10 @@
       <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
+
+    <div class="inline">
+      <a class="btn btn-success" data-url="@{DeliverPlans.triggerReceiveRecords()}" name="triggerReceiveRecordsBtn">确认发货</a>
+    </div>
   </div>
 </div>
 
@@ -49,6 +44,11 @@
   <div class="span12">
     <table class="table table-condensed table-bordered">
       <tr>
+        <th width="1%">
+          <label class="checkbox">
+            <input type="checkbox" id="deliverplan_check_all">
+          </label>
+        </th>
         <th>#</th>
         <th>Name</th>
         <th>供应商</th>
@@ -58,6 +58,11 @@
       </tr>
         #{list items:deliverplans, as:'dp'}
           <tr>
+            <td>
+              <label class="checkbox">
+                <input type="checkbox" name="ids" value="${dp.id}" class="deliverplan">
+              </label>
+            </td>
             <td>
               <a href="@{DeliverPlans.show(dp.id)}" target="_blank">${dp.id}</a>
             </td>
