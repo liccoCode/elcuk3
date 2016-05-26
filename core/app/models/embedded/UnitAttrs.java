@@ -101,4 +101,11 @@ public class UnitAttrs implements Serializable {
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
     }
 
+    public UnitAttrs() {
+    }
+
+    public UnitAttrs(Integer qty, Date deliveryDate) {
+        this.qty = qty;
+        this.deliveryDate = deliveryDate;
+    }
 }

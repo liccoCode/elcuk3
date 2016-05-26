@@ -7,6 +7,7 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.embedded.UnitAttrs;
 import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
@@ -190,9 +191,10 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
         this.confirmDate = new Date();
         this.confirmer = User.current();
         this.valid();
+        this.deliveryUnit();
+        this.triggerCheck();
         if(Validation.hasErrors()) return;
         this.save();
-        this.triggerCheck();
     }
 
     public void valid() {
@@ -202,11 +204,11 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     }
 
     public boolean isLocked() {
-        return this.state != S.Pending;
+        return this.isPersistent() && this.state == S.Received;
     }
 
     public void updateAttr(String attr, String value) {
-        if(this.isLocked()) throw new FastRuntimeException("已收货收货记录不允许修改!");
+        if(this.isLocked()) throw new FastRuntimeException("已收货的收货记录不允许修改!");
         List<String> logs = new ArrayList<>();
 
         if(StringUtils.containsIgnoreCase(attr, "mainBox.") || StringUtils.containsIgnoreCase(attr, "lastBox.")) {
@@ -235,7 +237,21 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
      * 生成质检任务
      */
     public void triggerCheck() {
-        if(this.isPersistent() && this.state == S.Received) new CheckTask(this).save();
+        if(this.isLocked()) {
+            CheckTask checkTask = new CheckTask(this);
+            if(!checkTask.isExists()) {
+                checkTask.validateAndSave();
+            }
+        }
+    }
+
+    /**
+     * 采购计划交货
+     */
+    public void deliveryUnit() {
+        if(this.isLocked()) {
+            this.procureUnit.delivery(new UnitAttrs(this.qty, this.confirmDate));
+        }
     }
 
     @Override

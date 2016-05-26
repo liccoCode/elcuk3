@@ -42,7 +42,12 @@ public class CheckTaskDTO implements Serializable {
      */
     public double height;
 
-    public CheckTaskDTO(){
-
+    /**
+     * 计算 boxNum * num
+     *
+     * @return
+     */
+    public int qty() {
+        return this.boxNum * this.num;
     }
 }

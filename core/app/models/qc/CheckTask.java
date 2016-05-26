@@ -11,6 +11,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.procure.ReceiveRecord;
 import models.view.dto.CheckTaskAQLDTO;
 import models.whouse.InboundRecord;
 import models.whouse.Whouse;
@@ -443,6 +444,12 @@ public class CheckTask extends Model {
     @Lob
     public String aqlBadDescs = "[]";
 
+    /**
+     * 收货记录
+     */
+    @OneToOne
+    public ReceiveRecord receiveRecord;
+
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
@@ -567,6 +574,11 @@ public class CheckTask extends Model {
         if(wh != null && wh.user != null) {
             this.shipwhouse = wh;
         }
+    }
+
+    public CheckTask(ReceiveRecord receiveRecord) {
+        this(receiveRecord.procureUnit);
+        this.receiveRecord = receiveRecord;
     }
 
     /**
@@ -1007,5 +1019,9 @@ public class CheckTask extends Model {
                 inboundRecord.save();
             }
         }
+    }
+
+    public boolean isExists() {
+        return CheckTask.find("units=?", this.units).fetch().size() != 0;
     }
 }

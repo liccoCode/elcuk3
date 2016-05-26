@@ -626,8 +626,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.deliveryment == null)
             Validation.addError("", "没有进入采购单, 无法交货.");
         if(attrs.qty == null) attrs.qty = 0;
-        //Validation.required("procureunit.attrs.qty", attrs.qty);
-        //Validation.min("procureunit.attrs.qty", attrs.qty, 0);
         Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
         if(Validation.hasErrors())
             throw new FastRuntimeException("检查不合格");
