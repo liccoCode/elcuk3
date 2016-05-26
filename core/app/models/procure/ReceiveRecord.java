@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Error;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
@@ -41,6 +42,7 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     /**
      * 出货单
      */
+    @Required
     @ManyToOne
     public DeliverPlan deliverPlan;
 
@@ -48,12 +50,14 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
      * 物料计划
      * TODO: 等待物料相关的功能上线后需要变更为物料而不是采购计划
      */
+    @Required
     @OneToOne(fetch = FetchType.LAZY)
     public ProcureUnit procureUnit;
 
     /**
      * 实际数量
      */
+    @Min(0)
     @Expose
     public int qty = 0;
 
@@ -135,7 +139,14 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     public ReceiveRecord() {
         this.createDate = new Date();
         this.updateDate = new Date();
+        this.state = S.Pending;
+    }
+
+    public ReceiveRecord(ProcureUnit procureUnit, DeliverPlan deliverPlan) {
+        super();
         this.id = ReceiveRecord.id();
+        this.deliverPlan = deliverPlan;
+        this.procureUnit = procureUnit;
     }
 
     public static String id() {
@@ -176,7 +187,8 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
 
     public void confirm() {
         this.state = S.Received;
-        if(this.confirmDate == null) this.confirmDate = new Date();
+        this.confirmDate = new Date();
+        this.confirmer = User.current();
         this.valid();
         //TODO 生成质检任务
         //List<StockRecord> stockRecords = this.buildStockRecords();
@@ -212,6 +224,10 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();
         this.save();
+    }
+
+    public boolean isExists() {
+        return ReceiveRecord.find("procureUnit=?", this.procureUnit).fetch().size() != 0;
     }
 
     @Override
