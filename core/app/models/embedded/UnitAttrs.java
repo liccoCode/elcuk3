@@ -94,18 +94,15 @@ public class UnitAttrs implements Serializable {
 
     public void validate() {
         // 两个计划的时间
-        if(this.planDeliveryDate != null && this.planShipDate != null)
+        if(this.planDeliveryDate != null && this.planShipDate != null) {
             Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate,
                     new Date(this.planShipDate.getTime() + 1));
-        if(this.planShipDate != null && this.planArrivDate != null)
+        }
+        if(this.planShipDate != null && this.planArrivDate != null) {
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
+        }
     }
 
     public UnitAttrs() {
-    }
-
-    public UnitAttrs(Integer qty, Date deliveryDate) {
-        this.qty = qty;
-        this.deliveryDate = deliveryDate;
     }
 }

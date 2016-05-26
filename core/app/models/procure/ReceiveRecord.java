@@ -250,7 +250,9 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
      */
     public void deliveryUnit() {
         if(this.isLocked()) {
-            this.procureUnit.delivery(new UnitAttrs(this.qty, this.confirmDate));
+            UnitAttrs attrs = this.procureUnit.attrs;
+            attrs.qty = this.qty;
+            this.procureUnit.delivery(attrs);
         }
     }
 
