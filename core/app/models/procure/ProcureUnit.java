@@ -32,7 +32,6 @@ import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.modules.pdf.PDF;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -621,15 +620,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          *  - 交货超额, Notify 提醒
          *
          */
-        if(!Arrays.asList(STAGE.DONE, STAGE.DELIVERY).contains(this.stage))
-            Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
-        if(this.deliveryment == null)
-            Validation.addError("", "没有进入采购单, 无法交货.");
         if(attrs.qty == null) attrs.qty = 0;
-        Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
-        if(Validation.hasErrors())
-            throw new FastRuntimeException("检查不合格");
-
         this.attrs = attrs;
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
@@ -639,6 +630,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.stage = STAGE.DONE;
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);
+    }
+
+    public void deliveryValidate(UnitAttrs attrs) {
+        if(!Arrays.asList(STAGE.DONE, STAGE.DELIVERY).contains(this.stage)) {
+            Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
+        }
+        if(this.deliveryment == null) {
+            Validation.addError("", "没有进入采购单, 无法交货.");
+        }
+        attrs.validate();
+        Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
     }
 
     /**

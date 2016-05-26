@@ -180,11 +180,10 @@ public class ProcureUnits extends Controller {
      */
     @Check("procures.delivery")
     public static void delivery(UnitAttrs attrs, long id, String cmt) {
-        attrs.validate();
         ProcureUnit unit = ProcureUnit.findById(id);
-        if(Validation.hasErrors()) {
-            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
-        }
+        unit.deliveryValidate(attrs);
+        if(Validation.hasErrors()) render("/ProcureUnits/deliveryUnit.html", unit, attrs);
+
         unit.comment = cmt;
         try {
             Boolean isFullDelivery = unit.delivery(attrs);
@@ -196,7 +195,7 @@ public class ProcureUnits extends Controller {
             }
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
-            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
+            render("/ProcureUnits/deliveryUnit.html", unit, attrs);
         }
 
         //抵达货代
