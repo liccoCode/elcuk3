@@ -27,7 +27,7 @@ import java.util.List;
  * Date: 16-1-21
  * Time: 上午10:40
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class DeliverPlans extends Controller {
 
 
@@ -135,5 +135,13 @@ public class DeliverPlans extends Controller {
         show(dp.id);
     }
 
-
+    public static void triggerReceiveRecords(List<String> ids) {
+        if(ids != null && !ids.isEmpty()) {
+            for(String id : ids) {
+                DeliverPlan deliverPlan = DeliverPlan.findById(id);
+                if(deliverPlan != null) deliverPlan.triggerReceiveRecords();
+            }
+        }
+        redirect("/ReceiveRecords/index");
+    }
 }
