@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"出货单列表 (${deliverplans.size()})" /}
 #{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
     #{script 'deliverplans/index.coffee'/}
 #{/set}
 
@@ -23,14 +24,17 @@
         #{/list}
     </select>
 
-      #{select_enum name: "p.planState", items: models.procure.DeliverPlan.P.values(), value: p.planState,
-      class:'inline'}
-        <option value="">状态</option>
-      #{/select_enum}
+    <select name="p.planState" class="inline">
+      <option value="">状态</option>
+        #{list items:models.procure.DeliverPlan.P.values(), as:'sp'}
+          <option ${sp == p.planState ? 'selected' : ''} value="${sp.name()}">${sp.label()}</option>
+        #{/list}
+    </select>
 
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+      <input type="hidden" name="p.page" value="${p.page}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
 
@@ -86,3 +90,14 @@
   </div>
 </div>
 #{/form}
+
+<div class="row-fluid" id="order_list">
+  <div class="span12">
+  #{if deliverplans.size() == 0}
+    暂时还没有收货记录
+  #{/if}
+  #{else }
+      #{bootstrap_pager pi:p, url:'' /}
+  #{/else}
+  </div>
+</div>
