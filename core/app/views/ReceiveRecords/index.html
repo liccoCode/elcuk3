@@ -73,6 +73,8 @@
       </div>
 
       <div class="inline">
+        <a href="javascript:void(0)" data-url="@{Excels.receiveRecords(p)}" data-target="_blank" class="btn btn-info
+        inline" id="exportBtn">导出</a>
         <a target="_blank" class="btn btn-info inline" name="confirm">确认收货</a>
       </div>
     </div>
@@ -132,7 +134,7 @@
           </td>
           <td>${r.id}</td>
           <td data-name="state">
-            ${r.state?.label()}
+          ${r.state?.label()}
           </td>
           <td>
             <a href="@{DeliverPlans.show(r.deliverPlan?.id)}" target="_blank">${r.deliverPlan?.id}</a>

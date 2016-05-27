@@ -11,6 +11,12 @@ $ ->
     else
       return unless confirm("确认收货?")
       $("form[name=confirm_form]").submit()
+  ).on('click', "#exportBtn", (e) ->
+    $btn = $(@)
+    form = $('<form method="post" action=""></form>')
+    form.attr('action', $btn.data('url')).attr('target', $btn.data('target'))
+    form.hide().append($btn.parents('form').find(":input").clone()).appendTo('body')
+    form.submit().remove()
   )
 
   $("form[name=confirm_form]").on('change', "td>:input[name*='Box']", (e) ->
