@@ -1497,7 +1497,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
         for(Task task : tasks) {
             if(task != null) {
-                if(task.getName().indexOf("运营专员") >= 0) {
+                if(task.getName().contains("运营专员")) {
                     taskService.setAssignee(task.getId(), this.handler.username);
                 } else {
                     Role role = Role.find("roleName=?", task.getName()).first();

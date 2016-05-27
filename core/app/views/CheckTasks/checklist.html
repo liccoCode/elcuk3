@@ -117,7 +117,7 @@
       <td style="text-align:center;background-color:${task.isTimeout() ? '#FAAB3B' : 'green'}" width="3.4%">
       ${task.isTimeout() ? '超时' : '正常'}
       </td>
-      <td width="3%">
+      <td width="3.5%">
         <a href="@{CheckTasks.show(task.id)}" target="_blank" class="btn btn-small btn-info">
         ${task.checkstat.name() == 'UNCHECK' ? '质检' : '查看'}
         </a>
