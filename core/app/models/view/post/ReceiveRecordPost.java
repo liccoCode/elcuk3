@@ -56,10 +56,10 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
-        Long recordId = isSearchForId();
+        String recordId = isSearchId();
         if(recordId != null) {
             sbd.append(" AND r.id=?");
-            params.add(recordId.toString());
+            params.add(recordId);
             return new F.T2<>(sbd.toString(), params);
         }
         if(this.state != null) {
@@ -82,13 +82,12 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
             sbd.append(" AND (");
             Matcher matcher = NUMBER_PATTEN.matcher(this.search);
             if(matcher.find()) {
-                sbd.append(" r.deliverPlan.id=?").append(" OR p.id=?");
-                long searchId = NumberUtils.toLong(matcher.group(1));
-                for(int i = 0; i < 2; i++) params.add(searchId);
+                sbd.append("p.id=? OR ");
+                params.add(NumberUtils.toLong(matcher.group(0)));
             }
 
             String word = this.word();
-            sbd.append(" OR p.sku LIKE ?")
+            sbd.append(" p.sku LIKE ?")
                     .append(" OR p.product.sku LIKE ?")
                     .append(" OR p.product.abbreviation LIKE ?")
                     .append(" OR p.selling.fnSku LIKE ?")
@@ -119,5 +118,13 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
     @Override
     public Long count(F.T2<String, List<Object>> params) {
         return (long) ReceiveRecord.find(params._1, params._2.toArray()).fetch().size();
+    }
+
+    public String isSearchId() {
+        if(StringUtils.containsIgnoreCase(this.search, "id:")) {
+            String[] match = StringUtils.split(this.search, "id:");
+            if(match != null && match.length > 0) return match[0];
+        }
+        return null;
     }
 }
