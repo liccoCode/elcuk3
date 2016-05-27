@@ -11,21 +11,13 @@ $ ->
   )
 
   $("#update_form").on("click", "#update_btn, #fullupdate_btn", (r) ->
-    $btn = $(@)
-    $form = $("#update_form")
-
-    msg = if $btn.attr("id") == 'fullupdate_btn'
+    $("#update_form").attr("action", "/checktasks/#{$(@).attr("id").split("_")[0]}")
+  ).on('submit', (e) ->
+    msg = if $(@).attr('action').indexOf("fullupdate") > 0
       '提交后将会生成仓库入库记录,确定？'
     else
       '确认保存?'
-    return unless confirm(msg)
-
-    $form.attr("action", "/checktasks/#{$btn.attr("id").split("_")[0]}")
-    # 提交表单前将下拉项的disabled属性取消掉
-    $resultSelect = $("select[name='check.result']")
-    $resultSelect.removeAttr("disabled")
-    $form.submit()
-    $resultSelect.attr("disabled", 'true')
+    e.preventDefault() unless confirm(msg)
   )
 
   $("#update_form").on("click", "#submitqc_btn", (r) ->
