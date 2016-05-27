@@ -78,12 +78,15 @@
   </td>
 
   <th>质检取样</th>
-  <td colspan="3"><input type="text" name="check.qcSample" class="input-mini" value="${check.qcSample}"/></td>
+  <td colspan="3">
+    <input type="text" name="check.qcSample" class="input-mini" value="${check.qcSample}"
+    ${check.result != null ? 'readonly' : ''} required/>
+  </td>
 </tr>
 <tr>
   <th>是否合格</th>
   <td>
-    <select name="check.result" style="width:80px;">
+    <select name="check.result" style="width:80px;" ${check.result != null ? 'disabled' : ''}>
     #{list items:models.qc.CheckTask.ResultType.values(), as: 'result'}
       <option value="${result.name()}" ${result == check.result? 'selected':''}>${result.label()}</option>
     #{/list}
@@ -92,7 +95,8 @@
 
   <th>不合格数量</th>
   <td colspan="3">
-    <input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}">
+    <input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}"
+    ${check.result != null ? 'readonly' : ''} required>
   </td>
 </tr>
 <tr>
@@ -204,11 +208,10 @@
 <tr>
   <td colspan="12">
   #{power.ck "checktasks.update"}
-      #{if check.checkstat == models.qc.CheckTask.StatType.UNCHECK || check.checkstat == models.qc.CheckTask
-      .StatType.REPEATCHECK}
-        <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
-        <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
-      #{/if}
+      #{ifnot check.isLock()}
+        <input type="submit" id="fullupdate_btn" class="btn btn-warning" value="提交">
+        <input type="submit" id="update_btn" class="btn btn-info" value="保存">
+      #{/ifnot}
   #{/power.ck}
-    <a href="@{CheckTasks.checklist()}" class="btn btn-success" data-loading>取消</a>
+    <a href="@{CheckTasks.checklist()}" class="btn" data-loading>取消</a>
 </tr>

@@ -142,7 +142,7 @@ public class CheckTask extends Model {
      * 质检取样
      */
     @Expose
-    public Integer qcSample = 0;
+    public Integer qcSample;
 
     /**
      * 预计交货日期
@@ -389,7 +389,7 @@ public class CheckTask extends Model {
     /**
      * 不合格数量
      */
-    public int unqualifiedQty = 0;
+    public int unqualifiedQty;
 
     @Expose
     public String ac;
@@ -1042,5 +1042,9 @@ public class CheckTask extends Model {
             this.save();
         }
         return this.isTimeout;
+    }
+
+    public boolean isLock() {
+        return this.checkstat != StatType.UNCHECK;
     }
 }
