@@ -25,13 +25,16 @@ import java.util.*;
  * Date: 3/11/14
  * Time: 6:59 PM
  */
-public class ProfitPost extends Post<Profit> {
+public class ProfitPost {
     public Date begin;
     public Date end;
     public String pmarket;
     public String sku;
     public String sellingId;
     public String category;
+    public int page = 1;
+    public int perSize = 50;
+    public long count = 1;
 
     public ProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -48,7 +51,6 @@ public class ProfitPost extends Post<Profit> {
     }
 
 
-    @Override
     public F.T2<String, List<Object>> params() {
         return null;
     }
@@ -58,7 +60,6 @@ public class ProfitPost extends Post<Profit> {
      *
      * @return
      */
-    @Override
     public Long count(F.T2<String, List<Object>> params) {
         long count = 0;
         /**
