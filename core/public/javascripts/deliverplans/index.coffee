@@ -14,5 +14,5 @@ $ ->
       $btn = $(@)
       form = $('<form method="post" target="_blank" action="' + $btn.data('url') + '"></form>')
       form.hide().append(idCheckboxs.clone()).appendTo('body')
-      form.submit()
+      form.submit().remove()
   )
