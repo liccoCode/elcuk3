@@ -13,6 +13,7 @@ import models.view.Ret;
 import models.view.post.CheckTaskPost;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
@@ -46,6 +47,13 @@ public class CheckTasks extends Controller {
                 Arrays.asList(Messages.get("checktask.update"), Messages.get("checktask.doPrints")), 50));
     }
 
+    @Before(only = {"show", "update", "fullUpdate"})
+    public static void setupLogs() {
+        Long id = NumberUtils.toLong(request.params.get("id"));
+        List<ElcukRecord> elcukRecords = ElcukRecord.records(id.toString());
+        renderArgs.put("elcukRecords", elcukRecords);
+    }
+
 
     @Check("checktasks.checklist")
     public static void checklist(CheckTaskPost p) {
@@ -67,7 +75,6 @@ public class CheckTasks extends Controller {
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
         check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
-        List<ElcukRecord> elcukRecords = ElcukRecord.records(id.toString());
         render(check);
     }
 
@@ -107,17 +114,13 @@ public class CheckTasks extends Controller {
     }
 
     @Check("checktasks.update")
-    public static void update(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
-                              @As("yyyy-MM-dd HH:mm") Date to) {
+    public static void update(Long id, CheckTask check) {
         CheckTask old = CheckTask.findById(id);
         old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
-        check.startTime = from;
-        check.endTime = to;
         check.checkor = Secure.Security.connected();
-
         check.validateRight();
+
         if(Validation.hasErrors()) {
-            check = old;
             render("CheckTasks/show.html", check);
         }
         check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
@@ -127,11 +130,8 @@ public class CheckTasks extends Controller {
     }
 
     @Check("checktasks.update")
-    public static void fullUpdate(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
-                                  @As("yyyy-MM-dd HH:mm") Date to) {
+    public static void fullUpdate(Long id, CheckTask check) {
         CheckTask old = CheckTask.findById(id);
-        check.startTime = from;
-        check.endTime = to;
         check.checkor = Secure.Security.connected();
         check.validateRequired();
         check.validateRight();

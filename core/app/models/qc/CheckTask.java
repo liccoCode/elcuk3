@@ -556,9 +556,6 @@ public class CheckTask extends Model {
     public void validateRight() {
         if(this.qty < 0) Validation.addError("", "实际交货数量不能小于0");
         if(this.pickqty < 0) Validation.addError("", "实际抽检数量不能小于0");
-        if(startTime != null && endTime != null && !endTime.after(startTime)) {
-            Validation.addError("", "质检开始时间不能大于结束时间");
-        }
     }
 
     private static final Interner<String> pool = Interners.newWeakInterner();
@@ -642,27 +639,30 @@ public class CheckTask extends Model {
      * 更新时的日志
      */
     public void beforeUpdateLog(CheckTask newCt) {
-        List<String> logs = new ArrayList<String>();
-        logs.addAll(Reflects.updateAndLogChanges(this, "startTime", newCt.startTime));
-        logs.addAll(Reflects.updateAndLogChanges(this, "endTime", newCt.endTime));
-        logs.addAll(Reflects.updateAndLogChanges(this, "isship", newCt.isship));
-        logs.addAll(Reflects.updateAndLogChanges(this, "result", newCt.result));
+        List<String> logs = new ArrayList<>();
+        if(newCt.isship != null) {
+            logs.addAll(Reflects.updateAndLogChanges(this, "isship", newCt.isship));
+        }
+        if(newCt.result != null) {
+            logs.addAll(Reflects.updateAndLogChanges(this, "result", newCt.result));
+        }
+        if(StringUtils.isNotBlank(newCt.checknote)) {
+            logs.addAll(Reflects.updateAndLogChanges(this, "checknote", newCt.checknote));
+        }
         logs.addAll(Reflects.updateAndLogChanges(this, "pickqty", newCt.pickqty));
         logs.addAll(Reflects.updateAndLogChanges(this, "qty", newCt.qty));
-        logs.addAll(Reflects.updateAndLogChanges(this, "checknote", newCt.checknote));
         if(logs.size() > 0) {
-            new ERecordBuilder("checktask.update", "checktask.update.msg").msgArgs(this.id, StringUtils.join(logs, "，"))
+            new ERecordBuilder("checktask.update").msgArgs(this.id, StringUtils.join(logs, "，"))
                     .fid(this.id).save();
         }
     }
 
     public void update(CheckTask newCt) {
         this.beforeUpdateLog(newCt);
-        this.qty = newCt.qty;
-        this.pickqty = newCt.pickqty;
         this.checkor = newCt.checkor;
         this.qcSample = newCt.qcSample;
-
+        this.startTime = new Date();
+        this.endTime = new Date();
         this.unqualifiedQty = newCt.unqualifiedQty;
         if(newCt.samplingTypes != null) this.samplingTypes = newCt.samplingTypes;
         if(newCt.samplingTypes != null) this.inspectionTimes = newCt.inspectionTimes;
@@ -672,18 +672,10 @@ public class CheckTask extends Model {
         if(newCt.ma != null) this.ma = newCt.ma;
         if(newCt.mi != null) this.mi = newCt.mi;
         if(newCt.aqlBadDescs != null) this.aqlBadDescs = newCt.aqlBadDescs;
-
         if(newCt.dealway != null) this.dealway = newCt.dealway;
-        if(newCt.startTime != null) this.startTime = newCt.startTime;
-        if(newCt.endTime != null) this.endTime = newCt.endTime;
-        if(newCt.result != null) this.result = newCt.result;
-        if(newCt.isship != null) this.isship = newCt.isship;
-        if(newCt.checknote != null) this.checknote = newCt.checknote;
         if(newCt.standBoxQctInfo != null) this.standBoxQctInfo = newCt.standBoxQctInfo;
         if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
-        if(this.result == ResultType.AGREE) {
-            this.isship = ShipType.SHIP;
-        }
+        if(this.result == ResultType.AGREE) this.isship = ShipType.SHIP;
         this.units.save();
         this.save();
     }
