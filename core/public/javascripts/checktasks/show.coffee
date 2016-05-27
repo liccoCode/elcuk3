@@ -116,8 +116,9 @@ $ ->
         fid: $file_home.data('fid'),
         base64File: $file_home.data('base64_file'),
         originName: $file_home.data('origin_name')
-      }, (r) ->
-      alert(r.message)
+      },
+      (r) ->
+        alert(r.message)
       window.location.reload()
     )
 

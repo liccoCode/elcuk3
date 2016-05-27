@@ -26,6 +26,7 @@ import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -141,7 +142,7 @@ public class CheckTask extends Model {
      * 质检取样
      */
     @Expose
-    public Integer qcSample;
+    public Integer qcSample = 0;
 
     /**
      * 预计交货日期
@@ -388,7 +389,7 @@ public class CheckTask extends Model {
     /**
      * 不合格数量
      */
-    public int unqualifiedQty;
+    public int unqualifiedQty = 0;
 
     @Expose
     public String ac;
@@ -441,14 +442,22 @@ public class CheckTask extends Model {
     @Transient
     public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<CheckTaskAQLDTO>();
 
+    @Expose
     @Lob
     public String aqlBadDescs = "[]";
 
     /**
      * 收货记录
      */
+    @Expose
     @OneToOne
     public ReceiveRecord receiveRecord;
+
+    /**
+     * 是否超时
+     */
+    @Expose
+    public boolean isTimeout = false;
 
     public enum FLAG {
         ARRAY_TO_STR,
@@ -568,7 +577,6 @@ public class CheckTask extends Model {
         if(unit.cooperator != null && unit.cooperator.qcLevel == Cooperator.L.MICRO) {
             this.qcType = T.SELF;
         }
-        this.checkor = this.matchChecktor();
         //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
         Whouse wh = this.units.matchWhouse();
         if(wh != null && wh.user != null) {
@@ -724,7 +732,6 @@ public class CheckTask extends Model {
         }
     }
 
-
     public void editplanArrivDate() {
         if(this.planDeliveryDate != null) {
             this.oldplanDeliveryDate = this.units.attrs.planDeliveryDate;
@@ -849,7 +856,6 @@ public class CheckTask extends Model {
             task.save();
         }
     }
-
 
     /**
      * 显示流程历史意见
@@ -1023,5 +1029,18 @@ public class CheckTask extends Model {
 
     public boolean isExists() {
         return CheckTask.find("units=?", this.units).fetch().size() != 0;
+    }
+
+    /**
+     * 计算是否超时并存入 DB
+     *
+     * @return
+     */
+    public boolean isTimeout() {
+        if(!this.isTimeout) {
+            this.isTimeout = Math.abs(System.currentTimeMillis() - this.creatat.getTime()) >= TimeUnit.HOURS.toMillis(8);
+            this.save();
+        }
+        return this.isTimeout;
     }
 }

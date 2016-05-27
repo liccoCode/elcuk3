@@ -16,11 +16,13 @@ import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,44 +38,20 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class CheckTasks extends Controller {
 
-    @Before(only = {"checklist", "checkerList"})
+    @Before(only = {"checklist"})
     public static void beforIndex() {
-        List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.find("type !=?", Whouse.T.FORWARD).fetch());
-        renderArgs.put("shipwhouses", Whouse.find("type =?", Whouse.T.FORWARD).fetch());
-        renderArgs.put("cooperators", cooperators);
-
-        List<User> users = User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
-                "like ?", "%质检%").fetch();
-        renderArgs.put("users", users);
+        renderArgs.put("cooperators", Cooperator.suppliers());
+        renderArgs.put("users", User.checkers());
+        renderArgs.put("elcukRecords", ElcukRecord.records(
+                Arrays.asList(Messages.get("checktask.update"), Messages.get("checktask.doPrints")), 50));
     }
 
 
     @Check("checktasks.checklist")
-    public static void checklist(CheckTaskPost p, int day) {
-        if(p == null) {
-            p = new CheckTaskPost();
-            p.initDateRange(day);
-        }
-        List<CheckTask> tasklist = p.query();
-        render(tasklist, p);
-    }
-
-    /**
-     * 质检员任务列表
-     */
-    @Check("checktasks.checkerList")
-    public static void checkerList(CheckTaskPost p, int day) {
-        String username = Secure.Security.connected();
-        if(p == null) {
-            p = new CheckTaskPost();
-            p.initDateRange(day);
-        }
-        List<ElcukRecord> records = ElcukRecord.find("action like '[CheckTask%' ORDER BY createAt DESC").fetch(50);
-        List<CheckTask> checks = p.check();
-        List<CheckTask> checkeds = p.checked();
-        List<CheckTask> checkRepeats = p.checkRepeat();
-        render(p, checks, checkeds, checkRepeats, records);
+    public static void checklist(CheckTaskPost p) {
+        if(p == null) p = new CheckTaskPost();
+        List<CheckTask> tasks = p.query();
+        render(tasks, p);
     }
 
     /**
@@ -89,30 +67,8 @@ public class CheckTasks extends Controller {
     public static void show(Long id) {
         CheckTask check = CheckTask.findById(id);
         check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
-        Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
-
-        ActivitiProcess ap = (ActivitiProcess) map.get("ap");
-        int issubmit = (Integer) map.get("issubmit");
-        String taskname = (String) map.get("taskname");
-        int oldPlanQty = (Integer) map.get("oldPlanQty");
-        List<Whouse> whouses = null;
-        Object temp = map.get("whouses");
-        if(temp != null) {
-            whouses = (List<Whouse>) map.get("whouses");
-        }
-        ProcureUnit unit = null;
-        temp = map.get("whouses");
-        if(temp != null) {
-            unit = (ProcureUnit) map.get("unit");
-        }
-        Date oldplanDeliveryDate = null;
-        temp = map.get("oldplanDeliveryDate");
-        if(temp != null) {
-            oldplanDeliveryDate = (Date) map.get("oldplanDeliveryDate");
-        }
-        List<Map<String, String>> infos = (List<Map<String, String>>) map.get("infos");
-
-        render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
+        List<ElcukRecord> elcukRecords = ElcukRecord.records(id.toString());
+        render(check);
     }
 
     public static void showactiviti(Long id) {
@@ -157,7 +113,7 @@ public class CheckTasks extends Controller {
         old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
         check.startTime = from;
         check.endTime = to;
-        check.checkor = old.checkor;
+        check.checkor = Secure.Security.connected();
 
         check.validateRight();
         if(Validation.hasErrors()) {
@@ -176,7 +132,7 @@ public class CheckTasks extends Controller {
         CheckTask old = CheckTask.findById(id);
         check.startTime = from;
         check.endTime = to;
-        check.checkor = old.checkor;
+        check.checkor = Secure.Security.connected();
         check.validateRequired();
         check.validateRight();
         if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
