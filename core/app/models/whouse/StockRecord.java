@@ -102,7 +102,9 @@ public class StockRecord extends Model {
         } else {
             this.qty = in.badQty;
             this.whouse = Whouse.defectiveWhouse();
-            if(this.whouse == null) throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
+            if(this.whouse == null) {
+                throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
+            }
         }
         this.type = T.Inbound;
         this.recordId = in.id;

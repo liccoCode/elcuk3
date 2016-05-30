@@ -233,12 +233,23 @@ public class OutboundRecord extends Model {
     }
 
     public OutboundRecord(ShipPlan plan) {
+        this(T.Normal, O.Normal);
         this.planQty = plan.qty;
         this.qty = this.planQty;
-        this.origin = O.Normal;
-        this.state = S.Pending;
         this.stockObj = plan.stockObj.dump();
-        this.type = T.Normal;
+    }
+
+    /**
+     * 该构造函数只服务于为质检不合格的入库记录自动生成出库记录
+     *
+     * @param inboundRecord
+     */
+    public OutboundRecord(InboundRecord inboundRecord) {
+        this(T.Refund, O.Normal);
+        if(!inboundRecord.isRefund()) throw new FastRuntimeException("该构造函数只服务于为质检不合格的入库记录自动生成出库记录!");
+        this.qty = inboundRecord.badQty;
+        this.planQty = this.qty;
+        this.targetId = inboundRecord.targetWhouse.id.toString();
     }
 
     /**

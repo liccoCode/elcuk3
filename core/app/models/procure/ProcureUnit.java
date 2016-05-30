@@ -628,6 +628,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .save();
         this.shipItemQty(this.qty());
         this.stage = STAGE.DONE;
+        this.attrs.deliveryDate = new Date();
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);
     }
