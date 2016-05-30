@@ -219,9 +219,6 @@
                 #{power.ck "checktasks.checklist"}
                   <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
                 #{/power.ck}
-                #{power.ck "checktasks.checkerlist"}
-                  <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
-                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -245,6 +242,9 @@
                 #{/power.ck}
                 #{power.ck "stockrecords.index"}
                   <li><a href="@{StockRecords.index()}">库存异动</a></li>
+                #{/power.ck}
+                #{power.ck "receiverecords.index"}
+                  <li><a href="@{ReceiveRecords.index()}">收货记录</a></li>
                 #{/power.ck}
             </ul>
           </li>

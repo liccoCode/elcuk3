@@ -78,11 +78,9 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
-
         // 针对 Id 的唯一搜索
         if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
-
+            return new F.T2<>(specialSearch._2, specialSearch._3);
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
 
@@ -106,7 +104,6 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
             params.addAll(specialSearch._3);
         }
 
-
         if(this.cooperId != null && this.cooperId > 0) {
             sbd.append(" AND d.cooperator.id=?");
             params.add(this.cooperId);
@@ -120,12 +117,11 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
                     .append(")");
             for(int i = 0; i < 2; i++) params.add(word);
         }
-
-
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     public List<DeliverPlan> query() {
+        this.count = this.count();
         F.T2<String, List<Object>> params = params();
         return DeliverPlan.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
                 .fetch();
@@ -163,4 +159,13 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
         return new F.T3<>(false, null, null);
     }
 
+    @Override
+    public Long getTotalCount() {
+        return this.count();
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return (long) DeliverPlan.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray()).fetch().size();
+    }
 }

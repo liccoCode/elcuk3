@@ -1,7 +1,6 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
-import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
@@ -33,7 +32,6 @@ import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.modules.pdf.PDF;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -569,8 +567,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.save();
-        //生成质检任务
-        newUnit.triggerCheck();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
@@ -624,17 +620,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          *  - 交货超额, Notify 提醒
          *
          */
-        if(!Arrays.asList(STAGE.DONE, STAGE.DELIVERY).contains(this.stage))
-            Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
-        if(this.deliveryment == null)
-            Validation.addError("", "没有进入采购单, 无法交货.");
         if(attrs.qty == null) attrs.qty = 0;
-        //Validation.required("procureunit.attrs.qty", attrs.qty);
-        //Validation.min("procureunit.attrs.qty", attrs.qty, 0);
-        Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
-        if(Validation.hasErrors())
-            throw new FastRuntimeException("检查不合格");
-
         this.attrs = attrs;
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
@@ -642,8 +628,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .save();
         this.shipItemQty(this.qty());
         this.stage = STAGE.DONE;
+        this.attrs.deliveryDate = new Date();
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);
+    }
+
+    public void deliveryValidate(UnitAttrs attrs) {
+        if(!Arrays.asList(STAGE.DONE, STAGE.DELIVERY).contains(this.stage)) {
+            Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
+        }
+        if(this.deliveryment == null) {
+            Validation.addError("", "没有进入采购单, 无法交货.");
+        }
+        attrs.validate();
+        Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
     }
 
     /**
@@ -1500,7 +1498,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
         for(Task task : tasks) {
             if(task != null) {
-                if(task.getName().indexOf("运营专员") >= 0) {
+                if(task.getName().contains("运营专员")) {
                     taskService.setAssignee(task.getId(), this.handler.username);
                 } else {
                     Role role = Role.find("roleName=?", task.getName()).first();
@@ -1593,17 +1591,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return item.currency.symbol() + " " + item.compenamt;
         } else {
             return String.valueOf(0);
-        }
-    }
-
-    /**
-     * 生成质检任务
-     */
-    public void triggerCheck() {
-        if(this.isPersistent() && this.shipType != null && this.isCheck == 0 && this.selling != null) {
-            new CheckTask(this).save();
-            this.isCheck = 1;
-            this.save();
         }
     }
 

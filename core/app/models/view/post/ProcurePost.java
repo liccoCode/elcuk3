@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
  * Time: 4:32 PM
  */
 public class ProcurePost extends Post<ProcureUnit> {
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
     private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
@@ -190,19 +189,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         }
         sbd.append(" AND planQty != 0");
         return new F.T2<String, List<Object>>(sbd.toString(), params);
-    }
-
-    /**
-     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
-     *
-     * @return
-     */
-    private Long isSearchForId() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
-        }
-        return null;
     }
 
     /**

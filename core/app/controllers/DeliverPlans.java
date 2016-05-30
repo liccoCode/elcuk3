@@ -27,7 +27,7 @@ import java.util.List;
  * Date: 16-1-21
  * Time: 上午10:40
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class DeliverPlans extends Controller {
 
 
@@ -104,6 +104,7 @@ public class DeliverPlans extends Controller {
      */
     public static void addunits(String id, List<Long> pids) {
         DeliverPlan dp = DeliverPlan.findById(id);
+        if(dp.isLocked()) Validation.addError("", "出库单已经确认,不允许再添加采购计划!");
         Validation.required("deliverplans.addunits", pids);
         if(Validation.hasErrors())
             render("DeliverPlans/show.html", dp);
@@ -123,6 +124,7 @@ public class DeliverPlans extends Controller {
      */
     public static void delunits(String id, List<Long> pids) {
         DeliverPlan dp = DeliverPlan.findById(id);
+        if(dp.isLocked()) Validation.addError("", "出库单已经确认,不允许再解除采购计划!");
         Validation.required("deliverplans.delunits", pids);
         if(Validation.hasErrors())
             render("DeliverPlans/show.html", dp);
@@ -135,5 +137,16 @@ public class DeliverPlans extends Controller {
         show(dp.id);
     }
 
-
+    public static void triggerReceiveRecords(List<String> ids) {
+        if(ids != null && !ids.isEmpty()) {
+            for(String id : ids) {
+                DeliverPlan deliverPlan = DeliverPlan.findById(id);
+                if(deliverPlan != null && deliverPlan.state == DeliverPlan.P.CREATE) {
+                    deliverPlan.triggerReceiveRecords();
+                }
+            }
+        }
+        flash.success("确认发货成功!");
+        redirect("/ReceiveRecords/index");
+    }
 }

@@ -13,14 +13,17 @@ import models.view.Ret;
 import models.view.post.CheckTaskPost;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.helper.StringUtil;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,44 +39,64 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class CheckTasks extends Controller {
 
-    @Before(only = {"checklist", "checkerList"})
+    @Before(only = {"checklist"})
     public static void beforIndex() {
-        List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.find("type !=?", Whouse.T.FORWARD).fetch());
-        renderArgs.put("shipwhouses", Whouse.find("type =?", Whouse.T.FORWARD).fetch());
-        renderArgs.put("cooperators", cooperators);
+        renderArgs.put("cooperators", Cooperator.suppliers());
+        renderArgs.put("users", User.checkers());
+        renderArgs.put("elcukRecords", ElcukRecord.records(
+                Arrays.asList(Messages.get("checktask.update"), Messages.get("checktask.doPrints")), 50));
+    }
 
-        List<User> users = User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
-                "like ?", "%质检%").fetch();
-        renderArgs.put("users", users);
+    @Before(only = {"show", "update", "fullUpdate"})
+    public static void setupLogs() {
+        Long id = NumberUtils.toLong(request.params.get("id"));
+        List<ElcukRecord> elcukRecords = ElcukRecord.records(id.toString());
+        renderArgs.put("elcukRecords", elcukRecords);
     }
 
 
     @Check("checktasks.checklist")
-    public static void checklist(CheckTaskPost p, int day) {
-        if(p == null) {
-            p = new CheckTaskPost();
-            p.initDateRange(day);
-        }
-        List<CheckTask> tasklist = p.query();
-        render(tasklist, p);
+    public static void checklist(CheckTaskPost p) {
+        if(p == null) p = new CheckTaskPost();
+        List<CheckTask> tasks = p.query();
+        render(tasks, p);
     }
 
-    /**
-     * 质检员任务列表
-     */
-    @Check("checktasks.checkerList")
-    public static void checkerList(CheckTaskPost p, int day) {
-        String username = Secure.Security.connected();
-        if(p == null) {
-            p = new CheckTaskPost();
-            p.initDateRange(day);
+    public static void show(Long id) {
+        CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        render(check);
+    }
+
+    @Check("checktasks.update")
+    public static void update(Long id, CheckTask check) {
+        CheckTask old = CheckTask.findById(id);
+        old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
+        check.valid();
+
+        if(Validation.hasErrors()) {
+            render("CheckTasks/show.html", check);
         }
-        List<ElcukRecord> records = ElcukRecord.find("action like '[CheckTask%' ORDER BY createAt DESC").fetch(50);
-        List<CheckTask> checks = p.check();
-        List<CheckTask> checkeds = p.checked();
-        List<CheckTask> checkRepeats = p.checkRepeat();
-        render(p, checks, checkeds, checkRepeats, records);
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
+        old.update(check);
+        flash.success("更新成功");
+        redirect("/CheckTasks/show/" + id);
+    }
+
+    @Check("checktasks.update")
+    public static void fullUpdate(Long id, CheckTask check) {
+        CheckTask old = CheckTask.findById(id);
+        check.submitValidate();
+        if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
+        if(Validation.hasErrors()) {
+            check = old;
+            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+            render("CheckTasks/show.html", check);
+        }
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
+        old.fullUpdate(check);
+        flash.success("更新成功");
+        show(id);
     }
 
     /**
@@ -84,35 +107,6 @@ public class CheckTasks extends Controller {
         check.qcType = qcType;
         check.save();
         renderJSON(new Ret());
-    }
-
-    public static void show(Long id) {
-        CheckTask check = CheckTask.findById(id);
-        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
-        Map<String, Object> map = check.showInfo(id, Secure.Security.connected());
-
-        ActivitiProcess ap = (ActivitiProcess) map.get("ap");
-        int issubmit = (Integer) map.get("issubmit");
-        String taskname = (String) map.get("taskname");
-        int oldPlanQty = (Integer) map.get("oldPlanQty");
-        List<Whouse> whouses = null;
-        Object temp = map.get("whouses");
-        if(temp != null) {
-            whouses = (List<Whouse>) map.get("whouses");
-        }
-        ProcureUnit unit = null;
-        temp = map.get("whouses");
-        if(temp != null) {
-            unit = (ProcureUnit) map.get("unit");
-        }
-        Date oldplanDeliveryDate = null;
-        temp = map.get("oldplanDeliveryDate");
-        if(temp != null) {
-            oldplanDeliveryDate = (Date) map.get("oldplanDeliveryDate");
-        }
-        List<Map<String, String>> infos = (List<Map<String, String>>) map.get("infos");
-
-        render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
     }
 
     public static void showactiviti(Long id) {
@@ -149,48 +143,6 @@ public class CheckTasks extends Controller {
 
         render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
     }
-
-    @Check("checktasks.update")
-    public static void update(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
-                              @As("yyyy-MM-dd HH:mm") Date to) {
-        CheckTask old = CheckTask.findById(id);
-        old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
-        check.startTime = from;
-        check.endTime = to;
-        check.checkor = old.checkor;
-
-        check.validateRight();
-        if(Validation.hasErrors()) {
-            check = old;
-            render("CheckTasks/show.html", check);
-        }
-        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
-        old.update(check);
-        flash.success("更新成功");
-        redirect("/CheckTasks/show/" + id);
-    }
-
-    @Check("checktasks.update")
-    public static void fullUpdate(Long id, CheckTask check, @As("yyyy-MM-dd HH:mm") Date from,
-                                  @As("yyyy-MM-dd HH:mm") Date to) {
-        CheckTask old = CheckTask.findById(id);
-        check.startTime = from;
-        check.endTime = to;
-        check.checkor = old.checkor;
-        check.validateRequired();
-        check.validateRight();
-        if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
-        if(Validation.hasErrors()) {
-            check = old;
-            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
-            render("CheckTasks/show.html", check);
-        }
-        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
-        old.fullUpdate(check, Secure.Security.connected());
-        flash.success("更新成功");
-        show(id);
-    }
-
 
     public static void submitactiviti(CheckTask check, long checkid, long processid, @As("yyyy-MM-dd HH:mm") Date from,
                                       @As("yyyy-MM-dd HH:mm") Date to) {

@@ -4,7 +4,6 @@ import helper.Dates;
 import models.market.M;
 import models.procure.Shipment;
 import models.whouse.OutboundRecord;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
@@ -12,7 +11,6 @@ import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -156,18 +154,5 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
     @Override
     public Long getTotalCount() {
         return this.count();
-    }
-
-    /**
-     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
-     *
-     * @return
-     */
-    private Long isSearchForId() {
-        if(org.apache.commons.lang.StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
-        }
-        return null;
     }
 }
