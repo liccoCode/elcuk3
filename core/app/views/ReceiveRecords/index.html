@@ -73,7 +73,7 @@
       </div>
 
       <div class="inline">
-        <a href="javascript:void(0)" data-url="@{Excels.receiveRecords(p)}" data-target="_blank" class="btn btn-info
+        <a href="javascript:void(0)" data-url="@{Excels.receiveRecords()}" data-target="_blank" class="btn btn-info
         inline" id="exportBtn">导出</a>
         <a target="_blank" class="btn btn-info inline" name="confirm">确认收货</a>
       </div>
@@ -166,7 +166,7 @@
           <td>${r.procureUnit?.fba}</td>
           <td>${r.procureUnit?.whouse?.name}</td>
           <td>${r.procureUnit?.shipType?.label()}</td>
-          <td>${r.procureUnit?.qty()}</td>
+          <td>${r.procureUnit?.attrs?.planQty}</td>
           <td>
             <input type="text" name="qty" value="${r.qty}" style="width:30px;">
           </td>
