@@ -13,11 +13,13 @@ $ ->
   $("#update_form").on("click", "#update_btn, #fullupdate_btn", (r) ->
     $("#update_form").attr("action", "/checktasks/#{$(@).attr("id").split("_")[0]}")
   ).on('submit', (e) ->
-    msg = if $(@).attr('action').indexOf("fullupdate") > 0
+    $form = $(@)
+    msg = if $form.attr('action').indexOf("fullupdate") > 0
       '提交后将会生成仓库入库记录,确定？'
     else
       '确认保存?'
     e.preventDefault() unless confirm(msg)
+    $form.find('select').removeAttr('disabled')
   )
 
   $("#update_form").on("click", "#submitqc_btn", (r) ->
