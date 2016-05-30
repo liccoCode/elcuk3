@@ -20,6 +20,7 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -196,7 +197,7 @@ public class CheckTask extends Model {
         CHECKFINISH {
             @Override
             public String label() {
-                return "已检-完成";
+                return "已检";
             }
         },
         CHECKNODEAL {
@@ -604,19 +605,7 @@ public class CheckTask extends Model {
         this.units.attrs.qty = newCt.qty;
         if(newCt.standBoxQctInfos != null) this.standBoxQctInfos = newCt.standBoxQctInfos;
         if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
-        switch(newCt.isship) {
-            case SHIP:
-                this.checkstat = StatType.CHECKFINISH;
-                this.finishStat = ConfirmType.CONFIRM;
-                this.updateFinishStat();
-                break;
-            case NOTSHIP:
-                this.checkstat = StatType.CHECKNODEAL;
-                //对应采购计划ID的“不发货处理”状态更新为：不发货待处理
-                //启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
-                startActiviti(username);
-                break;
-        }
+        this.checkstat = StatType.CHECKFINISH;
         this.update(newCt);
         this.buildInboundRecord();
     }
@@ -1038,5 +1027,33 @@ public class CheckTask extends Model {
 
     public boolean isLock() {
         return this.checkstat != StatType.UNCHECK;
+    }
+
+    /**
+     * 兼容老的数据
+     *
+     * @return
+     */
+    public static ResultType[] resultTypes() {
+        return ArrayUtils.removeElement(ResultType.values(), ResultType.OTHER);
+    }
+
+    /**
+     * 兼容老的数据
+     *
+     * @return
+     */
+    public static T[] types() {
+        return ArrayUtils.removeElement(T.values(), T.SELF);
+    }
+
+    /**
+     * 兼容老的数据
+     *
+     * @return
+     */
+    public static StatType[] statTypes() {
+        return ArrayUtils.removeElements(StatType.values(),
+                StatType.CHECKDEAL, StatType.CHECKNODEAL, StatType.REPEATCHECK);
     }
 }

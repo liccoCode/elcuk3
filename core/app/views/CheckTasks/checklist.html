@@ -31,14 +31,14 @@
 
     <select name="p.checkstat" class="inline">
       <option value="">质检状态</option>
-        #{list items:models.qc.CheckTask.StatType, as:'s'}
+        #{list items:models.qc.CheckTask.statTypes(), as:'s'}
           <option value="${s}" ${p.checkstat == s ? 'selected' : ''}>${s.label()}</option>
         #{/list}
     </select>
 
     <select name="p.result" class="inline">
       <option value="">是否合格</option>
-        #{list items:models.qc.CheckTask.ResultType, as:'r'}
+        #{list items:models.qc.CheckTask.resultTypes(), as:'r'}
           <option value="${r}" ${p.result == r ? 'selected' : ''}>${r.label()}</option>
         #{/list}
     </select>
@@ -118,9 +118,16 @@
       ${task.isTimeout() ? '超时' : '正常'}
       </td>
       <td width="3.5%">
-        <a href="@{CheckTasks.show(task.id)}" target="_blank" class="btn btn-small btn-info">
-        ${task.checkstat.name() == 'UNCHECK' ? '质检' : '查看'}
-        </a>
+          #{if task.checkstat.name() == 'UNCHECK'}
+            <a href="@{CheckTasks.show(task.id)}" target="_blank" class="btn btn-mini btn-primary">
+              质检
+            </a>
+          #{/if}
+          #{else}
+            <a href="@{CheckTasks.show(task.id)}" target="_blank" class="btn btn-mini btn-success">
+              查看
+            </a>
+          #{/else}
       </td>
       <td>
         <a href="/ReceiveRecords/index?p.search=id:${task.receiveRecord?.id}" target="_blank">

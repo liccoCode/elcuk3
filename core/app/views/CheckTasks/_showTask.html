@@ -62,7 +62,7 @@
   <th>质检方式</th>
   <td>
     <select name="check.qcType" style="width:80px;">
-    #{list items:models.qc.CheckTask.T.values(), as: 'qcType'}
+    #{list items:models.qc.CheckTask.types(), as: 'qcType'}
       <option value="${qcType.name()}" ${qcType == check.qcType? 'selected':''}>${qcType.label()}</option>
     #{/list}
     </select>
@@ -87,7 +87,7 @@
   <th>是否合格</th>
   <td>
     <select name="check.result" style="width:80px;" ${check.result != null ? 'disabled' : ''}>
-    #{list items:models.qc.CheckTask.ResultType.values(), as: 'result'}
+    #{list items:models.qc.CheckTask.resultTypes(), as: 'result'}
       <option value="${result.name()}" ${result == check.result? 'selected':''}>${result.label()}</option>
     #{/list}
     </select>
