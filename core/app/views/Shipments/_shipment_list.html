@@ -3,21 +3,21 @@
     <th style="width:2%"><input type="checkbox" class="checkbox_all" value="0"/></th>
     <th style="width:3%">#</th>
     <th style="width:15%">Track No.</th>
-    <th style="width:5%">运输商</th>
+    <th style="width:10%">运输商</th>
     <th style="width:5%">国际快递</th>
     <th style="width:5%">运输方式</th>
     <th style="width:10%">去往仓库</th>
     <th style="width:5%">目的地</th>
     <th style="width:10%">状态</th>
-    <th style="width:10%">预计开始时间</th>
-    <th style="width:10%">创建时间</th>
-    <th style="width:10%">预计到库时间</th>
+    <th style="width:8%">预计开始时间</th>
+    <th style="width:8%">创建时间</th>
+    <th style="width:8%">预计到库时间</th>
     <th style="width:10%">创建者</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.apply}">
+      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.apply}" way="${ship.type}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
