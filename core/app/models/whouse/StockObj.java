@@ -155,6 +155,7 @@ public class StockObj implements Serializable, Cloneable {
                 this.attrs.put("whouseName", unit.whouse.name);
             }
             if(unit.cooperator != null) this.attrs.put("cooperatorId", unit.cooperator.id);
+            if(unit.attrs.planShipDate != null) this.attrs.put("planBeginDate", unit.attrs.planShipDate);
             this.setAttributes();
         }
     }
