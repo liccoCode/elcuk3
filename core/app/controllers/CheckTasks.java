@@ -62,6 +62,43 @@ public class CheckTasks extends Controller {
         render(tasks, p);
     }
 
+    public static void show(Long id) {
+        CheckTask check = CheckTask.findById(id);
+        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+        render(check);
+    }
+
+    @Check("checktasks.update")
+    public static void update(Long id, CheckTask check) {
+        CheckTask old = CheckTask.findById(id);
+        old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
+        check.valid();
+
+        if(Validation.hasErrors()) {
+            render("CheckTasks/show.html", check);
+        }
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
+        old.update(check);
+        flash.success("更新成功");
+        redirect("/CheckTasks/show/" + id);
+    }
+
+    @Check("checktasks.update")
+    public static void fullUpdate(Long id, CheckTask check) {
+        CheckTask old = CheckTask.findById(id);
+        check.submitValidate();
+        if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
+        if(Validation.hasErrors()) {
+            check = old;
+            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
+            render("CheckTasks/show.html", check);
+        }
+        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
+        old.fullUpdate(check);
+        flash.success("更新成功");
+        show(id);
+    }
+
     /**
      * 更新质检方式
      */
@@ -70,12 +107,6 @@ public class CheckTasks extends Controller {
         check.qcType = qcType;
         check.save();
         renderJSON(new Ret());
-    }
-
-    public static void show(Long id) {
-        CheckTask check = CheckTask.findById(id);
-        check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
-        render(check);
     }
 
     public static void showactiviti(Long id) {
@@ -112,41 +143,6 @@ public class CheckTasks extends Controller {
 
         render(check, ap, issubmit, taskname, infos, unit, oldPlanQty, whouses, oldplanDeliveryDate);
     }
-
-    @Check("checktasks.update")
-    public static void update(Long id, CheckTask check) {
-        CheckTask old = CheckTask.findById(id);
-        old.arryParamSetUPForQtInfo(CheckTask.FLAG.STR_TO_ARRAY);
-        check.checkor = Secure.Security.connected();
-        check.validateRight();
-
-        if(Validation.hasErrors()) {
-            render("CheckTasks/show.html", check);
-        }
-        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
-        old.update(check);
-        flash.success("更新成功");
-        redirect("/CheckTasks/show/" + id);
-    }
-
-    @Check("checktasks.update")
-    public static void fullUpdate(Long id, CheckTask check) {
-        CheckTask old = CheckTask.findById(id);
-        check.checkor = Secure.Security.connected();
-        check.validateRequired();
-        check.validateRight();
-        if(old.units == null || old.units.id == null) Validation.addError("", "没有关联的采购单！");
-        if(Validation.hasErrors()) {
-            check = old;
-            check.arryParamSetUP(CheckTask.FLAG.STR_TO_ARRAY);
-            render("CheckTasks/show.html", check);
-        }
-        check.arryParamSetUP(CheckTask.FLAG.ARRAY_TO_STR);
-        old.fullUpdate(check, Secure.Security.connected());
-        flash.success("更新成功");
-        show(id);
-    }
-
 
     public static void submitactiviti(CheckTask check, long checkid, long processid, @As("yyyy-MM-dd HH:mm") Date from,
                                       @As("yyyy-MM-dd HH:mm") Date to) {

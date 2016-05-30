@@ -5,6 +5,7 @@ import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.User;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
@@ -548,15 +549,16 @@ public class CheckTask extends Model {
     /**
      * 质检任务检查
      */
-    public void validateRequired() {
-        Validation.required("实际交货数量", this.qty);
-        Validation.required("质检开始时间", this.startTime);
-        Validation.required("质检结束时间", this.endTime);
+    public void submitValidate() {
+        this.valid();
+        Validation.required("是否合格", this.result);
+        Validation.required("质检方式", this.qcType);
     }
 
-    public void validateRight() {
-        if(this.qty < 0) Validation.addError("", "实际交货数量不能小于0");
-        if(this.pickqty < 0) Validation.addError("", "实际抽检数量不能小于0");
+    public void valid() {
+        Validation.min("实际抽检数量", this.pickqty, 0);
+        Validation.min("质检取样", this.qcSample, 0);
+        Validation.min("不合格数", this.unqualifiedQty, 0);
     }
 
     private static final Interner<String> pool = Interners.newWeakInterner();
@@ -564,8 +566,8 @@ public class CheckTask extends Model {
     public CheckTask() {
         this.confirmstat = ConfirmType.UNCONFIRM;
         this.checkstat = StatType.UNCHECK;
-        this.creatat = new Date();
         this.finishStat = ConfirmType.UNCONFIRM;
+        this.creatat = new Date();
     }
 
     public CheckTask(ProcureUnit unit) {
@@ -599,18 +601,6 @@ public class CheckTask extends Model {
     }
 
     /**
-     * 保存质检任务且修改相关联的对应的采购计划数据
-     */
-    public void fullUpdate(CheckTask newCt, String username) {
-        this.units.attrs.qty = newCt.qty;
-        if(newCt.standBoxQctInfos != null) this.standBoxQctInfos = newCt.standBoxQctInfos;
-        if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
-        this.checkstat = StatType.CHECKFINISH;
-        this.update(newCt);
-        this.buildInboundRecord();
-    }
-
-    /**
      * 获取对应的质检任务查看链接
      * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
      * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面
@@ -629,44 +619,66 @@ public class CheckTask extends Model {
      */
     public void beforeUpdateLog(CheckTask newCt) {
         List<String> logs = new ArrayList<>();
-        if(newCt.isship != null) {
-            logs.addAll(Reflects.updateAndLogChanges(this, "isship", newCt.isship));
-        }
+        logs.addAll(Reflects.updateAndLogChanges(this, "pickqty", newCt.pickqty));
+        logs.addAll(Reflects.updateAndLogChanges(this, "qcSample", newCt.qcSample));
+        logs.addAll(Reflects.updateAndLogChanges(this, "unqualifiedQty", newCt.unqualifiedQty));
         if(newCt.result != null) {
             logs.addAll(Reflects.updateAndLogChanges(this, "result", newCt.result));
+        }
+        if(newCt.qcType != null) {
+            logs.addAll(Reflects.updateAndLogChanges(this, "qcType", newCt.qcType));
         }
         if(StringUtils.isNotBlank(newCt.checknote)) {
             logs.addAll(Reflects.updateAndLogChanges(this, "checknote", newCt.checknote));
         }
-        logs.addAll(Reflects.updateAndLogChanges(this, "pickqty", newCt.pickqty));
-        logs.addAll(Reflects.updateAndLogChanges(this, "qty", newCt.qty));
         if(logs.size() > 0) {
-            new ERecordBuilder("checktask.update").msgArgs(this.id, StringUtils.join(logs, "，"))
-                    .fid(this.id).save();
+            new ERecordBuilder("checktask.update").msgArgs(this.id, StringUtils.join(logs, "，")).fid(this.id).save();
         }
     }
 
     public void update(CheckTask newCt) {
+        this.checkor = User.username();
+        if(StringUtils.isNotBlank(newCt.samplingTypes)) {
+            this.samplingTypes = newCt.samplingTypes;
+        }
+        if(StringUtils.isNotBlank(inspectionTimes)) {
+            this.inspectionTimes = newCt.inspectionTimes;
+        }
+        if(StringUtils.isNotBlank(newCt.ac)) {
+            this.ac = newCt.ac;
+        }
+        if(StringUtils.isNotBlank(newCt.re)) {
+            this.re = newCt.re;
+        }
+        if(StringUtils.isNotBlank(newCt.cr)) {
+            this.cr = newCt.cr;
+        }
+        if(StringUtils.isNotBlank(newCt.ma)) {
+            this.ma = newCt.ma;
+        }
+        if(StringUtils.isNotBlank(newCt.mi)) {
+            this.mi = newCt.mi;
+        }
+        if(StringUtils.isNotBlank(newCt.aqlBadDescs)) {
+            this.aqlBadDescs = newCt.aqlBadDescs;
+        }
+        if(StringUtils.isNotBlank(newCt.standBoxQctInfo)) {
+            this.standBoxQctInfo = newCt.standBoxQctInfo;
+        }
+        if(StringUtils.isNotBlank(newCt.tailBoxQctInfo)) {
+            this.tailBoxQctInfo = newCt.tailBoxQctInfo;
+        }
         this.beforeUpdateLog(newCt);
-        this.checkor = newCt.checkor;
-        this.qcSample = newCt.qcSample;
-        this.startTime = new Date();
-        this.endTime = new Date();
-        this.unqualifiedQty = newCt.unqualifiedQty;
-        if(newCt.samplingTypes != null) this.samplingTypes = newCt.samplingTypes;
-        if(newCt.samplingTypes != null) this.inspectionTimes = newCt.inspectionTimes;
-        if(newCt.ac != null) this.ac = newCt.ac;
-        if(newCt.re != null) this.re = newCt.re;
-        if(newCt.cr != null) this.cr = newCt.cr;
-        if(newCt.ma != null) this.ma = newCt.ma;
-        if(newCt.mi != null) this.mi = newCt.mi;
-        if(newCt.aqlBadDescs != null) this.aqlBadDescs = newCt.aqlBadDescs;
-        if(newCt.dealway != null) this.dealway = newCt.dealway;
-        if(newCt.standBoxQctInfo != null) this.standBoxQctInfo = newCt.standBoxQctInfo;
-        if(newCt.tailBoxQctInfo != null) this.tailBoxQctInfo = newCt.tailBoxQctInfo;
-        if(this.result == ResultType.AGREE) this.isship = ShipType.SHIP;
-        this.units.save();
         this.save();
+    }
+
+    /**
+     * 保存质检任务且生成入库记录
+     */
+    public void fullUpdate(CheckTask newCt) {
+        this.checkstat = StatType.CHECKFINISH;
+        this.update(newCt);
+        this.buildInboundRecord();
     }
 
 
@@ -814,8 +826,6 @@ public class CheckTask extends Model {
                 this.opition = "[取消费用]" + this.opition;
             }
         }
-
-
         this.units.save();
         this.save();
 
@@ -995,8 +1005,8 @@ public class CheckTask extends Model {
      * 生成入库记录
      */
     public void buildInboundRecord() {
-        if(this.isship == ShipType.SHIP && this.units != null) {
-            //自动生成入库记录
+        if(this.checkstat == StatType.CHECKFINISH && this.units != null) {
+            //检查入库记录是否已经存在
             InboundRecord inboundRecord = InboundRecord
                     .find("attributes LIKE ?", "%\"procureunitId\":" + this.units.id.toString() + "%").first();
             if(inboundRecord == null) {
