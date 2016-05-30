@@ -144,7 +144,7 @@ public class CheckTask extends Model {
      * 质检取样
      */
     @Expose
-    public Integer qcSample;
+    public Integer qcSample = 0;
 
     /**
      * 预计交货日期
