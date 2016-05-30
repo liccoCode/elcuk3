@@ -1,10 +1,9 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import helper.Cached;
-import helper.DBUtils;
-import helper.Dates;
-import helper.Promises;
+import controllers.Secure;
+import helper.*;
+import models.User;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import org.apache.commons.lang.StringUtils;
@@ -499,20 +498,17 @@ public class Orderr extends GenericModel {
             if(item.quantity == null) item.quantity = 0;
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
-                itemamount =
-                        itemamount +
+                itemamount = itemamount +
                                 new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new
-                                                BigDecimal
-                                                (item.quantity), 2,
-                                                4).divide(new BigDecimal(this.orderrate()), 2,
-                                                java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
-                                        .floatValue();
+                                        .divide(new BigDecimal(item.quantity), 2, 4)
+                                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                        .setScale(2, 4).floatValue();
             }
         }
 
         for(SaleFee fee : this.fees) {
-            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
+            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") ||
+                    fee.type.name.equals("giftwrap")) && fee.cost > 0) {
                 totalamount = totalamount + fee.cost;
                 itemamount = itemamount + new BigDecimal(fee.cost).divide(
                         new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).setScale(2, 4)
@@ -668,13 +664,62 @@ public class Orderr extends GenericModel {
     public String showItemSku() {
         String show = "";
         List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
-        if(items != null && items.size() > 0 ) {
+        if(items != null && items.size() > 0) {
             for(OrderItem item : items) {
                 show += item.product.sku + ";";
             }
 
         }
         return show;
+    }
+
+    public OrderInvoice createOrderInvoice() {
+        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(this.market);
+        F.T3<Float, Float, Float> amt = this.amount();
+        OrderInvoice invoice = new OrderInvoice();
+        invoice.orderid = this.orderId;
+        invoice.updateDate = new Date();
+        invoice.updator = "auto_reply";
+
+        String editAddress = this.formataddress(this.country);
+        if(StringUtils.isNotBlank(this.address1)) {
+            invoice.invoiceto = this.reciver + "," + this.address1.replace("DE", "Deutschland");
+        } else {
+            invoice.invoiceto = editAddress;
+        }
+        invoice.address = this.formataddress(this.country);
+        invoice.notaxamount = amt._2;
+        invoice.taxamount = amt._3;
+        invoice.totalamount = amt._1;
+        invoice.price = new ArrayList<>();
+
+        if(this.items != null && this.items.size() > 0) {
+            for(OrderItem item : this.items) {
+                if(item.quantity.intValue() > 0) {
+                    invoice.price.add(new BigDecimal(item.price - item.discountPrice)
+                            .divide(new BigDecimal(item.quantity), 2, 4)
+                            .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).floatValue());
+
+                } else {
+                    invoice.price.add(0f);
+                }
+            }
+        }
+
+        if(this.fees != null && this.fees.size() > 0) {
+            for(SaleFee fee : this.fees) {
+                if(fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") ||
+                        fee.type.name.equals("giftwrap") && fee.cost > 0) {
+                    invoice.price.add(new BigDecimal(fee.cost).divide(new BigDecimal(this.orderrate()), 2,
+                            BigDecimal.ROUND_HALF_DOWN).floatValue());
+                }
+            }
+        }
+
+        invoice.saveprice();
+        invoice.europevat = OrderInvoice.VAT.NORMAL;
+        invoice.save();
+        return invoice;
     }
 
 }

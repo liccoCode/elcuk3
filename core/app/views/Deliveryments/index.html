@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"采购单列表 (${deliveryments.size()})" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
-    #{script_cdn name: 'deliveryments/index.coffee'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'deliveryments/index.coffee'/}
 #{/set}
 
 #{info_row}
@@ -108,7 +108,7 @@
           </td>
           <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>${dmt.deliveryType?.label()}</td>
-          <td>${dmt.supplier()?.fullName}</td>
+          <td>${dmt.supplier()?.name}</td>
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
           <td>

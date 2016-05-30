@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"请款单 ${apply.serialNumber}" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'applys/transport.coffee'/}
-    #{script_cdn name: 'shipments/paymentunits.coffee'/}
+    #{script 'applys/transport.coffee'/}
+    #{script 'shipments/paymentunits.coffee'/}
 #{/set}
 #{flash_alert /}
 

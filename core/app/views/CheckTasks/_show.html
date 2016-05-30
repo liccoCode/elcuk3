@@ -1,8 +1,8 @@
-#{script_cdn name: 'jquery.filedrop.js' /}
-#{script_cdn name: 'component/dropUpload.coffee'/}
-#{script_cdn name: 'checktasks/show.coffee'/}
-#{script_cdn name: 'localResize.coffee'/} <!-- LocalResize Github 地址: https://github.com/think2011/localResizeIMG-2 --!>
-#{script_cdn name: 'localResize.ui.coffee'/}
+#{script 'jquery.filedrop.js' /}
+#{script 'component/dropUpload.coffee'/}
+#{script 'checktasks/show.coffee'/}
+#{script 'localResize.coffee'/} <!-- LocalResize Github 地址: https://github.com/think2011/localResizeIMG-2 -->
+#{script 'localResize.ui.coffee'/}
 
 <div class="row-fluid">
   <div>
@@ -44,8 +44,6 @@
       #{/if}
       </table>
     </form>
-    #{include 'CheckTasks/_uploadFile.html'/}
+  #{include 'CheckTasks/_uploadFile.html'/}
   </div>
-
-
 </div>

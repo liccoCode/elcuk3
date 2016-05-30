@@ -1,5 +1,5 @@
 # config valid only for current version of Capistrano
-lock '3.4.0'
+lock '3.5.0'
 
 set :application, 'elcuk2'
 set :repo_url, 'ssh://git@tig.easyacc.com:21022/ea/elcuk2.git'
@@ -28,6 +28,7 @@ set :deploy_to, '/root/cap_elcuk2'
 
 # Default value for linked_dirs is []
 # set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system')
+set :linked_dirs, fetch(:linked_dirs, []).push('core/logs')
 
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
@@ -36,14 +37,23 @@ set :deploy_to, '/root/cap_elcuk2'
 # set :keep_releases, 5
 set :keep_releases, 3
 
+
+# 注册 play 命令
+SSHKit.config.command_map[:play] = "/opt/play-1.4.2/play"
+
+
 namespace :deploy do
 
   task :restart do
-    on roles(:web) do
-      execute("cd #{current_path}/core && /opt/play-1.4.2/play deps --sync")
-      execute(:supervisorctl, 'restart', 'erp')
+    on roles(:app) do
+      within("#{current_path}/core") do
+        execute(:play, "deps --sync")
+        execute(:supervisorctl, 'restart', 'erp')
+      end
     end
   end
   
-  after 'deploy:publishing', :restart
+  # 在完成发布之后
+  after 'deploy:publishing', "conf:application"
+  after 'deploy:published', :restart
 end

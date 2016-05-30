@@ -111,7 +111,7 @@ $ ->
       return
     LoadMask.mask()
     $form = $("#update_product_form")
-    $.ajax('/products/update', {type: 'GET', data: $form.serialize(), dataType: 'json'})
+    $.ajax('/products/update', {type: 'POST', data: $form.serialize(), dataType: 'json'})
     .done((r) ->
         msg = if r.flag is true
           {text: "保存成功.", type: 'success', timeout: 5000}

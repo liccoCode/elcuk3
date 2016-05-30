@@ -1,5 +1,6 @@
 package models.whouse;
 
+import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.Reflects;
@@ -21,6 +22,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class OutboundRecord extends Model {
     public StockObj stockObj;
 
     /**
-     * 出库目标(货代 Or 仓库 的 ID)
+     * 出库目标(货代 Or 供应商 Or 其他)
      */
     public String targetId;
 
@@ -54,13 +56,37 @@ public class OutboundRecord extends Model {
         Normal {
             @Override
             public String label() {
-                return "正常出库";
+                return "Amazon 出库";
             }
         },
-        InternalTrans {
+        B2B {
             @Override
             public String label() {
-                return "内部调拨";
+                return "B2B 出库";
+            }
+        },
+        Refund {
+            @Override
+            public String label() {
+                return "退回工厂";
+            }
+        },
+        Process {
+            @Override
+            public String label() {
+                return "品拓生产";
+            }
+        },
+        Sample {
+            @Override
+            public String label() {
+                return "取样";
+            }
+        },
+        Other {
+            @Override
+            public String label() {
+                return "其他出库";
             }
         };
 
@@ -187,15 +213,16 @@ public class OutboundRecord extends Model {
     public Shipment.T shipType;
 
     @Transient
-    public M market;
+    public String market;
 
     @Transient
     public String productCode;
+
     /**************************************/
 
     public OutboundRecord() {
         this.qty = 0;
-        this.planQty = 0;
+        this.planQty = 1;
         this.state = S.Pending;
     }
 
@@ -215,27 +242,15 @@ public class OutboundRecord extends Model {
     }
 
     /**
-     * 出货目标(货代)
+     * 出货目标(货代 Or 供应商)
      *
      * @return
      */
     public Cooperator getCooperator() {
-        if(this.type == T.Normal) {
+        if(Arrays.asList(T.Normal, T.B2B, T.Refund).contains(this.type)) {
             return Cooperator.findById(NumberUtils.toLong(this.targetId));
         }
-        throw new FastRuntimeException("类型(type)错误, 无法查询到合作伙伴!");
-    }
-
-    /**
-     * 出货目标(内部仓库)
-     *
-     * @return
-     */
-    public Whouse getSelfWhouse() {
-        if(this.type == T.InternalTrans) {
-            return Whouse.findById(NumberUtils.toLong(this.targetId));
-        }
-        throw new FastRuntimeException("类型(type)错误, 无法查询到仓库!");
+        return null;
     }
 
     public static List<String> batchConfirm(List<Long> rids) {
@@ -319,12 +334,64 @@ public class OutboundRecord extends Model {
         Validation.required("实际出库数量", this.qty);
         Validation.required("状态", this.state);
         Validation.min("预计出库数量", this.planQty, 1);
+        this.typeValid();
         this.stockObj.valid();
     }
 
+    /**
+     * 根据 type 来校验 market 和 targetId 字段
+     */
+    public void typeValid() {
+        if(StringUtils.isBlank(this.targetId)) Validation.addError("", "出库对象不能为空.");
+        Optional whouseName = Optional.fromNullable(this.stockObj.attributes().get("whouseName"));
+        switch(this.type) {
+            case Normal:
+                this.targetIdValidByCT(Cooperator.T.SHIPPER);
+                if(whouseName.isPresent()) {
+                    if(M.val(whouseName.get().toString()) == null) {
+                        Validation.addError("", "去往国家必须为一个正常的 Market(例: FBA_DE).");
+                    }
+                } else {
+                    Validation.addError("", "去往国家不能为空.");
+                }
+                break;
+            case B2B:
+                if(!whouseName.isPresent()) Validation.addError("", "去往国家不能为空.");
+                this.targetIdValidByCT(Cooperator.T.SHIPPER);
+                break;
+            case Refund:
+                this.targetIdValidByCT(Cooperator.T.SUPPLIER);
+                break;
+            case Process:
+                if(StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
+                    Validation.addError("", "出库对象只能为品拓生产部.");
+                }
+                break;
+            case Sample:
+                if(!Arrays.asList("质检部", "采购部", "运营部", "研发部", "生产部").contains(this.targetId)) {
+                    Validation.addError("", "出库对象错误.");
+                }
+                break;
+        }
+
+    }
+
+    /**
+     * 根据供应商类别来校验 targetId 是否正确对应到 Cooperator
+     *
+     * @param cooperatorType
+     */
+    public void targetIdValidByCT(Cooperator.T cooperatorType) {
+        if(StringUtils.isNotBlank(this.targetId) && cooperatorType != null &&
+                Cooperator.find("id=? AND type=?", NumberUtils.toLong(this.targetId), cooperatorType) == null) {
+            Validation.addError("", String.format("出库类别为 %s 的时候, 出库对象应该为 %s", this.type.label(), cooperatorType.to_s()));
+        }
+    }
+
+
     public void confirmValid() {
         this.valid();
-        Validation.required("接收对象", this.targetId);
+        Validation.min("实际出库", this.qty, (double) 1);
 
         if(Validation.hasErrors()) return;
         if(!this.checkWhouseItemQty()) {
@@ -367,5 +434,14 @@ public class OutboundRecord extends Model {
     public boolean checkWhouseItemQty() {
         WhouseItem item = WhouseItem.findItem(this.stockObj, this.whouse);
         return item != null && item.qty >= Math.abs(this.qty);
+    }
+
+    public String targetName() {
+        if(Arrays.asList(T.Normal, T.B2B, T.Refund).contains(this.type) && StringUtils.isNotBlank(this.targetId)) {
+            Cooperator cooperator = Cooperator.findById(NumberUtils.toLong(this.targetId));
+            return cooperator.name;
+        } else {
+            return targetId;
+        }
     }
 }

@@ -329,7 +329,9 @@ public class Cooperator extends Model {
      * @return
      */
     public static List<Cooperator> shippers() {
-        return Cooperator.find("type=?", T.SHIPPER).fetch();
+        List<Cooperator> cooperators = Cooperator.find("type=?", T.SHIPPER).fetch();
+        Collections.sort(cooperators, new PinyinSort());
+        return cooperators;
     }
 
     private static class PinyinSort implements Comparator<Object> {

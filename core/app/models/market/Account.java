@@ -176,7 +176,6 @@ public class Account extends Model {
     }
 
     public String cookie(String name) {
-
         return cookie(name, null);
     }
 
@@ -222,11 +221,8 @@ public class Account extends Model {
 
                     body = HTTP.post(this.cookieStore(), params._2, params._1);
                     if(Play.mode.isDev()) {
-                        FileUtils.writeStringToFile(
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
-                                        this.id +
-                                        ".afterLogin.html"),
-                                body
+                        FileUtils.writeStringToFile(new File(
+                                Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body
                         );
                     }
 
@@ -239,8 +235,7 @@ public class Account extends Model {
                 } catch(Exception e) {
                     try {
                         FileUtils.writeStringToFile(
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
-                                        this.id + ".error.html"),
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html"),
                                 body
                         );
                     } catch(IOException e1) {
@@ -268,25 +263,21 @@ public class Account extends Model {
 
     public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
         String body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-
+        List<NameValuePair> params = new ArrayList<>();
 
         if(Play.mode.isDev()) {
             FileUtils.writeStringToFile(new File(
-                            Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
-                                    ".homepage.html"),
+                            Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
                     body
             );
         }
 
         Document doc = Jsoup.parse(body);
-        Elements inputs = doc.select("form:eq(0) input");
+        Elements inputs = doc.select("form[name=signinWidget] input");
 
         if(inputs.size() == 0) {
-            Logger.info("WebSite [%s] Still have the Session with User [%s].",
-                    this.type.toString(), this.username
-            );
-            return new F.T2<List<NameValuePair>, String>(params, "");
+            Logger.info("WebSite [%s] Still have the Session with User [%s].", this.type.toString(), this.username);
+            return new F.T2<>(params, "");
         }
 
         for(Element el : inputs) {
@@ -298,8 +289,7 @@ public class Account extends Model {
             else
                 params.add(new BasicNameValuePair(att, el.val()));
         }
-        return new F.T2<List<NameValuePair>, String>(params,
-                doc.select("form:eq(0)").attr("action"));
+        return new F.T2<>(params, doc.select("form:eq(0)").attr("action"));
     }
 
     /**

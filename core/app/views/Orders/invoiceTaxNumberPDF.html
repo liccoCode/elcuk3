@@ -74,11 +74,11 @@
       <div class="div1">
       #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ) || (ord.market==models
       .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
-        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/EDEER-logo.jpg"
+        <img src="http://127.0.0.1:9000/images/common/EDEER-logo.jpg"
              style="height:100%">
       #{/if}
       #{if  (ord.market==models.market.M.AMAZON_DE) || (ord.market==models.market.M.AMAZON_FR) || (ord.market==models.market.M.AMAZON_IT && (invoice==null || invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
-        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/TUGGLE-logo.jpg"
+        <img src="http://127.0.0.1:9000/images/common/TUGGLE-logo.jpg"
              style="height:100%">
       #{/if}
       </div>
@@ -194,12 +194,6 @@
       </tr>
     #{/if}
 #{/list}
-
-
-
-
-
-
 
   <tr>
     <td class="td3"></td>
