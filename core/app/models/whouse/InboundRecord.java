@@ -278,14 +278,12 @@ public class InboundRecord extends Model {
         this.state = S.Inbound;
         this.completeDate = new Date();
         this.valid();
-        List<StockRecord> stockRecords = this.buildStockRecords();
+        if(Validation.hasErrors()) return;
 
-        if(!Validation.hasErrors()) {
-            this.save();
-            for(StockRecord record : stockRecords) record.doCerate();
-            //为质检不合格的入库生成出库记录(退给工厂)
-            if(this.isRefund()) new OutboundRecord(this).save();
-        }
+        this.save();
+        for(StockRecord record : this.buildStockRecords()) record.doCerate();
+        //为质检不合格的入库生成出库记录(退给工厂)
+        if(this.isRefund()) new OutboundRecord(this).save();
     }
 
     public void beforeCreate() {
