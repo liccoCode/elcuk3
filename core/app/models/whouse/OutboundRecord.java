@@ -250,7 +250,7 @@ public class OutboundRecord extends Model {
         this.qty = inboundRecord.badQty;
         this.planQty = this.qty;
         this.stockObj = inboundRecord.stockObj.dump();
-        this.targetId = inboundRecord.targetWhouse.id.toString();
+        this.targetId = inboundRecord.stockObj.attributes().get("cooperatorId").toString();
     }
 
     /**
