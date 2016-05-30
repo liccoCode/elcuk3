@@ -146,6 +146,7 @@ public class DeliverPlans extends Controller {
                 }
             }
         }
+        flash.success("确认发货成功!");
         redirect("/ReceiveRecords/index");
     }
 }
