@@ -334,7 +334,6 @@ public class Whouse extends Model {
 
     /**
      * 自有仓
-     *
      * @return
      */
     public static List<Whouse> selfWhouses() {
@@ -342,6 +341,8 @@ public class Whouse extends Model {
     }
 
     /**
+     * 自有仓
+     *
      * @param includeDefective
      * @return
      */

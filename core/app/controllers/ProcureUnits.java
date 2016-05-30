@@ -261,7 +261,8 @@ public class ProcureUnits extends Controller {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
         unit.save();
-        unit.triggerCheck();//生成质检任务
+        //生成质检任务
+        unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);
@@ -344,10 +345,6 @@ public class ProcureUnits extends Controller {
             p.search = "id:" + id;
             index(p);
         }
-        //通知当前操作用户 和采购计划创建人，发送删除成功的通知
-        String notifiMessage = String.format("采购计划 %s 删除", id);
-        //Notification.newSystemNoty(notifiMessage, Notification.INDEX, users.iterator().next())
-        //        .notifySomeone(users.toArray(new User[users.size()]));
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         index(null);
     }

@@ -30,6 +30,12 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
+      <select name="p.dateType" class="inline">
+      #{list items:models.view.post.OutboundRecordPost.DATE_TYPES, as:'t'}
+        <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+      #{/list}
+      </select>
+
       <select name="p.type" class="inline">
         <option value="">出库类别</option>
       #{list items:models.whouse.OutboundRecord.T, as:'t'}
@@ -83,13 +89,13 @@
             </label>
           </th>
           <th>ID</th>
-          <th>仓库</th>
           <th>出库类别</th>
           <th>状态</th>
           <th>出货计划 ID</th>
           <th>SKU</th>
           <th>产品名称</th>
           <th>FBA</th>
+          <th>仓库</th>
           <th>去往国家</th>
           <th>运输方式</th>
           <th>预计运输时间</th>
@@ -110,16 +116,6 @@
             </label>
           </td>
           <td>${r.id}</td>
-          <td>
-            <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
-              <option value="">仓库</option>
-                #{list items:whouses, as:'whouse'}
-                  <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
-                  ${whouse.name}
-                  </option>
-                #{/list}
-            </select>
-          </td>
           <td>${r.type.label()}</td>
           <td>${r.state.label()}</td>
           <td>
@@ -134,6 +130,16 @@
           </td>
           <td style="max-width: 280px;">${r.stockObj.name()}</td>
           <td>${attrs.get('fba')}</td>
+          <td>
+            <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
+              <option value="">仓库</option>
+                #{list items:whouses, as:'whouse'}
+                  <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
+                  ${whouse.name}
+                  </option>
+                #{/list}
+            </select>
+          </td>
           <td>${attrs.get('whouseName')}</td>
           <td>${attrs.get('shipType')}</td>
           <td>${attrs.get('planBeginDate')}</td>
