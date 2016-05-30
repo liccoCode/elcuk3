@@ -17,6 +17,16 @@ import java.util.List;
  * Time: 5:57 PM
  */
 public class InboundRecordPost extends Post<InboundRecord> {
+    public static final List<F.T2<String, String>> DATE_TYPES;
+
+    static {
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("createDate", "提交入库时间"));
+        DATE_TYPES.add(new F.T2<>("completeDate", "实际入库时间"));
+    }
+
+    public String dateType;
+
     public Date from;
     public Date to;
 
@@ -29,8 +39,9 @@ public class InboundRecordPost extends Post<InboundRecord> {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
         this.from = now.minusMonths(1).toDate();
         this.to = now.toDate();
+        this.state = InboundRecord.S.Pending;
+        this.dateType = "createDate";
         this.perSize = 25;
-        this.page = 1;
     }
 
     @Override
@@ -73,7 +84,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
             params.add("%\"fba\":\"" + this.search + "\"%");
             params.add("%\"procureunitId\":" + this.search + "%");
         }
-        sbd.append(" ORDER BY createDate DESC");
+        sbd.append(String.format(" ORDER BY %s DESC", this.dateType));
         return new F.T2<>(sbd.toString(), params);
     }
 

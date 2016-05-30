@@ -132,7 +132,7 @@ public class CheckTaskPost extends Post<CheckTask> {
             for(int i = 0; i < 4; i++) params.add(word);
         }
 
-        sbd.append(String.format("ORDER BY %s DESC", this.dateType));
+        sbd.append(String.format(" ORDER BY %s DESC", this.dateType));
         return new F.T2<>(sbd.toString(), params);
     }
 
