@@ -1,6 +1,5 @@
 package jobs.analyze;
 
-import helper.Caches;
 import models.view.post.ProfitPost;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
@@ -8,8 +7,8 @@ import play.cache.Cache;
 import play.jobs.Job;
 import play.jobs.On;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 周期:

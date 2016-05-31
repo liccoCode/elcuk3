@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"出货单列表 (${deliverplans.size()})" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'deliveryments/index.coffee'/}
+    #{script 'deliveryments/index.coffee'/}
 #{/set}
 
 
@@ -66,7 +66,7 @@
               <span>${dp.name}</span>
               <span class="badge badge-info">${dp.units.size()}</span>
             </td>
-            <td>${dp.supplier()?.fullName}</td>
+            <td>${dp.supplier()?.name}</td>
             <td>${dp.state.label()}</td>
             <td>${dp.handler.username}</td>
             <td>#{time_tooltip time:dp.createDate/}</td>

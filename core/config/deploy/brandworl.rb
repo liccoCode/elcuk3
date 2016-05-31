@@ -6,9 +6,8 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-
-set :branch, 'develop'
-server '192.168.1.170', user: 'root', roles: %w{web}
+set :jvm_opts, "-XX:PermSize=256m -XX:MaxPermSize=256m -Xms1024m -Xmx1024m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
+server '47.88.8.182', user: 'root', roles: %w{app}
 
 
 # role-based syntax

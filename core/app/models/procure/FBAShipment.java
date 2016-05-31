@@ -225,7 +225,8 @@ public class FBAShipment extends Model {
             this.state = FBA.update(this, state != null ? state : this.state);
             Thread.sleep(500);
         } catch(Exception e) {
-            if(e.getMessage().contains("Shipment is locked. No updates allowed")) {
+            if(e.getMessage().contains("Shipment is locked. No updates allowed") ||
+                    e.getMessage().contains("Shipment is in locked status")) {
                 this.state = FBAShipment.S.RECEIVING;
                 this.save();
                 Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
@@ -234,7 +235,25 @@ public class FBAShipment extends Model {
                 this.state = FBAShipment.S.IN_TRANSIT;
                 this.save();
                 Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
+            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "NOT_IN_PRODUCT_CATALOG")) {
+                //MSKU 错误
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 MSKU(SKU+UPC) 是否正确.");
+            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "MISSING_DIMENSIONS")) {
+                //产品尺寸没有填写
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 SKU 的长宽高是否正确填写.");
+            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "Invalid Status change")) {
+                //物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.
+                this.state = FBAShipment.S.SHIPPED;
+                this.save();
             } else {
+                //TODO:: ANDON_PULL_STRIKE_ONE
+                if(e.getClass() == FBAInboundServiceMWSException.class) {
+                    Webs.systemMail(
+                            "UpdateFBAShipment 出现未知异常",
+                            Webs.S(e),
+                            Arrays.asList("duan@easya.cc", "licco@easya.cc")
+                    );
+                }
                 throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
             }
         }

@@ -11,7 +11,6 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import models.whouse.Whouse;
@@ -50,10 +49,8 @@ public class Shipments extends Controller {
 
     @Check("shipments.index")
     public static void index(ShipmentPost p) {
-        List<Shipment> shipments = null;
-        if(p == null)
-            p = new ShipmentPost();
-        shipments = p.query();
+        if(p == null) p = new ShipmentPost();
+        List<Shipment> shipments = p.query();
 
         for(int i = 0; i < shipments.size(); i++) {
             Shipment ship = shipments.get(i);
@@ -169,69 +166,21 @@ public class Shipments extends Controller {
         show(id);
     }
 
-    //TODO effect: 需要调整
     public static void update(Shipment ship, String shipid) {
-        Shipment dbship = Shipment.findById(shipid);
-        dbship.cooper = ship.cooper;
-        dbship.whouse = ship.whouse;
-        dbship.title = ship.title;
-        dbship.reason = ship.reason;
-        dbship.tracknolist = ship.tracknolist;
-        dbship.trackNo = ship.trackNo;
-        dbship.memo = ship.memo;
-        dbship.dates.planBeginDate = ship.dates.planBeginDate;
-        dbship.internationExpress = ship.internationExpress;
-        dbship.jobNumber = ship.jobNumber;
-        dbship.totalWeightShipment = ship.totalWeightShipment;
-        dbship.totalVolumeShipment = ship.totalVolumeShipment;
-        dbship.shipmentTpye = ship.shipmentTpye;
-        dbship.totalStockShipment = ship.totalStockShipment;
-        dbship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         checkAuthenticity();
-        validation.valid(dbship);
-        dbship.validate();
-        String s = Validation.errors().toString();
+        Shipment dbship = Shipment.findById(shipid);
+        dbship.update(ship);
         if(Validation.hasErrors()) {
             dbship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
             renderArgs.put("ship", dbship);
             render("Shipments/show.html");
         }
-
-        dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
-        /**
-         * 日期发生改变则记录旧的日期
-         */
-        if(dbship.dates.planArrivDate.compareTo(ship.dates.planArrivDate) != 0)
-            dbship.dates.oldPlanArrivDate = dbship.dates.planArrivDate;
-        dbship.dates.planArrivDate = ship.dates.planArrivDate;
-
-        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
-        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state) &&
-                dbship.dates.planArrivDateForCountRate != ship.dates.planArrivDateForCountRate) {
-            if(StringUtils.isBlank(ship.reason)) {
-                //Validation.addError("", "修改约定到货时间必须填写原因!");
-            } else {
-                dbship.reason = ship.reason;
-            }
-            //TODO 需求临时变更,暂时取消对原因的不为空校验,后期如果需求明确后将其挪到 209 行上方即可。
-            dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
-        }
         dbship.updateShipment();
-
-        if(Validation.hasErrors()) {
-            renderArgs.put("ship", dbship);
-            render("Shipments/show.html");
-        }
-        new ElcukRecord(Messages.get("shipment.update"),
-                Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
         flash.success("更新成功.");
 
-        //更新快递单的货代仓库
-        for(ShipItem item : ship.items) {
-            CheckTask.updateExpressWarehouse(item.unit.id);
-        }
-
-        show(shipid);
+        new ElcukRecord(Messages.get("shipment.update"),
+                Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
+        Shipments.show(shipid);
     }
 
     /**

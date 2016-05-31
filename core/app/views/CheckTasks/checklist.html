@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"质检任务列表 (${tasklist.size()})" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.dataTables.js'/}
-    #{script_cdn name: 'checktasks/checklist.coffee'/}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'checktasks/checklist.coffee'/}
 #{/set}
 
 #{info_row}
@@ -156,7 +156,7 @@
         <td>${tl.units.attrs.qty}</td>
         <td>${tl.qcType?.label()}</td>
         <td>${tl.checkstat?.label()}</td>
-        <td>${tl.showChecktor()}</td>
+        <td>${tl.matchChecktor()}</td>
         <td>${tl.result?.label()}</td>
         <td>${tl.isship?.label()}</td>
         <td>${tl.startTime?.datetime()}</td>

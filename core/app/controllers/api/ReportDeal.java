@@ -1,5 +1,6 @@
 package controllers.api;
 
+import controllers.Secure;
 import helper.Constant;
 import helper.J;
 import helper.OrderInvoiceFormat;
@@ -104,7 +105,11 @@ public class ReportDeal extends Controller {
             renderJSON(new Ret(true, "this order is send before!"));
 
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+
         OrderInvoice invoice = OrderInvoice.findById(orderId);
+        if(invoice == null) {
+            invoice = ord.createOrderInvoice();
+        }
         invoice.setprice();
 
         final PDF.Options options = new PDF.Options();

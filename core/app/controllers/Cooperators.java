@@ -9,6 +9,7 @@ import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.BtbCustomPost;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -193,13 +194,27 @@ public class Cooperators extends Controller {
         b2bCustomInfoIndex(new BtbCustomPost());
     }
 
-    public static void findSameCooperator(String name) {
-        List<Cooperator> list = Cooperator.find("name like '%" + name + "%'").fetch();
+    /**
+     * 模糊匹配合作伙伴
+     *
+     * @param name
+     */
+    public static void findSameCooperator(String name, Cooperator.T type) {
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+        if(StringUtils.isNotBlank(name)) {
+            sql.append("name LIKE ?");
+            params.add("%" + name + "%");
+        }
+        if(type != null) {
+            sql.append(" AND type=?");
+            params.add(type);
+        }
+        List<Cooperator> list = Cooperator.find(sql.toString(), params.toArray()).fetch();
         List<String> names = new ArrayList<String>();
         for(Cooperator coop : list) {
             names.add(coop.name + "-" + coop.id);
         }
         renderJSON(J.json(names));
     }
-
 }

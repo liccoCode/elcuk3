@@ -27,6 +27,8 @@ public class InboundRecordPost extends Post<InboundRecord> {
     public InboundRecord.O origin;
     public InboundRecord.S state;
 
+    public Long cooperatorId;
+
     public InboundRecordPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
         this.from = now.minusMonths(1).toDate();
@@ -61,6 +63,10 @@ public class InboundRecordPost extends Post<InboundRecord> {
         if(this.to != null) {
             sbd.append(" AND createDate<=?");
             params.add(Dates.night(this.to));
+        }
+        if(this.cooperatorId != null) {
+            sbd.append(" AND attributes LIKE ?");
+            params.add("%\"cooperatorId\":" + this.cooperatorId + "%");
         }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(String.format(

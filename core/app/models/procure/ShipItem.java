@@ -9,7 +9,6 @@ import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
-import models.product.ProductAttr;
 import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
@@ -257,11 +256,7 @@ public class ShipItem extends GenericModel {
         for(ShipItem itm : items) {
             itm.shipment = shipment;
             itm.save();
-        }
-
-        //更新货代仓库
-        for(ShipItem item : items) {
-            CheckTask.updateExpressWarehouse(item.unit.id);
+            itm.unit.flushTask();
         }
     }
 
@@ -274,6 +269,7 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;
+        this.unit.flushTask();
         this.save();
     }
 
@@ -287,12 +283,14 @@ public class ShipItem extends GenericModel {
                             Float compenamt) {
         if(lossqty == null) lossqty = 0;
         if(compenamt == null) compenamt = 0f;
-        if(StringUtils.isNotBlank(compentype) && !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname")
-                .toLowerCase())) {
+        if(StringUtils.isNotBlank(compentype) &&
+                !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname")
+                        .toLowerCase())) {
             if((lossqty != 0 && compenamt.intValue() == 0) || (lossqty == 0 && compenamt.intValue() != 0))
                 Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
         }
-        if(StringUtils.isNotBlank(compentype) && compenamt.equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
+        if(StringUtils.isNotBlank(compentype) &&
+                compenamt.equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
 
         }
         if(Validation.hasErrors()) return;

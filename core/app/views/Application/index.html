@@ -1,8 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:'Home' /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'highstock.js'/}
-    #{script_cdn name: 'Application/app.coffee'/}
+    #{script 'highstock.js'/}
+    #{script 'Application/app.coffee'/}
 #{/set}
 
 #{info_row title:'FBA 仓库库存容量总览'/}

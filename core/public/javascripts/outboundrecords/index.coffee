@@ -9,7 +9,7 @@ $ ->
       noty({text: '请选择出库记录！', type: 'error'})
       return false
     else
-      return unless confirm("确认入库?")
+      return unless confirm("确认出库?")
       $("form[name=confirm_form]").submit()
   )
 
@@ -47,6 +47,37 @@ $ ->
             $input.parent().text($input.val())
         )
     )
+  ).on('initSelectize', "select[name='targetId']", (e) ->
+    $select = $(@)
+    type = $select.data('type')
+    $select.selectize({
+      persist: false,
+      create: if type == "Other" then true else false,
+      load: (query, callback) ->
+        return callback() if !query.length || !type.length || $.inArray(type, ["Process", "Sample"]) > -1
+
+        dataType = if $.inArray(type, ["Normal", "B2B"]) > -1
+          'SHIPPER'
+        else if type == 'Refund'
+          'SUPPLIER'
+        else
+          null
+        $.ajax({
+          url: '/Cooperators/findSameCooperator',
+          type: 'GET',
+          dataType: 'json',
+          data: {name: query, type: dataType},
+          error: ->
+            callback()
+          success: (res) ->
+            coopers = []
+            _.each(res, (cooper) ->
+              [t, v] = cooper.split('-')
+              coopers.push({value: v, text: t})
+            )
+            callback(coopers)
+        })
+    })
   )
 
   $(document).on('click', 'a[name=tryIdMatch]', (e) ->
@@ -60,12 +91,15 @@ $ ->
   )
 
   AttrsFormat = {
-    "qty": "实际入库",
+    "qty": "实际出货数量",
     "memo": "备注",
     "whouse": "仓库",
     "targetId": "出库对象",
     "outboundDate": "完成时间"
   }
 
-  $("form[name=confirm_form] table").trigger("disabledInput")
+  $(document).ready ->
+    $("form[name=confirm_form] table").trigger("disabledInput")
+    $("select[name='targetId']").trigger("initSelectize")
+
 

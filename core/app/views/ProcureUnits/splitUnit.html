@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"分拆采购计划 #" + unit.id /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'procureunits/splitUnit.coffee'/}
+    #{script 'procureunits/splitUnit.coffee'/}
 #{/set}
 
 #{errorMsgs /}
@@ -26,7 +26,7 @@
         <td>${unit.whouse?.name}</td>
 
         <th>供应商</th>
-        <td>${unit.cooperator.fullName}</td>
+        <td>${unit.cooperator.name}</td>
 
         <th>采购数量</th>
         <td>${unit.qty()}</td>

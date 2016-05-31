@@ -3,11 +3,13 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.Notification;
 import models.Privilege;
 import models.Role;
 import models.User;
 import models.product.Team;
 import models.view.Ret;
+import models.view.post.UserPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -18,10 +20,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User 相关的操作
@@ -33,8 +32,9 @@ import java.util.Set;
 public class Users extends Controller {
 
     @Check("users.index")
-    public static void index() {
-        List<User> users = User.findAll();
+    public static void index(UserPost p) {
+        if(p == null) p = new UserPost();
+        List<User> users = p.query();
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
         List<Role> roles = Role.findAll();
@@ -45,13 +45,18 @@ public class Users extends Controller {
         renderArgs.put("maps", maps);
         renderArgs.put("modules", modules);
 
-        render(users, privileges, teams, roles);
+        render(users, privileges, teams, roles, p);
     }
 
     @Before(only = {"home", "updates"})
     public static void setHomePage() {
         int page = NumberUtils.toInt(request.params.get("page"), 1);
-        renderArgs.put("notifications", Login.current().notificationFeeds(page));
+        List<Notification> notifications = new ArrayList<>();
+        User user = Login.current();
+        if(user != null) {
+            notifications = user.notificationFeeds(page);
+        }
+        renderArgs.put("notifications", notifications);
     }
 
     public static void home() {

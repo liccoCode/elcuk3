@@ -1,7 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:'运输单列表 (' + shipments.size() + ')' /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'shipments/index.coffee'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'shipments/index.coffee'/}
 #{/set}
 
 #{info_row}
@@ -70,6 +71,7 @@
       <div class="input-append input-prepend inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" name="p.search" value="${p.search}" placeHolder="自动识别 ID 搜索">
+        <input type="hidden" name="p.page" value="${p.page}">
         <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
       </div>
       <div class="inline">
@@ -102,3 +104,9 @@
     </div>
   </div>
 </form>
+
+<div class="row-fluid" id="order_list">
+  <div class="span12">
+  #{bootstrap_pager pi:p, url:'' /}
+  </div>
+</div>

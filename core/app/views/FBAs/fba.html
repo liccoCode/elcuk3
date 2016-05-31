@@ -1,4 +1,4 @@
-<table border="0" style="border: none;margin:0 0 0 0;display:inline-block;" cellpadding="0" cellspacing="0"
+<table border="0" style="border: none;display:inline-block;" cellpadding="0" cellspacing="0"
        width="100%">
   <tr>
     <td colspan="3" align="center" style="color: #666666; font-weight: bold;font-size: 10pt;">
@@ -15,7 +15,6 @@
   <tr valign="top">
     <td width="50%" colspan="2" style="font-size:10px;line-height:10px;">
       <b>SHIP FROM:</b><br>
-
 
     ${shipFrom?.name}<br>
     ${shipFrom?.addressLine1}<br>
@@ -50,7 +49,7 @@
     <td align="center" colspan="3">
       <!-- 需要生成的 Bar Code -->
       #{set shipmentIdStr: shipmentId + boxNumber/}
-      <img src="${System.getenv(helper.Constant.ROOT_URL)}@{Login.code128(shipmentIdStr)}" width="260"
+      <img src="http://127.0.0.1:9000/code128/${shipmentIdStr}" width="260"
            height="72" border="0" style="padding-left:30px">
       <!-- 测试用  -->
     *{<img src="https://images-na.ssl-images-amazon.com/images/G/02/barcodes/blank008._ZXcc464241354d465a34436fce,192,0,0,0,advc128d,42,0,0,0_V45455422_.jpg" width="260" height="72" border="0" style="padding-left:30px">}*

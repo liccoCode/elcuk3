@@ -19,8 +19,20 @@ $ ->
   $("#download_excel").click((e) ->
     e.preventDefault()
     $form = $("#search_form")
-    window.open('/Excels/shipmentDetails?' + $form.serialize() + "&" + $("#shipmentTable input[name='shipmentId']:checked").serialize(),
-      "_blank")
+
+    express_size = 0
+    other_size = 0
+    $("#shipmentTable input[name='shipmentId']:checked").each(->
+      if $(@).attr("way") == 'EXPRESS'
+        express_size++
+      else
+        other_size++
+    )
+    if other_size > 0 && express_size > 0
+      noty({text: "快递不可与海空运运输同时导出，请重新选择！", type: 'warning'})
+      return
+    window.open('/Excels/shipmentDetails?' + $form.serialize() + "&" +
+        $("#shipmentTable input[name='shipmentId']:checked").serialize(), "_blank")
   )
 
   $('#search_form').on('click', '#outboundBtn', (e) ->
