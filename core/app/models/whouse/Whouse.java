@@ -315,6 +315,7 @@ public class Whouse extends Model {
      * @return
      */
     public static Whouse findByCooperatorAndShipType(Cooperator cooperator, Shipment.T shiptype) {
+        if(cooperator == null || shiptype == null) return null;
         StringBuilder sbd = new StringBuilder("cooperator=?");
         switch(shiptype) {
             case SEA:
