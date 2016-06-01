@@ -137,13 +137,17 @@ public class DeliverPlans extends Controller {
         show(dp.id);
     }
 
+    /**
+     * 确认发货
+     *
+     * @param ids
+     */
     public static void triggerReceiveRecords(List<String> ids) {
         if(ids != null && !ids.isEmpty()) {
             for(String id : ids) {
                 DeliverPlan deliverPlan = DeliverPlan.findById(id);
-                if(deliverPlan != null && deliverPlan.state == DeliverPlan.P.CREATE) {
-                    deliverPlan.triggerReceiveRecords();
-                }
+                if(deliverPlan == null || deliverPlan.isLocked()) continue;
+                deliverPlan.triggerReceiveRecords();
             }
         }
         flash.success("确认发货成功!");
