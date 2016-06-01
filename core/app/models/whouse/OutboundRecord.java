@@ -249,6 +249,7 @@ public class OutboundRecord extends Model {
         if(!inboundRecord.isRefund()) throw new FastRuntimeException("该构造函数只服务于为质检不合格的入库记录自动生成出库记录!");
         this.qty = inboundRecord.badQty;
         this.planQty = this.qty;
+        this.whouse = inboundRecord.targetWhouse;
         this.stockObj = inboundRecord.stockObj.dump();
         Optional cooperatorId = Optional.fromNullable(this.stockObj.attributes().get("cooperatorId"));
         if(cooperatorId.isPresent()) this.targetId = cooperatorId.get().toString();
