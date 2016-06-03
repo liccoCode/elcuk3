@@ -1,16 +1,21 @@
 package helper;
 
 
+import org.allcolor.yahp.cl.converter.CHtmlToPdfFlyingSaucerTransformer;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.exceptions.TemplateNotFoundException;
 import play.modules.pdf.PDF;
 import play.modules.pdf.PDF.PDFDocument;
 import play.modules.pdf.RenderPDFTemplate;
 import play.mvc.Http;
+import play.templates.Template;
+import play.templates.TemplateLoader;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,6 +25,8 @@ import java.util.Map;
  * Time: 下午10:51
  */
 public class PDFs {
+
+    public PDF.MultiPDFDocuments docs;
 
     /**
      * 指定文件夹，生成PDF
@@ -40,12 +47,38 @@ public class PDFs {
             singleDoc.template = template;
             singleDoc.options = options;
 
-            RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc),
-                    args);
+            RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc), args);
             renderer.writePDF(out, Http.Request.current(), Http.Response.current());
         } catch(Exception e) {
             Logger.error(Webs.S(e));
         }
     }
+
+    /***
+     * 指定文件夹，生成PDF
+     * 在无request的情况下
+     * 目前主要是给每月自动生成发票的job用
+     * @param folder
+     * @param pdfName
+     * @param app_template
+     * @param args
+     */
+    public static void templateAsPDFWithNoRequest(File folder, String pdfName, String app_template, PDF.Options options,
+                                                  Map<String, Object> args) {
+        try {
+            String content = TemplateLoader.load(app_template).render(args);
+            IHtmlToPdfTransformer.PageSize pageSize = options.pageSize;
+            pdfName = StringUtils.replace(pdfName, "/", "|");
+            OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfName);
+            new CHtmlToPdfFlyingSaucerTransformer().transform(
+                    new ByteArrayInputStream(content.getBytes("UTF-8")), "", pageSize,
+                    new ArrayList(), new HashMap(), out);
+        } catch(UnsupportedEncodingException | IHtmlToPdfTransformer.CConvertException e) {
+            e.printStackTrace();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
