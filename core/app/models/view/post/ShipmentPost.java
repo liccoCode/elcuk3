@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class ShipmentPost extends Post<Shipment> {
     public static final List<F.T2<String, String>> DATE_TYPES;
-    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
+    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
     private static final Pattern UNITID = Pattern.compile("^DL(|\\d{6}\\|\\d{2})$");
@@ -64,7 +64,7 @@ public class ShipmentPost extends Post<Shipment> {
     public List<Shipment> query() {
         this.count = this.count();
         F.T2<String, List<Object>> params = this.params();
-        return Shipment.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        return Shipment.find(params._1, params._2.toArray()).fetch();
     }
 
     @Override
@@ -134,14 +134,12 @@ public class ShipmentPost extends Post<Shipment> {
             } else {
                 sbd.append(" AND (")
                         .append(" s.trackNo LIKE ? ")
-                        .append(" OR it.unit.fba.shipmentId LIKE ?")
-                        .append(" OR u.selling.sellingId LIKE ?")
-                        .append(" OR s.jobNumber LIKE ?");
+
+                        .append(" OR s.jobNumber LIKE ?")
+                        .append(" OR s.id = ? ");
                 if(num_matcher.matches()) sbd.append(" OR u.id =?");
-
                 sbd.append(")");
-                for(int i = 0; i < 4; i++) params.add(word);
-
+                for(int i = 0; i <= 2; i++) params.add(word);
                 if(num_matcher.matches()) params.add(Long.parseLong(this.search.trim()));
             }
         }
@@ -161,7 +159,7 @@ public class ShipmentPost extends Post<Shipment> {
             this.search = this.search.trim();
 
             Matcher unitmatcher = UNITID.matcher(this.search);
-            if(unitmatcher.find()) {
+            if(unitmatcher.matches()) {
                 String unitmentId = unitmatcher.group(1);
                 return new F.T3<Boolean, String, List<Object>>(true,
                         "SELECT s FROM Shipment s WHERE s.items.unit.deliveryment_id=?",
@@ -169,15 +167,12 @@ public class ShipmentPost extends Post<Shipment> {
             }
 
             Matcher matcher = ID.matcher(this.search);
-            Matcher matcher_num = NUM.matcher(this.search);
-            if(matcher.find()) {
+            if(matcher.matches()) {
                 String deliverymentId = matcher.group(1);
                 return new F.T3<Boolean, String, List<Object>>(true,
                         "SELECT s FROM Shipment s WHERE s.id=?",
                         new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
-
-
         }
         return new F.T3<>(false, null, null);
     }

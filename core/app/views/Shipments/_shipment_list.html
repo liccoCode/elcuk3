@@ -22,7 +22,7 @@
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
     </td>
-    <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
+    <td style="cursor:pointer;" name="clickTd" shipment_id="${ship.id}" memo="${ship.memo.raw()}">
       <i class="icon-reorder"></i>
       #{list items:ship.tracknolist, as:'trackno'}
         ${trackno+" "}
@@ -40,17 +40,6 @@
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.creater?.username}</td>
   </tr>
-  <tr id="ship_${ship_index}" style="display:none;">
-    <td colspan="14">
-      <div>
-        <h4 class="text-info">Commemt</h4>
-      ${ship.memo.raw()}
-      </div>
-      <hr>
-      <div>
-          #{render 'Shipments/_shipitem.html', items:ship.items/}
-      </div>
-    </td>
-  </tr>
+
 #{/list}
 </table>
