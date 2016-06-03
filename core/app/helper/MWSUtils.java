@@ -404,7 +404,7 @@ public class MWSUtils {
 
         Inventory inventory = new Inventory();
         inventory.setSKU(selling.merchantSKU);
-        inventory.setFulfillmentCenterID("AMAZON_NA");//TODO 确认 CenterId
+        inventory.setFulfillmentCenterID(selling.market.fulfillmentCenterID());
         inventory.setLookup("FulfillmentNetwork");
         inventory.setSwitchFulfillmentTo("AFN");
 
