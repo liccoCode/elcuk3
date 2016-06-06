@@ -1,56 +1,43 @@
 <table class="table table-condensed table-bordered" id="shipmentTable">
   <tr>
     <th style="width:2%"><input type="checkbox" class="checkbox_all" value="0"/></th>
-    <th style="width:3%">#</th>
+    <th style="width:10% ">#</th>
     <th style="width:15%">Track No.</th>
     <th style="width:10%">运输商</th>
     <th style="width:5%">国际快递</th>
     <th style="width:5%">运输方式</th>
     <th style="width:10%">去往仓库</th>
-    <th style="width:5%">目的地</th>
     <th style="width:10%">状态</th>
     <th style="width:8%">预计开始时间</th>
     <th style="width:8%">创建时间</th>
     <th style="width:8%">预计到库时间</th>
-    <th style="width:10%">创建者</th>
+    <th style="width:8%">创建者</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.apply}" way="${ship.type}">
+      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.applyId}" way="${ship.type}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
     </td>
-    <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
+    <td style="cursor:pointer;" name="clickTd" shipment_id="${ship.id}" memo="${ship.memo.raw()}">
       <i class="icon-reorder"></i>
       #{list items:ship.tracknolist, as:'trackno'}
         ${trackno+" "}
       #{/list}
-      <span class="badge badge-info">${ship.items.size()}</span>
+      <span class="badge badge-info">${ship.itemsNum}</span>
     </td>
-    <td>${ship.cooper?.name}</td>
-    <td>${ship.internationExpress}</td>
+    <td>${ship.cname}</td>
+    <td>${ship.iExpressName}</td>
     <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
-    <td>${ship.whouse?.name()}</td>
-    <td>${ship.target}</td>
+    <td>${ship.wname}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
-    <td>${ship.creater?.username}</td>
+    <td>${ship.uname}</td>
   </tr>
-  <tr id="ship_${ship_index}" style="display:none;">
-    <td colspan="14">
-      <div>
-        <h4 class="text-info">Commemt</h4>
-      ${ship.memo.raw()}
-      </div>
-      <hr>
-      <div>
-          #{render 'Shipments/_shipitem.html', items:ship.items/}
-      </div>
-    </td>
-  </tr>
+
 #{/list}
 </table>

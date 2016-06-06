@@ -62,6 +62,12 @@ public class Shipments extends Controller {
         render(shipments, p);
     }
 
+    public static void showProcureUnitList(String id) {
+        Shipment shipment = Shipment.findById(id);
+        List<ShipItem> items = shipment.items;
+        render("Shipments/_shipitem.html", items);
+    }
+
     public static void blank() {
         Shipment ship = new Shipment(Shipment.id());
         render(ship);
