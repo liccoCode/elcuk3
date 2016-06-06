@@ -43,7 +43,6 @@ $ ->
   # 初始化图片
   imageInit()
 
-
   # Update 按钮
   $('#amz-update').click ->
     return false unless imageIndexCal()
@@ -63,7 +62,6 @@ $ ->
     )
     false
 
-
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
     LoadMask.mask('#btns')
@@ -82,10 +80,9 @@ $ ->
     )
     false
 
-
   # Deploy 按钮
   $('#amz-deploy').click ->
-    # check account 与 market 不一样, 要提醒
+# check account 与 market 不一样, 要提醒
     switch $('[name=s\\.account\\.id]').val()
       when 1
         if $('[name=s\\.market]').val() != 'AMAZON_UK'
@@ -259,13 +256,14 @@ $ ->
       allowImageUpload: false
       newlineTag: 'br'
       afterChange: ->
-        htmlCode = this.html().toString()
-        re = new RegExp("<span>", "g");
-        htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("</span>", "g");
-        htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("<br />", "g");
-        htmlCode = htmlCode.replace(re, "<br>")
+        div = $('<div>').html($("<div>").html(this.html()).text())
+        div.find('div').replaceWith(->
+          return $(this).contents()
+        )
+        div.find('span').replaceWith(->
+          return $(this).contents()
+        )
+        htmlCode = div.html()
         count = htmlCode.length
         $('#productDesc').val(htmlCode)
         $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
