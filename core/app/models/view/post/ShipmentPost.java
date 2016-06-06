@@ -129,7 +129,7 @@ public class ShipmentPost extends Post<Shipment> {
         }
 
         sql.where(" s." + this.dateType + ">=?").params(Dates.morning(this.from)
-        ).where(" s." + this.dateType + ">=?").params(Dates.night(this.to));
+        ).where(" s." + this.dateType + "<=?").params(Dates.night(this.to));
 
         if(this.type != null) {
             sql.andWhere(" s.type=?").params(this.type.name());
