@@ -374,7 +374,34 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 多个traceno
      */
     @Transient
-    public List<String> tracknolist = new ArrayList<String>();
+    public List<String> tracknolist = new ArrayList<>();
+
+    /**
+     * 运输商名称
+     */
+    @Transient
+    public String cname;
+
+    /**
+     * 仓库名称
+     */
+    @Transient
+    public String wname;
+
+    /**
+     * 创建人
+     */
+    @Transient
+    public String uname;
+
+    @Transient
+    public int itemsNum;
+
+    @Transient
+    public String iExpressName;
+
+    @Transient
+    public String applyId;
 
     public enum FLAG {
         ARRAY_TO_STR,
