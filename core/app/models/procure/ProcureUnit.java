@@ -1631,7 +1631,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<CheckTask> tasks() {
-        return CheckTask.find("units_id=? ORDER BY createAt ASC", this.id).fetch();
+        return CheckTask.find("units_id=? ORDER BY creatat ASC", this.id).fetch();
     }
 
     /**
