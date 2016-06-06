@@ -674,7 +674,6 @@ public class Orderr extends GenericModel {
     }
 
     public OrderInvoice createOrderInvoice() {
-        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(this.market);
         F.T3<Float, Float, Float> amt = this.amount();
         OrderInvoice invoice = new OrderInvoice();
         invoice.orderid = this.orderId;
@@ -718,7 +717,6 @@ public class Orderr extends GenericModel {
 
         invoice.saveprice();
         invoice.europevat = OrderInvoice.VAT.NORMAL;
-        invoice.save();
         return invoice;
     }
 

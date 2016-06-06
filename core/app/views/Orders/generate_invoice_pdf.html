@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shipment Invoice</title>
+  <style type="text/css">
+    table{
+      border:0px solid;
+      text-align:center;
+    }
+
+    td{
+
+      border:0px solid #000000;
+    }
+
+    .td1{
+      width:50%;
+      text-align:left;
+      padding:10px;
+      font:14px bold;
+    }
+
+    .td2{
+      width:50%;
+      text-align:right;
+      padding:10px;
+      font:14px bold;
+    }
+
+    .td3{
+      border:1px solid #000000;
+    }
+
+    .table1{
+      border:1px solid;
+      text-align:center;
+    }
+
+    .div1{
+      border-bottom:0px;
+      padding-left:0px;
+      width:99.7%;
+      height:100px;
+    }
+  </style>
+</head>
+<body>
+<table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
+  <tr>
+    <td class="td1">
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
+      </strong><br>
+    ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}  </strong>
+    </td>
+    <td rowspan="4" class="td2">
+      <div class="div1"></div>
+    </td>
+  </tr>
+  <tr>
+    <td class="td1"></td>
+  </tr>
+  <tr>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+  </tr>
+  <tr>
+    <td class="td1">
+      <strong>${invoiceformat.to}</strong><br>
+    #{list items:invoice.invoiceto.split(","), as:'add'}
+    ${add}<br>
+    #{/list}
+    </td>
+    <td class="td2">
+      <strong>${invoiceformat.from}</strong> <br>
+    #{if  ord.market==models.market.M.AMAZON_IT && invoice!=null && invoice.europevat==models.market.OrderInvoice.VAT
+    .EUROPE}
+    ${invoiceformat.fromeurinfo1} <br>
+    ${invoiceformat.fromeurinfo2} <br>
+    ${invoiceformat.fromeurinfo3}<br>
+    ${invoiceformat.fromeurinfo4} <br>
+    ${invoiceformat.fromeurinfo5} <br>
+      <strong>${invoiceformat.fromeurinfo6}</strong> <br>
+      <strong>${invoiceformat.fromeurinfo7}</strong> <br>
+    #{/if}
+    #{else}
+    ${invoiceformat.frominfo1} <br>
+    ${invoiceformat.frominfo2} <br>
+    ${invoiceformat.frominfo3}<br>
+    ${invoiceformat.frominfo4} <br>
+    ${invoiceformat.frominfo5} <br>
+      <strong>${invoiceformat.frominfo6}</strong> <br>
+      <strong>${invoiceformat.frominfo7}</strong> <br>
+    #{/else}
+    </td>
+  </tr>
+  <tr>
+    <td class="td1"><strong>${invoiceformat.address}</strong><br>
+    #{list items:invoice.address.split(","), as:'add'}
+    ${add}<br>
+    #{/list}
+
+    #{if (invoice.europevat==models.market.OrderInvoice.VAT.EUROPE &&
+    (ord.market==models.market.M.AMAZON_IT || ord.market==models.market.M.AMAZON_ES)) }
+      <br>
+    ${invoiceformat.rate}<br>
+    #{/if}
+    </td>
+    <td rowspan="2"></td>
+  </tr>
+</table>
+<table class="table1" cellpadding="8px" style="width:70%" cellspacing="0" align='center'>
+  <tr>
+    <td class="td3"><strong>${invoiceformat.itemname}</strong></td>
+    <td class="td3"><strong>${invoiceformat.qty}</strong></td>
+    <td class="td3"><strong>${invoiceformat.price}</strong></td>
+    <td class="td3"><strong>${invoiceformat.itemamount}</strong></td>
+  </tr>
+#{list items:ord.items, as:'item'}
+    #{if item.quantity!=0}
+      <tr>
+        <td class="td3" style="width:50%">${item.listingName}</td>
+        <td class="td3">${item.quantity}</td>
+          #{if invoice != null}
+              #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+
+                <td class="td3">${new BigDecimal(item.price+item.discountPrice).divide(new BigDecimal(item.quantity),2,4)}</td>
+
+                <td class="td3">${new BigDecimal(item.price+item.discountPrice).setScale(2, 4).floatValue()}</td>
+              #{/if}
+              #{else}
+                <td class="td3">${invoice.price.get(item_index-1)}</td>
+                <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1)))
+                .setScale(2, 4).floatValue()}</td>
+              #{/else}
+          #{/if}
+      </tr>
+    #{/if}
+#{/list}
+
+
+#{set feecount:ord.items.size()/}
+#{list items:ord.fees, as:'fee'}
+    #{if (fee.type.name=='shipping'  || fee.type.name=='shippingcharge' || fee.type.name=='giftwrap') && fee.cost>0}
+      <tr>
+          #{if fee.type.name=='shipping' || fee.type.name=='shippingcharge' }
+            <td class="td3" style="width:50%">${invoiceformat.shipfee}</td>
+          #{/if}
+          #{if fee.type.name=='giftwrap'}
+            <td class="td3" style="width:50%">${invoiceformat.giftwrapfee}</td>
+          #{/if}
+        <td class="td3">1</td>
+          #{if invoice != null}
+              #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+                <td class="td3">${fee.cost}  </td>
+                <td class="td3">${fee.cost}</td>
+              #{/if}
+              #{else}
+                <td class="td3"> ${invoice.price.get(feecount)} </td>
+                <td class="td3">${invoice.price.get(feecount)}</td>
+              #{/else}
+              #{set feecount:feecount+1/}
+          #{/if}
+      </tr>
+    #{/if}
+#{/list}
+
+  <tr>
+    <td class="td3"></td>
+    <td class="td3"></td>
+    <td class="td3"><strong>${invoiceformat.notaxamount}</strong></td>
+    <td class="td3">${notaxamount}</td>
+  </tr>
+  <tr>
+    <td class="td3"></td>
+    <td class="td3"></td>
+  #{if invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE}
+    <td class="td3"><strong>${invoiceformat.taxamount}</strong></td>
+    <td class="td3">0.00</td>
+  #{/if}
+  #{else}
+    <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>
+    <td class="td3">${invoice.taxamount}</td>
+  #{/else}
+  </tr>
+  <tr>
+    <td class="td3"></td>
+    <td class="td3"></td>
+    <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
+    <td class="td3"><strong>${invoice.totalamount}</strong></td>
+  </tr>
+</table>
+</body>
+</html>

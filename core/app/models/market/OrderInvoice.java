@@ -1,17 +1,25 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
+import helper.Constant;
+import helper.Dates;
 import helper.OrderInvoiceFormat;
+import helper.PDFs;
 import models.finance.SaleFee;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.joda.time.DateTime;
+import play.Logger;
 import play.db.jpa.GenericModel;
+import play.libs.F;
+import play.libs.Files;
+import play.modules.pdf.PDF;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.io.File;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * 订单发票
@@ -194,5 +202,79 @@ public class OrderInvoice extends GenericModel {
         }
         return null;
     }
+
+    /**
+     * num 每个市场需要生成多少张发票
+     * date 时间
+     * 查询结果为当前date的 月初到月末
+     * @param num
+     * @param date
+     */
+    public static void createInvoicePdf(int num, Date date) {
+        Date beginDate = Dates.monthBegin(date);
+        Date endDate = Dates.monthEnd(date);
+        DateTime dateTime = new DateTime(date);
+
+        String path = Constant.INVOICE_PATH + "/" + dateTime.getMonthOfYear();
+        File folder = new File(path);
+        if(!folder.exists()) folder.mkdir();
+
+        List<M> markets = new ArrayList<>();
+        markets.add(M.val("amazon_uk"));
+        markets.add(M.val("amazon_it"));
+        markets.add(M.val("amazon_es"));
+        markets.add(M.val("amazon_fr"));
+        markets.add(M.val("amazon_de"));
+
+        num = (num == 0) ? 10000 : num;
+
+        for(M m : markets) {
+            List<Orderr> list = Orderr.find("createDate >= ? and createDate <= ? and invoiceState='no' and market = ? " +
+                    "and state <> ? ", beginDate, endDate, m, Orderr.S.CANCEL).fetch(1, num);
+            if(list != null && list.size() > 0) {
+                for(Orderr ord : list) {
+                    String orderId = ord.orderId;
+                    Logger.info(orderId);
+                    OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+
+                    OrderInvoice invoice = OrderInvoice.findById(orderId);
+                    if(invoice == null) {
+                        invoice = ord.createOrderInvoice();
+                    }
+                    invoice.setprice();
+
+                    final PDF.Options options = new PDF.Options();
+                    options.pageSize = IHtmlToPdfTransformer.A3P;
+
+                    F.T3<Float, Float, Float> amt = ord.amount();
+                    Float totalamount = amt._1;
+                    Float notaxamount = 0f;
+                    if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
+                        notaxamount = -1 * totalamount;
+                    } else
+                        notaxamount = invoice.notaxamount;
+                    Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4)
+                            .floatValue();
+                    Date returndate = ord.returndate();
+
+
+                    String pdfName = invoiceformat.filename + orderId + ".pdf";
+                    String template = "Orders/generate_invoice_pdf.html";
+                    Map<String, Object> args = new HashMap<>();
+                    args.put("invoiceformat", invoiceformat);
+                    args.put("ord", ord);
+                    args.put("invoice", invoice);
+                    args.put("totalamount", totalamount);
+                    args.put("notaxamount", notaxamount);
+                    args.put("tax", tax);
+                    args.put("returndate", returndate);
+                    PDFs.templateAsPDFWithNoRequest(folder, pdfName, template, options, args);
+                }
+            }
+        }
+        File zip = new File(Constant.INVOICE_PATH + "/" + dateTime.getMonthOfYear() + "月.zip");
+        Files.zip(folder, zip);
+    }
+
 
 }
