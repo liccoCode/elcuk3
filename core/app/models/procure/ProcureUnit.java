@@ -1,7 +1,6 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
-import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
@@ -1632,7 +1631,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<CheckTask> tasks() {
-        return CheckTask.find("units_id=?", this.id).fetch();
+        return CheckTask.find("units_id=? ORDER BY createAt ASC", this.id).fetch();
     }
 
     /**
