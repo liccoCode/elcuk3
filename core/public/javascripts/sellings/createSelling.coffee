@@ -39,13 +39,18 @@ $ ->
               allowImageUpload: false
               newlineTag: 'br'
               afterChange: ->
-                htmlCode = this.html().toString().replace(/^<span\S*\s*\S*>/, "").replace(/<span>/, '')
-
-                count = htmlCode.length
+                div = $('<div>').html($("<div>").html(this.html()).text())
+                div.find('div').replaceWith(->
+                  return $(this).contents()
+                )
+                div.find('span').replaceWith(->
+                  return $(this).contents()
+                )
+                htmlCode = div.html()
                 $('#productDesc').val(htmlCode)
-                $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
-                $('#previewDesc').html($('#productDesc').val())
-              items: ['source','|', '|', 'bold']
+                $("#productDesc").find('~ .help-inline').html((2000 - htmlCode.length) + " bytes left")
+                $('#previewDesc').html(htmlCode)
+              items: ['source', '|', '|', 'bold']
             })
           )
           $.getScript('../public/javascripts/component/amazon.coffee', ->
