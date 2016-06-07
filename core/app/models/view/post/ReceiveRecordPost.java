@@ -50,6 +50,8 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT r FROM ReceiveRecord r")
                 .append(" LEFT JOIN r.procureUnit p")
+                .append(" LEFT JOIN p.product pd")
+                .append(" LEFT JOIN p.selling s")
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -85,9 +87,9 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
 
             String word = this.word();
             sbd.append(" OR p.sku LIKE ?")
-                    .append(" OR p.product.sku LIKE ?")
-                    .append(" OR p.product.abbreviation LIKE ?")
-                    .append(" OR p.selling.fnSku LIKE ?")
+                    .append(" OR pd.sku LIKE ?")
+                    .append(" OR pd.abbreviation LIKE ?")
+                    .append(" OR s.fnSku LIKE ?")
                     .append(")");
             for(int i = 0; i < 4; i++) params.add(word);
         }
