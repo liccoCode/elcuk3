@@ -81,12 +81,12 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
             sbd.append(" AND (");
 
             if(NumberUtils.isNumber(this.search)) {
-                sbd.append(" p.id=?");
+                sbd.append(" p.id=? OR");
                 params.add(NumberUtils.toLong(this.search));
             }
 
             String word = this.word();
-            sbd.append(" OR p.sku LIKE ?")
+            sbd.append(" p.sku LIKE ?")
                     .append(" OR pd.sku LIKE ?")
                     .append(" OR pd.abbreviation LIKE ?")
                     .append(" OR s.fnSku LIKE ?")
