@@ -87,6 +87,7 @@
   <th>是否合格</th>
   <td>
     <select name="check.result" style="width:80px;" ${check.result != null ? 'disabled' : ''}>
+      <option value="">请选择</option>
     #{list items:models.qc.CheckTask.resultTypes(), as: 'result'}
       <option value="${result.name()}" ${result == check.result? 'selected':''}>${result.label()}</option>
     #{/list}

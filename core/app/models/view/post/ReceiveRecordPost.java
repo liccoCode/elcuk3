@@ -10,8 +10,6 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +18,6 @@ import java.util.regex.Pattern;
  * Time: 3:59 PM
  */
 public class ReceiveRecordPost extends Post<ReceiveRecord> {
-    public static Pattern NUMBER_PATTEN = Pattern.compile("^\\d+$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
     static {
@@ -53,6 +50,8 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT r FROM ReceiveRecord r")
                 .append(" LEFT JOIN r.procureUnit p")
+                .append(" LEFT JOIN p.product pd")
+                .append(" LEFT JOIN p.selling s")
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -80,17 +79,17 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
         }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND (");
-            Matcher matcher = NUMBER_PATTEN.matcher(this.search);
-            if(matcher.find()) {
-                sbd.append("p.id=? OR ");
-                params.add(NumberUtils.toLong(matcher.group(0)));
+
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append(" p.id=? OR");
+                params.add(NumberUtils.toLong(this.search));
             }
 
             String word = this.word();
             sbd.append(" p.sku LIKE ?")
-                    .append(" OR p.product.sku LIKE ?")
-                    .append(" OR p.product.abbreviation LIKE ?")
-                    .append(" OR p.selling.fnSku LIKE ?")
+                    .append(" OR pd.sku LIKE ?")
+                    .append(" OR pd.abbreviation LIKE ?")
+                    .append(" OR s.fnSku LIKE ?")
                     .append(")");
             for(int i = 0; i < 4; i++) params.add(word);
         }
