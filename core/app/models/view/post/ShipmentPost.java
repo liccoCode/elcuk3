@@ -102,6 +102,7 @@ public class ShipmentPost extends Post<Shipment> {
         ).from(" Shipment s ").leftJoin(" ShipItem i ON i.shipment_id = s.id "
         ).leftJoin(" Cooperator c ON c.id = s.cooper_id "
         ).leftJoin(" ProcureUnit pu ON pu.id = i.unit_id "
+        ).leftJoin(" FBAShipment f ON f.id = pu.fba_id "
         ).leftJoin(" Whouse w ON w.id = s.whouse_id "
         ).leftJoin(" User u ON u.id = s.creater_id ");
 
@@ -161,7 +162,8 @@ public class ShipmentPost extends Post<Shipment> {
             Matcher num_matcher = NUM.matcher(this.search);
             sql.andWhere("s.trackNo LIKE ? ").param(word)
                     .orWhere("s.jobNumber LIKE ? ").params(word)
-                    .orWhere("pu.sku LIKE ? ").params(word);
+                    .orWhere("pu.sku LIKE ? ").params(word)
+                    .orWhere("f.shipmentId LIKE ? ").params(word);
             if(num_matcher.matches()) sql.orWhere(" pu.id =?").params(this.search.trim());
         }
         sql.groupBy(" s.id");
