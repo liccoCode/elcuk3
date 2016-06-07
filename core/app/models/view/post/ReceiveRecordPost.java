@@ -10,8 +10,6 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +18,6 @@ import java.util.regex.Pattern;
  * Time: 3:59 PM
  */
 public class ReceiveRecordPost extends Post<ReceiveRecord> {
-    public static Pattern NUMBER_PATTEN = Pattern.compile("^\\d+$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
     static {
@@ -80,14 +77,14 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
         }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND (");
-            Matcher matcher = NUMBER_PATTEN.matcher(this.search);
-            if(matcher.find()) {
-                sbd.append("p.id=? OR ");
-                params.add(NumberUtils.toLong(matcher.group(0)));
+
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append(" p.id=?");
+                params.add(NumberUtils.toLong(this.search));
             }
 
             String word = this.word();
-            sbd.append(" p.sku LIKE ?")
+            sbd.append(" OR p.sku LIKE ?")
                     .append(" OR p.product.sku LIKE ?")
                     .append(" OR p.product.abbreviation LIKE ?")
                     .append(" OR p.selling.fnSku LIKE ?")
