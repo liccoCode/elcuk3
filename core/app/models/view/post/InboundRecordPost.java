@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.whouse.InboundRecord;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
@@ -34,6 +35,7 @@ public class InboundRecordPost extends Post<InboundRecord> {
     public InboundRecord.S state;
 
     public Long cooperatorId;
+    public String confirmer;
 
     public InboundRecordPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -46,45 +48,55 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("1=1");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT i FROM InboundRecord i")
+                .append(" LEFT JOIN i.confirmer c")
+                .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         Long recordId = isSearchForId();
         if(recordId != null) {
-            sbd.append(" AND id=?");
+            sbd.append(" AND i.id=?");
             params.add(recordId);
             return new F.T2<>(sbd.toString(), params);
         }
         if(this.origin != null) {
-            sbd.append(" AND origin=?");
+            sbd.append(" AND i.origin=?");
             params.add(this.origin);
         }
         if(this.state != null) {
-            sbd.append(" AND state=?");
+            sbd.append(" AND i.state=?");
             params.add(this.state);
         }
         if(this.from != null) {
-            sbd.append(" AND createDate>=?");
+            sbd.append(" AND i.createDate>=?");
             params.add(Dates.morning(this.from));
         }
         if(this.to != null) {
-            sbd.append(" AND createDate<=?");
+            sbd.append(" AND i.createDate<=?");
             params.add(Dates.night(this.to));
         }
         if(this.cooperatorId != null) {
-            sbd.append(" AND attributes LIKE ?");
+            sbd.append(" AND i.attributes LIKE ?");
             params.add("%\"cooperatorId\":" + this.cooperatorId + "%");
         }
-        if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(String.format(
-                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
-                    this.search, this.search)
-            );
-            params.add(this.word());
-            params.add("%\"fba\":\"" + this.search + "\"%");
-            params.add("%\"procureunitId\":" + this.search + "%");
+        if(StringUtils.isNotBlank(this.confirmer)) {
+            sbd.append(" AND c.username=?");
+            params.add(this.confirmer);
         }
-        sbd.append(String.format(" ORDER BY %s DESC", this.dateType));
+        if(StringUtils.isNotBlank(this.search)) {
+            sbd.append(" AND(");
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append("i.checkTask.id=? OR");
+                params.add(NumberUtils.toLong(this.search));//质检任务
+            }
+            sbd.append(" i.stockObj.stockObjId LIKE ? ")
+                    .append(" OR i.stockObj.attributes LIKE ?")
+                    .append(" OR i.stockObj.attributes LIKE ?)");
+            params.add(this.word());//物料(sku)
+            params.add("%\"fba\":\"" + this.search + "\"%");//FBA
+            params.add("%\"procureunitId\":" + this.search + "%");//采购计划 ID
+        }
+        sbd.append(String.format(" ORDER BY i.%s DESC", this.dateType));
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -102,6 +114,6 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return InboundRecord.count(params._1, params._2.toArray());
+        return (long) InboundRecord.find(params._1, params._2.toArray()).fetch().size();
     }
 }

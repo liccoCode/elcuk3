@@ -40,8 +40,9 @@ public class InboundRecords extends Controller {
                 Messages.get("inboundrecord.confirm"),
                 Messages.get("inboundrecord.update")
         ), 50);
+        List<String> confirmers = InboundRecord.confirmers();
         List<Cooperator> cooperators = Cooperator.suppliers();
-        render(p, records, elcukRecords, cooperators);
+        render(p, records, elcukRecords, cooperators, confirmers);
     }
 
     @Check("inboundrecords.index")

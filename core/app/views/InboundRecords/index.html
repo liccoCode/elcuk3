@@ -50,6 +50,13 @@
       #{/list}
       </select>
 
+      <select name="p.confirmer" class="inline">
+        <option value="">操作者</option>
+      #{list items:confirmers, as:'confirmer'}
+        <option ${confirmer == p.confirmer ? 'selected' : ''} value="${confirmer}">${confirmer}</option>
+      #{/list}
+      </select>
+
       <select name="p.cooperatorId" class="inline selectize" style="width: 100px;">
         <option value="">供应商</option>
       #{list items: cooperators, as:'c'}

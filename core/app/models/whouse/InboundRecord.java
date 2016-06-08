@@ -2,8 +2,10 @@ package models.whouse;
 
 import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import helper.Dates;
 import helper.Reflects;
+import helper.Webs;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
@@ -12,6 +14,7 @@ import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -23,6 +26,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 入库记录
@@ -368,5 +372,30 @@ public class InboundRecord extends Model {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 已经做过入库确认的人员名称
+     *
+     * @return
+     */
+    public static List<String> confirmers() {
+        List<String> names = new ArrayList<>();
+        try {
+            List<Map<String, Object>> rows = DBUtils.rows(
+                    "SELECT DISTINCT u.username AS username FROM InboundRecord i" +
+                            " LEFT JOIN User u ON u.id=i.confirmer_id"
+            );
+            if(rows != null && !rows.isEmpty()) {
+                for(Map<String, Object> row : rows) {
+                    if(row != null && row.containsKey("username")) {
+                        if(row.get("username") != null) names.add(row.get("username").toString());
+                    }
+                }
+            }
+        } catch(NullPointerException e) {
+            Logger.warn(Webs.E(e));
+        }
+        return names;
     }
 }
