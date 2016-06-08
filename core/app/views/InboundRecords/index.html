@@ -100,6 +100,7 @@
           <th>目标仓库</th>
           <th>提交入库时间</th>
           <th>实际入库时间</th>
+          <th>确认人</th>
           <th>备注</th>
         </tr>
       #{list items: records, as: 'r'}
@@ -166,6 +167,7 @@
           </td>
           <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
           <td>#{time_tooltip time: r.completeDate, datetime: true/}</td>
+          <td>${r.confirmer?.username}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
             <input type="hidden" name="state" value="${r.state.name()}">

@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.Reflects;
+import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
 import models.procure.Cooperator;
@@ -138,6 +139,12 @@ public class InboundRecord extends Model {
     @Lob
     @Expose
     public String memo = "";
+
+    /**
+     * 确认人
+     */
+    @OneToOne
+    public User confirmer;
 
     /**
      * 完成时间
@@ -277,6 +284,7 @@ public class InboundRecord extends Model {
     public void confirm() {
         this.state = S.Inbound;
         this.completeDate = new Date();
+        this.confirmer = User.current();
         this.valid();
         if(Validation.hasErrors()) return;
 
