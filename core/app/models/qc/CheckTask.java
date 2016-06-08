@@ -1028,7 +1028,8 @@ public class CheckTask extends Model {
      * @return
      */
     public boolean isTimeout() {
-        if(!this.isTimeout) {
+        //未检才去计算是否超时
+        if(!this.isTimeout && this.checkstat == StatType.UNCHECK) {
             this.isTimeout = Math.abs(System.currentTimeMillis() - this.creatat.getTime()) >= TimeUnit.HOURS.toMillis(8);
             this.save();
         }
