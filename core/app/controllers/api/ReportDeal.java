@@ -128,7 +128,7 @@ public class ReportDeal extends Controller {
         Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         Date returndate = ord.returndate();
 
-        String path =  Constant.INVOICE_PATH + "/" + new DateTime(new Date()).getMonthOfYear();
+        String path = Constant.INVOICE_PATH + "/" + new DateTime(new Date()).getMonthOfYear() + "sent";
         File folder = new File(path);
         if(!folder.exists()) folder.mkdir();
 
@@ -163,10 +163,12 @@ public class ReportDeal extends Controller {
     public static void genreateInvoiceByTime() {
         String date = request.params.get("date");
         String num = request.params.get("num");
+        String market = request.params.get("market");
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date time = sdf.parse(date);
-            OrderInvoice.createInvoicePdf(Integer.parseInt(num), time);
+            OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market);
             renderText("后台正在处理, 请稍后去服务器查看.");
         } catch(ParseException e) {
             e.printStackTrace();

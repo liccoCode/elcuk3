@@ -124,9 +124,7 @@
         <td class="td3">${item.quantity}</td>
           #{if invoice != null}
               #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
-
                 <td class="td3">${new BigDecimal(item.price+item.discountPrice).divide(new BigDecimal(item.quantity),2,4)}</td>
-
                 <td class="td3">${new BigDecimal(item.price+item.discountPrice).setScale(2, 4).floatValue()}</td>
               #{/if}
               #{else}
@@ -157,7 +155,7 @@
                 <td class="td3">${fee.cost}</td>
               #{/if}
               #{else}
-                <td class="td3"> ${invoice.price.get(feecount)} </td>
+                <td class="td3">${invoice.price.get(feecount)}</td>
                 <td class="td3">${invoice.price.get(feecount)}</td>
               #{/else}
               #{set feecount:feecount+1/}
