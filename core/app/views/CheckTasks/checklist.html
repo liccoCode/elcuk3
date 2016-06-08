@@ -114,8 +114,10 @@
       <td width="1%">${task.id}</td>
       <td width="3.5%">${task.checkstat.label()}</td>
       <td width="4.8%">#{time_tooltip time: task.units.attrs.planShipDate/}</td>
-      <td style="text-align:center;background-color:${task.isTimeout() ? '#FAAB3B' : '#51a351'}" width="3.4%">
-      ${task.isTimeout() ? '超时' : '正常'}
+      <td width="3.4%">
+        <span class="label label-${task.isTimeout() ? 'warning' : 'success'}">
+        ${task.isTimeout() ? '超时' : '正常'}
+        </span>
       </td>
       <td width="3.5%">
           #{if task.checkstat.name() == 'UNCHECK'}
