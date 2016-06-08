@@ -458,4 +458,38 @@ public class OutboundRecord extends Model {
             return targetId;
         }
     }
+
+    /**
+     * 根据 FBA 属性来尝试匹配入库记录
+     *
+     * @return
+     */
+    public Whouse findWhouse() {
+        Optional fba = Optional.fromNullable(this.stockObj.attributes().get("fba"));
+        if(fba.isPresent()) {
+            Optional<InboundRecord> inboundRecord = Optional.fromNullable(
+                    InboundRecord.findInboundRecordByFBA(fba.get().toString())
+            );
+            if(inboundRecord.isPresent()) return inboundRecord.get().targetWhouse;
+        }
+        return null;
+    }
+
+    /**
+     * 为已经存在的出库记录尝试匹配仓库
+     *
+     * @param records
+     */
+    public static void tryMatchWhouse(List<OutboundRecord> records) {
+        if(records == null || records.isEmpty()) return;
+        for(OutboundRecord record : records) {
+            if(record.whouse != null) continue;
+
+            Whouse whouse = record.findWhouse();
+            if(whouse != null) {
+                record.whouse = whouse;
+                record.save();
+            }
+        }
+    }
 }

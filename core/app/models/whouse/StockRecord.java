@@ -172,10 +172,11 @@ public class StockRecord extends Model {
      */
     public void pickAttrs() {
         if(this.stockObj != null && !this.stockObj.attributes().isEmpty()) {
-            this.stockObj.attrs = Maps
-                    .filterKeys(this.stockObj.attrs, Predicates.in(Arrays.asList("fba", "shipType", "whouseName"
-                    )));
-            this.stockObj.setAttributes();
+            this.stockObj.attrs = Maps.filterKeys(
+                    this.stockObj.attrs,
+                    Predicates.in(Arrays.asList("fba", "shipType", "whouseName"))
+            );
+            this.stockObj.marshalAtts();
         }
     }
 }

@@ -42,6 +42,7 @@ public class OutboundRecords extends Controller {
                 Messages.get("outboundrecord.confirm"),
                 Messages.get("outboundrecord.update")
         ), 50);
+        OutboundRecord.tryMatchWhouse(records);
         render(p, records, elcukRecords);
     }
 

@@ -131,14 +131,16 @@ public class StockObj implements Serializable, Cloneable {
     }
 
     public Map attributes() {
-        if(this.attrs == null || this.attrs.isEmpty()) {
-            this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
-        }
+        if(this.attrs == null || this.attrs.isEmpty()) this.unmarshalAtts();
         return this.attrs;
     }
 
-    public void setAttributes() {
+    public void marshalAtts() {
         this.attributes = J.json(this.attrs);
+    }
+
+    public void unmarshalAtts() {
+        this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
     }
 
     public void setAttributes(ProcureUnit unit) {
@@ -156,7 +158,7 @@ public class StockObj implements Serializable, Cloneable {
             }
             if(unit.cooperator != null) this.attrs.put("cooperatorId", unit.cooperator.id);
             if(unit.attrs.planShipDate != null) this.attrs.put("planBeginDate", unit.attrs.planShipDate);
-            this.setAttributes();
+            this.marshalAtts();
         }
     }
 
@@ -165,7 +167,7 @@ public class StockObj implements Serializable, Cloneable {
             if(item.unit != null) this.setAttributes(item.unit);
             this.attrs.put("shipItemId", item.id);
             this.attrs.put("planBeginDate", item.shipment.dates.planBeginDate);
-            this.setAttributes();
+            this.marshalAtts();
         }
     }
 
@@ -176,7 +178,7 @@ public class StockObj implements Serializable, Cloneable {
             if(outboundRecord.shipType != null) this.attrs.put("shipType", outboundRecord.shipType.name());
             if(StringUtils.isNotBlank(outboundRecord.market)) this.attrs.put("whouseName", outboundRecord.market);
             if(outboundRecord.productCode != null) this.attrs.put("productCode", outboundRecord.productCode);
-            this.setAttributes();
+            this.marshalAtts();
         }
     }
 
@@ -189,7 +191,7 @@ public class StockObj implements Serializable, Cloneable {
             if(inboundRecord.market != null) this.attrs.put("whouseName", inboundRecord.market
                     .marketAndWhouseMapping());
             if(inboundRecord.productCode != null) this.attrs.put("productCode", inboundRecord.productCode);
-            this.setAttributes();
+            this.marshalAtts();
         }
     }
 
@@ -227,7 +229,7 @@ public class StockObj implements Serializable, Cloneable {
             if(procureUnit != null && procureUnit.selling != null) {
                 this.attrs.put("fnsku", procureUnit.selling.fnSku);
                 this.attrs.put("cooperatorId", procureUnit.cooperator.id);
-                this.setAttributes();
+                this.marshalAtts();
             }
         }
     }

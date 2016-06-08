@@ -398,4 +398,13 @@ public class InboundRecord extends Model {
         }
         return names;
     }
+
+    /**
+     * 根据 FBA 属性来尝试匹配入库记录
+     *
+     * @return InboundRecord
+     */
+    public static InboundRecord findInboundRecordByFBA(String fba) {
+        return InboundRecord.find("attributes LIKE ?", "%\"fba\":\"" + fba + "\"%").first();
+    }
 }
