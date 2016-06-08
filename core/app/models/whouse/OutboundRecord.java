@@ -237,6 +237,8 @@ public class OutboundRecord extends Model {
         this.planQty = plan.qty;
         this.qty = this.planQty;
         this.stockObj = plan.stockObj.dump();
+        Whouse whouse = this.findWhouse();
+        if(whouse != null) this.whouse = whouse;
     }
 
     /**
@@ -465,6 +467,8 @@ public class OutboundRecord extends Model {
      * @return
      */
     public Whouse findWhouse() {
+        if(this.stockObj == null) return null;
+
         Optional fba = Optional.fromNullable(this.stockObj.attributes().get("fba"));
         if(fba.isPresent()) {
             Optional<InboundRecord> inboundRecord = Optional.fromNullable(
