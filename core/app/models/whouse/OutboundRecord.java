@@ -233,12 +233,28 @@ public class OutboundRecord extends Model {
     }
 
     public OutboundRecord(ShipPlan plan) {
+        this(T.Normal, O.Normal);
         this.planQty = plan.qty;
         this.qty = this.planQty;
-        this.origin = O.Normal;
-        this.state = S.Pending;
         this.stockObj = plan.stockObj.dump();
-        this.type = T.Normal;
+        Whouse whouse = this.findWhouse();
+        if(whouse != null) this.whouse = whouse;
+    }
+
+    /**
+     * 该构造函数只服务于为质检不合格的入库记录自动生成出库记录
+     *
+     * @param inboundRecord
+     */
+    public OutboundRecord(InboundRecord inboundRecord) {
+        this(T.Refund, O.Normal);
+        if(!inboundRecord.isRefund()) throw new FastRuntimeException("该构造函数只服务于为质检不合格的入库记录自动生成出库记录!");
+        this.qty = inboundRecord.badQty;
+        this.planQty = this.qty;
+        this.whouse = inboundRecord.targetWhouse;
+        this.stockObj = inboundRecord.stockObj.dump();
+        Optional cooperatorId = Optional.fromNullable(this.stockObj.attributes().get("cooperatorId"));
+        if(cooperatorId.isPresent()) this.targetId = cooperatorId.get().toString();
     }
 
     /**
@@ -442,6 +458,42 @@ public class OutboundRecord extends Model {
             return cooperator.name;
         } else {
             return targetId;
+        }
+    }
+
+    /**
+     * 根据 FBA 属性来尝试匹配入库记录
+     *
+     * @return
+     */
+    public Whouse findWhouse() {
+        if(this.stockObj == null) return null;
+
+        Optional fba = Optional.fromNullable(this.stockObj.attributes().get("fba"));
+        if(fba.isPresent()) {
+            Optional<InboundRecord> inboundRecord = Optional.fromNullable(
+                    InboundRecord.findInboundRecordByFBA(fba.get().toString())
+            );
+            if(inboundRecord.isPresent()) return inboundRecord.get().targetWhouse;
+        }
+        return null;
+    }
+
+    /**
+     * 为已经存在的出库记录尝试匹配仓库
+     *
+     * @param records
+     */
+    public static void tryMatchWhouse(List<OutboundRecord> records) {
+        if(records == null || records.isEmpty()) return;
+        for(OutboundRecord record : records) {
+            if(record.whouse != null) continue;
+
+            Whouse whouse = record.findWhouse();
+            if(whouse != null) {
+                record.whouse = whouse;
+                record.save();
+            }
         }
     }
 }

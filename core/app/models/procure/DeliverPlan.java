@@ -100,6 +100,8 @@ public class DeliverPlan extends GenericModel {
         public abstract String label();
     }
 
+    @OneToMany(mappedBy = "deliverPlan")
+    public List<ReceiveRecord> receiveRecords = new ArrayList<>();
 
     /**
      * 通过 ProcureUnit 来创建采购单
@@ -256,5 +258,20 @@ public class DeliverPlan extends GenericModel {
         }
     }
 
+    /**
+     * 生成收货记录
+     */
+    public void triggerReceiveRecords() {
+        if(this.units == null || this.units.isEmpty()) return;
+        this.state = P.DONE;
+        this.save();
+        for(ProcureUnit unit : this.units) {
+            ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
+            if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
+        }
+    }
 
+    public boolean isLocked() {
+        return this.state == P.DONE;
+    }
 }

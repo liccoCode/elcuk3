@@ -10,8 +10,6 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +18,16 @@ import java.util.regex.Pattern;
  * Time: 5:57 PM
  */
 public class InboundRecordPost extends Post<InboundRecord> {
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
+    public static final List<F.T2<String, String>> DATE_TYPES;
+
+    static {
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("createDate", "提交入库时间"));
+        DATE_TYPES.add(new F.T2<>("completeDate", "实际入库时间"));
+    }
+
+    public String dateType;
+
     public Date from;
     public Date to;
 
@@ -28,56 +35,68 @@ public class InboundRecordPost extends Post<InboundRecord> {
     public InboundRecord.S state;
 
     public Long cooperatorId;
+    public String confirmer;
 
     public InboundRecordPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
         this.from = now.minusMonths(1).toDate();
         this.to = now.toDate();
+        this.state = InboundRecord.S.Pending;
+        this.dateType = "createDate";
         this.perSize = 25;
-        this.page = 1;
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("1=1");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT i FROM InboundRecord i")
+                .append(" LEFT JOIN i.confirmer c")
+                .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         Long recordId = isSearchForId();
         if(recordId != null) {
-            sbd.append(" AND id=?");
+            sbd.append(" AND i.id=?");
             params.add(recordId);
             return new F.T2<>(sbd.toString(), params);
         }
         if(this.origin != null) {
-            sbd.append(" AND origin=?");
+            sbd.append(" AND i.origin=?");
             params.add(this.origin);
         }
         if(this.state != null) {
-            sbd.append(" AND state=?");
+            sbd.append(" AND i.state=?");
             params.add(this.state);
         }
         if(this.from != null) {
-            sbd.append(" AND createDate>=?");
+            sbd.append(" AND i.createDate>=?");
             params.add(Dates.morning(this.from));
         }
         if(this.to != null) {
-            sbd.append(" AND createDate<=?");
+            sbd.append(" AND i.createDate<=?");
             params.add(Dates.night(this.to));
         }
         if(this.cooperatorId != null) {
-            sbd.append(" AND attributes LIKE ?");
+            sbd.append(" AND i.attributes LIKE ?");
             params.add("%\"cooperatorId\":" + this.cooperatorId + "%");
         }
-        if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(String.format(
-                    " AND (checkTask.id='%s' OR stockObjId LIKE ? OR attributes LIKE ? OR attributes LIKE ?)",
-                    this.search, this.search)
-            );
-            params.add(this.word());
-            params.add("%\"fba\":\"" + this.search + "\"%");
-            params.add("%\"procureunitId\":" + this.search + "%");
+        if(StringUtils.isNotBlank(this.confirmer)) {
+            sbd.append(" AND c.username=?");
+            params.add(this.confirmer);
         }
-        sbd.append(" ORDER BY createDate DESC");
+        if(StringUtils.isNotBlank(this.search)) {
+            sbd.append(" AND(");
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append("i.checkTask.id=? OR");
+                params.add(NumberUtils.toLong(this.search));//质检任务
+            }
+            sbd.append(" i.stockObj.stockObjId LIKE ? ")
+                    .append(" OR i.stockObj.attributes LIKE ?")
+                    .append(" OR i.stockObj.attributes LIKE ?)");
+            params.add(this.word());//物料(sku)
+            params.add("%\"fba\":\"" + this.search + "\"%");//FBA
+            params.add("%\"procureunitId\":" + this.search + "%");//采购计划 ID
+        }
+        sbd.append(String.format(" ORDER BY i.%s DESC", this.dateType));
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -95,19 +114,6 @@ public class InboundRecordPost extends Post<InboundRecord> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return InboundRecord.count(params._1, params._2.toArray());
-    }
-
-    /**
-     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
-     *
-     * @return
-     */
-    private Long isSearchForId() {
-        if(org.apache.commons.lang.StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
-        }
-        return null;
+        return (long) InboundRecord.find(params._1, params._2.toArray()).fetch().size();
     }
 }

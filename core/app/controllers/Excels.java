@@ -778,4 +778,19 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(items);
     }
+
+    public static void receiveRecords(ReceiveRecordPost p) {
+        if(p == null) p = new ReceiveRecordPost();
+        if(p.dateRange() > 90) renderText("时间区间过大!");
+
+        p.pagination = false;
+        List<ReceiveRecord> records = p.query();
+        if(records == null || records.isEmpty()) renderText("未找到任何数据!");
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "收货记录.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(records, dateFormat, p);
+    }
 }

@@ -219,9 +219,6 @@
                 #{power.ck "checktasks.checklist"}
                   <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
                 #{/power.ck}
-                #{power.ck "checktasks.checkerlist"}
-                  <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
-                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -234,11 +231,14 @@
                   <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
               <li class="divider"></li>
-                #{power.ck "whouseitems.index"}
-                  <li><a href="@{WhouseItems.index()}">库存</a></li>
+                #{power.ck "receiverecords.index"}
+                  <li><a href="@{ReceiveRecords.index()}">收货记录</a></li>
                 #{/power.ck}
                 #{power.ck "inboundrecords.index"}
                   <li><a href="@{InboundRecords.index()}">入库记录</a></li>
+                #{/power.ck}
+                #{power.ck "whouseitems.index"}
+                  <li><a href="@{WhouseItems.index()}">库存</a></li>
                 #{/power.ck}
                 #{power.ck "outboundrecords.index"}
                   <li><a href="@{OutboundRecords.index()}">出库记录</a></li>
@@ -246,6 +246,7 @@
                 #{power.ck "stockrecords.index"}
                   <li><a href="@{StockRecords.index()}">库存异动</a></li>
                 #{/power.ck}
+
             </ul>
           </li>
         #{/power.ck}

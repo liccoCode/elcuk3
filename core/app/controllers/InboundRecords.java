@@ -29,7 +29,7 @@ import java.util.List;
 public class InboundRecords extends Controller {
     @Before(only = {"index", "blank", "create"})
     public static void setWhouses() {
-        renderArgs.put("whouses", Whouse.selfWhouses(false));
+        renderArgs.put("whouses", Whouse.selfWhouses(true));
     }
 
     @Check("inboundrecords.index")
@@ -40,8 +40,9 @@ public class InboundRecords extends Controller {
                 Messages.get("inboundrecord.confirm"),
                 Messages.get("inboundrecord.update")
         ), 50);
+        List<String> confirmers = InboundRecord.confirmers();
         List<Cooperator> cooperators = Cooperator.suppliers();
-        render(p, records, elcukRecords, cooperators);
+        render(p, records, elcukRecords, cooperators, confirmers);
     }
 
     @Check("inboundrecords.index")

@@ -14,11 +14,11 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
-import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
+import models.whouse.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -47,7 +47,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
         renderArgs.put("cooperators", cooperators);
 
@@ -180,11 +180,10 @@ public class ProcureUnits extends Controller {
      */
     @Check("procures.delivery")
     public static void delivery(UnitAttrs attrs, long id, String cmt) {
-        attrs.validate();
         ProcureUnit unit = ProcureUnit.findById(id);
-        if(Validation.hasErrors()) {
-            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
-        }
+        unit.deliveryValidate(attrs);
+        if(Validation.hasErrors()) render("/ProcureUnits/deliveryUnit.html", unit, attrs);
+
         unit.comment = cmt;
         try {
             Boolean isFullDelivery = unit.delivery(attrs);
@@ -196,7 +195,7 @@ public class ProcureUnits extends Controller {
             }
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
-            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
+            render("/ProcureUnits/deliveryUnit.html", unit, attrs);
         }
 
         //抵达货代
@@ -261,8 +260,6 @@ public class ProcureUnits extends Controller {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
         unit.save();
-        //生成质检任务
-        unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);
@@ -436,7 +433,7 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
-            if(unit.isNeedPay == false)
+            if(!unit.isNeedPay)
                 renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingPrePay();

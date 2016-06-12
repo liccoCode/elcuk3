@@ -27,6 +27,7 @@ public class Application extends Controller {
 
     public static void index() {
         //如果是有PM首页权限则跳转到PM首页
+        User user = Login.current();
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);

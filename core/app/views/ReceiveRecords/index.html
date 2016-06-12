@@ -1,0 +1,230 @@
+#{extends 'main_full.html'/}
+#{set title:'收货记录(' + records.size() + ')'/}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+    #{script 'receiverecords/index.coffee'/}
+#{/set}
+#{flash_alert /}
+
+#{info_row}
+<ul>
+  <li>
+    通过 <strong>[ID]</strong> 搜索收货记录时请使用匹配器: <strong>id:{ID}</strong>
+  </li>
+  <li>
+    <p class="text-error">
+      <strong>示例:</strong> id:123, 表示搜索 ID 为 123 的收货记录
+      &nbsp;&nbsp;<a href="javascript:void(0)" name="tryIdMatch"><i class="icon-hand-right"></i>试一下</a>
+    </p>
+  </li>
+</ul>
+#{/info_row}
+
+<div class="row-fluid">
+  <form action="@{ReceiveRecords.index()}" method="post" class="search_form" id="search_form">
+    <div class="span12">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">From:</span>
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${p.to.date()}">
+      </div>
+
+      <select name="p.dateType" class="inline">
+      #{list items:models.view.post.ReceiveRecordPost.DATE_TYPES, as:'t'}
+        <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+      #{/list}
+      </select>
+
+      <select name="p.state" class="inline">
+        <option value="">状态</option>
+      #{list items:models.procure.ReceiveRecord.S, as:'s'}
+        <option ${s == p.state ? 'selected' : ''} value="${s.name()}">${s.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.whouseId" class="inline">
+        <option value="">仓库</option>
+      #{list items:whouses, as:'wh'}
+        <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+      #{/list}
+      </select>
+
+      <select name="p.shipType" class="inline" style="width:82px;">
+        <option value="">运输方式</option>
+      #{list items:models.procure.Shipment.T.values(), as:'t'}
+        <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.cooperatorId" class="inline selectize" style="width: 100px;">
+        <option value="">供应商</option>
+      #{list items: cooperators, as:'c'}
+        <option ${c.id == p.cooperatorId ? 'selected' : ''} value="${c.id}">${c.name}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" name="p.search" placeholder="物料计划 ID Or 出货单 ID Or SKU Or 产品名称 Or FnSku" value="${p.search}"
+               style="width:350px;">
+        <input type="hidden" name="p.page" value="${p.page}">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="inline">
+        <a href="javascript:void(0)" data-url="@{Excels.receiveRecords()}" data-target="_blank" class="btn btn-info
+        inline" id="exportBtn">导出</a>
+        <a target="_blank" class="btn btn-info inline" name="confirm">确认收货</a>
+      </div>
+    </div>
+  </form>
+
+
+  <form action="@{ReceiveRecords.confirm()}" name="confirm_form">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th rowspan="2">
+            <label class="checkbox">
+              <input type="checkbox" id="receiverecord_check_all">
+            </label>
+          </th>
+          <th rowspan="2">ID</th>
+          <th rowspan="2">状态</th>
+          <th rowspan="2">出货单ID</th>
+          <th rowspan="2">物料计划ID</th>
+          <th rowspan="2">供应商</th>
+          <th rowspan="2">SKU</th>
+          <th rowspan="2">产品名称</th>
+          <th rowspan="2">FnSku</th>
+          <th rowspan="2">FBA</th>
+          <th rowspan="2">去往仓库</th>
+          <th rowspan="2">运输方式</th>
+          <th rowspan="2">预计数量</th>
+          <th rowspan="2">实际数量</th>
+
+          <th colspan="6" style="text-align:center;">主箱</th>
+          <th colspan="6" style="text-align:center;">尾箱</th>
+
+          <th rowspan="2">创建时间</th>
+          <th rowspan="2">确认时间</th>
+          <th rowspan="2">确认人</th>
+        </tr>
+        <tr>
+          <td>箱数</td>
+          <td>数量</td>
+          <td>重量(kg)</td>
+          <td>长(cm)</td>
+          <td>宽(cm)</td>
+          <td>高(cm)</td>
+          <td>箱数</td>
+          <td>数量</td>
+          <td>重量(kg)</td>
+          <td>长(cm)</td>
+          <td>宽(cm)</td>
+          <td>高(cm)</td>
+        </tr>
+      #{list items: records, as: 'r'}
+        <tr>
+          <td>
+            <label class="checkbox">
+              <input type="checkbox" name="rids" value="${r.id}" class="receiverecord">
+            </label>
+          </td>
+          <td>${r.id}</td>
+          <td data-name="state">
+          ${r.state?.label()}
+          </td>
+          <td>
+            <a href="@{DeliverPlans.show(r.deliverPlan?.id)}" target="_blank">${r.deliverPlan?.id}</a>
+          </td>
+          <td>
+            <a href="/ProcureUnits/index?p.search=id:${r.procureUnit?.id}" target="_blank">
+            ${r.procureUnit?.id}
+            </a>
+          </td>
+          <td>
+            <a href="@{Cooperators.show(r.procureUnit?.cooperator?.id)}" target="_blank">
+            ${r.procureUnit?.cooperator?.name}
+            </a>
+          </td>
+          <td>
+            <a href="@{Products.show(r.procureUnit?.product?.sku)}" target="_blank">
+            ${r.procureUnit?.product?.sku}
+            </a>
+          </td>
+          <td style="max-width: 280px;">${r.procureUnit?.product?.abbreviation}</td>
+          <td>
+              #{set fnsku: r.procureUnit?.selling?.fnSku/}
+              #{if fnsku != null && fnsku != ""}
+                <a href="@{Sellings.sellingLabel(r.procureUnit?.selling?.sellingId)}" class="btn btn-success">
+                ${fnsku} <i class="icon-download-alt"></i>
+                </a>
+              #{/if}
+          </td>
+          <td>${r.procureUnit?.fba}</td>
+          <td>${r.procureUnit?.whouse?.name}</td>
+          <td>${r.procureUnit?.shipType?.label()}</td>
+          <td>${r.procureUnit?.attrs?.planQty}</td>
+          <td>
+            <input type="text" name="qty" value="${r.qty}" style="width:30px;">
+          </td>
+          <td>
+            <input type="text" name="mainBox.boxNum" value="${r.mainBox?.boxNum}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="mainBox.num" value="${r.mainBox?.num}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="mainBox.singleBoxWeight" value="${r.mainBox?.singleBoxWeight}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="mainBox.length" value="${r.mainBox?.length}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="mainBox.width" value="${r.mainBox?.width}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="mainBox.height" value="${r.mainBox?.height}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="lastBox.boxNum" value="${r.lastBox?.boxNum}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="lastBox.num" value="${r.lastBox?.num}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="lastBox.singleBoxWeight" value="${r.lastBox?.singleBoxWeight}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="lastBox.length" value="${r.lastBox?.length}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="lastBox.width" value="${r.lastBox?.width}" style="width:20px;">
+          </td>
+          <td>
+            <input type="text" name="lastBox.height" value="${r.lastBox?.height}" style="width:20px;">
+          </td>
+          <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
+          <td>#{time_tooltip time: r.confirmDate, datetime: true/}</td>
+          <td>${r.confirmer?.username}</td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </form>
+
+  <div class="row-fluid" id="order_list">
+    <div class="span12">
+    #{if records.size() == 0}
+      暂时还没有收货记录
+    #{/if}
+    #{else }
+        #{bootstrap_pager pi:p, url:'' /}
+    #{/else}
+    </div>
+  </div>
+
+#{records records: elcukRecords/}
+</div>

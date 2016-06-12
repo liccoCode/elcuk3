@@ -2,8 +2,11 @@ package models.whouse;
 
 import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import helper.Dates;
 import helper.Reflects;
+import helper.Webs;
+import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
 import models.procure.Cooperator;
@@ -11,6 +14,7 @@ import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -22,6 +26,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 入库记录
@@ -140,6 +145,12 @@ public class InboundRecord extends Model {
     public String memo = "";
 
     /**
+     * 确认人
+     */
+    @OneToOne
+    public User confirmer;
+
+    /**
      * 完成时间
      */
     @Expose
@@ -184,12 +195,19 @@ public class InboundRecord extends Model {
     }
 
     public InboundRecord(CheckTask task) {
-        this.planQty = task.qty;
-        this.badQty = task.unqualifiedQty;
-        this.qty = this.planQty - this.badQty;
+        this(O.CheckTask);
         this.checkTask = task;
-        this.origin = O.CheckTask;
-        this.state = S.Pending;
+        if(task.receiveRecord != null) {
+            this.planQty = task.receiveRecord.qty;
+            if(this.isRefund()) {
+                //不合格时所有的数量都入库到不良品仓
+                this.badQty = task.receiveRecord.qty;
+                this.targetWhouse = Whouse.defectiveWhouse();
+            } else {
+                this.qty = task.receiveRecord.qty - task.unqualifiedQty;
+                this.badQty = task.unqualifiedQty;
+            }
+        }
         this.stockObj = new StockObj(task.units.product.sku);//TODO 添加物料的支持
         //把采购计划一些自身属性带入到入库记录,方便后期查询
         this.stockObj.setAttributes(task.units);
@@ -269,14 +287,15 @@ public class InboundRecord extends Model {
      */
     public void confirm() {
         this.state = S.Inbound;
-        if(this.completeDate == null) this.completeDate = new Date();
+        this.completeDate = new Date();
+        this.confirmer = User.current();
         this.valid();
-        List<StockRecord> stockRecords = this.buildStockRecords();
+        if(Validation.hasErrors()) return;
 
-        if(!Validation.hasErrors()) {
-            this.save();
-            for(StockRecord record : stockRecords) record.doCerate();
-        }
+        this.save();
+        for(StockRecord record : this.buildStockRecords()) record.doCerate();
+        //为质检不合格的入库生成出库记录(退给工厂)
+        if(this.isRefund()) new OutboundRecord(this).save();
     }
 
     public void beforeCreate() {
@@ -306,6 +325,15 @@ public class InboundRecord extends Model {
     }
 
     /**
+     * 判断当前的入库记录是否需要退货给工厂
+     *
+     * @return
+     */
+    public boolean isRefund() {
+        return this.checkTask != null && this.checkTask.result == CheckTask.ResultType.NOTAGREE;
+    }
+
+    /**
      * 确认入库记录时记录两个库存异动(正常与不良品)
      *
      * @return
@@ -313,8 +341,13 @@ public class InboundRecord extends Model {
     public List<StockRecord> buildStockRecords() {
         List<StockRecord> records = new ArrayList();
         try {
-            if(this.qty > 0) records.add(new StockRecord(this, true).valid());
-            if(this.badQty > 0) records.add(new StockRecord(this, false).valid());//不良品
+            //只要是入库到不良品仓就只处理 badQty
+            if(StringUtils.containsIgnoreCase(this.targetWhouse.name, "不良品仓")) {
+                if(this.badQty > 0) records.add(new StockRecord(this, false).valid());
+            } else {
+                if(this.qty > 0) records.add(new StockRecord(this, true).valid());
+                if(this.badQty > 0) records.add(new StockRecord(this, false).valid());
+            }
             return records;
         } catch(FastRuntimeException e) {
             Validation.addError("", e.getMessage());
@@ -323,7 +356,7 @@ public class InboundRecord extends Model {
     }
 
     /**
-     * 供应商
+     * 尝试匹配供应商
      *
      * @return
      */
@@ -339,5 +372,39 @@ public class InboundRecord extends Model {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 已经做过入库确认的人员名称
+     *
+     * @return
+     */
+    public static List<String> confirmers() {
+        List<String> names = new ArrayList<>();
+        try {
+            List<Map<String, Object>> rows = DBUtils.rows(
+                    "SELECT DISTINCT u.username AS username FROM InboundRecord i" +
+                            " LEFT JOIN User u ON u.id=i.confirmer_id"
+            );
+            if(rows != null && !rows.isEmpty()) {
+                for(Map<String, Object> row : rows) {
+                    if(row != null && row.containsKey("username")) {
+                        if(row.get("username") != null) names.add(row.get("username").toString());
+                    }
+                }
+            }
+        } catch(NullPointerException e) {
+            Logger.warn(Webs.E(e));
+        }
+        return names;
+    }
+
+    /**
+     * 根据 FBA 属性来尝试匹配入库记录
+     *
+     * @return InboundRecord
+     */
+    public static InboundRecord findInboundRecordByFBA(String fba) {
+        return InboundRecord.find("attributes LIKE ?", "%\"fba\":\"" + fba + "\"%").first();
     }
 }
