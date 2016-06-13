@@ -26,20 +26,26 @@ window.$ui =
       else
         $input.datetimepicker(format: $input.attr('format'))
   selectize: ->
-    for select in $('select')
+    for select in $('select.selectize')
       $select = $(select)
-      continue unless $select.hasClass('selectize')
       options = {plugins: ['remove_button']}
       for key in ['create', 'sortField', 'maxItems']
         options[key] = $select.data(key) if $select.data(key) != undefined
       $select.selectize(options)
-
+  multiselect: ->
+    for select in $('select[multiple]')
+      $select = $(select)
+      options = {buttonWidth: 150, nonSelectedText: '', maxHeight: 200, includeSelectAllOption: true}
+      for key in ['buttonWidth', 'nonSelectedText', 'maxHeight', 'includeSelectAllOption']
+        options[key] = $select.data(key.toLowerCase()) if $select.data(key.toLowerCase()) != undefined
+      $select.multiselect(options)
 
 # 初始化 popover, tooltip, dateinput
   init: ->
     @dateinput()
     @selectize()
     @datetimeinput()
+    @multiselect()
 
 # popover 与 tooltip 的基础方法
   relBase: (event, func)->
@@ -49,7 +55,8 @@ window.$ui =
       trigger: 'hover'
       placement: 'top'
       html: 'true'
-    for key in ['full-width', 'animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay', 'container']
+    for key in ['full-width', 'animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay'
+    , 'container']
       params[key] = tip.attr(key) if tip.attr(key)
     func.call(tip, params)
 
