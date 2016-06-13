@@ -26,15 +26,21 @@
 
     #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType, class:'inline selectize' /}
 
-    #{select_enum name:'p.state', items:models.procure.Deliveryment.S.values(), value:p.state, class:'inline selectize'}
-      <option value="">状态</option>
-    #{/select_enum}
+      <select name="p.state" style="width: 150px;" class="inline selectize">
+        <option value="">状态</option>
+      #{list items:models.procure.Deliveryment.S.values(), as:'t'}
+        <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
+      #{/list}
+      </select>
 
-    #{select_enum name: "p.deliveryType", items: models.procure.Deliveryment.T.values(), value: p.deliveryType, class:'inline selectize'}
-      <option value="">类型</option>
-    #{/select_enum}
+      <select name="p.deliveryType" style="width: 150px;" class="inline selectize">
+        <option value="">类型</option>
+      #{list items:models.procure.Deliveryment.T.values(), as:'t'}
+        <option value="${t.name()}" ${t.name() == p.deliveryType?.name() ? 'selected' : ''}>${t.label()}</option>
+      #{/list}
+      </select>
 
-      <select name="p.cooperId" class="inline selectize">
+      <select name="p.cooperId" class="inline selectize" style="width:150px;">
         <option value="">供应商</option>
       #{list items:suppliers, as:'sp'}
         <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
@@ -137,9 +143,9 @@
       </table>
       <div class="btn-toolbar">
       #{power.ck 'deliveryments.deliverymenttoapply'}
-        #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber', class:'inline'}
-          #{option '0'}新请款单#{/option}
-        #{/select}
+          #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber', class:'inline'}
+              #{option '0'}新请款单#{/option}
+          #{/select}
         <input url='@{Deliveryments.deliverymentToApply()}'
                type="submit" id="goToDeliverymentApply" class="btn btn-success" value="采购单请款">
       #{/power.ck}

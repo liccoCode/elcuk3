@@ -1101,4 +1101,22 @@ public enum M {
         }
         return AMAZON_UK;
     }
+
+    public String fulfillmentCenterID() {
+        switch(this) {
+            case AMAZON_JP:
+                return "AMAZON_JP";
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+                return "AMAZON_EU";
+            case AMAZON_CA:
+            case AMAZON_US:
+                return "AMAZON_NA";
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
 }

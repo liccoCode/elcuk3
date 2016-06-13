@@ -16,6 +16,7 @@ import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
@@ -403,7 +404,8 @@ public class Selling extends GenericModel {
 
         String xml = MWSUtils.buildProductImageBySelling(this, images);
         Feed feed = Feed.updateSellingFeed(xml, this);
-        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
+        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, this.market.amid(),
+                this.account);
         Logger.info(feed_submission_id);
         List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_get_feed", params);
@@ -417,6 +419,16 @@ public class Selling extends GenericModel {
      * @return
      */
     public Selling buildFromProduct() {
+        this.saleAmazonValid();
+        this.asin = this.aps.upc;
+        patchToListing();
+        this.saleAmazon();
+        this.assignAmazonListingPrice();
+        this.setFulfillmentByAmazon();
+        return this;
+    }
+
+    public void saleAmazonValid() {
         if(this.account == null) Webs.error("上架账户不能为空");
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
@@ -427,16 +439,26 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.aps.brand)) Webs.error("品牌必须填写");
         if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
         if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
-        if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
         if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("Feed Product Type 必须填写");
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
-        this.asin = this.aps.upc;
-        patchToListing();
-        this.saleAmazon();
-        this.assignAmazonListingPrice();
-        this.setFulfillmentByAmazon();
-        return this;
+        this.rbnsValid();
+    }
+
+    /**
+     * 校验 RBN 是否合法
+     */
+    public void rbnsValid() {
+        if(this.aps.rbns == null) Webs.error("Recommanded Browser Nodes 必须填写");
+        this.aps.rbns.remove("");
+        if(this.aps.rbns.isEmpty()) Webs.error("Recommanded Browser Nodes 必须填写");
+        if(this.market != M.AMAZON_US) {
+            for(String rbn : this.aps.rbns) {
+                if(!NumberUtils.isNumber(rbn)) {
+                    Webs.error(String.format("%s 市场的 Recommanded Browser Nodes 必须为数字", this.market.name()));
+                }
+            }
+        }
     }
 
     /**
@@ -951,7 +973,8 @@ public class Selling extends GenericModel {
                 p.productdesc) {
             String xml = MWSUtils.buildProductXMLBySelling(this, p);
             Feed feed = Feed.updateSellingFeed(xml, this);
-            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
+            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, this.market.amid(),
+                    this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
@@ -962,7 +985,7 @@ public class Selling extends GenericModel {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
             Feed price_feed = Feed.newAssignPriceFeed(xml, this);
             String feed_submission_id = MWSUtils
-                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
+                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, this.market.amid(), this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",

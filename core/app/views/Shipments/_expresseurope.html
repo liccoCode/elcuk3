@@ -26,8 +26,10 @@
     Buyer : ${models.OperatorConfig.getVal("shipmenteuropeotherbuyer")}  <br>
     VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeothervat")}<br>
   #{/else}
+  #{if country != 'DE' }
     Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} <br>
     Tel :
+  #{/if}
   #{if country == 'DE' }
   ${models.OperatorConfig.getVal("shipmenteuropedetel")}
   #{/if}
@@ -61,10 +63,8 @@
 #{/else}
 </tr>
 
-
 <tr>
   <td>Buyer VAT No. :</td>
-
 #{if country == 'DE' }
   <td>DE ${models.OperatorConfig.getVal("shipmenteuropedevat")}</td>
 #{/if}

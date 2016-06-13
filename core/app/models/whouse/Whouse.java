@@ -268,10 +268,10 @@ public class Whouse extends Model {
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime nextBeginDate = now.plusDays(i);
-            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate()));
-            if(exist != null) continue;
-
             M type = this.account.type;
+
+            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate(), type));
+            if(exist != null) continue;
 
             if(nextBeginDate.getDayOfWeek() == 1) {
                 if(Arrays.asList(M.AMAZON_DE, M.AMAZON_US).contains(type)) {
@@ -297,15 +297,18 @@ public class Whouse extends Model {
     class PlanDateEqual implements Predicate {
         // 期待的日期
         private Date date;
+        private M market;
 
-        PlanDateEqual(Date date) {
+        PlanDateEqual(Date date, M market) {
             this.date = date;
+            this.market = market;
         }
 
         @Override
         public boolean evaluate(Object o) {
             Shipment ship = (Shipment) o;
-            return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date));
+            return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date))
+                    && ship.whouse.account.type == this.market;
         }
     }
 

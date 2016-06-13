@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * Created by licco on 15/12/22.
  */
-public class SkuProfitPost extends Post<SkuProfit> {
+public class SkuProfitPost {
 
     public Date begin;
     public Date end;
@@ -27,6 +27,8 @@ public class SkuProfitPost extends Post<SkuProfit> {
     public String sku;
     public String sellingId;
     public String categories;
+    public int page = 1;
+    public int perSize = 10;
 
     public SkuProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -34,15 +36,7 @@ public class SkuProfitPost extends Post<SkuProfit> {
         DateTime from = DateTime.now().withDayOfYear(1);
         this.begin = from.toDate();
         this.pmarket = "market";
-        this.perSize = 10;
-        this.page = 1;
     }
-
-    @Override
-    public F.T2<String, List<Object>> params() {
-        return null;
-    }
-
 
     public List<SkuProfit> query() {
         List<SkuProfit> skuProfits = new ArrayList<>();

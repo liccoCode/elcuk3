@@ -183,7 +183,33 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_FILENAME,
                     String.format("运输单发货信息明细表格%s.xls", formatter.format(new Date())));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            render(dtos);
+
+            Shipment ship = dtos.get(0);
+            Date date = ship.dates.planBeginDate;
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+
+            int month = c.get(Calendar.MONTH) + 1;
+            int day = c.get(Calendar.DATE);
+            long totalQty = 0;
+            long totalUnit = 0;
+            Double totalWeight = 0d;
+            Double totalVolume = 0d;
+            for(Shipment shipment : dtos) {
+                shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+                for(ShipItem item : shipment.items) {
+                    totalQty += item.unit.realQty();
+                    totalUnit += item.caluTotalUnitByCheckTask();
+                    totalWeight += item.caluTotalWeightByCheckTask();
+                    totalVolume += item.caluTotalVolumeByCheckTask();
+                }
+            }
+
+            if(ship.type.name().equals("EXPRESS")) {
+                render("Excels/shipmentDetailsForExpress.xls", dtos, month, day);
+            } else {
+                render(dtos, month, day, totalQty, totalUnit, totalWeight, totalVolume);
+            }
         }
     }
 

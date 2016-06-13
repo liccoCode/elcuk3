@@ -374,7 +374,34 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 多个traceno
      */
     @Transient
-    public List<String> tracknolist = new ArrayList<String>();
+    public List<String> tracknolist = new ArrayList<>();
+
+    /**
+     * 运输商名称
+     */
+    @Transient
+    public String cname;
+
+    /**
+     * 仓库名称
+     */
+    @Transient
+    public String wname;
+
+    /**
+     * 创建人
+     */
+    @Transient
+    public String uname;
+
+    @Transient
+    public int itemsNum;
+
+    @Transient
+    public String iExpressName;
+
+    @Transient
+    public String applyId;
 
     public enum FLAG {
         ARRAY_TO_STR,
@@ -1210,10 +1237,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment
-                .find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
-                        S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
-                .fetch();
+        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
+                S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate()).fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whs) {

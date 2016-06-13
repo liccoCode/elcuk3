@@ -26,6 +26,8 @@ import play.mvc.With;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +110,7 @@ public class ReportDeal extends Controller {
         OrderInvoice invoice = OrderInvoice.findById(orderId);
         if(invoice == null) {
             invoice = ord.createOrderInvoice();
+            invoice.save();
         }
         invoice.setprice();
 
@@ -124,7 +127,8 @@ public class ReportDeal extends Controller {
         Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
         Date returndate = ord.returndate();
 
-        File folder = new File(Constant.INVOICE_PATH);
+        String path = Constant.INVOICE_PATH + "/" + new DateTime(new Date()).getMonthOfYear() + "sent";
+        File folder = new File(path);
         if(!folder.exists()) folder.mkdir();
 
         String pdfName = invoiceformat.filename + orderId + ".pdf";
@@ -150,4 +154,24 @@ public class ReportDeal extends Controller {
         File file = new File(folder + "/" + pdfName);
         renderBinary(file);
     }
+
+    /**
+     * 增加一个后备调用生成1W张发票的接口
+     * 可以传入时间参数
+     */
+    public static void genreateInvoiceByTime() {
+        String date = request.params.get("date");
+        String num = request.params.get("num");
+        String market = request.params.get("market");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date time = sdf.parse(date);
+            OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market);
+            renderText("后台正在处理, 请稍后去服务器查看.");
+        } catch(ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
