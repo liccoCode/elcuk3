@@ -47,6 +47,22 @@
       #{/list}
       </select>
 
+      <select name="p.userId">
+        <option>下单人</option>
+      #{list items: handlers, as: 'handler'}
+        <option ${p.handler == handler ? 'selected' : ''}value="${handler}">${handler}</option>
+      #{/list}
+      </select>
+
+      <select name="p.haveSelling">
+        <option>有无 Selling</option>
+      #{list items: [true, false], as: 'haveSelling'}
+        <option ${p.haveSelling == haveSelling ? 'selected' : ''}value="${haveSelling}">
+        ${haveSelling ? '有' :'无'}
+        </option>
+      #{/list}
+      </select>
+
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
@@ -73,15 +89,17 @@
           <th></th>
           <th>#</th>
           <th>请款单</th>
-          <th>Name</th>
-          <th>State</th>
+          <th>采购单名称</th>
           <th>单据类型</th>
           <th>供应商</th>
-          <th>最先交货时间</th>
-          <th>最后交货时间</th>
+          <th>有无 Selling</th>
+          <th>最先交货日期</th>
+          <th>最后交货日期</th>
           <th>交货进度</th>
-          <th>User</th>
-          <th>Create</th>
+          <th>状态</th>
+          <th>下单时间</th>
+          <th>确认时间</th>
+          <th>下单人</th>
         </tr>
       #{list items:deliveryments, as:'dmt'}
           #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
@@ -112,7 +130,6 @@
             <span>${dmt.name}</span>
             <span class="badge badge-info">${dmt.units.size()}</span>
           </td>
-          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>${dmt.deliveryType?.label()}</td>
           <td>${dmt.supplier()?.name}</td>
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
@@ -126,8 +143,10 @@
               </div>
             </div>
           </td>
-          <td>${dmt.handler.username}</td>
+          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>#{time_tooltip time:dmt.createDate/}</td>
+          <td>#{time_tooltip time:dmt.confirmDate/}</td>
+          <td>${dmt.handler.username}</td>
         </tr>
         <tr id="dmt_${dmt_index}" style="display:none;">
           <td colspan="12" style="padding:0;border:none">

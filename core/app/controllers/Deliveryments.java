@@ -69,10 +69,11 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
-        render(deliveryments, p, deliverymentIds);
+        List<String> handlers = Deliveryment.handlers();
+        render(deliveryments, p, deliverymentIds, handlers);
     }
 
     public static void show(String id) {
@@ -91,6 +92,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
         dmt.save();
+        dmt.syncCooperatorToUnits();
         flash.success("更新成功.");
         show(dmt.id);
     }

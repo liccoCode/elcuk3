@@ -1,6 +1,8 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -10,6 +12,7 @@ import models.product.Category;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -93,6 +96,9 @@ public class Deliveryment extends GenericModel {
     @Expose
     @Required
     public Date createDate = new Date();
+
+    @Expose
+    public Date confirmDate;
 
     /**
      * 下单时间
@@ -277,6 +283,7 @@ public class Deliveryment extends GenericModel {
         if(Validation.hasErrors()) return;
 
         this.state = Deliveryment.S.CONFIRM;
+        this.confirmDate = new Date();
         this.save();
     }
 
@@ -496,5 +503,42 @@ public class Deliveryment extends GenericModel {
 
     public boolean canBeCancle() {
         return Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state);
+    }
+
+    /**
+     * 已经做过入库确认的人员名称
+     *
+     * @return
+     */
+    public static List<String> handlers() {
+        List<String> names = new ArrayList<>();
+        try {
+            List<Map<String, Object>> rows = DBUtils.rows(
+                    "SELECT DISTINCT u.username AS username FROM InboundRecord i" +
+                            " LEFT JOIN User u ON u.id=i.confirmer_id"
+            );
+            if(rows != null && !rows.isEmpty()) {
+                for(Map<String, Object> row : rows) {
+                    if(row != null && row.containsKey("username")) {
+                        if(row.get("username") != null) names.add(row.get("username").toString());
+                    }
+                }
+            }
+        } catch(NullPointerException e) {
+            Logger.warn(Webs.E(e));
+        }
+        return names;
+    }
+
+    /**
+     * 同步供应商到采购计划
+     */
+    public void syncCooperatorToUnits() {
+        if(this.cooperator != null) {
+            for(ProcureUnit unit : this.units) {
+                unit.cooperator = this.cooperator;
+                unit.save();
+            }
+        }
     }
 }
