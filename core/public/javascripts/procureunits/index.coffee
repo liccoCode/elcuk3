@@ -6,8 +6,17 @@ $ ->
   ).on("click", "#downloadFBAZIP", (e) ->
     showBoxNumberModal()
   ).on("click", "#createdeliveryment", (e) ->
-    window.open('/deliveryments/create?' + $("#create_deliveryment").serialize(), "_blank")
-    #TODO 检查所选择的采购计划是否含有计划中的
+    if $('input[name="pids"][data-stage="PLAN"]:checked').size() is 0
+      noty({text: '请选择状态为计划中的采购计划', type: 'error'})
+    else
+      $('input[name="pids"][data-stage!="PLAN"]:checked').prop('checked', false)
+      window.open('/deliveryments/create?' + $("#create_deliveryment").serialize(), "_blank")
+  ).on("click", "#createdeliveryment", (e) ->
+    if $('input[name="pids"][data-stage="DELIVERY"]:checked').size() is 0
+      noty({text: '请选择状态为采购中的采购计划', type: 'error'})
+    else
+      $('input[name="pids"][data-stage!="DELIVERY"]:checked').prop('checked', false)
+      window.open('/deliverplans/deliverplan?' + $("#create_deliveryment").serialize(), "_blank")
   ).on("blur", "input[name='boxNumbers']", (e) ->
     $input = $(@)
     # 确保用户填写的是大于零的数字
@@ -26,6 +35,8 @@ $ ->
     $('#unitIds').val("")
     LoadMask.unmask()
     $('#box_number_modal').modal('hide')
+  ).on("click", "#download_excel", (r) ->
+    window.open('/Excels/procureUnitSearchExcel?' + $("#search_Form").serialize(), "_blank")
   )
 
   # 将字符串转化成Dom元素
@@ -52,17 +63,3 @@ $ ->
     for checkbox in checkboxs
       unitIds.push(checkbox.value)
     return unitIds
-
-  $("#download_excel").click((e) ->
-    e.preventDefault()
-    $btn = $(@)
-    $form = $("#search_Form")
-    window.open('/Excels/procureUnitSearchExcel?' + $form.serialize(), "_blank")
-  )
-
-  $("#create_deliverplan_btn").click (e) ->
-    $form = $("#create_deliveryment")
-    window.open('/deliverplans/deliverplan?' + $form.serialize(), "_blank")
-
-  $("#create_deliveryment_btn").click (e) ->
-

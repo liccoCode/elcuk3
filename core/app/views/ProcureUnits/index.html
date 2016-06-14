@@ -7,8 +7,14 @@
 #{errorMsgs /}
 #{flash_alert /}
 
+#{info_row}
+<ul>
+  <li>[阶段]为 PLAN 的采购计划, 可以 被关联到采购单</li>
+  <li>[阶段]为 DELIVERY 的采购计划, 可以 被关联到出货单</li>
+</ul>
+#{/info_row}
 <div class="row-fluid">
-  <form action="@{ProcureUnits.indexForMarket()}" method="get" class="search_form" id="search_Form">
+  <form action="@{ProcureUnits.index()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
@@ -70,7 +76,6 @@
         </div>
 
         <div class="inline">
-          <input type="hidden" name="p.unitIds" id="unitIds"/>
         #{power.ck "procures.createdeliveryment"}
           <a target="_blank" href="@{ProcureUnits.blank()}" class="btn btn-info" id="createdeliveryment">创建采购单</a>
         #{/power.ck}
