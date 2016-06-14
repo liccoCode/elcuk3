@@ -514,8 +514,8 @@ public class Deliveryment extends GenericModel {
         List<String> names = new ArrayList<>();
         try {
             List<Map<String, Object>> rows = DBUtils.rows(
-                    "SELECT DISTINCT u.username AS username FROM InboundRecord i" +
-                            " LEFT JOIN User u ON u.id=i.confirmer_id"
+                    "SELECT DISTINCT u.username AS username FROM Deliveryment d" +
+                            " LEFT JOIN User u ON u.id=d.handler_id"
             );
             if(rows != null && !rows.isEmpty()) {
                 for(Map<String, Object> row : rows) {
