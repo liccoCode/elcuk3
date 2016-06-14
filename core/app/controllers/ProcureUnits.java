@@ -77,11 +77,6 @@ public class ProcureUnits extends Controller {
         render(p);
     }
 
-    public static void indexForMarket(ProcurePost p) {
-        if(p == null) p = new ProcurePost();
-        render(p);
-    }
-
     /**
      * 将搜索结果 打成ZIP包，进行下载
      */
