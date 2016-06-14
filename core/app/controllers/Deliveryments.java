@@ -48,6 +48,7 @@ public class Deliveryments extends Controller {
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.openUsers());
+        renderArgs.put("cooperators", Cooperator.suppliers());
     }
 
     @Before(only = {"index", "deliverymentToApply"})
@@ -172,9 +173,10 @@ public class Deliveryments extends Controller {
         Validation.required("deliveryments.cancel", msg);
         Deliveryment dmt = Deliveryment.findById(id);
         dmt.cancel(msg);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             render("Deliveryments/show.html", dmt, msg);
-
+        }
+        flash.success("取消成功");
         show(dmt.id);
     }
 

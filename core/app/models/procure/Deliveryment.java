@@ -8,6 +8,7 @@ import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -51,7 +52,7 @@ public class Deliveryment extends GenericModel {
         CONFIRM {
             @Override
             public String label() {
-                return "确认并已下单";
+                return "已确认";
             }
         },
         /**
@@ -74,7 +75,7 @@ public class Deliveryment extends GenericModel {
     }
 
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
 
     @ManyToOne
     public ProcureApply apply;
@@ -127,23 +128,40 @@ public class Deliveryment extends GenericModel {
     public String memo = " ";
 
     public enum T {
-        /**
-         * 普通单
-         */
         NORMAL {
             @Override
             public String label() {
                 return "普通单";
             }
         },
-
-        /**
-         * 手动单
-         */
         MANUAL {
             @Override
             public String label() {
                 return "手动单";
+            }
+        },
+        Special {
+            @Override
+            public String label() {
+                return "特采单";
+            }
+        },
+        Expedited {
+            @Override
+            public String label() {
+                return "加急单";
+            }
+        },
+        New {
+            @Override
+            public String label() {
+                return "新品单";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B采购单";
             }
         };
 
@@ -155,6 +173,12 @@ public class Deliveryment extends GenericModel {
      */
     @Enumerated(EnumType.STRING)
     public T deliveryType;
+
+    /**
+     * 有无 Selling
+     */
+    @Expose
+    public Boolean haveSelling;
 
     /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
@@ -284,6 +308,7 @@ public class Deliveryment extends GenericModel {
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
+        this.memo = msg;
         this.save();
 
         new ElcukRecord(Messages.get("deliveryment.cancel"),
@@ -414,9 +439,7 @@ public class Deliveryment extends GenericModel {
             Validation.addError("deliveryment.units.create", "%s");
             return deliveryment;
         }
-        for(ProcureUnit unit : units) {
-            isUnitToDeliverymentValid(unit);
-        }
+        for(ProcureUnit unit : units) isUnitToDeliverymentValid(unit);
         if(Validation.hasErrors()) return deliveryment;
         deliveryment.handler = user;
         deliveryment.state = S.PENDING;
@@ -461,5 +484,17 @@ public class Deliveryment extends GenericModel {
             }
         }
         return cooperItems;
+    }
+
+    public static T[] types() {
+        return ArrayUtils.removeElement(T.values(), T.MANUAL);
+    }
+
+    public boolean canBeEdit() {
+        return this.state == S.PENDING;
+    }
+
+    public boolean canBeCancle() {
+        return Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state);
     }
 }
