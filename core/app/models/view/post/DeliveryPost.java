@@ -126,9 +126,10 @@ public class DeliveryPost extends Post<Deliveryment> {
             String word = this.word();
             sbd.append(" AND (")
                     .append(" u.sid LIKE ?")
+                    .append(" OR d.id LIKE ?")
                     .append(" OR d.name LIKE ?")
                     .append(")");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i < 3; i++) params.add(word);
         }
 
         if(this.deliveryType != null) {
@@ -139,7 +140,7 @@ public class DeliveryPost extends Post<Deliveryment> {
             sbd.append(" AND d.handler.username=?");
             params.add(this.handler);
         }
-        if(haveSelling) {
+        if(haveSelling != null && haveSelling) {
             sbd.append(" AND d.haveSelling=true");
         }
         return new F.T2<>(sbd.toString(), params);
