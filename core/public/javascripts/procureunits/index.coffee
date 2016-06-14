@@ -11,7 +11,7 @@ $ ->
     else
       $('input[name="pids"][data-stage!="PLAN"]:checked').prop('checked', false)
       window.open('/deliveryments/create?' + $("#create_deliveryment").serialize(), "_blank")
-  ).on("click", "#createdeliveryment", (e) ->
+  ).on("click", "#createdeliverplan", (e) ->
     if $('input[name="pids"][data-stage="DELIVERY"]:checked').size() is 0
       noty({text: '请选择状态为采购中的采购计划', type: 'error'})
     else
