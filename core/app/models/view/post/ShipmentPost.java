@@ -6,6 +6,7 @@ import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.db.helper.SqlQuery;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
@@ -50,13 +51,15 @@ public class ShipmentPost extends Post<Shipment> {
 
     public Shipment.T type;
 
-    public List<Shipment.S> states = new ArrayList<Shipment.S>();
+    public List<Shipment.S> states = new ArrayList<>();
 
     public iExpress iExpress;
 
     public Long cooperId;
 
     public long whouseId;
+
+    public List<Long> whouseIds = new ArrayList<>();
 
     @Override
     public List<Shipment> query() {
@@ -106,7 +109,7 @@ public class ShipmentPost extends Post<Shipment> {
         ).leftJoin(" Whouse w ON w.id = s.whouse_id "
         ).leftJoin(" User u ON u.id = s.creater_id ");
 
-        /**如果传入进来的是shipmentId或者采购单Id**/
+        //如果传入进来的是shipmentId或者采购单Id
         if(StringUtils.isNotBlank(this.search)) {
             this.search = this.search.trim();
 
@@ -142,17 +145,14 @@ public class ShipmentPost extends Post<Shipment> {
                 if(state == null) continue;
                 states.add(state.name());
             }
-            if(states.size() > 0) sql.andWhere(sql.whereIn("s.state", states));
+            if(states.size() > 0) sql.andWhere(SqlQuery.whereIn("s.state", states));
         }
-
+        if(this.whouseIds != null && !this.whouseIds.isEmpty()) {
+            sql.andWhere(SqlQuery.whereIn("s.whouse_id", whouseIds));
+        }
         if(this.iExpress != null) {
             sql.andWhere(" s.internationExpress=?").params(this.iExpress.name());
         }
-
-        if(this.whouseId > 0) {
-            sql.andWhere(" s.whouse_id=?").params(this.whouseId);
-        }
-
         if(this.cooperId != null) {
             sql.andWhere(" s.cooper_id=?").params(this.cooperId);
         }
