@@ -53,7 +53,7 @@
       <select name="p.confirmer" class="inline">
         <option value="">操作者</option>
       #{list items:confirmers, as:'confirmer'}
-        <option ${confirmer == p.confirmer ? 'selected' : ''} value="${confirmer}">${confirmer}</option>
+        <option ${confirmer.equalsIgnoreCase(p.confirmer) ? 'selected' : ''} value="${confirmer}">${confirmer}</option>
       #{/list}
       </select>
 

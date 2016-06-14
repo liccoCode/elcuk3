@@ -47,17 +47,17 @@
       #{/list}
       </select>
 
-      <select name="p.userId">
-        <option>下单人</option>
+      <select name="p.handler" class="inline">
+        <option value="">下单人</option>
       #{list items: handlers, as: 'handler'}
-        <option ${p.handler == handler ? 'selected' : ''}value="${handler}">${handler}</option>
+        <option ${handler.equalsIgnoreCase(p.handler) ? 'selected' : ''} value="${handler}">${handler}</option>
       #{/list}
       </select>
 
-      <select name="p.haveSelling">
-        <option>有无 Selling</option>
+      <select name="p.haveSelling" class="inline">
+        <option value="">有无 Selling</option>
       #{list items: [true, false], as: 'haveSelling'}
-        <option ${p.haveSelling == haveSelling ? 'selected' : ''}value="${haveSelling}">
+        <option ${p.haveSelling == haveSelling ? 'selected' : ''} value="${haveSelling}">
         ${haveSelling ? '有' :'无'}
         </option>
       #{/list}
@@ -65,7 +65,7 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="ID、名称、SellingId">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
@@ -75,7 +75,7 @@
           <i class="icon-plus"></i>新增手动单
         </a>
       #{/power.ck}
-
+        <a href="javascript:void(0)" name="confirmBtn" class="btn btn-warning">确认采购单</a>
         <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
       </div>
     </div>
