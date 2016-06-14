@@ -2,27 +2,26 @@
 * ProcueUnit: unit
 * Whouse: whouses
 }*
-#{set product: unit.selling.listing.product/}
 <tr>
   <th style="width:100px;">SellingId</th>
   <td style="width:650px;">
-    <input type="text" name="unit.selling.sellingId" id="sellingId" value="${unit.selling.sellingId}" readonly>
+    <input type="text" name="unit.selling.sellingId" id="sellingId" style="width:300px;" value="${unit.selling?.sellingId}">
   </td>
   <th style="width:100px;">SKU</th>
   <td>
-    <input type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}" readonly>
+    <input type="text" name="unit.product.sku" id="unit_sku" value="" required>
   </td>
 </tr>
-
 <tr>
-#{set copers:product.cooperators() /}
   <th>供应商</th>
   <td>
     <select name="unit.cooperator.id" native='true'>
       <option>请选择</option>
-    #{list items:copers, as:'c'}
-      <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
-    #{/list}
+    #{if unit.selling != null}
+        #{list items:unit.selling?.listing.product.cooperators(), as:'c'}
+          <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
+        #{/list}
+    #{/if}
     </select>
     <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
   </td>

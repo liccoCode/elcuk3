@@ -136,15 +136,14 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void blank(String sid, float day, int totalFive) {
+    public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
-        unit.selling = Selling.findById(sid);
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-        if(unit.selling == null) {
-            flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
-            Analyzes.index();
+        List<Whouse> whouses = new ArrayList<>();
+        if(StringUtils.isNotBlank(sid)) {
+            unit.selling = Selling.findById(sid);
+            whouses = Whouse.findByAccount(unit.selling.account);
         }
-        render(unit, whouses, day, totalFive);
+        render(unit, whouses);
     }
 
 
