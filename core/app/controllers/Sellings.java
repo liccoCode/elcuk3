@@ -425,4 +425,15 @@ public class Sellings extends Controller {
         }
     }
 
+    /**
+     * 模糊匹配selling
+     * @param name
+     */
+    public static void sameSelling(String name) {
+        List<Selling> sellings = Selling.find("sellingId like '" + name + "%'").fetch();
+        List<String> list = new ArrayList<>();
+        for(Selling s : sellings) list.add(s.sellingId);
+        renderJSON(J.json(list));
+    }
+
 }

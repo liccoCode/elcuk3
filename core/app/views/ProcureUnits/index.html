@@ -7,14 +7,8 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-#{info_row}
-<ul>
-  <li>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</li>
-  <li>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</li>
-</ul>
-#{/info_row}
 <div class="row-fluid">
-  <form action="@{ProcureUnits.index()}" method="get" class="search_form" id="search_Form">
+  <form action="@{ProcureUnits.indexForMarket()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
@@ -30,17 +24,17 @@
         #{/list}
         </select>
 
-        <select name="p.whouseId" class="inline">
-          <option value="0">仓库</option>
-        #{list items:whouses, as:'wh'}
-          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
-        #{/list}
-        </select>
-
         <select name="p.stage" class="inline" style="width:82px;">
           <option value="">阶段</option>
         #{list items:models.procure.ProcureUnit.stages(), as:'stage'}
           <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.whouseId" class="inline">
+          <option value="0">仓库</option>
+        #{list items:whouses, as:'wh'}
+          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
         #{/list}
         </select>
 
@@ -71,6 +65,7 @@
           <input type="text" class="input-medium" name="p.search" value="${p.search}" rel="popover"
                  content="可搜索 ID、SellingId、SKU、FBA、产品名称">
           <input type="hidden" name="p.page" value="${p.page}">
+          <input type="hidden" name="p.unitIds" id="unitIds"/>
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
 
@@ -90,8 +85,8 @@
         #{/power.ck}
         </div>
       </div>
-    #{include 'Deliveryments/box_number_model.html'/}
     </div>
+  #{include 'Deliveryments/box_number_model.html'/}
   </form>
 
   <form method="post" id="create_deliveryment">

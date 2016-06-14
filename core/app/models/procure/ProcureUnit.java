@@ -435,6 +435,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public OST isOut = OST.Pending;
 
+    /**
+     * 创建人
+     */
+    @Expose
+    public User creator;
+
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
 

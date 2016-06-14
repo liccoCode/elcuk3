@@ -128,7 +128,11 @@ $ ->
             $("#new_procureunit").submit()
           else
             sellingId = $("#sellingId").val()
-            $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day, sellingId: sellingId})
+            $.get('/procureunits/isNeedApprove', {
+              total: parseInt(totalFive) + parseInt(planQty),
+              day: day,
+              sellingId: sellingId
+            })
             .done((e)->
               if e.flag
                 if confirm(e.message)
@@ -151,4 +155,30 @@ $ ->
     else
       $("#new_procureunit").submit()
   )
+
+  $sku = $("#unit_sku")
+  $sku.typeahead({
+    source: (query, process) ->
+      sku = $sku.val()
+      $.get('/products/sameSku', {sku: sku})
+      .done((c) ->
+        process(c)
+      )
+    updater: (item) ->
+      alert item
+      item
+  })
+
+  $sellingId = $("#sellingId")
+  $sellingId.typeahead({
+    source: (query, process) ->
+      name = $sellingId.val()
+      $.get('/sellings/sameSelling', {name: name})
+      .done((c) ->
+        process(c)
+      )
+  })
+
+
+
 
