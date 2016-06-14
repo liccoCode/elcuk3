@@ -38,6 +38,7 @@ public class DeliverPlans extends Controller {
         DeliverPlan dmt = DeliverPlan.findById(deliverymentId);
         if(dmt != null)
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
     }
 
