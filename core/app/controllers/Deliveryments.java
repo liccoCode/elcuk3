@@ -35,7 +35,7 @@ import java.util.List;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Deliveryments extends Controller {
 
     @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
@@ -74,7 +74,6 @@ public class Deliveryments extends Controller {
         render(deliveryments, p, deliverymentIds);
     }
 
-    //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         String expressid = ",,";
@@ -97,25 +96,20 @@ public class Deliveryments extends Controller {
 
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
-     * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
-    public static void create(List<Long> pids, String name) {
-        Validation.required("procrues.createDeliveryment.name", name);
+    public static void create(List<Long> pids) {
         Validation.required("deliveryments.addunits", pids);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
-
         Deliveryment deliveryment = Deliveryment
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
-
+                .createFromProcures(pids, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
-
         flash.success("Deliveryment %s 创建成功.", deliveryment.id);
         Deliveryments.show(deliveryment.id);
     }
@@ -257,7 +251,7 @@ public class Deliveryments extends Controller {
 
         } catch(Exception e) {
             e.printStackTrace();
-            Logger.warn("downloadFBAZIP %s:%s", id,e.getMessage());
+            Logger.warn("downloadFBAZIP %s:%s", id, e.getMessage());
         } finally {
             File zip = new File(Constant.TMP + "/FBA.zip");
             Files.zip(dirfile, zip);

@@ -277,10 +277,10 @@ public class Deliveryment extends GenericModel {
          * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
          */
         for(ProcureUnit unit : this.units) {
-         //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
             //    Validation.addError("deliveryment.units.cancel", "validation.required");
-         //   else
-                unit.toggleAssignTodeliveryment(null, false);
+            //   else
+            unit.toggleAssignTodeliveryment(null, false);
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
@@ -302,9 +302,8 @@ public class Deliveryment extends GenericModel {
             return new ArrayList<ProcureUnit>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit, singleCop)) {
+            if(isUnitToDeliverymentValid(unit)) {
                 unit.toggleAssignTodeliveryment(this, true);
             }
             if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
@@ -408,24 +407,19 @@ public class Deliveryment extends GenericModel {
      *
      * @param pids
      */
-    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name,
-                                                               User user) {
+    public synchronized static Deliveryment createFromProcures(List<Long> pids, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
         if(pids.size() != units.size()) {
             Validation.addError("deliveryment.units.create", "%s");
             return deliveryment;
         }
-
-        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            isUnitToDeliverymentValid(unit, cop);
+            isUnitToDeliverymentValid(unit);
         }
         if(Validation.hasErrors()) return deliveryment;
-        deliveryment.cooperator = cop;
         deliveryment.handler = user;
         deliveryment.state = S.PENDING;
-        deliveryment.name = name.trim();
         deliveryment.units.addAll(units);
         deliveryment.deliveryType = T.NORMAL;
         for(ProcureUnit unit : deliveryment.units) {
@@ -433,20 +427,15 @@ public class Deliveryment extends GenericModel {
             unit.toggleAssignTodeliveryment(deliveryment, true);
         }
         deliveryment.save();
-
         new ERecordBuilder("deliveryment.createFromProcures")
                 .msgArgs(StringUtils.join(pids, ","), deliveryment.id)
                 .fid(deliveryment.id).save();
         return deliveryment;
     }
 
-    private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
+    private static boolean isUnitToDeliverymentValid(ProcureUnit unit) {
         if(unit.stage != ProcureUnit.STAGE.PLAN) {
             Validation.addError("deliveryment.units.unassign", "%s");
-            return false;
-        }
-        if(!cop.equals(unit.cooperator)) {
-            Validation.addError("deliveryment.units.singlecop", "%s");
             return false;
         }
         Validation.required("procureunit.planDeliveryDate", unit.attrs.planDeliveryDate);
