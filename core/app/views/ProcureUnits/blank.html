@@ -1,12 +1,15 @@
 #{extends 'main.html' /}
-#{set title:'ProcureUnit Create' /}
+#{set title:'采购计划' /}
 #{set 'moreScripts'}
     #{script 'procureunits/blank.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert/}
 
+#{info_row title:'采购计划' /}
+
 #{form @ProcureUnits.create(), method: 'POST', id: 'new_procureunit'}
+<div id="stockDiv"></div>
 <table class="table table-condensed table-bordered">
     #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus/}
   <tr>
@@ -22,9 +25,6 @@
     </td>
   </tr>
 </table>
-<input type="hidden" id="isNeedApply" name="isNeedApply" value="${isNeedApply}">
-<input type="hidden" id="totalFive" name="totalFive" value="${totalFive}">
-<input type="hidden" id="day" name="day" value="${day}">
 <input type="hidden" id="addressName" value="${models.OperatorConfig.getVal("addressname")}">
 
 #{/form}
