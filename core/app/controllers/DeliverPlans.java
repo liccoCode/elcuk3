@@ -47,25 +47,19 @@ public class DeliverPlans extends Controller {
         renderArgs.put("suppliers", suppliers);
     }
 
-    /**
-     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 出货单
-     * TODO effect: 需要调整权限
-     */
     @Check("procures.createdeliveryment")
-    public static void deliverplan(List<Long> pids, String name) {
-        if(StringUtils.isBlank(name))
-            Validation.addError("", "出货单名称必须填写!");
+    public static void deliverplan(List<Long> pids) {
         if(pids == null || pids.size() <= 0)
-            Validation.addError("", "必须选择采购计划单!");
+            Validation.addError("", "必须选择采购计划!");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.DELIVERY));
         }
         DeliverPlan deliverplan = DeliverPlan
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+                .createFromProcures(pids, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.DELIVERY));
         }
         flash.success("出货单 %s 创建成功.", pids.toString());
         DeliverPlans.show(deliverplan.id);
