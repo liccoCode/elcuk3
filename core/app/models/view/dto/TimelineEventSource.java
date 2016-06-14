@@ -188,10 +188,10 @@ public class TimelineEventSource {
             }
 
             //如果有签收数量则用采购计划的入库时间
-            if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
+            // 修改新规则 现在开始时间都采用运输单的预计到库时间,快递没关联运输单的话,则采用采购计划上的预计到库时间
+            if(predictShipFinishDate == null) {
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
             }
-
 
             this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
