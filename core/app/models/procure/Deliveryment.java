@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -184,7 +185,7 @@ public class Deliveryment extends GenericModel {
      * 有无 Selling
      */
     @Expose
-    public Boolean haveSelling;
+    public Boolean haveSelling = true;
 
     /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
@@ -271,13 +272,39 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
+     * 批量确认
+     *
+     * @param deliverymentIds
+     */
+    public static List<String> batchConfirm(List<String> deliverymentIds) {
+        List<String> errors = new ArrayList<>();
+        List<String> confirmed = new ArrayList<>();
+        for(String id : deliverymentIds) {
+            Deliveryment dmt = Deliveryment.findById(id);
+            dmt.confirm();
+
+            if(Validation.hasErrors()) {
+                for(Error error : Validation.errors()) {
+                    String errMsg = String.format("ID: [%s] %s", id, error.message());
+                    if(!errors.contains(errMsg)) errors.add(errMsg);
+                }
+                Validation.clear();
+            } else {
+                confirmed.add(id);
+            }
+        }
+        if(!confirmed.isEmpty()) {
+            new ERecordBuilder("deliveryment.confirm").msgArgs(StringUtils.join(confirmed, ",")).fid("1").save();
+        }
+        return errors;
+    }
+
+    /**
      * 确认下采购单
      */
     public void confirm() {
         if(this.state != S.PENDING)
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
-        if(this.deliveryTime == null)
-            Validation.addError("", "交货时间必须填写");
         if(this.orderTime == null)
             Validation.addError("", "下单时间必须填写");
         if(Validation.hasErrors()) return;
@@ -293,7 +320,7 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public Set<Category> unitsCategorys() {
-        Set<Category> categories = new HashSet<Category>();
+        Set<Category> categories = new HashSet<>();
         for(ProcureUnit unit : this.units) {
             categories.add(unit.product.category);
         }
@@ -452,6 +479,7 @@ public class Deliveryment extends GenericModel {
         deliveryment.state = S.PENDING;
         deliveryment.units.addAll(units);
         deliveryment.deliveryType = T.NORMAL;
+        deliveryment.orderTime = new Date();
         for(ProcureUnit unit : deliveryment.units) {
             // 将 ProcureUnit 添加进入 Deliveryment , ProcureUnit 进入 DELIVERY 阶段
             unit.toggleAssignTodeliveryment(deliveryment, true);
