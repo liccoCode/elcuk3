@@ -61,6 +61,7 @@ public class DeliverPlan extends GenericModel {
     /**
      * 可为每一个 Deliveryment 添加一个名称
      */
+    @Expose
     public String name;
 
 

@@ -84,6 +84,8 @@ public class DeliverPlans extends Controller {
 
     public static void update(DeliverPlan dp) {
         try {
+            Validation.required("供应商", dp.cooperator);
+            Validation.required("出货单名称", dp.name);
             validation.valid(dp);
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().toString()));

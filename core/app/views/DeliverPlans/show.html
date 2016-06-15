@@ -26,12 +26,12 @@
         </tr>
 
         <tr>
-          <th>出货单名称</th>
+          <th><span style="color:red">*</span>出货单名称</th>
           <td>
-            <input type="text" class="span10" name="dp.name" value="${dp.name}">
+            <input type="text" class="span10" name="dp.name" value="${dp.name}" required>
           </td>
 
-          <th>供应商</th>
+          <th><span style="color:red">*</span>供应商</th>
           <td>
             <select name="dp.cooperator.id" class="selectize" style="width:150px;">
               <option>请选择</option>
@@ -42,9 +42,9 @@
           </td>
         </tr>
         <tr>
-          <th>创建日期</th>
+          <th><span style="color:red">*</span>创建日期</th>
           <td>
-            <input type="text" readonly="" disabled="" class="input-medium" name="dp.createDate"
+            <input type="date" class="input-medium" name="dp.createDate"
                    value="${dp.createDate.datetime()}">
           </td>
 
@@ -56,9 +56,11 @@
           <td colspan="6">
             <h4>备注:</h4>
             <textarea rows="5" name="dp.memo" class="span12">${dp.memo}</textarea>
-            <button id="plan_update_btn" class="btn btn-primary">更新</button>
-            <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-primary" target="_blank"><i
-                class="icon-download-alt"></i>导出出仓单</a>
+            <div style="margin-top:10px;">
+              <button id="plan_update_btn" class="btn btn-primary">更新</button>
+              <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-primary" target="_blank"><i
+                  class="icon-download-alt"></i>导出出仓单</a>
+            </div>
           </td>
         </tr>
       </table>
