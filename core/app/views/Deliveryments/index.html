@@ -26,14 +26,14 @@
 
     #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType, class:'inline selectize' /}
 
-      <select name="p.state" style="width: 150px;" class="inline selectize">
+      <select name="p.state" style="width: 100px;" class="inline selectize">
         <option value="">状态</option>
       #{list items:models.procure.Deliveryment.S.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.deliveryType" style="width: 150px;" class="inline selectize">
+      <select name="p.deliveryType" style="width: 100px;" class="inline">
         <option value="">类型</option>
       #{list items:models.procure.Deliveryment.T.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.deliveryType?.name() ? 'selected' : ''}>${t.label()}</option>
@@ -70,13 +70,13 @@
       </div>
 
       <div class="inline">
+        <a href="@{Excels.deliveryments(p)}" class="btn btn-info" target="_blank">导出</a>
       #{power.ck "deliveryments.manual"}
-        <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
-          <i class="icon-plus"></i>新增手动单
+        <a target="_blank" class="btn btn-success" href='@{Deliveryments.manual()}'>
+          新增手动单
         </a>
       #{/power.ck}
         <a href="javascript:void(0)" name="confirmBtn" class="btn btn-warning">确认采购单</a>
-        <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
       </div>
     </div>
   </div>
@@ -86,13 +86,17 @@
     <div class="span12">
       <table class="table table-condensed table-bordered">
         <tr>
-          <th></th>
+          <th>
+            <label class="checkbox">
+              <input type="checkbox" id="deliveryment_check_all">
+            </label>
+          </th>
           <th>#</th>
           <th>请款单</th>
           <th>采购单名称</th>
           <th>单据类型</th>
           <th>供应商</th>
-          <th>有无 Selling</th>
+          <th width="5%">有无 Selling</th>
           <th>最先交货日期</th>
           <th>最后交货日期</th>
           <th>交货进度</th>
@@ -107,10 +111,8 @@
         <tr>
           <td>
             <label>
-                #{if dmt.apply == null}
-                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                         name="deliverymentIds" value="${dmt.id}">
-                #{/if}
+              <input type="checkbox" name="deliverymentIds" value="${dmt.id}" data-state="${dmt.state?.name()}"
+                     data-cooperator="${dmt.cooperator?.id}" class="deliveryment">
             </label>
           </td>
           <td>
@@ -132,6 +134,7 @@
           </td>
           <td>${dmt.deliveryType?.label()}</td>
           <td>${dmt.supplier()?.name}</td>
+          <td>#{yesOrNo f: dmt.haveSelling/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
           <td>
@@ -155,7 +158,7 @@
         </tr>
       #{/list}
         <tr class="tb_footer">
-          <td colspan="12">
+          <td colspan="14">
           #{bootstrap_pager pi:p, url:'' /}
           </td>
         </tr>
@@ -172,3 +175,4 @@
     </div>
   </div>
 </form>
+#{records records:records/}

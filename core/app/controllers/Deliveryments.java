@@ -18,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.libs.F;
 import play.libs.Files;
 import play.mvc.Before;
@@ -27,6 +26,7 @@ import play.mvc.With;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,7 +38,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Deliveryments extends Controller {
 
-    @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
+    @Before(only = {"show", "update", "addunits", "delunits", "cancel"})
     public static void showPageSetUp() {
         String deliverymentId = request.params.get("id");
         if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dmt.id");
@@ -64,6 +64,9 @@ public class Deliveryments extends Controller {
     public static void beforeCooperatorJson() {
         String suppliersJson = J.json(Cooperator.supplierNames());
         renderArgs.put("suppliersJson", suppliersJson);
+        renderArgs.put("records",
+                ElcukRecord.records(Arrays.asList("procureapply.save", "deliveryment.createFromProcures",
+                        "deliveryment.confirm"), 50));
     }
 
     @Check("deliveryments.index")
@@ -156,15 +159,16 @@ public class Deliveryments extends Controller {
     /**
      * 确认采购单, 这样才能进入运输单进行挑选
      */
-    public static void confirm(String id) {
-        Deliveryment dmt = Deliveryment.findById(id);
-        dmt.confirm();
-        if(Validation.hasErrors())
-            render("Deliveryments/show.html", dmt);
-
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
-                .save();
-        show(id);
+    public static void confirm(List<String> deliverymentIds) {
+        if(deliverymentIds != null && !deliverymentIds.isEmpty()) {
+            List<String> errors = Deliveryment.batchConfirm(deliverymentIds);
+            if(errors.isEmpty()) {
+                flash.success("确认成功!");
+            } else {
+                flash.error(StringUtils.join(errors, "<br/>"));
+            }
+        }
+        redirect("/Deliveryments/index");
     }
 
     /**
