@@ -74,10 +74,11 @@ public class DeliverPlans extends Controller {
     @Check("deliverplans.index")
     public static void index(DeliverPlanPost p, List<String> deliverplanIds) {
         List<DeliverPlan> deliverplans = null;
-        if(deliverplanIds == null) deliverplanIds = new ArrayList<String>();
+        if(deliverplanIds == null) deliverplanIds = new ArrayList<>();
         if(p == null) p = new DeliverPlanPost();
         deliverplans = p.query();
-        render(deliverplans, p, deliverplanIds);
+        List<String> handlers = DeliverPlan.handlers();
+        render(deliverplans, p, deliverplanIds, handlers);
     }
 
 
