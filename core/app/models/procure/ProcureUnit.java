@@ -1604,8 +1604,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Cooperator cooperator = null;
         if(this.shipItems != null && !this.shipItems.isEmpty()) {
             Shipment shipment = this.shipItems.get(0).shipment;
-            shiptype = shipment.type;
-            cooperator = shipment.cooper;
+            if(shipment != null) {
+                shiptype = shipment.type;
+                cooperator = shipment.cooper;
+            }
         }
         return Whouse.findByCooperatorAndShipType(
                 cooperator != null ? cooperator : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
