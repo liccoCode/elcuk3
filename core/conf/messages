@@ -140,7 +140,8 @@ deliveryment.cancel=\u53D6\u6D88[\u91C7\u8D2D\u5355]
 deliveryment.cancel.msg=\u53D6\u6D88[\u91C7\u8D2D\u5355] %s \u539F\u56E0\u662F (%s)
 deliveryment.createFromProcures=[\u91C7\u8D2D\u5355\u5143] \u521B\u5EFA [\u91C7\u8D2D\u5355]
 deliveryment.createFromProcures.msg=[\u91C7\u8D2D\u5355\u5143] %s \u521B\u5EFA\u5230 [\u91C7\u8D2D\u5355] %s
-deliveryment.confirm=\u786E\u8BA4[\u91C7\u8D2D\u5355]
+deliveryment.confirm=\u6279\u91cf\u786E\u8BA4[\u91C7\u8D2D\u5355]
+deliveryment.confirm.msg=ID[%s]
 deliveryment.departApply=[\u91C7\u8D2D\u5355]\u4ECE[\u8BF7\u6B3E\u5355]\u5265\u79BB
 deliveryment.departApply.msg=[\u91C7\u8D2D\u5355] %s \u4ECE %s [\u8BF7\u6B3E\u5355] \u4E2D\u5265\u79BB.
 
