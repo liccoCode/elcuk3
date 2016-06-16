@@ -16,6 +16,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
+import models.whouse.InboundRecord;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -438,6 +439,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 创建人
      */
     @Expose
+    @OneToOne
     public User creator;
 
     @Transient
@@ -1676,4 +1678,52 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         return "暂无出库信息.";
     }
+
+    public static HashMap<String, Integer> caluStockInProcureUnit(String name, String type) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("stage IN (?,?) AND " + type + "= ?  ",
+                STAGE.PLAN, STAGE.DELIVERY, name).fetch();
+        HashMap<String, Integer> map = new HashMap<>();
+        int total_num = 0;
+        int no_fba_num = 0;
+
+        for(ProcureUnit unit : procureUnits) {
+            if(unit.attrs.planShipDate == null) {
+                no_fba_num += unit.qty();
+            } else {
+                if(map.containsKey(unit.whouse.name)) {
+                    map.put(unit.whouse.name, map.get(unit.whouse.name) + unit.qty());
+                } else {
+                    map.put(unit.whouse.name, unit.qty());
+                }
+            }
+            total_num += unit.qty();
+        }
+        int td_num = map.keySet().size();
+        if(no_fba_num > 0) {
+            td_num++;
+        }
+        map.put("无条码无FBA", no_fba_num);
+        map.put("total_num", total_num);
+        map.put("td_num", td_num);
+        return map;
+    }
+
+    /**
+     * 找到对应的入库记录中的确认入库数量
+     *
+     * @return
+     */
+    public Integer inboundQty() {
+        InboundRecord record = this.inboundRecord();
+        if(record != null) {
+            return record.qty;
+        }
+        return null;
+    }
+
+    public InboundRecord inboundRecord() {
+        return InboundRecord.findInboundRecordByProcureunitId(this.id);
+    }
+
+
 }

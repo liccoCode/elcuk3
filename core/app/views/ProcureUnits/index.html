@@ -8,7 +8,7 @@
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{ProcureUnits.indexForMarket()}" method="get" class="search_form" id="search_Form">
+  <form action="@{ProcureUnits.index()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
@@ -59,7 +59,8 @@
     </div>
     <div class="row-fluid">
       <div class="span12">
-        <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-primary" data-disable-with="loading">批量创建FBA</a>
+        <input type="button" class="btn btn-primary" id="batch_create_fba_btn" value="批量创建FBA"
+               data-url="@{ProcureUnits.batchCreateFBA()}">
         <a href="@{ProcureUnits.blank()}" class="btn btn-success" data-disable-with="loading">创建采购计划</a>
         <a target="_blank" class="btn btn-info" id="downloadFBAZIP">
           <i class="icon-download-alt"></i>下载FBA ZIP包
@@ -77,7 +78,7 @@
 <form method="post" id="create_deliveryment">
   <div class="row-fluid">
     <div class="span12">
-    #{render 'ProcureUnits/_unit_market_list.html', units: p.query(), p:p, checkbox:true/}
+    #{render 'ProcureUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
     </div>
   </div>
 

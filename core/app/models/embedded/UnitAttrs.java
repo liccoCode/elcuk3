@@ -71,14 +71,12 @@ public class UnitAttrs implements Serializable {
     @Expose
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    @Required
     public Currency currency;
 
     /**
      * 采购单价
      */
     @Expose
-    @Required
     @Min(0)
     public Float price;
 

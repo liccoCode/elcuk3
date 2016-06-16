@@ -1,12 +1,15 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.procure.ReceiveRecord;
 import play.db.jpa.Model;
 
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 库存项
@@ -59,4 +62,47 @@ public class WhouseItem extends Model {
         }
         return whouseItem;
     }
+
+    public static HashMap<String, Integer> caluStockInProcureUnit(String name, String type) {
+        HashMap<String, Integer> map = new HashMap<>();
+        List<ReceiveRecord> records = ReceiveRecord.find("state=? and procureUnit.attrs.planShipDate is null",
+                ReceiveRecord.S.Received).fetch();
+        int no_country = 0;
+        int total_num = 0;
+
+        for(ReceiveRecord record : records) {
+            if(record.procureUnit.whouse == null) {
+                no_country += record.qty;
+            } else {
+                if(map.containsKey(record.procureUnit.whouse.name)) {
+                    map.put(record.procureUnit.whouse.name, map.get(record.procureUnit.whouse.name) + record.qty);
+                } else {
+                    map.put(record.procureUnit.whouse.name, record.qty);
+                }
+            }
+            total_num += record.qty;
+        }
+
+
+        List<WhouseItem> items = WhouseItem.find("stockObj.stockObjId=? and stockObj.stockObjType=?",
+                name, StockObj.SOT.valueOf(type)).fetch();
+        for(WhouseItem item : items) {
+            item.stockObj.unmarshalAtts();
+
+            if(item.stockObj.attrs.get("fba") == null) {
+
+
+            }
+        }
+        int td_num = map.keySet().size();
+        if(no_country > 0) {
+            td_num++;
+        }
+
+        map.put("无条码无FBA", no_country);
+        map.put("total_num", total_num);
+        map.put("td_num", td_num);
+        return map;
+    }
+
 }

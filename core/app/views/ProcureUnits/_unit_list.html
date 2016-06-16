@@ -48,7 +48,18 @@
     </td>
     <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
     <td>${unit.product.abbreviation}</td>
-    <td></td>
+    <td>
+        #{set qtys: unit.qtys()/}
+      <span>${qtys._1 == null ? 0 : qtys._1}</span>/
+      <!-- 1. 如果收货数不等于计划数，则收货数需要标红 -->
+            <span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">
+            ${qtys._2 == null ? 0 : qtys._2}
+            </span>/
+      <!-- 2.如果入库数不等于收货数，则入库数需要标红 -->
+            <span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">
+            ${qtys._3 == null ? 0 : qtys._3}
+            </span>
+    </td>
     <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
     <td>${unit.fba?.shipmentId}</td>
     <td>

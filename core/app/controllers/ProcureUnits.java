@@ -19,6 +19,7 @@ import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
 import models.whouse.Whouse;
+import models.whouse.WhouseItem;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -142,6 +143,8 @@ public class ProcureUnits extends Controller {
         if(StringUtils.isNotBlank(sid)) {
             unit.selling = Selling.findById(sid);
             whouses = Whouse.findByAccount(unit.selling.account);
+        } else {
+            whouses = Whouse.findByType(Whouse.T.FBA);
         }
         render(unit, whouses);
     }
@@ -241,6 +244,7 @@ public class ProcureUnits extends Controller {
 
     public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
         unit.handler = User.findByUserName(Secure.Security.connected());
+        unit.creator = unit.handler;
         unit.validate();
 
         if(unit.shipType == Shipment.T.EXPRESS) {
@@ -640,6 +644,31 @@ public class ProcureUnits extends Controller {
         ActivitiProcess.endTask(processid, "procureunit.stopactiviti");
         unit.resetUnitByTerminalProcess();
         redirect("/activitis/index");
+    }
+
+    /**
+     * 展示库存
+     *
+     * @param name
+     * @param type
+     */
+    public static void showStockBySellingOrSku(String name, String type) {
+        HashMap<String, Integer> map = ProcureUnit.caluStockInProcureUnit(name, type);
+        HashMap<String, Integer> stock_map = WhouseItem.caluStockInProcureUnit(name, type);
+
+        render(map, stock_map);
+    }
+
+    /**
+     * 批量创建FBA
+     *
+     * @param unitIds
+     */
+    public static void batchCreateFBA(ProcurePost p, List<Long> pids) {
+        if(pids != null && pids.size() > 0) {
+            //ProcureUnit.postFbaShipments(unitIds);
+        }
+        ProcureUnits.index(p);
     }
 
 }

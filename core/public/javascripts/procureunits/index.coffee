@@ -1,6 +1,6 @@
 $ ->
   unitIds = []
-  $(".search_form").on("click", "#downloadFBAZIP",(e) ->
+  $(".search_form").on("click", "#downloadFBAZIP", (e) ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
@@ -17,8 +17,8 @@ $ ->
       $table.appendChild($tr)
     )
     $('#box_number_modal').modal('show')
-  ).on("blur", "input[name='boxNumbers']",(e) ->
-    # 确保用户填写的是大于零的数字
+  ).on("blur", "input[name='boxNumbers']", (e) ->
+# 确保用户填写的是大于零的数字
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
   ).on("click", "#sumbitDownloadFBAZIP", (r) ->
@@ -59,3 +59,17 @@ $ ->
   $("#create_deliveryment_btn").click (e) ->
     $form = $("#create_deliveryment")
     window.open('/deliveryments/create?' + $form.serialize(), "_blank")
+
+
+  $("#batch_create_fba_btn").click (->
+    $btn = $(@)
+    checkboxList = $('input[name="pids"]')
+    unitIds = []
+    for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    if unitIds.length is 0
+      noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
+      return false
+
+    $form = $("#search_Form")
+    $form.attr("action", $btn.data('url')).submit()
+  )

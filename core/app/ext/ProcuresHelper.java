@@ -201,4 +201,13 @@ public class ProcuresHelper extends JavaExtensions {
         float amountUSD = priceUSD * unit.qty();
         return new F.T2<Float, Float>(priceUSD, amountUSD);
     }
+
+    /**
+     * 返回计划数、实际交货数、入库数(如果暂没有数据则显示0)
+     *
+     * @return
+     */
+    public static F.T3<Integer, Integer, Integer> qtys(ProcureUnit unit) {
+        return new F.T3(unit.attrs.planQty, unit.attrs.qty, unit.inboundQty());
+    }
 }
