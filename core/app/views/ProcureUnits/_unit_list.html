@@ -36,12 +36,12 @@
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td>
         #{if unit.stage.name()=='PLAN'}
-          <a href="#" class="btn btn-mini btn-primary">修改</a>
+          <a href="@{ProcureUnits.edit(unit.id, 'edit')}" class="btn btn-mini btn-primary">修改</a>
         #{/if}
         #{elseif unit.stage.name()=='DELIVERY'}
           <a href="#" class="btn btn-mini btn-warning">分拆</a>
         #{/elseif}
-      <a href="#" class="btn btn-mini btn-info">查看</a>
+      <a href="@{ProcureUnits.edit(unit.id, 'show')}" class="btn btn-mini btn-info">查看</a>
     </td>
     <td class="selling_id">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>

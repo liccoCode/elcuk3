@@ -149,6 +149,8 @@ $ ->
         cooper_name = item["cooperator"]["name"]
         $("#cooperator").append("<option value='" + cooper_id + "'>" + cooper_name + "</option>")
         coop_hash[cooper_id] = item
+      if $("#cooperator").attr("coop_value")
+        $("#cooperator option[value='" + $("#cooperator").attr("coop_value") + "']").attr("selected", true)
     )
 
   checkCoopertorBySelling = (selling) ->

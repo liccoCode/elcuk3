@@ -288,12 +288,12 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void edit(long id) {
+    public static void edit(long id, String type) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         unit.setPeriod();
-        render(unit, oldPlanQty, whouses);
+        render(unit, oldPlanQty, whouses, type);
     }
 
     /**
@@ -312,7 +312,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
         flash.success("成功修改采购计划!", id);
-        edit(id);
+        edit(id, "edit");
 
     }
 
