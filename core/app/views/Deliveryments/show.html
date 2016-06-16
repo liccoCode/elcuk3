@@ -74,7 +74,6 @@
           #{/power.ck}
           #{power.ck 'deliveryments.cancel'}
               #{if dmt.canBeCancle()}
-                <!-- TODO: 校验备注是否填写-->
                 <a href="javascript:void(0)" data-href="@{Deliveryments.cancel()}" name="cancleBtn"
                    class="btn btn-danger">取消采购单</a>
               #{/if}

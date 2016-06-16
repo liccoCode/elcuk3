@@ -84,6 +84,7 @@ public class DeliverPlans extends Controller {
 
     public static void update(DeliverPlan dp) {
         try {
+            if(dp.isLocked()) Validation.addError("", "已经确认发货的出货单不能再修改!");
             Validation.required("供应商", dp.cooperator);
             Validation.required("出货单名称", dp.name);
             validation.valid(dp);
