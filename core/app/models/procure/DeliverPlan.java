@@ -127,6 +127,7 @@ public class DeliverPlan extends GenericModel {
         }
         if(Validation.hasErrors()) return deliverplan;
         deliverplan.handler = user;
+        deliverplan.state = P.CREATE;
         for(ProcureUnit unit : units) {
             if(unit.deliverplan == null) {
                 // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
@@ -136,9 +137,6 @@ public class DeliverPlan extends GenericModel {
                 Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
             }
         }
-        deliverplan.state = P.CREATE;
-        deliverplan.save();
-
         new ERecordBuilder("deliverplan.createFromProcures")
                 .msgArgs(StringUtils.join(pids, ","), deliverplan.id)
                 .fid(deliverplan.id).save();

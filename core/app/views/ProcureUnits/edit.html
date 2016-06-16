@@ -6,6 +6,7 @@
 
 #{errorMsgs /}
 #{flash_alert/}
+#{info_row title:'采购计划' /}
 #{warning_row ''}
 <h4>采购计划在不同状态修改会有限制</h4>
 <ol>
@@ -27,13 +28,14 @@
       <tr>
         <td colspan="4">
           <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
-
+        #{if type=='edit'}
           <div class="input-append">
             <input type="text" name="msg" placeholder="简要填写变更的原因">
             <button type="submit" class="btn btn-primary" rel="popover" content="当[采购计划的FBA]已生成后再修改[运输方式]或[采购数量]时必须填写原因" placement="right" data-loading>
               更新
             </button>
           </div>
+        #{/if}
         </td>
       </tr>
     </table>

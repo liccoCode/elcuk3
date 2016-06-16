@@ -217,4 +217,13 @@ public class Cooperators extends Controller {
         }
         renderJSON(J.json(names));
     }
+
+    public static void findCoopItemBySku(String sku) {
+        List<CooperItem> list = CooperItem.find("product.sku = ? ", sku).fetch();
+        for(CooperItem item : list) {
+            item.cooper_id = item.cooperator.id;
+
+        }
+        renderJSON(J.G(list));
+    }
 }

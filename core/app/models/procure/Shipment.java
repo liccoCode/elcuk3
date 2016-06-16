@@ -103,6 +103,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String label() {
                 return "海运";
             }
+
+            @Override
+            public String detail() {
+                return "海运";
+            }
         },
         /**
          * 空运
@@ -112,6 +117,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String label() {
                 return "空运";
             }
+
+            @Override
+            public String detail() {
+                return "空运";
+            }
         },
         /**
          * 快递
@@ -119,11 +129,44 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         EXPRESS {
             @Override
             public String label() {
-                return "快递";
+                return "快递--优惠渠道";
+            }
+
+            @Override
+            public String detail() {
+                return "快递--优惠渠道 (8天,32.5/KGS)";
+            }
+        },
+        /**
+         * 快递--经济渠道
+         */
+        EXPRESS_ECO {
+            @Override
+            public String label() {
+                return "快递--经济渠道";
+            }
+
+            @Override
+            public String detail() {
+                return "快递--经济渠道 (11天,29/KGS)";
+            }
+        },
+        /**
+         * 快递--快速渠道
+         */
+        EXPRESS_FAST {
+            @Override
+            public String label() { return "快递--快速渠道";}
+
+            @Override
+            public String detail() {
+                return "快递--经济渠道 (5天,38/KGS)";
             }
         };
 
         public abstract String label();
+
+        public abstract String detail();
     }
 
     public enum S {

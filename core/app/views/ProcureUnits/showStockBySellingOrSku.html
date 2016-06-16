@@ -1,0 +1,44 @@
+<table class="table table-condensed table-bordered" style="background-color: #ffe4c4" bgcolor="#">
+  <tr>
+    <td rowspan="2">总数</td>
+    <td colspan="${map.get("td_num")}" style="text-align:center">工厂中</td>
+    <td rowspan="2">总数</td>
+    <td colspan="${stock_map.get("td_num")}" style="text-align:center">仓库中</td>
+  </tr>
+  <tr>
+  #{list map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num" && key == '无条码无FBA'}
+        <td>${key}</td>
+      #{/if}
+  #{/list}
+  #{list map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num" && key != '无条码无FBA'}
+        <td>${key}</td>
+      #{/if}
+  #{/list}
+  #{list stock_map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num" && key == '无条码无FBA'}
+        <td>${key}</td>
+      #{/if}
+  #{/list}
+  #{list stock_map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num" && key != '无条码无FBA'}
+        <td>${key}</td>
+      #{/if}
+  #{/list}
+  </tr>
+  <tr>
+    <td>${map.get("total_num")}</td>
+  #{list map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num"}
+        <td>${map.get(key)}</td>
+      #{/if}
+  #{/list}
+    <td>${stock_map.get("total_num")}</td>
+  #{list stock_map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num"}
+        <td>${stock_map.get(key)}</td>
+      #{/if}
+  #{/list}
+  </tr>
+</table>

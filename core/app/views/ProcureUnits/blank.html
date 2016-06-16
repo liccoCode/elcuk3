@@ -14,9 +14,7 @@
     #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus/}
   <tr>
     <td colspan="4">
-        #{if unit.selling != null}
-          #{render 'ProcureUnits/_shipments.html'/}
-        #{/if}
+        #{render 'ProcureUnits/_shipments.html'/}
     </td>
   </tr>
   <tr>

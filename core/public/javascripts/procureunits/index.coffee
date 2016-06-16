@@ -1,4 +1,5 @@
 $ ->
+  unitIds = []
   $(".search_form").on("click", "#downloadFBAZIP, #createdeliveryment, #createdeliverplan", (e) ->
     if $('input[name="pids"]:checked').size() is 0
       noty({text: '请选择采购计划', type: 'error'})
@@ -56,6 +57,23 @@ $ ->
       $table.appendChild($tr)
     )
     $('#box_number_modal').modal('show')
+
+  $("#create_deliveryment_btn").click (e) ->
+    $form = $("#create_deliveryment")
+    window.open('/deliveryments/create?' + $form.serialize(), "_blank")
+
+  $("#batch_create_fba_btn").click (->
+    $btn = $(@)
+    checkboxList = $('input[name="pids"]')
+    unitIds = []
+    for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    if unitIds.length is 0
+      noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
+      return false
+
+    $form = $("#search_Form")
+    $form.attr("action", $btn.data('url')).submit()
+  )
 
   getCheckedUnitIds = () ->
     unitIds = []
