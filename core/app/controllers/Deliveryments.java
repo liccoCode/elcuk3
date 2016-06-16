@@ -18,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.libs.F;
 import play.libs.Files;
 import play.mvc.Before;
@@ -27,6 +26,7 @@ import play.mvc.With;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,10 +35,10 @@ import java.util.List;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Deliveryments extends Controller {
 
-    @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
+    @Before(only = {"show", "update", "addunits", "delunits", "cancel"})
     public static void showPageSetUp() {
         String deliverymentId = request.params.get("id");
         if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dmt.id");
@@ -48,6 +48,7 @@ public class Deliveryments extends Controller {
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.openUsers());
+        renderArgs.put("cooperators", Cooperator.suppliers());
     }
 
     @Before(only = {"index", "deliverymentToApply"})
@@ -63,18 +64,21 @@ public class Deliveryments extends Controller {
     public static void beforeCooperatorJson() {
         String suppliersJson = J.json(Cooperator.supplierNames());
         renderArgs.put("suppliersJson", suppliersJson);
+        renderArgs.put("records",
+                ElcukRecord.records(Arrays.asList("procureapply.save", "deliveryment.createFromProcures",
+                        "deliveryment.confirm"), 50));
     }
 
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
-        render(deliveryments, p, deliverymentIds);
+        List<String> handlers = Deliveryment.handlers();
+        render(deliveryments, p, deliverymentIds, handlers);
     }
 
-    //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         String expressid = ",,";
@@ -87,35 +91,32 @@ public class Deliveryments extends Controller {
     }
 
     public static void update(Deliveryment dmt) {
+        if(!dmt.canBeEdit()) Validation.addError("", "已确认采购单不能再修改!");
         validation.valid(dmt);
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
         dmt.save();
+        dmt.syncCooperatorToUnits();
         flash.success("更新成功.");
         show(dmt.id);
     }
 
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
-     * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
-    public static void create(List<Long> pids, String name) {
-        Validation.required("procrues.createDeliveryment.name", name);
+    public static void create(List<Long> pids) {
         Validation.required("deliveryments.addunits", pids);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
-
         Deliveryment deliveryment = Deliveryment
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
-
+                .createFromProcures(pids, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
-
         flash.success("Deliveryment %s 创建成功.", deliveryment.id);
         Deliveryments.show(deliveryment.id);
     }
@@ -159,15 +160,16 @@ public class Deliveryments extends Controller {
     /**
      * 确认采购单, 这样才能进入运输单进行挑选
      */
-    public static void confirm(String id) {
-        Deliveryment dmt = Deliveryment.findById(id);
-        dmt.confirm();
-        if(Validation.hasErrors())
-            render("Deliveryments/show.html", dmt);
-
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
-                .save();
-        show(id);
+    public static void confirm(List<String> deliverymentIds) {
+        if(deliverymentIds != null && !deliverymentIds.isEmpty()) {
+            List<String> errors = Deliveryment.batchConfirm(deliverymentIds);
+            if(errors.isEmpty()) {
+                flash.success("确认成功!");
+            } else {
+                flash.error(StringUtils.join(errors, "<br/>"));
+            }
+        }
+        redirect("/Deliveryments/index");
     }
 
     /**
@@ -178,9 +180,10 @@ public class Deliveryments extends Controller {
         Validation.required("deliveryments.cancel", msg);
         Deliveryment dmt = Deliveryment.findById(id);
         dmt.cancel(msg);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             render("Deliveryments/show.html", dmt, msg);
-
+        }
+        flash.success("取消成功");
         show(dmt.id);
     }
 
@@ -257,7 +260,7 @@ public class Deliveryments extends Controller {
 
         } catch(Exception e) {
             e.printStackTrace();
-            Logger.warn("downloadFBAZIP %s:%s", id,e.getMessage());
+            Logger.warn("downloadFBAZIP %s:%s", id, e.getMessage());
         } finally {
             File zip = new File(Constant.TMP + "/FBA.zip");
             Files.zip(dirfile, zip);

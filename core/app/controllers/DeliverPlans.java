@@ -38,6 +38,7 @@ public class DeliverPlans extends Controller {
         DeliverPlan dmt = DeliverPlan.findById(deliverymentId);
         if(dmt != null)
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
     }
 
@@ -47,25 +48,19 @@ public class DeliverPlans extends Controller {
         renderArgs.put("suppliers", suppliers);
     }
 
-    /**
-     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 出货单
-     * TODO effect: 需要调整权限
-     */
     @Check("procures.createdeliveryment")
-    public static void deliverplan(List<Long> pids, String name) {
-        if(StringUtils.isBlank(name))
-            Validation.addError("", "出货单名称必须填写!");
+    public static void deliverplan(List<Long> pids) {
         if(pids == null || pids.size() <= 0)
-            Validation.addError("", "必须选择采购计划单!");
+            Validation.addError("", "必须选择采购计划!");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.DELIVERY));
         }
         DeliverPlan deliverplan = DeliverPlan
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+                .createFromProcures(pids, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.DELIVERY));
         }
         flash.success("出货单 %s 创建成功.", pids.toString());
         DeliverPlans.show(deliverplan.id);
@@ -79,15 +74,19 @@ public class DeliverPlans extends Controller {
     @Check("deliverplans.index")
     public static void index(DeliverPlanPost p, List<String> deliverplanIds) {
         List<DeliverPlan> deliverplans = null;
-        if(deliverplanIds == null) deliverplanIds = new ArrayList<String>();
+        if(deliverplanIds == null) deliverplanIds = new ArrayList<>();
         if(p == null) p = new DeliverPlanPost();
         deliverplans = p.query();
-        render(deliverplans, p, deliverplanIds);
+        List<String> handlers = DeliverPlan.handlers();
+        render(deliverplans, p, deliverplanIds, handlers);
     }
 
 
     public static void update(DeliverPlan dp) {
         try {
+            if(dp.isLocked()) Validation.addError("", "已经确认发货的出货单不能再修改!");
+            Validation.required("供应商", dp.cooperator);
+            Validation.required("出货单名称", dp.name);
             validation.valid(dp);
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().toString()));

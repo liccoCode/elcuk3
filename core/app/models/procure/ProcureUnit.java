@@ -26,6 +26,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -198,7 +199,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     /**
      * 此采购计划的供应商信息.
@@ -226,7 +227,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 所关联的运输出去的 ShipItem.
      */
     @OneToMany(mappedBy = "unit")
-    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
+    public List<ShipItem> shipItems = new ArrayList<>();
 
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -1612,8 +1613,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Cooperator cooperator = null;
         if(this.shipItems != null && !this.shipItems.isEmpty()) {
             Shipment shipment = this.shipItems.get(0).shipment;
-            shiptype = shipment.type;
-            cooperator = shipment.cooper;
+            if(shipment != null) {
+                shiptype = shipment.type;
+                cooperator = shipment.cooper;
+            }
         }
         return Whouse.findByCooperatorAndShipType(
                 cooperator != null ? cooperator : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
@@ -1725,5 +1728,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return InboundRecord.findInboundRecordByProcureunitId(this.id);
     }
 
-
+    public static STAGE[] stages() {
+        return ArrayUtils.removeElement(STAGE.values(), STAGE.APPROVE);
+    }
 }

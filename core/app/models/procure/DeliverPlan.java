@@ -1,11 +1,14 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -16,6 +19,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,7 +40,7 @@ public class DeliverPlan extends GenericModel {
 
 
     @OneToMany(mappedBy = "deliverplan", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
 
 
     @OneToOne
@@ -57,6 +61,7 @@ public class DeliverPlan extends GenericModel {
     /**
      * 可为每一个 Deliveryment 添加一个名称
      */
+    @Expose
     public String name;
 
 
@@ -104,14 +109,12 @@ public class DeliverPlan extends GenericModel {
     public List<ReceiveRecord> receiveRecords = new ArrayList<>();
 
     /**
-     * 通过 ProcureUnit 来创建采购单
+     * 通过 ProcureUnit 来创建出货单
      * <p/>
-     * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
      *
      * @param pids
      */
-    public synchronized static DeliverPlan createFromProcures(List<Long> pids, String name,
-                                                              User user) {
+    public synchronized static DeliverPlan createFromProcures(List<Long> pids, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         DeliverPlan deliverplan = new DeliverPlan(DeliverPlan.id());
         if(pids.size() != units.size()) {
@@ -119,20 +122,19 @@ public class DeliverPlan extends GenericModel {
             return deliverplan;
         }
 
-        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            isUnitToDeliverymentValid(unit, cop);
+            isUnitToDeliverymentValid(unit);
         }
         if(Validation.hasErrors()) return deliverplan;
-        deliverplan.cooperator = cop;
         deliverplan.handler = user;
-        deliverplan.name = name.trim();
-        deliverplan.units.addAll(units);
-        for(ProcureUnit unit : deliverplan.units) {
-            if(unit.deliverplan != null)
+        for(ProcureUnit unit : units) {
+            if(unit.deliverplan == null) {
+                // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
+                unit.toggleAssignTodeliverplan(deliverplan, true);
+                unit.save();
+            } else {
                 Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
-            // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
-            unit.toggleAssignTodeliverplan(deliverplan, true);
+            }
         }
         deliverplan.state = P.CREATE;
         deliverplan.save();
@@ -158,13 +160,9 @@ public class DeliverPlan extends GenericModel {
     }
 
 
-    private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
+    private static boolean isUnitToDeliverymentValid(ProcureUnit unit) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
             Validation.addError("", "采购计划单必须在采购中状态!");
-            return false;
-        }
-        if(!cop.equals(unit.cooperator)) {
-            Validation.addError("", "添加一个出库单只能一个供应商!");
             return false;
         }
         return true;
@@ -178,12 +176,11 @@ public class DeliverPlan extends GenericModel {
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit, singleCop)) {
+            if(isUnitToDeliverymentValid(unit)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
 
@@ -201,12 +198,14 @@ public class DeliverPlan extends GenericModel {
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else {
                 unit.toggleAssignTodeliverplan(null, false);
+                unit.save();
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+        if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
         this.save();
 
@@ -273,5 +272,30 @@ public class DeliverPlan extends GenericModel {
 
     public boolean isLocked() {
         return this.state == P.DONE;
+    }
+
+    /**
+     * 已经做过入库确认的人员名称
+     *
+     * @return
+     */
+    public static List<String> handlers() {
+        List<String> names = new ArrayList<>();
+        try {
+            List<Map<String, Object>> rows = DBUtils.rows(
+                    "SELECT DISTINCT u.username AS username FROM DeliverPlan d" +
+                            " LEFT JOIN User u ON u.id=d.handler_id"
+            );
+            if(rows != null && !rows.isEmpty()) {
+                for(Map<String, Object> row : rows) {
+                    if(row != null && row.containsKey("username")) {
+                        if(row.get("username") != null) names.add(row.get("username").toString());
+                    }
+                }
+            }
+        } catch(NullPointerException e) {
+            Logger.warn(Webs.E(e));
+        }
+        return names;
     }
 }
