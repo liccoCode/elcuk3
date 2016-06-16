@@ -5,7 +5,7 @@ $ ->
     if $("#sellingId")
       checkCoopertorBySelling($("#sellingId").val())
       getCooperItemBySku($("#unit_sku").val())
-
+      getStockBySku($("#unit_sku").val())
 
   $('#box_num').change (e) ->
     e.preventDefault()
@@ -41,7 +41,7 @@ $ ->
 
 
   # Ajax 加载 Shipment
-  $('#new_procureunit,#unitEditForm,#update_form').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
+  $('#new_procureunit,#unitEditForm,#update_form,#splitUnitForm').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
     whouseId = $("[name='unit.whouse.id']").val()
     shipType = $("[name='unit.shipType']:checked").val()
     shipment = $("#shipments")
@@ -129,7 +129,7 @@ $ ->
       sku = item.split(',')[0]
       $("#unit_sku").val(sku)
       $("#unit_sku").attr("readonly", true)
-      $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU"})
+      getStockBySku(sku)
       getProductNmae(sku)
       checkCoopertorBySelling(item)
       getCooperItemBySku(sku)
@@ -164,6 +164,10 @@ $ ->
     value = coop_hash[$(@).val()]
     $("#coop_text").text("生产周期(day): " + value["period"] + ";  每箱数量: " + value["boxSize"] + ";  最低采购量:" + value["lowestOrderNum"])
   )
+
+  getStockBySku = (sku) ->
+    $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU"})
+
 
 
 

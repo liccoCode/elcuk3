@@ -7,12 +7,22 @@
   </tr>
   <tr>
   #{list map.keySet(), as:'key'}
-      #{if key != "total_num" && key != "td_num"}
+      #{if key != "total_num" && key != "td_num" && key == '无条码无FBA'}
+        <td>${key}</td>
+      #{/if}
+  #{/list}
+  #{list map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num" && key != '无条码无FBA'}
         <td>${key}</td>
       #{/if}
   #{/list}
   #{list stock_map.keySet(), as:'key'}
-      #{if key != "total_num" && key != "td_num"}
+      #{if key != "total_num" && key != "td_num" && key == '无条码无FBA'}
+        <td>${key}</td>
+      #{/if}
+  #{/list}
+  #{list stock_map.keySet(), as:'key'}
+      #{if key != "total_num" && key != "td_num" && key != '无条码无FBA'}
         <td>${key}</td>
       #{/if}
   #{/list}

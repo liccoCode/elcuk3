@@ -6,15 +6,15 @@
   </td>
   <th style="width:100px;">SKU</th>
   <td>
-    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.selling?.listing.product.sku}"
-    #{if unit.selling?.listing.product.sku} readonly #{/if}required>
+    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.selling?.listing?.product?.sku}"
+    #{if unit.selling?.listing?.product?.sku} readonly #{/if}required>
   </td>
 </tr>
 <tr>
   <th>产品名称</th>
   <td>
-    <input type="text" id="productName" style="width:300px;" value="${unit.selling?.listing.product.abbreviation}"
-    #{if unit.selling?.listing.product.abbreviation} readonly #{/if}required>
+    <input type="text" id="productName" style="width:300px;" value="${unit.selling?.listing?.product?.abbreviation}"
+    #{if unit.selling?.listing?.product?.abbreviation} readonly #{/if}required>
   </td>
   <th>阶段</th>
   <td>
@@ -52,7 +52,7 @@
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
     &nbsp;&nbsp;&nbsp;
-    <select id="cooperator" name="unit.cooperator.id" coop_value="${unit.cooperator.id}">
+    <select id="cooperator" name="unit.cooperator.id" coop_value="${unit.cooperator?.id}">
       <option value="">供应商参考</option>
     </select>
     <span id="coop_text"></span>
