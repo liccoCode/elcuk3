@@ -32,6 +32,7 @@
     .td2{
       width:50%;
       text-align:right;
+      vertical-align:bottom;
       padding:10px;
       font:14px bold;
     }
@@ -70,263 +71,250 @@
 
 
 <form action="@{Orders.invoicepdf()}" method="post" id="create_invoice_form" target="_blank">
-<table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
-  <input type="hidden" name="invoice.orderid" value="${ord.orderId}">
-  <tr>
-    <td class="td1">
-      <input type="hidden" name="invoice.isreturn" value="0">
+  <table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
+    <input type="hidden" name="invoice.orderid" value="${ord.orderId}">
+    <tr>
+      <td class="td1">
+        <input type="hidden" name="invoice.isreturn" value="0">
 
-      <div class="${_row ? 'row' : 'row-fluid'}" style="margin-top:5px;max-height:200px;overflow:auto;margin-bottom:20px">
-        <div class="span12">
-        #{if records!=null && records.size()>0 }
-          <p class="text-info">${records.get(0).record().raw()}</p>
-        #{/if}
-        </div>
-      </div>
-
-
-      <select name="invoice.europevat" style="width:120px;">
-      #{list items:models.market.OrderInvoice.VAT.values(), as:'v'}
-          #{if !(ord.market==models.market.M.AMAZON_UK && v==models.market.OrderInvoice.VAT.EUROPE)}
-            <option ${v==invoice?.europevat ? 'selected' : ''} value="${v}">${v.label()}</option>
+        <div class="${_row ? 'row' : 'row-fluid'}" style="margin-top:5px;max-height:200px;overflow:auto;margin-bottom:20px">
+          <div class="span12">
+          #{if records!=null && records.size()>0 }
+            <p class="text-info">${records.get(0).record().raw()}</p>
           #{/if}
-      #{/list}
-      </select>
-    </td>
-    <td>
-    </td>
-  </tr>
-  <tr>
-    <td class="td1">
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
-      </strong><br>
-    ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}
-    </td>
-    <td rowspan="4" class="td2">
-      <div class="div1">
-      #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ) || (ord.market==models
-      .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
-        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/EDEER-logo.jpg"
-             style="height:100%">
-      #{/if}
-      #{if  (ord.market==models.market.M.AMAZON_DE) || (ord.market==models
-            .market.M.AMAZON_FR) ||  (ord.market==models.market.M.AMAZON_IT && (invoice==null
-      || invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
-        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/TUGGLE-logo.jpg"
-             style="height:100%">
-      #{/if}
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="td1"></td>
-  </tr>
-  <tr>
-    <td></td>
-  </tr>
-  <tr>
-    <td></td>
-  </tr>
-  <tr>
-    <td class="td4">
-      <strong>${invoiceformat.to}</strong> <br>
-    #{if invoice != null}
-      <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.invoiceto.replace("DE","Deutschland")}">
-    #{/if}
-    #{else}
-        #{if ord.address1!=null && ord.address1.length()>0}
-          <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.reciver+","+ord.address1
-          .replace("DE","Deutschland")}">
+          </div>
+        </div>
+
+        <select name="invoice.europevat" style="width:120px;">
+        #{list items:models.market.OrderInvoice.VAT.values(), as:'v'}
+            #{if !(ord.market==models.market.M.AMAZON_UK && v==models.market.OrderInvoice.VAT.EUROPE)}
+              <option ${v==invoice?.europevat ? 'selected' : ''} value="${v}">${v.label()}</option>
+            #{/if}
+        #{/list}
+        </select>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td class="td1">
+        <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
+        </strong><br>
+      ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}
+      </td>
+      <td rowspan="1" class="td2" style="vertical-align:bottom;">
+        #{if (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ) ||
+        (ord.market==models.market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
+          <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/easyacc_logo.png" style="height:100%;
+              width:80%">
         #{/if}
-        #{else}
-          <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
-        #{/else}
-    #{/else}
+        #{if (ord.market==models.market.M.AMAZON_DE) || (ord.market==models.market.M.AMAZON_FR) ||
+        (ord.market==models.market.M.AMAZON_IT && (invoice==null|| invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
+          <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/easyacc_logo.png" style="height:100%;
+              width:80%">
+        #{/if}
+      </td>
+    </tr>
 
-    </td>
-    <td class="td2">
-      <strong>${invoiceformat.from}</strong> <br>
-    #{if  ord.market==models.market.M.AMAZON_IT && invoice!=null && invoice.europevat==models.market.OrderInvoice.VAT
-    .EUROPE}
-    ${invoiceformat.fromeurinfo1} <br>
-    ${invoiceformat.fromeurinfo2} <br>
-    ${invoiceformat.fromeurinfo3}<br>
-    ${invoiceformat.fromeurinfo4} <br>
-    ${invoiceformat.fromeurinfo5} <br>
-      <strong>${invoiceformat.fromeurinfo6}</strong> <br>
-      <strong>${invoiceformat.fromeurinfo7}</strong> <br>
-    #{/if}
-    #{else}
-    ${invoiceformat.frominfo1} <br>
-    ${invoiceformat.frominfo2} <br>
-    ${invoiceformat.frominfo3}<br>
-    ${invoiceformat.frominfo4} <br>
-    ${invoiceformat.frominfo5} <br>
-      <strong>${invoiceformat.frominfo6}</strong> <br>
-      <strong>${invoiceformat.frominfo7}</strong> <br>
-    #{/else}
-    </td>
-  </tr>
-  <tr>
-    <td class="td4"><strong>${invoiceformat.address}</strong><br>
-    #{if invoice != null}
-      <input style="width:100%" type="text" id="address" name="invoice.address" value="${invoice.address.replace("DE","Deutschland")}">
-    #{/if}
-    #{else}
-      <input style="width:100%" type="text" id="address" name="invoice.address" value="${editaddress}">
-    #{/else}
-    </td>
-    <td rowspan="2"></td>
-  </tr>
-</table>
-<table class="table1" cellpadding="8px" style="width:70%" cellspacing="0" align='center'>
-  <tr>
-    <td class="td3"><strong>${invoiceformat.itemname}</strong></td>
-    <td class="td3"><strong>${invoiceformat.qty}</strong></td>
-    <td class="td3"><strong>${invoiceformat.price}</strong></td>
-    <td class="td3"><strong>${invoiceformat.itemamount}</strong></td>
-  </tr>
-
-
-#{list items:ord.items, as:'item'}
-  <tr>
-    <td class="td3" style="width:50%">${item.listingName}</td>
-    <td class="td3">${item.quantity}</td>
-
+    <tr>
+      <td class="td4">
+        <strong>${invoiceformat.to}</strong> <br>
       #{if invoice != null}
-          #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
-            <td class="td3">
-                #{if item.quantity!=0}
-                  <input type="text" name="invoice.price" value="${new BigDecimal(item.price-item.discountPrice).divide(new BigDecimal
-                  (item.quantity),2,4)}">
-                #{/if}
-                #{else}
-                  <input type="text" name="invoice.price" value="0">
-                #{/else}
-            </td>
-            <td class="td3">${new BigDecimal(item.price-item.discountPrice).setScale(2, 4).floatValue()}</td>
+        <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.invoiceto.replace("DE","Deutschland")}">
+      #{/if}
+      #{else}
+          #{if ord.address1!=null && ord.address1.length()>0}
+            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.reciver+","+ord.address1
+            .replace("DE","Deutschland")}">
           #{/if}
           #{else}
-            <td class="td3"><input type="text" name="invoice.price" value="${invoice.price.get(item_index-1)}">
-            </td>
-            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1)))
-            .setScale(2, 4).floatValue()}</td>
+            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
           #{/else}
+      #{/else}
+
+      </td>
+      <td class="td2">
+        <strong>${invoiceformat.from}</strong><br>
+      #{if ord.market==models.market.M.AMAZON_IT && invoice!=null && invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+      ${invoiceformat.fromeurinfo1} <br>
+      ${invoiceformat.fromeurinfo2} <br>
+      ${invoiceformat.fromeurinfo3}<br>
+      ${invoiceformat.fromeurinfo4} <br>
+      ${invoiceformat.fromeurinfo5} <br>
+        <strong>${invoiceformat.fromeurinfo6}</strong> <br>
+        <strong>${invoiceformat.fromeurinfo7}</strong> <br>
       #{/if}
-      #{else }
-          #{if item.quantity!=0}
-            <td class="td3">
-              <input type="text" name="invoice.price" value="${new BigDecimal(item.price-item.discountPrice).
+      #{else}
+      ${invoiceformat.frominfo1} <br>
+      ${invoiceformat.frominfo2} <br>
+      ${invoiceformat.frominfo3}<br>
+      ${invoiceformat.frominfo4} <br>
+      ${invoiceformat.frominfo5} <br>
+        <strong>${invoiceformat.frominfo6}</strong> <br>
+        <strong>${invoiceformat.frominfo7}</strong> <br>
+      #{/else}
+      </td>
+    </tr>
+    <tr>
+      <td class="td4"><strong>${invoiceformat.address}</strong><br>
+      #{if invoice != null}
+        <input style="width:100%" type="text" id="address" name="invoice.address" value="${invoice.address.replace("DE","Deutschland")}">
+      #{/if}
+      #{else}
+        <input style="width:100%" type="text" id="address" name="invoice.address" value="${editaddress}">
+      #{/else}
+      </td>
+      <td rowspan="2"></td>
+    </tr>
+  </table>
+  <table class="table1" cellpadding="8px" style="width:70%" cellspacing="0" align='center'>
+    <tr>
+      <td class="td3"><strong>${invoiceformat.itemname}</strong></td>
+      <td class="td3"><strong>${invoiceformat.qty}</strong></td>
+      <td class="td3"><strong>${invoiceformat.price}</strong></td>
+      <td class="td3"><strong>${invoiceformat.itemamount}</strong></td>
+    </tr>
+
+
+  #{list items:ord.items, as:'item'}
+    <tr>
+      <td class="td3" style="width:50%">${item.listingName}</td>
+      <td class="td3">${item.quantity}</td>
+
+        #{if invoice != null}
+            #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+              <td class="td3">
+                  #{if item.quantity!=0}
+                    <input type="text" name="invoice.price" value="${new BigDecimal(item.price-item.discountPrice).divide(new BigDecimal
+                    (item.quantity),2,4)}">
+                  #{/if}
+                  #{else}
+                    <input type="text" name="invoice.price" value="0">
+                  #{/else}
+              </td>
+              <td class="td3">${new BigDecimal(item.price-item.discountPrice).setScale(2, 4).floatValue()}</td>
+            #{/if}
+            #{else}
+              <td class="td3"><input type="text" name="invoice.price" value="${invoice.price.get(item_index-1)}">
+              </td>
+              <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1)))
+              .setScale(2, 4).floatValue()}</td>
+            #{/else}
+        #{/if}
+        #{else }
+            #{if item.quantity!=0}
+              <td class="td3">
+                <input type="text" name="invoice.price" value="${new BigDecimal(item.price-item.discountPrice).
+                divide(new BigDecimal(item.quantity),2,4).divide(new
+                BigDecimal(ord.orderrate()),2,
+                java.math.RoundingMode.HALF_DOWN)}"></td>
+              <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price-item.discountPrice).
               divide(new BigDecimal(item.quantity),2,4).divide(new
               BigDecimal(ord.orderrate()),2,
+              java.math.RoundingMode.HALF_DOWN)).setScale(2, 4).floatValue()}</td>
+            #{/if}
+            #{else}
+              <td class="td3"><input type="text" name="invoice.price" value="0"></td>
+              <td>0</td>
+            #{/else}
+        #{/else}
+    </tr>
+  #{/list}
+
+  #{set feecount:ord.items.size()/}
+  #{list items:ord.fees, as:'fee'}
+      #{if (fee.type.name=='shipping' || fee.type.name=='shippingcharge' || fee.type.name=='giftwrap') && fee.cost>0}
+        <tr>
+            #{if fee.type.name=='shipping' || fee.type.name=='shippingcharge' }
+              <td class="td3" style="width:50%">${invoiceformat.shipfee}</td>
+            #{/if}
+            #{if fee.type.name=='giftwrap'}
+              <td class="td3" style="width:50%">${invoiceformat.giftwrapfee}</td>
+            #{/if}
+          <td class="td3">1</td>
+            #{if invoice != null}
+                #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+                  <td class="td3">
+                    <input type="text" name="invoice.price" value="${fee.cost}">
+                  </td>
+                  <td class="td3">${fee.cost}</td>
+                #{/if}
+                #{else}
+                  <td class="td3"><input type="text" name="invoice.price" value="${invoice.price.get(feecount)}">
+                  </td>
+                  <td class="td3">${invoice.price.get(feecount)}</td>
+                #{/else}
+                #{set feecount:feecount+1/}
+            #{/if}
+            #{else }
+              <td class="td3"><input type="text" name="invoice.price" value="${new BigDecimal(fee.cost).divide(new
+              BigDecimal(ord.orderrate()),2,
               java.math.RoundingMode.HALF_DOWN)}"></td>
-            <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(item.price-item.discountPrice).
-            divide(new BigDecimal(item.quantity),2,4).divide(new
-            BigDecimal(ord.orderrate()),2,
-            java.math.RoundingMode.HALF_DOWN)).setScale(2, 4).floatValue()}</td>
-          #{/if}
-          #{else}
-            <td class="td3"><input type="text" name="invoice.price" value="0"></td>
-            <td>0</td>
-          #{/else}
-      #{/else}
-  </tr>
-#{/list}
+              <td class="td3">${new BigDecimal(fee.cost).divide(new
+              BigDecimal(ord.orderrate()),2,
+              java.math.RoundingMode.HALF_DOWN).setScale(2, 4).floatValue()}</td>
+            #{/else}
+        </tr>
+      #{/if}
+  #{/list}
 
-#{set feecount:ord.items.size()/}
-#{list items:ord.fees, as:'fee'}
-    #{if (fee.type.name=='shipping' || fee.type.name=='shippingcharge' || fee.type.name=='giftwrap') && fee.cost>0}
-      <tr>
-          #{if fee.type.name=='shipping' || fee.type.name=='shippingcharge' }
-            <td class="td3" style="width:50%">${invoiceformat.shipfee}</td>
-          #{/if}
-          #{if fee.type.name=='giftwrap'}
-            <td class="td3" style="width:50%">${invoiceformat.giftwrapfee}</td>
-          #{/if}
-        <td class="td3">1</td>
-          #{if invoice != null}
-              #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
-                <td class="td3">
-                  <input type="text" name="invoice.price" value="${fee.cost}">
-                </td>
-                <td class="td3">${fee.cost}</td>
-              #{/if}
-              #{else}
-                <td class="td3"><input type="text" name="invoice.price" value="${invoice.price.get(feecount)}">
-                </td>
-                <td class="td3">${invoice.price.get(feecount)}</td>
-              #{/else}
-              #{set feecount:feecount+1/}
-          #{/if}
-          #{else }
-            <td class="td3"><input type="text" name="invoice.price" value="${new BigDecimal(fee.cost).divide(new
-            BigDecimal(ord.orderrate()),2,
-            java.math.RoundingMode.HALF_DOWN)}"></td>
-            <td class="td3">${new BigDecimal(fee.cost).divide(new
-            BigDecimal(ord.orderrate()),2,
-            java.math.RoundingMode.HALF_DOWN).setScale(2, 4).floatValue()}</td>
-          #{/else}
-      </tr>
+
+
+
+
+
+    <tr>
+      <td class="td3"></td>
+      <td class="td3"></td>
+      <td class="td3"><strong>${invoiceformat.notaxamount}</strong></td>
+    #{if invoice != null}
+        #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
+          <td class="td3"><input type="text" name="invoice.notaxamount" value="${totalamount}"></td>
+        #{/if}
+        #{else}
+          <td class="td3"><input type="text" name="invoice.notaxamount" value="${invoice.notaxamount}"></td>
+        #{/else}
     #{/if}
-#{/list}
+    #{else }
+      <td class="td3"><input type="text" name="invoice.notaxamount" value="${notaxamount}"></td>
+    #{/else}
+    </tr>
+    <tr>
+      <td class="td3"></td>
+      <td class="td3"></td>
+    #{if invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE}
+      <td class="td3"><strong>${invoiceformat.taxamount}</strong></td>
+      <td class="td3">0.00</td>
+    #{/if}
+    #{else}
+      <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>
+        #{if invoice != null}
+          <td class="td3"><input type="text" name="invoice.taxamount" value="${invoice.taxamount}"></td>
+        #{/if}
+        #{else}
+          <td class="td3"><input type="text" name="invoice.taxamount" value="${tax}"></td>
+        #{/else}
 
+    #{/else}
+    </tr>
+    <tr>
+      <td class="td3"></td>
+      <td class="td3"></td>
+      <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
+    #{if invoice != null}
+      <td class="td3"><input type="text" name="invoice.totalamount" value="${invoice.totalamount}"></td>
+    #{/if}
+    #{else}
+      <td class="td3"><input type="text" name="invoice.totalamount" value="${totalamount}"></td>
+    #{/else}
 
-
-
-
-
-  <tr>
-    <td class="td3"></td>
-    <td class="td3"></td>
-    <td class="td3"><strong>${invoiceformat.notaxamount}</strong></td>
-  #{if invoice != null}
-      #{if invoice.europevat==models.market.OrderInvoice.VAT.EUROPE}
-        <td class="td3"><input type="text" name="invoice.notaxamount" value="${totalamount}"></td>
-      #{/if}
-      #{else}
-        <td class="td3"><input type="text" name="invoice.notaxamount" value="${invoice.notaxamount}"></td>
-      #{/else}
-  #{/if}
-  #{else }
-    <td class="td3"><input type="text" name="invoice.notaxamount" value="${notaxamount}"></td>
-  #{/else}
-  </tr>
-  <tr>
-    <td class="td3"></td>
-    <td class="td3"></td>
-  #{if invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE}
-    <td class="td3"><strong>${invoiceformat.taxamount}</strong></td>
-    <td class="td3">0.00</td>
-  #{/if}
-  #{else}
-    <td class="td3"><strong>${invoiceformat.taxamountper}</strong></td>
-      #{if invoice != null}
-        <td class="td3"><input type="text" name="invoice.taxamount" value="${invoice.taxamount}"></td>
-      #{/if}
-      #{else}
-        <td class="td3"><input type="text" name="invoice.taxamount" value="${tax}"></td>
-      #{/else}
-
-  #{/else}
-  </tr>
-  <tr>
-    <td class="td3"></td>
-    <td class="td3"></td>
-    <td class="td3"><strong>${invoiceformat.totalamount}</strong></td>
-  #{if invoice != null}
-    <td class="td3"><input type="text" name="invoice.totalamount" value="${invoice.totalamount}"></td>
-  #{/if}
-  #{else}
-    <td class="td3"><input type="text" name="invoice.totalamount" value="${totalamount}"></td>
-  #{/else}
-
-  </tr>
-  <tr>
-    <td class="td1" colspan="4">
-      <button class="btn btn-primary">保存并下载订单发票</button>
-    </td>
-  </tr>
-</table>
+    </tr>
+    <tr>
+      <td class="td1" colspan="4">
+        <button class="btn btn-primary">保存并下载订单发票</button>
+      </td>
+    </tr>
+  </table>
 </form>
 
 #{records records:records/}
