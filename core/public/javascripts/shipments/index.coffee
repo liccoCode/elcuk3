@@ -52,30 +52,14 @@ $ ->
     $ck = $(@)
     $ck.parents('table').find(':checkbox').not(':first').prop("checked", $ck.prop('checked'))
 
-  $("#states").multiselect({
-    buttonWidth: '120px'
-    nonSelectedText: '状态'
-    maxHeight: 200
-    includeSelectAllOption: true
-  });
-
   $("td[name='clickTd']").click(->
     tr = $(@).parent("tr")
     shipment_id = $(@).attr("shipment_id")
     memo = $(@).attr("memo")
     format_id = shipment_id.replace(/\|/gi, '_')
-    if tr.next("tr").find("div[id='div#{format_id}']").html()
+    if tr.next("tr").find("td").find("div").length > 0
       tr.next("tr").toggle()
     else
       tr.after("<tr><td colspan='12'><div><h4 class='text-info'>Comment</h4>#{memo}</div><hr><div id='div#{format_id}'></div></td></tr>")
       $("#div" + format_id).load("/Shipments/showProcureUnitList", id: shipment_id)
   )
-
-  $("#whouse_id").multiselect({
-    buttonWidth: '120px'
-    nonSelectedText: '运往仓库'
-    maxHeight: 200
-    includeSelectAllOption: true
-  })
-
-  

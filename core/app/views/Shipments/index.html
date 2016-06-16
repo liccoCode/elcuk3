@@ -1,10 +1,6 @@
 #{extends 'main_full.html' /}
 #{set title:'运输单列表 (' + shipments.size() + ')' /}
-#{set 'moreStyles'}
-    #{stylesheet 'bootstrap-multiselect.css'/}
-#{/set}
 #{set 'moreScripts'}
-    #{script 'bootstrap-multiselect.js'/}
     #{script 'shipments/index.coffee'/}
 #{/set}
 #{info_row}
@@ -48,14 +44,6 @@
       #{/list}
       </select>
 
-      <div class="input-prepend inline">
-        <select name="p.whouseId" style="width:150px;" id="whouse_id" multiple="multiple">
-        #{list items:whouses, as:'wh'}
-          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
-        #{/list}
-        </select>
-      </div>
-
       <select name="p.cooperId" style="width: 150px;" class="inline selectize">
         <option value="">运输商</option>
       #{list items:cooperators, as:'cooper'}
@@ -63,8 +51,14 @@
       #{/list}
       </select>
 
-      <div class="input-prepend inline">
-        <select name="p.states" id="states" multiple="multiple" style="width:150px;">
+      <div class="inline">
+        <select name="p.whouseIds" style="width:150px;" id="whouse_id" multiple data-nonSelectedText="运往仓库">
+        #{list items:whouses, as:'wh'}
+          <option ${p.whouseIds.contains(wh?.id)? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.states" id="states" multiple data-nonSelectedText="状态">
         #{list items:models.procure.Shipment.S.values(), as:'state'}
           <option value="${state.name()}" ${p.states.contains(state) ? 'selected' : ''}>${state.label()}</option>
         #{/list}

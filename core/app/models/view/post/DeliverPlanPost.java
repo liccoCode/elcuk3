@@ -74,6 +74,7 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
 
     public DeliverPlan.P planState;
 
+    public String handler;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -107,6 +108,11 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
         if(this.cooperId != null && this.cooperId > 0) {
             sbd.append(" AND d.cooperator.id=?");
             params.add(this.cooperId);
+        }
+
+        if(StringUtils.isNotBlank(this.handler)) {
+            sbd.append(" AND d.handler.username=?");
+            params.add(this.handler);
         }
 
         if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {

@@ -4,9 +4,9 @@
     #{script 'component/pagination.coffee'/}
     #{script 'deliverplans/index.coffee'/}
 #{/set}
-
 #{flash_alert /}
 #{errorMsgs /}
+
 #{form @DeliverPlans.index(), class:'search_form', id:'deliverys_form'}
 <div class="row-fluid">
   <div class="span12">
@@ -20,6 +20,12 @@
       <option value="">状态</option>
         #{list items:models.procure.DeliverPlan.P.values(), as:'sp'}
           <option ${sp == p.planState ? 'selected' : ''} value="${sp.name()}">${sp.label()}</option>
+        #{/list}
+    </select>
+    <select name="p.handler" class="inline">
+      <option value="">下单人</option>
+        #{list items: handlers, as: 'handler'}
+          <option ${handler.equalsIgnoreCase(p.handler) ? 'selected' : ''} value="${handler}">${handler}</option>
         #{/list}
     </select>
     <select name="p.cooperId" class="inline selectize" style="width: 100px;">

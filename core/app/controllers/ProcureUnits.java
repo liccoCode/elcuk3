@@ -21,7 +21,6 @@ import models.view.post.ProcurePost;
 import models.whouse.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -48,14 +47,12 @@ public class ProcureUnits extends Controller {
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
-        renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
+        renderArgs.put("logs", ElcukRecord.records(
+                Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay",
+                        "procureunit.tailpay"), 50));
         renderArgs.put("cooperators", cooperators);
-
-        //为视图提供日期
-        DateTime dateTime = new DateTime();
-        renderArgs.put("tomorrow1", dateTime.plusDays(1).toString("yyyy-MM-dd"));
-        renderArgs.put("tomorrow2", dateTime.plusDays(2).toString("yyyy-MM-dd"));
-        renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
+        renderArgs.put("categories", User.getTeamCategorys(User.current()));
     }
 
     @Before(only = {"index"})
@@ -74,7 +71,8 @@ public class ProcureUnits extends Controller {
     @Check("procures.index")
     public static void index(ProcurePost p) {
         if(p == null) p = new ProcurePost();
-        render(p);
+        List<ProcureUnit> units = p.query();
+        render(p, units);
     }
 
     /**

@@ -159,9 +159,7 @@ public class OrderInvoice extends GenericModel {
      */
     public void saveprice() {
         this.editprice = "";
-        for(float p : this.price) {
-            this.editprice = this.editprice + p + ",";
-        }
+        this.editprice = StringUtils.join(this.price.toArray(), ",");
     }
 
 
