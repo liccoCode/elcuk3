@@ -76,12 +76,12 @@
         </div>
 
         <div class="inline">
-          <a href="@{ProcureUnits.blank()}" class="btn btn-info" data-disable-with="loading">创建采购计划</a>
+          <a href="@{ProcureUnits.blank()}" class="btn btn-success" data-disable-with="loading">创建采购计划</a>
         #{power.ck "procures.createdeliveryment"}
-          <a target="_blank" href="javascript:void(0)" class="btn btn-info" id="createdeliveryment">创建采购单</a>
+          <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliveryment">创建采购单</a>
         #{/power.ck}
-          <a target="_blank" href="javascript:void(0)" class="btn btn-info" id="createdeliverplan">创建出货单</a>
-          <a href="javascript:void(0)" class="btn btn-info" id="batch_create_fba_btn">批量创建FBA</a>
+          <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliverplan">创建出货单</a>
+          <a href="javascript:void(0)" class="btn btn-warning" id="batch_create_fba_btn">批量创建FBA</a>
           <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
             下载 FBA ZIP
           </a>
@@ -107,8 +107,8 @@
             </label>
           </th>
           <th style="width:40px;">#</th>
-          <th>阶段</th>
-          <th>Selling ID</th>
+          <th>状态</th>
+          <th>Selling</th>
           <th>Sku</th>
           <th style="width:10%;">产品名称</th>
           <th>数量(计划/交货/入库)</th>
@@ -150,14 +150,8 @@
           <td>
               #{set qtys: unit.qtys()/}
             <span>${qtys._1 == null ? 0 : qtys._1}</span>
-            /
-            <span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">
-            ${qtys._2 == null ? 0 : qtys._2}
-            </span>
-            /
-            <span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">
-            ${qtys._3 == null ? 0 : qtys._3}
-            </span>
+            /<span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">${qtys._2 == null ? 0 : qtys._2}</span>
+            /<span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">${qtys._3 == null ? 0 : qtys._3}</span>
           </td>
           <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
@@ -183,7 +177,7 @@
                 </a>
               #{/elseif}
           </td>
-          <td>${unit.result()?.label()}</td>
+          <td>${unit.result()}</td>
           <td>
               #{if unit.deliveryment}
                 <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>

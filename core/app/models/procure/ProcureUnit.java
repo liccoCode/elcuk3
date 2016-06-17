@@ -446,6 +446,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
 
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public DeliverPlan.CT clearanceType;
+
+
     /**
      * ProcureUnit 的检查
      */
