@@ -565,6 +565,11 @@ public class Deliveryment extends GenericModel {
         if(this.cooperator != null) {
             for(ProcureUnit unit : this.units) {
                 unit.cooperator = this.cooperator;
+                CooperItem cooperItem = cooperator.cooperItem(unit.sku);
+                if(cooperItem != null) {
+                    unit.attrs.price = cooperItem.price;
+                    unit.attrs.currency = cooperItem.currency;
+                }
                 unit.save();
             }
         }

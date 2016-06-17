@@ -11,6 +11,7 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.procure.Cooperator;
+import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
@@ -249,6 +250,7 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.creator = unit.handler;
+        unit.clearanceType = DeliverPlan.CT.Self;
         if(unit.product != null) unit.sku = unit.product.sku;
         if(unit.selling != null)
             unit.validate();

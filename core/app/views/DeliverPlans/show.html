@@ -19,24 +19,33 @@
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>
-          <td colspan="2">
+          <td>
             <span id="deliverymentId">${dp.id}</span>
             <input type="hidden" name="dp.id" value="${dp.id}">
           </td>
-        </tr>
 
-        <tr>
           <th><span style="color:red">*</span>出货单名称</th>
           <td>
             <input type="text" class="span10" name="dp.name" value="${dp.name}" required>
           </td>
+        </tr>
 
+        <tr>
           <th><span style="color:red">*</span>供应商</th>
           <td>
             <select name="dp.cooperator.id" class="selectize" style="width:150px;">
               <option>请选择</option>
             #{list items:cooperators, as:'c'}
               <option ${c.id == dp.cooperator?.id} value="${c.id}">${c.name}</option>
+            #{/list}
+            </select>
+          </td>
+
+          <th><span style="color:red">*</span>报关类型</th>
+          <td>
+            <select name="dp.clearanceType" class="" style="width:90px;">
+            #{list items:models.procure.DeliverPlan.CT.values(), as:'ct'}
+              <option ${ct == dp.clearanceType} value="${ct.name()}">${ct.label()}</option>
             #{/list}
             </select>
           </td>
@@ -82,9 +91,10 @@
 
 #{success_row title:"已经添加进入[出货单]的[采购单元] "/}
 <form action="#" id="bulkpost" method="POST">
+  <input type="hidden" name="expressid" id="expressid" value="${expressid}">
   <div class="row-fluid">
     <div class="span12" id="unit_list">
-    #{render 'ProcureUnits/_unit_list.html', units:dp.units, checkbox:true, key:'delivery', delivery:true,deliveryplan:true/}
+    #{render 'DeliverPlans/_units.html', units: dp.units, key: 'delivery'/}
     </div>
   </div>
   <div class="row-fluid">
@@ -95,9 +105,20 @@
         解除
       </a>
     #{/power.ck}
+
+    #{power.ck 'fbas.deploytoamazon'}
+      <a href="javascript:void(0);" data-url='@{DeliverPlans.deploysToAmazon(dp.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
+        批量创建 FBA
+      </a>
+    #{/power.ck}
+      <a href="javascript:void(0);" data-url="@{DeliverPlans.downloadFBAZIP(dp.id)}" data-method="POST"
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
+           进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
+      </a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
+#{include 'Deliveryments/box_number_model.html'/}
 </form>
 
 #{info_row title:'可添加进入[出货单]的[采购单元]'/}
@@ -105,7 +126,7 @@
 <div class="row-fluid">
   <div class="span12">
     <input type="hidden" name="dp.id" value="${dp.id}">
-      #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan', deliveryplan:true/}
+      #{render 'DeliverPlans/_units.html', units: plan_units, key: 'plan'/}
   </div>
 </div>
 <div class="row-fluid">

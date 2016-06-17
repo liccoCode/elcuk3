@@ -32,9 +32,11 @@ import java.util.Map;
 public class DeliverPlan extends GenericModel {
 
     public DeliverPlan() {
+        this.clearanceType = CT.Self;
     }
 
     public DeliverPlan(String id) {
+        this();
         this.id = id;
     }
 
@@ -108,6 +110,27 @@ public class DeliverPlan extends GenericModel {
     @OneToMany(mappedBy = "deliverPlan")
     public List<ReceiveRecord> receiveRecords = new ArrayList<>();
 
+    public enum CT {
+        Self {
+            @Override
+            public String label() {
+                return "我司报关";
+            }
+        },
+        Cooperator {
+            @Override
+            public String label() {
+                return "工厂报关";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public CT clearanceType;
+
     /**
      * 通过 ProcureUnit 来创建出货单
      * <p/>
@@ -128,6 +151,7 @@ public class DeliverPlan extends GenericModel {
         if(Validation.hasErrors()) return deliverplan;
         deliverplan.handler = user;
         deliverplan.state = P.CREATE;
+        deliverplan.clearanceType = CT.Self;
         for(ProcureUnit unit : units) {
             if(unit.deliverplan == null) {
                 // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
@@ -295,5 +319,17 @@ public class DeliverPlan extends GenericModel {
             Logger.warn(Webs.E(e));
         }
         return names;
+    }
+
+    /**
+     * 同步报告类型到采购计划中去
+     */
+    public void syncClearanceTypeToUnits() {
+        for(ProcureUnit unit : this.units) {
+            if(unit.clearanceType != this.clearanceType) {
+                unit.clearanceType = this.clearanceType;
+                unit.save();
+            }
+        }
     }
 }

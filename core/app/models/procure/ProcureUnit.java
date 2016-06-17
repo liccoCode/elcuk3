@@ -464,6 +464,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
 
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public DeliverPlan.CT clearanceType;
+
+
     /**
      * ProcureUnit 的检查
      */
@@ -958,12 +963,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        Set<Shipment> shipments = new HashSet<Shipment>();
+        Set<Shipment> shipments = new HashSet<>();
         for(ShipItem shipItem : this.shipItems) {
             if(shipItem.shipment != null)
                 shipments.add(shipItem.shipment);
         }
-        return new ArrayList<Shipment>(shipments);
+        return new ArrayList<>(shipments);
     }
 
     public int qty() {
