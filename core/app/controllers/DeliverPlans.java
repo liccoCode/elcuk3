@@ -87,10 +87,12 @@ public class DeliverPlans extends Controller {
             if(dp.isLocked()) Validation.addError("", "已经确认发货的出货单不能再修改!");
             Validation.required("供应商", dp.cooperator);
             Validation.required("出货单名称", dp.name);
+            Validation.required("报关类型", dp.clearanceType);
             validation.valid(dp);
             if(Validation.hasErrors())
                 renderJSON(new Ret(Validation.errors().toString()));
             dp.save();
+            dp.syncClearanceTypeToUnits();
             renderJSON(new Ret(true, ""));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
