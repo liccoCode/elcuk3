@@ -2,6 +2,7 @@ package controllers;
 
 
 import controllers.api.SystemOperation;
+import helper.Constant;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -13,11 +14,14 @@ import models.view.post.DeliverPlanPost;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.data.validation.Validation;
+import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,5 +157,64 @@ public class DeliverPlans extends Controller {
         }
         flash.success("确认发货成功!");
         redirect("/ReceiveRecords/index");
+    }
+
+    @Check("fbas.deploytoamazon")
+    public static void deploysToAmazon(String id, List<Long> pids) {
+        if(pids == null || pids.size() == 0)
+            Validation.addError("", "必须选择需要创建的采购计划");
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            DeliverPlans.show(id);
+        }
+
+        ProcureUnit.postFbaShipments(pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+
+            flash.success("选择的采购计划全部成功创建 FBA");
+        }
+        DeliverPlans.show(id);
+    }
+
+    /**
+     * 将选定的采购单的 出货FBA 打成ZIP包，进行下载
+     */
+    public static synchronized void downloadFBAZIP(String id, List<Long> pids, List<Long> boxNumbers)
+            throws Exception {
+        if(pids == null || pids.size() == 0)
+            Validation.addError("", "必须选择需要下载的采购计划");
+        if(boxNumbers == null || boxNumbers.size() == 0 || pids.size() != boxNumbers.size())
+            Validation.addError("", "采购单元箱数填写错误");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
+        }
+        //创建FBA根目录，存放工厂FBA文件
+        File dirfile = new File(Constant.TMP, "FBA");
+        try {
+            Files.delete(dirfile);
+            dirfile.mkdir();
+
+            //生成工厂的文件夹. 格式：选中的采购单的id的组合a,b,c
+            File factoryDir = new File(dirfile, String.format("采购单元-%s-出货FBA", StringUtils.join(pids.toArray(), ",")));
+            factoryDir.mkdir();
+            for(int i = 0; i < pids.size(); i++) {
+                ProcureUnit procureunit = ProcureUnit.findById(pids.get(i));
+
+                procureunit.fbaAsPDF(factoryDir, boxNumbers.get(i));
+            }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            Logger.warn("downloadFBAZIP %s:%s", id, e.getMessage());
+        } finally {
+            File zip = new File(Constant.TMP + "/FBA.zip");
+            Files.zip(dirfile, zip);
+            zip.deleteOnExit();
+            renderBinary(zip);
+        }
     }
 }

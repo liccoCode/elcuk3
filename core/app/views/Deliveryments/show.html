@@ -95,9 +95,7 @@
 
 #{success_row title:"已经添加进入[采购单]的[采购单元] "/}
 <form action="#" id="bulkpost" method="POST">
-
   <input type="hidden" name="expressid" id="expressid" value="${expressid}">
-
   <div class="row-fluid">
     <div class="span12" id="unit_list">
     #{render 'Deliveryments/_units.html', units:dmt.units, key: 'delivery'/}

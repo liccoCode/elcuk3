@@ -91,6 +91,7 @@
 
 #{success_row title:"已经添加进入[出货单]的[采购单元] "/}
 <form action="#" id="bulkpost" method="POST">
+  <input type="hidden" name="expressid" id="expressid" value="${expressid}">
   <div class="row-fluid">
     <div class="span12" id="unit_list">
     #{render 'DeliverPlans/_units.html', units: dp.units, key: 'delivery'/}
@@ -104,9 +105,20 @@
         解除
       </a>
     #{/power.ck}
+
+    #{power.ck 'fbas.deploytoamazon'}
+      <a href="javascript:void(0);" data-url='@{DeliverPlans.deploysToAmazon(dp.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
+        批量创建 FBA
+      </a>
+    #{/power.ck}
+      <a href="javascript:void(0);" data-url="@{DeliverPlans.downloadFBAZIP(dp.id)}" data-method="POST"
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
+           进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
+      </a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
+#{include 'Deliveryments/box_number_model.html'/}
 </form>
 
 #{info_row title:'可添加进入[出货单]的[采购单元]'/}
