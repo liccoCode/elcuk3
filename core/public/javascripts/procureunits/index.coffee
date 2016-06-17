@@ -71,7 +71,7 @@ $ ->
       noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
       return false
 
-    $form = $("#search_Form")
+    $form = $("#create_deliveryment")
     $form.attr("action", $btn.data('url')).submit()
   )
 

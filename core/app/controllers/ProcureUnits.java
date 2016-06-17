@@ -44,7 +44,7 @@ import java.util.*;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "indexForMarket"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
@@ -71,6 +71,12 @@ public class ProcureUnits extends Controller {
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
+        if(p == null) p = new ProcurePost();
+        List<ProcureUnit> units = p.query();
+        render(p, units);
+    }
+
+    public static void indexForMarket(ProcurePost p) {
         if(p == null) p = new ProcurePost();
         List<ProcureUnit> units = p.query();
         render(p, units);
@@ -243,16 +249,25 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.creator = unit.handler;
-        unit.validate();
+        if(unit.product != null) unit.sku = unit.product.sku;
+        if(unit.selling != null)
+            unit.validate();
 
         if(unit.shipType == Shipment.T.EXPRESS) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
         } else {
-            Validation.required("运输单", shipmentId);
+            if(unit.selling != null)
+                Validation.required("运输单", shipmentId);
         }
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+            List<Whouse> whouses = new ArrayList<>();
+            if(StringUtils.isNotBlank(unit.sid)) {
+                unit.selling = Selling.findById(unit.sid);
+                whouses = Whouse.findByAccount(unit.selling.account);
+            } else {
+                whouses = Whouse.findByType(Whouse.T.FBA);
+            }
             render("ProcureUnits/blank.html", unit, whouses, totalFive, day);
         }
 
@@ -262,25 +277,27 @@ public class ProcureUnits extends Controller {
         }
         unit.save();
 
-        if(unit.shipType != Shipment.T.EXPRESS) {
-            Shipment ship = Shipment.findById(shipmentId);
-            ship.addToShip(unit);
-        }
+        if(unit.selling != null) {
+            if(unit.shipType != Shipment.T.EXPRESS) {
+                Shipment ship = Shipment.findById(shipmentId);
+                ship.addToShip(unit);
+            }
 
-        if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-            unit.remove();
-            render("ProcureUnits/blank.html", unit, whouses);
-        }
-        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
-                .save();
+            if(Validation.hasErrors()) {
+                List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+                unit.remove();
+                render("ProcureUnits/blank.html", unit, whouses);
+            }
+            new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
+                    .save();
 
-        if(StringUtils.equals(isNeedApply, "need")) {
-            unit.startActiviti(unit.handler.username);
-            flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-            ProcureUnits.showactiviti(unit.id);
-        } else {
-            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+            if(StringUtils.equals(isNeedApply, "need")) {
+                unit.startActiviti(unit.handler.username);
+                flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+                ProcureUnits.showactiviti(unit.id);
+            } else {
+                flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+            }
         }
         Analyzes.index();
     }
@@ -660,13 +677,13 @@ public class ProcureUnits extends Controller {
     /**
      * 批量创建FBA
      *
-     * @param unitIds
+     * @param pids
      */
     public static void batchCreateFBA(ProcurePost p, List<Long> pids) {
         if(pids != null && pids.size() > 0) {
-            //ProcureUnit.postFbaShipments(unitIds);
+            ProcureUnit.postFbaShipments(pids);
         }
-        ProcureUnits.index(p);
+        ProcureUnits.indexForMarket(p);
     }
 
 }

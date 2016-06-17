@@ -5,6 +5,7 @@ $ ->
     if $("#sellingId")
       checkCoopertorBySelling($("#sellingId").val())
       getCooperItemBySku($("#unit_sku").val())
+    if $("#unit_sku").val()
       getStockBySku($("#unit_sku").val())
 
   $('#box_num').change (e) ->
@@ -110,8 +111,9 @@ $ ->
         process(c)
       )
     updater: (item) ->
-      $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: item, type: "SKU"})
+      getStockBySku(item)
       getProductNmae(item)
+      getCooperItemBySku(item)
       item
   })
 
@@ -159,6 +161,7 @@ $ ->
       name = "A_" + name.split('_')[1]
       if selling.indexOf(name) > -1
         $(select).attr("selected", true)
+
 
   $("#cooperator").change(->
     value = coop_hash[$(@).val()]
