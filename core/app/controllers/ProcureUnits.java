@@ -11,6 +11,7 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.procure.Cooperator;
+import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
@@ -243,6 +244,7 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.creator = unit.handler;
+        unit.clearanceType = DeliverPlan.CT.Self;
         unit.validate();
 
         if(unit.shipType == Shipment.T.EXPRESS) {
@@ -660,11 +662,11 @@ public class ProcureUnits extends Controller {
     /**
      * 批量创建FBA
      *
-     * @param unitIds
+     * @param pids
      */
     public static void batchCreateFBA(ProcurePost p, List<Long> pids) {
         if(pids != null && pids.size() > 0) {
-            //ProcureUnit.postFbaShipments(unitIds);
+            ProcureUnit.postFbaShipments(pids);
         }
         ProcureUnits.index(p);
     }
