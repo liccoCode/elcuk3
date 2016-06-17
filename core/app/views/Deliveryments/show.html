@@ -171,8 +171,7 @@
         <tr>
           <th>交易条款<br>(供应商)</th>
           <td colspan="3">
-          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
-          .tradingTerms}</textarea>
+          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator?.tradingTerms}</textarea>
           </td>
           <th>产品要求<br>(产品线)</th>
           <td colspan="3">
@@ -194,11 +193,11 @@
         <tr>
           <th>供货方</th>
           <td>
-            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
+            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator?.fullName}">
           </td>
           <th>经办人</th>
           <td>
-            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
+            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator?.contacter}">
           </td>
 
           <th>买方</th>
@@ -214,11 +213,11 @@
         <tr>
           <th>移动电话</th>
           <td>
-            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
+            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator?.phone}">
           </td>
           <th>固定电话</th>
           <td>
-            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
+            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator?.tel}">
           </td>
 
           <th>移动电话</th>
@@ -232,7 +231,7 @@
         <tr>
           <th>传真</th>
           <td>
-            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
+            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator?.fax}">
           </td>
           <td colspan="2"></td>
 
@@ -256,7 +255,7 @@
         <tr>
           <th>地址</th>
           <td colspan="3">
-            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
+            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator?.address}">
           </td>
 
           <th>地址</th>
