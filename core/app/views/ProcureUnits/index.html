@@ -76,14 +76,12 @@
         </div>
 
         <div class="inline">
-
-          <input type="button" class="btn btn-primary" id="batch_create_fba_btn" value="批量创建FBA"
-                 data-url="@{ProcureUnits.batchCreateFBA()}">
-          <a href="@{ProcureUnits.blank()}" class="btn btn-success" data-disable-with="loading">创建采购计划</a>
+          <a href="@{ProcureUnits.blank()}" class="btn btn-info" data-disable-with="loading">创建采购计划</a>
         #{power.ck "procures.createdeliveryment"}
           <a target="_blank" href="javascript:void(0)" class="btn btn-info" id="createdeliveryment">创建采购单</a>
         #{/power.ck}
           <a target="_blank" href="javascript:void(0)" class="btn btn-info" id="createdeliverplan">创建出货单</a>
+          <a href="javascript:void(0)" class="btn btn-info" id="batch_create_fba_btn">批量创建FBA</a>
           <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
             下载 FBA ZIP
           </a>
@@ -101,25 +99,110 @@
 <form method="post" id="create_deliveryment">
   <div class="row-fluid">
     <div class="span12">
-    #{render 'ProcureUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
-    </div>
-  </div>
-
-  <div class="row-fluid">
-    <div class="span12">
-    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
-        #{power.ck "procures.createdeliveryment"}
-          <div class="input-append">
-            <input type="text" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
-            <button id="create_deliveryment_btn" class="btn btn-primary" data-disable-with='添加中'>
-              添加采购单
-            </button>
-          </div>
-        #{/power.ck}
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>
+            <label class="checkbox">
+              <input type="checkbox" id="unit_checkbox_all" class="unit checkall">
+            </label>
+          </th>
+          <th style="width:40px;">#</th>
+          <th>阶段</th>
+          <th>Selling ID</th>
+          <th>Sku</th>
+          <th style="width:10%;">产品名称</th>
+          <th>数量(计划/交货/入库)</th>
+          <th>预计交货时间</th>
+          <th>实际交货时间</th>
+          <th>入库时间</th>
+          <th>供应商</th>
+          <th>单价</th>
+          <th>总价</th>
+          <th>剩余请款额</th>
+          <th>FBA</th>
+          <th>去往仓库</th>
+          <th>预计运输时间</th>
+          <th>运输方式</th>
+          <th>FnSku</th>
+          <th>质检结果</th>
+          <th>采购单</th>
+          <th>出货单</th>
+          <th>创建时间</th>
+          <th>创建人</th>
+        </tr>
+      #{list items:units, as:'unit'}
+        <tr id="procureUnit_${unit.id}">
+          <td>
+            <label class="checkbox">
+              <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
+                     boxNum="${unit.recommendBoxNum()}">
+            </label>
+          </td>
+          <td>${unit.id}</td>
+          <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+          <td class="selling_id">
+            <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
+          </td>
+          <td>
+            <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+          </td>
+          <td>${unit.product.abbreviation}</td>
+          <td>
+              #{set qtys: unit.qtys()/}
+            <span>${qtys._1 == null ? 0 : qtys._1}</span>
+            /
+            <span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">
+            ${qtys._2 == null ? 0 : qtys._2}
+            </span>
+            /
+            <span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">
+            ${qtys._3 == null ? 0 : qtys._3}
+            </span>
+          </td>
+          <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+          <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+          <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
+          <td>${unit.cooperator?.name}</td>
+          <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
+          <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.qty() * unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
+          <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.leftAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
+          <td>${unit.fba?.shipmentId}</td>
+          <td>${unit.whouse?.name()}</td>
+          <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
+          <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
+          <td>
+            <!-- FnSku 下载 Label -->
+              #{if unit.selling?.fnSku}
+                <a href="@{Sellings.sellingLabel(unit.sid)}" class="btn btn-success btn-block">
+                  <i class="icon-download-alt"></i> ${unit.selling.fnSku}
+                </a>
+              #{/if}
+              #{elseif unit.selling != null}
+                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+                  补全 FnSku
+                </a>
+              #{/elseif}
+          </td>
+          <td>${unit.result()?.label()}</td>
+          <td>
+              #{if unit.deliveryment}
+                <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
+              #{/if}
+          </td>
+          <td>
+              #{if unit.deliverplan}
+                <a href="@{DeliverPlans.show(unit.deliverplan.id)}">${unit.deliverplan.id}</a>
+              #{/if}
+          </td>
+          <td>#{time_tooltip time:unit.createDate/}</td>
+          <td>${unit.creator?.username}</td>
+        </tr>
+      #{/list}
+      </table>
+    #{if p != null}
+        #{bootstrap_pager pi:p, url:'' /}
     #{/if}
     </div>
   </div>
 </form>
-
 #{records records:logs/}
-</div>

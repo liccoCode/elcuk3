@@ -660,11 +660,11 @@ public class ProcureUnits extends Controller {
     /**
      * 批量创建FBA
      *
-     * @param unitIds
+     * @param pids
      */
     public static void batchCreateFBA(ProcurePost p, List<Long> pids) {
         if(pids != null && pids.size() > 0) {
-            //ProcureUnit.postFbaShipments(unitIds);
+            ProcureUnit.postFbaShipments(pids);
         }
         ProcureUnits.index(p);
     }
