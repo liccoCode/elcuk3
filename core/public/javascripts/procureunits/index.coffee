@@ -63,7 +63,6 @@ $ ->
     window.open('/deliveryments/create?' + $form.serialize(), "_blank")
 
   $("#batch_create_fba_btn").click (->
-    $btn = $(@)
     if getCheckedUnitIds().length is 0
       noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
       return false

@@ -50,7 +50,7 @@
     <td class="selling_id">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
-    <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
+    <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.product.sku}</a></td>
     <td>${unit.product.abbreviation}</td>
     <td>
         #{set qtys: unit.qtys()/}

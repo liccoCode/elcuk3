@@ -81,7 +81,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 阶段
+     * 阶段    (新需求 状态为 计划中,采购中,出货中,已交货,已入库)
      */
     public enum STAGE {
         /**
@@ -112,12 +112,30 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
+         * 出货阶段; 采购确认出货单
+         */
+        INSHIPMENT {
+            @Override
+            public String label() {
+                return "出货中";
+            }
+        },
+        /**
          * 完成了, 全部交货了; 在采购单中进行交货
          */
         DONE {
             @Override
             public String label() {
                 return "已交货";
+            }
+        },
+        /**
+        * 已入库; 仓库确认入库
+        */
+        INWAREHOUSE {
+            @Override
+            public String label() {
+                return "已入库";
             }
         },
         /**
@@ -455,15 +473,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * ProcureUnit 的检查
      */
     public void validate() {
-        Validation.current().valid(this);
         Validation.current().valid(this.attrs);
-        Validation.required("procureunit.selling", this.selling);
         if(this.selling != null) this.sid = this.selling.sellingId;
         Validation.required("procureunit.whouse", this.whouse);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
         Validation.required("procureunit.cooperator", this.cooperator);
-        if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
         if(this.selling != null && this.whouse != null &&
@@ -1709,8 +1724,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int td_num = map.keySet().size();
         if(no_fba_num > 0) {
             td_num++;
+            map.put("无条码无FBA", no_fba_num);
         }
-        map.put("无条码无FBA", no_fba_num);
         map.put("total_num", total_num);
         map.put("td_num", td_num);
         return map;
@@ -1734,6 +1749,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public static STAGE[] stages() {
-        return ArrayUtils.removeElement(STAGE.values(), STAGE.APPROVE);
+        return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING, STAGE.INBOUND);
     }
 }
