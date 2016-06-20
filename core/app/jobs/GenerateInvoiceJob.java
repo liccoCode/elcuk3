@@ -3,7 +3,6 @@ package jobs;
 import models.market.OrderInvoice;
 import play.Logger;
 import play.jobs.Job;
-import play.jobs.On;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -12,7 +11,6 @@ import java.util.Date;
  * 后台自动生成发票功能, 预计每月1W张
  * Created by licco on 16/6/2.
  */
-@On("* 23 1 * * ? ")
 public class GenerateInvoiceJob extends Job {
 
     @Override
