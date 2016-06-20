@@ -10,6 +10,7 @@ import play.mvc.With;
  * User: mac
  * Date: 15-1-5
  * Time: AM9:57
+ * @deprecated
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class MarketAnalysis extends Controller {
