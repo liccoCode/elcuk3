@@ -1,5 +1,5 @@
 $ ->
-  # 检查字符串长度
+# 检查字符串长度
   validateMaxLength = (maxLength, obj) ->
     $text = $(obj)
     length = unescape(encodeURI(jsEscapeHtml($text.val().trim()))).length
@@ -38,29 +38,29 @@ $ ->
   )
 
   $(document).ready ->
-    # 页面初始化时校验非法字符
+# 页面初始化时校验非法字符
     $('#title, #bulletPoint1, #bulletPoint2, #bulletPoint3, #bulletPoint4, #bulletPoint5, #searchTerms1, #searchTerms2, #searchTerms3, #searchTerms4, #searchTerms5, #productDesc').trigger('change')
 
   $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
 
   # 方便提供自动加载其他 Selling 的功能
-  $('#sellingPreview').on('click', '#sid_preview',(e) ->
+  $('#sellingPreview').on('click', '#sid_preview', (e) ->
     noty({text: _.template($('#tsp-show-template').html())({tsp: $(@).data('tsp')})})
     false
-  ).on('change', 'input',(e) ->
-    #  自动补全的 sid 的功能条
+  ).on('change', 'input', (e) ->
+#  自动补全的 sid 的功能条
     $input = $(@)
-    return false if @value.length<10
+    return false if @value.length < 10
 
     LoadMask.mask()
     $.ajax('/sellings/tsp', {type: 'GET', data: {sid: @value}, dataType: 'json'})
-      .done((r) ->
-        $('#sid_preview').data('tsp', r)
-        noty({text: '加载成功, 可点击 "放大镜" 查看详细信息或者点击 "填充" 进行填充', type: 'success', timeout: 3000})
-        LoadMask.unmask()
-      )
+    .done((r) ->
+      $('#sid_preview').data('tsp', r)
+      noty({text: '加载成功, 可点击 "放大镜" 查看详细信息或者点击 "填充" 进行填充', type: 'success', timeout: 3000})
+      LoadMask.unmask()
+    )
   ).on('click', 'button:contains(填充)', (e) ->
-    # 加载 tsp 数据的按钮
+# 加载 tsp 数据的按钮
     json = $('#sid_preview').data('tsp')
     if json is undefined
       noty({text: '还没有数据, 请先预览!', type: 'warning', timeout: 3000})
@@ -202,7 +202,10 @@ $ ->
   )
 
   # hints...
-  $('#feedProductType').popover({trigger: 'focus', content: '修改这个值请非常注意, Amazon 对大类别下的产品的 Product Type 有严格的规定, 请参考 Amazon 文档进行处理'})
+  $('#feedProductType').popover({
+    trigger: 'focus',
+    content: '修改这个值请非常注意, Amazon 对大类别下的产品的 Product Type 有严格的规定, 请参考 Amazon 文档进行处理'
+  })
   $('#templateType').popover({trigger: 'focus', content: '为上传给 Amazon 的模板选择, 与 Amazon 的市场有关, 不可以随意修改'})
   $('#partNumber').popover({trigger: 'focus', content: '新 UPC 被使用后, Part Number 会被固定, 这个需要注意'})
   $('#state').popover({trigger: 'focus', content: 'NEW 状态 Selling 还没有同步回 ASIN, SELLING 状态为正常销售'})
@@ -214,8 +217,8 @@ $ ->
       sid = $sellingId.val()
       $.get('/sellings/sameSidSellings', {sid: sid})
       .done((c) ->
-          process(c)
-        )
+        process(c)
+      )
   })
 
   EU_And_US_Invalid_Characters = {
@@ -263,10 +266,12 @@ $ ->
       Invalid_Characters = JP_Invalid_Characters
       $("#upc").val($("#upc_jp").val())
       $("#partNumber").val($("#partNumber_jp").val())
+      $("#msku").val($("#msku").val().split(',')[0] + "," + $("#upc_jp").val())
     else
       Invalid_Characters = $.extend(EU_And_US_Invalid_Characters, JP_Invalid_Characters)
       $("#upc").val($("#upc_init").val())
       $("#partNumber").val($("#partNumber_init").val())
+      $("#msku").val($("#msku").val().split(',')[0] + "," + $("#upc_init").val())
     for key, value of Invalid_Characters
       if str.indexOf(key) >= 0
         reg = "/#{key}/g"

@@ -6,22 +6,24 @@
   #{/if}
   #{elseif country == 'FR'}
     Sold to : ${models.OperatorConfig.getVal("shipmenteuropefrsold")}<br>
-    Address:${models.OperatorConfig.getVal("shipmenteuropefraddress")}<br>
-    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropefrvat")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropefreori")} &nbsp;&nbsp;
+    EORI :  ${models.OperatorConfig.getVal("shipmenteuropeothereori")}<br>
   #{/elseif}
   #{elseif country == 'GB'}
-    Buyer : ${models.OperatorConfig.getVal("shipmenteuropeukbuyer")}<br>
-    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeukvat")}<br>
+    Sold to : ${models.OperatorConfig.getVal("shipmenteuropeukbuyer")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeukvat")} &nbsp;&nbsp;
+    EORI :  ${models.OperatorConfig.getVal("shipmenteuropeothereori")}<br>
   #{/elseif}
   #{elseif country == 'IT'}
-    Buyer : ${models.OperatorConfig.getVal("shipmenteuropeitbuyer")}<br>
-    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeitvat")}<br>
+    Sold to : ${models.OperatorConfig.getVal("shipmenteuropeitbuyer")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeitvat")} &nbsp;&nbsp;
+    EORI :  ${models.OperatorConfig.getVal("shipmenteuropeiteori")}<br>
   #{/elseif}
   #{else}
-    Buyer : ${models.OperatorConfig.getVal("shipmenteuropeotherbuyer")} <br>
+    Sold to : ${models.OperatorConfig.getVal("shipmenteuropeotherbuyer")} <br>
     VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeothervat")}<br>
   #{/else}
-    Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} <br>
+    Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} &nbsp;&nbsp;
     Tel :
   #{if country == 'DE' }
   ${models.OperatorConfig.getVal("shipmenteuropedetel")}
@@ -37,7 +39,7 @@
   #{/if}
     <br>
     Email: ${models.OperatorConfig.getVal("shipmenteuropeemail")} <br>
-    Add: ${address}
+    Ship to: ${address}
   </td>
   <td>Buyer EORI NO.：</td>
 #{if country == 'DE' }

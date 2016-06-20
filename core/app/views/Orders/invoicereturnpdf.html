@@ -12,16 +12,6 @@
       border:0px solid #000000;
     }
 
-    .tr1{
-      font:18px bold;
-      background-color:#9c9c9c;
-
-    }
-
-    .tr2{
-      height:50px;
-    }
-
     .td1{
       width:50%;
       text-align:left;
@@ -44,56 +34,26 @@
       border:1px solid;
       text-align:center;
     }
-
-    .div1{
-      border-bottom:0px;
-      padding-left:0px;
-      width:99.7%;
-      height:100px;
-    }
-
-    .div2{
-      text-align:right;
-      padding-top:20px;
-      width:99.7%;
-    }
-
-
   </style>
 </head>
 <body>
 <table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
   <tr>
     <td class="td1">
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle} #: CN${ord.orderId}</font>
-      </strong><br>
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle1} #: ${ord.orderId}</font>
-      </strong><br>
-    ${invoiceformat.date}: ${new org.joda.time.DateTime(returndate).toString("dd/MM/yyyy")}  </strong>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle} #:CN${ord.orderId}</font></strong><br>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.returntitle1} #: ${ord.orderId}</font></strong><br>
+      <strong>${invoiceformat.date}: ${new org.joda.time.DateTime(returndate).toString("dd/MM/yyyy")}  </strong>
     </td>
-    <td rowspan="4" class="td2">
-      <div class="div1">
-      #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ||ord.market==models
-      .market.M.AMAZON_FR) || (ord.market==models
-      .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
-        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/EDEER-logo.jpg"
-             style="height:100%">
-      #{/if}
-      #{if  (ord.market==models.market.M.AMAZON_DE) ||  (ord.market==models.market.M.AMAZON_IT && (invoice==null || invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
-        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/TUGGLE-logo.jpg"
-             style="height:100%">
-      #{/if}
-      </div>
+    <td class="td2">
+    #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ||ord.market==models
+    .market.M.AMAZON_FR) || (ord.market==models
+    .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
+      <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/easyacc_logo.png" style="height:80%;width:80%">
+    #{/if}
+    #{if  (ord.market==models.market.M.AMAZON_DE) ||  (ord.market==models.market.M.AMAZON_IT && (invoice==null || invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
+      <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/easyacc_logo.png" style="height:80%;width:80%">
+    #{/if}
     </td>
-  </tr>
-  <tr>
-    <td class="td1"></td>
-  </tr>
-  <tr>
-    <td></td>
-  </tr>
-  <tr>
-    <td></td>
   </tr>
   <tr>
     <td class="td1">

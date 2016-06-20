@@ -21,7 +21,7 @@ public class GenerateInvoiceJob extends Job {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
-        OrderInvoice.createInvoicePdf(0, calendar.getTime());
+        OrderInvoice.createInvoicePdf(0, calendar.getTime(), null);
     }
 
 }
