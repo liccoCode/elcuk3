@@ -157,9 +157,24 @@
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
           <td>${unit.cooperator?.name}</td>
-          <td>${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-          <td>${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(unit.qty() * unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-          <td>${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(unit.leftAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
+            #{set price: unit.attrs?.price/}
+            #{set qty: unit.attrs?.qty()/}
+          <td>
+              #{if price != null}
+                ${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(price).setScale(2,4).floatValue().format('#,###.##')}
+              #{/if}
+          </td>
+          <td>
+              #{if qty != null && price != null}
+                ${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(qty * price).setScale(2,4).floatValue().format('#,###.##')}
+              #{/if}
+          </td>
+          <td>
+            #{set leftAmount: unit.leftAmount()/}
+            #{if leftAmount != null}
+              ${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(leftAmount).setScale(2,4).floatValue().format('#,###.##')}
+            #{/if}
+          </td>
           <td>${unit.fba?.shipmentId}</td>
           <td>${unit.whouse?.name()}</td>
           <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
