@@ -130,8 +130,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-        * 已入库; 仓库确认入库
-        */
+         * 已入库; 仓库确认入库
+         */
         INWAREHOUSE {
             @Override
             public String label() {
@@ -1139,6 +1139,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalAmount() {
+        if(this.attrs.price == null) return 0f;
         return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2, 4)
                 .floatValue();
     }
