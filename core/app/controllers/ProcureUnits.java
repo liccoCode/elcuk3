@@ -672,7 +672,6 @@ public class ProcureUnits extends Controller {
     public static void showStockBySellingOrSku(String name, String type) {
         HashMap<String, Integer> map = ProcureUnit.caluStockInProcureUnit(name, type);
         HashMap<String, Integer> stock_map = WhouseItem.caluStockInProcureUnit(name, type);
-
         render(map, stock_map);
     }
 

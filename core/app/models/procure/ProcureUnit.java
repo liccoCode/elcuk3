@@ -130,8 +130,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-        * 已入库; 仓库确认入库
-        */
+         * 已入库; 仓库确认入库
+         */
         INWAREHOUSE {
             @Override
             public String label() {
@@ -1710,16 +1710,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int no_fba_num = 0;
 
         for(ProcureUnit unit : procureUnits) {
-            if(unit.attrs.planShipDate == null) {
-                no_fba_num += unit.qty();
-            } else {
-                if(map.containsKey(unit.whouse.name)) {
-                    map.put(unit.whouse.name, map.get(unit.whouse.name) + unit.qty());
-                } else {
-                    map.put(unit.whouse.name, unit.qty());
+            if(unit.qty() > 0) {
+                if(unit.attrs.planShipDate == null) {
+                    no_fba_num += unit.qty();
+                    total_num += unit.qty();
+                } else if(unit.attrs.planShipDate != null && unit.whouse != null) {
+                    if(map.containsKey(unit.whouse.name)) {
+                        map.put(unit.whouse.name, map.get(unit.whouse.name) + unit.qty());
+                    } else {
+                        map.put(unit.whouse.name, unit.qty());
+                    }
+                    total_num += unit.qty();
                 }
             }
-            total_num += unit.qty();
         }
         int td_num = map.keySet().size();
         if(no_fba_num > 0) {
