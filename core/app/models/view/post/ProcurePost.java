@@ -170,7 +170,7 @@ public class ProcurePost extends Post<ProcureUnit> {
                     .append(" OR p.selling.sellingId LIKE ?")
                     .append(" OR p.fba.shipmentId LIKE ?")
                     .append(") ");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i <= 3; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
