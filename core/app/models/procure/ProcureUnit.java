@@ -1750,6 +1750,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public static STAGE[] stages() {
-        return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING, STAGE.INBOUND);
+        return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING, STAGE
+                .INBOUND, STAGE.CLOSE);
     }
 }
