@@ -74,7 +74,6 @@ $ ->
     $("[name='s.aps.itemType']").val(json['type'][0]).blur()
     $("[name='s.aps.title']").val(json['title'][0]).blur()
 
-
     # technical
     tech = json['t']
     $("[name*='s.aps.keyFeturess']").each((i) ->
@@ -91,41 +90,81 @@ $ ->
   # 定义 Feed Product Type 所有Map组合 Key为market_templatetype value为对应的feedProductType
   # 注：美国市场下载的模板文件名为Wireless 且该模板没有productType字段
   feedProductTypeMap = {
-    "AMAZON_UK_Computers":["ComputerComponent", "ComputerDriveOrStorage", "Monitor", "NotebookComputer", "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
-    "AMAZON_UK_ConsumerElectronics":["AVFurniture", "AccessoryOrPartOrSupply", "AudioOrVideo", "Battery", "Binocular", "CableOrAdapter", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalCamera", "DigitalPictureFrame", "FilmCamera", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector", "camerabagsandcases"],
-    "AMAZON_UK_Games":["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
-    "AMAZON_UK_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
-    "AMAZON_UK_Sports":["SportingGoods"],
+    "AMAZON_UK_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_UK_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_UK_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
+    "AMAZON_UK_HomeImprovement": ['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage',
+      'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
 
-    "AMAZON_DE_Computers":["ComputerComponent", "ComputerDriveOrStorage", "Monitor", "NotebookComputer", "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
-    "AMAZON_DE_ConsumerElectronics":["AVFurniture", "AccessoryOrPartOrSupply", "AudioOrVideo", "Battery", "Binocular", "CableOrAdapter", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalCamera", "DigitalPictureFrame", "FilmCamera", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector", "camerabagsandcases"],
-    "AMAZON_DE_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware',  'OrganizersAndStorage', 'PlumbingFixtures',  'SecurityElectronics', 'Tools'],
-    "AMAZON_DE_Games":["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
-    "AMAZON_DE_Sports":["SportingGoods"],
-    "AMAZON_DE_Lighting":["LightBulbs", "LightsAndFixtures"],
+    "AMAZON_DE_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_DE_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_DE_HomeImprovement": ['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage',
+      'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
+    "AMAZON_DE_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
+    "AMAZON_DE_Lighting": ["LightBulbs", "LightsAndFixtures"],
 
-    "AMAZON_US_Computers":["CarryingCaseOrBag", "Computer", "ComputerAddOn", "ComputerComponent", "ComputerCoolingDevice", "ComputerDriveOrStorage", "ComputerInputDevice", "ComputerProcessor", "ComputerSpeaker", "FlashMemory", "Keyboards", "MemoryReader", "Monitor", "Motherboard", "NetworkingDevice", "NotebookComputer", "PersonalComputer", "RAMMemory", "SoundCard", "SystemCabinet", "SystemPowerDevice", "TabletComputer", "VideoCard", "VideoProjector", "Webcam"],
-    "AMAZON_US_ConsumerElectronics":["AVFurniture", "Antenna", "AudioVideoAccessory", "BarCodeReader", "Battery", "BlankMedia", "CableOrAdapter", "CarAlarm", "CarAudioOrTheater", "CarElectronics", "DVDPlayerOrRecorder", "DigitalVideoRecorder", "GPSOrNavigationAccessory", "GPSOrNavigationSystem", "HandheldOrPDA", "Headphones", "HomeTheaterSystemOrHTIB", "MediaPlayer", "MediaPlayerOrEReaderAccessory", "MediaStorage", "MiscAudioComponents", "Phone", "PortableAudio", "PowerSuppliesOrProtection", "RadarDetector", "RadioOrClockRadio", "ReceiverOrAmplifier", "RemoteControl", "Speakers", "StereoShelfSystem", "TVCombos", "Television", "Tuner", "TwoWayRadio", "VCR", "VideoProjector"],
-    "AMAZON_US_HomeImprovement":['BuildingMaterials', 'Electrical', 'Hardware', 'MajorHomeAppliances', 'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
-    "AMAZON_US_Wireless":["US市场下Wireless模板不包含该字段"],
-    "AMAZON_US_Home":['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants'],
-    "AMAZON_US_Games":["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
-    "AMAZON_US_Sports":["OutdoorRecreationProduct"],
+    "AMAZON_US_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_US_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_US_HomeImprovement": ['BuildingMaterials', 'Electrical', 'Hardware', 'MajorHomeAppliances',
+      'OrganizersAndStorage', 'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
+    "AMAZON_US_Home": ['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants'],
+    "AMAZON_US_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
+    "AMAZON_US_Sports": ["OutdoorRecreationProduct"],
 
-    "AMAZON_FR_Computers":['ComputerComponent', 'ComputerDriveOrStorage', 'Monitor', 'NotebookComputer', 'PersonalComputer', 'Printer', 'Scanner', 'VideoProjector'],
-    "AMAZON_FR_ConsumerElectronics":['AVFurniture', 'AccessoryOrPartOrSupply', 'AudioOrVideo', 'Battery', 'Binocular', 'CableOrAdapter', 'Camcorder', 'CameraFlash', 'CameraLenses', 'CameraOtherAccessories', 'CameraPowerSupply', 'CarElectronics', 'ConsumerElectronics', 'DigitalCamera', 'DigitalPictureFrame', 'FilmCamera', 'GpsOrNavigationSystem', 'Headphones', 'Phone', 'PhoneAccessory', 'PhotographicStudioItems', 'PortableAvDevice', 'PowerSuppliesOrProtection', 'Radio', 'RemoteControl', 'Speakers', 'Telescope', 'Television', 'VideoProjector', 'camerabagsandcases'],
+    "AMAZON_FR_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_FR_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
 
-    "AMAZON_ES_Computers":['NotebookComputer', 'PersonalComputer', 'Monitor', 'VideoProjector', 'Printer', 'Scanner', 'InkOrToner', 'ComputerComponent', 'ComputerDriveOrStorage'],
-    "AMAZON_ES_ConsumerElectronics":[ 'AVFurniture', 'AccessoryOrPartOrSupply', 'AudioOrVideo', 'Battery', 'Binocular', 'CableOrAdapter', 'Camcorder', 'CameraFlash', 'CameraLenses', 'CameraOtherAccessories', 'CameraPowerSupply', 'CarElectronics', 'ConsumerElectronics', 'DigitalCamera', 'DigitalPictureFrame', 'FilmCamera', 'GpsOrNavigationSystem', 'Headphones', 'Phone', 'PhoneAccessory', 'PhotographicStudioItems', 'PortableAvDevice', 'PowerSuppliesOrProtection', 'Radio', 'RemoteControl', 'Speakers', 'Telescope', 'Television', 'VideoProjector', 'camerabagsandcases'],
+    "AMAZON_ES_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_ES_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
 
-    "AMAZON_IT_Computers":[ 'NotebookComputer', 'PersonalComputer', 'Monitor', 'VideoProjector', 'Printer', 'Scanner', 'InkOrToner', 'ComputerComponent', 'ComputerDriveOrStorage'],
-    "AMAZON_IT_ConsumerElectronics":[ 'AVFurniture', 'AccessoryOrPartOrSupply', 'AudioOrVideo', 'Battery', 'Binocular', 'CableOrAdapter', 'Camcorder', 'CameraFlash', 'CameraLenses', 'CameraOtherAccessories', 'CameraPowerSupply', 'CarElectronics', 'ConsumerElectronics', 'DigitalCamera', 'DigitalPictureFrame', 'FilmCamera', 'GpsOrNavigationSystem', 'Headphones', 'Phone', 'PhoneAccessory', 'PhotographicStudioItems', 'PortableAvDevice', 'PowerSuppliesOrProtection', 'Radio', 'RemoteControl', 'Speakers', 'Telescope', 'Television', 'VideoProjector', 'camerabagsandcases'],
+    "AMAZON_IT_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_IT_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
 
-    "AMAZON_JP_Computers":[ 'ComputerComponent', 'ComputerDriveOrStorage', 'InkOrToner', 'Monitor', 'NotebookComputer', 'PersonalComputer', 'Printer', 'Scanner', 'VideoProjector'],
-    "AMAZON_JP_ConsumerElectronics":["AccessoryOrPartOrSupply", "AudioOrVideo", "AvFurniture", "Battery", "Binocular", "CableOrAdapter", "Camcorder", "CameraBagsAndCases", "DigitalCamera", "FilmCamera", "CameraFlash", "CameraLenses", "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics", "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones", "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection", "Radio", "RemoteControl", "Speakers", "Telescope", "Television", "VideoProjector"]
+    "AMAZON_JP_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_JP_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
 
-    "AMAZON_CA_Computers":["CarryingCaseOrBag", "Computer", "ComputerAddOn", "ComputerComponent", "ComputerCoolingDevice", "ComputerDriveOrStorage", "ComputerInputDevice", "ComputerProcessor", "ComputerSpeaker", "FlashMemory", "Keyboards", "MemoryReader", "Monitor", "Motherboard", "NetworkingDevice", "NotebookComputer", "PersonalComputer", "RAMMemory", "SoundCard", "SystemCabinet", "SystemPowerDevice", "TabletComputer", "VideoCard", "VideoProjector", "Webcam"],
-    "AMAZON_CA_ConsumerElectronics":["AVFurniture", "Antenna", "AudioVideoAccessory", "Battery", "BlankMedia", "CableOrAdapter", "CarAlarm", "CarAudioOrTheater", "CarElectronics", "DVDPlayerOrRecorder", "DigitalVideoRecorder", "GPSOrNavigationAccessory", "GPSOrNavigationSystem", "HandheldOrPDA", "Headphones", "HomeTheaterSystemOrHTIB", "MediaPlayer", "MediaPlayerOrEReaderAccessory", "MediaStorage", "MiscAudioComponents", "PortableAudio", "PowerSuppliesOrProtection", "RadarDetector", "RadioOrClockRadio", "ReceiverOrAmplifier", "RemoteControl", "Speakers", "StereoShelfSystem", "TVCombos", "Television", "Tuner", "TwoWayRadio", "VCR", "VideoProjector"]
+    "AMAZON_CA_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
+      "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
+    "AMAZON_CA_ConsumerElectronics": ["AVFurniture", "Battery", "CableOrAdapter", "CameraLenses",
+      "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
+      "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
+      "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"]
   }
 
   # 模板类型与 Feed Product Type 的组合使用
