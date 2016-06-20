@@ -1,5 +1,6 @@
 package ext;
 
+import com.google.common.base.Optional;
 import helper.Webs;
 import models.market.M;
 import models.procure.*;
@@ -8,6 +9,8 @@ import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
+
+import java.math.BigDecimal;
 
 /**
  * Created by IntelliJ IDEA.
@@ -209,5 +212,22 @@ public class ProcuresHelper extends JavaExtensions {
      */
     public static F.T3<Integer, Integer, Integer> qtys(ProcureUnit unit) {
         return new F.T3(unit.attrs.planQty, unit.attrs.qty, unit.inboundQty());
+    }
+
+    /**
+     * 返回单价 总价 剩余请款额
+     *
+     * @param unit
+     * @return
+     */
+    public static F.T3<BigDecimal, BigDecimal, BigDecimal> prices(ProcureUnit unit) {
+        Optional<Float> price = Optional.fromNullable(unit.attrs.price);
+        int qty = unit.qty();
+        if(price.isPresent()) {
+            return new F.T3(new java.math.BigDecimal(price.get()).setScale(2, 4).floatValue(),
+                    new java.math.BigDecimal(qty * price.get()).setScale(2, 4).floatValue(),
+                    new java.math.BigDecimal(unit.leftAmount()).setScale(2, 4).floatValue());
+        }
+        return null;
     }
 }
