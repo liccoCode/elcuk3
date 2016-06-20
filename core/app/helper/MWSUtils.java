@@ -455,9 +455,9 @@ public class MWSUtils {
                 Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
                 return clazz.newInstance();
             } catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                throw new FastRuntimeException(
+                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
             }
-            return null;
         }
 
         void setType(Object setter, Object param) {
@@ -466,7 +466,8 @@ public class MWSUtils {
                         param.getClass());
                 method.invoke(setter, param);
             } catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                e.printStackTrace();
+                throw new FastRuntimeException(
+                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
             }
         }
 
