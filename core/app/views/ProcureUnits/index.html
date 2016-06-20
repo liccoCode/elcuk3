@@ -158,7 +158,7 @@
           <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
           <td>${unit.cooperator?.name}</td>
             #{set price: unit.attrs?.price/}
-            #{set qty: unit.attrs?.qty()/}
+            #{set qty: unit.qty()/}
           <td>
               #{if price != null}
                 ${unit.attrs?.currency?.symbol()} ${new java.math.BigDecimal(price).setScale(2,4).floatValue().format('#,###.##')}
