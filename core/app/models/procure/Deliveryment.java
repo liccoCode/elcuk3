@@ -496,9 +496,7 @@ public class Deliveryment extends GenericModel {
             Validation.addError("deliveryment.units.unassign", "%s");
             return false;
         }
-        Validation.required("procureunit.planDeliveryDate", unit.attrs.planDeliveryDate);
-        Validation.required("procureunit.planShipDate", unit.attrs.planShipDate);
-        Validation.required("procureunit.planArrivDate", unit.attrs.planArrivDate);
+        if(unit.attrs.planDeliveryDate == null) Validation.addError("", String.format("[%s]的预计交货日期不能为空!", unit.id));
         return true;
     }
 
