@@ -135,7 +135,8 @@
           <td>
             <label class="checkbox">
               <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                     boxNum="${unit.recommendBoxNum()}" data-stage="${unit.stage.name()}">
+                     boxNum="${unit.recommendBoxNum()}" data-stage="${unit.stage.name()}"
+                     data-cooperatorid="${unit.cooperator?.id}">
             </label>
           </td>
           <td>${unit.id}</td>

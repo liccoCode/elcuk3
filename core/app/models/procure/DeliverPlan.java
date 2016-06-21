@@ -144,9 +144,9 @@ public class DeliverPlan extends GenericModel {
             Validation.addError("deliveryment.units.create", "%s");
             return deliverplan;
         }
-
+        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            isUnitToDeliverymentValid(unit);
+            isUnitToDeliverymentValid(unit, cop);
         }
         if(Validation.hasErrors()) return deliverplan;
         deliverplan.handler = user;
@@ -181,10 +181,13 @@ public class DeliverPlan extends GenericModel {
                 count.length() == 1 ? "0" + count : count);
     }
 
-
-    private static boolean isUnitToDeliverymentValid(ProcureUnit unit) {
+    private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
             Validation.addError("", "采购计划单必须在采购中状态!");
+            return false;
+        }
+        if(!cop.equals(unit.cooperator)) {
+            Validation.addError("", "添加一个出库单只能一个供应商!");
             return false;
         }
         return true;
@@ -198,8 +201,9 @@ public class DeliverPlan extends GenericModel {
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit)) {
+            if(isUnitToDeliverymentValid(unit, cop)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
             if(Validation.hasErrors()) return new ArrayList<>();

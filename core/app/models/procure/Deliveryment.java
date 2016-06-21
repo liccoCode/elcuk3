@@ -549,7 +549,7 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
-     * 同步供应商到采购计划
+     * 同步供应商 和 price 和 currency 到采购计划
      */
     public void syncCooperatorToUnits() {
         if(this.cooperator != null) {
