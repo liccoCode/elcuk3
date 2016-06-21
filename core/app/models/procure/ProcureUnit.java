@@ -371,7 +371,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public Integer period;
 
     public void setPeriod() {
-        if(this.product.cooperators().size() > 0) {
+        if(this.product.cooperators().size() > 0 && this.cooperator != null) {
             Long cid = this.cooperator.id;
             CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", cid, this.sku).first();
             this.period = cooperItem.period;
@@ -1593,6 +1593,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int recommendBoxNum() {
+        if(this.cooperator == null) return 0;
         CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
         return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
@@ -1752,6 +1753,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public static STAGE[] stages() {
-        return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING, STAGE.INBOUND);
+        return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING,
+                STAGE.INBOUND, STAGE.CLOSE);
     }
 }
