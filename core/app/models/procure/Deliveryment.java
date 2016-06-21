@@ -244,7 +244,7 @@ public class Deliveryment extends GenericModel {
             this.state = S.DONE;
             this.save();
         }
-        return new F.T2<Integer, Integer>(delivery, total == 0 ? 1 : total);
+        return new F.T2<>(delivery, total == 0 ? 1 : total);
     }
 
     /**
