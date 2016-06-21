@@ -127,6 +127,11 @@ public class ShipmentPost extends Post<Shipment> {
                 sql.orderBy(" s.createDate DESC");
                 return new F.T2<>(sql.toString(), sql.getParams());
             }
+            Matcher num_matcher = NUM.matcher(this.search);
+            if(num_matcher.matches()) {
+                sql.where("pu.id =? ").params(this.search.trim());
+                return new F.T2<>(sql.toString(), sql.getParams());
+            }
         }
 
         sql.where(" s." + this.dateType + ">=?").params(Dates.morning(this.from)
@@ -159,12 +164,11 @@ public class ShipmentPost extends Post<Shipment> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            Matcher num_matcher = NUM.matcher(this.search);
-            sql.andWhere("s.trackNo LIKE ? ").param(word)
+
+            sql.andWhere("( s.trackNo LIKE ? ").param(word)
                     .orWhere("s.jobNumber LIKE ? ").params(word)
                     .orWhere("pu.sku LIKE ? ").params(word)
-                    .orWhere("f.shipmentId LIKE ? ").params(word);
-            if(num_matcher.matches()) sql.orWhere(" pu.id =?").params(this.search.trim());
+                    .orWhere("f.shipmentId LIKE ? ) ").params(word);
         }
         sql.groupBy(" s.id");
         sql.orderBy(" s.createDate DESC");
