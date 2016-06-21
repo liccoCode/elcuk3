@@ -152,9 +152,10 @@ public class DeliverPlan extends GenericModel {
         deliverplan.handler = user;
         deliverplan.state = P.CREATE;
         deliverplan.clearanceType = CT.Self;
+        deliverplan.cooperator = cop;
         for(ProcureUnit unit : units) {
             if(unit.deliverplan == null) {
-                // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
+                // 将 ProcureUnit 添加进入 出货单
                 unit.toggleAssignTodeliverplan(deliverplan, true);
                 unit.save();
             } else {
