@@ -165,7 +165,10 @@ $ ->
 
   $("#cooperator").change(->
     value = coop_hash[$(@).val()]
-    $("#coop_text").text("生产周期(day): " + value["period"] + ";  每箱数量: " + value["boxSize"] + ";  最低采购量:" + value["lowestOrderNum"])
+    period = value["period"]
+    $("#coop_text").text("生产周期(day): " + period + ";  每箱数量: " + value["boxSize"] + ";  最低采购量:" + value["lowestOrderNum"])
+    $("#planDeliveryDate").val($.DateUtil.fmt2($.DateUtil.addDay(period, new Date())))
+
   )
 
   getStockBySku = (sku) ->
