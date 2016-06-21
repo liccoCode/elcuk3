@@ -233,7 +233,6 @@ public class DeliverPlan extends GenericModel {
             }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
-        this.units.removeAll(units);
         this.save();
 
         new ElcukRecord(Messages.get("deliverplan.delunit"),
@@ -247,14 +246,9 @@ public class DeliverPlan extends GenericModel {
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
-        if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
-        } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
-                    ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY)
-                    .fetch();
-        }
+        Cooperator cooperator = this.units.get(0).cooperator;
+        return ProcureUnit.find("cooperator=? AND stage=? AND deliverplan IS NULL", cooperator, ProcureUnit.STAGE
+                .DELIVERY).fetch();
     }
 
     /**
