@@ -334,4 +334,15 @@ public class DeliverPlan extends GenericModel {
             }
         }
     }
+
+    /**
+     * 尝试补全供应商
+     * @return
+     */
+    public Cooperator cooperator() {
+        if(this.cooperator == null && this.units != null && !this.units.isEmpty()) {
+            this.cooperator = this.units.get(0).cooperator;
+        }
+        return this.cooperator;
+    }
 }
