@@ -31,6 +31,7 @@ import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -689,4 +690,19 @@ public class ProcureUnits extends Controller {
         ProcureUnits.indexForMarket(p);
     }
 
+    /**
+     * 更新报关类型
+     */
+    public static void updateClearanceType(Long id, DeliverPlan.CT clearanceType) {
+        try {
+            ProcureUnit unit = ProcureUnit.findById(id);
+            if(unit == null) throw new FastRuntimeException("未找到对应的采购计划");
+            if(clearanceType == null) throw new FastRuntimeException("报关类型为空!");
+            unit.clearanceType = clearanceType;
+            unit.save();
+            renderJSON(new Ret(true, String.format("成功修改采购计划[%s]的报关类型!", id)));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
 }

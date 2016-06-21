@@ -15,7 +15,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <form method="post" id="plan_form">
+    <form method="post" action="@{DeliverPlans.update()}">
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>
@@ -31,21 +31,14 @@
         </tr>
 
         <tr>
-          <th><span style="color:red">*</span>供应商</th>
-          <td>
-            <select name="dp.cooperator.id" class="selectize" style="width:150px;">
-              <option>请选择</option>
-            #{list items:cooperators, as:'c'}
-              <option ${c.id == dp.cooperator?.id} value="${c.id}">${c.name}</option>
-            #{/list}
-            </select>
-          </td>
+          <th>供应商</th>
+          <td>${dp.cooperator?.name}</td>
 
           <th><span style="color:red">*</span>报关类型</th>
           <td>
             <select name="dp.clearanceType" class="" style="width:90px;">
             #{list items:models.procure.DeliverPlan.CT.values(), as:'ct'}
-              <option ${ct == dp.clearanceType} value="${ct.name()}">${ct.label()}</option>
+              <option ${ct == dp.clearanceType ? 'selected' : ''} value="${ct.name()}">${ct.label()}</option>
             #{/list}
             </select>
           </td>
@@ -67,7 +60,7 @@
             <textarea rows="5" name="dp.memo" class="span12">${dp.memo}</textarea>
             <div style="margin-top:10px;">
             #{ifnot dp.isLocked()}
-              <a href="javascript:void(0)" class="btn btn-primary" id="plan_update_btn">更新</a>
+              <input type="submit" class="btn btn-primary" value="提交">
             #{/ifnot}
               <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-primary" target="_blank"><i
                   class="icon-download-alt"></i>导出出仓单</a>
