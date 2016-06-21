@@ -895,18 +895,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     /**
-     * 将 ProcureUnit 添加到/移出 出库单,状态改变
+     * 将 ProcureUnit 添加到/移出 出库单
      *
      * @param deliverplan
      */
     public void toggleAssignTodeliverplan(DeliverPlan deliverplan, boolean assign) {
-        if(assign) {
-            this.deliverplan = deliverplan;
-            this.planstage = PLANSTAGE.DELIVERY;
-        } else {
-            this.deliverplan = null;
-            this.planstage = PLANSTAGE.PLAN;
-        }
+        this.deliverplan =  assign ? deliverplan : null;
     }
 
 
