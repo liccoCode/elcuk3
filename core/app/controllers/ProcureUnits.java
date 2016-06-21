@@ -248,6 +248,7 @@ public class ProcureUnits extends Controller {
     }
 
     public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
+        unit.stage = ProcureUnit.STAGE.PLAN;
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.creator = unit.handler;
         unit.clearanceType = DeliverPlan.CT.Self;
@@ -263,7 +264,7 @@ public class ProcureUnits extends Controller {
         }
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = new ArrayList<>();
+            List<Whouse> whouses;
             if(StringUtils.isNotBlank(unit.sid)) {
                 unit.selling = Selling.findById(unit.sid);
                 whouses = Whouse.findByAccount(unit.selling.account);

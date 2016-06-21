@@ -149,7 +149,7 @@ public class StockRecord extends Model {
         return this;
     }
 
-    public void doCerate() {
+    public void doCreate() {
         this.save();
         this.updateWhouseQty();
     }

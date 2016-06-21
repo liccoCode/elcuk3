@@ -1594,6 +1594,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int recommendBoxNum() {
+        if(this.cooperator == null) return 0;
         CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
         return (int) Math.ceil(this.attrs.planQty / (float) boxSize);

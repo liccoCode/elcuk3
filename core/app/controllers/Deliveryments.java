@@ -283,6 +283,7 @@ public class Deliveryments extends Controller {
      *
      * @param dmt  Deliveryment
      * @param unit ProcureUnit
+     * @deprecated
      */
     @Check("deliveryments.manual")
     public static void createManual(Deliveryment dmt, ProcureUnit unit) {
