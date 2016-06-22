@@ -546,6 +546,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
 
         // 分拆出的新采购计划变更
+        newUnit.comment = unit.comment;
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
