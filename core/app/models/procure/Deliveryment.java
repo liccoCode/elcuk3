@@ -349,8 +349,9 @@ public class Deliveryment extends GenericModel {
             return new ArrayList<>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator singleCop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit)) {
+            if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
             }
             if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
@@ -465,7 +466,8 @@ public class Deliveryment extends GenericModel {
             Validation.addError("deliveryment.units.create", "%s");
             return deliveryment;
         }
-        for(ProcureUnit unit : units) isUnitToDeliverymentValid(unit);
+        Cooperator singleCop = units.get(0).cooperator;
+        for(ProcureUnit unit : units) isUnitToDeliverymentValid(unit, singleCop);
         if(Validation.hasErrors()) return deliveryment;
         deliveryment.handler = user;
         deliveryment.state = S.PENDING;
@@ -483,9 +485,13 @@ public class Deliveryment extends GenericModel {
         return deliveryment;
     }
 
-    private static boolean isUnitToDeliverymentValid(ProcureUnit unit) {
+    private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.PLAN) {
             Validation.addError("deliveryment.units.unassign", "%s");
+            return false;
+        }
+        if(!cop.equals(unit.cooperator)) {
+            Validation.addError("deliveryment.units.singlecop", "%s");
             return false;
         }
         if(unit.attrs.planDeliveryDate == null) Validation.addError("", String.format("[%s]的预计交货日期不能为空!", unit.id));
