@@ -696,16 +696,17 @@ public class ProcureUnits extends Controller {
     }
 
     /**
-     * 更新报关类型
+     * 更新单一属性
+     *
+     * @param attr
+     * @param value
      */
-    public static void updateClearanceType(Long id, DeliverPlan.CT clearanceType) {
+    public static void updateAttr(Long id, String attr, String value) {
         try {
             ProcureUnit unit = ProcureUnit.findById(id);
             if(unit == null) throw new FastRuntimeException("未找到对应的采购计划");
-            if(clearanceType == null) throw new FastRuntimeException("报关类型为空!");
-            unit.clearanceType = clearanceType;
-            unit.save();
-            renderJSON(new Ret(true, String.format("成功修改采购计划[%s]的报关类型!", id)));
+            unit.update(attr, value);
+            renderJSON(new Ret(true, String.format("成功修改采购计划[%s]", id)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

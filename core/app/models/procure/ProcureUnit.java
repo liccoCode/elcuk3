@@ -26,6 +26,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -34,6 +35,7 @@ import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.modules.pdf.PDF;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -1702,5 +1704,45 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public static STAGE[] stages() {
         return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING,
                 STAGE.INBOUND, STAGE.CLOSE);
+    }
+
+    /**
+     * 可用的供应商
+     *
+     * @return List<Cooperator>
+     */
+    public List<Cooperator> availableCooperators() {
+        if(this.product == null) return new ArrayList<>();
+        List<Cooperator> cooperators = Cooperator.cooperatorsBySKU(this.product.sku);
+        if(this.cooperator == null && !cooperators.isEmpty()) {
+            this.cooperator = cooperators.get(0);
+            this.save();
+        }
+        return cooperators;
+    }
+
+    public ProcureUnit update(String attr, String value) {
+        switch(attr) {
+            case "ClearanceType":
+                DeliverPlan.CT clearanceType = DeliverPlan.CT.valueOf(value);
+                if(clearanceType == null) throw new FastRuntimeException("报关类型不合法!");
+                this.clearanceType = clearanceType;
+                break;
+            case "CooperatorId":
+                if(NumberUtils.isNumber(value)) {
+                    Cooperator cooperator = Cooperator.findById(NumberUtils.toLong(value));
+                    if(cooperator != null) {
+                        this.cooperator = cooperator;
+                    } else {
+                        throw new FastRuntimeException(String.format("未找到 ID 为 [%s] 的供应商!", value));
+                    }
+                } else {
+                    throw new FastRuntimeException("供应商 ID 不合法!");
+                }
+                break;
+            default:
+                throw new FastRuntimeException("不支持的参数类型");
+        }
+        return this.save();
     }
 }

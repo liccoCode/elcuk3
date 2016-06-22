@@ -157,7 +157,13 @@
           <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
-          <td>${unit.cooperator?.name}</td>
+          <td>
+            <select name="unitCooperator" class="selectize" style="width:100px;">
+                #{list items:unit.availableCooperators(), as:'cop'}
+                  <option ${cop.id == unit.cooperator?.id ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+                #{/list}
+            </select>
+          </td>
             #{set prices: unit.prices()/}
           <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
           <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
