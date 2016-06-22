@@ -45,6 +45,17 @@
                  title='因工厂延期交货而分拆'>分拆</a>
             #{/power.ck}
         #{/elseif}
+        #{if unit.fba}
+            #{power.ck 'fbas.update'}
+              <div class="btn-toolbar" style="display:none;">
+                <a href="@{FBAs.changeFBA(unit.id)}" class="btn btn-small btn-warning" data-disable-with='处理中...'
+                   title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
+                </a>
+                <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
+                <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
+              </div>
+            #{/power.ck}
+        #{/if}
       <a href="@{ProcureUnits.edit(unit.id, 'show')}" class="btn btn-mini btn-info">查看</a>
     </td>
     <td class="selling_id">
@@ -86,126 +97,6 @@
     <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
     <td>#{time_tooltip time:unit.createDate/}</td>
     <td>${unit.creator?.username}</td>
-  </tr>
-
-  <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '23' : '22'}">
-      <div class="row-fluid" id="actions_${unit.id}">
-        <div class="span3">
-          <dl>
-            <dt>Comment</dt>
-            <dd>${unit.comment}</dd>
-          </dl>
-
-        </div>
-        <div class="span3">
-          <dl>
-            <dt>关联运输单</dt>
-            <dd>
-              <ul>
-                  #{list items:unit.relateShipment(), as:'sp'}
-                    <li>
-                      <a href="@{Shipments.show(sp.id)}">${sp}</a>
-                      预计 #{time_tooltip time: sp.dates.planBeginDate /} 开船
-                    </li>
-                  #{/list}
-              </ul>
-            </dd>
-          </dl>
-          <dl>
-            <dt>关联 FBA</dt>
-            <dd>
-                #{if unit.fba}
-                  <a href="${unit.fba.fbaLink()}">
-                    <i class="icon-external-link"></i>
-                  ${unit.fba.shipmentId}
-                  </a>
-                #{/if}
-                #{else }
-                  <span class="text-warning">还没有 FBA</span>
-                #{/else}
-            </dd>
-          </dl>
-        </div>
-
-        <div class="span3">
-          <table class="table table-condensed table-bordered">
-            <tr>
-              <td>实际交货量</td>
-              <td>实际交货日期</td>
-            </tr>
-            <tr>
-              <td>${unit.attrs.qty}</td>
-              <td>${unit.attrs.deliveryDate.los()}</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="span3">
-          <div class="btn-toolbar">
-            <!-- 普通修改 -->
-              #{if unit.selling}
-                <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-small btn-primary">修改</a>
-              #{/if}
-              #{else }
-                <a href="@{ProcureUnits.editManual(unit.id)}" target="_blank" class="btn btn-small btn-primary">修改</a>
-              #{/else}
-              #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
-                <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-small btn-danger">
-                  删除
-                </a>
-              #{/if}
-          </div>
-
-            #{if delivery}
-              <div class="btn-toolbar">
-                  #{power.ck "procures.delivery"}
-                      #{if unit.selling}
-                        <!-- 交货页面（没有Selling不允许） -->
-                        <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
-                      #{/if}
-                  #{/power.ck}
-                  #{power.ck "procures.dosplitunit"}
-                    <!-- 分拆采购单元 -->
-                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
-                       rel='tooltip' title='因工厂延期交货而分拆'>
-                      分拆
-                    </a>
-                  #{/power.ck}
-                <!-- 确认到货代处 -->
-                  #{if unit.selling}
-                      #{ifnot unit.isPlaced}
-                        <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
-                           href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>
-                          抵达货代
-                        </a>
-                      #{/ifnot}
-                  #{/if}
-              </div>
-                #{if unit.fba}
-                    #{power.ck 'fbas.update'}
-                      <div class="btn-toolbar">
-                        <a href="@{FBAs.changeFBA(unit.id)}" class="btn btn-small btn-warning" data-disable-with='处理中...'
-                           title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
-                        </a>
-                      </div>
-                    #{/power.ck}
-                #{/if}
-              <div class="btn-toolbar">
-                  #{if unit.fba}
-                    <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
-                    <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
-                  #{/if}
-              </div>
-            #{/if}
-        </div>
-      </div>
-        #{ifnot norecord}
-          <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-              #{records_ul  records: unit.records()/}
-          </div>
-        #{/ifnot}
-    </td>
   </tr>
 #{/list}
 #{if p != null}

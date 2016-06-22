@@ -72,31 +72,34 @@ public class WhouseItem extends Model {
         int total_num = 0;
 
         for(ReceiveRecord record : records) {
-            if(record.procureUnit.whouse == null) {
-                no_country += record.qty;
-            } else {
-                // 仓库名都为FBA_DE,FBA_US
-                String country_name = record.procureUnit.whouse.name.split("_")[1];
-                if(map.containsKey(country_name)) {
-                    map.put(country_name, map.get(country_name) + record.qty);
+            if(record.qty > 0) {
+                if(record.procureUnit.whouse == null) {
+                    no_country += record.qty;
                 } else {
-                    map.put(country_name, record.qty);
+                    // 仓库名都为FBA_DE,FBA_US
+                    String country_name = record.procureUnit.whouse.name.split("_")[1];
+                    if(map.containsKey(country_name)) {
+                        map.put(country_name, map.get(country_name) + record.qty);
+                    } else {
+                        map.put(country_name, record.qty);
+                    }
                 }
+                total_num += record.qty;
             }
-            total_num += record.qty;
         }
-
 
         List<WhouseItem> items = WhouseItem.find("stockObj.stockObjId=? and stockObj.stockObjType=? and " +
                 "whouse.name like ? ", name, StockObj.SOT.valueOf(type), "半成品%").fetch();
         for(WhouseItem item : items) {
-            String country_name = item.whouse.country;
-            if(map.containsKey(country_name)) {
-                map.put(country_name, map.get(country_name) + item.qty);
-            } else {
-                map.put(country_name, item.qty);
+            if(item.qty > 0) {
+                String country_name = item.whouse.country;
+                if(map.containsKey(country_name)) {
+                    map.put(country_name, map.get(country_name) + item.qty);
+                } else {
+                    map.put(country_name, item.qty);
+                }
+                total_num += item.qty;
             }
-            total_num += item.qty;
         }
 
         int td_num = map.keySet().size();

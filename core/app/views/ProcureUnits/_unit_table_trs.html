@@ -4,14 +4,14 @@
     <input type="text" name="unit.selling.sellingId" id="sellingId" style="width:300px;" value="${unit.selling?.sellingId}"
     #{if unit.selling?.sellingId} readonly #{/if}>
   </td>
-  <th style="width:100px;">SKU</th>
+  <th style="width:100px;"><span style="color:red">*</span>SKU</th>
   <td>
     <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.selling?.listing?.product?.sku}"
     #{if unit.selling?.listing?.product?.sku} readonly #{/if}required autocomplete="off">
   </td>
 </tr>
 <tr>
-  <th>产品名称</th>
+  <th><span style="color:red">*</span>产品名称</th>
   <td>
     <input type="text" id="productName" style="width:300px;" value="${unit.selling?.listing?.product?.abbreviation}"
     #{if unit.selling?.listing?.product?.abbreviation} readonly #{/if}required>
@@ -23,9 +23,25 @@
 </tr>
 
 <tr>
-  <th>预计交货日期</th>
+  <th><span style="color:red">*</span>采购数量</th>
+  <td colspan="3">
+    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
+           value="${unit.attrs.planQty}">
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+    <span class="add-on">箱</span>
+    <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+    &nbsp;&nbsp;&nbsp;
+    <select id="cooperator" name="" coop_value="${unit.cooperator?.id}">
+      <option value="">供应商参考</option>
+    </select>
+    <span id="coop_text"></span>
+  </td>
+</tr>
+
+<tr>
+  <th><span style="color:red">*</span>预计交货日期</th>
   <td>
-    <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required>
+    <input type="date" id="planDeliveryDate" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required>
   #{if oldplanDeliveryDate!=null}
     <span class="add-on">比原预计交货日期${oldplanDeliveryDate.date()}推迟${(unit.attrs
     .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
@@ -40,22 +56,6 @@
       <option value="${w.id}">${w.name}</option>
     #{/list}
     </select>
-  </td>
-</tr>
-
-<tr>
-  <th>采购数量</th>
-  <td colspan="3">
-    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
-           value="${unit.attrs.planQty}">
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-    <span class="add-on">箱</span>
-    <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-    &nbsp;&nbsp;&nbsp;
-    <select id="cooperator" name="unit.cooperator.id" coop_value="${unit.cooperator?.id}">
-      <option value="">供应商参考</option>
-    </select>
-    <span id="coop_text"></span>
   </td>
 </tr>
 
@@ -97,3 +97,8 @@
     <textarea rows="8" class="span12" name="unit.comment" id="memo">${unit.comment.raw()}</textarea>
   </td>
 </tr>
+
+<input type="hidden" name="to_page" value="#{if sid} analysis #{/if} #{else } index #{/else}">
+
+
+

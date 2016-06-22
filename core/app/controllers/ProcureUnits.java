@@ -152,7 +152,7 @@ public class ProcureUnits extends Controller {
         } else {
             whouses = Whouse.findByType(Whouse.T.FBA);
         }
-        render(unit, whouses);
+        render(unit, whouses, sid);
     }
 
 
@@ -248,8 +248,7 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
-    public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
-        unit.stage = ProcureUnit.STAGE.PLAN;
+    public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, String to_page) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.creator = unit.handler;
         unit.clearanceType = DeliverPlan.CT.Self;
@@ -272,7 +271,7 @@ public class ProcureUnits extends Controller {
             } else {
                 whouses = Whouse.findByType(Whouse.T.FBA);
             }
-            render("ProcureUnits/blank.html", unit, whouses, totalFive, day);
+            render("ProcureUnits/blank.html", unit, whouses);
         }
 
         if(unit.isCheck != 1) unit.isCheck = 0;
@@ -303,14 +302,21 @@ public class ProcureUnits extends Controller {
                 flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
             }
         }
-        Analyzes.index();
+        if(StringUtils.isNotBlank(to_page) && to_page.trim().equals("analysis")) {
+            Analyzes.index();
+        } else {
+            ProcureUnits.indexForMarket(new ProcurePost());
+        }
     }
 
 
     public static void edit(long id, String type) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        List<Whouse> whouses = new ArrayList<>();
+        if(unit.selling != null) {
+            whouses = Whouse.findByAccount(unit.selling.account);
+        }
         unit.setPeriod();
         render(unit, oldPlanQty, whouses, type);
     }
@@ -674,7 +680,6 @@ public class ProcureUnits extends Controller {
     public static void showStockBySellingOrSku(String name, String type) {
         HashMap<String, Integer> map = ProcureUnit.caluStockInProcureUnit(name, type);
         HashMap<String, Integer> stock_map = WhouseItem.caluStockInProcureUnit(name, type);
-
         render(map, stock_map);
     }
 
