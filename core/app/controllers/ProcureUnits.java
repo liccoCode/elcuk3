@@ -14,11 +14,11 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
-import models.whouse.Whouse;
 import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
+import models.whouse.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -337,7 +337,6 @@ public class ProcureUnits extends Controller {
 
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        Set<User> users = unit.editToUsers();
         unit.remove();
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
