@@ -1715,7 +1715,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.product == null) return new ArrayList<>();
         List<Cooperator> cooperators = Cooperator.cooperatorsBySKU(this.product.sku);
         if(this.cooperator == null && !cooperators.isEmpty()) {
-            this.cooperator = cooperators.get(0);
+            this.updateCooperator(cooperators.get(0));
             this.save();
         }
         return cooperators;
@@ -1732,7 +1732,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 if(NumberUtils.isNumber(value)) {
                     Cooperator cooperator = Cooperator.findById(NumberUtils.toLong(value));
                     if(cooperator != null) {
-                        this.cooperator = cooperator;
+                        this.updateCooperator(cooperator);
                     } else {
                         throw new FastRuntimeException(String.format("未找到 ID 为 [%s] 的供应商!", value));
                     }
@@ -1744,5 +1744,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 throw new FastRuntimeException("不支持的参数类型");
         }
         return this.save();
+    }
+
+    /**
+     * 更新供应商 价格 货币
+     *
+     * @param cooperator
+     */
+    public void updateCooperator(Cooperator cooperator) {
+        this.cooperator = cooperator;
+        CooperItem cooperItem = this.cooperator.cooperItem(this.product.sku);
+        if(cooperItem != null) {
+            this.attrs.price = cooperItem.price;
+            this.attrs.currency = cooperItem.currency;
+        }
     }
 }

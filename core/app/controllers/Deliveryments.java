@@ -96,7 +96,6 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
         dmt.save();
-        dmt.syncCooperatorToUnits();
         flash.success("更新成功.");
         show(dmt.id);
     }
