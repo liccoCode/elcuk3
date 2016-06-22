@@ -911,7 +911,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 fba.units.remove(this);
                 fba.removeFBAShipment();
             }
-
             // 删除运输相关
             for(ShipItem item : this.shipItems) {
                 item.delete();
@@ -921,6 +920,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             List<CheckTask> tasks = this.tasks();
             for(CheckTask task : tasks) {
                 task.delete();
+            }
+            //删除采购单关联
+            Deliveryment deliveryment = this.deliveryment;
+            if(deliveryment != null && deliveryment.units != null) {
+                deliveryment.units.remove(this);
+            }
+            //删除出货单关联
+            DeliverPlan deliverPlan = this.deliverplan;
+            if(deliverPlan != null && deliverPlan.units != null) {
+                deliverPlan.units.remove(this);
             }
             this.delete();
         } else {

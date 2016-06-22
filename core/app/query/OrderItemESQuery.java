@@ -2,10 +2,8 @@ package query;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import helper.Constant;
-import helper.Dates;
-import helper.ES;
-import helper.Promises;
+import com.google.common.base.Optional;
+import helper.*;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +66,7 @@ public class OrderItemESQuery {
      * @return
      */
     public Series.Line skuSalesAndUnits(String sku, M market, Date from, Date to) {
-        return base("\"" + sku + "\"", "sku", market, from, to);
+        return base(sku, "sku", market, from, to);
     }
 
     /**
@@ -83,7 +81,7 @@ public class OrderItemESQuery {
     public Series.Line mskuSalesAndUnits(String sid, M market, Date from, Date to) {
         String[] args = StringUtils.split(sid, "|");
         if(args.length == 3) sid = args[0];
-        return base("\"" + sid + "\"", "msku", market, from, to);
+        return base(sid, "msku", market, from, to);
     }
 
     /**
@@ -92,7 +90,7 @@ public class OrderItemESQuery {
      * @param market
      */
     public Series.Line catSalesAndUnits(String cat, M market, Date from, Date to) {
-        return base("\"" + cat + "\"", "category_id", market, from, to);
+        return base(cat, "category_id", market, from, to);
     }
 
     /**
@@ -120,17 +118,17 @@ public class OrderItemESQuery {
     }
 
     public Series.Line skuSalesMovingAvg(String sku, M market, Date from, Date to) {
-        return baseMoveingAve("\"" + sku + "\"", "sku", market, from, to);
+        return baseMoveingAve(sku, "sku", market, from, to);
     }
 
     public Series.Line mskuSalesMovingAvg(String sid, M market, Date from, Date to) {
         String[] args = StringUtils.split(sid, "|");
         if(args.length == 3) sid = args[0];
-        return baseMoveingAve("\"" + sid + "\"", "msku", market, from, to);
+        return baseMoveingAve(sid, "msku", market, from, to);
     }
 
     public Series.Line catSalesMovingAvg(String cat, M market, Date from, Date to) {
-        return baseMoveingAve("\"" + cat + "\"", "category_id", market, from, to);
+        return baseMoveingAve(cat, "category_id", market, from, to);
     }
 
     /**
@@ -146,11 +144,8 @@ public class OrderItemESQuery {
     /**
      * @param val
      * @param type sku/msku/cat
-     * @deprecated facetFilter 查询需要替换
      */
     private Series.Line base(String val, String type, M market, Date from, Date to) {
-
-
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
         if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
@@ -159,21 +154,24 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .facet(FacetBuilders.dateHistogramFacet("units")
-                                .keyField("date")
-                                .valueField("quantity")
-                                .interval("day")
+        SearchSourceBuilder search = new SearchSourceBuilder().aggregation(
+                AggregationBuilders.filter("aggs_filter").filter(
+                        FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                .must(FilterBuilders.rangeFilter("date")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat))
+                                ).mustNot(FilterBuilders.termFilter("state", "cancel")
+                        )).subAggregation(
+                        AggregationBuilders.dateHistogram("units")
+                                .field("date")
+                                .interval(DateHistogram.Interval.DAY)
                                 .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                                .facetFilter(FilterBuilders.boolFilter()
-                                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                                .must(FilterBuilders.rangeFilter("date")
-                                                                .gte(fromD.toString(isoFormat))
-                                                                .lt(toD.toString(isoFormat))
-                                                ).mustNot(FilterBuilders.termFilter("state", "cancel"))
+                                .subAggregation(
+                                        AggregationBuilders.sum("quantity").field("quantity")
                                 )
-                ).size(0);
-
+                )
+        ).size(0);
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
@@ -182,27 +180,29 @@ public class OrderItemESQuery {
 
         Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        Logger.info(result.toString());
-        JSONObject facets = result.getJSONObject("facets");
-        if(facets != null && facets.getJSONObject("units") != null) {
-            JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
-            Series.Line line = new Series.Line(market.label() + "销量");
-            for(Object o : entries) {
-                JSONObject entry = (JSONObject) o;
-                line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
-            }
 
-            DateTime datePointer = new DateTime(from);
-            while(datePointer.getMillis() <= to.getTime()) {
-                line.add(0f, Dates.date2JDate(from));
-                datePointer = datePointer.plusDays(1);
+        Series.Line line = new Series.Line(market.label() + "销量");
+        Optional<JSONObject> units = Optional.fromNullable(J.dig(result, "aggregations.aggs_filter.units"));
+        if(units.isPresent()) {
+            Optional<JSONArray> buckets = Optional.fromNullable(units.get().getJSONArray("buckets"));
+            if(buckets.isPresent()) {
+                for(Object o : buckets.get()) {
+                    JSONObject entry = (JSONObject) o;
+                    Optional<JSONObject> quantity = Optional.fromNullable(entry.getJSONObject("quantity"));
+                    line.add(
+                            Dates.date2JDate(entry.getDate("key")),
+                            quantity.isPresent() ? quantity.get().getFloat("value") : 0f
+                    );
+                }
+                DateTime datePointer = new DateTime(from);
+                while(datePointer.getMillis() <= to.getTime()) {
+                    line.add(0f, Dates.date2JDate(from));
+                    datePointer = datePointer.plusDays(1);
+                }
+                line.sort();
             }
-            line.sort();
-            return line;
-        } else {
-            Series.Line line = new Series.Line(market.label() + "销量");
-            return line;
         }
+        return line;
     }
 
     /**
@@ -266,16 +266,16 @@ public class OrderItemESQuery {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(QueryBuilders.matchAllQuery())
                 .facet(FacetBuilders.termsStatsFacet("units")
-                                .keyField("category_id")
-                                .valueField("quantity")
-                                .size(30) // category 数量
-                                .facetFilter(FilterBuilders.boolFilter()
-                                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                                .must(FilterBuilders.rangeFilter("date")
-                                                                .gte(fromD.toString(isoFormat))
-                                                                .lt(toD.toString(isoFormat))
-                                                )
+                        .keyField("category_id")
+                        .valueField("quantity")
+                        .size(30) // category 数量
+                        .facetFilter(FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                .must(FilterBuilders.rangeFilter("date")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat))
                                 )
+                        )
                 ).size(0);
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
         JSONObject facets = result.getJSONObject("facets");
@@ -323,17 +323,17 @@ public class OrderItemESQuery {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .facet(FacetBuilders.dateHistogramFacet("units")
-                                .keyField("date")
-                                .valueField("quantity")
-                                .interval("day")
-                                .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                                .facetFilter(FilterBuilders.boolFilter()
-                                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                                .must(FilterBuilders.rangeFilter("date")
-                                                                .gte(fromD.toString(isoFormat))
-                                                                .lt(toD.toString(isoFormat))
-                                                ).must(skusfilter(type, val))
-                                )
+                        .keyField("date")
+                        .valueField("quantity")
+                        .interval("day")
+                        .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                        .facetFilter(FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                .must(FilterBuilders.rangeFilter("date")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat))
+                                ).must(skusfilter(type, val))
+                        )
                 ).size(0);
 
         Logger.info(search.toString());
@@ -383,8 +383,8 @@ public class OrderItemESQuery {
         RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
                 .keyField("date").valueField("quantity")
                 .facetFilter(FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(skusfilter(type, val))
+                        .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                        .must(skusfilter(type, val))
                 );
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
@@ -442,11 +442,11 @@ public class OrderItemESQuery {
         BoolFilterBuilder filter = FilterBuilders.boolFilter()
                 //市场
                 .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                        //日期
+                //日期
                 .must(FilterBuilders.rangeFilter("date")
                         .gte(fromD.toString(isoFormat))
                         .lt(toD.toString(isoFormat)))
-                        //SKU
+                //SKU
                 .must(FilterBuilders.termsFilter(type, params))
                 .mustNot(FilterBuilders.termFilter("state", "cancel"));
         aggregation.filter(filter);
@@ -467,10 +467,10 @@ public class OrderItemESQuery {
             BoolFilterBuilder filter = FilterBuilders.boolFilter()
                     //市场
                     .must(FilterBuilders.termFilter("market", m.name().toLowerCase()))
-                            //日期间隔
+                    //日期间隔
                     .must(FilterBuilders.rangeFilter("date")
-                                    .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
-                                    .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
+                            .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
+                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
                     ).mustNot(FilterBuilders.termFilter("state", "cancel"));
             marketAggregation.filter(filter);
             for(String sku : skus) {
