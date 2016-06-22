@@ -9,7 +9,6 @@ import models.User;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
-import models.view.Ret;
 import models.view.post.DeliverPlanPost;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
@@ -87,20 +86,15 @@ public class DeliverPlans extends Controller {
 
 
     public static void update(DeliverPlan dp) {
-        try {
-            if(dp.isLocked()) Validation.addError("", "已经确认发货的出货单不能再修改!");
-            Validation.required("供应商", dp.cooperator);
-            Validation.required("出货单名称", dp.name);
-            Validation.required("报关类型", dp.clearanceType);
-            validation.valid(dp);
-            if(Validation.hasErrors())
-                renderJSON(new Ret(Validation.errors().toString()));
+        if(dp.isLocked()) Validation.addError("", "已经确认发货的出货单不能再修改!");
+        Validation.required("出货单名称", dp.name);
+        Validation.required("报关类型", dp.clearanceType);
+        validation.valid(dp);
+        if(!Validation.hasErrors()) {
             dp.save();
             dp.syncClearanceTypeToUnits();
-            renderJSON(new Ret(true, ""));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
         }
+        render("/DeliverPlans/show.html", dp);
     }
 
 

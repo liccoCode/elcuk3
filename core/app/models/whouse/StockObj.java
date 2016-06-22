@@ -233,4 +233,16 @@ public class StockObj implements Serializable, Cloneable {
             }
         }
     }
+
+    /**
+     * 读取采购计划 ID
+     * @return
+     */
+    public Long procureunitId() {
+        if(this.attributes() != null && !this.attributes().isEmpty()) {
+            Optional<Object> procureunitId = Optional.fromNullable(this.attributes().get("procureunitId"));
+            if(procureunitId.isPresent()) return NumberUtils.toLong(procureunitId.get().toString());
+        }
+        return null;
+    }
 }

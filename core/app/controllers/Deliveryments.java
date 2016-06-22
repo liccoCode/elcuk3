@@ -91,7 +91,7 @@ public class Deliveryments extends Controller {
     }
 
     public static void update(Deliveryment dmt) {
-        if(!dmt.canBeEdit()) Validation.addError("", "已确认采购单不能再修改!");
+        if(!dmt.canBeEdit()) Validation.addError("", "已确认的采购单不能再修改!");
         validation.valid(dmt);
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
@@ -283,6 +283,7 @@ public class Deliveryments extends Controller {
      *
      * @param dmt  Deliveryment
      * @param unit ProcureUnit
+     * @deprecated
      */
     @Check("deliveryments.manual")
     public static void createManual(Deliveryment dmt, ProcureUnit unit) {

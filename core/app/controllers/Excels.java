@@ -598,6 +598,7 @@ public class Excels extends Controller {
                     String.format("采购计划明细表%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
+            renderArgs.put("costs", ProcurePost.countCostByCurrency(dtos));
             render(dtos, p);
         }
     }

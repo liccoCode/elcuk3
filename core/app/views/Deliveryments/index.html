@@ -197,9 +197,10 @@
                     <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
                     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
                     <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
-                    <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-                    <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.qty() * unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-                    <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.leftAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
+                      #{set prices: unit.prices()/}
+                    <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
+                    <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
+                    <td>${unit.attrs?.currency?.symbol()} ${prices?._3?.format('#,###.##')}</td>
                     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
                     <td>${unit.fba?.shipmentId}</td>
                     <td>

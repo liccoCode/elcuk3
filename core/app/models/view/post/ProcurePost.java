@@ -15,6 +15,7 @@ import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -169,7 +170,7 @@ public class ProcurePost extends Post<ProcureUnit> {
                     .append(" OR p.selling.sellingId LIKE ?")
                     .append(" OR p.fba.shipmentId LIKE ?")
                     .append(") ");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i <= 3; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
@@ -263,5 +264,33 @@ public class ProcurePost extends Post<ProcureUnit> {
     public String returnShipType() {
         if(this.shipType == null) return "运输方式";
         return this.shipType.label();
+    }
+
+    /**
+     * 按照货币单位统计数量和总额
+     *
+     * @param dtos
+     * @return
+     */
+    public static Map<String, F.T2<BigDecimal, Integer>> countCostByCurrency(List<ProcureUnit> dtos) {
+        Map<String, F.T2<BigDecimal, Integer>> costs = new HashMap<>();
+        if(dtos != null && !dtos.isEmpty()) {
+            Iterator<ProcureUnit> it = dtos.iterator();
+            while(it.hasNext()) {
+                ProcureUnit unit = it.next();
+                if(unit != null && unit.attrs != null && unit.attrs.currency != null && unit.attrs.price != null) {
+                    String key = unit.attrs.currency.name();
+                    BigDecimal cost = new BigDecimal(unit.qty() * unit.attrs.price);
+
+                    F.T2<BigDecimal, Integer> costAndQty = costs.get(key);
+                    if(costs.containsKey(key)) {
+                        costs.put(key, new F.T2(costAndQty._1.add(cost), costAndQty._2 + unit.qty()));
+                    } else {
+                        costs.put(key, new F.T2(cost, unit.qty()));
+                    }
+                }
+            }
+        }
+        return costs;
     }
 }

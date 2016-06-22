@@ -7,27 +7,29 @@
   #{/if}
   #{elseif country == 'FR'}
     Sold to : ${models.OperatorConfig.getVal("shipmenteuropefrsold")}<br>
-    (SERF Europefides SAS is the legal reprensentative of Tuggle in France)<br>
+    (SERF Europefides SAS is the legal reprensentative of EasyAcc in France)<br>
     Address:${models.OperatorConfig.getVal("shipmenteuropefraddress")}<br>
-    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropefrvat")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropefrvat")} &nbsp;&nbsp;
+    EORI : ${models.OperatorConfig.getVal("shipmenteuropefreori")}<br>
   #{/elseif}
   #{elseif country == 'GB'}
     Sold to : ${models.OperatorConfig.getVal("shipmenteuropeukbuyer")}<br>
-    Address:${models.OperatorConfig.getVal("shipmentexpresseuropeukaddress")}<br>
-    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeukvat")}<br>
+    VAT : ${models.OperatorConfig.getVal("shipmenteuropeukvat")}<br>
+    EORI : ${models.OperatorConfig.getVal("shipmenteuropeothereori")}<br>
   #{/elseif}
   #{elseif country == 'IT'}
     Sold to : ${models.OperatorConfig.getVal("shipmenteuropeitbuyer")}<br>
-    (ACIT S.R.L. is the legal reprensentative of Tuggle in Italy)<br>
+    (ACIT S.R.L. is the legal reprensentative of EasyAcc in Italy)<br>
     Address: ${models.OperatorConfig.getVal("shipmentexpresseuropeitaddress")}<br>
-    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeitvat")}<br>
+    VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeitvat")} &nbsp;&nbsp;
+    EORI : ${models.OperatorConfig.getVal("shipmenteuropeiteori")}<br>
   #{/elseif}
   #{else}
     Buyer : ${models.OperatorConfig.getVal("shipmenteuropeotherbuyer")}  <br>
     VAT No. : ${models.OperatorConfig.getVal("shipmenteuropeothervat")}<br>
   #{/else}
   #{if country != 'DE' }
-    Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} <br>
+    Attn : ${models.OperatorConfig.getVal("shipmenteuropeattn")} &nbsp;&nbsp;
     Tel :
   #{/if}
   #{if country == 'DE' }
@@ -45,7 +47,7 @@
     <br>
     Email: ${models.OperatorConfig.getVal("shipmenteuropeemail")} <br>
     Ship to: ${address} <br>
-    Contact Person: ${models.OperatorConfig.getVal("shipmentexpresseuropecontact")}<br>
+    Contact Person: ${models.OperatorConfig.getVal("shipmentexpresseuropecontact")} &nbsp;&nbsp;
     Tel: ${models.OperatorConfig.getVal("shipmentexpresseuropecontacttel")}
   </td>
   <td>Buyer EORI NO.：</td>

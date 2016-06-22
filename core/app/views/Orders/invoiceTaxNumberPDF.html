@@ -66,32 +66,18 @@
 <table cellpadding="4px" style="width:70%" cellspacing="0" align='center'>
   <tr>
     <td class="td1">
-      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
-      </strong><br>
-    ${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}  </strong>
+      <strong><font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font></strong><br>
+      <strong>${invoiceformat.date}: ${new org.joda.time.DateTime(ord.createDate).toString("dd/MM/yyyy")}</strong>
     </td>
-    <td rowspan="4" class="td2">
-      <div class="div1">
-      #{if  (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ) || (ord.market==models
-      .market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
-        <img src="http://127.0.0.1:9000/images/common/EDEER-logo.jpg"
-             style="height:100%">
+    <td class="td2">
+      #{if (ord.market==models.market.M.AMAZON_ES || ord.market==models.market.M.AMAZON_UK ) ||
+      (ord.market==models.market.M.AMAZON_IT && invoice?.europevat==models.market.OrderInvoice.VAT.EUROPE)}
+        <img src="http://127.0.0.1:9000/images/common/easyacc_logo.png" style="height:80%;width:80%">
       #{/if}
       #{if  (ord.market==models.market.M.AMAZON_DE) || (ord.market==models.market.M.AMAZON_FR) || (ord.market==models.market.M.AMAZON_IT && (invoice==null || invoice.europevat!=models.market.OrderInvoice.VAT.EUROPE))}
-        <img src="http://127.0.0.1:9000/images/common/TUGGLE-logo.jpg"
-             style="height:100%">
+        <img src="http://127.0.0.1:9000/images/common/easyacc_logo.png" style="height:80%;width:80%">
       #{/if}
-      </div>
     </td>
-  </tr>
-  <tr>
-    <td class="td1"></td>
-  </tr>
-  <tr>
-    <td></td>
-  </tr>
-  <tr>
-    <td></td>
   </tr>
   <tr>
     <td class="td1">
@@ -167,7 +153,6 @@
       </tr>
     #{/if}
 #{/list}
-
 
 #{set feecount:ord.items.size()/}
 #{list items:ord.fees, as:'fee'}

@@ -72,7 +72,7 @@
     </td>
       #{if key.equals('delivery')}
         <td>
-          <select name="customsClearanceTypeSetter" style="width: 90px;">
+          <select name="customsClearanceTypeSetter" data-unitid="${unit.id}" style="width: 90px;">
               #{list items:models.procure.DeliverPlan.CT.values(), as:'ct'}
                 <option ${unit.clearanceType == ct ? 'selected' : ''} value="${ct.name()}">${ct.label()}</option>
               #{/list}

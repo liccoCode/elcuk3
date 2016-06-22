@@ -10,6 +10,7 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
@@ -293,7 +294,8 @@ public class InboundRecord extends Model {
         if(Validation.hasErrors()) return;
 
         this.save();
-        for(StockRecord record : this.buildStockRecords()) record.doCerate();
+        this.inboundProcureunit();//设置采购计划入库
+        for(StockRecord record : this.buildStockRecords()) record.doCreate();
         //为质检不合格的入库生成出库记录(退给工厂)
         if(this.isRefund()) new OutboundRecord(this).save();
     }
@@ -415,5 +417,20 @@ public class InboundRecord extends Model {
      */
     public static InboundRecord findInboundRecordByProcureunitId(Long procureunitId) {
         return InboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + procureunitId + "%").first();
+    }
+
+
+    /**
+     * 采购计划入库
+     */
+    public void inboundProcureunit() {
+        Long procureunitId = this.stockObj.procureunitId();
+        if(procureunitId != null) {
+            ProcureUnit unit = ProcureUnit.findById(procureunitId);
+            if(unit != null) {
+                unit.stage = ProcureUnit.STAGE.INBOUND;
+                unit.save();
+            }
+        }
     }
 }

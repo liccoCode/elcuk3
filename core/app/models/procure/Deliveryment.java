@@ -41,27 +41,18 @@ public class Deliveryment extends GenericModel {
     }
 
     public enum S {
-        /**
-         * 预定.
-         */
         PENDING {
             @Override
             public String label() {
                 return "计划";
             }
         },
-        /**
-         * 确定采购单
-         */
         CONFIRM {
             @Override
             public String label() {
                 return "已确认";
             }
         },
-        /**
-         * 完成交货.
-         */
         DONE {
             @Override
             public String label() {
@@ -185,7 +176,7 @@ public class Deliveryment extends GenericModel {
      * 有无 Selling
      */
     @Expose
-    public Boolean haveSelling = true;
+    public Boolean haveSelling;
 
     /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
@@ -253,7 +244,7 @@ public class Deliveryment extends GenericModel {
             this.state = S.DONE;
             this.save();
         }
-        return new F.T2<Integer, Integer>(delivery, total == 0 ? 1 : total);
+        return new F.T2<>(delivery, total == 0 ? 1 : total);
     }
 
     /**
@@ -303,12 +294,15 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
-        if(this.state != S.PENDING)
+        if(this.isLock())
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
         if(this.orderTime == null)
             Validation.addError("", "下单时间必须填写");
         if(Validation.hasErrors()) return;
-
+        for(ProcureUnit unit : this.units) {
+            unit.stage = ProcureUnit.STAGE.DELIVERY;
+            unit.save();
+        }
         this.state = Deliveryment.S.CONFIRM;
         this.confirmDate = new Date();
         this.save();
@@ -331,14 +325,9 @@ public class Deliveryment extends GenericModel {
      * 取消采购单
      */
     public void cancel(String msg) {
-        /**
-         * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
-         */
         for(ProcureUnit unit : this.units) {
-            //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
-            //    Validation.addError("deliveryment.units.cancel", "validation.required");
-            //   else
             unit.toggleAssignTodeliveryment(null, false);
+            unit.save();
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
@@ -355,10 +344,9 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
-        if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
-            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
-                    " 状态的[采购单]添加[采购单元]");
-            return new ArrayList<ProcureUnit>();
+        if(this.isLock()) {
+            Validation.addError("", "只允许 " + S.PENDING.label() + "状态的[采购单]添加[采购单元]");
+            return new ArrayList<>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
@@ -381,6 +369,10 @@ public class Deliveryment extends GenericModel {
      * @param pids
      */
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
+        if(this.isLock()) {
+            Validation.addError("", "只允许 " + S.PENDING.label() + "状态的[采购单]删除[采购单元]");
+            return new ArrayList<>();
+        }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY)
@@ -496,9 +488,7 @@ public class Deliveryment extends GenericModel {
             Validation.addError("deliveryment.units.unassign", "%s");
             return false;
         }
-        Validation.required("procureunit.planDeliveryDate", unit.attrs.planDeliveryDate);
-        Validation.required("procureunit.planShipDate", unit.attrs.planShipDate);
-        Validation.required("procureunit.planArrivDate", unit.attrs.planArrivDate);
+        if(unit.attrs.planDeliveryDate == null) Validation.addError("", String.format("[%s]的预计交货日期不能为空!", unit.id));
         return true;
     }
 
@@ -559,7 +549,7 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
-     * 同步供应商到采购计划
+     * 同步供应商 和 price 和 currency 到采购计划
      */
     public void syncCooperatorToUnits() {
         if(this.cooperator != null) {
@@ -573,5 +563,9 @@ public class Deliveryment extends GenericModel {
                 unit.save();
             }
         }
+    }
+
+    public boolean isLock() {
+        return this.state != S.PENDING;
     }
 }

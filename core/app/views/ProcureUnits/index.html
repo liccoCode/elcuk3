@@ -76,7 +76,7 @@
         </div>
 
         <div class="inline">
-          <a href="@{ProcureUnits.blank()}" class="btn btn-success" data-disable-with="loading">创建采购计划</a>
+          <a href="@{ProcureUnits.blank()}" class="btn btn-success">创建采购计划</a>
         #{power.ck "procures.createdeliveryment"}
           <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliveryment">创建采购单</a>
         #{/power.ck}
@@ -135,7 +135,8 @@
           <td>
             <label class="checkbox">
               <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                     boxNum="${unit.recommendBoxNum()}" data-stage="${unit.stage.name()}">
+                     boxNum="${unit.recommendBoxNum()}" data-stage="${unit.stage.name()}"
+                     data-cooperatorid="${unit.cooperator?.id}">
             </label>
           </td>
           <td>${unit.id}</td>
@@ -157,9 +158,10 @@
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
           <td>${unit.cooperator?.name}</td>
-          <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-          <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.qty() * unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-          <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.leftAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
+            #{set prices: unit.prices()/}
+          <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
+          <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
+          <td>${unit.attrs?.currency?.symbol()} ${prices?._3?.format('#,###.##')}</td>
           <td>${unit.fba?.shipmentId}</td>
           <td>${unit.whouse?.name()}</td>
           <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>

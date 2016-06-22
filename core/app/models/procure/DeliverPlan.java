@@ -144,17 +144,18 @@ public class DeliverPlan extends GenericModel {
             Validation.addError("deliveryment.units.create", "%s");
             return deliverplan;
         }
-
+        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            isUnitToDeliverymentValid(unit);
+            isUnitToDeliverymentValid(unit, cop);
         }
         if(Validation.hasErrors()) return deliverplan;
         deliverplan.handler = user;
         deliverplan.state = P.CREATE;
         deliverplan.clearanceType = CT.Self;
+        deliverplan.cooperator = cop;
         for(ProcureUnit unit : units) {
             if(unit.deliverplan == null) {
-                // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
+                // 将 ProcureUnit 添加进入 出货单
                 unit.toggleAssignTodeliverplan(deliverplan, true);
                 unit.save();
             } else {
@@ -181,10 +182,13 @@ public class DeliverPlan extends GenericModel {
                 count.length() == 1 ? "0" + count : count);
     }
 
-
-    private static boolean isUnitToDeliverymentValid(ProcureUnit unit) {
+    private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
             Validation.addError("", "采购计划单必须在采购中状态!");
+            return false;
+        }
+        if(!cop.equals(unit.cooperator)) {
+            Validation.addError("", "添加一个出库单只能一个供应商!");
             return false;
         }
         return true;
@@ -198,8 +202,9 @@ public class DeliverPlan extends GenericModel {
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit)) {
+            if(isUnitToDeliverymentValid(unit, cop)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
             if(Validation.hasErrors()) return new ArrayList<>();
@@ -228,7 +233,6 @@ public class DeliverPlan extends GenericModel {
             }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
-        this.units.removeAll(units);
         this.save();
 
         new ElcukRecord(Messages.get("deliverplan.delunit"),
@@ -242,14 +246,9 @@ public class DeliverPlan extends GenericModel {
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
-        if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
-        } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
-                    ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY)
-                    .fetch();
-        }
+        Cooperator cooperator = this.units.get(0).cooperator;
+        return ProcureUnit.find("cooperator=? AND stage=? AND deliverplan IS NULL", cooperator, ProcureUnit.STAGE
+                .DELIVERY).fetch();
     }
 
     /**
@@ -280,13 +279,16 @@ public class DeliverPlan extends GenericModel {
     }
 
     /**
-     * 生成收货记录
+     * 确认出货单并生成收货记录
      */
     public void triggerReceiveRecords() {
         if(this.units == null || this.units.isEmpty()) return;
         this.state = P.DONE;
         this.save();
         for(ProcureUnit unit : this.units) {
+            unit.stage = ProcureUnit.STAGE.INSHIPMENT;
+            unit.save();
+
             ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
             if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
         }
@@ -331,5 +333,16 @@ public class DeliverPlan extends GenericModel {
                 unit.save();
             }
         }
+    }
+
+    /**
+     * 尝试补全供应商
+     * @return
+     */
+    public Cooperator cooperator() {
+        if(this.cooperator == null && this.units != null && !this.units.isEmpty()) {
+            this.cooperator = this.units.get(0).cooperator;
+        }
+        return this.cooperator;
     }
 }

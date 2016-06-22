@@ -17,7 +17,17 @@ $ ->
       noty({text: '请选择状态为采购中的采购计划', type: 'error'})
     else
       $('input[name="pids"][data-stage!="DELIVERY"]:checked').prop('checked', false)
-      window.open('/deliverplans/deliverplan?' + $("#create_deliveryment").serialize(), "_blank")
+      # 检查是否选择同一供应商
+      checkboxs = $('input[name="pids"]:checked')
+
+      cooperatorId = $(checkboxs[0]).data('cooperatorid')
+      valid = true
+      _.each(checkboxs, (checkbox) ->
+        if $(checkbox).data('cooperatorid') != cooperatorId
+          noty({text: '请选择供应商相同的采购计划', type: 'error'})
+          valid = false
+      )
+      window.open('/deliverplans/deliverplan?' + checkboxs.serialize(), "_blank") if valid
   ).on("blur", "input[name='boxNumbers']", (e) ->
     $input = $(@)
     # 确保用户填写的是大于零的数字
