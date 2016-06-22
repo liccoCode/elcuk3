@@ -428,7 +428,7 @@ public class InboundRecord extends Model {
         if(procureunitId != null) {
             ProcureUnit unit = ProcureUnit.findById(procureunitId);
             if(unit != null) {
-                unit.stage = ProcureUnit.STAGE.INBOUND;
+                unit.stage = ProcureUnit.STAGE.INWAREHOUSE;
                 unit.save();
             }
         }
