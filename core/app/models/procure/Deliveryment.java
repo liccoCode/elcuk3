@@ -554,23 +554,6 @@ public class Deliveryment extends GenericModel {
         return names;
     }
 
-    /**
-     * 同步供应商 和 price 和 currency 到采购计划
-     */
-    public void syncCooperatorToUnits() {
-        if(this.cooperator != null) {
-            for(ProcureUnit unit : this.units) {
-                unit.cooperator = this.cooperator;
-                CooperItem cooperItem = cooperator.cooperItem(unit.sku);
-                if(cooperItem != null) {
-                    unit.attrs.price = cooperItem.price;
-                    unit.attrs.currency = cooperItem.currency;
-                }
-                unit.save();
-            }
-        }
-    }
-
     public boolean isLock() {
         return this.state != S.PENDING;
     }
