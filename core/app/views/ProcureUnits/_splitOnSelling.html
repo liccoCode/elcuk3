@@ -17,13 +17,13 @@
     #{if unit.product?.abbreviation} readonly #{/if}required>
   </td>
   <th>阶段</th>
-  <td style="color:${unit.stage.rgb()}">${models.procure.ProcureUnit.STAGE.DELIVERY}</td>
+  <td style="color:${unit.stage.rgb()}">${models.procure.ProcureUnit.STAGE.DELIVERY.label()}</td>
 </tr>
 
 <tr>
-  <th>采购数量</th>
+  <th><span style="color:red">*</span>采购数量</th>
   <td colspan="3">
-    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
+    <input type="text" class="input-mini" placeHolder="具体数量" name="newUnit.attrs.planQty" id="planQty" required
            value="${unit.attrs.planQty}">
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
     <span class="add-on">箱</span>
@@ -36,9 +36,9 @@
   </td>
 </tr>
 <tr>
-  <th>预计交货时间</th>
+  <th><span style="color:red">*</span>预计交货时间</th>
   <td>
-    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${newUnit.attrs.planDeliveryDate.date()}">
+    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${newUnit.attrs.planDeliveryDate.date()}" required>
   </td>
   <th>去往仓库</th>
   <td>
@@ -66,7 +66,7 @@
   <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
-      <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>${t.detail()}
+      <input type="radio" name="newUnit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>${t.detail()}
     </label>
   #{/list}
   </td>
