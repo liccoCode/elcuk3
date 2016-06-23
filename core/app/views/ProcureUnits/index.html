@@ -158,7 +158,7 @@
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
           <td>
-            <select name="unitCooperator" class="selectize" style="width:100px;">
+            <select name="unitCooperator" style="width:100px;" ${unit.deliveryment != null ? 'disabled' : ''}>
                 #{list items:unit.availableCooperators(), as:'cop'}
                   <option ${cop.id == unit.cooperator?.id ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
                 #{/list}
