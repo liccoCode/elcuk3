@@ -7,10 +7,7 @@ import helper.*;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.OrFilterBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
@@ -175,7 +172,9 @@ public class OrderItemESQuery {
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
-            search.query(QueryBuilders.queryString(val).defaultField(type));
+            search.query(QueryBuilders.queryString(val)
+                    .defaultField(type)
+                    .defaultOperator(QueryStringQueryBuilder.Operator.AND));
         }
 
         Logger.info(search.toString());
@@ -235,7 +234,10 @@ public class OrderItemESQuery {
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
-            search.query(QueryBuilders.queryString(val).defaultField(type));
+            search.query(QueryBuilders.queryString(val)
+                    .defaultField(type)
+                    .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+            );
         }
 
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
