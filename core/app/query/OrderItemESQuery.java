@@ -234,7 +234,10 @@ public class OrderItemESQuery {
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
-            search.query(QueryBuilders.queryString(val).defaultField(type));
+            search.query(QueryBuilders.queryString(val)
+                    .defaultField(type)
+                    .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+            );
         }
 
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
