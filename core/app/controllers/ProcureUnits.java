@@ -253,8 +253,6 @@ public class ProcureUnits extends Controller {
         unit.creator = unit.handler;
         unit.clearanceType = DeliverPlan.CT.Self;
         if(unit.product != null) unit.sku = unit.product.sku;
-        if(unit.selling != null)
-            unit.validate();
 
         if(unit.shipType == Shipment.T.EXPRESS) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
