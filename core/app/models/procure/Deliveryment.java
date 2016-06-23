@@ -474,6 +474,7 @@ public class Deliveryment extends GenericModel {
         deliveryment.units.addAll(units);
         deliveryment.deliveryType = T.NORMAL;
         deliveryment.orderTime = new Date();
+        deliveryment.cooperator = singleCop;
         for(ProcureUnit unit : deliveryment.units) {
             // 将 ProcureUnit 添加进入 Deliveryment , ProcureUnit 进入 DELIVERY 阶段
             unit.toggleAssignTodeliveryment(deliveryment, true);
@@ -556,5 +557,18 @@ public class Deliveryment extends GenericModel {
 
     public boolean isLock() {
         return this.state != S.PENDING;
+    }
+
+    /**
+     * 尝试补全供应商
+     *
+     * @return
+     */
+    public Cooperator cooperator() {
+        if(this.cooperator == null && this.units != null && !this.units.isEmpty()) {
+            this.cooperator = this.units.get(0).cooperator;
+            this.save();
+        }
+        return this.cooperator;
     }
 }

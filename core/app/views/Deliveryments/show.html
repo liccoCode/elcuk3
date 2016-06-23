@@ -32,14 +32,8 @@
             <input type="text" class="input-block-level" name="dmt.name" value="${dmt.name}" required>
           </td>
 
-          <th><span style="color:red">*</span>供应商</th>
-          <td>
-            <select name="dmt.cooperator.id" class="selectize" style="width:150px;">
-            #{list items:cooperators, as:'c'}
-              <option ${c.id == dmt.cooperator?.id ? 'selected' : ''} value="${c.id}">${c.name}</option>
-            #{/list}
-            </select>
-          </td>
+          <th>供应商</th>
+          <td>${dmt.cooperator()?.name}</td>
         </tr>
         <tr>
           <th>下单时间</th>
