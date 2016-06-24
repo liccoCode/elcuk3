@@ -256,9 +256,6 @@ public class ProcureUnits extends Controller {
 
         if(unit.shipType == Shipment.T.EXPRESS) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
-        } else {
-            if(unit.selling != null)
-                Validation.required("运输单", shipmentId);
         }
 
         if(Validation.hasErrors()) {
@@ -278,7 +275,7 @@ public class ProcureUnits extends Controller {
         }
         unit.save();
 
-        if(unit.selling != null) {
+        if(unit.selling != null && StringUtils.isNotBlank(shipmentId)) {
             if(unit.shipType != Shipment.T.EXPRESS) {
                 Shipment ship = Shipment.findById(shipmentId);
                 ship.addToShip(unit);
