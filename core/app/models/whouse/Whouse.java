@@ -367,11 +367,7 @@ public class Whouse extends Model {
     }
 
     /**
-     * 返回 CreateInboundShipmentPlanRequest 所需要的 Marketplace 参数
-     * <p>
-     * 类似于:
-     * FBA_DE => DE
-     * FBA_UK => Uk
+     * Marketplace ID
      *
      * @return
      */
