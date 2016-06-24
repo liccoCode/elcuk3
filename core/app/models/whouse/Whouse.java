@@ -9,6 +9,7 @@ import models.procure.Cooperator;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -335,6 +336,11 @@ public class Whouse extends Model {
         return Whouse.find(sbd.toString(), cooperator).first();
     }
 
+    /**
+     * 自有仓
+     *
+     * @return
+     */
     public static List<Whouse> selfWhouses() {
         return selfWhouses(true);
     }
@@ -358,5 +364,17 @@ public class Whouse extends Model {
      */
     public static Whouse defectiveWhouse() {
         return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
+    }
+
+    /**
+     * Marketplace ID
+     *
+     * @return
+     */
+    public String marketplace() {
+        if(this.type != T.FBA) throw new FastRuntimeException("Type 必须为 FBA!");
+        if(!StringUtils.contains(this.name, "FBA_"))
+            throw new FastRuntimeException("FBA 仓库名称不合法!(必须为 FBA_XX)");
+        return M.val(this.name.toLowerCase()).amid().name();
     }
 }
