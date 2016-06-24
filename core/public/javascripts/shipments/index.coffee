@@ -1,6 +1,5 @@
 $ ->
   $('#createApplyBtn').click((e) ->
-
 #过滤掉apply为空的数据
     $ck = $("#shipmentTable [type='checkbox']:checked")
     size = $ck.length
