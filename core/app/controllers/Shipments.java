@@ -68,6 +68,11 @@ public class Shipments extends Controller {
         render("Shipments/_shipitem.html", items);
     }
 
+    public static void showShipPlanList(String id) {
+
+        render("Shipments");
+    }
+
     public static void blank() {
         Shipment ship = new Shipment(Shipment.id());
         render(ship);
