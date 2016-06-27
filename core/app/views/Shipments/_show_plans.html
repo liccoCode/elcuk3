@@ -1,0 +1,52 @@
+<table class="table table-condensed table-bordered" id="shipmentTable">
+  <tr>
+    <th>出库Id</th>
+    <th>状态</th>
+    <th>SKU</th>
+    <th>selling</th>
+    <th>产品名称</th>
+    <th>最新采购价</th>
+    <th>报关类型</th>
+    <th>去往仓库</th>
+    <th>FBA</th>
+    <th>CenterId</th>
+    <th>Qty(计划/实际)</th>
+    <th>Receive</th>
+    <th>Qty1</th>
+    <th>预计运输时间</th>
+    <th>预计到库时间</th>
+    <th>箱数</th>
+    <th>总重量</th>
+    <th>总体积</th>
+    <th>运营对接人</th>
+    <th>仓库对接人</th>
+    <th>丢失量/赔偿金额</th>
+  </tr>
+#{list items:shipments, as:'ship'}
+  <tr>
+    <td>
+      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.applyId}" way="${ship.type}">
+    </td>
+    <td>
+      <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
+    </td>
+    <td style="cursor:pointer;" name="clickTd" shipment_id="${ship.id}" memo="${ship.memo.raw()}">
+      <i class="icon-reorder"></i>
+        #{list items:ship.tracknolist, as:'trackno'}
+        ${trackno+" "}
+        #{/list}
+      <span class="badge badge-info">${ship.itemsNum}</span>
+    </td>
+    <td>${ship.cname}</td>
+    <td>${ship.iExpressName}</td>
+    <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
+    <td>${ship.wname}</td>
+    <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
+    <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
+    <td>#{time_tooltip time:ship.createDate/}</td>
+    <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
+    <td>${ship.uname}</td>
+  </tr>
+
+#{/list}
+</table>

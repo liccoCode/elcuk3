@@ -1185,8 +1185,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @Override
     public String to_log() {
+        String cooperator_name = this.cooperator == null ? "" : this.cooperator.fullName;
         return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
-                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
+                this.sid, this.whouse.name(), cooperator_name, this.attrs.planQty,
                 Dates.date2Date(this.attrs.planArrivDate), this.shipType);
     }
 
