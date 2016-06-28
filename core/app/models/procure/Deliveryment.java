@@ -8,6 +8,7 @@ import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -26,7 +27,7 @@ import java.util.*;
  * Time: 4:50 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Deliveryment extends GenericModel {
     public Deliveryment() {
     }

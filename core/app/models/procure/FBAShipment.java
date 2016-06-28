@@ -6,6 +6,7 @@ import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -22,7 +23,7 @@ import java.util.*;
  * Time: 4:27 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class FBAShipment extends Model {
 
     public enum S {
