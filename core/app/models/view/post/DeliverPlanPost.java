@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.procure.DeliverPlan;
+import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -81,7 +82,7 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
 
         // 针对 Id 的唯一搜索
         if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+            return new F.T2<>(specialSearch._2, specialSearch._3);
 
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
@@ -122,13 +123,23 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
         }
 
 
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     public List<DeliverPlan> query() {
         F.T2<String, List<Object>> params = params();
+        this.count = this.count();
         return DeliverPlan.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
-                .fetch();
+                .fetch(this.page, this.perSize);
+    }
+
+    public Long getTotalCount() {
+        return this.count();
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     public F.T3<Boolean, String, List<Object>> multiProcureUnit() {
