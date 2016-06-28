@@ -79,6 +79,7 @@ public class ShipPlan extends Model {
     @Expose
     public Date updateDate = new Date();
 
+
     @PrePersist
     @PreUpdate
     public void setupAttrs() {

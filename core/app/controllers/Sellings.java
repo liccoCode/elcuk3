@@ -94,6 +94,13 @@ public class Sellings extends Controller {
         renderJSON(J.json(sids));
     }
 
+    public static void findSellingBySkuAndMarket(String sku, String market) {
+        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku+"%", M.valueOf(market)).fetch();
+        List<String> sids = new ArrayList<String>();
+        for(Selling s : list) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
+    }
+
 
     /**
      * 加载指定 Sid 下的所有的 SellingId
