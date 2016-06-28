@@ -67,7 +67,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
         List<ElcukRecord> logs = ElcukRecord
-                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"));
+                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"), 50);
         renderArgs.put("logs", logs);
     }
 
