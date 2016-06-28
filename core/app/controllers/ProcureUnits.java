@@ -383,7 +383,7 @@ public class ProcureUnits extends Controller {
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         render(unit, newUnit);
     }
 

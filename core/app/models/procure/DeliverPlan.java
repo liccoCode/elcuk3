@@ -330,6 +330,7 @@ public class DeliverPlan extends GenericModel {
         for(ProcureUnit unit : this.units) {
             if(unit.clearanceType != this.clearanceType) {
                 unit.clearanceType = this.clearanceType;
+                unit.stage = ProcureUnit.STAGE.INSHIPMENT;
                 unit.save();
             }
         }

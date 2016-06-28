@@ -12,6 +12,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.post.ShipPlanPost;
 import models.view.post.ShipmentPost;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -60,6 +61,10 @@ public class Shipments extends Controller {
         Shipment.handleQty1(shipments, null);
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
+    }
+
+    public static void indexOfShipPlan(ShipPlanPost p) {
+
     }
 
     public static void showProcureUnitList(String id) {

@@ -2,10 +2,7 @@ package models.whouse;
 
 import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
-import helper.DBUtils;
-import helper.Dates;
-import helper.Reflects;
-import helper.Webs;
+import helper.*;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
@@ -13,6 +10,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.qc.CheckTask;
+import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
@@ -85,6 +83,14 @@ public class InboundRecord extends Model {
     @Expose
     @ManyToOne
     public Whouse targetWhouse;
+
+
+    /**
+     * 去往仓库
+     */
+    @Expose
+    @ManyToOne
+    public Whouse toWhouse;
 
     /**
      * 预计入库数量
@@ -164,6 +170,19 @@ public class InboundRecord extends Model {
     public Date updateDate = new Date();
 
     /**
+     * 主箱信息
+     */
+    @Lob
+    public String mainBoxInfo;
+
+    /**
+     * 尾箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+
+    /**
      * 这些属性字段全部都是为了前台传递数据的
      */
     @Transient
@@ -180,6 +199,12 @@ public class InboundRecord extends Model {
 
     @Transient
     public String procureunitId;
+
+    @Transient
+    public CheckTaskDTO mainBox = new CheckTaskDTO();
+
+    @Transient
+    public CheckTaskDTO lastBox = new CheckTaskDTO();
 
     /**************************************/
 
@@ -304,6 +329,7 @@ public class InboundRecord extends Model {
         if(this.planQty == 0) {
             this.planQty = this.qty + this.badQty;
         }
+        this.marshalBoxs();
     }
 
     public void valid() {
@@ -432,5 +458,10 @@ public class InboundRecord extends Model {
                 unit.save();
             }
         }
+    }
+
+    public void marshalBoxs() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
     }
 }

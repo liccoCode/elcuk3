@@ -1,20 +1,20 @@
 $ ->
 
-  # 切换供应商, 自行寻找价格
+# 切换供应商, 自行寻找价格
   $("select[name='newUnit.cooperator.id']").change (e) ->
     id = $(@).val()
     if id
       LoadMask.mask()
       $.get('/Cooperators/price', {id: id, sku: $('#unit_sku').val()}, 'json')
       .done((r) ->
-          if r.flag is false
-            alert(r.message)
-          else
-            $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
-            $("#unit_price").val(r.price)
-          LoadMask.unmask()
-        )
-      # 恢复默认
+        if r.flag is false
+          alert(r.message)
+        else
+          $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
+          $("#unit_price").val(r.price)
+        LoadMask.unmask()
+      )
+# 恢复默认
     else
       $("#unit_currency option:contains('CNY')").prop('selected', true)
       $("#unit_price").val('')
@@ -25,11 +25,11 @@ $ ->
     if coperId
       $.post('/cooperators/boxSize', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()})
       .done((r) ->
-          if r.flag is false
-            alert(r.message)
-          else
-            $("input[name='newUnit.attrs.planQty']").val(r['message'])
-        )
+        if r.flag is false
+          alert(r.message)
+        else
+          $("input[name='newUnit.attrs.planQty']").val(r['message'])
+      )
     else
       alert('请先选择 供应商')
 
@@ -46,19 +46,19 @@ $ ->
       LoadMask.mask()
       $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
       .done((html) ->
-          shipment.html(html)
-          LoadMask.unmask()
-        )
+        shipment.html(html)
+        LoadMask.unmask()
+      )
   )
 
   $('#shipments').on('change', '[name=shipmentId]', (e) ->
     LoadMask.mask()
     $.get("/shipment/#{@getAttribute('value')}/dates")
     .done((r) ->
-        $("input[name='newUnit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
-        $("input[name='newUnit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
-        LoadMask.unmask()
-      )
+      $("input[name='newUnit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
+      $("input[name='newUnit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
+      LoadMask.unmask()
+    )
   )
 
   # Ajax 加载供应商列表
@@ -70,11 +70,11 @@ $ ->
       LoadMask.mask()
       $.get('/products/cooperators', {sku: msku})
       .done((r) ->
-          $cooperators.empty()
-          $cooperators.append("<option value=''>请选择</option>")
-          r.forEach (value) ->
-            $cooperators.append("<option value='#{value.id}'>#{value.name}</option>")
-        )
+        $cooperators.empty()
+        $cooperators.append("<option value=''>请选择</option>")
+        r.forEach (value) ->
+          $cooperators.append("<option value='#{value.id}'>#{value.name}</option>")
+      )
       LoadMask.unmask()
   )
 
@@ -87,6 +87,17 @@ $ ->
 
       $.get('/sellings/sameFamilySellings', {msku: msku})
       .done((c) ->
-          process(c)
-        )
+        process(c)
+      )
   })
+
+  $("#warehouse_select").change(->
+    country = $("#warehouse_select :selected").text().split('_')[1]
+    sku = $("#unit_sku").val()
+    $.get("/sellings/findSellingBySkuAndMarket", {sku: sku, market: "AMAZON_" + country})
+    .done((c) ->
+      $("#sellingId").val(c)
+      if !$("#sellingId").val()
+        noty({text: "市场对应无Selling", type: 'error'})
+    )
+  )
