@@ -2,6 +2,7 @@ package models;
 
 import com.google.gson.annotations.Expose;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -23,7 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Time: 11:55 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Notification extends GenericModel {
     /**
      * 用来记录用户 Notification 的 Queue Map

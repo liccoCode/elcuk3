@@ -6,10 +6,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import models.User;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -36,7 +36,7 @@ import java.util.List;
  * Time: 4:33 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class AmazonListingReview extends GenericModel {
 
     /**

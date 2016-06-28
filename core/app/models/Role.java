@@ -1,6 +1,7 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -8,7 +9,10 @@ import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 上午10:12
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Role extends GenericModel {
 
     /**

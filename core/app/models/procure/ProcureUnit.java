@@ -25,6 +25,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -47,7 +48,7 @@ import java.util.*;
  * Time: 5:23 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public ProcureUnit() {
@@ -1227,7 +1228,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"));
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"), 50);
     }
 
     @Override

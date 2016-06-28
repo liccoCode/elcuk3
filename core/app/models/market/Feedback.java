@@ -5,6 +5,7 @@ import models.product.Category;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.Duration;
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -24,8 +25,8 @@ import java.util.List;
  * Time: 5:15 PM
  */
 @Entity
+@DynamicUpdate
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Feedback extends GenericModel {
 
     public static final String FRONT_TABLE = "Feedback.frontPageTable";

@@ -1,13 +1,15 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import controllers.Secure;
-import helper.*;
-import models.User;
+import helper.Cached;
+import helper.DBUtils;
+import helper.Dates;
+import helper.Promises;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -34,7 +36,7 @@ import java.util.regex.Pattern;
  * Time: 10:18 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Orderr extends GenericModel {
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
     public static final Pattern AMAZON_ORDERID = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
