@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -26,7 +27,6 @@ import query.ProductQuery;
 
 import javax.persistence.*;
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * Time: 10:55 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Product extends GenericModel implements ElcukRecord.Log {
     public static final Pattern Nub = Pattern.compile("[0-9]*");
     /**

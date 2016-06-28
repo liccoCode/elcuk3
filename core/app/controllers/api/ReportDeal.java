@@ -1,6 +1,5 @@
 package controllers.api;
 
-import controllers.Secure;
 import helper.Constant;
 import helper.J;
 import helper.OrderInvoiceFormat;
@@ -25,7 +24,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

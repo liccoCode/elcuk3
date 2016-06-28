@@ -1,12 +1,13 @@
 package models.finance;
 
-import helper.*;
 import helper.Currency;
+import helper.Dates;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.Shipment;
+import models.view.dto.ApplyPaymentDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
@@ -20,8 +21,6 @@ import javax.persistence.OneToOne;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-
-import models.view.dto.ApplyPaymentDTO;
 
 /**
  * Created by IntelliJ IDEA.
@@ -81,7 +80,7 @@ public class TransportApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Arrays.asList("transportapply.save", "shipment.departFromApply"));
+        return ElcukRecord.records(this.id + "", Arrays.asList("transportapply.save", "shipment.departFromApply"), 50);
     }
 
 

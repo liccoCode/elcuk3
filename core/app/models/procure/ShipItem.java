@@ -13,6 +13,7 @@ import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
@@ -34,7 +35,7 @@ import java.util.Map;
  * Time: 12:24 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class ShipItem extends GenericModel {
     public ShipItem() {
     }

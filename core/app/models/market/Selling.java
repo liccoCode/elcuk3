@@ -21,6 +21,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
@@ -49,8 +50,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date: 1/6/12
  * Time: 10:48 AM
  */
-@javax.persistence.Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@Entity
+@DynamicUpdate
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
 

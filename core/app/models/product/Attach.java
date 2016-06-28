@@ -10,9 +10,9 @@ import models.embedded.ERecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
@@ -43,7 +43,7 @@ import java.util.List;
  * Time: 10:34 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Attach extends Model {
 
     /**

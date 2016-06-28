@@ -48,6 +48,7 @@ public class FBA {
         plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
                 Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
+        if(unit.whouse != null) plan.setMarketplace(unit.whouse.marketplace());
 
         CreateInboundShipmentPlanResponse response = client(account).createInboundShipmentPlan(plan);
         CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
@@ -355,7 +356,8 @@ public class FBA {
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
-                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"), "1.0",
+                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"),
+                        "1.0",
                         config);
                 CLIENT_CACHE.put(key, client);
             }

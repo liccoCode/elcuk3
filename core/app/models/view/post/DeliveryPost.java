@@ -130,7 +130,7 @@ public class DeliveryPost extends Post<Deliveryment> {
             params.add(this.deliveryType);
         }
 
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     public Long getTotalCount() {

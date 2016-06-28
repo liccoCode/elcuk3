@@ -9,6 +9,7 @@ import models.ElcukRecord;
 import models.finance.SaleFee;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.GenericModel;
@@ -30,7 +31,7 @@ import java.util.*;
  * Time: 10:18 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class OrderInvoice extends GenericModel {
     /**
      * 订单的编码
