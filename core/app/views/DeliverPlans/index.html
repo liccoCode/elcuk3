@@ -1,9 +1,9 @@
 #{extends 'main_full.html'/}
 #{set title:"出货单列表 (${deliverplans.size()})" /}
 #{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
     #{script 'deliveryments/index.coffee'/}
 #{/set}
-
 
 #{info_row}
 <ul>
@@ -40,6 +40,7 @@
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+      <input type="hidden" name="p.page" value="${p.page}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
   </div>
@@ -81,3 +82,4 @@
   </div>
 </div>
 #{/form}
+#{bootstrap_pager pi:p, url:'' /}
