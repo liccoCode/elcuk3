@@ -111,7 +111,6 @@ public class DeliverPlans extends Controller {
 
         // 再一次检查, 是否有错误
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dp.availableInPlanStageProcureUnits());
             render("DeliverPlans/show.html", dp);
         }
         flash.success("成功将 %s 采购计划添加到当前采购单.", StringUtils.join(pids, ","));
