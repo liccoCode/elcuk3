@@ -1,16 +1,20 @@
 package models.whouse;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.J;
 import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
 import models.procure.Cooperator;
+import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Error;
@@ -21,10 +25,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 出库记录
@@ -200,6 +201,10 @@ public class OutboundRecord extends Model {
     @Expose
     public Date updateDate = new Date();
 
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public DeliverPlan.CT clearanceType;
+
     /**
      * 这些属性字段全部都是为了前台传递数据的
      */
@@ -217,6 +222,37 @@ public class OutboundRecord extends Model {
 
     @Transient
     public String productCode;
+
+    /**
+     * 主箱信息
+     */
+    @Lob
+    public String mainBoxInfo;
+
+    @Transient
+    public CheckTaskDTO mainBox = new CheckTaskDTO();
+
+    /**
+     * 尾箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+    @Transient
+    public CheckTaskDTO lastBox = new CheckTaskDTO();
+
+    @PrePersist
+    public void beforeSave() {
+        this.marshalBoxs();
+    }
+
+    @PostLoad
+    public void postPersist() {
+        this.mainBox = StringUtils.isEmpty(this.mainBoxInfo) ? new CheckTaskDTO() :
+                JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = StringUtils.isEmpty(this.lastBoxInfo) ? new CheckTaskDTO() :
+                JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
 
     /**************************************/
 
@@ -311,7 +347,6 @@ public class OutboundRecord extends Model {
 
     public void updateAttr(String attr, String value) {
         if(this.isLocked()) throw new FastRuntimeException("已经入库或取消状态下的出库记录不允许修改!");
-
         List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
@@ -330,11 +365,61 @@ public class OutboundRecord extends Model {
             case "outboundDate":
                 logs.addAll(Reflects.logFieldFade(this, "outboundDate", Dates.cn(value).toDate()));
                 break;
+            case "mainBox.boxNum":
+                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
+                this.marshalBoxs();
+                break;
+            case "mainBox.num":
+                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
+                this.marshalBoxs();
+                break;
+            case "mainBox.singleBoxWeight":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "mainBox.length":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "mainBox.width":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "mainBox.height":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "lastBox.boxNum":
+                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
+                this.marshalBoxs();
+                break;
+            case "lastBox.num":
+                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
+                this.marshalBoxs();
+                break;
+            case "lastBox.singleBoxWeight":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "lastBox.length":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "lastBox.width":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "lastBox.height":
+                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
+                this.marshalBoxs();
+                break;
+            case "clearanceType":
+                logs.addAll(Reflects.logFieldFade(this, attr, DeliverPlan.CT.valueOf(value)));
+                break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
-        new ERecordBuilder("outboundrecord.update")
-                .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
+        new ERecordBuilder("outboundrecord.update").msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();
         this.save();
     }
@@ -495,5 +580,55 @@ public class OutboundRecord extends Model {
                 record.save();
             }
         }
+    }
+
+    /**
+     * 为出库计划匹配 入库计划中的主箱和尾箱信息
+     *
+     * @param records
+     */
+    public static void tryMatchBoxInfo(List<OutboundRecord> records) {
+        if(records == null || records.isEmpty()) return;
+        for(OutboundRecord record : records) {
+            if(StringUtils.isEmpty(record.mainBoxInfo) && StringUtils.isEmpty(record.lastBoxInfo)) {
+                Map<String, Object> attrs = record.stockObj.attributes();
+                if(attrs.get("procureunitId") != null && StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
+                    List<InboundRecord> list = InboundRecord.find("stockObj.attributes like ? ",
+                            "%\"procureunitId\":" + attrs.get("procureunitId").toString() + "%").fetch();
+                    if(list != null && list.size() > 0) {
+                        InboundRecord inboundRecord = list.get(0);
+                        record.mainBoxInfo = inboundRecord.mainBoxInfo;
+                        record.lastBoxInfo = inboundRecord.lastBoxInfo;
+                        record.save();
+                        record.postPersist();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 为出库计划匹配 采购计划中的 报关类型
+     *
+     * @param records
+     */
+    public static void tryMatchClearanceType(List<OutboundRecord> records) {
+        if(records == null || records.isEmpty()) return;
+        for(OutboundRecord record : records) {
+            if(record.clearanceType == null) {
+                Map<String, Object> attrs = record.stockObj.attributes();
+                if(attrs.get("procureunitId") != null && StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
+                    Long id = Long.parseLong(attrs.get("procureunitId").toString());
+                    ProcureUnit u = ProcureUnit.findById(id);
+                    record.clearanceType = u.clearanceType;
+                    record.save();
+                }
+            }
+        }
+    }
+
+    public void marshalBoxs() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
     }
 }

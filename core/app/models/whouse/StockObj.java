@@ -15,6 +15,7 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -141,6 +142,18 @@ public class StockObj implements Serializable, Cloneable {
 
     public void unmarshalAtts() {
         this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
+        if(this.attrs.get("procureunitId") != null && StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
+            ProcureUnit unit = ProcureUnit.findById(Long.parseLong(attrs.get("procureunitId").toString()));
+            this.attrs.put("unit", unit);
+            if(attrs.get("procureunitId") != null && StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
+                List<InboundRecord> list = InboundRecord.find("stockObj.attributes like ? ",
+                        "%\"procureunitId\":" + attrs.get("procureunitId").toString() + "%").fetch();
+                if(list != null && list.size() > 0) {
+                    InboundRecord inboundRecord = list.get(0);
+                    this.attrs.put("inboundRecord", inboundRecord);
+                }
+            }
+        }
     }
 
     public void setAttributes(ProcureUnit unit) {
@@ -236,6 +249,7 @@ public class StockObj implements Serializable, Cloneable {
 
     /**
      * 读取采购计划 ID
+     *
      * @return
      */
     public Long procureunitId() {

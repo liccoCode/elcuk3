@@ -95,7 +95,20 @@ $ ->
     "memo": "备注",
     "whouse": "仓库",
     "targetId": "出库对象",
-    "outboundDate": "完成时间"
+    "outboundDate": "完成时间",
+    "mainBox.boxNum": "主箱箱数",
+    "mainBox.num": "主箱数量",
+    "mainBox.singleBoxWeight": "主箱重量",
+    "mainBox.length": "主箱长",
+    "mainBox.width": "主箱宽",
+    "mainBox.height": "主箱高",
+    "lastBox.boxNum": "尾箱箱数",
+    "lastBox.num": "尾箱数量",
+    "lastBox.singleBoxWeight": "尾箱重量",
+    "lastBox.length": "尾箱长",
+    "lastBox.width": "尾箱宽",
+    "lastBox.height": "尾箱高",
+    "r.clearanceType": "报关类型"
   }
 
   $(document).ready ->

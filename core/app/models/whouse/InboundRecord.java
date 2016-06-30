@@ -1,5 +1,6 @@
 package models.whouse;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.*;
@@ -207,6 +208,12 @@ public class InboundRecord extends Model {
     public CheckTaskDTO lastBox = new CheckTaskDTO();
 
     /**************************************/
+
+    @PostLoad
+    public void postPersist() {
+        this.mainBox = JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
 
     public InboundRecord() {
         this.state = S.Pending;
