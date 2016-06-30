@@ -357,6 +357,7 @@ public class Selling extends GenericModel {
             for(Cookie coo : this.account.cookieStore().getCookies()) {
                 Logger.info(" ============" + coo.getName() + "=" + coo.getValue() + "============");
             }
+            this.account.changeRegion(this.market);
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
