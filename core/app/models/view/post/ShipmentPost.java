@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.DBUtils;
 import helper.Dates;
+import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
@@ -129,13 +130,16 @@ public class ShipmentPost extends Post<Shipment> {
             }
             Matcher num_matcher = NUM.matcher(this.search);
             if(num_matcher.matches()) {
-                sql.where("pu.id =? ").params(this.search.trim());
-                return new F.T2<>(sql.toString(), sql.getParams());
+                ProcureUnit unit = ProcureUnit.findById(Long.parseLong(this.search.trim()));
+                if(unit != null) {
+                    sql.where("pu.id =? ").params(this.search.trim());
+                    return new F.T2<>(sql.toString(), sql.getParams());
+                }
             }
         }
 
-        sql.where(" s." + this.dateType + ">=?").params(Dates.morning(this.from)
-        ).where(" s." + this.dateType + "<=?").params(Dates.night(this.to));
+        sql.where(" s." + this.dateType + ">=?").params(Dates.morning(this.from));
+        sql.where(" s." + this.dateType + "<=?").params(Dates.night(this.to));
 
         if(this.type != null) {
             sql.andWhere(" s.type=?").params(this.type.name());

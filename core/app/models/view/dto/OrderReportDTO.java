@@ -36,11 +36,11 @@ public class OrderReportDTO {
         sql.append("WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds));
         sql.append("GROUP BY r.orderId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
-        List<OrderReportDTO> dtos = new ArrayList<OrderReportDTO>();
+        List<OrderReportDTO> dtos = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             OrderReportDTO dto = new OrderReportDTO();
             dto.orderId = row.get("orderId").toString();
-            dto.sku = row.get("sku").toString();
+            dto.sku = getNullReturn(row.get("sku"));
             dto.market = M.valueOf(row.get("market").toString());
             dto.paymentDate = row.get("paymentDate").toString();
             dto.positivePrice = Float.parseFloat(row.get("positivePrice").toString());
@@ -54,6 +54,14 @@ public class OrderReportDTO {
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    public static String getNullReturn(Object obj) {
+        if(obj == null) {
+            return "";
+        } else {
+            return obj.toString();
+        }
     }
 
 
