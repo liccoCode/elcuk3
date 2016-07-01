@@ -108,7 +108,7 @@ $ ->
     "lastBox.length": "尾箱长",
     "lastBox.width": "尾箱宽",
     "lastBox.height": "尾箱高",
-    "r.clearanceType": "报关类型"
+    "clearanceType": "报关类型"
   }
 
   $(document).ready ->
