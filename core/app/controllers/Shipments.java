@@ -12,6 +12,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.post.ShipPlanPost;
 import models.view.post.ShipmentPost;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -62,10 +63,19 @@ public class Shipments extends Controller {
         render(shipments, p);
     }
 
+    public static void indexOfShipPlan(ShipPlanPost p) {
+
+    }
+
     public static void showProcureUnitList(String id) {
         Shipment shipment = Shipment.findById(id);
         List<ShipItem> items = shipment.items;
         render("Shipments/_shipitem.html", items);
+    }
+
+    public static void showShipPlanList(String id) {
+
+        render("Shipments");
     }
 
     public static void blank() {

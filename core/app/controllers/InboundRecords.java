@@ -48,7 +48,8 @@ public class InboundRecords extends Controller {
     @Check("inboundrecords.index")
     public static void blank() {
         InboundRecord record = new InboundRecord(InboundRecord.O.Other);
-        render(record);
+        List<Whouse> toWhouse = Whouse.findByType(Whouse.T.FBA);
+        render(record, toWhouse);
     }
 
     @Check("inboundrecords.index")

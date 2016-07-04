@@ -2,12 +2,12 @@
   <th style="width:100px;">SellingId</th>
   <td style="width:650px;">
     <input type="text" name="unit.selling.sellingId" id="sellingId" style="width:300px;" value="${unit.selling?.sellingId}"
-    #{if unit.selling?.sellingId} readonly #{/if}>
+    #{if unit.selling?.sellingId} readonly #{/if} autocomplete="off">
   </td>
   <th style="width:100px;"><span style="color:red">*</span>SKU</th>
   <td>
     <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.selling?.listing?.product?.sku}"
-    #{if unit.selling?.listing?.product?.sku} readonly #{/if}required autocomplete="off">
+    #{if unit.selling?.listing?.product?.sku} readonly #{/if} required autocomplete="off">
   </td>
 </tr>
 <tr>

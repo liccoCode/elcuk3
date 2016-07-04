@@ -96,8 +96,17 @@ $ ->
       )
   ).on('click', "#create_unit", (e) ->
     e.preventDefault()
+    if !$("#unit_sku").val()
+      $("#unit_sku").focus()
+      noty({text: "请先填写SKU或者Selling！", type: 'error'})
+      return false
     if !$("#planQty").val()
+      $("#planQty").focus()
       noty({text: "请先填写采购数量！", type: 'error'})
+      return false
+    if !$("#planDeliveryDate").val()
+      noty({text: "请先填写预计交货日期！", type: 'error'})
+      $("#planDeliveryDate").focus()
       return false
     $("#new_procureunit").submit()
   )
@@ -168,7 +177,6 @@ $ ->
     period = value["period"]
     $("#coop_text").text("生产周期(day): " + period + ";  每箱数量: " + value["boxSize"] + ";  最低采购量:" + value["lowestOrderNum"])
     $("#planDeliveryDate").val($.DateUtil.fmt2($.DateUtil.addDay(period, new Date())))
-
   )
 
   getStockBySku = (sku) ->

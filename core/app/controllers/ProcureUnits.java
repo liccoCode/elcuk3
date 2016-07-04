@@ -253,14 +253,9 @@ public class ProcureUnits extends Controller {
         unit.creator = unit.handler;
         unit.clearanceType = DeliverPlan.CT.Self;
         if(unit.product != null) unit.sku = unit.product.sku;
-        if(unit.selling != null)
-            unit.validate();
 
         if(unit.shipType == Shipment.T.EXPRESS) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
-        } else {
-            if(unit.selling != null)
-                Validation.required("运输单", shipmentId);
         }
 
         if(Validation.hasErrors()) {
@@ -280,7 +275,7 @@ public class ProcureUnits extends Controller {
         }
         unit.save();
 
-        if(unit.selling != null) {
+        if(unit.selling != null && StringUtils.isNotBlank(shipmentId)) {
             if(unit.shipType != Shipment.T.EXPRESS) {
                 Shipment ship = Shipment.findById(shipmentId);
                 ship.addToShip(unit);
@@ -388,7 +383,7 @@ public class ProcureUnits extends Controller {
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         render(unit, newUnit);
     }
 

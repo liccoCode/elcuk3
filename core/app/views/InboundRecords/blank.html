@@ -12,7 +12,7 @@
   <tr>
     <th>产品编码</th>
     <td>
-      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}" required>
+      <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}" required autocomplete="off">
       <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
     </td>
 
@@ -56,12 +56,12 @@
   </tr>
 
   <tr>
-    <th>去往国家</th>
+    <th>去往仓库</th>
     <td>
-      <select name="record.market" class="inline" name="record.market">
+      <select name="record.toWhouse.id" class="inline">
         <option value="">请选择</option>
-          #{list items:models.market.M.amazonVals(), as:'m'}
-            <option ${m == record.market ? 'selected' : ''} value="${m.marketAndWhouseMapping()}">${m.marketAndWhouseMapping()}</option>
+          #{list items:toWhouse, as:'m'}
+            <option value="${m.id}">${m.name}</option>
           #{/list}
       </select>
     </td>
@@ -90,16 +90,79 @@
   </tr>
 
   <tr>
+    <td colspan="4">
+        #{info_row}
+          <li>标准箱质检信息</li>
+        #{/info_row}
+      <table class="table table-hover table-condensed table-bordered" id="standTable">
+        <tr>
+          <th>箱数量：</th>
+          <td colspan="2">
+            <input type="text" class="input-mini" name="record.mainBox.boxNum" value=""/>箱
+            x
+            <input type="text" class="input-mini" name="record.mainBox.num" value=""/>个
+          </td>
+          <th>单箱体积(m³)：</th>
+          <td colspan="3"><span></span></td>
+        </tr>
+        <tr>
+          <th>单箱重量(kg)：</th>
+          <td colspan="2">
+            <input type="text" name="record.mainBox.singleBoxWeight" value="">
+          </td>
+          <th>单箱长宽高(cm)：</th>
+          <td colspan="3">
+            <input type="text" class="input-mini" name="record.mainBox.length" value="">
+            x
+            <input type="text" class="input-mini" name="record.mainBox.width" value="">
+            x
+            <input type="text" class="input-mini" name="record.mainBox.height" value="">
+          </td>
+        </tr>
+      </table>
+        #{info_row}
+          <li>尾准箱质检信息</li>
+        #{/info_row}
+      <table class="table table-hover table-condensed table-bordered" id="standTable">
+        <tr>
+          <th>箱数量：</th>
+          <td colspan="2">
+            <input type="text" class="input-mini" name="record.lastBox.boxNum" value=""/>箱
+            x
+            <input type="text" class="input-mini" name="record.lastBox.num" value=""/>个
+          </td>
+          <th>单箱体积(m³)：</th>
+          <td colspan="3"><span></span></td>
+        </tr>
+        <tr>
+          <th>单箱重量(kg)：</th>
+          <td colspan="2">
+            <input type="text" name="record.lastBox.singleBoxWeight" value="">
+          </td>
+          <th>单箱长宽高(cm)：</th>
+          <td colspan="3">
+            <input type="text" class="input-mini" name="record.lastBox.length" value="">
+            x
+            <input type="text" class="input-mini" name="record.lastBox.width" value="">
+            x
+            <input type="text" class="input-mini" name="record.lastBox.height" value="">
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
     <th>备注</th>
     <td colspan="4">
       <textarea name="record.memo" rows="4" class="input-block-level">${record.memo}</textarea>
     </td>
   </tr>
+
   <tr>
     <td colspan="4">
       <input type="hidden" name="record.origin" value="${record.origin}">
       <input type="hidden" name="record.state" value="${record.state}">
-
       <button class="btn btn-primary" name="create_record">创建</button>
       <a href="@{InboundRecords.index()}" class="btn btn-success">取消</a>
     </td>

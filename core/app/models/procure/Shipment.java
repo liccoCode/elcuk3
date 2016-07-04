@@ -160,8 +160,21 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
             @Override
             public String detail() {
-                return "快递--经济渠道 (5天,38/KGS)";
+                return "快递--快速渠道 (5天,38/KGS)";
             }
+        },
+        /**
+         * 专线
+         */
+        DEDICATED_LINE {
+            @Override
+            public String label() { return "专线";}
+
+            @Override
+            public String detail() {
+                return "专线(欧洲 15天 含税 37/KGS，美国20天 含税 29/KGS)";
+            }
+
         };
 
         public abstract String label();

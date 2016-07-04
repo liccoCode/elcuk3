@@ -453,7 +453,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.required("procureunit.cooperator", this.cooperator);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
-        Validation.required("价格", this.attrs.price);
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
@@ -549,6 +548,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
 
         // 分拆出的新采购计划变更
+        newUnit.comment = unit.comment;
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
@@ -1187,8 +1187,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @Override
     public String to_log() {
+        String cooperator_name = this.cooperator == null ? "" : this.cooperator.fullName;
         return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
-                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
+                this.sid, this.whouse.name(), cooperator_name, this.attrs.planQty,
                 Dates.date2Date(this.attrs.planArrivDate), this.shipType);
     }
 
