@@ -195,6 +195,31 @@ public class Login extends Secure.Security {
         renderBinary(file.toURI().toURL().openStream());
     }
 
+    public static void fnSkuCode128(String fnSku) throws IOException {
+        //TODO: 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
+        // 核心使用到两个 API: MatrixToImageWriter, Code128Writer
+        Code128Bean bean = new Code128Bean();
+
+        // 尽可能调整到与 Amazon 的规格一样
+        bean.setModuleWidth(0.11888);
+        bean.setHeight(1);
+        // 控制值内容, CODESET_A 不允许有小写
+        bean.setCodeset(Code128Constants.CODESET_ALL);
+        bean.setMsgPosition(HumanReadablePlacement.HRP_NONE);
+
+        String fileName = String.format("%s.jpeg", fnSku);
+        File file = new File(Constant.TMP, fileName);
+        file.delete(); // 删除原来的, 再写新的
+        OutputStream out = new FileOutputStream(file);
+        BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_JPEG, 600,
+                BufferedImage.TYPE_BYTE_BINARY, false, 0);
+        bean.generateBarcode(canvas, fnSku);
+        canvas.finish();
+        out.close();
+        response.setContentTypeIfNotSet(MimeTypes.MIME_JPEG);
+        renderBinary(file.toURI().toURL().openStream());
+    }
+
     /**
      * 触发使用计算使用
      *
