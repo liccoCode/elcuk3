@@ -688,11 +688,15 @@ public class ProcureUnits extends Controller {
      *
      * @param pids
      */
-    public static void batchCreateFBA(ProcurePost p, List<Long> pids) {
+    public static void batchCreateFBA(ProcurePost p, List<Long> pids, String redirectTarget) {
         if(pids != null && pids.size() > 0) {
             ProcureUnit.postFbaShipments(pids);
         }
-        ProcureUnits.indexForMarket(p);
+        if(StringUtils.isNotBlank(redirectTarget) && StringUtils.containsIgnoreCase(redirectTarget, "index")) {
+            ProcureUnits.index(p);
+        } else {
+            ProcureUnits.indexForMarket(p);
+        }
     }
 
     /**

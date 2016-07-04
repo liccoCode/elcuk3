@@ -84,7 +84,7 @@ $ ->
     if getCheckedUnitIds().length is 0
       noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
       return false
-    window.location.replace('/ProcureUnits/batchCreateFBA?' + $("#create_deliveryment").find("input[name=pids]").serialize())
+    window.location.replace('/ProcureUnits/batchCreateFBA?redirectTarget=index&' + $("[name='pids'], [name^='p.']").serialize())
   )
 
   getCheckedUnitIds = () ->
