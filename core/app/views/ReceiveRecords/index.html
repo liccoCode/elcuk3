@@ -106,7 +106,7 @@
 
           <th colspan="6" style="text-align:center;">主箱</th>
           <th colspan="6" style="text-align:center;">尾箱</th>
-
+          <th rowspan="2">报关类型</th>
           <th rowspan="2">创建时间</th>
           <th rowspan="2">确认时间</th>
           <th rowspan="2">确认人</th>
@@ -206,6 +206,7 @@
           <td>
             <input type="text" name="lastBox.height" value="${r.lastBox?.height}" style="width:20px;">
           </td>
+          <td>${r.procureUnit?.clearanceType?.label()}</td>
           <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
           <td>#{time_tooltip time: r.confirmDate, datetime: true/}</td>
           <td>${r.confirmer?.username}</td>

@@ -8,9 +8,7 @@
 
 #{info_row}
 <ul>
-  <li>
-    通过 <strong>[ID]</strong> 搜索出库记录时请使用匹配器: <strong>id:{ID}</strong>
-  </li>
+  <li>通过 <strong>[ID]</strong> 搜索出库记录时请使用匹配器: <strong>id:{ID}</strong></li>
   <li>
     <p class="text-error">
       <strong>示例:</strong> id:123, 表示搜索 ID 为 123 的出库记录
@@ -80,32 +78,50 @@
   </form>
 
   <form action="@{OutboundRecords.confirm()}" name="confirm_form">
-    <div class="span12">
-      <table class="table table-condensed table-bordered">
+    <div class="span12" style="overflow: auto;">
+      <table class="table table-condensed table-bordered" style="width:2700px;">
         <tr>
-          <th>
+          <th rowspan="2">
             <label class="checkbox">
               <input type="checkbox" id="outboundrecord_check_all">
             </label>
           </th>
-          <th>ID</th>
-          <th>出库类别</th>
-          <th>状态</th>
-          <th>物料采购 ID</th>
-          <th>SKU</th>
-          <th>产品名称</th>
-          <th>FBA</th>
-          <th>仓库</th>
-          <th>去往国家</th>
-          <th>运输方式</th>
-          <th>预计运输时间</th>
-          <th>预计出货数量</th>
-          <th>实际出货数量</th>
-          <th>出库对象</th>
-          <th>创建时间</th>
-          <th>完成时间</th>
-          <th>备注</th>
-          <th></th>
+          <th rowspan="2" style="width:30px;">ID</th>
+          <th rowspan="2" style="width:60px;">出库类别</th>
+          <th rowspan="2" style="width:50px;">状态</th>
+          <th rowspan="2" style="width:40px;">物料采购 ID</th>
+          <th rowspan="2" style="width:120px;">SKU</th>
+          <th rowspan="2" style="width:110px;">产品名称</th>
+          <th rowspan="2" style="width:100px;">FBA</th>
+          <th rowspan="2" style="width:80px;">预计运输时间</th>
+          <th rowspan="2" style="width:40px;">预计出货数量</th>
+          <th rowspan="2" style="width:60px;">实际出货数量</th>
+          <th rowspan="2" style="width:70px;">去往国家</th>
+          <th rowspan="2" style="width:70px;">运输方式</th>
+          <th rowspan="2" style="width:120px;">仓库</th>
+          <th rowspan="2" style="width:80px;">出库对象</th>
+          <th colspan="6" style="width:380px;">主箱</th>
+          <th colspan="6" style="width:380px;">尾箱</th>
+          <th rowspan="2" style="width:80px;">报关类型</th>
+          <th rowspan="2" style="width:80px;">供应商</th>
+          <th rowspan="2" style="width:60px;">收货记录Id</th>
+          <th rowspan="2" style="width:80px;">创建时间</th>
+          <th rowspan="2" style="width:80px;">完成时间</th>
+          <th rowspan="2" style="width:160px;">备注</th>
+        </tr>
+        <tr>
+          <th>箱数</th>
+          <th>数量</th>
+          <th>重量</th>
+          <th>长</th>
+          <th>宽</th>
+          <th>高</th>
+          <th>箱数</th>
+          <th>数量</th>
+          <th>重量</th>
+          <th>长</th>
+          <th>宽</th>
+          <th>高</th>
         </tr>
       #{list items: records, as: 'r'}
         <tr>
@@ -128,8 +144,15 @@
           <td>
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
-          <td style="max-width: 280px;">${r.stockObj.name()}</td>
+          <td title="${r.stockObj.name()}">${r.stockObj.name().substring(0,10)}...</td>
           <td>${attrs.get('fba')}</td>
+          <td>${attrs.get('planBeginDate').substring(0,10)}</td>
+          <td>${r.planQty}</td>
+          <td><input type="text" name="qty" value="${r.qty}" style="width:45px;"></td>
+          <td>${attrs.get('whouseName')}</td>
+          <td>
+              #{if attrs.get('shipType')}${models.procure.Shipment.T.valueOf(attrs.get('shipType')).label()}#{/if}
+          </td>
           <td>
             <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
               <option value="">仓库</option>
@@ -140,15 +163,8 @@
                 #{/list}
             </select>
           </td>
-          <td>${attrs.get('whouseName')}</td>
-          <td>${attrs.get('shipType')}</td>
-          <td>${attrs.get('planBeginDate')}</td>
-          <td>${r.planQty}</td>
           <td>
-            <input type="text" name="qty" value="${r.qty}" style="width:45px;">
-          </td>
-          <td>
-            <select name="targetId" style="width: 150px;" data-value="${r.targetName()}" data-type="${r.type?.name()}">
+            <select name="targetId" style="width: 100px;" data-value="${r.targetName()}" data-type="${r.type?.name()}">
               <option value=""></option>
                 #{if r.type.name() ==  'Normal' || r.type.name() == 'B2B'}
                     #{list items:shippers, as: 'ship'}
@@ -181,6 +197,33 @@
                 #{/elseif}
             </select>
           </td>
+          <td><input type="text" name="mainBox.boxNum" value="${r.mainBox?.boxNum}" style="width:40px;"></td>
+          <td><input type="text" name="mainBox.num" value="${r.mainBox?.num}" style="width:40px;"></td>
+          <td>
+            <input type="text" name="mainBox.singleBoxWeight" value="${r.mainBox?.singleBoxWeight}" style="width:40px;">
+          </td>
+          <td><input type="text" name="mainBox.length" value="${r.mainBox?.length}" style="width:40px;"></td>
+          <td><input type="text" name="mainBox.width" value="${r.mainBox?.width}" style="width:40px;"></td>
+          <td><input type="text" name="mainBox.height" value="${r.mainBox?.height}" style="width:40px;"></td>
+          <td><input type="text" name="lastBox.boxNum" value="${r.lastBox?.boxNum}" style="width:40px;"></td>
+          <td><input type="text" name="lastBox.num" value="${r.lastBox?.num}" style="width:40px;"></td>
+          <td>
+            <input type="text" name="lastBox.singleBoxWeight" value="${r.lastBox?.singleBoxWeight}" style="width:40px;">
+          </td>
+          <td><input type="text" name="lastBox.length" value="${r.lastBox?.length}" style="width:40px;"></td>
+          <td><input type="text" name="lastBox.width" value="${r.lastBox?.width}" style="width:40px;"></td>
+          <td><input type="text" name="lastBox.height" value="${r.lastBox?.height}" style="width:40px;"></td>
+          <td>
+            <select style="width:80px;" name="clearanceType">
+                #{list items:models.procure.DeliverPlan.CT , as:'c'}
+                  <option value="${c.name()}"
+                      #{if r.clearanceType?.name()==c.name()} selected #{/if}>${c.label()}
+                  </option>
+                #{/list}
+            </select>
+          </td>
+          <td>${attrs.get("unit")?.cooperator?.name}</td>
+          <td>${attrs.get("inboundRecord")?.id}</td>
           <td>${r.createDate.datetime()}</td>
           <td>${r.outboundDate.datetime()}</td>
           <td>
