@@ -107,9 +107,7 @@
                 </tr>
                   #{list items:dp.units, as:'unit'}
                     <tr>
-                      <td>
-                        <a href="/ProcureUnits/index?p.search=${unit.id}" target="_blank">${unit.id}</a>
-                      </td>
+                      <td><a href="@{ProcureUnits.edit(unit.id)}" target="_blank">${unit.id}</a></td>
                       <td class="selling_id">
                         <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
                       </td>

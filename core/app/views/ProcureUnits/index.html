@@ -139,7 +139,7 @@
                      data-cooperatorid="${unit.cooperator?.id}">
             </label>
           </td>
-          <td>${unit.id}</td>
+          <td><a href="@{ProcureUnits.edit(unit.id)}" target="_blank">${unit.id}</a></td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
           <td class="selling_id">
             <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
