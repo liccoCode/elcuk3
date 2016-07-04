@@ -246,6 +246,7 @@ public class DeliverPlan extends GenericModel {
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
+        if(this.units == null || this.units.isEmpty()) return new ArrayList<>();
         Cooperator cooperator = this.units.get(0).cooperator;
         return ProcureUnit.find("cooperator=? AND stage=? AND deliverplan IS NULL", cooperator, ProcureUnit.STAGE
                 .DELIVERY).fetch();
