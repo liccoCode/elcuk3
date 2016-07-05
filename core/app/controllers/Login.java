@@ -202,7 +202,7 @@ public class Login extends Secure.Security {
 
         // 尽可能调整到与 Amazon 的规格一样
         bean.setModuleWidth(0.11888);
-        bean.setHeight(1);
+        bean.setHeight(8.344);
         // 控制值内容, CODESET_A 不允许有小写
         bean.setCodeset(Code128Constants.CODESET_ALL);
         bean.setMsgPosition(HumanReadablePlacement.HRP_NONE);
