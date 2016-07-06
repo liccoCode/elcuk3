@@ -33,14 +33,19 @@ public class PurchasePaymentDTO implements Serializable {
     public float totalPurchases;
 
     /**
-     * 已请款金额
+     * 已请款金额(已支付)
      */
-    public float paymentAmount;
+    public float paidAmount;
 
     /**
-     * 未支付金额
+     * 已请款未支付金额
      */
     public float notPayAmount;
+
+    /**
+     * 未请款未支付金额
+     */
+    public float leftAmount;
 
     public String payment;
 
