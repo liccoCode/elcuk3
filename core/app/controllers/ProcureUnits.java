@@ -316,6 +316,13 @@ public class ProcureUnits extends Controller {
         render(unit, oldPlanQty, whouses, type);
     }
 
+    public static void delete(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.stage = ProcureUnit.STAGE.CANCEL;
+        unit.save();
+        ProcureUnits.indexForMarket(new ProcurePost());
+    }
+
     /**
      * TODO effect: 需要调整的采购计划的修改
      *
@@ -405,7 +412,7 @@ public class ProcureUnits extends Controller {
         }
 
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
-        Deliveryments.show(unit.deliveryment.id);
+        ProcureUnits.indexForMarket(new ProcurePost());
     }
 
     /**
