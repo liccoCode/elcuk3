@@ -48,6 +48,7 @@ public class FBA {
         plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
                 Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
+
         if(unit.whouse != null) plan.setMarketplace(unit.whouse.marketplace());
 
         CreateInboundShipmentPlanResponse response = client(account).createInboundShipmentPlan(plan);
@@ -66,7 +67,7 @@ public class FBA {
             for(InboundShipmentPlan planFba : members) {
                 try {
                     List<InboundShipmentPlanItem> itemMember = planFba.getItems().getMember();
-                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<String, InboundShipmentPlanItem>();
+                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<>();
                     for(InboundShipmentPlanItem inboundPlanItem : itemMember) {
                         inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
                     }
