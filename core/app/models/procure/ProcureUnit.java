@@ -1228,7 +1228,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"), 50);
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
+                50);
     }
 
     @Override
@@ -1575,7 +1576,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int recommendBoxNum() {
-        CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
+        CooperItem item = CooperItem.find("sku=? AND cooperator.id=?", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
         return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
     }

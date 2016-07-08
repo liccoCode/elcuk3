@@ -37,7 +37,7 @@ public class DeliverPlan extends GenericModel {
 
 
     @OneToMany(mappedBy = "deliverplan", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
 
 
     @OneToOne
