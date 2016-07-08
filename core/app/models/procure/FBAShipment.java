@@ -4,6 +4,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import models.whouse.ShipPlan;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -133,7 +134,10 @@ public class FBAShipment extends Model {
     public String shipmentId;
 
     @OneToMany(mappedBy = "fba")
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
+
+    @OneToMany(mappedBy = "fba")
+    public List<ShipPlan> plans = new ArrayList<>();
 
     @Lob
     public String records = "";

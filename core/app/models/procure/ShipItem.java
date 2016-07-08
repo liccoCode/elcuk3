@@ -12,6 +12,7 @@ import models.market.Selling;
 import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -74,6 +75,17 @@ public class ShipItem extends GenericModel {
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
     }
 
+    /**
+     * 通过 ShipPlan 创建 ShipItem
+     *
+     * @param plan
+     */
+    public ShipItem(ShipPlan plan) {
+        this.plan = plan;
+        this.qty = plan.qty;
+        this.fulfillmentNetworkSKU = plan.selling.fnSku;
+    }
+
     @Id
     @GeneratedValue
     @Expose
@@ -86,6 +98,10 @@ public class ShipItem extends GenericModel {
     @Expose
     @ManyToOne
     public ProcureUnit unit;
+
+    @Expose
+    @ManyToOne
+    public ShipPlan plan;
 
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();

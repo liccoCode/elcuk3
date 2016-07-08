@@ -680,8 +680,11 @@ public class ProcureUnits extends Controller {
 
     /**
      * 批量创建FBA
+     * <p>
+     * 以后所有的 FBA 应该关联到出库计划
      *
      * @param pids
+     * @deprecated
      */
     public static void batchCreateFBA(ProcurePost p, List<Long> pids, String redirectTarget) {
         if(pids != null && pids.size() > 0) {

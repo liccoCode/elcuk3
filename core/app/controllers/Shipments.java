@@ -459,6 +459,7 @@ public class Shipments extends Controller {
     }
 
     /**
+     * TODO: 重构(只生成出库记录,不生成出货计划)
      * 创建出库
      */
     @Check("outboundrecords.index")

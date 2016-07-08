@@ -1,15 +1,21 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.User;
+import models.market.Selling;
+import models.procure.FBAShipment;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 出货计划
@@ -20,12 +26,48 @@ import java.util.Date;
  * Time: 2:55 PM
  */
 @Entity
-public class ShipPlan extends Model {
+public class ShipPlan extends GenericModel {
+    @Id
+    @Column(length = 30)
+    @Expose
+    public String id;
+
     /**
-     * 运输单
+     * Selling
+     * <p>
+     * PS:物料计划上线后不能再这样关联了
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    public Selling selling;
+
+    /**
+     * 送往的仓库
+     */
+    @OneToOne
+    public Whouse whouse;
+
+    /**
+     * 货物运输的类型 (海运? 空运? 快递)
+     */
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Column(length = 20)
+    public Shipment.T shipType;
+
+    /**
+     * 冗余运输单字段
      */
     @ManyToOne
     public Shipment shipment;
+
+    @ManyToOne
+    public FBAShipment fba;
+
+    /**
+     * 所关联的运输出去的 ShipItem.
+     */
+    @OneToMany(mappedBy = "unit")
+    public List<ShipItem> shipItems = new ArrayList<>();
 
     /**
      * 出货对象(SKU or 物料)
@@ -47,13 +89,13 @@ public class ShipPlan extends Model {
         Pending {
             @Override
             public String label() {
-                return "待确认";
+                return "待出库";
             }
         },
         Confirmd {
             @Override
             public String label() {
-                return "已确认";
+                return "已出库";
             }
         };
 
@@ -68,7 +110,7 @@ public class ShipPlan extends Model {
     public Integer qty;
 
     /**
-     * 预计出货时间
+     * 预计运输时间
      */
     @Expose
     public Date planDate;
@@ -79,16 +121,23 @@ public class ShipPlan extends Model {
     @Expose
     public Date updateDate = new Date();
 
-
-    @PrePersist
-    @PreUpdate
-    public void setupAttrs() {
-        if(this.shipment != null) {
-            this.state = S.Confirmd;
-        }
-    }
+    /**
+     * 创建人
+     */
+    @Expose
+    @OneToOne
+    public User creator;
 
     public ShipPlan() {
+        this.createDate = new Date();
+        this.state = S.Pending;
+    }
+
+    public ShipPlan(String sid) {
+        this();
+        if(StringUtils.isNotBlank(sid)) {
+            this.selling = Selling.findById(sid);
+        }
     }
 
     public ShipPlan(ShipItem shipItem) {
@@ -120,5 +169,27 @@ public class ShipPlan extends Model {
             return ShipPlan.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
         }
         return false;
+    }
+
+    public boolean isLock() {
+        return this.state != S.Pending;
+    }
+
+    public ShipPlan doCreate() {
+        //为了避免出现重复的 ID, 加上类锁
+        synchronized(ShipPlan.class) {
+            this.id = ShipPlan.id();
+            return this.save();
+        }
+    }
+
+    private static String id() {
+        DateTime dt = DateTime.now();
+        DateTime nextMonth = dt.plusMonths(1);
+        String count = ShipPlan.count("createDate>=? AND createDate<?",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
+        ) + "";
+        return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 }
