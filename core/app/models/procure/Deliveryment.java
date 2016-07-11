@@ -278,10 +278,10 @@ public class Deliveryment extends GenericModel {
          * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
          */
         for(ProcureUnit unit : this.units) {
-         //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
             //    Validation.addError("deliveryment.units.cancel", "validation.required");
-         //   else
-                unit.toggleAssignTodeliveryment(null, false);
+            //   else
+            unit.toggleAssignTodeliveryment(null, false);
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
@@ -326,12 +326,16 @@ public class Deliveryment extends GenericModel {
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else if(this.deliveryType == T.MANUAL && unit.selling == null) {
+                //手动采购单中的默认的采购计划(没有 Selling)不允许从采购单中移除
+                Validation.addError("", "手动单中默认的采购计划不允许被移除!");
+            } else {
                 unit.toggleAssignTodeliveryment(null, false);
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+        if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
         this.save();
 

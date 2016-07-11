@@ -35,7 +35,7 @@ import java.util.List;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Deliveryments extends Controller {
 
     @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
@@ -257,7 +257,7 @@ public class Deliveryments extends Controller {
 
         } catch(Exception e) {
             e.printStackTrace();
-            Logger.warn("downloadFBAZIP %s:%s", id,e.getMessage());
+            Logger.warn("downloadFBAZIP %s:%s", id, e.getMessage());
         } finally {
             File zip = new File(Constant.TMP + "/FBA.zip");
             Files.zip(dirfile, zip);
@@ -295,7 +295,6 @@ public class Deliveryments extends Controller {
         dmt.handler = user;
         dmt.state = Deliveryment.S.PENDING;
         dmt.name = dmt.name.trim();
-        dmt.units.add(unit);
         dmt.deliveryType = Deliveryment.T.MANUAL;
         unit.validateManual();
         if(Validation.hasErrors()) {
