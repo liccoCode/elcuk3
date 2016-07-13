@@ -372,4 +372,20 @@ public class FBAShipment extends Model {
         return FBAShipment.find(SqlSelect.whereIn("shipmentId", shipmentids)).fetch();
     }
 
+    /**
+     * 返回对应市场的 Marketplace ID
+     * <p>
+     * PS:
+     * 只支持一个采购计划(当前设计中不存在一个 FBAShipment 包含多个采购计划的情况, 如果以后有变化再更新)
+     *
+     * @return
+     */
+    public String marketplace() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        try {
+            return this.units.get(0).selling.market.amid().name();
+        } catch(NullPointerException e) {
+            return null;
+        }
+    }
 }
