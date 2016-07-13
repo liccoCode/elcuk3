@@ -91,21 +91,38 @@ public class ReportDeal extends Controller {
     }
 
     /**
+     *  Osticket调用,返回订单状态
+     */
+    public static void returnOrderStatus() {
+        String orderId = request.params.get("orderId");
+        if(StringUtils.isNotBlank(orderId)) {
+            Orderr ord = Orderr.findById(orderId);
+            renderJSON(new Ret(true, ord.state.name()));
+        } else {
+            renderJSON(new Ret(false));
+        }
+    }
+
+
+    /**
      * Osticket 调用生成pdf
      */
     public static void returnInvoicePdf() {
         String orderId = request.params.get("orderId");
         String taxNumber = request.params.get("taxNumber");
+        String flag = request.params.get("flag");
 
         Orderr ord = Orderr.findById(orderId);
         if(ord == null) renderJSON(new Ret(false, "this order is not exist"));
-        if(!(ord.state.equals(Orderr.S.SHIPPED) || ord.state.equals(Orderr.S.PAYMENT)))
-            renderJSON(new Ret(true, "this order state is " + ord.state.name()));
-        if(StringUtils.isNotBlank(ord.invoiceState) && ord.invoiceState.equals("yes"))
-            renderJSON(new Ret(true, "this order is send before!"));
+
+        if(flag==null || !flag.equals("1")) {
+            if(!(ord.state.equals(Orderr.S.SHIPPED) || ord.state.equals(Orderr.S.PAYMENT)))
+                renderJSON(new Ret(true, "this order state is " + ord.state.name()));
+            if(StringUtils.isNotBlank(ord.invoiceState) && ord.invoiceState.equals("yes"))
+                renderJSON(new Ret(true, "this order is send before!"));
+        }
 
         OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
-
         OrderInvoice invoice = OrderInvoice.findById(orderId);
         if(invoice == null) {
             invoice = ord.createOrderInvoice();
