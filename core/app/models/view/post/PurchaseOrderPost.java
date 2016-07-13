@@ -61,14 +61,14 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         List<Object> params = new ArrayList<Object>();
         StringBuilder sql = new StringBuilder();
         sql.append(" SELECT c.name, u.deliveryment_id, u.id, u.sku, u.stage, u.price, u.currency, ");
-        sql.append(" IF(u.qty, u.qty,  u.planQty) AS qty, ");
-        sql.append(" round(sum(IF(u.qty, u.qty,  u.planQty) * u.price), 2) AS 'totalPurchases',");
+        sql.append(" IFNULL(u.qty, u.planQty)  AS qty, ");
+        sql.append(" round(sum(IFNULL(u.qty,  u.planQty) * u.price), 2) AS 'totalPurchases',");
         sql.append(" IF(round(sum(p.amount + p.fixValue),2), round(sum(p.amount + p.fixValue)), 0) AS 'paymentAmount'");
         sql.append(" FROM  ProcureUnit u ");
         sql.append(" LEFT JOIN Deliveryment d ON d.id = u.deliveryment_id ");
         sql.append(" LEFT JOIN Cooperator c ON c.id = u.cooperator_id ");
         sql.append(" LEFT JOIN PaymentUnit p ON p.procureUnit_id = u.id ");
-        sql.append(" WHERE u.stage <> 'CLOSE'");
+        sql.append(" WHERE u.stage <> 'APPROVE'");
         sql.append(" AND d.createDate >= ? ");
         sql.append(" AND d.createDate <= ? ");
         params.add(from);

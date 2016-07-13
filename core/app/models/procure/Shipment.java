@@ -972,7 +972,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void produceFee(PaymentUnit fee) {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
-        if(fee.unitQty < 1f) Validation.addError("", "数量必须大于等于 1");
+        if(fee.unitQty <= 0f) Validation.addError("", "数量必须大于等于 0");
         // 海运/空运的运输运费无法绑定运输项目, 只能平摊
         if(this.type == T.EXPRESS && FeeType.expressFee().equals(fee.feeType))
             Validation.addError("", "快递的运输费用需要通过运输项目记录");
