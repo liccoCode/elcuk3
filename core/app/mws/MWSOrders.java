@@ -6,7 +6,6 @@ import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersConfig;
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
 import com.amazonservices.mws.orders.model.*;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import helper.LogUtils;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
@@ -25,6 +24,7 @@ import java.util.*;
  * User: wyatt
  * Date: 5/24/13
  * Time: 10:24 AM
+ * @deprecated
  */
 public class MWSOrders {
     private static final Map<String, MarketplaceWebServiceOrders> CLIENT_CACHE = new HashMap<String, MarketplaceWebServiceOrders>();
