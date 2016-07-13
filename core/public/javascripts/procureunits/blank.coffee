@@ -74,8 +74,8 @@ $ ->
     LoadMask.mask()
     $.get("/shipment/#{@getAttribute('value')}/dates")
     .done((r) ->
-      $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
-      $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
+      $("#planShipDate").data('dateinput').setValue(r['begin'])
+      $("#planArrivDate").data('dateinput').setValue(r['end'])
       LoadMask.unmask()
     )
   )

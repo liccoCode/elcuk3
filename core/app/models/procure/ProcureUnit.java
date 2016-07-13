@@ -172,6 +172,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             public String label() {
                 return "结束";
             }
+        },
+        /**
+         * 取消,页面无显示
+         */
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消";
+            }
         };
 
         public abstract String label();
@@ -502,6 +511,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.stage = STAGE.DELIVERY;
         if(unit.selling == null) {
+            if(unit.shipType == null) {
+                newUnit.selling = null;
+                newUnit.shipType = null;
+            }
             newUnit.manualValidate();
         } else {
             newUnit.validate();
@@ -547,6 +560,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.comment = unit.comment;
+        newUnit.creator = unit.handler;
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
@@ -1702,6 +1716,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public static STAGE[] stages() {
         return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING,
-                STAGE.INBOUND, STAGE.CLOSE);
+                STAGE.INBOUND, STAGE.CLOSE, STAGE.CANCEL);
     }
 }
