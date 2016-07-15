@@ -1,12 +1,12 @@
 <tr>
   <th style="width:15%;">Selling</th>
   <td style="width:35%;">
-    <input type="text" name="unit.selling.sellingId" id="sellingId" style="width:300px;" value="${unit.selling?.sellingId}"
+    <input type="text" name="newUnit.selling.sellingId" id="sellingId" style="width:300px;" value="${unit.selling?.sellingId}"
       autocomplete="off" readonly>
   </td>
   <th style="width:15%;">SKU</th>
   <td style="width:35%;">
-    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.sku}" autocomplete="off" required readonly>
+    <input type="text" name="newUnit.product.sku" id="unit_sku" value="${unit.sku}" autocomplete="off" required readonly>
   </td>
 </tr>
 
@@ -23,8 +23,7 @@
 <tr>
   <th><span style="color:red">*</span>采购数量</th>
   <td colspan="3">
-    <input type="text" class="input-mini" placeHolder="具体数量" name="newUnit.attrs.planQty" id="planQty" required
-           value="${unit.attrs.planQty}">
+    <input type="text" class="input-mini" placeHolder="具体数量" name="newUnit.attrs.planQty" id="planQty" required>
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
@@ -66,19 +65,11 @@
   <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
-      <input type="radio" name="newUnit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>${t.detail()}
+      <input type="radio" name="newUnit.shipType" value="${t.name()}">${t.detail()}
     </label>
   #{/list}
   </td>
-  <td colspan="2">
-  #{list items: unit.relateShipment()}
-    <div>
-      <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
-      <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
-      <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
-    </div>
-  #{/list}
-  </td>
+  <td colspan="2"></td>
 </tr>
 
 
