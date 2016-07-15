@@ -517,19 +517,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             newUnit.manualValidate();
         } else {
+            newUnit.selling = unit.selling;
+            newUnit.whouse = unit.whouse;
             newUnit.validate();
         }
 
-
-        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
-                newUnit.whouse, newUnit.shipType);
+        List<Shipment> shipments = Shipment
+                .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS
-                && shipments.size() <= 0)
-            Validation.addError("",
-                    String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
-                            newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
+        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+            Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
+                    newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
 
         if(Validation.hasErrors()) return newUnit;
         //无selling的手动单不做处理
