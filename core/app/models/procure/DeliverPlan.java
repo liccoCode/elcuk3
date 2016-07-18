@@ -7,6 +7,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
@@ -28,7 +29,7 @@ import java.util.Map;
  * Time: 上午10:12
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class DeliverPlan extends GenericModel {
 
     public DeliverPlan() {

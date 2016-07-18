@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
  * User: wyattpan
  * Date: 1/23/12
  * Time: 5:29 PM
+ * @deprecated
  */
 @Entity
 public class JobRequest extends Model {

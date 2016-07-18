@@ -67,7 +67,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
         List<ElcukRecord> logs = ElcukRecord
-                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"));
+                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"), 50);
         renderArgs.put("logs", logs);
     }
 
@@ -357,7 +357,6 @@ public class ProcureUnits extends Controller {
 
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        Set<User> users = unit.editToUsers();
         unit.remove();
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

@@ -3,6 +3,7 @@ package models;
 import helper.GTs;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.db.jpa.JPABase;
 import play.db.jpa.Model;
@@ -20,7 +21,7 @@ import java.util.*;
  * Time: AM11:18
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class OperatorConfig extends Model {
     public static final Map<String, T> NAME_Type_MAPS;
     public static final Map<String, String> VALUES_MAPS;

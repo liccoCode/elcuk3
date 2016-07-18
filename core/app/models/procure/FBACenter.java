@@ -1,6 +1,7 @@
 package models.procure;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.Model;
 import play.libs.F;
 
@@ -16,7 +17,7 @@ import java.util.List;
  * Time: 12:08 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class FBACenter extends Model {
     public FBACenter() {
     }

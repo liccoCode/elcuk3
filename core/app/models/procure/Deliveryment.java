@@ -11,6 +11,7 @@ import models.finance.ProcureApply;
 import models.product.Category;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Error;
@@ -31,7 +32,7 @@ import java.util.*;
  * Time: 4:50 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Deliveryment extends GenericModel {
     public Deliveryment() {
     }
@@ -327,7 +328,6 @@ public class Deliveryment extends GenericModel {
     public void cancel(String msg) {
         for(ProcureUnit unit : this.units) {
             unit.toggleAssignTodeliveryment(null, false);
-            unit.save();
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
@@ -376,12 +376,16 @@ public class Deliveryment extends GenericModel {
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else if(this.deliveryType == T.MANUAL && unit.selling == null) {
+                //手动采购单中的默认的采购计划(没有 Selling)不允许从采购单中移除
+                Validation.addError("", "手动单中默认的采购计划不允许被移除!");
+            } else {
                 unit.toggleAssignTodeliveryment(null, false);
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+        if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
         this.save();
 

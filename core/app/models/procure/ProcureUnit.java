@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -50,7 +51,7 @@ import java.util.*;
  * Time: 5:23 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public ProcureUnit() {
@@ -887,7 +888,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 fba.units.remove(this);
                 fba.removeFBAShipment();
             }
-
             // 删除运输相关
             for(ShipItem item : this.shipItems) {
                 item.delete();
@@ -897,6 +897,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             List<CheckTask> tasks = this.tasks();
             for(CheckTask task : tasks) {
                 task.delete();
+            }
+            //删除采购单关联
+            Deliveryment deliveryment = this.deliveryment;
+            if(deliveryment != null && deliveryment.units != null) {
+                deliveryment.units.remove(this);
+            }
+            //删除出货单关联
+            DeliverPlan deliverPlan = this.deliverplan;
+            if(deliverPlan != null && deliverPlan.units != null) {
+                deliverPlan.units.remove(this);
             }
             this.delete();
         } else {
@@ -1196,7 +1206,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"));
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
+                50);
     }
 
     @Override
@@ -1544,7 +1555,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public int recommendBoxNum() {
         if(this.cooperator == null) return 0;
-        CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
+        CooperItem item = CooperItem.find("sku=? AND cooperator.id=?", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
         return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
     }

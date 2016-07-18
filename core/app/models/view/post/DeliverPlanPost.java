@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.procure.DeliverPlan;
+import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -129,8 +130,9 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
     public List<DeliverPlan> query() {
         this.count = this.count();
         F.T2<String, List<Object>> params = params();
+        this.count = this.count();
         return DeliverPlan.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
-                .fetch();
+                .fetch(this.page, this.perSize);
     }
 
     public F.T3<Boolean, String, List<Object>> multiProcureUnit() {
