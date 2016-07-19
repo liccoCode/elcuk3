@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.InboundShipmentItem;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
@@ -391,5 +392,58 @@ public class FBAShipment extends Model {
         } catch(NullPointerException e) {
             return null;
         }
+    }
+
+    public int qty() {
+        int qty = 0;
+        for(ProcureUnit unit : this.units) {
+            qty += unit.qty();
+        }
+        for(ShipPlan plan : this.plans) {
+            qty += plan.qty;
+        }
+        return qty;
+    }
+
+    public Set<Shipment> shipments() {
+        Set<Shipment> shipments = new HashSet<>();
+        for(ProcureUnit unit : this.units) {
+            for(ShipItem item : unit.shipItems) {
+                if(item.shipment == null) continue;
+                shipments.add(item.shipment);
+            }
+        }
+        for(ShipPlan plan : this.plans) {
+            for(ShipItem item : plan.shipItems) {
+                if(item.shipment == null) continue;
+                shipments.add(item.shipment);
+            }
+        }
+        return shipments;
+    }
+
+    public List<InboundShipmentItem> inboundShipmentItems() {
+        List<InboundShipmentItem> items = new ArrayList<>();
+        for(ProcureUnit unit : this.units) {
+            items.add(new InboundShipmentItem(
+                    null,
+                    FBA.fixHistoryMSKU(unit.selling.merchantSKU),
+                    null,
+                    unit.qty(),
+                    null,
+                    null,
+                    null));
+        }
+        for(ShipPlan plan : this.plans) {
+            items.add(new InboundShipmentItem(
+                    null,
+                    FBA.fixHistoryMSKU(plan.selling.merchantSKU),
+                    null,
+                    plan.qty,
+                    null,
+                    null,
+                    null));
+        }
+        return items;
     }
 }

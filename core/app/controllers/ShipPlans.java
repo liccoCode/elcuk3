@@ -3,7 +3,6 @@ package controllers;
 import controllers.api.SystemOperation;
 import models.ElcukRecord;
 import models.User;
-import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.view.post.ShipPlanPost;
 import models.whouse.ShipPlan;
@@ -63,13 +62,11 @@ public class ShipPlans extends Controller {
 
     public static void batchCreateFBA(ShipPlanPost p, List<Long> pids, String redirectTarget) {
         if(pids != null && pids.size() > 0) {
-            ProcureUnit.postFbaShipments(pids);
+            ShipPlan.postFbaShipments(pids);
         }
-        if(StringUtils.isNotBlank(redirectTarget) && StringUtils.containsIgnoreCase(redirectTarget, "index")) {
-
-        } else {
-
+        if(StringUtils.isNotBlank(redirectTarget)) {
+            redirect(redirectTarget);//如果需要参数请自行加到地址中去
         }
+        redirect("ShipPlans/index");
     }
-
 }

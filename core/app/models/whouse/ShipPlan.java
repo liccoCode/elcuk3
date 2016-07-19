@@ -1,15 +1,20 @@
 package models.whouse;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import helper.Webs;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.market.Selling;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -119,6 +124,9 @@ public class ShipPlan extends GenericModel {
     public Date planDate;
 
     @Expose
+    public String sku;// 冗余 sku 字段
+
+    @Expose
     public Date createDate = new Date();
 
     @Expose
@@ -192,5 +200,49 @@ public class ShipPlan extends GenericModel {
                 DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
         ) + "";
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+    }
+
+    public static void postFbaShipments(List<Long> planIds) {
+        List<ShipPlan> plans = ShipPlan.find(SqlSelect.whereIn("id", planIds)).fetch();
+        if(plans.size() != planIds.size())
+            Validation.addError("", "加载的数量");
+        if(Validation.hasErrors()) return;
+
+        for(ShipPlan plan : plans) {
+            try {
+                if(plan.fba != null) {
+                    Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", plan.id));
+                } else {
+                    plan.postFbaShipment();
+                }
+            } catch(Exception e) {
+                Validation.addError("", Webs.E(e));
+            }
+        }
+    }
+
+    /**
+     * 通过 ProcureUnit 创建 FBA
+     */
+    public synchronized FBAShipment postFbaShipment() {
+        FBAShipment fba = null;
+        try {
+            fba = FBA.plan(this.selling.account, this);
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            return null;
+        }
+        try {
+            fba.state = FBA.create(fba);
+            this.fba = fba.save();
+            this.save();
+            new ERecordBuilder("shipment.createFBA")
+                    .msgArgs(this.id, this.sku, this.fba.shipmentId)
+                    .fid(this.id)
+                    .save();
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
+        }
+        return fba;
     }
 }

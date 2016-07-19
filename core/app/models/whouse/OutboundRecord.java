@@ -29,6 +29,8 @@ import java.util.*;
 
 /**
  * 出库记录
+ * <p>
+ * (角色等同于出货计划,但是手动创建的出货记录没有关联的出货计划)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -98,7 +100,7 @@ public class OutboundRecord extends Model {
      * 出货计划
      */
     @Expose
-    @ManyToOne
+    @OneToOne
     public ShipPlan shipPlan;
 
     /**
@@ -260,6 +262,9 @@ public class OutboundRecord extends Model {
         this.qty = 0;
         this.planQty = 1;
         this.state = S.Pending;
+        this.type = T.Normal;
+        this.origin = O.Normal;
+        this.handler = User.current();
     }
 
     public OutboundRecord(T type, O origin) {
@@ -273,6 +278,7 @@ public class OutboundRecord extends Model {
         this.planQty = plan.qty;
         this.qty = this.planQty;
         this.stockObj = plan.stockObj.dump();
+        this.shipPlan = plan;
         Whouse whouse = this.findWhouse();
         if(whouse != null) this.whouse = whouse;
     }
@@ -527,6 +533,11 @@ public class OutboundRecord extends Model {
         return false;
     }
 
+    public static boolean checkExistsWithUnitId(String procureunitId) {
+        return StringUtils.isBlank(procureunitId) ||
+                OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId + "%") != 0;
+    }
+
     /**
      * 检查仓库中的库存是否能够满足当前出库的数量
      *
@@ -547,7 +558,7 @@ public class OutboundRecord extends Model {
     }
 
     /**
-     * 根据 FBA 属性来尝试匹配入库记录
+     * 根据 FBA 属性来尝试获取入库记录中选择的目标仓库
      *
      * @return
      */
