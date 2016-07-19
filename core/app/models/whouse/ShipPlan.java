@@ -7,6 +7,7 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.Selling;
 import models.procure.FBAShipment;
+import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import mws.FBA;
@@ -111,7 +112,12 @@ public class ShipPlan extends GenericModel {
     }
 
     /**
-     * 出货数量
+     * 计划出库数
+     */
+    public Integer planQty;
+
+    /**
+     * 出货数
      */
     @Required
     @Expose
@@ -142,6 +148,7 @@ public class ShipPlan extends GenericModel {
     public ShipPlan() {
         this.createDate = new Date();
         this.state = S.Pending;
+        this.creator = User.current();
     }
 
     public ShipPlan(String sid) {
@@ -151,6 +158,10 @@ public class ShipPlan extends GenericModel {
         }
     }
 
+    /**
+     * @param shipItem
+     * @deprecated
+     */
     public ShipPlan(ShipItem shipItem) {
         this.shipment = shipItem.shipment;
         this.planDate = shipment.dates.planBeginDate;
@@ -158,6 +169,16 @@ public class ShipPlan extends GenericModel {
         this.qty = shipItem.qty;
         this.stockObj.setAttributes(shipItem);
         this.state = S.Confirmd;
+    }
+
+    public ShipPlan(ProcureUnit unit) {
+        this();
+        this.planDate = unit.attrs.planShipDate;
+        this.qty = unit.qty();
+        this.shipType = unit.shipType;
+        this.selling = unit.selling;
+        this.sku = unit.sku;
+        this.whouse = unit.whouse;
     }
 
     public ShipPlan triggerRecord(String targetId) {
@@ -244,5 +265,10 @@ public class ShipPlan extends GenericModel {
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
         return fba;
+    }
+
+    public int qty() {
+        if(this.qty != null) return this.qty;
+        return this.planQty;
     }
 }
