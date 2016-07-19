@@ -19,7 +19,10 @@ import java.util.List;
 
 /**
  * 出货计划
- * 角色定义为出货记录与运输单中间的信息传递,允许从运输单创建出货计划或者先创建出货计划然后再去关联运输单
+ * <p>
+ * (角色定义与出库记录的角色基本一致,
+ * 主要为出货记录与运输单中间的信息传递,
+ * 允许从运输单创建出货计划或者先创建出货计划然后再去关联运输单)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -66,7 +69,7 @@ public class ShipPlan extends GenericModel {
     /**
      * 所关联的运输出去的 ShipItem.
      */
-    @OneToMany(mappedBy = "unit")
+    @OneToMany(mappedBy = "plan")
     public List<ShipItem> shipItems = new ArrayList<>();
 
     /**
@@ -165,10 +168,8 @@ public class ShipPlan extends GenericModel {
 
     public boolean exist() {
         Object procureunitId = this.stockObj.attributes().get("procureunitId");
-        if(procureunitId != null) {
-            return ShipPlan.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
-        }
-        return false;
+        return procureunitId != null &&
+                ShipPlan.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
     }
 
     public boolean isLock() {

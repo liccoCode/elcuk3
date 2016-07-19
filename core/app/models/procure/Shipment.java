@@ -12,8 +12,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.whouse.ShipPlan;
-import models.whouse.Whouse;
+import models.whouse.*;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -1682,19 +1681,29 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 初始化出库信息
+     * 初始化出库信息(仅用于方便遗留的老的运输单进行创建出库记录)
      */
-    public void initOutbound() {
+    public void outbound() {
+        if(this.items == null || this.items.isEmpty()) return;
         Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        if(this.items != null && !this.items.isEmpty()) {
-            for(ShipItem item : this.items) {
-                ShipPlan plan = new ShipPlan(item);
-                plan.valid();
-                if(!plan.exist() && !Validation.hasErrors()) {
-                    plan.save();
-                    plan.triggerRecord(cooperator != null ? cooperator.id.toString() : "");
-                }
+        for(ShipItem item : this.items) {
+            if(item.plan != null || item.unit == null ||
+                    OutboundRecord.checkExistsWithUnitId(item.unit.id.toString())) {
+                continue; //排除掉通过出库计划创建的运输项 或者 没有关联上采购计划 或者 采购计划已经存在出库记录的
             }
+            //通过运输单的运输项来创建的出库记录与手动创建的出库记录基本上是类似的
+            OutboundRecord record = new OutboundRecord();
+            record.planQty = item.qty;
+            record.qty = item.qty;
+            if(cooperator != null) record.targetId = cooperator.id.toString();
+            if(item.unit.fba != null) {
+                //根据 FBA 属性来尝试获取入库记录中选择的目标仓库
+                InboundRecord inboundRecord = InboundRecord.findInboundRecordByFBA(item.unit.fba.shipmentId);
+                if(inboundRecord != null) this.whouse = inboundRecord.targetWhouse;
+            }
+            record.stockObj = new StockObj(item.unit.product.sku);
+            record.stockObj.setAttributes(item);
+            record.save();
         }
     }
 }

@@ -453,13 +453,12 @@ public class Shipments extends Controller {
         shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));
         int day = shipment.shipDay();
         DateTime arrivedate = Dates.cn(planShipDate).plusDays(day);
-        Map<String, String> dates = new HashMap<String, String>();
+        Map<String, String> dates = new HashMap<>();
         dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
     }
 
     /**
-     * TODO: 重构(只生成出库记录,不生成出货计划)
      * 创建出库
      */
     @Check("outboundrecords.index")
@@ -467,7 +466,7 @@ public class Shipments extends Controller {
         if(shipmentId != null && !shipmentId.isEmpty()) {
             for(String sid : shipmentId) {
                 Shipment shipment = Shipment.findById(sid);
-                shipment.initOutbound();
+                shipment.outbound();
             }
         }
         flash.success("创建出库成功!");
