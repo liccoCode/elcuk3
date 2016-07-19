@@ -400,7 +400,7 @@ public class FBAShipment extends Model {
             qty += unit.qty();
         }
         for(ShipPlan plan : this.plans) {
-            qty += plan.qty;
+            qty += plan.qty();
         }
         return qty;
     }
@@ -439,7 +439,7 @@ public class FBAShipment extends Model {
                     null,
                     FBA.fixHistoryMSKU(plan.selling.merchantSKU),
                     null,
-                    plan.qty,
+                    plan.qty(),
                     null,
                     null,
                     null));
