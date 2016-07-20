@@ -18,6 +18,7 @@ import models.product.Product;
 import models.qc.CheckTask;
 import models.whouse.InboundRecord;
 import models.whouse.OutboundRecord;
+import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;
@@ -806,6 +807,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     /**
      * 通过 ProcureUnit 创建 FBA
+     *
+     * @deprecated
      */
     public synchronized FBAShipment postFbaShipment() {
         FBAShipment fba = null;
@@ -1250,6 +1253,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ProcureUnit.find("stage=?", stage).fetch();
     }
 
+    /**
+     * @param unitIds
+     * @deprecated
+     */
     public static void postFbaShipments(List<Long> unitIds) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
         if(units.size() != unitIds.size())
@@ -1257,14 +1264,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         for(ProcureUnit unit : units) {
-            try {
-                if(unit.fba != null) {
-                    Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+            //为了照顾老数据的过渡,采取如果找到了出货计划就使用出货计划去创建 FBA, 未找到出货计划则使用采购计划去创建 FBA
+            ShipPlan plan = ShipPlan.find("unit.id=?", unit.id).first();
+            if(plan != null) {
+                if(plan.fba != null) {
+                    Validation.addError("", String.format("#%s 关联的出货计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
                 } else {
-                    unit.postFbaShipment();
+                    plan.postFbaShipment();
                 }
-            } catch(Exception e) {
-                Validation.addError("", Webs.E(e));
+            } else {
+                try {
+                    if(unit.fba != null) {
+                        Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+                    } else {
+                        unit.postFbaShipment();
+                    }
+                } catch(Exception e) {
+                    Validation.addError("", Webs.E(e));
+                }
             }
         }
     }
