@@ -34,9 +34,18 @@ public class ShipPlans extends Controller {
                 50));
     }
 
+    @Before(only = {"show", "update"})
+    public static void beforeLogs() {
+        String id = request.params.get("id");
+        if(StringUtils.isNotBlank(id)) {
+            renderArgs.put("logs", ElcukRecord.records(id));
+        }
+    }
+
     public static void index(ShipPlanPost p) {
+        if(p == null) p = new ShipPlanPost();
         List<ShipPlan> plans = p.query();
-        render(plans);
+        render(plans, p);
     }
 
     public static void blank(String sid) {
@@ -60,6 +69,27 @@ public class ShipPlans extends Controller {
         redirect("ShipPlans/index");
     }
 
+    public static void show(String id) {
+        ShipPlan plan = ShipPlan.findById(id);
+        render(plan);
+    }
+
+    public static void update(String id, ShipPlan plan, String shipmentId) {
+        ShipPlan manager = ShipPlan.findById(id);
+        manager.update(plan, shipmentId);
+        if(Validation.hasErrors()) {
+            plan.id = manager.id;
+            render("ShipPlans/show.html", plan);
+        }
+        flash.success("成功修改采购计划!", id);
+        redirect("ShipPlan/index");
+    }
+
+    /**
+     * @param p
+     * @param pids
+     * @param redirectTarget
+     */
     public static void batchCreateFBA(ShipPlanPost p, List<Long> pids, String redirectTarget) {
         if(pids != null && pids.size() > 0) {
             ShipPlan.postFbaShipments(pids);
@@ -67,6 +97,6 @@ public class ShipPlans extends Controller {
         if(StringUtils.isNotBlank(redirectTarget)) {
             redirect(redirectTarget);//如果需要参数请自行加到地址中去
         }
-        redirect("ShipPlans/index");
+        index(p);
     }
 }

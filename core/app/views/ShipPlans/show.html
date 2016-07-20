@@ -1,0 +1,23 @@
+#{extends 'main.html' /}
+#{set title:'出货计划' /}
+#{set 'moreScripts'}
+    #{script 'shipplans/blank.coffee'/}
+#{/set}
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @ShipPlans.create(), method: 'POST', id: 'update_shipplan'}
+<div id="stockDiv"></div>
+<table class="table table-condensed table-bordered">
+    #{render 'ShipPlans/_form.html', plan: plan, whouses: whouses/}
+  <tr>
+    <td colspan="4">
+      <input type="hidden" name="id" value="${plan.id}">
+        #{ifnot plan.isLock()}
+          <button class="btn btn-primary" id="create_plan">更新</button>
+        #{/ifnot}
+    </td>
+  </tr>
+</table>
+#{/form}
+#{records records:logs/}
