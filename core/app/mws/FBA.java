@@ -304,7 +304,7 @@ public class FBA {
                 fixHistoryMSKU(plan.selling.merchantSKU),
                 null,
                 null,
-                plan.qty,
+                plan.qty(),
                 null
         );
     }
