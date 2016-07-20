@@ -2,6 +2,7 @@ package models.whouse;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import helper.Reflects;
 import helper.Webs;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -10,6 +11,7 @@ import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.product.Product;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -19,9 +21,7 @@ import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 出货计划
@@ -43,11 +43,12 @@ public class ShipPlan extends GenericModel {
 
     /**
      * Selling
-     * <p>
-     * PS:物料计划上线后不能再这样关联了
      */
     @OneToOne(fetch = FetchType.LAZY)
     public Selling selling;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    public Product product;
 
     /**
      * 送往的仓库
@@ -62,12 +63,6 @@ public class ShipPlan extends GenericModel {
     @Required
     @Column(length = 20)
     public Shipment.T shipType;
-
-    /**
-     * 冗余运输单字段
-     */
-    @ManyToOne
-    public Shipment shipment;
 
     @ManyToOne
     public FBAShipment fba;
@@ -127,10 +122,27 @@ public class ShipPlan extends GenericModel {
      * 预计运输时间
      */
     @Expose
-    public Date planDate;
+    public Date planShipDate;
+
+    /**
+     * 预计到达时间
+     */
+    @Expose
+    public Date planArrivDate;
 
     @Expose
     public String sku;// 冗余 sku 字段
+
+    @Expose
+    @Lob
+    public String memo;
+
+    /**
+     * 记录一下是由哪个采购计划生成的
+     */
+    @Expose
+    @OneToOne
+    public ProcureUnit unit;
 
     @Expose
     public Date createDate = new Date();
@@ -155,30 +167,21 @@ public class ShipPlan extends GenericModel {
         this();
         if(StringUtils.isNotBlank(sid)) {
             this.selling = Selling.findById(sid);
+            this.product = this.selling.listing.product;
         }
-    }
-
-    /**
-     * @param shipItem
-     * @deprecated
-     */
-    public ShipPlan(ShipItem shipItem) {
-        this.shipment = shipItem.shipment;
-        this.planDate = shipment.dates.planBeginDate;
-        this.stockObj = new StockObj(shipItem.unit.product.sku);
-        this.qty = shipItem.qty;
-        this.stockObj.setAttributes(shipItem);
-        this.state = S.Confirmd;
     }
 
     public ShipPlan(ProcureUnit unit) {
         this();
-        this.planDate = unit.attrs.planShipDate;
-        this.qty = unit.qty();
+        this.planShipDate = unit.attrs.planShipDate;
+        this.planArrivDate = unit.attrs.planArrivDate;
+        this.planQty = unit.qty();
         this.shipType = unit.shipType;
         this.selling = unit.selling;
         this.sku = unit.sku;
+        this.product = unit.product;
         this.whouse = unit.whouse;
+        this.unit = unit;
     }
 
     public ShipPlan triggerRecord(String targetId) {
@@ -191,14 +194,12 @@ public class ShipPlan extends GenericModel {
     public void valid() {
         Validation.required("状态", this.state);
         Validation.required("出货数量", this.qty);
-        Validation.required("预计出货时间", this.planDate);
+        Validation.required("预计出货时间", this.planShipDate);
         this.stockObj.valid();
     }
 
     public boolean exist() {
-        Object procureunitId = this.stockObj.attributes().get("procureunitId");
-        return procureunitId != null &&
-                ShipPlan.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
+        return this.unit != null && ShipPlan.count("unit.id=?", unit.id) != 0;
     }
 
     public boolean isLock() {
@@ -271,4 +272,85 @@ public class ShipPlan extends GenericModel {
         if(this.qty != null) return this.qty;
         return this.planQty;
     }
+
+    /**
+     * 采购单元相关联的运输单
+     *
+     * @return
+     */
+    public List<Shipment> relateShipment() {
+        Set<Shipment> shipments = new HashSet<>();
+        for(ShipItem shipItem : this.shipItems) {
+            if(shipItem.shipment != null)
+                shipments.add(shipItem.shipment);
+        }
+        return new ArrayList<>(shipments);
+    }
+
+    public void update(ShipPlan plan, String shipmentId) {
+        if(this.fba != null && (plan.shipType != this.shipType || plan.planQty.intValue() != this.planQty.intValue())) {
+            Validation.required("备注", plan.memo);
+        }
+        if(this.isLock()) {
+            Validation.addError("", "已出库, 无法再修改");
+        }
+        List<String> logs = this.updateLogs(plan);
+        this.changeShipItemShipment(StringUtils.isNotBlank(shipmentId) ? Shipment.<Shipment>findById(shipmentId) : null);
+        if(Validation.hasErrors()) return;
+        if(!logs.isEmpty()) {
+            new ERecordBuilder("shipplan.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id).save();
+        }
+        this.save();
+    }
+
+    /**
+     * 调整采购计划所产生的运输项目的运输单
+     *
+     * @param shipment
+     */
+    public void changeShipItemShipment(Shipment shipment) {
+        if(shipment != null && shipment.state != Shipment.S.PLAN) {
+            Validation.addError("", "涉及的运输单已经为" + shipment.state.label() + "状态, 只有"
+                    + Shipment.S.PLAN.label() + "状态的运输单才可调整.");
+            return;
+        }
+        if(this.shipItems.size() == 0) {
+            // 出库计划没有运输项目, 调整运输单的时候, 需要创建运输项目
+            if(shipment == null) return;
+            shipment.addToShip(this);
+        } else {
+            for(ShipItem shipItem : this.shipItems) {
+                if(this.shipType == Shipment.T.EXPRESS) {
+                    if(shipItem.shipment.state == Shipment.S.PLAN) {
+                        // 快递运输单调整, 运输项目全部删除, 重新设计.
+                        shipItem.delete();
+                    }
+                } else {
+                    if(shipment == null) return;
+                    Shipment originShipment = shipItem.shipment;
+                    shipItem.adjustShipment(shipment);
+                    if(Validation.hasErrors()) {
+                        shipItem.shipment = originShipment;
+                        shipItem.save();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    public List<String> updateLogs(ShipPlan plan) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "product.sku", plan.product.sku));
+        logs.addAll(Reflects.logFieldFade(this, "selling.sellingId", plan.selling.sellingId));
+        logs.addAll(Reflects.logFieldFade(this, "product.abbreviation", plan.product.abbreviation));
+        logs.addAll(Reflects.logFieldFade(this, "whouse.id", plan.whouse.id));
+        logs.addAll(Reflects.logFieldFade(this, "planShipDate", plan.planShipDate));
+        logs.addAll(Reflects.logFieldFade(this, "planArrivDate", plan.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "planQty", plan.planQty));
+        logs.addAll(Reflects.logFieldFade(this, "shipType", plan.shipType));
+        logs.addAll(Reflects.logFieldFade(this, "memo", plan.memo));
+        return logs;
+    }
+
 }
