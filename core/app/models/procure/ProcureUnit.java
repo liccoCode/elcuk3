@@ -806,6 +806,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 删除 FBA
+     *
+     * @deprecated
+     */
+    public synchronized void removeFBAShipment() {
+        ShipPlan plan = this.shipPlan();
+        if(plan != null) {
+            plan.fba.removeFBAShipment();
+        } else {
+            this.fba.removeFBAShipment();
+        }
+    }
+
+    /**
      * 通过 ProcureUnit 创建 FBA
      *
      * @deprecated
@@ -1265,7 +1279,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         for(ProcureUnit unit : units) {
             //为了照顾老数据的过渡,采取如果找到了出货计划就使用出货计划去创建 FBA, 未找到出货计划则使用采购计划去创建 FBA
-            ShipPlan plan = ShipPlan.find("unit.id=?", unit.id).first();
+            ShipPlan plan = unit.shipPlan();
             if(plan != null) {
                 if(plan.fba != null) {
                     Validation.addError("", String.format("#%s 关联的出货计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
@@ -1787,5 +1801,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.attrs.price = cooperItem.price;
             this.attrs.currency = cooperItem.currency;
         }
+    }
+
+    public ShipPlan shipPlan() {
+        return ShipPlan.find("unit.id=?", this.id).first();
     }
 }
