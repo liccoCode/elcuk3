@@ -6,6 +6,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -291,8 +292,18 @@ public class DeliverPlan extends GenericModel {
             unit.stage = ProcureUnit.STAGE.INSHIPMENT;
             unit.save();
 
+            //生成收货记录
             ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
             if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
+
+            //生成出货计划(我也不知道为什么要把生成出货计划的节点放在这里)
+            ShipPlan plan = new ShipPlan(unit);
+            if(!plan.exist()) {
+                plan.save();
+                Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
+                //生成出库记录
+                plan.triggerRecord(cooperator == null ? "" : cooperator.id.toString());
+            }
         }
     }
 
