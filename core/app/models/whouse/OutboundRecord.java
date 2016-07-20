@@ -275,12 +275,13 @@ public class OutboundRecord extends Model {
 
     public OutboundRecord(ShipPlan plan) {
         this(T.Normal, O.Normal);
-        this.planQty = plan.qty;
+        this.planQty = plan.planQty;
         this.qty = this.planQty;
-        this.stockObj = plan.stockObj.dump();
         this.shipPlan = plan;
         Whouse whouse = this.findWhouse();
         if(whouse != null) this.whouse = whouse;
+        this.stockObj = new StockObj(plan.product.sku);
+        this.stockObj.setAttributes(plan);
     }
 
     /**
@@ -514,7 +515,7 @@ public class OutboundRecord extends Model {
      * 设置采购计划是否出库状态为已出库
      */
     public void outboundProcureUnit() {
-        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        Object procureunitId = this.stockObj.procureunitId();
         if(procureunitId != null) {
             ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
             if(procureUnit != null) {
@@ -524,11 +525,26 @@ public class OutboundRecord extends Model {
         }
     }
 
+    /**
+     * 同步实际出库数到出库计划
+     */
+    public void syncQtyToShipPlan() {
+        if(this.shipPlan != null) {
+            ShipPlan plan = this.shipPlan;
+            plan.qty = this.qty;
+            plan.save();
+        }
+    }
+
     public boolean exist() {
-        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        Object procureunitId = this.stockObj.procureunitId();
+        Object shipPlanId = this.stockObj.shipPlanId();
         if(procureunitId != null) {
-            return OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%")
-                    != 0;
+            return OutboundRecord.count("attributes LIKE ?",
+                    "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
+        } else if(shipPlanId != null) {
+            return ShipPlan.count("attributes LIKE ?",
+                    "%\"shipPlanId\":" + shipPlanId.toString() + "%") != 0;
         }
         return false;
     }
