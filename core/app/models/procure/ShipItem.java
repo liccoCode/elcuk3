@@ -83,7 +83,7 @@ public class ShipItem extends GenericModel {
      */
     public ShipItem(ShipPlan plan) {
         this.plan = plan;
-        this.qty = plan.qty;
+        this.qty = plan.qty();
         this.fulfillmentNetworkSKU = plan.selling.fnSku;
     }
 
