@@ -192,10 +192,12 @@ public class ShipPlan extends GenericModel {
     }
 
     public void valid() {
-        Validation.required("状态", this.state);
-        Validation.required("出货数量", this.qty);
-        Validation.required("预计出货时间", this.planShipDate);
-        this.stockObj.valid();
+        Validation.required("SKU", this.product);
+        Validation.required("Sellinig ID", this.selling);
+        Validation.required("仓库", this.whouse);
+        Validation.required("预计运输时间", this.planShipDate);
+        Validation.required("计划出库数量", this.planQty);
+        Validation.required("运输方式", this.shipType);
     }
 
     public boolean exist() {
