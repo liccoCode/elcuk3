@@ -74,6 +74,8 @@
                 #{power.ck "reportdownloads"}
                   <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
                 #{/power.ck}
+
+              <li><a href="@{ShipPlans.index()}">出货计划</a></li>
             </ul>
           </li>
         #{/power.ck}
@@ -146,7 +148,7 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="@{ShipItems.index()}">快递运输</a></li>
+              <li><a href="@{ShipItems.index()}">运输项</a></li>
                 #{power.ck "shipments.index"}
                   <li><a href="@{Shipments.index()}">运输单</a></li>
                 #{/power.ck}
