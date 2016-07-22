@@ -20,13 +20,14 @@
 
   <th><span style="color:red">*</span>产品名称</th>
   <td>
-    <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" required>
+    <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" class="input-block-level"
+           required>
   </td>
 </tr>
 <tr>
   <th><span style="color:red">*</span>去往仓库</th>
   <td>
-    <select name="plan.whouse.id" id="warehouse_select">
+    <select name="plan.whouse.id">
       <option value="">请选择</option>
     #{list items:whouses, as:'w'}
       <option value="${w.id}" ${w.id == plan.whouse?.id ? 'selected' : ''}>${w.name}</option>
@@ -63,7 +64,7 @@
 <tr>
   <td colspan="4">
     <h4>Memo</h4>
-    <textarea rows="8" class="span12" name="plan.memo" id="memo">${plan.memo.raw()}</textarea>
+    <textarea rows="8" class="input-block-level" name="plan.memo" id="memo">${plan.memo.raw()}</textarea>
   </td>
 </tr>
 <tr>
