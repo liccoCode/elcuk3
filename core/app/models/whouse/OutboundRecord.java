@@ -264,13 +264,13 @@ public class OutboundRecord extends Model {
         this.state = S.Pending;
         this.type = T.Normal;
         this.origin = O.Normal;
-        this.handler = User.current();
     }
 
     public OutboundRecord(T type, O origin) {
         this();
         this.origin = origin;
         this.type = type;
+        this.handler = User.current();
     }
 
     public OutboundRecord(ShipPlan plan) {
