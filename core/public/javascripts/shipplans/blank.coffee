@@ -54,3 +54,4 @@ $ ->
 
   $(document).ready ->
     initTypeahead()
+    $("[name='plan.whouse.id']").trigger("change")
