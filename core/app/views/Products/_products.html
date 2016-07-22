@@ -4,16 +4,16 @@
 #{else }
 <table class="table table-condensed table-bordered">
   <tr>
-    <th>SKU</th>
-    <th>Family</th>
-    <th>Name</th>
-    <th>最近采购价格</th>
-    <th>最近采购供应商</th>
-    <th>产品状态</th>
-    <th>销售级别</th>
-    <th>上市时间</th>
-    <th>退市时间</th>
-    <th>Action</th>
+    <th width="150px;">SKU</th>
+    <th width="100px;">Family</th>
+    <th width="220px;">Name</th>
+    <th width="120px;">最近采购价格</th>
+    <th width="140px;">最近采购供应商</th>
+    <th width="120px;">产品状态</th>
+    <th width="120px;">销售级别</th>
+    <th width="120px;">上市时间</th>
+    <th width="120px;">退市时间</th>
+    <th width="200px;">Action</th>
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
@@ -41,7 +41,7 @@
         </td>
         <td>#{time_tooltip time:prod.marketTime/}</td>
         <td>#{time_tooltip time:prod.delistingTime/}</td>
-        <td style="width:140px">
+        <td>
           <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
             <i class="icon-refresh"></i>同步
           </a>
