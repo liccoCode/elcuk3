@@ -2,8 +2,10 @@ package models.whouse;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.Reflects;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.Selling;
@@ -34,7 +36,7 @@ import java.util.*;
  * Time: 2:55 PM
  */
 @Entity
-public class ShipPlan extends Model {
+public class ShipPlan extends Model implements ElcukRecord.Log {
     /**
      * Selling
      */
@@ -82,6 +84,13 @@ public class ShipPlan extends Model {
     @Expose
     @Enumerated(EnumType.STRING)
     public S state;
+
+    @Override
+    public String to_log() {
+        return String.format("[sid:%s] [仓库:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
+                this.selling.sellingId, this.whouse.name(), this.planQty,
+                Dates.date2Date(this.planArrivDate), this.shipType);
+    }
 
     public enum S {
         Pending {
@@ -332,4 +341,25 @@ public class ShipPlan extends Model {
         return logs;
     }
 
+    /**
+     * 删除出货计划
+     * TODO: 校验是否还有其他关联数据需要检查和删除
+     */
+    public void remove() {
+        if(this.isLock()) {
+            Validation.addError("", String.format("只允许 %s, %s 状态的出货计划进行取消", S.Pending.label()));
+            return;
+        }
+        // 删除 FBA
+        FBAShipment fba = this.fba;
+        if(fba != null) {
+            fba.plans.remove(this);
+            fba.removeFBAShipment();
+        }
+        // 删除运输相关
+        for(ShipItem item : this.shipItems) {
+            item.delete();
+        }
+        this.delete();
+    }
 }

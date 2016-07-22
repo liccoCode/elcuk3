@@ -9,6 +9,7 @@ import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -69,6 +70,16 @@ public class ShipPlans extends Controller {
             render("ShipPlans/blank.html", plan);
         }
         plan.save();
+        if(StringUtils.isNotBlank(shipmentId)) {
+            Shipment.<Shipment>findById(shipmentId).addToShip(plan);
+        }
+        if(Validation.hasErrors()) {
+            plan.remove();
+            render("ShipPlans/blank.html", plan);
+        }
+        new ElcukRecord(Messages.get("shipplan.save"),
+                Messages.get("action.base", plan.to_log()),
+                plan.id + "").save();
         flash.success("创建成功!");
         redirect("/ShipPlans/index");
     }
