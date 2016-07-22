@@ -973,7 +973,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public int inboundingQty() {
         int inboundingQty = 0;
         for(ShipItem shipItm : this.shipItems) {
-            inboundingQty += shipItm.recivedQty;
+            inboundingQty += shipItm.adjustQty;
         }
         return inboundingQty;
     }
