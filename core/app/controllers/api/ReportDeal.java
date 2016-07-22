@@ -91,7 +91,7 @@ public class ReportDeal extends Controller {
     }
 
     /**
-     *  Osticket调用,返回订单状态
+     * Osticket调用,返回订单状态
      */
     public static void returnOrderStatus() {
         String orderId = request.params.get("orderId");
@@ -115,60 +115,65 @@ public class ReportDeal extends Controller {
         Orderr ord = Orderr.findById(orderId);
         if(ord == null) renderJSON(new Ret(false, "this order is not exist"));
 
-        if(flag==null || !flag.equals("1")) {
+        if(flag == null || !flag.equals("1")) {
             if(!(ord.state.equals(Orderr.S.SHIPPED) || ord.state.equals(Orderr.S.PAYMENT)))
                 renderJSON(new Ret(true, "this order state is " + ord.state.name()));
             if(StringUtils.isNotBlank(ord.invoiceState) && ord.invoiceState.equals("yes"))
                 renderJSON(new Ret(true, "this order is send before!"));
         }
 
-        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
-        OrderInvoice invoice = OrderInvoice.findById(orderId);
-        if(invoice == null) {
-            invoice = ord.createOrderInvoice();
-            invoice.save();
+        try {
+            OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+            OrderInvoice invoice = OrderInvoice.findById(orderId);
+            if(invoice == null) {
+                invoice = ord.createOrderInvoice();
+                invoice.save();
+            }
+            invoice.setprice();
+
+            final PDF.Options options = new PDF.Options();
+            options.pageSize = IHtmlToPdfTransformer.A3P;
+
+            F.T3<Float, Float, Float> amt = ord.amount();
+            Float totalamount = amt._1;
+            Float notaxamount = 0f;
+            if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
+                notaxamount = -1 * totalamount;
+            } else
+                notaxamount = invoice.notaxamount;
+            Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4)
+                    .floatValue();
+            Date returndate = ord.returndate();
+
+            String path = Constant.INVOICE_PATH + "/" + new DateTime(new Date()).getMonthOfYear() + "sent";
+            File folder = new File(path);
+            if(!folder.exists()) folder.mkdir();
+
+            String pdfName = invoiceformat.filename + orderId + ".pdf";
+            String template = "Orders/invoiceTaxNumberPDF.html";
+            Map<String, Object> args = new HashMap<>();
+            args.put("invoiceformat", invoiceformat);
+            args.put("ord", ord);
+            args.put("invoice", invoice);
+            args.put("totalamount", totalamount);
+            args.put("notaxamount", notaxamount);
+            args.put("tax", tax);
+            args.put("returndate", returndate);
+            args.put("taxNumber", taxNumber);
+            PDFs.templateAsPDF(folder, pdfName, template, options, args);
+
+            /**订单状态改为已发送**/
+            ord.invoiceState = "yes";
+            ord.save();
+            if(StringUtils.isNotEmpty(taxNumber)) {
+                invoice.invoiceto += "," + taxNumber;
+                invoice.save();
+            }
+            File file = new File(folder + "/" + pdfName);
+            renderBinary(file);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, e.getMessage()));
         }
-        invoice.setprice();
-
-        final PDF.Options options = new PDF.Options();
-        options.pageSize = IHtmlToPdfTransformer.A3P;
-
-        F.T3<Float, Float, Float> amt = ord.amount();
-        Float totalamount = amt._1;
-        Float notaxamount = 0f;
-        if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
-            notaxamount = -1 * totalamount;
-        } else
-            notaxamount = invoice.notaxamount;
-        Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
-        Date returndate = ord.returndate();
-
-        String path = Constant.INVOICE_PATH + "/" + new DateTime(new Date()).getMonthOfYear() + "sent";
-        File folder = new File(path);
-        if(!folder.exists()) folder.mkdir();
-
-        String pdfName = invoiceformat.filename + orderId + ".pdf";
-        String template = "Orders/invoiceTaxNumberPDF.html";
-        Map<String, Object> args = new HashMap<>();
-        args.put("invoiceformat", invoiceformat);
-        args.put("ord", ord);
-        args.put("invoice", invoice);
-        args.put("totalamount", totalamount);
-        args.put("notaxamount", notaxamount);
-        args.put("tax", tax);
-        args.put("returndate", returndate);
-        args.put("taxNumber", taxNumber);
-        PDFs.templateAsPDF(folder, pdfName, template, options, args);
-
-        /**订单状态改为已发送**/
-        ord.invoiceState = "yes";
-        ord.save();
-        if(StringUtils.isNotEmpty(taxNumber)) {
-            invoice.invoiceto += "," + taxNumber;
-            invoice.save();
-        }
-        File file = new File(folder + "/" + pdfName);
-        renderBinary(file);
     }
 
     /**
