@@ -26,7 +26,7 @@
 
         <select name="p.state" class="inline" style="width:82px;">
           <option value="">状态</option>
-        #{list items:models.procure.ShipPlan.S.values(), as:'state'}
+        #{list items:models.whouse.ShipPlan.S.values(), as:'state'}
           <option ${state == p.state ? 'selected' : ''} value="${state.name()}">${state.label()}</option>
         #{/list}
         </select>
@@ -57,7 +57,8 @@
           <a href="@{ShipPlans.blank()}" target="_blank" class="btn btn-success">新建</a>
           <a href="javascript:void(0)" id="download_excel" class="btn btn-info">导出</a>
           <a href="javascript:void(0)" class="btn btn-warning" id="batch_create_fba_btn">创建 FBA</a>
-          <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+          <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " placement="bottom"
+             id="downloadFBAZIP">
             下载 FBA
           </a>
         </div>
