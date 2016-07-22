@@ -1,8 +1,8 @@
 $ ->
   # Ajax 加载 Shipment
   $('#new_shipplan, #update_shipplan').on('change', "[name='plan.shipType'],[name='plan.whouse.id']", ->
-    whouseId = $("[name='unit.whouse.id']").val()
-    shipType = $("[name='unit.shipType']:checked").val()
+    whouseId = $("[name='plan.whouse.id']").val()
+    shipType = $("[name='plan.shipType']:checked").val()
     shipment = $("#shipments")
     return unless (whouseId && shipType && shipment.size() > 0)
 
