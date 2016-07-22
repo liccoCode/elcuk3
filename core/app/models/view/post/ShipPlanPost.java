@@ -4,6 +4,7 @@ import helper.Dates;
 import models.procure.Shipment;
 import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -22,9 +23,9 @@ public class ShipPlanPost extends Post<ShipPlan> {
 
     static {
         DATE_TYPES = new ArrayList<>();
-        DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<>("planShipDate", "预计运输时间"));
-        DATE_TYPES.add(new F.T2<>("planArrivDate", "预计到达时间"));
+        DATE_TYPES.add(new F.T2<>("sp.createDate", "创建时间"));
+        DATE_TYPES.add(new F.T2<>("sp.planShipDate", "预计运输时间"));
+        DATE_TYPES.add(new F.T2<>("sp.planArrivDate", "预计到达时间"));
     }
 
     public Date from;
@@ -54,19 +55,28 @@ public class ShipPlanPost extends Post<ShipPlan> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ShipPlan.count(params._1, params._2.toArray());
+        return (long) ShipPlan.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("1=1");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT sp FROM ShipPlan sp")
+                .append(" LEFT JOIN sp.selling s")
+                .append(" LEFT JOIN sp.product pd")
+                .append(" LEFT JOIN sp.fba f")
+                .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND (id LIKE ? OR selling.sellingId LIKE ? OR product.sku LIKE ? OR fba.shipmentId LIKE ? OR " +
-                    "product.abbreviation LIKE ?)");
+            sbd.append(" AND(");
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append(" sp.id=?");
+                params.add((NumberUtils.toLong(this.search)));
+            }
+            sbd.append(" OR s.sellingId LIKE ? OR pd.sku LIKE ? OR f.shipmentId LIKE ?")
+                    .append(" OR pd.abbreviation LIKE ?)");
             String word = this.word();
-            for(int i = 0; i <= 4; i++) params.add(word);
+            for(int i = 0; i <= 3; i++) params.add(word);
         }
 
         if(StringUtils.isNotBlank(this.dateType)) {
@@ -77,21 +87,20 @@ public class ShipPlanPost extends Post<ShipPlan> {
         }
 
         if(this.state != null) {
-            sbd.append(" AND state=?");
+            sbd.append(" AND sp.state=?");
             params.add(this.state.name());
         }
 
         if(this.whouseId > 0) {
-            sbd.append(" AND whouse.id=?");
+            sbd.append(" AND sp.whouse.id=?");
             params.add(this.whouseId);
         }
 
         if(this.shipType != null) {
-            sbd.append(" AND shipType=? ");
+            sbd.append(" AND sp.shipType=? ");
             params.add(this.shipType.name());
         }
-
-        sbd.append(" ORDER BY createDate DESC");
+        sbd.append(" ORDER BY sp.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
 }
