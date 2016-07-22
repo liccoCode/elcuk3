@@ -14,11 +14,10 @@ import models.procure.Shipment;
 import models.product.Product;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
-import play.db.jpa.GenericModel;
+import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.*;
@@ -35,12 +34,7 @@ import java.util.*;
  * Time: 2:55 PM
  */
 @Entity
-public class ShipPlan extends GenericModel {
-    @Id
-    @Column(length = 30)
-    @Expose
-    public String id;
-
+public class ShipPlan extends Model {
     /**
      * Selling
      */
@@ -160,7 +154,6 @@ public class ShipPlan extends GenericModel {
     public ShipPlan() {
         this.createDate = new Date();
         this.state = S.Pending;
-        this.creator = User.current();
     }
 
     public ShipPlan(String sid) {
@@ -169,6 +162,7 @@ public class ShipPlan extends GenericModel {
             this.selling = Selling.findById(sid);
             this.product = this.selling.listing.product;
         }
+        this.creator = User.current();
     }
 
     public ShipPlan(ProcureUnit unit) {
@@ -182,6 +176,7 @@ public class ShipPlan extends GenericModel {
         this.product = unit.product;
         this.whouse = unit.whouse;
         this.unit = unit;
+        this.creator = User.current();
     }
 
     public ShipPlan triggerRecord(String targetId) {
@@ -206,24 +201,6 @@ public class ShipPlan extends GenericModel {
 
     public boolean isLock() {
         return this.state != S.Pending;
-    }
-
-    public ShipPlan doCreate() {
-        //为了避免出现重复的 ID, 加上类锁
-        synchronized(ShipPlan.class) {
-            this.id = ShipPlan.id();
-            return this.save();
-        }
-    }
-
-    private static String id() {
-        DateTime dt = DateTime.now();
-        DateTime nextMonth = dt.plusMonths(1);
-        String count = ShipPlan.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
-        ) + "";
-        return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
     public static void postFbaShipments(List<Long> planIds) {

@@ -27,11 +27,15 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipPlans extends Controller {
     @Before(only = {"index", "blank", "create"})
-    public static void beforeArgs() {
-        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
+    public static void beforeAllLogs() {
         renderArgs.put("logs", ElcukRecord.records(
                 Arrays.asList("shipplan.save", "shipplan.update", "shipplan.remove", "shipplan.delivery"),
                 50));
+    }
+
+    @Before(only = {"index", "blank", "create", "blank", "show", "update"})
+    public static void beforeArgs() {
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
     }
 
     @Before(only = {"show", "update"})
@@ -64,12 +68,12 @@ public class ShipPlans extends Controller {
         if(Validation.hasErrors()) {
             render("ShipPlans/blank.html", plan);
         }
-        plan.doCreate();
+        plan.save();
         flash.success("创建成功!");
-        redirect("ShipPlans/index");
+        redirect("/ShipPlans/index");
     }
 
-    public static void show(String id) {
+    public static void show(Long id) {
         ShipPlan plan = ShipPlan.findById(id);
         render(plan);
     }
@@ -82,7 +86,7 @@ public class ShipPlans extends Controller {
             render("ShipPlans/show.html", plan);
         }
         flash.success("成功修改采购计划!", id);
-        redirect("ShipPlan/index");
+        redirect("/ShipPlan/index");
     }
 
     /**
