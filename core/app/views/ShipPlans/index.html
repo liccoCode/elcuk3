@@ -136,6 +136,8 @@
             </dl>
           </td>
           <td>${plan.shipType.label()}</td>
+          <td>#{time_tooltip time:plan.createDate/}</td>
+          <td>${plan.creator?.username}</td>
         </tr>
       #{/list}
       </table>
