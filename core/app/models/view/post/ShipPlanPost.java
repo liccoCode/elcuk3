@@ -30,7 +30,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
 
     public Date from;
     public Date to;
-    public String dateType = "planShipDate";
+    public String dateType = "sp.planShipDate";
     public ShipPlan.S state;
     public long whouseId;
     public Shipment.T shipType;
@@ -39,7 +39,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
     public ShipPlanPost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.dateType = "planShipDate";
+        this.dateType = "sp.planShipDate";
         this.perSize = 50;
     }
 

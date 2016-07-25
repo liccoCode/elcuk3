@@ -28,7 +28,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipPlans extends Controller {
     @Before(only = {"index", "blank", "create"})
-    public static void beforeAllLogs() {
+    public static void beforeIndexLogs() {
         renderArgs.put("logs", ElcukRecord.records(
                 Arrays.asList("shipplan.save", "shipplan.update", "shipplan.remove", "shipplan.delivery"),
                 50));
@@ -40,7 +40,7 @@ public class ShipPlans extends Controller {
     }
 
     @Before(only = {"show", "update"})
-    public static void beforeLogs() {
+    public static void beforeUpdateLogs() {
         String id = request.params.get("id");
         if(StringUtils.isNotBlank(id)) {
             renderArgs.put("logs", ElcukRecord.records(id));
