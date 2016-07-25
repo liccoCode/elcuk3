@@ -17,6 +17,8 @@ $ ->
     $input = $(@)
     # 确保用户填写的是大于零的数字
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
+  ).on("click", "#download_excel", (r) ->
+    window.open('/Excels/exportShipPlans?' + $("#search_Form").serialize(), "_blank")
   )
 
   getCheckedIds = () ->

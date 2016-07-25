@@ -103,4 +103,9 @@ public class ShipPlanPost extends Post<ShipPlan> {
         sbd.append(" ORDER BY sp.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
+
+    public List<ShipPlan> queryForExcel() {
+        F.T2<String, List<Object>> params = params();
+        return ShipPlan.find(params._1, params._2.toArray()).fetch();
+    }
 }
