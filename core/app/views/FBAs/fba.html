@@ -48,7 +48,7 @@
   <tr>
     <td align="center" colspan="3">
       <!-- 需要生成的 Bar Code -->
-      #{set shipmentIdStr: shipmentId + boxNumber/}
+      #{set shipmentIdStr: shipmentId + boxNumberStr/}
       <img src="http://127.0.0.1:9000/code128/${shipmentIdStr}" width="260"
            height="72" border="0" style="padding-left:30px">
       <!-- 测试用  -->

@@ -4,6 +4,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.Role;
 import models.User;
 import models.activiti.ActivitiDefinition;
@@ -1349,42 +1350,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
      *
      * @param folder 指定PDF文件，生成的文件目录
+     * @deprecated
      */
     public void fbaAsPDF(File folder, Long boxNumber) throws Exception {
-        if(fba != null) {
-            // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
-            String namePDF = String.format("[%s][%s][%s][%s][%s]",
-                    this.selling.market.countryName(),
-                    this.shipType.label(),
-                    this.attrs.planQty,
-                    this.product.abbreviation,
-                    this.id
-            );
-
-            Map<String, Object> map = new HashMap<String, Object>();
-            String shipmentid = fba.shipmentId;
-            shipmentid = shipmentid.trim() + "U";
-
-            map.put("shipmentId", shipmentid);
-            map.put("shipFrom", Account.address(this.fba.account.type));
-            map.put("fba", this.fba);
-            map.put("procureUnit", this);
-            map.put("boxNumber", boxNumber);
-            if(this.shipType == Shipment.T.EXPRESS) {
-                map.put("isexpress", "1");
-            } else {
-                map.put("isexpress", "0");
-            }
-
-            PDF.Options options = new PDF.Options();
-            //只设置 width height    margin 为零
-            options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
-
-            //生成箱外卖 PDF
-            PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
+        ShipPlan plan = this.shipPlan();
+        if(plan != null) {
+            plan.fbaAsPDF(folder, boxNumber);
         } else {
-            String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
-            FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
+            if(fba != null) {
+                // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
+                String namePDF = String.format("[%s][%s][%s][%s][%s]",
+                        this.selling.market.countryName(),
+                        this.shipType.label(),
+                        this.attrs.planQty,
+                        this.product.abbreviation,
+                        this.id
+                );
+                Map<String, Object> map = this.fbaPDFParams();
+                map.put("boxNumber", boxNumber);
+                map.put("boxNumberStr", Webs.hundredNumber(boxNumber));
+                PDF.Options options = new PDF.Options();
+                //只设置 width height    margin 为零
+                options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+                //生成箱外卖 PDF
+                PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
+            } else {
+                String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
+                FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
+            }
         }
     }
 
@@ -1805,5 +1798,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public ShipPlan shipPlan() {
         return ShipPlan.find("unit.id=?", this.id).first();
+    }
+
+    public Map<String, Object> fbaPDFParams() {
+        return GTs.MapBuilder.map("shipmentId",
+                (Object) String.format("%s%s", fba.shipmentId.trim(), "U"))
+                .put("shipFrom", Account.address(this.fba.account.type))
+                .put("fba", this.fba)
+                .put("deliveryDate", new SimpleDateFormat("yyyy年MM月dd日").format(
+                        this.attrs.deliveryDate == null ? this.attrs.planDeliveryDate : this.attrs.deliveryDate)
+                ).put("shipType", this.shipType)
+                .put("isExpress", this.shipType == Shipment.T.EXPRESS)
+                .put("product", this.product)
+                .put("selling", this.selling)
+                .put("addressname", OperatorConfig.getVal("addressname"))
+                .put("brandname", OperatorConfig.getVal("brandname"))
+                .put("shipmentdetaillabel", OperatorConfig.getVal("shipmentdetaillabel"))
+                .put("companyname", OperatorConfig.getVal("companyname"))
+                .put("cooperator", this.cooperator)
+                .build();
     }
 }

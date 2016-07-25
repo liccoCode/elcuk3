@@ -2,12 +2,12 @@ package models.whouse;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import helper.Dates;
-import helper.Reflects;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.Account;
 import models.market.Selling;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
@@ -15,13 +15,18 @@ import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Product;
 import mws.FBA;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
+import play.modules.pdf.PDF;
 
 import javax.persistence.*;
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -361,5 +366,57 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             item.delete();
         }
         this.delete();
+    }
+
+    /**
+     * 指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
+     *
+     * @param folder
+     * @param boxNumber
+     */
+    public void fbaAsPDF(File folder, Long boxNumber) throws Exception {
+        if(this.fba != null) {
+            // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
+            String namePDF = String.format("[%s][%s][%s][%s][%s]",
+                    this.selling.market.countryName(),
+                    this.shipType.label(),
+                    this.planQty,
+                    this.product.abbreviation,
+                    this.id
+            );
+            Map map = this.fbaPDFParams();
+            map.put("boxNumber", boxNumber);
+            map.put("boxNumberStr", Webs.hundredNumber(boxNumber));
+
+            PDF.Options options = new PDF.Options();
+            options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+            PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
+        } else {
+            String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
+            FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
+        }
+    }
+
+    /**
+     * 输出生成 PDF 时所需要的参数
+     *
+     * @return
+     */
+    public Map<String, Object> fbaPDFParams() {
+        GTs.MapBuilder mapBuilder = GTs.MapBuilder.map("shipmentId",
+                (Object) String.format("%s%s", fba.shipmentId.trim(), "U"))
+                .put("shipFrom", Account.address(this.fba.account.type))
+                .put("fba", this.fba)
+                .put("deliveryDate", new SimpleDateFormat("yyyy年MM月dd日").format(this.planShipDate))
+                .put("shipType", this.shipType)
+                .put("isExpress", this.shipType == Shipment.T.EXPRESS)
+                .put("product", this.product)
+                .put("selling", this.selling)
+                .put("addressName", OperatorConfig.getVal("addressname"))
+                .put("brandName", OperatorConfig.getVal("brandname"))
+                .put("shipmentDetailLabel", OperatorConfig.getVal("shipmentdetaillabel"))
+                .put("companyName", OperatorConfig.getVal("companyname"));
+        if(this.unit != null) mapBuilder.put("cooperator", this.unit.cooperator);
+        return mapBuilder.build();
     }
 }

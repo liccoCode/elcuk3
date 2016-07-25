@@ -1,19 +1,25 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Constant;
+import helper.Dates;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Shipment;
 import models.view.post.ShipPlanPost;
 import models.whouse.ShipPlan;
 import models.whouse.Whouse;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
+import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -101,6 +107,8 @@ public class ShipPlans extends Controller {
     }
 
     /**
+     * 批量创建 FBA
+     *
      * @param p
      * @param pids
      * @param redirectTarget
@@ -113,5 +121,43 @@ public class ShipPlans extends Controller {
             redirect(redirectTarget);//如果需要参数请自行加到地址中去
         }
         index(p);
+    }
+
+    /**
+     * 批量下载 FBA zip
+     *
+     * @param pids
+     * @param boxNumbers
+     * @throws Exception
+     */
+    public static void downloadFBAZIP(List<Long> pids, List<Long> boxNumbers) throws Exception {
+        List<ShipPlan> plans = ShipPlan.find("id IN ?", SqlSelect.inlineParam(pids)).fetch();
+        if(plans == null || plans.isEmpty()) renderText("没有数据无法生成zip文件！");
+        if(pids.size() != boxNumbers.size()) renderText("出库计划 ID 与 箱数的 Size 不一致!");
+
+        synchronized(ShipPlans.class) {//加类锁
+            //创建FBA根目录，存放工厂FBA文件
+            File dirfile = new File(Constant.TMP, "FBA");
+            try {
+                Files.delete(dirfile);
+                dirfile.mkdir();
+                for(int i = 0; i < plans.size(); i++) {
+                    ShipPlan plan = plans.get(i);
+                    String name = plan.selling.sellingId;
+                    String date = Dates.date2Date(plan.planShipDate);
+                    File folder = new File(dirfile, String.format("%s-%s-FBA", date, name));
+                    folder.mkdir();
+                    //生成 PDF
+                    plan.fbaAsPDF(folder, boxNumbers.get(i));
+                }
+                FileUtils.writeStringToFile(new File(dirfile, "出货计划 ID.txt"),
+                        java.net.URLDecoder.decode(StringUtils.join(pids, "_"), "UTF-8"), "UTF-8");
+            } finally {
+                File zip = new File(Constant.TMP + "/FBA.zip");
+                Files.zip(dirfile, zip);
+                zip.deleteOnExit();
+                renderBinary(zip);
+            }
+        }
     }
 }
