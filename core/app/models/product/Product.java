@@ -435,8 +435,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @PrePersist
     @PreUpdate
     public void prePersist() {
-        this.upc = this.upc.trim();
-        this.upcJP = this.upcJP.trim();
+        if(StringUtils.isNotBlank(this.upc)) {
+            this.upc = this.upc.trim();
+        }
+        if(StringUtils.isNotBlank(this.upcJP)) {
+            this.upcJP = this.upcJP.trim();
+        }
     }
 
     /**

@@ -501,10 +501,10 @@ public class Orderr extends GenericModel {
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
                 itemamount = itemamount +
-                                new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new BigDecimal(item.quantity), 2, 4)
-                                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
-                                        .setScale(2, 4).floatValue();
+                        new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                                .divide(new BigDecimal(item.quantity), 2, 4)
+                                .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                .setScale(2, 4).floatValue();
             }
         }
 
@@ -671,6 +671,32 @@ public class Orderr extends GenericModel {
                 show += item.product.sku + ";";
             }
 
+        }
+        return show;
+    }
+
+    public String showPromotionIDs() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0) {
+            for(OrderItem item : items) {
+                if(StringUtils.isNotBlank(item.promotionIDs)) {
+                    show += item.promotionIDs + ";";
+                }
+            }
+        }
+        return show;
+    }
+
+    public String showDiscountPrice() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0) {
+            for(OrderItem item : items) {
+                if(item.discountPrice != null) {
+                    show += item.discountPrice + ";";
+                }
+            }
         }
         return show;
     }
