@@ -1437,21 +1437,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return this.purchaseSample == null ? 0 : this.purchaseSample;
     }
 
-    /**
-     * 将数字转换成对应的三位数的字符串
-     * <p/>
-     * 示例：1 => 001; 10 => 010
-     *
-     * @param number
-     * @return
-     */
-    public String numberToStr(Long number) {
-        int targetSize = 3;
-        int size = number.toString().length();
-        return StringUtils.repeat("0", (targetSize - size)) + number.toString();
-    }
-
-
     public String dateDesc() {
         if(this.stage == ProcureUnit.STAGE.CLOSE) {
             return "";
