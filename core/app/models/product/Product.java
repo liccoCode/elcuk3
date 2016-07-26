@@ -432,6 +432,13 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         }
     }
 
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        this.upc = this.upc.trim();
+        this.upcJP = this.upcJP.trim();
+    }
+
     /**
      * 创建一个全新的 Product
      */

@@ -158,6 +158,7 @@ public class User extends Model {
     @PrePersist
     @PreUpdate
     public void prePersist() {
+        this.username = this.username.trim();
         // 密码的加密操作在保存的时候进行; 在程序内部使用时为明文密码
         if(StringUtils.isNotBlank(this.password))
             this.passwordDigest = Crypto.encryptAES(this.password);

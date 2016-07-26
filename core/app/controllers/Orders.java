@@ -54,6 +54,7 @@ public class Orders extends Controller {
 
     public static void show(String id) {
         Orderr ord = Orderr.findById(id);
+        notFoundIfNull(ord, "未找到相关订单,请稍后再来查看 : )");
 
         if(ord.orderrate() != 0) {
             OrderInvoice invoice = OrderInvoice.findById(id);
