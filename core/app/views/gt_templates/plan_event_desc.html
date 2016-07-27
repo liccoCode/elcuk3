@@ -1,0 +1,98 @@
+<table class="table table-bordered table-condensed">
+  <tr>
+    <td>预计到达时间</td>
+    <td>
+    #{time_tooltip time: plan.planArrivDate /}
+      <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini pull-right">修改</a>
+    </td>
+  </tr>
+  <tr>
+    <td>预计运输时间</td>
+    <td>#{time_tooltip time: plan.planShipDate /}</td>
+  </tr>
+  <tr>
+    <td>实际运输时间</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: plan.shipItems, as:'shipItem'}
+        <li>
+            #{time_tooltip time: shipItem.shipDate/}
+          <a href="@{Shipments.show(shipItem.shipment.id)}" target="_blank">${shipItem.shipment.id}</a>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>计算完成时间</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: plan.shipItems, as:'shipItem'}
+        <li>
+            #{time_tooltip time: shipItem.shipment.predictArriveDate()/}
+          <a href="@{Shipments.show(shipItem.shipment.id)}" target="_blank">${shipItem.shipment.id}</a>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>运输方式</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: plan.shipItems, as:'shipItem'}
+        <li>
+          <abbr rel='tooltip' title='${shipItem.shipment.id}' style="color:${shipItem.shipment.type.rgb()}">
+          ${shipItem.shipment.type.label()}
+          </abbr>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>运输状态</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: plan.shipItems, as:'shipItem'}
+        <li>
+          <abbr rel='tooltip' title='${shipItem.shipment.id}' style="color:${shipItem.shipment.state.rgb()}">
+          ${shipItem.shipment.state.label()}
+          </abbr>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+#{if plan.fba}
+  <tr>
+      #{if plan.fba.records}
+        <td rel='popover' trigger='click' placement='bottom' content="${plan.fba.records()}" full-width='true'>
+          入库进度 <i class="icon-search"></i>
+        </td>
+      #{/if}
+      #{else }
+        <td>入库进度</td>
+      #{/else}
+    <td>
+      <ul class="unstyled">
+          #{list items: plan.shipItems, as:'shipItem'}
+            <li>
+              <a href="${plan.fba.fbaLink()}" target="_blank">${plan.fba.shipmentId}</a>
+              <abbr rel='tooltip' title='入库数量 / 运输数量'>
+                [${shipItem.recivedQty} / ${shipItem.qty}]
+              </abbr>
+            </li>
+          #{/list}
+      </ul>
+    </td>
+  </tr>
+#{/if}
+  <tr>
+    <td colspan="2">
+      备注<br>:
+    ${plan.memo.raw()}<br>
+    ${plan.dateDesc()}
+    </td>
+  </tr>
+</table>

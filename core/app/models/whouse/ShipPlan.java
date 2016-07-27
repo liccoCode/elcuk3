@@ -142,6 +142,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     public String sku;// 冗余 sku 字段
 
     @Expose
+    public String sid;// 冗余 sellingId 字段
+
+    @Expose
     @Lob
     public String memo;
 
@@ -187,6 +190,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         this.shipType = unit.shipType;
         this.selling = unit.selling;
         this.sku = unit.sku;
+        this.sid = unit.sid;
         this.product = unit.product;
         this.whouse = unit.whouse;
         this.unit = unit;
@@ -418,5 +422,21 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
                 .put("companyName", OperatorConfig.getVal("companyname"));
         if(this.unit != null) mapBuilder.put("cooperator", this.unit.cooperator);
         return mapBuilder.build();
+    }
+
+    public String dateDesc() {
+        List<Shipment> relateShipments = this.relateShipment();
+        if(relateShipments.size() > 0) {
+            Shipment shipment = relateShipments.get(0);
+            if(this.planArrivDate != null && shipment.dates.planArrivDate != null &&
+                    ((this.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) != 0)) {
+                return String.format("系统备注: 出货计划最新预计到库时间 %s, 比原预计到库日期 %s 差异 %s 天",
+                        this.planArrivDate,
+                        shipment.dates.planArrivDate,
+                        (this.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) / (24 * 60 * 60 * 1000)
+                );
+            }
+        }
+        return "";
     }
 }
