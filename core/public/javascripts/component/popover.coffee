@@ -43,9 +43,18 @@ window.$ui =
     clipboard = new Clipboard('.clipboard')
     clipboard.on('success', (e) ->
       tip = $(e.trigger)
-      tip.data('placement', 'bottom').data('title', 'Asin Copied!').data('trigger', '')
-      tip.tooltip('show')
+      tip.tooltip(
+        container: 'body',
+        placement: 'bottom',
+        title: 'Asin Copied!',
+        trigger: 'manual'
+      ).tooltip('show')
+      setTimeout(->
+        tip.tooltip('hide')
+      , 300
+      )
     )
+
 
 # 初始化 popover, tooltip, dateinput
   init: ->
@@ -77,8 +86,7 @@ $(document).on('mouseover', '[rel=popover]', (event) ->
     @popover(params).popover('show')
     @data('popover').tip().css('max-width', '900px') if 'full-width' of params
   )
-).on('mouseleave', '.clipboard', (e) ->
-  $(@).tooltip('hide')
 )
+
 $ ->
   window.$ui.init()
