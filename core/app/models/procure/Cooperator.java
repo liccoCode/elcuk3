@@ -64,8 +64,7 @@ public class Cooperator extends Model {
      * 只有 SUPPLIER 会使用到此字段, 表示这个 SUPPLIER 可以生产的 Item.
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    public List<CooperItem> cooperItems = new ArrayList<CooperItem>();
+    public List<CooperItem> cooperItems = new ArrayList<>();
 
     /**
      * 向这个供应商交易的采购单.
