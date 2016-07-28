@@ -347,6 +347,7 @@ public class OutboundRecord extends Model {
         } else {
             this.save();
             this.outboundProcureUnit();
+            this.syncQtyToShipPlan();
             new StockRecord(this).doCreate();
             return true;
         }
@@ -531,6 +532,7 @@ public class OutboundRecord extends Model {
     public void syncQtyToShipPlan() {
         if(this.shipPlan != null) {
             ShipPlan plan = this.shipPlan;
+            plan.state = ShipPlan.S.Confirmd;
             plan.qty = this.qty;
             plan.save();
         }
