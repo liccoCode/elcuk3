@@ -1165,9 +1165,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
         float weight = 0f;
         for(ShipItem itm : this.items) {
-            Float product_weight = itm.unit.product.weight;
-            if(product_weight == null) continue;
-            weight += itm.qty * product_weight;
+            Float productWeight = 0f;
+            if(itm.unit != null) {
+                productWeight = itm.unit.product.weight;
+            } else {
+                productWeight = itm.plan.product.weight;
+            }
+            if(productWeight != null) weight += itm.qty * productWeight;
         }
         return weight;
     }
