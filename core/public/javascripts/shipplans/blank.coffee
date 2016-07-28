@@ -1,5 +1,5 @@
 $ ->
-  # Ajax 加载 Shipment
+# Ajax 加载 Shipment
   $('#new_shipplan, #update_shipplan').on('change', "[name='plan.shipType'],[name='plan.whouse.id']", ->
     whouseId = $("[name='plan.whouse.id']").val()
     shipType = $("[name='plan.shipType']:checked").val()
@@ -45,6 +45,7 @@ $ ->
     })
 
   getStockBySku = (sku) ->
+    return if _.isEmpty(sku)
     $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU"})
 
   getProductNmae = (sku) ->
@@ -54,4 +55,5 @@ $ ->
 
   $(document).ready ->
     initTypeahead()
+    getStockBySku($("input[name='plan.product.sku']").val())
     $("[name='plan.whouse.id']").trigger("change")
