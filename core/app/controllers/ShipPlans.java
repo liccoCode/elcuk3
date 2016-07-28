@@ -5,6 +5,7 @@ import helper.Constant;
 import helper.Dates;
 import models.ElcukRecord;
 import models.User;
+import models.market.Selling;
 import models.procure.Shipment;
 import models.view.post.ShipPlanPost;
 import models.whouse.ShipPlan;
@@ -40,7 +41,7 @@ public class ShipPlans extends Controller {
                 50));
     }
 
-    @Before(only = {"index", "blank", "create", "blank", "show", "update"})
+    @Before(only = {"index", "create", "show", "update"})
     public static void beforeArgs() {
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
     }
@@ -60,8 +61,17 @@ public class ShipPlans extends Controller {
     }
 
     public static void blank(String sid) {
-        ShipPlan plan = new ShipPlan(sid);
-        render(plan);
+        Selling selling = Selling.findById(sid);
+        ShipPlan plan = null;
+        List<Whouse> whouses = null;
+        if(selling != null) {
+            plan = new ShipPlan(selling);
+            whouses = Whouse.findByAccount(plan.selling.account);
+        } else {
+            plan = new ShipPlan();
+            whouses = Whouse.findByType(Whouse.T.FBA);
+        }
+        render(plan, whouses);
     }
 
     public static void create(ShipPlan plan, String shipmentId) {

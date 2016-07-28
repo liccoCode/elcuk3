@@ -173,12 +173,10 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         this.state = S.Pending;
     }
 
-    public ShipPlan(String sid) {
+    public ShipPlan(Selling selling) {
         this();
-        if(StringUtils.isNotBlank(sid)) {
-            this.selling = Selling.findById(sid);
-            this.product = this.selling.listing.product;
-        }
+        this.selling = selling;
+        this.product = this.selling.listing.product;
         this.creator = User.current();
     }
 

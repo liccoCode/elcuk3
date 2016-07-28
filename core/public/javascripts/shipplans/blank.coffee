@@ -15,7 +15,11 @@ $ ->
         shipment.html(html)
         LoadMask.unmask()
       )
+  ).on('change', "[name='plan.product.sku'], [name='plan.whouse.id']", (e) ->
+    loadStockDetail()
   )
+  $("[name='plan.planShipDate']").change ->
+    loadStockDetail()
 
   $('#shipments').on('change', '[name=shipmentId]', (e) ->
     LoadMask.mask()
@@ -38,7 +42,7 @@ $ ->
         )
       updater: (item) ->
         sku = item.split(',')[0]
-        $("input[name='plan.product.sku']").attr("readonly", true).val(sku)
+        $("input[name='plan.product.sku']").attr("readonly", true).val(sku).trigger('change')
         getStockBySku(sku)
         getProductNmae(sku)
         item
@@ -52,8 +56,19 @@ $ ->
     $.post('/products/findProductName', sku: sku, (r) ->
       $("input[name='plan.product.abbreviation']").val(r.name)
     )
+  loadStockDetail = ->
+    sku = $("[name='plan.product.sku']").val()
+    whouseId = $("[name = 'plan.whouse.id']").val()
+    planShipDate = $("[name = 'plan.planShipDate']").val()
+    return if _.isEmpty(sku) || _.isEmpty(whouseId) || _.isEmpty(planShipDate)
+    $.get('/whouseitems/deatils', {sku: sku, whouseId: whouseId, planShipDate: planShipDate})
+    .done((r) ->
+      stockStr = ""
+      for stock in r
+        stockStr += "#{stock.name}: #{stock.qty}"
+      $("#stockDeatil").html(stockStr)
+    )
 
   $(document).ready ->
     initTypeahead()
     getStockBySku($("input[name='plan.product.sku']").val())
-    $("[name='plan.whouse.id']").trigger("change")

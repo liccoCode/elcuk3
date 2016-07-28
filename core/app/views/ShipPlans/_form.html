@@ -10,13 +10,13 @@
 <tr>
   <th><span style="color:red">*</span>SKU</th>
   <td>
-    <input type="text" value="${plan.product?.sku}" name="plan.product.sku" required>
+    <input type="text" value="${plan.product?.sku}" name="plan.product.sku" required readonly>
   </td>
 
   <th><span style="color:red">*</span>产品名称</th>
   <td>
     <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" class="input-block-level"
-           required>
+           required readonly>
   </td>
 </tr>
 <tr>
@@ -44,6 +44,7 @@
   <th><span style="color:red">*</span>计划出库数量</th>
   <td>
     <input type="text" class="input-mini" value="${plan.planQty}" name="plan.planQty" id="planQty" required>
+    <span id="stockDeatil"></span>
   </td>
 </tr>
 <tr>
