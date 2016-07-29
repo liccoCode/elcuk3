@@ -10,12 +10,10 @@ import models.embedded.ERecordBuilder;
 import models.procure.*;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import query.PaymentUnitQuery;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -431,7 +429,7 @@ public class PaymentUnit extends Model {
 
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
-                Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update"));
+                Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update"), 50);
     }
 
     /**

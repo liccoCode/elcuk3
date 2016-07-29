@@ -1,11 +1,14 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.InboundShipmentItem;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import models.whouse.ShipPlan;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -22,7 +25,7 @@ import java.util.*;
  * Time: 4:27 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class FBAShipment extends Model {
 
     public enum S {
@@ -133,7 +136,10 @@ public class FBAShipment extends Model {
     public String shipmentId;
 
     @OneToMany(mappedBy = "fba")
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
+
+    @OneToMany(mappedBy = "fba")
+    public List<ShipPlan> plans = new ArrayList<>();
 
     @Lob
     public String records = "";
@@ -371,4 +377,73 @@ public class FBAShipment extends Model {
         return FBAShipment.find(SqlSelect.whereIn("shipmentId", shipmentids)).fetch();
     }
 
+    /**
+     * 返回对应市场的 Marketplace ID
+     * <p>
+     * PS:
+     * 只支持一个采购计划(当前设计中不存在一个 FBAShipment 包含多个采购计划的情况, 如果以后有变化再更新)
+     *
+     * @return
+     */
+    public String marketplace() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        try {
+            return this.units.get(0).selling.market.amid().name();
+        } catch(NullPointerException e) {
+            return null;
+        }
+    }
+
+    public int qty() {
+        int qty = 0;
+        for(ProcureUnit unit : this.units) {
+            qty += unit.qty();
+        }
+        for(ShipPlan plan : this.plans) {
+            qty += plan.qty();
+        }
+        return qty;
+    }
+
+    public Set<Shipment> shipments() {
+        Set<Shipment> shipments = new HashSet<>();
+        for(ProcureUnit unit : this.units) {
+            for(ShipItem item : unit.shipItems) {
+                if(item.shipment == null) continue;
+                shipments.add(item.shipment);
+            }
+        }
+        for(ShipPlan plan : this.plans) {
+            for(ShipItem item : plan.shipItems) {
+                if(item.shipment == null) continue;
+                shipments.add(item.shipment);
+            }
+        }
+        return shipments;
+    }
+
+    public List<InboundShipmentItem> inboundShipmentItems() {
+        List<InboundShipmentItem> items = new ArrayList<>();
+        for(ProcureUnit unit : this.units) {
+            items.add(new InboundShipmentItem(
+                    null,
+                    FBA.fixHistoryMSKU(unit.selling.merchantSKU),
+                    null,
+                    unit.qty(),
+                    null,
+                    null,
+                    null));
+        }
+        for(ShipPlan plan : this.plans) {
+            items.add(new InboundShipmentItem(
+                    null,
+                    FBA.fixHistoryMSKU(plan.selling.merchantSKU),
+                    null,
+                    plan.qty(),
+                    null,
+                    null,
+                    null));
+        }
+        return items;
+    }
 }

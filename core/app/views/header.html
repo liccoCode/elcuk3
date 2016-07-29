@@ -26,9 +26,6 @@
                 #{power.ck "listings.index"}
                   <li><a href="@{Listings.index()}">Listing</a></li>
                 #{/power.ck}
-                #{power.ck "listings.trackedlistings"}
-                  <li><a href="@{Listings.trackedListings()}">Tracked Listing</a></li>
-                #{/power.ck}
                 #{power.ck "procures.index"}
                   <li><a href="@{ProcureUnits.indexForMarket()}">采购计划</a></li>
                 #{/power.ck}
@@ -53,9 +50,6 @@
                 #{power.ck "analyzes.trafficrate"}
                   <li><a href="@{Analyzes.trafficRate()}">Selling 流量转化率统计</a></li>
                 #{/power.ck}
-                #{power.ck "categoryinfos.show"}
-                  <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
-                #{/power.ck}
                 #{power.ck "profits.index"}
                   <li><a href="@{Profits.index()}">利润分析</a></li>
 
@@ -74,17 +68,8 @@
                 #{power.ck "reportdownloads"}
                   <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
                 #{/power.ck}
-            </ul>
-          </li>
-        #{/power.ck}
 
-        #{power.ck 'marketanalyze'}
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场分析<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li><a href="@{MarketAnalysis.channels()}">数据抓取任务</a></li>
-              <li><a href="@{MarketAnalysis.tags()}">属性</a></li>
-              <li><a href="@{MarketAnalysis.categories()}">自定义 Category</a></li>
+              <li><a href="@{ShipPlans.index()}">出货计划</a></li>
             </ul>
           </li>
         #{/power.ck}

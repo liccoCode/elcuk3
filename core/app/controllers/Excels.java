@@ -16,6 +16,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.ShipPlan;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -793,5 +794,20 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_FILENAME, "收货记录.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(records, dateFormat, p);
+    }
+
+    public static void exportShipPlans(ShipPlanPost p) {
+        List<ShipPlan> plans = p.queryForExcel();
+        if(plans == null || plans.size() == 0) {
+            renderText("没有数据无法生成Excel文件!");
+        } else {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("出货计划明细%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(plans, p);
+        }
     }
 }

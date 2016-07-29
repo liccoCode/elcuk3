@@ -1,5 +1,6 @@
 package models;
 
+import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -21,7 +22,7 @@ import javax.persistence.Entity;
  * @deprecated
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Jobex extends Model {
 
     public Jobex() {

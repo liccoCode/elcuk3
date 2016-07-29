@@ -3,7 +3,6 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.Webs;
 import models.market.Account;
-import models.market.M;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -23,7 +22,7 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 11/29/12
  * Time: 11:38 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class FBAs extends Controller {
 
     @Check("fbas.deploytoamazon")
@@ -60,11 +59,12 @@ public class FBAs extends Controller {
 
     /**
      * 更换FBA
+     *
      * @param procureUnitId
      */
     public static void changeFBA(Long procureUnitId) {
         ProcureUnit unit = ProcureUnit.findById(procureUnitId);
-        unit.fba.removeFBAShipment();
+        unit.removeFBAShipment();
         unit.postFbaShipment();
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

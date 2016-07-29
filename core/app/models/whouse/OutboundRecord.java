@@ -29,6 +29,8 @@ import java.util.*;
 
 /**
  * 出库记录
+ * <p>
+ * (角色等同于出货计划,但是手动创建的出货记录没有关联的出货计划)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -98,7 +100,7 @@ public class OutboundRecord extends Model {
      * 出货计划
      */
     @Expose
-    @ManyToOne
+    @OneToOne
     public ShipPlan shipPlan;
 
     /**
@@ -260,21 +262,26 @@ public class OutboundRecord extends Model {
         this.qty = 0;
         this.planQty = 1;
         this.state = S.Pending;
+        this.type = T.Normal;
+        this.origin = O.Normal;
     }
 
     public OutboundRecord(T type, O origin) {
         this();
         this.origin = origin;
         this.type = type;
+        this.handler = User.current();
     }
 
     public OutboundRecord(ShipPlan plan) {
         this(T.Normal, O.Normal);
-        this.planQty = plan.qty;
+        this.planQty = plan.planQty;
         this.qty = this.planQty;
-        this.stockObj = plan.stockObj.dump();
+        this.shipPlan = plan;
         Whouse whouse = this.findWhouse();
         if(whouse != null) this.whouse = whouse;
+        this.stockObj = new StockObj(plan.product.sku);
+        this.stockObj.setAttributes(plan);
     }
 
     /**
@@ -340,6 +347,7 @@ public class OutboundRecord extends Model {
         } else {
             this.save();
             this.outboundProcureUnit();
+            this.syncQtyToShipPlan();
             new StockRecord(this).doCreate();
             return true;
         }
@@ -508,7 +516,7 @@ public class OutboundRecord extends Model {
      * 设置采购计划是否出库状态为已出库
      */
     public void outboundProcureUnit() {
-        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        Object procureunitId = this.stockObj.procureunitId();
         if(procureunitId != null) {
             ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
             if(procureUnit != null) {
@@ -518,13 +526,34 @@ public class OutboundRecord extends Model {
         }
     }
 
+    /**
+     * 同步实际出库数到出库计划
+     */
+    public void syncQtyToShipPlan() {
+        if(this.shipPlan != null) {
+            ShipPlan plan = this.shipPlan;
+            plan.state = ShipPlan.S.Confirmd;
+            plan.qty = this.qty;
+            plan.save();
+        }
+    }
+
     public boolean exist() {
-        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        Object procureunitId = this.stockObj.procureunitId();
+        Object shipPlanId = this.stockObj.shipPlanId();
         if(procureunitId != null) {
-            return OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%")
-                    != 0;
+            return OutboundRecord.count("attributes LIKE ?",
+                    "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
+        } else if(shipPlanId != null) {
+            return ShipPlan.count("attributes LIKE ?",
+                    "%\"shipPlanId\":" + shipPlanId.toString() + "%") != 0;
         }
         return false;
+    }
+
+    public static boolean checkExistsWithUnitId(String procureunitId) {
+        return StringUtils.isBlank(procureunitId) ||
+                OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId + "%") != 0;
     }
 
     /**
@@ -547,7 +576,7 @@ public class OutboundRecord extends Model {
     }
 
     /**
-     * 根据 FBA 属性来尝试匹配入库记录
+     * 根据 FBA 属性来尝试获取入库记录中选择的目标仓库
      *
      * @return
      */

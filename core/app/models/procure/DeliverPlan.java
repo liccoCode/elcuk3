@@ -6,7 +6,9 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
@@ -28,7 +30,7 @@ import java.util.Map;
  * Time: 上午10:12
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class DeliverPlan extends GenericModel {
 
     public DeliverPlan() {
@@ -246,6 +248,7 @@ public class DeliverPlan extends GenericModel {
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
+        if(this.units == null || this.units.isEmpty()) return new ArrayList<>();
         Cooperator cooperator = this.units.get(0).cooperator;
         return ProcureUnit.find("cooperator=? AND stage=? AND deliverplan IS NULL", cooperator, ProcureUnit.STAGE
                 .DELIVERY).fetch();
@@ -289,8 +292,18 @@ public class DeliverPlan extends GenericModel {
             unit.stage = ProcureUnit.STAGE.INSHIPMENT;
             unit.save();
 
+            //生成收货记录
             ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
             if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
+
+            //生成出货计划(我也不知道为什么要把生成出货计划的节点放在这里)
+            ShipPlan plan = new ShipPlan(unit);
+            if(!plan.exist()) {
+                plan.save();
+                Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
+                //生成出库记录
+                plan.triggerRecord(cooperator == null ? "" : cooperator.id.toString());
+            }
         }
     }
 
@@ -338,11 +351,13 @@ public class DeliverPlan extends GenericModel {
 
     /**
      * 尝试补全供应商
+     *
      * @return
      */
     public Cooperator cooperator() {
         if(this.cooperator == null && this.units != null && !this.units.isEmpty()) {
             this.cooperator = this.units.get(0).cooperator;
+            this.save();
         }
         return this.cooperator;
     }

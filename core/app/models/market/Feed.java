@@ -4,6 +4,7 @@ import helper.DBUtils;
 import models.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 2:27 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Feed extends Model {
     private static final long serialVersionUID = 370209511312724644L;
 

@@ -1119,4 +1119,39 @@ public enum M {
                 throw new NotSupportChangeRegionFastException();
         }
     }
+
+    /**
+     * CreateInboundShipmentPlan 时的 ShipToCountryCode 参数值
+     * <p>
+     * PS:
+     * 只支持 北美 和 欧洲 市场
+     * 印度市场请使用 ShipToCountrySubdivisionCode 参数
+     * <p>
+     * 详见:
+     * http://docs.developer.amazonservices.com/en_US/fba_inbound/FBAInbound_CreateInboundShipmentPlan.html
+     *
+     * @return
+     */
+    public String country() {
+        switch(this) {
+            case AMAZON_CA:
+                return "CA";
+            case AMAZON_DE:
+                return "DE";
+            case AMAZON_ES:
+                return "ES";
+            case AMAZON_FR:
+                return "FR";
+            case AMAZON_IT:
+                return "IT";
+            case AMAZON_JP:
+                return null;
+            case AMAZON_UK:
+                return "GB";
+            case AMAZON_US:
+                return "US";
+            default:
+                return null;
+        }
+    }
 }

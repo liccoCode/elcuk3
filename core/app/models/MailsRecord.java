@@ -9,6 +9,7 @@ import notifiers.FBAMails;
 import notifiers.Mails;
 import notifiers.SystemMails;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.helper.SqlQuery;
@@ -27,7 +28,7 @@ import java.util.*;
  * @deprecated
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class MailsRecord extends Model {
 
     /**

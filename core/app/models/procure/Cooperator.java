@@ -7,6 +7,7 @@ import models.product.Product;
 import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Min;
@@ -330,6 +331,20 @@ public class Cooperator extends Model {
      */
     public static List<Cooperator> shippers() {
         List<Cooperator> cooperators = Cooperator.find("type=?", T.SHIPPER).fetch();
+        Collections.sort(cooperators, new PinyinSort());
+        return cooperators;
+    }
+
+    /**
+     * 返回所有能生产该产品的供应商
+     *
+     * @param sku
+     * @return
+     */
+    public static List<Cooperator> cooperatorsBySKU(String sku) {
+        if(StringUtils.isBlank(sku)) return new ArrayList<>();
+        List<Cooperator> cooperators = Cooperator.find("SELECT DISTINCT co FROM Cooperator co " +
+                "LEFT JOIN co.cooperItems ci WHERE co.type=? AND ci.product.sku=?", T.SUPPLIER, sku).fetch();
         Collections.sort(cooperators, new PinyinSort());
         return cooperators;
     }

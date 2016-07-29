@@ -277,3 +277,7 @@ deliverplan.confirm=\u6279\u91cf\u786E\u8BA4[\u51fa\u8d27\u5355]
 deliverplan.confirm.msg=ID[%s]
 deliverplan.createFromProcures=[\u91C7\u8D2D\u5355\u5143] \u521B\u5EFA [\u51fa\u8d27\u5355]
 deliverplan.createFromProcures.msg=[\u91C7\u8D2D\u5355\u5143] %s \u521B\u5EFA\u5230 [\u51fa\u8d27\u5355] %s
+
+shipplan.save=\u521B\u5EFA[\u51fa\u5e93\u8ba1\u5212]
+shipplan.update=\u66F4\u65B0[\u51fa\u5e93\u8ba1\u5212]
+shipplan.update.msg=\u66F4\u65B0\u51fa\u5e93\u8ba1\u5212[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]

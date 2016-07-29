@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
  * Time: 10:55 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Product extends GenericModel implements ElcukRecord.Log {
     public static final Pattern Nub = Pattern.compile("[0-9]*");
     /**
@@ -428,6 +429,17 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.listings != null && this.listings.size() > 0) {
             throw new FastRuntimeException(
                     "Product [" + this.sku + "] have relate Listing, cannot be delete.");
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if(StringUtils.isNotBlank(this.upc)) {
+            this.upc = this.upc.trim();
+        }
+        if(StringUtils.isNotBlank(this.upcJP)) {
+            this.upcJP = this.upcJP.trim();
         }
     }
 

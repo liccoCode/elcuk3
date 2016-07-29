@@ -175,9 +175,27 @@ public class StockObj implements Serializable, Cloneable {
         }
     }
 
+    public void setAttributes(ShipPlan plan) {
+        //把采购计划一些自身属性存入到 DB,方便后期查询
+        if(plan != null) {
+            this.attrs.put("shipPlanId", plan.id);
+            if(plan.fba != null) this.attrs.put("fba", plan.fba.shipmentId);
+            if(plan.shipType != null) this.attrs.put("shipType", plan.shipType.name());
+            if(plan.selling != null && StringUtils.isNotBlank(plan.selling.fnSku)) {
+                this.attrs.put("fnsku", plan.selling.fnSku);
+            }
+            if(plan.whouse != null) {
+                this.attrs.put("whouseId", plan.whouse.id);
+                this.attrs.put("whouseName", plan.whouse.name);
+            }
+            this.marshalAtts();
+        }
+    }
+
     public void setAttributes(ShipItem item) {
         if(item != null) {
             if(item.unit != null) this.setAttributes(item.unit);
+            if(item.plan != null) this.setAttributes(item.plan);
             this.attrs.put("shipItemId", item.id);
             this.attrs.put("planBeginDate", item.shipment.dates.planBeginDate);
             this.marshalAtts();
@@ -256,6 +274,19 @@ public class StockObj implements Serializable, Cloneable {
         if(this.attributes() != null && !this.attributes().isEmpty()) {
             Optional<Object> procureunitId = Optional.fromNullable(this.attributes().get("procureunitId"));
             if(procureunitId.isPresent()) return NumberUtils.toLong(procureunitId.get().toString());
+        }
+        return null;
+    }
+
+    /**
+     * 读取出库计划 ID
+     *
+     * @return
+     */
+    public String shipPlanId() {
+        if(this.attributes() != null && !this.attributes().isEmpty()) {
+            Optional<Object> shipPlanId = Optional.fromNullable(this.attributes().get("shipPlanId"));
+            if(shipPlanId.isPresent()) return shipPlanId.get().toString();
         }
         return null;
     }

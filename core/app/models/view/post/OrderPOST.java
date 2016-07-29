@@ -132,8 +132,9 @@ public class OrderPOST extends ESPost<Orderr> {
                 throw new FastRuntimeException("没有结果");
             return OrderReportDTO.query(orderIds);
         } catch(Exception e) {
+            e.printStackTrace();
             Logger.error(e.getMessage());
-            return new ArrayList<OrderReportDTO>();
+            return new ArrayList<>();
         }
     }
 

@@ -21,7 +21,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,9 +37,9 @@ public class DeliverPlans extends Controller {
     public static void showPageSetUp() {
         String deliverymentId = request.params.get("id");
         if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dp.id");
-        DeliverPlan dmt = DeliverPlan.findById(deliverymentId);
-        if(dmt != null)
-            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        DeliverPlan dp = DeliverPlan.findById(deliverymentId);
+        if(dp != null)
+            renderArgs.put("plan_units", dp.availableInPlanStageProcureUnits());
         renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
     }
@@ -75,13 +74,12 @@ public class DeliverPlans extends Controller {
     }
 
     @Check("deliverplans.index")
-    public static void index(DeliverPlanPost p, List<String> deliverplanIds) {
+    public static void index(DeliverPlanPost p) {
         List<DeliverPlan> deliverplans = null;
-        if(deliverplanIds == null) deliverplanIds = new ArrayList<>();
         if(p == null) p = new DeliverPlanPost();
         deliverplans = p.query();
         List<String> handlers = DeliverPlan.handlers();
-        render(deliverplans, p, deliverplanIds, handlers);
+        render(deliverplans, p, handlers);
     }
 
 
@@ -111,7 +109,6 @@ public class DeliverPlans extends Controller {
 
         // 再一次检查, 是否有错误
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dp.availableInPlanStageProcureUnits());
             render("DeliverPlans/show.html", dp);
         }
         flash.success("成功将 %s 采购计划添加到当前采购单.", StringUtils.join(pids, ","));
@@ -141,7 +138,7 @@ public class DeliverPlans extends Controller {
      *
      * @param ids
      */
-    public static void triggerReceiveRecords(List<String> ids) {
+    public static void triggerReceiveRecords(List<String> ids, DeliverPlanPost p) {
         if(ids != null && !ids.isEmpty()) {
             for(String id : ids) {
                 DeliverPlan deliverPlan = DeliverPlan.findById(id);
@@ -150,7 +147,7 @@ public class DeliverPlans extends Controller {
             }
         }
         flash.success("确认发货成功!");
-        redirect("/ReceiveRecords/index");
+        index(p);
     }
 
     @Check("fbas.deploytoamazon")

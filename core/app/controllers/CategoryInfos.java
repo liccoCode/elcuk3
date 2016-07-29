@@ -27,6 +27,7 @@ import java.util.Map;
  * User: mac
  * Date: 14-3-27
  * Time: AM10:19
+ * @deprecated
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class CategoryInfos extends Controller {

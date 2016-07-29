@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import models.view.post.WhouseItemPost;
 import models.whouse.Whouse;
 import models.whouse.WhouseItem;
@@ -8,6 +9,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,5 +30,10 @@ public class WhouseItems extends Controller {
         if(p == null) p = new WhouseItemPost();
         List<WhouseItem> items = p.query();
         render(p, items);
+    }
+
+    public static void deatils(String sku, Long whouseId, Date planShipDate) {
+        Whouse whouse = Whouse.findById(whouseId);
+        renderJSON(J.json(WhouseItem.stocks(sku, whouse, planShipDate)));
     }
 }

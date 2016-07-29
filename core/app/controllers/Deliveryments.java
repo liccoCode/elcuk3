@@ -96,7 +96,6 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
         dmt.save();
-        dmt.syncCooperatorToUnits();
         flash.success("更新成功.");
         show(dmt.id);
     }
@@ -299,7 +298,6 @@ public class Deliveryments extends Controller {
         dmt.handler = user;
         dmt.state = Deliveryment.S.PENDING;
         dmt.name = dmt.name.trim();
-        dmt.units.add(unit);
         dmt.deliveryType = Deliveryment.T.MANUAL;
         unit.validateManual();
         if(Validation.hasErrors()) {

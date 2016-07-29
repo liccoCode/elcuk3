@@ -139,7 +139,7 @@
                      data-cooperatorid="${unit.cooperator?.id}">
             </label>
           </td>
-          <td>${unit.id}</td>
+          <td><a href="@{ProcureUnits.edit(unit.id)}" target="_blank">${unit.id}</a></td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
           <td class="selling_id">
             <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
@@ -157,7 +157,13 @@
           <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
-          <td>${unit.cooperator?.name}</td>
+          <td>
+            <select name="unitCooperator" style="width:100px;" ${unit.deliveryment != null ? 'disabled' : ''}>
+                #{list items:unit.availableCooperators(), as:'cop'}
+                  <option ${cop.id == unit.cooperator?.id ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+                #{/list}
+            </select>
+          </td>
             #{set prices: unit.prices()/}
           <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
           <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>

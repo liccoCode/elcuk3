@@ -12,13 +12,13 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.whouse.ShipPlan;
-import models.whouse.Whouse;
+import models.whouse.*;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -44,7 +44,7 @@ import java.util.*;
  * Time: 5:32 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
@@ -156,7 +156,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         EXPRESS_FAST {
             @Override
-            public String label() { return "快递--快速渠道";}
+            public String label() {
+                return "快递--快速渠道";
+            }
 
             @Override
             public String detail() {
@@ -168,7 +170,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         DEDICATED_LINE {
             @Override
-            public String label() { return "专线";}
+            public String label() {
+                return "专线";
+            }
 
             @Override
             public String detail() {
@@ -649,6 +653,27 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         unit.flushTask();//更新相关的质检任务
     }
 
+    /**
+     * 向运输单中添加一个出货计划
+     *
+     * @param plan
+     */
+    public synchronized void addToShip(ShipPlan plan) {
+        if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
+            Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
+        if(!plan.whouse.equals(this.whouse))
+            Validation.addError("", "运输目的地不一样, 无法添加");
+        if(plan.shipType != this.type)
+            Validation.addError("", "运输方式不一样, 无法添加.");
+        if(plan.shipItems.size() > 0)
+            Validation.addError("", "出货计划已经拥有运输项目, 不可以再重新创建.");
+        if(Validation.hasErrors()) return;
+
+        ShipItem shipitem = new ShipItem(plan);
+        shipitem.shipment = this;
+        this.items.add(shipitem.<ShipItem>save());
+    }
+
 
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;
@@ -1027,7 +1052,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void produceFee(PaymentUnit fee) {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
-        if(fee.unitQty < 1f) Validation.addError("", "数量必须大于等于 1");
+        if(fee.unitQty <= 0f) Validation.addError("", "数量必须大于等于 0");
         // 海运/空运的运输运费无法绑定运输项目, 只能平摊
         if(this.type == T.EXPRESS && FeeType.expressFee().equals(fee.feeType))
             Validation.addError("", "快递的运输费用需要通过运输项目记录");
@@ -1140,9 +1165,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
         float weight = 0f;
         for(ShipItem itm : this.items) {
-            Float product_weight = itm.unit.product.weight;
-            if(product_weight == null) continue;
-            weight += itm.qty * product_weight;
+            Float productWeight = 0f;
+            if(itm.unit != null) {
+                productWeight = itm.unit.product.weight;
+            } else {
+                productWeight = itm.plan.product.weight;
+            }
+            if(productWeight != null) weight += itm.qty * productWeight;
         }
         return weight;
     }
@@ -1615,7 +1644,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * <<<<<<< HEAD
      * 修改运输单
      *
      * @param newShip
@@ -1657,19 +1685,29 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 初始化出库信息
+     * 初始化出库信息(仅用于方便遗留的老的运输单进行创建出库记录)
      */
-    public void initOutbound() {
+    public void outbound() {
+        if(this.items == null || this.items.isEmpty()) return;
         Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        if(this.items != null && !this.items.isEmpty()) {
-            for(ShipItem item : this.items) {
-                ShipPlan plan = new ShipPlan(item);
-                plan.valid();
-                if(!plan.exist() && !Validation.hasErrors()) {
-                    plan.save();
-                    plan.triggerRecord(cooperator != null ? cooperator.id.toString() : "");
-                }
+        for(ShipItem item : this.items) {
+            if(item.plan != null || item.unit == null ||
+                    OutboundRecord.checkExistsWithUnitId(item.unit.id.toString())) {
+                continue; //排除掉通过出库计划创建的运输项 或者 没有关联上采购计划 或者 采购计划已经存在出库记录的
             }
+            //通过运输单的运输项来创建的出库记录与手动创建的出库记录基本上是类似的
+            OutboundRecord record = new OutboundRecord();
+            record.planQty = item.qty;
+            record.qty = item.qty;
+            if(cooperator != null) record.targetId = cooperator.id.toString();
+            if(item.unit.fba != null) {
+                //根据 FBA 属性来尝试获取入库记录中选择的目标仓库
+                InboundRecord inboundRecord = InboundRecord.findInboundRecordByFBA(item.unit.fba.shipmentId);
+                if(inboundRecord != null) this.whouse = inboundRecord.targetWhouse;
+            }
+            record.stockObj = new StockObj(item.unit.product.sku);
+            record.stockObj.setAttributes(item);
+            record.save();
         }
     }
 }

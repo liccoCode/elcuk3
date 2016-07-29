@@ -10,6 +10,7 @@ import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -29,7 +30,7 @@ import java.util.*;
  * Time: 6:40 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class SellingRecord extends GenericModel {
 
     @Transient

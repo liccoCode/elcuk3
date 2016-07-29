@@ -39,6 +39,22 @@ window.$ui =
       for key in ['buttonWidth', 'nonSelectedText', 'maxHeight', 'includeSelectAllOption']
         options[key] = $select.data(key.toLowerCase()) if $select.data(key.toLowerCase()) != undefined
       $select.multiselect(options)
+  clipboard: ->
+    clipboard = new Clipboard('.clipboard')
+    clipboard.on('success', (e) ->
+      tip = $(e.trigger)
+      tip.tooltip(
+        container: 'body',
+        placement: 'bottom',
+        title: 'Asin Copied!',
+        trigger: 'manual'
+      ).tooltip('show')
+      setTimeout(->
+        tip.tooltip('hide')
+      , 300
+      )
+    )
+
 
 # 初始化 popover, tooltip, dateinput
   init: ->
@@ -46,6 +62,7 @@ window.$ui =
     @selectize()
     @datetimeinput()
     @multiselect()
+    @clipboard()
 
 # popover 与 tooltip 的基础方法
   relBase: (event, func)->
@@ -64,7 +81,6 @@ $(document).on('mouseover', '[rel=tooltip]', (event) ->
   window.$ui.relBase(event, (params) ->
     @tooltip(params).tooltip('show'))
 )
-
 $(document).on('mouseover', '[rel=popover]', (event) ->
   window.$ui.relBase(event, (params) ->
     @popover(params).popover('show')

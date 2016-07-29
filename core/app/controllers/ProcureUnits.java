@@ -67,7 +67,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
         List<ElcukRecord> logs = ElcukRecord
-                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"));
+                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"), 50);
         renderArgs.put("logs", logs);
     }
 
@@ -364,7 +364,6 @@ public class ProcureUnits extends Controller {
 
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        Set<User> users = unit.editToUsers();
         unit.remove();
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
@@ -687,27 +686,35 @@ public class ProcureUnits extends Controller {
 
     /**
      * 批量创建FBA
+     * <p>
+     * 以后所有的 FBA 应该关联到出库计划
      *
      * @param pids
+     * @deprecated
      */
-    public static void batchCreateFBA(ProcurePost p, List<Long> pids) {
+    public static void batchCreateFBA(ProcurePost p, List<Long> pids, String redirectTarget) {
         if(pids != null && pids.size() > 0) {
             ProcureUnit.postFbaShipments(pids);
         }
-        ProcureUnits.indexForMarket(p);
+        if(StringUtils.isNotBlank(redirectTarget) && StringUtils.containsIgnoreCase(redirectTarget, "index")) {
+            ProcureUnits.index(p);
+        } else {
+            ProcureUnits.indexForMarket(p);
+        }
     }
 
     /**
-     * 更新报关类型
+     * 更新单一属性
+     *
+     * @param attr
+     * @param value
      */
-    public static void updateClearanceType(Long id, DeliverPlan.CT clearanceType) {
+    public static void updateAttr(Long id, String attr, String value) {
         try {
             ProcureUnit unit = ProcureUnit.findById(id);
             if(unit == null) throw new FastRuntimeException("未找到对应的采购计划");
-            if(clearanceType == null) throw new FastRuntimeException("报关类型为空!");
-            unit.clearanceType = clearanceType;
-            unit.save();
-            renderJSON(new Ret(true, String.format("成功修改采购计划[%s]的报关类型!", id)));
+            unit.update(attr, value);
+            renderJSON(new Ret(true, String.format("成功修改采购计划[%s]", id)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

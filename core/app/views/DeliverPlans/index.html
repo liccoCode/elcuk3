@@ -4,6 +4,13 @@
     #{script 'component/pagination.coffee'/}
     #{script 'deliverplans/index.coffee'/}
 #{/set}
+
+#{info_row}
+<ul>
+  <li><strong>[最先交货时间]</strong>为采购单有交货情况后, 记录的第一次交货时间</li>
+  <li><strong>[最后交货时间]</strong>为采购单有交货情况后, 记录的第后一次交货时间</li>
+</ul>
+#{/info_row}
 #{flash_alert /}
 #{errorMsgs /}
 
@@ -107,9 +114,7 @@
                 </tr>
                   #{list items:dp.units, as:'unit'}
                     <tr>
-                      <td>
-                        <a href="/ProcureUnits/index?p.search=${unit.id}" target="_blank">${unit.id}</a>
-                      </td>
+                      <td><a href="@{ProcureUnits.edit(unit.id)}" target="_blank">${unit.id}</a></td>
                       <td class="selling_id">
                         <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
                       </td>
@@ -161,7 +166,6 @@
   </div>
 </div>
 #{/form}
-
 <div class="row-fluid" id="order_list">
   <div class="span12">
   #{if deliverplans.size() == 0}

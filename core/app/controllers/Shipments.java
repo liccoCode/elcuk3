@@ -192,6 +192,8 @@ public class Shipments extends Controller {
             render("Shipments/show.html");
         }
         dbship.updateShipment();
+        /**像采购计划负责人发送邮件**/
+        dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
         flash.success("更新成功.");
 
         new ElcukRecord(Messages.get("shipment.update"),
@@ -453,7 +455,7 @@ public class Shipments extends Controller {
         shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));
         int day = shipment.shipDay();
         DateTime arrivedate = Dates.cn(planShipDate).plusDays(day);
-        Map<String, String> dates = new HashMap<String, String>();
+        Map<String, String> dates = new HashMap<>();
         dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
     }
@@ -466,7 +468,7 @@ public class Shipments extends Controller {
         if(shipmentId != null && !shipmentId.isEmpty()) {
             for(String sid : shipmentId) {
                 Shipment shipment = Shipment.findById(sid);
-                shipment.initOutbound();
+                shipment.outbound();
             }
         }
         flash.success("创建出库成功!");

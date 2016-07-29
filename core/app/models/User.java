@@ -15,6 +15,7 @@ import models.product.Team;
 import models.whouse.Whouse;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.*;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
@@ -33,7 +34,7 @@ import java.util.Map.Entry;
  * Time: 10:37 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class User extends Model {
     private static final long serialVersionUID = 4195929532608535016L;
 
@@ -157,6 +158,7 @@ public class User extends Model {
     @PrePersist
     @PreUpdate
     public void prePersist() {
+        this.username = this.username.trim();
         // 密码的加密操作在保存的时候进行; 在程序内部使用时为明文密码
         if(StringUtils.isNotBlank(this.password))
             this.passwordDigest = Crypto.encryptAES(this.password);

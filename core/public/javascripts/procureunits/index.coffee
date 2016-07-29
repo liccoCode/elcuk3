@@ -11,23 +11,13 @@ $ ->
       noty({text: '请选择状态为计划中的采购计划', type: 'error'})
     else
       $('input[name="pids"][data-stage!="PLAN"]:checked').prop('checked', false)
-      window.open('/deliveryments/create?' + $("#create_deliveryment").serialize(), "_blank")
+      window.open('/deliveryments/create?' + $("#create_deliveryment").serialize(), "_blank") if checkCooperators()
   ).on("click", "#createdeliverplan", (e) ->
     if $('input[name="pids"][data-stage="DELIVERY"]:checked').size() is 0
       noty({text: '请选择状态为采购中的采购计划', type: 'error'})
     else
       $('input[name="pids"][data-stage!="DELIVERY"]:checked').prop('checked', false)
-      # 检查是否选择同一供应商
-      checkboxs = $('input[name="pids"]:checked')
-
-      cooperatorId = $(checkboxs[0]).data('cooperatorid')
-      valid = true
-      _.each(checkboxs, (checkbox) ->
-        if $(checkbox).data('cooperatorid') != cooperatorId
-          noty({text: '请选择供应商相同的采购计划', type: 'error'})
-          valid = false
-      )
-      window.open('/deliverplans/deliverplan?' + checkboxs.serialize(), "_blank") if valid
+      window.open('/deliverplans/deliverplan?' + $("#create_deliveryment").serialize(), "_blank") if checkCooperators()
   ).on("blur", "input[name='boxNumbers']", (e) ->
     $input = $(@)
     # 确保用户填写的是大于零的数字
@@ -48,6 +38,24 @@ $ ->
     $('#box_number_modal').modal('hide')
   ).on("click", "#download_excel", (r) ->
     window.open('/Excels/procureUnitSearchExcel?' + $("#search_Form").serialize(), "_blank")
+  )
+
+  $('#create_deliveryment').on('change', "select[name=unitCooperator]", (e) ->
+    $select = $(@)
+    $checkbox = $select.parents('tr').find('input[name="pids"]')
+    $.ajax('/procureUnits/updateAttr', {
+      type: 'GET',
+      data: {id: $checkbox.val(), attr: 'CooperatorId', value: $select.val()},
+      dataType: 'json'
+    })
+    .done((r) ->
+      msg = if r.flag is true
+        {text: r.message, type: 'success', timeout: 5000}
+        $checkbox.data('cooperatorid', $select.val())
+      else
+        {text: "#{r.message}", type: 'error', timeout: 5000}
+      noty(msg)
+    )
   )
 
   # 将字符串转化成Dom元素
@@ -76,7 +84,7 @@ $ ->
     if getCheckedUnitIds().length is 0
       noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
       return false
-    window.location.replace('/ProcureUnits/batchCreateFBA?' + $("#create_deliveryment").find("input[name=pids]").serialize())
+    window.location.replace('/ProcureUnits/batchCreateFBA?redirectTarget=index&' + $("[name='pids'], [name^='p.']").serialize())
   )
 
   $("#create_deliveryment").on("click", "a[name='deleteBtn']", (e) ->
@@ -91,3 +99,15 @@ $ ->
     for checkbox in checkboxs
       unitIds.push(checkbox.value)
     return unitIds
+
+  checkCooperators = () ->
+    checkboxs = $('input[name="pids"]:checked')
+    cooperatorId = $(checkboxs[0]).data('cooperatorid')
+    valid = true
+    # 检查是否选择同一供应商
+    _.each(checkboxs, (checkbox) ->
+      if $(checkbox).data('cooperatorid') != cooperatorId
+        noty({text: '请选择供应商相同的采购计划', type: 'error'})
+        valid = false
+    )
+    return valid

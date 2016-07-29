@@ -9,6 +9,7 @@ import models.procure.Cooperator;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -28,7 +29,7 @@ import java.util.List;
  * Time: 上午6:06
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Whouse extends Model {
 
     /**
@@ -338,6 +339,7 @@ public class Whouse extends Model {
 
     /**
      * 自有仓
+     *
      * @return
      */
     public static List<Whouse> selfWhouses() {

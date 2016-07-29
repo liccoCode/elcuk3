@@ -5,6 +5,7 @@ import models.procure.Shipment;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.Model;
@@ -23,7 +24,7 @@ import java.util.Map;
  * Time: 3:01 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ElcukConfig extends Model {
     public static final Map<String, String> MARKETS;

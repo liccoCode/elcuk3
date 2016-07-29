@@ -3,10 +3,10 @@
   <tr style="border-bottom: 2px solid black">
     <td colspan="7" align="center" style="font-weight: bold;font-size: 6pt;border-bottom: 2px solid black">
       <div style="float:left;">
-        <span style="font-size: 14pt;">${models.OperatorConfig.getVal("brandname")}</span>
+        <span style="font-size: 14pt;">${brandName}</span>
       </div>
-      <span style="font-weight: bold; font-size: 12pt">${models.OperatorConfig.getVal("shipmentdetaillabel")}</span><br>
-      ONLY FOR ${models.OperatorConfig.getVal("companyname")} PACKING LIST
+      <span style="font-weight: bold; font-size: 12pt">${shipmentDetailLabel}</span><br>
+      ONLY FOR ${companyName} PACKING LIST
     </td>
   </tr>
 
@@ -18,20 +18,19 @@
             供应商:
           </td>
           <td width="20%" style="border-bottom: 2px solid black">
-            <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
+            <span style="font-size:8pt">${cooperator?.name}</span>
           </td>
           <td width="4%">
             交期:
           </td>
           <td width="18%" style="text-align:left;" COLSPAN="4">
-            <SPAN>${procureUnit?.attrs?.deliveryDate==null?procureUnit?.attrs?.planDeliveryDate?.format("yyyy年MM月dd日")
-            :procureUnit?.attrs?.deliveryDate?.format("yyyy年MM月dd日")} </SPAN>
+            <span>${deliveryDate}</span>
           </td>
           <td width="20%" style="font-weight:bold; font-size:12pt">
             运输方式
           </td>
           <td style="border-bottom: 2px solid black">
-            <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
+            <span style="font-size:8pt"> ${shipType?.label()} </span>
           </td>
         </tr>
       </table>
@@ -51,7 +50,7 @@
             去往国家
           </td>
           <td width="12%" style="border:1px solid #000000; padding-left:6px;">
-          ${procureUnit?.selling?.market?.countryName()}
+          ${selling?.market?.countryName()}
           </td>
           <td width="8%">
             整箱重量
@@ -88,13 +87,13 @@
         </tr>
         <tr>
           <td height="35px;">
-          ${procureUnit?.product?.abbreviation}
+          ${product?.abbreviation}
           </td>
           <td>
-          ${procureUnit?.sku}
+          ${product?.sku}
           </td>
           <td>
-          ${procureUnit?.selling?.fnSku}
+          ${selling?.fnSku}
           </td>
           <td>
           </td>

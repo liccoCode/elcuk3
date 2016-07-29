@@ -1,0 +1,70 @@
+<tr>
+  <th>ID</th>
+  <td>${plan.id}</td>
+
+  <th><span style="color:red">*</span>Selling ID</th>
+  <td>
+    <input type="text" value="${plan.selling?.sellingId}" name="plan.selling.sellingId" required>
+  </td>
+</tr>
+<tr>
+  <th><span style="color:red">*</span>SKU</th>
+  <td>
+    <input type="text" value="${plan.product?.sku}" name="plan.product.sku" required readonly>
+  </td>
+
+  <th><span style="color:red">*</span>产品名称</th>
+  <td>
+    <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" class="input-block-level"
+           required readonly>
+  </td>
+</tr>
+<tr>
+  <th><span style="color:red">*</span>去往仓库</th>
+  <td>
+    <select name="plan.whouse.id">
+      <option value="">请选择</option>
+    #{list items:whouses, as:'w'}
+      <option value="${w.id}" ${w.id == plan.whouse?.id ? 'selected' : ''}>${w.name}</option>
+    #{/list}
+    </select>
+  </td>
+
+  <th><span style="color:red">*</span>预计运输时间</th>
+  <td>
+    <input type="date" value="${plan.planShipDate?.date()}" name="plan.planShipDate" required>
+  </td>
+</tr>
+<tr>
+  <th>预计到库时间</th>
+  <td>
+    <input type="date" value="${plan.planArrivDate?.date()}" name="plan.planArrivDate">
+  </td>
+
+  <th><span style="color:red">*</span>计划出库数量</th>
+  <td>
+    <input type="text" class="input-mini" value="${plan.planQty}" name="plan.planQty" id="planQty" required>
+    <span id="stockDeatil"></span>
+  </td>
+</tr>
+<tr>
+  <th><span style="color:red">*</span>运输方式</th>
+  <td colspan="4">
+  #{list items:models.procure.Shipment.T.values(), as:'t'}
+    <label class="radio">
+      <input type="radio" name="plan.shipType" value="${t.name()}" ${ t == plan.shipType ? 'checked':'unchecked'}>${t.detail()}
+    </label>
+  #{/list}
+  </td>
+</tr>
+<tr>
+  <td colspan="4">
+    <h4>Memo</h4>
+    <textarea rows="8" class="input-block-level" name="plan.memo" id="memo">${plan.memo.raw()}</textarea>
+  </td>
+</tr>
+<tr>
+  <td colspan="4">
+  #{render 'ProcureUnits/_shipments.html'/}
+  </td>
+</tr>
