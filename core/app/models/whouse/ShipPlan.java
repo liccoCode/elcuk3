@@ -9,10 +9,7 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.Account;
 import models.market.Selling;
-import models.procure.FBAShipment;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Product;
 import mws.FBA;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -195,6 +192,19 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         this.creator = User.current();
     }
 
+    public ShipPlan doCreate() {
+        this.save();
+        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
+        this.triggerRecord(cooperator == null ? "" : cooperator.id.toString());
+        return this;
+    }
+
+    /**
+     * 生成出库记录
+     *
+     * @param targetId
+     * @return
+     */
     public ShipPlan triggerRecord(String targetId) {
         OutboundRecord outboundRecord = new OutboundRecord(this);
         if(StringUtils.isNotBlank(targetId)) outboundRecord.targetId = targetId;
