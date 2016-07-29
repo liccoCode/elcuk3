@@ -299,10 +299,7 @@ public class DeliverPlan extends GenericModel {
             //生成出货计划(我也不知道为什么要把生成出货计划的节点放在这里)
             ShipPlan plan = new ShipPlan(unit);
             if(!plan.exist()) {
-                plan.save();
-                Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-                //生成出库记录
-                plan.triggerRecord(cooperator == null ? "" : cooperator.id.toString());
+                plan.doCreate();
             }
         }
     }

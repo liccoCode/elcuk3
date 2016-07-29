@@ -31,9 +31,4 @@ public class WhouseItems extends Controller {
         List<WhouseItem> items = p.query();
         render(p, items);
     }
-
-    public static void deatils(String sku, Long whouseId, Date planShipDate) {
-        Whouse whouse = Whouse.findById(whouseId);
-        renderJSON(J.json(WhouseItem.stocks(sku, whouse, planShipDate)));
-    }
 }
