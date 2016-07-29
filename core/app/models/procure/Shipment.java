@@ -286,10 +286,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 此 Shipment 的运输项
      */
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
-    public List<ShipItem> items = new ArrayList<ShipItem>();
+    public List<ShipItem> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
+    public List<ShipPlan> plans = new ArrayList<>();
 
     @ManyToOne
     public TransportApply apply;
