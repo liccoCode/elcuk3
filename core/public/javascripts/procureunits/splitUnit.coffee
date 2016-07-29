@@ -92,12 +92,18 @@ $ ->
   })
 
   $("#warehouse_select").change(->
-    country = $("#warehouse_select :selected").text().split('_')[1]
-    sku = $("#unit_sku").val()
-    $.get("/sellings/findSellingBySkuAndMarket", {sku: sku, market: "AMAZON_" + country})
-    .done((c) ->
-      $("#sellingId").val(c)
-      if !$("#sellingId").val()
-        noty({text: "市场对应无Selling", type: 'error'})
-    )
+    if $(@).val()
+      country = $("#warehouse_select :selected").text().split('_')[1]
+      sku = $("#unit_sku").val()
+      $.get("/sellings/findSellingBySkuAndMarket", {sku: sku, market: "AMAZON_" + country})
+      .done((c) ->
+        $("#sellingId").val(c)
+        if !$("#sellingId").val()
+          noty({text: "市场对应无Selling", type: 'error'})
+      )
+    else
+      $("#sellingId").val("")
+      $("input[name='newUnit.shipType']").each(->
+        $(@).attr("checked", false)
+      )
   )

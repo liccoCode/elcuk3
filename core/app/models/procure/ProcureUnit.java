@@ -177,6 +177,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             public String label() {
                 return "结束";
             }
+        },
+        /**
+         * 取消,页面无显示
+         */
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消";
+            }
         };
 
         public abstract String label();
@@ -507,21 +516,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.stage = STAGE.DELIVERY;
         if(unit.selling == null) {
+            if(unit.shipType == null) {
+                newUnit.selling = null;
+                newUnit.shipType = null;
+            }
             newUnit.manualValidate();
         } else {
+            newUnit.selling = unit.selling;
+            newUnit.whouse = unit.whouse;
             newUnit.validate();
         }
 
-
-        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
-                newUnit.whouse, newUnit.shipType);
+        List<Shipment> shipments = Shipment
+                .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS
-                && shipments.size() <= 0)
-            Validation.addError("",
-                    String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
-                            newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
+        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+            Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
+                    newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
 
         if(Validation.hasErrors()) return newUnit;
         //无selling的手动单不做处理
@@ -552,6 +564,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.comment = unit.comment;
+        newUnit.creator = unit.handler;
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
@@ -1724,7 +1737,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public static STAGE[] stages() {
         return ArrayUtils.removeElements(STAGE.values(), STAGE.APPROVE, STAGE.SHIP_OVER, STAGE.SHIPPING,
-                STAGE.INBOUND, STAGE.CLOSE);
+                STAGE.INBOUND, STAGE.CLOSE, STAGE.CANCEL);
     }
 
     /**

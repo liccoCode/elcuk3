@@ -87,6 +87,12 @@ $ ->
     window.location.replace('/ProcureUnits/batchCreateFBA?redirectTarget=index&' + $("[name='pids'], [name^='p.']").serialize())
   )
 
+  $("#create_deliveryment").on("click", "a[name='deleteBtn']", (e) ->
+    return unless confirm("确认删除吗?")
+      e.preventDefault()
+  )
+
+
   getCheckedUnitIds = () ->
     unitIds = []
     checkboxs = $('input[name="pids"]:checked')

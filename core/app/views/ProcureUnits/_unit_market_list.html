@@ -32,16 +32,17 @@
                boxNum="${unit.recommendBoxNum()}">
       </label>
     </td>
-    <td>${unit.id}</td>
+    <td><a href="@{ProcureUnits.edit(unit.id, 'show')}">${unit.id}</a></td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td>
         #{if unit.stage.name()=='PLAN'}
           <a href="@{ProcureUnits.edit(unit.id, 'edit')}" class="btn btn-mini btn-primary">修改</a>
+          <a href="@{ProcureUnits.delete(unit.id)}" class="btn btn-mini btn-danger" name="deleteBtn">删除</a>
         #{/if}
         #{elseif unit.stage.name()=='DELIVERY'}
             #{power.ck "procures.dosplitunit"}
               <!-- 分拆采购单元 -->
-              <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-mini btn-danger" rel='tooltip'
+              <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-mini btn-warning" rel='tooltip'
                  title='因工厂延期交货而分拆'>分拆</a>
             #{/power.ck}
         #{/elseif}
@@ -56,13 +57,22 @@
               </div>
             #{/power.ck}
         #{/if}
-      <a href="@{ProcureUnits.edit(unit.id, 'show')}" class="btn btn-mini btn-info">查看</a>
+        #{if unit.stage.name()!='PLAN'}
+          <a href="@{ProcureUnits.edit(unit.id, 'show')}" class="btn btn-mini btn-info">查看</a>
+        #{/if}
     </td>
     <td class="selling_id">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
     <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.product.sku}</a></td>
-    <td>${unit.product.abbreviation}</td>
+    <td title="${unit.product.abbreviation}">
+      #{if unit.product.abbreviation.length() <= 15}
+         ${unit.product.abbreviation}
+      #{/if}
+      #{else }
+        ${unit.product.abbreviation.substring(0,15)}...
+      #{/else}
+    </td>
     <td>
         #{set qtys: unit.qtys()/}
       <span>${qtys._1 == null ? 0 : qtys._1}</span>/
