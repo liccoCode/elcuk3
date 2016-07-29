@@ -3,7 +3,7 @@ $ ->
     $self = $(@)
     $tr = $("#forward_shipment_tr")
 
-    if $self.val() is "FORWARD"
+    if $self.val() is "FORWARD" || $self.val() is "SELF"
       $tr.show("slow")
     else
       $tr.hide('slow')

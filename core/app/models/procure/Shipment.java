@@ -16,6 +16,7 @@ import models.whouse.*;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -1728,5 +1729,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             record.stockObj.setAttributes(item);
             record.save();
         }
+    }
+
+    public static T[] shipTypes() {
+        return ArrayUtils.removeElements(T.values(), T.EXPRESS_FAST, T.EXPRESS_ECO, T.DEDICATED_LINE);
     }
 }
