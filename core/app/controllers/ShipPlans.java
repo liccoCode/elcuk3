@@ -61,10 +61,10 @@ public class ShipPlans extends Controller {
     }
 
     public static void blank(String sid) {
-        Selling selling = Selling.findById(sid);
         ShipPlan plan = null;
         List<Whouse> whouses = null;
-        if(selling != null) {
+        if(StringUtils.isNotBlank(sid)) {
+            Selling selling = Selling.findById(sid);
             plan = new ShipPlan(selling);
             whouses = Whouse.findByAccount(plan.selling.account);
         } else {
