@@ -63,34 +63,6 @@ public class WhouseItem extends Model {
         return whouseItem;
     }
 
-    /**
-     * 根据 SKU + FBA 仓库 + 预计运输时间 来查询出当前可用的库存数
-     * TODO: 搞清楚这个库存的到底公式是什么?
-     *
-     * @param sku
-     * @param whouse
-     * @param planShipDate
-     * @return
-     */
-    public static List<Map<String, String>> stocks(String sku, Whouse whouse, Date planShipDate) {
-        List<Map<String, String>> stocks = new ArrayList<>();
-
-        Integer stockQty = 0;
-        if(whouse != null) {
-            //已经处在仓库中的库存
-            List<WhouseItem> whouseItems = WhouseItem.find("stockObjId=? AND stockObjType=? AND whouse_id=?",
-                    sku, StockObj.SOT.SKU.name(), whouse.id).fetch();
-            if(whouseItems != null && !whouseItems.isEmpty()) {
-                for(WhouseItem item : whouseItems) {
-                    stockQty += item.qty;
-                }
-            }
-        }
-        stocks.add(GTs.MapBuilder.map("name", whouse.name).put("qty", stockQty.toString()).build());
-        return stocks;
-    }
-
-
     public static HashMap<String, Integer> caluStockInProcureUnit(String name, String type) {
         HashMap<String, Integer> map = new HashMap<>();
         //已收货的出货单
