@@ -116,6 +116,22 @@ public class Whouse extends Model {
     public User user;
 
     /**
+     * 市场
+     */
+    @Expose
+    @Column(length = 20)
+    @Enumerated(EnumType.STRING)
+    public M market;
+
+    /**
+     * 运输方式
+     */
+    @Expose
+    @Column(length = 20)
+    @Enumerated(EnumType.STRING)
+    public Shipment.T shipType;
+
+    /**
      * 运输方式是否为海运
      */
     @Expose
@@ -141,14 +157,10 @@ public class Whouse extends Model {
         if(this.type == null) return;
         switch(this.type) {
             case FBA:
-                if(this.account == null) {
-                    Validation.addError("", "wh.fba.account");
-                }
+                Validation.required("Account", this.account);
                 break;
             case FORWARD:
-                if(this.cooperator == null) {
-                    Validation.addError("", "货代不能为空");
-                }
+                Validation.required("货代不能为空", this.cooperator);
                 if(!this.isAIR && !this.isEXPRESS && !this.isSEA) {
                     Validation.addError("", "运输方式不能为空");
                 }

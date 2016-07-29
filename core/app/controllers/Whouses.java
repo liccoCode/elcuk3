@@ -92,6 +92,7 @@ public class Whouses extends Controller {
 
     public static void edit(long id) {
         Whouse wh = Whouse.findById(id);
+        notFoundIfNull(wh);
         render(wh);
     }
 
