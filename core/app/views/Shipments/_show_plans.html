@@ -30,10 +30,13 @@
     <td>${plan.state.label()}</td>
     <td><a href="@{Products.show(plan.product?.sku)}" target="_blank">${plan.product?.sku}</a></td>
     <td><a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a></td>
+    <td>${plan.product?.abbreviation}</td>
     <td></td>
-    <td>${plan.whouse?.name()}</td>
+    <td>${plan.out?.clearanceType?.label()}</td>
+    <td>${plan.whouse.name}</td>
+
     <td>${plan.fba?.shipmentId}</td>
-    <td></td>
+    <td>${plan.fba?.centerId}</td>
     <td>${plan.planQty}/${plan.qty}</td>
     <td></td>
     <td></td>

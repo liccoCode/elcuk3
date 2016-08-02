@@ -61,6 +61,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT sp FROM ShipPlan sp")
+                .append(" LEFT JOIN sp.out o")
                 .append(" LEFT JOIN sp.selling s")
                 .append(" LEFT JOIN sp.product pd")
                 .append(" LEFT JOIN sp.fba f")
