@@ -414,7 +414,7 @@ public class MWSUtils {
     }
 
     public static boolean needSetProductData(String feedProductType) {
-        return !Arrays.asList("NotebookComputer").contains(feedProductType);
+        return !Arrays.asList("NotebookComputer", "Kitchen").contains(feedProductType);
     }
 
     private static class ProductTypeSetter {
@@ -531,6 +531,11 @@ public class MWSUtils {
             setType(productType, getInstanceByFeedProductType());
             lighting.setProductType(productType);
             productData.setLighting(lighting);
+        }
+
+        void setKitchen() {
+            Kitchen kitchen = new Kitchen();
+
         }
     }
 }
