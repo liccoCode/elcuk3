@@ -100,7 +100,7 @@ $ ->
     "AMAZON_UK_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
     "AMAZON_UK_HomeImprovement": ['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage',
       'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
-    "AMAZON_UK_Kitchen": ["Kitchen"],
+    "AMAZON_UK_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_DE_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -113,7 +113,7 @@ $ ->
       'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_DE_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
     "AMAZON_DE_Lighting": ["LightBulbs", "LightsAndFixtures"],
-    "AMAZON_DE_Kitchen": ["Kitchen"],
+    "AMAZON_DE_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_US_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -135,6 +135,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_FR_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_ES_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -143,6 +144,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_ES_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_IT_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -151,7 +153,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
-    "AMAZON_IT_Kitchen": ["Kitchen"],
+    "AMAZON_IT_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_JP_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -160,6 +162,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_JP_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_CA_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -167,7 +170,8 @@ $ ->
       "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
-      "RemoteControl", "Speakers", "Television", "camerabagsandcases"]
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_CA_Home": ['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants']
   }
 
   # 模板类型与 Feed Product Type 的组合使用
