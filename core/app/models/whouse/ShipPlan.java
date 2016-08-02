@@ -46,6 +46,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     public Selling selling;
 
     @OneToOne(fetch = FetchType.LAZY)
+    public Shipment shipment;
+
+    @OneToOne(fetch = FetchType.LAZY)
     public Product product;
 
     /**

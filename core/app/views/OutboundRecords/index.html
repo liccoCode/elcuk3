@@ -144,9 +144,9 @@
           <td>
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
-          <td title="${r.stockObj.name()}">${r.stockObj.name().substring(0,10)}...</td>
+          <td title="${r.stockObj?.name()}">${r.stockObj?.name()}</td>
           <td>${attrs.get('fba')}</td>
-          <td>${attrs.get('planBeginDate').substring(0,10)}</td>
+          <td>${attrs.get('planBeginDate')?.substring(0,10)}</td>
           <td>${r.planQty}</td>
           <td><input type="text" name="qty" value="${r.qty}" style="width:45px;"></td>
           <td>${attrs.get('whouseName')}</td>

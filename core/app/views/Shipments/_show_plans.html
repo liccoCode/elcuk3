@@ -22,30 +22,29 @@
     <th>仓库对接人</th>
     <th>丢失量/赔偿金额</th>
   </tr>
-#{list items:shipments, as:'ship'}
+#{list items:plans, as:'plan'}
   <tr>
     <td>
-      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.applyId}" way="${ship.type}">
+      <a target="_blank" href="@{ShipPlans.show(plan.id)}">${plan.id}</a>
     </td>
-    <td>
-      <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
-    </td>
-    <td style="cursor:pointer;" name="clickTd" shipment_id="${ship.id}" memo="${ship.memo.raw()}">
-      <i class="icon-reorder"></i>
-        #{list items:ship.tracknolist, as:'trackno'}
-        ${trackno+" "}
-        #{/list}
-      <span class="badge badge-info">${ship.itemsNum}</span>
-    </td>
-    <td>${ship.cname}</td>
-    <td>${ship.iExpressName}</td>
-    <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
-    <td>${ship.wname}</td>
-    <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
-    <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
-    <td>#{time_tooltip time:ship.createDate/}</td>
-    <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
-    <td>${ship.uname}</td>
+    <td>${plan.state.label()}</td>
+    <td><a href="@{Products.show(plan.product?.sku)}" target="_blank">${plan.product?.sku}</a></td>
+    <td><a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a></td>
+    <td></td>
+    <td>${plan.whouse?.name()}</td>
+    <td>${plan.fba?.shipmentId}</td>
+    <td></td>
+    <td>${plan.planQty}/${plan.qty}</td>
+    <td></td>
+    <td></td>
+    <td>#{time_tooltip time:plan.planShipDate/}</td>
+    <td>#{time_tooltip time:plan.planArrivDate/}</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
 
 #{/list}

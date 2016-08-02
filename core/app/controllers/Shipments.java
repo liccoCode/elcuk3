@@ -14,6 +14,7 @@ import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.ShipPlanPost;
 import models.view.post.ShipmentPost;
+import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -73,9 +74,16 @@ public class Shipments extends Controller {
         render("Shipments/_shipitem.html", items);
     }
 
-    public static void showShipPlanList(String id) {
+    public static void showShipPlans(String id) {
+        Shipment shipment = Shipment.findById(id);
 
-        render("Shipments");
+        render("Shipments/_shipitem.html");
+    }
+
+    public static void showShipPlanList(String id) {
+        Shipment shipment = Shipment.findById(id);
+        List<ShipPlan> plans = shipment.plans;
+        render("Shipments/_show_plans.html", plans);
     }
 
     public static void blank() {
