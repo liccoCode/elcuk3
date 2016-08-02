@@ -414,12 +414,7 @@ public class MWSUtils {
     }
 
     public static boolean needSetProductData(String templateType, String feedProductType) {
-        if("Computers".equalsIgnoreCase(templateType) && "NotebookComputer".equalsIgnoreCase(feedProductType)) {
-            return true;
-        } else if("Kitchen".equalsIgnoreCase(templateType) && "Kitchen".equalsIgnoreCase(feedProductType)) {
-            return true;
-        }
-        return false;
+        return "Computers".equalsIgnoreCase(templateType) && "NotebookComputer".equalsIgnoreCase(feedProductType);
     }
 
     private static class ProductTypeSetter {
@@ -536,11 +531,6 @@ public class MWSUtils {
             setType(productType, getInstanceByFeedProductType());
             lighting.setProductType(productType);
             productData.setLighting(lighting);
-        }
-
-        void setKitchen() {
-            Kitchen kitchen = new Kitchen();
-
         }
     }
 }

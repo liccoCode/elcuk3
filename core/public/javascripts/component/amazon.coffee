@@ -182,7 +182,7 @@ $ ->
 
     if _.isEmpty(feedTypes)
       noty({
-        text: "暂不支持 #{$templateType.val()} 模板. 请联系开发人员添加新的模板.(备注: US 与 FR 市场可使用 Home 模板来替代 Kitchen 模板进行上架)",
+        text: "暂不支持 #{$templateType.val()} 模板, 请联系开发人员添加新的模板.",
         type: 'error',
         timeout: 5000
       })
