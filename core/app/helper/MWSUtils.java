@@ -330,7 +330,7 @@ public class MWSUtils {
         }
         product.setDescriptionData(descriptionData);
 
-        if(needSetProductData(selling.aps.feedProductType)) {
+        if(needSetProductData(selling.aps.templateType, selling.aps.feedProductType)) {
             Product.ProductData productData = new Product.ProductData();
             new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
             product.setProductData(productData);
@@ -413,8 +413,8 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
-    public static boolean needSetProductData(String feedProductType) {
-        return !Arrays.asList("NotebookComputer").contains(feedProductType);
+    public static boolean needSetProductData(String templateType, String feedProductType) {
+        return "Computers".equalsIgnoreCase(templateType) && "NotebookComputer".equalsIgnoreCase(feedProductType);
     }
 
     private static class ProductTypeSetter {
