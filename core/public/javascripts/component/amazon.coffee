@@ -186,7 +186,7 @@ $ ->
 
     if _.isEmpty(feedTypes)
       noty({
-        text: "暂不支持 #{$templateType.val()} 模板, 请联系开发人员添加新的模板.",
+        text: "#{$market.val()} 市场暂不支持 #{$templateType.val()} 模板, 如有需要请联系开发人员添加模板.",
         type: 'error',
         timeout: 5000
       })
