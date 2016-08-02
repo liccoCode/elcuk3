@@ -72,14 +72,6 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     public List<ShipItem> shipItems = new ArrayList<>();
 
     /**
-     * 出货对象(SKU or 物料)
-     */
-    @Required
-    @Embedded
-    @Expose
-    public StockObj stockObj;
-
-    /**
      * 状态
      */
     @Required
