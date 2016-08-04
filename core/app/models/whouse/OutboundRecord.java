@@ -620,10 +620,10 @@ public class OutboundRecord extends Model {
         if(records == null || records.isEmpty()) return;
         for(OutboundRecord record : records) {
             if(StringUtils.isEmpty(record.mainBoxInfo) && StringUtils.isEmpty(record.lastBoxInfo)) {
-                Map<String, Object> attrs = record.stockObj.attributes();
-                if(attrs.get("procureunitId") != null && StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
+                Object procureunitId = record.stockObj.procureunitId();
+                if(procureunitId != null) {
                     List<InboundRecord> list = InboundRecord.find("stockObj.attributes like ? ",
-                            "%\"procureunitId\":" + attrs.get("procureunitId").toString() + "%").fetch();
+                            "%\"procureunitId\":" + procureunitId.toString() + "%").fetch();
                     if(list != null && list.size() > 0) {
                         InboundRecord inboundRecord = list.get(0);
                         record.mainBoxInfo = inboundRecord.mainBoxInfo;
