@@ -22,6 +22,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -50,7 +51,6 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 物料计划
-     * TODO: 等待物料相关的功能上线后需要变更为物料而不是采购计划
      */
     @Required
     @OneToOne(fetch = FetchType.LAZY)
@@ -144,7 +144,7 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     }
 
     public ReceiveRecord(ProcureUnit procureUnit, DeliverPlan deliverPlan) {
-        super();
+        this();
         this.id = ReceiveRecord.id();
         this.deliverPlan = deliverPlan;
         this.procureUnit = procureUnit;
@@ -209,15 +209,20 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
 
     public void updateAttr(String attr, String value) {
         if(this.isLocked()) throw new FastRuntimeException("已收货的收货记录不允许修改!");
-        List<String> logs = new ArrayList<>();
-
-        if(StringUtils.containsIgnoreCase(attr, "mainBox.") || StringUtils.containsIgnoreCase(attr, "lastBox.")) {
-            logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
-            logs.addAll(Reflects.logFieldFade(this, "qty", this.mainBox.qty() + this.lastBox.qty()));
-            this.marshalBoxs();
-        } else {
-            throw new FastRuntimeException("不支持的属性类型!");
+        if(StringUtils.isBlank(attr)) throw new FastRuntimeException("属性名称不能为空!");
+        String[] chunks = StringUtils.splitByWholeSeparator(attr, ".");
+        if(chunks.length != 2 || !Arrays.asList("mainBox", "lastBox").contains(chunks[0])) {
+            throw new FastRuntimeException("不合法的属性名称!");
         }
+
+        List<String> logs = new ArrayList<>();
+        if(Arrays.asList("boxNum", "num").contains(chunks[1])) {
+            logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+        } else if(Arrays.asList("singleBoxWeight", "length", "width", "height").contains(chunks[1])) {
+            logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toDouble(value)));
+        }
+        logs.addAll(Reflects.logFieldFade(this, "qty", this.mainBox.qty() + this.lastBox.qty()));
+        this.marshalBoxs();
         new ERecordBuilder("receiverecord.update")
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();
