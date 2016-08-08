@@ -126,6 +126,7 @@ public class Orderr extends GenericModel {
      * 订单创建时间
      */
     public Date createDate;
+    public Date updateDate;
 
     /**
      * 订单的付款时间
@@ -501,10 +502,10 @@ public class Orderr extends GenericModel {
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
                 itemamount = itemamount +
-                                new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new BigDecimal(item.quantity), 2, 4)
-                                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
-                                        .setScale(2, 4).floatValue();
+                        new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                                .divide(new BigDecimal(item.quantity), 2, 4)
+                                .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                .setScale(2, 4).floatValue();
             }
         }
 
