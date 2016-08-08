@@ -93,10 +93,14 @@ public class WhouseItem extends Model {
         for(WhouseItem item : items) {
             if(item.qty > 0) {
                 String country_name = item.whouse.country;
-                if(map.containsKey(country_name)) {
-                    map.put(country_name, map.get(country_name) + item.qty);
+                if(country_name != null && country_name.equals("no_country")) {
+                    no_country += item.qty;
                 } else {
-                    map.put(country_name, item.qty);
+                    if(map.containsKey(country_name)) {
+                        map.put(country_name, map.get(country_name) + item.qty);
+                    } else {
+                        map.put(country_name, item.qty);
+                    }
                 }
                 total_num += item.qty;
             }

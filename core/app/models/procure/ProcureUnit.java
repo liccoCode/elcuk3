@@ -1687,18 +1687,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public static HashMap<String, Integer> caluStockInProcureUnit(String name, String type) {
-        List<ProcureUnit> procureUnits = ProcureUnit.find("stage IN (?,?) AND " + type + "= ?  ",
-                STAGE.PLAN, STAGE.DELIVERY, name).fetch();
+        List<ProcureUnit> procureUnits = ProcureUnit.find("stage IN (?,?) AND " + type + "= ? " +
+                " AND attrs.planShipDate is null", STAGE.DELIVERY, STAGE.INSHIPMENT, name).fetch();
         HashMap<String, Integer> map = new HashMap<>();
         int total_num = 0;
         int no_fba_num = 0;
 
         for(ProcureUnit unit : procureUnits) {
             if(unit.qty() > 0) {
-                if(unit.attrs.planShipDate == null) {
+                if(unit.whouse == null) {
                     no_fba_num += unit.qty();
                     total_num += unit.qty();
-                } else if(unit.attrs.planShipDate != null && unit.whouse != null) {
+                } else {
                     if(map.containsKey(unit.whouse.name)) {
                         map.put(unit.whouse.name, map.get(unit.whouse.name) + unit.qty());
                     } else {

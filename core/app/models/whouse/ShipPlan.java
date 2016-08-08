@@ -160,6 +160,13 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     @OneToOne
     public User creator;
 
+    /**
+     * 出库记录
+     */
+    @Expose
+    @OneToOne
+    public OutboundRecord out;
+
     public ShipPlan() {
         this.createDate = new Date();
         this.state = S.Pending;
@@ -204,6 +211,8 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         OutboundRecord outboundRecord = new OutboundRecord(this);
         if(StringUtils.isNotBlank(targetId)) outboundRecord.targetId = targetId;
         if(!outboundRecord.exist()) outboundRecord.save();
+        this.out = outboundRecord;
+        this.save();
         return this;
     }
 

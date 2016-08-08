@@ -61,6 +61,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT sp FROM ShipPlan sp")
+                .append(" LEFT JOIN sp.out o")
                 .append(" LEFT JOIN sp.selling s")
                 .append(" LEFT JOIN sp.product pd")
                 .append(" LEFT JOIN sp.fba f")
@@ -70,10 +71,10 @@ public class ShipPlanPost extends Post<ShipPlan> {
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND(");
             if(NumberUtils.isNumber(this.search)) {
-                sbd.append(" sp.id=?");
+                sbd.append(" sp.id=? OR ");
                 params.add((NumberUtils.toLong(this.search)));
             }
-            sbd.append(" OR s.sellingId LIKE ? OR pd.sku LIKE ? OR f.shipmentId LIKE ?")
+            sbd.append("  s.sellingId LIKE ? OR pd.sku LIKE ? OR f.shipmentId LIKE ?")
                     .append(" OR pd.abbreviation LIKE ?)");
             String word = this.word();
             for(int i = 0; i <= 3; i++) params.add(word);
