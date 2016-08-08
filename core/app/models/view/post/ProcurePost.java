@@ -120,7 +120,10 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM ProcureUnit p")
-                .append(" LEFT JOIN p.product pd WHERE 1=1 ");
+                .append(" LEFT JOIN p.product pd ")
+                .append(" LEFT JOIN p.fba pf ")
+                .append(" LEFT JOIN p.selling ps ")
+                .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if(NumberUtils.isNumber(this.search)) {
@@ -167,8 +170,8 @@ public class ProcurePost extends Post<ProcureUnit> {
             sbd.append(" AND (")
                     .append("pd.sku LIKE ?")
                     .append(" OR pd.abbreviation LIKE ?")
-                    .append(" OR p.selling.sellingId LIKE ?")
-                    .append(" OR p.fba.shipmentId LIKE ?")
+                    .append(" OR ps.sellingId LIKE ?")
+                    .append(" OR pf.shipmentId LIKE ?")
                     .append(") ");
             for(int i = 0; i <= 3; i++) params.add(word);
         }

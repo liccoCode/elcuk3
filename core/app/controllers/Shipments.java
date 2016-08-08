@@ -71,19 +71,13 @@ public class Shipments extends Controller {
     public static void showProcureUnitList(String id) {
         Shipment shipment = Shipment.findById(id);
         List<ShipItem> items = shipment.items;
-        render("Shipments/_shipitem.html", items);
+        render("Shipments/_show_plans.html", items);
     }
 
     public static void showShipPlans(String id) {
         Shipment shipment = Shipment.findById(id);
 
         render("Shipments/_shipitem.html");
-    }
-
-    public static void showShipPlanList(String id) {
-        Shipment shipment = Shipment.findById(id);
-        List<ShipPlan> plans = shipment.plans;
-        render("Shipments/_show_plans.html", plans);
     }
 
     public static void blank() {
