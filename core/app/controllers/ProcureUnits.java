@@ -330,12 +330,17 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.update(unit, shipmentId, msg);
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
+            List<Whouse> whouses;
+            if(unit.selling != null) {
+                whouses = Whouse.findByAccount(unit.selling.account);
+            } else {
+                whouses = Whouse.findByType(Whouse.T.FBA);
+            }
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
         flash.success("成功修改采购计划!", id);
