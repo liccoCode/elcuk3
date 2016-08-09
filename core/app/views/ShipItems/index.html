@@ -87,7 +87,7 @@
         </td>
         <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
         <td>${unit.qty()}</td>
-        <td>${unit.cooperator.name}</td>
+        <td>${unit.cooperator?.name}</td>
         <td>${unit.totalWeight()} kg</td>
         <td>${unit.whouse?.name}</td>
         <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
