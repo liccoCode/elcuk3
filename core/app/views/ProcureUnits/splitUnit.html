@@ -56,12 +56,7 @@
     <form action="@{ProcureUnits.doSplitUnit(unit.id)}" method="POST" id="splitUnitForm">
     #{authenticityToken /}
       <table class="table table-condensed table-bordered">
-      #{if unit.selling}
-          #{include 'ProcureUnits/_splitOnSelling.html'/}
-      #{/if}
-      #{else}
-          #{include 'ProcureUnits/_splitOnNoSelling.html'/}
-      #{/else}
+      #{include 'ProcureUnits/_splitOnSelling.html'/}
         <tr>
           <td colspan="6">
             <h4>Comment</h4>
