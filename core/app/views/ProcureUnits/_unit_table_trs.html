@@ -6,14 +6,14 @@
   </td>
   <th style="width:100px;"><span style="color:red">*</span>SKU</th>
   <td>
-    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.selling?.listing?.product?.sku}"
+    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.product.sku}"
     #{if unit.selling?.listing?.product?.sku} readonly #{/if} required autocomplete="off">
   </td>
 </tr>
 <tr>
   <th><span style="color:red">*</span>产品名称</th>
   <td>
-    <input type="text" id="productName" style="width:300px;" value="${unit.selling?.listing?.product?.abbreviation}"
+    <input type="text" id="productName" style="width:300px;" value="${unit.product?.abbreviation}"
     #{if unit.selling?.listing?.product?.abbreviation} readonly #{/if}required>
   </td>
   <th>阶段</th>
