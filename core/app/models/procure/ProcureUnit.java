@@ -462,7 +462,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void manualValidate() {
         Validation.required("交货日期", this.attrs.planDeliveryDate);
         Validation.required("采购数量", this.attrs.planQty);
-        Validation.required("procureunit.cooperator", this.cooperator);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
         if(this.product != null) this.sku = this.product.sku;
