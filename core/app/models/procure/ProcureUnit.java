@@ -227,7 +227,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 所关联的运输出去的 ShipItem.
      */
     @OneToMany(mappedBy = "unit")
-    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
+    public List<ShipItem> shipItems = new ArrayList<>();
 
 
     @OneToOne(fetch = FetchType.LAZY)

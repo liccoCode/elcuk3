@@ -126,6 +126,7 @@ public class Orderr extends GenericModel {
      * 订单创建时间
      */
     public Date createDate;
+    public Date updateDate;
 
     /**
      * 订单的付款时间

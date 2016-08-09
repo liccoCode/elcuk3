@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'Template' /}
 #{set 'moreScripts'}
-  #{script 'template/show.coffee'/}
+    #{script 'template/show.coffee'/}
 #{/set}
 
 <div class="row-fluid">
@@ -23,7 +23,7 @@
               ${temp_left.categorys.size()}
               </td>
               <td>
-              ${temp_left.attributes.size()}
+              ${temp_left.templateAttributes.size()}
               </td>
             </tr>
           #{/list}
@@ -92,7 +92,8 @@
             <div style="margin-bottom:10px;">
               <input type="hidden" name="id" value="${temp.id}">
               <button class="btn btn-warning" data-url="@{Templates.unattribute()}" data-loading>解除绑定</button>
-              <button class="btn btn-warning" id="saveDeclareBtn" data-url="@{Templates.saveDeclare()}" data-loading>保存</button>
+              <button class="btn btn-warning" id="saveDeclareBtn" data-url="@{Templates.saveDeclare()}" data-loading>保存
+              </button>
             </div>
             <table class="table table-bordered table-condensed">
               <tr>
@@ -100,15 +101,16 @@
                 <th>Name</th>
                 <th>是否报关要素</th>
               </tr>
-                #{list items:temp.findAttr(), as:'att'}
+                #{list items:temp.templateAttributes, as:'ta'}
                   <tr>
                     <td>
-                      <label><input type="checkbox" name="attributeIds" value="${att.attribute.id}"></label>
+                      <label><input type="checkbox" name="attributeIds" value="${ta.attribute?.id}"></label>
                     </td>
-                    <td>${att.attribute.name}</td>
+                    <td>${ta.attribute?.name}</td>
                     <td style="text-align:center;">
-                      <input type="checkbox" name="isDeclare" value="${att.attribute.id}_${att.isDeclare}" #{if att.isDeclare}
-                             checked #{/if}>
+                      <input type="hidden" name="templateAttributes[${ta_index - 1}].id" value="${ta.id}">
+                      <input type="checkbox" name="templateAttributes[${ta_index - 1}].isDeclare"
+                              ${ta.isDeclare ? 'checked' : ''}>
                     </td>
                   </tr>
                 #{/list}

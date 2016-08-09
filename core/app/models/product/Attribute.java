@@ -8,6 +8,7 @@ import play.db.jpa.Model;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 产品的扩展属性
@@ -76,17 +77,16 @@ public class Attribute extends Model {
     /**
      * 属性属于哪些模板
      */
-    @ManyToMany(mappedBy = "attributes", cascade = CascadeType.PERSIST)
-    public List<Template> templates;
+    @OneToMany(mappedBy = "attribute")
+    public List<TemplateAttribute> templateAttributes;
 
     public boolean exist() {
         return Attribute.count("name=?", this.name) > 0;
     }
 
     public void safeDelete() {
-        if(this.templates != null && this.templates.size() > 0) {
-            Validation.addError("",
-                    String.format("拥有 %s 个 Template 关联，无法删除", this.templates.size()));
+        if(this.templateAttributes != null && this.templateAttributes.size() > 0) {
+            Validation.addError("", String.format("拥有 %s 个 Template 关联，无法删除", this.templateAttributes.size()));
         }
         if(Validation.hasErrors()) return;
         this.delete();
@@ -105,7 +105,10 @@ public class Attribute extends Model {
     public boolean equals(Object other) {
         if(other instanceof ProductAttr) {
             ProductAttr productAttr = (ProductAttr) other;
-            return this.id == productAttr.attribute.id;
+            return Objects.equals(this.id, productAttr.attribute.id);
+        } else if(other instanceof TemplateAttribute) {
+            TemplateAttribute templateAttribute = (TemplateAttribute) other;
+            return Objects.equals(this.id, templateAttribute.attribute.id);
         }
         return super.equals(other);
     }
