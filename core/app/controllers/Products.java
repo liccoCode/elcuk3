@@ -341,11 +341,11 @@ public class Products extends Controller {
         Product pro = Product.findById(sku);
         Template template = Template.findById(templateId);
         List<ProductAttr> atts = pro.productAttrs;
-        for(Attribute attribute : template.attributes) {
-            if(!atts.contains(attribute)) {
+        for(TemplateAttribute templateAttribute : template.templateAttributes) {
+            if(!atts.contains(templateAttribute.attribute)) {
                 ProductAttr productAttr = new ProductAttr();
                 productAttr.product = pro;
-                productAttr.attribute = attribute;
+                productAttr.attribute = templateAttribute.attribute;
                 productAttr.save();
                 atts.add(productAttr);
             }
