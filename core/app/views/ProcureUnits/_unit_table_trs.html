@@ -6,7 +6,7 @@
   </td>
   <th style="width:100px;"><span style="color:red">*</span>SKU</th>
   <td>
-    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.product.sku}"
+    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.product?.sku}"
     #{if unit.product?.sku} readonly #{/if} required autocomplete="off">
   </td>
 </tr>
