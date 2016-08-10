@@ -278,10 +278,11 @@ public class OutboundRecord extends Model {
         this.planQty = plan.planQty;
         this.qty = this.planQty;
         this.shipPlan = plan;
-        Whouse whouse = this.findWhouse();
-        if(whouse != null) this.whouse = whouse;
+        this.whouse = this.findWhouse();
         this.stockObj = new StockObj(plan.product.sku);
         this.stockObj.setAttributes(plan);
+        Cooperator cooperator = Cooperator.mainShipper();
+        if(cooperator != null) this.targetId = cooperator.id.toString();
     }
 
     /**
@@ -291,7 +292,9 @@ public class OutboundRecord extends Model {
      */
     public OutboundRecord(InboundRecord inboundRecord) {
         this(T.Refund, O.Normal);
-        if(!inboundRecord.isRefund()) throw new FastRuntimeException("该构造函数只服务于为质检不合格的入库记录自动生成出库记录!");
+        if(!inboundRecord.isRefund()) {
+            throw new FastRuntimeException("该构造函数只能用于为质检不合格的入库记录自动生成出库记录!");
+        }
         this.qty = inboundRecord.badQty;
         this.planQty = this.qty;
         this.whouse = inboundRecord.targetWhouse;
