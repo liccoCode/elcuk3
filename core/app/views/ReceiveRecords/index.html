@@ -44,7 +44,7 @@
       </select>
 
       <select name="p.whouseId" class="inline">
-        <option value="">仓库</option>
+        <option value="">去往仓库</option>
       #{list items:whouses, as:'wh'}
         <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
       #{/list}
@@ -93,7 +93,7 @@
           <th rowspan="2">ID</th>
           <th rowspan="2">状态</th>
           <th rowspan="2">出货单ID</th>
-          <th rowspan="2">物料计划ID</th>
+          <th rowspan="2">采购计划ID</th>
           <th rowspan="2">供应商</th>
           <th rowspan="2">SKU</th>
           <th rowspan="2">产品名称</th>
