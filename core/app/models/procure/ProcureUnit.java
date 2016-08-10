@@ -462,7 +462,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void manualValidate() {
         Validation.required("交货日期", this.attrs.planDeliveryDate);
         Validation.required("采购数量", this.attrs.planQty);
-        Validation.required("procureunit.cooperator", this.cooperator);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
         if(this.product != null) this.sku = this.product.sku;
@@ -677,7 +676,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.required("procureunit.update.reason", reason);
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
-        if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
 
         List<String> logs = new ArrayList<String>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {

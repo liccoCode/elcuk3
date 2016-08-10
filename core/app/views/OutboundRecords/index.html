@@ -126,6 +126,7 @@
       #{list items: records, as: 'r'}
         <tr>
             #{set attrs: r.stockObj.attributes()/}
+            #{set unit_maps: r.stockObj.unitMaps()/}
           <td>
             <label class="checkbox">
               <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
@@ -222,8 +223,8 @@
                 #{/list}
             </select>
           </td>
-          <td>${attrs.get("unit")?.cooperator?.name}</td>
-          <td>${attrs.get("inboundRecord")?.id}</td>
+          <td>${unit_maps.get("unit")?.cooperator?.name}</td>
+          <td>${unit_maps.get("inboundRecord")?.id}</td>
           <td>${r.createDate.datetime()}</td>
           <td>${r.outboundDate.datetime()}</td>
           <td>
