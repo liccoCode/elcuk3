@@ -79,7 +79,7 @@ public class OutboundRecords extends Controller {
      * @param rids
      */
     @Check("outboundrecords.index")
-    public static void confirm(List<Long> rids) {
+    public static void confirm(List<Long> rids, OutboundRecordPost p) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = OutboundRecord.batchConfirm(rids);
             if(errors.isEmpty()) {
@@ -89,6 +89,6 @@ public class OutboundRecords extends Controller {
             }
 
         }
-        redirect("/OutboundRecords/index");
+        redirect("/OutboundRecords/index", p);
     }
 }

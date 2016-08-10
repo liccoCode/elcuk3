@@ -10,7 +10,7 @@ $ ->
       return false
     else
       return unless confirm("确认出库?")
-      $("form[name=confirm_form]").submit()
+      window.location.replace("/OutboundRecords/confirm?#{$("[name='rids']").serialize()}&#{$("#search_Form").serialize()}")
   ).on('click', '#download_excel', (e) ->
     window.open('/Excels/exportOutboundRecords?' + $("#search_Form").serialize(), "_blank")
   )
