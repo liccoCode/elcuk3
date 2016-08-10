@@ -29,14 +29,17 @@
                 #{power.ck "procures.index"}
                   <li><a href="@{ProcureUnits.indexForMarket()}">采购计划</a></li>
                 #{/power.ck}
+                #{power.ck "shipplans.index"}
+                  <li><a href="@{ShipPlans.index()}">出库计划</a></li>
+                #{/power.ck}
+                #{power.ck "analyzes.index"}
+                  <li><a href="@{Analyzes.index()}">销量分析</a></li>
+                #{/power.ck}
                 #{power.ck "sellings.index"}
                   <li><a href="@{Sellings.index()}">Selling列表</a></li>
                 #{/power.ck}
                 #{power.ck "orders.index"}
                   <li><a href="@{Orders.index()}">订单</a></li>
-                #{/power.ck}
-                #{power.ck "analyzes.index"}
-                  <li><a href="@{Analyzes.index()}">销量分析</a></li>
                 #{/power.ck}
                 #{power.ck "analyzeskus.index"}
                   <li><a href="@{AnalyzeSkus.index()}">SKU 销量分析</a></li>
@@ -52,12 +55,10 @@
                 #{/power.ck}
                 #{power.ck "profits.index"}
                   <li><a href="@{Profits.index()}">利润分析</a></li>
-
                 #{/power.ck}
                 #{power.ck "sellingrecords.index"}
                   <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
                 #{/power.ck}
-
                 #{power.ck "salereports.salecount"}
                   <li><a href="@{SaleReports.saleCount()}">销售统计报表</a></li>
                 #{/power.ck}
@@ -68,8 +69,6 @@
                 #{power.ck "reportdownloads"}
                   <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
                 #{/power.ck}
-
-              <li><a href="@{ShipPlans.index()}">出货计划</a></li>
             </ul>
           </li>
         #{/power.ck}

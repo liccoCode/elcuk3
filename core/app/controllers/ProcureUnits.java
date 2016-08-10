@@ -683,10 +683,10 @@ public class ProcureUnits extends Controller {
      * @param name
      * @param type
      */
-    public static void showStockBySellingOrSku(String name, String type) {
+    public static void showStockBySellingOrSku(String name, String type, String flag) {
         HashMap<String, Integer> map = ProcureUnit.caluStockInProcureUnit(name, type);
         HashMap<String, Integer> stock_map = WhouseItem.caluStockInProcureUnit(name, type);
-        render(map, stock_map);
+        render(map, stock_map, flag);
     }
 
     /**

@@ -46,7 +46,7 @@ $ ->
 
   getStockBySku = (sku) ->
     return if _.isEmpty(sku)
-    $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU"})
+    $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU", flag: "shipPlan"})
 
   getProductNmae = (sku) ->
     $.post('/products/findProductName', sku: sku, (r) ->
