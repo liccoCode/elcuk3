@@ -105,6 +105,10 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
 
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append("AND (");
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append(" shipPlan.id=? OR");
+                params.add(NumberUtils.toLong(this.search));
+            }
             sbd.append(" stockObjId LIKE ? OR attributes LIKE ?").append(")");
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");

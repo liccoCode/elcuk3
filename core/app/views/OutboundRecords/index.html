@@ -90,6 +90,7 @@
           <th rowspan="2" style="width:30px;">ID</th>
           <th rowspan="2" style="width:60px;">出库类别</th>
           <th rowspan="2" style="width:50px;">状态</th>
+          <th rowspan="2" style="width:40px;">出库计划ID</th>
           <th rowspan="2" style="width:40px;">采购计划ID</th>
           <th rowspan="2" style="width:120px;">SKU</th>
           <th rowspan="2" style="width:110px;">产品名称</th>
@@ -136,6 +137,11 @@
           <td>${r.id}</td>
           <td>${r.type.label()}</td>
           <td>${r.state.label()}</td>
+          <td>
+              #{if r.shipPlan != null}
+                <a href="@{ShipPlans.show(r.shipPlan)}">${r.shipPlan?.id}</a>
+              #{/if}
+          </td>
           <td>
               #{if attrs.containsKey('procureunitId')}
                 <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
