@@ -10,10 +10,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
-import models.procure.Cooperator;
-import models.procure.DeliverPlan;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -250,13 +247,8 @@ public class OutboundRecord extends Model {
 
     @PostLoad
     public void postPersist() {
-        this.mainBox = StringUtils.isEmpty(this.mainBoxInfo) ? new CheckTaskDTO() :
-                JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
-        this.lastBox = StringUtils.isEmpty(this.lastBoxInfo) ? new CheckTaskDTO() :
-                JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+        this.unmarshalBoxs();
     }
-
-    /**************************************/
 
     public OutboundRecord() {
         this.qty = 0;
@@ -281,8 +273,7 @@ public class OutboundRecord extends Model {
         this.whouse = this.findWhouse();
         this.stockObj = new StockObj(plan.product.sku);
         this.stockObj.setAttributes(plan);
-        Cooperator cooperator = Cooperator.mainShipper();
-        if(cooperator != null) this.targetId = cooperator.id.toString();
+        this.tryMatchAttrs();
     }
 
     /**
@@ -301,6 +292,44 @@ public class OutboundRecord extends Model {
         this.stockObj = inboundRecord.stockObj.dump();
         Optional cooperatorId = Optional.fromNullable(this.stockObj.attributes().get("cooperatorId"));
         if(cooperatorId.isPresent()) this.targetId = cooperatorId.get().toString();
+    }
+
+    /**
+     * 为出库计划尝试匹配
+     * 1. 出库对象
+     * 2. 主箱信息 和 尾箱信息
+     * 3. 报关类型
+     * 4. 哪个仓库出货
+     */
+    public void tryMatchAttrs() {
+        if(StringUtils.isBlank(this.targetId)) {
+            //尝试匹配出库对象
+            Cooperator cooperator = Cooperator.mainShipper();
+            if(cooperator != null) this.targetId = cooperator.id.toString();
+        }
+
+        if(StringUtils.isBlank(this.mainBoxInfo) || StringUtils.isBlank(this.lastBoxInfo)) {
+            if(this.stockObj != null && this.stockObj.procureunitId() != null) {
+                //尝试匹配 主箱信息 和 尾箱信息
+                ReceiveRecord receiveRecord = this.receiveRecord();
+                if(receiveRecord != null) {
+                    this.mainBoxInfo = receiveRecord.mainBoxInfo;
+                    this.lastBoxInfo = receiveRecord.lastBoxInfo;
+                    this.unmarshalBoxs();
+                }
+            }
+            if(this.clearanceType == null) {
+                //尝试匹配报关类型
+                ProcureUnit procureUnit = this.procureUnit();
+                if(procureUnit != null) {
+                    this.clearanceType = procureUnit.clearanceType;
+                }
+            }
+        }
+
+        if(this.whouse == null) {
+            this.whouse = this.findWhouse();
+        }
     }
 
     /**
@@ -585,7 +614,6 @@ public class OutboundRecord extends Model {
      */
     public Whouse findWhouse() {
         if(this.stockObj == null) return null;
-
         Optional fba = Optional.fromNullable(this.stockObj.attributes().get("fba"));
         if(fba.isPresent()) {
             Optional<InboundRecord> inboundRecord = Optional.fromNullable(
@@ -596,71 +624,58 @@ public class OutboundRecord extends Model {
         return null;
     }
 
-    /**
-     * 为已经存在的出库记录尝试匹配仓库
-     *
-     * @param records
-     */
-    public static void tryMatchWhouse(List<OutboundRecord> records) {
-        if(records == null || records.isEmpty()) return;
-        for(OutboundRecord record : records) {
-            if(record.whouse != null) continue;
-
-            Whouse whouse = record.findWhouse();
-            if(whouse != null) {
-                record.whouse = whouse;
-                record.save();
-            }
+    public ReceiveRecord receiveRecord() {
+        Long procureunitId = this.stockObj.procureunitId();
+        if(procureunitId != null) {
+            return ReceiveRecord.find("procureUnit.id=?", procureunitId).first();
         }
+        return null;
     }
 
-    /**
-     * 为出库计划匹配 入库计划中的主箱和尾箱信息
-     *
-     * @param records
-     */
-    public static void tryMatchBoxInfo(List<OutboundRecord> records) {
-        if(records == null || records.isEmpty()) return;
-        for(OutboundRecord record : records) {
-            if(StringUtils.isEmpty(record.mainBoxInfo) && StringUtils.isEmpty(record.lastBoxInfo)) {
-                Object procureunitId = record.stockObj.procureunitId();
-                if(procureunitId != null) {
-                    List<InboundRecord> list = InboundRecord.find("stockObj.attributes like ? ",
-                            "%\"procureunitId\":" + procureunitId.toString() + "%").fetch();
-                    if(list != null && list.size() > 0) {
-                        InboundRecord inboundRecord = list.get(0);
-                        record.mainBoxInfo = inboundRecord.mainBoxInfo;
-                        record.lastBoxInfo = inboundRecord.lastBoxInfo;
-                        record.save();
-                        record.postPersist();
-                    }
-                }
-            }
-        }
+    public String receiveRecordId() {
+        ReceiveRecord receiveRecord = this.receiveRecord();
+        if(receiveRecord != null) return receiveRecord.id;
+        return null;
     }
 
-    /**
-     * 为出库计划匹配 采购计划中的 报关类型
-     *
-     * @param records
-     */
-    public static void tryMatchClearanceType(List<OutboundRecord> records) {
-        if(records == null || records.isEmpty()) return;
-        for(OutboundRecord record : records) {
-            if(record.clearanceType == null) {
-                Map<String, Object> attrs = record.stockObj.attributes();
-                if(attrs.get("procureunitId") != null && StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
-                    Long id = Long.parseLong(attrs.get("procureunitId").toString());
-                    ProcureUnit u = ProcureUnit.findById(id);
-                    record.clearanceType = u.clearanceType;
-                    record.save();
-                }
-            }
+    public ProcureUnit procureUnit() {
+        Long procureunitId = this.stockObj.procureunitId();
+        if(procureunitId != null) {
+            return ProcureUnit.findById(procureunitId);
         }
+        return null;
     }
 
     public void marshalBoxs() {
         this.mainBoxInfo = J.json(this.mainBox);
         this.lastBoxInfo = J.json(this.lastBox);
+    }
+
+    public void unmarshalBoxs() {
+        this.mainBox = StringUtils.isEmpty(this.mainBoxInfo) ? new CheckTaskDTO() :
+                JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = StringUtils.isEmpty(this.lastBoxInfo) ? new CheckTaskDTO() :
+                JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
+
+    /**
+     * 格式化出库对象
+     *
+     * @return
+     */
+    public String getFormatTarget() {
+        switch(this.type) {
+            case Normal:
+            case B2B:
+            case Refund:
+                Cooperator cooperator = Cooperator.findById(NumberUtils.toLong(this.targetId));
+                return cooperator.name;
+            case Process:
+            case Sample:
+            case Other:
+                return this.targetId;
+            default:
+                return null;
+        }
     }
 }

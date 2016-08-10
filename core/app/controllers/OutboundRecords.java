@@ -41,9 +41,7 @@ public class OutboundRecords extends Controller {
         List<ElcukRecord> elcukRecords = ElcukRecord.records(Arrays.asList(
                 Messages.get("outboundrecord.confirm"),
                 Messages.get("outboundrecord.update")), 50);
-        OutboundRecord.tryMatchWhouse(records);
-        OutboundRecord.tryMatchBoxInfo(records);
-        OutboundRecord.tryMatchClearanceType(records);
+        for(OutboundRecord record : records) record.tryMatchAttrs();
         render(p, records, elcukRecords);
     }
 

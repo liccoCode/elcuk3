@@ -50,7 +50,7 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     public DeliverPlan deliverPlan;
 
     /**
-     * 物料计划
+     * 采购计划
      */
     @Required
     @OneToOne(fetch = FetchType.LAZY)

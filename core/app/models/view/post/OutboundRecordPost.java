@@ -155,4 +155,9 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
     public Long getTotalCount() {
         return this.count();
     }
+
+    public List<OutboundRecord> queryForExcel() {
+        F.T2<String, List<Object>> params = params();
+        return OutboundRecord.find(params._1, params._2.toArray()).fetch();
+    }
 }
