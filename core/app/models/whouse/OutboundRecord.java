@@ -251,7 +251,6 @@ public class OutboundRecord extends Model {
     }
 
     public OutboundRecord() {
-        this.qty = 0;
         this.planQty = 1;
         this.state = S.Pending;
         this.type = T.Normal;
