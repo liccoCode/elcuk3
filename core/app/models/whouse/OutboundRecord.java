@@ -504,7 +504,7 @@ public class OutboundRecord extends Model {
                 this.targetIdValidByCT(Cooperator.T.SUPPLIER);
                 break;
             case Process:
-                if(StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
+                if(!StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
                     Validation.addError("", "出库对象只能为品拓生产部.");
                 }
                 break;
