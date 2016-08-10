@@ -112,6 +112,8 @@ $ ->
       $("#planDeliveryDate").focus()
       return false
     $("#new_procureunit").submit()
+  ).on('click', 'input[name=shipmentId]', (e) ->
+    $("input[name='unit.shipmentId']").val($(@).val())
   )
 
   $sku = $("#unit_sku")

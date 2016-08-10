@@ -197,6 +197,11 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     public ShipPlan doCreate() {
         this.save();
         this.triggerRecord();
+        //将生成的出货计划添加到运输单
+        if(this.unit != null && StringUtils.isNotBlank(this.unit.shipmentId)) {
+            Shipment shipment = Shipment.findById(this.unit.shipmentId);
+            shipment.addToShip(this);
+        }
         return this;
     }
 
