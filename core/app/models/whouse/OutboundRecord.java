@@ -632,6 +632,14 @@ public class OutboundRecord extends Model {
         return null;
     }
 
+    public String cooperatorName() {
+        ReceiveRecord receiveRecord = this.receiveRecord();
+        if(receiveRecord != null && receiveRecord.procureUnit != null && receiveRecord.procureUnit.cooperator != null) {
+            return receiveRecord.procureUnit.cooperator.name;
+        }
+        return null;
+    }
+
     public String receiveRecordId() {
         ReceiveRecord receiveRecord = this.receiveRecord();
         if(receiveRecord != null) return receiveRecord.id;
