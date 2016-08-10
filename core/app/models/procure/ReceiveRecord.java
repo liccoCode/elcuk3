@@ -61,8 +61,7 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
      */
     @Min(0)
     @Expose
-    public int qty = 0;
-
+    public Integer qty;
 
     /**
      * 状态
