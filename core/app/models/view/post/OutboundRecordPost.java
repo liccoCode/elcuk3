@@ -5,6 +5,7 @@ import models.market.M;
 import models.procure.Shipment;
 import models.whouse.OutboundRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -101,7 +102,12 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND (stockObjId LIKE ? OR attributes LIKE ?)");
+            sbd.append("AND (");
+            if(NumberUtils.isNumber(this.search)) {
+                sbd.append(" shipPlan.id=? OR");
+                params.add(NumberUtils.toLong(this.search));
+            }
+            sbd.append(" stockObjId LIKE ? OR attributes LIKE ?").append(")");
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");
         }
