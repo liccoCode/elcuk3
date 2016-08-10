@@ -89,6 +89,6 @@ public class OutboundRecords extends Controller {
             }
 
         }
-        redirect("/OutboundRecords/index", p);
+        index(p);
     }
 }

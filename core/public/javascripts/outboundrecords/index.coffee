@@ -10,9 +10,9 @@ $ ->
       return false
     else
       return unless confirm("确认出库?")
-      window.location.replace("/OutboundRecords/confirm?#{$("[name='rids']").serialize()}&#{$("#search_Form").serialize()}")
+      window.location.replace("/OutboundRecords/confirm?#{$("[name='rids']").serialize()}&#{$("form.search_form").serialize()}")
   ).on('click', '#download_excel', (e) ->
-    window.open('/Excels/exportOutboundRecords?' + $("#search_Form").serialize(), "_blank")
+    window.open('/Excels/exportOutboundRecords?' + $("form.search_form").serialize(), "_blank")
   )
 
   $("form[name=confirm_form]").on('change', "td>:input[name]", (e) -> #"input[name=qty],input[name=memo],select[name=whouse],select[name=targetId]"
