@@ -72,7 +72,8 @@
 
       <div class="inline">
         <a href="@{OutboundRecords.blank()}" target="_blank" class="btn btn-success inline">添加其他出库</a>
-        <a target="_blank" class="btn btn-info inline" name="confirm">确认出库</a>
+        <a class="btn btn-info inline" href="javascript:void(0)" id="download_excel">导出</a>
+        <a target="_blank" class="btn btn-warning inline" name="confirm">确认出库</a>
       </div>
     </div>
   </form>
@@ -104,7 +105,7 @@
           <th colspan="6" style="width:380px;">尾箱</th>
           <th rowspan="2" style="width:80px;">报关类型</th>
           <th rowspan="2" style="width:80px;">供应商</th>
-          <th rowspan="2" style="width:60px;">收货记录Id</th>
+          <th rowspan="2" style="width:60px;">收货记录ID</th>
           <th rowspan="2" style="width:80px;">创建时间</th>
           <th rowspan="2" style="width:80px;">完成时间</th>
           <th rowspan="2" style="width:160px;">备注</th>

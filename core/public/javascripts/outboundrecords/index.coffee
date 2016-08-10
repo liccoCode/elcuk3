@@ -11,6 +11,8 @@ $ ->
     else
       return unless confirm("确认出库?")
       $("form[name=confirm_form]").submit()
+  ).on('click', '#download_excel', (e) ->
+    window.open('/Excels/exportOutboundRecords?' + $("#search_Form").serialize(), "_blank")
   )
 
   $("form[name=confirm_form]").on('change', "td>:input[name]", (e) -> #"input[name=qty],input[name=memo],select[name=whouse],select[name=targetId]"

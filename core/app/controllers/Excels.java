@@ -16,6 +16,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.OutboundRecord;
 import models.whouse.ShipPlan;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
@@ -808,6 +809,22 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(plans, p);
+        }
+    }
+
+
+    public static void exportOutboundRecords(OutboundRecordPost p) {
+        List<OutboundRecord> records = p.queryForExcel();
+        if(records == null || records.size() == 0) {
+            renderText("没有数据无法生成Excel文件!");
+        } else {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("出库记录%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dateFormat", formatter);
+            render(records, p);
         }
     }
 }
