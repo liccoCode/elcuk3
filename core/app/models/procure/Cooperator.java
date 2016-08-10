@@ -359,4 +359,13 @@ public class Cooperator extends Model {
             return collator.compare(a.name, b.name);
         }
     }
+
+    /**
+     * Easyacc 这边大部分的货物都是走的欧嘉国际货代
+     *
+     * @return
+     */
+    public static Cooperator mainShipper() {
+        return Cooperator.find("name LIKE '%欧嘉国际%'").first();
+    }
 }

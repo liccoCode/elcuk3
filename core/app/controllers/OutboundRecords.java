@@ -41,9 +41,7 @@ public class OutboundRecords extends Controller {
         List<ElcukRecord> elcukRecords = ElcukRecord.records(Arrays.asList(
                 Messages.get("outboundrecord.confirm"),
                 Messages.get("outboundrecord.update")), 50);
-        OutboundRecord.tryMatchWhouse(records);
-        OutboundRecord.tryMatchBoxInfo(records);
-        OutboundRecord.tryMatchClearanceType(records);
+        for(OutboundRecord record : records) record.tryMatchAttrs();
         render(p, records, elcukRecords);
     }
 
@@ -81,7 +79,7 @@ public class OutboundRecords extends Controller {
      * @param rids
      */
     @Check("outboundrecords.index")
-    public static void confirm(List<Long> rids) {
+    public static void confirm(List<Long> rids, OutboundRecordPost p) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = OutboundRecord.batchConfirm(rids);
             if(errors.isEmpty()) {
@@ -91,6 +89,6 @@ public class OutboundRecords extends Controller {
             }
 
         }
-        redirect("/OutboundRecords/index");
+        index(p);
     }
 }

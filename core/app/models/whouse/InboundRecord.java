@@ -73,7 +73,6 @@ public class InboundRecord extends Model {
     /**
      * 质检任务
      */
-    @Expose
     @OneToOne
     public CheckTask checkTask;
 
@@ -81,7 +80,6 @@ public class InboundRecord extends Model {
      * 目标仓库
      */
     @Required
-    @Expose
     @ManyToOne
     public Whouse targetWhouse;
 
@@ -89,7 +87,6 @@ public class InboundRecord extends Model {
     /**
      * 去往仓库
      */
-    @Expose
     @ManyToOne
     public Whouse toWhouse;
 

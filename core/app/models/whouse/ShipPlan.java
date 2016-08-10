@@ -196,20 +196,17 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
 
     public ShipPlan doCreate() {
         this.save();
-        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        this.triggerRecord(cooperator == null ? "" : cooperator.id.toString());
+        this.triggerRecord();
         return this;
     }
 
     /**
      * 生成出库记录
      *
-     * @param targetId
      * @return
      */
-    public ShipPlan triggerRecord(String targetId) {
+    public ShipPlan triggerRecord() {
         OutboundRecord outboundRecord = new OutboundRecord(this);
-        if(StringUtils.isNotBlank(targetId)) outboundRecord.targetId = targetId;
         if(!outboundRecord.exist()) outboundRecord.save();
         this.out = outboundRecord;
         this.save();
