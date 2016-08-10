@@ -46,13 +46,16 @@ $ ->
     whouseId = $("[name='unit.whouse.id']").val()
     shipType = $("[name='unit.shipType']:checked").val()
     shipment = $("#shipments")
+    getSelling($("#unit_sku").val())
     return unless (whouseId && shipType && shipment.size() > 0)
+
+    planDeliveryDate = $("#planDeliveryDate").val()
 
     if shipType == 'EXPRESS'
       $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.')
     else
       LoadMask.mask(shipment)
-      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
+      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType, planDeliveryDate: planDeliveryDate})
       .done((html) ->
         shipment.html(html)
         LoadMask.unmask()
@@ -123,6 +126,7 @@ $ ->
       getStockBySku(item)
       getProductNmae(item)
       getCooperItemBySku(item)
+      getSelling(item)
       item
   })
 
@@ -144,6 +148,7 @@ $ ->
       getProductNmae(sku)
       checkCoopertorBySelling(item)
       getCooperItemBySku(sku)
+      getSelling()
       item
   })
 
@@ -182,6 +187,16 @@ $ ->
   getStockBySku = (sku) ->
     $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU"})
 
+  getSelling = (sku) ->
+    if sku && $("#warehouse_select").val()
+      country = $("#warehouse_select :selected").text().split('_')[1]
+      sku = $("#unit_sku").val()
+      $.get("/sellings/findSellingBySkuAndMarket", {sku: sku, market: "AMAZON_" + country})
+      .done((c) ->
+        $("#sellingId").val(c)
+        if !$("#sellingId").val()
+          noty({text: "市场对应无Selling", type: 'error'})
+      )
 
 
 
