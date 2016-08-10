@@ -1004,8 +1004,12 @@ public class Selling extends GenericModel {
          * 域名主市场由账户决定, Listing 跨市场由 Selling 的 Market 属性决定
          */
         switch(this.account.type) {
-            case AMAZON_CA:
             case AMAZON_US:
+                return String.format(
+                        "https://catalog.%s/abis/product/DisplayEditProduct?marketplaceID=%s&sku=%s&asin=%s",
+                        this.account.type.toString(), this.market.amid().name(), msku, this.asin
+                );
+            case AMAZON_CA:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
