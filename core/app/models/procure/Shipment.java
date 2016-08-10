@@ -1712,7 +1712,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void outbound() {
         if(this.items == null || this.items.isEmpty()) return;
-        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
+        Cooperator cooperator = Cooperator.mainShipper();
         for(ShipItem item : this.items) {
             if(item.plan != null || item.unit == null ||
                     OutboundRecord.checkExistsWithUnitId(item.unit.id.toString())) {

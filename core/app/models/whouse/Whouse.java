@@ -338,13 +338,15 @@ public class Whouse extends Model {
                 sbd.append(" AND isSEA=true");
                 break;
             case EXPRESS:
+            case EXPRESS_FAST:
+            case EXPRESS_ECO:
                 sbd.append(" AND isEXPRESS=true");
                 break;
             case AIR:
                 sbd.append(" AND isAIR=true");
                 break;
             default:
-                throw new FastRuntimeException("不支持的 ShipType");
+                return null;
         }
         return Whouse.find(sbd.toString(), cooperator).first();
     }

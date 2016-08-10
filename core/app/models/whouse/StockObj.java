@@ -75,9 +75,6 @@ public class StockObj implements Serializable, Cloneable {
     @Transient
     public Map<String, Object> attrs = new HashMap<>();
 
-    @Transient
-    public Map<String, Object> obj_map = new HashMap<>();
-
     public Product getProduct() {
         if(this.stockObjType != SOT.SKU) {
             throw new FastRuntimeException("货物类型(stockObjType)错误, 无法找到对应 Product!");
@@ -137,23 +134,6 @@ public class StockObj implements Serializable, Cloneable {
     public Map attributes() {
         if(this.attrs == null || this.attrs.isEmpty()) this.unmarshalAtts();
         return this.attrs;
-    }
-
-    public Map unitMaps() {
-        if(this.attrs != null && !this.attrs.isEmpty()) {
-            if(this.attrs.get("procureunitId") != null &&
-                    StringUtils.isNotBlank(attrs.get("procureunitId").toString())) {
-                ProcureUnit unit = ProcureUnit.findById(Long.parseLong(attrs.get("procureunitId").toString()));
-                this.obj_map.put("unit", unit);
-                List<InboundRecord> list = InboundRecord.find("stockObj.attributes like ? ",
-                        "%\"procureunitId\":" + attrs.get("procureunitId").toString() + "%").fetch();
-                if(list != null && list.size() > 0) {
-                    InboundRecord inboundRecord = list.get(0);
-                    this.obj_map.put("inboundRecord", inboundRecord);
-                }
-            }
-        }
-        return this.obj_map;
     }
 
     public void marshalAtts() {
