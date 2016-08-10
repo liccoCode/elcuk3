@@ -97,7 +97,7 @@
     <textarea rows="8" class="span12" name="unit.comment" id="memo">${unit.comment.raw()}</textarea>
   </td>
 </tr>
-
+<input type="hidden" name="unit.shipmentId" value="${unit.shipmentId}">
 <input type="hidden" name="to_page" value="#{if sid} analysis #{/if} #{else } index #{/else}">
 
 

@@ -436,6 +436,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     /**
+     * 运输单 ID(只用作出库计划去关联上运输单使用)
+     */
+    @Expose
+    public String shipmentId;
+
+    /**
      * ProcureUnit 的检查
      */
     public void validate() {

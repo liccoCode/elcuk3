@@ -296,7 +296,7 @@ public class DeliverPlan extends GenericModel {
             ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
             if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
 
-            //生成出货计划(我也不知道为什么要把生成出货计划的节点放在这里)
+            //生成出货计划
             ShipPlan plan = new ShipPlan(unit);
             if(!plan.exist()) {
                 plan.doCreate();

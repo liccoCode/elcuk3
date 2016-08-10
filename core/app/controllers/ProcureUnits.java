@@ -248,15 +248,11 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
-    public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, String to_page) {
+    public static void create(ProcureUnit unit, String isNeedApply, String to_page) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.creator = unit.handler;
         unit.clearanceType = DeliverPlan.CT.Self;
         if(unit.product != null) unit.sku = unit.product.sku;
-
-        if(unit.shipType == Shipment.T.EXPRESS) {
-            if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
-        }
 
         if(Validation.hasErrors()) {
             List<Whouse> whouses;
@@ -274,29 +270,6 @@ public class ProcureUnits extends Controller {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
         unit.save();
-
-        if(unit.selling != null && StringUtils.isNotBlank(shipmentId)) {
-            if(unit.shipType != Shipment.T.EXPRESS) {
-                Shipment ship = Shipment.findById(shipmentId);
-                ship.addToShip(unit);
-            }
-
-            if(Validation.hasErrors()) {
-                List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-                unit.remove();
-                render("ProcureUnits/blank.html", unit, whouses);
-            }
-            new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
-                    .save();
-
-            if(StringUtils.equals(isNeedApply, "need")) {
-                unit.startActiviti(unit.handler.username);
-                flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-                ProcureUnits.showactiviti(unit.id);
-            } else {
-                flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-            }
-        }
         if(StringUtils.isNotBlank(to_page) && to_page.trim().equals("analysis")) {
             Analyzes.index();
         } else {
