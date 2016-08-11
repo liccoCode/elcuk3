@@ -134,7 +134,7 @@
           </td>
           <td>${dmt.deliveryType?.label()}</td>
           <td>${dmt.supplier()?.name}</td>
-          <td>${dmt.haveSelling ? '有' : '无'}</td>
+          <td>#{yesOrNo f: dmt.haveSelling/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
           <td>
