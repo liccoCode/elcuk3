@@ -211,7 +211,11 @@ public class ShipItem extends GenericModel {
      * @return
      */
     public float totalWeight() {
-        return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
+        if(this.unit != null) {
+            return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
+        } else {
+            return this.qty * (this.plan.product.weight == null ? 0 : this.plan.product.weight);
+        }
     }
 
 

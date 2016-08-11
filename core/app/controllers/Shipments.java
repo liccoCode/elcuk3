@@ -43,7 +43,7 @@ import static play.modules.pdf.PDF.renderPDF;
 public class Shipments extends Controller {
     @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
-        List<Whouse> whouses = Whouse.findAll();
+        List<Whouse> whouses = Whouse.find("type=?", Whouse.T.FBA).fetch();
         List<Cooperator> cooperators = Cooperator.shippers();
         renderArgs.put("whouses", whouses);
         renderArgs.put("cooperators", cooperators);

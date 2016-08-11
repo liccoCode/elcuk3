@@ -24,7 +24,7 @@
   </tr>
 #{list items:items, as:'item'}
     #{if item.plan}
-    #{set plan: item.plan/}
+        #{set plan: item.plan/}
       <tr>
         <td>
           <a target="_blank" href="@{ShipPlans.show(plan.id)}">${plan.id}</a>
@@ -45,17 +45,43 @@
         <td>#{time_tooltip time:plan.planShipDate/}</td>
         <td>#{time_tooltip time:plan.planArrivDate/}</td>
         <td></td>
+        <td>${item.totalWeight()}</td>
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
-        <td></td>
+        <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>
       </tr>
     #{/if}
-    #{else }
+    #{else}
       <tr>
-
-
+        <td></td>
+        <td></td>
+        <td>${item.unit.sku}</td>
+        <td>${item.unit.sid}</td>
+        <td>${item.unit.product?.abbreviation}</td>
+        <td>${item.unit.attrs.price}</td>
+        <td></td>
+        <td>${item.unit.whouse.name()}</td>
+        <td><a href="${item.unit.fba.fbaLink()}" target="_blank">${item.unit.fba.shipmentId}</a></td>
+        <td>${item.unit.fba?.centerId}</td>
+        <td>
+        ${item.qty - item.unit.returnPurchaseSample() - item.unit.fetchCheckTaskQcSample()}
+          (${item.unit.attrs.planQty} | ${item.unit.attrs.qty})
+        </td>
+        <td style="#{if item.recivedQty != item.qty || item.changeFromZero()}background:#F2DEDE#{/if}"
+            name='recivedQty' placement='right' rel='popover'>${item.recivedQty}
+        </td>
+        <td style="${item.adjustQty != item.qty ? 'background:#F2DEDE' : ''}" name="adjustQty"
+            content='#{records_ul records: item.recivedLogs()/}'>${item.adjustQty}<i class="icon-wrench"></i>
+        </td>
+        <td style="background:${item.overdue()}">#{time_tooltip time: item.unit.attrs.planShipDate/}</td>
+        <td>#{time_tooltip time: item.unit.attrs.planArrivDate/}</td>
+        <td></td>
+        <td>${item.totalWeight()}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>
       </tr>
     #{/else}
 #{/list}
