@@ -391,69 +391,32 @@ public class OutboundRecord extends Model {
         if(this.isLocked()) throw new FastRuntimeException("已经入库或取消状态下的出库记录不允许修改!");
         List<String> logs = new ArrayList<>();
         switch(attr) {
-            case "qty":
-                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
-                break;
-            case "memo":
-                logs.addAll(Reflects.logFieldFade(this, attr, value));
-                break;
             case "whouse":
-                Whouse whouse = Whouse.findById(NumberUtils.toLong(value));
-                logs.addAll(Reflects.logFieldFade(this, "whouse", whouse != null ? whouse : null));
+                logs.addAll(Reflects.logFieldFade(this, "whouse", Whouse.findById(NumberUtils.toLong(value))));
                 break;
             case "targetId":
+            case "memo":
                 logs.addAll(Reflects.logFieldFade(this, attr, value));
                 break;
             case "outboundDate":
                 logs.addAll(Reflects.logFieldFade(this, "outboundDate", Dates.cn(value).toDate()));
                 break;
+            case "qty":
             case "mainBox.boxNum":
-                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
-                this.marshalBoxs();
-                break;
             case "mainBox.num":
-                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
-                this.marshalBoxs();
+            case "lastBox.boxNum":
+            case "lastBox.num":
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "mainBox.singleBoxWeight":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
             case "mainBox.length":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
             case "mainBox.width":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
             case "mainBox.height":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
-            case "lastBox.boxNum":
-                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
-                this.marshalBoxs();
-                break;
-            case "lastBox.num":
-                logs.addAll(Reflects.logFieldFade(this, attr, Integer.parseInt(value)));
-                this.marshalBoxs();
-                break;
             case "lastBox.singleBoxWeight":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
             case "lastBox.length":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
             case "lastBox.width":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
-                break;
             case "lastBox.height":
-                logs.addAll(Reflects.logFieldFade(this, attr, Double.valueOf(value)));
-                this.marshalBoxs();
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toDouble(value)));
                 break;
             case "clearanceType":
                 logs.addAll(Reflects.logFieldFade(this, attr, DeliverPlan.CT.valueOf(value)));
@@ -461,7 +424,14 @@ public class OutboundRecord extends Model {
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
-        new ERecordBuilder("outboundrecord.update").msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
+        this.marshalBoxs();
+        if(attr.contains(".boxNum") || attr.contains(".num")) {
+            int fullQty = this.mainBox.qty() + this.lastBox.qty();
+            if(fullQty != 0) logs.addAll(Reflects.logFieldFade(this, "qty", fullQty));
+        }
+        new ERecordBuilder("outboundrecord.update")
+                .msgArgs(this.id, StringUtils.join(logs, "<br/>"))
+                .fid(this.id)
                 .save();
         this.save();
     }

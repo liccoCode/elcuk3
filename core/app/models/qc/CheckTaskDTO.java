@@ -15,32 +15,32 @@ public class CheckTaskDTO implements Serializable {
     /**
      * 箱数
      */
-    public int boxNum;
+    public Integer boxNum;
 
     /**
      * 个数
      */
-    public int num;
+    public Integer num;
 
     /**
      * 单箱重量
      */
-    public double singleBoxWeight;
+    public Double singleBoxWeight;
 
     /**
      * 长
      */
-    public double length;
+    public Double length;
 
     /**
      * 宽
      */
-    public double width;
+    public Double width;
 
     /**
      * 高
      */
-    public double height;
+    public Double height;
 
     /**
      * 计算 boxNum * num
@@ -48,6 +48,9 @@ public class CheckTaskDTO implements Serializable {
      * @return
      */
     public int qty() {
-        return this.boxNum * this.num;
+        if(this.boxNum != null && this.num != null) {
+            return this.boxNum * this.num;
+        }
+        return 0;
     }
 }
