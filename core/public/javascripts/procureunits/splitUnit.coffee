@@ -40,11 +40,12 @@ $ ->
     shipment = $('#shipments')
     return unless (whouseId && shipType && shipment.size() > 0)
 
+    planDeliveryDate = $("#planDeliveryDate").val()
     if shipType == 'EXPRESS'
       $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.')
     else
       LoadMask.mask()
-      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
+      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType, planDeliveryDate: planDeliveryDate})
       .done((html) ->
         shipment.html(html)
         LoadMask.unmask()
