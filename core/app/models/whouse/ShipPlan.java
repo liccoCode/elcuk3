@@ -20,6 +20,7 @@ import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.modules.pdf.PDF;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -194,13 +195,25 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         this.creator = User.current();
     }
 
-    public ShipPlan doCreate() {
+    /**
+     * 保存出货计划同时将其添加到运输单并生成出库记录
+     * PS: 如果出现校验问题会抛出 FastRuntimeException, 需要调用者自行处理
+     *
+     * @return
+     */
+    public ShipPlan createAndOutbound() {
         this.save();
-        this.triggerRecord();
-        //将生成的出货计划添加到运输单
+        this.outbound();
+        //添加到运输单
         if(this.unit != null && StringUtils.isNotBlank(this.unit.shipmentId)) {
             Shipment shipment = Shipment.findById(this.unit.shipmentId);
+            if(shipment == null) {
+                throw new FastRuntimeException(String.format("采购计划绑定的运输单[%s]无效!", this.unit.shipmentId));
+            }
             shipment.addToShip(this);
+            if(Validation.hasErrors()) {
+                throw new FastRuntimeException(Webs.V(Validation.errors()));
+            }
         }
         return this;
     }
@@ -210,9 +223,12 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
      *
      * @return
      */
-    public ShipPlan triggerRecord() {
+    public ShipPlan outbound() {
         OutboundRecord outboundRecord = new OutboundRecord(this);
-        if(!outboundRecord.exist()) outboundRecord.save();
+        if(outboundRecord.exist()) {
+            throw new FastRuntimeException(String.format("出库记录已经存在![采购计划ID: %s, 出库计划ID: %s]", this.unit.id, this.id));
+        }
+        outboundRecord.save();
         this.out = outboundRecord;
         this.save();
         return this;

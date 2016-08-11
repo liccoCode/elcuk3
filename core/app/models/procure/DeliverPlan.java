@@ -6,7 +6,6 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
-import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -16,6 +15,7 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -284,24 +284,25 @@ public class DeliverPlan extends GenericModel {
     /**
      * 确认出货单并生成收货记录
      */
-    public void triggerReceiveRecords() {
+    public void confirm() {
         if(this.units == null || this.units.isEmpty()) return;
         this.state = P.DONE;
         this.save();
-        for(ProcureUnit unit : this.units) {
-            unit.stage = ProcureUnit.STAGE.INSHIPMENT;
-            unit.save();
 
-            //生成收货记录
-            ReceiveRecord receiveRecord = new ReceiveRecord(unit, this);
-            if(!receiveRecord.isExists()) receiveRecord.validateAndSave();
-
-            //生成出货计划
-            ShipPlan plan = new ShipPlan(unit);
-            if(!plan.exist()) {
-                plan.doCreate();
+        try {
+            for(ProcureUnit unit : this.units) {
+                unit.inShipment(this);
             }
+        } catch(FastRuntimeException e) {
+            //Rollback
+            this.state = P.CREATE;
+            this.save();
+            for(ProcureUnit unit : this.units) {
+                unit.delivery(true);
+            }
+            throw e;
         }
+
     }
 
     public boolean isLocked() {

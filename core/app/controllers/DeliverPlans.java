@@ -19,6 +19,7 @@ import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.util.List;
@@ -138,12 +139,19 @@ public class DeliverPlans extends Controller {
      *
      * @param ids
      */
-    public static void triggerReceiveRecords(List<String> ids, DeliverPlanPost p) {
+    public static void confirm(List<String> ids, DeliverPlanPost p) {
         if(ids != null && !ids.isEmpty()) {
             for(String id : ids) {
                 DeliverPlan deliverPlan = DeliverPlan.findById(id);
                 if(deliverPlan == null || deliverPlan.isLocked()) continue;
-                deliverPlan.triggerReceiveRecords();
+
+                try {
+                    deliverPlan.confirm();
+                } catch(FastRuntimeException e) {
+                    Validation.addError("", e.getMessage());
+                    Webs.errorToFlash(flash);
+                    index(p);
+                }
             }
         }
         flash.success("确认发货成功!");

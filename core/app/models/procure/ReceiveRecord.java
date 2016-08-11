@@ -229,7 +229,7 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
     }
 
     public boolean isExists() {
-        return ReceiveRecord.find("procureUnit=?", this.procureUnit).fetch().size() != 0;
+        return ReceiveRecord.count("procureUnit=?", this.procureUnit) != 0;
     }
 
     public void marshalBoxs() {

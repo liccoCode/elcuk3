@@ -1820,4 +1820,46 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .put("cooperator", this.cooperator)
                 .build();
     }
+
+    public ReceiveRecord receiveRecord() {
+        return ReceiveRecord.find("procureUnit=?", this).first();
+    }
+
+    /**
+     * 出货中
+     */
+    public void inShipment(DeliverPlan deliverPlan) {
+        this.stage = ProcureUnit.STAGE.INSHIPMENT;
+        //生成收货记录
+        ReceiveRecord receiveRecord = new ReceiveRecord(this, deliverPlan);
+        if(receiveRecord.isExists()) {
+            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有收货记录!", this.id));
+        } else {
+            receiveRecord.save();
+        }
+        //生成出货计划
+        ShipPlan plan = new ShipPlan(this);
+        if(plan.exist()) {
+            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出货计划!", this.id));
+        } else {
+            plan.createAndOutbound();
+        }
+        this.save();
+    }
+
+    /**
+     * 采购中
+     *
+     * @param forceRemove 是否需要清除关联的 ReceiveRecord ShipPlan 数据
+     */
+    public void delivery(boolean forceRemove) {
+        this.stage = ProcureUnit.STAGE.DELIVERY;
+        if(forceRemove) {
+            ReceiveRecord receiveRecord = this.receiveRecord();
+            if(receiveRecord != null) receiveRecord.delete();
+            ShipPlan plan = this.shipPlan();
+            if(plan != null) plan.delete();
+        }
+        this.save();
+    }
 }
