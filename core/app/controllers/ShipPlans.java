@@ -85,7 +85,7 @@ public class ShipPlans extends Controller {
         if(Validation.hasErrors()) {
             render("ShipPlans/blank.html", plan);
         }
-        plan.doCreate();
+        plan.createAndOutbound();
         if(StringUtils.isNotBlank(shipmentId)) {
             plan.shipment = Shipment.findById(shipmentId);
             Shipment.<Shipment>findById(shipmentId).addToShip(plan);

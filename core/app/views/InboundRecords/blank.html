@@ -10,19 +10,19 @@
 <h4 style="text-align:center" class="alert alert-info">添加其他入库</h4>
 <table class="table table-condensed table-bordered">
   <tr>
-    <th>产品编码</th>
+    <th><span style="color:red">*</span>SKU</th>
     <td>
       <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}" required autocomplete="off">
       <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
     </td>
 
-    <th>产品名称</th>
+    <th><span style="color:red">*</span>产品名称</th>
     <td style="width: 40%;">
       <input type="text" name="stock_name" value="${record.stockObj?.name()}" class="input-xxlarge" required>
     </td>
   </tr>
   <tr>
-    <th>仓库名称</th>
+    <th><span style="color:red">*</span>仓库名称</th>
     <td>
       <select name="record.targetWhouse.id">
           #{list items:whouses, as:'whouse'}
@@ -31,7 +31,7 @@
       </select>
     </td>
 
-    <th>预计入库数</th>
+    <th><span style="color:red">*</span>预计入库数</th>
     <td>
       <input type="text" name="record.planQty" value="${record.planQty}" class="input-mini" required>
     </td>
@@ -49,7 +49,7 @@
       <input type="text" name="record.fba" value="${record.fba}">
     </td>
 
-    <th>产品条码</th>
+    <th>SKU</th>
     <td>
       <input type="text" name="record.productCode" value="${record.productCode}">
     </td>
