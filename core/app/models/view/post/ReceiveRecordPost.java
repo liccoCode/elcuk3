@@ -71,7 +71,7 @@ public class ReceiveRecordPost extends Post<ReceiveRecord> {
         }
         if(this.shipType != null) {
             sbd.append(" AND p.shipType=?");
-            params.add(this.shipType.label());
+            params.add(this.shipType);
         }
         if(this.cooperatorId != null) {
             sbd.append(" AND p.cooperator.id=?");
