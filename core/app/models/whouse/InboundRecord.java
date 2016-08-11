@@ -190,7 +190,7 @@ public class InboundRecord extends Model {
     public Shipment.T shipType;
 
     @Transient
-    public String productCode;
+    public String fnSku;
 
     @Transient
     public M market;

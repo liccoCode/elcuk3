@@ -223,7 +223,7 @@ public class OutboundRecord extends Model {
     public String market;
 
     @Transient
-    public String productCode;
+    public String fnSku;
 
     /**
      * 主箱信息
