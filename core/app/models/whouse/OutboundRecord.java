@@ -444,7 +444,6 @@ public class OutboundRecord extends Model {
         Validation.required("类型", this.type);
         Validation.required("仓库", this.whouse);
         Validation.required("预计出库数量", this.planQty);
-        Validation.required("实际出库数量", this.qty);
         Validation.required("状态", this.state);
         Validation.min("预计出库数量", this.planQty, 1);
         this.typeValid();
