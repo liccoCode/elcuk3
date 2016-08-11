@@ -692,9 +692,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
         // 2
-        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(
-                    StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId));
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.INSHIPMENT, STAGE.DONE).contains(this.stage)) {
+            this.changeShipItemShipment(shipmentId);
         }
         if(Validation.hasErrors()) return;
 
@@ -782,51 +781,30 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
             if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
         }
-        String procureUnitStatus = String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
-                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
-        return procureUnitStatus;
+        return String.format("抵达货代: %s, FBA: %s, 付款信息: %s",
+                this.isPlaced,
+                this.fba != null ? this.fba.shipmentId : "无",
+                StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
     }
 
     /**
      * 调整采购计划所产生的运输项目的运输单
      *
-     * @param shipment
+     * @param shipmentId
      */
-    public void changeShipItemShipment(Shipment shipment) {
-        if(shipment != null && shipment.state != Shipment.S.PLAN) {
-            Validation.addError("", "涉及的运输单已经为" + shipment.state.label() + "状态, 只有"
-                    + Shipment.S.PLAN.label() + "状态的运输单才可调整.");
-            return;
-        }
-        if(this.shipItems.size() == 0) {
-            // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
+    public void changeShipItemShipment(String shipmentId) {
+        if(StringUtils.isNotBlank(shipmentId)) {
+            Shipment shipment = Shipment.findById(shipmentId);
             if(shipment == null) return;
-            shipment.addToShip(this);
-        } else {
-            for(ShipItem shipItem : this.shipItems) {
-                if(this.shipType == Shipment.T.EXPRESS) {
-                    if(shipItem.shipment.state == Shipment.S.PLAN) {
-                        // 快递运输单调整, 运输项目全部删除, 重新设计.
-                        shipItem.delete();
-                    }
-                } else {
-                    if(shipment == null) return;
-                    Shipment originShipment = shipItem.shipment;
-                    shipItem.adjustShipment(shipment);
-                    if(Validation.hasErrors()) {
-                        shipItem.shipment = originShipment;
-                        shipItem.save();
-                        return;
-                    }
-                }
-            }
+
+            this.shipmentId = shipmentId;
+            ShipPlan plan = this.shipPlan();
+            if(plan != null) plan.changeShipItemShipment(shipment);
         }
     }
 
     /**
      * 删除 FBA
-     *
-     * @deprecated
      */
     public synchronized void removeFBAShipment() {
         ShipPlan plan = this.shipPlan();
@@ -839,8 +817,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     /**
      * 通过 ProcureUnit 创建 FBA
-     *
-     * @deprecated
      */
     public synchronized FBAShipment postFbaShipment() {
         FBAShipment fba = null;
@@ -900,11 +876,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public void remove() {
-        /**
-         * TODO: 这里需要理清楚
-         * 1. 什么时候可以删除采购计划?
-         * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?
-         */
         for(PaymentUnit fee : this.fees()) {
             if(fee.state == PaymentUnit.S.PAID) {
                 Validation.addError("", "采购计划" + this.id + "已经拥有成功的支付信息, 不可以删除.");
@@ -913,7 +884,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             if(Validation.hasErrors()) return;
         }
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN).contains(this.stage)) {
             for(PaymentUnit fee : this.fees) {
                 fee.permanentRemove();
             }
@@ -946,9 +917,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.delete();
         } else {
             Validation.addError("",
-                    String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
+                    String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.APPROVE, STAGE.PLAN));
         }
     }
+
 
     /**
      * 采购单元相关联的运输单
@@ -1286,8 +1258,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 批量创建 FBA
+     * <p>
+     * 原则:
+     * 如果采购计划已经出库(关联上了出库计划)则使用出库计划来操作(增加 Or 删除) FBA
+     *
      * @param unitIds
-     * @deprecated
      */
     public static void postFbaShipments(List<Long> unitIds) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
@@ -1296,7 +1272,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         for(ProcureUnit unit : units) {
-            //为了照顾老数据的过渡,采取如果找到了出货计划就使用出货计划去创建 FBA, 未找到出货计划则使用采购计划去创建 FBA
             ShipPlan plan = unit.shipPlan();
             if(plan != null) {
                 if(plan.fba != null) {
@@ -1305,14 +1280,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     plan.postFbaShipment();
                 }
             } else {
-                try {
-                    if(unit.fba != null) {
-                        Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
-                    } else {
-                        unit.postFbaShipment();
-                    }
-                } catch(Exception e) {
-                    Validation.addError("", Webs.E(e));
+                if(unit.fba != null) {
+                    Validation.addError("", String.format("#%s 采购计划已经有 FBA, 不需要再创建", unit.id));
+                } else {
+                    unit.postFbaShipment();
                 }
             }
         }
@@ -1352,7 +1323,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
      */
     public Set<User> editToUsers() {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         users.add(this.handler);
         if(this.deliveryment != null)
             users.add(this.deliveryment.handler);

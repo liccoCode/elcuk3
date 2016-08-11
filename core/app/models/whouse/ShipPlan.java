@@ -192,6 +192,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         this.product = unit.product;
         this.whouse = unit.whouse;
         this.unit = unit;
+        this.fba = unit.fba;
         this.creator = User.current();
     }
 
@@ -271,7 +272,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 通过 ProcureUnit 创建 FBA
+     * 创建 FBA
      */
     public synchronized FBAShipment postFbaShipment() {
         FBAShipment fba = null;
@@ -284,6 +285,10 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         try {
             fba.state = FBA.create(fba);
             this.fba = fba.save();
+            if(this.unit != null) {//将创建的 FBA 同步到采购计划
+                this.unit.fba = this.fba;
+                this.unit.save();
+            }
             this.save();
             new ERecordBuilder("shipment.createFBA")
                     .msgArgs(this.id, this.sku, this.fba.shipmentId)
@@ -331,19 +336,19 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 调整采购计划所产生的运输项目的运输单
+     * 调整运输单
      *
      * @param shipment
      */
     public void changeShipItemShipment(Shipment shipment) {
-        if(shipment != null && shipment.state != Shipment.S.PLAN) {
+        if(shipment == null) return;
+        if(shipment.state != Shipment.S.PLAN) {
             Validation.addError("", "涉及的运输单已经为" + shipment.state.label() + "状态, 只有"
                     + Shipment.S.PLAN.label() + "状态的运输单才可调整.");
             return;
         }
         if(this.shipItems.size() == 0) {
             // 出库计划没有运输项目, 调整运输单的时候, 需要创建运输项目
-            if(shipment == null) return;
             shipment.addToShip(this);
         } else {
             for(ShipItem shipItem : this.shipItems) {
@@ -353,7 +358,6 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
                         shipItem.delete();
                     }
                 } else {
-                    if(shipment == null) return;
                     Shipment originShipment = shipItem.shipment;
                     shipItem.adjustShipment(shipment);
                     if(Validation.hasErrors()) {
