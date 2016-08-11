@@ -187,6 +187,7 @@ public class Deliveryment extends GenericModel {
     public float leftAmount() {
         float leftAmount = 0;
         for(ProcureUnit unit : this.units) {
+            if(unit.attrs.currency == null) continue;
             leftAmount += unit.attrs.currency.toCNY(unit.leftAmount());
         }
         return leftAmount;
