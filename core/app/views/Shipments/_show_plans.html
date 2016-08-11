@@ -1,5 +1,13 @@
+#{set useCheckbox: checkbox == null || checkbox /}
 <table class="table table-condensed table-bordered" id="shipmentTable">
   <tr>
+  #{if useCheckbox}
+    <th>
+      <label class="checkbox">
+        <input type="checkbox" class="checkbox_all"/>
+      </label>
+    </th>
+  #{/if}
     <th>出库Id</th>
     <th>状态</th>
     <th>SKU</th>
@@ -25,7 +33,16 @@
 #{list items:items, as:'item'}
     #{if item.plan}
         #{set plan: item.plan/}
-      <tr>
+      <tr id="${item.id}" data-received-url='@{ShipItems.received(item.id)}'
+          data-lossqty='${item.lossqty}' data-compenamt='${item.compenamt}'
+          data-currency='${item.currency?.name()}' data-compentype='${item.compentype}'>
+          #{if useCheckbox}
+            <td>
+              <label class="checkbox">
+                <input type="checkbox" name="shipItemId" value="${item.id}" id="checkbox_${item.id}">
+              </label>
+            </td>
+          #{/if}
         <td>
           <a target="_blank" href="@{ShipPlans.show(plan.id)}">${plan.id}</a>
         </td>
@@ -53,9 +70,18 @@
       </tr>
     #{/if}
     #{else}
-      <tr>
+      <tr id="${item.id}" data-received-url='@{ShipItems.received(item.id)}'
+          data-lossqty='${item.lossqty}' data-compenamt='${item.compenamt}'
+          data-currency='${item.currency?.name()}' data-compentype='${item.compentype}'>
+          #{if useCheckbox}
+            <td>
+              <label class="checkbox">
+                <input type="checkbox" name="shipItemId" value="${item.id}" id="checkbox_${item.id}">
+              </label>
+            </td>
+          #{/if}
         <td></td>
-        <td></td>
+        <td>${item.unit?.isOut?.label()}</td>
         <td>${item.unit.sku}</td>
         <td>${item.unit.sid}</td>
         <td>${item.unit.product?.abbreviation}</td>
