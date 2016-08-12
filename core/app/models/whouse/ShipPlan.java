@@ -9,7 +9,10 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.Account;
 import models.market.Selling;
-import models.procure.*;
+import models.procure.FBAShipment;
+import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Product;
 import mws.FBA;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -199,19 +202,28 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
      *
      * @return
      */
-    public ShipPlan createAndOutbound() {
-        this.save();
-        this.outbound();
-        //添加到运输单
-        if(this.unit != null && StringUtils.isNotBlank(this.unit.shipmentId)) {
-            Shipment shipment = Shipment.findById(this.unit.shipmentId);
-            if(shipment == null) {
-                throw new FastRuntimeException(String.format("采购计划绑定的运输单[%s]无效!", this.unit.shipmentId));
+    public ShipPlan createAndOutbound(String shipmentId) {
+        this.creator = User.current();
+        if(this.valid()) {
+            this.<ShipPlan>save().outbound();
+            //添加到运输单
+            if(StringUtils.isNotBlank(shipmentId)) {
+                Shipment shipment = Shipment.findById(shipmentId);
+                if(shipment != null) shipment.addToShip(this);
+            } else {
+                if(this.unit != null && StringUtils.isNotBlank(this.unit.shipmentId)) {
+                    Shipment shipment = Shipment.findById(this.unit.shipmentId);
+                    if(shipment != null) {
+                        shipment.addToShip(this);
+                    } else {
+                        Validation.addError("",
+                                String.format("采购计划[%s]指定的的运输单[%s]无效!", this.unit.id, this.unit.shipmentId));
+                    }
+                }
             }
-            shipment.addToShip(this);
-            if(Validation.hasErrors()) {
-                throw new FastRuntimeException(Webs.V(Validation.errors()));
-            }
+        }
+        if(Validation.hasErrors()) {
+            throw new FastRuntimeException(Webs.V(Validation.errors()));
         }
         return this;
     }
@@ -232,13 +244,14 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         return this;
     }
 
-    public void valid() {
+    public boolean valid() {
         Validation.required("SKU", this.product);
         Validation.required("Sellinig ID", this.selling);
         Validation.required("仓库", this.whouse);
         Validation.required("预计运输时间", this.planShipDate);
         Validation.required("计划出库数量", this.planQty);
         Validation.required("运输方式", this.shipType);
+        return !Validation.hasErrors();
     }
 
     public boolean exist() {
@@ -400,6 +413,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         for(ShipItem item : this.shipItems) {
             item.delete();
         }
+
+        //删除出库记录
+        if(this.out != null) this.out.delete();
         this.delete();
     }
 

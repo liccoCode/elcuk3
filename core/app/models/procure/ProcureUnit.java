@@ -1813,7 +1813,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(plan.exist()) {
             throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出货计划!", this.id));
         } else {
-            plan.createAndOutbound();
+            plan.createAndOutbound(null);
         }
         this.save();
     }
@@ -1829,7 +1829,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             ReceiveRecord receiveRecord = this.receiveRecord();
             if(receiveRecord != null) receiveRecord.delete();
             ShipPlan plan = this.shipPlan();
-            if(plan != null) plan.delete();
+            if(plan != null) plan.remove();
         }
         this.save();
     }
