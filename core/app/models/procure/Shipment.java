@@ -292,9 +292,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<>();
 
-    @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
-    public List<ShipPlan> plans = new ArrayList<>();
-
     @ManyToOne
     public TransportApply apply;
 
@@ -499,11 +496,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public boolean calcuPlanArriveDate() {
         if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
-        int plusDay = 7;
-//        if(type == T.EXPRESS) plusDay = 7;
-//        else if(type == T.AIR) plusDay = 15;
-//        else if(type == T.SEA) plusDay = 60;
-        plusDay = shipDay();
+        int plusDay = shipDay();
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
         this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
