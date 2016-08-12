@@ -9,7 +9,10 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.Account;
 import models.market.Selling;
-import models.procure.*;
+import models.procure.FBAShipment;
+import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Product;
 import mws.FBA;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -28,11 +31,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * 出货计划
+ * 出库计划
  * <p>
  * (角色定义与出库记录的角色基本一致,
  * 主要为出货记录与运输单中间的信息传递,
- * 允许从运输单创建出货计划或者先创建出货计划然后再去关联运输单)
+ * 允许从运输单创建出库计划或者先创建出库计划然后再去关联运输单)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -45,9 +48,6 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
      */
     @OneToOne(fetch = FetchType.LAZY)
     public Selling selling;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    public Shipment shipment;
 
     @OneToOne(fetch = FetchType.LAZY)
     public Product product;
@@ -197,24 +197,33 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 保存出货计划同时将其添加到运输单并生成出库记录
+     * 保存出库计划同时将其添加到运输单并生成出库记录
      * PS: 如果出现校验问题会抛出 FastRuntimeException, 需要调用者自行处理
      *
      * @return
      */
-    public ShipPlan createAndOutbound() {
-        this.save();
-        this.outbound();
-        //添加到运输单
-        if(this.unit != null && StringUtils.isNotBlank(this.unit.shipmentId)) {
-            Shipment shipment = Shipment.findById(this.unit.shipmentId);
-            if(shipment == null) {
-                throw new FastRuntimeException(String.format("采购计划绑定的运输单[%s]无效!", this.unit.shipmentId));
+    public ShipPlan createAndOutbound(String shipmentId) {
+        this.creator = User.current();
+        if(this.valid()) {
+            this.<ShipPlan>save().outbound();
+            //添加到运输单
+            if(StringUtils.isNotBlank(shipmentId)) {
+                Shipment shipment = Shipment.findById(shipmentId);
+                if(shipment != null) shipment.addToShip(this);
+            } else {
+                if(this.unit != null && StringUtils.isNotBlank(this.unit.shipmentId)) {
+                    Shipment shipment = Shipment.findById(this.unit.shipmentId);
+                    if(shipment != null) {
+                        shipment.addToShip(this);
+                    } else {
+                        Validation.addError("",
+                                String.format("采购计划[%s]指定的的运输单[%s]无效!", this.unit.id, this.unit.shipmentId));
+                    }
+                }
             }
-            shipment.addToShip(this);
-            if(Validation.hasErrors()) {
-                throw new FastRuntimeException(Webs.V(Validation.errors()));
-            }
+        }
+        if(Validation.hasErrors()) {
+            throw new FastRuntimeException(Webs.V(Validation.errors()));
         }
         return this;
     }
@@ -235,13 +244,14 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         return this;
     }
 
-    public void valid() {
+    public boolean valid() {
         Validation.required("SKU", this.product);
         Validation.required("Sellinig ID", this.selling);
         Validation.required("仓库", this.whouse);
         Validation.required("预计运输时间", this.planShipDate);
         Validation.required("计划出库数量", this.planQty);
         Validation.required("运输方式", this.shipType);
+        return !Validation.hasErrors();
     }
 
     public boolean exist() {
@@ -390,7 +400,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
      */
     public void remove() {
         if(this.isLock()) {
-            Validation.addError("", String.format("只允许 %s, %s 状态的出货计划进行取消", S.Pending.label()));
+            Validation.addError("", String.format("只允许 %s, %s 状态的出库计划进行取消", S.Pending.label()));
             return;
         }
         // 删除 FBA
@@ -403,6 +413,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         for(ShipItem item : this.shipItems) {
             item.delete();
         }
+
+        //删除出库记录
+        if(this.out != null) this.out.delete();
         this.delete();
     }
 
@@ -464,7 +477,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             Shipment shipment = relateShipments.get(0);
             if(this.planArrivDate != null && shipment.dates.planArrivDate != null &&
                     ((this.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) != 0)) {
-                return String.format("系统备注: 出货计划最新预计到库时间 %s, 比原预计到库日期 %s 差异 %s 天",
+                return String.format("系统备注: 出库计划最新预计到库时间 %s, 比原预计到库日期 %s 差异 %s 天",
                         this.planArrivDate,
                         shipment.dates.planArrivDate,
                         (this.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) / (24 * 60 * 60 * 1000)

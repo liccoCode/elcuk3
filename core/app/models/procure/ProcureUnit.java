@@ -1268,7 +1268,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             ShipPlan plan = unit.shipPlan();
             if(plan != null) {
                 if(plan.fba != null) {
-                    Validation.addError("", String.format("#%s 关联的出货计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
+                    Validation.addError("", String.format("#%s 关联的出库计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
                 } else {
                     plan.postFbaShipment();
                 }
@@ -1790,9 +1790,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 判断是否能够出货
+     *
+     * @return
+     */
+    public boolean canBeShip() {
+        return this.stage == ProcureUnit.STAGE.DELIVERY &&
+                this.selling != null &&
+                this.whouse != null &&
+                this.attrs.planShipDate != null;
+    }
+
+    /**
      * 出货中
      */
     public void inShipment(DeliverPlan deliverPlan) {
+        if(!this.canBeShip()) return;
         this.stage = ProcureUnit.STAGE.INSHIPMENT;
         //生成收货记录
         ReceiveRecord receiveRecord = new ReceiveRecord(this, deliverPlan);
@@ -1801,12 +1814,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             receiveRecord.save();
         }
-        //生成出货计划
+        //生成出库计划
         ShipPlan plan = new ShipPlan(this);
         if(plan.exist()) {
-            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出货计划!", this.id));
+            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出库计划!", this.id));
         } else {
-            plan.createAndOutbound();
+            plan.createAndOutbound(null);
         }
         this.save();
     }
@@ -1822,7 +1835,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             ReceiveRecord receiveRecord = this.receiveRecord();
             if(receiveRecord != null) receiveRecord.delete();
             ShipPlan plan = this.shipPlan();
-            if(plan != null) plan.delete();
+            if(plan != null) plan.remove();
         }
         this.save();
     }

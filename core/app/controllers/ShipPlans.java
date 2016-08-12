@@ -4,7 +4,6 @@ import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.Dates;
 import models.ElcukRecord;
-import models.User;
 import models.market.Selling;
 import models.procure.Shipment;
 import models.view.post.ShipPlanPost;
@@ -19,14 +18,14 @@ import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
- * 出货计划控制器
+ * 出库计划控制器
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 7/4/16
@@ -75,23 +74,12 @@ public class ShipPlans extends Controller {
     }
 
     public static void create(ShipPlan plan, String shipmentId) {
-        plan.creator = User.findByUserName(Secure.Security.connected());
-        plan.createDate = new Date();
-        plan.state = ShipPlan.S.Pending;
         if(plan.shipType == Shipment.T.EXPRESS && StringUtils.isNotBlank(shipmentId)) {
             Validation.addError("", "快递运输方式, 不需要指定运输单");
         }
-        plan.valid();
-        if(Validation.hasErrors()) {
-            render("ShipPlans/blank.html", plan);
-        }
-        plan.createAndOutbound();
-        if(StringUtils.isNotBlank(shipmentId)) {
-            plan.shipment = Shipment.findById(shipmentId);
-            Shipment.<Shipment>findById(shipmentId).addToShip(plan);
-            plan.save();
-        }
-        if(Validation.hasErrors()) {
+        try {
+            plan.createAndOutbound(shipmentId);
+        } catch(FastRuntimeException e) {
             plan.remove();
             render("ShipPlans/blank.html", plan);
         }
@@ -162,7 +150,7 @@ public class ShipPlans extends Controller {
                     //生成 PDF
                     plan.fbaAsPDF(folder, boxNumbers.get(i));
                 }
-                FileUtils.writeStringToFile(new File(dirfile, "出货计划 ID.txt"),
+                FileUtils.writeStringToFile(new File(dirfile, "出库计划 ID.txt"),
                         java.net.URLDecoder.decode(StringUtils.join(pids, "_"), "UTF-8"), "UTF-8");
             } finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");

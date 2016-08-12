@@ -294,7 +294,7 @@ public class FBA {
     }
 
     /**
-     * 将 出货计划 转换为 FBA 的提交 Request Plan Item
+     * 将 出库计划 转换为 FBA 的提交 Request Plan Item
      *
      * @param plan
      * @return

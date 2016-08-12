@@ -292,9 +292,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<>();
 
-    @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
-    public List<ShipPlan> plans = new ArrayList<>();
-
     @ManyToOne
     public TransportApply apply;
 
@@ -499,11 +496,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public boolean calcuPlanArriveDate() {
         if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
-        int plusDay = 7;
-//        if(type == T.EXPRESS) plusDay = 7;
-//        else if(type == T.AIR) plusDay = 15;
-//        else if(type == T.SEA) plusDay = 60;
-        plusDay = shipDay();
+        int plusDay = shipDay();
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
         this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
@@ -659,7 +652,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 向运输单中添加一个出货计划
+     * 向运输单中添加一个出库计划
      *
      * @param plan
      */
@@ -672,7 +665,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(plan.shipType != this.type)
             Validation.addError("", "运输方式不一样, 无法添加.");
         if(plan.shipItems.size() > 0)
-            Validation.addError("", "出货计划已经拥有运输项目, 不可以再重新创建.");
+            Validation.addError("", "出库计划已经拥有运输项目, 不可以再重新创建.");
         if(Validation.hasErrors()) return;
 
         ShipItem shipitem = new ShipItem(plan);
