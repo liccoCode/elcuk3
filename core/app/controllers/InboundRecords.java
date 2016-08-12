@@ -53,14 +53,14 @@ public class InboundRecords extends Controller {
     }
 
     @Check("inboundrecords.index")
-    public static void create(InboundRecord record) {
-        record.beforeCreate();
-        record.valid();
-        if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
-        record.save();
-        record.stockObj.setAttributes(record);
-        flash.success("创建成功!");
-        redirect("/InboundRecords/index");
+    public static void create(InboundRecord record, Long outboundRecordId) {
+        record.doCreate(outboundRecordId);
+        if(Validation.hasErrors()) {
+            render("InboundRecords/blank.html", record);
+        } else {
+            flash.success("创建成功!");
+            redirect("/InboundRecords/index");
+        }
     }
 
     /**

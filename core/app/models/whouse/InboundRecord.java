@@ -14,6 +14,7 @@ import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.w3c.tidy.Out;
 import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Min;
@@ -184,18 +185,21 @@ public class InboundRecord extends Model {
      * 这些属性字段全部都是为了前台传递数据的
      */
     @Transient
+    @Deprecated
     public String fba;
 
     @Transient
     public Shipment.T shipType;
 
     @Transient
+    @Deprecated
     public String fnSku;
 
     @Transient
     public M market;
 
     @Transient
+    @Deprecated
     public String procureunitId;
 
     @Transient
@@ -329,11 +333,25 @@ public class InboundRecord extends Model {
         if(this.isRefund()) new OutboundRecord(this).save();
     }
 
-    public void beforeCreate() {
+    public void doCreate(Long outboundRecordId) {
         if(this.planQty == 0) {
             this.planQty = this.qty + this.badQty;
         }
         this.marshalBoxs();
+        this.stockObj.setAttributes(this);
+        this.valid();
+        if(Validation.hasErrors()) return;
+        this.save();
+
+        if(outboundRecordId != null) {
+            //同步主箱尾箱数据到出库计划
+            OutboundRecord outboundRecord = OutboundRecord.findById(outboundRecordId);
+            if(outboundRecord != null) {
+                outboundRecord.mainBoxInfo = this.mainBoxInfo;
+                outboundRecord.lastBoxInfo = this.lastBoxInfo;
+                outboundRecord.save();
+            }
+        }
     }
 
     public void valid() {
