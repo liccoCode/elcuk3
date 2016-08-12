@@ -1275,7 +1275,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             ShipPlan plan = unit.shipPlan();
             if(plan != null) {
                 if(plan.fba != null) {
-                    Validation.addError("", String.format("#%s 关联的出货计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
+                    Validation.addError("", String.format("#%s 关联的出库计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
                 } else {
                     plan.postFbaShipment();
                 }
@@ -1808,10 +1808,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             receiveRecord.save();
         }
-        //生成出货计划
+        //生成出库计划
         ShipPlan plan = new ShipPlan(this);
         if(plan.exist()) {
-            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出货计划!", this.id));
+            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出库计划!", this.id));
         } else {
             plan.createAndOutbound(null);
         }

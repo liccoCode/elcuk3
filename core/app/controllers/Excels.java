@@ -126,7 +126,7 @@ public class Excels extends Controller {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME,
-                String.format("%s出货计划.xls", pidstr.toString()));
+                String.format("%s出库计划.xls", pidstr.toString()));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         renderArgs.put("dateFormat", formatter);
         renderArgs.put("procurecompany", models.OperatorConfig.getVal("procurecompany"));
@@ -805,7 +805,7 @@ public class Excels extends Controller {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("出货计划明细%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
+                    String.format("出库计划明细%s-%s.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(plans, p);
