@@ -106,12 +106,12 @@
           </td>
           <td>${plan.state.label()}</td>
           <td>
-            #{if plan.state.name()=='Pending'}
-              <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-primary">修改</a>
-            #{/if}
-            #{else }
-              <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-info">查看</a>
-            #{/else}
+              #{if plan.state.name() == 'Pending'}
+                <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-primary">修改</a>
+              #{/if}
+              #{else }
+                <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-info">查看</a>
+              #{/else}
           </td>
           <td>
             <a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a>
@@ -138,7 +138,11 @@
           <td>${plan.qty}</td>
           <td>#{time_tooltip time:plan.planShipDate/}</td>
           <td>#{time_tooltip time:plan.planArrivDate/}</td>
-          <td><a href="@{Shipments.show(plan.shipment.id)}">${plan.shipment.id}</a></td>
+          <td>
+              #{if plan.shipment}
+                <a href="@{Shipments.show(plan.shipment.id)}">${plan.shipment.id}</a>
+              #{/if}
+          </td>
           <td>${plan.shipType?.label()}</td>
           <td>#{time_tooltip time:plan.createDate/}</td>
           <td>${plan.creator?.username}</td>
