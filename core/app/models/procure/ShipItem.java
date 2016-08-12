@@ -96,8 +96,13 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
+    /**
+     * WARNING: 运输项关联的对象在(version:1.3.0)已经变更成了 ShipPlan,
+     * 相关信息展示的时候应该从关联的 ShipPlan 身上获取.
+     */
     @Expose
     @ManyToOne
+    @Deprecated
     public ProcureUnit unit;
 
     @Expose
@@ -398,7 +403,8 @@ public class ShipItem extends GenericModel {
     }
 
     public List<CheckTask> checkTasks() {
-        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
+        return CheckTask.find("units=? ORDER BY creatat DESC",
+                this.plan != null ? this.plan.unit : this.unit).fetch();
     }
 
     public Integer caluTotalUnitByCheckTask() {
