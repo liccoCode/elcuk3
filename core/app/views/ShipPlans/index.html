@@ -134,14 +134,17 @@
               #{/elseif}
           </td>
           <td>${plan.whouse?.name()}</td>
+
           <td>${plan.planQty}</td>
           <td>${plan.qty}</td>
           <td>#{time_tooltip time:plan.planShipDate/}</td>
           <td>#{time_tooltip time:plan.planArrivDate/}</td>
           <td>
-              #{if plan.shipment}
-                <a href="@{Shipments.show(plan.shipment.id)}">${plan.shipment.id}</a>
-              #{/if}
+            <dl>
+                #{list items:plan.relateShipment(), as:'sp'}
+                  <li><a href="@{Shipments.show(sp.id)}">${sp}</a></li>
+                #{/list}
+            </dl>
           </td>
           <td>${plan.shipType?.label()}</td>
           <td>#{time_tooltip time:plan.createDate/}</td>

@@ -87,9 +87,8 @@ public class ShipPlans extends Controller {
         }
         plan.createAndOutbound();
         if(StringUtils.isNotBlank(shipmentId)) {
-            plan.shipment = Shipment.findById(shipmentId);
-            Shipment.<Shipment>findById(shipmentId).addToShip(plan);
-            plan.save();
+            Shipment shipment = Shipment.findById(shipmentId);
+            if(shipment != null) shipment.addToShip(plan);
         }
         if(Validation.hasErrors()) {
             plan.remove();
