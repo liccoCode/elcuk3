@@ -1797,9 +1797,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 判断是否能够出货
+     *
+     * @return
+     */
+    public boolean canBeShip() {
+        return this.stage == ProcureUnit.STAGE.DELIVERY &&
+                this.selling != null &&
+                this.whouse != null &&
+                this.attrs.planShipDate != null;
+    }
+
+    /**
      * 出货中
      */
     public void inShipment(DeliverPlan deliverPlan) {
+        if(!this.canBeShip()) return;
         this.stage = ProcureUnit.STAGE.INSHIPMENT;
         //生成收货记录
         ReceiveRecord receiveRecord = new ReceiveRecord(this, deliverPlan);
