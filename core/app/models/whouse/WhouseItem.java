@@ -2,6 +2,7 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import helper.GTs;
+import models.procure.ProcureUnit;
 import models.procure.ReceiveRecord;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -66,8 +67,8 @@ public class WhouseItem extends Model {
     public static HashMap<String, Integer> caluStockInProcureUnit(String name, String type) {
         HashMap<String, Integer> map = new HashMap<>();
         //已收货的出货单
-        List<ReceiveRecord> records = ReceiveRecord.find("state=? and procureUnit.attrs.planShipDate is null and " +
-                "procureUnit.product.sku = ? ", ReceiveRecord.S.Received, name).fetch();
+        List<ReceiveRecord> records = ReceiveRecord.find("procureUnit.stage=? and procureUnit.attrs.planShipDate is null"
+                + " and procureUnit.product.sku = ? ", ProcureUnit.STAGE.DONE, name).fetch();
         int no_country = 0;
         int total_num = 0;
 
