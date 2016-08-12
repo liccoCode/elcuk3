@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * 出库记录
  * <p>
- * (角色等同于出货计划,但是手动创建的出货记录没有关联的出货计划)
+ * (角色等同于出库计划,但是手动创建的出货记录没有关联的出库计划)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -97,7 +97,7 @@ public class OutboundRecord extends Model {
     }
 
     /**
-     * 出货计划
+     * 出库计划
      */
     @Expose
     @OneToOne

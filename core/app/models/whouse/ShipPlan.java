@@ -31,11 +31,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * 出货计划
+ * 出库计划
  * <p>
  * (角色定义与出库记录的角色基本一致,
  * 主要为出货记录与运输单中间的信息传递,
- * 允许从运输单创建出货计划或者先创建出货计划然后再去关联运输单)
+ * 允许从运输单创建出库计划或者先创建出库计划然后再去关联运输单)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -197,7 +197,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 保存出货计划同时将其添加到运输单并生成出库记录
+     * 保存出库计划同时将其添加到运输单并生成出库记录
      * PS: 如果出现校验问题会抛出 FastRuntimeException, 需要调用者自行处理
      *
      * @return
@@ -400,7 +400,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
      */
     public void remove() {
         if(this.isLock()) {
-            Validation.addError("", String.format("只允许 %s, %s 状态的出货计划进行取消", S.Pending.label()));
+            Validation.addError("", String.format("只允许 %s, %s 状态的出库计划进行取消", S.Pending.label()));
             return;
         }
         // 删除 FBA
@@ -477,7 +477,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             Shipment shipment = relateShipments.get(0);
             if(this.planArrivDate != null && shipment.dates.planArrivDate != null &&
                     ((this.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) != 0)) {
-                return String.format("系统备注: 出货计划最新预计到库时间 %s, 比原预计到库日期 %s 差异 %s 天",
+                return String.format("系统备注: 出库计划最新预计到库时间 %s, 比原预计到库日期 %s 差异 %s 天",
                         this.planArrivDate,
                         shipment.dates.planArrivDate,
                         (this.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) / (24 * 60 * 60 * 1000)
