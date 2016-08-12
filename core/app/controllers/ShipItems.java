@@ -6,6 +6,7 @@ import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.view.post.ShipItemPost;
 import models.whouse.Whouse;
 import models.view.post.ProcureUnitShipPost;
 import play.data.validation.Validation;
@@ -25,11 +26,11 @@ public class ShipItems extends Controller {
         renderArgs.put("centers", FBACenter.findAll());
     }
 
-    public static void index(ProcureUnitShipPost p) {
+    public static void index(ShipItemPost p) {
         if(p == null)
-            p = new ProcureUnitShipPost();
-        List<ProcureUnit> units = p.query();
-        render(p, units);
+            p = new ShipItemPost();
+        List<ShipItem> items = p.query();
+        render(p, items);
     }
 
     public static void showJson(Long id) {

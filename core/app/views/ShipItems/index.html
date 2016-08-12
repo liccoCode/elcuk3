@@ -54,59 +54,46 @@
     <table class="table table-bordered table-condensed">
       <tr>
         <th><label><input type="checkbox" class="checkall"></label></th>
-        <th>#</th>
+        <th>出库计划ID</th>
+        <th>Selling ID</th>
         <th>SKU</th>
-        <th>计划数量</th>
-        <th>供应商</th>
-        <th>重量</th>
-        <th>仓库</th>
-        <th>建议运输方式</th>
-        <th>FBA 仓库</th>
+        <th>产品名称</th>
         <th>FBA</th>
+        <th>去往仓库</th>
+        <th>FBA仓库</th>
+        <th>计划出库数</th>
         <th>预计发货时间</th>
         <th>预计到库时间</th>
-        <th>预计交货时间</th>
-        <th>实际交货时间</th>
-        <th>抵达货代</th>
-        <th>Selling</th>
-
-        <th>是否合格</th>
-        <th>是否发货</th>
-        <th>质检信息</th>
+        <th>运输方式</th>
+        <th>报关类型</th>
+        <th>箱数</th>
+        <th>总重量</th>
+        <th>总体积</th>
+        <th>创建时间</th>
+        <th>创建人</th>
       </tr>
-    #{list items: units, as:'unit'}
+    #{list items: items, as:'item'}
       <tr>
-        #{set relateShipments: unit.relateShipment()/}
+        <td><input type="checkbox" value="${item.plan?.id}"></td>
         <td>
-          #{ifnot relateShipments.size() > 0}
-            <label><input type="checkbox" name="units" value="${unit.id}"></label>
-          #{/ifnot}
+          <a href="@{ShipPlans.show(item.plan?.id)}" target="_blank">${item.plan?.id}</a>
         </td>
-        <td>
-          <a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a>
-        </td>
-        <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
-        <td>${unit.qty()}</td>
-        <td>${unit.cooperator?.name}</td>
-        <td>${unit.totalWeight()} kg</td>
-        <td>${unit.whouse?.name}</td>
-        <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
-        <td>${unit.fba?.fbaCenter?.centerId}</td>
-        <td>${unit.fba?.shipmentId}</td>
-        <td>#{time_tooltip time: unit.attrs.planShipDate/}</td>
-        <td>#{time_tooltip time: unit.attrs.planArrivDate/}</td>
-        <td>#{time_tooltip time: unit.attrs.planDeliveryDate/}</td>
-        <td>#{time_tooltip time: unit.attrs.deliveryDate/}</td>
-        <td>#{yesOrNo f:unit.isPlaced/}</td>
-        <td>${unit.sid}</td>
-
-        <td>${unit.result()}</td>
-        <td>${unit.isship()}</td>
-        <td>
-          #{if unit.fetchCheckTaskLink() != null}
-            <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
-          #{/if}
-        </td>
+        <td><a href="@{Products.show(item.plan?.product.sku)}" target="_blank">${item.plan?.product.sku}</a></td>
+        <td>${item.plan?.selling?.sellingId}</td>
+        <td>${item.plan?.product.sku}</td>
+        <td>${item.plan?.product.abbreviation}</td>
+        <td>${item.plan?.fba?.shipmentId}</td>
+        <td>${item.plan?.whouse?.name}</td>
+        <td>${item.plan?.fba?.fbaCenter?.centerId}</td>
+        <td></td>
+        <td>#{time_tooltip time: item.plan?.planShipDate/}</td>
+        <td>#{time_tooltip time: item.plan?.planArrivDate/}</td>
+        <td style="color:${item.plan?.shipType?.rgb()}">${item.plan?.shipType?.label()}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>#{time_tooltip time: item.plan?.createDate/}</td>
+        <td>${item.plan?.creator.username}</td>
       </tr>
     #{/list}
     </table>
