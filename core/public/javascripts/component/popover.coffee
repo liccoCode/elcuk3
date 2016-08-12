@@ -18,13 +18,14 @@ window.$ui =
       else
         $input.dateinput(format: $input.attr('format'))
   datetimeinput: ->
+    options = {format: 'yyyy-mm-dd', minView: 'month', autoclose: true}
     for input in $('input[type=datetime]')
       $input = $(input)
-      return if $input.attr('native') != undefined
-      if $input.attr('format') is undefined
-        $input.datetimepicker(format: 'yyyy-mm-dd hh:ii:ss')
-      else
-        $input.datetimepicker(format: $input.attr('format'))
+      continue if $input.attr('native') != undefined
+
+      for key in  Object.keys(options)
+        options[key] = $input.attr(key.toLowerCase()) if $input.attr(key.toLowerCase()) != undefined
+      $input.datetimepicker(options)
   selectize: ->
     for select in $('select.selectize')
       $select = $(select)
