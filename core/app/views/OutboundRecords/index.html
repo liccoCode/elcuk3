@@ -138,7 +138,7 @@
           <td>${r.state.label()}</td>
           <td>
               #{if r.shipPlan != null}
-                <a href="@{ShipPlans.show(r.shipPlan)}">${r.shipPlan?.id}</a>
+                <a href="@{ShipPlans.show(r.shipPlan.id)}">${r.shipPlan.id}</a>
               #{/if}
           </td>
           <td>

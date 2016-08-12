@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import models.ElcukRecord;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -8,6 +9,7 @@ import models.view.post.OutboundRecordPost;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
+import org.w3c.tidy.Out;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -90,5 +92,18 @@ public class OutboundRecords extends Controller {
 
         }
         index(p);
+    }
+
+    /**
+     * 返回出库记录的 attributes 信息
+     *
+     * @param id
+     */
+    public static void attributes(Long id) {
+        OutboundRecord record = OutboundRecord.findById(id);
+        if(record == null) {
+            renderJSON(new Ret(String.format("无法找到出库记录[%s]", id)));
+        }
+        renderJSON(J.json(record.stockObj.attributes()));
     }
 }

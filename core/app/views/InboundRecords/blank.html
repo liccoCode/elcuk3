@@ -37,21 +37,14 @@
     </td>
   </tr>
   <tr>
-    <th>采购计划ID</th>
-    <td colspan="3">
-      <input type="text" name="record.procureunitId" value="${record.procureunitId}" class="input-block-level">
-    </td>
-  </tr>
-
-  <tr>
     <th>FBA</th>
     <td>
-      <input type="text" name="record.fba" value="${record.fba}">
+      <input type="text" name="fba" readonly>
     </td>
 
     <th>FnSKU</th>
     <td>
-      <input type="text" name="record.fnSku" value="${record.fnSku}">
+      <input type="text" name="fnsku" readonly>
     </td>
   </tr>
 
@@ -86,6 +79,17 @@
     <th>不良品入库数</th>
     <td>
       <input type="text" name="record.badQty" value="${record.badQty}" class="input-mini" required>
+    </td>
+  </tr>
+  <tr>
+    <th>出库计划 ID</th>
+    <td>
+      <input type="text" name="shipPlanId" class="input-mini">
+    </td>
+
+    <th>出库记录 ID</th>
+    <td>
+      <input type="text" name="outboundRecordId" class="input-mini">
     </td>
   </tr>
 
@@ -151,14 +155,12 @@
       </table>
     </td>
   </tr>
-
   <tr>
     <th>备注</th>
     <td colspan="4">
       <textarea name="record.memo" rows="4" class="input-block-level">${record.memo}</textarea>
     </td>
   </tr>
-
   <tr>
     <td colspan="4">
       <input type="hidden" name="record.origin" value="${record.origin}">
