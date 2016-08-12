@@ -445,14 +445,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * ProcureUnit 的检查
      */
     public void validate() {
-        Validation.current().valid(this.attrs);
         if(this.selling != null) this.sid = this.selling.sellingId;
         Validation.required("procureunit.whouse", this.whouse);
         Validation.required("procureunit.handler", this.handler);
         Validation.required("procureunit.product", this.product);
-        Validation.required("procureunit.cooperator", this.cooperator);
         Validation.required("procureunit.createDate", this.createDate);
-        if(this.attrs != null) this.attrs.validate();
+        if(this.attrs != null && StringUtils.isNotEmpty(this.shipmentId)) this.attrs.validate();
         if(this.selling != null && this.whouse != null &&
                 this.whouse.account != null && this.whouse.type == Whouse.T.FBA) {
             if(!this.selling.account.uniqueName.equals(this.whouse.account.uniqueName)) {
@@ -472,7 +470,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.required("procureunit.product", this.product);
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
-        if(this.attrs != null) this.attrs.validate();
+        if(this.attrs != null && this.shipmentId != null) this.attrs.validate();
         if(this.selling == null && this.shipType != null) {
             Validation.addError("", "运输方式不为空时,selling也不能为空!");
         }
@@ -534,11 +532,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         List<Shipment> shipments = Shipment
                 .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
-        //无selling的手动单不做处理
-        //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
-            Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
-                    newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
 
         if(Validation.hasErrors()) return newUnit;
         //无selling的手动单不做处理

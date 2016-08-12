@@ -17,16 +17,23 @@ import helper.Currency;
 
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipItems extends Controller {
 
     @Before(only = "index")
     public static void setIndex() {
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("centers", FBACenter.findAll());
     }
 
-    public static void index(ShipItemPost p) {
+    public static void index(ProcureUnitShipPost p) {
+        if(p == null)
+            p = new ProcureUnitShipPost();
+        List<ProcureUnit> units = p.query();
+        render(p, units);
+    }
+
+    public static void planIndex(ShipItemPost p) {
         if(p == null)
             p = new ShipItemPost();
         List<ShipItem> items = p.query();

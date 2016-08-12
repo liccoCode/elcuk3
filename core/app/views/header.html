@@ -141,7 +141,8 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="@{ShipItems.index()}">快递运输</a></li>
+              <li><a href="@{ShipItems.index()}">快递运输(旧)</a></li>
+              <li><a href="@{ShipItems.planIndex()}">快递运输</a></li>
                 #{power.ck "shipments.index"}
                   <li><a href="@{Shipments.index()}">运输单</a></li>
                 #{/power.ck}
