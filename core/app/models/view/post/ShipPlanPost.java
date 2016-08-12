@@ -89,7 +89,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
 
         if(this.state != null) {
             sbd.append(" AND sp.state=?");
-            params.add(this.state.name());
+            params.add(this.state);
         }
 
         if(this.whouseId > 0) {
@@ -99,7 +99,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
 
         if(this.shipType != null) {
             sbd.append(" AND sp.shipType=? ");
-            params.add(this.shipType.name());
+            params.add(this.shipType);
         }
         sbd.append(" ORDER BY sp.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
