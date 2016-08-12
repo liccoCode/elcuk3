@@ -15,6 +15,15 @@ import java.util.regex.Pattern;
  */
 public class ShipItemPost extends Post<ShipItem> {
 
+    public static final List<F.T2<String, String>> DATE_TYPES;
+
+    static {
+            DATE_TYPES = new ArrayList<>();
+            DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
+            DATE_TYPES.add(new F.T2<>("planShipDate", "预计运输时间"));
+            DATE_TYPES.add(new F.T2<>("planArrivDate", "预计到达时间"));
+        }
+
     private static Pattern SHIPITEMS_ALL_NUM_PATTERN = Pattern.compile("^-?[1-9]\\d*$");
 
     public ShipItemPost() {
@@ -23,16 +32,9 @@ public class ShipItemPost extends Post<ShipItem> {
         this.from = now.minusDays(45).toDate();
     }
 
-    public List<F.T2<String, String>> dateTypes = Arrays.asList(
-            new F.T2<>("createDate", "创建时间"),
-            new F.T2<>("dates.planBeginDate", "预计 [发货] 时间"),
-            new F.T2<>("dates.planDeliveryDate", "预计 [交货] 时间"),
-            new F.T2<>("dates.planArrivDate", "预计 [到库] 时间")
-    );
-
     public boolean isHaveShipment = false;
 
-    public String dateType = "dates.planBeginDate";
+    public String dateType = "createDate";
 
     public Long whouseId;
 
@@ -41,8 +43,8 @@ public class ShipItemPost extends Post<ShipItem> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sql = new StringBuilder("SELECT si FROM ShipItem si LEFT JOIN si.plan p WHERE ");
-
+        StringBuilder sql = new StringBuilder("SELECT si FROM ShipItem si LEFT JOIN si.plan p  ");
+        sql.append(" LEFT JOIN si.unit u WHERE ");
         List<Object> params = new ArrayList<>();
         sql.append("p.").append(this.dateType).append(">=?").append(" AND ").append("p.").append(this.dateType)
                 .append("<=?");

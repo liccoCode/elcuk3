@@ -165,6 +165,7 @@ GET     /shipment/{id}/invoice                              Shipments.invoice
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
+GET     /shipitems                                          ShipItems.planIndex
 GET     /shipitem/{id}.json                                 ShipItems.showJson(format:'json')
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
