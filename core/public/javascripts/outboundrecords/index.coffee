@@ -26,13 +26,13 @@ $ ->
       id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
       attr: attr,
       value: value
-    },
-      (r) ->
-        if r.flag is false
-          noty({text: r.message, type: 'error'})
-        else
-          msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
-          noty({text: "更新#{msg}成功!", type: 'success'})
+    }, (r) ->
+      if r.flag
+        msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
+        noty({text: "更新#{msg}成功!", type: 'success'})
+        $input.trigger('flushQty') #需要更新 Qty 字段
+      else
+        noty({text: r.message, type: 'error'})
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
@@ -80,6 +80,19 @@ $ ->
             callback(coopers)
         })
     })
+  ).on('flushQty', "td>:input[name*='Box']", (e) ->
+    $input = $(@)
+    $tr = $input.parents('tr')
+    mainBoxNum = parseInt($tr.find("input[name='mainBox.boxNum']").val())
+    mainNum = parseInt($tr.find("input[name='mainBox.num']").val())
+
+    lastBoxNum = parseInt($tr.find("input[name='lastBox.boxNum']").val())
+    lastNum = parseInt($tr.find("input[name='lastBox.num']").val())
+
+    tmpSum = 0
+    tmpSum += mainBoxNum * mainNum if _.isInteger(mainBoxNum) && _.isInteger(mainNum)
+    tmpSum += lastBoxNum * lastNum if _.isInteger(lastBoxNum) && _.isInteger(lastNum)
+    $tr.find("input[name='qty']").val(tmpSum)
   )
 
   $(document).on('click', 'a[name=tryIdMatch]', (e) ->
