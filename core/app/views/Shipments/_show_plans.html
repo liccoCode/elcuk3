@@ -51,7 +51,7 @@
         <td><a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a></td>
         <td>${plan.product?.abbreviation}</td>
         <td></td>
-        <td>${plan.out?.clearanceType?.label()}</td>
+        <td>${plan.outboundRecord()?.clearanceType?.label()}</td>
         <td>${plan.whouse.name}</td>
 
         <td>${plan.fba?.shipmentId}</td>
