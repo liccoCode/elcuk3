@@ -200,7 +200,7 @@ public class Excels extends Controller {
             for(Shipment shipment : dtos) {
                 shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
                 for(ShipItem item : shipment.items) {
-                    totalQty += item.unit.realQty();
+                    totalQty += item.unit().realQty();
                     totalUnit += item.caluTotalUnitByCheckTask();
                     totalWeight += item.caluTotalWeightByCheckTask();
                     totalVolume += item.caluTotalVolumeByCheckTask();
@@ -633,14 +633,16 @@ public class Excels extends Controller {
      */
     public static void declare(String id) {
         Shipment ship = Shipment.findById(id);
+        notFoundIfNull(ship);
+        if(ship.items.isEmpty()) renderText("运输单没有运输项(采购计划 Or 出货计划)!");
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
-        String countryCode = ship.items.get(0).unit.fba.fbaCenter.countryCode;
+        String countryCode = ship.items.get(0).unit().fba.fbaCenter.countryCode;
         DeclareDTO dto = DeclareDTO.changeCounty(countryCode);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         String issueDate = Dates.date2Date();
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s%s%s%s.xls",
-                dateFormat.format(new Date()), ship.items.get(0).unit.fba.centerId, ship.type.label(), "报关要素"));
+                dateFormat.format(new Date()), ship.items.get(0).unit().fba.centerId, ship.type.label(), "报关要素"));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(invoiceNo, ship, dto, issueDate);
     }
