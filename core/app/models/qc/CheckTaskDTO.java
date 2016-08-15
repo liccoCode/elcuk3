@@ -53,4 +53,18 @@ public class CheckTaskDTO implements Serializable {
         }
         return 0;
     }
+
+    public Double weight() {
+        if(this.boxNum != null && this.singleBoxWeight != null) {
+            return this.boxNum * this.singleBoxWeight;
+        }
+        return 0d;
+    }
+
+    public Double volume() {
+        if(this.boxNum != null && this.length != null && this.width != null && this.height != null) {
+            return this.length * this.width * this.height * this.boxNum / 1000000;
+        }
+        return 0d;
+    }
 }

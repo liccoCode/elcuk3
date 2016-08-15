@@ -12,6 +12,7 @@ import models.market.Selling;
 import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.OutboundRecord;
 import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -410,33 +411,6 @@ public class ShipItem extends GenericModel {
         return CheckTask.find("units=? ORDER BY creatat DESC", this.unit()).fetch();
     }
 
-    public Integer caluTotalUnitByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalBoxNum();
-        } else {
-            return 0;
-        }
-    }
-
-    public Double caluTotalVolumeByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalVolume();
-        } else {
-            return 0d;
-        }
-    }
-
-    public Double caluTotalWeightByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalWeight();
-        } else {
-            return 0d;
-        }
-    }
-
     public String showDeliverymentId() {
         ShipItem shipItem = ShipItem.findById(this.id);
         return shipItem.unit().deliveryment.id;
@@ -478,5 +452,95 @@ public class ShipItem extends GenericModel {
     public ProcureUnit unit() {
         if(this.plan != null) return plan.unit;
         return this.unit;
+    }
+
+    public Integer caluTotalUnitByCheckTask() {
+        List<CheckTask> tasks = this.checkTasks();
+        if(tasks.size() > 0) {
+            return tasks.get(0).totalBoxNum();
+        } else {
+            return 0;
+        }
+    }
+
+    public Double caluTotalVolumeByCheckTask() {
+        List<CheckTask> tasks = this.checkTasks();
+        if(tasks.size() > 0) {
+            return tasks.get(0).totalVolume();
+        } else {
+            return 0d;
+        }
+    }
+
+    public Double caluTotalWeightByCheckTask() {
+        List<CheckTask> tasks = this.checkTasks();
+        if(tasks.size() > 0) {
+            return tasks.get(0).totalWeight();
+        } else {
+            return 0d;
+        }
+    }
+
+    /**
+     * 运输的产品总数
+     *
+     * @return
+     */
+    public int qty() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return outboundRecord.qty;
+            }
+        }
+        return this.unit().realQty();
+    }
+
+    /**
+     * 运输的总重量
+     *
+     * @return
+     */
+    public Double weight() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return outboundRecord.mainBox.weight() + outboundRecord.lastBox.weight();
+            }
+        }
+        return this.caluTotalWeightByCheckTask();
+    }
+
+    /**
+     * 运输的总箱数
+     *
+     * @return
+     */
+    public Integer boxNumber() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                Integer boxNumSum = 0;
+                if(outboundRecord.mainBox.boxNum != null) boxNumSum += outboundRecord.mainBox.boxNum;
+                if(outboundRecord.lastBox.boxNum != null) boxNumSum += outboundRecord.lastBox.boxNum;
+                return boxNumSum;
+            }
+        }
+        return this.caluTotalUnitByCheckTask();
+    }
+
+    /**
+     * 运输的总体积
+     *
+     * @return
+     */
+    public Double volume() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return outboundRecord.mainBox.volume() + outboundRecord.lastBox.volume();
+            }
+        }
+        return this.caluTotalVolumeByCheckTask();
     }
 }

@@ -186,10 +186,10 @@ public class Excels extends Controller {
             for(Shipment shipment : dtos) {
                 shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
                 for(ShipItem item : shipment.items) {
-                    totalQty += item.unit().realQty();
-                    totalUnit += item.caluTotalUnitByCheckTask();
-                    totalWeight += item.caluTotalWeightByCheckTask();
-                    totalVolume += item.caluTotalVolumeByCheckTask();
+                    totalQty += item.qty();
+                    totalUnit += item.boxNumber();
+                    totalWeight += item.weight();
+                    totalVolume += item.volume();
                 }
             }
 
