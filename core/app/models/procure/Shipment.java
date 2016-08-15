@@ -1718,8 +1718,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             if(cooperator != null) record.targetId = cooperator.id.toString();
             if(item.unit().fba != null) {
                 //根据 FBA 属性来尝试获取入库记录中选择的目标仓库
-                InboundRecord inboundRecord = InboundRecord.findInboundRecordByFBA(item.unit.fba.shipmentId);
-                if(inboundRecord != null) this.whouse = inboundRecord.targetWhouse;
+                ProcureUnit unit = item.unit();
+                if(unit != null) {
+                    InboundRecord inboundRecord = InboundRecord.findInboundRecordByFBA(item.unit.fba.shipmentId);
+                    if(inboundRecord != null) this.whouse = inboundRecord.targetWhouse;
+                }
             }
             record.stockObj = new StockObj(item.unit().product.sku);
             record.stockObj.setAttributes(item);
