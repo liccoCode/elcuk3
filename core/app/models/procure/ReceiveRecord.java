@@ -208,22 +208,37 @@ public class ReceiveRecord extends GenericModel implements ElcukRecord.Log {
 
     public void updateAttr(String attr, String value) {
         if(this.isLocked()) throw new FastRuntimeException("已收货的收货记录不允许修改!");
-        if(StringUtils.isBlank(attr)) throw new FastRuntimeException("属性名称不能为空!");
-        String[] chunks = StringUtils.splitByWholeSeparator(attr, ".");
-        if(chunks.length != 2 || !Arrays.asList("mainBox", "lastBox").contains(chunks[0])) {
-            throw new FastRuntimeException("不合法的属性名称!");
-        }
-
         List<String> logs = new ArrayList<>();
-        if(Arrays.asList("boxNum", "num").contains(chunks[1])) {
-            logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
-        } else if(Arrays.asList("singleBoxWeight", "length", "width", "height").contains(chunks[1])) {
-            logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toDouble(value)));
+        switch(attr) {
+            case "qty":
+            case "mainBox.boxNum":
+            case "mainBox.num":
+            case "lastBox.boxNum":
+            case "lastBox.num":
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                break;
+            case "mainBox.singleBoxWeight":
+            case "mainBox.length":
+            case "mainBox.width":
+            case "mainBox.height":
+            case "lastBox.singleBoxWeight":
+            case "lastBox.length":
+            case "lastBox.width":
+            case "lastBox.height":
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toDouble(value)));
+                break;
+            default:
+                throw new FastRuntimeException("不合法的属性名称!");
+
         }
-        logs.addAll(Reflects.logFieldFade(this, "qty", this.mainBox.qty() + this.lastBox.qty()));
         this.marshalBoxs();
+        if(attr.contains(".boxNum") || attr.contains(".num")) {
+            int fullQty = this.mainBox.qty() + this.lastBox.qty();
+            if(fullQty != 0) logs.addAll(Reflects.logFieldFade(this, "qty", fullQty));
+        }
         new ERecordBuilder("receiverecord.update")
-                .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
+                .msgArgs(this.id, StringUtils.join(logs, "<br/>"))
+                .fid(this.id)
                 .save();
         this.save();
     }

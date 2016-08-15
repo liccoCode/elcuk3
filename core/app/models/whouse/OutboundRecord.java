@@ -542,16 +542,7 @@ public class OutboundRecord extends Model {
     }
 
     public boolean exist() {
-        Object procureunitId = this.stockObj.procureunitId();
-        Object shipPlanId = this.stockObj.shipPlanId();
-        if(procureunitId != null) {
-            return OutboundRecord.count("attributes LIKE ?",
-                    "%\"procureunitId\":" + procureunitId.toString() + "%") != 0;
-        } else if(shipPlanId != null) {
-            return ShipPlan.count("attributes LIKE ?",
-                    "%\"shipPlanId\":" + shipPlanId.toString() + "%") != 0;
-        }
-        return false;
+        return OutboundRecord.count("shipPlan=?", this.shipPlan) != 0;
     }
 
     public static boolean checkExistsWithUnitId(String procureunitId) {

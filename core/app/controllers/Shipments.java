@@ -415,7 +415,8 @@ public class Shipments extends Controller {
      * @param whouseId
      */
     public static void unitShipments(Long whouseId, Shipment.T shipType, Date planDeliveryDate) {
-        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId, shipType, planDeliveryDate);
+        List<Shipment> unitRelateShipments = Shipment
+                .findUnitRelateShipmentByWhouse(whouseId, shipType, planDeliveryDate);
         render(unitRelateShipments);
     }
 
@@ -429,10 +430,10 @@ public class Shipments extends Controller {
         String shipType = ship.type.name();
         Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
         for(ShipItem item : ship.items) {
-            String centerId = item.unit.fba.centerId;
+            String centerId = item.unit().fba.centerId;
             if(!fbaGroupUnits.containsKey(centerId))
                 fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
-            fbaGroupUnits.get(centerId).add(item.unit);
+            fbaGroupUnits.get(centerId).add(item.unit());
         }
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
         final PDF.Options options = new PDF.Options();
