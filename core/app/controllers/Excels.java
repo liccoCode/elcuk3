@@ -420,10 +420,9 @@ public class Excels extends Controller {
     public static void exportProcureUnitsLogs(ProcurePost p) {
         List<HashMap<String, Object>> logs = p.queryLogs();
         if(logs != null && logs.size() > 0) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s采购计划log记录.xls", formatter.format(p.from), formatter.format(p.to)));
+                    String.format("%s-%s采购计划log记录.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
             render(logs);
         } else {
             renderText("没有数据无法生成Excel文件!");
@@ -575,10 +574,9 @@ public class Excels extends Controller {
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
         String countryCode = ship.items.get(0).unit().fba.fbaCenter.countryCode;
         DeclareDTO dto = DeclareDTO.changeCounty(countryCode);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         String issueDate = Dates.date2Date();
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s%s%s%s.xls",
-                dateFormat.format(new Date()), ship.items.get(0).unit().fba.centerId, ship.type.label(), "报关要素"));
+                Date_Formater.format(new Date()), ship.items.get(0).unit().fba.centerId, ship.type.label(), "报关要素"));
         render(invoiceNo, ship, dto, issueDate);
     }
 
