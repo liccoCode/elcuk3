@@ -51,13 +51,13 @@ import java.util.*;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Excels extends Controller {
-    public static final SimpleDateFormat Date_Formater = new SimpleDateFormat("yyyyMMdd");
+    public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
     @Before
     public static void requestFormat() {
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        renderArgs.put("dateFormat", Date_Formater);
+        renderArgs.put("dateFormat", DATE_FORMATTER);
     }
 
     @Check("excels.deliveryment")
@@ -79,7 +79,7 @@ public class Excels extends Controller {
         List<Deliveryment> deliverymentList = p.queryForExcel();
         if(deliverymentList != null && deliverymentList.size() != 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s采购单.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("%s-%s采购单.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             render(deliverymentList);
         } else {
             renderText("没有数据无法生成Excel文件！");
@@ -137,7 +137,7 @@ public class Excels extends Controller {
         List<AnalyzeDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s销售分析.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("%s-%s销售分析.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             render(dtos);
         } else {
             renderText("没有数据无法生成Excel文件！");
@@ -152,7 +152,7 @@ public class Excels extends Controller {
         List<TrafficRate> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%sSelling流量转化率.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("%s-%sSelling流量转化率.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, p);
         } else {
@@ -244,8 +244,8 @@ public class Excels extends Controller {
                     categorykey = p.sku;
                 }
                 postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
-                        + Date_Formater.format(p.begin) + "_"
-                        + Date_Formater.format(p.end);
+                        + DATE_FORMATTER.format(p.begin) + "_"
+                        + DATE_FORMATTER.format(p.end);
                 String postvalue = Caches.get(postkey);
                 if(StringUtils.isBlank(postvalue)) {
                     String categoryname = "";
@@ -260,8 +260,8 @@ public class Excels extends Controller {
                             System.getenv(Constant.ROCKEND_HOST),
                             categoryname,
                             marketkey,
-                            Date_Formater.format(p.begin),
-                            Date_Formater.format(p.end),
+                            DATE_FORMATTER.format(p.begin),
+                            DATE_FORMATTER.format(p.end),
                             is_sku);
                     HTTP.get(url);
                 }
@@ -270,7 +270,7 @@ public class Excels extends Controller {
 
         if(profits != null && profits.size() != 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s销售库存利润报表.xls", Date_Formater.format(p.begin), Date_Formater.format(p.end)));
+                    String.format("%s-%s销售库存利润报表.xls", DATE_FORMATTER.format(p.begin), DATE_FORMATTER.format(p.end)));
             render(profits, p);
         } else {
             renderText("正在后台计算生成Excel文件！");
@@ -291,8 +291,8 @@ public class Excels extends Controller {
                 sku_key = p.sku;
             }
             String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_" +
-                    Date_Formater.format(p.begin) + "_" +
-                    Date_Formater.format(p.end);
+                    DATE_FORMATTER.format(p.begin) + "_" +
+                    DATE_FORMATTER.format(p.end);
             String cache_str = Caches.get(cacke_key);
 
             if(!StringUtils.isBlank(cache_str)) {
@@ -326,7 +326,7 @@ public class Excels extends Controller {
                 } else {
                     SkuProfit total = SkuProfit.handleSkuProfit(dtos);
                     renderArgs.put(RenderExcel.RA_FILENAME,
-                            String.format("SKU销售库存利润报表%s.xls", Date_Formater.format(new Date())));
+                            String.format("SKU销售库存利润报表%s.xls", DATE_FORMATTER.format(new Date())));
                     render(total, p, dtos);
                 }
             }
@@ -337,7 +337,7 @@ public class Excels extends Controller {
         List<SaleReportDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s产品销售统计报表.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("%s-%s产品销售统计报表.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, p);
 
@@ -396,8 +396,8 @@ public class Excels extends Controller {
         Map<String, ShipmentWeight> sws = excel.query();
         if(sws != null && sws.size() > 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s运输重量报表.xls", Date_Formater.format(excel.from),
-                            Date_Formater.format(excel.to)));
+                    String.format("%s-%s运输重量报表.xls", DATE_FORMATTER.format(excel.from),
+                            DATE_FORMATTER.format(excel.to)));
             render(sws, excel);
         } else {
             renderText("没有数据无法生成Excel文件！");
@@ -408,8 +408,8 @@ public class Excels extends Controller {
         List<Shipment> dtos = excel.queryShipmentCostAndWeight();
         if(dtos != null && dtos.size() > 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("运输单费用及重量统计报表%s-%s.xls", Date_Formater.format(excel.from),
-                            Date_Formater.format(excel.to)));
+                    String.format("运输单费用及重量统计报表%s-%s.xls", DATE_FORMATTER.format(excel.from),
+                            DATE_FORMATTER.format(excel.to)));
             renderArgs.put("symbol", Currency.CNY.symbol());
             render(dtos, excel);
         } else {
@@ -422,7 +422,7 @@ public class Excels extends Controller {
         if(logs != null && logs.size() > 0) {
             renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s采购计划log记录.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("%s-%s采购计划log记录.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             render(logs);
         } else {
             renderText("没有数据无法生成Excel文件!");
@@ -437,7 +437,7 @@ public class Excels extends Controller {
             renderArgs.put("dmt", new SimpleDateFormat("yyyy-MM-dd"));
             renderArgs.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:MM:SS"));
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s运输准时到货统计报表.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("%s-%s运输准时到货统计报表.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             render(dtos, shipments, p);
         } else {
             renderText("没有数据无法生成Excel文件!");
@@ -452,8 +452,8 @@ public class Excels extends Controller {
             LossRate losstotal = p.buildTotalLossRate(lossrates);
             if(lossrates != null && lossrates.size() != 0) {
                 renderArgs.put(RenderExcel.RA_FILENAME,
-                        String.format("%s-%s运输单丢失率报表.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
-                renderArgs.put("dmt", Date_Formater);
+                        String.format("%s-%s运输单丢失率报表.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
+                renderArgs.put("dmt", DATE_FORMATTER);
                 render(lossrates, losstotal, p);
             } else {
                 renderText("没有数据无法生成Excel文件！");
@@ -464,8 +464,8 @@ public class Excels extends Controller {
             if(dtos != null && dtos.size() > 0) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 renderArgs.put(RenderExcel.RA_FILENAME,
-                        String.format("%s-%s未完全入库统计报表.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
-                renderArgs.put("dmt", Date_Formater);
+                        String.format("%s-%s未完全入库统计报表.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
+                renderArgs.put("dmt", DATE_FORMATTER);
                 renderArgs.put("dft", dateFormat);
                 render("Excels/notFullyStorageReport.xls", dtos, p);
             } else {
@@ -479,7 +479,7 @@ public class Excels extends Controller {
         List<F.T4<String, Long, Long, Double>> sales = OrderItem.querySalesBySkus(from, to, val);
         if(sales != null && sales.size() != 0) {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("自定义销售报表%s.xls", Date_Formater.format(DateTime.now().toDate())));
+                    String.format("自定义销售报表%s.xls", DATE_FORMATTER.format(DateTime.now().toDate())));
             render(sales, from, to);
         } else {
             renderText("没有数据无法生成Excel文件！");
@@ -506,7 +506,7 @@ public class Excels extends Controller {
                 List<Integer> months = new ArrayList<Integer>();
                 for(int i = begin; i <= end; i++) months.add(i);
                 renderArgs.put(RenderExcel.RA_FILENAME,
-                        String.format("SKU月度日均销量报表%s.xls", Date_Formater.format(DateTime.now().toDate())));
+                        String.format("SKU月度日均销量报表%s.xls", DATE_FORMATTER.format(DateTime.now().toDate())));
                 File fileOut = OrderItem.createWorkBook(dtos, months, cacheKey);
                 renderBinary(fileOut);
             }
@@ -538,7 +538,7 @@ public class Excels extends Controller {
         if(dtos == null || dtos.size() == 0) {
             renderText("没有数据无法生成Excel文件!");
         } else {
-            String.format("采购计划明细表%s-%s.xls", Date_Formater.format(p.from), Date_Formater.format(p.to));
+            String.format("采购计划明细表%s-%s.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to));
             renderArgs.put("costs", ProcurePost.countCostByCurrency(dtos));
             render(dtos, p);
         }
@@ -576,7 +576,7 @@ public class Excels extends Controller {
         DeclareDTO dto = DeclareDTO.changeCounty(countryCode);
         String issueDate = Dates.date2Date();
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s%s%s%s.xls",
-                Date_Formater.format(new Date()), ship.items.get(0).unit().fba.centerId, ship.type.label(), "报关要素"));
+                DATE_FORMATTER.format(new Date()), ship.items.get(0).unit().fba.centerId, ship.type.label(), "报关要素"));
         render(invoiceNo, ship, dto, issueDate);
     }
 
@@ -717,7 +717,7 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件!");
         } else {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("出库计划明细%s-%s.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("出库计划明细%s-%s.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             render(plans, p);
         }
     }
@@ -729,7 +729,7 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件!");
         } else {
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("出库记录%s-%s.xls", Date_Formater.format(p.from), Date_Formater.format(p.to)));
+                    String.format("出库记录%s-%s.xls", DATE_FORMATTER.format(p.from), DATE_FORMATTER.format(p.to)));
             render(records, p);
         }
     }
