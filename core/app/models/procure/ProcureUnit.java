@@ -1693,7 +1693,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public Integer inboundQty() {
         InboundRecord record = this.inboundRecord();
-        if(record != null) {
+        if(record != null && record.state == InboundRecord.S.Pending) {
             return record.qty;
         }
         return null;
