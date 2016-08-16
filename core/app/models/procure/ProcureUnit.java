@@ -1795,8 +1795,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public boolean canBeOutbound() {
-        return this.stage == ProcureUnit.STAGE.DELIVERY &&
-                this.selling != null &&
+        return this.selling != null &&
                 this.whouse != null &&
                 this.attrs.planShipDate != null;
     }
