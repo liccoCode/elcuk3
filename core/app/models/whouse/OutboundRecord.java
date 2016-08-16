@@ -516,13 +516,18 @@ public class OutboundRecord extends Model {
      * 设置采购计划是否出库状态为已出库
      */
     public void outboundProcureUnit() {
-        Object procureunitId = this.stockObj.procureunitId();
-        if(procureunitId != null) {
-            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
-            if(procureUnit != null) {
-                procureUnit.isOut = ProcureUnit.OST.Outbound;
-                procureUnit.save();
+        ProcureUnit procureUnit = null;
+        if(this.shipPlan != null && this.shipPlan.unit != null) {
+            procureUnit = this.shipPlan.unit;
+        } else {
+            Object procureunitId = this.stockObj.procureunitId();
+            if(procureunitId != null) {
+                procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
             }
+        }
+        if(procureUnit != null) {
+            procureUnit.isOut = ProcureUnit.OST.Outbound;
+            procureUnit.save();
         }
     }
 
