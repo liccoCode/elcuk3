@@ -1790,14 +1790,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 判断是否能够出货
+     * 判断是否能够生成出库计划
      *
      * @return
      */
     public boolean canBeOutbound() {
         return this.selling != null &&
                 this.whouse != null &&
-                this.attrs.planShipDate != null;
+                this.attrs.planShipDate != null &&
+                this.shipType != null;
     }
 
     /**
