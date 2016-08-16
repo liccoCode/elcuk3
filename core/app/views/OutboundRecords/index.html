@@ -166,9 +166,10 @@
               #{/if}
           </td>
           <td>
-              #{if attrs.containsKey('procureunitId')}
-                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
-                ${attrs.get('procureunitId')}
+              #{set procureunitId: r.shipPlan != null ? r.shipPlan?.unit?.id : attrs.get('procureunitId')/}
+              #{if procureunitId}
+                <a href="/ProcureUnits/index?p.search=id:${procureunitId}" target="_blank">
+                ${procureunitId}
                 </a>
               #{/if}
           </td>

@@ -166,6 +166,7 @@ public class StockObj implements Serializable, Cloneable {
     public void setAttributes(ShipPlan plan) {
         //把采购计划一些自身属性存入到 DB,方便后期查询
         if(plan != null) {
+            if(plan.unit != null) this.setAttributes(plan.unit);
             this.attrs.put("shipPlanId", plan.id);
             if(plan.fba != null) this.attrs.put("fba", plan.fba.shipmentId);
             if(plan.shipType != null) this.attrs.put("shipType", plan.shipType.name());
