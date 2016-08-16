@@ -310,6 +310,7 @@ public class OutboundRecord extends Model {
             if(cooperator != null) this.targetId = cooperator.id.toString();
         }
 
+
         if("{}".equals(this.mainBoxInfo) || "{}".equals(this.lastBoxInfo)) {
             //尝试匹配 主箱信息 和 尾箱信息
             ReceiveRecord receiveRecord = this.receiveRecord();
@@ -318,6 +319,17 @@ public class OutboundRecord extends Model {
                 this.lastBoxInfo = receiveRecord.lastBoxInfo;
                 this.unmarshalBoxs();
             }
+        }
+        //尝试匹配 主箱信息 和 尾箱信息
+        ReceiveRecord receiveRecord = this.receiveRecord();
+        if(receiveRecord != null) {
+            if("{}".equals(this.mainBoxInfo)) {
+                this.mainBoxInfo = receiveRecord.mainBoxInfo;
+            }
+            if("{}".equals(this.lastBoxInfo)) {
+                this.lastBoxInfo = receiveRecord.lastBoxInfo;
+            }
+            this.unmarshalBoxs();
         }
         if(this.clearanceType == null) {
             //尝试匹配报关类型
@@ -329,6 +341,7 @@ public class OutboundRecord extends Model {
         if(this.whouse == null) {
             this.whouse = this.findWhouse();
         }
+        this.save();
     }
 
     /**
