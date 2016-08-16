@@ -309,17 +309,6 @@ public class OutboundRecord extends Model {
             Cooperator cooperator = Cooperator.mainShipper();
             if(cooperator != null) this.targetId = cooperator.id.toString();
         }
-
-
-        if("{}".equals(this.mainBoxInfo) || "{}".equals(this.lastBoxInfo)) {
-            //尝试匹配 主箱信息 和 尾箱信息
-            ReceiveRecord receiveRecord = this.receiveRecord();
-            if(receiveRecord != null) {
-                this.mainBoxInfo = receiveRecord.mainBoxInfo;
-                this.lastBoxInfo = receiveRecord.lastBoxInfo;
-                this.unmarshalBoxs();
-            }
-        }
         //尝试匹配 主箱信息 和 尾箱信息
         ReceiveRecord receiveRecord = this.receiveRecord();
         if(receiveRecord != null) {
