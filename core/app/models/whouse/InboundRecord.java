@@ -472,13 +472,18 @@ public class InboundRecord extends Model {
      * 采购计划入库
      */
     public void inboundProcureunit() {
-        Long procureunitId = this.stockObj.procureunitId();
-        if(procureunitId != null) {
-            ProcureUnit unit = ProcureUnit.findById(procureunitId);
-            if(unit != null) {
-                unit.stage = ProcureUnit.STAGE.INWAREHOUSE;
-                unit.save();
+        ProcureUnit unit = null;
+        if(this.checkTask != null && this.checkTask.units != null) {
+            unit = this.checkTask.units;
+        } else {
+            Long procureunitId = this.stockObj.procureunitId();
+            if(procureunitId != null) {
+                unit = ProcureUnit.findById(procureunitId);
             }
+        }
+        if(unit != null) {
+            unit.stage = ProcureUnit.STAGE.INWAREHOUSE;
+            unit.save();
         }
     }
 

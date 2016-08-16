@@ -311,24 +311,21 @@ public class OutboundRecord extends Model {
         }
 
         if(StringUtils.isBlank(this.mainBoxInfo) || StringUtils.isBlank(this.lastBoxInfo)) {
-            if(this.stockObj != null && this.stockObj.procureunitId() != null) {
-                //尝试匹配 主箱信息 和 尾箱信息
-                ReceiveRecord receiveRecord = this.receiveRecord();
-                if(receiveRecord != null) {
-                    this.mainBoxInfo = receiveRecord.mainBoxInfo;
-                    this.lastBoxInfo = receiveRecord.lastBoxInfo;
-                    this.unmarshalBoxs();
-                }
-            }
-            if(this.clearanceType == null) {
-                //尝试匹配报关类型
-                ProcureUnit procureUnit = this.procureUnit();
-                if(procureUnit != null) {
-                    this.clearanceType = procureUnit.clearanceType;
-                }
+            //尝试匹配 主箱信息 和 尾箱信息
+            ReceiveRecord receiveRecord = this.receiveRecord();
+            if(receiveRecord != null) {
+                this.mainBoxInfo = receiveRecord.mainBoxInfo;
+                this.lastBoxInfo = receiveRecord.lastBoxInfo;
+                this.unmarshalBoxs();
             }
         }
-
+        if(this.clearanceType == null) {
+            //尝试匹配报关类型
+            ProcureUnit procureUnit = this.procureUnit();
+            if(procureUnit != null) {
+                this.clearanceType = procureUnit.clearanceType;
+            }
+        }
         if(this.whouse == null) {
             this.whouse = this.findWhouse();
         }
@@ -519,13 +516,18 @@ public class OutboundRecord extends Model {
      * 设置采购计划是否出库状态为已出库
      */
     public void outboundProcureUnit() {
-        Object procureunitId = this.stockObj.procureunitId();
-        if(procureunitId != null) {
-            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
-            if(procureUnit != null) {
-                procureUnit.isOut = ProcureUnit.OST.Outbound;
-                procureUnit.save();
+        ProcureUnit procureUnit = null;
+        if(this.shipPlan != null && this.shipPlan.unit != null) {
+            procureUnit = this.shipPlan.unit;
+        } else {
+            Object procureunitId = this.stockObj.procureunitId();
+            if(procureunitId != null) {
+                procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
             }
+        }
+        if(procureUnit != null) {
+            procureUnit.isOut = ProcureUnit.OST.Outbound;
+            procureUnit.save();
         }
     }
 
@@ -587,9 +589,13 @@ public class OutboundRecord extends Model {
     }
 
     public ReceiveRecord receiveRecord() {
-        Long procureunitId = this.stockObj.procureunitId();
-        if(procureunitId != null) {
-            return ReceiveRecord.find("procureUnit.id=?", procureunitId).first();
+        if(this.shipPlan != null) {
+            return ReceiveRecord.find("procureUnit=?", this.shipPlan.unit).first();
+        } else {
+            Long procureunitId = this.stockObj.procureunitId();
+            if(procureunitId != null) {
+                return ReceiveRecord.find("procureUnit.id=?", procureunitId).first();
+            }
         }
         return null;
     }
@@ -609,9 +615,13 @@ public class OutboundRecord extends Model {
     }
 
     public ProcureUnit procureUnit() {
-        Long procureunitId = this.stockObj.procureunitId();
-        if(procureunitId != null) {
-            return ProcureUnit.findById(procureunitId);
+        if(this.shipPlan != null && this.shipPlan.unit != null) {
+            return this.shipPlan.unit;
+        } else {
+            Long procureunitId = this.stockObj.procureunitId();
+            if(procureunitId != null) {
+                return ProcureUnit.findById(procureunitId);
+            }
         }
         return null;
     }
