@@ -161,13 +161,6 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     @OneToOne
     public User creator;
 
-    /**
-     * 出库记录
-     */
-    @Expose
-    @OneToOne
-    public OutboundRecord out;
-
     public ShipPlan() {
         this.createDate = new Date();
         this.state = S.Pending;
@@ -239,8 +232,6 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException(String.format("出库记录已经存在![采购计划ID: %s, 出库计划ID: %s]", this.unit.id, this.id));
         }
         outboundRecord.save();
-        this.out = outboundRecord;
-        this.save();
         return this;
     }
 
@@ -415,7 +406,8 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         }
 
         //删除出库记录
-        if(this.out != null) this.out.delete();
+        OutboundRecord outboundRecord = this.outboundRecord();
+        if(outboundRecord != null) outboundRecord.delete();
         this.delete();
     }
 
@@ -485,5 +477,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             }
         }
         return "";
+    }
+
+    public OutboundRecord outboundRecord() {
+        return OutboundRecord.find("shipPlan=?", this).first();
     }
 }

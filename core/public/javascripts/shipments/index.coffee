@@ -30,8 +30,7 @@ $ ->
     if other_size > 0 && express_size > 0
       noty({text: "快递不可与海空运运输同时导出，请重新选择！", type: 'warning'})
       return
-    window.open('/Excels/shipmentDetails?' + $form.serialize() + "&" +
-        $("#shipmentTable input[name='shipmentId']:checked").serialize(), "_blank")
+    window.open('/Excels/shipmentDetails?' + $("#shipmentTable input[name='shipmentId']:checked").serialize(), "_blank")
   )
 
   $('#search_form').on('click', '#outboundBtn', (e) ->

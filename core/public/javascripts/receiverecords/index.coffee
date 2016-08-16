@@ -19,7 +19,7 @@ $ ->
     form.submit().remove()
   )
 
-  $("form[name=confirm_form]").on('change', "td>:input[name*='Box']", (e) ->
+  $("form[name=confirm_form]").on('change', "td>:input[name]", (e) ->
     $input = $(@)
     attr = $input.attr('name')
     value = $input.val()
@@ -29,12 +29,12 @@ $ ->
       id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
       attr: attr,
       value: value
-    },
-      (r) ->
-        if r.flag is false
-          noty({text: r.message, type: 'error'})
-        else
-          noty({text: "更新#{attr}成功!", type: 'success'})
+    }, (r) ->
+      if r.flag
+        noty({text: "更新#{attr}成功!", type: 'success'})
+        $input.trigger('flushQty') #需要更新 Qty 字段
+      else
+        noty({text: r.message, type: 'error'})
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
@@ -51,7 +51,7 @@ $ ->
             $input.parent().text($input.val())
         )
     )
-  ).on('change', "td>:input[name*='um']", (e) ->
+  ).on('flushQty', "td>:input[name*='Box']", (e) ->
     $input = $(@)
     $tr = $input.parents('tr')
     mainBoxNum = parseInt($tr.find("input[name='mainBox.boxNum']").val())
