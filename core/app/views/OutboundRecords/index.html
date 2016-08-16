@@ -168,7 +168,7 @@
           <td>
               #{set procureunitId: r.shipPlan != null ? r.shipPlan?.unit?.id : attrs.get('procureunitId')/}
               #{if procureunitId}
-                <a href="/ProcureUnits/index?p.search=id:${procureunitId}" target="_blank">
+                <a href="/ProcureUnits/index?p.search=${procureunitId}" target="_blank">
                 ${procureunitId}
                 </a>
               #{/if}

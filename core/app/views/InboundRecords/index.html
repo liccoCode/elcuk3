@@ -126,7 +126,7 @@
           </td>
           <td>
               #{if attrs.containsKey('procureunitId')}
-                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
+                <a href="/ProcureUnits/index?p.search=${attrs.get('procureunitId')}" target="_blank">
                 ${attrs.get('procureunitId')}
                 </a>
               #{/if}

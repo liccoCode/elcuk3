@@ -164,7 +164,7 @@
             <a href="@{DeliverPlans.show(r.deliverPlan?.id)}" target="_blank">${r.deliverPlan?.id}</a>
           </td>
           <td>
-            <a href="/ProcureUnits/index?p.search=id:${r.procureUnit?.id}" target="_blank">
+            <a href="/ProcureUnits/index?p.search=${r.procureUnit?.id}" target="_blank">
             ${r.procureUnit?.id}
             </a>
           </td>
