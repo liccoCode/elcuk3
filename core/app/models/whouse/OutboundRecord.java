@@ -310,7 +310,7 @@ public class OutboundRecord extends Model {
             if(cooperator != null) this.targetId = cooperator.id.toString();
         }
 
-        if(StringUtils.isBlank(this.mainBoxInfo) || StringUtils.isBlank(this.lastBoxInfo)) {
+        if("{}".equals(this.mainBoxInfo) || "{}".equals(this.lastBoxInfo)) {
             //尝试匹配 主箱信息 和 尾箱信息
             ReceiveRecord receiveRecord = this.receiveRecord();
             if(receiveRecord != null) {
