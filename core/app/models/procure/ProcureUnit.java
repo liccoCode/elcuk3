@@ -1794,7 +1794,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @return
      */
-    public boolean canBeShip() {
+    public boolean canBeOutbound() {
         return this.stage == ProcureUnit.STAGE.DELIVERY &&
                 this.selling != null &&
                 this.whouse != null &&
@@ -1805,7 +1805,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 出货中
      */
     public void inShipment(DeliverPlan deliverPlan) {
-        if(!this.canBeShip()) return;
         this.stage = ProcureUnit.STAGE.INSHIPMENT;
         //生成收货记录
         ReceiveRecord receiveRecord = new ReceiveRecord(this, deliverPlan);
@@ -1814,12 +1813,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             receiveRecord.save();
         }
-        //生成出库计划
-        ShipPlan plan = new ShipPlan(this);
-        if(plan.exist()) {
-            throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出库计划!", this.id));
-        } else {
-            plan.createAndOutbound(null);
+        if(this.canBeOutbound()) {
+            //生成出库计划
+            ShipPlan plan = new ShipPlan(this);
+            if(plan.exist()) {
+                throw new FastRuntimeException(String.format("采购计划[%s]已经拥有出库计划!", this.id));
+            } else {
+                plan.createAndOutbound(null);
+            }
         }
         this.save();
     }
