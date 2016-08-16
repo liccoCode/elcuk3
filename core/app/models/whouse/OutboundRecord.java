@@ -330,7 +330,6 @@ public class OutboundRecord extends Model {
         if(this.whouse == null) {
             this.whouse = this.findWhouse();
         }
-        this.save();
     }
 
     /**

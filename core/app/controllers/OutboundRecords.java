@@ -43,7 +43,10 @@ public class OutboundRecords extends Controller {
         List<ElcukRecord> elcukRecords = ElcukRecord.records(Arrays.asList(
                 Messages.get("outboundrecord.confirm"),
                 Messages.get("outboundrecord.update")), 50);
-        for(OutboundRecord record : records) record.tryMatchAttrs();
+        for(OutboundRecord record : records) {
+            record.tryMatchAttrs();
+            record.save();
+        }
         render(p, records, elcukRecords);
     }
 
