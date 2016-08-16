@@ -93,6 +93,8 @@ $ ->
     tmpSum += mainBoxNum * mainNum if _.isInteger(mainBoxNum) && _.isInteger(mainNum)
     tmpSum += lastBoxNum * lastNum if _.isInteger(lastBoxNum) && _.isInteger(lastNum)
     $tr.find("input[name='qty']").val(tmpSum)
+  ).on('click', 'select[name=whouse]', (e) ->
+    noty({text: "库存不足, 无法匹配仓库!", type: 'warning'}) if $(@).find('option').size() <= 1
   )
 
   $(document).on('click', 'a[name=tryIdMatch]', (e) ->

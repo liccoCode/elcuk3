@@ -660,4 +660,18 @@ public class OutboundRecord extends Model {
                 return null;
         }
     }
+
+    /**
+     * 找出当前出库记录可用的仓库(有库存)
+     *
+     * @return
+     */
+    public List<Whouse> availableWhouses() {
+        String sql = "SELECT DISTINCT w FROM Whouse w " +
+                " LEFT JOIN w.items it" +
+                " WHERE w.type=? AND w.name NOT LIKE '%不良品仓%'" +
+                " AND it.stockObj.stockObjId=? AND it.stockObj.stockObjType=? AND it.qty>0";
+        return Whouse.find(sql, Whouse.T.SELF, this.stockObj.stockObjId, this.stockObj.stockObjType)
+                .fetch();
+    }
 }

@@ -187,7 +187,7 @@
           <td>
             <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
               <option value="">仓库</option>
-                #{list items:whouses, as:'whouse'}
+                #{list items:r.availableWhouses(), as:'whouse'}
                   <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
                   ${whouse.name}
                   </option>
