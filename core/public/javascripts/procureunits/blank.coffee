@@ -73,6 +73,16 @@ $ ->
     )
   )
 
+  $("#del_ship_type").click(->
+    $("#ship_type_text").html("")
+    $("#shipmentId").val("")
+    $("#planShipDate").val("")
+    $("#planArrivDate").val("")
+    $("[name='unit.shipType']").each(->
+      $(@).attr("checked",false)
+    )
+  )
+
   $('#shipments').on('change', '[name=shipmentId]', (e) ->
     LoadMask.mask()
     $.get("/shipment/#{@getAttribute('value')}/dates")
