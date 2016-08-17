@@ -79,18 +79,32 @@ $ ->
       LoadMask.unmask()
   )
 
+  $("#del_sid").click(->
+    $("#sellingId").val("")
+    $("#warehouse_select option[value='']").prop("selected", "selected")
+  )
+
   # Ajax 加载 Sellingid
   $sellingId = $("input[name='newUnit.selling.sellingId']")
   $sellingId.typeahead({
     source: (query, process) ->
       msku = $("#unit_sku").val()
       return if _.isEmpty(msku)
-
       $.get('/sellings/sameFamilySellings', {msku: msku})
       .done((c) ->
         process(c)
       )
+    updater: (item) ->
+      checkCoopertorBySelling(item)
+      item
   })
+
+  checkCoopertorBySelling = (selling) ->
+    for select, i in $("#warehouse_select option")
+      name = $(select).text()
+      name = "A_" + name.split('_')[1]
+      if selling.indexOf(name) > -1
+        $(select).attr("selected", true)
 
   $("#warehouse_select").change(->
     if $(@).val()

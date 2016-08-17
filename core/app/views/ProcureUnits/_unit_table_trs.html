@@ -80,14 +80,13 @@
     </label>
   #{/list}
   </td>
-  <td colspan="2">
-  #{list items: unit.relateShipment()}
+  <td colspan="2" id="ship_type_text">
     <div>
-      <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
-      <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
-      <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
+    #{if unit.shipmentId}
+      <a href="@{Shipments.show(unit.shipmentId)}" target="_blank">${unit.shipmentId} (${unit.shipType?.label()})</a>
+      <input type="button" class="btn btn-mini btn-primary" id="del_ship_type" name="unit.shipType" value="清除运输方式">
+    #{/if}
     </div>
-  #{/list}
   </td>
 </tr>
 
@@ -97,7 +96,7 @@
     <textarea rows="8" class="span12" name="unit.comment" id="memo">${unit.comment.raw()}</textarea>
   </td>
 </tr>
-<input type="hidden" name="unit.shipmentId" value="${unit.shipmentId}">
+<input type="hidden" name="unit.shipmentId" value="${unit.shipmentId}" id="shipmentId">
 <input type="hidden" name="to_page" value="#{if sid} analysis #{/if} #{else } index #{/else}">
 
 
