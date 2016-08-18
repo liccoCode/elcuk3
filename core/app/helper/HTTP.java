@@ -185,6 +185,40 @@ public class HTTP {
     }
 
     /**
+     * 传入指定的 CookieStore, 并返回 HttpClientContext 对象
+     * <p>
+     * PS: HttpClientContext 可以得到:
+     * 1. Request(getRequest())
+     * 2. Response(getResponse())
+     *
+     * @param cookieStore
+     * @param url
+     * @return
+     */
+    public static HttpClientContext request(CookieStore cookieStore, String url) {
+        try {
+            HttpClientContext context = getContextWithCookieStore(cookieStore);
+            client().execute(new HttpGet(url), context);
+            return context;
+        } catch(IOException e) {
+            e.printStackTrace();
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
+            return null;
+        }
+    }
+
+    public static String toString(HttpResponse reponse) {
+        if(reponse != null) {
+            try {
+                return EntityUtils.toString(reponse.getEntity(), "UTF-8");
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+    /**
      * 使用默认 Cookie Store
      *
      * @param url
