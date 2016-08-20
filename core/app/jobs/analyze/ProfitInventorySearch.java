@@ -1,18 +1,16 @@
 package jobs.analyze;
 
 
+import models.ProfitInventory;
 import models.procure.CooperItem;
 import models.product.Category;
 import models.view.post.ProfitPost;
 import models.view.report.Profit;
-import org.apache.commons.lang.StringUtils;
-import play.cache.Cache;
 import play.jobs.Job;
 import play.jobs.On;
 
-import java.util.*;
-
-import models.ProfitInventory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 计算库存的成本
@@ -47,9 +45,8 @@ public class ProfitInventorySearch extends Job {
         if(post.sku != null) skukey = post.sku;
         if(post.pmarket != null) marketkey = post.pmarket;
         if(post.category != null) categorykey = post.category.toLowerCase();
-        List<Profit> profits = new ArrayList<Profit>();
         //从ES查找SKU的利润
-        profits = post.Inventory();
+        List<Profit> profits = post.Inventory();
         for(Profit p : profits) {
             ProfitInventory inv = new ProfitInventory();
             inv.sku = p.sku;
