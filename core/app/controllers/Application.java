@@ -14,6 +14,7 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -28,17 +29,26 @@ public class Application extends Controller {
     public static void index() {
         //如果是有PM首页权限则跳转到PM首页
         User user = Login.current();
-        DashBoard dashborad = Orderr.frontPageOrderTable(11);
+        DashBoard dashBoard = await(new Job<DashBoard>() {
+            @Override
+            public DashBoard doJobWithResult() throws Exception {
+                return Orderr.frontPageOrderTable(11);
+            }
+        }.now());
         // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render(dashborad, fbaWhouse);
+        render(dashBoard, fbaWhouse);
     }
 
     public static void oldDashBoard() {
-        DashBoard dashborad = Orderr.frontPageOrderTable(11);
-        // Feedback 信息
+        DashBoard dashBoard = await(new Job<DashBoard>() {
+            @Override
+            public DashBoard doJobWithResult() throws Exception {
+                return Orderr.frontPageOrderTable(11);
+            }
+        }.now());
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render("Application/index.html", dashborad, fbaWhouse);
+        render("Application/index.html", dashBoard, fbaWhouse);
     }
 
     public static void percent(String type, Date date, String m) {
