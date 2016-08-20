@@ -1,9 +1,12 @@
 package helper;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Play;
 
 /**
@@ -75,4 +78,25 @@ public class J {
         return dateTimeFormatGsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(obj);
     }
 
+    /**
+     * 使用递归来读取 JSON 对象
+     *
+     * @param result
+     * @param infos  类似于 a.b.c.d, 不支持 JSONArray
+     */
+    public static JSONObject dig(JSONObject result, String infos) {
+        if(result == null || StringUtils.isBlank(infos)) return null;
+
+        String[] keys = StringUtils.splitByWholeSeparator(infos, ".");
+        if(result.containsKey(keys[0])) {
+            JSONObject object = result.getJSONObject(keys[0]);
+
+            if(keys.length == 1) {
+                return object;
+            } else {
+                return dig(object, StringUtils.join(ArrayUtils.remove(keys, 0), "."));
+            }
+        }
+        return null;
+    }
 }

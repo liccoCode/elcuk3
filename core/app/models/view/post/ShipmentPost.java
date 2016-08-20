@@ -1,17 +1,16 @@
 package models.view.post;
 
+import helper.DBUtils;
 import helper.Dates;
+import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,12 +20,12 @@ import java.util.regex.Pattern;
  * Date: 9/8/12
  * Time: 11:06 AM
  */
-public class ShipmentPost extends Post {
+public class ShipmentPost extends Post<Shipment> {
     public static final List<F.T2<String, String>> DATE_TYPES;
-    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
+    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
-    private static final Pattern UNITID = Pattern.compile("^DL(|\\d{6}\\|\\d{2})$");
+    private static final Pattern UNITID = Pattern.compile("^DL(\\|\\d{6}\\|\\d+)$");
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -35,19 +34,20 @@ public class ShipmentPost extends Post {
         this.states = Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM, Shipment.S.SHIPPING,
                 Shipment.S.CLEARANCE, Shipment.S.PACKAGE, Shipment.S.BOOKED, Shipment.S.DELIVERYING,
                 Shipment.S.RECEIPTD, Shipment.S.RECEIVING, Shipment.S.DONE);
+        this.perSize = 50;
     }
 
     static {
         DATE_TYPES = new ArrayList<>();
-        DATE_TYPES.add(new F.T2<>("dates.planBeginDate", "预计开始运输时间"));
-        DATE_TYPES.add(new F.T2<>("dates.beginDate", "开始运输时间"));
+        DATE_TYPES.add(new F.T2<>("planBeginDate", "预计开始运输时间"));
+        DATE_TYPES.add(new F.T2<>("beginDate", "开始运输时间"));
         DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<>("dates.planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<>("dates.arriveDate", "实际 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<>("planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<>("arriveDate", "实际 [到库] 时间"));
     }
 
     // 默认的搜索排序时间
-    public String dateType = "dates.planBeginDate";
+    public String dateType = "planBeginDate";
 
     public Shipment.T type;
 
@@ -62,31 +62,87 @@ public class ShipmentPost extends Post {
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
-        List<Shipment> shipList = Shipment.find(params._1, params._2.toArray()).fetch();
-        return shipList;
+        List<Map<String, Object>> rows = DBUtils.rows(params._1, params._2.toArray());
+        List<Shipment> list = new ArrayList<>();
+
+        for(Map<String, Object> row : rows) {
+            Shipment shipment = new Shipment();
+            shipment.id = row.get("id").toString();
+            shipment.itemsNum = Integer.parseInt(this.returnStringOrNull(row.get("itemsNum")));
+            shipment.trackNo = this.returnStringOrNull(row.get("trackNo"));
+            shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+
+            shipment.iExpressName = this.returnStringOrNull(row.get("internationExpress"));
+            shipment.cname = this.returnStringOrNull(row.get("cname"));
+
+            shipment.type = Shipment.T.valueOf(row.get("type").toString());
+            shipment.wname = this.returnStringOrNull(row.get("wname"));
+            shipment.target = this.returnStringOrNull(row.get("target"));
+            shipment.state = Shipment.S.valueOf(row.get("state").toString());
+            shipment.dates.planBeginDate = (Date) row.get("planBeginDate");
+            shipment.createDate = (Date) row.get("createDate");
+            shipment.dates.planArrivDate = (Date) row.get("planArrivDate");
+            shipment.uname = this.returnStringOrNull(row.get("username"));
+            shipment.memo = this.returnStringOrNull(row.get("memo"));
+            shipment.applyId = this.returnStringOrNull(row.get("applyId"));
+            list.add(shipment);
+        }
+        return list;
+    }
+
+
+    public String returnStringOrNull(Object o) {
+        return o == null ? "" : o.toString();
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
+        SqlSelect sql = new SqlSelect().select("s.id, s.internationExpress, s.memo, s.apply_id as applyId, s.trackNo, " +
+                "(SELECT count(1) FROM ShipItem si WHERE si.shipment_id=s.id) as itemsNum, c.name as cname, " +
+                "s.type, w.name AS wname, s.target, s.state, s.planBeginDate, s.createDate, s.planArrivDate, u.username "
+        ).from(" Shipment s ").leftJoin(" ShipItem i ON i.shipment_id = s.id "
+        ).leftJoin(" Cooperator c ON c.id = s.cooper_id "
+        ).leftJoin(" ProcureUnit pu ON pu.id = i.unit_id "
+        ).leftJoin(" FBAShipment f ON f.id = pu.fba_id "
+        ).leftJoin(" Whouse w ON w.id = s.whouse_id "
+        ).leftJoin(" User u ON u.id = s.creater_id ");
 
-        if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+        /**如果传入进来的是shipmentId或者采购单Id**/
+        if(StringUtils.isNotBlank(this.search)) {
+            this.search = this.search.trim();
 
-        StringBuilder sbd = new StringBuilder(
-                // 几个表使用 left join 级联...
-                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i" +
-                                " LEFT JOIN i.unit u" +
-                                " LEFT JOIN s.items it" +
-                                " WHERE s.%s>=? AND s.%s<=?",
-                        this.dateType, this.dateType));
-        List<Object> params = new ArrayList<>();
-        params.add(Dates.morning(this.from));
-        params.add(Dates.night(this.to));
+            Matcher unitmatcher = UNITID.matcher(this.search);
+            if(unitmatcher.matches()) {
+                String unitmentId = unitmatcher.group();
+                sql.where("pu.deliveryment_id = ?").params(unitmentId);
+                sql.groupBy(" s.id");
+                sql.orderBy(" s.createDate DESC");
+                return new F.T2<>(sql.toString(), sql.getParams());
+            }
+
+            Matcher matcher = ID.matcher(this.search);
+            if(matcher.matches()) {
+                String shipmentId = matcher.group(1);
+                sql.where("s.id = ?").params(shipmentId);
+                sql.groupBy(" s.id");
+                sql.orderBy(" s.createDate DESC");
+                return new F.T2<>(sql.toString(), sql.getParams());
+            }
+            Matcher num_matcher = NUM.matcher(this.search);
+            if(num_matcher.matches()) {
+                ProcureUnit unit = ProcureUnit.findById(Long.parseLong(this.search.trim()));
+                if(unit != null) {
+                    sql.where("pu.id =? ").params(this.search.trim());
+                    return new F.T2<>(sql.toString(), sql.getParams());
+                }
+            }
+        }
+
+        sql.where(" s." + this.dateType + ">=?").params(Dates.morning(this.from));
+        sql.where(" s." + this.dateType + "<=?").params(Dates.night(this.to));
 
         if(this.type != null) {
-            sbd.append(" AND s.type=?");
-            params.add(this.type);
+            sql.andWhere(" s.type=?").params(this.type.name());
         }
 
         if(this.states != null && this.states.size() > 0) {
@@ -95,79 +151,31 @@ public class ShipmentPost extends Post {
                 if(state == null) continue;
                 states.add(state.name());
             }
-            if(states.size() > 0) sbd.append(" AND ").append(SqlSelect.whereIn("s.state", states));
+            if(states.size() > 0) sql.andWhere(sql.whereIn("s.state", states));
         }
 
         if(this.iExpress != null) {
-            sbd.append(" AND s.internationExpress=?");
-            params.add(this.iExpress);
+            sql.andWhere(" s.internationExpress=?").params(this.iExpress.name());
         }
 
         if(this.whouseId > 0) {
-            sbd.append(" AND s.whouse.id=?");
-            params.add(this.whouseId);
+            sql.andWhere(" s.whouse_id=?").params(this.whouseId);
         }
 
         if(this.cooperId != null) {
-            sbd.append(" AND s.cooper.id=?");
-            params.add(this.cooperId);
+            sql.andWhere(" s.cooper_id=?").params(this.cooperId);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            Matcher matcher = SHIPITEMS_NUM_PATTERN.matcher(this.search);
-            Matcher num_matcher = NUM.matcher(this.search);
-            if(matcher.matches()) {
-                int shipItemSize = NumberUtils.toInt(matcher.group(1), 1);
-                sbd.append(" AND SIZE(s.items)>").append(shipItemSize).append(" ");
-            } else {
-                sbd.append(" AND (")
-                        .append(" s.trackNo LIKE ? ")
-                        .append(" OR it.unit.fba.shipmentId LIKE ?")
-                        .append(" OR u.selling.sellingId LIKE ?")
-                        .append(" OR s.jobNumber LIKE ?");
-                if(num_matcher.matches()) sbd.append(" OR u.id =?");
 
-                sbd.append(")");
-                for(int i = 0; i < 4; i++) params.add(word);
-
-                if(num_matcher.matches()) params.add(Long.parseLong(this.search.trim()));
-            }
+            sql.andWhere("( s.trackNo LIKE ? ").param(word)
+                    .orWhere("s.jobNumber LIKE ? ").params(word)
+                    .orWhere("pu.sku LIKE ? ").params(word)
+                    .orWhere("f.shipmentId LIKE ? ) ").params(word);
         }
-
-        // 因为需要使用 deliverymentId() 方法, 不能够在 param 的地方添加 fba.centerId 路径
-        sbd.append(" ORDER BY s.createDate DESC");
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
-    }
-
-    /**
-     * 通过 Id 搜索 Deliveryment
-     *
-     * @return
-     */
-    private F.T3<Boolean, String, List<Object>> deliverymentId() {
-        if(StringUtils.isNotBlank(this.search)) {
-            this.search = this.search.trim();
-
-            Matcher unitmatcher = UNITID.matcher(this.search);
-            if(unitmatcher.find()) {
-                String unitmentId = unitmatcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true,
-                        "SELECT s FROM Shipment s WHERE s.items.unit.deliveryment_id=?",
-                        new ArrayList<Object>(Arrays.asList(unitmentId)));
-            }
-
-            Matcher matcher = ID.matcher(this.search);
-            Matcher matcher_num = NUM.matcher(this.search);
-            if(matcher.find()) {
-                String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true,
-                        "SELECT s FROM Shipment s WHERE s.id=?",
-                        new ArrayList<Object>(Arrays.asList(deliverymentId)));
-            }
-
-
-        }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        sql.groupBy(" s.id");
+        sql.orderBy(" s.createDate DESC");
+        return new F.T2<>(sql.toString(), sql.getParams());
     }
 }

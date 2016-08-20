@@ -188,10 +188,10 @@ public class TimelineEventSource {
             }
 
             //如果有签收数量则用采购计划的入库时间
-            if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
+            // 修改新规则 现在开始时间都采用运输单的预计到库时间,快递没关联运输单的话,则采用采购计划上的预计到库时间
+            if(predictShipFinishDate == null) {
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
             }
-
 
             this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
@@ -251,12 +251,10 @@ public class TimelineEventSource {
 
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
                 this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
                         this.unit.id, getunitstage().label(), 0,
                         0);
             } else {
                 this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
                         this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
                         this.lastDays);
             }
@@ -267,7 +265,7 @@ public class TimelineEventSource {
 
 
         public ProcureUnit.STAGE getunitstage() {
-            /**如果是入库数量相等则是已入库**/
+            //如果是入库数量相等则是已入库
             ProcureUnit.STAGE unitstage = this.unit.stage;
             if(unitstage != ProcureUnit.STAGE.CLOSE) {
                 int inboundingqty = this.unit.inboundingQty();

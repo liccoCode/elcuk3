@@ -3,9 +3,9 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import helper.DBUtils;
 import models.User;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 上午11:44
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Team extends Model {
 
     /**

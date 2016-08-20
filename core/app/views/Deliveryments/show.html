@@ -310,6 +310,7 @@
 <div class="row-fluid">
   <div class="span12">
     <input type="hidden" name="dmt.id" value="${dmt.id}">
+    <!-- TODO: 进行异步加载(采取搜索的方式) -->
       #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan'/}
   </div>
 </div>

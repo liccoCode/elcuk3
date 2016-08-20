@@ -18,7 +18,7 @@ import java.util.concurrent.*;
  * Time: 10:24 AM
  */
 public class Promises {
-    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_CA,M.AMAZON_UK, M.AMAZON_FR, M.AMAZON_ES,
+    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_UK, M.AMAZON_FR, M.AMAZON_ES,
             M.AMAZON_IT,
             M.AMAZON_JP};
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
@@ -58,6 +58,7 @@ public class Promises {
             }
             try {
                 for(FutureTask<T> task : futures) {
+                    //获取执行结果，如果在指定时间内，还没获取到结果，就直接返回 null
                     vos.add(task.get(45, TimeUnit.MINUTES));
                 }
             } catch(Exception e) {

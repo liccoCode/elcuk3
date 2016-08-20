@@ -8,9 +8,7 @@ import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
@@ -24,6 +22,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import play.Logger;
@@ -37,10 +36,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
@@ -189,6 +185,40 @@ public class HTTP {
     }
 
     /**
+     * 传入指定的 CookieStore, 并返回 HttpClientContext 对象
+     * <p>
+     * PS: HttpClientContext 可以得到:
+     * 1. Request(getRequest())
+     * 2. Response(getResponse())
+     *
+     * @param cookieStore
+     * @param url
+     * @return
+     */
+    public static HttpClientContext request(CookieStore cookieStore, String url) {
+        try {
+            HttpClientContext context = getContextWithCookieStore(cookieStore);
+            client().execute(new HttpGet(url), context);
+            return context;
+        } catch(IOException e) {
+            e.printStackTrace();
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
+            return null;
+        }
+    }
+
+    public static String toString(HttpResponse reponse) {
+        if(reponse != null) {
+            try {
+                return EntityUtils.toString(reponse.getEntity(), "UTF-8");
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+    /**
      * 使用默认 Cookie Store
      *
      * @param url
@@ -217,6 +247,33 @@ public class HTTP {
                     client().execute(post, getContextWithCookieStore(cookieStore)).getEntity(),
                     Consts.UTF_8
             );
+        } catch(Exception e) {
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            return "";
+        }
+    }
+
+    /**
+     * 传入指定的 CookieStore 和 Headers
+     *
+     * @param cookieStore
+     * @param url
+     * @param headers
+     * @param params
+     * @return
+     */
+    public static String post(CookieStore cookieStore, String url, List<BasicHeader> headers,
+                              Collection<? extends NameValuePair> params) {
+
+        RequestBuilder requestBuilder = RequestBuilder.post().setUri(url);
+        if(headers != null && !headers.isEmpty()) {
+            for(BasicHeader header : headers) requestBuilder.setHeader(header);
+        }
+        requestBuilder.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
+        try {
+            CloseableHttpResponse response = client()
+                    .execute(requestBuilder.build(), getContextWithCookieStore(cookieStore));
+            return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";

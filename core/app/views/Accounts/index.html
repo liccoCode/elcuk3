@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'用户管理'/}
 #{set 'moreScripts'}
-    #{script  name: 'accounts/index.coffee'/}
+    #{script 'accounts/index.coffee'/}
 #{/set}
 
 <div class="row-fluid" style="margin-bottom:10px;">
@@ -17,6 +17,7 @@
     <li><a href="#unsale_fr" data-toggle="tab">UnSale FR</a></li>
     <li><a href="#unsale_it" data-toggle="tab">UnSale IT</a></li>
     <li><a href="#unsale_jp" data-toggle="tab">UnSale JP</a></li>
+    <li><a href="#unsale_es" data-toggle="tab">UnSale ES</a></li>
   </ul>
   <div class="tab-content">
     <div id="sales" class="tab-pane active fade in">
@@ -39,6 +40,9 @@
     </div>
     <div id="unsale_jp" class="tab-pane fade in">
     #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_JP/}
+    </div>
+    <div id="unsale_es" class="tab-pane fade in">
+    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_ES/}
     </div>
   </div>
 </div>

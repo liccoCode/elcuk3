@@ -21,7 +21,6 @@ import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
-import java.math.BigDecimal;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
@@ -544,7 +543,7 @@ public class Payment extends Model {
 
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
-                Arrays.asList("payment.approval", "payment.payit", "payment.uploadDestroy", "payment.cancel"));
+                Arrays.asList("payment.approval", "payment.payit", "payment.uploadDestroy", "payment.cancel"), 50);
     }
 
 

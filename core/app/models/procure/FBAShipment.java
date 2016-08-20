@@ -6,6 +6,7 @@ import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -22,7 +23,7 @@ import java.util.*;
  * Time: 4:27 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class FBAShipment extends Model {
 
     public enum S {
@@ -235,21 +236,18 @@ public class FBAShipment extends Model {
                 this.state = FBAShipment.S.IN_TRANSIT;
                 this.save();
                 Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
-            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "ANDON_PULL_STRIKE_ONE")) {
-                throw new FastRuntimeException(
-                        "向 Amazon 更新失败. 请根据 InvalidItems 所报告的 MSKU 检查:" +
-                                "(1)该 MSKU 是否存在于 Amazon 后台. " +
-                                "(2)FBA 与 MSKU 在 Amazon 后台的对应关系是否正确" +
-                                Webs.E(e)
-                );
+            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "NOT_IN_PRODUCT_CATALOG")) {
+                //MSKU 错误
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 MSKU(SKU+UPC) 是否正确.");
+            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "MISSING_DIMENSIONS")) {
+                //产品尺寸没有填写
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 SKU 的长宽高是否正确填写.");
             } else if(StringUtils.containsIgnoreCase(e.getMessage(), "Invalid Status change")) {
                 //物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.
                 this.state = FBAShipment.S.SHIPPED;
                 this.save();
-            } else if(StringUtils.containsIgnoreCase(e.getMessage(), "MISSING_DIMENSIONS")) {
-                //产品尺寸没有填写
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 SKU 的长宽高是否正确填写.");
             } else {
+                //TODO:: ANDON_PULL_STRIKE_ONE
                 if(e.getClass() == FBAInboundServiceMWSException.class) {
                     Webs.systemMail(
                             "UpdateFBAShipment 出现未知异常",
@@ -374,4 +372,20 @@ public class FBAShipment extends Model {
         return FBAShipment.find(SqlSelect.whereIn("shipmentId", shipmentids)).fetch();
     }
 
+    /**
+     * 返回对应市场的 Marketplace ID
+     * <p>
+     * PS:
+     * 只支持一个采购计划(当前设计中不存在一个 FBAShipment 包含多个采购计划的情况, 如果以后有变化再更新)
+     *
+     * @return
+     */
+    public String marketplace() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        try {
+            return this.units.get(0).selling.market.amid().name();
+        } catch(NullPointerException e) {
+            return null;
+        }
+    }
 }

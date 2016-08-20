@@ -196,10 +196,6 @@
               #{if unit.fba}
                 #{power.ck 'fbas.update'}
                   <div class="btn-toolbar">
-                    <!-- <a href="@{FBAs.update(unit.id)}" class="btn btn-small btn-warning" data-method='PUT'
-                  data-disable-with='更新中...'>
-                    更新 ${unit.fba?.shipmentId}
-                  </a>  -->
                     <a href="@{FBAs.changeFBA(unit.id)}" class="btn btn-small btn-warning" data-disable-with='处理中...'
                        title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
                     </a>

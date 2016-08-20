@@ -1,6 +1,7 @@
 package jobs.driver;
 
 import helper.J;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -18,7 +19,7 @@ import java.util.Map;
  * Time: 10:54 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class GJob extends Model {
 
     public enum S {

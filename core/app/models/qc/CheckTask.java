@@ -1,17 +1,16 @@
 package models.qc;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import models.CategoryAssignManagement;
 import models.activiti.ActivitiDefinition;
 import models.activiti.ActivitiProcess;
 import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
 import models.view.dto.CheckTaskAQLDTO;
 import models.whouse.InboundRecord;
 import models.whouse.Whouse;
@@ -20,7 +19,7 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
-import play.cache.Cache;
+import play.Logger;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
@@ -546,204 +545,39 @@ public class CheckTask extends Model {
         }
     }
 
-    /**
-     * 产生质检任务
-     */
-    public static void generateTask() {
-        String unitcache = "checktaskprocureunitcache";
+    private static final Interner<String> pool = Interners.newWeakInterner();
 
-        if(StringUtils.isNotBlank(Cache.get(unitcache, String.class))) return;
-        String running = "running";
-        try {
-            Cache.add(unitcache, running);
-            List<Map<String, Object>> units = DBUtils
-                    .rows("select id from ProcureUnit where isCheck=0 AND shipType is not null");
-            for(Map<String, Object> unit : units) {
-                Long unitid = (Long) unit.get("id");
-                CheckTask task = CheckTask.find("units.id=?", unitid).first();
-
-                if(task == null) {
-                    CheckTask newtask = new CheckTask();
-                    ProcureUnit punit = ProcureUnit.findById(unitid);
-
-                    newtask.units = punit;
-                    newtask.confirmstat = ConfirmType.UNCONFIRM;
-                    newtask.checkstat = StatType.UNCHECK;
-                    if(punit.cooperator != null && punit.cooperator.qcLevel == Cooperator.L.MICRO) {
-                        //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
-                        newtask.qcType = T.SELF;
-                    }
-                    newtask.checkor = newtask.showChecktor();
-                    //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
-                    Whouse wh = searchWarehouse(punit);
-                    if(wh != null && wh.user != null) {
-                        newtask.shipwhouse = wh;
-                    }
-
-                    newtask.creatat = new Date();
-                    newtask.finishStat = ConfirmType.UNCONFIRM;
-                    newtask.save();
-                    DBUtils.execute("update ProcureUnit set isCheck=1 where id=" + unitid);
-                }
-            }
-
-            //因为运输方式经常变化，需要重新检查一次
-            List<Map<String, Object>> unchecktasks = DBUtils.rows("select id from CheckTask where "
-                    + "  units_id in (" +
-                    "  select unit_id from ShipItem where shipment_id in (" +
-                    "  select id from Shipment where type='EXPRESS'" +
-                    "  )" +
-                    "  ) and checkstat='UNCHECK'");
-            if(unchecktasks.size() > 0) {
-                checkwarehouse(unchecktasks);
-            }
-            unchecktasks = DBUtils.rows("select id from CheckTask where "
-                    + " not exists (select 1 from ShipItem where ShipItem.unit_id=CheckTask.units_id)"
-                    + " and exists (select 1 from ProcureUnit where "
-                    + " ProcureUnit.id=CheckTask.units_id and shipType='EXPRESS')"
-                    + " and checkstat='UNCHECK'");
-            if(unchecktasks.size() > 0) {
-                checkwarehouse(unchecktasks);
-            }
-
-
-            List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where shipwhouse_id is null");
-            if(tasks.size() > 0) {
-                checkwarehouse(tasks);
-            }
-        } catch(Exception e) {
-            Cache.delete(unitcache);
-        } finally {
-            Cache.delete(unitcache);
-        }
+    public CheckTask() {
+        this.confirmstat = ConfirmType.UNCONFIRM;
+        this.checkstat = StatType.UNCHECK;
+        this.creatat = new Date();
+        this.finishStat = ConfirmType.UNCONFIRM;
     }
 
-    public static void checkwarehouse(List<Map<String, Object>> tasks) {
-        //欧嘉货代
-        Cooperator cooperator = Cooperator.findById(59l);
-        for(Map<String, Object> task : tasks) {
-            Long taskid = (Long) task.get("id");
-            CheckTask checktask = CheckTask.findById(taskid);
-
-            Whouse wh = searchWarehouse(checktask.units);
-            if(wh != null && wh.user != null) {
-                if(checktask.checkor == null || !checktask.checkor.equals(wh.user)) {
-                    checktask.shipwhouse = wh;
-                    checktask.checkor = wh.user.username;
-                    checktask.save();
-                }
-            } else if(wh == null) {
-                //如果是快递、空运、海运则默认为欧嘉
-                wh = searchCooperWarehouse(cooperator, checktask.units.shipType);
-                if(wh != null && wh.user != null) {
-                    if(checktask.checkor == null || !checktask.checkor.equals(wh.user)) {
-                        checktask.shipwhouse = wh;
-                        checktask.checkor = wh.user.username;
-                        checktask.save();
-                    }
-                }
-            }
+    public CheckTask(ProcureUnit unit) {
+        this();
+        this.units = unit;
+        //当合作伙伴的质检级别为微检，则质检方式默认为工厂自检 其他情况需要质检员手动选择
+        if(unit.cooperator != null && unit.cooperator.qcLevel == Cooperator.L.MICRO) {
+            this.qcType = T.SELF;
         }
-
-    }
-
-
-    public static Whouse searchCooperWarehouse(Cooperator cooperator, Shipment.T shiptype) {
-        List<Object> params = new ArrayList<Object>();
-        StringBuilder sbd = new StringBuilder(
-                " cooperator=? ");
-        params.add(cooperator);
-
-        if(shiptype == Shipment.T.SEA) {
-            sbd.append(" and isSEA=? ");
-            params.add(true);
-        }
-        if(shiptype == Shipment.T.EXPRESS) {
-            sbd.append(" and isEXPRESS=? ");
-            params.add(true);
-        }
-        if(shiptype == Shipment.T.AIR) {
-            sbd.append(" and isAIR=? ");
-            params.add(true);
-        }
-        return Whouse.find(sbd.toString(), params.toArray()).first();
-    }
-
-    public static void updateExpressWarehouse(Long id) {
-        //更新快递单的货代仓库
-        List<Map<String, Object>> tasks = DBUtils.rows("select id from CheckTask where units_id=" + id);
-        if(tasks.size() > 0) {
-            for(Map<String, Object> task : tasks) {
-                Long taskid = (Long) task.get("id");
-                CheckTask checktask = CheckTask.findById(taskid);
-                Whouse wh = CheckTask.searchWarehouse(checktask.units);
-                if(wh != null && wh.user != null) {
-                    checktask.shipwhouse = wh;
-                    checktask.checkor = wh.user.username;
-                    checktask.save();
-                }
-            }
+        this.checkor = this.matchChecktor();
+        //根据采购计划的运输方式+运输单中的运输商 匹配对应的货代仓库
+        Whouse wh = this.units.matchWhouse();
+        if(wh != null && wh.user != null) {
+            this.shipwhouse = wh;
         }
     }
-
 
     /**
      * 产生重检任务
      */
     public static void generateRepeatTask(CheckTask.DealType dt, long chechtaskid, long unitid) {
-        CheckTask newtask = new CheckTask();
-        ProcureUnit punit = ProcureUnit.findById(unitid);
-        newtask.units = punit;
-        newtask.confirmstat = ConfirmType.UNCONFIRM;
-        //重检
-        newtask.checkstat = StatType.REPEATCHECK;
-        newtask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
-        newtask.creatat = new Date();
-        newtask.finishStat = ConfirmType.UNCONFIRM;
-
-        //查找仓库
-        Whouse wh = searchWarehouse(punit);
-        if(wh != null && wh.user != null) {
-            newtask.shipwhouse = wh;
-            newtask.checkor = wh.user.username;
-        }
-        newtask.save();
-    }
-
-
-    public static Whouse searchWarehouse(ProcureUnit units) {
-        List<ShipItem> shipitem = units.shipItems;
-        List<Object> params = new ArrayList<Object>();
-        if(shipitem != null && shipitem.size() > 0) {
-            Shipment ment = shipitem.get(0).shipment;
-            if(ment != null) {
-                StringBuilder sbd = new StringBuilder(
-                        " cooperator=? ");
-                Cooperator cooperator = ment.cooper;
-                if(cooperator == null) cooperator = Cooperator.findById(59l);
-                params.add(cooperator);
-                if(ment.type == Shipment.T.SEA) {
-                    sbd.append(" and isSEA=? ");
-                    params.add(true);
-                }
-                if(ment.type == Shipment.T.EXPRESS) {
-                    sbd.append(" and isEXPRESS=? ");
-                    params.add(true);
-                }
-                if(ment.type == Shipment.T.AIR) {
-                    sbd.append(" and isAIR=? ");
-                    params.add(true);
-                }
-                return Whouse.find(sbd.toString(), params.toArray()).first();
-
-            } else {
-                Cooperator cooperator = Cooperator.findById(59l);
-                return searchCooperWarehouse(cooperator, units.shipType);
-            }
-        } else {
-            Cooperator cooperator = Cooperator.findById(59l);
-            return searchCooperWarehouse(cooperator, units.shipType);
-        }
+        ProcureUnit unit = ProcureUnit.findById(unitid);
+        CheckTask checkTask = new CheckTask(unit);
+        checkTask.checkstat = StatType.REPEATCHECK;
+        checkTask.checknote = "[不发货流程" + chechtaskid + "因" + dt.label() + "自动产生重检单]";
+        checkTask.save();
     }
 
     /**
@@ -762,7 +596,7 @@ public class CheckTask extends Model {
             case NOTSHIP:
                 this.checkstat = StatType.CHECKNODEAL;
                 //对应采购计划ID的“不发货处理”状态更新为：不发货待处理
-                //TODO:启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
+                //启动不发货流程，并进入到“采购计划不发货待处理事务”，为该采购计划的采购单的创建人 生成不发货待处理任务
                 startActiviti(username);
                 break;
         }
@@ -1127,21 +961,35 @@ public class CheckTask extends Model {
         return totalWeight;
     }
 
-    public String showChecktor() {
-        String id = this.units.product.category.categoryId;
-        String name = "";
-        List<CategoryAssignManagement> categoryAssignManagements = CategoryAssignManagement
-                .find("category.categoryId=? AND isCharge =1", id).fetch();
-        if(categoryAssignManagements.size() > 0) {
-            for(CategoryAssignManagement c : categoryAssignManagements) {
-                if(c.isQCrole()) {
-                    name += c.user.username + ",";
+    /**
+     * 根据 CategoryId 找出对应的质检人员
+     *
+     * @return
+     */
+    public String matchChecktor() {
+        List<String> names = new ArrayList<>();
+        try {
+            List<Map<String, Object>> rows = DBUtils.rows(
+                    "SELECT DISTINCT u.username AS username FROM CategoryAssignManagement c" +
+                            " LEFT JOIN User u ON u.id=c.user_id" +
+                            " LEFT JOIN User_Role ur ON c.user_id=ur.users_id" +
+                            " LEFT JOIN Role r ON r.roleId=ur.roles_roleId" +
+                            " WHERE c.category_categoryId=?" +
+                            " AND c.isCharge=1" +
+                            " AND r.roleName LIKE '%质检%'",
+                    this.units.product.category.categoryId
+            );
+            if(rows != null && !rows.isEmpty()) {
+                for(Map<String, Object> row : rows) {
+                    if(row != null && row.containsKey("username")) {
+                        if(row.get("username") != null) names.add(row.get("username").toString());
+                    }
                 }
             }
-            return name.length() > 0 ? name.substring(0, name.length() - 1) : "";
-        } else {
-            return "";
+        } catch(NullPointerException e) {
+            Logger.warn(String.format("CheckTask#matchChecktor: %s", e.getMessage()));
         }
+        return StringUtils.join(names, ",");
     }
 
     /**

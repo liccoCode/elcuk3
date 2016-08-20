@@ -16,11 +16,11 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
-import play.libs.Files;
 import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
 import query.ProductQuery;
@@ -38,7 +38,7 @@ import java.util.*;
  * Time: 10:42 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class OrderItem extends GenericModel {
 
     /**

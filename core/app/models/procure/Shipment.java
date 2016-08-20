@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -44,7 +45,7 @@ import java.util.*;
  * Time: 5:32 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
@@ -374,7 +375,34 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 多个traceno
      */
     @Transient
-    public List<String> tracknolist = new ArrayList<String>();
+    public List<String> tracknolist = new ArrayList<>();
+
+    /**
+     * 运输商名称
+     */
+    @Transient
+    public String cname;
+
+    /**
+     * 仓库名称
+     */
+    @Transient
+    public String wname;
+
+    /**
+     * 创建人
+     */
+    @Transient
+    public String uname;
+
+    @Transient
+    public int itemsNum;
+
+    @Transient
+    public String iExpressName;
+
+    @Transient
+    public String applyId;
 
     public enum FLAG {
         ARRAY_TO_STR,
@@ -535,6 +563,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void updateShipment() {
         if(this.creater == null) this.creater = User.current();
         this.save();
+        //更新货代仓库
+        for(ShipItem item : this.items) item.unit.flushTask();
     }
 
     public void setTrackNo(String trackNo) {
@@ -561,7 +591,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
         this.items.add(shipitem.<ShipItem>save());
-        //TODO c: 添加日志
+        unit.flushTask();//更新相关的质检任务
     }
 
 
@@ -942,7 +972,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void produceFee(PaymentUnit fee) {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
-        if(fee.unitQty < 1f) Validation.addError("", "数量必须大于等于 1");
+        if(fee.unitQty <= 0f) Validation.addError("", "数量必须大于等于 0");
         // 海运/空运的运输运费无法绑定运输项目, 只能平摊
         if(this.type == T.EXPRESS && FeeType.expressFee().equals(fee.feeType))
             Validation.addError("", "快递的运输费用需要通过运输项目记录");
@@ -1208,10 +1238,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment
-                .find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
-                        S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
-                .fetch();
+        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
+                S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate()).fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whs) {
@@ -1532,16 +1560,59 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * <<<<<<< HEAD
+     * 修改运输单
+     *
+     * @param newShip
+     */
+    public void update(Shipment newShip) {
+        this.cooper = newShip.cooper;
+        this.whouse = newShip.whouse;
+        this.title = newShip.title;
+        this.reason = newShip.reason;
+        this.tracknolist = newShip.tracknolist;
+        this.trackNo = newShip.trackNo;
+        this.memo = newShip.memo;
+        this.dates.planBeginDate = newShip.dates.planBeginDate;
+        this.internationExpress = newShip.internationExpress;
+        this.jobNumber = newShip.jobNumber;
+        this.totalWeightShipment = newShip.totalWeightShipment;
+        this.totalVolumeShipment = newShip.totalVolumeShipment;
+        this.shipmentTpye = newShip.shipmentTpye;
+        this.totalStockShipment = newShip.totalStockShipment;
+        this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
+
+        //日期发生改变则记录旧的日期
+        if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0)
+            this.dates.oldPlanArrivDate = newShip.dates.planArrivDate;
+        this.dates.planArrivDate = newShip.dates.planArrivDate;
+
+        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) &&
+                this.dates.planArrivDateForCountRate != newShip.dates.planArrivDateForCountRate) {
+            if(StringUtils.isBlank(newShip.reason)) {
+                //Validation.addError("", "修改约定到货时间必须填写原因!");
+            } else {
+                this.reason = newShip.reason;
+            }
+            this.dates.planArrivDateForCountRate = newShip.dates.planArrivDateForCountRate;
+        }
+        this.validate();
+        Validation.current().valid(this);
+    }
+
+    /**
      * 初始化出库信息
      */
     public void initOutbound() {
+        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
         if(this.items != null && !this.items.isEmpty()) {
             for(ShipItem item : this.items) {
                 ShipPlan plan = new ShipPlan(item);
                 plan.valid();
                 if(!plan.exist() && !Validation.hasErrors()) {
                     plan.save();
-                    plan.triggerRecord();
+                    plan.triggerRecord(cooperator != null ? cooperator.id.toString() : "");
                 }
             }
         }

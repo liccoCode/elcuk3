@@ -48,6 +48,9 @@ public class FBA {
         plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
                 Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
+        //单账户跨市场相关的处理
+        plan.setMarketplace(unit.selling.market.amid().name());
+        plan.setShipToCountryCode(unit.selling.market.country());
 
         CreateInboundShipmentPlanResponse response = client(account).createInboundShipmentPlan(plan);
         CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
@@ -65,7 +68,7 @@ public class FBA {
             for(InboundShipmentPlan planFba : members) {
                 try {
                     List<InboundShipmentPlanItem> itemMember = planFba.getItems().getMember();
-                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<String, InboundShipmentPlanItem>();
+                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<>();
                     for(InboundShipmentPlanItem inboundPlanItem : itemMember) {
                         inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
                     }
@@ -152,8 +155,9 @@ public class FBA {
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);
+        create.setMarketplace(fbashipment.marketplace());
         create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle.toString(),
-                Account.address(fbashipment.account.type), fbashipment.centerId,
+                Account.address(fbashipment.account.type), fbashipment.centerId, false,
                 FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
         // 设置 items
         //TODO effect: 创建 FBA 的算法需要调整
@@ -188,8 +192,9 @@ public class FBA {
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(fbaShipment.account.merchantId);
         update.setShipmentId(fbaShipment.shipmentId);
+        update.setMarketplace(fbaShipment.marketplace());
         update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
-                Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
+                Account.address(fbaShipment.account.type), fbaShipment.centerId, false, state.name(),
                 fbaShipment.labelPrepType));
 
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
@@ -277,7 +282,9 @@ public class FBA {
                 fixHistoryMSKU(unit.selling.merchantSKU),
                 null,
                 null,
-                unit.qty());
+                unit.qty(),
+                null
+        );
     }
 
     /**
@@ -290,10 +297,13 @@ public class FBA {
 
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
         for(ProcureUnit unit : units) {
-            items.add(new InboundShipmentItem(null,
+            items.add(new InboundShipmentItem(
+                    null,
                     fixHistoryMSKU(unit.selling.merchantSKU),
                     null,
                     unit.qty(),
+                    null,
+                    null,
                     null));
         }
         return items;
@@ -355,13 +365,12 @@ public class FBA {
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
-                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"), "1.0",
+                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"),
+                        "1.0",
                         config);
                 CLIENT_CACHE.put(key, client);
             }
         }
         return client;
     }
-
-
 }

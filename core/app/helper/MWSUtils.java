@@ -65,6 +65,12 @@ public class MWSUtils {
             public String toString() {
                 return "_POST_PRODUCT_IMAGE_DATA_";
             }
+        },
+        PRODUCT_INVENTORY_FEED {
+            @Override
+            public String toString() {
+                return "_POST_INVENTORY_AVAILABILITY_DATA_";
+            }
         }
     }
 
@@ -322,14 +328,13 @@ public class MWSUtils {
         for(String searchTerm : selling.aps.searchTermss) {
             if(StringUtils.isNotBlank(searchTerm)) descriptionData.getSearchTerms().add(searchTerm);
         }
+        product.setDescriptionData(descriptionData);
 
-        if(needSetProductData(selling.aps.feedProductType)) {
+        if(!skipProductData(selling.aps.templateType, selling.aps.feedProductType)) {
             Product.ProductData productData = new Product.ProductData();
             new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
-            product.setDescriptionData(descriptionData);
             product.setProductData(productData);
         }
-
         message.setProduct(product);
         envelope.getMessage().add(message);
         return JaxbUtil.convertToXml(envelope);
@@ -383,8 +388,33 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
-    public static boolean needSetProductData(String feedProductType) {
-        return !Arrays.asList("NotebookComputer").contains(feedProductType);
+    public static String fulfillmentByAmazonXml(Selling selling) {
+        AmazonEnvelope envelope = new AmazonEnvelope();
+
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
+
+        envelope.setHeader(header);
+        envelope.setMessageType("Inventory");
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
+        message.setOperationType("Update");
+
+        Inventory inventory = new Inventory();
+        inventory.setSKU(selling.merchantSKU);
+        inventory.setFulfillmentCenterID(selling.market.fulfillmentCenterID());
+        inventory.setLookup("FulfillmentNetwork");
+        inventory.setSwitchFulfillmentTo("AFN");
+
+        message.setInventory(inventory);
+        envelope.getMessage().add(message);
+        return JaxbUtil.convertToXml(envelope);
+    }
+
+    public static boolean skipProductData(String templateType, String feedProductType) {
+        return "Computers".equalsIgnoreCase(templateType) && "NotebookComputer".equalsIgnoreCase(feedProductType);
     }
 
     private static class ProductTypeSetter {
@@ -425,9 +455,9 @@ public class MWSUtils {
                 Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
                 return clazz.newInstance();
             } catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                throw new FastRuntimeException(
+                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
             }
-            return null;
         }
 
         void setType(Object setter, Object param) {
@@ -436,7 +466,8 @@ public class MWSUtils {
                         param.getClass());
                 method.invoke(setter, param);
             } catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                e.printStackTrace();
+                throw new FastRuntimeException(
+                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
             }
         }
 

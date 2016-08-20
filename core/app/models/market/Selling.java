@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import exception.NotSupportChangeRegionFastException;
 import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.ElcukRecord;
@@ -16,10 +17,12 @@ import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
@@ -48,8 +51,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date: 1/6/12
  * Time: 10:48 AM
  */
-@javax.persistence.Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@Entity
+@DynamicUpdate
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
 
@@ -61,9 +64,6 @@ public class Selling extends GenericModel {
         this.createDate = new Date();
     }
 
-    /*
-     * Selling 的状态
-     */
     public enum S {
         /**
          * 新创建的, 准备开卖
@@ -291,7 +291,6 @@ public class Selling extends GenericModel {
 
     /**
      * 从 amazon 将数据同步回来
-     * TODO 这个功能期望取消, 因为通过 MWS API 后应该要消除上架成功但系统却脱离管理的问题.
      */
     public void syncFromAmazon() {
         String html = "";
@@ -299,20 +298,17 @@ public class Selling extends GenericModel {
         synchronized(this.account.cookieStore()) {
             checkAmazonLogin();
             // 1. 切换 Selling 所在区域
-            if(!this.market.toString().equals("AMAZON_JP"))
-                this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
-
+            this.account.changeRegion(this.market);
             // 2. 获取修改 Selling 的页面, 获取参数
-            html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+            html = HTTP.get(this.account.cookieStore(), this.amzListingEditPage());
             if(StringUtils.isBlank(html))
-                throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+                throw new FastRuntimeException(String.format("Visit %s page is empty.", this.amzListingEditPage()));
             if(Play.mode.isDev()) {
                 IO.writeContent(html,
                         new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
             }
             // 获取Fnsku
-            fnskuhtml = HTTP.get(this.account.cookieStore(), this.market.listingfnSkuPage(this));
-            this.account.changeRegion(this.account.type);
+            fnskuhtml = HTTP.get(this.account.cookieStore(), this.amzListingFnSkuPage());
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
@@ -355,6 +351,7 @@ public class Selling extends GenericModel {
             for(Cookie coo : this.account.cookieStore().getCookies()) {
                 Logger.info(" ============" + coo.getName() + "=" + coo.getValue() + "============");
             }
+            this.account.changeRegion(this.market);
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(new BasicNameValuePair("model", J.json(params))));
         }
@@ -370,7 +367,6 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString())); // 作用与哪一个 Selling
         return params;
     }
 
@@ -384,6 +380,7 @@ public class Selling extends GenericModel {
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
         return feed;
     }
@@ -392,7 +389,7 @@ public class Selling extends GenericModel {
      * 用Feed方式更新产品图片
      */
     public void uploadFeedAmazonImg(String imageName, boolean waterMark, String userName) {
-        //if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
+        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         String dealImageNames = imageName;
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
@@ -403,7 +400,8 @@ public class Selling extends GenericModel {
 
         String xml = MWSUtils.buildProductImageBySelling(this, images);
         Feed feed = Feed.updateSellingFeed(xml, this);
-        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, null, this.account);
+        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, this.market.amid(),
+                this.account);
         Logger.info(feed_submission_id);
         List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_get_feed", params);
@@ -417,9 +415,18 @@ public class Selling extends GenericModel {
      * @return
      */
     public Selling buildFromProduct() {
+        this.saleAmazonValid();
+        this.asin = this.aps.upc;
+        patchToListing();
+        this.saleAmazon();
+        this.assignAmazonListingPrice();
+        this.setFulfillmentByAmazon();
+        return this;
+    }
+
+    public void saleAmazonValid() {
         if(this.account == null) Webs.error("上架账户不能为空");
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
-        // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
         if(this.market == null) Webs.error("Market 不能为空");
         if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
@@ -428,24 +435,59 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(this.aps.brand)) Webs.error("品牌必须填写");
         if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
         if(StringUtils.isBlank(this.aps.manufacturerPartNumber)) Webs.error("Part Number 需要填写");
-        if(this.aps.rbns == null || this.aps.rbns.size() == 0) Webs.error("Recommanded Browser Nodes 必须填写");
         if(StringUtils.isBlank(this.aps.feedProductType)) Webs.error("Feed Product Type 必须填写");
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
-        this.asin = this.aps.upc;
-        patchToListing();
+        this.rbnsValid();
+    }
 
+    /**
+     * 校验 RBN 是否合法
+     */
+    public void rbnsValid() {
+        if(this.aps.rbns == null) Webs.error("Recommanded Browser Nodes 必须填写");
+        this.aps.rbns.remove("");
+        if(this.aps.rbns.isEmpty()) Webs.error("Recommanded Browser Nodes 必须填写");
+        if(this.market != M.AMAZON_US) {
+            for(String rbn : this.aps.rbns) {
+                if(!NumberUtils.isNumber(rbn)) {
+                    Webs.error(String.format("%s 市场的 Recommanded Browser Nodes 必须为数字", this.market.name()));
+                }
+            }
+        }
+    }
+
+    /**
+     * 提交 Listing 上架的 XML
+     */
+    public void saleAmazon() {
         Feed saleAmazonBasicFeed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
-        Feed assignPriceFeed = Feed.newSellingFeed(MWSUtils.assignPriceXml(this), this);
-
         List<NameValuePair> params = this.submitJobParams(saleAmazonBasicFeed);
         params.add(new BasicNameValuePair("type", "CreateListing"));
-        params.add(new BasicNameValuePair("next_type", "AssignPrice"));
-        params.add(new BasicNameValuePair("next_feed_id", assignPriceFeed.id.toString()));
-        params.add(new BasicNameValuePair("next_feed_type", MWSUtils.T.PRICING_FEED.toString()));
-
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
-        return this;
+    }
+
+    /**
+     * 通过 XML 来设置 Amazon Listing 的 Price 属性
+     */
+    public void assignAmazonListingPrice() {
+        Feed feed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRICING_FEED.toString()));
+        params.add(new BasicNameValuePair("type", "AssignPrice"));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
+    }
+
+    /**
+     * 通过 XML 来设置 Amazon Listing 为 Fulfillment By Amazon
+     */
+    public void setFulfillmentByAmazon() {
+        Feed feed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_INVENTORY_FEED.toString()));
+        params.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
     }
 
     /**
@@ -853,6 +895,7 @@ public class Selling extends GenericModel {
         }
         synchronized(this.account.cookieStore()) {
             checkAmazonLogin();
+            this.account.changeRegion(this.market);
             Logger.info("Upload Picture to Amazon AND Synchronized[%s].",
                     this.account.prettyName());
             String body = HTTP
@@ -883,7 +926,6 @@ public class Selling extends GenericModel {
                                 new BasicNameValuePair("variant", fileName)
                         ));
             }
-            this.account.changeRegion(this.account.type);
         }
         this.save();
     }
@@ -896,14 +938,11 @@ public class Selling extends GenericModel {
         // 1. 切换 Selling 所在区域
         this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
         // 2. 获取修改 Selling 的页面, 获取参数
-        String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+        String html = HTTP.get(this.account.cookieStore(), this.amzListingEditPage());
         Document doc = Jsoup.parse(html);
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
-        if(inputs.size() == 0) {
-            this.account.loginAmazonSellerCenter();
-            this.account.changeRegion(this.market);
-        }
+        if(inputs.size() == 0) this.account.loginAmazonSellerCenter();
     }
 
     public List<NameValuePair> submitGetFeedParams(Feed feed, String feed_submission_id) {
@@ -927,7 +966,8 @@ public class Selling extends GenericModel {
                 p.productdesc) {
             String xml = MWSUtils.buildProductXMLBySelling(this, p);
             Feed feed = Feed.updateSellingFeed(xml, this);
-            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, null, this.account);
+            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, this.market.amid(),
+                    this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
@@ -936,13 +976,78 @@ public class Selling extends GenericModel {
 
         if(p.standerprice || p.saleprice) {
             String xml = MWSUtils.buildPriceXMLBySelling(this, p);
-            Feed price_feed = Feed.updateSellingFeed(xml, this);
+            Feed price_feed = Feed.newAssignPriceFeed(xml, this);
             String feed_submission_id = MWSUtils
-                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, null, this.account);
+                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, this.market.amid(), this.account);
             Logger.info(feed_submission_id);
             List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
             String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
                     priceParams);
+        }
+    }
+
+    /**
+     * 模拟人工方式修改 Listing 信息的地址(Amazon)
+     *
+     * @return
+     */
+    public String amzListingEditPage() {
+        String msku = this.merchantSKU;
+        if("68-MAGGLASS-3X75BG,B001OQOK5U".equalsIgnoreCase(this.merchantSKU)) {
+            msku = "68-MAGGLASS-3x75BG,B001OQOK5U";
+        } else if("80-qw1a56-be,2".equalsIgnoreCase(this.merchantSKU)) {
+            msku = "80-qw1a56-be,2";
+        } else if("80-qw1a56-be".equalsIgnoreCase(this.merchantSKU)) {
+            msku = "80-qw1a56-be";
+        }
+        /**
+         * 域名主市场由账户决定, Listing 跨市场由 Selling 的 Market 属性决定
+         */
+        switch(this.account.type) {
+            case AMAZON_US:
+                return String.format(
+                        "https://catalog.%s/abis/product/DisplayEditProduct?marketplaceID=%s&sku=%s&asin=%s",
+                        this.account.type.toString(), this.market.amid().name(), msku, this.asin
+                );
+            case AMAZON_CA:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_JP:
+                return String.format(
+                        "https://catalog-sc.%s/abis/product/DisplayEditProduct?marketplaceID=%s&sku=%s&asin=%s",
+                        this.account.type.toString(), this.market.amid().name(), msku, this.asin
+                );
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    /**
+     * 模拟人工查询 FnSku 的地址
+     *
+     * @return
+     */
+    public String amzListingFnSkuPage() {
+        switch(this.account.type) {
+            case AMAZON_CA:
+            case AMAZON_ES:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_JP:
+            case AMAZON_IT:
+            case AMAZON_UK:
+            case AMAZON_US:
+                return String.format(
+                        "https://sellercentral.%s/gp/ssof/knights/items-list-xml.html/ref=ag_xx_cont_fbalist?searchType=genericQuery&genericQuery=%s",
+                        this.account.type, this.merchantSKU
+                );
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
         }
     }
 }

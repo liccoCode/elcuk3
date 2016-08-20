@@ -1,13 +1,15 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import controllers.Secure;
-import helper.*;
-import models.User;
+import helper.Cached;
+import helper.DBUtils;
+import helper.Dates;
+import helper.Promises;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -34,7 +36,7 @@ import java.util.regex.Pattern;
  * Time: 10:18 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Orderr extends GenericModel {
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
     public static final Pattern AMAZON_ORDERID = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
@@ -124,6 +126,7 @@ public class Orderr extends GenericModel {
      * 订单创建时间
      */
     public Date createDate;
+    public Date updateDate;
 
     /**
      * 订单的付款时间
@@ -499,10 +502,10 @@ public class Orderr extends GenericModel {
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
                 itemamount = itemamount +
-                                new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new BigDecimal(item.quantity), 2, 4)
-                                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
-                                        .setScale(2, 4).floatValue();
+                        new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                                .divide(new BigDecimal(item.quantity), 2, 4)
+                                .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                .setScale(2, 4).floatValue();
             }
         }
 
@@ -673,8 +676,33 @@ public class Orderr extends GenericModel {
         return show;
     }
 
+    public String showPromotionIDs() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0) {
+            for(OrderItem item : items) {
+                if(StringUtils.isNotBlank(item.promotionIDs)) {
+                    show += item.promotionIDs + ";";
+                }
+            }
+        }
+        return show;
+    }
+
+    public String showDiscountPrice() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0) {
+            for(OrderItem item : items) {
+                if(item.discountPrice != null) {
+                    show += item.discountPrice + ";";
+                }
+            }
+        }
+        return show;
+    }
+
     public OrderInvoice createOrderInvoice() {
-        OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(this.market);
         F.T3<Float, Float, Float> amt = this.amount();
         OrderInvoice invoice = new OrderInvoice();
         invoice.orderid = this.orderId;
@@ -718,7 +746,6 @@ public class Orderr extends GenericModel {
 
         invoice.saveprice();
         invoice.europevat = OrderInvoice.VAT.NORMAL;
-        invoice.save();
         return invoice;
     }
 

@@ -9,10 +9,12 @@ import models.procure.Cooperator;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ import java.util.List;
  * Time: 上午6:06
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Whouse extends Model {
 
     /**
@@ -267,10 +269,10 @@ public class Whouse extends Model {
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime nextBeginDate = now.plusDays(i);
-            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate()));
-            if(exist != null) continue;
-
             M type = this.account.type;
+
+            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate(), type));
+            if(exist != null) continue;
 
             if(nextBeginDate.getDayOfWeek() == 1) {
                 if(Arrays.asList(M.AMAZON_DE, M.AMAZON_US).contains(type)) {
@@ -296,16 +298,42 @@ public class Whouse extends Model {
     class PlanDateEqual implements Predicate {
         // 期待的日期
         private Date date;
+        private M market;
 
-        PlanDateEqual(Date date) {
+        PlanDateEqual(Date date, M market) {
             this.date = date;
+            this.market = market;
         }
 
         @Override
         public boolean evaluate(Object o) {
             Shipment ship = (Shipment) o;
-            return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date));
+            return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date))
+                    && ship.whouse.account.type == this.market;
         }
+    }
+
+    /**
+     * 根据运输商与运输方式来查找仓库
+     *
+     * @return
+     */
+    public static Whouse findByCooperatorAndShipType(Cooperator cooperator, Shipment.T shiptype) {
+        StringBuilder sbd = new StringBuilder("cooperator=?");
+        switch(shiptype) {
+            case SEA:
+                sbd.append(" AND isSEA=true");
+                break;
+            case EXPRESS:
+                sbd.append(" AND isEXPRESS=true");
+                break;
+            case AIR:
+                sbd.append(" AND isAIR=true");
+                break;
+            default:
+                throw new FastRuntimeException("不支持的 ShipType");
+        }
+        return Whouse.find(sbd.toString(), cooperator).first();
     }
 
     /**
@@ -318,6 +346,8 @@ public class Whouse extends Model {
     }
 
     /**
+     * 自有仓
+     *
      * @param includeDefective
      * @return
      */

@@ -25,6 +25,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -47,7 +48,7 @@ import java.util.*;
  * Time: 5:23 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public ProcureUnit() {
@@ -226,7 +227,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 所关联的运输出去的 ShipItem.
      */
     @OneToMany(mappedBy = "unit")
-    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
+    public List<ShipItem> shipItems = new ArrayList<>();
 
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -315,8 +316,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public Integer purchaseSample;
 
+    /**
+     * 是否生成了质检任务
+     */
     @Expose
-    public int isCheck;
+    public int isCheck = 0;
 
     public enum S {
         NOSHIPED {
@@ -565,6 +569,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 分拆出的新采购计划变更
         newUnit.save();
+        //生成质检任务
+        newUnit.triggerCheck();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
@@ -792,7 +798,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return;
         }
         if(this.shipItems.size() == 0) {
-            CheckTask.updateExpressWarehouse(this.id);
             // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
             if(shipment == null) return;
             shipment.addToShip(this);
@@ -815,12 +820,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
         }
-
-        //更新快递单的货代仓库
-        for(ShipItem item : this.shipItems) {
-            CheckTask.updateExpressWarehouse(item.unit.id);
-        }
-
     }
 
     /**
@@ -913,16 +912,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 fba.units.remove(this);
                 fba.removeFBAShipment();
             }
-
             // 删除运输相关
             for(ShipItem item : this.shipItems) {
                 item.delete();
             }
 
             //删除 质检任务相关
-            List<CheckTask> tasks = CheckTask.find("units_id=?", this.id).fetch();
+            List<CheckTask> tasks = this.tasks();
             for(CheckTask task : tasks) {
                 task.delete();
+            }
+            //删除采购单关联
+            Deliveryment deliveryment = this.deliveryment;
+            if(deliveryment != null && deliveryment.units != null) {
+                deliveryment.units.remove(this);
+            }
+            //删除出货单关联
+            DeliverPlan deliverPlan = this.deliverplan;
+            if(deliverPlan != null && deliverPlan.units != null) {
+                deliverPlan.units.remove(this);
             }
             this.delete();
         } else {
@@ -965,7 +973,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public int inboundingQty() {
         int inboundingQty = 0;
         for(ShipItem shipItm : this.shipItems) {
-            inboundingQty += shipItm.recivedQty;
+            inboundingQty += shipItm.adjustQty;
         }
         return inboundingQty;
     }
@@ -1220,7 +1228,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"));
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
+                50);
     }
 
     @Override
@@ -1376,7 +1385,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String isship() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        List<CheckTask> tasks = this.tasks();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).isship != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
                 return tasks.get(0).isship.label();
@@ -1390,7 +1399,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String result() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        List<CheckTask> tasks = this.tasks();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).result != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
                 return tasks.get(0).result.label();
@@ -1414,7 +1423,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public Integer fetchCheckTaskQcSample() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? ORDER BY id DESC", this.id).fetch();
+        List<CheckTask> tasks = this.tasks();
         if(tasks != null && tasks.size() > 0) {
             if(tasks.get(0).qcSample != null)
                 return tasks.get(0).qcSample;
@@ -1567,13 +1576,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int recommendBoxNum() {
-        CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
+        CooperItem item = CooperItem.find("sku=? AND cooperator.id=?", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
         return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
     }
 
     public int fetchCheckTaskQty() {
-        CheckTask task = CheckTask.find("units_id=? ORDER BY id DESC", this.id).first();
+        CheckTask task = this.tasks().get(0);
         if(task != null) {
             return task.qty;
         }
@@ -1594,6 +1603,58 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return item.currency.symbol() + " " + item.compenamt;
         } else {
             return String.valueOf(0);
+        }
+    }
+
+    /**
+     * 生成质检任务
+     */
+    public void triggerCheck() {
+        if(this.isPersistent() && this.shipType != null && this.isCheck == 0 && this.selling != null) {
+            new CheckTask(this).save();
+            this.isCheck = 1;
+            this.save();
+        }
+    }
+
+    /**
+     * 根据 运输方式+运输单中的运输商 去匹配对应的货代仓库
+     *
+     * @return
+     */
+    public Whouse matchWhouse() {
+        Shipment.T shiptype = null;
+        Cooperator cooperator = null;
+        if(this.shipItems != null && !this.shipItems.isEmpty()) {
+            Shipment shipment = this.shipItems.get(0).shipment;
+            shiptype = shipment.type;
+            cooperator = shipment.cooper;
+        }
+        return Whouse.findByCooperatorAndShipType(
+                cooperator != null ? cooperator : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
+                shiptype != null ? shiptype : this.shipType
+        );
+    }
+
+    /**
+     * 相关联的质检任务
+     *
+     * @return
+     */
+    public List<CheckTask> tasks() {
+        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.id).fetch();
+    }
+
+    /**
+     * 更新相关的质检任务的仓库
+     */
+    public void flushTask() {
+        List<CheckTask> tasks = CheckTask.find("units_id=? AND checkstat='UNCHECK'", this.id).fetch();
+        if(tasks != null && !tasks.isEmpty()) {
+            Whouse wh = this.matchWhouse();
+            if(wh != null) {
+                for(CheckTask task : tasks) task.shipwhouse = wh;
+            }
         }
     }
 
