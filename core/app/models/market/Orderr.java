@@ -405,7 +405,7 @@ public class Orderr extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("1h")
+    @Cached("2h")
     public static DashBoard frontPageOrderTable(int days) {
         DashBoard dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
         if(dashBoard != null) return dashBoard;
@@ -455,7 +455,7 @@ public class Orderr extends GenericModel {
                 dashBoard.shippeds(key, vo);
         }
         dashBoard.sort();
-        Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+        Cache.add(Orderr.FRONT_TABLE, dashBoard, "2h");
         return dashBoard;
     }
 

@@ -178,7 +178,7 @@ public class OrderItem extends GenericModel {
      * @param val 需要查询的 all, categoryId, sku, sid
      * @param to  @return {series_size, days, series_n}
      */
-    @Cached("2h")
+    @Cached("3h")
     public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
@@ -216,7 +216,7 @@ public class OrderItem extends GenericModel {
                 }
             }
 
-            Cache.add(cacked_key, highChart, "2h");
+            Cache.add(cacked_key, highChart, "3h");
         }
         return Cache.get(cacked_key, HighChart.class);
     }
@@ -336,7 +336,7 @@ public class OrderItem extends GenericModel {
 
                 @Override
                 public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
+                    return "OrderItem.ajaxSkusUnitOrder(ES)";
                 }
             });
 
