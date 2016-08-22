@@ -35,6 +35,8 @@ public class ShipPlanPost extends Post<ShipPlan> {
     public long whouseId;
     public Shipment.T shipType;
     public String search;
+    public boolean isHaveNoShipment = false;
+    public String centerId;
 
     public ShipPlanPost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -100,6 +102,10 @@ public class ShipPlanPost extends Post<ShipPlan> {
             sbd.append(" AND sp.shipType=? ");
             params.add(this.shipType);
         }
+        if(isHaveNoShipment){
+            sbd.append(" AND sp.shipItems.size = 0 ");
+        }
+
         sbd.append(" ORDER BY sp.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }

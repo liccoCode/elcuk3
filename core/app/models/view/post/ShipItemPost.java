@@ -33,11 +33,8 @@ public class ShipItemPost extends Post<ShipItem> {
     }
 
     public boolean isHaveShipment = false;
-
     public String dateType = "createDate";
-
     public Long whouseId;
-
     public String centerId;
 
 

@@ -12,6 +12,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.post.ShipItemPost;
 import models.view.post.ShipPlanPost;
 import models.view.post.ShipmentPost;
 import models.whouse.ShipPlan;
@@ -120,6 +121,23 @@ public class Shipments extends Controller {
             ShipItems.index(null);
         }
         flash.success("成功为 %s 个采购计划创建运输单 %s", units.size(), shipment.id);
+        show(shipment.id);
+    }
+
+    /**
+     * 通过出库计划创建运输单
+     * @param itemIds
+     */
+    public static void shipPlanToShipment(List<Long> planIds) {
+        if(planIds == null || planIds.size() <= 0)
+            Validation.addError("", "必须选择出库计划");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            ShipItems.planIndex(new ShipPlanPost());
+        }
+
+        Shipment shipment = new Shipment().buildFromShipPlan(planIds);
+        flash.success("成功为 %s 个出库计划创建运输单 %s", planIds.size(), shipment.id);
         show(shipment.id);
     }
 

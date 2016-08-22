@@ -599,6 +599,56 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return this;
     }
 
+    public Shipment buildFromShipPlan(List<Long> planIds) {
+        List<ShipPlan> planList = ShipPlan.find(SqlSelect.whereIn("id", planIds)).fetch();
+        if(planList.size() != planIds.size())
+            Validation.addError("", "提交的出库计划数量与系统存在的不一致!");
+        ShipPlan first = planList.get(0);
+        Shipment.T firstShipType = first.shipType;
+        Date earlyPlanBeginDate = first.planShipDate;
+        for(ShipPlan plan : planList) {
+            if(plan.selling == null) {
+                Validation.addError("", "出库计划的selling为空");
+                break;
+            }
+            if(firstShipType != plan.shipType) {
+                Validation.addError("", "不同运输方式不可以创建到一个运输单.");
+                break;
+            }
+            earlyPlanBeginDate = new Date(Math.min(earlyPlanBeginDate.getTime(), plan.planShipDate.getTime()));
+
+            if(plan.whouse == null) {
+                Validation.addError("", "采购单仓库为空");
+                break;
+            }
+
+            if(this.type == T.EXPRESS) {
+                if(!plan.whouse.id.equals(first.whouse.id)) {
+                    Validation.addError("", "快递运输, 去往仓库不一样不可以创建到同一个运输单");
+                    break;
+                }
+            } else {
+                if(!plan.whouse.country.equals(first.whouse.country)) {
+                    Validation.addError("", "海运/空运, 运往国家不一样不可以创建同一个运输单");
+                    break;
+                }
+            }
+        }
+        this.type = firstShipType;
+        if(Validation.hasErrors()) return this;
+        this.id = Shipment.id();
+        this.dates.planBeginDate = earlyPlanBeginDate;
+        this.whouse = first.whouse;
+        this.calcuPlanArriveDate();
+        this.creater = User.current();
+        this.save();
+        for(ShipPlan plan : planList) {
+            this.addToShip(plan);
+        }
+        return this;
+    }
+
+
     public void destroy() {
         /**
          * 0. 检查状态
