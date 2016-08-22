@@ -11,7 +11,7 @@
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{ShipItems.index()}" class="search_form" method="POST">
+  <form action="@{ShipItems.planIndex()}" class="search_form" method="POST">
     <div class="span12">
       <div class="inline">
         <button id="today" class="btn"><i class="icon-search"></i> Today</button>
@@ -81,24 +81,24 @@
       </tr>
     #{list items: items, as:'item'}
       <tr>
-        <td><input type="checkbox" value="${item.plan?.id}"></td>
+        <td><input type="checkbox" name="" value="${item.plan?.id}"></td>
         <td>
           <a href="@{ShipPlans.show(item.plan?.id)}" target="_blank">${item.plan?.id}</a>
         </td>
-        <td><a href="@{Products.show(item.plan?.product.sku)}" target="_blank">${item.plan?.product.sku}</a></td>
         <td>${item.plan?.selling?.sellingId}</td>
-        <td>${item.plan?.product.sku}</td>
+        <td><a href="@{Products.show(item.plan?.product.sku)}" target="_blank">${item.plan?.product.sku}</a></td>
         <td>${item.plan?.product.abbreviation}</td>
         <td>${item.plan?.fba?.shipmentId}</td>
         <td>${item.plan?.whouse?.name}</td>
         <td>${item.plan?.fba?.fbaCenter?.centerId}</td>
-        <td></td>
+        <td>${item.plan?.planQty}/${item.plan?.qty}</td>
         <td>#{time_tooltip time: item.plan?.planShipDate/}</td>
         <td>#{time_tooltip time: item.plan?.planArrivDate/}</td>
         <td style="color:${item.plan?.shipType?.rgb()}">${item.plan?.shipType?.label()}</td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>${item.plan?.outboundRecord()?.clearanceType.label()}</td>
+        <td>${item.totalBoxNum()}</td>
+        <td>${item.totalWeight()}</td>
+        <td>${item.totalVolume()}</td>
         <td>#{time_tooltip time: item.plan?.createDate/}</td>
         <td>${item.plan?.creator.username}</td>
       </tr>
