@@ -46,6 +46,7 @@ import static play.modules.pdf.PDF.renderPDF;
 public class Orders extends Controller {
 
     public static void index(OrderPOST p) {
+        //TODO use awiat + job
         List<Account> accs = Account.openedSaleAcc();
         if(p == null) p = new OrderPOST();
         List<Orderr> orders = p.query();

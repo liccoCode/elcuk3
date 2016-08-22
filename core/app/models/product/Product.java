@@ -722,6 +722,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public static List<String> skus(boolean forceClearCache) {
         List<String> skus = null;
         if(forceClearCache) {
+            //TODO:: check redis client
             skus = new ProductQuery().skus();
             Cache.delete(Caches.SKUS);
             Cache.add(Caches.SKUS, skus, "10h");

@@ -74,7 +74,7 @@ public class Deliveryment extends GenericModel {
         public abstract String label();
     }
 
-    @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
+    @OneToMany(mappedBy = "deliveryment", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
     @ManyToOne
@@ -227,7 +227,7 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     * 返回可以用来添加的 ProcureUnits
      *
      * @return
      */

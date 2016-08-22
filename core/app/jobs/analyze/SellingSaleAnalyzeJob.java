@@ -411,6 +411,7 @@ public class SellingSaleAnalyzeJob extends Job {
      * @return
      */
     public static Date cachedDate(String type) {
+        //TODO:: use page cache?
         String cacke_key = "sid".equals(type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
         String cache_str = Caches.get(cacke_key + ".time");
         if(StringUtils.isBlank(cache_str)) {
