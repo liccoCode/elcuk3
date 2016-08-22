@@ -51,6 +51,11 @@ public class ShipItemPost extends Post<ShipItem> {
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 
+        if(whouseId != null) {
+
+
+        }
+
         if(!this.isHaveShipment)
             sql.append(" AND si.shipment IS NULL");
 
