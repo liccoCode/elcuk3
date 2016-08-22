@@ -482,4 +482,39 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     public OutboundRecord outboundRecord() {
         return OutboundRecord.find("shipPlan=?", this).first();
     }
+
+
+    /**
+     * 总重量 (kg)
+     *
+     * @return
+     */
+    public Double totalWeight() {
+        if(this.outboundRecord() != null) {
+            OutboundRecord out = this.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.weight() + out.lastBox.weight();
+        }
+        return null;
+    }
+
+
+    public Integer totalBoxNum() {
+        if(this.outboundRecord() != null) {
+            OutboundRecord out = this.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.boxNum + out.lastBox.boxNum;
+        }
+        return null;
+    }
+
+    public Double totalVolume() {
+        if(this.outboundRecord() != null) {
+            OutboundRecord out = this.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.volume() + out.lastBox.volume();
+        }
+        return null;
+    }
+
 }
