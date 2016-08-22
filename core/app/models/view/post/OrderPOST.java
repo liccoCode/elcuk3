@@ -70,8 +70,6 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public String invoiceState;
 
-
-    @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         SearchSourceBuilder builder = this.params();
         try {
@@ -97,7 +95,7 @@ public class OrderPOST extends ESPost<Orderr> {
             return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
         } catch(Exception e) {
             Logger.error(e.getMessage());
-            return new ArrayList<Orderr>();
+            return new ArrayList<>();
         }
     }
 
@@ -153,17 +151,17 @@ public class OrderPOST extends ESPost<Orderr> {
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.query(QueryBuilders
-                        .queryString(this.search())
-                        .field("selling_ids")
-                        .field("buyer")
-                        .field("email")
-                        .field("address")
-                        .field("order_id")
-                        .field("userid")
-                        .field("track_no")
-                        .field("upc")
-                        .field("asin")
-                        .field("promotion_ids")
+                .queryString(this.search())
+                .field("selling_ids")
+                .field("buyer")
+                .field("email")
+                .field("address")
+                .field("order_id")
+                .field("userid")
+                .field("track_no")
+                .field("upc")
+                .field("asin")
+                .field("promotion_ids")
         ).postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
         if(this.promotion != null) {
@@ -215,7 +213,7 @@ public class OrderPOST extends ESPost<Orderr> {
                             .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
             boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
-                                .to(Dates.night(this.end)).includeUpper(true));
+                    .to(Dates.night(this.end)).includeUpper(true));
         }
 
 
