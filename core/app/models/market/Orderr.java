@@ -419,7 +419,7 @@ public class Orderr extends GenericModel {
         final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
-        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        List<OrderrVO> vos = new ArrayList<>();
         List<List<OrderrVO>> results = Promises.forkJoin(new Promises.DBCallback<List<OrderrVO>>() {
             @Override
             public List<OrderrVO> doJobWithResult(M m) {
