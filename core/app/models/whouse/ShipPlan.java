@@ -503,7 +503,12 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         if(this.outboundRecord() != null) {
             OutboundRecord out = this.outboundRecord();
             out.unmarshalBoxs();
-            return out.mainBox.boxNum + out.lastBox.boxNum;
+            int temp = 0;
+            if(out.mainBox != null && out.mainBox.boxNum != null)
+                temp += out.mainBox.boxNum;
+            if(out.lastBox != null && out.lastBox.boxNum != null)
+                temp += out.lastBox.boxNum;
+            return temp;
         }
         return null;
     }
