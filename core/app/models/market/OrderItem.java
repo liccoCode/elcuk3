@@ -178,8 +178,8 @@ public class OrderItem extends GenericModel {
      * @param val 需要查询的 all, categoryId, sku, sid
      * @param to  @return {series_size, days, series_n}
      */
-    @Cached("3h")
-    public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
+    @Cached("2h")
+    public static HighChart ajaxHighChartUnitOrder(String val, String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
@@ -188,23 +188,15 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            Date _from = Dates.morning(from);
+            Date _to = Dates.night(to);
 
-            final HighChart highChart = new HighChart();
-            final OrderItemESQuery esQuery = new OrderItemESQuery();
-            Promises.forkJoin(new Promises.Callback<Object>() {
-                @Override
-                public Object doJobWithResult(M m) {
-                    highChart.series(esQuery.salesFade(type, val, m, _from, _to));
-                    return null;
-                }
+            HighChart highChart = new HighChart();
+            OrderItemESQuery esQuery = new OrderItemESQuery();
 
-                @Override
-                public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
-                }
-            });
+            for(M market : Promises.MARKETS) {
+                highChart.series(esQuery.salesFade(type, val, market, _from, _to));
+            }
             highChart.series(highChart.sumSeries("销量"));
             if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length() >= 6) {
                 for(int i = 0; i < highChart.series.size(); i++) {
@@ -216,7 +208,7 @@ public class OrderItem extends GenericModel {
                 }
             }
 
-            Cache.add(cacked_key, highChart, "3h");
+            Cache.add(cacked_key, highChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);
     }

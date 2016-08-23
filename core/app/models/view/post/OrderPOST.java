@@ -82,7 +82,7 @@ public class OrderPOST extends ESPost<Orderr> {
 
             JSONObject hits = result.getJSONObject("hits");
             this.count = hits.getLong("total");
-            Set<String> orderIds = new HashSet<String>();
+            Set<String> orderIds = new HashSet<>();
             for(Object obj : hits.getJSONArray("hits")) {
                 JSONObject hit = (JSONObject) obj;
                 orderIds.add(hit.getJSONObject("_source").getString("order_id"));
