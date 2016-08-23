@@ -111,7 +111,6 @@ public class OrderPOST extends ESPost<Orderr> {
 
             JSONObject hits = result.getJSONObject("hits");
             this.count = hits.getLong("total");
-            /**先查出总共有多少条订单**/
             this.perSize = hits.getInteger("total");
             this.page = 1;
             builder = this.params();
@@ -130,7 +129,6 @@ public class OrderPOST extends ESPost<Orderr> {
                 throw new FastRuntimeException("没有结果");
             return OrderReportDTO.query(orderIds);
         } catch(Exception e) {
-            e.printStackTrace();
             Logger.error(e.getMessage());
             return new ArrayList<>();
         }
