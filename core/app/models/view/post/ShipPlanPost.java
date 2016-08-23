@@ -66,6 +66,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
                 .append(" LEFT JOIN sp.selling s")
                 .append(" LEFT JOIN sp.product pd")
                 .append(" LEFT JOIN sp.fba f")
+                .append(" LEFT JOIN sp.shipItems si ")
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -102,8 +103,8 @@ public class ShipPlanPost extends Post<ShipPlan> {
             sbd.append(" AND sp.shipType=? ");
             params.add(this.shipType);
         }
-        if(isHaveNoShipment){
-            sbd.append(" AND sp.shipItems.size = 0 ");
+        if(isHaveNoShipment) {
+            sbd.append(" AND si.id IS NULL ");
         }
 
         sbd.append(" ORDER BY sp.createDate DESC");
