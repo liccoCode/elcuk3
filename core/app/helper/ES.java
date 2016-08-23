@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 简单的集成 ES 的搜索功能. 不是用 ElasticSearch 提供的 API 是因为
  * -> http://blog.florian-hopf.de/2013/05/getting-started-with-elasticsearch-part.html)
@@ -15,20 +17,29 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  */
 public class ES {
     public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
-        return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_search", builder.toString());
+        return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_search",
+                builder.toString());
     }
-
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
         return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
     }
 
+    /**
+     * @param index
+     * @param type
+     * @param builder
+     * @return
+     * @deprecated
+     */
     public static JSONObject searchOnEtrackerES(String index, String type, SearchSourceBuilder builder) {
         return processSearch(index, type, builder, System.getenv(Constant.ETRACKER_ES_HOST));
     }
 
     public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
-        return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search", builder.toString());
+        return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search",
+                builder.toString(),
+                (int) TimeUnit.SECONDS.toMillis(2));
     }
 
     public static JSONObject get(String index, String type, String id) {
@@ -40,7 +51,7 @@ public class ES {
     }
 
     public static JSONObject processGet(String index, String type, String id, String esHost) {
-        return HTTP.getJson(esHost + "/" + index + "/" + type + "/" + id);
+        return HTTP.getJson(esHost + "/" + index + "/" + type + "/" + id, (int) TimeUnit.SECONDS.toMillis(2));
     }
 
     /**
