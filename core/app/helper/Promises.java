@@ -20,7 +20,7 @@ import java.util.concurrent.*;
 public class Promises {
     public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_UK, M.AMAZON_FR, M.AMAZON_ES,
             M.AMAZON_IT, M.AMAZON_JP};
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(MARKETS.length);
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(8);
 
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
