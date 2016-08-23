@@ -39,7 +39,7 @@ public class ES {
     public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
         return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search",
                 builder.toString(),
-                (int) TimeUnit.SECONDS.toMillis(2));
+                (int) TimeUnit.SECONDS.toMillis(1));
     }
 
     public static JSONObject get(String index, String type, String id) {
