@@ -157,11 +157,26 @@ public class HTTP {
      * @return
      */
     public static String get(String url) {
-        return get(null, url);
+        return get(null, url, null);
     }
 
     public static JSONObject getJson(String url) {
-        return JSON.parseObject(get(null, url));
+        return getJson(url, null);
+    }
+
+    public static JSONObject getJson(String url, Integer timeout) {
+        RequestConfig requestConfig = null;
+        if(timeout != null) {
+            requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(timeout)
+                    .setConnectTimeout(timeout)
+                    .build();
+        }
+        return JSON.parseObject(get(null, url, requestConfig));
+    }
+
+    public static String get(CookieStore cookieStore, String url) {
+        return get(cookieStore, url, null);
     }
 
     /**
@@ -171,10 +186,12 @@ public class HTTP {
      * @param url
      * @return
      */
-    public static String get(CookieStore cookieStore, String url) {
+    public static String get(CookieStore cookieStore, String url, RequestConfig requestConfig) {
+        HttpGet get = new HttpGet(url);
+        if(requestConfig != null) get.setConfig(requestConfig);
         try {
             return EntityUtils.toString(
-                    client().execute(new HttpGet(url), getContextWithCookieStore(cookieStore)).getEntity(),
+                    client().execute(get, getContextWithCookieStore(cookieStore)).getEntity(),
                     "UTF-8"
             );
         } catch(IOException e) {
@@ -404,9 +421,13 @@ public class HTTP {
     // -------------------- body string ----------------------
 
     public static String post(String url, String body) {
-        HttpPost post = new HttpPost(url);
-        try {
+        return post(url, body, null);
+    }
 
+    public static String post(String url, String body, RequestConfig requestConfig) {
+        HttpPost post = new HttpPost(url);
+        if(requestConfig != null) post.setConfig(requestConfig);
+        try {
             post.setEntity(new StringEntity(body, Charset.forName("UTF-8")));
             return EntityUtils.toString(client().execute(post).getEntity());
         } catch(Exception e) {
@@ -417,7 +438,34 @@ public class HTTP {
 
     public static JSONObject postJson(String url, String body) {
         Logger.debug("HTTP.post Json [%s]", url);
-        String json = post(url, body);
+        String json = post(url, body, null);
+        try {
+            return JSON.parseObject(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
+    /**
+     * 支持自定义超时时间的 post 请求
+     * 现阶段只有设置超时时间的需求,如果以后还有其他需求再重构成传递一个 RequestConfig
+     *
+     * @param url
+     * @param body
+     * @param timeout
+     * @return
+     */
+    public static JSONObject postJson(String url, String body, Integer timeout) {
+        Logger.debug("HTTP.post Json [%s]", url);
+        RequestConfig requestConfig = null;
+        if(timeout != null) {
+            requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(timeout)
+                    .setConnectTimeout(timeout)
+                    .build();
+        }
+        String json = post(url, body, requestConfig);
         try {
             return JSON.parseObject(json);
         } catch(Exception e) {
@@ -428,7 +476,7 @@ public class HTTP {
 
     public static JSONObject getJson(CookieStore cookieStore, String url) {
         Logger.debug("HTTP.get Json [%s]", url);
-        String json = get(cookieStore, url);
+        String json = get(cookieStore, url, null);
         try {
             return JSON.parseObject(json);
         } catch(Exception e) {
