@@ -60,15 +60,15 @@ public class HTTP {
 
     public static CloseableHttpClient create() {
         RequestConfig defaultRequestConfig = RequestConfig.custom()
-                // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
-                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(90))
-                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(90))
+                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(5))
+                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5))
+                .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(5))
                 .setRedirectsEnabled(true) //允许 Redirect
                 .build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-        connManager.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
-        connManager.setMaxTotal(40); // 所有站点最多允许 40 个链接
+        connManager.setDefaultMaxPerRoute(10); // 每一个站点最多只允许 10 个链接
+        connManager.setMaxTotal(100); // 所有站点最多允许 100 个链接
 
         ConnectionConfig connectionConfig = ConnectionConfig.custom()
                 .setCharset(Charset.forName("UTF-8")) //Charset
@@ -333,6 +333,19 @@ public class HTTP {
     }
 
     /**
+     * 由于下载的时间比较长所以这里单独准备一个 RequestConfig
+     *
+     * @return
+     */
+    public static RequestConfig downloadRequestConfig() {
+        return RequestConfig.custom()
+                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(90))
+                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(90))
+                .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(90))
+                .build();
+    }
+
+    /**
      * 最简单的下载
      *
      * @param url
@@ -340,6 +353,7 @@ public class HTTP {
      */
     public static byte[] getDown(String url) {
         HttpGet get = new HttpGet(url);
+        get.setConfig(downloadRequestConfig());
         try {
             return EntityUtils.toByteArray(client().execute(get).getEntity());
         } catch(Exception e) {
@@ -350,6 +364,7 @@ public class HTTP {
 
     public static F.Option<File> getDownFile(String url, String fileName, CookieStore cookie) {
         HttpGet get = new HttpGet(url);
+        get.setConfig(downloadRequestConfig());
         try {
             File file = new File(String.format("%s/%s", Constant.TMP, fileName));
             IO.copy(client().execute(get, getContextWithCookieStore(cookie)).getEntity().getContent(),
@@ -373,6 +388,7 @@ public class HTTP {
     public static byte[] postDown(CookieStore cookieStore, String url,
                                   Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
+        post.setConfig(downloadRequestConfig());
         try {
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toByteArray(client().execute(post, getContextWithCookieStore(cookieStore)).getEntity());
@@ -395,6 +411,7 @@ public class HTTP {
                                 Collection<? extends NameValuePair> params,
                                 Map<String, F.T2<String, BufferedInputStream>> uploadFiles) {
         HttpPost post = new HttpPost(url);
+        post.setConfig(downloadRequestConfig());
         MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
             for(NameValuePair nv : params) {
