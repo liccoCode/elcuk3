@@ -1,4 +1,4 @@
-namespace :log do
+namespace :logs do
 
   desc '查看 Elcuk2 log'
   task :elcuk2 do
