@@ -39,7 +39,7 @@ public class ES {
     public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
         return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search",
                 builder.toString(),
-                (int) TimeUnit.SECONDS.toMillis(1));
+                HTTP.requestConfigWithTimeout((int) TimeUnit.SECONDS.toMillis(1)));
     }
 
     public static JSONObject get(String index, String type, String id) {
@@ -51,7 +51,9 @@ public class ES {
     }
 
     public static JSONObject processGet(String index, String type, String id, String esHost) {
-        return HTTP.getJson(esHost + "/" + index + "/" + type + "/" + id, (int) TimeUnit.SECONDS.toMillis(2));
+        return HTTP.getJson(
+                esHost + "/" + index + "/" + type + "/" + id,
+                HTTP.requestConfigWithTimeout((int) TimeUnit.SECONDS.toMillis(2)));
     }
 
     /**
