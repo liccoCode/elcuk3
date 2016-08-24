@@ -244,54 +244,6 @@ public class OrderItem extends GenericModel {
     }
 
     /**
-     * 不同 Category 销量的百分比;
-     * TODO 取消销售额饼图
-     *
-     * @param type units/sales
-     * @param from
-     * @param to
-     * @param
-     * @return
-     */
-    public static HighChart categoryPie(String type, final Date from, final Date to, M market) {
-        String key = Caches.Q.cacheKey(type, from, to, market.name());
-        HighChart pieChart = Cache.get(key, HighChart.class);
-        if(pieChart != null) return pieChart;
-
-        synchronized(key.intern()) {
-            pieChart = Cache.get(key, HighChart.class);
-            if(pieChart != null) return pieChart;
-
-            pieChart = new HighChart(Series.PIE);
-
-            final OrderItemESQuery esQuery = new OrderItemESQuery();
-            if("all".equals(type)) {
-                final HighChart finalPieChart = pieChart;
-                Promises.forkJoin(new Promises.Callback<Object>() {
-                    @Override
-                    public Object doJobWithResult(M m) {
-                        finalPieChart.series(esQuery.categoryPie(m, from, to));
-                        return null;
-                    }
-
-                    @Override
-                    public String id() {
-                        return "OrderItem.categoryPie";
-                    }
-                });
-                AbstractSeries pie = pieChart.sumSeries("销量百分比");
-                pieChart.series.clear();
-                pieChart.series.add(pie);
-            } else {
-                pieChart.series(esQuery.categoryPie(market, from, to));
-            }
-            Cache.add(key, pieChart, "8h");
-        }
-        return pieChart;
-    }
-
-
-    /**
      * <pre>
      * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
