@@ -26,18 +26,8 @@ public class JobsSetup {
         boolean isprodjob = isProdJob();
         boolean isdevJob = isDevJob();
 
-        /**
-         * 因cookie无法转成json到redis,暂时两边都执行此job
-         */
-        every(KeepSessionJob.class, "20mn");
+        new KeepSessionJob().now();
         if(isprodjob || isdevJob) {
-
-            // 手动的将所有的需要的 Job 启动
-            //ruby job 已执行
-            //every(FeedbackCheckJob.class, "5mn");
-            //every(AmazonFBAInventoryReceivedJob.class, "20mn");
-            //every(AmazonFinanceCheckJob.class, "1mn");
-            //every(ListingSchedulJob.class, "1mn");
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
