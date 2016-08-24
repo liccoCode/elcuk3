@@ -60,9 +60,9 @@ public class HTTP {
 
     public static CloseableHttpClient create() {
         RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(3))
-                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(3))
-                .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(5))
+                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(5)) // 请求获取数据的超时时间
+                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5)) // 连接超时时间
+                .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(1)) // 从 pool 获取 connection超时时间
                 .setRedirectsEnabled(true) //允许 Redirect
                 .build();
 
@@ -355,7 +355,6 @@ public class HTTP {
         return RequestConfig.custom()
                 .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(90))
                 .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(90))
-                .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(90))
                 .build();
     }
 
