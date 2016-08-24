@@ -26,7 +26,6 @@ public class JobsSetup {
         boolean isprodjob = isProdJob();
         boolean isdevJob = isDevJob();
 
-        new KeepSessionJob().now();
         if(isprodjob || isdevJob) {
             new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
