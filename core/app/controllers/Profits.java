@@ -127,7 +127,7 @@ public class Profits extends Controller {
 
 
     public static void inventory(ProfitPost p) {
-        List<Profit> profits = new ArrayList<Profit>();
+        List<Profit> profits = new ArrayList<>();
         if(p == null) {
             p = new ProfitPost();
             render(profits, p);

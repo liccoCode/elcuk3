@@ -7,9 +7,7 @@ import models.product.Category;
 import models.view.post.ProfitPost;
 import models.view.report.Profit;
 import play.jobs.Job;
-import play.jobs.On;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +17,7 @@ import java.util.List;
  * Date: 5/14/2015
  * Time: 3:06 PM
  */
-@On("0 20 0,7,15 * * ?")
+//@On("0 20 0,7,15 * * ?")
 public class ProfitInventorySearch extends Job {
 
     private ProfitPost post;
