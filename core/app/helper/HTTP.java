@@ -60,14 +60,14 @@ public class HTTP {
 
     public static CloseableHttpClient create() {
         RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(5))
-                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5))
+                .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(3))
+                .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(3))
                 .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(5))
                 .setRedirectsEnabled(true) //允许 Redirect
                 .build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-        connManager.setDefaultMaxPerRoute(10); // 每一个站点最多只允许 10 个链接
+        connManager.setDefaultMaxPerRoute(12); // 每一个站点最多只允许 12 个链接(request pool 的两倍)
         connManager.setMaxTotal(100); // 所有站点最多允许 100 个链接
 
         ConnectionConfig connectionConfig = ConnectionConfig.custom()
@@ -133,7 +133,7 @@ public class HTTP {
     }
 
     /**
-     * 设置 CookieStore 到 HttpClientContext
+     * 返回包含了传入的 CookieStore 的 HttpClientContext
      *
      * @param cookieStore
      * @return
@@ -150,12 +150,37 @@ public class HTTP {
         return context;
     }
 
+    public static HttpEntity doRequest(HttpRequestBase request) throws IOException {
+        return doRequest(request, null, null);
+    }
+
+    public static HttpEntity doRequest(HttpRequestBase request, HttpClientContext context) throws IOException {
+        return doRequest(request, context, null);
+    }
+
+    public static HttpEntity doRequest(HttpRequestBase request, RequestConfig config) throws IOException {
+        return doRequest(request, null, config);
+    }
+
+    public static HttpEntity doRequest(HttpRequestBase request, HttpClientContext context, RequestConfig config)
+            throws IOException {
+        CloseableHttpResponse response = null;
+        try {
+            if(config != null) request.setConfig(config);
+            response = client().execute(request, context);
+            return response.getEntity();
+        } finally {
+            if(response != null) response.close();
+        }
+    }
+
     /**
      * 使用默认 Cookie Store
      *
      * @param url
      * @return
      */
+
     public static String get(String url) {
         return get(null, url, null);
     }
@@ -164,15 +189,16 @@ public class HTTP {
         return getJson(url, null);
     }
 
-    public static JSONObject getJson(String url, Integer timeout) {
-        RequestConfig requestConfig = null;
-        if(timeout != null) {
-            requestConfig = RequestConfig.custom()
-                    .setSocketTimeout(timeout)
-                    .setConnectTimeout(timeout)
-                    .build();
-        }
+    public static JSONObject getJson(String url, RequestConfig requestConfig) {
         return JSON.parseObject(get(null, url, requestConfig));
+    }
+
+    public static RequestConfig requestConfigWithTimeout(int timeout) {
+        if(timeout <= 0) return null;
+        return RequestConfig.custom()
+                .setSocketTimeout(timeout)
+                .setConnectTimeout(timeout)
+                .build();
     }
 
     public static String get(CookieStore cookieStore, String url) {
@@ -191,9 +217,8 @@ public class HTTP {
         if(requestConfig != null) get.setConfig(requestConfig);
         try {
             return EntityUtils.toString(
-                    client().execute(get, getContextWithCookieStore(cookieStore)).getEntity(),
-                    "UTF-8"
-            );
+                    doRequest(get, getContextWithCookieStore(cookieStore)),
+                    "UTF-8");
         } catch(IOException e) {
             e.printStackTrace();
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
@@ -215,24 +240,13 @@ public class HTTP {
     public static HttpClientContext request(CookieStore cookieStore, String url) {
         try {
             HttpClientContext context = getContextWithCookieStore(cookieStore);
-            client().execute(new HttpGet(url), context);
+            doRequest(new HttpGet(url), context);
             return context;
         } catch(IOException e) {
             e.printStackTrace();
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return null;
         }
-    }
-
-    public static String toString(HttpResponse reponse) {
-        if(reponse != null) {
-            try {
-                return EntityUtils.toString(reponse.getEntity(), "UTF-8");
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return "";
     }
 
     /**
@@ -261,7 +275,7 @@ public class HTTP {
         try {
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
             return EntityUtils.toString(
-                    client().execute(post, getContextWithCookieStore(cookieStore)).getEntity(),
+                    doRequest(post, getContextWithCookieStore(cookieStore)),
                     Consts.UTF_8
             );
         } catch(Exception e) {
@@ -281,16 +295,16 @@ public class HTTP {
      */
     public static String post(CookieStore cookieStore, String url, List<BasicHeader> headers,
                               Collection<? extends NameValuePair> params) {
+        HttpPost post = new HttpPost(url);
+        post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
 
-        RequestBuilder requestBuilder = RequestBuilder.post().setUri(url);
         if(headers != null && !headers.isEmpty()) {
-            for(BasicHeader header : headers) requestBuilder.setHeader(header);
+            post.setHeaders((BasicHeader[]) headers.toArray());
         }
-        requestBuilder.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
         try {
-            CloseableHttpResponse response = client()
-                    .execute(requestBuilder.build(), getContextWithCookieStore(cookieStore));
-            return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
+            return EntityUtils.toString(
+                    doRequest(post, getContextWithCookieStore(cookieStore))
+                    , Consts.UTF_8);
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
@@ -353,9 +367,8 @@ public class HTTP {
      */
     public static byte[] getDown(String url) {
         HttpGet get = new HttpGet(url);
-        get.setConfig(downloadRequestConfig());
         try {
-            return EntityUtils.toByteArray(client().execute(get).getEntity());
+            return EntityUtils.toByteArray(doRequest(get, downloadRequestConfig()));
         } catch(Exception e) {
             Logger.warn("HTTP.getDown[%s] [%s]", url, Webs.E(e));
             return new byte[]{};
@@ -364,10 +377,9 @@ public class HTTP {
 
     public static F.Option<File> getDownFile(String url, String fileName, CookieStore cookie) {
         HttpGet get = new HttpGet(url);
-        get.setConfig(downloadRequestConfig());
         try {
             File file = new File(String.format("%s/%s", Constant.TMP, fileName));
-            IO.copy(client().execute(get, getContextWithCookieStore(cookie)).getEntity().getContent(),
+            IO.copy(doRequest(get, getContextWithCookieStore(cookie), downloadRequestConfig()).getContent(),
                     new FileOutputStream(file));
             return F.Option.Some(file);
         } catch(IOException e) {
@@ -388,10 +400,10 @@ public class HTTP {
     public static byte[] postDown(CookieStore cookieStore, String url,
                                   Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
-        post.setConfig(downloadRequestConfig());
         try {
-            post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
-            return EntityUtils.toByteArray(client().execute(post, getContextWithCookieStore(cookieStore)).getEntity());
+            post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), "UTF-8"));
+            return EntityUtils.toByteArray(
+                    doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig()));
         } catch(Exception e) {
             Logger.warn("HTTP.postDown[%s] [%s]", url, Webs.E(e));
             return new byte[]{};
@@ -411,7 +423,6 @@ public class HTTP {
                                 Collection<? extends NameValuePair> params,
                                 Map<String, F.T2<String, BufferedInputStream>> uploadFiles) {
         HttpPost post = new HttpPost(url);
-        post.setConfig(downloadRequestConfig());
         MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
             for(NameValuePair nv : params) {
@@ -420,13 +431,12 @@ public class HTTP {
 
             for(String fileParamName : uploadFiles.keySet()) {
                 F.T2<String, BufferedInputStream> file = uploadFiles.get(fileParamName);
-
-
                 multipartEntity.addPart(fileParamName,
                         new InputStreamBody(file._2, MimeTypes.getMimeType(file._1)));
             }
             post.setEntity(multipartEntity);
-            return EntityUtils.toString(client().execute(post, getContextWithCookieStore(cookieStore)).getEntity());
+            return EntityUtils.toString(
+                    doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig()));
         } catch(Exception e) {
             e.printStackTrace();
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
@@ -443,10 +453,9 @@ public class HTTP {
 
     public static String post(String url, String body, RequestConfig requestConfig) {
         HttpPost post = new HttpPost(url);
-        if(requestConfig != null) post.setConfig(requestConfig);
         try {
             post.setEntity(new StringEntity(body, Charset.forName("UTF-8")));
-            return EntityUtils.toString(client().execute(post).getEntity());
+            return EntityUtils.toString(doRequest(post, requestConfig));
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
@@ -470,18 +479,11 @@ public class HTTP {
      *
      * @param url
      * @param body
-     * @param timeout
+     * @param requestConfig
      * @return
      */
-    public static JSONObject postJson(String url, String body, Integer timeout) {
+    public static JSONObject postJson(String url, String body, RequestConfig requestConfig) {
         Logger.debug("HTTP.post Json [%s]", url);
-        RequestConfig requestConfig = null;
-        if(timeout != null) {
-            requestConfig = RequestConfig.custom()
-                    .setSocketTimeout(timeout)
-                    .setConnectTimeout(timeout)
-                    .build();
-        }
         String json = post(url, body, requestConfig);
         try {
             return JSON.parseObject(json);
