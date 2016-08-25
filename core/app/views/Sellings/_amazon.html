@@ -20,6 +20,12 @@
     <button class="btn btn-warning" id="img_cal" content="图片按照 0~8 设置好编号以后,点击此按钮更新到AMAZON." placement='bottom'
             rel="popover">AMZ图片更新
     </button>
+      #{power.ck "sellings.repushfeedstoamazon"}
+        <a class="btn btn-danger" href="@{Sellings.rePushFeedsToAmazon(s.sellingId)}" content="把 DB 内已经存在的 Feed 重新提交给
+        Amazon, 只用于 Rockend 和 Amazon 出现问题后重新上架" placement='bottom' rel="popover">
+          重新提交上架
+        </a>
+      #{/power.ck}
   </div>
 #{/else}
 </div>
