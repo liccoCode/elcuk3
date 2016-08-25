@@ -22,7 +22,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipItems extends Controller {
 
-    @Before(only = "index")
+    @Before(only = {"index", "planIndex"})
     public static void setIndex() {
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("centers", FBACenter.findAll());
