@@ -31,6 +31,7 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.Codec;
@@ -457,15 +458,33 @@ public class Selling extends GenericModel {
         }
     }
 
+    public List<NameValuePair> saleAmazonParams(Feed feed) {
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("type", "CreateListing"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
+        return params;
+    }
+
+    public List<NameValuePair> assignAmazonListingPriceParams(Feed feed) {
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("type", "AssignPrice"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRICING_FEED.toString()));
+        return params;
+    }
+
+    public List<NameValuePair> setFulfillmentByAmazonParams(Feed feed) {
+        List<NameValuePair> params = this.submitJobParams(feed);
+        params.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_INVENTORY_FEED.toString()));
+        return params;
+    }
+
     /**
      * 提交 Listing 上架的 XML
      */
     public void saleAmazon() {
-        Feed saleAmazonBasicFeed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
-        List<NameValuePair> params = this.submitJobParams(saleAmazonBasicFeed);
-        params.add(new BasicNameValuePair("type", "CreateListing"));
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
+        Feed feed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
+        feed.submit(this.saleAmazonParams(feed));
     }
 
     /**
@@ -473,10 +492,7 @@ public class Selling extends GenericModel {
      */
     public void assignAmazonListingPrice() {
         Feed feed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
-        List<NameValuePair> params = this.submitJobParams(feed);
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRICING_FEED.toString()));
-        params.add(new BasicNameValuePair("type", "AssignPrice"));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
+        feed.submit(this.assignAmazonListingPriceParams(feed));
     }
 
     /**
@@ -484,10 +500,7 @@ public class Selling extends GenericModel {
      */
     public void setFulfillmentByAmazon() {
         Feed feed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
-        List<NameValuePair> params = this.submitJobParams(feed);
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_INVENTORY_FEED.toString()));
-        params.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed", params);
+        feed.submit(this.setFulfillmentByAmazonParams(feed));
     }
 
     /**
@@ -1049,5 +1062,28 @@ public class Selling extends GenericModel {
             default:
                 throw new NotSupportChangeRegionFastException();
         }
+    }
+
+    /**
+     * 找出已经存在的 Feed 重新推送给 Amazon 进行上架(只用于处理上架失败的但是不是 Feed 错误的情况)
+     */
+    public void rePushFeedsToAmazon() {
+        Feed saleAmazonFeed = Feed.getFeedWithSellingAndType(this, Feed.T.SALE_AMAZON);
+        Feed assignAmazonListingPriceFeed = Feed.getFeedWithSellingAndType(this, Feed.T.ASSIGN_AMAZON_LISTING_PRICE);
+        Feed setFulfillmentByAmazonFeed = Feed.getFeedWithSellingAndType(this, Feed.T.FULFILLMENT_BY_AMAZON);
+
+        if(saleAmazonFeed != null && assignAmazonListingPriceFeed != null && setFulfillmentByAmazonFeed != null) {
+            if(!saleAmazonFeed.sameHours(assignAmazonListingPriceFeed) ||
+                    !saleAmazonFeed.sameHours(setFulfillmentByAmazonFeed) ||
+                    !assignAmazonListingPriceFeed.sameHours(setFulfillmentByAmazonFeed)) {
+                Validation.addError("", "未匹配到合法的 Feed, 请重新上架!");
+            }
+        } else {
+            Validation.addError("", "Feed 不完整, 请重新上架!!");
+        }
+        if(Validation.hasErrors()) return;
+        saleAmazonFeed.submit(this.saleAmazonParams(saleAmazonFeed));
+        assignAmazonListingPriceFeed.submit(this.assignAmazonListingPriceParams(assignAmazonListingPriceFeed));
+        setFulfillmentByAmazonFeed.submit(this.setFulfillmentByAmazonParams(setFulfillmentByAmazonFeed));
     }
 }
