@@ -434,6 +434,7 @@ public class Sellings extends Controller {
         notFoundIfNull(s, "未找到相关 Selling!");
         s.rePushFeedsToAmazon();
         Webs.errorToFlash(flash);
+        if(!Validation.hasErrors()) flash.success("成功提交请求到 Rockend, 请等待 2~5 分钟后查看执行结果!");
         selling(sellingId);
     }
 }

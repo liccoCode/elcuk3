@@ -9,6 +9,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Play;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
@@ -201,7 +202,7 @@ public class Feed extends Model {
                 String.format("fid=? AND (type=? OR memo=?) %s ORDER BY createdAt DESC",
                         Play.mode.isProd() ? "AND feedId IS NULL" : ""),
                 selling.sellingId,
-                type.name(),
+                type,
                 type.label()).first();
     }
 
@@ -210,7 +211,8 @@ public class Feed extends Model {
     }
 
     public void submit(List<NameValuePair> params) {
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed",
+        String response = HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed",
                 params);
+        if(StringUtils.isBlank(response)) Validation.addError("", "向 Rockend 提交请求: submit_feed 时出现了错误, 请稍后再重试!");
     }
 }
