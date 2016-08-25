@@ -207,6 +207,48 @@ public class FBA {
     }
 
     /**
+     * 提交运输信息给 Amazon
+     * <p>
+     * Carrier 和 Tracking numbers 和 ShipmentType
+     *
+     * @return
+     */
+    public static void putTransportContent(FBAShipment fbaShipment, Shipment shipment) throws
+            FBAInboundServiceMWSException {
+        if(fbaShipment.state != FBAShipment.S.PLAN) return;
+        PutTransportContentRequest request = new PutTransportContentRequest();
+        request.setSellerId(fbaShipment.account.merchantId);
+        request.setShipmentId(fbaShipment.shipmentId);
+        request.setIsPartnered(false);
+        request.setShipmentType(shipmentType(shipment.type));
+        request.setTransportDetails(fbaShipment.transportDetails(shipment));
+        PutTransportContentResponse response = client(fbaShipment.account).putTransportContent(request);
+    }
+
+    /**
+     * 提交运输信息时用到的 ShipmentType
+     * <p>
+     * ShipmentType values:
+     * 1. SP – Small Parcel
+     * 2. LTL – Less Than Truckload/Full Truckload (LTL/FTL)
+     *
+     * @param shipType
+     * @return
+     */
+    public static String shipmentType(Shipment.T shipType) {
+        if(shipType == null) return null;
+        switch(shipType) {
+            case EXPRESS:
+                return "SP";
+            case AIR:
+            case SEA:
+                return "LTL";
+            default:
+                return "SP";
+        }
+    }
+
+    /**
      * 根据 FBAShipment 获取 Amazon 上的状态.
      *
      * @param shipmentIds 此账户相关的 FBA ShipmentId

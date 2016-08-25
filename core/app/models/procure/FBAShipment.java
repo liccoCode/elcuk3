@@ -1,9 +1,11 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import models.market.M;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -278,6 +280,17 @@ public class FBAShipment extends Model {
         }
     }
 
+    public synchronized void putTransportContentRetry(int times, Shipment shipment) {
+        try {
+            FBA.putTransportContent(this, shipment);
+        } catch(Exception e) {
+            if(times > 0)
+                putTransportContentRetry(--times, shipment);
+            else
+                throw new FastRuntimeException(e.getMessage());
+        }
+    }
+
     /**
      * 将从 Amazon 解析的 Rows model 数据同步到当前系统中 FBA 的相关数据结构中.
      *
@@ -381,11 +394,56 @@ public class FBAShipment extends Model {
      * @return
      */
     public String marketplace() {
-        if(this.units == null || this.units.isEmpty()) return null;
-        try {
-            return this.units.get(0).selling.market.amid().name();
-        } catch(NullPointerException e) {
+        M market = this.market();
+        if(market != null) {
+            return market.amid().name();
+        } else {
             return null;
         }
+    }
+
+    public M market() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        return this.units.get(0).selling.market;
+    }
+
+    public TransportDetailInput transportDetails(Shipment shipment) {
+        TransportDetailInput input = new TransportDetailInput();
+        switch(shipment.type) {
+            case EXPRESS:
+                input.setNonPartneredSmallParcelData(this.smallParcelDataInput(shipment));
+                break;
+            case AIR:
+            case SEA:
+                input.setNonPartneredLtlData(this.ltlDataInput(shipment));
+                break;
+            default:
+                input.setNonPartneredSmallParcelData(this.smallParcelDataInput(shipment));
+                break;
+        }
+        return input;
+    }
+
+    private NonPartneredSmallParcelDataInput smallParcelDataInput(Shipment shipment) {
+        NonPartneredSmallParcelDataInput input = new NonPartneredSmallParcelDataInput();
+        input.setCarrierName(shipment.internationExpress.carrierName(this.market()));
+        input.setPackageList(packageList(shipment.tracknolist));
+        return input;
+    }
+
+    private NonPartneredSmallParcelPackageInputList packageList(List<String> trackNumbers) {
+        if(trackNumbers == null || trackNumbers.isEmpty()) return null;
+        NonPartneredSmallParcelPackageInputList inputList = new NonPartneredSmallParcelPackageInputList();
+        List<NonPartneredSmallParcelPackageInput> member = new ArrayList<>();
+        for(String trackingId : trackNumbers) {
+            member.add(new NonPartneredSmallParcelPackageInput(trackingId));
+        }
+        inputList.setMember(member);
+        return inputList;
+    }
+
+
+    private NonPartneredLtlDataInput ltlDataInput(Shipment shipment) {
+        return new NonPartneredLtlDataInput(shipment.internationExpress.carrierName(this.market()), "       ");
     }
 }
