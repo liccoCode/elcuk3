@@ -150,27 +150,48 @@ public class HTTP {
         return context;
     }
 
-    public static HttpEntity doRequest(HttpRequestBase request) throws IOException {
+    public static RequestConfig requestConfigWithTimeout(int timeout) {
+        if(timeout <= 0) return null;
+        return RequestConfig.custom()
+                .setSocketTimeout(timeout)
+                .setConnectTimeout(timeout)
+                .build();
+    }
+
+    public static BasicClientCookie buildCrossDomainCookie(String cookieName, String cookieValue) {
+        BasicClientCookie cookie = new BasicClientCookie(cookieName, cookieValue);
+        String domain = String.format(".%s", models.OperatorConfig.getVal("domain"));
+        cookie.setDomain(domain);
+        cookie.setAttribute(ClientCookie.DOMAIN_ATTR, domain);
+        cookie.setAttribute(ClientCookie.PATH_ATTR, "/");
+        return cookie;
+    }
+
+    public static CloseableHttpResponse doRequest(HttpRequestBase request) throws IOException {
         return doRequest(request, null, null);
     }
 
-    public static HttpEntity doRequest(HttpRequestBase request, HttpClientContext context) throws IOException {
+    public static CloseableHttpResponse doRequest(HttpRequestBase request, HttpClientContext context)
+            throws IOException {
         return doRequest(request, context, null);
     }
 
-    public static HttpEntity doRequest(HttpRequestBase request, RequestConfig config) throws IOException {
+    public static CloseableHttpResponse doRequest(HttpRequestBase request, RequestConfig config) throws IOException {
         return doRequest(request, null, config);
     }
 
-    public static HttpEntity doRequest(HttpRequestBase request, HttpClientContext context, RequestConfig config)
-            throws IOException {
-        CloseableHttpResponse response = null;
+    public static CloseableHttpResponse doRequest(HttpRequestBase request,
+                                                  HttpClientContext context,
+                                                  RequestConfig config) throws IOException {
+        if(config != null) request.setConfig(config);
+        return client().execute(request, context);
+    }
+
+    public static void closeResponse(CloseableHttpResponse response) {
         try {
-            if(config != null) request.setConfig(config);
-            response = client().execute(request, context);
-            return response.getEntity();
-        } finally {
             if(response != null) response.close();
+        } catch(IOException e) {
+            Logger.warn("关闭 Response 时出现错误!", Webs.E(e));
         }
     }
 
@@ -193,14 +214,6 @@ public class HTTP {
         return JSON.parseObject(get(null, url, requestConfig));
     }
 
-    public static RequestConfig requestConfigWithTimeout(int timeout) {
-        if(timeout <= 0) return null;
-        return RequestConfig.custom()
-                .setSocketTimeout(timeout)
-                .setConnectTimeout(timeout)
-                .build();
-    }
-
     public static String get(CookieStore cookieStore, String url) {
         return get(cookieStore, url, null);
     }
@@ -214,15 +227,16 @@ public class HTTP {
      */
     public static String get(CookieStore cookieStore, String url, RequestConfig requestConfig) {
         HttpGet get = new HttpGet(url);
-        if(requestConfig != null) get.setConfig(requestConfig);
+        CloseableHttpResponse response = null;
         try {
-            return EntityUtils.toString(
-                    doRequest(get, getContextWithCookieStore(cookieStore)),
-                    "UTF-8");
+            response = doRequest(get, getContextWithCookieStore(cookieStore), requestConfig);
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch(IOException e) {
             e.printStackTrace();
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return "";
+        } finally {
+            closeResponse(response);
         }
     }
 
@@ -237,15 +251,33 @@ public class HTTP {
      * @param url
      * @return
      */
-    public static HttpClientContext request(CookieStore cookieStore, String url) {
+    public static HttpClientContext request(CookieStore cookieStore, String url, RequestConfig requestConfig) {
+        CloseableHttpResponse response = null;
         try {
             HttpClientContext context = getContextWithCookieStore(cookieStore);
-            doRequest(new HttpGet(url), context);
+            response = doRequest(new HttpGet(url), context, requestConfig);
             return context;
         } catch(IOException e) {
             e.printStackTrace();
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return null;
+        } finally {
+            closeResponse(response);
+        }
+    }
+
+    public static HttpClientContext request(CookieStore cookieStore, String url) {
+        CloseableHttpResponse response = null;
+        try {
+            HttpClientContext context = getContextWithCookieStore(cookieStore);
+            response = doRequest(new HttpGet(url), context);
+            return context;
+        } catch(IOException e) {
+            e.printStackTrace();
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
+            return null;
+        } finally {
+            closeResponse(response);
         }
     }
 
@@ -271,17 +303,7 @@ public class HTTP {
      */
     public static String post(CookieStore cookieStore, String url,
                               Collection<? extends NameValuePair> params) {
-        HttpPost post = new HttpPost(url);
-        try {
-            post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
-            return EntityUtils.toString(
-                    doRequest(post, getContextWithCookieStore(cookieStore)),
-                    Consts.UTF_8
-            );
-        } catch(Exception e) {
-            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
-            return "";
-        }
+        return post(cookieStore, url, null, params);
     }
 
     /**
@@ -294,21 +316,28 @@ public class HTTP {
      * @return
      */
     public static String post(CookieStore cookieStore, String url, List<BasicHeader> headers,
-                              Collection<? extends NameValuePair> params) {
+                              Collection<? extends NameValuePair> params, RequestConfig requestConfig) {
         HttpPost post = new HttpPost(url);
         post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), Consts.UTF_8));
-
         if(headers != null && !headers.isEmpty()) {
-            post.setHeaders((BasicHeader[]) headers.toArray());
+            for(BasicHeader header : headers) post.setHeader(header);
         }
+
+        CloseableHttpResponse response = null;
         try {
-            return EntityUtils.toString(
-                    doRequest(post, getContextWithCookieStore(cookieStore))
-                    , Consts.UTF_8);
+            response = doRequest(post, getContextWithCookieStore(cookieStore), requestConfig);
+            return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
+        } finally {
+            closeResponse(response);
         }
+    }
+
+    public static String post(CookieStore cookieStore, String url, List<BasicHeader> headers,
+                              Collection<? extends NameValuePair> params) {
+        return post(cookieStore, url, headers, params, null);
     }
 
     public static JSONObject postJson(String url, Collection<? extends NameValuePair> params) {
@@ -366,24 +395,32 @@ public class HTTP {
      */
     public static byte[] getDown(String url) {
         HttpGet get = new HttpGet(url);
+        CloseableHttpResponse response = null;
         try {
-            return EntityUtils.toByteArray(doRequest(get, downloadRequestConfig()));
+            response = doRequest(get, downloadRequestConfig());
+            return EntityUtils.toByteArray(response.getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.getDown[%s] [%s]", url, Webs.E(e));
             return new byte[]{};
+        } finally {
+            closeResponse(response);
         }
     }
 
     public static F.Option<File> getDownFile(String url, String fileName, CookieStore cookie) {
         HttpGet get = new HttpGet(url);
+        CloseableHttpResponse response = null;
         try {
+            response = doRequest(get, getContextWithCookieStore(cookie), downloadRequestConfig());
             File file = new File(String.format("%s/%s", Constant.TMP, fileName));
-            IO.copy(doRequest(get, getContextWithCookieStore(cookie), downloadRequestConfig()).getContent(),
+            IO.copy(response.getEntity().getContent(),
                     new FileOutputStream(file));
             return F.Option.Some(file);
         } catch(IOException e) {
             Logger.warn("HTTP.getDownFile[%s] [%s]", url, Webs.E(e));
             return F.Option.None();
+        } finally {
+            closeResponse(response);
         }
     }
 
@@ -399,13 +436,16 @@ public class HTTP {
     public static byte[] postDown(CookieStore cookieStore, String url,
                                   Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
+        CloseableHttpResponse response = null;
         try {
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<>(params), "UTF-8"));
-            return EntityUtils.toByteArray(
-                    doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig()));
+            response = doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig());
+            return EntityUtils.toByteArray(response.getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.postDown[%s] [%s]", url, Webs.E(e));
             return new byte[]{};
+        } finally {
+            closeResponse(response);
         }
     }
 
@@ -423,6 +463,7 @@ public class HTTP {
                                 Map<String, F.T2<String, BufferedInputStream>> uploadFiles) {
         HttpPost post = new HttpPost(url);
         MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        CloseableHttpResponse response = null;
         try {
             for(NameValuePair nv : params) {
                 multipartEntity.addPart(nv.getName(), new StringBody(nv.getValue()));
@@ -434,12 +475,14 @@ public class HTTP {
                         new InputStreamBody(file._2, MimeTypes.getMimeType(file._1)));
             }
             post.setEntity(multipartEntity);
-            return EntityUtils.toString(
-                    doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig()));
+            response = doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig());
+            return EntityUtils.toString(response.getEntity());
         } catch(Exception e) {
             e.printStackTrace();
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
+        } finally {
+            closeResponse(response);
         }
     }
 
@@ -452,12 +495,16 @@ public class HTTP {
 
     public static String post(String url, String body, RequestConfig requestConfig) {
         HttpPost post = new HttpPost(url);
+        CloseableHttpResponse response = null;
         try {
             post.setEntity(new StringEntity(body, Charset.forName("UTF-8")));
-            return EntityUtils.toString(doRequest(post, requestConfig));
+            response = doRequest(post, requestConfig);
+            return EntityUtils.toString(response.getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
+        } finally {
+            closeResponse(response);
         }
     }
 
@@ -503,12 +550,5 @@ public class HTTP {
         }
     }
 
-    public static BasicClientCookie buildCrossDomainCookie(String cookieName, String cookieValue) {
-        BasicClientCookie cookie = new BasicClientCookie(cookieName, cookieValue);
-        String domain = String.format(".%s", models.OperatorConfig.getVal("domain"));
-        cookie.setDomain(domain);
-        cookie.setAttribute(ClientCookie.DOMAIN_ATTR, domain);
-        cookie.setAttribute(ClientCookie.PATH_ATTR, "/");
-        return cookie;
-    }
+
 }
