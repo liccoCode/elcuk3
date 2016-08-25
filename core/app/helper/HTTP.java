@@ -155,6 +155,7 @@ public class HTTP {
         return RequestConfig.custom()
                 .setSocketTimeout(timeout)
                 .setConnectTimeout(timeout)
+                .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(1))
                 .build();
     }
 
