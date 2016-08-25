@@ -126,7 +126,8 @@ public class Shipments extends Controller {
 
     /**
      * 通过出库计划创建运输单
-     * @param itemIds
+     *
+     * @param planIds
      */
     public static void shipPlanToShipment(List<Long> planIds) {
         if(planIds == null || planIds.size() <= 0)
@@ -137,6 +138,10 @@ public class Shipments extends Controller {
         }
 
         Shipment shipment = new Shipment().buildFromShipPlan(planIds);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            ShipItems.planIndex(new ShipPlanPost());
+        }
         flash.success("成功为 %s 个出库计划创建运输单 %s", planIds.size(), shipment.id);
         show(shipment.id);
     }
