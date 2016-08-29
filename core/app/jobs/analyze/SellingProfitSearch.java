@@ -5,7 +5,6 @@ import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.jobs.Job;
-import play.jobs.On;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.List;
  * Date: 8/13/13
  * Time: 3:06 PM
  */
-@On("0 20 0,7,15 * * ?")
+//@On("0 20 0,7,15 * * ?")
 public class SellingProfitSearch extends Job {
 
     private String RUNNING = "profitsellingsearch_running";

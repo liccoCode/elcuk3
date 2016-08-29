@@ -19,6 +19,7 @@ import java.util.List;
  * User: cary
  * Date: 5/10/14
  * Time: 4:25 PM
+ * @deprecated
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Activitis extends Controller {

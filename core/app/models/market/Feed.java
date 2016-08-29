@@ -1,15 +1,21 @@
 package models.market;
 
+import helper.Constant;
 import helper.DBUtils;
+import helper.HTTP;
 import models.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.NameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
+import play.Play;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -60,6 +66,32 @@ public class Feed extends Model {
      */
     public String memo;
 
+    public enum T {
+        SALE_AMAZON {
+            @Override
+            public String label() {
+                return "上架 Listing 到 Amazon";
+            }
+        },
+        ASSIGN_AMAZON_LISTING_PRICE {
+            @Override
+            public String label() {
+                return "更新 Listing 的 Price 属性";
+            }
+        },
+        FULFILLMENT_BY_AMAZON {
+            @Override
+            public String label() {
+                return "设置 Listing Fulfillment By Amazon";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    @Enumerated(EnumType.STRING)
+    public T type;
+
     public Feed() {
     }
 
@@ -67,6 +99,13 @@ public class Feed extends Model {
         this.content = content;
         this.fid = selling.sellingId;
         this.memo = memo;
+        this.byWho = User.username();
+    }
+
+    public Feed(String content, T type, Selling selling) {
+        this.content = content;
+        this.fid = selling.sellingId;
+        this.type = type;
         this.byWho = User.username();
     }
 
@@ -117,15 +156,15 @@ public class Feed extends Model {
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {
-        return new Feed(content, "上架 Listing 到 Amazon", selling).save();
+        return new Feed(content, T.SALE_AMAZON, selling).save();
     }
 
     public static Feed newAssignPriceFeed(String content, Selling selling) {
-        return new Feed(content, "更新 Listing 的 Price 属性", selling).save();
+        return new Feed(content, T.ASSIGN_AMAZON_LISTING_PRICE, selling).save();
     }
 
     public static Feed setFulfillmentByAmazonFeed(String content, Selling selling) {
-        return new Feed(content, "设置 Listing Fulfillment By Amazon", selling).save();
+        return new Feed(content, T.FULFILLMENT_BY_AMAZON, selling).save();
     }
 
     public static Feed updateSellingFeed(String content, Selling selling) {
@@ -156,5 +195,24 @@ public class Feed extends Model {
         } else {
             return "Feed 处理成功";
         }
+    }
+
+    public static Feed getFeedWithSellingAndType(Selling selling, T type) {
+        return Feed.find(
+                String.format("fid=? AND (type=? OR memo=?) %s ORDER BY createdAt DESC",
+                        Play.mode.isProd() ? "AND feedId IS NULL" : ""),
+                selling.sellingId,
+                type,
+                type.label()).first();
+    }
+
+    public boolean sameHours(Feed other) {
+        return this.createdAt.getTime() - other.createdAt.getTime() <= TimeUnit.HOURS.toMillis(1);
+    }
+
+    public void submit(List<NameValuePair> params) {
+        String response = HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed",
+                params);
+        if(StringUtils.isBlank(response)) Validation.addError("", "向 Rockend 提交请求: submit_feed 时出现了错误, 请稍后再重试!");
     }
 }

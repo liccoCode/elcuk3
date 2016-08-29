@@ -100,6 +100,7 @@ $ ->
     "AMAZON_UK_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
     "AMAZON_UK_HomeImprovement": ['BuildingMaterials', 'Electrical', 'Hardware', 'OrganizersAndStorage',
       'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
+    "AMAZON_UK_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_DE_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -112,6 +113,7 @@ $ ->
       'PlumbingFixtures', 'SecurityElectronics', 'Tools'],
     "AMAZON_DE_Games": ["Software", "SoftwareGames", "VideoGames", "VideoGamesAccessories", "VideoGamesHardware"],
     "AMAZON_DE_Lighting": ["LightBulbs", "LightsAndFixtures"],
+    "AMAZON_DE_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_US_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -133,6 +135,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_FR_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_ES_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -141,6 +144,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_ES_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_IT_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -149,6 +153,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_IT_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_JP_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -157,6 +162,7 @@ $ ->
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
       "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_JP_Home": ['BedAndBath', 'FurnitureAndDecor', 'Home'],
 
     "AMAZON_CA_Computers": ["ComputerComponent", "ComputerDriveOrStorage", "NotebookComputer",
       "PersonalComputer", "Printer", "Scanner", "VideoProjector"],
@@ -164,27 +170,36 @@ $ ->
       "CameraOtherAccessories", "CameraPowerSupply", "CarElectronics",
       "ConsumerElectronics", "DigitalPictureFrame", "GpsOrNavigationSystem", "Headphones",
       "Phone", "PhoneAccessory", "PhotographicStudioItems", "PortableAvDevice", "PowerSuppliesOrProtection",
-      "RemoteControl", "Speakers", "Television", "camerabagsandcases"]
+      "RemoteControl", "Speakers", "Television", "camerabagsandcases"],
+    "AMAZON_CA_Home": ['Art', 'BedAndBath', 'FurnitureAndDecor', 'Home', 'Kitchen', 'OutdoorLiving', 'SeedsAndPlants']
   }
 
   # 模板类型与 Feed Product Type 的组合使用
   $(document).on('adjust', '#feedProductType', (r) ->
     $feedProductType = $("#feedProductType")
-    value = $feedProductType.val()
-    $feedProductType.empty()
-    templateType = $('#templateType').val()
-    market = $('#market').val()
-    fpkey = market + "_" + templateType
+    $templateType = $('#templateType')
+    $market = $('#market')
+    return if _.isEmpty($market.val()) || _.isEmpty($templateType.val())
 
-    feedTypes = feedProductTypeMap[fpkey]
-    #循环数组，给selectd的option赋值
-    _.each(feedTypes, (value) ->
-      $feedProductType.append("<option value='#{value}'>#{value}</option>")
+    feedTypes = feedProductTypeMap["#{$market.val()}_#{$templateType.val()}"]
+    $feedProductType.empty()
+
+    if _.isEmpty(feedTypes)
+      noty({
+        text: "#{$market.val()} 市场暂不支持 #{$templateType.val()} 模板, 如有需要请联系开发人员添加模板.",
+        type: 'error',
+        timeout: 5000
+      })
+      return
+
+    _.each(feedTypes, (f) ->
+      $feedProductType.append("<option value='#{f}'>#{f}</option>")
     )
-    $feedProductType.val(value) if value
-    #显示和隐藏hardwarePlatformHome
-    if templateType is "Games" then $("#hardwarePlatformHome").show("slow")
-    else $("#hardwarePlatformHome").hide("slow")
+
+    if templateType is "Games"
+      $("#hardwarePlatformHome").show("slow")
+    else
+      $("#hardwarePlatformHome").hide("slow")
   )
 
   # 市场 下拉项变化 feedProductType 跟着变化
