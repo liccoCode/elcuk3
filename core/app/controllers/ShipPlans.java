@@ -95,7 +95,7 @@ public class ShipPlans extends Controller {
         render(plan);
     }
 
-    public static void update(String id, ShipPlan plan, String shipmentId) {
+    public static void update(Long id, ShipPlan plan, String shipmentId) {
         ShipPlan manager = ShipPlan.findById(id);
         manager.update(plan, shipmentId);
         if(Validation.hasErrors()) {
@@ -103,7 +103,7 @@ public class ShipPlans extends Controller {
             render("ShipPlans/show.html", plan);
         }
         flash.success("成功修改采购计划!", id);
-        redirect("/ShipPlan/index");
+        redirect("/ShipPlans/index");
     }
 
     /**
