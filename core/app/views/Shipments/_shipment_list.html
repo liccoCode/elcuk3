@@ -1,17 +1,19 @@
 <table class="table table-condensed table-bordered" id="shipmentTable">
   <tr>
     <th style="width:2%"><input type="checkbox" class="checkbox_all" value="0"/></th>
-    <th style="width:10% ">#</th>
-    <th style="width:15%">Track No.</th>
+    <th style="width:8% ">#</th>
+    <th style="width:14%">Track No.</th>
+    <th style="width:6%">状态</th>
     <th style="width:10%">运输商</th>
     <th style="width:5%">国际快递</th>
-    <th style="width:10%">运输方式</th>
-    <th style="width:10%">去往仓库</th>
-    <th style="width:10%">状态</th>
-    <th style="width:8%">预计开始时间</th>
-    <th style="width:8%">创建时间</th>
-    <th style="width:8%">预计到库时间</th>
-    <th style="width:8%">创建者</th>
+    <th style="width:6%">运输方式</th>
+    <th style="width:8%">去往仓库</th>
+    <th style="width:7%">预计开始时间</th>
+    <th style="width:7%">实际运输时间</th>
+    <th style="width:7%">预计到库时间</th>
+    <th style="width:7%">实际到库时间</th>
+    <th style="width:7%">创建时间</th>
+    <th style="width:5%">创建者</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
@@ -28,14 +30,16 @@
       #{/list}
       <span class="badge badge-info">${ship.itemsNum}</span>
     </td>
+    <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>${ship.cname}</td>
     <td>${ship.iExpressName}</td>
     <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
     <td>${ship.wname}</td>
-    <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
-    <td>#{time_tooltip time:ship.createDate/}</td>
+    <td>#{time_tooltip time:ship.dates.beginDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
+    <td>#{time_tooltip time:ship.dates.inbondDate/}</td>
+    <td>#{time_tooltip time:ship.createDate/}</td>
     <td>${ship.uname}</td>
   </tr>
 

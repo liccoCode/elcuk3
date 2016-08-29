@@ -35,6 +35,8 @@ public class ShipPlanPost extends Post<ShipPlan> {
     public long whouseId;
     public Shipment.T shipType;
     public String search;
+    public boolean isHaveNoShipment = false;
+    public String centerId;
 
     public ShipPlanPost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -65,6 +67,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
                 .append(" LEFT JOIN sp.selling s")
                 .append(" LEFT JOIN sp.product pd")
                 .append(" LEFT JOIN sp.fba f")
+                .append(" LEFT JOIN sp.shipItems si ")
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -102,6 +105,10 @@ public class ShipPlanPost extends Post<ShipPlan> {
             sbd.append(" AND sp.shipType=? ");
             params.add(this.shipType);
         }
+        if(isHaveNoShipment) {
+            sbd.append(" AND si.id IS NULL ");
+        }
+
         sbd.append(" ORDER BY sp.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }

@@ -50,22 +50,28 @@
         <td><a href="@{Products.show(plan.product?.sku)}" target="_blank">${plan.product?.sku}</a></td>
         <td><a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a></td>
         <td>${plan.product?.abbreviation}</td>
-        <td></td>
+        <td>
+            #{if plan.unit}
+            ${plan.unit.attrs.price}
+            #{/if}
+          #{else }
+        ${item.showSkuPrice()}
+        #{/else}
+        </td>
         <td>${plan.outboundRecord()?.clearanceType?.label()}</td>
         <td>${plan.whouse.name}</td>
-
         <td>${plan.fba?.shipmentId}</td>
         <td>${plan.fba?.centerId}</td>
         <td>${plan.planQty}/${plan.qty}</td>
-        <td></td>
-        <td></td>
+        <td>${item.recivedQty}</td>
+        <td>${item.adjustQty}</td>
         <td>#{time_tooltip time:plan.planShipDate/}</td>
         <td>#{time_tooltip time:plan.planArrivDate/}</td>
-        <td></td>
-        <td>${item.totalWeight()}</td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>${plan.totalBoxNum()}</td>
+        <td>${plan.totalWeight()}</td>
+        <td>${plan.totalVolume()}</td>
+        <td>${plan.creator?.username}</td>
+        <td>${item.showName()}</td>
         <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>
       </tr>
     #{/if}
@@ -80,7 +86,8 @@
               </label>
             </td>
           #{/if}
-        <td></td>
+        <td><a target="_blank" href="@{Deliveryments.show(item.unit.deliveryment?.id)}#${item.unit.id}">${item.unit.id}</a>
+        </td>
         <td>${item.unit()?.isOut?.label()}</td>
         <td>${item.unit()?.sku}</td>
         <td>${item.unit()?.sid}</td>

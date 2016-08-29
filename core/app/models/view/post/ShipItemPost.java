@@ -33,11 +33,8 @@ public class ShipItemPost extends Post<ShipItem> {
     }
 
     public boolean isHaveShipment = false;
-
     public String dateType = "createDate";
-
     public Long whouseId;
-
     public String centerId;
 
 
@@ -50,6 +47,11 @@ public class ShipItemPost extends Post<ShipItem> {
                 .append("<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
+
+        if(whouseId != null) {
+
+
+        }
 
         if(!this.isHaveShipment)
             sql.append(" AND si.shipment IS NULL");

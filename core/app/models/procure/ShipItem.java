@@ -220,14 +220,61 @@ public class ShipItem extends GenericModel {
      *
      * @return
      */
-    public float totalWeight() {
-        if(this.unit != null) {
-            return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
-        } else {
-            return this.qty * (this.plan.product.weight == null ? 0 : this.plan.product.weight);
+    public Double totalWeight() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.weight() + out.lastBox.weight();
         }
+        return null;
     }
 
+
+    public Integer totalBoxNum() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.boxNum + out.lastBox.boxNum;
+        }
+        return null;
+    }
+
+    public Double totalVolume() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.volume() + out.lastBox.volume();
+        }
+        return null;
+    }
+
+    /**
+     * 仓库对接人
+     *
+     * @return
+     */
+    public String showName() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            if(out.handler != null)
+                return out.handler.username;
+        }
+        return null;
+    }
+
+    /**
+     * 最新采购价
+     * @return
+     */
+    public Float showSkuPrice() {
+        if(this.plan != null) {
+            ProcureUnit unit = ProcureUnit.find("product.sku=?", this.plan.product.sku).first();
+            if(unit != null ){
+                return unit.attrs.price;
+            }
+        }
+        return null;
+    }
 
     /**
      * 根据运输项目关联的采购计划, 从缓存的 AnalyzeDTO 中获取 TurnOver

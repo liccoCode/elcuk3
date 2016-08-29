@@ -41,7 +41,11 @@ public class ElcukConfig extends Model {
         SHIP_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map(Shipment.T.SEA.name().toLowerCase(), "海运")
                         .put(Shipment.T.AIR.name().toLowerCase(), "空运")
-                        .put(Shipment.T.EXPRESS.name().toLowerCase(), "快递").build());
+                        .put(Shipment.T.EXPRESS.name().toLowerCase(), "快递--优惠渠道")
+                        .put(Shipment.T.EXPRESS_ECO.name().toLowerCase(), "快递--经济渠道")
+                        .put(Shipment.T.EXPRESS_FAST.name().toLowerCase(), "快递--快速渠道")
+                        .put(Shipment.T.DEDICATED_LINE.name().toLowerCase(), "专线")
+                        .build());
 
         DAY_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map("atport", "运输到港").put("clearance", "清关").put("pick", "提货")
@@ -65,7 +69,7 @@ public class ElcukConfig extends Model {
                     ElcukConfig config = ElcukConfig.config(key, 0);
                     Logger.info("key: %s", key);
                     if(!config.exist()) {
-                        config.calFullName();
+                        config.calFullName(marketEntry.getKey(), shipTypeEntry.getKey(), dayTypeEntry.getKey());
                         config.save();
                     }
                 }
@@ -92,10 +96,9 @@ public class ElcukConfig extends Model {
         return val;
     }
 
-    public void calFullName() {
-        String[] keys = this.name.split("_");
+    public void calFullName(String market_key, String ship_key,String dayType_key) {
         this.fullName = String.format("%s %s %s",
-                MARKETS.get(keys[0]), SHIP_TYPES.get(keys[1]), DAY_TYPES.get(keys[2]));
+                MARKETS.get(market_key), SHIP_TYPES.get(ship_key), DAY_TYPES.get(dayType_key));
         this.save();
     }
 

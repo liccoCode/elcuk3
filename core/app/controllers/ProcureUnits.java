@@ -363,10 +363,6 @@ public class ProcureUnits extends Controller {
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
         newUnit.attrs.qty = 0;
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(unit.sku);
-        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
-        renderArgs.put("skus", J.json(skusToJson._2));
-        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         render(unit, newUnit);
     }

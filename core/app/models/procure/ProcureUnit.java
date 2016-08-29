@@ -684,6 +684,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
+        this.shipmentId = unit.shipmentId;
         // 2
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.INSHIPMENT, STAGE.DONE).contains(this.stage)) {
             this.changeShipItemShipment(shipmentId);
@@ -1693,7 +1694,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public Integer inboundQty() {
         InboundRecord record = this.inboundRecord();
-        if(record != null) {
+        if(record != null && record.state == InboundRecord.S.Inbound) {
             return record.qty;
         }
         return null;
