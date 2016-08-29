@@ -552,7 +552,7 @@ public class ShipItem extends GenericModel {
         if(this.plan != null) {
             OutboundRecord outboundRecord = this.plan.outboundRecord();
             if(outboundRecord != null) {
-                return outboundRecord.mainBox.weight() + outboundRecord.lastBox.weight();
+                return this.plan.totalWeight();
             }
         }
         return this.caluTotalWeightByCheckTask();
@@ -567,10 +567,7 @@ public class ShipItem extends GenericModel {
         if(this.plan != null) {
             OutboundRecord outboundRecord = this.plan.outboundRecord();
             if(outboundRecord != null) {
-                Integer boxNumSum = 0;
-                if(outboundRecord.mainBox.boxNum != null) boxNumSum += outboundRecord.mainBox.boxNum;
-                if(outboundRecord.lastBox.boxNum != null) boxNumSum += outboundRecord.lastBox.boxNum;
-                return boxNumSum;
+                return this.plan.totalBoxNum();
             }
         }
         return this.caluTotalUnitByCheckTask();
@@ -585,7 +582,7 @@ public class ShipItem extends GenericModel {
         if(this.plan != null) {
             OutboundRecord outboundRecord = this.plan.outboundRecord();
             if(outboundRecord != null) {
-                return outboundRecord.mainBox.volume() + outboundRecord.lastBox.volume();
+                return this.plan.totalVolume();
             }
         }
         return this.caluTotalVolumeByCheckTask();

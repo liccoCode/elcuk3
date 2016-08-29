@@ -339,7 +339,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void setPeriod() {
         if(this.product.cooperators().size() > 0 && this.cooperator != null) {
             Long cid = this.cooperator.id;
-            CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", cid, this.sku).first();
+            CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", cid, this.product.sku).first();
             this.period = cooperItem.period;
         }
 
