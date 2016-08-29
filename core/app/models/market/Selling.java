@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Entity
 @DynamicUpdate
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
 
     private static final long serialVersionUID = -4124213853478159984L;
