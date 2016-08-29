@@ -62,3 +62,4 @@ server '192.168.1.170', user: 'root', roles: %w{app}
 #     auth_methods: %w(publickey password)
 #     # password: 'please use keys'
 #   }
+set :ssh_options, {}
