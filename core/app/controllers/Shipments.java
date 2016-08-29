@@ -453,7 +453,7 @@ public class Shipments extends Controller {
         String shipType = ship.type.name();
         Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
         for(ShipItem item : ship.items) {
-            String centerId = item.unit().fba.centerId;
+            String centerId = item.get(String.class, "fba.centerId");
             if(!fbaGroupUnits.containsKey(centerId))
                 fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
             fbaGroupUnits.get(centerId).add(item.unit());
@@ -483,20 +483,5 @@ public class Shipments extends Controller {
         Map<String, String> dates = new HashMap<>();
         dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
-    }
-
-    /**
-     * 创建出库
-     */
-    @Check("outboundrecords.index")
-    public static void outbound(List<String> shipmentId) {
-        if(shipmentId != null && !shipmentId.isEmpty()) {
-            for(String sid : shipmentId) {
-                Shipment shipment = Shipment.findById(sid);
-                shipment.outbound();
-            }
-        }
-        flash.success("创建出库成功!");
-        redirect("/OutboundRecords/index");
     }
 }

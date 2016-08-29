@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.DBUtils;
+import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -182,8 +183,14 @@ public class ShipItem extends GenericModel {
     public void updateSellingFNSku() {
         if(StringUtils.isNotBlank(this.fulfillmentNetworkSKU)) {
             if(!this.fulfillmentNetworkSKU.equals(this.unit.selling.fnSku)) {
-                this.unit().selling.fnSku = this.fulfillmentNetworkSKU;
-                this.unit().selling.save();
+                ProcureUnit unit = this.unit();
+                if(unit != null) {
+                    Selling selling = unit.selling;
+                    if(selling != null) {
+                        selling.fnSku = this.fulfillmentNetworkSKU;
+                        selling.save();
+                    }
+                }
             }
         }
     }
@@ -212,7 +219,7 @@ public class ShipItem extends GenericModel {
         this.shipment = null;
         ProcureUnit unit = this.unit();
         this.unit = null;
-        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        return new F.T2<>(this.<ShipItem>delete(), unit);
     }
 
     /**
@@ -264,12 +271,13 @@ public class ShipItem extends GenericModel {
 
     /**
      * 最新采购价
+     *
      * @return
      */
     public Float showSkuPrice() {
         if(this.plan != null) {
             ProcureUnit unit = ProcureUnit.find("product.sku=?", this.plan.product.sku).first();
-            if(unit != null ){
+            if(unit != null) {
                 return unit.attrs.price;
             }
         }
@@ -286,10 +294,10 @@ public class ShipItem extends GenericModel {
         if(dtos == null || dtos.size() == 0)
             return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
         for(AnalyzeDTO dto : dtos) {
-            if(!dto.fid.equals(this.unit().sid)) continue;
+            if(!dto.fid.equals(this.get(String.class, "selling.sellingId"))) continue;
             return dto.getTurnOverT4();
         }
-        return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+        return new F.T4<>(0f, 0f, 0f, 0f);
     }
 
     /**
@@ -298,7 +306,7 @@ public class ShipItem extends GenericModel {
      * @return
      */
     public float totalDeclaredValue() {
-        return this.qty * this.unit().product.declaredValue;
+        return this.qty * this.get(Float.class, "product.declaredValue");
     }
 
     public static List<ShipItem> sameFBAShipItems(String shipmentId) {
@@ -334,7 +342,7 @@ public class ShipItem extends GenericModel {
         for(ShipItem itm : items) {
             itm.shipment = shipment;
             itm.save();
-            itm.unit().flushTask();
+            itm.flushUnitTask();
         }
     }
 
@@ -347,7 +355,7 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;
-        this.unit().flushTask();
+        this.flushUnitTask();
         this.save();
     }
 
@@ -455,12 +463,19 @@ public class ShipItem extends GenericModel {
     }
 
     public List<CheckTask> checkTasks() {
-        return CheckTask.find("units=? ORDER BY creatat DESC", this.unit()).fetch();
+        ProcureUnit unit = this.unit();
+        if(unit == null) return new ArrayList<>();
+        return CheckTask.find("units=? ORDER BY creatat DESC", unit).fetch();
     }
 
     public String showDeliverymentId() {
         ShipItem shipItem = ShipItem.findById(this.id);
-        return shipItem.unit().deliveryment.id;
+        ProcureUnit unit = this.unit();
+        if(unit != null) {
+            return unit.deliveryment.id;
+        } else {
+            return null;
+        }
     }
 
     public String showDeclare() {
@@ -477,7 +492,7 @@ public class ShipItem extends GenericModel {
         StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");
         sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
         sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
-        sql.append(" WHERE p.product_sku = '" + this.unit().product.sku + "'");
+        sql.append(" WHERE p.product_sku = '" + this.get(String.class, "product.sku") + "'");
         sql.append(" AND t.templates_id IN " + JpqlSelect.inlineParam(ids));
         sql.append(" AND t.isDeclare = true ");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
@@ -589,5 +604,24 @@ public class ShipItem extends GenericModel {
             }
         }
         return this.caluTotalVolumeByCheckTask();
+    }
+
+    /**
+     * fba
+     * product
+     * selling
+     *
+     * @param clazz
+     * @param attr
+     * @param <T>
+     * @return
+     */
+    public <T> T get(Class<T> clazz, String attr) {
+        return Reflects.get(this.plan != null ? this.plan : this.unit, clazz, attr);
+    }
+
+    public void flushUnitTask() {
+        ProcureUnit unit = this.unit();
+        if(unit != null) unit.flushTask();
     }
 }

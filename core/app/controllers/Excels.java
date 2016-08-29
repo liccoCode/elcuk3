@@ -572,11 +572,13 @@ public class Excels extends Controller {
         notFoundIfNull(ship);
         if(ship.items.isEmpty()) renderText("运输单没有运输项(采购计划 Or 出货计划)!");
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
-        String countryCode = ship.items.get(0).unit().fba.fbaCenter.countryCode;
-        DeclareDTO dto = DeclareDTO.changeCounty(countryCode);
+        String countryCode = ship.items.get(0).get(String.class, "fba.fbaCenter.countryCode");
+        DeclareDTO dto = DeclareDTO.changeCounty(StringUtils.isBlank(countryCode) ? "" : countryCode);
         String issueDate = Dates.date2Date();
-        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s%s%s%s.xls",
-                DATE_FORMATTER.format(new Date()), ship.items.get(0).unit().fba.centerId, ship.type.label(), "报关要素"));
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("%s%s%s%s.xls",
+                        DATE_FORMATTER.format(new Date()), ship.items.get(0).get(String.class, "fba.centerId"),
+                        ship.type.label(), "报关要素"));
         render(invoiceNo, ship, dto, issueDate);
     }
 

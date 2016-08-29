@@ -11,6 +11,7 @@ import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -161,10 +162,17 @@ public class ProcuresHelper extends JavaExtensions {
      * @return
      */
     public static String overdue(ShipItem itm) {
-        if(itm.unit().attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
+        Date planShipDate = null;
+        if(itm.plan != null) {
+            planShipDate = itm.plan.planShipDate;
+        } else {
+            planShipDate = itm.unit.attrs.planShipDate;
+        }
+        if(planShipDate != null && planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime()) {
             return "#F2DEDE";
-        else
+        } else {
             return "#FFFFFF";
+        }
     }
 
     /**
