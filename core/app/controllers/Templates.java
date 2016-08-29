@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import models.User;
 import models.product.Template;
+import models.product.TemplateAttribute;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -52,7 +53,7 @@ public class Templates extends Controller {
 
 
     public static void update(Template temp) {
-        if(!Template.exist(temp.id)) {
+        if(!temp.exist()) {
             flash.error(String.format("Template %s 不存在", temp.name));
             redirect("/Templates/show");
         }
@@ -101,12 +102,12 @@ public class Templates extends Controller {
         redirect("/templates/show/" + id);
     }
 
-    public static void saveDeclare(Long id, List<String> isDeclare) {
-        validation.required(isDeclare);
-        Template temp = Template.findById(id);
-        if(Validation.hasErrors()) render("Templates/show.html", temp);
-        temp.saveDeclare(id, isDeclare);
-        flash.success("保存成功");
+    public static void saveDeclare(Long id, List<TemplateAttribute> templateAttributes) {
+        for(TemplateAttribute templateAttribute : templateAttributes) {
+            TemplateAttribute manager = TemplateAttribute.findById(templateAttribute.id);
+            manager.updateDeclare(templateAttribute.isDeclare);
+        }
+        flash.success("更新成功!");
         redirect("/templates/show/" + id);
     }
 

@@ -9,11 +9,9 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,11 +34,11 @@ public class Template extends Model {
     /**
      * 模板所拥有的属性
      */
-    @ManyToMany(cascade = CascadeType.PERSIST)
-    public List<Attribute> attributes;
+    @OneToMany(mappedBy = "template", cascade = CascadeType.MERGE)
+    public List<TemplateAttribute> templateAttributes;
 
     /**
-     * 模板属于哪些Category
+     * 模板属于哪些 Category
      */
     @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Category> categorys;
@@ -58,13 +56,7 @@ public class Template extends Model {
      */
     public Date createDate = new Date();
 
-    /**
-     * 判断是否存在
-     *
-     * @param id
-     * @return
-     */
-    public static boolean exist(Long id) {
+    public boolean exist() {
         return Template.count("id=?", id) > 0;
     }
 
@@ -72,9 +64,9 @@ public class Template extends Model {
      * 删除模板需要进行检查
      */
     public void deleteAttribute() {
-        if(this.attributes.size() > 0) {
+        if(!this.templateAttributes.isEmpty()) {
             Validation.addError("", String.format("%s 模板拥有 %s 个 Attribute 关联，无法删除",
-                    this.name, this.attributes.size()));
+                    this.name, this.templateAttributes.size()));
         }
         if(this.categorys.size() > 0) {
             Validation.addError("", String.format("%s 模板拥有 %s 个 Category 关联，无法删除",
@@ -90,11 +82,26 @@ public class Template extends Model {
      * @param attributeIds
      */
     public void bindAttributes(List<Long> attributeIds) {
-        for(Long attributeId : attributeIds){
-            StringBuilder sql = new StringBuilder("insert into Template_Attribute (templates_id, attributes_id, isDeclare) " +
-                    "values (" + this.id + "," + attributeId  + ", true)");
-            DBUtils.execute(sql.toString());
+        for(Long attributeId : attributeIds) {
+            Attribute attribute = Attribute.findById(attributeId);
+            this.addAttribute(attribute);
         }
+    }
+
+    public void addAttribute(Attribute attribute) {
+        TemplateAttribute templateAttribute = new TemplateAttribute(this, attribute);
+        if(templateAttribute.exists()) {
+            throw new FastRuntimeException(String.format("模板[%s] 已经拥有属性[%s]!", this.name, attribute.name));
+        }
+        templateAttribute.save();
+    }
+
+    public void removeAttribute(Attribute attribute) {
+        TemplateAttribute templateAttribute = TemplateAttribute.findByTemplateAndAttribute(this, attribute);
+        if(!templateAttribute.exists()) {
+            throw new FastRuntimeException(String.format("模板[%s] 未关联上属性[%s], 无法删除!", this.name, attribute.name));
+        }
+        templateAttribute.delete();
     }
 
     /**
@@ -105,40 +112,21 @@ public class Template extends Model {
     public void unBindAttributes(List<Long> attributeIds) {
         List<Attribute> attributes = Attribute.find("id IN" + JpqlSelect.inlineParam(attributeIds)).fetch();
         for(Attribute attribute : attributes) {
-            this.attributes.remove(attribute);
+            this.removeAttribute(attribute);
         }
-        this.save();
     }
 
-    public void saveDeclare(Long id, List<String> isDeclares) {
+    public void saveDeclare(List<String> isDeclares) {
         StringBuilder sql = new StringBuilder(
                 "UPDATE Template_Attribute a SET a.isDeclare = false WHERE a.templates_id = " + id);
         DBUtils.execute(sql.toString());
+
         for(String isDeclare : isDeclares) {
             sql = new StringBuilder("UPDATE Template_Attribute a SET a.isDeclare = true WHERE ");
             sql.append("a.templates_id = " + id + " AND a.attributes_id = " + isDeclare.split("_")[0]);
             DBUtils.execute(sql.toString());
         }
     }
-
-    public List<TemplateAttribute> findAttr() {
-        List<TemplateAttribute> list = new ArrayList<TemplateAttribute>();
-        StringBuilder sql = new StringBuilder("SELECT a.templates_id, a.attributes_id, a.isDeclare ");
-        sql.append(" FROM Template_Attribute a ");
-        sql.append(" WHERE a.templates_id = ? ");
-        List<Object> params = new ArrayList<Object>();
-        params.add(this.id);
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
-        for(Map<String, Object> row : rows) {
-            TemplateAttribute templateAttribute = new TemplateAttribute();
-            templateAttribute.template = Template.findById(row.get("templates_id"));
-            templateAttribute.attribute = Attribute.findById(row.get("attributes_id"));
-            templateAttribute.isDeclare = Boolean.valueOf(row.get("isDeclare").toString());
-            list.add(templateAttribute);
-        }
-        return list;
-    }
-
 
     /**
      * 模板绑定 Category
@@ -170,9 +158,9 @@ public class Template extends Model {
      * @return
      */
     public List<Attribute> getUnBindAttributes() {
-        List<Attribute> attributes = Attribute.all().fetch();
-        if(this.attributes == null) return attributes;
-        CollectionUtils.filter(attributes, new FilterUnBindAttributes(this.attributes));
+        List<Attribute> attributes = Attribute.all().fetch(200);
+        if(this.templateAttributes == null) return attributes;
+        CollectionUtils.filter(attributes, new FilterUnBindAttributes(this.templateAttributes));
         return attributes;
     }
 
@@ -189,9 +177,9 @@ public class Template extends Model {
     }
 
     private static class FilterUnBindAttributes implements Predicate {
-        private List<Attribute> existAttributes;
+        private List<TemplateAttribute> existAttributes;
 
-        private FilterUnBindAttributes(List<Attribute> existAttributes) {
+        private FilterUnBindAttributes(List<TemplateAttribute> existAttributes) {
             this.existAttributes = existAttributes;
         }
 

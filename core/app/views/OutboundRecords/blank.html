@@ -6,8 +6,13 @@
 #{errorMsgs /}
 #{flash_alert/}
 
+#{info_row}
+<ul>
+  <li>当出库类别为<strong style="color:red">其他出库</strong>时, 出库对象需要自定义<strong style="color:red">[手动输入并回车确认]</strong>.</li>
+  <li>当出库类别为<strong style="color:red">其他出库</strong>时, 去往国家允许自定义<strong style="color:red">[手动输入并回车确认]</strong>.</li>
+</ul>
+#{/info_row}
 #{form @OutboundRecords.create(), method:'POST', id: 'new_outbound_record'}
-<h4 style="text-align:center" class="alert alert-info">添加其他出库</h4>
 <table class="table table-condensed table-bordered">
   <tr>
     <th><span style="color:red">*</span>物料编码</th>

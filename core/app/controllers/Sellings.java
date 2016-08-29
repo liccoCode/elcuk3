@@ -16,6 +16,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
@@ -95,7 +96,7 @@ public class Sellings extends Controller {
     }
 
     public static void findSellingBySkuAndMarket(String sku, String market) {
-        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku+"%", M.valueOf(market)).fetch();
+        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku + "%", M.valueOf(market)).fetch();
         List<String> sids = new ArrayList<String>();
         for(Selling s : list) sids.add(s.sellingId);
         renderJSON(J.json(sids));
@@ -434,6 +435,7 @@ public class Sellings extends Controller {
 
     /**
      * 模糊匹配selling
+     *
      * @param name
      */
     public static void sameSelling(String name) {
@@ -443,4 +445,15 @@ public class Sellings extends Controller {
         renderJSON(J.json(list));
     }
 
+    /**
+     * 调用 Rockend 来重新上架
+     */
+    public static void rePushFeedsToAmazon(String sellingId) {
+        Selling s = Selling.findById(sellingId);
+        notFoundIfNull(s, "未找到相关 Selling!");
+        s.rePushFeedsToAmazon();
+        Webs.errorToFlash(flash);
+        if(!Validation.hasErrors()) flash.success("成功提交请求到 Rockend, 请等待 2~5 分钟后查看执行结果!");
+        selling(sellingId);
+    }
 }

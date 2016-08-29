@@ -126,6 +126,7 @@ public class Orderr extends GenericModel {
      * 订单创建时间
      */
     public Date createDate;
+    public Date updateDate;
 
     /**
      * 订单的付款时间
@@ -404,7 +405,7 @@ public class Orderr extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("1h")
+    @Cached("2h")
     public static DashBoard frontPageOrderTable(int days) {
         DashBoard dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
         if(dashBoard != null) return dashBoard;
@@ -418,7 +419,7 @@ public class Orderr extends GenericModel {
         final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
-        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        List<OrderrVO> vos = new ArrayList<>();
         List<List<OrderrVO>> results = Promises.forkJoin(new Promises.DBCallback<List<OrderrVO>>() {
             @Override
             public List<OrderrVO> doJobWithResult(M m) {
@@ -454,7 +455,7 @@ public class Orderr extends GenericModel {
                 dashBoard.shippeds(key, vo);
         }
         dashBoard.sort();
-        Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+        Cache.add(Orderr.FRONT_TABLE, dashBoard, "2h");
         return dashBoard;
     }
 

@@ -250,7 +250,7 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     * 返回可以用来添加的 ProcureUnits
      *
      * @return
      */

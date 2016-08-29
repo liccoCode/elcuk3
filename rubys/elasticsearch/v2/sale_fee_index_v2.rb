@@ -49,19 +49,18 @@ class SaleFeeActor
 })
 
   def bulk_submit(rows)
-    submit(rows) do |row|
-      row[:order_id].gsub!(/-/, '_')
+   submit(rows) do |row|
+      if row[:order_id].nil?
+        row[:order_id] = ""
+      else
+        row[:order_id].gsub!(/-/, '_')
+      end
       row
     end
   end
 end
 
-SQL = %q(SELECT fee.id, oi.createDate `date`, oi.selling_sellingId selling_id, 
-  case when fee.product_sku is not null then fee.product_sku when fee.orderitem_sku is not null then fee.orderitem_sku else  oi.product_sku end sku, 
-    oi.market, fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId order_id
-  FROM SaleFee fee
-  LEFT JOIN OrderItem oi ON fee.order_orderId=oi.order_orderId
-  WHERE oi.product_sku IS NOT NULL AND oi.market IS NOT NULL AND date>=?)
+SQL = %q(SELECT fee.md5_id as id,fee.date `date`,fee.transaction_type,case when product_sku is not null then (select selling_sellingid from OrderItem o where o.order_orderid=fee.order_orderid and o.product_sku=fee.product_sku) else (select selling_sellingid from OrderItem o where o.order_orderid=fee.order_orderid limit 1)  end selling_id, case when product_sku is not null then  product_sku else (select product_sku from OrderItem o where o.order_orderid=fee.order_orderid limit 1) end sku ,fee.market,fee.type_name fee_type, fee.usdCost cost_in_usd, fee.cost, fee.currency, fee.qty quantity, fee.order_orderId order_id FROM SaleFee fee WHERE fee.date>=? and fee.date<=? and fee.transaction_type is not null)
 #SQL << " LIMIT 31000"
 SaleFeeActor.new.init_mapping
-process(dataset: DB[SQL, Time.parse('2012-01-01')].stream, actor: SaleFeeActor.pool(size: 6))
+process(dataset: DB[SQL, Time.now - 60 * 86400, Time.now].stream, actor: SaleFeeActor.pool(size: 6))
