@@ -1,7 +1,10 @@
 package models.view.dto;
 
 /**
- * Created by licco on 15/10/29.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/10/29
+ * Time: 4:50 PM
  */
 public class DeclareDTO {
 

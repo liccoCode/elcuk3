@@ -37,6 +37,7 @@ set :linked_dirs, fetch(:linked_dirs, []).push('core/logs')
 # set :keep_releases, 5
 set :keep_releases, 3
 
+set :ssh_options, {keys: %w(/home/dev/.ssh/dev.key)}
 
 # 注册 play 命令
 SSHKit.config.command_map[:play] = "/opt/play-1.4.2/play"
@@ -52,7 +53,7 @@ namespace :deploy do
       end
     end
   end
-  
+
   # 在完成发布之后
   after 'deploy:publishing', "conf:application"
   after 'deploy:published', :restart

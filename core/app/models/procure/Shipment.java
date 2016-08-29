@@ -13,6 +13,7 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
 import models.whouse.*;
+import mws.FBA;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -670,7 +671,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.creater == null) this.creater = User.current();
         this.save();
         //更新货代仓库
-        for(ShipItem item : this.items) item.unit().flushTask();
+        for(ShipItem item : this.items) item.flushUnitTask();
     }
 
     public void setTrackNo(String trackNo) {
@@ -768,12 +769,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.items.size() <= 0)
             Validation.addError("", "没有运输项目可以运输.");
         for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
-                    ProcureUnit.STAGE.CLOSE).contains(itm.unit().stage))
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit().id + " 还没有交货.");
+            if(itm.unit != null) {
+                if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
+                        ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage)) {
+                    Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
+                }
+                if(!itm.unit.isPlaced) {
+                    Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
+                }
+            } else if(itm.plan != null) {
+                if(!itm.plan.isLock()) {
+                    Validation.addError("", "需要运输的出库计划 #" + itm.plan.id + " 还没已出库.");
+                }
+            }
 
-            if(!itm.unit().isPlaced)
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit().id + " 还没抵达货代.");
         }
         if(this.type == T.EXPRESS && this.internationExpress == null)
             Validation.addError("", "请填写运输单的国际快递商");
@@ -789,10 +798,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(datetime == null) datetime = new Date();
 
         for(ShipItem shipItem : this.items) {
-            if(shipItem.unit().fba != null) {
+            FBAShipment fba = shipItem.get(FBAShipment.class, "fba");
+            if(fba != null) {
                 // 在测试环境下也不能标记 SHIPPED
-                shipItem.unit().fba.updateFBAShipmentRetry(3,
-                        Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+                fba.updateFBAShipmentRetry(3, Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
             }
         }
 
@@ -1143,16 +1152,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : this.items) {
             if(PaymentUnit.count("feeType=? AND shipItem=?", transportDuty, itm) > 0) continue;
             PaymentUnit fee = new PaymentUnit();
-            //TODO 这里本应该为 HKD 但现在业务为 CNY 所以暂时以 CNY 存在
             fee.currency = Currency.CNY;
-            fee.unitPrice = Webs.scalePointUp(4, (float) (itm.unit().product.declaredValue * 6.35 * 0.2));
+            fee.unitPrice = Webs.scalePointUp(4, (float) (itm.get(Long.class, "product.declaredValue") * 6.35 * 0.2));
             fee.unitQty = itm.qty;
             fee.cooperator = this.cooper;
             itm.produceFee(fee, transportDuty);
             if(Validation.hasErrors()) return;
 
             fee.memo = String.format("%s %s = %s(申报价) * 6.35 * 0.2 * %s(运输数量)",
-                    fee.currency.symbol(), fee.amount(), itm.unit().product.declaredValue, itm.qty);
+                    fee.currency.symbol(), fee.amount(), itm.get(Long.class, "product.declaredValue"), itm.qty);
             fee.save();
         }
     }
@@ -1327,11 +1335,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public List<FBAShipment> fbas() {
-        List<FBAShipment> fbas = new ArrayList<FBAShipment>();
+        List<FBAShipment> fbas = new ArrayList<>();
         for(ShipItem item : this.items) {
-            if(item.unit().fba == null) continue;
-            if(fbas.contains(item.unit().fba)) continue;
-            fbas.add(item.unit().fba);
+            FBAShipment fba = item.get(FBAShipment.class, "fba");
+            if(fba == null) continue;
+            if(fbas.contains(fba)) continue;
+            fbas.add(fba);
         }
         return fbas;
     }
@@ -1669,10 +1678,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public String fetchCenterId() {
         for(ShipItem shipItem : this.items) {
-            if(shipItem.unit() != null) {
-                if(shipItem.unit().fba != null) {
-                    return shipItem.unit().fba.centerId.toUpperCase();
-                }
+            FBAShipment fba = shipItem.get(FBAShipment.class, "fba");
+            if(fba != null) {
+                return fba.centerId.toUpperCase();
             }
         }
         return null;
@@ -1748,36 +1756,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.validate();
         Validation.current().valid(this);
-    }
-
-    /**
-     * 初始化出库信息(仅用于方便遗留的老的运输单进行创建出库记录)
-     */
-    public void outbound() {
-        if(this.items == null || this.items.isEmpty()) return;
-        Cooperator cooperator = Cooperator.mainShipper();
-        for(ShipItem item : this.items) {
-            if(item.plan != null || item.unit == null ||
-                    OutboundRecord.checkExistsWithUnitId(item.unit().id.toString())) {
-                continue; //排除掉通过出库计划创建的运输项 或者 没有关联上采购计划 或者 采购计划已经存在出库记录的
-            }
-            //通过运输单的运输项来创建的出库记录与手动创建的出库记录基本上是类似的
-            OutboundRecord record = new OutboundRecord();
-            record.planQty = item.qty;
-            record.qty = item.qty;
-            if(cooperator != null) record.targetId = cooperator.id.toString();
-            if(item.unit().fba != null) {
-                //根据 FBA 属性来尝试获取入库记录中选择的目标仓库
-                ProcureUnit unit = item.unit();
-                if(unit != null) {
-                    InboundRecord inboundRecord = InboundRecord.findInboundRecordByFBA(item.unit.fba.shipmentId);
-                    if(inboundRecord != null) this.whouse = inboundRecord.targetWhouse;
-                }
-            }
-            record.stockObj = new StockObj(item.unit().product.sku);
-            record.stockObj.setAttributes(item);
-            record.save();
-        }
     }
 
     public static T[] shipTypes() {

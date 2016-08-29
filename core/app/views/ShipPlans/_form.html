@@ -48,12 +48,25 @@
 </tr>
 <tr>
   <th><span style="color:red">*</span>运输方式</th>
-  <td colspan="4">
+  <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
       <input type="radio" name="plan.shipType" value="${t.name()}" ${ t == plan.shipType ? 'checked':'unchecked'}>${t.detail()}
     </label>
   #{/list}
+  </td>
+  <td colspan="2">
+    <div class="pull-left">
+    #{list items: plan.relateShipment()}
+      <div>
+        <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      </div>
+    #{/list}
+    </div>
+    <div class="pull-right">
+      <input type="button" class="btn btn-mini btn-primary" id="resetShipCondition" value="Reset" rel="popover"
+             content="重置当前采购计划用来加载运输单的条件">
+    </div>
   </td>
 </tr>
 <tr>
