@@ -56,13 +56,17 @@
   #{/list}
   </td>
   <td colspan="2">
-  #{list items: plan.relateShipment()}
-    <div>
-      <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
-      <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
-      <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
+    <div class="pull-left">
+    #{list items: plan.relateShipment()}
+      <div>
+        <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      </div>
+    #{/list}
     </div>
-  #{/list}
+    <div class="pull-right">
+      <input type="button" class="btn btn-mini btn-primary" id="resetShipCondition" value="Reset" rel="popover"
+             content="重置当前采购计划用来加载运输单的条件">
+    </div>
   </td>
 </tr>
 <tr>

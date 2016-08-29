@@ -19,6 +19,11 @@ $ ->
         shipment.html(html)
         LoadMask.unmask()
       )
+  ).on('click', '#resetShipCondition', (e) ->
+    $("input[name='plan.planShipDate']").val('')
+    $("input[name='plan.planArrivDate']").val('')
+    $("[name=shipmentId]").attr('checked', false)
+    $("[name='plan.shipType']").attr('checked', false)
   )
 
   $('#shipments').on('change', '[name=shipmentId]', (e) ->
