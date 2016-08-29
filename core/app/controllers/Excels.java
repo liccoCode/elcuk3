@@ -193,7 +193,8 @@ public class Excels extends Controller {
                 }
             }
 
-            if(ship.type.name().equals("EXPRESS")) {
+            if(ship.type.name().equals("EXPRESS") || ship.type.name().equals("EXPRESS_ECO")
+                    || ship.type.name().equals("EXPRESS_FAST")) {
                 render("Excels/shipmentDetailsForExpress.xls", dtos, month, day);
             } else {
                 render(dtos, month, day, totalQty, totalUnit, totalWeight, totalVolume);
