@@ -48,11 +48,20 @@
 </tr>
 <tr>
   <th><span style="color:red">*</span>运输方式</th>
-  <td colspan="4">
+  <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
       <input type="radio" name="plan.shipType" value="${t.name()}" ${ t == plan.shipType ? 'checked':'unchecked'}>${t.detail()}
     </label>
+  #{/list}
+  </td>
+  <td colspan="2">
+  #{list items: plan.relateShipment()}
+    <div>
+      <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
+      <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
+    </div>
   #{/list}
   </td>
 </tr>
