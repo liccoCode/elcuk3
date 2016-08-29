@@ -48,7 +48,7 @@
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>
           <input type="text" class="input-medium" name="p.search" value="${p.search}" rel="popover"
-                 content="可搜索 ID、SellingId、SKU、FBA、产品名称" placement="bottom">
+                 content="可搜索 ID、采购计划 ID、SellingId、SKU、FBA、产品名称" placement="bottom">
           <input type="hidden" name="p.page" value="${p.page}">
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
@@ -79,6 +79,7 @@
           <th>#</th>
           <th>状态</th>
           <th>操作</th>
+          <th>采购计划</th>
           <th>Selling</th>
           <th>Sku</th>
           <th style="width:10%;">产品名称</th>
@@ -106,12 +107,14 @@
           </td>
           <td>${plan.state.label()}</td>
           <td>
-              #{if plan.state.name() == 'Pending'}
-                <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-primary">修改</a>
+            <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-info">
+            ${plan.isLock() ? '查看' : '修改'}
+            </a>
+          </td>
+          <td>
+              #{if plan.unit}
+                <a href="/ProcureUnits/index?p.search=${plan.unit.id}">${plan.unit.id}</a>
               #{/if}
-              #{else }
-                <a href="@{ShipPlans.show(plan.id)}" target="_blank" class="btn btn-mini btn-info">查看</a>
-              #{/else}
           </td>
           <td>
             <a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a>
