@@ -443,8 +443,8 @@ public class MWSUtils {
 
         CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
         item.setSKU(selling.merchantSKU);
-        item.setQuantityShipped(BigInteger.valueOf(fbaShipment.boxQty));
-        item.setQuantityInCase(BigInteger.valueOf(fbaShipment.boxQty));
+        item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.num));
+        item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.num));
 
         CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
         //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
@@ -453,7 +453,7 @@ public class MWSUtils {
 
         CartonContentsRequest request = new CartonContentsRequest();
         request.setShipmentId(fbaShipment.shipmentId);
-        request.setNumCartons(BigInteger.valueOf(fbaShipment.boxNum));//箱数
+        request.setNumCartons(BigInteger.valueOf(fbaShipment.dto.boxNum));//箱数
         request.getCarton().add(carton);
 
         return JaxbUtil.convertToXml(request);
