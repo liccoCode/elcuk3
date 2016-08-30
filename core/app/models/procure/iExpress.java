@@ -91,8 +91,9 @@ public enum iExpress {
     FEDEX {
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("https://www.fedex.com/fedextrack/index" +
-                    ".html?tracknumbers=%s&locale=zh_CN&cntry_code=cn", tracNo);
+            return String.format(
+                    "https://www.fedex.com/apps/fedextrack/index.html?tracknumbers=%s&locale=zh_CN&cntry_code=cn",
+                    tracNo);
         }
 
         @Override
