@@ -48,3 +48,8 @@ $ ->
       tr.after("<tr><td colspan='14'><div><h4 class='text-info'>Comment</h4>#{memo}</div><hr><div id='div#{format_id}'></div></td></tr>")
       $("#div" + format_id).load("/Shipments/showProcureUnitList", id: shipment_id)
   )
+
+  $("#today").click(->
+    $("input[name='p.from']").data('dateinput').setValue(new Date())
+    $("input[name='p.to']").data('dateinput').setValue(new Date())
+  )
