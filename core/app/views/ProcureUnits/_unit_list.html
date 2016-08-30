@@ -1,6 +1,4 @@
-#{set 'moreScripts'}
-    #{script 'procureunits/_unit_list.coffee'/}
-#{/set}
+#{script 'procureunits/_unit_list.coffee'/}
 #{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered">
   <tr>
@@ -202,7 +200,6 @@
                         <a href="javascript:void(0)" class="btn btn-small btn-warning" id="replaceUnitFBA"
                            data-unit-id="${unit.id}" title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
                         </a>
-                          #{render 'Deliveryments/fba_carton_contents.html'/}
                       </div>
                     #{/power.ck}
                 #{/if}

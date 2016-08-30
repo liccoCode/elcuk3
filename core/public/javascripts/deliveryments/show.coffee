@@ -43,9 +43,14 @@ $ ->
     else
       window.open("/FBAs/boxLabel?id=#{$btn.data('id')}&boxNumber=#{boxNumber}", "_blank")
   ).on('click', '#deployFBAs', (e) ->
-    $('#fba_carton_contents_modal').modal('show')
+    $("#fba_carton_contents_modal").removeData("unit-source").modal('show')
   ).on('click', '#sumbitDeployFBAs', (e) ->
-    submitForm($("#deployFBAs"))
+    $modal = $("#fba_carton_contents_modal")
+    return if $modal.data('unit-source')
+    $trigger = $("#deployFBAs")
+    form = $("<form method='post' action='#{$trigger.data('url')}'></form>")
+    form.hide().append($trigger.parents('form').find('input[name="pids"]:checked')).append($modal.find(":input").clone()).appendTo('body')
+    form.submit().remove()
   )
 
   # 将字符串转化成Dom元素
