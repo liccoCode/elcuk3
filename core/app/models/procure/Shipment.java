@@ -547,7 +547,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
 
         List<ProcureUnit> procureUnits = multipleUnitValidate(units);
-
         ProcureUnit firstProcureUnit = procureUnits.get(0);
         Shipment.T firstShipType = firstProcureUnit.shipType;
         Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
@@ -564,7 +563,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             earlyPlanBeginDate = new Date(
                     Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
         }
-
         this.type = firstShipType;
 
         for(ProcureUnit unit : procureUnits) {
@@ -572,7 +570,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 Validation.addError("", "采购单仓库为空");
                 break;
             }
-
             if(this.type == T.EXPRESS) {
                 if(!firstProcureUnit.whouse.id.equals(unit.whouse.id)) {
                     Validation.addError("", "快递运输, 仓库不一样不可以创建到一个运输单");
@@ -585,7 +582,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 }
             }
         }
-
         if(Validation.hasErrors()) return this;
 
         this.id = Shipment.id();
@@ -685,7 +681,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param unit
      */
     public synchronized void addToShip(ProcureUnit unit) {
-        if(this.isShipPlanShipment()) Validation.addError("", "该运输单的运输项中含有出库计划!");
+        ShipPlan shipPlan = unit.shipPlan();
+        if(shipPlan != null) Validation.addError("", "采购计划拥有出库计划, 请使用出库计划来创建运输项目!");
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!unit.whouse.equals(this.whouse))
@@ -708,7 +705,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param plan
      */
     public synchronized void addToShip(ShipPlan plan) {
-        if(this.isProcureUnitShipment()) Validation.addError("", "该运输单的运输项中含有采购计划!");
+        if(plan.unit != null && plan.unit.shipItems.size() > 0) {
+            Validation.addError("", "出库计划关联的采购计划已经拥有运输项目, 不可以重新创建.");
+        }
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!plan.whouse.equals(this.whouse))
@@ -722,24 +721,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         ShipItem shipitem = new ShipItem(plan);
         shipitem.shipment = this;
         this.items.add(shipitem.<ShipItem>save());
-    }
-
-    /**
-     * 运输项是否为采购计划
-     *
-     * @return
-     */
-    public boolean isProcureUnitShipment() {
-        return this.items != null && !this.items.isEmpty() && this.items.get(0).unit != null;
-    }
-
-    /**
-     * 运输项是否为出库计划
-     *
-     * @return
-     */
-    public boolean isShipPlanShipment() {
-        return this.items != null && !this.items.isEmpty() && this.items.get(0).plan != null;
     }
 
     public void comment(String cmt) {
