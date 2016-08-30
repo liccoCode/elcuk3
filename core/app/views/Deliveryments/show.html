@@ -7,9 +7,7 @@
     #{script 'analyzes/timeline.coffee'/}
     #{script 'deliveryments/show.coffee'/}
 #{/set}
-
 #{errorMsgs /}
-
 #{flash_alert /}
 
 #{set isPending: dmt.state == models.procure.Deliveryment.S.PENDING/}
@@ -153,8 +151,8 @@
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 
-#{include 'Deliveryments/box_number_model.html'/}
-#{include 'Deliveryments/fba_carton_contents.html'/}
+#{render 'Deliveryments/box_number_model.html'/}
+#{render 'Deliveryments/fba_carton_contents.html'/}
 </form>
 *{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
 *{#{power.ck 'excels.deliveryment'}}*
@@ -311,7 +309,6 @@
 <div class="row-fluid">
   <div class="span12">
     <input type="hidden" name="dmt.id" value="${dmt.id}">
-    <!-- TODO: 进行异步加载(采取搜索的方式) -->
       #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan'/}
   </div>
 </div>
