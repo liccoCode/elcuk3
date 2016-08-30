@@ -498,7 +498,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unit
      */
-    public ProcureUnit split(ProcureUnit unit) {
+    public ProcureUnit split(ProcureUnit unit, String shipmentId) {
         int originQty = this.qty();
         if(unit.attrs.planQty != null) {
             if(unit.attrs.planQty > originQty)
@@ -517,29 +517,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit = new ProcureUnit(this);
             newUnit.attrs.planQty = unit.attrs.planQty;
         }
+        newUnit.shipmentId = shipmentId;
         newUnit.stage = STAGE.DELIVERY;
-        if(unit.selling == null) {
-            if(unit.shipType == null) {
-                newUnit.selling = null;
-                newUnit.shipType = null;
-            }
+        if(unit.selling == null && unit.shipType == null) {
             newUnit.manualValidate();
         } else {
             newUnit.selling = unit.selling;
             newUnit.whouse = unit.whouse;
             newUnit.validate();
         }
-
-
         if(Validation.hasErrors()) return newUnit;
+
         // FBA 变更
-        if(this.fba != null)
-            this.fba.updateFBAShipment(null);
+        if(this.fba != null) this.fba.updateFBAShipment(null);
 
         // 原采购计划数量变更
         this.attrs.planQty = originQty - newUnit.attrs.planQty;
-        if(this.attrs.qty != null)
+        if(this.attrs.qty != null) {
             this.attrs.qty = this.attrs.planQty;
+        }
         this.shipItemQty(this.qty());
         this.save();
 
@@ -558,9 +554,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.comment = unit.comment;
         newUnit.creator = unit.handler;
         newUnit.save();
-        List<Shipment> shipments = Shipment.similarShipments(
-                newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
-        if(unit.selling != null && shipments.size() > 0) shipments.get(0).addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
                 .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
@@ -1835,6 +1828,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             ShipPlan plan = this.shipPlan();
             if(plan != null) plan.remove();
         }
+        this.save();
+    }
+
+    public void doCreate(String shipmentId) {
+        this.handler = User.current();
+        this.creator = this.handler;
+        this.clearanceType = DeliverPlan.CT.Self;
+        this.selling = Selling.findById(this.selling.sellingId);
+        this.shipmentId = shipmentId;
+        if(this.product != null) this.sku = this.product.sku;
+        this.validate();
+        if(Validation.hasErrors()) return;
         this.save();
     }
 }

@@ -49,13 +49,17 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index", "indexForMarket"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("logs", ElcukRecord.records(
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
                         "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay",
                         "procureunit.tailpay"), 50));
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("categories", User.getTeamCategorys(User.current()));
+    }
+
+    @Before(only = {"index", "indexForMarket", "blank", "create", "edit", "update", "splitUnit", "doSplitUnit"})
+    public static void beforeWhouses() {
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
     }
 
     @Before(only = {"index"})
@@ -121,14 +125,7 @@ public class ProcureUnits extends Controller {
 
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
-        List<Whouse> whouses = new ArrayList<>();
-        if(StringUtils.isNotBlank(sid)) {
-            unit.selling = Selling.findById(sid);
-            whouses = Whouse.findByAccount(unit.selling.account);
-        } else {
-            whouses = Whouse.findByType(Whouse.T.FBA);
-        }
-        render(unit, whouses, sid);
+        render(unit, sid);
     }
 
 
@@ -224,28 +221,11 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
-    public static void create(ProcureUnit unit, String isNeedApply, String to_page) {
-        unit.handler = User.findByUserName(Secure.Security.connected());
-        unit.creator = unit.handler;
-        unit.clearanceType = DeliverPlan.CT.Self;
-        if(unit.product != null) unit.sku = unit.product.sku;
-
+    public static void create(ProcureUnit unit, String shipmentId, String to_page) {
+        unit.doCreate(shipmentId);
         if(Validation.hasErrors()) {
-            List<Whouse> whouses;
-            if(StringUtils.isNotBlank(unit.sid)) {
-                unit.selling = Selling.findById(unit.sid);
-                whouses = Whouse.findByAccount(unit.selling.account);
-            } else {
-                whouses = Whouse.findByType(Whouse.T.FBA);
-            }
-            render("ProcureUnits/blank.html", unit, whouses);
+            render("ProcureUnits/blank.html", unit);
         }
-
-        if(unit.isCheck != 1) unit.isCheck = 0;
-        if(isNeedApply != null && isNeedApply.equals("need")) {
-            unit.stage = ProcureUnit.STAGE.APPROVE;
-        }
-        unit.save();
         if(StringUtils.isNotBlank(to_page) && to_page.trim().equals("analysis")) {
             Analyzes.index();
         } else {
@@ -257,12 +237,8 @@ public class ProcureUnits extends Controller {
     public static void edit(long id, String type) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
-        List<Whouse> whouses = new ArrayList<>();
-        if(unit.selling != null) {
-            whouses = Whouse.findByAccount(unit.selling.account);
-        }
         unit.setPeriod();
-        render(unit, oldPlanQty, whouses, type);
+        render(unit, oldPlanQty, type);
     }
 
     public static void delete(long id) {
@@ -284,13 +260,7 @@ public class ProcureUnits extends Controller {
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
-            List<Whouse> whouses;
-            if(unit.selling != null) {
-                whouses = Whouse.findByAccount(unit.selling.account);
-            } else {
-                whouses = Whouse.findByType(Whouse.T.FBA);
-            }
-            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
+            render("ProcureUnits/edit.html", unit, oldPlanQty);
         }
         flash.success("成功修改采购计划!", id);
         edit(id, "edit");
@@ -322,7 +292,7 @@ public class ProcureUnits extends Controller {
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcurePost p = new ProcurePost();
-            p.search = "id:" + id;
+            p.search = id + "";
             index(p);
         }
         flash.success("删除成功, 所关联的运输项目也成功删除.");
@@ -339,7 +309,6 @@ public class ProcureUnits extends Controller {
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
         newUnit.attrs.qty = 0;
-        renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         render(unit, newUnit);
     }
 
@@ -350,16 +319,14 @@ public class ProcureUnits extends Controller {
      * @param newUnit
      */
     @Check("procures.dosplitunit")
-    public static void doSplitUnit(long id, ProcureUnit newUnit) {
+    public static void doSplitUnit(long id, ProcureUnit newUnit, String shipmentId) {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
-        ProcureUnit nUnit = unit.split(newUnit);
+        ProcureUnit nUnit = unit.split(newUnit, shipmentId);
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findAll();
-            render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
+            render("ProcureUnits/splitUnit.html", unit, newUnit);
         }
-
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
         ProcureUnits.indexForMarket(new ProcurePost());
     }
