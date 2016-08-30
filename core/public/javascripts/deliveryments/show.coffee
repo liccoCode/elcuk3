@@ -1,14 +1,13 @@
 window.jQuery = window.$
 $ ->
-  $(document).on('click', "#delunit_form_submit, #deployFBAs, #downloadProcureunitsOrder",
+  $(document).on('click', "#delunit_form_submit,  #downloadProcureunitsOrder",
     (e) ->
       $btn = $(@)
       return false unless confirm("确认 #{$btn.text().trim()} ?")
       submitForm($btn)
-  ).on("blur", "input[name='boxNumbers']", (e) ->
-# 确保用户填写的是大于零的数字
+  ).on("blur", "input[name='boxNumbers'], [name=boxNum], [name=boxQty], [name=boxWeight], [name=boxLength], [name=boxWidth], [name=boxHeight]", (e) ->
     $input = $(@)
-    if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
+    if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1") # 确保用户填写的是大于零的数字
   ).on('click', '#sumbitDownloadFBAZIP', (e) ->
     submitForm($("#downloadFBAZIP"))
     $('#box_number_modal').modal('hide')
@@ -43,8 +42,40 @@ $ ->
       noty({text: '请正确输入采购单元箱数', type: 'error'})
     else
       window.open("/FBAs/boxLabel?id=#{$btn.data('id')}&boxNumber=#{boxNumber}", "_blank")
+  ).on('click', '#deployFBAs', (e) ->
+    $modal = $('#fba_carton_contents_modal')
+    if processModalTableLines($modal)
+      $modal.modal('show')
+  ).on('click', '#sumbitDeployFBAs', (e) ->
+    submitForm($("#deployFBAs"))
+    $('#fba_carton_contents_modal').modal('hide')
   )
 
+  # 填充数据行到 Modal 中的 Table
+  processModalTableLines = (modal) ->
+    $tabel = modal.find("#fba_carton_contents_table")
+    $tabel.find("tr").not(":eq(0)").remove()
+
+    units = [] # [{id: 1, boxNum: 2}]
+    for checkbox in $('input[name="pids"]:checked')
+      units.push({id: checkbox.val(), boxNum: checkbox.attr("boxNum")})
+
+    if _.isEmpty(units)
+      noty({text: '请选择采购单元', type: 'error'})
+      false
+    else
+      for unit in units
+        tr = "<tr>" +
+          "<td>#{unit.id}</td>" +
+          "<td><div class='input-append'><input type='text' class='input-mini' name='boxNum' value='#{unit.boxNum}' maxlength='3'/></div></td>" +
+          "<td><div class='input-append'><input type='text' class='input-mini' name='boxQty' value='' maxlength='3'/></div></td>" +
+          "<td><div class='input-append'><input type='text' class='input-mini' name='boxWeight' value='' maxlength='3'/></div></td>" +
+          "<td><div class='input-append'><input type='text' class='input-mini' name='boxLength' value='' maxlength='3'/></div></td>" +
+          "<td><div class='input-append'><input type='text' class='input-mini' name='boxWidth' value='' maxlength='3'/></div></td>" +
+          "<td><div class='input-append'><input type='text' class='input-mini' name='boxHeight' value='' maxlength='3'/></div></td>" +
+          "</tr>"
+        $tabel.append(tr)
+      true
   # 将字符串转化成Dom元素
   parseDom1 = (arg) ->
     objE = document.createElement("table")
