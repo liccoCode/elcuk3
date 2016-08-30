@@ -119,30 +119,6 @@ public class ProcureUnits extends Controller {
         }
     }
 
-    /**
-     * 明天 后天 大后天 计划视图
-     */
-    public static void planView(Date date) {
-        ProcurePost p = new ProcurePost(ProcureUnit.STAGE.DELIVERY);
-        p.dateType = "attrs.planDeliveryDate";
-        p.from = date;
-        p.to = date;
-        ProcureUnits.index(p);
-    }
-
-    /**
-     * 发货时间为当天, 同时货物还没有抵达货代的采购计划
-     */
-    public static void noPlaced() {
-        ProcurePost p = new ProcurePost();
-        p.dateType = "attrs.planArrivDate";
-        p.from = new Date();
-        p.to = new Date();
-        p.isPlaced = ProcurePost.PLACEDSTATE.NOARRIVE;
-        ProcureUnits.index(p);
-    }
-
-
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         List<Whouse> whouses = new ArrayList<>();
