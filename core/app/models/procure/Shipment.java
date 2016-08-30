@@ -685,7 +685,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param unit
      */
     public synchronized void addToShip(ProcureUnit unit) {
-        if(this.isShipPlanShipment()) Validation.addError("", "该运输单的运输项中含有出库计划!");
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!unit.whouse.equals(this.whouse))
@@ -708,7 +707,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param plan
      */
     public synchronized void addToShip(ShipPlan plan) {
-        if(this.isProcureUnitShipment()) Validation.addError("", "该运输单的运输项中含有采购计划!");
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!plan.whouse.equals(this.whouse))
@@ -722,24 +720,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         ShipItem shipitem = new ShipItem(plan);
         shipitem.shipment = this;
         this.items.add(shipitem.<ShipItem>save());
-    }
-
-    /**
-     * 运输项是否为采购计划
-     *
-     * @return
-     */
-    public boolean isProcureUnitShipment() {
-        return this.items != null && !this.items.isEmpty() && this.items.get(0).unit != null;
-    }
-
-    /**
-     * 运输项是否为出库计划
-     *
-     * @return
-     */
-    public boolean isShipPlanShipment() {
-        return this.items != null && !this.items.isEmpty() && this.items.get(0).plan != null;
     }
 
     public void comment(String cmt) {
