@@ -1,13 +1,17 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
+import com.google.gson.annotations.Expose;
+import helper.J;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
 import models.market.Feed;
 import models.market.M;
 import models.market.Selling;
+import models.qc.CheckTaskDTO;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -169,35 +173,14 @@ public class FBAShipment extends Model {
      */
     public String title;
 
-    /**
-     * 箱数
-     */
-    public int boxNum;
+    @Transient
+    public CheckTaskDTO dto;
 
     /**
-     * 单箱个数
+     * FBA 箱信息
      */
-    public int boxQty;
-
-    /**
-     * 单箱重量
-     */
-    public double boxWeight;
-
-    /**
-     * 单箱长
-     */
-    public double boxLength;
-
-    /**
-     * 单箱宽
-     */
-    public double boxWidth;
-
-    /**
-     * 单箱高
-     */
-    public double boxHeight;
+    @Expose
+    public String fbaCartonContents;
 
     public Date createAt;
 
@@ -205,6 +188,20 @@ public class FBAShipment extends Model {
      * 关闭/取消 时间
      */
     public Date closeAt;
+
+    @PrePersist
+    public void setupFbaCartonContents() {
+        if(this.dto != null) {
+            this.fbaCartonContents = J.json(this.dto);
+        }
+    }
+
+    @PostLoad
+    public void setupDto() {
+        if(StringUtils.isNotBlank(this.fbaCartonContents)) {
+            this.dto = JSON.parseObject(this.fbaCartonContents, CheckTaskDTO.class);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -472,7 +469,7 @@ public class FBAShipment extends Model {
         if(trackNumbers == null || trackNumbers.isEmpty()) return null;
         NonPartneredSmallParcelPackageInputList inputList = new NonPartneredSmallParcelPackageInputList();
         List<NonPartneredSmallParcelPackageInput> member = new ArrayList<>();
-        for(int i = 0; i < this.boxNum; i++) {//有多少箱就填写多少个,时钟都填写第一个 tracking number
+        for(int i = 0; i < this.dto.boxNum; i++) {//有多少箱就填写多少个,时钟都填写第一个 tracking number
             member.add(new NonPartneredSmallParcelPackageInput(trackNumbers.get(0)));
         }
         inputList.setMember(member);

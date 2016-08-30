@@ -6,6 +6,7 @@ import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.qc.CheckTaskDTO;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import play.data.validation.Validation;
 import play.modules.pdf.PDF;
@@ -26,16 +27,20 @@ import static play.modules.pdf.PDF.renderPDF;
 public class FBAs extends Controller {
 
     @Check("fbas.deploytoamazon")
-    public static void deploysToAmazon(String deliveryId, List<Long> pids) {
+    public static void deploysToAmazon(String deliveryId,
+                                       List<Long> pids,
+                                       List<CheckTaskDTO> dtos) {
         if(pids == null || pids.size() == 0) {
-            Validation.addError("", "必须选择需要创建的采购计划");
+            Validation.addError("", "必须选择需要创建 FBA 的采购计划");
+        } else if(pids.size() != dtos.size()) {
+            Validation.addError("", "FBA 箱内信息的个数与采购计划的数量不一致");
         }
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             Deliveryments.show(deliveryId);
         }
 
-        ProcureUnit.postFbaShipments(pids);
+        ProcureUnit.postFbaShipments(pids, dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
@@ -57,14 +62,14 @@ public class FBAs extends Controller {
     }
 
     /**
-     * 更换FBA TODO:: 需要传递 FBA箱内包装数据 过来
+     * 更换FBA
      *
      * @param procureUnitId
      */
-    public static void changeFBA(Long procureUnitId) {
+    public static void changeFBA(Long procureUnitId, CheckTaskDTO dto) {
         ProcureUnit unit = ProcureUnit.findById(procureUnitId);
         unit.fba.removeFBAShipment();
-        unit.postFbaShipment();
+        unit.postFbaShipment(dto);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
