@@ -5,7 +5,9 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import models.market.Feed;
 import models.market.M;
+import models.market.Selling;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -166,6 +168,36 @@ public class FBAShipment extends Model {
      * Amazon FBA 上的 title
      */
     public String title;
+
+    /**
+     * 箱数
+     */
+    public int boxNum;
+
+    /**
+     * 单箱个数
+     */
+    public int boxQty;
+
+    /**
+     * 单箱重量
+     */
+    public double boxWeight;
+
+    /**
+     * 单箱长
+     */
+    public double boxLength;
+
+    /**
+     * 单箱宽
+     */
+    public double boxWidth;
+
+    /**
+     * 单箱高
+     */
+    public double boxHeight;
 
     public Date createAt;
 
@@ -407,6 +439,11 @@ public class FBAShipment extends Model {
         return this.units.get(0).selling.market;
     }
 
+    public Selling selling() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        return this.units.get(0).selling;
+    }
+
     public TransportDetailInput transportDetails(Shipment shipment) {
         TransportDetailInput input = new TransportDetailInput();
         switch(shipment.type) {
@@ -435,8 +472,8 @@ public class FBAShipment extends Model {
         if(trackNumbers == null || trackNumbers.isEmpty()) return null;
         NonPartneredSmallParcelPackageInputList inputList = new NonPartneredSmallParcelPackageInputList();
         List<NonPartneredSmallParcelPackageInput> member = new ArrayList<>();
-        for(String trackingId : trackNumbers) {
-            member.add(new NonPartneredSmallParcelPackageInput(trackingId));
+        for(int i = 0; i < this.boxNum; i++) {//有多少箱就填写多少个,时钟都填写第一个 tracking number
+            member.add(new NonPartneredSmallParcelPackageInput(trackNumbers.get(0)));
         }
         inputList.setMember(member);
         return inputList;
@@ -445,5 +482,10 @@ public class FBAShipment extends Model {
 
     private NonPartneredLtlDataInput ltlDataInput(Shipment shipment) {
         return new NonPartneredLtlDataInput(shipment.internationExpress.carrierName(this.market()), "       ");
+    }
+
+    public List<Feed> feeds() {
+        return Feed.find("fid=? AND type=? ORDER BY createdAt DESC", this.id, Feed.T.FBA_INBOUND_CARTON_CONTENTS)
+                .fetch();
     }
 }
