@@ -5,6 +5,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import com.google.gson.annotations.Expose;
 import helper.J;
+import helper.MWSUtils;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
@@ -14,6 +15,8 @@ import models.market.Selling;
 import models.qc.CheckTaskDTO;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
@@ -484,5 +487,31 @@ public class FBAShipment extends Model {
     public List<Feed> feeds() {
         return Feed.find("fid=? AND type=? ORDER BY createdAt DESC", this.id, Feed.T.FBA_INBOUND_CARTON_CONTENTS)
                 .fetch();
+    }
+
+    public FBAShipment doCreate() {
+        this.save();
+        if(this.dto != null) {
+            this.submitFbaInboundCartonContentsFeed();
+        }
+        return this;
+    }
+
+    public void submitFbaInboundCartonContentsFeed() {
+        Feed feed = new Feed(
+                MWSUtils.fbaInboundCartonContentsXml(this),
+                Feed.T.FBA_INBOUND_CARTON_CONTENTS,
+                this.id.toString()).save();
+        feed.submit(this.submitParams());
+    }
+
+    public List<NameValuePair> submitParams() {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
+        params.add(new BasicNameValuePair("market", this.market().name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("selling_id", this.selling().sellingId)); // 作用与哪一个 Selling
+        params.add(new BasicNameValuePair("type", "CreateListing"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.FBA_INBOUND_CARTON_CONTENTS.toString()));
+        return params;
     }
 }
