@@ -14,6 +14,10 @@
 <form action="@{Shipments.index()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
     <div class="span12">
+      <div class="inline">
+        <button id="today" class="btn"><i class="icon-search"></i> Today</button>
+      </div>
+
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
         <input type="date" name="p.from" value="${p.from.date()}">
