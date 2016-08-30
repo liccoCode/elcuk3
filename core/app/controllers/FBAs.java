@@ -22,14 +22,14 @@ import static play.modules.pdf.PDF.renderPDF;
  * Date: 11/29/12
  * Time: 11:38 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class FBAs extends Controller {
 
     @Check("fbas.deploytoamazon")
     public static void deploysToAmazon(String deliveryId, List<Long> pids) {
-        if(pids == null || pids.size() == 0)
+        if(pids == null || pids.size() == 0) {
             Validation.addError("", "必须选择需要创建的采购计划");
-
+        }
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             Deliveryments.show(deliveryId);
@@ -39,7 +39,6 @@ public class FBAs extends Controller {
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
-
             flash.success("选择的采购计划全部成功创建 FBA");
         }
         Deliveryments.show(deliveryId);
@@ -58,7 +57,8 @@ public class FBAs extends Controller {
     }
 
     /**
-     * 更换FBA
+     * 更换FBA TODO:: 需要传递 FBA箱内包装数据 过来
+     *
      * @param procureUnitId
      */
     public static void changeFBA(Long procureUnitId) {
