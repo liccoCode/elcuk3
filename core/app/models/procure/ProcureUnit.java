@@ -16,6 +16,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
+import models.qc.CheckTaskDTO;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -825,7 +826,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 通过 ProcureUnit 创建 FBA
      */
-    public synchronized FBAShipment postFbaShipment() {
+    public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
         FBAShipment fba = null;
         try {
             fba = FBA.plan(this.selling.account, this);
@@ -834,6 +835,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return null;
         }
         try {
+            fba.dto = dto;
             fba.state = FBA.create(fba);
             this.fba = fba.save();
             this.save();
@@ -1273,22 +1275,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 批量创建 FBA TODO:: 需要传递 FBA箱内包装数据 过来
+     * 批量创建 FBA
      *
      * @param unitIds
      */
-    public static void postFbaShipments(List<Long> unitIds) {
+    public static void postFbaShipments(List<Long> unitIds, List<CheckTaskDTO> dtos) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
-        if(units.size() != unitIds.size())
+        if(units.size() != unitIds.size() || units.size() != dtos.size()) {
             Validation.addError("", "加载的数量");
+        }
         if(Validation.hasErrors()) return;
 
-        for(ProcureUnit unit : units) {
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
             try {
                 if(unit.fba != null) {
                     Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
                 } else {
-                    unit.postFbaShipment();
+                    unit.postFbaShipment(dtos.get(i));
                 }
             } catch(Exception e) {
                 Validation.addError("", Webs.E(e));
