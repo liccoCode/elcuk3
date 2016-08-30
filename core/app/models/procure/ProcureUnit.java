@@ -1835,11 +1835,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.handler = User.current();
         this.creator = this.handler;
         this.clearanceType = DeliverPlan.CT.Self;
-        this.selling = Selling.findById(this.selling.sellingId);
         this.shipmentId = shipmentId;
         if(this.product != null) this.sku = this.product.sku;
-        this.validate();
-        if(Validation.hasErrors()) return;
         this.save();
     }
 }
