@@ -86,6 +86,15 @@
       <a href="@{Shipments.show(unit.shipmentId)}" target="_blank">${unit.shipmentId} (${unit.shipType?.label()})</a>
       <input type="button" class="btn btn-mini btn-primary" id="del_ship_type" name="unit.shipType" value="清除运输方式">
     #{/if}
+    #{else }
+        #{list items: unit.relateShipment()}
+          <div>
+            <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+            <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
+            <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
+          </div>
+        #{/list}
+    #{/else}
     </div>
   </td>
 </tr>

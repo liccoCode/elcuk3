@@ -3,8 +3,10 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.Dates;
+import helper.Reflects;
 import models.ElcukRecord;
 import models.market.Selling;
+import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.view.post.ShipPlanPost;
 import models.whouse.ShipPlan;
@@ -95,7 +97,7 @@ public class ShipPlans extends Controller {
         render(plan);
     }
 
-    public static void update(String id, ShipPlan plan, String shipmentId) {
+    public static void update(Long id, ShipPlan plan, String shipmentId) {
         ShipPlan manager = ShipPlan.findById(id);
         manager.update(plan, shipmentId);
         if(Validation.hasErrors()) {
@@ -103,7 +105,7 @@ public class ShipPlans extends Controller {
             render("ShipPlans/show.html", plan);
         }
         flash.success("成功修改采购计划!", id);
-        redirect("/ShipPlan/index");
+        redirect("/ShipPlans/index");
     }
 
     /**

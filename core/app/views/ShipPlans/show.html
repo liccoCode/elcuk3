@@ -6,7 +6,7 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @ShipPlans.create(), method: 'POST', id: 'update_shipplan'}
+#{form @ShipPlans.update(), method: 'POST', id: 'update_shipplan'}
 <div id="stockDiv"></div>
 <table class="table table-condensed table-bordered">
     #{render 'ShipPlans/_form.html', plan: plan, whouses: whouses/}
