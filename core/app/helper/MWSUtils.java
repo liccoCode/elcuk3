@@ -71,6 +71,12 @@ public class MWSUtils {
             public String toString() {
                 return "_POST_INVENTORY_AVAILABILITY_DATA_";
             }
+        },
+        FBA_INBOUND_CARTON_CONTENTS {
+            @Override
+            public String toString() {
+                return "_POST_FBA_INBOUND_CARTON_CONTENTS_";
+            }
         }
     }
 
