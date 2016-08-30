@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import com.google.gson.annotations.Expose;
+import helper.GTs;
 import helper.J;
 import helper.MWSUtils;
 import helper.Webs;
@@ -513,5 +514,9 @@ public class FBAShipment extends Model {
         params.add(new BasicNameValuePair("type", "CreateListing"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.FBA_INBOUND_CARTON_CONTENTS.toString()));
         return params;
+    }
+
+    public String feedsPage() {
+        return GTs.render("Feeds/_feed.html", GTs.newMap("feeds", this.feeds()).build());
     }
 }

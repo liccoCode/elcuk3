@@ -56,7 +56,7 @@
       <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${unit.cooperator?.cooperItem(unit.sku)?.memo}">${unit.sku}</a>
     </td>
     <td>
-    ${unit.fba?.shipmentId}
+    ${unit.fba?.shipmentId} <i class="icon-search" rel="popover" content="${unit.fba?.feedsPage?.raw()}"></i>
     </td>
     <td>
         #{if unit.deliveryment}
