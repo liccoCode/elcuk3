@@ -84,6 +84,12 @@ public class Feed extends Model {
             public String label() {
                 return "设置 Listing Fulfillment By Amazon";
             }
+        },
+        FBA_INBOUND_CARTON_CONTENTS {
+            @Override
+            public String label() {
+                return "提交 FBA 包装信息到 Amazon";
+            }
         };
 
         public abstract String label();
