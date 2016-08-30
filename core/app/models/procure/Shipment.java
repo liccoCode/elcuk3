@@ -682,7 +682,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public synchronized void addToShip(ProcureUnit unit) {
         ShipPlan shipPlan = unit.shipPlan();
-        if(shipPlan != null) Validation.addError("", "采购计划已经拥有出库计划, 请使用出库计划来关联运输单!");
+        if(shipPlan != null) Validation.addError("", "采购计划拥有出库计划, 请使用出库计划来创建运输项目!");
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!unit.whouse.equals(this.whouse))
@@ -705,6 +705,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param plan
      */
     public synchronized void addToShip(ShipPlan plan) {
+        if(plan.unit != null && plan.unit.shipItems.size() > 0) {
+            Validation.addError("", "出库计划关联的采购计划已经拥有运输项目, 不可以重新创建.");
+        }
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!plan.whouse.equals(this.whouse))
