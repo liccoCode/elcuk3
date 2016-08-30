@@ -837,7 +837,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         try {
             fba.dto = dto;
             fba.state = FBA.create(fba);
-            this.fba = fba.save();
+            this.fba = fba.doCreate();
             this.save();
             new ERecordBuilder("shipment.createFBA")
                     .msgArgs(this.id, this.sku, this.fba.shipmentId)
@@ -852,6 +852,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
+
 
     /**
      * 将 ProcureUnit 添加到/移出 采购单,状态改变
