@@ -10,6 +10,7 @@ import models.market.Account;
 import models.market.Feed;
 import models.market.M;
 import models.market.Selling;
+import models.procure.FBAShipment;
 import models.product.Attach;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
@@ -25,7 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 
@@ -340,6 +340,12 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
+    /**
+     * 生成设置价格的 XML
+     *
+     * @param selling
+     * @return
+     */
     public static String assignPriceXml(Selling selling) {
         AmazonEnvelope envelope = new AmazonEnvelope();
 
@@ -388,6 +394,12 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
+    /**
+     * 生成设置 Fulfillment By Amazon 的 XML
+     *
+     * @param selling
+     * @return
+     */
     public static String fulfillmentByAmazonXml(Selling selling) {
         AmazonEnvelope envelope = new AmazonEnvelope();
 
@@ -411,6 +423,34 @@ public class MWSUtils {
         message.setInventory(inventory);
         envelope.getMessage().add(message);
         return JaxbUtil.convertToXml(envelope);
+    }
+
+    /**
+     * 生成提交包装信息给 FBA 的XML
+     *
+     * @param fbaShipment
+     * @return
+     */
+    public static String fbaInboundCartonContentsXml(FBAShipment fbaShipment) {
+        Selling selling = fbaShipment.selling();
+        if(selling == null) return null;
+
+        CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
+        item.setSKU(selling.merchantSKU);
+        item.setQuantityShipped(BigInteger.valueOf(fbaShipment.boxQty));
+        item.setQuantityInCase(BigInteger.valueOf(fbaShipment.boxQty));
+
+        CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
+        //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
+        carton.setCartonId(fbaShipment.shipmentId);
+        carton.getItem().add(item);
+
+        CartonContentsRequest request = new CartonContentsRequest();
+        request.setShipmentId(fbaShipment.shipmentId);
+        request.setNumCartons(BigInteger.valueOf(fbaShipment.boxNum));//箱数
+        request.getCarton().add(carton);
+
+        return JaxbUtil.convertToXml(request);
     }
 
     public static boolean skipProductData(String templateType, String feedProductType) {
