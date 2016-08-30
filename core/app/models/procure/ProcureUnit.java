@@ -1272,6 +1272,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ProcureUnit.find("stage=?", stage).fetch();
     }
 
+    /**
+     * 批量创建 FBA TODO:: 需要传递 FBA箱内包装数据 过来
+     *
+     * @param unitIds
+     */
     public static void postFbaShipments(List<Long> unitIds) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
         if(units.size() != unitIds.size())
@@ -1575,6 +1580,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.delete();
     }
 
+    /**
+     * 计算推荐的箱数
+     * <p>
+     * (采购计划计划数/SKU 在供应商处维护的一箱的数量)
+     *
+     * @return
+     */
     public int recommendBoxNum() {
         CooperItem item = CooperItem.find("sku=? AND cooperator.id=?", this.sku, this.cooperator.id).first();
         int boxSize = (item == null ? 1 : item.boxSize);
