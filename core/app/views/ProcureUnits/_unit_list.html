@@ -1,3 +1,6 @@
+#{set 'moreScripts'}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
 #{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered">
   <tr>
@@ -183,7 +186,7 @@
                       分拆
                     </a>
                   #{/power.ck}
-                  <!-- 确认到货代处 -->
+                <!-- 确认到货代处 -->
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
                         <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
@@ -193,15 +196,16 @@
                       #{/ifnot}
                   #{/if}
               </div>
-              #{if unit.fba}
-                #{power.ck 'fbas.update'}
-                  <div class="btn-toolbar">
-                    <a href="@{FBAs.changeFBA(unit.id)}" class="btn btn-small btn-warning" data-disable-with='处理中...'
-                       title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
-                    </a>
-                  </div>
-                #{/power.ck}
-              #{/if}
+                #{if unit.fba}
+                    #{power.ck 'fbas.update'}
+                      <div class="btn-toolbar">
+                        <a href="javascript:void(0)" class="btn btn-small btn-warning" id="replaceUnitFBA"
+                           data-unit-id="${unit.id}" title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
+                        </a>
+                          #{render 'Deliveryments/fba_carton_contents.html'/}
+                      </div>
+                    #{/power.ck}
+                #{/if}
               <div class="btn-toolbar">
                   #{if unit.fba}
                     <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
