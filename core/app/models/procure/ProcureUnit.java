@@ -530,13 +530,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.validate();
         }
 
-        List<Shipment> shipments = Shipment
-                .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
 
         if(Validation.hasErrors()) return newUnit;
-        //无selling的手动单不做处理
-        Shipment shipment = null;
-        if(unit.selling != null && shipments.size() > 0) shipment = shipments.get(0);
         // FBA 变更
         if(this.fba != null)
             this.fba.updateFBAShipment(null);
@@ -553,8 +548,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         for(int i = 0; i < this.shipItems.size(); i++) {
             // 平均化, 包含除不尽的情况
             if(i == this.shipItems.size() - 1) {
-                this.shipItems.get(i).qty =
-                        this.qty() - (average * this.shipItems.size() - 1);
+                this.shipItems.get(i).qty = this.qty() - (average * this.shipItems.size() - 1);
             } else {
                 this.shipItems.get(i).qty = average;
             }
@@ -564,7 +558,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.comment = unit.comment;
         newUnit.creator = unit.handler;
         newUnit.save();
-        if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
+        List<Shipment> shipments = Shipment.similarShipments(
+                newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
+        if(unit.selling != null && shipments.size() > 0) shipments.get(0).addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
                 .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
