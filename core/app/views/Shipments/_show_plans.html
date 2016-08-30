@@ -8,13 +8,14 @@
       </label>
     </th>
   #{/if}
-    <th>出库Id</th>
+    <th>出库计划</th>
     <th>状态</th>
     <th>SKU</th>
     <th>selling</th>
     <th>产品名称</th>
     <th>最新采购价</th>
     <th>报关类型</th>
+    <th>供应商</th>
     <th>去往仓库</th>
     <th>FBA</th>
     <th>CenterId</th>
@@ -59,6 +60,7 @@
         #{/else}
         </td>
         <td>${plan.outboundRecord()?.clearanceType?.label()}</td>
+        <td>${plan.unit?.cooperator?.name}</td>
         <td>${plan.whouse.name}</td>
         <td>${plan.fba?.shipmentId}</td>
         <td>${plan.fba?.centerId}</td>
@@ -94,6 +96,7 @@
         <td>${item.unit()?.product?.abbreviation}</td>
         <td>${item.unit()?.attrs?.price}</td>
         <td></td>
+        <td>${item.unit()?.cooperator?.name}</td>
         <td>${item.unit()?.whouse?.name()}</td>
         <td><a href="${item.unit()?.fba?.fbaLink()}" target="_blank">${item.unit()?.fba?.shipmentId}</a></td>
         <td>${item.unit()?.fba?.centerId}</td>
