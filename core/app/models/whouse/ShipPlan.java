@@ -376,7 +376,7 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "product.sku", plan.product.sku));
         logs.addAll(Reflects.logFieldFade(this, "selling.sellingId", plan.selling.sellingId));
         logs.addAll(Reflects.logFieldFade(this, "product.abbreviation", plan.product.abbreviation));
-        logs.addAll(Reflects.logFieldFade(this, "whouse.id", plan.whouse.id));
+        logs.addAll(Reflects.logFieldFade(this, "whouse", Whouse.findById(plan.whouse.id)));
         logs.addAll(Reflects.logFieldFade(this, "planShipDate", plan.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "planArrivDate", plan.planArrivDate));
         logs.addAll(Reflects.logFieldFade(this, "planQty", plan.planQty));

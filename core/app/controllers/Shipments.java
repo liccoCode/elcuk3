@@ -451,7 +451,7 @@ public class Shipments extends Controller {
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
         String shipType = ship.type.name();
-        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
+        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<>();
         for(ShipItem item : ship.items) {
             String centerId = item.get(String.class, "fba.centerId");
             if(!fbaGroupUnits.containsKey(centerId))
