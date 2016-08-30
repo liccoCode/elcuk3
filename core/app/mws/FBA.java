@@ -9,6 +9,7 @@ import helper.Dates;
 import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
+import models.market.M;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -134,7 +135,7 @@ public class FBA {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
         //TODO effects: 计算 FBA title 算法需要调整
         StringBuilder fbaTitle = new StringBuilder();
-        Set<Shipment> shipments = new HashSet<Shipment>();
+        Set<Shipment> shipments = new HashSet<>();
         int qty = 0;
         for(ProcureUnit unit : fbashipment.units) {
             for(ShipItem item : unit.shipItems) {
@@ -156,9 +157,13 @@ public class FBA {
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);
         create.setMarketplace(fbashipment.marketplace());
-        create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle.toString(),
+        InboundShipmentHeader header = new InboundShipmentHeader(fbaTitle.toString(),
                 Account.address(fbashipment.account.type), fbashipment.centerId, false,
-                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
+                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType);
+        //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
+        if(fbashipment.market() == M.AMAZON_US) header.setIntendedBoxContentsSource("FEED");
+        create.setInboundShipmentHeader(header);
+
         // 设置 items
         //TODO effect: 创建 FBA 的算法需要调整
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbashipment.units);
@@ -193,9 +198,12 @@ public class FBA {
         update.setSellerId(fbaShipment.account.merchantId);
         update.setShipmentId(fbaShipment.shipmentId);
         update.setMarketplace(fbaShipment.marketplace());
-        update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
+        InboundShipmentHeader header = new InboundShipmentHeader(fbaShipment.title,
                 Account.address(fbaShipment.account.type), fbaShipment.centerId, false, state.name(),
-                fbaShipment.labelPrepType));
+                fbaShipment.labelPrepType);
+        //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
+        if(fbaShipment.market() == M.AMAZON_US) header.setIntendedBoxContentsSource("FEED");
+        update.setInboundShipmentHeader(header);
 
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
         update.setInboundShipmentItems(new InboundShipmentItemList(items));
