@@ -241,7 +241,11 @@ public class Cooperator extends Model {
      * @return
      */
     public CooperItem cooperItem(String sku) {
-        return CooperItem.find("cooperator.id=? AND sku=?", this.id, sku).first();
+        Object item = CollectionUtils.find(this.cooperItems, new SkuPredicate(sku));
+        if(item != null) {
+            return (CooperItem) item;
+        }
+        return null;
     }
 
     /**
@@ -367,4 +371,18 @@ public class Cooperator extends Model {
     public static Cooperator mainShipper() {
         return Cooperator.find("name LIKE '%欧嘉国际%'").first();
     }
+    private static class SkuPredicate implements Predicate {
+        private String sku;
+
+        private SkuPredicate(String sku) {
+            this.sku = sku;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            CooperItem item = (CooperItem) o;
+            return sku.equalsIgnoreCase(item.sku);
+        }
+    }
+
 }
