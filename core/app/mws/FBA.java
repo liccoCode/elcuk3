@@ -161,7 +161,7 @@ public class FBA {
                 Account.address(fbashipment.account.type), fbashipment.centerId, false,
                 FBAShipment.S.WORKING.name(), fbashipment.labelPrepType);
         //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
-        if(fbashipment.market() == M.AMAZON_US) header.setIntendedBoxContentsSource("FEED");
+        header.setIntendedBoxContentsSource("FEED");
         create.setInboundShipmentHeader(header);
 
         // 设置 items
@@ -215,7 +215,7 @@ public class FBA {
                 Account.address(fbaShipment.account.type), fbaShipment.centerId, false, state.name(),
                 fbaShipment.labelPrepType);
         //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
-        if(fbaShipment.market() == M.AMAZON_US) header.setIntendedBoxContentsSource("FEED");
+        header.setIntendedBoxContentsSource("FEED");
         update.setInboundShipmentHeader(header);
 
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
