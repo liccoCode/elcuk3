@@ -522,7 +522,7 @@ public class FBAShipment extends Model {
         params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
         params.add(new BasicNameValuePair("market", this.market().name()));// 向哪一个市场
         params.add(new BasicNameValuePair("selling_id", this.selling().sellingId)); // 作用与哪一个 Selling
-        params.add(new BasicNameValuePair("type", "CreateListing"));
+        params.add(new BasicNameValuePair("type", "PostFbaInboundCartonContents"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.FBA_INBOUND_CARTON_CONTENTS.toString()));
         return params;
     }
