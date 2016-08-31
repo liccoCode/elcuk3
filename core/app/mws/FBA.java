@@ -191,9 +191,22 @@ public class FBA {
             FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state))
+        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state)) {
             return fbaShipment.state;
+        }
+        UpdateInboundShipmentResponse response = updateFbaInboundCartonContents(fbaShipment, state);
+        if(response.isSetUpdateInboundShipmentResult())
+            fbaShipment.state = state;
+        return fbaShipment.state;
+    }
 
+    /**
+     * 更新 FBA Shipment
+     *
+     * @param fbaShipment
+     */
+    public static UpdateInboundShipmentResponse updateFbaInboundCartonContents(FBAShipment fbaShipment,
+                                                                               FBAShipment.S state) {
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(fbaShipment.account.merchantId);
         update.setShipmentId(fbaShipment.shipmentId);
@@ -207,11 +220,7 @@ public class FBA {
 
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
         update.setInboundShipmentItems(new InboundShipmentItemList(items));
-
-        UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
-        if(response.isSetUpdateInboundShipmentResult())
-            fbaShipment.state = state;
-        return fbaShipment.state;
+        return client(fbaShipment.account).updateInboundShipment(update);
     }
 
     /**

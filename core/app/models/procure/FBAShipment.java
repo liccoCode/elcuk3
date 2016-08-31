@@ -324,6 +324,17 @@ public class FBAShipment extends Model {
         }
     }
 
+    public synchronized void updateFbaInboundCartonContentsRetry(int times) {
+        try {
+            FBA.updateFbaInboundCartonContents(this, this.state);
+        } catch(Exception e) {
+            if(times > 0)
+                updateFbaInboundCartonContentsRetry(--times);
+            else
+                throw new FastRuntimeException(e.getMessage());
+        }
+    }
+
     /**
      * 将从 Amazon 解析的 Rows model 数据同步到当前系统中 FBA 的相关数据结构中.
      *
@@ -522,5 +533,12 @@ public class FBAShipment extends Model {
         if(feed.analyzeResult != null && feed.analyzeResult.contains("成功")) return false;
         feed.submit(this.submitParams());
         return true;
+    }
+
+    public void postFbaInboundCartonContents() {
+        if(this.dto != null) {
+            this.updateFbaInboundCartonContentsRetry(3); //更新 IntendedBoxContentsSource 为 FEED
+            this.submitFbaInboundCartonContentsFeed(); //提交 Feed
+        }
     }
 }

@@ -165,7 +165,7 @@ public class FBAs extends Controller {
             Deliveryments.show(deliveryId);
         }
 
-        ProcureUnit.updateFbaCartonContents(pids, dtos);
+        ProcureUnit.postFbaCartonContents(pids, dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {

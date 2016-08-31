@@ -1306,7 +1306,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unitIds
      */
-    public static void updateFbaCartonContents(List<Long> unitIds, List<CheckTaskDTO> dtos) {
+    public static void postFbaCartonContents(List<Long> unitIds, List<CheckTaskDTO> dtos) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
         if(units.size() != unitIds.size() || units.size() != dtos.size()) {
             Validation.addError("", "加载的数量");
@@ -1322,8 +1322,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     FBAShipment fba = unit.fba;
                     fba.dto = dtos.get(i);
                     fba.save();
-                    FBA.update(fba, fba.state); //更新 IntendedBoxContentsSource 为 FEED
-                    fba.submitFbaInboundCartonContentsFeed(); //提交 Feed
+                    fba.postFbaInboundCartonContents();
                 }
             } catch(Exception e) {
                 Validation.addError("", Webs.E(e));
