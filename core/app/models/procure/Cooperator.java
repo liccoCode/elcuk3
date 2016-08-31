@@ -240,10 +240,9 @@ public class Cooperator extends Model {
      * @return
      */
     public CooperItem cooperItem(String sku) {
-        List<CooperItem> items = this.cooperItems;
-        CollectionUtils.filter(items, new SkuPredicate(sku));
-        if(items.size() > 0) {
-            return items.get(0);
+        Object item = CollectionUtils.find(this.cooperItems, new SkuPredicate(sku));
+        if(item != null) {
+            return (CooperItem) item;
         }
         return null;
     }
