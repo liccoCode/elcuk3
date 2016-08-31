@@ -483,8 +483,12 @@ public class FBAShipment extends Model {
         if(trackNumbers == null || trackNumbers.isEmpty()) return null;
         NonPartneredSmallParcelPackageInputList inputList = new NonPartneredSmallParcelPackageInputList();
         List<NonPartneredSmallParcelPackageInput> member = new ArrayList<>();
-        for(int i = 0; i < this.dto.boxNum; i++) {//有多少箱就填写多少个,时钟都填写第一个 tracking number
+        if(this.dto == null || this.dto.boxNum == 0) {
             member.add(new NonPartneredSmallParcelPackageInput(trackNumbers.get(0)));
+        } else {
+            for(int i = 0; i < this.dto.boxNum; i++) {//有多少箱就填写多少个,时钟都填写第一个 tracking number
+                member.add(new NonPartneredSmallParcelPackageInput(trackNumbers.get(0)));
+            }
         }
         inputList.setMember(member);
         return inputList;
