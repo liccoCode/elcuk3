@@ -519,7 +519,7 @@ public class FBAShipment extends Model {
 
     public boolean reSubmit(Long feedId) {
         Feed feed = Feed.findById(feedId);
-        if(feed.analyzeResult.contains("成功")) return false;
+        if(feed.analyzeResult != null && feed.analyzeResult.contains("成功")) return false;
         feed.submit(this.submitParams());
         return true;
     }
