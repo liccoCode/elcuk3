@@ -143,4 +143,27 @@ public class FBAs extends Controller {
             renderText(String.format("Amazon 已经处理成功 Feed[%s], 请勿重复提交.", feedId));
         }
     }
+
+    public static void updateCartonContents(String deliveryId,
+                                            List<Long> pids,
+                                            List<CheckTaskDTO> dtos) {
+
+        if(pids == null || pids.size() == 0) {
+            Validation.addError("", "必须选择需要创建 FBA 的采购计划");
+        } else if(pids.size() != dtos.size()) {
+            Validation.addError("", "FBA 箱内信息的个数与采购计划的数量不一致");
+        }
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Deliveryments.show(deliveryId);
+        }
+
+        ProcureUnit.updateFbaCartonContents(pids, dtos);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("选择的采购计划全部成功创建 FBA");
+        }
+        Deliveryments.show(deliveryId);
+    }
 }

@@ -1301,6 +1301,36 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 批量更新 FBA 的箱内包装信息
+     *
+     * @param unitIds
+     */
+    public static void updateFbaCartonContents(List<Long> unitIds, List<CheckTaskDTO> dtos) {
+        List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
+        if(units.size() != unitIds.size() || units.size() != dtos.size()) {
+            Validation.addError("", "加载的数量");
+        }
+        if(Validation.hasErrors()) return;
+
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
+            try {
+                if(unit.fba == null) {
+                    Validation.addError("", String.format("#%s 没有相关的 FBA, 请创建 FBA.", unit.id));
+                } else {
+                    FBAShipment fba = unit.fba;
+                    fba.dto = dtos.get(i);
+                    fba.save();
+                    FBA.update(fba, fba.state); //更新 IntendedBoxContentsSource 为 FEED
+                    fba.submitFbaInboundCartonContentsFeed(); //提交 Feed
+                }
+            } catch(Exception e) {
+                Validation.addError("", Webs.E(e));
+            }
+        }
+    }
+
 
     static class MskuCheck extends Check {
 

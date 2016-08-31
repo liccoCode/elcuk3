@@ -134,6 +134,10 @@
       <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
         批量创建 FBA
       </a>
+      <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents(dmt.id)}' data-method="POST"
+         id="updateFbaCartonContents" class="btn btn-success">
+        批量更新 FBA 箱内包装信息
+      </a>
     #{/power.ck}
     #{power.ck 'fbas.procureunitsorder'}
       <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
