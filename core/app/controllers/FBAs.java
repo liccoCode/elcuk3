@@ -144,6 +144,13 @@ public class FBAs extends Controller {
         }
     }
 
+    /**
+     * 更新 FBA 的箱内包装信息
+     *
+     * @param deliveryId
+     * @param pids
+     * @param dtos
+     */
     public static void updateCartonContents(String deliveryId,
                                             List<Long> pids,
                                             List<CheckTaskDTO> dtos) {
@@ -162,7 +169,7 @@ public class FBAs extends Controller {
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
-            flash.success("选择的采购计划全部成功创建 FBA");
+            flash.success("选择的采购计划全部成功提交更新 FBA, 请等待 3~5 分钟后查看.");
         }
         Deliveryments.show(deliveryId);
     }
