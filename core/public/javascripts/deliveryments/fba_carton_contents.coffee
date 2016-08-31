@@ -1,6 +1,11 @@
 $ ->
   $("#fba_carton_contents_modal").on('click', '#sumbitDeployFBAs', (e) ->
-    $('#fba_carton_contents_modal').modal('hide')
+    $modal = $('#fba_carton_contents_modal')
+    for input in $modal.find("input[name*=um]")
+      if _.isEmpty($(input).val())
+        noty({text: '箱数 和 个数 不允许为空!', type: 'error'})
+        return e.stopPropagation()
+    $modal.modal('hide')
   ).on('show', (e) ->
     unless processModalTableLines($(@))
       return e.preventDefault()
