@@ -128,4 +128,19 @@ public class FBAs extends Controller {
             renderPDF(options);
         }
     }
+
+    /**
+     * 重新提交 Feed 给 Amazon 处理(只适用于 Rockend 和 API Limit 等造成的提交失败)
+     *
+     * @param id
+     * @param feedId
+     */
+    public static void reSubmit(Long id, Long feedId) {
+        FBAShipment fba = FBAShipment.findById(id);
+        if(fba.reSubmit(feedId)) {
+            renderText("成功提交 Feed 给 Amazon 处理, 请等待 2~3 分钟后再来查看处理结果.");
+        } else {
+            renderText(String.format("Amazon 已经处理成功 Feed[%s], 请勿重复提交.", feedId));
+        }
+    }
 }

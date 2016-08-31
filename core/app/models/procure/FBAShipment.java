@@ -486,7 +486,8 @@ public class FBAShipment extends Model {
     }
 
     public List<Feed> feeds() {
-        return Feed.find("fid=? AND type=? ORDER BY createdAt DESC", this.id, Feed.T.FBA_INBOUND_CARTON_CONTENTS)
+        return Feed
+                .find("fid=? AND type=? ORDER BY createdAt DESC", this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS)
                 .fetch();
     }
 
@@ -516,7 +517,10 @@ public class FBAShipment extends Model {
         return params;
     }
 
-    public String feedsPage() {
-        return GTs.render("Feeds/_feed.html", GTs.newMap("feeds", this.feeds()).build());
+    public boolean reSubmit(Long feedId) {
+        Feed feed = Feed.findById(feedId);
+        if(feed.analyzeResult.contains("成功")) return false;
+        feed.submit(this.submitParams());
+        return true;
     }
 }
