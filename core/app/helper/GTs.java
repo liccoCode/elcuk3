@@ -19,9 +19,9 @@ public class GTs {
 
     /**
      * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出;首先查询以.html结尾的模板，
-     *
+     * <p>
      * 如果未找到则再查询以.txt结尾的模板，找到则停止查找，全部未找到则抛出TemplateNotFoundException异常;
-     *
+     * <p>
      * 例:
      * GTs.render('templateName', GTs.newMap('key', val).build());
      *

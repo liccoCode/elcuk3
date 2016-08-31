@@ -1,11 +1,23 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
+import com.google.gson.annotations.Expose;
+import helper.GTs;
+import helper.J;
+import helper.MWSUtils;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import models.market.Feed;
+import models.market.M;
+import models.market.Selling;
+import models.qc.CheckTaskDTO;
 import mws.FBA;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
@@ -165,12 +177,35 @@ public class FBAShipment extends Model {
      */
     public String title;
 
+    @Transient
+    public CheckTaskDTO dto;
+
+    /**
+     * FBA 箱信息
+     */
+    @Expose
+    public String fbaCartonContents;
+
     public Date createAt;
 
     /**
      * 关闭/取消 时间
      */
     public Date closeAt;
+
+    @PrePersist
+    public void setupFbaCartonContents() {
+        if(this.dto != null) {
+            this.fbaCartonContents = J.json(this.dto);
+        }
+    }
+
+    @PostLoad
+    public void setupDto() {
+        if(StringUtils.isNotBlank(this.fbaCartonContents)) {
+            this.dto = JSON.parseObject(this.fbaCartonContents, CheckTaskDTO.class);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -273,6 +308,28 @@ public class FBAShipment extends Model {
         } catch(Exception e) {
             if(times > 0)
                 updateFBAShipmentRetry(--times, state);
+            else
+                throw new FastRuntimeException(e.getMessage());
+        }
+    }
+
+    public synchronized void putTransportContentRetry(int times, Shipment shipment) {
+        try {
+            FBA.putTransportContent(this, shipment);
+        } catch(Exception e) {
+            if(times > 0)
+                putTransportContentRetry(--times, shipment);
+            else
+                throw new FastRuntimeException(e.getMessage());
+        }
+    }
+
+    public synchronized void updateFbaInboundCartonContentsRetry(int times) {
+        try {
+            FBA.updateFbaInboundCartonContents(this, this.state);
+        } catch(Exception e) {
+            if(times > 0)
+                updateFbaInboundCartonContentsRetry(--times);
             else
                 throw new FastRuntimeException(e.getMessage());
         }
@@ -381,11 +438,109 @@ public class FBAShipment extends Model {
      * @return
      */
     public String marketplace() {
-        if(this.units == null || this.units.isEmpty()) return null;
-        try {
-            return this.units.get(0).selling.market.amid().name();
-        } catch(NullPointerException e) {
+        M market = this.market();
+        if(market != null) {
+            return market.amid().name();
+        } else {
             return null;
+        }
+    }
+
+    public M market() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        return this.units.get(0).selling.market;
+    }
+
+    public Selling selling() {
+        if(this.units == null || this.units.isEmpty()) return null;
+        return this.units.get(0).selling;
+    }
+
+    public TransportDetailInput transportDetails(Shipment shipment) {
+        TransportDetailInput input = new TransportDetailInput();
+        switch(shipment.type) {
+            case EXPRESS:
+                input.setNonPartneredSmallParcelData(this.smallParcelDataInput(shipment));
+                break;
+            case AIR:
+            case SEA:
+                input.setNonPartneredLtlData(this.ltlDataInput(shipment));
+                break;
+            default:
+                input.setNonPartneredSmallParcelData(this.smallParcelDataInput(shipment));
+                break;
+        }
+        return input;
+    }
+
+    private NonPartneredSmallParcelDataInput smallParcelDataInput(Shipment shipment) {
+        NonPartneredSmallParcelDataInput input = new NonPartneredSmallParcelDataInput();
+        input.setCarrierName(shipment.internationExpress.carrierName(this.market()));
+        input.setPackageList(packageList(shipment.tracknolist));
+        return input;
+    }
+
+    private NonPartneredSmallParcelPackageInputList packageList(List<String> trackNumbers) {
+        if(trackNumbers == null || trackNumbers.isEmpty()) return null;
+        NonPartneredSmallParcelPackageInputList inputList = new NonPartneredSmallParcelPackageInputList();
+        List<NonPartneredSmallParcelPackageInput> member = new ArrayList<>();
+        for(int i = 0; i < this.dto.boxNum; i++) {//有多少箱就填写多少个,时钟都填写第一个 tracking number
+            member.add(new NonPartneredSmallParcelPackageInput(trackNumbers.get(0)));
+        }
+        inputList.setMember(member);
+        return inputList;
+    }
+
+
+    private NonPartneredLtlDataInput ltlDataInput(Shipment shipment) {
+        return new NonPartneredLtlDataInput(shipment.internationExpress.carrierName(this.market()), "       ");
+    }
+
+    public List<Feed> feeds() {
+        return Feed
+                .find("fid=? AND type=? ORDER BY createdAt DESC", this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS)
+                .fetch();
+    }
+
+    public FBAShipment doCreate() {
+        this.save();
+        if(this.dto != null) {
+            this.submitFbaInboundCartonContentsFeed();
+        }
+        return this;
+    }
+
+    public void submitFbaInboundCartonContentsFeed() {
+        Feed feed = new Feed(
+                MWSUtils.fbaInboundCartonContentsXml(this),
+                Feed.T.FBA_INBOUND_CARTON_CONTENTS,
+                this.id.toString()).save();
+        feed.submit(this.submitParams());
+    }
+
+    public List<NameValuePair> submitParams() {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
+        params.add(new BasicNameValuePair("market", this.market().name()));// 向哪一个市场
+        params.add(new BasicNameValuePair("selling_id", this.selling().sellingId)); // 作用与哪一个 Selling
+        params.add(new BasicNameValuePair("type", "CreateListing"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.FBA_INBOUND_CARTON_CONTENTS.toString()));
+        return params;
+    }
+
+    public boolean reSubmit(Long feedId) {
+        Feed feed = Feed.findById(feedId);
+        if(feed == null || StringUtils.containsIgnoreCase(feed.analyzeResult, "成功")) {
+            return false;
+        }
+        feed.submit(this.submitParams());
+        return true;
+    }
+
+    public void postFbaInboundCartonContents() {
+        if(this.dto != null) {
+            this.updateFbaInboundCartonContentsRetry(3); //更新 IntendedBoxContentsSource 为 FEED
+            this.submitFbaInboundCartonContentsFeed(); //提交 Feed
         }
     }
 }

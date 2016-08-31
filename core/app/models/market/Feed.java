@@ -7,6 +7,7 @@ import models.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Play;
 import play.data.validation.Validation;
@@ -84,6 +85,12 @@ public class Feed extends Model {
             public String label() {
                 return "设置 Listing Fulfillment By Amazon";
             }
+        },
+        FBA_INBOUND_CARTON_CONTENTS {
+            @Override
+            public String label() {
+                return "提交 FBA 包装信息到 Amazon";
+            }
         };
 
         public abstract String label();
@@ -95,6 +102,12 @@ public class Feed extends Model {
     public Feed() {
     }
 
+    /**
+     * @param content
+     * @param memo
+     * @param selling
+     * @deprecated
+     */
     public Feed(String content, String memo, Selling selling) {
         this.content = content;
         this.fid = selling.sellingId;
@@ -103,9 +116,13 @@ public class Feed extends Model {
     }
 
     public Feed(String content, T type, Selling selling) {
+        this(content, type, selling.sellingId);
+    }
+
+    public Feed(String content, T type, String fid) {
         this.content = content;
-        this.fid = selling.sellingId;
         this.type = type;
+        this.fid = fid;
         this.byWho = User.username();
     }
 
@@ -211,6 +228,7 @@ public class Feed extends Model {
     }
 
     public void submit(List<NameValuePair> params) {
+        params.add(new BasicNameValuePair("feed_id", this.id.toString()));// 提交哪一个 Feed
         String response = HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed",
                 params);
         if(StringUtils.isBlank(response)) Validation.addError("", "向 Rockend 提交请求: submit_feed 时出现了错误, 请稍后再重试!");

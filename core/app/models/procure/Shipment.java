@@ -644,6 +644,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         for(ShipItem shipItem : this.items) {
             if(shipItem.unit.fba != null) {
+                shipItem.unit.fba.putTransportContentRetry(3, this);
                 // 在测试环境下也不能标记 SHIPPED
                 shipItem.unit.fba.updateFBAShipmentRetry(3,
                         Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);

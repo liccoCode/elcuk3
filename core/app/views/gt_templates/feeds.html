@@ -1,0 +1,22 @@
+<table class="table table-condensed table-bordered" style="display:none" data-feeds-page-key="${key ? key : ''}">
+  <tr>
+    <th>Id</th>
+    <th>Result</th>
+    <th>Action</th>
+  </tr>
+#{list items:feeds, as:'feed'}
+  <tr>
+    <td>
+      <a href="/feed/${feed.id}/show" target="_blank">${feed.id}</a>
+    </td>
+    <td>${feed.analyzeResult}</td>
+    <td>
+        #{if fid}
+            #{power.ck 'fbas.update'}
+              <a class="btn-small btn-danger" href="@{FBAs.reSubmit(fid, feed.id)}" target="_blank">重新提交</a>
+            #{/power.ck}
+        #{/if}
+    </td>
+  </tr>
+#{/list}
+</table>

@@ -1,0 +1,36 @@
+#{script 'deliveryments/fba_carton_contents.coffee'/}
+<div id="fba_carton_contents_modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>FBA Carton Contents</h3>
+  </div>
+  <div class="modal-body">
+    <table class="table table-bordered table-condensed" id="fba_carton_contents_table">
+      <tr>
+        <td>采购计划</td>
+        <td>
+          <abbr title="多少个箱子">箱数</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子内货物的个数">个数</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的重量">箱重(lbs.)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的长度">箱长(in.)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的宽度">箱宽(in.)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的高度">箱高(in.)</abbr>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="sumbitDeployFBAs">提交</a>
+  </div>
+</div>
