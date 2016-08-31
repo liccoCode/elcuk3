@@ -56,7 +56,14 @@
       <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${unit.cooperator?.cooperItem(unit.sku)?.memo}">${unit.sku}</a>
     </td>
     <td>
-    ${unit.fba?.shipmentId} <i class="icon-search" rel="popover" content="${unit.fba?.feedsPage?.raw()}"></i>
+        #{if unit.fba}
+        ${unit.fba.shipmentId}
+            #{set feeds: unit.fba.feeds()/}
+            #{if feeds.size() > 0}
+                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+              <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+            #{/if}
+        #{/if}
     </td>
     <td>
         #{if unit.deliveryment}
