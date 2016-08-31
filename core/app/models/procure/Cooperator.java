@@ -240,7 +240,12 @@ public class Cooperator extends Model {
      * @return
      */
     public CooperItem cooperItem(String sku) {
-        return CooperItem.find("cooperator.id=? AND sku=?", this.id, sku).first();
+        List<CooperItem> items = this.cooperItems;
+        CollectionUtils.filter(items, new SkuPredicate(sku));
+        if(items.size() > 0) {
+            return items.get(0);
+        }
+        return null;
     }
 
     /**
@@ -343,4 +348,19 @@ public class Cooperator extends Model {
             return collator.compare(a.name, b.name);
         }
     }
+
+    private static class SkuPredicate implements Predicate {
+        private String sku;
+
+        private SkuPredicate(String sku) {
+            this.sku = sku;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            CooperItem item = (CooperItem) o;
+            return sku.equalsIgnoreCase(item.sku);
+        }
+    }
+
 }
