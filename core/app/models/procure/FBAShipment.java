@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import com.google.gson.annotations.Expose;
-import helper.GTs;
 import helper.J;
 import helper.MWSUtils;
 import helper.Webs;
@@ -538,6 +537,11 @@ public class FBAShipment extends Model {
     }
 
     public void postFbaInboundCartonContents() {
+        List<Feed> feeds = this.feeds();
+        if(feeds.size() > 0 && feeds.get(0).analyzeResult == null) {
+            Validation.addError("", "请勿重复生成 Feed.");
+            return;
+        }
         if(this.dto != null) {
             this.updateFbaInboundCartonContentsRetry(3); //更新 IntendedBoxContentsSource 为 FEED
             this.submitFbaInboundCartonContentsFeed(); //提交 Feed
