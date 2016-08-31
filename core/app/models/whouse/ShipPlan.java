@@ -480,7 +480,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     }
 
     public OutboundRecord outboundRecord() {
-        return OutboundRecord.find("shipPlan=?", this).first();
+        OutboundRecord out = OutboundRecord.find("shipPlan=?", this).first();
+        out.unmarshalBoxs();
+        return out;
     }
 
 

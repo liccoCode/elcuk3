@@ -11,7 +11,7 @@
     <th>出库计划</th>
     <th>状态</th>
     <th>SKU</th>
-    <th>selling</th>
+    <th style="width:120px;">selling</th>
     <th>产品名称</th>
     <th>最新采购价</th>
     <th>报关类型</th>
@@ -34,6 +34,7 @@
 #{list items:items, as:'item'}
     #{if item.plan}
         #{set plan: item.plan/}
+        #{set out: plan.outboundRecord()/}
       <tr id="${item.id}" data-received-url='@{ShipItems.received(item.id)}'
           data-lossqty='${item.lossqty}' data-compenamt='${item.compenamt}'
           data-currency='${item.currency?.name()}' data-compentype='${item.compentype}'>
@@ -45,6 +46,7 @@
             </td>
           #{/if}
         <td>
+          <i class="icon-reorder" name="click_plan" planId="${plan.id}" style="cursor:pointer;" title="详情"></i>
           <a target="_blank" href="@{ShipPlans.show(plan.id)}">${plan.id}</a>
         </td>
         <td>${plan.state.label()}</td>
@@ -59,7 +61,7 @@
         ${item.showSkuPrice()}
         #{/else}
         </td>
-        <td>${plan.outboundRecord()?.clearanceType?.label()}</td>
+        <td>${out?.clearanceType?.label()}</td>
         <td>${plan.unit?.cooperator?.name}</td>
         <td>${plan.whouse.name}</td>
         <td>${plan.fba?.shipmentId}</td>
@@ -76,6 +78,48 @@
         <td>${item.showName()}</td>
         <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>
       </tr>
+      <tr style="display:none;" id="plan_${plan.id}">
+        <td colspan="23" style="background-color:#9FAFD1;">
+          <table class="table table-condensed table-bordered" style="width:800px;">
+            <tr>
+              <th rowspan="2">总重量kg</th>
+              <th rowspan="2">总体积m³</th>
+              <th colspan="6" style="text-align:center">主箱</th>
+              <th colspan="6" style="text-align:center">尾箱</th>
+            </tr>
+            <tr>
+              <th>箱数</th>
+              <th>数量</th>
+              <th>重量(kg)</th>
+              <th>长(cm)</th>
+              <th>宽(cm)</th>
+              <th>高(cm)</th>
+              <th>箱数</th>
+              <th>数量</th>
+              <th>重量(kg)</th>
+              <th>长(cm)</th>
+              <th>宽(cm)</th>
+              <th>高(cm)</th>
+            </tr>
+            <tr>
+              <td>${plan.totalWeight()}</td>
+              <td>${plan.totalVolume()}</td>
+              <td>${out?.mainBox?.boxNum}</td>
+              <td>${out?.mainBox?.num}</td>
+              <td>${out?.mainBox?.singleBoxWeight}</td>
+              <td>${out?.mainBox?.length}</td>
+              <td>${out?.mainBox?.width}</td>
+              <td>${out?.mainBox?.height}</td>
+              <td>${out?.lastBox?.boxNum}</td>
+              <td>${out?.lastBox?.num}</td>
+              <td>${out?.lastBox?.singleBoxWeight}</td>
+              <td>${out?.lastBox?.length}</td>
+              <td>${out?.lastBox?.width}</td>
+              <td>${out?.lastBox?.height}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
     #{/if}
     #{else}
       <tr id="${item.id}" data-received-url='@{ShipItems.received(item.id)}'
@@ -88,7 +132,8 @@
               </label>
             </td>
           #{/if}
-        <td><a target="_blank" href="@{Deliveryments.show(item.unit.deliveryment?.id)}#${item.unit.id}">${item.unit.id}</a>
+        <td>
+          <a target="_blank" href="@{Deliveryments.show(item.unit.deliveryment?.id)}#${item.unit.id}">${item.unit.id}</a>
         </td>
         <td>${item.unit()?.isOut?.label()}</td>
         <td>${item.unit()?.sku}</td>

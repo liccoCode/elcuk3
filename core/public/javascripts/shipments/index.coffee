@@ -46,7 +46,14 @@ $ ->
       tr.next("tr").toggle()
     else
       tr.after("<tr><td colspan='14'><div><h4 class='text-info'>Comment</h4>#{memo}</div><hr><div id='div#{format_id}'></div></td></tr>")
-      $("#div" + format_id).load("/Shipments/showProcureUnitList", id: shipment_id)
+      $("#div" + format_id).load("/Shipments/showProcureUnitList", id: shipment_id, (r) ->
+        $.getScript('../public/javascripts/shipments/index.coffee')
+      )
+  )
+
+  $("i[name='click_plan']").click(->
+    planId = $(@).attr("planId")
+    $("#plan_" + planId).toggle()
   )
 
   $("#today").click(->
