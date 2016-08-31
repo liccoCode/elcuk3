@@ -441,22 +441,37 @@ public class MWSUtils {
         Selling selling = fbaShipment.selling();
         if(selling == null) return null;
 
-        CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
-        item.setSKU(selling.merchantSKU);
-        item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.num));
-        item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.num));
+        AmazonEnvelope envelope = new AmazonEnvelope();
 
-        CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
-        //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
-        carton.setCartonId(fbaShipment.shipmentId);
-        carton.getItem().add(item);
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.account.merchantId);
+
+        envelope.setHeader(header);
+        envelope.setMessageType("CartonContentsRequest");
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
 
         CartonContentsRequest request = new CartonContentsRequest();
         request.setShipmentId(fbaShipment.shipmentId);
         request.setNumCartons(BigInteger.valueOf(fbaShipment.dto.boxNum));//箱数
-        request.getCarton().add(carton);
+        for(int i = 0; i < fbaShipment.dto.boxNum; i++) {
+            CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
+            item.setSKU(selling.merchantSKU);
+            item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.num));
+            item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.num));
 
-        return JaxbUtil.convertToXml(request);
+            CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
+            //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
+            carton.setCartonId(String.format("%s%s", fbaShipment.shipmentId, i));
+            carton.getItem().add(item);
+            request.getCarton().add(carton);
+        }
+
+        message.setCartonContentsRequest(request);
+        envelope.getMessage().add(message);
+        return JaxbUtil.convertToXml(envelope);
     }
 
     public static boolean skipProductData(String templateType, String feedProductType) {
