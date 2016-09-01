@@ -836,6 +836,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
         FBAShipment fba = null;
+        if(!dto.validedQtys(this.qty())) return fba;
         try {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {

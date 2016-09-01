@@ -1,5 +1,7 @@
 package models.qc;
 
+import play.data.validation.Validation;
+
 import java.io.Serializable;
 
 /**
@@ -51,5 +53,16 @@ public class CheckTaskDTO implements Serializable {
 
     public CheckTaskDTO() {
 
+    }
+
+    public boolean validedQtys(int shipedQty) {
+        if(this.boxNum == 0) Validation.addError("", "箱数不能为 0");
+        if(this.num == 0) Validation.addError("", "单箱个数不能为空");
+        if(this.boxNum != 0 && this.num != 0) {
+            int qtySum = this.boxNum * this.num;
+            if(this.lastCartonNum != null) qtySum += lastCartonNum;
+            if(qtySum != shipedQty) Validation.addError("", "数量不匹配!(主箱*个数 + 尾箱个数)");
+        }
+        return !Validation.hasErrors();
     }
 }
