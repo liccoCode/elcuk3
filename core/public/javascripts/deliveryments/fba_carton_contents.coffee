@@ -1,7 +1,7 @@
 $ ->
   $("#fba_carton_contents_modal").on('click', '#sumbitDeployFBAs', (e) ->
     $modal = $('#fba_carton_contents_modal')
-    for input in $modal.find("input[name*=boxNum][name*=num]")
+    for input in $modal.find("input[name*=boxNum], input[name*=num]")
       if _.isEmpty($(input).val())
         noty({text: '箱数 和 个数 不允许为空!', type: 'error'})
         return e.stopPropagation()
@@ -37,7 +37,7 @@ $ ->
           "<td>#{unit.id}</td>" +
           "<td><input type='text' style='width: 30px;' name='dtos[#{index}].boxNum' value='#{unit.boxNum}' maxlength='3'/></td>" +
           "<td><input type='text' style='width: 30px;' name='dtos[#{index}].num'  maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].lastCartonNum'  placeholder='可选, 默认只有一个尾箱.' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].lastCartonNum'  placeholder='可选' maxlength='3'/></td>" +
           "<td><input type='text' style='width: 30px;' name='dtos[#{index}].singleBoxWeight'  maxlength='3'/></td>" +
           "<td><input type='text' style='width: 30px;' name='dtos[#{index}].length' maxlength='3'/></td>" +
           "<td><input type='text' style='width: 30px;' name='dtos[#{index}].width'  maxlength='3'/></td>" +
