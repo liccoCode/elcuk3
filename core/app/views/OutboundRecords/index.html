@@ -101,7 +101,7 @@
           <th rowspan="2" style="width:60px;">实际出货数量</th>
           <th rowspan="2" style="width:70px;">去往国家</th>
           <th rowspan="2" style="width:70px;">运输方式</th>
-          <th rowspan="2" style="width:120px;">去往仓库</th>
+          <th rowspan="2" style="width:120px;">仓库名称</th>
           <th rowspan="2" style="width:80px;">出库对象</th>
           <th colspan="6" style="width:380px;">主箱</th>
           <th colspan="6" style="width:380px;">尾箱</th>
@@ -113,46 +113,21 @@
           <th rowspan="2" style="width:160px;">备注</th>
         </tr>
         <tr>
-          <th>
-            <abbr title="主箱收了多少箱货">箱数</abbr>
-          </th>
-          <th>
-            <abbr title="主箱每箱有多少货">数量</abbr>
-          </th>
-          <th>
-            <abbr title="主箱每箱的重量是多少">重量(kg)</abbr>
-          </th>
-          <th>
-            <abbr title="主箱每箱长多少">长(cm)</abbr>
-          </th>
-          <th>
-            <abbr title="主箱每箱宽多少">宽(cm)</abbr>
-          </th>
-          <th>
-            <abbr title="主箱每箱高多少">高(cm)</abbr>
-          </th>
-          <th>
-            <abbr title="尾箱收了多少箱货">箱数</abbr>
-          </th>
-          <th>
-            <abbr title="尾箱每箱有多少货">数量</abbr>
-          </th>
-          <th>
-            <abbr title="尾箱每箱的重量是多少">重量(kg)</abbr>
-          </th>
-          <th>
-            <abbr title="尾箱每箱长多少">长(cm)</abbr>
-          </th>
-          <th>
-            <abbr title="尾箱每箱宽多少">宽(cm)</abbr>
-          </th>
-          <th>
-            <abbr title="尾箱每箱高多少">高(cm)</abbr>
-          </th>
+          <th><abbr title="主箱收了多少箱货">箱数</abbr></th>
+          <th><abbr title="主箱每箱有多少货">数量</abbr></th>
+          <th><abbr title="主箱每箱的重量是多少">重量(kg)</abbr></th>
+          <th><abbr title="主箱每箱长多少">长(cm)</abbr></th>
+          <th><abbr title="主箱每箱宽多少">宽(cm)</abbr></th>
+          <th><abbr title="主箱每箱高多少">高(cm)</abbr></th>
+          <th><abbr title="尾箱收了多少箱货">箱数</abbr></th>
+          <th><abbr title="尾箱每箱有多少货">数量</abbr></th>
+          <th><abbr title="尾箱每箱的重量是多少">重量(kg)</abbr></th>
+          <th><abbr title="尾箱每箱长多少">长(cm)</abbr></th>
+          <th><abbr title="尾箱每箱宽多少">宽(cm)</abbr></th>
+          <th><abbr title="尾箱每箱高多少">高(cm)</abbr></th>
         </tr>
       #{list items: records, as: 'r'}
         <tr>
-            #{set attrs: r.stockObj.attributes()/}
           <td>
             <label class="checkbox">
               <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
@@ -167,37 +142,30 @@
               #{/if}
           </td>
           <td>
-              #{set procureunitId: r.shipPlan != null ? r.shipPlan?.unit?.id : attrs.get('procureunitId')/}
-              #{if procureunitId}
-                <a href="/ProcureUnits/index?p.search=${procureunitId}" target="_blank">
-                ${procureunitId}
-                </a>
-              #{/if}
+              <a href="@{ProcureUnits.edit(r.shipPlan?.unit?.id, 'show')}" target="_blank">${r.shipPlan?.unit?.id}</a>
           </td>
-          <td>
-            <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
-          </td>
-          <td title="${r.stockObj?.name()}">
-              #{if r.stockObj?.name().length() <= 20}
-                ${r.stockObj?.name()}
+          <td><a href="@{Products.show(r.shipPlan?.product.sku)}" target="_blank">${r.shipPlan?.product.sku}</a></td>
+          <td title="${r.shipPlan?.product.abbreviation}">
+              #{if r.shipPlan?.product.abbreviation.length() <= 20}
+              ${r.shipPlan?.product.abbreviation}
               #{/if}
               #{else }
-                ${r.stockObj?.name().substring(0,20)}...
+              ${r.shipPlan?.product.abbreviation.substring(0,20)}...
               #{/else}
           </td>
           <td title="${r.shipPlan?.memo}">
               #{if r.shipPlan?.memo?.length() <= 7}
-                <b>${r.shipPlan?.memo}</b>
+              ${r.shipPlan?.memo}
               #{/if}
               #{else }
               ${r.shipPlan?.memo.substring(0,7)}...
               #{/else}
           </td>
-          <td>${attrs.get('fba')}</td>
-          <td>${attrs.get('planBeginDate')?.substring(0,10)}</td>
+          <td>${r.shipPlan?.fba.shipmentId}</td>
+          <td>#{time_tooltip time:r.shipPlan?.planShipDate /}</td>
           <td>${r.planQty}</td>
           <td><input type="text" name="qty" value="${r.qty}" style="width:45px;"></td>
-          <td>${attrs.get('whouseName')}</td>
+          <td>${r.shipPlan?.whouse.name}</td>
           <td>${r.shipPlan?.shipType?.label()}</td>
           <td>
             <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
