@@ -453,14 +453,26 @@ public class MWSUtils {
         AmazonEnvelope.Message message = new AmazonEnvelope.Message();
         message.setMessageID(BigInteger.valueOf(1));
 
+        //如果填写了 lastCartonNum 则多加一个 Carton 尾箱
+        int numCartons = fbaShipment.dto.boxNum;
+        if(fbaShipment.dto.lastCartonNum != null) {
+            ++numCartons;
+        }
+
         CartonContentsRequest request = new CartonContentsRequest();
         request.setShipmentId(fbaShipment.shipmentId);
-        request.setNumCartons(BigInteger.valueOf(fbaShipment.dto.boxNum));//箱数
-        for(int i = 0; i < fbaShipment.dto.boxNum; i++) {
+        request.setNumCartons(BigInteger.valueOf(numCartons));//箱数
+
+        for(int i = 0; i < numCartons; i++) {
             CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
             item.setSKU(selling.merchantSKU);
-            item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.num));
-            item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.num));
+            if(i == numCartons - 1 && fbaShipment.dto.lastCartonNum != null) {
+                item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.lastCartonNum));
+                item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.lastCartonNum));
+            } else {
+                item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.num));
+                item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.num));
+            }
 
             CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
             //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html

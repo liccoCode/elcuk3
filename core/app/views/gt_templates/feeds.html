@@ -11,7 +11,7 @@
     </td>
     <td>${feed.analyzeResult}</td>
     <td>
-        #{if fid}
+        #{if fid && feed.analyzeResult == null}
             #{power.ck 'fbas.update'}
               <a class="btn-small btn-danger" href="@{FBAs.reSubmit(fid, feed.id)}" target="_blank">重新提交</a>
             #{/power.ck}

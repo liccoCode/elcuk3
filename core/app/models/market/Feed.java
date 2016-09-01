@@ -233,4 +233,8 @@ public class Feed extends Model {
                 params);
         if(StringUtils.isBlank(response)) Validation.addError("", "向 Rockend 提交请求: submit_feed 时出现了错误, 请稍后再重试!");
     }
+
+    public boolean isFailed() {
+        return this.analyzeResult != null && "失败".equalsIgnoreCase(this.analyzeResult);
+    }
 }

@@ -61,7 +61,12 @@
             #{set feeds: unit.fba.feeds()/}
             #{if feeds.size() > 0}
                 #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-              <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{if feeds.get(0).isFailed()}
+                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{/if}
+                #{else }
+                  <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{/else}
             #{/if}
         #{/if}
     </td>

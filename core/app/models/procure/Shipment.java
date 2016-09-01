@@ -641,7 +641,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
-
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
         for(ShipItem shipItem : this.items) {
             if(shipItem.unit.fba != null) {
                 shipItem.unit.fba.putTransportContentRetry(3, this);
