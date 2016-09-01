@@ -80,7 +80,7 @@
 
   <form action="javascript:void(0)" name="confirm_form">
     <div class="span12" style="overflow: auto;">
-      <table class="table table-condensed table-bordered" style="width:2700px;">
+      <table class="table table-condensed table-bordered" style="width:2810px;">
         <tr>
           <th rowspan="2">
             <label class="checkbox">
@@ -94,6 +94,7 @@
           <th rowspan="2" style="width:40px;">采购计划ID</th>
           <th rowspan="2" style="width:120px;">SKU</th>
           <th rowspan="2" style="width:110px;">产品名称</th>
+          <th rowspan="2" style="width:110px;">变更情况</th>
           <th rowspan="2" style="width:100px;">FBA</th>
           <th rowspan="2" style="width:80px;">预计运输时间</th>
           <th rowspan="2" style="width:40px;">预计出货数量</th>
@@ -176,15 +177,28 @@
           <td>
             <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
-          <td title="${r.stockObj?.name()}">${r.stockObj?.name()}</td>
+          <td title="${r.stockObj?.name()}">
+              #{if r.stockObj?.name().length() <= 20}
+                ${r.stockObj?.name()}
+              #{/if}
+              #{else }
+                ${r.stockObj?.name().substring(0,20)}...
+              #{/else}
+          </td>
+          <td title="${r.shipPlan?.memo}">
+              #{if r.shipPlan?.memo?.length() <= 7}
+                <b>${r.shipPlan?.memo}</b>
+              #{/if}
+              #{else }
+              ${r.shipPlan?.memo.substring(0,7)}...
+              #{/else}
+          </td>
           <td>${attrs.get('fba')}</td>
           <td>${attrs.get('planBeginDate')?.substring(0,10)}</td>
           <td>${r.planQty}</td>
           <td><input type="text" name="qty" value="${r.qty}" style="width:45px;"></td>
           <td>${attrs.get('whouseName')}</td>
-          <td>
-              #{if attrs.get('shipType')}${models.procure.Shipment.T.valueOf(attrs.get('shipType')).label()}#{/if}
-          </td>
+          <td>${r.shipPlan?.shipType?.label()}</td>
           <td>
             <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
               <option value="">仓库</option>
