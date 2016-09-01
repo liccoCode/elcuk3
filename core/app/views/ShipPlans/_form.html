@@ -4,25 +4,26 @@
 
   <th><span style="color:red">*</span>Selling ID</th>
   <td>
-    <input type="text" value="${plan.selling?.sellingId}" name="plan.selling.sellingId" required autocomplete="off">
+    <input type="text" value="${plan.selling?.sellingId}" name="plan.selling.sellingId" id="sellingId"
+           class="input-block-level" required autocomplete="off">
   </td>
 </tr>
 <tr>
   <th><span style="color:red">*</span>SKU</th>
   <td>
-    <input type="text" value="${plan.product?.sku}" name="plan.product.sku" required readonly>
+    <input type="text" value="${plan.product?.sku}" name="plan.product.sku" id="unit_sku" required readonly>
   </td>
 
   <th><span style="color:red">*</span>产品名称</th>
   <td>
-    <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" class="input-block-level"
+    <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" style="width:300px;"
            required readonly>
   </td>
 </tr>
 <tr>
   <th><span style="color:red">*</span>去往仓库</th>
   <td>
-    <select name="plan.whouse.id">
+    <select name="plan.whouse.id" id="warehouse_select">
       <option value="">请选择</option>
     #{list items:whouses, as:'w'}
       <option value="${w.id}" ${w.id == plan.whouse?.id ? 'selected' : ''}>${w.name}</option>

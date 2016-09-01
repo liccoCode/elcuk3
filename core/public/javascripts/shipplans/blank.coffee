@@ -50,6 +50,7 @@ $ ->
         $("input[name='plan.product.sku']").attr("readonly", true).val(sku).trigger('change')
         getStockBySku(sku)
         getProductNmae(sku)
+        checkCoopertorBySelling(item)
         item
     })
 
@@ -61,6 +62,30 @@ $ ->
     $.post('/products/findProductName', sku: sku, (r) ->
       $("input[name='plan.product.abbreviation']").val(r.name)
     )
+
+  checkCoopertorBySelling = (selling) ->
+    for select, i in $("#warehouse_select option")
+      name = $(select).text()
+      name = "A_" + name.split('_')[1]
+      if selling.indexOf(name) > -1
+        $(select).attr("selected", true)
+
+  $("#warehouse_select").change(->
+    if $(@).val()
+      country = $("#warehouse_select :selected").text().split('_')[1]
+      sku = $("#unit_sku").val()
+      $.get("/sellings/findSellingBySkuAndMarket", {sku: sku, market: "AMAZON_" + country})
+      .done((c) ->
+        $("#sellingId").val(c)
+        if !$("#sellingId").val()
+          noty({text: "市场对应无Selling", type: 'error'})
+      )
+    else
+      $("#sellingId").val("")
+      $("input[name='newUnit.shipType']").each(->
+        $(@).attr("checked", false)
+      )
+  )
 
   $(document).ready ->
     initTypeahead()
