@@ -533,7 +533,7 @@ public class FBAShipment extends Model {
 
     public boolean reSubmit(Long feedId) {
         Feed feed = Feed.findById(feedId);
-        if(feed == null || StringUtils.containsIgnoreCase(feed.analyzeResult, "成功")) {
+        if(feed == null || !feed.isFailed()) {
             return false;
         }
         feed.submit(this.submitParams());
