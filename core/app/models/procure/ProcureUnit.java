@@ -1324,6 +1324,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
+            CheckTaskDTO dto = dtos.get(i);
+            if(!dto.validedQtys(unit.qty())) return;
+
             try {
                 if(unit.fba == null) {
                     Validation.addError("", String.format("#%s 没有相关的 FBA, 请创建 FBA.", unit.id));

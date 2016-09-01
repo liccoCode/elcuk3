@@ -10,16 +10,17 @@ $ ->
   )
 
   $(document).ready ->
-    $trigger = $("i[name=showFeedsPage]")
-    if $trigger.data('feeds-page')
-      pageKey = $trigger.data('feeds-page')
-      $page = $("table[data-feeds-page-key='#{pageKey}']")
-      $trigger.popover({
-        html: true,
-        trigger: "click",
-        placement: "right",
-        content: $page.html(),
-        title: "Feeds"
-      }).popover('hide')
+    for trigger in $("i[name=showFeedsPage]")
+      $trigger = $(trigger)
+      if $trigger.data('feeds-page')
+        pageKey = $trigger.data('feeds-page')
+        $page = $("table[data-feeds-page-key='#{pageKey}']")
+        $trigger.popover({
+          html: true,
+          trigger: "click",
+          placement: "right",
+          content: $page.html(),
+          title: "Feeds"
+        }).popover('hide')
 
 
