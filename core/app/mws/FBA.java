@@ -232,7 +232,6 @@ public class FBA {
      */
     public static void putTransportContent(FBAShipment fbaShipment, Shipment shipment) throws
             FBAInboundServiceMWSException {
-        if(fbaShipment.state != FBAShipment.S.PLAN) return;
         PutTransportContentRequest request = new PutTransportContentRequest();
         request.setSellerId(fbaShipment.account.merchantId);
         request.setShipmentId(fbaShipment.shipmentId);
