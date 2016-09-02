@@ -165,7 +165,7 @@
           <td>#{time_tooltip time:r.shipPlan?.planShipDate /}</td>
           <td>${r.planQty}</td>
           <td><input type="text" name="qty" value="${r.qty}" style="width:45px;"></td>
-          <td>${r.shipPlan?.whouse.name}</td>
+          <td>${r.shipPlan?.whouse?.name}</td>
           <td>${r.shipPlan?.shipType?.label()}</td>
           <td>
             <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
