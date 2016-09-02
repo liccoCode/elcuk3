@@ -302,7 +302,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
         DateTime dt = DateTime.now();
         List<ProcureUnit> units = ProcureUnit.find(
-                "fba IS NOT NULL AND createDate>=? AND createDate<=? AND " + type + "=?",
+                "attrs.planShipDate IS NOT NULL AND whouse IS NOT NULL AND shipType IS NOT NULL " +
+                        "AND createDate>=? AND createDate<=? AND " + type + "=?",
                 Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
         TimelineEventSource eventSource = new TimelineEventSource();
@@ -318,8 +319,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             eventSource.events.add(event);
         }
 
-        List<ShipPlan> plans = ShipPlan.find(
-                String.format("fba IS NOT NULL AND unit IS NULL AND createDate>=? AND createDate<=? AND %s =?", type),
+        List<ShipPlan> plans = ShipPlan.find(//预计运输时间 仓库 运输方式
+                String.format("planShipDate IS NOT NULL AND whouse IS NOT NULL AND shipType IS NOT NULL" +
+                                " AND unit IS NULL AND createDate>=? AND createDate<=? AND %s =?",
+                        type),
                 Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
         // 将所有与此 SKU/SELLING 关联的手动创建的 ShipPlan 展示出来.(前 9 个月~后3个月)
         for(ShipPlan plan : plans) {
