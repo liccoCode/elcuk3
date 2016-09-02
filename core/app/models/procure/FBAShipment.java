@@ -496,7 +496,7 @@ public class FBAShipment extends Model {
 
 
     private NonPartneredLtlDataInput ltlDataInput(Shipment shipment) {
-        return new NonPartneredLtlDataInput(shipment.internationExpress.carrierName(this.market()), "       ");
+        return new NonPartneredLtlDataInput("Other", shipment.tracknolist.get(0));
     }
 
     public List<Feed> feeds() {
