@@ -144,7 +144,7 @@
           <td>
               <a href="@{ProcureUnits.edit(r.shipPlan?.unit?.id, 'show')}" target="_blank">${r.shipPlan?.unit?.id}</a>
           </td>
-          <td><a href="@{Products.show(r.shipPlan?.product.sku)}" target="_blank">${r.shipPlan?.product.sku}</a></td>
+          <td><a href="@{Products.show(r.shipPlan?.product?.sku)}" target="_blank">${r.shipPlan?.product?.sku}</a></td>
           <td title="${r.shipPlan?.product.abbreviation}">
               #{if r.shipPlan?.product.abbreviation.length() <= 20}
               ${r.shipPlan?.product.abbreviation}
