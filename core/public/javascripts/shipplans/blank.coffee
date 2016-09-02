@@ -47,7 +47,7 @@ $ ->
         )
       updater: (item) ->
         sku = item.split(',')[0]
-        $("input[name='plan.product.sku']").attr("readonly", true).val(sku).trigger('change')
+        $("input[name='plan.product.sku']").attr("readonly", true).val(sku)
         getStockBySku(sku)
         getProductNmae(sku)
         item
@@ -64,4 +64,9 @@ $ ->
 
   $(document).ready ->
     initTypeahead()
-    getStockBySku($("input[name='plan.product.sku']").val())
+    sid = $("input[name='plan.selling.sellingId']").val()
+    return if _.isElement(sid)
+    $sku = $("input[name='plan.product.sku']")
+    $sku.val(sid.split(',')[0])
+    getStockBySku($sku.val())
+    getProductNmae($sku.val())
