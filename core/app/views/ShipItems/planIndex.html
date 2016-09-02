@@ -91,7 +91,14 @@
         </td>
         <td>${plan.selling?.sellingId}</td>
         <td><a href="@{Products.show(plan.product.sku)}" target="_blank">${plan.product.sku}</a></td>
-        <td>${plan.product.abbreviation}</td>
+        <td title="${plan.product.abbreviation}">
+            #{if plan.product.abbreviation.length()>10}
+            ${plan.product.abbreviation.substring(0,10)}...
+            #{/if}
+            #{else }
+            ${plan.product.abbreviation}
+            #{/else}
+        </td>
         <td>${plan.unit?.cooperator?.name}</td>
         <td>${plan.fba?.shipmentId}</td>
         <td>${plan.whouse?.name}</td>

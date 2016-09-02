@@ -106,7 +106,7 @@ public class ShipPlanPost extends Post<ShipPlan> {
             params.add(this.shipType);
         }
         if(isHaveNoShipment) {
-            sbd.append(" AND si.id IS NULL ");
+            sbd.append(" AND si.shipment IS NULL ");
         }
 
         sbd.append(" ORDER BY sp.createDate DESC");
