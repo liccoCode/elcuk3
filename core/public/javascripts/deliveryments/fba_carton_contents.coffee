@@ -11,7 +11,9 @@ $ ->
       return e.preventDefault()
   ).on('blur', ":input", (e) ->
     $input = $(@)
-    if($input.val() is "" or $input.val() <= 0 or isNaN($input.val()))
+    if _.isEmpty($input.val())
+      return
+    else if $input.val() <= 0 or isNaN($input.val())
       $input.val("1") # 确保用户填写的是大于零的数字
   )
 
