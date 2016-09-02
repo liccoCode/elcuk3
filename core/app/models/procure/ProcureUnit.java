@@ -1626,19 +1626,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.delete();
     }
 
-    /**
-     * 计算推荐的箱数
-     * <p>
-     * (采购计划计划数/SKU 在供应商处维护的一箱的数量)
-     *
-     * @return
-     */
-    public int recommendBoxNum() {
-        CooperItem item = CooperItem.find("sku=? AND cooperator.id=?", this.sku, this.cooperator.id).first();
-        int boxSize = (item == null ? 1 : item.boxSize);
-        return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
-    }
-
     public int fetchCheckTaskQty() {
         CheckTask task = this.tasks().get(0);
         if(task != null) {
