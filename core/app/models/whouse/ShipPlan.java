@@ -334,6 +334,12 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             new ERecordBuilder("shipplan.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id).save();
         }
         this.save();
+        /**需要同步修改出库记录的planQty**/
+        OutboundRecord out = this.outboundRecord();
+        if(out != null) {
+            out.planQty = this.planQty;
+            out.save();
+        }
     }
 
     /**
@@ -481,7 +487,8 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
 
     public OutboundRecord outboundRecord() {
         OutboundRecord out = OutboundRecord.find("shipPlan=?", this).first();
-        out.unmarshalBoxs();
+        if(out != null)
+            out.unmarshalBoxs();
         return out;
     }
 
