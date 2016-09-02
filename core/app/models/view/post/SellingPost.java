@@ -11,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by licco on 15/8/4.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/8/4
+ * Time: 5:39 PM
  */
 public class SellingPost extends Post<Selling> {
 
@@ -30,10 +33,9 @@ public class SellingPost extends Post<Selling> {
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s WHERE 1 = 1 ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s LEFT JOIN s.listing l WHERE 1 = 1 ");
 
         if(StringUtils.isNotBlank(analyzeResult)) {
-
             params.add(analyzeResult);
         }
         if(market != null) {
@@ -60,11 +62,11 @@ public class SellingPost extends Post<Selling> {
             List<String> categorys = User.getTeamCategorys(User.current());
 
             if(categorys != null && categorys.size() > 0) {
-                sql.append(" AND s.listing.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
+                sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
             } else {
-                categorys = new ArrayList<String>();
+                categorys = new ArrayList<>();
                 categorys.add("-1");
-                sql.append(" AND s.listing.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
+                sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
             }
         }
         if(StringUtils.isNotBlank(keywords)) {
