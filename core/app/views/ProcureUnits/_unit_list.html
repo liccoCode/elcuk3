@@ -39,11 +39,24 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
+      #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
       #{if checkbox}
         <td>
           <label class="checkbox">
-            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                   boxNum="${unit.recommendBoxNum()}">
+              #{if unit.fba && unit.fba.dto}
+                  #{set dto: unit.fba.dto/}
+                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                       data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                       data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                       data-width="${dto.width}" data-height="${dto.height}">
+              #{/if}
+              #{else}
+                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                       data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                       data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                       data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                       data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+              #{/else}
           </label>
         </td>
       #{/if}
@@ -53,7 +66,7 @@
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
     <td>
-      <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${unit.cooperator?.cooperItem(unit.sku)?.memo}">${unit.sku}</a>
+      <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
     </td>
     <td>
         #{if unit.fba}

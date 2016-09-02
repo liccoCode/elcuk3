@@ -11,7 +11,9 @@ $ ->
       return e.preventDefault()
   ).on('blur', ":input", (e) ->
     $input = $(@)
-    if($input.val() is "" or $input.val() <= 0 or isNaN($input.val()))
+    if _.isEmpty($input.val())
+      return
+    else if $input.val() <= 0 or isNaN($input.val())
       $input.val("1") # 确保用户填写的是大于零的数字
   )
 
@@ -22,11 +24,30 @@ $ ->
 
     units = [] # [{id: 1, boxNum: 2}]
     if modal.data('unit-source')
-      units.push({id: modal.data('unit-source'), boxNum: 1})
+      $checkbox = $("input[name='pids'][value='#{modal.data('unit-source')}']")
+      units.push({
+        id: modal.data('unit-source'),
+        boxNum: $checkbox.data("boxnum"),
+        num: $checkbox.data("num"),
+        lastCartonNum: $checkbox.data("lastcartonnum"),
+        singleBoxWeight: $checkbox.data("singleboxweight"),
+        length: $checkbox.data("length"),
+        width: $checkbox.data("width"),
+        height: $checkbox.data("height")
+      })
     else
       for checkbox in $('input[name="pids"]:checked')
         $checkbox = $(checkbox)
-        units.push({id: $checkbox.val(), boxNum: $checkbox.attr("boxNum")})
+        units.push({
+          id: $checkbox.val(),
+          boxNum: $checkbox.data("boxnum"),
+          num: $checkbox.data("num"),
+          lastCartonNum: $checkbox.data("lastcartonnum"),
+          singleBoxWeight: $checkbox.data("singleboxweight"),
+          length: $checkbox.data("length"),
+          width: $checkbox.data("width"),
+          height: $checkbox.data("height")
+        })
 
     if _.isEmpty(units)
       noty({text: '请选择采购单元!', type: 'error'})
@@ -36,12 +57,12 @@ $ ->
         tr = "<tr>" +
           "<td>#{unit.id}</td>" +
           "<td><input type='text' style='width: 30px;' name='dtos[#{index}].boxNum' value='#{unit.boxNum}' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].num'  maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].lastCartonNum'  placeholder='可选' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].singleBoxWeight'  maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].length' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].width'  maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].height'  maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].num'  value='#{unit.num}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].lastCartonNum'  value='#{unit.lastCartonNum}' placeholder='可选' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].singleBoxWeight' value='#{unit.singleBoxWeight}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].length' value='#{unit.length}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].width' value='#{unit.width}'  maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].height' value='#{unit.height}'  maxlength='3'/></td>" +
           "</tr>"
         $tabel.append(tr)
       )

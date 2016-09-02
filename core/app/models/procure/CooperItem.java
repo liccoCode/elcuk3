@@ -64,6 +64,26 @@ public class CooperItem extends Model {
     public Integer boxSize;
 
     /**
+     * 单箱重量
+     */
+    public double singleBoxWeight;
+
+    /**
+     * 单箱长
+     */
+    public double length;
+
+    /**
+     * 单箱宽
+     */
+    public double width;
+
+    /**
+     * 单箱高
+     */
+    public double height;
+
+    /**
      * 最低订货量
      */
     @Required
@@ -132,5 +152,27 @@ public class CooperItem extends Model {
      */
     public CooperItem checkAndRemove() {
         return this.delete();
+    }
+
+    /**
+     * 主箱箱数
+     *
+     * @param shipedQty
+     * @return
+     */
+    public int boxNum(int shipedQty) {
+        if(this.boxSize == null) return 0;
+        return (int) Math.ceil(shipedQty / (float) this.boxSize);
+    }
+
+    /**
+     * 尾箱内的产品数量
+     *
+     * @return
+     */
+    public int lastCartonNum(int shipedQty) {
+        if(this.boxSize == null) return 0;
+        int boxNum = this.boxNum(shipedQty);
+        return shipedQty - boxNum * this.boxSize;
     }
 }
