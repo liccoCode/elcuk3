@@ -122,6 +122,9 @@ public class Feed extends Model {
     public Feed(String content, T type, String fid) {
         this.content = content;
         this.type = type;
+        if(this.type != null) {
+            this.memo = this.type.label();
+        }
         this.fid = fid;
         this.byWho = User.username();
     }
