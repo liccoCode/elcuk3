@@ -617,31 +617,42 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 触发采购计划阶段, 时间
          * 3. 触发运输单状态, 时间
          */
-        if(this.state != S.CONFIRM)
+        if(this.state != S.CONFIRM) {
             Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
-        if(this.items.size() <= 0)
+        }
+        if(this.items.size() <= 0) {
             Validation.addError("", "没有运输项目可以运输.");
+        }
         for(ShipItem itm : this.items) {
             if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
-                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage))
+                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage)) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
-
-            if(!itm.unit.isPlaced)
+            }
+            if(!itm.unit.isPlaced) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
-        }
-        if(this.type == T.EXPRESS && this.internationExpress == null)
-            Validation.addError("", "请填写运输单的国际快递商");
-        if(this.cooper == null)
-            Validation.addError("", "请填写运输单合作伙伴(货代)");
-        if(this.whouse == null)
-            Validation.addError("", "请填写运输单仓库信息");
-        if(StringUtils.isBlank(this.trackNo))
-            Validation.addError("", "请填写运输单的跟踪号");
+            }
 
+        }
+        if(this.type == T.EXPRESS && this.internationExpress == null) {
+            Validation.addError("", "请填写运输单的国际快递商");
+        }
+        if(this.cooper == null) {
+            Validation.addError("", "请填写运输单合作伙伴(货代)");
+        }
+        if(this.whouse == null) {
+            Validation.addError("", "请填写运输单仓库信息");
+        }
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        if(this.tracknolist == null || this.tracknolist.size() == 0) {
+            Validation.addError("", "请填写运输单的跟踪号");
+        } else {
+            if(T.EXPRESS != this.type && this.tracknolist.get(0).length() > 10) {
+                Validation.addError("", String.format("%s运输单的跟踪号的最大长度为 10.", this.type.label()));
+            }
+        }
 
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
-        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
         for(ShipItem shipItem : this.items) {
             if(shipItem.unit.fba != null) {
                 shipItem.unit.fba.putTransportContentRetry(3, this);
