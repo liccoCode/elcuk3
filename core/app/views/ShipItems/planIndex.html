@@ -68,6 +68,7 @@
         <th>Selling ID</th>
         <th>SKU</th>
         <th>产品名称</th>
+        <th>供应商</th>
         <th>FBA</th>
         <th>去往仓库</th>
         <th>CenterId</th>
@@ -91,6 +92,7 @@
         <td>${plan.selling?.sellingId}</td>
         <td><a href="@{Products.show(plan.product.sku)}" target="_blank">${plan.product.sku}</a></td>
         <td>${plan.product.abbreviation}</td>
+        <td>${plan.unit?.cooperator?.name}</td>
         <td>${plan.fba?.shipmentId}</td>
         <td>${plan.whouse?.name}</td>
         <td>${plan.fba?.fbaCenter?.centerId}</td>
