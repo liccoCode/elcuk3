@@ -647,7 +647,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "请填写运输单的跟踪号");
         } else {
             if(T.EXPRESS != this.type && this.tracknolist.get(0).length() > 10) {
-                Validation.addError("", "运输单的跟踪号的最大长度为 10.");
+                Validation.addError("", String.format("%s运输单的跟踪号的最大长度为 10.", this.type.label()));
             }
         }
 
