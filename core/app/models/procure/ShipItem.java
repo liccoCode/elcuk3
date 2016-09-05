@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.DBUtils;
+import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -12,6 +13,8 @@ import models.market.Selling;
 import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.OutboundRecord;
+import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Validation;
@@ -45,6 +48,7 @@ public class ShipItem extends GenericModel {
      *
      * @param msku
      * @param qty
+     * @deprecated
      */
     public ShipItem(String msku, Integer qty) {
         this.unit = new ProcureUnit();
@@ -75,6 +79,17 @@ public class ShipItem extends GenericModel {
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
     }
 
+    /**
+     * 通过 ShipPlan 创建 ShipItem
+     *
+     * @param plan
+     */
+    public ShipItem(ShipPlan plan) {
+        this.plan = plan;
+        this.qty = plan.qty();
+        this.fulfillmentNetworkSKU = plan.selling.fnSku;
+    }
+
     @Id
     @GeneratedValue
     @Expose
@@ -84,9 +99,18 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
+    /**
+     * WARNING: 运输项关联的对象在(version:1.3.0)已经变更成了 ShipPlan,
+     * 相关信息展示的时候应该从关联的 ShipPlan 身上获取.
+     */
     @Expose
     @ManyToOne
+    @Deprecated
     public ProcureUnit unit;
+
+    @Expose
+    @ManyToOne
+    public ShipPlan plan;
 
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
@@ -159,8 +183,14 @@ public class ShipItem extends GenericModel {
     public void updateSellingFNSku() {
         if(StringUtils.isNotBlank(this.fulfillmentNetworkSKU)) {
             if(!this.fulfillmentNetworkSKU.equals(this.unit.selling.fnSku)) {
-                this.unit.selling.fnSku = this.fulfillmentNetworkSKU;
-                this.unit.selling.save();
+                ProcureUnit unit = this.unit();
+                if(unit != null) {
+                    Selling selling = unit.selling;
+                    if(selling != null) {
+                        selling.fnSku = this.fulfillmentNetworkSKU;
+                        selling.save();
+                    }
+                }
             }
         }
     }
@@ -171,8 +201,11 @@ public class ShipItem extends GenericModel {
      * @param stage
      */
     public void unitStage(ProcureUnit.STAGE stage) {
-        this.unit.stage = stage;
-        this.unit.save();
+        ProcureUnit unit = this.unit();
+        if(unit != null) {
+            unit.stage = stage;
+            unit.save();
+        }
     }
 
     /**
@@ -184,9 +217,9 @@ public class ShipItem extends GenericModel {
      */
     public F.T2<ShipItem, ProcureUnit> cancel() {
         this.shipment = null;
-        ProcureUnit unit = this.unit;
+        ProcureUnit unit = this.unit();
         this.unit = null;
-        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        return new F.T2<>(this.<ShipItem>delete(), unit);
     }
 
     /**
@@ -194,10 +227,62 @@ public class ShipItem extends GenericModel {
      *
      * @return
      */
-    public float totalWeight() {
-        return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
+    public Double totalWeight() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.weight() + out.lastBox.weight();
+        }
+        return null;
     }
 
+
+    public Integer totalBoxNum() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.boxNum + out.lastBox.boxNum;
+        }
+        return null;
+    }
+
+    public Double totalVolume() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            out.unmarshalBoxs();
+            return out.mainBox.volume() + out.lastBox.volume();
+        }
+        return null;
+    }
+
+    /**
+     * 仓库对接人
+     *
+     * @return
+     */
+    public String showName() {
+        if(this.plan != null && this.plan.outboundRecord() != null) {
+            OutboundRecord out = this.plan.outboundRecord();
+            if(out.handler != null)
+                return out.handler.username;
+        }
+        return null;
+    }
+
+    /**
+     * 最新采购价
+     *
+     * @return
+     */
+    public Float showSkuPrice() {
+        if(this.plan != null) {
+            ProcureUnit unit = ProcureUnit.find("product.sku=?", this.plan.product.sku).first();
+            if(unit != null) {
+                return unit.attrs.price;
+            }
+        }
+        return null;
+    }
 
     /**
      * 根据运输项目关联的采购计划, 从缓存的 AnalyzeDTO 中获取 TurnOver
@@ -209,10 +294,10 @@ public class ShipItem extends GenericModel {
         if(dtos == null || dtos.size() == 0)
             return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
         for(AnalyzeDTO dto : dtos) {
-            if(!dto.fid.equals(this.unit.sid)) continue;
+            if(!dto.fid.equals(this.get(String.class, "selling.sellingId"))) continue;
             return dto.getTurnOverT4();
         }
-        return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+        return new F.T4<>(0f, 0f, 0f, 0f);
     }
 
     /**
@@ -221,7 +306,7 @@ public class ShipItem extends GenericModel {
      * @return
      */
     public float totalDeclaredValue() {
-        return this.qty * this.unit.product.declaredValue;
+        return this.qty * this.get(Float.class, "product.declaredValue");
     }
 
     public static List<ShipItem> sameFBAShipItems(String shipmentId) {
@@ -257,7 +342,7 @@ public class ShipItem extends GenericModel {
         for(ShipItem itm : items) {
             itm.shipment = shipment;
             itm.save();
-            itm.unit.flushTask();
+            itm.flushUnitTask();
         }
     }
 
@@ -270,7 +355,7 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;
-        this.unit.flushTask();
+        this.flushUnitTask();
         this.save();
     }
 
@@ -378,7 +463,57 @@ public class ShipItem extends GenericModel {
     }
 
     public List<CheckTask> checkTasks() {
-        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
+        ProcureUnit unit = this.unit();
+        if(unit == null) return new ArrayList<>();
+        return CheckTask.find("units=? ORDER BY creatat DESC", unit).fetch();
+    }
+
+    public String showDeliverymentId() {
+        ShipItem shipItem = ShipItem.findById(this.id);
+        ProcureUnit unit = this.unit();
+        if(unit != null) {
+            return unit.deliveryment.id;
+        } else {
+            return null;
+        }
+    }
+
+    public String showDeclare() {
+        List<Template> templates = this.unit().product.category.templates;
+        List<String> ids = new ArrayList<>();
+        if(templates == null || templates.size() == 0) {
+            return "";
+        } else {
+            for(Template template : templates) {
+                ids.add(template.id.toString());
+            }
+        }
+        String message = "";
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");
+        sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
+        sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
+        sql.append(" WHERE p.product_sku = '" + this.get(String.class, "product.sku") + "'");
+        sql.append(" AND t.templates_id IN " + JpqlSelect.inlineParam(ids));
+        sql.append(" AND t.isDeclare = true ");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        if(rows != null && rows.size() > 1) {
+            for(Map<String, Object> map : rows) {
+                message += map.get("declareName").toString();
+                message += ":" + map.get("value") + " ";
+            }
+        }
+        return message;
+    }
+
+    /**
+     * 为了老的运输单做一下过渡
+     * (避免出现 VERSION: 1.3.0 上线后, 之前遗留的运输单无法打开)
+     *
+     * @return
+     */
+    public ProcureUnit unit() {
+        if(this.plan != null) return plan.unit;
+        return this.unit;
     }
 
     public Integer caluTotalUnitByCheckTask() {
@@ -408,36 +543,82 @@ public class ShipItem extends GenericModel {
         }
     }
 
-    public String showDeliverymentId() {
-        ShipItem shipItem = ShipItem.findById(this.id);
-        return shipItem.unit.deliveryment.id;
-    }
-
-    public String showDeclare() {
-        List<Template> templates = this.unit.product.category.templates;
-        List<String> ids = new ArrayList<String>();
-        if(templates == null || templates.size() == 0) {
-            return "";
-        } else {
-            for(Template template : templates) {
-                ids.add(template.id.toString());
+    /**
+     * 运输的产品总数
+     *
+     * @return
+     */
+    public int qty() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return outboundRecord.qty;
             }
         }
-        String message = "";
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");
-        sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
-        sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
-        sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");
-        sql.append(" AND t.templates_id IN " + JpqlSelect.inlineParam(ids));
-        sql.append(" AND t.isDeclare = true ");
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
-        if(rows != null && rows.size() > 1) {
-            for(Map<String, Object> map : rows) {
-                message += map.get("declareName").toString();
-                message += ":" + map.get("value") + " ";
-            }
-        }
-        return message;
+        return this.unit().realQty();
     }
 
+    /**
+     * 运输的总重量
+     *
+     * @return
+     */
+    public Double weight() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return this.plan.totalWeight();
+            }
+        }
+        return this.caluTotalWeightByCheckTask();
+    }
+
+    /**
+     * 运输的总箱数
+     *
+     * @return
+     */
+    public Integer boxNumber() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return this.plan.totalBoxNum();
+            }
+        }
+        return this.caluTotalUnitByCheckTask();
+    }
+
+    /**
+     * 运输的总体积
+     *
+     * @return
+     */
+    public Double volume() {
+        if(this.plan != null) {
+            OutboundRecord outboundRecord = this.plan.outboundRecord();
+            if(outboundRecord != null) {
+                return this.plan.totalVolume();
+            }
+        }
+        return this.caluTotalVolumeByCheckTask();
+    }
+
+    /**
+     * fba
+     * product
+     * selling
+     *
+     * @param clazz
+     * @param attr
+     * @param <T>
+     * @return
+     */
+    public <T> T get(Class<T> clazz, String attr) {
+        return Reflects.get(this.plan != null ? this.plan : this.unit, clazz, attr);
+    }
+
+    public void flushUnitTask() {
+        ProcureUnit unit = this.unit();
+        if(unit != null) unit.flushTask();
+    }
 }

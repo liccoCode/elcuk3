@@ -68,7 +68,7 @@ public class FBAs extends Controller {
      */
     public static void changeFBA(Long procureUnitId, CheckTaskDTO dto) {
         ProcureUnit unit = ProcureUnit.findById(procureUnitId);
-        unit.fba.removeFBAShipment();
+        unit.removeFBAShipment();
         unit.postFbaShipment(dto);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

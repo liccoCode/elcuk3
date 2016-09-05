@@ -17,12 +17,12 @@ public class CheckTaskDTO implements Serializable {
     /**
      * 箱数
      */
-    public int boxNum;
+    public Integer boxNum;
 
     /**
      * 个数
      */
-    public int num;
+    public Integer num;
 
     /**
      * 尾箱箱内的产品个数(可选)
@@ -34,25 +34,50 @@ public class CheckTaskDTO implements Serializable {
     /**
      * 单箱重量
      */
-    public double singleBoxWeight;
+    public Double singleBoxWeight;
 
     /**
      * 长
      */
-    public double length;
+    public Double length;
 
     /**
      * 宽
      */
-    public double width;
+    public Double width;
 
     /**
      * 高
      */
-    public double height;
+    public Double height;
 
     public CheckTaskDTO() {
+    }
 
+    /**
+     * 计算 boxNum * num
+     *
+     * @return
+     */
+    public int qty() {
+        if(this.boxNum != null && this.num != null) {
+            return this.boxNum * this.num;
+        }
+        return 0;
+    }
+
+    public Double weight() {
+        if(this.boxNum != null && this.singleBoxWeight != null) {
+            return this.boxNum * this.singleBoxWeight;
+        }
+        return 0d;
+    }
+
+    public Double volume() {
+        if(this.boxNum != null && this.length != null && this.width != null && this.height != null) {
+            return this.length * this.width * this.height * this.boxNum / 1000000;
+        }
+        return 0d;
     }
 
     public boolean validedQtys(int shipedQty) {

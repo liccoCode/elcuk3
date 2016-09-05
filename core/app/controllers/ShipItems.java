@@ -6,6 +6,9 @@ import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.view.post.ShipItemPost;
+import models.view.post.ShipPlanPost;
+import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import models.view.post.ProcureUnitShipPost;
 import play.data.validation.Validation;
@@ -16,12 +19,12 @@ import helper.Currency;
 
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipItems extends Controller {
 
-    @Before(only = "index")
+    @Before(only = {"index", "planIndex"})
     public static void setIndex() {
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("centers", FBACenter.findAll());
     }
 
@@ -30,6 +33,14 @@ public class ShipItems extends Controller {
             p = new ProcureUnitShipPost();
         List<ProcureUnit> units = p.query();
         render(p, units);
+    }
+
+    public static void planIndex(ShipPlanPost p) {
+        if(p == null)
+            p = new ShipPlanPost();
+        p.isHaveNoShipment = true;
+        List<ShipPlan> plans = p.query();
+        render(p, plans);
     }
 
     public static void showJson(Long id) {

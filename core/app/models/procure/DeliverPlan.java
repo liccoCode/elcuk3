@@ -1,22 +1,27 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,9 +34,11 @@ import java.util.List;
 public class DeliverPlan extends GenericModel {
 
     public DeliverPlan() {
+        this.clearanceType = CT.Self;
     }
 
     public DeliverPlan(String id) {
+        this();
         this.id = id;
     }
 
@@ -58,6 +65,7 @@ public class DeliverPlan extends GenericModel {
     /**
      * 可为每一个 Deliveryment 添加一个名称
      */
+    @Expose
     public String name;
 
 
@@ -101,41 +109,61 @@ public class DeliverPlan extends GenericModel {
         public abstract String label();
     }
 
+    @OneToMany(mappedBy = "deliverPlan")
+    public List<ReceiveRecord> receiveRecords = new ArrayList<>();
+
+    public enum CT {
+        Self {
+            @Override
+            public String label() {
+                return "我司报关";
+            }
+        },
+        Cooperator {
+            @Override
+            public String label() {
+                return "工厂报关";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public CT clearanceType;
 
     /**
-     * 通过 ProcureUnit 来创建采购单
+     * 通过 ProcureUnit 来创建出货单
      * <p/>
-     * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
      *
      * @param pids
      */
-    public synchronized static DeliverPlan createFromProcures(List<Long> pids, String name,
-                                                              User user) {
+    public synchronized static DeliverPlan createFromProcures(List<Long> pids, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         DeliverPlan deliverplan = new DeliverPlan(DeliverPlan.id());
         if(pids.size() != units.size()) {
             Validation.addError("deliveryment.units.create", "%s");
             return deliverplan;
         }
-
         Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
             isUnitToDeliverymentValid(unit, cop);
         }
         if(Validation.hasErrors()) return deliverplan;
-        deliverplan.cooperator = cop;
         deliverplan.handler = user;
-        deliverplan.name = name.trim();
-        deliverplan.units.addAll(units);
-        for(ProcureUnit unit : deliverplan.units) {
-            if(unit.deliverplan != null)
-                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
-            // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
-            unit.toggleAssignTodeliverplan(deliverplan, true);
-        }
         deliverplan.state = P.CREATE;
-        deliverplan.save();
-
+        deliverplan.clearanceType = CT.Self;
+        deliverplan.cooperator = cop;
+        for(ProcureUnit unit : units) {
+            if(unit.deliverplan == null) {
+                // 将 ProcureUnit 添加进入 出货单
+                unit.toggleAssignTodeliverplan(deliverplan, true);
+                unit.save();
+            } else {
+                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
+            }
+        }
         new ERecordBuilder("deliverplan.createFromProcures")
                 .msgArgs(StringUtils.join(pids, ","), deliverplan.id)
                 .fid(deliverplan.id).save();
@@ -155,7 +183,6 @@ public class DeliverPlan extends GenericModel {
         return String.format("DP|%s|%s", dt.toString("yyyyMM"),
                 count.length() == 1 ? "0" + count : count);
     }
-
 
     private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
@@ -177,12 +204,12 @@ public class DeliverPlan extends GenericModel {
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
+        Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit, singleCop)) {
+            if(isUnitToDeliverymentValid(unit, cop)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
 
@@ -200,13 +227,14 @@ public class DeliverPlan extends GenericModel {
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else {
                 unit.toggleAssignTodeliverplan(null, false);
+                unit.save();
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
-        this.units.removeAll(units);
+        if(Validation.hasErrors()) return new ArrayList<>();
         this.save();
 
         new ElcukRecord(Messages.get("deliverplan.delunit"),
@@ -220,14 +248,10 @@ public class DeliverPlan extends GenericModel {
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
-        if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
-        } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
-                    ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY)
-                    .fetch();
-        }
+        if(this.units == null || this.units.isEmpty()) return new ArrayList<>();
+        Cooperator cooperator = this.units.get(0).cooperator;
+        return ProcureUnit.find("cooperator=? AND stage=? AND deliverplan IS NULL", cooperator, ProcureUnit.STAGE
+                .DELIVERY).fetch();
     }
 
     /**
@@ -257,5 +281,82 @@ public class DeliverPlan extends GenericModel {
         }
     }
 
+    /**
+     * 确认出货单并生成收货记录
+     */
+    public void confirm() {
+        if(this.units == null || this.units.isEmpty()) return;
+        this.state = P.DONE;
+        this.save();
 
+        try {
+            for(ProcureUnit unit : this.units) {
+                unit.inShipment(this);
+            }
+        } catch(FastRuntimeException e) {
+            //Rollback
+            this.state = P.CREATE;
+            this.save();
+            for(ProcureUnit unit : this.units) {
+                unit.delivery(true);
+            }
+            throw e;
+        }
+
+    }
+
+    public boolean isLocked() {
+        return this.state == P.DONE;
+    }
+
+    /**
+     * 已经做过入库确认的人员名称
+     *
+     * @return
+     */
+    public static List<String> handlers() {
+        List<String> names = new ArrayList<>();
+        try {
+            List<Map<String, Object>> rows = DBUtils.rows(
+                    "SELECT DISTINCT u.username AS username FROM DeliverPlan d" +
+                            " LEFT JOIN User u ON u.id=d.handler_id"
+            );
+            if(rows != null && !rows.isEmpty()) {
+                for(Map<String, Object> row : rows) {
+                    if(row != null && row.containsKey("username")) {
+                        if(row.get("username") != null) names.add(row.get("username").toString());
+                    }
+                }
+            }
+        } catch(NullPointerException e) {
+            Logger.warn(Webs.E(e));
+        }
+        return names;
+    }
+
+    /**
+     * 同步报告类型到采购计划中去
+     */
+    public void syncClearanceTypeToUnits() {
+        for(ProcureUnit unit : this.units) {
+            if(unit.clearanceType != this.clearanceType) {
+                unit.clearanceType = this.clearanceType;
+                unit.stage = ProcureUnit.STAGE.INSHIPMENT;
+                unit.save();
+            }
+        }
+    }
+
+    /**
+     * 尝试补全供应商
+     *
+     * @return
+     */
+    public Cooperator cooperator() {
+        if(this.cooperator == null && this.units != null && !this.units.isEmpty()) {
+            this.cooperator = this.units.get(0).cooperator;
+            this.save();
+        }
+        return this.cooperator;
+    }
 }

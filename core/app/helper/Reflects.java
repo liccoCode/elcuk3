@@ -70,4 +70,31 @@ public class Reflects {
             throw new FastRuntimeException(Webs.E(e));
         }
     }
+
+    /**
+     * 使用反射来读取数据, 支持多级嵌套(attrs.address.name 和 类型匹配)
+     *
+     * @param instance
+     * @param clazz
+     * @param attr
+     * @param <T>
+     * @return
+     */
+    public static <T> T get(Object instance, Class<T> clazz, String attr) {
+        if(instance == null || StringUtils.isBlank(attr)) return null;
+
+        try {
+            String[] attrs = StringUtils.split(attr, ".");
+            Field field = instance.getClass().getField(attrs[0]);
+            Object value = field.get(instance);
+            if(attrs.length > 1) {
+                return get(value, clazz, StringUtils.join(attrs, ".", 1, attrs.length));
+            } else {
+                return (T) value;
+            }
+        } catch(NoSuchFieldException | IllegalAccessException | ClassCastException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

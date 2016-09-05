@@ -26,14 +26,14 @@
 
     #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType, class:'inline selectize' /}
 
-      <select name="p.state" style="width: 150px;" class="inline selectize">
+      <select name="p.state" style="width: 100px;" class="inline selectize">
         <option value="">状态</option>
       #{list items:models.procure.Deliveryment.S.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.deliveryType" style="width: 150px;" class="inline selectize">
+      <select name="p.deliveryType" style="width: 100px;" class="inline">
         <option value="">类型</option>
       #{list items:models.procure.Deliveryment.T.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.deliveryType?.name() ? 'selected' : ''}>${t.label()}</option>
@@ -47,20 +47,36 @@
       #{/list}
       </select>
 
+      <select name="p.handler" class="inline">
+        <option value="">下单人</option>
+      #{list items: handlers, as: 'handler'}
+        <option ${handler.equalsIgnoreCase(p.handler) ? 'selected' : ''} value="${handler}">${handler}</option>
+      #{/list}
+      </select>
+
+      <select name="p.haveSelling" class="inline">
+        <option value="">有无 Selling</option>
+      #{list items: [true, false], as: 'haveSelling'}
+        <option ${p.haveSelling == haveSelling ? 'selected' : ''} value="${haveSelling}">
+        ${haveSelling ? '有' :'无'}
+        </option>
+      #{/list}
+      </select>
+
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="ID、名称、SellingId">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
       <div class="inline">
+        <a href="@{Excels.deliveryments(p)}" class="btn btn-info" target="_blank">导出</a>
       #{power.ck "deliveryments.manual"}
-        <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
-          <i class="icon-plus"></i>新增手动单
+        <a target="_blank" class="btn btn-success" href='@{Deliveryments.manual()}'>
+          新增手动单
         </a>
       #{/power.ck}
-
-        <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
+        <a href="javascript:void(0)" name="confirmBtn" class="btn btn-warning">确认采购单</a>
       </div>
     </div>
   </div>
@@ -70,18 +86,24 @@
     <div class="span12">
       <table class="table table-condensed table-bordered">
         <tr>
-          <th></th>
+          <th>
+            <label class="checkbox">
+              <input type="checkbox" id="deliveryment_check_all">
+            </label>
+          </th>
           <th>#</th>
           <th>请款单</th>
-          <th>Name</th>
-          <th>State</th>
+          <th>采购单名称</th>
           <th>单据类型</th>
           <th>供应商</th>
-          <th>最先交货时间</th>
-          <th>最后交货时间</th>
+          <th width="5%">有无 Selling</th>
+          <th>最先交货日期</th>
+          <th>最后交货日期</th>
           <th>交货进度</th>
-          <th>User</th>
-          <th>Create</th>
+          <th>状态</th>
+          <th>下单时间</th>
+          <th>确认时间</th>
+          <th>下单人</th>
         </tr>
       #{list items:deliveryments, as:'dmt'}
           #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
@@ -89,10 +111,8 @@
         <tr>
           <td>
             <label>
-                #{if dmt.apply == null}
-                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                         name="deliverymentIds" value="${dmt.id}">
-                #{/if}
+              <input type="checkbox" name="deliverymentIds" value="${dmt.id}" data-state="${dmt.state?.name()}"
+                     data-cooperator="${dmt.cooperator?.id}" class="deliveryment">
             </label>
           </td>
           <td>
@@ -112,9 +132,9 @@
             <span>${dmt.name}</span>
             <span class="badge badge-info">${dmt.units.size()}</span>
           </td>
-          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>${dmt.deliveryType?.label()}</td>
           <td>${dmt.supplier()?.name}</td>
+          <td>#{yesOrNo f: dmt.haveSelling/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
           <td>
@@ -126,17 +146,90 @@
               </div>
             </div>
           </td>
-          <td>${dmt.handler.username}</td>
+          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>#{time_tooltip time:dmt.createDate/}</td>
+          <td>#{time_tooltip time:dmt.confirmDate/}</td>
+          <td>${dmt.handler.username}</td>
         </tr>
         <tr id="dmt_${dmt_index}" style="display:none;">
-          <td colspan="12" style="padding:0;border:none">
-              #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
+          <td colspan="14" style="padding:0;border:none">
+            <table class="table table-condensed table-bordered">
+              <tr>
+                <th style="width:40px;">采购计划</th>
+                <th>Selling</th>
+                <th>Sku</th>
+                <th style="width:10%;">产品名称</th>
+                <th>数量(计划/交货/入库)</th>
+                <th>预计交货时间</th>
+                <th>实际交货时间</th>
+                <th>入库时间</th>
+                <th>单价</th>
+                <th>总价</th>
+                <th>剩余请款额</th>
+                <th>状态</th>
+                <th>FBA</th>
+                <th>FnSku</th>
+                <th>去往仓库</th>
+                <th>运输方式</th>
+                <th>预计运输时间</th>
+                <th>质检结果</th>
+                <th>创建时间</th>
+                <th>创建人</th>
+              </tr>
+                #{list items:dmt.units, as:'unit'}
+                  <tr>
+                    <td>
+                      <a href="/ProcureUnits/index?p.search=${unit.id}" target="_blank">${unit.id}</a>
+                    </td>
+                    <td class="selling_id">
+                      <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
+                    </td>
+                    <td>
+                      <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+                    </td>
+                    <td>${unit.product.abbreviation}</td>
+                    <td>
+                        #{set qtys: unit.qtys()/}
+                      <span>${qtys._1 == null ? 0 : qtys._1}</span>
+                      /<span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">${qtys._2 == null ? 0 : qtys._2}</span>
+                      /<span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">${qtys._3 == null ? 0 : qtys._3}</span>
+                    </td>
+                    <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+                    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+                    <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
+                      #{set prices: unit.prices()/}
+                    <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
+                    <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
+                    <td>${unit.attrs?.currency?.symbol()} ${prices?._3?.format('#,###.##')}</td>
+                    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+                    <td>${unit.fba?.shipmentId}</td>
+                    <td>
+                      <!-- FnSku 下载 Label -->
+                        #{if unit.selling?.fnSku}
+                          <a href="@{Sellings.sellingLabel(unit.sid)}" class="btn btn-success btn-block">
+                            <i class="icon-download-alt"></i> ${unit.selling.fnSku}
+                          </a>
+                        #{/if}
+                        #{elseif unit.selling != null}
+                          <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+                            补全 FnSku
+                          </a>
+                        #{/elseif}
+                    </td>
+                    <td>${unit.whouse?.name()}</td>
+                    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
+                    <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
+                    <td>${unit.result()}</td>
+                    <td>#{time_tooltip time:unit.createDate/}</td>
+                    <td>${unit.creator?.username}</td>
+                  </tr>
+                #{/list}
+            </table>
           </td>
         </tr>
       #{/list}
         <tr class="tb_footer">
-          <td colspan="12">
+          <td colspan="14">
           #{bootstrap_pager pi:p, url:'' /}
           </td>
         </tr>
@@ -153,3 +246,4 @@
     </div>
   </div>
 </form>
+#{records records:records/}

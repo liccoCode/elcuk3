@@ -1,0 +1,116 @@
+#{script 'procureunits/_unit_list.coffee'/}
+#{set tr_key: key ? key : 'unit'/}
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>
+      <label class="checkbox">
+        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall">
+      </label>
+    </th>
+    <th style="width:40px;">采购计划</th>
+    <th>Selling ID</th>
+    <th>Sku</th>
+    <th style="width:10%;">产品名称</th>
+    <th>FnSku</th>
+    <th>FBA</th>
+    <th>去往仓库</th>
+    <th>数量(计划/交货/入库)</th>
+    <th>预计交货时间</th>
+    <th>实际交货时间</th>
+    <th>入库时间</th>
+    <th>单价</th>
+    <th>总价</th>
+    <th>剩余请款额</th>
+    <th>运输方式</th>
+    <th>预计运输时间</th>
+    <th>状态</th>
+    <th>质检结果</th>
+    <th>创建时间</th>
+    <th>创建人</th>
+  </tr>
+#{list items:units, as:'unit'}
+  <tr id="procureUnit_${unit.id}">
+      #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+    <td>
+      <label class="checkbox">
+          #{if unit.fba && unit.fba.dto}
+              #{set dto: unit.fba.dto/}
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                   data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                   data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                   data-width="${dto.width}" data-height="${dto.height}">
+          #{/if}
+          #{else}
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                   data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                   data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                   data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                   data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+          #{/else}
+      </label>
+    </td>
+    <td>${unit.id}</td>
+    <td class="selling_id">
+      <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
+    </td>
+    <td>
+      <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+    </td>
+    <td>${unit.product.abbreviation}</td>
+    <td>
+      <!-- FnSku 下载 Label -->
+        #{if unit.selling?.fnSku}
+          <a href="@{Sellings.sellingLabel(unit.sid)}" class="btn btn-success btn-block">
+            <i class="icon-download-alt"></i> ${unit.selling.fnSku}
+          </a>
+        #{/if}
+        #{elseif unit.selling != null}
+          <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+            补全 FnSku
+          </a>
+        #{/elseif}
+    </td>
+    <td>
+        #{if unit.fba}
+        ${unit.fba.shipmentId}
+            #{set feeds: unit.fba.feeds()/}
+            #{if feeds.size() > 0}
+                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                #{if feeds.get(0).isFailed()}
+                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{/if}
+                #{else }
+                  <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{/else}
+            #{/if}
+        #{/if}
+    </td>
+    <td>${unit.whouse?.name()}</td>
+    <td>
+        #{set qtys: unit.qtys()/}
+      <span>${qtys._1 == null ? 0 : qtys._1}</span>
+      /
+      <span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">
+      ${qtys._2 == null ? 0 : qtys._2}
+      </span>
+      /
+      <span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">
+      ${qtys._3 == null ? 0 : qtys._3}
+      </span>
+    </td>
+    <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+    <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
+      #{set prices: unit.prices()/}
+    <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
+    <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
+    <td>${unit.attrs?.currency?.symbol()} ${prices?._3?.format('#,###.##')}</td>
+    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
+    <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
+    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+    <td>${unit.result()}</td>
+    <td>#{time_tooltip time:unit.createDate/}</td>
+    <td>${unit.creator?.username}</td>
+  </tr>
+#{/list}
+</table>

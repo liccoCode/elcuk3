@@ -71,14 +71,12 @@ public class UnitAttrs implements Serializable {
     @Expose
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    @Required
     public Currency currency;
 
     /**
      * 采购单价
      */
     @Expose
-    @Required
     @Min(0)
     public Float price;
 
@@ -94,11 +92,15 @@ public class UnitAttrs implements Serializable {
 
     public void validate() {
         // 两个计划的时间
-        if(this.planDeliveryDate != null && this.planShipDate != null)
+        if(this.planDeliveryDate != null && this.planShipDate != null) {
             Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate,
                     new Date(this.planShipDate.getTime() + 1));
-        if(this.planShipDate != null && this.planArrivDate != null)
+        }
+        if(this.planShipDate != null && this.planArrivDate != null) {
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
+        }
     }
 
+    public UnitAttrs() {
+    }
 }

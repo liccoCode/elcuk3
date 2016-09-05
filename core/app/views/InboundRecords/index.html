@@ -30,6 +30,12 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
+      <select name="p.dateType" class="inline" style="width:120px;">
+      #{list items:models.view.post.InboundRecordPost.DATE_TYPES, as:'t'}
+        <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+      #{/list}
+      </select>
+
       <select name="p.origin" class="inline">
         <option value="">入库来源</option>
       #{list items:models.whouse.InboundRecord.O, as:'o'}
@@ -41,6 +47,13 @@
         <option value="">状态</option>
       #{list items:models.whouse.InboundRecord.S, as:'s'}
         <option ${s == p.state ? 'selected' : ''} value="${s.name()}">${s.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.confirmer" class="inline">
+        <option value="">操作者</option>
+      #{list items:confirmers, as:'confirmer'}
+        <option ${confirmer.equalsIgnoreCase(p.confirmer) ? 'selected' : ''} value="${confirmer}">${confirmer}</option>
       #{/list}
       </select>
 
@@ -68,7 +81,6 @@
 
   <form action="@{InboundRecords.confirm()}" name="confirm_form">
     <div class="span12">
-
       <table class="table table-condensed table-bordered">
         <tr>
           <th>
@@ -77,7 +89,7 @@
             </label>
           </th>
           <th>ID</th>
-          <th>状态</th>
+          <th style="width:50px;">状态</th>
           <th>来源</th>
           <th>质检任务 ID</th>
           <th>物料采购 ID</th>
@@ -93,8 +105,9 @@
           <th>良品入库数</th>
           <th>不良品入库数</th>
           <th>目标仓库</th>
-          <th>创建时间</th>
-          <th>入库时间</th>
+          <th>提交入库时间</th>
+          <th>实际入库时间</th>
+          <th style="width:50px;">确认人</th>
           <th>备注</th>
         </tr>
       #{list items: records, as: 'r'}
@@ -113,7 +126,7 @@
           </td>
           <td>
               #{if attrs.containsKey('procureunitId')}
-                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
+                <a href="/ProcureUnits/index?p.search=${attrs.get('procureunitId')}" target="_blank">
                 ${attrs.get('procureunitId')}
                 </a>
               #{/if}
@@ -161,6 +174,7 @@
           </td>
           <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
           <td>#{time_tooltip time: r.completeDate, datetime: true/}</td>
+          <td>${r.confirmer?.username}</td>
           <td>
             <input type="text" name="memo" value="${r.memo}">
             <input type="hidden" name="state" value="${r.state.name()}">

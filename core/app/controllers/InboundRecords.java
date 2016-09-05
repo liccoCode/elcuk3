@@ -29,7 +29,7 @@ import java.util.List;
 public class InboundRecords extends Controller {
     @Before(only = {"index", "blank", "create"})
     public static void setWhouses() {
-        renderArgs.put("whouses", Whouse.selfWhouses(false));
+        renderArgs.put("whouses", Whouse.selfWhouses(true));
     }
 
     @Check("inboundrecords.index")
@@ -40,25 +40,27 @@ public class InboundRecords extends Controller {
                 Messages.get("inboundrecord.confirm"),
                 Messages.get("inboundrecord.update")
         ), 50);
+        List<String> confirmers = InboundRecord.confirmers();
         List<Cooperator> cooperators = Cooperator.suppliers();
-        render(p, records, elcukRecords, cooperators);
+        render(p, records, elcukRecords, cooperators, confirmers);
     }
 
     @Check("inboundrecords.index")
     public static void blank() {
         InboundRecord record = new InboundRecord(InboundRecord.O.Other);
-        render(record);
+        List<Whouse> toWhouse = Whouse.findByType(Whouse.T.FBA);
+        render(record, toWhouse);
     }
 
     @Check("inboundrecords.index")
-    public static void create(InboundRecord record) {
-        record.beforeCreate();
-        record.valid();
-        if(Validation.hasErrors()) render("InboundRecords/blank.html", record);
-        record.save();
-        record.stockObj.setAttributes(record);
-        flash.success("创建成功!");
-        redirect("/InboundRecords/index");
+    public static void create(InboundRecord record, Long outboundRecordId) {
+        record.doCreate(outboundRecordId);
+        if(Validation.hasErrors()) {
+            render("InboundRecords/blank.html", record);
+        } else {
+            flash.success("创建成功!");
+            redirect("/InboundRecords/index");
+        }
     }
 
     /**

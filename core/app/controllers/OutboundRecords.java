@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import models.ElcukRecord;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -8,6 +9,7 @@ import models.view.post.OutboundRecordPost;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
+import org.w3c.tidy.Out;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -40,8 +42,11 @@ public class OutboundRecords extends Controller {
         List<OutboundRecord> records = p.query();
         List<ElcukRecord> elcukRecords = ElcukRecord.records(Arrays.asList(
                 Messages.get("outboundrecord.confirm"),
-                Messages.get("outboundrecord.update")
-        ), 50);
+                Messages.get("outboundrecord.update")), 50);
+        for(OutboundRecord record : records) {
+            record.tryMatchAttrs();
+            record.save();
+        }
         render(p, records, elcukRecords);
     }
 
@@ -79,7 +84,7 @@ public class OutboundRecords extends Controller {
      * @param rids
      */
     @Check("outboundrecords.index")
-    public static void confirm(List<Long> rids) {
+    public static void confirm(List<Long> rids, OutboundRecordPost p) {
         if(rids != null && !rids.isEmpty()) {
             List<String> errors = OutboundRecord.batchConfirm(rids);
             if(errors.isEmpty()) {
@@ -89,6 +94,19 @@ public class OutboundRecords extends Controller {
             }
 
         }
-        redirect("/OutboundRecords/index");
+        index(p);
+    }
+
+    /**
+     * 返回出库记录的 attributes 信息
+     *
+     * @param id
+     */
+    public static void attributes(Long id) {
+        OutboundRecord record = OutboundRecord.findById(id);
+        if(record == null) {
+            renderJSON(new Ret(String.format("无法找到出库记录[%s]", id)));
+        }
+        renderJSON(J.json(record.stockObj.attributes()));
     }
 }

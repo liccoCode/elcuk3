@@ -1,0 +1,83 @@
+<tr>
+  <th>ID</th>
+  <td>${plan.id}</td>
+
+  <th><span style="color:red">*</span>Selling ID</th>
+  <td>
+    <input type="text" value="${plan.selling?.sellingId}" name="plan.selling.sellingId" id="sellingId"
+           class="input-block-level" required autocomplete="off">
+  </td>
+</tr>
+<tr>
+  <th><span style="color:red">*</span>SKU</th>
+  <td>
+    <input type="text" value="${plan.product?.sku}" name="plan.product.sku" id="unit_sku" required readonly>
+  </td>
+
+  <th><span style="color:red">*</span>产品名称</th>
+  <td>
+    <input type="text" value="${plan.product?.abbreviation}" name="plan.product.abbreviation" style="width:300px;"
+           required readonly>
+  </td>
+</tr>
+<tr>
+  <th><span style="color:red">*</span>去往仓库</th>
+  <td>
+    <select name="plan.whouse.id" id="warehouse_select">
+      <option value="">请选择</option>
+    #{list items:whouses, as:'w'}
+      <option value="${w.id}" ${w.id == plan.whouse?.id ? 'selected' : ''}>${w.name}</option>
+    #{/list}
+    </select>
+  </td>
+
+  <th><span style="color:red">*</span>预计运输时间</th>
+  <td>
+    <input type="date" value="${plan.planShipDate?.date()}" name="plan.planShipDate" required>
+  </td>
+</tr>
+<tr>
+  <th>预计到库时间</th>
+  <td>
+    <input type="date" value="${plan.planArrivDate?.date()}" name="plan.planArrivDate">
+  </td>
+
+  <th><span style="color:red">*</span>计划出库数量</th>
+  <td>
+    <input type="text" class="input-mini" value="${plan.planQty}" name="plan.planQty" id="planQty" required>
+  </td>
+</tr>
+<tr>
+  <th><span style="color:red">*</span>运输方式</th>
+  <td>
+  #{list items:models.procure.Shipment.T.values(), as:'t'}
+    <label class="radio">
+      <input type="radio" name="plan.shipType" value="${t.name()}" ${ t == plan.shipType ? 'checked':'unchecked'}>${t.detail()}
+    </label>
+  #{/list}
+  </td>
+  <td colspan="2">
+    <div class="pull-left">
+    #{list items: plan.relateShipment()}
+      <div>
+        <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      </div>
+    #{/list}
+    </div>
+    <div class="pull-right">
+      <input type="button" class="btn btn-mini btn-primary" id="resetShipCondition" value="Reset" rel="popover"
+             content="重置当前采购计划用来加载运输单的条件">
+    </div>
+  </td>
+</tr>
+<tr>
+  <td colspan="4">
+    <h4>Memo <span style="color:red">(注意：变更计划必须写变更情况，如：“由海运改为空运“)</span></h4>
+    <textarea rows="8" class="input-block-level" name="plan.memo" id="memo">${plan.memo.raw()}</textarea>
+  </td>
+</tr>
+<tr>
+  <td colspan="4">
+  #{render 'ProcureUnits/_shipments.html'/}
+  </td>
+</tr>

@@ -7,6 +7,7 @@ import models.product.Product;
 import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Min;
@@ -337,6 +338,20 @@ public class Cooperator extends Model {
         return cooperators;
     }
 
+    /**
+     * 返回所有能生产该产品的供应商
+     *
+     * @param sku
+     * @return
+     */
+    public static List<Cooperator> cooperatorsBySKU(String sku) {
+        if(StringUtils.isBlank(sku)) return new ArrayList<>();
+        List<Cooperator> cooperators = Cooperator.find("SELECT DISTINCT co FROM Cooperator co " +
+                "LEFT JOIN co.cooperItems ci WHERE co.type=? AND ci.product.sku=?", T.SUPPLIER, sku).fetch();
+        Collections.sort(cooperators, new PinyinSort());
+        return cooperators;
+    }
+
     private static class PinyinSort implements Comparator<Object> {
         RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
 
@@ -346,6 +361,15 @@ public class Cooperator extends Model {
             Cooperator b = (Cooperator) o2;
             return collator.compare(a.name, b.name);
         }
+    }
+
+    /**
+     * Easyacc 这边大部分的货物都是走的欧嘉国际货代
+     *
+     * @return
+     */
+    public static Cooperator mainShipper() {
+        return Cooperator.find("name LIKE '%欧嘉国际%'").first();
     }
 
     private static class SkuPredicate implements Predicate {
@@ -361,5 +385,4 @@ public class Cooperator extends Model {
             return sku.equalsIgnoreCase(item.sku);
         }
     }
-
 }

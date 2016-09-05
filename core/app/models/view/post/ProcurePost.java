@@ -15,9 +15,8 @@ import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,17 +25,15 @@ import java.util.regex.Pattern;
  * Time: 4:32 PM
  */
 public class ProcurePost extends Post<ProcureUnit> {
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
-    private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
     static {
-        DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planDeliveryDate", "预计 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.deliveryDate", "实际 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"));
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("p.createDate", "创建时间"));
+        DATE_TYPES.add(new F.T2<>("p.attrs.planDeliveryDate", "预计 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("p.attrs.deliveryDate", "实际 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("p.attrs.planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<>("p.attrs.planShipDate", "预计 [发货] 时间"));
     }
 
     /**
@@ -60,6 +57,8 @@ public class ProcurePost extends Post<ProcureUnit> {
      * 选择过滤的日期类型
      */
     public String dateType;
+
+    public List<String> categories = new ArrayList<>();
 
     /**
      * 在 ProcureUnits中，downloadFBAZIP 方法 需要调用 传入 POST 查询条件， PLay 无法解析父类的属性，必须重写
@@ -89,8 +88,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.stage = ProcureUnit.STAGE.DONE;
-        this.dateType = "createDate";
+        this.dateType = "p.createDate";
         this.perSize = 70;
     }
 
@@ -106,116 +104,83 @@ public class ProcurePost extends Post<ProcureUnit> {
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray())
+        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray())
                 .fetch(this.page, this.perSize);
     }
 
     public List<ProcureUnit> queryForExcel() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
+        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureUnit.count(params._1, params._2.toArray());
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder();
-        List<Object> params = new ArrayList<Object>();
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM ProcureUnit p")
+                .append(" LEFT JOIN p.product pd ")
+                .append(" LEFT JOIN p.fba pf ")
+                .append(" LEFT JOIN p.selling ps ")
+                .append(" WHERE 1=1");
+        List<Object> params = new ArrayList<>();
 
-        Long procrueId = isSearchForId();
-        if(procrueId != null) {
-            sbd.append("id=?");
-            params.add(procrueId);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        if(NumberUtils.isNumber(this.search)) {
+            sbd.append(" AND p.id=?");
+            params.add(NumberUtils.toLong(this.search));
+            return new F.T2<>(sbd.toString(), params);
         }
-
-        String fba = isSearchFBA();
-        if(fba != null) {
-            sbd.append("fba.shipmentId=?");
-            params.add(fba);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        if(StringUtils.isNotBlank(this.dateType)) {
+            sbd.append(" AND ").append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
+                    .append("<=?");
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
         }
-
-        if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
-        sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
-                .append("<=?");
-        params.add(Dates.morning(this.from));
-        params.add(Dates.night(this.to));
-
+        if(this.categories != null && !this.categories.isEmpty()) {
+            sbd.append("AND pd.category.categoryId IN ").append(SqlSelect.inlineParam(this.categories));
+        }
         if(this.whouseId > 0) {
-            sbd.append(" AND whouse.id=?");
+            sbd.append(" AND p.whouse.id=?");
             params.add(this.whouseId);
         }
-
         if(this.cooperatorId > 0) {
-            sbd.append(" AND cooperator.id=? ");
+            sbd.append(" AND p.cooperator.id=? ");
             params.add(this.cooperatorId);
         }
-
         if(this.stage != null) {
-            sbd.append(" AND stage=? ");
+            sbd.append(" AND p.stage=? ");
             params.add(this.stage);
         }
-        sbd.append(" AND stage != 'APPROVE'");
-
+        sbd.append(" AND p.stage NOT IN ('APPROVE', 'CANCEL')");
         if(this.shipType != null) {
-            sbd.append(" AND shipType=? ");
+            sbd.append(" AND p.shipType=? ");
             params.add(this.shipType);
         }
-
         if(this.isPlaced != null) {
-            sbd.append(" AND isPlaced=? ");
+            sbd.append(" AND p.isPlaced=? ");
             params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
         }
-
         if(this.isOut != null) {
-            sbd.append(" AND isOut=?");
+            sbd.append(" AND p.isOut=?");
             params.add(this.isOut);
         }
-
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append("product.sku LIKE ? OR ")
-                    .append("selling.sellingId LIKE ?")
-//                        .append("fba.shipmentId LIKE ?")
+                    .append("pd.sku LIKE ?")
+                    .append(" OR pd.abbreviation LIKE ?")
+                    .append(" OR ps.sellingId LIKE ?")
+                    .append(" OR pf.shipmentId LIKE ?")
                     .append(") ");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i <= 3; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
-            sbd.append(" AND id IN " + SqlSelect.inlineParam(unitIdList));
+            sbd.append(" AND p.id IN ").append(SqlSelect.inlineParam(unitIdList));
         }
-        sbd.append(" AND planQty != 0");
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
-    }
-
-    /**
-     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
-     *
-     * @return
-     */
-    private Long isSearchForId() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
-        }
-        return null;
-    }
-
-    /**
-     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
-     *
-     * @return
-     */
-    private String isSearchFBA() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = FBA.matcher(this.search);
-            if(matcher.find()) return matcher.group(1);
-        }
-        return null;
+        sbd.append(" AND p.attrs.planQty != 0");
+        return new F.T2<>(sbd.toString(), params);
     }
 
     /**
@@ -302,5 +267,33 @@ public class ProcurePost extends Post<ProcureUnit> {
     public String returnShipType() {
         if(this.shipType == null) return "运输方式";
         return this.shipType.label();
+    }
+
+    /**
+     * 按照货币单位统计数量和总额
+     *
+     * @param dtos
+     * @return
+     */
+    public static Map<String, F.T2<BigDecimal, Integer>> countCostByCurrency(List<ProcureUnit> dtos) {
+        Map<String, F.T2<BigDecimal, Integer>> costs = new HashMap<>();
+        if(dtos != null && !dtos.isEmpty()) {
+            Iterator<ProcureUnit> it = dtos.iterator();
+            while(it.hasNext()) {
+                ProcureUnit unit = it.next();
+                if(unit != null && unit.attrs != null && unit.attrs.currency != null && unit.attrs.price != null) {
+                    String key = unit.attrs.currency.name();
+                    BigDecimal cost = new BigDecimal(unit.qty() * unit.attrs.price);
+
+                    F.T2<BigDecimal, Integer> costAndQty = costs.get(key);
+                    if(costs.containsKey(key)) {
+                        costs.put(key, new F.T2(costAndQty._1.add(cost), costAndQty._2 + unit.qty()));
+                    } else {
+                        costs.put(key, new F.T2(cost, unit.qty()));
+                    }
+                }
+            }
+        }
+        return costs;
     }
 }

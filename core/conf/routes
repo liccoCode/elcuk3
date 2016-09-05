@@ -149,6 +149,7 @@ GET     /shipment/{id}                                      Shipments.show
 GET     /shipment/{id}/dates                                Shipments.dates
 PUT     /shipment/{id}/process                              Shipments.refreshProcuress
 POST    /procureunits/shipment/new                          Shipments.procureUnitToShipment
+POST    /procureunits/shipment/blank                          Shipments.shipPlanToShipment
 GET     /shipment/{id}/preview                              Shipments.preview
 POST    /shipment/{id}/begin                                Shipments.beginShip
 POST    /shipment/{id}/confirm/{undo}                       Shipments.confirm

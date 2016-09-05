@@ -1,0 +1,21 @@
+#{extends 'main.html' /}
+#{set title:'出库计划' /}
+#{set 'moreScripts'}
+    #{script 'shipplans/blank.coffee'/}
+#{/set}
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @ShipPlans.create(), method: 'POST', id: 'new_shipplan'}
+<div id="stockDiv"></div>
+<table class="table table-condensed table-bordered">
+    #{render 'ShipPlans/_form.html', plan: plan, whouses: whouses/}
+  <tr>
+    <td colspan="4">
+      <button class="btn btn-primary" id="create_plan">创建</button>
+    </td>
+  </tr>
+</table>
+#{/form}
+#{records records:logs/}
+

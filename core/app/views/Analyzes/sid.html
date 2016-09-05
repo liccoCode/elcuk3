@@ -64,10 +64,15 @@
   #{list items:dtos, as:'dto'}
   <tr>
     <td class="sid">${dto.fid}</td>
-    <td style="min-width: 105px;">
-      <a href="@{ProcureUnits.blank(dto.fid, dto.totalfive(), dto.day())}" target="_blank">采购计划</a>&nbsp;
-      <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
-      <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
+    <td style="min-width: 140px;">
+      <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank" style="font-size: 11px">采购计划</a>
+      <a href="@{ShipPlans.blank(dto.fid)}" target="_blank" style="font-size: 11px">出库计划</a>
+      <br/>
+      <a href="@{Sellings.selling(dto.fid)}" target="_blank" style="font-size: 11px">Selling</a>
+      <a href="${dto.asinLink()}" target="_blank" style="font-size: 11px">${dto.asin}</a>
+      <a class="btn btn-mini clipboard" data-clipboard-text="${dto.asin}">
+        <img class="clippy" src="/images/clippy.svg" width="11px" height="11px" alt="Copy to clipboard">
+      </a>
     </td>
     <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
     <td class="text-warning">${dto.working}</td>

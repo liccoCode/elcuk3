@@ -10,10 +10,9 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-#{set isPending: dmt.state == models.procure.Deliveryment.S.PENDING/}
 <div class="row-fluid">
   <div class="span12">
-    <form action="@{Deliveryments.update()}" method="post">
+    <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm">
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>
@@ -22,45 +21,55 @@
             <input type="hidden" name="dmt.id" value="${dmt.id}">
           </td>
 
-          <th>State</th>
-          <td style="color:${dmt.state.rgb()}">${dmt.state}</td>
-          <th>CreateDate</th>
+          <th>状态</th>
+          <td style="color:${dmt.state.rgb()}">${dmt.state?.label()}</td>
+        </tr>
+
+        <tr>
+          <th><span style="color:red">*</span>采购单名称</th>
           <td>
-            <input type="text" readonly="" disabled="" class="input-medium" name="dmt.createDate" value="${dmt.createDate.datetime()}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>Name</th>
-          <td colspan="2">
-            <input type="text" class="span10" name="dmt.name" value="${dmt.name}">
+            <input type="text" class="input-block-level" name="dmt.name" value="${dmt.name}" required>
           </td>
 
-          <th>User</th>
-          <td>${dmt.handler.username}</td>
-          <td></td>
-        </tr>
-        <tr>
           <th>供应商</th>
-          <td>${dmt.cooperator?.name}</td>
-
+          <td>${dmt.cooperator()?.name}</td>
+        </tr>
+        <tr>
           <th>下单时间</th>
           <td>
             <input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}">
           </td>
 
-          <th>交货时间</th>
+          <th>单据类型</th>
           <td>
-            <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}">
+            <select name="dmt.deliveryType">
+            #{list items: models.procure.Deliveryment.types(), as: 't'}
+              <option ${dmt.deliveryType == t ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+            #{/list}
+            </select>
           </td>
         </tr>
-
+        <tr>
+          <th>有无 Selling</th>
+          <td colspan="3">
+            <input type="checkbox" name="dmt.haveSelling" value="${true}" ${dmt.haveSelling ? 'checked' : ''}>有
+          </td>
+        </tr>
         <tr>
           <td colspan="6">
-            <h4>Memo:</h4>
-            <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
+            <h4>备注:</h4>
+            <textarea rows="5" name="dmt.memo" class="input-block-level">${dmt.memo}</textarea>
+            <br/>
           #{power.ck "products.edit"}
-            <button class="btn btn-primary">更新</button>
+              #{if dmt.canBeEdit()}
+                <button class="btn btn-primary">提交</button>
+              #{/if}
+          #{/power.ck}
+          #{power.ck 'deliveryments.cancel'}
+              #{if dmt.canBeCancle()}
+                <a href="javascript:void(0)" data-href="@{Deliveryments.cancel()}" name="cancleBtn"
+                   class="btn btn-danger">取消采购单</a>
+              #{/if}
           #{/power.ck}
           </td>
         </tr>
@@ -68,41 +77,6 @@
     </form>
   </div>
 </div>
-
-<div class="row-fluid">
-  <div class="span12">
-  #{if isPending}
-    <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;">
-      <div class="input-prepend input-append" style="float:left;">
-        <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
-        <input type="hidden" name="id" value="${dmt.id}">
-          #{power.ck "products.edit"}
-            <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
-              确认
-            </button>
-          #{/power.ck}
-      </div>
-    </form>
-  #{/if}
-  #{power.ck 'deliveryments.cancel'}
-    <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;">
-      <input type="hidden" name="id" value="${dmt.id}">
-
-      <div class="input-append" style="float:left;margin-left:10px;">
-        <input type="text" name="msg" value="${msg}" placeHolder="简要填写关闭的原因">
-        <button class="btn btn-danger">取消采购单</button>
-      </div>
-    </form>
-  #{/power.ck}
-  #{if dmt.apply}
-    <div style="float:left;display:inline-block">
-      <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
-        请款单</a>
-    </div>
-  #{/if}
-  </div>
-</div>
-
 <div class="row-fluid">
   <div class="span12 alert">
     <h4 data-toggle="toggle" data-target="#tl">Timeline <i class="icon-reorder"></i></h4>
@@ -114,22 +88,22 @@
 
 #{success_row title:"已经添加进入[采购单]的[采购单元] "/}
 <form action="#" id="bulkpost" method="POST">
-
   <input type="hidden" name="expressid" id="expressid" value="${expressid}">
-
   <div class="row-fluid">
     <div class="span12" id="unit_list">
-    #{render 'ProcureUnits/_unit_list.html', units:dmt.units, checkbox:true, key:'delivery', delivery:true/}
+    #{render 'Deliveryments/_units.html', units:dmt.units, key: 'delivery'/}
     </div>
   </div>
   <div class="row-fluid">
     <div class="btn-toolbar">
-    #{power.ck "products.edit"}
-      <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
-         id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
-        解除
-      </a>
-    #{/power.ck}
+    #{ifnot dmt.isLock()}
+        #{power.ck "products.edit"}
+          <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
+             id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+            解除
+          </a>
+        #{/power.ck}
+    #{/ifnot}
     #{power.ck 'fbas.deploytoamazon'}
       <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
         批量创建 FBA
@@ -149,8 +123,6 @@
          id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
        进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
-
-
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
@@ -158,8 +130,6 @@
 #{render 'Deliveryments/box_number_model.html'/}
 #{render 'Deliveryments/fba_carton_contents.html'/}
 </form>
-*{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
-*{#{power.ck 'excels.deliveryment'}}*
 <div class="row-fluid">
   <div class="span12 alert">
     <h4 data-toggle="toggle" data-target="#excel">生成采购单信息 <i class="icon-reorder"></i></h4>
@@ -197,8 +167,7 @@
         <tr>
           <th>交易条款<br>(供应商)</th>
           <td colspan="3">
-          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
-          .tradingTerms}</textarea>
+            <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator?.tradingTerms}</textarea>
           </td>
           <th>产品要求<br>(产品线)</th>
           <td colspan="3">
@@ -220,11 +189,11 @@
         <tr>
           <th>供货方</th>
           <td>
-            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
+            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator?.fullName}">
           </td>
           <th>经办人</th>
           <td>
-            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
+            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator?.contacter}">
           </td>
 
           <th>买方</th>
@@ -240,11 +209,11 @@
         <tr>
           <th>移动电话</th>
           <td>
-            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
+            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator?.phone}">
           </td>
           <th>固定电话</th>
           <td>
-            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
+            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator?.tel}">
           </td>
 
           <th>移动电话</th>
@@ -258,7 +227,7 @@
         <tr>
           <th>传真</th>
           <td>
-            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
+            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator?.fax}">
           </td>
           <td colspan="2"></td>
 
@@ -282,7 +251,7 @@
         <tr>
           <th>地址</th>
           <td colspan="3">
-            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
+            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator?.address}">
           </td>
 
           <th>地址</th>
@@ -302,27 +271,24 @@
   </div>
 </div>
 #{/else}
-*{#{/power.ck}}*
-
-
-
-
 
 #{info_row title:'可添加进入[采购单]的[采购单元]'/}
 #{form @Deliveryments.addunits(dmt.id), method: 'POST'}
 <div class="row-fluid">
   <div class="span12">
     <input type="hidden" name="dmt.id" value="${dmt.id}">
-      #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan'/}
+      #{render 'Deliveryments/_units.html', units: plan_units, key: 'plan'/}
   </div>
 </div>
 <div class="row-fluid">
   <div class="span12">
     <div class="pull-left input-prepend input-append">
       <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
-        #{power.ck "products.edit"}
-          <button id="plan_form_submit" class="btn btn-primary">添加</button>
-        #{/power.ck}
+        #{ifnot dmt.isLock()}
+            #{power.ck "products.edit"}
+              <button id="plan_form_submit" class="btn btn-primary">添加</button>
+            #{/power.ck}
+        #{/ifnot}
     </div>
   </div>
 </div>

@@ -1,26 +1,12 @@
 $ ->
-
-# 切换供应商, 自行寻找价格
-  $("select[name='unit.cooperator.id']").change (e) ->
-    id = $(@).val()
-    if id
-      LoadMask.mask()
-      $.get('/Cooperators/price', {id: id, sku: $('#unit_sku').val()}, 'json')
-      .done((r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
-          $("#unit_price").val(r.price)
-          $("#unit_period").show()
-          $("#unit_period").text('（生产周期：' + r.period + ' 天）')
-        LoadMask.unmask()
-      )
-# 恢复默认
-    else
-      $("#unit_currency option:contains('CNY')").prop('selected', true)
-      $("#unit_price").text('')
-      $("#unit_period").hide()
+  $(document).ready ->
+    $shipType = $("[name='unit.shipType']")
+    $shipType.trigger('change') if $shipType.val() != undefined && $shipType.val() != 'EXPRESS'
+    if $("#sellingId")
+      checkCoopertorBySelling($("#sellingId").val())
+      getCooperItemBySku($("#unit_sku").val())
+    if $("#unit_sku").val()
+      getStockBySku($("#unit_sku").val())
 
   $('#box_num').change (e) ->
     e.preventDefault()
@@ -54,22 +40,22 @@ $ ->
       $("[name='unit.attrs.planArrivDate']").val(r['arrivedate'])
     )
 
-  $(document).ready ->
-    $shipType = $("[name='unit.shipType']")
-    $shipType.trigger('change') if $shipType.val() != undefined && $shipType.val() != 'EXPRESS'
 
   # Ajax 加载 Shipment
-  $('#new_procureunit,#unitEditForm,#update_form').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
+  $('#new_procureunit,#unitEditForm,#update_form,#splitUnitForm').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
     whouseId = $("[name='unit.whouse.id']").val()
     shipType = $("[name='unit.shipType']:checked").val()
-    shipment = $('#shipments')
+    shipment = $("#shipments")
+    getSelling($("#unit_sku").val())
     return unless (whouseId && shipType && shipment.size() > 0)
+
+    planDeliveryDate = $("#planDeliveryDate").val()
 
     if shipType == 'EXPRESS'
       $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.')
     else
       LoadMask.mask(shipment)
-      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
+      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType, planDeliveryDate: planDeliveryDate})
       .done((html) ->
         shipment.html(html)
         LoadMask.unmask()
@@ -87,12 +73,22 @@ $ ->
     )
   )
 
+  $("#del_ship_type").click(->
+    $("#ship_type_text").html("")
+    $("#shipmentId").val("")
+    $("#planShipDate").val("")
+    $("#planArrivDate").val("")
+    $("[name='unit.shipType']").each(->
+      $(@).attr("checked",false)
+    )
+  )
+
   $('#shipments').on('change', '[name=shipmentId]', (e) ->
     LoadMask.mask()
     $.get("/shipment/#{@getAttribute('value')}/dates")
     .done((r) ->
-      $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
-      $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
+      $("#planShipDate").data('dateinput').setValue(r['begin'])
+      $("#planArrivDate").data('dateinput').setValue(r['end'])
       LoadMask.unmask()
     )
   )
@@ -113,42 +109,110 @@ $ ->
       )
   ).on('click', "#create_unit", (e) ->
     e.preventDefault()
+    if !$("#unit_sku").val()
+      $("#unit_sku").focus()
+      noty({text: "请先填写SKU或者Selling！", type: 'error'})
+      return false
     if !$("#planQty").val()
+      $("#planQty").focus()
       noty({text: "请先填写采购数量！", type: 'error'})
       return false
-    address_name = $("#addressName").val()
-    if address_name == 'EasyAcc'
-      $.get('/procureunits/hasProcureUnitBySellings', {sellingId: $("#sellingId").val()})
-      .done((r)->
-        if r.flag
-          totalFive = $("#totalFive").val()
-          day = $("#day").val()
-          planQty = $("#planQty").val()
-          if day == null || day == '0' || day == '0.0'
-            $("#new_procureunit").submit()
-          else
-            sellingId = $("#sellingId").val()
-            $.get('/procureunits/isNeedApprove', {total: parseInt(totalFive) + parseInt(planQty), day: day, sellingId: sellingId})
-            .done((e)->
-              if e.flag
-                if confirm(e.message)
-                  if $("#memo").val().trim()
-#                    $("#isNeedApply").val("need")
-                    $("#isNeedApply").val("")
-                    $("#new_procureunit").submit()
-                  else
-                    noty({text: "请先填写备注！", type: 'error'})
-                    return false
-              else
-                $("#new_procureunit").submit()
-            )
-        else
-          if confirm('该selling第一次创建采购计划需走采购计划审批流程，确定吗?')
-#            $("#isNeedApply").val("need")
-            $("#isNeedApply").val("")
-            $("#new_procureunit").submit()
-      )
-    else
-      $("#new_procureunit").submit()
+    if !$("#planDeliveryDate").val()
+      noty({text: "请先填写预计交货日期！", type: 'error'})
+      $("#planDeliveryDate").focus()
+      return false
+    $("#new_procureunit").submit()
+  ).on('click', 'input[name=shipmentId]', (e) ->
+    $("input[name='unit.shipmentId']").val($(@).val())
   )
+
+  $sku = $("#unit_sku")
+  $sku.typeahead({
+    source: (query, process) ->
+      sku = $sku.val()
+      $.get('/products/sameSku', {sku: sku})
+      .done((c) ->
+        process(c)
+      )
+    updater: (item) ->
+      getStockBySku(item)
+      getProductNmae(item)
+      getCooperItemBySku(item)
+      getSelling(item)
+      item
+  })
+
+  coop_hash = {}
+
+  $sellingId = $("#sellingId")
+  $sellingId.typeahead({
+    source: (query, process) ->
+      name = $sellingId.val()
+      $.get('/sellings/sameSelling', {name: name})
+      .done((c) ->
+        process(c)
+      )
+    updater: (item) ->
+      sku = item.split(',')[0]
+      $("#unit_sku").val(sku)
+      $("#unit_sku").attr("readonly", true)
+      getStockBySku(sku)
+      getProductNmae(sku)
+      checkCoopertorBySelling(item)
+      getCooperItemBySku(sku)
+      getSelling()
+      item
+  })
+
+  getProductNmae = (sku) ->
+    $.post('/products/findProductName', sku: sku, (r) ->
+      $("#productName").val(r.name)
+    )
+  #获取供应商
+  getCooperItemBySku = (sku) ->
+    $.getJSON("/cooperators/findCoopItemBySku", sku: sku, (list) ->
+      coop_hash = {}
+      for item, i in list
+        cooper_id = item["cooper_id"]
+        cooper_name = item["cooperator"]["name"]
+        $("#cooperator").append("<option value='" + cooper_id + "'>" + cooper_name + "</option>")
+        coop_hash[cooper_id] = item
+      if $("#cooperator").attr("coop_value")
+        $("#cooperator option[value='" + $("#cooperator").attr("coop_value") + "']").attr("selected", true)
+    )
+
+  checkCoopertorBySelling = (selling) ->
+    for select, i in $("#warehouse_select option")
+      name = $(select).text()
+      name = "A_" + name.split('_')[1]
+      if selling.indexOf(name) > -1
+        $(select).attr("selected", true)
+
+
+  $("#cooperator").change(->
+    value = coop_hash[$(@).val()]
+    period = value["period"]
+    $("#coop_text").text("生产周期(day): " + period + ";  每箱数量: " + value["boxSize"] + ";  最低采购量:" + value["lowestOrderNum"])
+    $("#planDeliveryDate").val($.DateUtil.fmt2($.DateUtil.addDay(period, new Date())))
+  )
+
+  getStockBySku = (sku) ->
+    $("#stockDiv").load('/ProcureUnits/showStockBySellingOrSku', {name: sku, type: "SKU"})
+
+  getSelling = (sku) ->
+    if sku && $("#warehouse_select").val()
+      country = $("#warehouse_select :selected").text().split('_')[1]
+      sku = $("#unit_sku").val()
+      $.get("/sellings/findSellingBySkuAndMarket", {sku: sku, market: "AMAZON_" + country})
+      .done((c) ->
+        $("#sellingId").val(c)
+        if !$("#sellingId").val()
+          noty({text: "市场对应无Selling", type: 'error'})
+      )
+
+
+
+
+
+
 

@@ -455,6 +455,16 @@ public class User extends Model {
         return users;
     }
 
+    /**
+     * 质检人员
+     *
+     * @return
+     */
+    public static List<User> checkers() {
+        return User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
+                "like ?", "%质检%").fetch();
+    }
+
     public boolean getClosed() {
         return closed;
     }

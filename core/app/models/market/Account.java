@@ -13,7 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.message.BasicHeader;
@@ -35,7 +34,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 
 
@@ -222,10 +220,15 @@ public class Account extends Model {
                      * 2. With the website params and user/password to login.
                      */
                     this.cookieStore().clear();
-                    String uri = this.loginAmazonSellerCenterStep1();
-                    loginAmazonSellerCenterStep2(uri);
-                    F.T3<List<NameValuePair>, List<BasicHeader>, String> params = loginAmazonSellerCenterStep3(uri);
+                    this.loginAmazonSellerCenterStep1();
+                    this.loginAmazonSellerCenterStep2();
+                    F.T3<List<NameValuePair>, List<BasicHeader>, String> params = loginAmazonSellerCenterStep3();
                     body = HTTP.post(this.cookieStore(), params._3, params._2, params._1);
+                    if(Play.mode.isDev()) {
+                        FileUtils.writeStringToFile(new File(
+                                Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body
+                        );
+                    }
 
                     if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
@@ -262,38 +265,40 @@ public class Account extends Model {
                 StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
-    /**
-     * 访问 HomePage, 返回最后一个 Redirect 的 URI
-     *
-     * @return
-     */
-    public String loginAmazonSellerCenterStep1() {
-        HttpClientContext context = HTTP.request(this.cookieStore(), this.type.sellerCentralHomePage());
-        List<URI> uris = context.getRedirectLocations();
-        if(uris != null && uris.size() > 0) {
-            return uris.get(uris.size() - 1).toString();
-        } else {
-            return context.getTargetHost().getAddress().getHostAddress();
-        }
+    public void loginAmazonSellerCenterStep1() {
+        HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
     }
 
-    public void loginAmazonSellerCenterStep2(String uri) {
-        HTTP.get(this.cookieStore(), uri);
+    public void loginAmazonSellerCenterStep2() {
+        HTTP.get(this.cookieStore(), String.format("%s/%s", this.type.sellerCentralHomePage(), "gp/uedata/unsticky"));
     }
 
-    /**
-     * @param uri
-     * @return
-     * @throws IOException
-     */
-    public F.T3<List<NameValuePair>, List<BasicHeader>, String> loginAmazonSellerCenterStep3(String uri) throws
-            IOException {
-        List<BasicHeader> headers = loginHeaders(uri);
+    public F.T3<List<NameValuePair>, List<BasicHeader>, String> loginAmazonSellerCenterStep3() throws IOException {
+        List<BasicHeader> headers = new ArrayList<>();
+        headers.add(new BasicHeader(HttpHeaders.CACHE_CONTROL, "max-age=0"));
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT,
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"));
+        headers.add(new BasicHeader("Origin", this.type.sellerCentralHomePage()));
+        headers.add(new BasicHeader("Upgrade-Insecure-Requests", "1"));
+        headers.add(new BasicHeader(HttpHeaders.USER_AGENT,
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36"));
+        headers.add(new BasicHeader(HttpHeaders.REFERER, String.format("%s/%s", this.type.sellerCentralHomePage(),
+                "gp/homepage.html")));
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4"));
+
+        String body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
         List<NameValuePair> params = new ArrayList<>();
 
-        String body = HTTP.get(this.cookieStore(), uri);
+        if(Play.mode.isDev()) {
+            FileUtils.writeStringToFile(
+                    new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+                    body
+            );
+        }
+
         Document doc = Jsoup.parse(body);
-        Elements inputs = doc.select("form[name=signIn] input");
+        Elements inputs = doc.select("form[name=signinWidget] input");
+
         if(inputs.size() == 0) {
             Logger.info("WebSite [%s] Still have the Session with User [%s].", this.type.toString(), this.username);
             return new F.T3<>(params, headers, "");
@@ -301,35 +306,17 @@ public class Account extends Model {
 
         for(Element el : inputs) {
             String att = el.attr("name");
-            if("email".equals(att)) {
+            if("username".equals(att))
                 params.add(new BasicNameValuePair(att, this.username));
-            } else if("password".equals(att)) {
+            else if("password".equals(att))
                 params.add(new BasicNameValuePair(att, this.password));
-            } else {
+            else
                 params.add(new BasicNameValuePair(att, el.val()));
-            }
         }
         params.add(new BasicNameValuePair("sign-in-button", ""));
-        return new F.T3<>(params, headers, doc.select("form[name=signIn]").attr("action"));
-    }
 
-    /**
-     * Login 需要用到的 Headers
-     *
-     * @return
-     */
-    public List<BasicHeader> loginHeaders(String uri) {
-        List<BasicHeader> headers = new ArrayList<>();
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT,
-                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"));
-        headers.add(new BasicHeader(HttpHeaders.CACHE_CONTROL, "max-age=0"));
-        headers.add(new BasicHeader("Origin", this.type.sellerCentralHomePage()));
-        headers.add(new BasicHeader("Upgrade-Insecure-Requests", "1"));
-        headers.add(new BasicHeader(HttpHeaders.USER_AGENT,
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36"));
-        headers.add(new BasicHeader(HttpHeaders.REFERER, uri));
-        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4"));
-        return headers;
+
+        return new F.T3<>(params, headers, doc.select("form:eq(0)").attr("action"));
     }
 
     /**

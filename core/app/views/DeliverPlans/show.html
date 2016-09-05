@@ -10,12 +10,11 @@
 #{/set}
 
 #{errorMsgs /}
-
 #{flash_alert /}
 
 <div class="row-fluid">
   <div class="span12">
-    <form method="post" id="plan_form">
+    <form method="post" action="@{DeliverPlans.update()}">
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>
@@ -23,36 +22,48 @@
             <span id="deliverymentId">${dp.id}</span>
             <input type="hidden" name="dp.id" value="${dp.id}">
           </td>
-          <th>CreateDate</th>
+
+          <th><span style="color:red">*</span>出货单名称</th>
           <td>
-            <input type="text" readonly="" disabled="" class="input-medium" name="dp.createDate" value="${dp.createDate
-            .datetime()}">
+            <input type="text" class="span10" name="dp.name" value="${dp.name}" required>
           </td>
         </tr>
 
-        <tr>
-          <th>Name</th>
-          <td colspan="1">
-            <input type="text" class="span10" name="dp.name" value="${dp.name}">
-          </td>
-
-          <th>User</th>
-          <td>${dp.handler.username}</td>
-        </tr>
         <tr>
           <th>供应商</th>
-          <td>${dp.cooperator?.name}</td>
-          <th>状态</th>
-          <td>${dp.state.label()}</td>
+          <td>${dp.cooperator()?.name}</td>
+
+          <th><span style="color:red">*</span>报关类型</th>
+          <td>
+            <select name="dp.clearanceType" class="" style="width:90px;">
+            #{list items:models.procure.DeliverPlan.CT.values(), as:'ct'}
+              <option ${ct == dp.clearanceType ? 'selected' : ''} value="${ct.name()}">${ct.label()}</option>
+            #{/list}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th><span style="color:red">*</span>创建日期</th>
+          <td>
+            <input type="date" class="input-medium" name="dp.createDate"
+                   value="${dp.createDate.datetime()}">
+          </td>
+
+          <th>创建者</th>
+          <td>${dp.handler?.username}</td>
         </tr>
 
         <tr>
           <td colspan="6">
-            <h4>Memo:</h4>
+            <h4>备注:</h4>
             <textarea rows="5" name="dp.memo" class="span12">${dp.memo}</textarea>
-            <button id="plan_update_btn" class="btn btn-primary">更新</button>
-            <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-primary" target="_blank"><i
-                class="icon-download-alt"></i>导出出仓单</a>
+            <div style="margin-top:10px;">
+            #{ifnot dp.isLocked()}
+              <input type="submit" class="btn btn-primary" value="提交">
+            #{/ifnot}
+              <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-primary" target="_blank"><i
+                  class="icon-download-alt"></i>导出出仓单</a>
+            </div>
           </td>
         </tr>
       </table>
@@ -72,26 +83,36 @@
 
 #{success_row title:"已经添加进入[出货单]的[采购单元] "/}
 <form action="#" id="bulkpost" method="POST">
-
-
+  <input type="hidden" name="expressid" id="expressid" value="${expressid}">
   <div class="row-fluid">
     <div class="span12" id="unit_list">
-    #{render 'ProcureUnits/_unit_list.html', units:dp.units, checkbox:true, key:'delivery', delivery:true,
-    deliveryplan:true/}
+    #{render 'DeliverPlans/_units.html', units: dp.units, key: 'delivery'/}
     </div>
   </div>
   <div class="row-fluid">
     <div class="btn-toolbar">
-    #{power.ck "products.edit"}
-      <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
-         id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
-        解除
+    #{ifnot dp.isLocked()}
+        #{power.ck "products.edit"}
+          <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
+             id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
+            解除
+          </a>
+        #{/power.ck}
+    #{/ifnot}
+    #{power.ck 'fbas.deploytoamazon'}
+      <a href="javascript:void(0);" data-url='@{DeliverPlans.deploysToAmazon(dp.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
+        批量创建 FBA
       </a>
     #{/power.ck}
+      <a href="javascript:void(0);" data-url="@{DeliverPlans.downloadFBAZIP(dp.id)}" data-method="POST"
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
+           进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
+      </a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
-
+#{render 'Deliveryments/box_number_model.html'/}
+#{render 'Deliveryments/fba_carton_contents.html'/}
 </form>
 
 #{info_row title:'可添加进入[出货单]的[采购单元]'/}
@@ -99,17 +120,18 @@
 <div class="row-fluid">
   <div class="span12">
     <input type="hidden" name="dp.id" value="${dp.id}">
-    <!-- TODO: 进行异步加载(采取搜索的方式) -->
-      #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan', deliveryplan:true/}
+      #{render 'DeliverPlans/_units.html', units: plan_units, key: 'plan'/}
   </div>
 </div>
 <div class="row-fluid">
   <div class="span12">
     <div class="pull-left input-prepend input-append">
       <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
-        #{power.ck "products.edit"}
-          <button id="plan_form_submit" class="btn btn-primary">添加</button>
-        #{/power.ck}
+        #{ifnot dp.isLocked()}
+            #{power.ck "products.edit"}
+              <button id="plan_form_submit" class="btn btn-primary">添加</button>
+            #{/power.ck}
+        #{/ifnot}
     </div>
   </div>
 </div>

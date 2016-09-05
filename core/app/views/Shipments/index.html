@@ -1,10 +1,6 @@
 #{extends 'main_full.html' /}
 #{set title:'运输单列表 (' + shipments.size() + ')' /}
-#{set 'moreStyles'}
-    #{stylesheet 'bootstrap-multiselect.css'/}
-#{/set}
 #{set 'moreScripts'}
-    #{script 'bootstrap-multiselect.js'/}
     #{script 'shipments/index.coffee'/}
 #{/set}
 #{info_row}
@@ -18,6 +14,10 @@
 <form action="@{Shipments.index()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
     <div class="span12">
+      <div class="inline">
+        <button id="today" class="btn"><i class="icon-search"></i> Today</button>
+      </div>
+
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
         <input type="date" name="p.from" value="${p.from.date()}">
@@ -34,10 +34,10 @@
       #{/list}
       </select>
 
-      <select name="p.type" style="width: 100px;" class="inline selectize">
+      <select name="p.type" style="width: 150px;" class="inline selectize">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
-        <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t}</option>
+        <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
@@ -48,14 +48,6 @@
       #{/list}
       </select>
 
-      <div class="input-prepend inline">
-        <select name="p.whouseId" style="width:150px;" id="whouse_id" multiple="multiple">
-        #{list items:whouses, as:'wh'}
-          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
-        #{/list}
-        </select>
-      </div>
-
       <select name="p.cooperId" style="width: 150px;" class="inline selectize">
         <option value="">运输商</option>
       #{list items:cooperators, as:'cooper'}
@@ -63,8 +55,14 @@
       #{/list}
       </select>
 
-      <div class="input-prepend inline">
-        <select name="p.states" id="states" multiple="multiple" style="width:150px;">
+      <div class="inline">
+        <select name="p.whouseIds" style="width:150px;" id="whouse_id" multiple data-nonSelectedText="去往仓库">
+        #{list items:whouses, as:'wh'}
+          <option ${p.whouseIds.contains(wh?.id)? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.states" id="states" multiple data-nonSelectedText="状态">
         #{list items:models.procure.Shipment.S.values(), as:'state'}
           <option value="${state.name()}" ${p.states.contains(state) ? 'selected' : ''}>${state.label()}</option>
         #{/list}
@@ -96,13 +94,6 @@
     #{/power.ck}
       <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary">
         <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
-
-    #{power.ck 'outboundrecords.index'}
-      <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" data-target="_blank" class="btn btn-primary"
-         id="outboundBtn">
-        创建出库
-      </a>
-    #{/power.ck}
     </div>
   </div>
 </form>

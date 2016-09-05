@@ -95,6 +95,13 @@ public class Sellings extends Controller {
         renderJSON(J.json(sids));
     }
 
+    public static void findSellingBySkuAndMarket(String sku, String market) {
+        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku + "%", M.valueOf(market)).fetch();
+        List<String> sids = new ArrayList<String>();
+        for(Selling s : list) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
+    }
+
 
     /**
      * 加载指定 Sid 下的所有的 SellingId
@@ -424,6 +431,18 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
+
+    /**
+     * 模糊匹配selling
+     *
+     * @param name
+     */
+    public static void sameSelling(String name) {
+        List<Selling> sellings = Selling.find("sellingId like '" + name + "%'").fetch();
+        List<String> list = new ArrayList<>();
+        for(Selling s : sellings) list.add(s.sellingId);
+        renderJSON(J.json(list));
     }
 
     /**

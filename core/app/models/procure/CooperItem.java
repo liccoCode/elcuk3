@@ -10,6 +10,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,6 +22,7 @@ import javax.persistence.*;
 public class CooperItem extends Model {
 
     @ManyToOne
+    @Expose
     public Cooperator cooperator;
 
     @OneToOne
@@ -100,6 +102,10 @@ public class CooperItem extends Model {
     @Lob
     public String productTerms;
 
+    @Transient
+    @Expose
+    public long cooper_id;
+
     public CooperItem checkAndUpdate() {
         this.check();
         return this.save();
@@ -162,7 +168,12 @@ public class CooperItem extends Model {
      */
     public int boxNum(int shipedQty) {
         if(this.boxSize == null) return 0;
-        return (int) Math.ceil(shipedQty / (float) this.boxSize);
+        float boxNum = shipedQty / (float) this.boxSize;
+        if(boxNum < 1) {
+            return 1;
+        } else {
+            return (int) Math.floor(boxNum);
+        }
     }
 
     /**
@@ -173,6 +184,11 @@ public class CooperItem extends Model {
     public int lastCartonNum(int shipedQty) {
         if(this.boxSize == null) return 0;
         int boxNum = this.boxNum(shipedQty);
-        return shipedQty - boxNum * this.boxSize;
+        int lastCartonNum = shipedQty - boxNum * this.boxSize;
+        if(lastCartonNum <= 0) {
+            return 0;
+        } else {
+            return lastCartonNum;
+        }
     }
 }
