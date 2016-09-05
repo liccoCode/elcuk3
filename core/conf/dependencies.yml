@@ -17,7 +17,7 @@ require:
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
-    - elcuk -> mws 1.2:
+    - elcuk -> mws 1.3.1:
         exclude:
           - org.codehaus.woodstox -> *
     # 取消 es 的所有依赖, 因为只使用到 es 的搜索 Builder API

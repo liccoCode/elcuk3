@@ -40,6 +40,21 @@ $ ->
     window.open('/Excels/procureUnitSearchExcel?' + $("#search_Form").serialize(), "_blank")
   )
 
+  $(document).on('click', '#deployFBAs', (e) ->
+    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'deployFBAs').modal('show')
+  ).on('click', '#sumbitDeployFBAs', (e) ->
+    $modal = $("#fba_carton_contents_modal")
+    return if $modal.data('unit-source')
+
+    $trigger = $("##{$modal.data('modal-trigger')}")
+    form = $("<form method='post' action='#{$trigger.data('url')}'></form>")
+    form.hide().append($('input[name="pids"]:checked')) #  采购计划 ID
+    form.append($trigger.parents('form').find("[name*='p.']").clone()) # index form 表单
+    form.append($modal.find(":input").clone()) # dtos
+    form.appendTo('body')
+    form.submit().remove()
+  )
+
   $('#create_deliveryment').on('change', "select[name=unitCooperator]", (e) ->
     $select = $(@)
     $checkbox = $select.parents('tr').find('input[name="pids"]')
@@ -80,18 +95,10 @@ $ ->
     $form = $("#create_deliveryment")
     window.open('/deliveryments/create?' + $form.serialize(), "_blank")
 
-  $("#batch_create_fba_btn").click (->
-    if getCheckedUnitIds().length is 0
-      noty({text: '请选择需要批量创建FBA的采购单元', type: 'error'})
-      return false
-    window.location.replace('/ProcureUnits/batchCreateFBA?redirectTarget=index&' + $("[name='pids'], [name^='p.']").serialize())
-  )
-
   $("#create_deliveryment").on("click", "a[name='deleteBtn']", (e) ->
     return unless confirm("确认删除吗?")
       e.preventDefault()
   )
-
 
   getCheckedUnitIds = () ->
     unitIds = []

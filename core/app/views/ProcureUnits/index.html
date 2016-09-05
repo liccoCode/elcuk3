@@ -81,7 +81,7 @@
           <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliveryment">创建采购单</a>
         #{/power.ck}
           <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliverplan">创建出货单</a>
-          <a href="javascript:void(0)" class="btn btn-warning" id="batch_create_fba_btn">批量创建FBA</a>
+          <a href="javascript:void(0)" class="btn btn-warning" id="deployFBAs" data-url="/ProcureUnits/batchCreateFBA?redirectTarget=index">批量创建FBA</a>
           <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
             下载 FBA ZIP
           </a>
@@ -92,7 +92,8 @@
         </div>
       </div>
     </div>
-  #{include 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/fba_carton_contents.html'/}
   </form>
 </div>
 
@@ -130,11 +131,25 @@
         </tr>
       #{list items:units, as:'unit'}
         <tr id="procureUnit_${unit.id}">
+            #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
           <td>
             <label class="checkbox">
-              <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                     boxNum="${unit.recommendBoxNum()}" data-stage="${unit.stage.name()}"
-                     data-cooperatorid="${unit.cooperator?.id}">
+                #{if unit.fba && unit.fba.dto}
+                    #{set dto: unit.fba.dto/}
+                  <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
+                         data-stage="${unit.stage.name()}" data-cooperatorid="${unit.cooperator?.id}"
+                         data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                         data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                         data-width="${dto.width}" data-height="${dto.height}">
+                #{/if}
+                #{else}
+                  <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
+                         data-stage="${unit.stage.name()}" data-cooperatorid="${unit.cooperator?.id}"
+                         data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                         data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                         data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                         data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+                #{/else}
             </label>
           </td>
           <td><a href="@{ProcureUnits.edit(unit.id)}" target="_blank">${unit.id}</a></td>

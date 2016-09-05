@@ -10,10 +10,7 @@ import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
 import models.market.Selling;
-import models.procure.FBACenter;
-import models.procure.FBAShipment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -165,9 +162,13 @@ public class FBA {
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);
         create.setMarketplace(fbashipment.marketplace());
-        create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle.toString(),
+        InboundShipmentHeader header = new InboundShipmentHeader(fbaTitle.toString(),
                 Account.address(fbashipment.account.type), fbashipment.centerId, false,
-                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
+                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType);
+        //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED
+        header.setIntendedBoxContentsSource("FEED");
+        create.setInboundShipmentHeader(header);
+
         // 设置 items
         //TODO effect: 创建 FBA 的算法需要调整
         create.setInboundShipmentItems(new InboundShipmentItemList(fbashipment.inboundShipmentItems()));
@@ -194,22 +195,77 @@ public class FBA {
             FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state))
+        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state)) {
             return fbaShipment.state;
+        }
+        UpdateInboundShipmentResponse response = updateFbaInboundCartonContents(fbaShipment, state);
+        if(response.isSetUpdateInboundShipmentResult())
+            fbaShipment.state = state;
+        return fbaShipment.state;
+    }
 
+    /**
+     * 更新 FBA Shipment
+     *
+     * @param fbaShipment
+     */
+    public static UpdateInboundShipmentResponse updateFbaInboundCartonContents(FBAShipment fbaShipment,
+                                                                               FBAShipment.S state) {
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(fbaShipment.account.merchantId);
         update.setShipmentId(fbaShipment.shipmentId);
         update.setMarketplace(fbaShipment.marketplace());
-        update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
+        InboundShipmentHeader header = new InboundShipmentHeader(fbaShipment.title,
                 Account.address(fbaShipment.account.type), fbaShipment.centerId, false, state.name(),
-                fbaShipment.labelPrepType));
-        update.setInboundShipmentItems(new InboundShipmentItemList(fbaShipment.inboundShipmentItems()));
+                fbaShipment.labelPrepType);
+        //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
+        header.setIntendedBoxContentsSource("FEED");
+        update.setInboundShipmentHeader(header);
 
-        UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
-        if(response.isSetUpdateInboundShipmentResult())
-            fbaShipment.state = state;
-        return fbaShipment.state;
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
+        update.setInboundShipmentItems(new InboundShipmentItemList(items));
+        return client(fbaShipment.account).updateInboundShipment(update);
+    }
+
+    /**
+     * 提交运输信息给 Amazon
+     * <p>
+     * Carrier 和 Tracking numbers 和 ShipmentType
+     *
+     * @return
+     */
+    public static void putTransportContent(FBAShipment fbaShipment, Shipment shipment) throws
+            FBAInboundServiceMWSException {
+        PutTransportContentRequest request = new PutTransportContentRequest();
+        request.setSellerId(fbaShipment.account.merchantId);
+        request.setShipmentId(fbaShipment.shipmentId);
+        request.setIsPartnered(false);
+        request.setShipmentType(shipmentType(shipment.type));
+        request.setTransportDetails(fbaShipment.transportDetails(shipment));
+        PutTransportContentResponse response = client(fbaShipment.account).putTransportContent(request);
+    }
+
+    /**
+     * 提交运输信息时用到的 ShipmentType
+     * <p>
+     * ShipmentType values:
+     * 1. SP – Small Parcel
+     * 2. LTL – Less Than Truckload/Full Truckload (LTL/FTL)
+     *
+     * @param shipType
+     * @return
+     */
+    public static String shipmentType(Shipment.T shipType) {
+        if(shipType == null) return null;
+        switch(shipType) {
+            case EXPRESS:
+                return "SP";
+            case AIR:
+            case SEA:
+                return "LTL";
+            default:
+                return "SP";
+        }
     }
 
     /**

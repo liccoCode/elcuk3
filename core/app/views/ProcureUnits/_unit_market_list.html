@@ -26,10 +26,24 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
+
     <td>
       <label class="checkbox">
-        <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-               boxNum="${unit.recommendBoxNum()}">
+          #{if unit.fba && unit.fba.dto}
+              #{set dto: unit.fba.dto/}
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                   data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                   data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                   data-width="${dto.width}" data-height="${dto.height}">
+          #{/if}
+          #{else}
+            #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                   data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                   data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                   data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                   data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+          #{/else}
       </label>
     </td>
     <td><a href="@{ProcureUnits.edit(unit.id, 'show')}">${unit.id}</a></td>
@@ -66,12 +80,12 @@
     </td>
     <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.product.sku}</a></td>
     <td title="${unit.product.abbreviation}">
-      #{if unit.product.abbreviation.length() <= 15}
-         ${unit.product.abbreviation}
-      #{/if}
-      #{else }
+        #{if unit.product.abbreviation.length() <= 15}
+        ${unit.product.abbreviation}
+        #{/if}
+        #{else }
         ${unit.product.abbreviation.substring(0,15)}...
-      #{/else}
+        #{/else}
     </td>
     <td>
         #{set qtys: unit.qtys()/}

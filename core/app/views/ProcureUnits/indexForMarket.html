@@ -63,8 +63,8 @@
     </div>
     <div class="row-fluid">
       <div class="span12">
-        <input type="button" class="btn btn-primary" id="batch_create_fba_btn" value="批量创建FBA"
-               data-url="@{ProcureUnits.batchCreateFBA()}">
+        <a href="javascript:void(0)" class="btn btn-primary" id="deployFBAs" data-url="/ProcureUnits/batchCreateFBA">批量创建
+          FBA</a>
         <a href="@{ProcureUnits.blank()}" class="btn btn-success">创建采购计划</a>
         <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info">导出修改日志</a>
       #{power.ck "procures.downloadreports"}
@@ -72,7 +72,8 @@
       #{/power.ck}
       </div>
     </div>
-  #{include 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/fba_carton_contents.html'/}
   </form>
 </div>
 
