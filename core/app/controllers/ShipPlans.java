@@ -104,7 +104,7 @@ public class ShipPlans extends Controller {
             plan.id = manager.id;
             render("ShipPlans/show.html", plan);
         }
-        flash.success("成功修改采购计划!", id);
+        flash.success("成功修改出库计划!", id);
         redirect("/ShipPlans/index");
     }
 
