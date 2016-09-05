@@ -1,0 +1,42 @@
+#{script 'deliveryments/fba_carton_contents.coffee'/}
+<div id="fba_carton_contents_modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>FBA Carton Contents</h3>
+    <p class="muted">默认数据来源于供应商的产品</p>
+  </div>
+  <div class="modal-body">
+    <table class="table table-bordered table-condensed" id="fba_carton_contents_table">
+      <tr>
+        <td>
+          <abbr title="采购计划 ID Or 出货计划 ID">ID</abbr>
+        </td>
+        <td>
+          <abbr title="多少个箱子(不包含尾箱)">箱数(仅含主箱)</abbr>
+        </td>
+        <td>
+          <abbr title="单个主箱内货物的个数">个数(主箱)</abbr>
+        </td>
+        <td>
+          <abbr title="单个尾箱内货物的个数(默认只有一个尾箱)">个数(尾箱)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的重量">箱重(lbs.)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的长度">箱长(in.)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的宽度">箱宽(in.)</abbr>
+        </td>
+        <td>
+          <abbr title="单个箱子的高度">箱高(in.)</abbr>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="sumbitDeployFBAs">提交</a>
+  </div>
+</div>

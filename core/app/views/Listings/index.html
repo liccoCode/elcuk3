@@ -4,7 +4,7 @@
     #{stylesheet 'market.css' /}
 #{/set}
 #{set 'moreScripts'}
-    ##{script 'listings/listings.coffee'/}
+    #{script 'listings/listings.coffee'/}
 #{/set}
 
 #{flash_alert /}
@@ -14,7 +14,7 @@
   </div>
 </div>
 <div class="row-fluid">
-#{cache 'listings#index', for:'6h'}
+#{cache 'listings#index', for:'1h'}
   <div class="span3" style="min-height:700px;">
     <ul id="slider" class="nav nav-list nav-collapse" style="font-size:1em;cursor:pointer;">
       <!-- Category; cursor 继承下去了 -->

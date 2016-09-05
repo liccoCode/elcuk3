@@ -10,6 +10,7 @@ import models.market.Account;
 import models.market.Feed;
 import models.market.M;
 import models.market.Selling;
+import models.procure.FBAShipment;
 import models.product.Attach;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
@@ -25,7 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 
@@ -70,6 +70,12 @@ public class MWSUtils {
             @Override
             public String toString() {
                 return "_POST_INVENTORY_AVAILABILITY_DATA_";
+            }
+        },
+        FBA_INBOUND_CARTON_CONTENTS {
+            @Override
+            public String toString() {
+                return "_POST_FBA_INBOUND_CARTON_CONTENTS_";
             }
         }
     }
@@ -340,6 +346,12 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
+    /**
+     * 生成设置价格的 XML
+     *
+     * @param selling
+     * @return
+     */
     public static String assignPriceXml(Selling selling) {
         AmazonEnvelope envelope = new AmazonEnvelope();
 
@@ -388,6 +400,12 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
+    /**
+     * 生成设置 Fulfillment By Amazon 的 XML
+     *
+     * @param selling
+     * @return
+     */
     public static String fulfillmentByAmazonXml(Selling selling) {
         AmazonEnvelope envelope = new AmazonEnvelope();
 
@@ -409,6 +427,61 @@ public class MWSUtils {
         inventory.setSwitchFulfillmentTo("AFN");
 
         message.setInventory(inventory);
+        envelope.getMessage().add(message);
+        return JaxbUtil.convertToXml(envelope);
+    }
+
+    /**
+     * 生成提交包装信息给 FBA 的XML
+     *
+     * @param fbaShipment
+     * @return
+     */
+    public static String fbaInboundCartonContentsXml(FBAShipment fbaShipment) {
+        Selling selling = fbaShipment.selling();
+        if(selling == null) return null;
+
+        AmazonEnvelope envelope = new AmazonEnvelope();
+
+        Header header = new Header();
+        header.setDocumentVersion("1.01");
+        header.setMerchantIdentifier(selling.account.merchantId);
+
+        envelope.setHeader(header);
+        envelope.setMessageType("CartonContentsRequest");
+
+        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
+        message.setMessageID(BigInteger.valueOf(1));
+
+        //如果填写了 lastCartonNum 则多加一个 Carton 尾箱
+        int numCartons = fbaShipment.dto.boxNum;
+        if(fbaShipment.dto.lastCartonNum != null) {
+            ++numCartons;
+        }
+
+        CartonContentsRequest request = new CartonContentsRequest();
+        request.setShipmentId(fbaShipment.shipmentId);
+        request.setNumCartons(BigInteger.valueOf(numCartons));//箱数
+
+        for(int i = 0; i < numCartons; i++) {
+            CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
+            item.setSKU(selling.merchantSKU);
+            if(i == numCartons - 1 && fbaShipment.dto.lastCartonNum != null) {
+                item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.lastCartonNum));
+                item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.lastCartonNum));
+            } else {
+                item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.num));
+                item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.num));
+            }
+
+            CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
+            //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
+            carton.setCartonId(String.format("%s%s", fbaShipment.shipmentId, i));
+            carton.getItem().add(item);
+            request.getCarton().add(carton);
+        }
+
+        message.setCartonContentsRequest(request);
         envelope.getMessage().add(message);
         return JaxbUtil.convertToXml(envelope);
     }

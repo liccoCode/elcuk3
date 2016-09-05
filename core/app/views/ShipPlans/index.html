@@ -56,7 +56,9 @@
         <div class="inline">
           <a href="@{ShipPlans.blank()}" target="_blank" class="btn btn-success">新建</a>
           <a href="javascript:void(0)" id="download_excel" class="btn btn-info">导出</a>
-          <a href="javascript:void(0)" class="btn btn-warning" id="batch_create_fba_btn">创建 FBA</a>
+          <a href="javascript:void(0)" class="btn btn-warning" id="deployFBAs" data-url="/ShipPlans/batchCreateFBA">
+            创建 FBA
+          </a>
           <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " placement="bottom"
              id="downloadFBAZIP">
             下载 FBA
@@ -64,7 +66,8 @@
         </div>
       </div>
     </div>
-  #{include 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/fba_carton_contents.html'/}
   </form>
 
   <div class="row-fluid">
@@ -99,7 +102,26 @@
         <tr>
           <td>
             <label class="checkbox">
-              <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}">
+                #{set dto: plan?.fba?.dto/}
+                #{if dto}
+                  <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
+                         data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                         data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                         data-width="${dto.width}" data-height="${dto.height}">
+                #{/if}
+                #{elseif plan.unit}
+                    #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+                  <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
+                         data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                         data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                         data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                         data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+                #{/elseif}
+                #{else}
+                  <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
+                         data-boxnum="0" data-num="0" data-lastcartonnum="0" data-singleboxweight="0" data-length="0"
+                         data-width="0" data-height="0">
+                #{/else}
             </label>
           </td>
           <td>

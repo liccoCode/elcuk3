@@ -9,6 +9,7 @@ import models.User;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
+import models.qc.CheckTaskDTO;
 import models.view.post.DeliverPlanPost;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
@@ -159,7 +160,7 @@ public class DeliverPlans extends Controller {
     }
 
     @Check("fbas.deploytoamazon")
-    public static void deploysToAmazon(String id, List<Long> pids) {
+    public static void deploysToAmazon(String id, List<Long> pids, List<CheckTaskDTO> dtos) {
         if(pids == null || pids.size() == 0)
             Validation.addError("", "必须选择需要创建的采购计划");
 
@@ -168,7 +169,7 @@ public class DeliverPlans extends Controller {
             DeliverPlans.show(id);
         }
 
-        ProcureUnit.postFbaShipments(pids);
+        ProcureUnit.postFbaShipments(pids, dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {

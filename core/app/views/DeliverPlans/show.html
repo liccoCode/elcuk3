@@ -10,7 +10,6 @@
 #{/set}
 
 #{errorMsgs /}
-
 #{flash_alert /}
 
 <div class="row-fluid">
@@ -112,7 +111,8 @@
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
-#{include 'Deliveryments/box_number_model.html'/}
+#{render 'Deliveryments/box_number_model.html'/}
+#{render 'Deliveryments/fba_carton_contents.html'/}
 </form>
 
 #{info_row title:'可添加进入[出货单]的[采购单元]'/}
