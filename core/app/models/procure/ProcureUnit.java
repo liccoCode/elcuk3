@@ -60,6 +60,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public ProcureUnit() {
     }
 
+    public ProcureUnit(Selling selling) {
+        if(selling != null) {
+            this.selling = selling;
+            this.product = this.selling.listing.product;
+        }
+    }
+
     /**
      * Copy 一个全新的 ProcureUnit, 用来将部分交货的 ProcureUnit 分单交货
      *
