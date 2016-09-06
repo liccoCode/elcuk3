@@ -30,6 +30,11 @@
     <th>运营对接人</th>
     <th>仓库对接人</th>
     <th>丢失量/赔偿金额</th>
+  #{power.ck 'paymentunits.postfromtransport'}
+      #{if isExpress}
+        <th>记录运费</th>
+      #{/if}
+  #{/power.ck}
   </tr>
 #{list items:items, as:'item'}
     #{if item.plan}
@@ -165,6 +170,13 @@
         <td></td>
         <td></td>
         <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>
+          #{power.ck 'paymentunits.postfromtransport'}
+              #{if isExpress}
+                <td>
+                  <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(item.id)}'>L</a>
+                </td>
+              #{/if}
+          #{/power.ck}
       </tr>
     #{/else}
 #{/list}

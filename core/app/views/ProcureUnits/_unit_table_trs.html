@@ -106,7 +106,7 @@
   </td>
 </tr>
 <input type="hidden" name="unit.shipmentId" value="${unit.shipmentId}" id="shipmentId">
-<input type="hidden" name="to_page" value="#{if sid} analysis #{/if} #{else } index #{/else}">
+<input type="hidden" name="to_page" value="${sid != null ? 'analysis' : 'index'}">
 
 
 

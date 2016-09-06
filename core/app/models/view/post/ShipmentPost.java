@@ -73,7 +73,7 @@ public class ShipmentPost extends Post<Shipment> {
             shipment.id = row.get("id").toString();
             shipment.itemsNum = Integer.parseInt(this.returnStringOrNull(row.get("itemsNum")));
             shipment.trackNo = this.returnStringOrNull(row.get("trackNo"));
-            shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            shipment.postLoad();
 
             shipment.iExpressName = this.returnStringOrNull(row.get("internationExpress"));
             shipment.cname = this.returnStringOrNull(row.get("cname"));

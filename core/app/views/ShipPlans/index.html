@@ -102,15 +102,15 @@
         <tr>
           <td>
             <label class="checkbox">
-                #{set dto: plan?.fba?.dto/}
-                #{if dto}
+                #{set cooperItem: plan.unit?.cooperator?.cooperItem(plan.unit?.sku)/}
+                #{if plan.fba && plan.fba.dto}
+                    #{set dto: plan.fba.dto/}
                   <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
                          data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
                          data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
                          data-width="${dto.width}" data-height="${dto.height}">
                 #{/if}
-                #{elseif plan.unit}
-                    #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+                #{elseif cooperItem}
                   <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
                          data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
                          data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
@@ -119,8 +119,8 @@
                 #{/elseif}
                 #{else}
                   <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
-                         data-boxnum="0" data-num="0" data-lastcartonnum="0" data-singleboxweight="0" data-length="0"
-                         data-width="0" data-height="0">
+                         data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
+                         data-width="" data-height="">
                 #{/else}
             </label>
           </td>

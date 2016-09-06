@@ -106,6 +106,14 @@ public class CheckTaskPost extends Post<CheckTask> {
             params.add(this.result);
         }
 
+        if(StringUtils.isNotBlank(this.isTimeout)) {
+            if("true".equals(this.isTimeout)) {
+                sbd.append(" AND isTimeout=true");
+            } else {
+                sbd.append(" AND isTimeout=false OR isTimeout IS NULL");
+            }
+        }
+
         if(StringUtils.isNotBlank(this.checkor)) {
             List<Long> categories = CategoryAssignManagement.showCategoryByUserName(this.checkor);
             if(categories != null && !categories.isEmpty()) {
