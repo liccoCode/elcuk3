@@ -442,7 +442,7 @@ public class CheckTask extends Model {
      * JSON 格式: [{"badDesc": "aaa", inspectionResult: [检验结果1, 检验结果2]}]
      */
     @Transient
-    public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<CheckTaskAQLDTO>();
+    public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<>();
 
     @Expose
     @Lob

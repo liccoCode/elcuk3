@@ -12,7 +12,7 @@
 <form action="@{ShipItems.adjust(ship.id, ship.id)}" method="POST" id="adjust_shipitems">
   <div class="row-fluid">
     <div class="span12">
-    #{render './_show_plans.html', items: ship.items, itmRecord: true,isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
+    #{render './_show_plans.html', items: ship.items, itmRecord: true, isExpress: ship.isExpress()/}
     </div>
   </div>
 #{power.ck 'shipitems.adjust'}
@@ -164,9 +164,9 @@
 
         <div class="controls">
           <select name="fee.chargingWay" class="input-small">
-              #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
-                <option value="${way}">${way.label()}</option>
-              #{/list}
+          #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
+            <option value="${way}">${way.label()}</option>
+          #{/list}
           </select>
         </div>
       </div>

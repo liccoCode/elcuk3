@@ -9,6 +9,7 @@ import models.activiti.ActivitiProcess;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.market.Selling;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.qc.CheckTask;
@@ -121,6 +122,10 @@ public class ProcureUnits extends Controller {
 
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
+        if(StringUtils.isNotBlank(sid)) {
+            Selling selling = Selling.findById(sid);
+            unit = new ProcureUnit(selling);
+        }
         render(unit, sid);
     }
 

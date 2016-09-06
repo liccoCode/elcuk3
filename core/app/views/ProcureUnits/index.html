@@ -131,24 +131,29 @@
         </tr>
       #{list items:units, as:'unit'}
         <tr id="procureUnit_${unit.id}">
-            #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
           <td>
             <label class="checkbox">
+                #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
                 #{if unit.fba && unit.fba.dto}
+                  <!-- 优先使用自身的 FBA 箱包装数据 -->
                     #{set dto: unit.fba.dto/}
                   <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                         data-stage="${unit.stage.name()}" data-cooperatorid="${unit.cooperator?.id}"
                          data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
                          data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
                          data-width="${dto.width}" data-height="${dto.height}">
                 #{/if}
-                #{else}
+                #{elseif cooperItem}
+                  <!-- 使用维护好的合作伙伴的数据 -->
                   <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                         data-stage="${unit.stage.name()}" data-cooperatorid="${unit.cooperator?.id}"
                          data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
                          data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
                          data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
                          data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+                #{/elseif}
+                #{else}
+                  <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
+                         data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
+                         data-width="" data-height="">
                 #{/else}
             </label>
           </td>

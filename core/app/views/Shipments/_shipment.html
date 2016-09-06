@@ -51,41 +51,36 @@
     <tr>
       <th>Track No.</th>
       <td>
-        <div class="input-append">
-
-
-          <table class="table table-hover table-condensed table-bordered" id="trackno_table">
-          #{if ship.tracknolist==null || ship.tracknolist.size()<=0}
-            <tr>
-              <td class="span3">
-                <input type="text" class="input-medium" name="ship.tracknolist[${0}]" value="">
-              </td>
-            </tr>
-          #{/if}
-          #{else }
-
-              #{list items:ship.tracknolist, as:'trackno'}
-                <tr>
-                  <td class="span4">
-                    <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
-                      #{if ship.internationExpress && trackno}
-                        <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
-                      #{/if}
-                  </td>
-                  <td>
-                    <a class="btn" name='delete_trackno_row'>删除</a>
-                  </td>
-                </tr>
-              #{/list}
-          #{/else}
-          </table>
-          <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-             id="more_trackno_btn" data-table="trackno_table">
-            <i class="icon-plus"></i> More
-          </a>
-
-
-        </div>
+        <table class="table table-hover table-condensed table-bordered" id="trackno_table" style="max-width: 260px;">
+        #{if ship.tracknolist==null || ship.tracknolist.isEmpty()}
+          <tr>
+            <td>
+              <input type="text" class="input-medium" name="ship.tracknolist[${0}]" value="">
+            </td>
+          </tr>
+        #{/if}
+        #{else }
+            #{list items:ship.tracknolist, as:'trackno'}
+              <tr>
+                <td>
+                  <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
+                    #{if ship.internationExpress && trackno}
+                      <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                    #{/if}
+                  <a class="btn" name='delete_trackno_row'><i class="icon-remove"></i></a>
+                </td>
+              </tr>
+            #{/list}
+        #{/else}
+          <tr>
+            <td>
+              <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+                 id="more_trackno_btn" data-table="trackno_table">
+                <i class="icon-plus"></i>
+              </a>
+            </td>
+          </tr>
+        </table>
       </td>
       <th>工作号</th>
       <td>
