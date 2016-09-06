@@ -1696,4 +1696,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public static T[] shipTypes() {
         return ArrayUtils.removeElements(T.values(), T.EXPRESS_FAST, T.EXPRESS_ECO, T.DEDICATED_LINE);
     }
+
+    public boolean isExpress() {
+        return Arrays.asList(T.EXPRESS, T.EXPRESS_ECO, T.EXPRESS_FAST).contains(this.type);
+    }
 }
