@@ -476,6 +476,34 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Lob
     public String reason = " ";
 
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if(this.tracknolist != null && this.tracknolist.size() > 0) {
+            List<String> formatedTrackNumbers = new ArrayList<>();
+            for(String tn : this.tracknolist) {
+                if(StringUtils.isNotBlank(tn)) {
+                    formatedTrackNumbers.add(StringUtils.trim(tn));
+                }
+            }
+            this.trackNo = J.json(formatedTrackNumbers);
+        }
+    }
+
+    @PostLoad
+    public void postLoad() {
+        if(StringUtils.isNotBlank(this.trackNo)) {
+            List<String> trackNumberList = JSON.parseArray(this.trackNo, String.class);
+            if(trackNumberList != null && trackNumberList.size() > 0) {
+                for(int i = 0; i < trackNumberList.size(); i++) {
+                    trackNumberList.set(i, StringUtils.trim(trackNumberList.get(i)));
+                }
+                this.tracknolist = trackNumberList;
+            }
+        }
+    }
+
+
     /**
      * Shipment 的检查
      */
@@ -776,7 +804,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.whouse == null) {
             Validation.addError("", "请填写运输单仓库信息");
         }
-        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
         if(this.tracknolist == null || this.tracknolist.size() == 0) {
             Validation.addError("", "请填写运输单的跟踪号");
         } else {
@@ -1087,8 +1114,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Logger.warn("Shipment %s do not have trackNo.", this.id);
             return "";
         }
-
-        this.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         if(this.tracknolist == null || this.tracknolist.size() <= 0) return "";
         String onetrackno = this.tracknolist.get(0);
         if(StringUtils.isBlank(onetrackno)) return "";
@@ -1521,80 +1546,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     }
 
-
-    /**
-     * 将产品定位属性转换成 String 存入DB
-     * 或者将 String 转换成 List
-     *
-     * @param flag
-     */
-    public void arryParamSetUP(FLAG flag) {
-        if(flag.equals(FLAG.ARRAY_TO_STR)) {
-            /**
-             * 在转换成Json字符串之前需要对空字符串做一点处理
-             */
-            this.trackNo = this.listToStr(this.tracknolist);
-            if(this.trackNo.equals("{}") || this.trackNo.equals("[\"\"]") || this.trackNo.equals("[]")) {
-                this.trackNo = null;
-            }
-        } else {
-            if(StringUtils.isNotBlank(this.trackNo)) {
-                if(!trackNo.contains("[")) {
-                    this.trackNo = "[\"" + this.trackNo + "\"]";
-                }
-                try {
-                    this.tracknolist = JSON.parseArray(this.trackNo, String.class);
-                } catch(Exception e) {
-                    LogUtils.JOBLOG.info(this.trackNo + "--" + e.getMessage());
-                }
-            }
-
-        }
-    }
-
-    /**
-     * 对空字符进行处理
-     *
-     * @return
-     */
-    private List<String> fixNullStr(List<String> target) {
-        Iterator<String> iterator = target.iterator();
-        while(iterator.hasNext()) {
-            String p = iterator.next();
-            if(null == p) {
-                iterator.remove();
-            }
-        }
-        return target;
-    }
-
-
-    /**
-     * 对空字符进行处理
-     *
-     * @return
-     */
-    private String listToStr(List<String> target) {
-        Iterator<String> iterator = target.iterator();
-        String str = "[";
-        while(iterator.hasNext()) {
-            String p = iterator.next();
-            if(null == p || p.trim().equals("")) {
-                iterator.remove();
-            } else {
-                String[] args = p.split(",");
-                for(int i = 0; i < args.length; i++) {
-                    str = str + J.json(args[i].replace(" ", "")) + ",";
-                }
-            }
-        }
-        if(!str.equals("[")) {
-            str = str.substring(0, str.length() - 1);
-        }
-        str = str + "]";
-        return str;
-    }
-
     /**
      * 生成 InvoiceNO
      * <p/>
@@ -1674,7 +1625,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public String showTrackNo() {
         String showTrackNo = "";
-        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
         for(String trackNo : this.tracknolist) {
             showTrackNo += trackNo + ",";
         }
@@ -1723,7 +1673,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.totalVolumeShipment = newShip.totalVolumeShipment;
         this.shipmentTpye = newShip.shipmentTpye;
         this.totalStockShipment = newShip.totalStockShipment;
-        this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
 
         //日期发生改变则记录旧的日期
         if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0)

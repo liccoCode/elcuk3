@@ -184,7 +184,6 @@ public class Excels extends Controller {
             Double totalWeight = 0d;
             Double totalVolume = 0d;
             for(Shipment shipment : dtos) {
-                shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
                 for(ShipItem item : shipment.items) {
                     totalQty += item.qty();
                     totalUnit += item.boxNumber();
