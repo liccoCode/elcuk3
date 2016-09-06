@@ -140,20 +140,20 @@
                   <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
                          data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
                          data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
-                         data-width="${dto.width}" data-height="${dto.height}">
+                         data-width="${dto.width}" data-height="${dto.height}" data-stage="${unit.stage.name()}">
                 #{/if}
                 #{elseif cooperItem}
                   <!-- 使用维护好的合作伙伴的数据 -->
                   <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
                          data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
-                         data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                         data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}" data-stage="${unit.stage.name()}"
                          data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
                          data-width="${cooperItem.width}" data-height="${cooperItem.height}">
                 #{/elseif}
                 #{else}
                   <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
                          data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-                         data-width="" data-height="">
+                         data-width="" data-height="" data-stage="${unit.stage.name()}">
                 #{/else}
             </label>
           </td>
