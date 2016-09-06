@@ -21,6 +21,21 @@ $ ->
     window.open('/Excels/exportShipPlans?' + $("#search_Form").serialize(), "_blank")
   )
 
+  $(document).on('click', '#deployFBAs', (e) ->
+    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'deployFBAs').modal('show')
+  ).on('click', '#sumbitDeployFBAs', (e) ->
+    $modal = $("#fba_carton_contents_modal")
+    return if $modal.data('unit-source')
+
+    $trigger = $("##{$modal.data('modal-trigger')}")
+    form = $("<form method='post' action='#{$trigger.data('url')}'></form>")
+    form.hide().append($('input[name="pids"]:checked')) #  采购计划 ID
+    form.append($trigger.parents('form').find("[name*='p.']").clone()) # index form 表单
+    form.append($modal.find(":input").clone()) # dtos
+    form.appendTo('body')
+    form.submit().remove()
+  )
+
   getCheckedIds = () ->
     ids = []
     checkboxs = $('input[name="pids"]:checked')

@@ -8,6 +8,7 @@ import models.ElcukRecord;
 import models.market.Selling;
 import models.procure.Cooperator;
 import models.procure.Shipment;
+import models.qc.CheckTaskDTO;
 import models.view.post.ShipPlanPost;
 import models.whouse.ShipPlan;
 import models.whouse.Whouse;
@@ -104,7 +105,7 @@ public class ShipPlans extends Controller {
             plan.id = manager.id;
             render("ShipPlans/show.html", plan);
         }
-        flash.success("成功修改采购计划!", id);
+        flash.success("成功修改出库计划!", id);
         redirect("/ShipPlans/index");
     }
 
@@ -115,9 +116,9 @@ public class ShipPlans extends Controller {
      * @param pids
      * @param redirectTarget
      */
-    public static void batchCreateFBA(ShipPlanPost p, List<Long> pids, String redirectTarget) {
+    public static void batchCreateFBA(ShipPlanPost p, List<Long> pids, String redirectTarget, List<CheckTaskDTO> dtos) {
         if(pids != null && pids.size() > 0) {
-            ShipPlan.postFbaShipments(pids);
+            ShipPlan.postFbaShipments(pids, dtos);
         }
         if(StringUtils.isNotBlank(redirectTarget)) {
             redirect(redirectTarget);//如果需要参数请自行加到地址中去

@@ -52,9 +52,9 @@ $ ->
         , interval * 1000)
 
   # 检测 Notification 功能
-  Notify.checkNotify()
+  # Notify.checkNotify()
   # 循环 load 需要进行的通知内容
-  Notify.loopCheck()
+  # Notify.loopCheck()
 
   #统计当前用户的 新通知记录的条数
   newsCount = ->

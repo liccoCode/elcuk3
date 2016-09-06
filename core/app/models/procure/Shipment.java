@@ -12,8 +12,8 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.whouse.*;
-import mws.FBA;
+import models.whouse.ShipPlan;
+import models.whouse.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -745,10 +745,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 触发采购计划阶段, 时间
          * 3. 触发运输单状态, 时间
          */
-        if(this.state != S.CONFIRM)
+        if(this.state != S.CONFIRM) {
             Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
-        if(this.items.size() <= 0)
+        }
+        if(this.items.size() <= 0) {
             Validation.addError("", "没有运输项目可以运输.");
+        }
         for(ShipItem itm : this.items) {
             if(itm.unit != null) {
                 if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
@@ -760,38 +762,41 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 }
             } else if(itm.plan != null) {
                 if(!itm.plan.isLock()) {
-                    Validation.addError("", "需要运输的出库计划 #" + itm.plan.id + " 还没已出库.");
+                    Validation.addError("", "需要运输的出库计划 #" + itm.plan.id + " 还没出库.");
                 }
             }
 
         }
-        if(this.type == T.EXPRESS && this.internationExpress == null)
+        if(this.type == T.EXPRESS && this.internationExpress == null) {
             Validation.addError("", "请填写运输单的国际快递商");
-        if(this.cooper == null)
+        }
+        if(this.cooper == null) {
             Validation.addError("", "请填写运输单合作伙伴(货代)");
-        if(this.whouse == null)
+        }
+        if(this.whouse == null) {
             Validation.addError("", "请填写运输单仓库信息");
-        if(StringUtils.isBlank(this.trackNo))
+        }
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        if(this.tracknolist == null || this.tracknolist.size() == 0) {
             Validation.addError("", "请填写运输单的跟踪号");
-
-
+        } else {
+            if(T.EXPRESS != this.type && this.tracknolist.get(0).length() > 10) {
+                Validation.addError("", String.format("%s运输单的跟踪号的最大长度为 10.", this.type.label()));
+            }
+        }
         if(Validation.hasErrors()) return;
-        if(datetime == null) datetime = new Date();
 
+        if(datetime == null) datetime = new Date();
         for(ShipItem shipItem : this.items) {
             FBAShipment fba = shipItem.get(FBAShipment.class, "fba");
             if(fba != null) {
-                // 在测试环境下也不能标记 SHIPPED
+                fba.putTransportContentRetry(3, this);
                 fba.updateFBAShipmentRetry(3, Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
             }
-        }
-
-        for(ShipItem shipItem : this.items) {
             shipItem.shipDate = datetime;
             shipItem.save();
         }
         this.changeRelateProcureUnitStage(ProcureUnit.STAGE.SHIPPING);
-
         this.dates.beginDate = datetime;
         this.state = S.SHIPPING;
         this.save();

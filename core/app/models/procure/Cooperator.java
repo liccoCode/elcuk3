@@ -371,6 +371,7 @@ public class Cooperator extends Model {
     public static Cooperator mainShipper() {
         return Cooperator.find("name LIKE '%欧嘉国际%'").first();
     }
+
     private static class SkuPredicate implements Predicate {
         private String sku;
 

@@ -29,10 +29,23 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
+      #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
     <td>
       <label class="checkbox">
-        <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-               boxNum="${unit.recommendBoxNum()}">
+          #{if unit.fba && unit.fba.dto}
+              #{set dto: unit.fba.dto/}
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                   data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                   data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                   data-width="${dto.width}" data-height="${dto.height}">
+          #{/if}
+          #{else}
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                   data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                   data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                   data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                   data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+          #{/else}
       </label>
     </td>
     <td>${unit.id}</td>
@@ -56,7 +69,21 @@
           </a>
         #{/elseif}
     </td>
-    <td>${unit.fba?.shipmentId}</td>
+    <td>
+        #{if unit.fba}
+        ${unit.fba.shipmentId}
+            #{set feeds: unit.fba.feeds()/}
+            #{if feeds.size() > 0}
+                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                #{if feeds.get(0).isFailed()}
+                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{/if}
+                #{else }
+                  <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                #{/else}
+            #{/if}
+        #{/if}
+    </td>
     <td>${unit.whouse?.name()}</td>
     <td>
         #{set qtys: unit.qtys()/}

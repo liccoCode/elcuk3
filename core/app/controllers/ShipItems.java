@@ -38,6 +38,7 @@ public class ShipItems extends Controller {
     public static void planIndex(ShipPlanPost p) {
         if(p == null)
             p = new ShipPlanPost();
+        p.isHaveNoShipment = true;
         List<ShipPlan> plans = p.query();
         render(p, plans);
     }

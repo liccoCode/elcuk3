@@ -21,7 +21,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -357,16 +356,21 @@ public class Selling extends GenericModel {
         }
     }
 
-    public List<NameValuePair> submitJobParams(Feed feed) {
-        Validate.notNull(feed);
+    public List<NameValuePair> submitJobParams() {
         Validate.notNull(this.account);
         Validate.notNull(this.market);
         Validate.notEmpty(this.sellingId);
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
-        params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
+        return params;
+    }
+
+    public List<NameValuePair> submitJobParams(Feed feed) {
+        Validate.notNull(feed);
+        List<NameValuePair> params = this.submitJobParams();
+        params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         return params;
     }
 
@@ -457,22 +461,22 @@ public class Selling extends GenericModel {
         }
     }
 
-    public List<NameValuePair> saleAmazonParams(Feed feed) {
-        List<NameValuePair> params = this.submitJobParams(feed);
+    public List<NameValuePair> saleAmazonParams() {
+        List<NameValuePair> params = this.submitJobParams();
         params.add(new BasicNameValuePair("type", "CreateListing"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
         return params;
     }
 
-    public List<NameValuePair> assignAmazonListingPriceParams(Feed feed) {
-        List<NameValuePair> params = this.submitJobParams(feed);
+    public List<NameValuePair> assignAmazonListingPriceParams() {
+        List<NameValuePair> params = this.submitJobParams();
         params.add(new BasicNameValuePair("type", "AssignPrice"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRICING_FEED.toString()));
         return params;
     }
 
-    public List<NameValuePair> setFulfillmentByAmazonParams(Feed feed) {
-        List<NameValuePair> params = this.submitJobParams(feed);
+    public List<NameValuePair> setFulfillmentByAmazonParams() {
+        List<NameValuePair> params = this.submitJobParams();
         params.add(new BasicNameValuePair("type", "FulfillmentByAmazon"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_INVENTORY_FEED.toString()));
         return params;
@@ -483,7 +487,7 @@ public class Selling extends GenericModel {
      */
     public void saleAmazon() {
         Feed feed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
-        feed.submit(this.saleAmazonParams(feed));
+        feed.submit(this.saleAmazonParams());
     }
 
     /**
@@ -491,7 +495,7 @@ public class Selling extends GenericModel {
      */
     public void assignAmazonListingPrice() {
         Feed feed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
-        feed.submit(this.assignAmazonListingPriceParams(feed));
+        feed.submit(this.assignAmazonListingPriceParams());
     }
 
     /**
@@ -499,7 +503,7 @@ public class Selling extends GenericModel {
      */
     public void setFulfillmentByAmazon() {
         Feed feed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
-        feed.submit(this.setFulfillmentByAmazonParams(feed));
+        feed.submit(this.setFulfillmentByAmazonParams());
     }
 
     /**
@@ -1081,8 +1085,8 @@ public class Selling extends GenericModel {
             Validation.addError("", "Feed 不完整, 请重新上架!!");
         }
         if(Validation.hasErrors()) return;
-        saleAmazonFeed.submit(this.saleAmazonParams(saleAmazonFeed));
-        assignAmazonListingPriceFeed.submit(this.assignAmazonListingPriceParams(assignAmazonListingPriceFeed));
-        setFulfillmentByAmazonFeed.submit(this.setFulfillmentByAmazonParams(setFulfillmentByAmazonFeed));
+        saleAmazonFeed.submit(this.saleAmazonParams());
+        assignAmazonListingPriceFeed.submit(this.assignAmazonListingPriceParams());
+        setFulfillmentByAmazonFeed.submit(this.setFulfillmentByAmazonParams());
     }
 }

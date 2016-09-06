@@ -202,7 +202,21 @@
                     <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
                     <td>${unit.attrs?.currency?.symbol()} ${prices?._3?.format('#,###.##')}</td>
                     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-                    <td>${unit.fba?.shipmentId}</td>
+                    <td>
+                        #{if unit.fba}
+                        ${unit.fba.shipmentId}
+                            #{set feeds: unit.fba.feeds()/}
+                            #{if feeds.size() > 0}
+                                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                                #{if feeds.get(0).isFailed()}
+                                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                                #{/if}
+                                #{else }
+                                  <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                                #{/else}
+                            #{/if}
+                        #{/if}
+                    </td>
                     <td>
                       <!-- FnSku 下载 Label -->
                         #{if unit.selling?.fnSku}

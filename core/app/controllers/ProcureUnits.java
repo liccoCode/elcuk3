@@ -9,13 +9,10 @@ import models.activiti.ActivitiProcess;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
-import models.market.Selling;
 import models.procure.Cooperator;
-import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
-import models.procure.Shipment;
-import models.product.Product;
 import models.qc.CheckTask;
+import models.qc.CheckTaskDTO;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
@@ -26,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
-import play.libs.F;
 import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -609,9 +605,9 @@ public class ProcureUnits extends Controller {
      * @param pids
      * @deprecated
      */
-    public static void batchCreateFBA(ProcurePost p, List<Long> pids, String redirectTarget) {
+    public static void batchCreateFBA(ProcurePost p, List<Long> pids, String redirectTarget, List<CheckTaskDTO> dtos) {
         if(pids != null && pids.size() > 0) {
-            ProcureUnit.postFbaShipments(pids);
+            ProcureUnit.postFbaShipments(pids, dtos);
         }
         if(StringUtils.isNotBlank(redirectTarget) && StringUtils.containsIgnoreCase(redirectTarget, "index")) {
             ProcureUnits.index(p);

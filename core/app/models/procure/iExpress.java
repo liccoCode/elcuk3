@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import helper.Dates;
 import helper.HTTP;
 import helper.J;
+import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -63,6 +64,11 @@ public enum iExpress {
             return isAnyState(iExpressHTML, "签收");
         }
 
+        @Override
+        public String carrierName(M m) {
+            return Arrays.asList(M.AMAZON_US, M.AMAZON_CA).contains(m) ? "DHL_EXPRESS_USA_INC" : "DHL_UK";
+        }
+
         public F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String text) {
             if(StringUtils.isNotBlank(iExpressHTML)) {
                 Document doc = Jsoup.parse(iExpressHTML);
@@ -78,7 +84,7 @@ public enum iExpress {
                     }
                 }
             }
-            return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            return new F.T2<>(false, DateTime.now());
         }
 
         private DateTime dateStringParse(String dateString) {
@@ -177,6 +183,11 @@ public enum iExpress {
             return isAnyState(iExpressHTML, "已送达");
         }
 
+        @Override
+        public String carrierName(M m) {
+            return Arrays.asList(M.AMAZON_US, M.AMAZON_CA).contains(m) ? "FEDERAL_EXPRESS_CORP" : "OTHER";
+        }
+
         private F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String state) {
             if(StringUtils.isNotBlank(iExpressHTML)) {
                 Document doc = Jsoup.parse(iExpressHTML);
@@ -251,6 +262,11 @@ public enum iExpress {
             return new F.T2<Boolean, DateTime>(false, DateTime.now());
         }
 
+        @Override
+        public String carrierName(M m) {
+            return "UNITED_PARCEL_SERVICE_INC";
+        }
+
         private DateTime trToDate(Element trElement) {
             return DateTime.parse(
                     String.format("%s %s",
@@ -308,4 +324,6 @@ public enum iExpress {
      * @return
      */
     public abstract F.T2<Boolean, DateTime> isReceipt(String iExpressHTML);
+
+    public abstract String carrierName(M m);
 }

@@ -14,6 +14,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Product;
+import models.qc.CheckTaskDTO;
 import mws.FBA;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.io.FileUtils;
@@ -253,18 +254,19 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
         return this.state != S.Pending;
     }
 
-    public static void postFbaShipments(List<Long> planIds) {
+    public static void postFbaShipments(List<Long> planIds, List<CheckTaskDTO> dtos) {
         List<ShipPlan> plans = ShipPlan.find(SqlSelect.whereIn("id", planIds)).fetch();
-        if(plans.size() != planIds.size())
+        if(plans.size() != planIds.size() || plans.size() != dtos.size())
             Validation.addError("", "加载的数量");
         if(Validation.hasErrors()) return;
 
-        for(ShipPlan plan : plans) {
+        for(int i = 0; i < plans.size(); i++) {
+            ShipPlan plan = plans.get(i);
             try {
                 if(plan.fba != null) {
                     Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", plan.id));
                 } else {
-                    plan.postFbaShipment();
+                    plan.postFbaShipment(dtos.get(i));
                 }
             } catch(Exception e) {
                 Validation.addError("", Webs.E(e));
@@ -275,8 +277,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
     /**
      * 创建 FBA
      */
-    public synchronized FBAShipment postFbaShipment() {
+    public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
         FBAShipment fba = null;
+        if(!dto.validedQtys(this.qty())) return fba;
         try {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
@@ -284,8 +287,9 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             return null;
         }
         try {
+            fba.dto = dto;
             fba.state = FBA.create(fba);
-            this.fba = fba.save();
+            this.fba = fba.doCreate();
             if(this.unit != null) {//将创建的 FBA 同步到采购计划
                 this.unit.fba = this.fba;
                 this.unit.save();
@@ -334,6 +338,12 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
             new ERecordBuilder("shipplan.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id).save();
         }
         this.save();
+        /**需要同步修改出库记录的planQty**/
+        OutboundRecord out = this.outboundRecord();
+        if(out != null) {
+            out.planQty = this.planQty;
+            out.save();
+        }
     }
 
     /**
@@ -481,7 +491,8 @@ public class ShipPlan extends Model implements ElcukRecord.Log {
 
     public OutboundRecord outboundRecord() {
         OutboundRecord out = OutboundRecord.find("shipPlan=?", this).first();
-        out.unmarshalBoxs();
+        if(out != null)
+            out.unmarshalBoxs();
         return out;
     }
 

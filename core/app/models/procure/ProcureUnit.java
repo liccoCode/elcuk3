@@ -17,6 +17,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
+import models.qc.CheckTaskDTO;
 import models.whouse.InboundRecord;
 import models.whouse.OutboundRecord;
 import models.whouse.ShipPlan;
@@ -809,8 +810,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 通过 ProcureUnit 创建 FBA
      */
-    public synchronized FBAShipment postFbaShipment() {
+    public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
         FBAShipment fba = null;
+        if(!dto.validedQtys(this.qty())) return fba;
         try {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
@@ -818,8 +820,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return null;
         }
         try {
+            fba.dto = dto;
             fba.state = FBA.create(fba);
-            this.fba = fba.save();
+            this.fba = fba.doCreate();
             this.save();
             new ERecordBuilder("shipment.createFBA")
                     .msgArgs(this.id, this.sku, this.fba.shipmentId)
@@ -834,6 +837,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
+
 
     /**
      * 将 ProcureUnit 添加到/移出 采购单,状态改变
@@ -1255,27 +1259,67 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 如果采购计划已经出库(关联上了出库计划)则使用出库计划来操作(增加 Or 删除) FBA
      *
      * @param unitIds
-     */
-    public static void postFbaShipments(List<Long> unitIds) {
+     **/
+    public static void postFbaShipments(List<Long> unitIds, List<CheckTaskDTO> dtos) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
-        if(units.size() != unitIds.size())
+        if(units.size() != unitIds.size() || units.size() != dtos.size()) {
             Validation.addError("", "加载的数量");
+        }
         if(Validation.hasErrors()) return;
 
-        for(ProcureUnit unit : units) {
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
             ShipPlan plan = unit.shipPlan();
-            if(plan != null) {
-                if(plan.fba != null) {
-                    Validation.addError("", String.format("#%s 关联的出库计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
+
+            try {
+                if(plan != null) {
+                    if(plan.fba != null) {
+                        Validation.addError("", String.format("#%s 关联的出库计划(%s)已经有 FBA, 不需要再创建", unit.id, plan.id));
+                    } else {
+                        plan.postFbaShipment(dtos.get(i));
+                    }
                 } else {
-                    plan.postFbaShipment();
+                    if(unit.fba != null) {
+                        Validation.addError("", String.format("#%s 采购计划已经有 FBA, 不需要再创建", unit.id));
+                    } else {
+                        unit.postFbaShipment(dtos.get(i));
+                    }
                 }
-            } else {
-                if(unit.fba != null) {
-                    Validation.addError("", String.format("#%s 采购计划已经有 FBA, 不需要再创建", unit.id));
+            } catch(Exception e) {
+                Validation.addError("", Webs.E(e));
+            }
+        }
+    }
+
+    /**
+     * 批量更新 FBA 的箱内包装信息
+     *
+     * @param unitIds
+     */
+
+    public static void postFbaCartonContents(List<Long> unitIds, List<CheckTaskDTO> dtos) {
+        List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
+        if(units.size() != unitIds.size() || units.size() != dtos.size()) {
+            Validation.addError("", "加载的数量");
+        }
+        if(Validation.hasErrors()) return;
+
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
+            CheckTaskDTO dto = dtos.get(i);
+            if(!dto.validedQtys(unit.qty())) return;
+
+            try {
+                if(unit.fba == null) {
+                    Validation.addError("", String.format("#%s 没有相关的 FBA, 请创建 FBA.", unit.id));
                 } else {
-                    unit.postFbaShipment();
+                    FBAShipment fba = unit.fba;
+                    fba.dto = dtos.get(i);
+                    fba.save();
+                    fba.postFbaInboundCartonContents();
                 }
+            } catch(Exception e) {
+                Validation.addError("", Webs.E(e));
             }
         }
     }
@@ -1430,7 +1474,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     datedesc = "系统备注:运输单最新预计到库时间" + shipment.dates.planArrivDate
                             + "，比原预计到库日期" + shipment.dates.oldPlanArrivDate
                             + "差异" +
-                            (shipment.dates.planArrivDate.getTime() - shipment.dates.oldPlanArrivDate.getTime()) /
+                            (shipment.dates.planArrivDate.getTime() -
+                                    shipment.dates.oldPlanArrivDate.getTime()) /
                                     (24 * 60 * 60 * 1000)
                             + "天";
                 }
@@ -1440,8 +1485,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                         .planArrivDate.getTime()) != 0)) {
                     datedesc = "系统备注:采购计划单最新预计到库时间" + this.attrs.planArrivDate
                             + "，比原预计到库日期" + shipment.dates.planArrivDate
-                            + "差异" + (this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) /
-                            (24 * 60 * 60 * 1000)
+                            + "差异" +
+                            (this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) /
+                                    (24 * 60 * 60 * 1000)
                             + "天";
                 }
             }
@@ -1490,7 +1536,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public Map<String, Object> showInfo(Long id, String username) {
-        ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?", ACTIVITINAME, id).first();
+        ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?", ACTIVITINAME, id)
+                .first();
         List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
         int issubmit = 0;
         String taskname = "";
@@ -1520,7 +1567,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         //如果是最后异步判断是否是生效日期当天
         TaskService taskService = ActivitiEngine.processEngine.getTaskService();
-        Task task = taskService.createTaskQuery().processInstanceId(ap.processInstanceId).active().singleResult();
+        Task task = taskService.createTaskQuery().processInstanceId(ap.processInstanceId).active()
+                .singleResult();
 
         ActivitiProcess.submitProcess(ap.processInstanceId, username, variableMap, opition);
         //价格生效
@@ -1539,13 +1587,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             item.delete();
         }
         this.delete();
-    }
-
-    public int recommendBoxNum() {
-        if(this.cooperator == null) return 0;
-        CooperItem item = CooperItem.find("sku=? AND cooperator.id=?", this.sku, this.cooperator.id).first();
-        int boxSize = (item == null ? 1 : item.boxSize);
-        return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
     }
 
     public int fetchCheckTaskQty() {
@@ -1622,7 +1663,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public OutboundRecord outboundRecord() {
-        return OutboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + this.id.toString() + "%").first();
+        return OutboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + this.id.toString() + "%")
+                .first();
     }
 
     /**
