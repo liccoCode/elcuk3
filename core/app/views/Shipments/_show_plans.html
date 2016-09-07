@@ -59,12 +59,8 @@
         <td><a href="@{Sellings.selling(plan.selling?.sellingId)}" target="_blank">${plan.selling?.sellingId}</a></td>
         <td>${plan.product?.abbreviation}</td>
         <td>
-            #{if plan.unit}
-            ${plan.unit.attrs.price}
-            #{/if}
-          #{else }
-        ${item.showSkuPrice()}
-        #{/else}
+            #{if plan.unit}${plan.unit.attrs.price}#{/if}
+            #{else}${item.showSkuPrice()}#{/else}
         </td>
         <td>${out?.clearanceType?.label()}</td>
         <td>${plan.unit?.cooperator?.name}</td>
@@ -82,6 +78,13 @@
         <td>${plan.creator?.username}</td>
         <td>${item.showName()}</td>
         <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>
+          #{power.ck 'paymentunits.postfromtransport'}
+              #{if isExpress}
+                <td>
+                  <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(item.id)}'>L</a>
+                </td>
+              #{/if}
+          #{/power.ck}
       </tr>
       <tr style="display:none;" id="plan_${plan.id}">
         <td colspan="23" style="background-color:#9FAFD1;">
@@ -140,21 +143,23 @@
         <td>
           <a target="_blank" href="@{Deliveryments.show(item.unit.deliveryment?.id)}#${item.unit.id}">${item.unit.id}</a>
         </td>
-        <td>${item.unit()?.isOut?.label()}</td>
-        <td>${item.unit()?.sku}</td>
-        <td>${item.unit()?.sid}</td>
-        <td>${item.unit()?.product?.abbreviation}</td>
-        <td>${item.unit()?.attrs?.price}</td>
-        <td></td>
-        <td>${item.unit()?.cooperator?.name}</td>
-        <td>${item.unit()?.whouse?.name()}</td>
-        <td><a href="${item.unit()?.fba?.fbaLink()}" target="_blank">${item.unit()?.fba?.shipmentId}</a></td>
-        <td>${item.unit()?.fba?.centerId}</td>
+        <td>${item.unit?.isOut?.label()}</td>
         <td>
-            #{if item.unit()}
-            ${item.qty - item.unit().returnPurchaseSample() - item.unit().fetchCheckTaskQcSample()}
+            #{if item.unit?.product}
+              <a href="@{Products.show(item.unit.product.sku)}" target="_blank">${item.unit.product.sku}</a>
             #{/if}
-          (${item.unit()?.attrs?.planQty} | ${item.unit()?.attrs?.qty})
+        </td>
+        <td>${item.unit?.sid}</td>
+        <td>${item.unit?.product?.abbreviation}</td>
+        <td>${item.unit?.attrs?.price}</td>
+        <td></td>
+        <td>${item.unit?.cooperator?.name}</td>
+        <td>${item.unit?.whouse?.name()}</td>
+        <td><a href="${item.unit?.fba?.fbaLink()}" target="_blank">${item.unit?.fba?.shipmentId}</a></td>
+        <td>${item.unit?.fba?.centerId}</td>
+        <td>
+        ${item.qty - item.unit.returnPurchaseSample() - item.unit.fetchCheckTaskQcSample()}
+          (${item.unit?.attrs?.planQty} | ${item.unit?.attrs?.qty})
         </td>
         <td style="#{if item.recivedQty != item.qty || item.changeFromZero()}background:#F2DEDE#{/if}"
             name='recivedQty' placement='right' rel='popover'>${item.recivedQty}
@@ -162,8 +167,8 @@
         <td style="${item.adjustQty != item.qty ? 'background:#F2DEDE' : ''}" name="adjustQty"
             content='#{records_ul records: item.recivedLogs()/}'>${item.adjustQty}<i class="icon-wrench"></i>
         </td>
-        <td style="background:${item.overdue()}">#{time_tooltip time: item.unit()?.attrs?.planShipDate/}</td>
-        <td>#{time_tooltip time: item.unit()?.attrs?.planArrivDate/}</td>
+        <td style="background:${item.overdue()}">#{time_tooltip time: item.unit?.attrs?.planShipDate/}</td>
+        <td>#{time_tooltip time: item.unit?.attrs?.planArrivDate/}</td>
         <td></td>
         <td>${item.totalWeight()}</td>
         <td></td>
