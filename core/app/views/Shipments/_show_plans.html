@@ -145,8 +145,9 @@
         </td>
         <td>${item.unit?.isOut?.label()}</td>
         <td>
-          <a href="@{Products.show(plan.product?.sku)}" target="_blank">${plan.product?.sku}</a>
-        ${item.unit?.sku}
+            #{if item.unit?.product}
+              <a href="@{Products.show(item.unit.product.sku)}" target="_blank">${item.unit.product.sku}</a>
+            #{/if}
         </td>
         <td>${item.unit?.sid}</td>
         <td>${item.unit?.product?.abbreviation}</td>
