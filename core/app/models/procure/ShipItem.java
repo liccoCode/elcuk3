@@ -232,8 +232,11 @@ public class ShipItem extends GenericModel {
             OutboundRecord out = this.plan.outboundRecord();
             out.unmarshalBoxs();
             return out.mainBox.weight() + out.lastBox.weight();
+        } else if(this.unit != null) {
+            return (double) this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
+        } else {
+            return (double) this.qty * (this.plan.product.weight == null ? 0 : this.plan.product.weight);
         }
-        return null;
     }
 
 
