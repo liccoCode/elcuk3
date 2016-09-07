@@ -164,7 +164,6 @@ public class Analyzes extends Controller {
      * @param type
      * @param val
      */
-    @CacheFor("30mn")
     public static void ajaxProcureUnitTimeline(String type, String val) {
         renderJSON(J.G(AnalyzePost.timelineEvents(type, val)));
     }
