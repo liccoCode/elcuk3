@@ -52,6 +52,12 @@ public class Shipments extends Controller {
     public static void index(ShipmentPost p) {
         if(p == null) p = new ShipmentPost();
         List<Shipment> shipments = p.query();
+
+        for(int i = 0; i < shipments.size(); i++) {
+            Shipment ship = shipments.get(i);
+            ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            shipments.set(i, ship);
+        }
         Shipment.handleQty1(shipments, null);
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
@@ -87,6 +93,7 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) {
             render("Shipments/blank.html", ship);
         }
+        ship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         Shipment shipment = new Shipment(ship).save();
         show(shipment.id);
     }
@@ -171,7 +178,7 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.endShipByComputer();
         List<Cooperator> cooperators = Cooperator.shippers();
-        //ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+        ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         Shipment.handleQty1(null, ship);
         render(ship, cooperators);
     }
@@ -203,11 +210,12 @@ public class Shipments extends Controller {
         Shipment dbship = Shipment.findById(shipid);
         dbship.update(ship);
         if(Validation.hasErrors()) {
-            //dbship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            dbship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
             renderArgs.put("ship", dbship);
             render("Shipments/show.html");
         }
         dbship.updateShipment();
+        /**像采购计划负责人发送邮件**/
         dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
         flash.success("更新成功.");
 
