@@ -106,11 +106,11 @@ public class CategoryAssignManagement extends Model {
         return User.findByUserName(name) != null;
     }
 
-    public static List<Long> showCategoryByUserName(String userName) {
+    public static List<String> showCategoryByUserName(String userName) {
         List<CategoryAssignManagement> cList = CategoryAssignManagement.find("user.username = ?", userName).fetch();
-        List<Long> categoryList = new ArrayList<Long>();
+        List<String> categoryList = new ArrayList<>();
         for(CategoryAssignManagement cassign : cList) {
-            categoryList.add(Long.parseLong(cassign.category.categoryId));
+            categoryList.add(cassign.category.categoryId);
         }
         return categoryList;
     }

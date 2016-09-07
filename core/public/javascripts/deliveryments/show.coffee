@@ -54,6 +54,8 @@ $ ->
     form.submit().remove()
   ).on('click', '#updateFbaCartonContents', (e) ->
     $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'updateFbaCartonContents').modal('show')
+  ).on('click', '#edit_memo', (e) ->
+    alert 1
   )
 
   # 将字符串转化成Dom元素
