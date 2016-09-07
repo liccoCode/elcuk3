@@ -208,6 +208,121 @@
 </tr>
 <tr>
   <td colspan="12">
+  #{info_row}
+    <li>标准箱质检信息</li>
+  #{/info_row}
+    <table class="table table-hover table-condensed table-bordered" id="standTable">
+    #{if check.standBoxQctInfos.size()==0}
+      <tr>
+        <th>箱数量：</th>
+        <td colspan="2">
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[0].boxNum" value=""/>箱
+          x
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[0].num" value=""/>个
+        </td>
+        <th>单箱体积(m³)：</th>
+        <td colspan="3"><span></span></td>
+      </tr>
+      <tr>
+        <th>单箱重量(kg)：</th>
+        <td colspan="2">
+          <input type="text" name="check.standBoxQctInfos[0].singleBoxWeight" value="">
+        </td>
+        <th>单箱长宽高(cm)：</th>
+        <td colspan="3">
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[0].length" value="">
+          x
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[0].width" value="">
+          x
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[0].height" value="">
+        </td>
+      </tr>
+    #{/if}
+    #{list items:check.standBoxQctInfos, as:'stand'}
+      <tr>
+        <th>箱数量：</th>
+        <td colspan="2">
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[${stand_index - 1}].boxNum" value="${stand
+          .boxNum}"/>箱
+          x
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[${stand_index - 1}].num" value="${stand
+          .num}"/>个
+        </td>
+        <th>单箱体积(m³)：</th>
+        <td colspan="3">${(stand.length*stand.width*stand.height/1000000).format('#.##')}</td>
+      </tr>
+      <tr>
+        <th>单箱重量(kg)：</th>
+        <td colspan="2">
+          <input type="text" name="check.standBoxQctInfos[${stand_index - 1}].singleBoxWeight" value="${stand
+          .singleBoxWeight}">
+        </td>
+        <th>单箱长宽高(cm)：</th>
+        <td colspan="3">
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[${stand_index - 1}].length" value="${stand
+          .length}">
+          x
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[${stand_index - 1}].width" value="${stand
+          .width}">
+          x
+          <input type="text" class="input-mini" name="check.standBoxQctInfos[${stand_index - 1}].height" value="${stand
+          .height}">
+        </td>
+      </tr>
+    #{/list}
+    </table>
+  </td>
+</tr>
+<tr>
+  <td colspan="12">
+  #{info_row}
+    <li>尾箱质检信息</li>
+  #{/info_row}
+    <table class="table table-hover table-condensed table-bordered" id="tailBoxQctInfosTable">
+    #{list items:check.tailBoxQctInfos, as:'tail'}
+      <tr>
+        <th>箱数量：</th>
+        <td colspan="2">
+          <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].boxNum" value="${tail.boxNum}"/>箱
+          x
+          <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].num" value="${tail.num}"/>个
+        </td>
+        <th>单箱体积(m³)：</th>
+        <td colspan="4">${(tail.length*tail.width*tail.height/1000000).format('#.##')}</td>
+      </tr>
+      <tr>
+        <th>单箱重量(kg)：</th>
+        <td colspan="2">
+          <input type="text" name="check.tailBoxQctInfos[${tail_index - 1}].singleBoxWeight" value="${tail.singleBoxWeight}">
+        </td>
+        <th>单箱长宽高(cm)：</th>
+        <td colspan="3">
+          <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].length" value="${tail.length}">
+          x
+          <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].width" value="${tail.width}">
+          x
+          <input type="text" class="input-mini" name="check.tailBoxQctInfos[${tail_index - 1}].height" value="${tail.height}">
+        </td>
+        <td>
+          <a class="btn" name='delete_tailBoxQctInfos_row'>删除</a>
+        </td>
+      </tr>
+    #{/list}
+
+    </table>
+    <table>
+      <tr id="addBtnTr">
+        <td align="right" colspan="6">
+          <a class="btn" rel="popover" content="不够?那就再来一行" placement="right" id="addMultiBox" data-name="tailBoxQctInfos"
+             data-table="tailBoxQctInfosTable" data-tr="addBtnTr" data-listSize="${check.tailBoxQctInfos.size()}">增加多尾箱输入
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td colspan="12">
   #{power.ck "checktasks.update"}
       #{ifnot check.isLock()}
         <input type="submit" id="fullupdate_btn" class="btn btn-warning" value="提交">

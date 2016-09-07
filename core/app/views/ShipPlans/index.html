@@ -112,8 +112,8 @@
                 #{/if}
                 #{elseif cooperItem}
                   <input type="checkbox" name="pids" value="${plan.id}" class="plan" id="checkbox_${plan.id}"
-                         data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
-                         data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                         data-boxnum="${cooperItem.boxNum(plan.unit.qty())}" data-num="${cooperItem.boxSize}"
+                         data-lastcartonnum="${cooperItem.lastCartonNum(plan.unit.qty())}"
                          data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
                          data-width="${cooperItem.width}" data-height="${cooperItem.height}">
                 #{/elseif}
