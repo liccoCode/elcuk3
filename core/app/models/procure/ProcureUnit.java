@@ -569,12 +569,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 分拆出的新采购计划变更
         newUnit.comment = unit.comment;
         newUnit.creator = unit.handler;
+        newUnit.product = unit.product;
+        newUnit.sku = unit.product.sku;
+        if(unit.attrs.price != null)
+            newUnit.attrs.price = unit.attrs.price;
+        if(unit.attrs.currency != null)
+            newUnit.attrs.currency = unit.attrs.currency;
+        if(unit.cooperator != null)
+            newUnit.cooperator = unit.cooperator;
         newUnit.save();
-
-        new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
-                .fid(this.id)
-                .save();
+        new ERecordBuilder("procureunit.split").msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
+                .fid(this.id).save();
         return newUnit;
     }
 

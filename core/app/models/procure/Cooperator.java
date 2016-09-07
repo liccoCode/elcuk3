@@ -385,4 +385,5 @@ public class Cooperator extends Model {
             return sku.equalsIgnoreCase(item.sku);
         }
     }
+
 }
