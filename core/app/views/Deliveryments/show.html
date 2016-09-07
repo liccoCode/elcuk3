@@ -12,7 +12,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm">
+    <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>
@@ -58,7 +58,7 @@
         <tr>
           <td colspan="6">
             <h4>备注:</h4>
-            <textarea rows="5" name="dmt.memo" class="input-block-level">${dmt.memo}</textarea>
+            <textarea rows="5" name="dmt.memo" id="memo" class="input-block-level">${dmt.memo}</textarea>
             <br/>
           #{power.ck "products.edit"}
               #{if dmt.canBeEdit()}

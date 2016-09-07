@@ -55,7 +55,10 @@ $ ->
   ).on('click', '#updateFbaCartonContents', (e) ->
     $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'updateFbaCartonContents').modal('show')
   ).on('click', '#edit_memo', (e) ->
-    alert 1
+      if $("#memo").val() == null || $("#memo").val().trim().length == 0
+        noty({text: '请输入备注!', type: 'error'})
+      else
+         $("#updateDeliverymentForm").submit()
   )
 
   # 将字符串转化成Dom元素
