@@ -115,7 +115,7 @@ public class CheckTaskPost extends Post<CheckTask> {
         }
 
         if(StringUtils.isNotBlank(this.checkor)) {
-            List<Long> categories = CategoryAssignManagement.showCategoryByUserName(this.checkor);
+            List<String> categories = CategoryAssignManagement.showCategoryByUserName(this.checkor);
             if(categories != null && !categories.isEmpty()) {
                 sbd.append(" AND units.product.category.categoryId IN ")
                         .append(SqlSelect.inlineParam(categories));
