@@ -25,6 +25,7 @@
     <th>预计运输时间</th>
     <th>预计到库时间</th>
     <th>箱数</th>
+    <th>总重量(预估)</th>
     <th>总重量</th>
     <th>总体积</th>
     <th>运营对接人</th>
@@ -73,6 +74,7 @@
         <td>#{time_tooltip time:plan.planShipDate/}</td>
         <td>#{time_tooltip time:plan.planArrivDate/}</td>
         <td>${plan.totalBoxNum()}</td>
+        <td>${item.estimateWeight()}</td>
         <td>${plan.totalWeight()}</td>
         <td>${plan.totalVolume()}</td>
         <td>${plan.creator?.username}</td>
@@ -169,9 +171,10 @@
         </td>
         <td style="background:${item.overdue()}">#{time_tooltip time: item.unit?.attrs?.planShipDate/}</td>
         <td>#{time_tooltip time: item.unit?.attrs?.planArrivDate/}</td>
-        <td></td>
-        <td>${item.totalWeight()}</td>
-        <td></td>
+        <td>${item.boxNumber()}</td>
+        <td>${item.estimateWeight()}</td>
+        <td>${item.weight()}</td>
+        <td>${item.volume()}</td>
         <td></td>
         <td></td>
         <td>${item.lossqty}/${item.compenamt}${item.currency?.name()}</td>

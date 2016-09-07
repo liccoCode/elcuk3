@@ -227,35 +227,12 @@ public class ShipItem extends GenericModel {
      *
      * @return
      */
-    public Double totalWeight() {
-        if(this.plan != null && this.plan.outboundRecord() != null) {
-            OutboundRecord out = this.plan.outboundRecord();
-            out.unmarshalBoxs();
-            return out.mainBox.weight() + out.lastBox.weight();
-        } else if(this.unit != null) {
-            return (double) this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
-        } else {
+    public Double estimateWeight() {
+        if(this.plan != null) {
             return (double) this.qty * (this.plan.product.weight == null ? 0 : this.plan.product.weight);
+        } else {
+            return (double) this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
         }
-    }
-
-
-    public Integer totalBoxNum() {
-        if(this.plan != null && this.plan.outboundRecord() != null) {
-            OutboundRecord out = this.plan.outboundRecord();
-            out.unmarshalBoxs();
-            return out.mainBox.boxNum + out.lastBox.boxNum;
-        }
-        return null;
-    }
-
-    public Double totalVolume() {
-        if(this.plan != null && this.plan.outboundRecord() != null) {
-            OutboundRecord out = this.plan.outboundRecord();
-            out.unmarshalBoxs();
-            return out.mainBox.volume() + out.lastBox.volume();
-        }
-        return null;
     }
 
     /**
