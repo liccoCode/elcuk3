@@ -53,17 +53,31 @@ $ ->
       noty({text: '请选择采购单元!', type: 'error'})
       false
     else
-      units.forEach((unit, index) ->
+      if modal.data('unit-source')
+        unit = units[0]
         tr = "<tr>" +
           "<td>#{unit.id}</td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].boxNum' value='#{unit.boxNum}' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].num'  value='#{unit.num}' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].lastCartonNum'  value='#{unit.lastCartonNum}' placeholder='可选' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].singleBoxWeight' value='#{unit.singleBoxWeight}' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].length' value='#{unit.length}' maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].width' value='#{unit.width}'  maxlength='3'/></td>" +
-          "<td><input type='text' style='width: 30px;' name='dtos[#{index}].height' value='#{unit.height}'  maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.boxNum' value='#{unit.boxNum}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.num'  value='#{unit.num}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.lastCartonNum'  value='#{unit.lastCartonNum}' placeholder='可选' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.singleBoxWeight' value='#{unit.singleBoxWeight}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.length' value='#{unit.length}' maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.width' value='#{unit.width}'  maxlength='3'/></td>" +
+          "<td><input type='text' style='width: 30px;' name='dto.height' value='#{unit.height}'  maxlength='3'/></td>" +
           "</tr>"
         $tabel.append(tr)
-      )
+      else
+        units.forEach((unit, index) ->
+          tr = "<tr>" +
+              "<td>#{unit.id}</td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].boxNum' value='#{unit.boxNum}' maxlength='3'/></td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].num'  value='#{unit.num}' maxlength='3'/></td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].lastCartonNum'  value='#{unit.lastCartonNum}' placeholder='可选' maxlength='3'/></td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].singleBoxWeight' value='#{unit.singleBoxWeight}' maxlength='3'/></td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].length' value='#{unit.length}' maxlength='3'/></td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].width' value='#{unit.width}'  maxlength='3'/></td>" +
+              "<td><input type='text' style='width: 30px;' name='dtos[#{index}].height' value='#{unit.height}'  maxlength='3'/></td>" +
+              "</tr>"
+          $tabel.append(tr)
+        )
       true
