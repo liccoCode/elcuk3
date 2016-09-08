@@ -757,6 +757,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage)) {
                     Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
                 }
+                //TODO: isPlaced 该状态 在 1.3.0 已经不在被使用,需要考虑是否还原?
                 if(!itm.unit.isPlaced) {
                     Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
                 }
