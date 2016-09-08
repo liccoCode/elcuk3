@@ -1410,7 +1410,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     this.trackNo = "[\"" + this.trackNo + "\"]";
                 }
                 try {
-                    this.tracknolist = JSON.parseArray(this.trackNo, String.class);
+                    List<String> trackingNumbers = JSON.parseArray(this.trackNo, String.class);
+                    for(int i = 0; i < trackingNumbers.size(); i++) {
+                        trackingNumbers.set(i, StringUtils.trim(trackingNumbers.get(i)));
+                    }
+                    this.tracknolist = trackingNumbers;
                 } catch(Exception e) {
                     LogUtils.JOBLOG.info(this.trackNo + "--" + e.getMessage());
                 }
@@ -1572,7 +1576,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * <<<<<<< HEAD
      * 修改运输单
      *
      * @param newShip
