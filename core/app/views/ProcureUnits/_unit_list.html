@@ -50,12 +50,18 @@
                        data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
                        data-width="${dto.width}" data-height="${dto.height}">
               #{/if}
-              #{else}
+              #{elseif cooperItem}
                 <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
                        data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
                        data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
                        data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
                        data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+              #{/elseif}
+              #{else}
+                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                       data-boxnum="" data-num="" data-lastcartonnum=""
+                       data-singleboxweight="" data-length=""
+                       data-width="" data-height="">
               #{/else}
           </label>
         </td>
