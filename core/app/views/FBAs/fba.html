@@ -43,8 +43,7 @@
   <tr>
     <td align="center" colspan="3">
       <!-- 需要生成的 Bar Code -->
-      #{set boxNum: helper.Webs.hundredNumber(i)/}
-      #{set shipmentIdStr: shipmentId + boxNum/}
+      #{set shipmentIdStr: shipmentId + boxNumber/}
       <img src="http://127.0.0.1:9000/code128/${shipmentIdStr}" width="260"
            height="72" border="0" style="padding-left:30px">
       <!-- 测试用  -->
