@@ -1430,17 +1430,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+
     /**
      * 查看当前采购计划(对应的质检任务)的是否发货状态
      *
      * @return
      */
     public String isship() {
-        List<CheckTask> tasks = this.tasks();
-        if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).isship != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
-                return tasks.get(0).isship.label();
-        }
+        CheckTask task = this.lastCheckedTask();
+        if(task != null) return task.isship.label();
         return null;
     }
 
@@ -1450,11 +1448,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String result() {
-        List<CheckTask> tasks = this.tasks();
-        if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).result != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
-                return tasks.get(0).result.label();
-        }
+        CheckTask task = this.lastCheckedTask();
+        if(task != null) return task.result.label();
         return null;
     }
 
@@ -1474,10 +1469,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public Integer fetchCheckTaskQcSample() {
-        List<CheckTask> tasks = this.tasks();
-        if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).qcSample != null)
-                return tasks.get(0).qcSample;
+        CheckTask task = this.lastTask();
+        if(task != null && task.qcSample != null) {
+            return task.qcSample;
         }
         return 0;
     }
@@ -1561,7 +1555,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
         for(Task task : tasks) {
             if(task != null) {
-                if(task.getName().indexOf("运营专员") >= 0) {
+                if(task.getName().contains("运营专员")) {
                     taskService.setAssignee(task.getId(), this.handler.username);
                 } else {
                     Role role = Role.find("roleName=?", task.getName()).first();
@@ -1627,10 +1621,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int fetchCheckTaskQty() {
-        CheckTask task = this.tasks().get(0);
-        if(task != null) {
-            return task.qty;
-        }
+        CheckTask task = this.lastTask();
+        if(task != null) return task.qty;
         return 0;
     }
 
@@ -1688,6 +1680,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public List<CheckTask> tasks() {
         return CheckTask.find("units_id=? ORDER BY creatat DESC", this.id).fetch();
+    }
+
+    public CheckTask lastTask() {
+        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.id).first();
+    }
+
+    public CheckTask lastCheckedTask() {
+        CheckTask task = this.lastTask();
+        if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
+            return task;
+        }
+        return null;
     }
 
     /**
