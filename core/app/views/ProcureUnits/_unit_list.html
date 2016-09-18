@@ -126,7 +126,12 @@
     <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
     <td>${unit.isOut?.label()}</td>
     <td>${unit.isship()}</td>
-    <td>#{if unit.fetchCheckTaskLink() != null}<a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>#{/if}</td>
+    <td>
+        #{set taskLink: unit.fetchCheckTaskLink()/}
+        #{if taskLink}
+          <a href="${taskLink}" target="_blank">查看</a>
+        #{/if}
+    </td>
     <td>#{time_tooltip time:unit.createDate/}</td>
   </tr>
 
