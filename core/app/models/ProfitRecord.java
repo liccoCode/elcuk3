@@ -76,4 +76,6 @@ public class ProfitRecord extends Model {
     public float theoretical_profit;
     @Expose
     public float theoretical_profit_rate;
+    @Expose
+    public float total_theoretical_qty;
 }
