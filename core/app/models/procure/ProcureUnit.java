@@ -840,7 +840,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         try {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            String errMsg = e.getMessage();
+            if(errMsg.contains("UNKNOWN_SKU")) {
+                Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
+                        this.selling.merchantSKU));
+            } else {
+                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            }
             return null;
         }
         try {
@@ -1555,7 +1561,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
         for(Task task : tasks) {
             if(task != null) {
-                if(task.getName().contains("运营专员")) {
+                if(task.getName().indexOf("运营专员") >= 0) {
                     taskService.setAssignee(task.getId(), this.handler.username);
                 } else {
                     Role role = Role.find("roleName=?", task.getName()).first();
