@@ -278,9 +278,12 @@ public class FBAShipment extends Model {
             } else if(errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
                 throw new FastRuntimeException("向 Amazon 更新失败. 请检查 MSKU(SKU+UPC) 是否正确.");
             } else if(errMsg.contains("MISSING_DIMENSIONS") || errMsg.contains("NON_SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的长宽高是否正确填写.");
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的尺寸是否正确填写(数值和单位).");
             } else {
-                //TODO:: ANDON_PULL_STRIKE_ONE
+                //TODO: NOT_ELIGIBLE_FC_FOR_ITEM 这个看起来是创建 FBA 时选择的 center 暂时在 MWS 内被标记了不可用
+                //暂时考虑可选的处理方案:
+                //1. 等着(一般会自行恢复)
+                //2. 替换 FBA(重新选择 center)
                 if(e.getClass() == FBAInboundServiceMWSException.class) {
                     Webs.systemMail("UpdateFBAShipment 出现未知异常", Webs.S(e),
                             Arrays.asList("duan@easya.cc", "licco@easya.cc"));

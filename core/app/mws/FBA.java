@@ -9,7 +9,6 @@ import helper.Dates;
 import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
-import models.market.M;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -84,13 +83,13 @@ public class FBA {
                         }
                         member = planFba;
                     }
-
                 } catch(Exception e) {
                     //ignore
                 }
             }
-            if(member == null)
+            if(member == null) {
                 throw new FastRuntimeException(msg.toString());
+            }
 
             fbaShipment.account = account;
             fbaShipment.shipmentId = member.getShipmentId();
