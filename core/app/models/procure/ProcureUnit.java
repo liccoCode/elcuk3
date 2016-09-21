@@ -844,6 +844,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(errMsg.contains("UNKNOWN_SKU")) {
                 Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
                         this.selling.merchantSKU));
+            } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP")) {
+                Validation.addError("", String.format(
+                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 在 Amazon 后台的 Listing 的尺寸是否正确填写(数值和单位).",
+                        this.selling.merchantSKU));
+            } else if(errMsg.contains("ANDON_PULL_STRIKE_ONE")) {
+                Validation.addError("", String.format(
+                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 市场 [%s] 的其他的 FBA 是否报告了异常.",
+                        this.selling.market.name(), this.selling.merchantSKU));
             } else {
                 Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
             }
