@@ -6,7 +6,7 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-set :jvm_opts, "-XX:PermSize=256m -XX:MaxPermSize=256m -Xms1536m -Xmx1536m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
+set :jvm_opts, "-XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m -Xms1536m -Xmx1536m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
 server '45.33.102.74', user: 'root', roles: %w{app}
 
 
