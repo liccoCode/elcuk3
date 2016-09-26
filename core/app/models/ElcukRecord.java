@@ -140,7 +140,7 @@ public class ElcukRecord extends Model {
 
     public static String pageCacheKey(Class owner, Object fid) {
         return String.format("%s_%s_%s",
-                StringUtils.lowerCase(owner.toString()),
+                StringUtils.lowerCase(owner.getSimpleName()),
                 fid.toString(),
                 ElcukRecord.FRAGMENT_PAGE_CACHE_KEY);
     }
