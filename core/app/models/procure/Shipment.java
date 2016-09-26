@@ -227,10 +227,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 此 Shipment 的运输项
      */
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
-    public List<ShipItem> items = new ArrayList<ShipItem>();
+    public List<ShipItem> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     @ManyToOne
     public TransportApply apply;
@@ -1095,13 +1095,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float totalWeight() {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
-        float weight = 0f;
+        float totalWeight = 0f;
         for(ShipItem itm : this.items) {
             if(itm.unit == null) continue;
-            Float product_weight = itm.unit.product.weight;
-            weight += itm.qty * product_weight;
+            Float weight = itm.unit.product.weight;
+            if(weight != null) {
+                totalWeight += itm.qty * weight;
+            }
         }
-        return weight;
+        return totalWeight;
     }
 
     /**
@@ -1312,7 +1314,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new Shipment(planBeginDate, type, whouse).save();
     }
 
-    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<String, Integer>();
+    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<>();
 
     /**
      * 初始化不同运输方式的标准运输量对应关系
