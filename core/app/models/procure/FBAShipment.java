@@ -499,9 +499,8 @@ public class FBAShipment extends Model {
     }
 
     public List<Feed> feeds() {
-        return Feed
-                .find("fid=? AND type=? ORDER BY createdAt DESC", this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS)
-                .fetch();
+        return Feed.find("fid=? AND type=? ORDER BY createdAt DESC",
+                this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS).fetch();
     }
 
     public FBAShipment doCreate() {
