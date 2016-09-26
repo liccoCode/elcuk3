@@ -89,13 +89,13 @@ public class ElcukRecord extends Model {
     }
 
     public static List<ElcukRecord> records(String fid, List<String> actions, int size) {
-        List<String> actionMsgs = new ArrayList<String>();
+        List<String> actionMsgs = new ArrayList<>();
         for(String action : actions) {
             actionMsgs.add(Messages.get(action));
         }
-        return ElcukRecord.find("fid=? AND " +
-                JpqlSelect.whereIn("action", actionMsgs) +
-                " ORDER BY createAt DESC", fid).fetch(size);
+        return ElcukRecord.find(
+                String.format("fid=? AND %s ORDER BY createAt DESC", JpqlSelect.whereIn("action", actionMsgs)),
+                fid).fetch(size);
     }
 
     public static List<ElcukRecord> records(List<String> actions, int size) {
