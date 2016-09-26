@@ -9,6 +9,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Index;
 import play.Play;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -28,6 +29,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 @DynamicUpdate
+@org.hibernate.annotations.Table(
+        appliesTo = "Feed",
+        indexes = {@Index(name = "FID_TYPE", columnNames = {"fid", "type"})}
+)
 public class Feed extends Model {
     private static final long serialVersionUID = 370209511312724644L;
 
