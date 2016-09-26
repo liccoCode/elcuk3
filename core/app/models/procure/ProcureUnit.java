@@ -44,8 +44,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static models.qc.CheckTask.StatType.UNCHECK;
-
 /**
  * 每一个采购单元
  * User: wyattpan
@@ -1269,7 +1267,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
                         "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
-                50);
+                15);
     }
 
     @Override
