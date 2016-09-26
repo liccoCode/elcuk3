@@ -249,9 +249,11 @@
         </div>
       </div>
         #{ifnot norecord}
-          <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-              #{records_ul  records: unit.records()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
-          </div>
+            #{cache unit.recordsPageCacheKey(), for:'1h'}
+              <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                  #{records_ul  records: unit.records()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
+              </div>
+            #{/cache}
         #{/ifnot}
     </td>
   </tr>

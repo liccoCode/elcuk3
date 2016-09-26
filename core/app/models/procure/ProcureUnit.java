@@ -596,7 +596,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         new ERecordBuilder("procureunit.split")
                 .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return newUnit;
     }
@@ -659,7 +659,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs = attrs;
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         this.shipItemQty(this.qty());
         this.stage = STAGE.DONE;
@@ -681,7 +681,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
         new ERecordBuilder("procureunit.revertdelivery")
                 .msgArgs(msg)
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
     }
 
@@ -721,10 +721,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(logs.size() > 0) {
             if(StringUtils.isBlank(reason)) {
                 new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
-                        this.generateProcureUnitStatusInfo()).fid(this.id).save();
+                        this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
             } else {
                 new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
-                        this.generateProcureUnitStatusInfo()).fid(this.id).save();
+                        this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
             }
             noty(this.sku, StringUtils.join(logs, ","));
         }
@@ -1040,7 +1040,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ERecordBuilder("procureunit.prepay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
     }
@@ -1078,7 +1078,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ERecordBuilder("procureunit.tailpay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
     }
@@ -1104,7 +1104,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ERecordBuilder("procureunit.reworkpay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
     }
@@ -1267,7 +1267,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
                         "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
-                15);
+                50);
+    }
+
+    public String recordsPageCacheKey() {
+        return ElcukRecord.pageCacheKey(ProcureUnit.class, this.id);
     }
 
     @Override

@@ -1,13 +1,12 @@
 package models;
 
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +20,8 @@ import java.util.List;
  */
 @Entity
 public class ElcukRecord extends Model {
+    public static final String FRAGMENT_PAGE_CACHE_KEY = "elcuk_record_page_cache";
+
     /**
      * 用来记录 Model 的 Record
      */
@@ -80,6 +81,19 @@ public class ElcukRecord extends Model {
     @Required
     public Date createAt = new Date();
 
+    /**
+     * 只用来过期缓存的, 标识属于哪个 Class
+     */
+    @Transient
+    public Class owner;
+
+    @PrePersist
+    public void expiredPageCache() {
+        if(this.owner != null && StringUtils.isNotBlank(this.fid)) {
+            play.cache.Cache.delete(ElcukRecord.pageCacheKey(this.owner, this.fid));
+        }
+    }
+
     public static List<ElcukRecord> records(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid).fetch();
     }
@@ -122,5 +136,12 @@ public class ElcukRecord extends Model {
                 .append(", createAt=").append(createAt)
                 .append('}');
         return sb.toString();
+    }
+
+    public static String pageCacheKey(Class owner, Object fid) {
+        return String.format("%s_%s_%s",
+                StringUtils.lowerCase(owner.toString()),
+                fid.toString(),
+                ElcukRecord.FRAGMENT_PAGE_CACHE_KEY);
     }
 }
