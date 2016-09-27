@@ -1492,7 +1492,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public String fetchCheckTaskLink() {
         if(this.haveTask()) {
-            List<CheckTask> tasks = (List<CheckTask>) CollectionUtils.find(this.taskList, new Predicate() {
+            List<CheckTask> tasks = (List) CollectionUtils.select(this.taskList, new Predicate() {
                 @Override
                 public boolean evaluate(Object o) {
                     CheckTask task = (CheckTask) o;
@@ -1734,7 +1734,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public List<CheckTask> uncheckTaskList() {
-        return (List<CheckTask>) CollectionUtils.find(this.taskList, new Predicate() {
+        return (List) CollectionUtils.select(this.taskList, new Predicate() {
             @Override
             public boolean evaluate(Object o) {
                 CheckTask task = (CheckTask) o;
