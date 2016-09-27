@@ -1270,6 +1270,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 50);
     }
 
+    /**
+     * 页面上用来缓存 records 的 key
+     *
+     * @return
+     */
     public String recordsPageCacheKey() {
         return ElcukRecord.pageCacheKey(ProcureUnit.class, this.id);
     }
@@ -1603,7 +1608,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
         for(Task task : tasks) {
             if(task != null) {
-                if(task.getName().indexOf("运营专员") >= 0) {
+                if(task.getName().contains("运营专员")) {
                     taskService.setAssignee(task.getId(), this.handler.username);
                 } else {
                     Role role = Role.find("roleName=?", task.getName()).first();

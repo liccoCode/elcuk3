@@ -104,6 +104,12 @@ public class Feed extends Model {
     @Enumerated(EnumType.STRING)
     public T type;
 
+    /**
+     * 只用来过期缓存的, 标识属于哪个 Class
+     */
+    @Transient
+    public Class owner;
+
     public Feed() {
     }
 
@@ -200,11 +206,30 @@ public class Feed extends Model {
     public void beforeSave() {
         this.updatedAt = new Date();
         this.createdAt = new Date();
+
+        if(this.owner != null && StringUtils.isNotBlank(this.fid)) {
+            play.cache.Cache.delete(Feed.pageCacheKey(this.owner, this.fid));
+        }
     }
 
     @PreUpdate
     public void beforeUpdate() {
         this.updatedAt = new Date();
+    }
+
+    /**
+     * 页面缓存所使用的 key
+     *
+     * @param owner
+     * @param fid
+     * @return
+     */
+    public static String pageCacheKey(Class owner, Object fid) {
+        return String.format("%s_%s_%s_%s",
+                StringUtils.lowerCase(owner.getSimpleName()),
+                fid.toString(),
+                StringUtils.lowerCase(Feed.class.getSimpleName()),
+                "page_cache");
     }
 
     public String checkResult() {
