@@ -76,17 +76,19 @@
     </td>
     <td>
         #{if unit.fba}
-        ${unit.fba.shipmentId}
-            #{set feeds: unit.fba.feeds()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
-            #{if feeds.size() > 0}
-                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                #{if feeds.get(0).isFailed()}
-                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+            #{cache unit.fba.feedsPageCacheKey(), for:'6h'}
+            ${unit.fba.shipmentId}
+                #{set feeds: unit.fba.feeds()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
+                #{if feeds.size() > 0}
+                    #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                    #{if feeds.get(0).isFailed()}
+                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                    #{/if}
+                    #{else }
+                      <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                    #{/else}
                 #{/if}
-                #{else }
-                  <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
-                #{/else}
-            #{/if}
+            #{/cache}
         #{/if}
     </td>
     <td>
@@ -249,7 +251,7 @@
         </div>
       </div>
         #{ifnot norecord}
-            #{cache unit.recordsPageCacheKey(), for:'1h'}
+            #{cache unit.recordsPageCacheKey(), for:'3h'}
               <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
                   #{records_ul  records: unit.records()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
               </div>

@@ -20,7 +20,6 @@ import java.util.List;
  */
 @Entity
 public class ElcukRecord extends Model {
-    public static final String FRAGMENT_PAGE_CACHE_KEY = "elcuk_record_page_cache";
 
     /**
      * 用来记录 Model 的 Record
@@ -94,6 +93,21 @@ public class ElcukRecord extends Model {
         }
     }
 
+    /**
+     * 页面缓存所使用的 key
+     *
+     * @param owner
+     * @param fid
+     * @return
+     */
+    public static String pageCacheKey(Class owner, Object fid) {
+        return String.format("%s_%s_%s_%s",
+                StringUtils.lowerCase(owner.getSimpleName()),
+                fid.toString(),
+                StringUtils.lowerCase(ElcukRecord.class.getSimpleName()),
+                "page_cache");
+    }
+
     public static List<ElcukRecord> records(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid).fetch();
     }
@@ -136,12 +150,5 @@ public class ElcukRecord extends Model {
                 .append(", createAt=").append(createAt)
                 .append('}');
         return sb.toString();
-    }
-
-    public static String pageCacheKey(Class owner, Object fid) {
-        return String.format("%s_%s_%s",
-                StringUtils.lowerCase(owner.getSimpleName()),
-                fid.toString(),
-                ElcukRecord.FRAGMENT_PAGE_CACHE_KEY);
     }
 }

@@ -21,6 +21,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
+import play.db.jpa.JPABase;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -192,11 +193,12 @@ public class FBAShipment extends Model {
      */
     public Date closeAt;
 
-    @PrePersist
-    public void setupFbaCartonContents() {
+    @Override
+    public <T extends JPABase> T save() {
         if(this.dto != null) {
             this.fbaCartonContents = J.json(this.dto);
         }
+        return super.save();
     }
 
     @PostLoad
@@ -503,6 +505,15 @@ public class FBAShipment extends Model {
                 this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS).fetch();
     }
 
+    /**
+     * 页面上用来缓存 feeds 的 key
+     *
+     * @return
+     */
+    public String feedsPageCacheKey() {
+        return Feed.pageCacheKey(FBAShipment.class, this.id);
+    }
+
     public FBAShipment doCreate() {
         this.save();
         if(this.dto != null) {
@@ -515,7 +526,9 @@ public class FBAShipment extends Model {
         Feed feed = new Feed(
                 MWSUtils.fbaInboundCartonContentsXml(this),
                 Feed.T.FBA_INBOUND_CARTON_CONTENTS,
-                this.id.toString()).save();
+                this.id.toString());
+        feed.owner = FBAShipment.class;
+        feed.save();
         feed.submit(this.submitParams());
     }
 
