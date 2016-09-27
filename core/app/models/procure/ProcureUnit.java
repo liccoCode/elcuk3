@@ -1499,8 +1499,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     return task.checkstat != CheckTask.StatType.UNCHECK;
                 }
             });
-            if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
-            if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.id);
+            if(tasks != null) {
+                if(tasks.size() == 1) {
+                    return String.format("/checktasks/%s/show", tasks.get(0).id);
+                } else if(tasks.size() > 1) {
+                    return String.format("/checktasks/%s/showList", this.id);
+                }
+            }
         }
         return null;
     }
