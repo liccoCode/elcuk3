@@ -225,11 +225,18 @@ public class Feed extends Model {
      * @return
      */
     public static String pageCacheKey(Class owner, Object fid) {
-        return String.format("%s_%s_%s_%s",
+        return String.format("%s_%s_%s",
                 StringUtils.lowerCase(owner.getSimpleName()),
                 fid.toString(),
-                StringUtils.lowerCase(Feed.class.getSimpleName()),
-                "page_cache");
+                StringUtils.lowerCase(Feed.class.getSimpleName()));
+    }
+
+    public static List<Map<String, Object>> countFeedByFid(String fid, T type) {
+        SqlSelect sql = new SqlSelect().select("count(id) AS count").from("Feed")
+                .where("fid=? AND type=? AND analyzeResult IS NOT NULL")
+                .groupBy("analyzeResult")
+                .params(fid, type.name());
+        return DBUtils.rows(sql.toString(), sql.getParams().toArray());
     }
 
     public String checkResult() {
@@ -269,5 +276,9 @@ public class Feed extends Model {
 
     public boolean isFailed() {
         return this.analyzeResult != null && "失败".equalsIgnoreCase(this.analyzeResult);
+    }
+
+    public boolean isSussess() {
+        return this.analyzeResult != null && "成功".equalsIgnoreCase(this.analyzeResult);
     }
 }

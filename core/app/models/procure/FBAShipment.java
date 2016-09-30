@@ -511,7 +511,15 @@ public class FBAShipment extends Model {
      * @return
      */
     public String feedsPageCacheKey() {
-        return Feed.pageCacheKey(FBAShipment.class, this.id);
+        List<Map<String, Object>> rows = Feed.countFeedByFid(this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS);
+        StringBuilder feedCountDigest = new StringBuilder("");
+        if(rows != null && !rows.isEmpty()) {
+            for(Map<String, Object> row : rows) {
+                feedCountDigest.append(row.get("count"));
+            }
+        }
+        return Webs.Md5(
+                String.format("%s|%s", Feed.pageCacheKey(FBAShipment.class, this.id), feedCountDigest.toString()));
     }
 
     public FBAShipment doCreate() {
