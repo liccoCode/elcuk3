@@ -76,16 +76,25 @@
     </td>
     <td>
         #{if unit.fba}
-            #{cache unit.fba.feedsPageCacheKey(), for:'6h'}
+            #{cache unit.fba.feedsPageCacheKey(), for:'3h'}
             ${unit.fba.shipmentId}
                 #{set feeds: unit.fba.feeds()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
                 #{if feeds.size() > 0}
                     #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                    #{if feeds.get(0).isFailed()}
-                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                    #{set lastFeed: feeds.get(0)/}
+                    #{if lastFeed.isFailed()}
+                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
                     #{/if}
+                    #{elseif lastFeed.isSussess()}
+                      <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                      </i>
+                    #{/elseif}
                     #{else }
-                      <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+                      <i class="icon-search" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                      </i>
                     #{/else}
                 #{/if}
             #{/cache}

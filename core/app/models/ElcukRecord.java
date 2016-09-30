@@ -101,11 +101,10 @@ public class ElcukRecord extends Model {
      * @return
      */
     public static String pageCacheKey(Class owner, Object fid) {
-        return String.format("%s_%s_%s_%s",
+        return String.format("%s_%s_%s",
                 StringUtils.lowerCase(owner.getSimpleName()),
                 fid.toString(),
-                StringUtils.lowerCase(ElcukRecord.class.getSimpleName()),
-                "page_cache");
+                StringUtils.lowerCase(ElcukRecord.class.getSimpleName()));
     }
 
     public static List<ElcukRecord> records(String fid) {
