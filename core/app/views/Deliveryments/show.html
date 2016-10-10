@@ -13,7 +13,7 @@
 #{set isPending: dmt.state == models.procure.Deliveryment.S.PENDING/}
 <div class="row-fluid">
   <div class="span12">
-    <form action="@{Deliveryments.update()}" method="post">
+    <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>

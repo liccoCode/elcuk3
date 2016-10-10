@@ -212,7 +212,7 @@ public class ShipItem extends GenericModel {
             if(!dto.fid.equals(this.unit.sid)) continue;
             return dto.getTurnOverT4();
         }
-        return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+        return new F.T4<>(0f, 0f, 0f, 0f);
     }
 
     /**

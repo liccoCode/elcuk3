@@ -9,6 +9,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Index;
 import play.Play;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -28,6 +29,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 @DynamicUpdate
+@org.hibernate.annotations.Table(
+        appliesTo = "Feed",
+        indexes = {@Index(name = "FID_TYPE", columnNames = {"fid", "type"})}
+)
 public class Feed extends Model {
     private static final long serialVersionUID = 370209511312724644L;
 
@@ -98,6 +103,12 @@ public class Feed extends Model {
 
     @Enumerated(EnumType.STRING)
     public T type;
+
+    /**
+     * 只用来过期缓存的, 标识属于哪个 Class
+     */
+    @Transient
+    public Class owner;
 
     public Feed() {
     }
@@ -195,11 +206,37 @@ public class Feed extends Model {
     public void beforeSave() {
         this.updatedAt = new Date();
         this.createdAt = new Date();
+
+        if(this.owner != null && StringUtils.isNotBlank(this.fid)) {
+            play.cache.Cache.delete(Feed.pageCacheKey(this.owner, this.fid));
+        }
     }
 
     @PreUpdate
     public void beforeUpdate() {
         this.updatedAt = new Date();
+    }
+
+    /**
+     * 页面缓存所使用的 key
+     *
+     * @param owner
+     * @param fid
+     * @return
+     */
+    public static String pageCacheKey(Class owner, Object fid) {
+        return String.format("%s_%s_%s",
+                StringUtils.lowerCase(owner.getSimpleName()),
+                fid.toString(),
+                StringUtils.lowerCase(Feed.class.getSimpleName()));
+    }
+
+    public static List<Map<String, Object>> countFeedByFid(String fid, T type) {
+        SqlSelect sql = new SqlSelect().select("count(id) AS count").from("Feed")
+                .where("fid=? AND type=? AND analyzeResult IS NOT NULL")
+                .groupBy("analyzeResult")
+                .params(fid, type.name());
+        return DBUtils.rows(sql.toString(), sql.getParams().toArray());
     }
 
     public String checkResult() {
@@ -239,5 +276,9 @@ public class Feed extends Model {
 
     public boolean isFailed() {
         return this.analyzeResult != null && "失败".equalsIgnoreCase(this.analyzeResult);
+    }
+
+    public boolean isSussess() {
+        return this.analyzeResult != null && "成功".equalsIgnoreCase(this.analyzeResult);
     }
 }

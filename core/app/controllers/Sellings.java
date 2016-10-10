@@ -16,6 +16,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
@@ -28,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import play.data.validation.Error;
 
 /**
  * 控制 Selling

@@ -165,9 +165,9 @@
 
         <div class="controls">
           <select name="fee.chargingWay" class="input-small">
-              #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
-                <option value="${way}">${way.label()}</option>
-              #{/list}
+          #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
+            <option value="${way}">${way.label()}</option>
+          #{/list}
           </select>
         </div>
       </div>

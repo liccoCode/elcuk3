@@ -3,7 +3,6 @@ package models.finance;
 import helper.Currency;
 import models.market.Account;
 import models.market.M;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.Model;
 
 import javax.persistence.*;

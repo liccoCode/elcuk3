@@ -467,6 +467,7 @@ public class Listing extends GenericModel {
 
     /**
      * 获得被跟踪的Listing
+     * @deprecated
      */
     public static List<Listing> trackedListings() {
         return Listing.find("isTracked = true").fetch();

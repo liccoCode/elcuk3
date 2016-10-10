@@ -362,7 +362,7 @@ public class User extends Model {
     public static String username() {
         String username = Scope.Session.current().get("username");
         if(StringUtils.isBlank(username)) return "system";
-        else return username;
+        else return StringUtils.lowerCase(username);
     }
 
     public static User current() {

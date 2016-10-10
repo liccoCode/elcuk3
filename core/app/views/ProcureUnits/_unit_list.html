@@ -39,11 +39,12 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
-      #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
       #{if checkbox}
         <td>
           <label class="checkbox">
+              #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
               #{if unit.fba && unit.fba.dto}
+                <!-- 优先使用自身的 FBA 箱包装数据 -->
                   #{set dto: unit.fba.dto/}
                 <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
                        data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
@@ -51,6 +52,7 @@
                        data-width="${dto.width}" data-height="${dto.height}">
               #{/if}
               #{elseif cooperItem}
+                <!-- 使用维护好的合作伙伴的数据 -->
                 <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
                        data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
                        data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
@@ -76,17 +78,28 @@
     </td>
     <td>
         #{if unit.fba}
-        ${unit.fba.shipmentId}
-            #{set feeds: unit.fba.feeds()/}
-            #{if feeds.size() > 0}
-                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                #{if feeds.get(0).isFailed()}
-                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
+            #{cache unit.fba.feedsPageCacheKey(), for:'3h'}
+            ${unit.fba.shipmentId}
+                #{set feeds: unit.fba.feeds()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
+                #{if feeds.size() > 0}
+                    #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                    #{set lastFeed: feeds.get(0)/}
+                    #{if lastFeed.isFailed()}
+                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
+                    #{/if}
+                    #{elseif lastFeed.isSussess()}
+                      <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                      </i>
+                    #{/elseif}
+                    #{else }
+                      <i class="icon-search" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                      </i>
+                    #{/else}
                 #{/if}
-                #{else }
-                  <i class="icon-search" name="showFeedsPage" data-feeds-page="${unit.fba.shipmentId}"></i>
-                #{/else}
-            #{/if}
+            #{/cache}
         #{/if}
     </td>
     <td>
@@ -127,7 +140,7 @@
     <td>${unit.isOut?.label()}</td>
     <td>${unit.isship()}</td>
     <td>
-        #{set taskLink: unit.fetchCheckTaskLink()/}
+        #{set taskLink: unit.fetchCheckTaskLink()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
         #{if taskLink}
           <a href="${taskLink}" target="_blank">查看</a>
         #{/if}
@@ -249,9 +262,11 @@
         </div>
       </div>
         #{ifnot norecord}
-          <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-              #{records_ul  records: unit.records()/}
-          </div>
+            #{cache unit.recordsPageCacheKey(), for:'3h'}
+              <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                  #{records_ul  records: unit.records()/} <!-- TODO 跟踪是否任旧会导致耗尽 request pool-->
+              </div>
+            #{/cache}
         #{/ifnot}
     </td>
   </tr>
