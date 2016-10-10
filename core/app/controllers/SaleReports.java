@@ -16,6 +16,7 @@ import java.util.List;
  * User: mac
  * Date: 14-6-9
  * Time: AM10:12
+ * @deprecated
  */
 @With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class SaleReports extends Controller {
