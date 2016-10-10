@@ -16,7 +16,7 @@ $ ->
     expressid = $("input[name='expressid']").val()
     unitIds = []
     checkboxList.each(->
-      unitIds.push($(@).val() + "-" + $(@).attr("boxNum"))
+      unitIds.push($(@).val() + "-" + $(@).data("boxnum"))
     )
     if unitIds.length is 0
       noty({text: '请选择需要下载的采购单元', type: 'error'})

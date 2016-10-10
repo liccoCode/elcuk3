@@ -26,6 +26,10 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class CategoryInfos extends Controller {
 
+    /**
+     * @deprecated
+     * @param id
+     */
     @Check("categoryinfos.show")
     public static void show(String id) {
         User user = User.findByUserName(Secure.Security.connected());

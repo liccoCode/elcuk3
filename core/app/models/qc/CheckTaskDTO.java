@@ -65,4 +65,8 @@ public class CheckTaskDTO implements Serializable {
         }
         return !Validation.hasErrors();
     }
+
+    public boolean haveLastCartonNum() {
+        return this.lastCartonNum != null && this.lastCartonNum != 0;
+    }
 }

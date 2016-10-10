@@ -1,13 +1,12 @@
 package models;
 
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.List;
  */
 @Entity
 public class ElcukRecord extends Model {
+
     /**
      * 用来记录 Model 的 Record
      */
@@ -80,6 +80,33 @@ public class ElcukRecord extends Model {
     @Required
     public Date createAt = new Date();
 
+    /**
+     * 只用来过期缓存的, 标识属于哪个 Class
+     */
+    @Transient
+    public Class owner;
+
+    @PrePersist
+    public void expiredPageCache() {
+        if(this.owner != null && StringUtils.isNotBlank(this.fid)) {
+            play.cache.Cache.delete(ElcukRecord.pageCacheKey(this.owner, this.fid));
+        }
+    }
+
+    /**
+     * 页面缓存所使用的 key
+     *
+     * @param owner
+     * @param fid
+     * @return
+     */
+    public static String pageCacheKey(Class owner, Object fid) {
+        return String.format("%s_%s_%s",
+                StringUtils.lowerCase(owner.getSimpleName()),
+                fid.toString(),
+                StringUtils.lowerCase(ElcukRecord.class.getSimpleName()));
+    }
+
     public static List<ElcukRecord> records(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid).fetch();
     }
@@ -89,13 +116,13 @@ public class ElcukRecord extends Model {
     }
 
     public static List<ElcukRecord> records(String fid, List<String> actions, int size) {
-        List<String> actionMsgs = new ArrayList<String>();
+        List<String> actionMsgs = new ArrayList<>();
         for(String action : actions) {
             actionMsgs.add(Messages.get(action));
         }
-        return ElcukRecord.find("fid=? AND " +
-                JpqlSelect.whereIn("action", actionMsgs) +
-                " ORDER BY createAt DESC", fid).fetch(size);
+        return ElcukRecord.find(
+                String.format("fid=? AND %s ORDER BY createAt DESC", JpqlSelect.whereIn("action", actionMsgs)),
+                fid).fetch(size);
     }
 
     public static List<ElcukRecord> records(List<String> actions, int size) {

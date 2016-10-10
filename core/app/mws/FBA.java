@@ -83,13 +83,13 @@ public class FBA {
                         }
                         member = planFba;
                     }
-
                 } catch(Exception e) {
                     //ignore
                 }
             }
-            if(member == null)
+            if(member == null) {
                 throw new FastRuntimeException(msg.toString());
+            }
 
             fbaShipment.account = account;
             fbaShipment.shipmentId = member.getShipmentId();

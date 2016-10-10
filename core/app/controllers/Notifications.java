@@ -52,7 +52,7 @@ public class Notifications extends Controller {
      */
     public static void amount() {
         //改成未执行流程的数量
-        List<String> tasks = ActivitiProcess.userTask(Secure.Security.connected());
+        List<String> tasks = ActivitiProcess.userTask(User.username());
         long count = tasks.size();
         renderJSON(GTs.MapBuilder
                 .map("user", User.username())

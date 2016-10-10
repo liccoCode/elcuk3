@@ -107,6 +107,7 @@ public class Listings extends Controller {
 
     /**
      * 获取被跟踪的Lisitng列表
+     * @deprecated
      */
     @Check("listings.trackedlistings")
     public static void trackedListings() {
