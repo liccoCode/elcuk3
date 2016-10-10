@@ -3,6 +3,7 @@ cted from https://github.com/ulrich/macaron-factory/blob/master/.gitignore
 .*
 # except for .gitignore
 !.gitignore
+!.eslintrc
 *.jar
 *.class
 

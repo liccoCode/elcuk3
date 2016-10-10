@@ -51,8 +51,8 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
                 .append(" WHERE ");
         List<Object> params = new ArrayList<>();
 
-        sql.append("p.").append(this.dateType).append(">=?").append(" AND ").append("p.").append(this.dateType)
-                .append("<=?");
+        sql.append("p.").append(this.dateType).append(">=?").append(" AND ")
+                .append("p.").append(this.dateType).append("<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 

@@ -10,9 +10,7 @@ $ ->
       return false
     else
       return unless confirm("确认出库?")
-      window.location.replace("/OutboundRecords/confirm?#{$("[name='rids']").serialize()}&#{$("form.search_form").serialize()}")
-  ).on('click', '#download_excel', (e) ->
-    window.open('/Excels/exportOutboundRecords?' + $("form.search_form").serialize(), "_blank")
+      $("form[name=confirm_form]").submit()
   )
 
   $("form[name=confirm_form]").on('change', "td>:input[name]", (e) -> #"input[name=qty],input[name=memo],select[name=whouse],select[name=targetId]"
@@ -26,13 +24,13 @@ $ ->
       id: $input.parents('tr').find('input:checkbox[name=rids]').val(),
       attr: attr,
       value: value
-    }, (r) ->
-      if r.flag
-        msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
-        noty({text: "更新#{msg}成功!", type: 'success'})
-        $input.trigger('flushQty') #需要更新 Qty 字段
-      else
-        noty({text: r.message, type: 'error'})
+    },
+      (r) ->
+        if r.flag is false
+          noty({text: r.message, type: 'error'})
+        else
+          msg = if _.isEmpty(AttrsFormat[attr]) then attr else AttrsFormat[attr]
+          noty({text: "更新#{msg}成功!", type: 'success'})
     )
   ).on('disabledInput', "table", (e) ->
     _.each($(@).find("tr"), (tr) ->
@@ -80,21 +78,6 @@ $ ->
             callback(coopers)
         })
     })
-  ).on('flushQty', "td>:input[name*='Box']", (e) ->
-    $input = $(@)
-    $tr = $input.parents('tr')
-    mainBoxNum = parseInt($tr.find("input[name='mainBox.boxNum']").val())
-    mainNum = parseInt($tr.find("input[name='mainBox.num']").val())
-
-    lastBoxNum = parseInt($tr.find("input[name='lastBox.boxNum']").val())
-    lastNum = parseInt($tr.find("input[name='lastBox.num']").val())
-
-    tmpSum = 0
-    tmpSum += mainBoxNum * mainNum if _.isInteger(mainBoxNum) && _.isInteger(mainNum)
-    tmpSum += lastBoxNum * lastNum if _.isInteger(lastBoxNum) && _.isInteger(lastNum)
-    $tr.find("input[name='qty']").val(tmpSum)
-  ).on('click', 'select[name=whouse]', (e) ->
-    noty({text: "库存不足, 无法匹配仓库!", type: 'warning'}) if $(@).find('option').size() <= 1
   )
 
   $(document).on('click', 'a[name=tryIdMatch]', (e) ->
@@ -112,20 +95,7 @@ $ ->
     "memo": "备注",
     "whouse": "仓库",
     "targetId": "出库对象",
-    "outboundDate": "完成时间",
-    "mainBox.boxNum": "主箱箱数",
-    "mainBox.num": "主箱数量",
-    "mainBox.singleBoxWeight": "主箱重量",
-    "mainBox.length": "主箱长",
-    "mainBox.width": "主箱宽",
-    "mainBox.height": "主箱高",
-    "lastBox.boxNum": "尾箱箱数",
-    "lastBox.num": "尾箱数量",
-    "lastBox.singleBoxWeight": "尾箱重量",
-    "lastBox.length": "尾箱长",
-    "lastBox.width": "尾箱宽",
-    "lastBox.height": "尾箱高",
-    "clearanceType": "报关类型"
+    "outboundDate": "完成时间"
   }
 
   $(document).ready ->

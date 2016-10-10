@@ -6,108 +6,107 @@
   </td>
 </tr>
 <tr>
-  <th>质检任务 ID</th>
-  <td>${check.id}</td>
-
-  <th>产品编码</th>
-  <td>
-    <a href="@{Products.show(check.units?.product?.sku)}" target="_blank">
-    ${check.units?.product?.sku}
-    </a>
-  </td>
-
-  <th>产品名称</th>
-  <td style="max-width: 80px;">
-  ${check.units?.product?.abbreviation}
-  </td>
-</tr>
-<tr>
-  <th>收货计划 ID</th>
-  <td>
-    <a href="/ReceiveRecords/index?p.search=id:${check.receiveRecord?.id}" target="_blank">
-    ${check.receiveRecord?.id}
-    </a>
-  </td>
-
-  <th>采购计划 ID</th>
-  <td>
-    <a href="/ProcureUnits/index?p.search=id:${check.units?.id}" target="_blank">
-    ${check.units?.id}
-    </a>
+  <th>采购计划ID</th>
+  <td colspan="2">
+  #{if controllers.Login.check("deliveryments.index")}
+    <a href="@{Deliveryments.show(check.units?.deliveryment?.id)}" target="_blank">${check.units?.id}</a>
+  #{/if}
+  #{else}
+  ${check.units?.id}
+  #{/else}
   </td>
   <th>FBA</th>
-  <td>${check.units?.fba?.shipmentId}</td>
-</tr>
-<tr>
+  <td colspan="3">${check.units?.fba?.shipmentId}</td>
   <th>FnSku</th>
-  <td>${check.units?.selling?.fnSku}</td>
-
-  <th>去往国家</th>
-  <td>${check.units?.whouse?.name}</td>
-
-  <th>预计运输时间</th>
-  <td>#{time_tooltip time: check.receiveRecord?.confirmDate/}</td>
+  <td colspan="4">${check.units?.selling?.fnSku}</td>
 </tr>
 <tr>
-  <th>收货时间</th>
-  <td>#{time_tooltip time: check.units.attrs.planShipDate, datetime: true/}</td>
-
-  <th>收货数量</th>
-  <td colspan="3">${check.receiveRecord?.qty}</td>
-</tr>
-<tr>
+  <th>质检员</th>
+  <td colspan="2">${check.matchChecktor()}</td>
   <th>状态</th>
-  <td>${check.checkstat.label()}</td>
-
-  <th>质检方式</th>
-  <td>
-    <select name="check.qcType" style="width:80px;">
-    #{list items:models.qc.CheckTask.types(), as: 'qcType'}
-      <option value="${qcType.name()}" ${qcType == check.qcType? 'selected':''}>${qcType.label()}</option>
-    #{/list}
-    </select>
+  <td colspan="3">${check.checkstat.label()}</td>
+  <th>订单数量</th>
+  <td colspan="4">${check.units?.attrs?.planQty}</td>
+</tr>
+<tr>
+  <th>实际交货数量</th>
+  <td colspan="3">
+    <input type="text" name="check.qty" class="input-mini" value="${check.qty}">
   </td>
 
-  <th>质检员</th>
-  <td>${check.matchChecktor()}</td>
+  <th>实际交货日期</th>
+  <td colspan="2">${check.units?.attrs.deliveryDate}</td>
+
+  <th>处理方式</th>
+  <td colspan="4">${check.dealway?.label()}</td>
 </tr>
 <tr>
   <th>实际抽检数量</th>
-  <td>
+  <td colspan="3">
     <input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}">
   </td>
 
-  <th>质检取样</th>
-  <td colspan="3">
-    <input type="text" name="check.qcSample" class="input-mini" value="${check.qcSample}"
-    ${check.result != null ? 'readonly' : ''} required/>
+  <th>不合格数量</th>
+  <td colspan="2">
+    <input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}">
   </td>
+
+  <th>质检方式</th>
+  <td colspan="4">${check.qcType?.label()}</td>
+</tr>
+<tr>
+  <th>质检开始时间</th>
+  <td colspan="3">
+    <input type="datetime" size="16" value="${check.startTime?.format("yyyy-MM-dd HH:mm")}" name="from" readonly>
+  </td>
+  <th>质检完成时间</th>
+  <td colspan="7">
+    <input type="datetime" size="16" value="${check.endTime?.format("yyyy-MM-dd HH:mm")}" name="to" readonly>
+  </td>
+</tr>
+<tr>
+  <th>质检取样</th>
+  <td colspan="3"><input type="text" name="check.qcSample" value="${check.qcSample}"/></td>
+  <th>采购取样</th>
+  <td colspan="7"><input type="text" value="${check.units?.purchaseSample}" readonly/></td>
 </tr>
 <tr>
   <th>是否合格</th>
-  <td>
-    <select name="check.result" style="width:80px;" ${check.result != null ? 'disabled' : ''}>
-      <option value="">请选择</option>
-    #{list items:models.qc.CheckTask.resultTypes(), as: 'result'}
-      <option value="${result.name()}" ${result == check.result? 'selected':''}>${result.label()}</option>
+  <td colspan="3">
+  #{select_enum name: 'check.result', items: models.qc.CheckTask.ResultType.values(), value: check.result/}
+  </td>
+  <th>是否发货</th>
+  <td colspan="10">
+    <select name="check.isship" size="1" disabled>
+    #{list items:models.qc.CheckTask.ShipType.values(), as: 'shipType'}
+      <option value="${shipType}" ${shipType == check.isship? 'selected':''}>${shipType.label()}</option>
     #{/list}
     </select>
   </td>
+</tr>
 
-  <th>不合格数量</th>
-  <td colspan="3">
-    <input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}"
-    ${check.result != null ? 'readonly' : ''} required>
+#{if (check.dealway==models.qc.CheckTask.DealType.HELP && taskname!=null && taskname=="质检确认") || check.workhour>0 || check.workers>0}
+<tr>
+  <th>工作小时</th>
+  <td>
+    <input type="text" name="check.workhour" class="input-mini" value="${check.workhour}">
+  </td>
+  <th>人数</th>
+  <td colspan="10">
+    <input type="text" name="check.workers" class="input-mini" value="${check.workers}">
   </td>
 </tr>
+#{/if}
+
 <tr>
   <th>备注</th>
-  <td colspan="5">
-    <textarea name="check.checknote" rows="6" class="input-block-level">${check.checknote}</textarea>
+  <td colspan="11">
+    <textarea name="check.checknote" rows="5" cols="80" class="span12">${check.checknote}</textarea>
     <input type="hidden" name="attid" value="${check.id}">
     <input type="hidden" name="id" value="${check.id}">
   </td>
 </tr>
+
 <tr>
   <td colspan="12">
   #{info_row}
@@ -173,14 +172,15 @@
     </table>
   </td>
 </tr>
+
 <tr>
   <td colspan="12">
     <table class="table table-hover table-condensed table-bordered" id="aqlTable">
       <tr>
-        <th style="width:10%">序号</th>
-        <th style="width:40%">不良描述</th>
-        <th style="width:40%">检验结果</th>
-        <th style="width:10%">Action</th>
+        <th style="width: 10%">序号</th>
+        <th style="width: 40%">不良描述</th>
+        <th style="width: 40%">检验结果</th>
+        <th style="width: 10%">Action</th>
       </tr>
     #{list items:check.aqlBadDesc, as:'desc'}
       <tr>
@@ -206,6 +206,7 @@
       添加</a>
   </td>
 </tr>
+
 <tr>
   <td colspan="12">
   #{info_row}
@@ -273,6 +274,7 @@
     </table>
   </td>
 </tr>
+
 <tr>
   <td colspan="12">
   #{info_row}
@@ -321,13 +323,17 @@
     </table>
   </td>
 </tr>
+
 <tr>
   <td colspan="12">
-  #{power.ck "checktasks.update"}
-      #{ifnot check.isLock()}
-        <input type="submit" id="fullupdate_btn" class="btn btn-warning" value="提交">
-      #{/ifnot}
-    <input type="submit" id="update_btn" class="btn btn-info" value="保存">
-  #{/power.ck}
-    <a href="@{CheckTasks.checklist()}" class="btn" data-loading>取消</a>
+  #{if ap==null || ap.id==null}
+      #{power.ck "checktasks.update"}
+          #{if check.checkstat == models.qc.CheckTask.StatType.UNCHECK || check.checkstat == models.qc.CheckTask
+          .StatType.REPEATCHECK}
+            <a id="update_btn" href="javascript:void(0)" class="btn btn-info" data-loading>保存不提交</a>
+            <a id="fullupdate_btn" href="javascript:void(0)" class="btn btn-primary" data-loading>保存并提交</a>
+          #{/if}
+      #{/power.ck}
+    <a href="@{CheckTasks.checkerList()}" class="btn btn-success" data-loading>取消</a>
+  #{/if}
 </tr>

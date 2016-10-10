@@ -5,4 +5,5 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-#{include 'CheckTasks/_show.html'/}
+#{render 'CheckTasks/_show.html', check: check,ap: ap,issubmit: issubmit,infos: infos,taskname: taskname,unit: unit,
+oldPlanQty: oldPlanQty, whouses: whouses/}

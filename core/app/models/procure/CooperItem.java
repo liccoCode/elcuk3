@@ -10,7 +10,6 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,7 +21,6 @@ import java.util.List;
 public class CooperItem extends Model {
 
     @ManyToOne
-    @Expose
     public Cooperator cooperator;
 
     @OneToOne
@@ -101,10 +99,6 @@ public class CooperItem extends Model {
      */
     @Lob
     public String productTerms;
-
-    @Transient
-    @Expose
-    public long cooper_id;
 
     public CooperItem checkAndUpdate() {
         this.check();

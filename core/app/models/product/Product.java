@@ -47,7 +47,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @OneToMany(mappedBy = "product",
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
                     CascadeType.REFRESH}, fetch = FetchType.LAZY)
-    public List<Listing> listings = new ArrayList<>();
+    public List<Listing> listings = new ArrayList<Listing>();
 
     @ManyToOne
     public Category category;
@@ -59,7 +59,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 产品拥有哪些扩展属性
      */
     @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
-    public List<ProductAttr> productAttrs = new ArrayList<>();
+    public List<ProductAttr> productAttrs = new ArrayList<ProductAttr>();
 
     /**
      * 唯一的标示

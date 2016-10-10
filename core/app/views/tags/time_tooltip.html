@@ -2,12 +2,9 @@
 datetime:true? default: false
 short:true? default: false
 }*
-#{if _time != null}
-    #{if _short}
-    <a href="javascript:void(0);" rel="tooltip" title="${_datetime ? _time.datetime() : _time.date()}">${_time.los()}</a>
-    #{/if}
-    #{else }
-    <a href="javascript:void(0);" rel="tooltip" title="${_time.los()}">${_datetime ? _time.datetime() : _time.date()}</a>
-    #{/else}
+#{if _short}
+<a href="javascript:void(0);" rel="tooltip" title="${_datetime ? _time.datetime() : _time.date()}">${_time.los()}</a>
 #{/if}
-
+#{else }
+<a href="javascript:void(0);" rel="tooltip" title="${_time.los()}">${_datetime ? _time.datetime() : _time.date()}</a>
+#{/else}

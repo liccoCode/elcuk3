@@ -12,9 +12,9 @@
     <div class="span12">
       <div class="input-prepend input-append inline">
         <span class="add-on">From:</span>
-        <input type="datetime" name="p.from" value="${p.from.date()}">
+        <input type="date" name="p.from" value="${p.from.date()}">
         <span class="add-on">To:</span>
-        <input type="datetime" name="p.to" value="${p.to.date()}">
+        <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
       <select name="p.whouse.id" class="inline">
@@ -34,11 +34,11 @@
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
+      <a href="javascript:void(0)" data-url="@{Excels.stockRecords(p)}" data-target="_blank" class="btn btn-info
+      inline" id="exportBtn">
+        开始盘点
+      </a>
       <div class="inline">
-        <a href="javascript:void(0)" data-url="@{Excels.stockRecords(p)}" data-target="_blank" class="btn btn-info
-              inline" id="exportBtn">
-          开始盘点
-        </a>
       </div>
     </div>
 

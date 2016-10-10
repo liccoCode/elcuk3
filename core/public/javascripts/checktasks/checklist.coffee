@@ -1,14 +1,25 @@
 $ ->
-  $('.search_form').on('change', "select[name='p.dateType']", (e) ->
-    $select = $(@)
-    $from = $("input[name='p.from']")
-    $to = $("input[name='p.to']")
-
-    date = new Date()
-    if $select.val() is 'units.attrs.planShipDate'
-      $from.val($.DateUtil.fmt2(date))
-      $to.val($.DateUtil.fmt2($.DateUtil.addDay(2, date)))
-    else
-      $from.val($.DateUtil.fmt2($.DateUtil.addDay(-2, date)))
-      $to.val($.DateUtil.fmt2(date))
+  $('#check_div').on("click", "#reset_edit", (r) ->
+    return unless confirm('确认重新编辑?')
+    LoadMask.mask()
+    $.ajax($(@).data('href'))
+      .done((r) ->
+        type = if r.flag
+          'success'
+        else
+          'error'
+        noty({text: r.message, type: type})
+        LoadMask.unmask()
+      )
   )
+
+  $.extend $.fn.dataTableExt.oStdClasses,
+    sWrapper: "dataTables_wrapper form-inline"
+
+  $(document).ready ->
+    oTable = $("#check_table").dataTable(
+      sDom: "<'row-fluid'<'span10'l><'span2'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
+      sPaginationType: "full_numbers"
+      iDisplayLength: 50
+      aaSorting: [[0, "desc"]]
+    )

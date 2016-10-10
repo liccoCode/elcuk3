@@ -4,15 +4,15 @@ import helper.Dates;
 import models.market.M;
 import models.procure.Shipment;
 import models.whouse.OutboundRecord;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -37,14 +37,13 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
     public OutboundRecord.O origin;
     public Shipment.T shipType;
     public M market;
-    public Date from;
-    public Date to;
 
     public OutboundRecordPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
         this.from = now.minusMonths(1).toDate();
         this.to = now.toDate();
         this.perSize = 30;
+        this.page = 1;
         this.dateType = "planBeginDate";
     }
 
@@ -104,12 +103,7 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append("AND (");
-            if(NumberUtils.isNumber(this.search)) {
-                sbd.append(" shipPlan.id=? OR");
-                params.add(NumberUtils.toLong(this.search));
-            }
-            sbd.append(" stockObjId LIKE ? OR attributes LIKE ?").append(")");
+            sbd.append(" AND (stockObjId LIKE ? OR attributes LIKE ?)");
             params.add(this.word());
             params.add("%\"fba\":\"" + this.search + "\"%");
         }
@@ -164,8 +158,16 @@ public class OutboundRecordPost extends Post<OutboundRecord> {
         return this.count();
     }
 
-    public List<OutboundRecord> queryForExcel() {
-        F.T2<String, List<Object>> params = params();
-        return OutboundRecord.find(params._1, params._2.toArray()).fetch();
+    /**
+     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
+     *
+     * @return
+     */
+    private Long isSearchForId() {
+        if(org.apache.commons.lang.StringUtils.isNotBlank(this.search)) {
+            Matcher matcher = ID.matcher(this.search);
+            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
+        }
+        return null;
     }
 }

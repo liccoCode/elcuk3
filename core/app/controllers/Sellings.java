@@ -16,6 +16,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
@@ -28,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import play.data.validation.Error;
 
 /**
  * 控制 Selling
@@ -92,13 +91,6 @@ public class Sellings extends Controller {
             }
 
         }
-        renderJSON(J.json(sids));
-    }
-
-    public static void findSellingBySkuAndMarket(String sku, String market) {
-        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku + "%", M.valueOf(market)).fetch();
-        List<String> sids = new ArrayList<String>();
-        for(Selling s : list) sids.add(s.sellingId);
         renderJSON(J.json(sids));
     }
 
@@ -431,18 +423,6 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-    }
-
-    /**
-     * 模糊匹配selling
-     *
-     * @param name
-     */
-    public static void sameSelling(String name) {
-        List<Selling> sellings = Selling.find("sellingId like '" + name + "%'").fetch();
-        List<String> list = new ArrayList<>();
-        for(Selling s : sellings) list.add(s.sellingId);
-        renderJSON(J.json(list));
     }
 
     /**

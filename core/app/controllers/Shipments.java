@@ -12,7 +12,6 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
-import models.view.post.ShipPlanPost;
 import models.view.post.ShipmentPost;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
@@ -42,7 +41,7 @@ import static play.modules.pdf.PDF.renderPDF;
 public class Shipments extends Controller {
     @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
-        List<Whouse> whouses = Whouse.find("type=?", Whouse.T.FBA).fetch();
+        List<Whouse> whouses = Whouse.findAll();
         List<Cooperator> cooperators = Cooperator.shippers();
         renderArgs.put("whouses", whouses);
         renderArgs.put("cooperators", cooperators);
@@ -63,20 +62,10 @@ public class Shipments extends Controller {
         render(shipments, p);
     }
 
-    public static void indexOfShipPlan(ShipPlanPost p) {
-
-    }
-
     public static void showProcureUnitList(String id) {
         Shipment shipment = Shipment.findById(id);
         List<ShipItem> items = shipment.items;
-        render("Shipments/_show_plans.html", items);
-    }
-
-    public static void showShipPlans(String id) {
-        Shipment shipment = Shipment.findById(id);
-
-        render("Shipments/_shipitem.html");
+        render("Shipments/_shipitem.html", items);
     }
 
     public static void blank() {
@@ -119,28 +108,6 @@ public class Shipments extends Controller {
             ShipItems.index(null);
         }
         flash.success("成功为 %s 个采购计划创建运输单 %s", units.size(), shipment.id);
-        show(shipment.id);
-    }
-
-    /**
-     * 通过出库计划创建运输单
-     *
-     * @param planIds
-     */
-    public static void shipPlanToShipment(List<Long> planIds) {
-        if(planIds == null || planIds.size() <= 0)
-            Validation.addError("", "必须选择出库计划");
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            ShipItems.planIndex(new ShipPlanPost());
-        }
-
-        Shipment shipment = new Shipment().buildFromShipPlan(planIds);
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            ShipItems.planIndex(new ShipPlanPost());
-        }
-        flash.success("成功为 %s 个出库计划创建运输单 %s", planIds.size(), shipment.id);
         show(shipment.id);
     }
 
@@ -435,9 +402,9 @@ public class Shipments extends Controller {
      *
      * @param whouseId
      */
-    public static void unitShipments(Long whouseId, Shipment.T shipType, Date planDeliveryDate) {
+    public static void unitShipments(Long whouseId, Shipment.T shipType) {
         List<Shipment> unitRelateShipments = Shipment
-                .findUnitRelateShipmentByWhouse(whouseId, shipType, planDeliveryDate);
+                .findUnitRelateShipmentByWhouse(whouseId, shipType);
         render(unitRelateShipments);
     }
 
@@ -449,12 +416,12 @@ public class Shipments extends Controller {
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
         String shipType = ship.type.name();
-        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<>();
+        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
         for(ShipItem item : ship.items) {
-            String centerId = item.get(String.class, "fba.centerId");
+            String centerId = item.unit.fba.centerId;
             if(!fbaGroupUnits.containsKey(centerId))
                 fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
-            fbaGroupUnits.get(centerId).add(item.unit());
+            fbaGroupUnits.get(centerId).add(item.unit);
         }
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
         final PDF.Options options = new PDF.Options();
@@ -478,8 +445,23 @@ public class Shipments extends Controller {
         shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));
         int day = shipment.shipDay();
         DateTime arrivedate = Dates.cn(planShipDate).plusDays(day);
-        Map<String, String> dates = new HashMap<>();
+        Map<String, String> dates = new HashMap<String, String>();
         dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
+    }
+
+    /**
+     * 创建出库
+     */
+    @Check("outboundrecords.index")
+    public static void outbound(List<String> shipmentId) {
+        if(shipmentId != null && !shipmentId.isEmpty()) {
+            for(String sid : shipmentId) {
+                Shipment shipment = Shipment.findById(sid);
+                shipment.initOutbound();
+            }
+        }
+        flash.success("创建出库成功!");
+        redirect("/OutboundRecords/index");
     }
 }
