@@ -1,8 +1,6 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.DBUtils;
-import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -10,11 +8,8 @@ import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
-import play.Logger;
-import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -42,18 +37,27 @@ public class Deliveryment extends GenericModel {
     }
 
     public enum S {
+        /**
+         * 预定.
+         */
         PENDING {
             @Override
             public String label() {
                 return "计划";
             }
         },
+        /**
+         * 确定采购单
+         */
         CONFIRM {
             @Override
             public String label() {
-                return "已确认";
+                return "确认并已下单";
             }
         },
+        /**
+         * 完成交货.
+         */
         DONE {
             @Override
             public String label() {
@@ -70,8 +74,8 @@ public class Deliveryment extends GenericModel {
         public abstract String label();
     }
 
-    @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<>();
+    @OneToMany(mappedBy = "deliveryment", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
     @ManyToOne
     public ProcureApply apply;
@@ -89,9 +93,6 @@ public class Deliveryment extends GenericModel {
     @Expose
     @Required
     public Date createDate = new Date();
-
-    @Expose
-    public Date confirmDate;
 
     /**
      * 下单时间
@@ -127,40 +128,23 @@ public class Deliveryment extends GenericModel {
     public String memo = " ";
 
     public enum T {
+        /**
+         * 普通单
+         */
         NORMAL {
             @Override
             public String label() {
                 return "普通单";
             }
         },
+
+        /**
+         * 手动单
+         */
         MANUAL {
             @Override
             public String label() {
                 return "手动单";
-            }
-        },
-        Special {
-            @Override
-            public String label() {
-                return "特采单";
-            }
-        },
-        Expedited {
-            @Override
-            public String label() {
-                return "加急单";
-            }
-        },
-        New {
-            @Override
-            public String label() {
-                return "新品单";
-            }
-        },
-        B2B {
-            @Override
-            public String label() {
-                return "B2B采购单";
             }
         };
 
@@ -174,12 +158,6 @@ public class Deliveryment extends GenericModel {
     public T deliveryType;
 
     /**
-     * 有无 Selling
-     */
-    @Expose
-    public Boolean haveSelling;
-
-    /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
      *
      * @return CNY 币种下的总金额
@@ -187,7 +165,6 @@ public class Deliveryment extends GenericModel {
     public float leftAmount() {
         float leftAmount = 0;
         for(ProcureUnit unit : this.units) {
-            if(unit.attrs.currency == null) continue;
             leftAmount += unit.attrs.currency.toCNY(unit.leftAmount());
         }
         return leftAmount;
@@ -246,7 +223,7 @@ public class Deliveryment extends GenericModel {
             this.state = S.DONE;
             this.save();
         }
-        return new F.T2<>(delivery, total == 0 ? 1 : total);
+        return new F.T2<Integer, Integer>(delivery, total == 0 ? 1 : total);
     }
 
     /**
@@ -265,48 +242,18 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
-     * 批量确认
-     *
-     * @param deliverymentIds
-     */
-    public static List<String> batchConfirm(List<String> deliverymentIds) {
-        List<String> errors = new ArrayList<>();
-        List<String> confirmed = new ArrayList<>();
-        for(String id : deliverymentIds) {
-            Deliveryment dmt = Deliveryment.findById(id);
-            dmt.confirm();
-
-            if(Validation.hasErrors()) {
-                for(Error error : Validation.errors()) {
-                    String errMsg = String.format("ID: [%s] %s", id, error.message());
-                    if(!errors.contains(errMsg)) errors.add(errMsg);
-                }
-                Validation.clear();
-            } else {
-                confirmed.add(id);
-            }
-        }
-        if(!confirmed.isEmpty()) {
-            new ERecordBuilder("deliveryment.confirm").msgArgs(StringUtils.join(confirmed, ",")).fid("1").save();
-        }
-        return errors;
-    }
-
-    /**
      * 确认下采购单
      */
     public void confirm() {
-        if(this.isLock())
+        if(this.state != S.PENDING)
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
+        if(this.deliveryTime == null)
+            Validation.addError("", "交货时间必须填写");
         if(this.orderTime == null)
             Validation.addError("", "下单时间必须填写");
         if(Validation.hasErrors()) return;
-        for(ProcureUnit unit : this.units) {
-            unit.stage = ProcureUnit.STAGE.DELIVERY;
-            unit.save();
-        }
+
         this.state = Deliveryment.S.CONFIRM;
-        this.confirmDate = new Date();
         this.save();
     }
 
@@ -316,7 +263,7 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public Set<Category> unitsCategorys() {
-        Set<Category> categories = new HashSet<>();
+        Set<Category> categories = new HashSet<Category>();
         for(ProcureUnit unit : this.units) {
             categories.add(unit.product.category);
         }
@@ -327,12 +274,17 @@ public class Deliveryment extends GenericModel {
      * 取消采购单
      */
     public void cancel(String msg) {
+        /**
+         * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
+         */
         for(ProcureUnit unit : this.units) {
+            //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            //    Validation.addError("deliveryment.units.cancel", "validation.required");
+            //   else
             unit.toggleAssignTodeliveryment(null, false);
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
-        this.memo = msg;
         this.save();
 
         new ElcukRecord(Messages.get("deliveryment.cancel"),
@@ -345,9 +297,10 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
-        if(this.isLock()) {
-            Validation.addError("", "只允许 " + S.PENDING.label() + "状态的[采购单]添加[采购单元]");
-            return new ArrayList<>();
+        if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
+            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
+                    " 状态的[采购单]添加[采购单元]");
+            return new ArrayList<ProcureUnit>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Cooperator singleCop = units.get(0).cooperator;
@@ -371,10 +324,6 @@ public class Deliveryment extends GenericModel {
      * @param pids
      */
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
-        if(this.isLock()) {
-            Validation.addError("", "只允许 " + S.PENDING.label() + "状态的[采购单]删除[采购单元]");
-            return new ArrayList<>();
-        }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
@@ -464,27 +413,32 @@ public class Deliveryment extends GenericModel {
      *
      * @param pids
      */
-    public synchronized static Deliveryment createFromProcures(List<Long> pids, User user) {
+    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name,
+                                                               User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
         if(pids.size() != units.size()) {
             Validation.addError("deliveryment.units.create", "%s");
             return deliveryment;
         }
-        Cooperator singleCop = units.get(0).cooperator;
-        for(ProcureUnit unit : units) isUnitToDeliverymentValid(unit, singleCop);
+
+        Cooperator cop = units.get(0).cooperator;
+        for(ProcureUnit unit : units) {
+            isUnitToDeliverymentValid(unit, cop);
+        }
         if(Validation.hasErrors()) return deliveryment;
+        deliveryment.cooperator = cop;
         deliveryment.handler = user;
         deliveryment.state = S.PENDING;
+        deliveryment.name = name.trim();
         deliveryment.units.addAll(units);
         deliveryment.deliveryType = T.NORMAL;
-        deliveryment.orderTime = new Date();
-        deliveryment.cooperator = singleCop;
         for(ProcureUnit unit : deliveryment.units) {
             // 将 ProcureUnit 添加进入 Deliveryment , ProcureUnit 进入 DELIVERY 阶段
             unit.toggleAssignTodeliveryment(deliveryment, true);
         }
         deliveryment.save();
+
         new ERecordBuilder("deliveryment.createFromProcures")
                 .msgArgs(StringUtils.join(pids, ","), deliveryment.id)
                 .fid(deliveryment.id).save();
@@ -500,7 +454,9 @@ public class Deliveryment extends GenericModel {
             Validation.addError("deliveryment.units.singlecop", "%s");
             return false;
         }
-        if(unit.attrs.planDeliveryDate == null) Validation.addError("", String.format("[%s]的预计交货日期不能为空!", unit.id));
+        Validation.required("procureunit.planDeliveryDate", unit.attrs.planDeliveryDate);
+        Validation.required("procureunit.planShipDate", unit.attrs.planShipDate);
+        Validation.required("procureunit.planArrivDate", unit.attrs.planArrivDate);
         return true;
     }
 
@@ -521,59 +477,5 @@ public class Deliveryment extends GenericModel {
             }
         }
         return cooperItems;
-    }
-
-    public static T[] types() {
-        return ArrayUtils.removeElement(T.values(), T.MANUAL);
-    }
-
-    public boolean canBeEdit() {
-        return this.state == S.PENDING;
-    }
-
-    public boolean canBeCancle() {
-        return Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state);
-    }
-
-    /**
-     * 已经做过入库确认的人员名称
-     *
-     * @return
-     */
-    public static List<String> handlers() {
-        List<String> names = new ArrayList<>();
-        try {
-            List<Map<String, Object>> rows = DBUtils.rows(
-                    "SELECT DISTINCT u.username AS username FROM Deliveryment d" +
-                            " LEFT JOIN User u ON u.id=d.handler_id"
-            );
-            if(rows != null && !rows.isEmpty()) {
-                for(Map<String, Object> row : rows) {
-                    if(row != null && row.containsKey("username")) {
-                        if(row.get("username") != null) names.add(row.get("username").toString());
-                    }
-                }
-            }
-        } catch(NullPointerException e) {
-            Logger.warn(Webs.E(e));
-        }
-        return names;
-    }
-
-    public boolean isLock() {
-        return this.state != S.PENDING;
-    }
-
-    /**
-     * 尝试补全供应商
-     *
-     * @return
-     */
-    public Cooperator cooperator() {
-        if(this.cooperator == null && this.units != null && !this.units.isEmpty()) {
-            this.cooperator = this.units.get(0).cooperator;
-            this.save();
-        }
-        return this.cooperator;
     }
 }

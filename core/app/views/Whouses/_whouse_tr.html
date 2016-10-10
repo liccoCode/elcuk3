@@ -1,10 +1,11 @@
 <tr>
   <th>仓库名称</th>
-  <td><input type="text" name="wh.name" value="${wh.name}" required></td>
+  <td><input type="text" name="wh.name" value="${wh.name}"></td>
 
   <th>仓库类型</th>
   <td>
     <select name="wh.type" style="width: 100px;">
+      <option value="">选择类型</option>
     #{list items:models.whouse.Whouse.T.values(), as:'t'}
       <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
     #{/list}
@@ -48,15 +49,7 @@
     <input type="text" name="wh.province" value="${wh.province}">
   </td>
 
-  <th>Market</th>
-  <td>
-    <select name="wh.market">
-      <option value="">请选择</option>
-    #{list items: models.market.M.amazonVals(), as: 'm'}
-      <option value="${m.name()}" ${wh.market == m ? 'selected' : ''}>${m.name()}</option>
-    #{/list}
-    </select>
-  </td>
+  <td colspan="2"></td>
 </tr>
 
 <tr style="display:none" id="forward_shipment_tr">
@@ -72,11 +65,18 @@
 
   <th>运输方式</th>
   <td colspan="3">
-    <select name="p.type" style="width: 100px;" class="inline">
-      <option value="">运输方式</option>
-    #{list items:models.procure.Shipment.shipTypes(), as:'t'}
-      <option value="${t.name()}" ${t == wh.shipType ? 'selected' : ''}>${t}</option>
-    #{/list}
-    </select>
+    <label class="checkbox inline">
+      <input type="hidden" name="wh.isSEA" value="${wh.isSEA}" id="sea_hidden">
+      <input type="checkbox" name="wh.isSEA" value="${wh.isSEA}" data-id="sea_hidden" ${wh.isSEA ? 'checked' : ''}>海运
+    </label>
+    <label class="checkbox inline">
+      <input type="hidden" name="wh.isAIR" value="${wh.isAIR}" id="air_hidden">
+      <input type="checkbox" name="wh.isAIR" value="${wh.isAIR}" data-id="air_hidden" ${wh.isAIR ? 'checked' : ''}>空运
+    </label>
+    <label class="checkbox inline">
+      <input type="hidden" name="wh.isEXPRESS" value="${wh.isEXPRESS}" id="express_hidden">
+      <input type="checkbox" name="wh.isEXPRESS" value="${wh.isEXPRESS}" data-id="express_hidden" ${wh.isEXPRESS ?
+      'checked' : ''}>快递
+    </label>
   </td>
 </tr>

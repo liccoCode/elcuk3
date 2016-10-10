@@ -301,7 +301,7 @@ public class PaymentUnit extends Model {
         this.save();
         new ERecordBuilder("payment.approval")
                 .msgArgs(this.unitQty,
-                        this.shipItem == null ? "" : this.shipItem.get(String.class, "product.sku"),
+                        this.shipItem == null ? "" : this.shipItem.unit.sku,
                         this.id,
                         this.feeType.nickName,
                         this.currency.symbol() + " " + this.amount())
@@ -343,8 +343,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue)))
-                .floatValue();
+        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue))).floatValue();
     }
 
     public BigDecimal decimalamount() {

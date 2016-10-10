@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.gson.JsonElement;
+import controllers.api.SystemOperation;
 import helper.Crawl;
 import helper.J;
 import helper.Webs;
@@ -20,7 +21,6 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.util.List;
-import controllers.api.SystemOperation;
 
 /**
  * Listing 的引入:
@@ -107,7 +107,6 @@ public class Listings extends Controller {
 
     /**
      * 获取被跟踪的Lisitng列表
-     * @deprecated
      */
     @Check("listings.trackedlistings")
     public static void trackedListings() {

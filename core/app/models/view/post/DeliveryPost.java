@@ -1,7 +1,6 @@
 package models.view.post;
 
 import helper.Dates;
-import models.User;
 import models.procure.Deliveryment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -28,7 +27,6 @@ public class DeliveryPost extends Post<Deliveryment> {
         this.to = now.toDate();
         this.dateType = DateType.DELIVERY;
         this.perSize = 25;
-        this.handler = User.username();
     }
 
     /**
@@ -78,17 +76,13 @@ public class DeliveryPost extends Post<Deliveryment> {
 
     public Deliveryment.T deliveryType;
 
-    public String handler;
-
-    public Boolean haveSelling;
-
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
 
         // 针对 Id 的唯一搜索
         if(specialSearch._1)
-            return new F.T2<>(specialSearch._2, specialSearch._3);
+            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
@@ -126,23 +120,16 @@ public class DeliveryPost extends Post<Deliveryment> {
             String word = this.word();
             sbd.append(" AND (")
                     .append(" u.sid LIKE ?")
-                    .append(" OR d.id LIKE ?")
                     .append(" OR d.name LIKE ?")
                     .append(")");
-            for(int i = 0; i < 3; i++) params.add(word);
+            for(int i = 0; i < 2; i++) params.add(word);
         }
 
         if(this.deliveryType != null) {
             sbd.append("And d.deliveryType=?");
             params.add(this.deliveryType);
         }
-        if(StringUtils.isNotBlank(this.handler)) {
-            sbd.append(" AND d.handler.username=?");
-            params.add(this.handler);
-        }
-        if(haveSelling != null && haveSelling) {
-            sbd.append(" AND d.haveSelling=true");
-        }
+
         return new F.T2<>(sbd.toString(), params);
     }
 

@@ -15,7 +15,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -132,16 +131,14 @@ public class StockObj implements Serializable, Cloneable {
     }
 
     public Map attributes() {
-        if(this.attrs == null || this.attrs.isEmpty()) this.unmarshalAtts();
+        if(this.attrs == null || this.attrs.isEmpty()) {
+            this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
+        }
         return this.attrs;
     }
 
-    public void marshalAtts() {
+    public void setAttributes() {
         this.attributes = J.json(this.attrs);
-    }
-
-    public void unmarshalAtts() {
-        this.attrs = JSON.parseObject(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}", Map.class);
     }
 
     public void setAttributes(ProcureUnit unit) {
@@ -158,36 +155,16 @@ public class StockObj implements Serializable, Cloneable {
                 this.attrs.put("whouseName", unit.whouse.name);
             }
             if(unit.cooperator != null) this.attrs.put("cooperatorId", unit.cooperator.id);
-            if(unit.attrs.planShipDate != null) this.attrs.put("planBeginDate", unit.attrs.planShipDate);
-            this.marshalAtts();
-        }
-    }
-
-    public void setAttributes(ShipPlan plan) {
-        //把采购计划一些自身属性存入到 DB,方便后期查询
-        if(plan != null) {
-            if(plan.unit != null) this.setAttributes(plan.unit);
-            this.attrs.put("shipPlanId", plan.id);
-            if(plan.fba != null) this.attrs.put("fba", plan.fba.shipmentId);
-            if(plan.shipType != null) this.attrs.put("shipType", plan.shipType.name());
-            if(plan.selling != null && StringUtils.isNotBlank(plan.selling.fnSku)) {
-                this.attrs.put("fnsku", plan.selling.fnSku);
-            }
-            if(plan.whouse != null) {
-                this.attrs.put("whouseId", plan.whouse.id);
-                this.attrs.put("whouseName", plan.whouse.name);
-            }
-            this.marshalAtts();
+            this.setAttributes();
         }
     }
 
     public void setAttributes(ShipItem item) {
         if(item != null) {
             if(item.unit != null) this.setAttributes(item.unit);
-            if(item.plan != null) this.setAttributes(item.plan);
             this.attrs.put("shipItemId", item.id);
             this.attrs.put("planBeginDate", item.shipment.dates.planBeginDate);
-            this.marshalAtts();
+            this.setAttributes();
         }
     }
 
@@ -197,8 +174,8 @@ public class StockObj implements Serializable, Cloneable {
             if(StringUtils.isNotBlank(outboundRecord.fba)) this.attrs.put("fba", outboundRecord.fba);
             if(outboundRecord.shipType != null) this.attrs.put("shipType", outboundRecord.shipType.name());
             if(StringUtils.isNotBlank(outboundRecord.market)) this.attrs.put("whouseName", outboundRecord.market);
-            if(outboundRecord.fnSku != null) this.attrs.put("fnSku", outboundRecord.fnSku);
-            this.marshalAtts();
+            if(outboundRecord.productCode != null) this.attrs.put("productCode", outboundRecord.productCode);
+            this.setAttributes();
         }
     }
 
@@ -210,8 +187,8 @@ public class StockObj implements Serializable, Cloneable {
             if(inboundRecord.shipType != null) this.attrs.put("shipType", inboundRecord.shipType.name());
             if(inboundRecord.market != null) this.attrs.put("whouseName", inboundRecord.market
                     .marketAndWhouseMapping());
-            if(inboundRecord.fnSku != null) this.attrs.put("fnSku", inboundRecord.fnSku);
-            this.marshalAtts();
+            if(inboundRecord.productCode != null) this.attrs.put("productCode", inboundRecord.productCode);
+            this.setAttributes();
         }
     }
 
@@ -249,34 +226,8 @@ public class StockObj implements Serializable, Cloneable {
             if(procureUnit != null && procureUnit.selling != null) {
                 this.attrs.put("fnsku", procureUnit.selling.fnSku);
                 this.attrs.put("cooperatorId", procureUnit.cooperator.id);
-                this.marshalAtts();
+                this.setAttributes();
             }
         }
-    }
-
-    /**
-     * 读取采购计划 ID
-     *
-     * @return
-     */
-    public Long procureunitId() {
-        if(this.attributes() != null && !this.attributes().isEmpty()) {
-            Optional<Object> procureunitId = Optional.fromNullable(this.attributes().get("procureunitId"));
-            if(procureunitId.isPresent()) return NumberUtils.toLong(procureunitId.get().toString());
-        }
-        return null;
-    }
-
-    /**
-     * 读取出库计划 ID
-     *
-     * @return
-     */
-    public String shipPlanId() {
-        if(this.attributes() != null && !this.attributes().isEmpty()) {
-            Optional<Object> shipPlanId = Optional.fromNullable(this.attributes().get("shipPlanId"));
-            if(shipPlanId.isPresent()) return shipPlanId.get().toString();
-        }
-        return null;
     }
 }

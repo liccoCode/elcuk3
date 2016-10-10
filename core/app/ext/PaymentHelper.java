@@ -100,7 +100,7 @@ public class PaymentHelper extends JavaExtensions {
             DateTime threeMonthAgo = now.minusMonths(3);
 
             if(unit.shipItem != null && shipType == Shipment.T.EXPRESS) {
-                String sku = unit.shipItem.get(String.class, "product.sku");
+                String sku = unit.shipItem.unit.sku;
                 Float price = aveFeeQuery.avgSkuExpressTransportshippingFee(threeMonthAgo.toDate(), now.toDate(), sku)
                         .get(sku);
                 return price == null ? 0 : price;
@@ -122,8 +122,7 @@ public class PaymentHelper extends JavaExtensions {
             DateTime now = DateTime.now();
 
             if(unit.shipItem != null && shipType == Shipment.T.EXPRESS) {
-                return unit.shipItem.qty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) /
-                        unit.shipItem.qty());
+                return unit.shipItem.qty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) / unit.shipItem.unit.realQty());
             } else if(Arrays.asList(Shipment.T.AIR, Shipment.T.SEA).contains(shipType)) {
                 // 总运输费用平摊到所有产品
                 int sumQty = 0;

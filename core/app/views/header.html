@@ -26,20 +26,17 @@
                 #{power.ck "listings.index"}
                   <li><a href="@{Listings.index()}">Listing</a></li>
                 #{/power.ck}
-                #{power.ck "procures.index"}
-                  <li><a href="@{ProcureUnits.indexForMarket()}">采购计划</a></li>
-                #{/power.ck}
-                #{power.ck "shipplans.index"}
-                  <li><a href="@{ShipPlans.index()}">出库计划</a></li>
-                #{/power.ck}
-                #{power.ck "analyzes.index"}
-                  <li><a href="@{Analyzes.index()}">销量分析</a></li>
+                #{power.ck "listings.trackedlistings"}
+                  <li><a href="@{Listings.trackedListings()}">Tracked Listing</a></li>
                 #{/power.ck}
                 #{power.ck "sellings.index"}
                   <li><a href="@{Sellings.index()}">Selling列表</a></li>
                 #{/power.ck}
                 #{power.ck "orders.index"}
                   <li><a href="@{Orders.index()}">订单</a></li>
+                #{/power.ck}
+                #{power.ck "analyzes.index"}
+                  <li><a href="@{Analyzes.index()}">销量分析</a></li>
                 #{/power.ck}
                 #{power.ck "analyzeskus.index"}
                   <li><a href="@{AnalyzeSkus.index()}">SKU 销量分析</a></li>
@@ -53,12 +50,17 @@
                 #{power.ck "analyzes.trafficrate"}
                   <li><a href="@{Analyzes.trafficRate()}">Selling 流量转化率统计</a></li>
                 #{/power.ck}
+                #{power.ck "categoryinfos.show"}
+                  <li><a href="@{CategoryInfos.show()}">Category 销售分析</a></li>
+                #{/power.ck}
                 #{power.ck "profits.index"}
                   <li><a href="@{Profits.index()}">利润分析</a></li>
+
                 #{/power.ck}
                 #{power.ck "sellingrecords.index"}
                   <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
                 #{/power.ck}
+
                 #{power.ck "salereports.salecount"}
                   <li><a href="@{SaleReports.saleCount()}">销售统计报表</a></li>
                 #{/power.ck}
@@ -141,9 +143,8 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
+              <li><a href="@{ShipItems.index()}">快递运输</a></li>
                 #{power.ck "shipments.index"}
-                  <li><a href="@{ShipItems.index()}">快递运输(旧)</a></li>
-                  <li><a href="@{ShipItems.planIndex()}">快递运输</a></li>
                   <li><a href="@{Shipments.index()}">运输单</a></li>
                 #{/power.ck}
                 #{power.ck "shipmentreports.cost"}
@@ -207,6 +208,9 @@
                 #{power.ck "checktasks.checklist"}
                   <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
                 #{/power.ck}
+                #{power.ck "checktasks.checkerlist"}
+                  <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
+                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -219,14 +223,11 @@
                   <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
               <li class="divider"></li>
-                #{power.ck "receiverecords.index"}
-                  <li><a href="@{ReceiveRecords.index()}">收货记录</a></li>
+                #{power.ck "whouseitems.index"}
+                  <li><a href="@{WhouseItems.index()}">库存</a></li>
                 #{/power.ck}
                 #{power.ck "inboundrecords.index"}
                   <li><a href="@{InboundRecords.index()}">入库记录</a></li>
-                #{/power.ck}
-                #{power.ck "whouseitems.index"}
-                  <li><a href="@{WhouseItems.index()}">库存</a></li>
                 #{/power.ck}
                 #{power.ck "outboundrecords.index"}
                   <li><a href="@{OutboundRecords.index()}">出库记录</a></li>
@@ -234,7 +235,6 @@
                 #{power.ck "stockrecords.index"}
                   <li><a href="@{StockRecords.index()}">库存异动</a></li>
                 #{/power.ck}
-
             </ul>
           </li>
         #{/power.ck}

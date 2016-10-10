@@ -11,7 +11,6 @@ import models.market.M;
 import models.procure.ProcureUnit;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.TimelineEventSource;
-import models.whouse.ShipPlan;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -301,35 +300,18 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
 
         DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit.find(
-                "attrs.planShipDate IS NOT NULL AND whouse IS NOT NULL AND shipType IS NOT NULL " +
-                        "AND createDate>=? AND createDate<=? AND " + type + "=?",
+        List<ProcureUnit> units = ProcureUnit.find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
                 Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
+
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
         TimelineEventSource eventSource = new TimelineEventSource();
         AnalyzeDTO analyzeDTO = AnalyzeDTO.findByValAndType(type, val);
         for(ProcureUnit unit : units) {
-            ShipPlan plan = unit.shipPlan();
-            TimelineEventSource.Event event = plan != null ?
-                    new TimelineEventSource.Event(analyzeDTO, plan) :
-                    new TimelineEventSource.Event(analyzeDTO, unit);
+            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
             event.startAndEndDate(type)
                     .titleAndDesc()
-                    .color();
-            eventSource.events.add(event);
-        }
+                    .color(unit);
 
-        List<ShipPlan> plans = ShipPlan.find(//预计运输时间 仓库 运输方式
-                String.format("planShipDate IS NOT NULL AND whouse IS NOT NULL AND shipType IS NOT NULL" +
-                                " AND unit IS NULL AND createDate>=? AND createDate<=? AND %s =?",
-                        type),
-                Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
-        // 将所有与此 SKU/SELLING 关联的手动创建的 ShipPlan 展示出来.(前 9 个月~后3个月)
-        for(ShipPlan plan : plans) {
-            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, plan);
-            event.startAndEndDate(type)
-                    .titleAndDesc()
-                    .color();
             eventSource.events.add(event);
         }
 

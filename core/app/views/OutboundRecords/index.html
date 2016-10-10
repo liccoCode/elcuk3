@@ -8,7 +8,9 @@
 
 #{info_row}
 <ul>
-  <li>通过 <strong>[ID]</strong> 搜索出库记录时请使用匹配器: <strong>id:{ID}</strong></li>
+  <li>
+    通过 <strong>[ID]</strong> 搜索出库记录时请使用匹配器: <strong>id:{ID}</strong>
+  </li>
   <li>
     <p class="text-error">
       <strong>示例:</strong> id:123, 表示搜索 ID 为 123 的出库记录
@@ -72,62 +74,42 @@
 
       <div class="inline">
         <a href="@{OutboundRecords.blank()}" target="_blank" class="btn btn-success inline">添加其他出库</a>
-        <a class="btn btn-info inline" href="javascript:void(0)" id="download_excel">导出</a>
-        <a target="_blank" class="btn btn-warning inline" name="confirm">确认出库</a>
+        <a target="_blank" class="btn btn-info inline" name="confirm">确认出库</a>
       </div>
     </div>
   </form>
 
-  <form action="javascript:void(0)" name="confirm_form">
-    <div class="span12" style="overflow: auto;">
-      <table class="table table-condensed table-bordered" style="width:2810px;">
+  <form action="@{OutboundRecords.confirm()}" name="confirm_form">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
         <tr>
-          <th rowspan="2">
+          <th>
             <label class="checkbox">
               <input type="checkbox" id="outboundrecord_check_all">
             </label>
           </th>
-          <th rowspan="2" style="width:30px;">ID</th>
-          <th rowspan="2" style="width:60px;">出库类别</th>
-          <th rowspan="2" style="width:50px;">状态</th>
-          <th rowspan="2" style="width:40px;">出库计划ID</th>
-          <th rowspan="2" style="width:40px;">采购计划ID</th>
-          <th rowspan="2" style="width:120px;">SKU</th>
-          <th rowspan="2" style="width:110px;">产品名称</th>
-          <th rowspan="2" style="width:110px;">变更情况</th>
-          <th rowspan="2" style="width:100px;">FBA</th>
-          <th rowspan="2" style="width:80px;">预计运输时间</th>
-          <th rowspan="2" style="width:40px;">预计出货数量</th>
-          <th rowspan="2" style="width:60px;">实际出货数量</th>
-          <th rowspan="2" style="width:70px;">去往国家</th>
-          <th rowspan="2" style="width:70px;">运输方式</th>
-          <th rowspan="2" style="width:120px;">仓库名称</th>
-          <th rowspan="2" style="width:80px;">出库对象</th>
-          <th colspan="6" style="width:380px;">主箱</th>
-          <th colspan="6" style="width:380px;">尾箱</th>
-          <th rowspan="2" style="width:80px;">报关类型</th>
-          <th rowspan="2" style="width:80px;">供应商</th>
-          <th rowspan="2" style="width:60px;">收货记录ID</th>
-          <th rowspan="2" style="width:80px;">创建时间</th>
-          <th rowspan="2" style="width:80px;">完成时间</th>
-          <th rowspan="2" style="width:160px;">备注</th>
-        </tr>
-        <tr>
-          <th><abbr title="主箱收了多少箱货">箱数</abbr></th>
-          <th><abbr title="主箱每箱有多少货">数量</abbr></th>
-          <th><abbr title="主箱每箱的重量是多少">重量(kg)</abbr></th>
-          <th><abbr title="主箱每箱长多少">长(cm)</abbr></th>
-          <th><abbr title="主箱每箱宽多少">宽(cm)</abbr></th>
-          <th><abbr title="主箱每箱高多少">高(cm)</abbr></th>
-          <th><abbr title="尾箱收了多少箱货">箱数</abbr></th>
-          <th><abbr title="尾箱每箱有多少货">数量</abbr></th>
-          <th><abbr title="尾箱每箱的重量是多少">重量(kg)</abbr></th>
-          <th><abbr title="尾箱每箱长多少">长(cm)</abbr></th>
-          <th><abbr title="尾箱每箱宽多少">宽(cm)</abbr></th>
-          <th><abbr title="尾箱每箱高多少">高(cm)</abbr></th>
+          <th>ID</th>
+          <th>出库类别</th>
+          <th>状态</th>
+          <th>出货计划 ID</th>
+          <th>SKU</th>
+          <th>产品名称</th>
+          <th>FBA</th>
+          <th>仓库</th>
+          <th>去往国家</th>
+          <th>运输方式</th>
+          <th>预计运输时间</th>
+          <th>预计出货数量</th>
+          <th>实际出货数量</th>
+          <th>出库对象</th>
+          <th>创建时间</th>
+          <th>完成时间</th>
+          <th>备注</th>
+          <th></th>
         </tr>
       #{list items: records, as: 'r'}
         <tr>
+            #{set attrs: r.stockObj.attributes()/}
           <td>
             <label class="checkbox">
               <input type="checkbox" name="rids" value="${r.id}" class="outboundrecord">
@@ -137,48 +119,36 @@
           <td>${r.type.label()}</td>
           <td>${r.state.label()}</td>
           <td>
-              #{if r.shipPlan != null}
-                <a href="@{ShipPlans.show(r.shipPlan.id)}" target="_blank">${r.shipPlan.id}</a>
+              #{if attrs.containsKey('procureunitId')}
+                <a href="/ProcureUnits/index?p.search=id:${attrs.get('procureunitId')}" target="_blank">
+                ${attrs.get('procureunitId')}
+                </a>
               #{/if}
           </td>
           <td>
-              <a href="@{ProcureUnits.edit(r.shipPlan?.unit?.id, 'show')}" target="_blank">${r.shipPlan?.unit?.id}</a>
+            <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
           </td>
-          <td><a href="@{Products.show(r.shipPlan?.product?.sku)}" target="_blank">${r.shipPlan?.product?.sku}</a></td>
-          <td title="${r.shipPlan?.product?.abbreviation}">
-              #{if r.shipPlan?.product?.abbreviation.length() <= 20}
-              ${r.shipPlan?.product?.abbreviation}
-              #{/if}
-              #{else }
-              ${r.shipPlan?.product?.abbreviation.substring(0,20)}...
-              #{/else}
-          </td>
-          <td title="${r.shipPlan?.memo}">
-              #{if r.shipPlan?.memo?.length() <= 7}
-              ${r.shipPlan?.memo}
-              #{/if}
-              #{else }
-              ${r.shipPlan?.memo.substring(0,7)}...
-              #{/else}
-          </td>
-          <td>${r.shipPlan?.fba?.shipmentId}</td>
-          <td>#{time_tooltip time:r.shipPlan?.planShipDate /}</td>
-          <td>${r.planQty}</td>
-          <td><input type="text" name="qty" value="${r.qty}" style="width:45px;"></td>
-          <td>${r.shipPlan?.whouse?.name}</td>
-          <td>${r.shipPlan?.shipType?.label()}</td>
+          <td style="max-width: 280px;">${r.stockObj.name()}</td>
+          <td>${attrs.get('fba')}</td>
           <td>
             <select name="whouse" style="width: 100px;" data-value="${r.whouse?.name}">
               <option value="">仓库</option>
-                #{list items:r.availableWhouses(), as:'whouse'}
+                #{list items:whouses, as:'whouse'}
                   <option ${whouse.id == r.whouse?.id ? 'selected' : ''} value="${whouse.id}">
                   ${whouse.name}
                   </option>
                 #{/list}
             </select>
           </td>
+          <td>${attrs.get('whouseName')}</td>
+          <td>${attrs.get('shipType')}</td>
+          <td>${attrs.get('planBeginDate')}</td>
+          <td>${r.planQty}</td>
           <td>
-            <select name="targetId" style="width: 100px;" data-value="${r.targetName()}" data-type="${r.type?.name()}">
+            <input type="text" name="qty" value="${r.qty}" style="width:45px;">
+          </td>
+          <td>
+            <select name="targetId" style="width: 150px;" data-value="${r.targetName()}" data-type="${r.type?.name()}">
               <option value=""></option>
                 #{if r.type.name() ==  'Normal' || r.type.name() == 'B2B'}
                     #{list items:shippers, as: 'ship'}
@@ -210,46 +180,6 @@
                   <option selected value="${r.targetId}">${r.targetId}</option>
                 #{/elseif}
             </select>
-          </td>
-          <td><input type="text" name="mainBox.boxNum" value="${r.mainBox?.boxNum}" style="width:40px;"></td>
-          <td><input type="text" name="mainBox.num" value="${r.mainBox?.num}" style="width:40px;"></td>
-          <td>
-            <input type="text" name="mainBox.singleBoxWeight" value="${r.mainBox?.singleBoxWeight}" style="width:40px;">
-          </td>
-          <td><input type="text" name="mainBox.length" value="${r.mainBox?.length}" style="width:40px;"></td>
-          <td><input type="text" name="mainBox.width" value="${r.mainBox?.width}" style="width:40px;"></td>
-          <td><input type="text" name="mainBox.height" value="${r.mainBox?.height}" style="width:40px;"></td>
-          <td><input type="text" name="lastBox.boxNum" value="${r.lastBox?.boxNum}" style="width:40px;"></td>
-          <td><input type="text" name="lastBox.num" value="${r.lastBox?.num}" style="width:40px;"></td>
-          <td>
-            <input type="text" name="lastBox.singleBoxWeight" value="${r.lastBox?.singleBoxWeight}" style="width:40px;">
-          </td>
-          <td><input type="text" name="lastBox.length" value="${r.lastBox?.length}" style="width:40px;"></td>
-          <td><input type="text" name="lastBox.width" value="${r.lastBox?.width}" style="width:40px;"></td>
-          <td><input type="text" name="lastBox.height" value="${r.lastBox?.height}" style="width:40px;"></td>
-          <td>
-            <select style="width:80px;" name="clearanceType">
-                #{list items:models.procure.DeliverPlan.CT , as:'c'}
-                  <option value="${c.name()}"
-                      #{if r.clearanceType?.name()==c.name()} selected #{/if}>${c.label()}
-                  </option>
-                #{/list}
-            </select>
-          </td>
-            #{set receiveRecord: r.receiveRecord()/}
-          <td>
-              #{if receiveRecord != null && receiveRecord.procureUnit != null}
-                <a href="@{Cooperators.show(receiveRecord.procureUnit?.cooperator?.id)}" target="_blank">
-                ${receiveRecord.procureUnit?.cooperator?.name}
-                </a>
-              #{/if}
-          </td>
-          <td>
-              #{if receiveRecord != null}
-                <a href="/ReceiveRecords/index?p.search=id:${receiveRecord.id}" target="_blank">
-                ${receiveRecord.id}
-                </a>
-              #{/if}
           </td>
           <td>${r.createDate.datetime()}</td>
           <td>${r.outboundDate.datetime()}</td>

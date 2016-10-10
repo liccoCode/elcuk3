@@ -1,20 +1,88 @@
+*{需要
+* ProcueUnit: unit
+* Whouse: whouses
+}*
+#{set product: unit.selling.listing.product/}
 <tr>
   <th style="width:100px;">SellingId</th>
   <td style="width:650px;">
-    <input type="text" name="unit.selling.sellingId" id="sellingId" style="width:300px;" value="${unit.selling?.sellingId}"
-    #{if unit.selling?.sellingId} readonly #{/if} autocomplete="off">
+    <input type="text" name="unit.selling.sellingId" id="sellingId" value="${unit.selling.sellingId}" readonly>
   </td>
-  <th style="width:100px;"><span style="color:red">*</span>SKU</th>
+  <th style="width:100px;">SKU</th>
   <td>
-    <input type="text" name="unit.product.sku" id="unit_sku" value="${unit.product?.sku}"
-    #{if unit.product?.sku} readonly #{/if} required autocomplete="off">
+    <input type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}" readonly>
   </td>
 </tr>
+
 <tr>
-  <th><span style="color:red">*</span>产品名称</th>
+#{set copers:product.cooperators() /}
+  <th>供应商</th>
   <td>
-    <input type="text" id="productName" style="width:300px;" value="${unit.product?.abbreviation}"
-    #{if unit.selling?.listing?.product?.abbreviation} readonly #{/if}required>
+    <select name="unit.cooperator.id" native='true'>
+      <option>请选择</option>
+    #{list items:copers, as:'c'}
+      <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
+    #{/list}
+    </select>
+    <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
+  </td>
+
+  <th>价格</th>
+  <td>
+    <input type="text" class="span2" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+  #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
+  </td>
+</tr>
+
+<tr>
+  <th>采购数量</th>
+  <td>
+    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
+           value="${unit.attrs.planQty}">
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+    <span class="add-on">箱</span>
+    <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+  </td>
+  <th>预计交货日期</th>
+  <td>
+    <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+  #{if oldplanDeliveryDate!=null}
+    <span class="add-on">比原预计交货日期${oldplanDeliveryDate.date()}推迟${(unit.attrs
+    .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
+  #{/if}
+    <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
+  </td>
+</tr>
+
+<tr>
+  <th>采购取样</th>
+  <td>
+    <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/><span class="add-on">个</span>
+  </td>
+  <th>质检取样</th>
+  <td>
+    <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
+  </td>
+</tr>
+
+<tr>
+  <th>预计运输时间</th>
+  <td>
+    <input type="date" name="unit.attrs.planShipDate" value="${unit.attrs.planShipDate.date()}">
+  </td>
+  <th>预计到库时间</th>
+  <td>
+    <div class="input-append">
+      <input type="date" name="unit.attrs.planArrivDate" value="${unit.attrs.planArrivDate.date()}">
+      <span class="add-on">? 天</span>
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <th>去往仓库</th>
+  <td>
+  #{select 'unit.whouse.id', items: whouses, labelProperty: 'name', value: unit.whouse?.id}#{/select}
   </td>
   <th>阶段</th>
   <td>
@@ -23,79 +91,23 @@
 </tr>
 
 <tr>
-  <th><span style="color:red">*</span>采购数量</th>
-  <td colspan="3">
-    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
-           value="${unit.attrs.planQty}">
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-    <span class="add-on">箱</span>
-    <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-    &nbsp;&nbsp;&nbsp;
-    <select id="cooperator" name="" coop_value="${unit.cooperator?.id}">
-      <option value="">供应商参考</option>
-    </select>
-    <span id="coop_text"></span>
-  </td>
-</tr>
-
-<tr>
-  <th><span style="color:red">*</span>预计交货日期</th>
-  <td>
-    <input type="date" id="planDeliveryDate" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required>
-  #{if oldplanDeliveryDate!=null}
-    <span class="add-on">比原预计交货日期${oldplanDeliveryDate.date()}推迟${(unit.attrs
-    .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
-  #{/if}
-    <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
-  </td>
-  <th>去往仓库</th>
-  <td>
-    <select name="unit.whouse.id" id="warehouse_select">
-      <option value="">请选择</option>
-    #{list items:whouses, as:'w'}
-      <option value="${w.id}">${w.name}</option>
-    #{/list}
-    </select>
-  </td>
-</tr>
-
-<tr>
-  <th>预计运输时间</th>
-  <td>
-    <input type="date" name="unit.attrs.planShipDate" id="planShipDate" value="${unit.attrs.planShipDate.date()}">
-  </td>
-  <th>预计到库时间</th>
-  <td>
-    <input type="date" name="unit.attrs.planArrivDate" id="planArrivDate" value="${unit.attrs.planArrivDate.date()}">
-    <span class="add-on">? 天</span>
-  </td>
-</tr>
-
-<tr>
   <th>运输方式</th>
   <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
-      <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>${t.detail()}
+      <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>
+    ${t.label()}
     </label>
   #{/list}
   </td>
-  <td colspan="2" id="ship_type_text">
+  <td colspan="2">
+  #{list items: unit.relateShipment()}
     <div>
-    #{if unit.shipmentId}
-      <a href="@{Shipments.show(unit.shipmentId)}" target="_blank">${unit.shipmentId} (${unit.shipType?.label()})</a>
-      <input type="button" class="btn btn-mini btn-primary" id="del_ship_type" name="unit.shipType" value="清除运输方式">
-    #{/if}
-    #{else }
-        #{list items: unit.relateShipment()}
-          <div>
-            <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
-            <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
-            <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
-          </div>
-        #{/list}
-    #{/else}
+      <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
+      <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
     </div>
+  #{/list}
   </td>
 </tr>
 
@@ -105,8 +117,3 @@
     <textarea rows="8" class="span12" name="unit.comment" id="memo">${unit.comment.raw()}</textarea>
   </td>
 </tr>
-<input type="hidden" name="unit.shipmentId" value="${unit.shipmentId}" id="shipmentId">
-<input type="hidden" name="to_page" value="${sid != null ? 'analysis' : 'index'}">
-
-
-

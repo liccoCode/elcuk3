@@ -72,24 +72,21 @@
           </thead>
           <tbody>
           #{list items:shipItems, as:'itm'}
-              #{set unit: itm.unit()/}
           <tr>
-            <td>${unit?.sid}</td>
-            <td>${unit?.fba?.shipmentId}</td>
-            <td>${unit?.fba?.centerId}</td>
+            <td>${itm.unit.sid}</td>
+            <td>${itm.unit.fba?.shipmentId}</td>
+            <td>${itm.unit.fba?.centerId}</td>
             <td>
-                #{if unit}
-                ${itm.qty - unit.returnPurchaseSample() - unit.fetchCheckTaskQcSample()}
-                #{/if}
-              (${unit?.attrs?.planQty} | ${unit?.attrs?.qty})
+            ${itm.qty - itm.unit.returnPurchaseSample() - itm.unit.fetchCheckTaskQcSample()}
+              (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
             </td>
             <td>${itm.recivedQty}</td>
             <td>${itm.adjustQty}</td>
             <td>${itm.showDeliverymentId()}</td>
-            <td>#{time_tooltip time: unit?.attrs?.planShipDate/}</td>
-            <td>#{time_tooltip time: unit?.attrs?.planArrivDate/}</td>
-            <td>#{time_tooltip time: unit?.attrs?.deliveryDate/}</td>
-            <td>${unit?.cooperator?.name}</td>
+            <td>#{time_tooltip time: itm.unit.attrs.planShipDate/}</td>
+            <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
+            <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
+            <td>${itm.unit.cooperator?.name}</td>
             <td>${itm.lossqty}</td>
             <td>${itm.compentype}</td>
             <td>${itm.purchaseCost}</td>

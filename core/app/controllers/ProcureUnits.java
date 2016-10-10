@@ -12,23 +12,24 @@ import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
+import models.product.Product;
 import models.qc.CheckTask;
-import models.qc.CheckTaskDTO;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
 import models.whouse.Whouse;
-import models.whouse.WhouseItem;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
+import play.libs.F;
 import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -43,20 +44,18 @@ import java.util.*;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
-    @Before(only = {"index", "indexForMarket"})
+    @Before(only = {"index"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("logs", ElcukRecord.records(
-                Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay",
-                        "procureunit.tailpay"), 50));
+        renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
+        renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
         renderArgs.put("cooperators", cooperators);
-        renderArgs.put("categories", User.getTeamCategorys(User.current()));
-    }
 
-    @Before(only = {"index", "indexForMarket", "blank", "create", "edit", "update", "splitUnit", "doSplitUnit"})
-    public static void beforeWhouses() {
-        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
+        //为视图提供日期
+        DateTime dateTime = new DateTime();
+        renderArgs.put("tomorrow1", dateTime.plusDays(1).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow2", dateTime.plusDays(2).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
     }
 
     @Before(only = {"index"})
@@ -75,14 +74,7 @@ public class ProcureUnits extends Controller {
     @Check("procures.index")
     public static void index(ProcurePost p) {
         if(p == null) p = new ProcurePost();
-        List<ProcureUnit> units = p.query();
-        render(p, units);
-    }
-
-    public static void indexForMarket(ProcurePost p) {
-        if(p == null) p = new ProcurePost();
-        List<ProcureUnit> units = p.query();
-        render(p, units);
+        render(p);
     }
 
     /**
@@ -120,13 +112,39 @@ public class ProcureUnits extends Controller {
         }
     }
 
-    public static void blank(String sid) {
+    /**
+     * 明天 后天 大后天 计划视图
+     */
+    public static void planView(Date date) {
+        ProcurePost p = new ProcurePost(ProcureUnit.STAGE.DELIVERY);
+        p.dateType = "attrs.planDeliveryDate";
+        p.from = date;
+        p.to = date;
+        ProcureUnits.index(p);
+    }
+
+    /**
+     * 发货时间为当天, 同时货物还没有抵达货代的采购计划
+     */
+    public static void noPlaced() {
+        ProcurePost p = new ProcurePost();
+        p.dateType = "attrs.planArrivDate";
+        p.from = new Date();
+        p.to = new Date();
+        p.isPlaced = ProcurePost.PLACEDSTATE.NOARRIVE;
+        ProcureUnits.index(p);
+    }
+
+
+    public static void blank(String sid, float day, int totalFive) {
         ProcureUnit unit = new ProcureUnit();
-        if(StringUtils.isNotBlank(sid)) {
-            Selling selling = Selling.findById(sid);
-            unit = new ProcureUnit(selling);
+        unit.selling = Selling.findById(sid);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        if(unit.selling == null) {
+            flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
+            Analyzes.index();
         }
-        render(unit, sid);
+        render(unit, whouses, day, totalFive);
     }
 
 
@@ -162,10 +180,11 @@ public class ProcureUnits extends Controller {
      */
     @Check("procures.delivery")
     public static void delivery(UnitAttrs attrs, long id, String cmt) {
+        attrs.validate();
         ProcureUnit unit = ProcureUnit.findById(id);
-        unit.deliveryValidate(attrs);
-        if(Validation.hasErrors()) render("/ProcureUnits/deliveryUnit.html", unit, attrs);
-
+        if(Validation.hasErrors()) {
+            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
+        }
         unit.comment = cmt;
         try {
             Boolean isFullDelivery = unit.delivery(attrs);
@@ -177,7 +196,7 @@ public class ProcureUnits extends Controller {
             }
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
-            render("/ProcureUnits/deliveryUnit.html", unit, attrs);
+            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
         }
 
         //抵达货代
@@ -222,31 +241,59 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
-    public static void create(ProcureUnit unit, String shipmentId, String to_page) {
-        unit.doCreate(shipmentId);
-        if(Validation.hasErrors()) {
-            render("ProcureUnits/blank.html", unit);
-        }
-        if(StringUtils.isNotBlank(to_page) && to_page.trim().equals("analysis")) {
-            Analyzes.index();
+    public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
+        unit.handler = User.findByUserName(Secure.Security.connected());
+        unit.validate();
+
+        if(unit.shipType == Shipment.T.EXPRESS) {
+            if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
         } else {
-            ProcureUnits.indexForMarket(new ProcurePost());
+            Validation.required("运输单", shipmentId);
         }
+
+        if(Validation.hasErrors()) {
+            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+            render("ProcureUnits/blank.html", unit, whouses, totalFive, day);
+        }
+
+        if(unit.isCheck != 1) unit.isCheck = 0;
+        if(isNeedApply != null && isNeedApply.equals("need")) {
+            unit.stage = ProcureUnit.STAGE.APPROVE;
+        }
+        unit.save();
+        //生成质检任务
+        unit.triggerCheck();
+
+        if(unit.shipType != Shipment.T.EXPRESS) {
+            Shipment ship = Shipment.findById(shipmentId);
+            ship.addToShip(unit);
+        }
+
+        if(Validation.hasErrors()) {
+            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+            unit.remove();
+            render("ProcureUnits/blank.html", unit, whouses);
+        }
+        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
+                .save();
+
+        if(StringUtils.equals(isNeedApply, "need")) {
+            unit.startActiviti(unit.handler.username);
+            flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+            ProcureUnits.showactiviti(unit.id);
+        } else {
+            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+        }
+        Analyzes.index();
     }
 
 
-    public static void edit(long id, String type) {
+    public static void edit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         unit.setPeriod();
-        render(unit, oldPlanQty, type);
-    }
-
-    public static void delete(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        unit.stage = ProcureUnit.STAGE.CANCEL;
-        unit.save();
-        ProcureUnits.indexForMarket(new ProcurePost());
+        render(unit, oldPlanQty, whouses);
     }
 
     /**
@@ -256,15 +303,16 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
         managedUnit.update(unit, shipmentId, msg);
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
-            render("ProcureUnits/edit.html", unit, oldPlanQty);
+            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
         flash.success("成功修改采购计划!", id);
-        edit(id, "edit");
+        edit(id);
 
     }
 
@@ -293,7 +341,7 @@ public class ProcureUnits extends Controller {
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcurePost p = new ProcurePost();
-            p.search = id + "";
+            p.search = "id:" + id;
             index(p);
         }
         flash.success("删除成功, 所关联的运输项目也成功删除.");
@@ -310,6 +358,11 @@ public class ProcureUnits extends Controller {
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
         newUnit.attrs.qty = 0;
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(unit.sku);
+        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
+        renderArgs.put("skus", J.json(skusToJson._2));
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
+        renderArgs.put("whouses", Whouse.findAll());
         render(unit, newUnit);
     }
 
@@ -320,16 +373,18 @@ public class ProcureUnits extends Controller {
      * @param newUnit
      */
     @Check("procures.dosplitunit")
-    public static void doSplitUnit(long id, ProcureUnit newUnit, String shipmentId) {
+    public static void doSplitUnit(long id, ProcureUnit newUnit) {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
-        ProcureUnit nUnit = unit.split(newUnit, shipmentId);
+        ProcureUnit nUnit = unit.split(newUnit);
         if(Validation.hasErrors()) {
-            render("ProcureUnits/splitUnit.html", unit, newUnit);
+            List<Whouse> whouses = Whouse.findAll();
+            render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
         }
+
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
-        ProcureUnits.indexForMarket(new ProcurePost());
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     /**
@@ -380,7 +435,7 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
-            if(!unit.isNeedPay)
+            if(unit.isNeedPay == false)
                 renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingPrePay();
@@ -590,51 +645,4 @@ public class ProcureUnits extends Controller {
         redirect("/activitis/index");
     }
 
-    /**
-     * 展示库存
-     *
-     * @param name
-     * @param type
-     */
-    public static void showStockBySellingOrSku(String name, String type, String flag) {
-        HashMap<String, Integer> map = ProcureUnit.caluStockInProcureUnit(name, type);
-        HashMap<String, Integer> stock_map = WhouseItem.caluStockInProcureUnit(name, type);
-        render(map, stock_map, flag);
-    }
-
-    /**
-     * 批量创建FBA
-     * <p>
-     * 以后所有的 FBA 应该关联到出库计划
-     *
-     * @param pids
-     * @deprecated
-     */
-    public static void batchCreateFBA(ProcurePost p, List<Long> pids, String redirectTarget, List<CheckTaskDTO> dtos) {
-        if(pids != null && pids.size() > 0) {
-            ProcureUnit.postFbaShipments(pids, dtos);
-        }
-        if(StringUtils.isNotBlank(redirectTarget) && StringUtils.containsIgnoreCase(redirectTarget, "index")) {
-            ProcureUnits.index(p);
-        } else {
-            ProcureUnits.indexForMarket(p);
-        }
-    }
-
-    /**
-     * 更新单一属性
-     *
-     * @param attr
-     * @param value
-     */
-    public static void updateAttr(Long id, String attr, String value) {
-        try {
-            ProcureUnit unit = ProcureUnit.findById(id);
-            if(unit == null) throw new FastRuntimeException("未找到对应的采购计划");
-            unit.update(attr, value);
-            renderJSON(new Ret(true, String.format("成功修改采购计划[%s]", id)));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-    }
 }

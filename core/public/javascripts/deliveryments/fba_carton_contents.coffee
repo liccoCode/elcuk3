@@ -7,7 +7,8 @@ $ ->
         return e.stopPropagation()
     $modal.modal('hide')
   ).on('show', (e) ->
-    unless processModalTableLines($(@)) then return e.preventDefault()
+    unless processModalTableLines($(@))
+      return e.preventDefault()
   ).on('blur', ":input", (e) ->
     $input = $(@)
     if _.isEmpty($input.val())
