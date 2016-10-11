@@ -210,18 +210,18 @@ public class Sellings extends Controller {
     }
 
     /**
-     * 将部分信息同步到AMAZON
+     * 将部分信息同步到 Amazon
      *
      * @param s
      * @param p
      */
-    public static void amazon_update(Selling s, SellingAmzPost p) {
+    public static void partialUpdate(Selling s, SellingAmzPost p) {
         if(p == null) {
             renderJSON(new Ret(false, "请勾选Selling信息更新!"));
         }
         try {
             s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-            s.syncAndUpdateAmazon(p);
+            s.partialUpdate(p);
             s.save();
             renderJSON(new Ret(true));
         } catch(Exception e) {

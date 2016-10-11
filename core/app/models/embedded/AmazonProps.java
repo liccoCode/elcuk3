@@ -73,7 +73,7 @@ public class AmazonProps implements Serializable {
     @Lob
     public String keyFetures;
     @Transient
-    public List<String> keyFeturess = new ArrayList<String>();
+    public List<String> keyFeturess = new ArrayList<>();
     /**
      * Recommended Browse Nodes;
      * 使用 [,] 进行分割, 一般为 2 个
@@ -82,7 +82,7 @@ public class AmazonProps implements Serializable {
     public String RBN;
 
     @Transient
-    public List<String> rbns = new ArrayList<String>();
+    public List<String> rbns = new ArrayList<>();
     /**
      * For most products, this will be identical to the model number;
      * however, some manufacturers distinguish part number from model number
