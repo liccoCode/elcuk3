@@ -8,7 +8,6 @@ import controllers.Login;
 import exception.NotSupportChangeRegionFastException;
 import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
-import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
 import models.product.Attach;
@@ -327,13 +326,21 @@ public class Selling extends GenericModel {
         this.save();
     }
 
-
-    public void syncAndUpdateAmazon(SellingAmzPost p) {
-        try {
-            this.uploadFeedToAmazonForProduct(p);
-            new ElcukRecord("selling.update", "执行API操作", this.sellingId).save();
-        } catch(Exception e) {
-            throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
+    /**
+     * 将前端勾选的部分属性同步到 Amazon
+     *
+     * @param p
+     */
+    public void partialUpdate(SellingAmzPost p) {
+        this.account = Account.findById(this.account.id);
+        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
+                p.productdesc) {
+            Feed feed = Feed.updateSellingFeed(MWSUtils.buildProductXMLBySelling(this, p), this);
+            feed.submit(this.partialUpdateParams());
+        }
+        if(p.standerprice || p.saleprice) {
+            Feed priceFeed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
+            priceFeed.submit(this.assignAmazonListingPriceParams());
         }
     }
 
@@ -378,14 +385,16 @@ public class Selling extends GenericModel {
         if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
         this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
         this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
-        String content = Selling
-                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(),
-                        "PartialUpdate");
+        String content = Selling.generateFeedTemplateFile(
+                Lists.newArrayList(this),
+                this.aps.templateType,
+                this.market.toString(),
+                "PartialUpdate");
         Feed feed = Feed.updateSellingFeed(content, this);
         List<NameValuePair> params = this.submitJobParams(feed);
         params.add(new BasicNameValuePair("action", "update"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
+        feed.submit(params);
         return feed;
     }
 
@@ -398,20 +407,12 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
         String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
-        if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
-            images = Arrays.copyOfRange(images, 0, 9);
+        // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
+        if(images.length >= 9) images = Arrays.copyOfRange(images, 0, 9);
         this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
-
-        String xml = MWSUtils.buildProductImageBySelling(this, images);
-        Feed feed = Feed.updateSellingFeed(xml, this);
-        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, this.market.amid(),
-                this.account);
-        Logger.info(feed_submission_id);
-        List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_get_feed", params);
+        this.postImages(images);
         this.save();
     }
-
 
     /**
      * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值
@@ -468,6 +469,20 @@ public class Selling extends GenericModel {
         return params;
     }
 
+    public List<NameValuePair> partialUpdateParams() {
+        List<NameValuePair> params = this.submitJobParams();
+        params.add(new BasicNameValuePair("type", "PartialUpdateListing"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
+        return params;
+    }
+
+    public List<NameValuePair> postImagesParams() {
+        List<NameValuePair> params = this.submitJobParams();
+        params.add(new BasicNameValuePair("type", "PostImages"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_IMAGES_FEED.toString()));
+        return params;
+    }
+
     public List<NameValuePair> assignAmazonListingPriceParams() {
         List<NameValuePair> params = this.submitJobParams();
         params.add(new BasicNameValuePair("type", "AssignPrice"));
@@ -488,6 +503,14 @@ public class Selling extends GenericModel {
     public void saleAmazon() {
         Feed feed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
         feed.submit(this.saleAmazonParams());
+    }
+
+    /**
+     * 上传图片
+     */
+    public void postImages(String[] images) {
+        Feed feed = Feed.updateSellingFeed(MWSUtils.buildProductImageBySelling(this, images), this);
+        feed.submit(this.postImagesParams());
     }
 
     /**
@@ -973,33 +996,6 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("feed_submission_id", feed_submission_id));
         return params;
-    }
-
-
-    public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
-        this.account = Account.findById(this.account.id);
-        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
-                p.productdesc) {
-            String xml = MWSUtils.buildProductXMLBySelling(this, p);
-            Feed feed = Feed.updateSellingFeed(xml, this);
-            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, this.market.amid(),
-                    this.account);
-            Logger.info(feed_submission_id);
-            List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
-            String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
-                    productParams);
-        }
-
-        if(p.standerprice || p.saleprice) {
-            String xml = MWSUtils.buildPriceXMLBySelling(this, p);
-            Feed price_feed = Feed.newAssignPriceFeed(xml, this);
-            String feed_submission_id = MWSUtils
-                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, this.market.amid(), this.account);
-            Logger.info(feed_submission_id);
-            List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
-            String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
-                    priceParams);
-        }
     }
 
     /**
