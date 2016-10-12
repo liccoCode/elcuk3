@@ -32,6 +32,7 @@
     <th>实际交货时间</th>
     <th>阶段</th>
     <th>抵达货代</th>
+    <th>是否核对</th>
     <th>是否出库</th>
     <th>是否发货</th>
     <th>质检信息</th>
@@ -137,6 +138,7 @@
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
+    <td>#{yesOrNo f:unit.isConfirm/}</td>
     <td>${unit.isOut?.label()}</td>
     <td>${unit.isship()}</td>
     <td>
@@ -149,7 +151,7 @@
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '23' : '22'}">
+    <td colspan="${checkbox ? '24' : '22'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
@@ -237,11 +239,11 @@
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
                         <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
-                           href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>
-                          抵达货代
-                        </a>
+                           href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
                       #{/ifnot}
                   #{/if}
+                <a data-remote='true' data-method='PUT' class="btn btn-small btn-warning" id="isConfirm_${unit.id}_btn"
+                   href="@{ProcureUnits.confirmUnit(unit.id)}" data-disable-with='更新中'>已核单</a>
               </div>
                 #{if unit.fba}
                     #{power.ck 'fbas.update'}

@@ -31,12 +31,12 @@ public class ProcurePost extends Post<ProcureUnit> {
     public static final List<F.T2<String, String>> DATE_TYPES;
 
     static {
-        DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planDeliveryDate", "预计 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.deliveryDate", "实际 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"));
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.planDeliveryDate", "预计 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.deliveryDate", "实际 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.planShipDate", "预计 [发货] 时间"));
     }
 
     /**
@@ -122,20 +122,20 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder();
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         Long procrueId = isSearchForId();
         if(procrueId != null) {
             sbd.append("id=?");
             params.add(procrueId);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+            return new F.T2<>(sbd.toString(), params);
         }
 
         String fba = isSearchFBA();
         if(fba != null) {
             sbd.append("fba.shipmentId=?");
             params.add(fba);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+            return new F.T2<>(sbd.toString(), params);
         }
 
         if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
@@ -189,7 +189,7 @@ public class ProcurePost extends Post<ProcureUnit> {
             sbd.append(" AND id IN " + SqlSelect.inlineParam(unitIdList));
         }
         sbd.append(" AND planQty != 0");
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     /**
@@ -255,7 +255,7 @@ public class ProcurePost extends Post<ProcureUnit> {
      * @return
      */
     public String generatePayInfo(String id) {
-        ProcureUnit unit = ProcureUnit.<ProcureUnit>findById(NumberUtils.toLong(id));
+        ProcureUnit unit = ProcureUnit.findById(NumberUtils.toLong(id));
         if(unit == null) {
             return "";
         } else {

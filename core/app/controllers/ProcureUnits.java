@@ -403,6 +403,17 @@ public class ProcureUnits extends Controller {
         render(unit);
     }
 
+    /**
+     * 已核单
+     * @param id
+     */
+    public static void confirmUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.isConfirm = true;
+        unit.save();
+        render(unit);
+    }
+
 
     /**
      * 预付款申请
