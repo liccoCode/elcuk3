@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import helper.*;
 import helper.Currency;
 import models.market.M;
-import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.view.dto.ProfitDto;
 import models.view.report.LossRate;
@@ -231,17 +230,12 @@ public class LossRatePost extends Post<LossRate> {
             }
 
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
-            ProcureUnit unit = ship.unit();
-            if(unit != null) {
-                ship.purchaseCost = new BigDecimal(unit.attrs.currency.toUSD(unit.attrs.price) * lossNum)
-                        .setScale(2, BigDecimal.ROUND_HALF_UP);
-            } else {
-                ship.purchaseCost = new BigDecimal(0);
-            }
-
-            String key = ship.get(String.class, "product.sku") + "_" + ship.get(M.class, "selling.market").name();
-
+            ship.purchaseCost = new BigDecimal(ship.unit.attrs.currency.toUSD(ship.unit.attrs.price) * lossNum)
+                    .setScale(2, BigDecimal.ROUND_HALF_UP);
+            String key = ship.unit.sku + "_" + ship.unit.selling.market.name();
+            Logger.info("::::::2:::::key:::" + key);
             ProfitDto dto = existMap.get(key);
+            Logger.info("::::::2:::::key:::xxx:::" + dto);
             if(dto != null) {
                 ship.shipmentCost = new BigDecimal((dto.ship_price + dto.vat_price) * lossNum)
                         .setScale(2, BigDecimal.ROUND_HALF_UP);

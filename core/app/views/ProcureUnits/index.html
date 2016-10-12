@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"采购单元列表 (${units.size()})"  /}
+#{set title:"采购单元列表 (${p.count()})"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'procureunits/index.coffee'/}
@@ -9,10 +9,11 @@
 
 #{info_row}
 <ul>
-  <li>[阶段]为 PLAN 的采购计划, 可以 被关联到采购单</li>
-  <li>[阶段]为 DELIVERY 的采购计划, 可以 被关联到出货单</li>
+  <li>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</li>
+  <li>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</li>
 </ul>
 #{/info_row}
+
 <div class="row-fluid">
   <form action="@{ProcureUnits.index()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
@@ -30,17 +31,19 @@
         #{/list}
         </select>
 
-        <select name="p.stage" class="inline" style="width:82px;">
-          <option value="">阶段</option>
-        #{list items:models.procure.ProcureUnit.stages(), as:'stage'}
-          <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
-        #{/list}
-        </select>
-
         <select name="p.whouseId" class="inline">
           <option value="0">仓库</option>
         #{list items:whouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+        #{/list}
+        </select>
+
+        <select name="p.stage" class="inline" style="width:82px;">
+          <option value="">阶段</option>
+        #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+            #{if stage.label() != '审批中'}
+              <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
+            #{/if}
         #{/list}
         </select>
 
@@ -51,177 +54,98 @@
         #{/list}
         </select>
 
-        <select name="p.cooperatorId" class="inline selectize" style="width:130px;">
+        <select name="p.isPlaced" class="inline">
+          <option value="">是否抵达货代处</option>
+        #{list items:models.view.post.ProcurePost.PLACEDSTATE, as:'t'}
+          <option ${t == p.isPlaced  ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.isOut" class="inline">
+          <option value="">是否出库</option>
+        #{list items:models.procure.ProcureUnit.OST.values(), as:'o'}
+          <option ${o == p.isOut ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.cooperatorId" class="inline selectize">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
         #{/list}
         </select>
-
-        <div class="inline">
-          <select name="p.categories" class="inline" multiple data-nonSelectedText="产品线">
-          #{list items:categories, as:'c'}
-            <option ${p.categories.contains(c) ? 'selected' : ''} value="${c}">${c}</option>
-          #{/list}
-          </select>
-        </div>
-
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" class="input-medium" name="p.search" value="${p.search}" rel="popover"
-                 content="可搜索 ID、SellingId、SKU、FBA、产品名称">
+          <input type="text" class="input-medium" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
           <input type="hidden" name="p.page" value="${p.page}">
-          <input type="hidden" name="p.unitIds" id="unitIds"/>
           <button class="btn btn-primary" data-loading>搜索</button>
-        </div>
-
-        <div class="inline">
-          <a href="@{ProcureUnits.blank()}" class="btn btn-success">创建采购计划</a>
-        #{power.ck "procures.createdeliveryment"}
-          <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliveryment">创建采购单</a>
-        #{/power.ck}
-          <a target="_blank" href="javascript:void(0)" class="btn btn-success" id="createdeliverplan">创建出货单</a>
-          <a href="javascript:void(0)" class="btn btn-warning" id="deployFBAs" data-url="/ProcureUnits/batchCreateFBA?redirectTarget=index">批量创建FBA</a>
-          <a target="_blank" class="btn btn-info" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
-            下载 FBA ZIP
-          </a>
-          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info">导出修改日志</a>
-        #{power.ck "procures.downloadreports"}
-          <a href="javascript:void(0)" id="download_excel" class="btn btn-info">导出采购计划</a>
-        #{/power.ck}
         </div>
       </div>
     </div>
-  #{render 'Deliveryments/box_number_model.html'/}
-  #{render 'Deliveryments/fba_carton_contents.html'/}
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-primary" rel="popover"
+             content="明天需要交货的采购计划" data-disable-with="loading">明天计划</a>
+          <a href="@{ProcureUnits.planView(tomorrow2)}" class="btn btn-primary" rel="popover"
+             content="后天需要交货的采购计划" data-disable-with="loading">后天计划</a>
+          <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-primary" rel="popover"
+             content="第三天需要交货的采购计划" data-disable-with="loading">大后天计划</a>
+          <a href="@{ProcureUnits.noPlaced()}" class="btn btn-primary" rel="popover" content="发货时间为当天,
+              同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
+        </div>
+
+        <div class="inline">
+          <input type="hidden" name="p.unitIds" id="unitIds"/>
+          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+            <i class="icon-download-alt"></i>下载ZIP
+          </a>
+          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>
+        #{power.ck "procures.downloadreports"}
+          <a href="javascript:void(0)" id="download_excel" class="btn btn-success">
+            <i class="icon-download-alt"></i>导出采购计划</a>
+        #{/power.ck}
+        </div>
+      #{include 'Deliveryments/box_number_model.html'/}
+
+      </div>
+    </div>
   </form>
 </div>
 
 <form method="post" id="create_deliveryment">
   <div class="row-fluid">
     <div class="span12">
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th>
-            <label class="checkbox"><input type="checkbox" id="unit_checkbox_all" class="unit checkall"></label>
-          </th>
-          <th style="width:40px;">#</th>
-          <th>Sku</th>
-          <th style="width:10%;">产品简称</th>
-          <th>FnSku</th>
-          <th>FBA</th>
-          <th>数量(计划/交货/入库)</th>
-          <th>预计交货时间</th>
-          <th>实际交货时间</th>
-          <th>入库时间</th>
-          <th>预计运输时间</th>
-          <th>去往仓库</th>
-          <th>运输方式</th>
-          <th>采购单</th>
-          <th>出货单</th>
-          <th>质检结果</th>
-          <th>状态</th>
-          <th>创建时间</th>
-          <th>创建人</th>
-          <th>Selling</th>
-          <th>供应商</th>
-          <th>单价</th>
-          <th>总价</th>
-          <th>剩余请款额</th>
-        </tr>
-      #{list items:units, as:'unit'}
-        <tr id="procureUnit_${unit.id}">
-          <td>
-            <label class="checkbox">
-                #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
-                #{if unit.fba && unit.fba.dto}
-                  <!-- 优先使用自身的 FBA 箱包装数据 -->
-                    #{set dto: unit.fba.dto/}
-                  <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                         data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
-                         data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
-                         data-width="${dto.width}" data-height="${dto.height}" data-stage="${unit.stage.name()}">
-                #{/if}
-                #{elseif cooperItem}
-                  <!-- 使用维护好的合作伙伴的数据 -->
-                  <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                         data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
-                         data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}" data-stage="${unit.stage.name()}"
-                         data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
-                         data-width="${cooperItem.width}" data-height="${cooperItem.height}">
-                #{/elseif}
-                #{else}
-                  <input type="checkbox" name="pids" value="${unit.id}" class="unit" id="checkbox_${unit.id}"
-                         data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-                         data-width="" data-height="" data-stage="${unit.stage.name()}">
-                #{/else}
-            </label>
-          </td>
-          <td><a href="@{ProcureUnits.edit(unit.id)}" target="_blank">${unit.id}</a></td>
-          <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
-          <td>${unit.product.abbreviation}</td>
-          <td>
-            <!-- FnSku 下载 Label -->
-              #{if unit.selling?.fnSku}
-                <a href="@{Sellings.sellingLabel(unit.sid)}" class="btn btn-success btn-block">
-                  <i class="icon-download-alt"></i> ${unit.selling.fnSku}
-                </a>
-              #{/if}
-              #{elseif unit.selling != null}
-                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
-                  补全 FnSku
-                </a>
-              #{/elseif}
-          </td>
-          <td>${unit.fba?.shipmentId}</td>
-          <td>
-              #{set qtys: unit.qtys()/}
-            <span>${qtys._1 == null ? 0 : qtys._1}</span>
-            /<span style="${qtys._1 != null && qtys._2 != null && qtys._2 < qtys._1 ? 'color:red' : ''}">${qtys._2 == null ? 0 : qtys._2}</span>
-            /<span style="${qtys._2 != null && qtys._3 != null && qtys._3 < qtys._2 ? 'color:red' : ''}">${qtys._3 == null ? 0 : qtys._3}</span>
-          </td>
-          <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
-          <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
-          <td>#{time_tooltip time:unit.inboundRecord()?.completeDate/}</td>
-          <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
-          <td>${unit.whouse?.name()}</td>
-          <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
-          <td>
-              #{if unit.deliveryment}
-                <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
-              #{/if}
-          </td>
-          <td>
-              #{if unit.deliverplan}
-                <a href="@{DeliverPlans.show(unit.deliverplan.id)}">${unit.deliverplan.id}</a>
-              #{/if}
-          </td>
-          <td>${unit.result()}</td>
-          <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-          <td>#{time_tooltip time:unit.createDate/}</td>
-          <td>${unit.creator?.username}</td>
+    #{render 'ProcureUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
+    </div>
+  </div>
 
-          <td class="selling_id">
-            <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
-          </td>
-          <td>
-            <select name="unitCooperator" style="width:100px;" ${unit.deliveryment != null ? 'disabled' : ''}>
-                #{list items:unit.availableCooperators(), as:'cop'}
-                  <option ${cop.id == unit.cooperator?.id ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
-                #{/list}
-            </select>
-          </td>
-            #{set prices: unit.prices()/}
-          <td>${unit.attrs?.currency?.symbol()} ${prices?._1?.format('#,###.##')}</td>
-          <td>${unit.attrs?.currency?.symbol()} ${prices?._2?.format('#,###.##')}</td>
-          <td>${unit.attrs?.currency?.symbol()} ${prices?._3?.format('#,###.##')}</td>
-        </tr>
-      #{/list}
-      </table>
-    #{if p != null}
-        #{bootstrap_pager pi:p, url:'' /}
+  <div class="row-fluid">
+    <div class="span12">
+    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
+        #{power.ck "procures.createdeliveryment"}
+          <div class="input-append">
+            <input type="text" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
+            <button id="create_deliveryment_btn" class="btn btn-primary" data-disable-with='添加中'>
+              添加采购单
+            </button>
+          </div>
+        #{/power.ck}
     #{/if}
+
+    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+
+      <div class="input-append">
+        <input type="text" id="name_deliverplan" name="name" value="${name}" placeHolder="出货单的别名(必须)">
+        <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>
+          添加出货单
+        </button>
+      </div>
+
+    #{/if}
+
     </div>
   </div>
 </form>
+
 #{records records:logs/}

@@ -409,16 +409,4 @@ public class Webs {
     public static String Md5(String str) {
         return DigestUtils.md5Hex(str);
     }
-
-    /**
-     * 将数字转换成对应的三位数的字符串
-     * <p/>
-     * 示例：1 => 001; 10 => 010
-     *
-     * @param number
-     * @return
-     */
-    public static String hundredNumber(Long number) {
-        return StringUtils.repeat("0", 3 - number.toString().length()) + number.toString();
-    }
 }

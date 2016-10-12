@@ -32,6 +32,7 @@ import java.util.Set;
  * User: cary
  * Date: 14-3-17
  * Time: 下午2:44
+ * @deprecated
  */
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})

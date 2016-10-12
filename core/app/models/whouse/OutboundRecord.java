@@ -1,17 +1,16 @@
 package models.whouse;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Optional;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.J;
 import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.market.M;
-import models.procure.*;
-import models.qc.CheckTaskDTO;
+import models.procure.Cooperator;
+import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Error;
@@ -29,8 +28,6 @@ import java.util.List;
 
 /**
  * 出库记录
- * <p>
- * (角色等同于出库计划,但是手动创建的出货记录没有关联的出库计划)
  * Created by IntelliJ IDEA.
  * User: duan
  * Date: 4/1/16
@@ -97,10 +94,10 @@ public class OutboundRecord extends Model {
     }
 
     /**
-     * 出库计划
+     * 出货计划
      */
     @Expose
-    @OneToOne
+    @ManyToOne
     public ShipPlan shipPlan;
 
     /**
@@ -203,10 +200,6 @@ public class OutboundRecord extends Model {
     @Expose
     public Date updateDate = new Date();
 
-    @Expose
-    @Enumerated(EnumType.STRING)
-    public DeliverPlan.CT clearanceType;
-
     /**
      * 这些属性字段全部都是为了前台传递数据的
      */
@@ -223,113 +216,29 @@ public class OutboundRecord extends Model {
     public String market;
 
     @Transient
-    public String fnSku;
+    public String productCode;
 
-    /**
-     * 主箱信息
-     */
-    @Lob
-    public String mainBoxInfo;
-
-    @Transient
-    public CheckTaskDTO mainBox = new CheckTaskDTO();
-
-    /**
-     * 尾箱信息
-     */
-    @Lob
-    public String lastBoxInfo;
-
-    @Transient
-    public CheckTaskDTO lastBox = new CheckTaskDTO();
-
-    @PrePersist
-    public void beforeSave() {
-        this.marshalBoxs();
-    }
-
-    @PostLoad
-    public void postPersist() {
-        this.unmarshalBoxs();
-    }
+    /**************************************/
 
     public OutboundRecord() {
+        this.qty = 0;
         this.planQty = 1;
         this.state = S.Pending;
-        this.type = T.Normal;
-        this.origin = O.Normal;
     }
 
     public OutboundRecord(T type, O origin) {
         this();
         this.origin = origin;
         this.type = type;
-        this.handler = User.current();
     }
 
     public OutboundRecord(ShipPlan plan) {
-        this(T.Normal, O.Normal);
-        this.planQty = plan.planQty;
+        this.planQty = plan.qty;
         this.qty = this.planQty;
-        this.shipPlan = plan;
-        this.whouse = this.findWhouse();
-        this.stockObj = new StockObj(plan.product.sku);
-        this.stockObj.setAttributes(plan);
-        this.tryMatchAttrs();
-    }
-
-    /**
-     * 该构造函数只服务于为质检不合格的入库记录自动生成出库记录
-     *
-     * @param inboundRecord
-     */
-    public OutboundRecord(InboundRecord inboundRecord) {
-        this(T.Refund, O.Normal);
-        if(!inboundRecord.isRefund()) {
-            throw new FastRuntimeException("该构造函数只能用于为质检不合格的入库记录自动生成出库记录!");
-        }
-        this.qty = inboundRecord.badQty;
-        this.planQty = this.qty;
-        this.whouse = inboundRecord.targetWhouse;
-        this.stockObj = inboundRecord.stockObj.dump();
-        Optional cooperatorId = Optional.fromNullable(this.stockObj.attributes().get("cooperatorId"));
-        if(cooperatorId.isPresent()) this.targetId = cooperatorId.get().toString();
-    }
-
-    /**
-     * 为出库计划尝试匹配
-     * 1. 出库对象
-     * 2. 主箱信息 和 尾箱信息
-     * 3. 报关类型
-     * 4. 哪个仓库出货
-     */
-    public void tryMatchAttrs() {
-        if(StringUtils.isBlank(this.targetId)) {
-            //尝试匹配出库对象
-            Cooperator cooperator = Cooperator.mainShipper();
-            if(cooperator != null) this.targetId = cooperator.id.toString();
-        }
-        //尝试匹配 主箱信息 和 尾箱信息
-        ReceiveRecord receiveRecord = this.receiveRecord();
-        if(receiveRecord != null) {
-            if("{}".equals(this.mainBoxInfo)) {
-                this.mainBoxInfo = receiveRecord.mainBoxInfo;
-            }
-            if("{}".equals(this.lastBoxInfo)) {
-                this.lastBoxInfo = receiveRecord.lastBoxInfo;
-            }
-            this.unmarshalBoxs();
-        }
-        if(this.clearanceType == null) {
-            //尝试匹配报关类型
-            ProcureUnit procureUnit = this.procureUnit();
-            if(procureUnit != null) {
-                this.clearanceType = procureUnit.clearanceType;
-            }
-        }
-        if(this.whouse == null) {
-            this.whouse = this.findWhouse();
-        }
+        this.origin = O.Normal;
+        this.state = S.Pending;
+        this.stockObj = plan.stockObj.dump();
+        this.type = T.Normal;
     }
 
     /**
@@ -379,57 +288,37 @@ public class OutboundRecord extends Model {
         } else {
             this.save();
             this.outboundProcureUnit();
-            this.syncQtyToShipPlan();
-            new StockRecord(this).doCreate();
+            new StockRecord(this).doCerate();
             return true;
         }
     }
 
     public void updateAttr(String attr, String value) {
         if(this.isLocked()) throw new FastRuntimeException("已经入库或取消状态下的出库记录不允许修改!");
+
         List<String> logs = new ArrayList<>();
         switch(attr) {
+            case "qty":
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                break;
+            case "memo":
+                logs.addAll(Reflects.logFieldFade(this, attr, value));
+                break;
             case "whouse":
-                logs.addAll(Reflects.logFieldFade(this, "whouse", Whouse.findById(NumberUtils.toLong(value))));
+                Whouse whouse = Whouse.findById(NumberUtils.toLong(value));
+                logs.addAll(Reflects.logFieldFade(this, "whouse", whouse != null ? whouse : null));
                 break;
             case "targetId":
-            case "memo":
                 logs.addAll(Reflects.logFieldFade(this, attr, value));
                 break;
             case "outboundDate":
                 logs.addAll(Reflects.logFieldFade(this, "outboundDate", Dates.cn(value).toDate()));
                 break;
-            case "qty":
-            case "mainBox.boxNum":
-            case "mainBox.num":
-            case "lastBox.boxNum":
-            case "lastBox.num":
-                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
-                break;
-            case "mainBox.singleBoxWeight":
-            case "mainBox.length":
-            case "mainBox.width":
-            case "mainBox.height":
-            case "lastBox.singleBoxWeight":
-            case "lastBox.length":
-            case "lastBox.width":
-            case "lastBox.height":
-                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toDouble(value)));
-                break;
-            case "clearanceType":
-                logs.addAll(Reflects.logFieldFade(this, attr, DeliverPlan.CT.valueOf(value)));
-                break;
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
-        this.marshalBoxs();
-        if(attr.contains(".boxNum") || attr.contains(".num")) {
-            int fullQty = this.mainBox.qty() + this.lastBox.qty();
-            if(fullQty != 0) logs.addAll(Reflects.logFieldFade(this, "qty", fullQty));
-        }
         new ERecordBuilder("outboundrecord.update")
-                .msgArgs(this.id, StringUtils.join(logs, "<br/>"))
-                .fid(this.id)
+                .msgArgs(this.id, StringUtils.join(logs, "<br/>")).fid(this.id)
                 .save();
         this.save();
     }
@@ -442,6 +331,7 @@ public class OutboundRecord extends Model {
         Validation.required("类型", this.type);
         Validation.required("仓库", this.whouse);
         Validation.required("预计出库数量", this.planQty);
+        Validation.required("实际出库数量", this.qty);
         Validation.required("状态", this.state);
         Validation.min("预计出库数量", this.planQty, 1);
         this.typeValid();
@@ -473,7 +363,7 @@ public class OutboundRecord extends Model {
                 this.targetIdValidByCT(Cooperator.T.SUPPLIER);
                 break;
             case Process:
-                if(!StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
+                if(StringUtils.equalsIgnoreCase(this.targetId, "品拓生产部")) {
                     Validation.addError("", "出库对象只能为品拓生产部.");
                 }
                 break;
@@ -517,40 +407,23 @@ public class OutboundRecord extends Model {
      * 设置采购计划是否出库状态为已出库
      */
     public void outboundProcureUnit() {
-        ProcureUnit procureUnit = null;
-        if(this.shipPlan != null && this.shipPlan.unit != null) {
-            procureUnit = this.shipPlan.unit;
-        } else {
-            Object procureunitId = this.stockObj.procureunitId();
-            if(procureunitId != null) {
-                procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
+        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        if(procureunitId != null) {
+            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(procureunitId.toString()));
+            if(procureUnit != null) {
+                procureUnit.isOut = ProcureUnit.OST.Outbound;
+                procureUnit.save();
             }
-        }
-        if(procureUnit != null) {
-            procureUnit.isOut = ProcureUnit.OST.Outbound;
-            procureUnit.save();
-        }
-    }
-
-    /**
-     * 同步实际出库数到出库计划
-     */
-    public void syncQtyToShipPlan() {
-        if(this.shipPlan != null) {
-            ShipPlan plan = this.shipPlan;
-            plan.state = ShipPlan.S.Confirmd;
-            plan.qty = this.qty;
-            plan.save();
         }
     }
 
     public boolean exist() {
-        return OutboundRecord.count("shipPlan=?", this.shipPlan) != 0;
-    }
-
-    public static boolean checkExistsWithUnitId(String procureunitId) {
-        return StringUtils.isBlank(procureunitId) ||
-                OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId + "%") != 0;
+        Object procureunitId = this.stockObj.attributes().get("procureunitId");
+        if(procureunitId != null) {
+            return OutboundRecord.count("attributes LIKE ?", "%\"procureunitId\":" + procureunitId.toString() + "%")
+                    != 0;
+        }
+        return false;
     }
 
     /**
@@ -570,107 +443,5 @@ public class OutboundRecord extends Model {
         } else {
             return targetId;
         }
-    }
-
-    /**
-     * 根据 FBA 属性来尝试获取入库记录中选择的目标仓库
-     *
-     * @return
-     */
-    public Whouse findWhouse() {
-        if(this.stockObj == null) return null;
-        Optional fba = Optional.fromNullable(this.stockObj.attributes().get("fba"));
-        if(fba.isPresent()) {
-            Optional<InboundRecord> inboundRecord = Optional.fromNullable(
-                    InboundRecord.findInboundRecordByFBA(fba.get().toString())
-            );
-            if(inboundRecord.isPresent()) return inboundRecord.get().targetWhouse;
-        }
-        return null;
-    }
-
-    public ReceiveRecord receiveRecord() {
-        if(this.shipPlan != null) {
-            return ReceiveRecord.find("procureUnit=?", this.shipPlan.unit).first();
-        } else {
-            Long procureunitId = this.stockObj.procureunitId();
-            if(procureunitId != null) {
-                return ReceiveRecord.find("procureUnit.id=?", procureunitId).first();
-            }
-        }
-        return null;
-    }
-
-    public String cooperatorName() {
-        ReceiveRecord receiveRecord = this.receiveRecord();
-        if(receiveRecord != null && receiveRecord.procureUnit != null && receiveRecord.procureUnit.cooperator != null) {
-            return receiveRecord.procureUnit.cooperator.name;
-        }
-        return null;
-    }
-
-    public String receiveRecordId() {
-        ReceiveRecord receiveRecord = this.receiveRecord();
-        if(receiveRecord != null) return receiveRecord.id;
-        return null;
-    }
-
-    public ProcureUnit procureUnit() {
-        if(this.shipPlan != null && this.shipPlan.unit != null) {
-            return this.shipPlan.unit;
-        } else {
-            Long procureunitId = this.stockObj.procureunitId();
-            if(procureunitId != null) {
-                return ProcureUnit.findById(procureunitId);
-            }
-        }
-        return null;
-    }
-
-    public void marshalBoxs() {
-        this.mainBoxInfo = J.json(this.mainBox);
-        this.lastBoxInfo = J.json(this.lastBox);
-    }
-
-    public void unmarshalBoxs() {
-        this.mainBox = StringUtils.isEmpty(this.mainBoxInfo) ? new CheckTaskDTO() :
-                JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
-        this.lastBox = StringUtils.isEmpty(this.lastBoxInfo) ? new CheckTaskDTO() :
-                JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
-    }
-
-    /**
-     * 格式化出库对象
-     *
-     * @return
-     */
-    public String getFormatTarget() {
-        switch(this.type) {
-            case Normal:
-            case B2B:
-            case Refund:
-                Cooperator cooperator = Cooperator.findById(NumberUtils.toLong(this.targetId));
-                return cooperator.name;
-            case Process:
-            case Sample:
-            case Other:
-                return this.targetId;
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * 找出当前出库记录可用的仓库(有库存)
-     *
-     * @return
-     */
-    public List<Whouse> availableWhouses() {
-        String sql = "SELECT DISTINCT w FROM Whouse w " +
-                " LEFT JOIN w.items it" +
-                " WHERE w.type=? AND w.name NOT LIKE '%不良品仓%'" +
-                " AND it.stockObj.stockObjId=? AND it.stockObj.stockObjType=? AND it.qty>0";
-        return Whouse.find(sql, Whouse.T.SELF, this.stockObj.stockObjId, this.stockObj.stockObjType)
-                .fetch();
     }
 }

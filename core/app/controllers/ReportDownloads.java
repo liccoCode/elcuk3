@@ -79,6 +79,7 @@ public class ReportDownloads extends Controller {
 
     /**
      * 采购报表
+     * @deprecated
      */
     @Check("report.procurereports")
     public static void procureReportsIndex(ReportPost p) {

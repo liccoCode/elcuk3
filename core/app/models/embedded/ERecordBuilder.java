@@ -28,6 +28,8 @@ public class ERecordBuilder implements Serializable {
     private String username;
     private String fid;
 
+    private Class owner;
+
     public ERecordBuilder() {
     }
 
@@ -80,6 +82,15 @@ public class ERecordBuilder implements Serializable {
         return this;
     }
 
+    public ERecordBuilder fid(Long fid, Class owner) {
+        if(fid == null) {
+            throw new FastRuntimeException("设置的外键不能为空");
+        }
+        this.fid = fid.toString();
+        this.owner = owner;
+        return this;
+    }
+
     public ElcukRecord record() {
         if(StringUtils.isBlank(this.fid))
             throw new FastRuntimeException("外键不能为空");
@@ -89,6 +100,7 @@ public class ERecordBuilder implements Serializable {
                 Messages.get(this.keyMsg, this.msgArgs.toArray())
         );
         record.fid = this.fid;
+        record.owner = this.owner;
         if(StringUtils.isNotBlank(this.username))
             record.username = this.username;
         else {

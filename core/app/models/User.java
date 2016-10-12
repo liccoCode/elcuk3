@@ -362,7 +362,7 @@ public class User extends Model {
     public static String username() {
         String username = Scope.Session.current().get("username");
         if(StringUtils.isBlank(username)) return "system";
-        else return username;
+        else return StringUtils.lowerCase(username);
     }
 
     public static User current() {
@@ -453,16 +453,6 @@ public class User extends Model {
             if(user != null) users.add(user);
         }
         return users;
-    }
-
-    /**
-     * 质检人员
-     *
-     * @return
-     */
-    public static List<User> checkers() {
-        return User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
-                "like ?", "%质检%").fetch();
     }
 
     public boolean getClosed() {

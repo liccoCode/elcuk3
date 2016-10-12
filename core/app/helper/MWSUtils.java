@@ -455,7 +455,7 @@ public class MWSUtils {
 
         //如果填写了 lastCartonNum 则多加一个 Carton 尾箱
         int numCartons = fbaShipment.dto.boxNum;
-        if(fbaShipment.dto.lastCartonNum != null) {
+        if(fbaShipment.dto.haveLastCartonNum()) {
             ++numCartons;
         }
 
@@ -466,7 +466,7 @@ public class MWSUtils {
         for(int i = 0; i < numCartons; i++) {
             CartonContentsRequest.Carton.Item item = new CartonContentsRequest.Carton.Item();
             item.setSKU(selling.merchantSKU);
-            if(i == numCartons - 1 && fbaShipment.dto.lastCartonNum != null) {
+            if(i == numCartons - 1 && fbaShipment.dto.haveLastCartonNum()) {
                 item.setQuantityShipped(BigInteger.valueOf(fbaShipment.dto.lastCartonNum));
                 item.setQuantityInCase(BigInteger.valueOf(fbaShipment.dto.lastCartonNum));
             } else {

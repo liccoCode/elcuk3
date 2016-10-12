@@ -5,7 +5,6 @@ import helper.*;
 import helper.Currency;
 import jobs.driver.BaseJob;
 import models.market.M;
-import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.view.dto.ProfitDto;
 import models.view.report.LossRate;
@@ -113,18 +112,12 @@ public class LossRateJob extends BaseJob {
                 ship.adjustQty = ship.recivedQty;
                 ship.save();
             }
-            ProcureUnit unit = ship.unit();
 
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
-            ship.purchaseCost = new BigDecimal((unit != null ? unit.attrs.price : 0) * lossNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP);
+            ship.purchaseCost = new BigDecimal(ship.unit.attrs.price * lossNum).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-            String key = "";
-            if(unit != null) {
-                key = unit.sku + "_" + unit.selling.market.toString();
-            } else if(ship.plan != null) {
-                key = ship.plan.product.sku + "_" + ship.plan.selling.market.toString();
-            }
+
+            String key = ship.unit.sku + "_" + ship.unit.selling.market.toString();
             ProfitDto dto = existMap.get(key);
             if(dto != null) {
                 ship.shipmentCost = new BigDecimal((dto.ship_price + dto.vat_price) * lossNum)

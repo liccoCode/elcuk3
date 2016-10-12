@@ -102,9 +102,7 @@ public class StockRecord extends Model {
         } else {
             this.qty = in.badQty;
             this.whouse = Whouse.defectiveWhouse();
-            if(this.whouse == null) {
-                throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
-            }
+            if(this.whouse == null) throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
         }
         this.type = T.Inbound;
         this.recordId = in.id;
@@ -149,7 +147,7 @@ public class StockRecord extends Model {
         return this;
     }
 
-    public void doCreate() {
+    public void doCerate() {
         this.save();
         this.updateWhouseQty();
     }
@@ -172,11 +170,10 @@ public class StockRecord extends Model {
      */
     public void pickAttrs() {
         if(this.stockObj != null && !this.stockObj.attributes().isEmpty()) {
-            this.stockObj.attrs = Maps.filterKeys(
-                    this.stockObj.attrs,
-                    Predicates.in(Arrays.asList("fba", "shipType", "whouseName"))
-            );
-            this.stockObj.marshalAtts();
+            this.stockObj.attrs = Maps
+                    .filterKeys(this.stockObj.attrs, Predicates.in(Arrays.asList("fba", "shipType", "whouseName"
+                    )));
+            this.stockObj.setAttributes();
         }
     }
 }

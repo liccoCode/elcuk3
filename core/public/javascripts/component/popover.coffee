@@ -18,43 +18,21 @@ window.$ui =
       else
         $input.dateinput(format: $input.attr('format'))
   datetimeinput: ->
-    options = {format: 'yyyy-mm-dd', minView: 'month', autoclose: true}
     for input in $('input[type=datetime]')
       $input = $(input)
-      continue if $input.attr('native') != undefined
-
-      for key in  Object.keys(options)
-        options[key] = $input.attr(key.toLowerCase()) if $input.attr(key.toLowerCase()) != undefined
-      $input.datetimepicker(options)
+      return if $input.attr('native') != undefined
+      if $input.attr('format') is undefined
+        $input.datetimepicker(format: 'yyyy-mm-dd hh:ii:ss')
+      else
+        $input.datetimepicker(format: $input.attr('format'))
   selectize: ->
-    for select in $('select.selectize')
+    for select in $('select')
       $select = $(select)
+      continue unless $select.hasClass('selectize')
       options = {plugins: ['remove_button']}
       for key in ['create', 'sortField', 'maxItems']
         options[key] = $select.data(key) if $select.data(key) != undefined
       $select.selectize(options)
-  multiselect: ->
-    for select in $('select[multiple]')
-      $select = $(select)
-      options = {buttonWidth: 150, nonSelectedText: '', maxHeight: 200, includeSelectAllOption: true}
-      for key in ['buttonWidth', 'nonSelectedText', 'maxHeight', 'includeSelectAllOption']
-        options[key] = $select.data(key.toLowerCase()) if $select.data(key.toLowerCase()) != undefined
-      $select.multiselect(options)
-  clipboard: ->
-    clipboard = new Clipboard('.clipboard')
-    clipboard.on('success', (e) ->
-      tip = $(e.trigger)
-      tip.tooltip(
-        container: 'body',
-        placement: 'bottom',
-        title: 'Asin Copied!',
-        trigger: 'manual'
-      ).tooltip('show')
-      setTimeout(->
-        tip.tooltip('hide')
-      , 300
-      )
-    )
 
 
 # 初始化 popover, tooltip, dateinput
@@ -62,8 +40,6 @@ window.$ui =
     @dateinput()
     @selectize()
     @datetimeinput()
-    @multiselect()
-    @clipboard()
 
 # popover 与 tooltip 的基础方法
   relBase: (event, func)->
@@ -73,8 +49,7 @@ window.$ui =
       trigger: 'hover'
       placement: 'top'
       html: 'true'
-    for key in ['full-width', 'animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay'
-    , 'container']
+    for key in ['full-width', 'animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay', 'container']
       params[key] = tip.attr(key) if tip.attr(key)
     func.call(tip, params)
 
@@ -82,6 +57,7 @@ $(document).on('mouseover', '[rel=tooltip]', (event) ->
   window.$ui.relBase(event, (params) ->
     @tooltip(params).tooltip('show'))
 )
+
 $(document).on('mouseover', '[rel=popover]', (event) ->
   window.$ui.relBase(event, (params) ->
     @popover(params).popover('show')

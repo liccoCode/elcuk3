@@ -6,28 +6,23 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{info_row}
-<ul>
-  <li>当出库类别为<strong style="color:red">其他出库</strong>时, 出库对象需要自定义<strong style="color:red">[手动输入并回车确认]</strong>.</li>
-  <li>当出库类别为<strong style="color:red">其他出库</strong>时, 去往国家允许自定义<strong style="color:red">[手动输入并回车确认]</strong>.</li>
-</ul>
-#{/info_row}
 #{form @OutboundRecords.create(), method:'POST', id: 'new_outbound_record'}
+<h4 style="text-align:center" class="alert alert-info">添加其他出库</h4>
 <table class="table table-condensed table-bordered">
   <tr>
-    <th><span style="color:red">*</span>物料编码</th>
+    <th>物料编码</th>
     <td>
       <input type="text" name="record.stockObj.stockObjId" value="${record.stockObj?.stockObjId}" required>
       <input type="hidden" name="record.stockObj.stockObjType" value="${record.stockObj?.stockObjType}">
     </td>
 
-    <th><span style="color:red">*</span>产品名称</th>
+    <th>产品名称</th>
     <td style="width: 40%;">
       <input type="text" name="stock_name" value="${record.stockObj?.name()}" class="input-xxlarge" required>
     </td>
   </tr>
   <tr>
-    <th><span style="color:red">*</span>仓库名称</th>
+    <th>仓库名称</th>
     <td>
       <select name="record.whouse.id">
           #{list items:whouses, as:'whouse'}
@@ -38,7 +33,7 @@
       </select>
     </td>
 
-    <th><span style="color:red">*</span>出库类别</th>
+    <th>出库类别</th>
     <td>
       <select name="record.type">
           #{list items: models.whouse.OutboundRecord.T.values(), as: 't'}
@@ -99,9 +94,9 @@
       <input type="text" name="record.fba" value="${record.fba}">
     </td>
 
-    <th>SKU</th>
+    <th>产品条码</th>
     <td>
-      <input type="text" name="record.fnSku" value="${record.fnSku}">
+      <input type="text" name="record.productCode" value="${record.productCode}">
     </td>
   </tr>
   <tr>
@@ -121,7 +116,7 @@
     </td>
   </tr>
   <tr>
-    <th><span style="color:red">*</span>预计出库数量</th>
+    <th>预计出库数量</th>
     <td>
       <input type="text" name="record.planQty" value="${record.planQty}" class="input-mini" required>
     </td>

@@ -84,6 +84,7 @@ public class AnalyzeSkus extends Controller {
 
     /**
      * 自定义销售报表
+     * @deprecated
      */
     @Check("analyzeskus.skusalesreport")
     public static void skuSalesReport() {

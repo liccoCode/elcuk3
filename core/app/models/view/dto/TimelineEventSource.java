@@ -8,10 +8,8 @@ import helper.Webs;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.whouse.ShipPlan;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.JVMRandom;
-import org.apache.poi.hssf.record.formula.functions.Even;
 import org.joda.time.DateTime;
 import play.utils.FastRuntimeException;
 
@@ -58,11 +56,6 @@ public class TimelineEventSource {
         public Event(AnalyzeDTO analyzeDTO, ProcureUnit unit) {
             this.analyzeDTO = analyzeDTO;
             this.unit = unit;
-        }
-
-        public Event(AnalyzeDTO analyzeDTO, ShipPlan plan) {
-            this.analyzeDTO = analyzeDTO;
-            this.plan = plan;
         }
 
         public Event(String start, String end, String description, String title) {
@@ -169,9 +162,6 @@ public class TimelineEventSource {
         @Transient
         public volatile ProcureUnit unit;
 
-        @Transient
-        public volatile ShipPlan plan;
-
         public Float lastDays;
 
         /**
@@ -181,7 +171,7 @@ public class TimelineEventSource {
          */
         public Event startAndEndDate(String type) {
             Date predictShipFinishDate = null;
-            List<Shipment> relateShipments = this.plan != null ? this.plan.relateShipment() : this.unit.relateShipment();
+            List<Shipment> relateShipments = this.unit.relateShipment();
 
             // 检查运输单的是否可以从签收进入入库状态
             for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
@@ -199,29 +189,29 @@ public class TimelineEventSource {
             //如果有签收数量则用采购计划的入库时间
             // 修改新规则 现在开始时间都采用运输单的预计到库时间,快递没关联运输单的话,则采用采购计划上的预计到库时间
             if(predictShipFinishDate == null) {
-                predictShipFinishDate = this.plan != null ? this.plan.planArrivDate : this.unit.attrs.planArrivDate;
+                predictShipFinishDate = this.unit.attrs.planArrivDate;
             }
 
-            int qty = this.plan != null ? this.plan.qty() : (this.unit.qty() - this.unit.inboundingQty());
-            this.lastDays = Webs.scale2PointUp(qty / this.ps(type));
+            this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
 
-            if(this.unit != null) {
-                if(this.unit.stage == ProcureUnit.STAGE.INBOUND) {
-                    // 如果在入库中, 进度条自动缩短
-                    timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
-                } else if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
-                    timeLineDays = 0f;
-                }
+            if(this.unit.stage == ProcureUnit.STAGE.INBOUND) {
+                // 如果在入库中, 进度条自动缩短
+                timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
+            } else if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
+                timeLineDays = 0f;
             }
-
             // 如果不够卖到第二天, 那么就省略
-            this.end = add8Hour(new DateTime(predictShipFinishDate).plusDays(timeLineDays.intValue()).toDate());
+            this.end = add8Hour(new DateTime(predictShipFinishDate)
+                    .plusDays(timeLineDays.intValue()).toDate());
             this.durationEvent = true;
+
+
             return this;
         }
+
 
         private boolean isEnsureQty() {
             return (this.unit.attrs != null && this.unit.attrs.qty != null);
@@ -257,36 +247,18 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-            if(this.unit != null) {
-                this.unitTitleAndDesc();
-            } else if(this.plan != null) {
-                this.planTitleAndDesc();
-            }
-            return this;
-        }
 
-        public Event unitTitleAndDesc() {
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
-                this.title = String.format("#%s 采购计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
+                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                         this.unit.id, getunitstage().label(), 0,
                         0);
             } else {
-                this.title = String.format("#%s 采购计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
+                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
                         this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
                         this.lastDays);
             }
-            this.description = GTs.render("unit_event_desc", GTs.newMap("unit", this.unit).build());
+            this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
-            return this;
-        }
-
-        public Event planTitleAndDesc() {
-            this.title = String.format("#%s 出库计划 %s状态, 数量 %s 可销售 %s 天",
-                    this.plan.id, plan.state.label(), this.plan.qty(), this.lastDays);
-            this.description = GTs.render("plan_event_desc", GTs.newMap("plan", this.plan).build());
-            this.link = "/shipplans/show?id=" + this.plan.id;
             return this;
         }
 
@@ -313,14 +285,7 @@ public class TimelineEventSource {
          */
         public Event color() {
             if(StringUtils.isNotBlank(this.color)) return this;
-
-            if(this.unit != null) {
-                this.color(this.unit);
-            } else if(this.plan != null) {
-                this.color(this.plan);
-            } else {
-                this.color = "#" + getRandomColorCode();
-            }
+            this.color = "#" + getRandomColorCode();
             return this;
         }
 
@@ -329,7 +294,7 @@ public class TimelineEventSource {
             return this;
         }
 
-        public Event color(ProcureUnit unit) {
+        public Event color(ProcureUnit unitunit) {
             String color = "999999";
             switch(getunitstage()) {
                 case PLAN:
@@ -364,24 +329,6 @@ public class TimelineEventSource {
             this.color = String.format("#%s", color);
             return this;
         }
-
-        public Event color(ShipPlan plan) {
-            String color = "999999";
-            switch(plan.state) {
-                case Pending:
-                    color = "A5B600";
-                    break;
-                case Confirmd:
-                    color = "C09853";
-                    break;
-                default:
-                    // error
-                    color = "B94A48";
-            }
-            color = fetchShipmentSate(plan, color);
-            this.color = String.format("#%s", color);
-            return this;
-        }
     }
 
     /**
@@ -389,35 +336,6 @@ public class TimelineEventSource {
      */
     public static String fetchShipmentSate(ProcureUnit unit, String color) {
         List<ShipItem> shipItems = unit.shipItems;
-        if(shipItems.size() == 1) {
-            //正常情况下一个采购计划只有一个对应的运输单
-            Shipment shipment = shipItems.get(0).shipment;
-            switch(shipment.state) {
-                case SHIPPING:
-                    color = "3A87AD";
-                    break;
-                case CLEARANCE:
-                case PACKAGE:
-                case BOOKED:
-                case DELIVERYING:
-                    color = "3746B1";
-                    break;
-                case RECEIPTD:
-                    color = "5437B1";
-                    break;
-            }
-        } else if(shipItems.size() > 1) {
-            //有多个对应的运输单，表示出现异常
-            color = "ff0000";
-        }
-        return color;
-    }
-
-    /**
-     * 出库计划的运输单状态
-     */
-    public static String fetchShipmentSate(ShipPlan plan, String color) {
-        List<ShipItem> shipItems = plan.shipItems;
         if(shipItems.size() == 1) {
             //正常情况下一个采购计划只有一个对应的运输单
             Shipment shipment = shipItems.get(0).shipment;

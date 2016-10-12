@@ -16,7 +16,7 @@ $ ->
     expressid = $("input[name='expressid']").val()
     unitIds = []
     checkboxList.each(->
-      unitIds.push($(@).val() + "-" + $(@).attr("boxNum"))
+      unitIds.push($(@).val() + "-" + $(@).data("boxnum"))
     )
     if unitIds.length is 0
       noty({text: '请选择需要下载的采购单元', type: 'error'})
@@ -126,15 +126,6 @@ $ ->
         finally
           LoadMask.unmask($time_line_home)
     )
-
-  $('form[name=updateDeliverymentForm]').on('click', 'a[name=cancleBtn]', (e) ->
-    memo = $("textarea[name='dmt.memo']").val()
-    if _.isEmpty(memo)
-      noty({text: '请填写备注', type: 'error'})
-      return
-    else
-      window.location.replace("#{$(@).data('href')}?id=#{$("input[name='dmt.id']").val()}&msg=#{memo}")
-  )
 
   do ->
     procureUntiId = window.location.hash[1..-1]

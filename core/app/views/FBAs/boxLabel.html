@@ -14,16 +14,17 @@
 #{list items:1..boxNumber, as: 'i'}
   <tr style="height: 98.6mm; vertical-align:middle;">
     <td width="49%" style="vertical-align:middle">
-        #{if addressName == "Brandworl"}
-            #{include './brandworlShipmentDetail.html'/}
+        #{if models.OperatorConfig.getVal("addressname")=='Brandworl'}
+            #{render './brandworlShipmentDetail.html', procureUnit: procureUnit/}
         #{/if}
-        #{else}
-            #{include './shipmentDetail.html'/}
-        #{/else}
+            #{else}
+        #{render './shipmentDetail.html', procureUnit: procureUnit/}
+    #{/else}
     </td>
     <td width="2%"></td>
     <td width="49%" style="vertical-align:middle">
-        #{include './fba.html'/}
+        #{render './fba.html', isexpress: isexpress,shipmentId: shipmentId, fba: fba, shipFrom: shipFrom,
+          boxNumber: procureUnit.numberToStr(i)/}
     </td>
   </tr>
 #{/list}

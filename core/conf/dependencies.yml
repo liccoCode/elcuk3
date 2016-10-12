@@ -14,6 +14,7 @@ require:
     - org.hamcrest -> hamcrest-library 1.3:
         id: test
     - redis -> redis 0.4
+    # - es6 -> es6 0.1
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
@@ -72,6 +73,11 @@ repositories:
         artifact: "https://raw.github.com/wppurking/play-redis/master/dist/[module]-[revision].zip"
         contains:
             - redis -> *
+    - es6:
+        type: HTTP
+        artifact: "https://raw.github.com/kenyonduan/play-es6/master/dist/[module]-[revision].zip"
+        contains:
+            - es6 -> *
     - qiniu:
         type: HTTP
         artifact: "http://77g8qz.com1.z0.glb.clouddn.com/[module]-[revision].jar"
