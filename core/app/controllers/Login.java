@@ -41,7 +41,7 @@ public class Login extends Secure.Security {
     /**
      * 登陆的用户 Cache
      */
-    private static final Map<String, User> USER_CACHE = new ConcurrentHashMap<String, User>();
+    private static final Map<String, User> USER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 登陆

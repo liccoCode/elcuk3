@@ -13,21 +13,23 @@ import models.view.dto.CostReportDTO;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
+import models.view.post.LossRatePost;
 import models.view.report.AreaGoodsAnalyze;
 import models.view.report.ArrivalRate;
+import models.view.report.LossRate;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 import query.ShipmentReportESQuery;
 
-import java.util.*;
-
-import models.view.post.LossRatePost;
-import models.view.report.LossRate;
-import play.utils.FastRuntimeException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 物流模块报表控制器
@@ -146,8 +148,8 @@ public class ShipmentReports extends Controller {
 
     public static void lossRateReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
-        List<LossRate> lossrates = new ArrayList<LossRate>();
-        List<ShipItem> shipItems = new ArrayList<ShipItem>();
+        List<LossRate> lossrates = new ArrayList<>();
+        List<ShipItem> shipItems = new ArrayList<>();
         LossRate losstotal = new LossRate();
         try {
             Map<String, Object> map = p.queryDate();

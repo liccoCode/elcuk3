@@ -199,6 +199,6 @@ public class ProcuresHelper extends JavaExtensions {
     public static F.T2<Float, Float> amountUSD(ProcureUnit unit) {
         float priceUSD = Webs.scale2PointUp(unit.product.declaredValue);
         float amountUSD = priceUSD * unit.qty();
-        return new F.T2<Float, Float>(priceUSD, amountUSD);
+        return new F.T2<>(priceUSD, amountUSD);
     }
 }

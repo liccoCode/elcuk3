@@ -33,7 +33,7 @@ public abstract class AbstractSeries implements Serializable {
     /**
      * Series 的数据为 [[key, value], [key, value]...] 的形式
      */
-    public List<Object[]> data = new ArrayList<Object[]>();
+    public List<Object[]> data = new ArrayList<>();
 
     /**
      * Series 的名称

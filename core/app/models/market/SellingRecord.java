@@ -307,7 +307,7 @@ public class SellingRecord extends GenericModel {
         F.T2<DateTime, DateTime> actualDatePair = market
                 .withTimeZone(Dates.morning(oneDay), Dates.morning(dt.toDate()));
 
-        Set<SellingRecord> records = new HashSet<SellingRecord>();
+        Set<SellingRecord> records = new HashSet<>();
         JsonArray rows = null;
         int curentPage = 0;
         synchronized(acc.cookieStore()) {
@@ -407,7 +407,7 @@ public class SellingRecord extends GenericModel {
                     .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from,
                             to).fetch();
             // 需要将相同 Date 不同 Market 的全部累计
-            Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
+            Map<String, SellingRecord> groupByDate = new LinkedHashMap<>();
             for(SellingRecord rcd : dateMixRecords) {
                 String key = rcd.date.getTime() + "" + rcd.market;
                 if(groupByDate.containsKey(key)) {
@@ -419,7 +419,7 @@ public class SellingRecord extends GenericModel {
                 } else
                     groupByDate.put(key, rcd);
             }
-            cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
+            cacheElement = new ArrayList<>(groupByDate.values());
         } else {
             //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
             cacheElement = SellingRecord

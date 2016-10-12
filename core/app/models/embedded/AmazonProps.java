@@ -148,7 +148,7 @@ public class AmazonProps implements Serializable {
     public String searchTerms;
 
     @Transient
-    public List<String> searchTermss = new ArrayList<String>();
+    public List<String> searchTermss = new ArrayList<>();
 
     /**
      * 使用 Webs.SPLIT 进行分割, 5 行
@@ -214,7 +214,7 @@ public class AmazonProps implements Serializable {
     public String hardwarePlatforms;
 
     @Transient
-    public List<String> hardwarePlatformss = new ArrayList<String>();
+    public List<String> hardwarePlatformss = new ArrayList<>();
 
     public void validate() {
         if(StringUtils.isBlank(this.title))
@@ -250,10 +250,10 @@ public class AmazonProps implements Serializable {
             this.RBN = StringUtils.join(this.rbns, ",");
             this.hardwarePlatforms = StringUtils.join(this.hardwarePlatformss, Webs.SPLIT);
         } else if(flag == T.STR_TO_ARRAY) {
-            this.keyFeturess = new ArrayList<String>();
-            this.searchTermss = new ArrayList<String>();
-            this.rbns = new ArrayList<String>();
-            this.hardwarePlatformss = new ArrayList<String>();
+            this.keyFeturess = new ArrayList<>();
+            this.searchTermss = new ArrayList<>();
+            this.rbns = new ArrayList<>();
+            this.hardwarePlatformss = new ArrayList<>();
             String[] tmp = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
             if(tmp != null) Collections.addAll(this.keyFeturess, tmp);
 
@@ -378,8 +378,8 @@ public class AmazonProps implements Serializable {
                 throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
         }
 
-        List<String> searchTerms = new ArrayList<String>();
-        List<String> rbns = new ArrayList<String>();
+        List<String> searchTerms = new ArrayList<>();
+        List<String> rbns = new ArrayList<>();
 
         this.productDesc = doc.select("#product_description").text().trim();
         this.condition_ = doc.select("#offering_condition_display").text().trim().toUpperCase(); // 默认为 NEW
@@ -462,7 +462,7 @@ public class AmazonProps implements Serializable {
             throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
         }
 
-        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        Set<NameValuePair> params = new HashSet<>();
 
         for(Element el : inputs) {
             String name = el.attr("name").toLowerCase().trim();
@@ -530,7 +530,7 @@ public class AmazonProps implements Serializable {
         for(Element select : selects) {
             params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
         }
-        return new F.T2<Collection<NameValuePair>, String>(params, form.attr("action"));
+        return new F.T2<>(params, form.attr("action"));
     }
 
     private void addParams(String name, String value, Collection<NameValuePair> params) {
@@ -554,7 +554,7 @@ public class AmazonProps implements Serializable {
             if(StringUtils.isBlank(msg)) msg = "AMZ返回页面信息不正确,请重新更新! Display Post page visit Error. Please try again.";
             throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
         }
-        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        Set<NameValuePair> params = new HashSet<>();
         F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(
                 doc.select("#our_price").val(), sell.account.type);
         for(Element el : inputs) {
@@ -658,7 +658,7 @@ public class AmazonProps implements Serializable {
                 params.add(new BasicNameValuePair(select.attr("name"),
                         select.select("option[selected]").val()));
         }
-        return new F.T2<Collection<NameValuePair>, Document>(params, doc);
+        return new F.T2<>(params, doc);
     }
 
 }

@@ -103,16 +103,16 @@ public class SaleFee extends Model {
      * @return missing: order(use order_id)
      */
     public static Map<String, List<SaleFee>> flatFileFinanceParse(File file, Account account) {
-        Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<String, F.T2<AtomicInteger, List<SaleFee>>>();
-        mapFees.put("SYSTEM", new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(1),
-                new ArrayList<SaleFee>()));
+        Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<>();
+        mapFees.put("SYSTEM", new F.T2<>(new AtomicInteger(1),
+                new ArrayList<>()));
 
         try {
             List<String> lines = FileUtils.readLines(file);
             lines.remove(0);
             lines.remove(0);// 删除最上面的 2 行
 
-            List<String> emailLines = new ArrayList<String>();
+            List<String> emailLines = new ArrayList<>();
             for(String line : lines) {
                 try {
 
@@ -138,8 +138,8 @@ public class SaleFee extends Model {
 
                         if(!mapFees.containsKey(orderId))
                             mapFees.put(orderId,
-                                    new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(),
-                                            new ArrayList<SaleFee>()));
+                                    new F.T2<>(new AtomicInteger(),
+                                            new ArrayList<>()));
                         F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
 
                         // 计算数量
@@ -174,8 +174,8 @@ public class SaleFee extends Model {
                         if(StringUtils.isNotBlank(orderId)) {
                             if(!mapFees.containsKey(orderId))
                                 mapFees.put(orderId,
-                                        new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(),
-                                                new ArrayList<SaleFee>()));
+                                        new F.T2<>(new AtomicInteger(),
+                                                new ArrayList<>()));
                             F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
                             if(addOneFee(lastPrice(params), params[17], transactionType, orderId,
                                     account.type, fees, account, transactionType/*不然会自动跳出*/))
@@ -204,7 +204,7 @@ public class SaleFee extends Model {
 
 
         // 在返回前, 还需要将保留再 T2._1 中的 qty 设置到所有的 SaleFee 中
-        Map<String, List<SaleFee>> feesMap = new HashMap<String, List<SaleFee>>();
+        Map<String, List<SaleFee>> feesMap = new HashMap<>();
         for(String key : mapFees.keySet()) {
             F.T2<AtomicInteger, List<SaleFee>> feesTuple = mapFees.get(key);
             if(!"SYSTEM".equals(key)) {

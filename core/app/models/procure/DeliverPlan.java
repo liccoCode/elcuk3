@@ -182,7 +182,7 @@ public class DeliverPlan extends GenericModel {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
 
@@ -205,7 +205,7 @@ public class DeliverPlan extends GenericModel {
             else
                 unit.toggleAssignTodeliverplan(null, false);
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+        if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
         this.save();
 

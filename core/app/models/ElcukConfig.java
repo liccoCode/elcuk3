@@ -129,7 +129,7 @@ public class ElcukConfig extends Model {
     }
 
     public static List<String> multiUpdate(Map<String, String> valsMap) {
-        List<String> errorMsg = new ArrayList<String>();
+        List<String> errorMsg = new ArrayList<>();
         for(String key : valsMap.keySet()) {
             ElcukConfig config = ElcukConfig.findById(NumberUtils.toLong(key));
             if(config != null) {

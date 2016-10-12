@@ -26,9 +26,9 @@ public class BtbOrderPost extends Post<BtbOrder> {
 
     public int totalQty;
 
-    public List<String> totalSaleCost = new ArrayList<String>();
+    public List<String> totalSaleCost = new ArrayList<>();
 
-    public List<String> totalShipCost = new ArrayList<String>();
+    public List<String> totalShipCost = new ArrayList<>();
 
     public BtbOrderPost() {
         from = DateTime.now().withDayOfYear(1).toDate();
@@ -36,7 +36,7 @@ public class BtbOrderPost extends Post<BtbOrder> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbOrder s LEFT JOIN s.btbOrderItemList i " +
                 "WHERE  1 = 1 ");
         if(StringUtils.isNotEmpty(from.toString()) && StringUtils.isNotEmpty(to.toString())) {
@@ -60,7 +60,7 @@ public class BtbOrderPost extends Post<BtbOrder> {
         }
         sql.append(" GROUP BY s ");
         sql.append(" ORDER BY s.saleDate DESC ");
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<BtbOrder> query() {
@@ -85,8 +85,8 @@ public class BtbOrderPost extends Post<BtbOrder> {
      * @param dtos
      */
     public void totalCost(List<BtbOrder> dtos) {
-        Map<Currency, BigDecimal> cost_map = new HashMap<Currency, BigDecimal>();
-        Map<Currency, BigDecimal> ship_map = new HashMap<Currency, BigDecimal>();
+        Map<Currency, BigDecimal> cost_map = new HashMap<>();
+        Map<Currency, BigDecimal> ship_map = new HashMap<>();
         for(BtbOrder order : dtos) {
             for(BtbOrderItem item : order.btbOrderItemList) {
                 totalQty += item.qty;

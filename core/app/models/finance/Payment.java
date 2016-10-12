@@ -78,7 +78,7 @@ public class Payment extends Model {
     }
 
     @OneToMany(mappedBy = "payment")
-    public List<PaymentUnit> units = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> units = new ArrayList<>();
 
     /**
      * Payment 所关联的采购请款单;
@@ -222,7 +222,7 @@ public class Payment extends Model {
          * 2. 判断软删除的, 软删除的不允许处理
          * 3. 判断状态是允许的
          */
-        List<Long> existIds = new ArrayList<Long>();
+        List<Long> existIds = new ArrayList<>();
         for(PaymentUnit fee : this.units) {
             existIds.add(fee.id);
         }
@@ -260,7 +260,7 @@ public class Payment extends Model {
     }
 
     private List<PaymentUnit> waitForDealPaymentUnit(List<Long> paymentUnitIds) {
-        List<PaymentUnit> paymentUnits = new ArrayList<PaymentUnit>();
+        List<PaymentUnit> paymentUnits = new ArrayList<>();
         for(Long id : paymentUnitIds) {
             PaymentUnit unit = PaymentUnit.findById(id);
             if(unit.payment.id.equals(this.id))
@@ -365,7 +365,7 @@ public class Payment extends Model {
                 throw new FastRuntimeException("付款单中的币种不可能不一样, 数据有错误, 请联系开发人员.");
             currenctCurrencyAmount += unit.amount();
         }
-        return new F.T3<Float, Float, Float>(
+        return new F.T3<>(
                 currency.toUSD(currenctCurrencyAmount),
                 currency.toCNY(currenctCurrencyAmount),
                 currenctCurrencyAmount);
@@ -392,7 +392,7 @@ public class Payment extends Model {
      * @return
      */
     public List<PaymentUnit> units() {
-        List<PaymentUnit> unRemove = new ArrayList<PaymentUnit>();
+        List<PaymentUnit> unRemove = new ArrayList<>();
         for(PaymentUnit unit : this.units) {
             if(unit.remove) continue;
             unRemove.add(unit);
@@ -408,12 +408,12 @@ public class Payment extends Model {
      * @return
      */
     public List<Cooperator> cooperators() {
-        Set<Cooperator> cooperatorSet = new HashSet<Cooperator>();
+        Set<Cooperator> cooperatorSet = new HashSet<>();
         for(PaymentUnit unit : this.units()) {
             if(unit.cooperator() == null) continue;
             cooperatorSet.add(unit.cooperator());
         }
-        return new ArrayList<Cooperator>(cooperatorSet);
+        return new ArrayList<>(cooperatorSet);
     }
 
 
@@ -424,7 +424,7 @@ public class Payment extends Model {
      */
     public String approvalAmount() {
         BigDecimal amount = new BigDecimal(0);
-        ArrayList<String> shipments = new java.util.ArrayList<String>();
+        ArrayList<String> shipments = new java.util.ArrayList<>();
         for(PaymentUnit fee : this.units()) {
             if(fee.shipment != null && !shipments.contains(fee.shipment.id)) {
                 shipments.add(fee.shipment.id);
@@ -454,11 +454,11 @@ public class Payment extends Model {
     }
 
     public List<User> applyers() {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         for(PaymentUnit unit : this.units()) {
             users.add(unit.payee);
         }
-        return new ArrayList<User>(users);
+        return new ArrayList<>(users);
     }
 
 

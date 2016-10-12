@@ -82,14 +82,14 @@ public class DeliveryPost extends Post<Deliveryment> {
 
         // 针对 Id 的唯一搜索
         if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+            return new F.T2<>(specialSearch._2, specialSearch._3);
 
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
 
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE 1=1 AND");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             if(this.dateType == DateType.DELIVERY) {
@@ -159,8 +159,8 @@ public class DeliveryPost extends Post<Deliveryment> {
             Matcher matcher = SIZE.matcher(this.search);
             if(matcher.find()) {
                 int size = NumberUtils.toInt(matcher.group(1));
-                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(d.units)>=?",
-                        new ArrayList<Object>(Arrays.asList(size)));
+                return new F.T3<>(true, "SIZE(d.units)>=?",
+                        new ArrayList<>(Arrays.asList(size)));
             }
         }
         return new F.T3<>(false, null, null);
@@ -177,9 +177,9 @@ public class DeliveryPost extends Post<Deliveryment> {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true,
+                return new F.T3<>(true,
                         "SELECT d FROM Deliveryment d WHERE d.id=?",
-                        new ArrayList<Object>(Arrays.asList(deliverymentId)));
+                        new ArrayList<>(Arrays.asList(deliverymentId)));
             }
         }
         return new F.T3<>(false, null, null);

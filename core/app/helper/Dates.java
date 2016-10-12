@@ -386,7 +386,7 @@ public class Dates {
             _end = Dates.getSundayOfSpecifyTime(lastWeek.toDate());
         }
         Calendar c = Calendar.getInstance();
-        List<Date> dates = new ArrayList<Date>();
+        List<Date> dates = new ArrayList<>();
         while(_begin.getTime() <= _end.getTime()) {
             dates.add(Dates.night(_begin));
             c.setTime(_begin);
@@ -417,7 +417,7 @@ public class Dates {
             _end = Dates.getMondayOfSpecifyTime(lastWeek.toDate());
         }
         Calendar c = Calendar.getInstance();
-        List<Date> dates = new ArrayList<Date>();
+        List<Date> dates = new ArrayList<>();
         while(_begin.getTime() <= _end.getTime()) {
             //这里还有一个问题 当结束日期刚好是周一时,由于无法找到对应的周日(超出了结束时间)来构成完整的一周,所以需要舍弃该日期
             if(Dates.getSundayOfSpecifyTime(_begin).getTime() <= end.getTime()) {

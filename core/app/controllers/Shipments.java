@@ -416,11 +416,11 @@ public class Shipments extends Controller {
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
         String shipType = ship.type.name();
-        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
+        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<>();
         for(ShipItem item : ship.items) {
             String centerId = item.unit.fba.centerId;
             if(!fbaGroupUnits.containsKey(centerId))
-                fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
+                fbaGroupUnits.put(centerId, new ArrayList<>());
             fbaGroupUnits.get(centerId).add(item.unit);
         }
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
@@ -432,7 +432,7 @@ public class Shipments extends Controller {
 
     public static void dates(String id) {
         Shipment shipment = Shipment.findById(id);
-        Map<String, String> dates = new HashMap<String, String>();
+        Map<String, String> dates = new HashMap<>();
         dates.put("begin", Dates.date2Date(shipment.dates.planBeginDate));
         dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
         renderJSON(dates);
@@ -445,7 +445,7 @@ public class Shipments extends Controller {
         shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));
         int day = shipment.shipDay();
         DateTime arrivedate = Dates.cn(planShipDate).plusDays(day);
-        Map<String, String> dates = new HashMap<String, String>();
+        Map<String, String> dates = new HashMap<>();
         dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
     }

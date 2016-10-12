@@ -146,7 +146,7 @@ public class FBAShipment extends Model {
     public String shipmentId;
 
     @OneToMany(mappedBy = "fba")
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
 
     @Lob
     public String records = "";

@@ -73,7 +73,7 @@ public class OrderrQuery {
 
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
 
-        List<String> orderIds = new ArrayList<String>();
+        List<String> orderIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             if(row != null) {
                 String orderId = row.get("orderId").toString();

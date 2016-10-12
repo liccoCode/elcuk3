@@ -81,11 +81,11 @@ public class FBACenter extends Model {
      */
     public F.T2<Long, List<String>> fbas() {
         List<FBAShipment> shipments = FBAShipment.find("fbaCenter=?", this).fetch();
-        List<String> shipmentIds = new ArrayList<String>();
+        List<String> shipmentIds = new ArrayList<>();
         for(FBAShipment shipment : shipments) {
             shipmentIds.add(shipment.shipmentId);
         }
-        return new F.T2<Long, List<String>>((long) shipments.size(), shipmentIds);
+        return new F.T2<>((long) shipments.size(), shipmentIds);
     }
 
     public String codeToCountry() {

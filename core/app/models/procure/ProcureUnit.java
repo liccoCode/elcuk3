@@ -209,7 +209,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     /**
      * 此采购计划的供应商信息.
@@ -710,7 +710,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
 
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
@@ -771,7 +771,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return List<String>
      */
     public List<String> beforeDoneUpdate(ProcureUnit unit) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
@@ -784,7 +784,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     private List<String> doneUpdate(ProcureUnit unit) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
@@ -990,12 +990,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        Set<Shipment> shipments = new HashSet<Shipment>();
+        Set<Shipment> shipments = new HashSet<>();
         for(ShipItem shipItem : this.shipItems) {
             if(shipItem.shipment != null)
                 shipments.add(shipItem.shipment);
         }
-        return new ArrayList<Shipment>(shipments);
+        return new ArrayList<>(shipments);
     }
 
     public int qty() {
@@ -1238,7 +1238,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public List<PaymentUnit> fees() {
-        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+        List<PaymentUnit> fees = new ArrayList<>();
         for(PaymentUnit fee : this.fees) {
             if(fee.remove) continue;
             fees.add(fee);
@@ -1418,7 +1418,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
      */
     public Set<User> editToUsers() {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         users.add(this.handler);
         if(this.deliveryment != null)
             users.add(this.deliveryment.handler);
@@ -1445,7 +1445,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     this.id
             );
 
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             String shipmentid = fba.shipmentId;
             shipmentid = shipmentid.trim() + "U";
 
@@ -1630,7 +1630,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public Map<String, Object> showInfo(Long id, String username) {
         ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?", ACTIVITINAME, id).first();
-        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> infos = new ArrayList<>();
         int issubmit = 0;
         String taskname = "";
         if(ap == null) {
@@ -1645,7 +1645,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             infos = ActivitiProcess.processInfo(ap.processInstanceId);
         }
 
-        Map<String, Object> map = new Hashtable<String, Object>();
+        Map<String, Object> map = new Hashtable<>();
         map.put("ap", ap);
         map.put("issubmit", issubmit);
         if(taskname != null) map.put("taskname", taskname);
@@ -1654,7 +1654,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public void submitActiviti(ActivitiProcess ap, String flow, String username, String opition) {
-        Map<String, Object> variableMap = new HashMap<String, Object>();
+        Map<String, Object> variableMap = new HashMap<>();
         if(StringUtils.isNotBlank(flow)) variableMap.put("flow", flow);
 
         //如果是最后异步判断是否是生效日期当天

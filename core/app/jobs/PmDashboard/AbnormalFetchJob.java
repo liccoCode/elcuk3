@@ -61,12 +61,12 @@ public class AbnormalFetchJob extends Job {
         Cache.add(RUNNING, RUNNING);
         //获取所有的 sku
         List<String> skus = new ProductQuery().skus();
-        Map<String, List<AbnormalDTO>> dtoMap = new HashMap<String, List<AbnormalDTO>>();
+        Map<String, List<AbnormalDTO>> dtoMap = new HashMap<>();
         //准备数据容器
-        List<AbnormalDTO> salesQty = new ArrayList<AbnormalDTO>();
-        List<AbnormalDTO> reviews = new ArrayList<AbnormalDTO>();
-        List<AbnormalDTO> salesAmount = new ArrayList<AbnormalDTO>();
-        List<AbnormalDTO> salesProfits = new ArrayList<AbnormalDTO>();
+        List<AbnormalDTO> salesQty = new ArrayList<>();
+        List<AbnormalDTO> reviews = new ArrayList<>();
+        List<AbnormalDTO> salesAmount = new ArrayList<>();
+        List<AbnormalDTO> salesProfits = new ArrayList<>();
         for(String sku : skus) {
             fetchSalesQty(sku, salesQty);
             fetchReview(sku, reviews);
@@ -88,7 +88,7 @@ public class AbnormalFetchJob extends Job {
      * 计算出所有销量异常的sku
      */
     private void fetchSalesQty(String sku, List<AbnormalDTO> dtos) {
-        DateTime day1 = new DateTime().now().plusDays(-1);
+        DateTime day1 = DateTime.now().plusDays(-1);
         Date day1begin = Dates.morning(day1.toDate());
         Date day1end = Dates.night(day1.toDate());
         MetricProfitService met = new MetricProfitService(day1begin, day1end, null, sku, null);

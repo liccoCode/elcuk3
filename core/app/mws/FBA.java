@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class FBA {
 
-    private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<String, FBAInboundServiceMWSClient>();
+    private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<>();
 
     public static FBAShipment plan(Account account, ProcureUnit unit) throws FBAInboundServiceMWSException {
         FBAShipment fbaShipment = new FBAShipment();
@@ -286,12 +286,12 @@ public class FBA {
         List<InboundShipmentInfo> inbounds = response.getListInboundShipmentsResult()
                 .getShipmentData().getMember();
 
-        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<String, F.T3<String, String, String>>();
+        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<>();
         for(InboundShipmentInfo info : inbounds) {
             // Amazon 对于重复提交的 FBA ShipmentId 不会做限制, 所以有过的信息不需要再记录
             if(shipmentsT3.containsKey(info.getShipmentId()))
                 continue;
-            shipmentsT3.put(info.getShipmentId(), new F.T3<String, String, String>(
+            shipmentsT3.put(info.getShipmentId(), new F.T3<>(
                     info.getShipmentStatus(), info.getDestinationFulfillmentCenterId(), info.getShipmentName())
             );
         }
@@ -312,7 +312,7 @@ public class FBA {
          * item.getQuantityShipped();
          * item.getQuantityReceived();
          */
-        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<String, F.T2<Integer, Integer>>();
+        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<>();
         ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest();
         request.setShipmentId(shipmentId);
         request.setSellerId(acc.merchantId);
@@ -322,7 +322,7 @@ public class FBA {
             // 进入系统内 msku 全变成大写
             if(fetchItems.containsKey(item.getSellerSKU().toUpperCase())) continue;
             fetchItems.put(item.getSellerSKU().toUpperCase(),
-                    new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped())
+                    new F.T2<>(item.getQuantityReceived(), item.getQuantityShipped())
             );
         }
         return fetchItems;
@@ -352,7 +352,7 @@ public class FBA {
      */
     private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems(List<ProcureUnit> units) {
 
-        List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
+        List<InboundShipmentItem> items = new ArrayList<>();
         for(ProcureUnit unit : units) {
             items.add(new InboundShipmentItem(
                     null,

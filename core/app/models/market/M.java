@@ -785,7 +785,7 @@ public enum M {
      * @return
      */
     public F.T2<DateTime, DateTime> withTimeZone(Date from, Date to) {
-        return new F.T2<DateTime, DateTime>(withTimeZone(from), withTimeZone(to));
+        return new F.T2<>(withTimeZone(from), withTimeZone(to));
     }
 
 

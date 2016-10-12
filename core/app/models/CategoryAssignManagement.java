@@ -73,7 +73,7 @@ public class CategoryAssignManagement extends Model {
 
 
     public List<CategoryAssignManagement> buildUserList(Long teamId, String categoryId) {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("select c from CategoryAssignManagement c " +
                 " LEFT JOIN c.user u " +
                 " LEFT JOIN u.roles r " +

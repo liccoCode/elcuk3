@@ -79,7 +79,7 @@ public class Orderr extends GenericModel {
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    public List<OrderItem> items = new ArrayList<OrderItem>();
+    public List<OrderItem> items = new ArrayList<>();
 
     /**
      * 订单所属的市场
@@ -99,7 +99,7 @@ public class Orderr extends GenericModel {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @OrderBy("date ASC,cost DESC")
-    public List<SaleFee> fees = new ArrayList<SaleFee>();
+    public List<SaleFee> fees = new ArrayList<>();
     //-------------- Basic ----------------
 
     /**
@@ -478,8 +478,8 @@ public class Orderr extends GenericModel {
      * @return
      */
     public static List<String> ids(List<Orderr> orderrs) {
-        if(orderrs == null) orderrs = new ArrayList<Orderr>();
-        List<String> orderIds = new ArrayList<String>();
+        if(orderrs == null) orderrs = new ArrayList<>();
+        List<String> orderIds = new ArrayList<>();
         for(Orderr o : orderrs) orderIds.add(o.orderId);
         return orderIds;
     }
@@ -532,7 +532,7 @@ public class Orderr extends GenericModel {
             notaxamount = itemamount;
         }
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
-        return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
+        return new F.T3<>(totalamount, notaxamount, tax);
     }
 
 

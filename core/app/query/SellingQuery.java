@@ -28,7 +28,7 @@ public class SellingQuery {
                 .select("s.sellingId", "s.asin", "s.ps", "s.account_id", "s.market", "s.state")
                 .from("Selling s");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
-        List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>();
+        List<AnalyzeDTO> dtos = new ArrayList<>();
 
         for(Map<String, Object> row : rows) {
             AnalyzeDTO dto = new AnalyzeDTO(row.get("sellingId").toString());

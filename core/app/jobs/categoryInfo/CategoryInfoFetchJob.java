@@ -52,10 +52,10 @@ public class CategoryInfoFetchJob extends Job {
     public void categoryinfo() {
         Cache.add(CategoryInfoFetchJob.RUNNING, CategoryInfoFetchJob.RUNNING);
 
-        Map<String, List<CategoryInfoDTO>> dtoMap = new HashMap<String, List<CategoryInfoDTO>>();
+        Map<String, List<CategoryInfoDTO>> dtoMap = new HashMap<>();
         List<Category> categorys = Category.findAll();
         for(Category category : categorys) {
-            List<CategoryInfoDTO> categoryDtos = new ArrayList<CategoryInfoDTO>();
+            List<CategoryInfoDTO> categoryDtos = new ArrayList<>();
             for(Product product : category.products) {
                 CategoryInfoDTO dto = new CategoryInfoDTO(product);
                 //1、sku总销量(从ERP上线到今日)

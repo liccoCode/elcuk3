@@ -14,8 +14,8 @@ import java.util.*;
  */
 public class DashBoard implements Serializable {
 
-    public Map<String, OrderInfo> infos = new LinkedHashMap<String, OrderInfo>();
-    public Map<String, OrderInfo> accsInfos = new HashMap<String, OrderInfo>();
+    public Map<String, OrderInfo> infos = new LinkedHashMap<>();
+    public Map<String, OrderInfo> accsInfos = new HashMap<>();
 
     private String accKey(String date, long aid) {
         return String.format("%s_%s", date, aid);
@@ -133,9 +133,9 @@ public class DashBoard implements Serializable {
      */
     public synchronized DashBoard sort() {
         // Make a copy
-        List<String> keys = new ArrayList<String>(infos.keySet());
+        List<String> keys = new ArrayList<>(infos.keySet());
         Collections.sort(keys, new InfoDateKeySort());
-        LinkedHashMap<String, OrderInfo> afterSorted = new LinkedHashMap<String, OrderInfo>();
+        LinkedHashMap<String, OrderInfo> afterSorted = new LinkedHashMap<>();
         for(String key : keys) {
             afterSorted.put(key, infos.get(key));
         }

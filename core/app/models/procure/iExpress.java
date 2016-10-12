@@ -80,7 +80,7 @@ public enum iExpress {
                         }
                         String date = thead.select("tr:eq(1) th:eq(0)").text() + " "
                                 + element.select("td:eq(3)").text();
-                        return new F.T2<Boolean, DateTime>(true, dateStringParse(date));
+                        return new F.T2<>(true, dateStringParse(date));
                     }
                 }
             }
@@ -104,12 +104,12 @@ public enum iExpress {
 
         @Override
         public String fetchStateHTML(String tracNo) {
-            Map<String, Map> data = new HashMap<String, Map>();
-            Map<String, Object> trackpackgeRequest = new HashMap<String, Object>();
-            List<Map<String, Object>> trackingInfoList = new ArrayList<Map<String, Object>>();
-            Map<String, Object> trackNumberInfo = new HashMap<String, Object>();
-            Map<String, String> trackNumber = new HashMap<String, String>();
-            Map<String, String> processingParameters = new HashMap<String, String>();
+            Map<String, Map> data = new HashMap<>();
+            Map<String, Object> trackpackgeRequest = new HashMap<>();
+            List<Map<String, Object>> trackingInfoList = new ArrayList<>();
+            Map<String, Object> trackNumberInfo = new HashMap<>();
+            Map<String, String> trackNumber = new HashMap<>();
+            Map<String, String> processingParameters = new HashMap<>();
 
             data.put("TrackPackagesRequest", trackpackgeRequest);
             trackpackgeRequest.put("processingParameters", processingParameters);
@@ -194,11 +194,11 @@ public enum iExpress {
                 for(Element element : doc.select("tr")) {
                     if(element.text().contains(state)) {
                         String date = element.select("td:eq(0)").text();
-                        return new F.T2<Boolean, DateTime>(true, Dates.cn(date));
+                        return new F.T2<>(true, Dates.cn(date));
                     }
                 }
             }
-            return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            return new F.T2<>(false, DateTime.now());
         }
 
     },
@@ -217,7 +217,7 @@ public enum iExpress {
             String html = HTTP.get(this.trackUrl(tracNo));
             Document doc = Jsoup.parse(html);
             Element form = doc.select("#detailFormid").first();
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            List<NameValuePair> params = new ArrayList<>();
             for(Element input : form.select("input")) {
                 params.add(new BasicNameValuePair(input.attr("name"), input.val()));
             }
@@ -236,9 +236,9 @@ public enum iExpress {
             Elements elements = doc.select("tr:contains(清关机构)");
             if(elements.size() > 0) {
                 // 由于 UPS 的重复信息太多了, 所以只能按照 "清关机构" 这四个字进行处理
-                return new F.T2<Boolean, DateTime>(true, trToDate(elements.last()));
+                return new F.T2<>(true, trToDate(elements.last()));
             }
-            return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            return new F.T2<>(false, DateTime.now());
         }
 
         @Override
@@ -247,7 +247,7 @@ public enum iExpress {
             Document doc = Jsoup.parse(iExpressHTML);
             Elements elements = doc.select("tr:contains(外出递送)");
             if(elements.size() > 0) {
-                return new F.T2<Boolean, DateTime>(true, trToDate(elements.last()));
+                return new F.T2<>(true, trToDate(elements.last()));
             }
             return isReceipt(iExpressHTML);
         }
@@ -257,9 +257,9 @@ public enum iExpress {
             Document doc = Jsoup.parse(iExpressHTML);
             Elements elements = doc.select("tr:contains(已递送)");
             if(elements.size() > 0) {
-                return new F.T2<Boolean, DateTime>(true, trToDate(elements.last()));
+                return new F.T2<>(true, trToDate(elements.last()));
             }
-            return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            return new F.T2<>(false, DateTime.now());
         }
 
         @Override

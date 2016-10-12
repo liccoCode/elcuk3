@@ -83,9 +83,9 @@ public class SkuProfit implements Serializable {
 
 
     public static SkuProfit handleSkuProfit(List<SkuProfit> skuProfits) {
-        List<SkuProfit> marketProfit = new ArrayList<SkuProfit>();
+        List<SkuProfit> marketProfit = new ArrayList<>();
         SkuProfit total_skuProfits = new SkuProfit();
-        Map<M, SkuProfit> skuProfitMap = new HashMap<M, SkuProfit>();
+        Map<M, SkuProfit> skuProfitMap = new HashMap<>();
         SkuProfit totalSkuProfit = new SkuProfit();
         for(SkuProfit skuProfit : skuProfits) {
             if(skuProfitMap.containsKey(skuProfit.market)) {
