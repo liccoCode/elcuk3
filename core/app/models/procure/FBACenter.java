@@ -7,8 +7,8 @@ import play.libs.F;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * FBA 仓库. 每一个 FBAShipment 都会关联的
@@ -81,10 +81,7 @@ public class FBACenter extends Model {
      */
     public F.T2<Long, List<String>> fbas() {
         List<FBAShipment> shipments = FBAShipment.find("fbaCenter=?", this).fetch();
-        List<String> shipmentIds = new ArrayList<>();
-        for(FBAShipment shipment : shipments) {
-            shipmentIds.add(shipment.shipmentId);
-        }
+        List<String> shipmentIds = shipments.stream().map(shipment -> shipment.shipmentId).collect(Collectors.toList());
         return new F.T2<>((long) shipments.size(), shipmentIds);
     }
 
@@ -122,4 +119,19 @@ public class FBACenter extends Model {
         return FBACenter.find("centerId=?", centerId).first();
     }
 
+    public FBACenter createOrUpdate() {
+        FBACenter manager = FBACenter.findByCenterId(this.centerId);
+        if(manager != null) {
+            manager.addressLine1 = this.addressLine1;
+            manager.addressLine2 = this.addressLine2;
+            manager.city = this.city;
+            manager.name = this.name;
+            manager.countryCode = this.countryCode;
+            manager.stateOrProvinceCode = this.stateOrProvinceCode;
+            manager.postalCode = this.postalCode;
+        } else {
+            manager.save();
+        }
+        return manager;
+    }
 }

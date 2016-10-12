@@ -5,8 +5,6 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
-import helper.Dates;
-import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
 import models.procure.*;
@@ -99,21 +97,13 @@ public class FBA {
             fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
 
             // FBA 仓库自适应
-            FBACenter center = FBACenter.findByCenterId(fbaShipment.centerId);
-            if(center == null) {
-                Address fbaAddress = member.getShipToAddress();
-                center = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
-                        fbaAddress.getAddressLine2(), fbaAddress.getCity(),
-                        fbaAddress.getName(), fbaAddress.getCountryCode(),
-                        fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
-                ).save();
-                Webs.systemMail(String.format("Add a new FC`s %s", center.centerId),
-                        center.toString());
-            }
-            fbaShipment.fbaCenter = center;
+            Address fbaAddress = member.getShipToAddress();
+            fbaShipment.fbaCenter = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
+                    fbaAddress.getAddressLine2(), fbaAddress.getCity(),
+                    fbaAddress.getName(), fbaAddress.getCountryCode(),
+                    fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
+            ).createOrUpdate();
         } else {
-            Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(),
-                    "创建 FBAShipment 失败.");
             throw new FBAInboundServiceMWSException("创建 FBA Plan 失败.");
         }
         return fbaShipment;
