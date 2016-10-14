@@ -33,7 +33,7 @@ public class Promises {
      * @return
      */
     public static <T> List<T> forkJoin(final Callback<T> callback) {
-        List<T> vos = new ArrayList<T>();
+        List<T> vos = new ArrayList<>();
         // 通过 Job 异步 fork 加载不同时段的数据
         List<FutureTask<T>> futures = new ArrayList<>();
         long begin = System.currentTimeMillis();
@@ -97,7 +97,7 @@ public class Promises {
      */
     public static abstract class DBCallback<T> implements Callback<T> {
 
-        private static ThreadLocal<Connection> connHolder = new ThreadLocal<Connection>();
+        private static ThreadLocal<Connection> connHolder = new ThreadLocal<>();
 
 
         public Connection getConnection() {

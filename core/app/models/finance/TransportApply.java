@@ -40,10 +40,10 @@ public class TransportApply extends Apply {
     public User applier;
 
     @OneToMany(mappedBy = "apply")
-    public List<Shipment> shipments = new ArrayList<Shipment>();
+    public List<Shipment> shipments = new ArrayList<>();
 
     @OneToMany(mappedBy = "tApply")
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
 
 
     @Override
@@ -107,7 +107,7 @@ public class TransportApply extends Apply {
         if(shipments.size() != shipmentId.size())
             Validation.addError("", "提交的运输单参数与系统中的不符.");
 
-        Set<Cooperator> coopers = new HashSet<Cooperator>();
+        Set<Cooperator> coopers = new HashSet<>();
         for(Shipment ship : shipments) {
             if(ship.cooper != null) coopers.add(ship.cooper);
         }
@@ -116,7 +116,7 @@ public class TransportApply extends Apply {
             Validation.addError("", "请仅对同一个运输商.");
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的运输单.");
-        return new F.T2<List<Shipment>, Set<Cooperator>>(shipments, coopers);
+        return new F.T2<>(shipments, coopers);
     }
 
     /**
@@ -131,7 +131,7 @@ public class TransportApply extends Apply {
             usd += payment.totalFees()._1;
             cny += payment.totalFees()._2;
         }
-        return new F.T2<Float, Float>(usd, cny);
+        return new F.T2<>(usd, cny);
     }
 
     /**
@@ -146,7 +146,7 @@ public class TransportApply extends Apply {
                 cny += payment.actualCurrency.toCNY(payment.actualPaid.floatValue());
             }
         }
-        return new F.T2<Float, Float>(usd, cny);
+        return new F.T2<>(usd, cny);
     }
 
 
@@ -156,7 +156,7 @@ public class TransportApply extends Apply {
      * @return
      */
     public List<ApplyPaymentDTO> currencyFees() {
-        List<ApplyPaymentDTO> apply = new java.util.ArrayList<ApplyPaymentDTO>();
+        List<ApplyPaymentDTO> apply = new java.util.ArrayList<>();
         for(Currency currency : helper.Currency.values()) {
             ApplyPaymentDTO dto = new ApplyPaymentDTO();
             dto.currency = currency;

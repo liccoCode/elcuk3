@@ -157,7 +157,7 @@ public class Category extends GenericModel {
     public static List<String> categoryIds() {
         List<Map<String, Object>> rows = DBUtils
                 .rows("SELECT categoryId FROM Category ORDER BY categoryId");
-        List<String> categoryIds = new ArrayList<String>();
+        List<String> categoryIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             categoryIds.add(row.get("categoryId").toString());
         }
@@ -208,7 +208,7 @@ public class Category extends GenericModel {
      */
     public static F.T2<List<String>, List<String>> fetchCategorysJson() {
         List<String> categorys = Category.categorys(true);
-        return new F.T2<List<String>, List<String>>(categorys, categorys);
+        return new F.T2<>(categorys, categorys);
     }
 
     /**
@@ -243,7 +243,7 @@ public class Category extends GenericModel {
     public static List<String> allcategorys() {
         SqlSelect sql = new SqlSelect().select("categoryid").from("Category");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
-        List<String> categorys = new ArrayList<String>();
+        List<String> categorys = new ArrayList<>();
 
         for(Map<String, Object> row : rows) {
             categorys.add(row.get("categoryid").toString());
@@ -259,7 +259,7 @@ public class Category extends GenericModel {
      * @return
      */
     public static List<String> getSKUs(List<String> categoryIds) {
-        List<String> skus = new ArrayList<String>();
+        List<String> skus = new ArrayList<>();
 
         List<Map<String, Object>> rows = null;
         if(categoryIds != null && categoryIds.size() > 0) {
@@ -276,7 +276,7 @@ public class Category extends GenericModel {
 
     public static List<String> getSKUs(String categoryId) {
         if(StringUtils.isBlank(categoryId)) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
         return getSKUs(Arrays.asList(categoryId));
     }
@@ -290,7 +290,7 @@ public class Category extends GenericModel {
      * @return
      */
     public static List<String> listingIds(String categoryId, M market, boolean isOnlySelf) {
-        List<String> listingIds = new ArrayList<String>();
+        List<String> listingIds = new ArrayList<>();
         List<Map<String, Object>> rows = null;
         if(StringUtils.isNotBlank(categoryId)) {
             SqlSelect sql = new SqlSelect().select("Distinct l.listingId AS listingId").from("Listing l")
@@ -339,7 +339,7 @@ public class Category extends GenericModel {
      * @return
      */
     public static List<String> asinsByCategories(List<String> categories, M market, boolean isOnlySelf) {
-        List<String> asins = new ArrayList<String>();
+        List<String> asins = new ArrayList<>();
         List<Map<String, Object>> rows = null;
         SqlSelect sql = new SqlSelect().select("Distinct l.asin AS asin").from("Listing l")
                 .leftJoin("Product p ON  l.product_sku = p.sku")

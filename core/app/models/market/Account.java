@@ -51,7 +51,7 @@ public class Account extends Model {
     /**
      * 需要过滤掉的 MerchantId
      */
-    public final static Map<String, String> OFFER_IDS = new HashMap<String, String>();
+    public final static Map<String, String> OFFER_IDS = new HashMap<>();
 
     static {
         OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
@@ -65,7 +65,7 @@ public class Account extends Model {
     private static Map<String, BasicCookieStore> COOKIE_STORE_MAP;
 
     public static Map<String, BasicCookieStore> cookieMap() {
-        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
+        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<>();
         return COOKIE_STORE_MAP;
     }
 
@@ -364,7 +364,7 @@ public class Account extends Model {
                     return false;
                 }
 
-                Set<NameValuePair> params = new HashSet<NameValuePair>();
+                Set<NameValuePair> params = new HashSet<>();
                 for(Element el : inputs) {
                     String att = el.attr("name");
                     if("email".equals(att)) params.add(new BasicNameValuePair(att, this.username));
@@ -480,7 +480,7 @@ public class Account extends Model {
                 listing.market.amazonAsinLink(listing.asin));
         Document doc = Jsoup.parse(listing_body);
         Elements inputs = doc.select("#handleBuy input");
-        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        Set<NameValuePair> params = new HashSet<>();
         for(Element el : inputs) {
             if(StringUtils.isNotBlank(el.val())) {
                 params.add(new BasicNameValuePair(el.attr("name"), el.val()));
@@ -538,7 +538,7 @@ public class Account extends Model {
         // 只有后面登陆成功了, 才允许记录 Record
         if(loginAndClicks._1) record.save();
         else Logger.warn("Not Login? %s, %s", this.prettyName(), this.password);
-        return new F.T2<AmazonReviewRecord, String>(record, content);
+        return new F.T2<>(record, content);
     }
 
     /**
@@ -570,7 +570,7 @@ public class Account extends Model {
             FLog.fileLog(String.format("%s.URL_NULL.%s.%s.Failed.html", this.prettyName(),
                     review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
 
-        return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
+        return new F.T3<>(isLogin, upAndDownLink[0], upAndDownLink[1]);
     }
 
     /**

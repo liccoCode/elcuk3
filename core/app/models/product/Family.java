@@ -103,7 +103,7 @@ public class Family extends GenericModel {
         }
 
         List<Family> familyList = Family.all().fetch();
-        familys = new ArrayList<String>();
+        familys = new ArrayList<>();
         for(Family fml : familyList) familys.add(fml.family);
         play.cache.Cache.delete(Caches.FAMILYS);
         play.cache.Cache.add(Caches.FAMILYS, familys, "1h");

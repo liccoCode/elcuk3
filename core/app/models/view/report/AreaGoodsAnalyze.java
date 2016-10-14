@@ -1,8 +1,8 @@
 package models.view.report;
 
-import helper.*;
 import helper.Currency;
-import models.procure.FBACenter;
+import helper.DBUtils;
+import helper.Dates;
 import models.procure.Shipment;
 import models.qc.CheckTask;
 import org.jsoup.helper.StringUtil;
@@ -60,7 +60,7 @@ public class AreaGoodsAnalyze implements Serializable {
 
     public List<AreaGoodsAnalyze> query() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        List<Object> list = new ArrayList<Object>();
+        List<Object> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 "SELECT fc.countryCode, fc.centerId, IFNULL(sum(pu.fixValue+pu.amount), 0) as totalCost, ")
                 .append(" IFNULL(SUM(case s.type when 'SEA' then pu.fixValue+pu.amount else 0 end), 0) as seaCost, ")
@@ -88,8 +88,8 @@ public class AreaGoodsAnalyze implements Serializable {
 
         sql.append(" GROUP BY fc.countryCode, fc.centerId, pu.currency");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), list.toArray());
-        List<AreaGoodsAnalyze> analyzes = new ArrayList<AreaGoodsAnalyze>();
-        Map<String, AreaGoodsAnalyze> map = new HashMap<String, AreaGoodsAnalyze>();
+        List<AreaGoodsAnalyze> analyzes = new ArrayList<>();
+        Map<String, AreaGoodsAnalyze> map = new HashMap<>();
         int sort = 0;
         for(Map<String, Object> row : rows) {
             AreaGoodsAnalyze analyze = new AreaGoodsAnalyze();
@@ -180,7 +180,7 @@ public class AreaGoodsAnalyze implements Serializable {
     public List<String> queryCountryCode() {
         SqlSelect sql = new SqlSelect().select("countryCode").from("FBACenter").groupBy("countryCode");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
-        List<String> countryCode = new ArrayList<String>();
+        List<String> countryCode = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             countryCode.add(row.get("countryCode").toString());
         }
@@ -193,7 +193,7 @@ public class AreaGoodsAnalyze implements Serializable {
         }
         SqlSelect sql = new SqlSelect().select("centerId").from("FBACenter").where("countryCode=?").groupBy("centerId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), countryCode);
-        List<String> centerId = new ArrayList<String>();
+        List<String> centerId = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             centerId.add(row.get("centerId").toString());
         }

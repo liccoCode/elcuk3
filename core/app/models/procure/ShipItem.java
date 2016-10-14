@@ -89,7 +89,7 @@ public class ShipItem extends GenericModel {
     public ProcureUnit unit;
 
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     /**
      * 此次运输的数量; 注意其他与产品有关的信息都从关联的 ProcureUnit 中获取
@@ -186,7 +186,7 @@ public class ShipItem extends GenericModel {
         this.shipment = null;
         ProcureUnit unit = this.unit;
         this.unit = null;
-        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        return new F.T2<>(this.<ShipItem>delete(), unit);
     }
 
     /**
@@ -207,7 +207,7 @@ public class ShipItem extends GenericModel {
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
         if(dtos == null || dtos.size() == 0)
-            return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+            return new F.T4<>(0f, 0f, 0f, 0f);
         for(AnalyzeDTO dto : dtos) {
             if(!dto.fid.equals(this.unit.sid)) continue;
             return dto.getTurnOverT4();
@@ -415,7 +415,7 @@ public class ShipItem extends GenericModel {
 
     public String showDeclare() {
         List<Template> templates = this.unit.product.category.templates;
-        List<String> ids = new ArrayList<String>();
+        List<String> ids = new ArrayList<>();
         if(templates == null || templates.size() == 0) {
             return "";
         } else {

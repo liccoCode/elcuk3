@@ -42,7 +42,7 @@ public class TimelineEventSource {
     public String dateTimeFormat = "iso8601";
 
     @Expose
-    public List<Event> events = new ArrayList<Event>();
+    public List<Event> events = new ArrayList<>();
 
 
     /**

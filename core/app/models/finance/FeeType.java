@@ -35,7 +35,7 @@ public class FeeType extends GenericModel {
     public FeeType parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    public List<FeeType> children = new ArrayList<FeeType>();
+    public List<FeeType> children = new ArrayList<>();
 
     /**
      * 这项费用的简单名称
@@ -99,7 +99,7 @@ public class FeeType extends GenericModel {
 
     public static List<FeeType> fbaFees() {
         List<FeeType> amzFees = amazon().children;
-        List<FeeType> fbaFees = new ArrayList<FeeType>();
+        List<FeeType> fbaFees = new ArrayList<>();
         for(FeeType fee : amzFees) {
             //TODO 需要在数据结构上将 FBA 与 Amazon 费用区分开.
             if(fee.name.contains("fba") || fee.name.contains("fulfil")) {

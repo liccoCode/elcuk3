@@ -9,7 +9,6 @@ import helper.Webs;
 import jobs.works.ListingReviewsWork;
 import models.market.*;
 import models.product.Family;
-import models.product.Product;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
@@ -98,7 +97,7 @@ public class AmazonOperations extends Controller {
         AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
         F.T2<Account, Integer> accT2 = review.pickUpOneAccountToClick();
         F.T2<AmazonReviewRecord, String> t2 = accT2._1.clickReview(review, isUp);
-        renderJSON(J.json(new F.T2<Integer, String>(accT2._2, J.G(t2._1))));
+        renderJSON(J.json(new F.T2<>(accT2._2, J.G(t2._1))));
     }
 
     public static void reCrawl(String asin, String m, String sku) {
@@ -188,7 +187,7 @@ public class AmazonOperations extends Controller {
         List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
             @Override
             public List<Error> doJobWithResult() throws Exception {
-                List<Error> errors = new ArrayList<Error>();
+                List<Error> errors = new ArrayList<>();
                 try {
                     JsonElement reviewElement = Crawl.crawlReview(m, reviewId);
                     JsonObject reviewObj = reviewElement.getAsJsonObject();

@@ -41,7 +41,7 @@ public class LossRatePost extends Post<LossRate> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuffer sql = new StringBuffer("");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sql.append(
                 "select f.shipmentid,p.sku,(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) as qty,"
                         + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype "
@@ -57,7 +57,7 @@ public class LossRatePost extends Post<LossRate> {
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public Map queryDate() {
@@ -82,7 +82,7 @@ public class LossRatePost extends Post<LossRate> {
     }
 
     public F.T2<String, List<Object>> shipParams() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
                 .append(" WHERE m.state = 'DONE' ")
                 .append(" AND m.dates.arriveDate >= ? AND m.dates.arriveDate <= ? ")
@@ -93,7 +93,7 @@ public class LossRatePost extends Post<LossRate> {
 
     public F.T2<String, List<Object>> totalparams() {
         StringBuffer sql = new StringBuffer("");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sql.append("select sum(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) shipqty," +
                 " sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s " +
                 " left join ProcureUnit p on s.unit_id=p.id " +
@@ -162,10 +162,10 @@ public class LossRatePost extends Post<LossRate> {
     public Map<String, Object> lossRateMap(F.T2<String, List<Object>> params, F.T2<String, List<Object>> shipParams) {
         //TODO: 这里的日志 Logger.info 需要集中清理.
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
-        List<LossRate> lossrate = new ArrayList<LossRate>();
+        List<LossRate> lossrate = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("0.00");
 
-        Map<String, ProfitDto> existMap = new HashMap<String, ProfitDto>();
+        Map<String, ProfitDto> existMap = new HashMap<>();
         List<ProfitDto> dtos = null;
         M[] marray = models.market.M.values();
         for(M m : marray) {
@@ -244,7 +244,7 @@ public class LossRatePost extends Post<LossRate> {
             ship.lossCost = ship.purchaseCost.add(ship.shipmentCost);
         }
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("shipItems", shipItems);
         map.put("lossrate", lossrate);
         return map;

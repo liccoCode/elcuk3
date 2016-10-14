@@ -43,7 +43,7 @@ public class PaymentsPost extends Post<Payment> {
 
     public DateType dateType;
 
-    public List<Payment.S> states = new ArrayList<Payment.S>();
+    public List<Payment.S> states = new ArrayList<>();
 
     public Long cooperId;
 
@@ -81,7 +81,7 @@ public class PaymentsPost extends Post<Payment> {
 
 
         StringBuffer sql = new StringBuffer(" 1=1 ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
@@ -96,7 +96,7 @@ public class PaymentsPost extends Post<Payment> {
         }
 
         if(this.states != null) {
-            List<String> states = new ArrayList<String>();
+            List<String> states = new ArrayList<>();
             for(Payment.S state : this.states) {
                 if(state == null) continue;
                 states.add(state.name());
@@ -120,7 +120,7 @@ public class PaymentsPost extends Post<Payment> {
         }
 
 
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<Payment> query() {

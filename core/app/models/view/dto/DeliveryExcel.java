@@ -65,7 +65,7 @@ public class DeliveryExcel {
 
 
     public List<String> tradeTerms() {
-        List<String> termLines = new ArrayList<String>();
+        List<String> termLines = new ArrayList<>();
         if(StringUtils.isBlank(this.tradeTerms)) return termLines;
         String[] lines = StringUtils.split(this.tradeTerms);
         for(int i = 0; i < lines.length; i++)

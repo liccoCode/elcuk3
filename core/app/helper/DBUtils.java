@@ -3,13 +3,12 @@ package helper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.db.DB;
+import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-
-import play.db.helper.SqlSelect;
 
 /**
  * 直接使用 SQL 的工具方法
@@ -38,7 +37,7 @@ public class DBUtils {
      * @return
      */
     public static Map<String, Object> row(Connection conn, String sql, Object... params) {
-        Map<String, Object> row = new HashMap<String, Object>();
+        Map<String, Object> row = new HashMap<>();
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -79,7 +78,7 @@ public class DBUtils {
      * @throws SQLException
      */
     private static Map<String, Object> mapOneRow(ResultSetMetaData mete, ResultSet rs) throws SQLException {
-        Map<String, Object> row = new HashMap<String, Object>();
+        Map<String, Object> row = new HashMap<>();
         for(int i = 1; i <= mete.getColumnCount(); i++) {
             Object value = rs.getObject(i);
             if(value != null && value.getClass() == Timestamp.class) {
@@ -110,7 +109,7 @@ public class DBUtils {
      * @return
      */
     public static List<Map<String, Object>> rows(Connection conn, String sql, Object... params) {
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);

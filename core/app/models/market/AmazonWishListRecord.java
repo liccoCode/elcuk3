@@ -1,9 +1,7 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import helper.DBUtils;
 import models.User;
-import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.libs.F;
 
@@ -11,7 +9,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 记录 Listing被添加到用户WishList的记录
@@ -73,7 +70,7 @@ public class AmazonWishListRecord extends Model {
      */
     public static List<Account> nonAddWishListAccs(List<Account> opendAccs, String lid) {
         F.T2<String, M> lidT2 = Listing.unLid(lid);
-        List<Account> nonAddWishListAccs = new ArrayList<Account>();
+        List<Account> nonAddWishListAccs = new ArrayList<>();
         for(Account acc : opendAccs) {
             if(AmazonWishListRecord.count("asin=? and market=? and account=?", lidT2._1, lidT2._2, acc) != 0)
                 continue;
@@ -93,7 +90,7 @@ public class AmazonWishListRecord extends Model {
     public static F.T2<Long, Long> wishList(String asin, M market) {
         long addedNumb = AmazonWishListRecord.count("asin=? and market=?", asin, market);
         long totalNumb = Account.count("type=?", market);
-        return new F.T2<Long, Long>(addedNumb, totalNumb);
+        return new F.T2<>(addedNumb, totalNumb);
     }
 
     /**

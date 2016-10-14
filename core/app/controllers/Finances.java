@@ -66,7 +66,7 @@ public class Finances extends Controller {
     }
 
     public static void skuProfitAnalyse(SkuProfitPost p) {
-        List<SkuProfit> skuProfits = new ArrayList<SkuProfit>();
+        List<SkuProfit> skuProfits = new ArrayList<>();
         if(p == null) {
             p = new SkuProfitPost();
             render(skuProfits, p);
@@ -110,7 +110,7 @@ public class Finances extends Controller {
                     } else {
                         category_names = p.categories.replace(" ", "").toLowerCase();
                     }
-                    List<NameValuePair> params = new ArrayList<NameValuePair>();
+                    List<NameValuePair> params = new ArrayList<>();
                     params.add(new BasicNameValuePair("categories", category_names));
                     params.add(new BasicNameValuePair("market", market_key));
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));

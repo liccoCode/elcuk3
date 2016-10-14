@@ -49,35 +49,35 @@ public class User extends Model {
      * 用户所拥有的权限
      */
     @ManyToMany
-    public Set<Privilege> privileges = new HashSet<Privilege>();
+    public Set<Privilege> privileges = new HashSet<>();
 
     /**
      * 用户所拥有的TEAM
      */
     @ManyToMany
-    public Set<Team> teams = new HashSet<Team>();
+    public Set<Team> teams = new HashSet<>();
 
     /**
      * 用户所拥有的ROLE
      */
     @ManyToMany(fetch = FetchType.EAGER)
-    public Set<Role> roles = new HashSet<Role>();
+    public Set<Role> roles = new HashSet<>();
 
 
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
-    public List<Payment> paymentPaied = new ArrayList<Payment>();
+    public List<Payment> paymentPaied = new ArrayList<>();
 
     /**
      * 一个人可以拥有很多个请款单元
      */
     @OneToMany(mappedBy = "payee", fetch = FetchType.LAZY)
-    public List<PaymentUnit> pamentApplies = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> pamentApplies = new ArrayList<>();
 
     /**
      * 用户的通知
      */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    public List<Notification> notifications = new ArrayList<Notification>();
+    public List<Notification> notifications = new ArrayList<>();
 
     @Column(nullable = false, unique = true)
     @Required
@@ -208,7 +208,7 @@ public class User extends Model {
                 .fetch();
         if(privilegeId.size() != privileges.size())
             throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-        this.privileges = new HashSet<Privilege>();
+        this.privileges = new HashSet<>();
         this.save();
         this.privileges.addAll(privileges);
         Privilege.updatePrivileges(this.username, this.privileges);
@@ -232,7 +232,7 @@ public class User extends Model {
      */
     public void addTeams(List<Long> teamId) {
         if(teamId == null || teamId.size() == 0) {
-            this.teams = new HashSet<Team>();
+            this.teams = new HashSet<>();
             this.save();
             Team.updateTeams(this.username, this.teams);
         } else {
@@ -240,7 +240,7 @@ public class User extends Model {
                     .fetch();
             if(teamId.size() != teams.size())
                 throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-            this.teams = new HashSet<Team>();
+            this.teams = new HashSet<>();
             this.save();
             this.teams.addAll(teams);
             Team.updateTeams(this.username, this.teams);
@@ -256,7 +256,7 @@ public class User extends Model {
      */
     public void addRoles(List<Long> roleId) {
         if(roleId == null || roleId.size() == 0) {
-            this.roles = new HashSet<Role>();
+            this.roles = new HashSet<>();
             this.save();
             Role.updateRoles(this.username, this.roles);
         } else {
@@ -264,7 +264,7 @@ public class User extends Model {
                     .fetch();
             if(roleId.size() != roles.size())
                 throw new FastRuntimeException("需要修改的Role数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-            this.roles = new HashSet<Role>();
+            this.roles = new HashSet<>();
             this.save();
             this.roles.addAll(roles);
             Role.updateRoles(this.username, this.roles);
@@ -432,7 +432,7 @@ public class User extends Model {
             }
         }
 
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         for(String name : new String[]{userids}) {
             User user = User.findByUserName(name);
             if(user != null) users.add(user);
@@ -447,7 +447,7 @@ public class User extends Model {
      * @return
      */
     public static Set<User> shipoperations() {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         for(String name : new String[]{"wendy"}) {
             User user = User.findByUserName(name);
             if(user != null) users.add(user);
@@ -486,7 +486,7 @@ public class User extends Model {
      * @return
      */
     public static List<String> getTeamCategorys(User user) {
-        List<String> categories = new ArrayList<String>();
+        List<String> categories = new ArrayList<>();
         String sql = "select c.categoryid From User_Team u,Category c "
                 + " where u.teams_id=c.team_id"
                 + " and users_id=" + user.id;
@@ -506,7 +506,7 @@ public class User extends Model {
      * @return
      */
     public static List<Category> getObjCategorys(User user) {
-        List<Category> categories = new ArrayList<Category>();
+        List<Category> categories = new ArrayList<>();
         for(Team team : user.teams) {
             List<Category> categoryList = team.getObjCategorys();
             categories.addAll(categoryList);
@@ -530,7 +530,7 @@ public class User extends Model {
      * @return
      */
     public static List<String> getListings(User user) {
-        List<String> listings = new ArrayList<String>();
+        List<String> listings = new ArrayList<>();
         for(String sku : getSkus(user)) {
             listings.addAll(Listing.getAllListingBySKU(sku));
         }

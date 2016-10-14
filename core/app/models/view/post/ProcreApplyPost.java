@@ -4,12 +4,12 @@ import helper.Dates;
 import models.finance.Apply;
 import models.finance.ProcureApply;
 import org.joda.time.DateTime;
+import play.db.jpa.GenericModel.JPAQuery;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import play.db.jpa.GenericModel.JPAQuery;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,7 +63,7 @@ public class ProcreApplyPost extends Post<Apply> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sql = new StringBuilder(" 1=1 ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         //查询不需要付款的请款单
         if(this.isneedPay == 1) {
@@ -92,7 +92,7 @@ public class ProcreApplyPost extends Post<Apply> {
             params.add(this.word());
         }
 
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<Apply> query() {

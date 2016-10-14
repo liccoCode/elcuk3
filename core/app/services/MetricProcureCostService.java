@@ -56,6 +56,6 @@ public class MetricProcureCostService {
         if(procureNumberSum != 0) {
             toDayProcureCost = (record.procureCost * record.procureNumberSum + toDayTotalProcureCost) / procureNumberSum;
         }
-        return new F.T2<Float, Integer>(toDayProcureCost, procureNumberSum);
+        return new F.T2<>(toDayProcureCost, procureNumberSum);
     }
 }

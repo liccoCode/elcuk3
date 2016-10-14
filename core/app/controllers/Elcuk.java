@@ -4,8 +4,8 @@ import controllers.api.SystemOperation;
 import helper.J;
 import jobs.driver.DriverJob;
 import models.ElcukConfig;
-import models.market.M;
 import models.OperatorConfig;
+import models.market.M;
 import models.procure.Shipment;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -95,7 +95,7 @@ public class Elcuk extends Controller {
             ptn = Pattern.compile("http[s]?://[w]{0,3}[\\.]?(.*)/dp/(\\w+)");
         }
         Matcher matcher = ptn.matcher(url);
-        List<String> parts = new ArrayList<String>();
+        List<String> parts = new ArrayList<>();
         if(matcher.find()) {
             for(int i = 0; i <= matcher.groupCount(); i++) {
                 parts.add(matcher.group(i));

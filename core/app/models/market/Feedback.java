@@ -192,7 +192,7 @@ public class Feedback extends GenericModel {
      * @return
      */
     public List<Category> relateCats() {
-        List<Category> cats = new ArrayList<Category>();
+        List<Category> cats = new ArrayList<>();
         for(OrderItem itm : this.orderr.items) {
             cats.add(Product.<Product>findById(
                     Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);

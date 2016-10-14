@@ -91,11 +91,11 @@ public class SellingSaleAnalyzeJob extends Job {
                 dtos = Cache.get(cacke_key, List.class);
                 if(dtos != null) return dtos;
 
-                dtos = new ArrayList<AnalyzeDTO>();
+                dtos = new ArrayList<>();
                 boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
 
                 // 准备计算用的数据容器
-                Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
+                Map<String, AnalyzeDTO> analyzeMap = new HashMap<>();
                 if(isSku) {
                     Map<String, Product.S> products = new ProductQuery().skuAndStates();
                     for(String sku : products.keySet()) {
@@ -369,7 +369,7 @@ public class SellingSaleAnalyzeJob extends Job {
     private void pullReviewToDTO(boolean sku, Map<String, AnalyzeDTO> analyzeMap) {
         AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
         Map<String, F.T2<Integer, Float>> reviewMap;
-        Map<String, F.T2<Float, Date>> latestReviewMap = new HashMap<String, F.T2<Float, Date>>();
+        Map<String, F.T2<Float, Date>> latestReviewMap = new HashMap<>();
         if(sku) {
             reviewMap = amazonQuery.skuRelateReviews(analyzeMap.keySet());
             latestReviewMap = amazonQuery.skusLastRating(analyzeMap.keySet());

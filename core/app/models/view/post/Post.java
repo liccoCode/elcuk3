@@ -110,7 +110,7 @@ public abstract class Post<T> implements Serializable, Cloneable {
      */
     public List<T> programPager(List<T> dtos) {
         this.count = dtos.size();
-        List<T> afterPager = new ArrayList<T>();
+        List<T> afterPager = new ArrayList<>();
         int index = (this.page - 1) * this.perSize;
         int end = index + this.perSize;
         for(; index < end; index++) {
