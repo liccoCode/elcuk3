@@ -332,6 +332,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Expose
     public int isCheck = 0;
 
+    /**
+     * 装箱单是否核准
+     */
+    public boolean isConfirm = false;
+
     public enum S {
         NOSHIPED {
             @Override

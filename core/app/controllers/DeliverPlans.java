@@ -27,7 +27,7 @@ import java.util.List;
  * Date: 16-1-21
  * Time: 上午10:40
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class DeliverPlans extends Controller {
 
 
@@ -132,6 +132,13 @@ public class DeliverPlans extends Controller {
 
         flash.success("成功将 %s 采购计划从当前采购单中移除.", StringUtils.join(pids, ","));
         show(dp.id);
+    }
+
+    public static void showProcureUnitById(String id) {
+        List<ProcureUnit> units = ProcureUnit.find("deliverplan.id = ? ", id).fetch();
+        renderArgs.put("norecord", true);
+        renderArgs.put("deliveryplan", true);
+        render("ProcureUnits/_unit_list.html", units);
     }
 
 

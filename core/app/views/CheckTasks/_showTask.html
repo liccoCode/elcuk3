@@ -33,10 +33,8 @@
   <td colspan="3">
     <input type="text" name="check.qty" class="input-mini" value="${check.qty}">
   </td>
-
   <th>实际交货日期</th>
   <td colspan="2">${check.units?.attrs.deliveryDate}</td>
-
   <th>处理方式</th>
   <td colspan="4">${check.dealway?.label()}</td>
 </tr>
@@ -45,12 +43,10 @@
   <td colspan="3">
     <input type="text" name="check.pickqty" class="input-mini" value="${check.pickqty}">
   </td>
-
   <th>不合格数量</th>
   <td colspan="2">
     <input type="text" name="check.unqualifiedQty" class="input-mini" value="${check.unqualifiedQty}">
   </td>
-
   <th>质检方式</th>
   <td colspan="4">${check.qcType?.label()}</td>
 </tr>
@@ -84,7 +80,6 @@
     </select>
   </td>
 </tr>
-
 #{if (check.dealway==models.qc.CheckTask.DealType.HELP && taskname!=null && taskname=="质检确认") || check.workhour>0 || check.workers>0}
 <tr>
   <th>工作小时</th>
@@ -97,7 +92,6 @@
   </td>
 </tr>
 #{/if}
-
 <tr>
   <th>备注</th>
   <td colspan="11">
@@ -106,7 +100,6 @@
     <input type="hidden" name="id" value="${check.id}">
   </td>
 </tr>
-
 <tr>
   <td colspan="12">
   #{info_row}
@@ -114,7 +107,6 @@
   #{/info_row}
   </td>
 </tr>
-
 <tr>
   <th>抽检方式:</th>
   <td colspan="3">
@@ -125,13 +117,11 @@
     </span>
   #{/list}
   </td>
-
   <th>AC</th>
   <td colspan="8">
     <input type="text" name="check.ac" value="${check.ac}">
   </td>
 </tr>
-
 <tr>
   <th>送检次数:</th>
   <td colspan="3">
@@ -142,13 +132,11 @@
     </span>
   #{/list}
   </td>
-
   <th>RE</th>
   <td colspan="8">
     <input type="text" name="check.re" value="${check.re}">
   </td>
 </tr>
-
 <tr>
   <th>AQL:</th>
   <td colspan="11">
@@ -158,12 +146,10 @@
         <td>
           <input type="text" name="check.cr" value="${check.cr}">
         </td>
-
         <th>主要(Ma):</th>
         <td>
           <input type="text" name="check.ma" value="${check.ma}">
         </td>
-
         <th>次要(Mi):</th>
         <td>
           <input type="text" name="check.mi" value="${check.mi}">
@@ -172,7 +158,6 @@
     </table>
   </td>
 </tr>
-
 <tr>
   <td colspan="12">
     <table class="table table-hover table-condensed table-bordered" id="aqlTable">
@@ -206,7 +191,6 @@
       添加</a>
   </td>
 </tr>
-
 <tr>
   <td colspan="12">
   #{info_row}
@@ -274,7 +258,6 @@
     </table>
   </td>
 </tr>
-
 <tr>
   <td colspan="12">
   #{info_row}
@@ -310,7 +293,6 @@
         </td>
       </tr>
     #{/list}
-
     </table>
     <table>
       <tr id="addBtnTr">
@@ -323,7 +305,6 @@
     </table>
   </td>
 </tr>
-
 <tr>
   <td colspan="12">
   #{if ap==null || ap.id==null}

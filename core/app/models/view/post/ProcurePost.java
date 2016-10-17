@@ -255,7 +255,7 @@ public class ProcurePost extends Post<ProcureUnit> {
      * @return
      */
     public String generatePayInfo(String id) {
-        ProcureUnit unit = ProcureUnit.<ProcureUnit>findById(NumberUtils.toLong(id));
+        ProcureUnit unit = ProcureUnit.findById(NumberUtils.toLong(id));
         if(unit == null) {
             return "";
         } else {
