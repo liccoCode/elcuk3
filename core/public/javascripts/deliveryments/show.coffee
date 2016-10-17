@@ -55,10 +55,18 @@ $ ->
   ).on('click', '#updateFbaCartonContents', (e) ->
     $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'updateFbaCartonContents').modal('show')
   ).on('click', '#edit_memo', (e) ->
-      if $("#memo").val() == null || $("#memo").val().trim().length == 0
-        noty({text: '请输入备注!', type: 'error'})
-      else
-         $("#updateDeliverymentForm").submit()
+    if $("#memo").val() == null || $("#memo").val().trim().length == 0
+      noty({text: '请输入备注!', type: 'error'})
+    else
+      $("#updateDeliverymentForm").submit()
+  ).on('click', '#isConfirm_btn', (e) ->
+    if $("#unit_table input[name='pids']:checked").length = 0
+      noty({text: '请输入备注!', type: 'error'})
+    else
+      $btn=$(@)
+      submitForm($btn)
+
+
   )
 
   # 将字符串转化成Dom元素

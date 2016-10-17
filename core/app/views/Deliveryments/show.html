@@ -146,11 +146,11 @@
       </a>
     #{/power.ck}
       <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
-         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
-       进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
+        <i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
-
-
+      <a data-remote='true' data-method='PUT' class="btn btn-warning" id="isConfirm_btn" data-disable-with='更新中'
+         data-url="@{Deliveryments.confirmUnit(dmt.id)}">已核单</a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
@@ -197,7 +197,7 @@
         <tr>
           <th>交易条款<br>(供应商)</th>
           <td colspan="3">
-          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator.tradingTerms}</textarea>
+            <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator.tradingTerms}</textarea>
           </td>
           <th>产品要求<br>(产品线)</th>
           <td colspan="3">

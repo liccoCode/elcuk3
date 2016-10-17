@@ -95,6 +95,17 @@ public class Deliveryments extends Controller {
         show(dmt.id);
     }
 
+    public static void confirmUnit(String id, List<Long> pids) {
+        if(pids.size() > 0) {
+            for(Long unit_id : pids) {
+                ProcureUnit unit = ProcureUnit.findById(unit_id);
+                unit.isConfirm = true;
+                unit.save();
+            }
+        }
+        show(id);
+    }
+
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
      * TODO effect: 需要调整权限
