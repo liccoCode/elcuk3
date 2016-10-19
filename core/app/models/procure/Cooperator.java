@@ -6,7 +6,6 @@ import models.finance.PaymentTarget;
 import models.product.Product;
 import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Min;
@@ -19,7 +18,10 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * 所有与公司一起的合作者;
@@ -31,6 +33,7 @@ import java.util.*;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Cooperator extends Model {
+    private static final RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
 
     public enum T {
         /**
@@ -240,10 +243,11 @@ public class Cooperator extends Model {
      * @return
      */
     public CooperItem cooperItem(String sku) {
-        Object item = CollectionUtils.find(this.cooperItems, new SkuPredicate(sku));
-        if(item != null) {
-            return (CooperItem) item;
-        }
+        CooperItem item = (CooperItem) CollectionUtils.find(this.cooperItems, o -> {
+            CooperItem ci = (CooperItem) o;
+            return sku.equalsIgnoreCase(ci.sku);
+        });
+        if(item != null) return item;
         return null;
     }
 
@@ -269,19 +273,12 @@ public class Cooperator extends Model {
     public List<String> frontSkuAutoPopulate() {
         // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<>(Product.skus(false));
-        final List<String> existSkus = new ArrayList<>();
-        for(CooperItem itm : this.cooperItems) {
-            existSkus.add(itm.sku);
-        }
-
-        CollectionUtils.filter(allSkus, new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                for(String existSku : existSkus) {
-                    if(existSku.equals(o.toString())) return false;
-                }
-                return true;
+        final List<String> existSkus = this.cooperItems.stream().map(itm -> itm.sku).collect(Collectors.toList());
+        CollectionUtils.filter(allSkus, o -> {
+            for(String existSku : existSkus) {
+                if(existSku.equals(o.toString())) return false;
             }
+            return true;
         });
         return allSkus;
     }
@@ -311,7 +308,7 @@ public class Cooperator extends Model {
      */
     public static List<Cooperator> suppliers() {
         List<Cooperator> cooperators = Cooperator.find("type=?", T.SUPPLIER).fetch();
-        Collections.sort(cooperators, new PinyinSort());
+        cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return cooperators;
     }
 
@@ -321,9 +318,7 @@ public class Cooperator extends Model {
      * @return
      */
     public static List<String> supplierNames() {
-        List<String> supplierNames = new ArrayList<>();
-        for(Cooperator co : suppliers()) supplierNames.add(co.name);
-        return supplierNames;
+        return suppliers().stream().map(co -> co.name).collect(Collectors.toList());
     }
 
     /**
@@ -333,33 +328,7 @@ public class Cooperator extends Model {
      */
     public static List<Cooperator> shippers() {
         List<Cooperator> cooperators = Cooperator.find("type=?", T.SHIPPER).fetch();
-        Collections.sort(cooperators, new PinyinSort());
+        cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return cooperators;
     }
-
-    private static class PinyinSort implements Comparator<Object> {
-        RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
-
-        @Override
-        public int compare(Object o1, Object o2) {
-            Cooperator a = (Cooperator) o1;
-            Cooperator b = (Cooperator) o2;
-            return collator.compare(a.name, b.name);
-        }
-    }
-
-    private static class SkuPredicate implements Predicate {
-        private String sku;
-
-        private SkuPredicate(String sku) {
-            this.sku = sku;
-        }
-
-        @Override
-        public boolean evaluate(Object o) {
-            CooperItem item = (CooperItem) o;
-            return sku.equalsIgnoreCase(item.sku);
-        }
-    }
-
 }
