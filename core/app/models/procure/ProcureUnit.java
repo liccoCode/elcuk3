@@ -43,6 +43,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 每一个采购单元
@@ -1422,10 +1423,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         users.add(this.handler);
         if(this.deliveryment != null)
             users.add(this.deliveryment.handler);
-        for(Shipment shipment : this.relateShipment()) {
-            if(shipment.creater != null)
-                users.add(shipment.creater);
-        }
+        users.addAll(this.relateShipment().stream()
+                .filter(shipment -> shipment.creater != null)
+                .map(shipment -> shipment.creater).collect(Collectors.toList()));
         return users;
     }
 
@@ -1504,12 +1504,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public String fetchCheckTaskLink() {
         if(this.haveTask()) {
-            List<CheckTask> tasks = (List) CollectionUtils.select(this.taskList, new Predicate() {
-                @Override
-                public boolean evaluate(Object o) {
-                    CheckTask task = (CheckTask) o;
-                    return task.checkstat != CheckTask.StatType.UNCHECK;
-                }
+            List<CheckTask> tasks = (List) CollectionUtils.select(this.taskList, o -> {
+                CheckTask task = (CheckTask) o;
+                return task.checkstat != CheckTask.StatType.UNCHECK;
             });
             if(tasks != null) {
                 if(tasks.size() == 1) {
