@@ -25,7 +25,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -1423,8 +1422,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         users.add(this.handler);
         if(this.deliveryment != null)
             users.add(this.deliveryment.handler);
-        users.addAll(this.relateShipment().stream()
-                .filter(shipment -> shipment.creater != null)
+        users.addAll(this.relateShipment().stream().filter(shipment -> shipment.creater != null)
                 .map(shipment -> shipment.creater).collect(Collectors.toList()));
         return users;
     }
@@ -1743,12 +1741,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public List<CheckTask> uncheckTaskList() {
-        return (List) CollectionUtils.select(this.taskList, new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                CheckTask task = (CheckTask) o;
-                return task.checkstat == CheckTask.StatType.UNCHECK;
-            }
+        return (List) CollectionUtils.select(this.taskList, o -> {
+            CheckTask task = (CheckTask) o;
+            return task.checkstat == CheckTask.StatType.UNCHECK;
         });
     }
 
