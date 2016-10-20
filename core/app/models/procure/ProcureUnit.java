@@ -715,7 +715,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
 
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
@@ -725,8 +725,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.purchaseSample = unit.purchaseSample;
         // 2
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(
-                    StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId));
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId));
         }
         if(Validation.hasErrors()) return;
 
