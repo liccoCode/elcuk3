@@ -9,7 +9,6 @@ import models.product.Product;
 import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
-import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -373,7 +372,7 @@ public class OrderItem extends GenericModel {
      * 查询传入的 SKU 的销量信息
      */
     public static List<F.T4<String, Long, Long, Double>> querySalesBySkus(Date from, Date to, String val) {
-        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<F.T4<String, Long, Long, Double>>();
+        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<>();
 
         List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
         List<String> categories = new ProductQuery().loadCategoriesBySkus(selectedSkus);
@@ -397,7 +396,7 @@ public class OrderItem extends GenericModel {
             JSONObject categoryResult = catgoriesResult.getJSONObject(m.name());
             Long categorySales = categoryResult.getJSONObject("sum_sales").getLongValue("value");
             Float rate = categorySales == 0 ? 0 : ((float) skuSales / (float) categorySales);
-            sales.add(new F.T4<String, Long, Long, Double>(m.name(), skuSales, categorySales,
+            sales.add(new F.T4<>(m.name(), skuSales, categorySales,
                     Webs.scale2Double(rate * 100))
             );
         }
@@ -410,7 +409,7 @@ public class OrderItem extends GenericModel {
             sumCategorySales += item._3;
         }
         Float sumRate = sumCategorySales == 0 ? 0 : ((float) sumSkuSales / (float) sumCategorySales);
-        sales.add(0, new F.T4<String, Long, Long, Double>("ALL", sumSkuSales, sumCategorySales,
+        sales.add(0, new F.T4<>("ALL", sumSkuSales, sumCategorySales,
                 Webs.scale2Double(sumRate * 100))
         );
         return sales;
@@ -433,7 +432,7 @@ public class OrderItem extends GenericModel {
 
             try {
                 Cache.add(runningKey, runningKey);
-                List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
+                List<String> selectedSkus = new ArrayList<>(Arrays.asList(val.replace("\"", "").split(",")));
                 if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
                 List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
 
@@ -444,7 +443,7 @@ public class OrderItem extends GenericModel {
                         .format("SkuMonthlyDailySales fetch es result.... [%sms]", System.currentTimeMillis() - begin));
                 begin = System.currentTimeMillis();
 
-                HashMap<String, Integer> units = new HashMap<String, Integer>();
+                HashMap<String, Integer> units = new HashMap<>();
                 if(esResult != null) {
                     for(M m : markets) {
                         JSONObject marketResult = esResult.getJSONObject(m.name());
@@ -462,7 +461,7 @@ public class OrderItem extends GenericModel {
                     }
                 }
 
-                dtos = new ArrayList<DailySalesReportsDTO>();
+                dtos = new ArrayList<>();
                 int beginMonth = new DateTime(from).getMonthOfYear();
                 int endMonth = new DateTime(to).getMonthOfYear();
                 DateTime currentYear = new DateTime(from);

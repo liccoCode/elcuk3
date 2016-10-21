@@ -70,19 +70,19 @@ public class Cooperator extends Model {
      * 向这个供应商交易的采购单.
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
-    public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+    public List<Deliveryment> deliveryments = new ArrayList<>();
 
     /**
      * 这个合作伙伴的所有可用支付方式
      */
     @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
-    public List<PaymentTarget> paymentMethods = new ArrayList<PaymentTarget>();
+    public List<PaymentTarget> paymentMethods = new ArrayList<>();
 
     /**
      * 这个合作伙伴的所有支付信息
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
 
     /**
      * 全称
@@ -268,8 +268,8 @@ public class Cooperator extends Model {
      */
     public List<String> frontSkuAutoPopulate() {
         // 需要一份 Clone, 不能修改缓存中的值
-        List<String> allSkus = new ArrayList<String>(Product.skus(false));
-        final List<String> existSkus = new ArrayList<String>();
+        List<String> allSkus = new ArrayList<>(Product.skus(false));
+        final List<String> existSkus = new ArrayList<>();
         for(CooperItem itm : this.cooperItems) {
             existSkus.add(itm.sku);
         }
@@ -321,7 +321,7 @@ public class Cooperator extends Model {
      * @return
      */
     public static List<String> supplierNames() {
-        List<String> supplierNames = new ArrayList<String>();
+        List<String> supplierNames = new ArrayList<>();
         for(Cooperator co : suppliers()) supplierNames.add(co.name);
         return supplierNames;
     }

@@ -33,7 +33,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }
@@ -48,7 +48,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }
@@ -62,7 +62,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }

@@ -32,7 +32,7 @@ public class Categorys extends Controller {
         List<Category> cats = renderArgs.get("cates", List.class);
         if(cats == null || cats.size() <= 0) {
             Category cat = new Category();
-            List<Team> teams = new ArrayList<Team>();
+            List<Team> teams = new ArrayList<>();
             render(cat, teams);
         }
         Category cat = (Category) renderArgs.get("cates", List.class).get(0);

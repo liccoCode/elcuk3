@@ -26,7 +26,7 @@ import java.util.*;
 public class ProcureApply extends Apply {
 
     @OneToMany(mappedBy = "apply", cascade = CascadeType.PERSIST)
-    public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+    public List<Deliveryment> deliveryments = new ArrayList<>();
 
     /**
      * 用来记录 Deliveryment 中指定的 Cooperator. 为方便的冗余数据
@@ -38,7 +38,7 @@ public class ProcureApply extends Apply {
      * 请款单所拥有的支付信息
      */
     @OneToMany(mappedBy = "pApply")
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
 
     /**
      * 请款人
@@ -160,7 +160,7 @@ public class ProcureApply extends Apply {
         List<Deliveryment> deliveryments = Deliveryment.find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
         if(deliverymentIds.size() != deliveryments.size())
             Validation.addError("", "提交的采购单参数与系统内不符.");
-        Set<Cooperator> coopers = new HashSet<Cooperator>();
+        Set<Cooperator> coopers = new HashSet<>();
         for(Deliveryment dmt : deliveryments) {
             if(dmt.cooperator != null) coopers.add(dmt.cooperator);
         }
@@ -168,7 +168,7 @@ public class ProcureApply extends Apply {
             Validation.addError("", "请仅对同一个工厂创建请款单.");
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的采购单.");
-        return new F.T2<List<Deliveryment>, Set<Cooperator>>(deliveryments, coopers);
+        return new F.T2<>(deliveryments, coopers);
     }
 
     /**

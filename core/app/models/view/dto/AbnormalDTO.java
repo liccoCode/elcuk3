@@ -2,7 +2,6 @@ package models.view.dto;
 
 import helper.Dates;
 import jobs.PmDashboard.AbnormalFetchJob;
-import jobs.driver.GJob;
 import models.User;
 import models.market.AmazonListingReview;
 import models.market.Listing;
@@ -13,7 +12,10 @@ import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * PM 首页异常信息
@@ -111,9 +113,7 @@ public class AbnormalDTO implements Serializable {
         List<String> skus = Category.getSKUs(categoryIds);
 
         List<AbnormalDTO> dtos = dtoMap.get(this.abnormalType.toString());
-        List<AbnormalDTO> filterResult = AbnormalDTO.abnormalFilter(skus, dtos, this);
-
-        return filterResult;
+        return AbnormalDTO.abnormalFilter(skus, dtos, this);
     }
 
     /**
@@ -148,7 +148,7 @@ public class AbnormalDTO implements Serializable {
      * @return
      */
     public static List<AbnormalDTO> abnormalFilter(List<String> skus, List<AbnormalDTO> dtos, AbnormalDTO arg) {
-        List<AbnormalDTO> filterResult = new ArrayList<AbnormalDTO>();
+        List<AbnormalDTO> filterResult = new ArrayList<>();
         for(AbnormalDTO dto : dtos) {
             if(skus.contains(dto.sku) && dto.difference >= (arg.difference / 100)) filterResult.add(dto);
 
@@ -162,12 +162,12 @@ public class AbnormalDTO implements Serializable {
      * @return
      */
     public List<AmazonListingReview> reviews() {
-        DateTime day1 = new DateTime().now().plusDays(-1);
+        DateTime day1 = DateTime.now().plusDays(-1);
         Date day1begin = Dates.morning(day1.toDate());
         Date day1end = Dates.night(day1.toDate());
 
         List<String> listingIds = Listing.getAllListingBySKU(this.sku);
-        List<AmazonListingReview> listingReviews = new ArrayList<AmazonListingReview>();
+        List<AmazonListingReview> listingReviews = new ArrayList<>();
         if(listingIds.size() > 0) {
             listingReviews = AmazonListingReview
                     .find("rating <= 3 AND listingId IN " + SqlSelect.inlineParam(listingIds) + " AND reviewDate >=? " +

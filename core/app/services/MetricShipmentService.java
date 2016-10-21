@@ -136,7 +136,7 @@ public class MetricShipmentService {
         if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
         sql.groupBy("w.name, s.type, p.currency");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, Float> vat = new HashMap<String, Float>();
+        Map<String, Float> vat = new HashMap<>();
         for(Map<String, Object> objectMap : rows) {
             String market = objectMap.get("name").toString().split("_")[1];
             String type = objectMap.get("type").toString();

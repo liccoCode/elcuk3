@@ -230,9 +230,9 @@ public class ProcurePost extends Post<ProcureUnit> {
                 "WHERE e.action=? AND e.createAt >= ? AND e.createAt <= ? ORDER BY e.createAt DESC";
         List<Map<String, Object>> rows = DBUtils
                 .rows(sql, Messages.get("procureunit.deepUpdate"), Dates.morning(this.from), Dates.night(this.to));
-        List<HashMap<String, Object>> logs = new ArrayList<HashMap<String, Object>>();
+        List<HashMap<String, Object>> logs = new ArrayList<>();
         for(Map<String, Object> row : rows) {
-            HashMap<String, Object> log = new HashMap<String, Object>();
+            HashMap<String, Object> log = new HashMap<>();
             log.put("date", row.get("createAt"));
             log.put("user", row.get("username"));
             log.put("fid", row.get("fid"));

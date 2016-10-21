@@ -34,7 +34,7 @@ public class PaymentUnitQuery {
                 .where(SqlSelect.whereIn("u.sku", skus))
                 .where("p.feeType_name='transportshipping'");
         List<Map<String, Object>> rows = DBUtils.rows(currencySql.toString(), currencySql.getParams().toArray());
-        List<Currency> currencies = new ArrayList<Currency>();
+        List<Currency> currencies = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             try {
                 Currency currency = Currency.valueOf(row.get("currency").toString());
@@ -72,7 +72,7 @@ public class PaymentUnitQuery {
         float cnyAveFee = 0;
         int totalQty = 0;
 
-        List<String> shipmentIds = new ArrayList<String>();
+        List<String> shipmentIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             Currency currency = Currency.valueOf(row.get("currency").toString());
             cnyAveFee += currency.toCNY(NumberUtils.toFloat(row.get("sumFee").toString()));
@@ -128,11 +128,11 @@ public class PaymentUnitQuery {
          * 2. 每个币种进行统计总额
          * 3. 统一为 CNY 币种
          */
-        Map<Currency, Map<String, Float>> currencyAvgFeeMap = new HashMap<Currency, Map<String, Float>>();
+        Map<Currency, Map<String, Float>> currencyAvgFeeMap = new HashMap<>();
         List<Currency> currencies = transportshippingCurrencies(from, to, skus);
         for(Currency currency : currencies) {
             if(!currencyAvgFeeMap.containsKey(currency))
-                currencyAvgFeeMap.put(currency, new HashMap<String, Float>());
+                currencyAvgFeeMap.put(currency, new HashMap<>());
         }
 
         // 2
@@ -172,8 +172,8 @@ public class PaymentUnitQuery {
      * @return
      */
     private Map<String, Float> mergeSkuDiffCurrencyToCNY(Map<Currency, Map<String, Float>> currencyAvgFeeMap) {
-        Map<String, Float> cnyMap = new HashMap<String, Float>();
-        Map<String, AtomicInteger> crcyChangeTimes = new HashMap<String, AtomicInteger>();
+        Map<String, Float> cnyMap = new HashMap<>();
+        Map<String, AtomicInteger> crcyChangeTimes = new HashMap<>();
 
         for(Currency crcy : currencyAvgFeeMap.keySet()) {
             Map<String, Float> crcyMap = currencyAvgFeeMap.get(crcy);

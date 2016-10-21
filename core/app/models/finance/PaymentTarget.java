@@ -28,7 +28,7 @@ public class PaymentTarget extends Model {
     }
 
     @OneToMany(mappedBy = "target")
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
 
     @ManyToOne
     public Cooperator cooper;

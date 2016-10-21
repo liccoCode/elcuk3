@@ -224,7 +224,7 @@ public class Users extends Controller {
              * 清理TEAM的信息
              */
             Team.clearUserTeamsCache(user);
-            user.privileges = new HashSet<Privilege>();
+            user.privileges = new HashSet<>();
             user.password = RandomStringUtils.randomAlphanumeric(15);
             user.closed = true;
             user.save();

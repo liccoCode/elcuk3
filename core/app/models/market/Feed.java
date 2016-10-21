@@ -85,6 +85,12 @@ public class Feed extends Model {
                 return "更新 Listing 的 Price 属性";
             }
         },
+        POST_IMAGES {
+            @Override
+            public String label() {
+                return "更新产品图片";
+            }
+        },
         FULFILLMENT_BY_AMAZON {
             @Override
             public String label() {
@@ -199,7 +205,7 @@ public class Feed extends Model {
     }
 
     public static Feed updateSellingFeed(String content, Selling selling) {
-        return new Feed(content, "更新 Listing 属性", selling).save();
+        return new Feed(content, T.POST_IMAGES, selling).save();
     }
 
     @PrePersist

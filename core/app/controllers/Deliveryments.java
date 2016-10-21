@@ -68,7 +68,7 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
         render(deliveryments, p, deliverymentIds);
@@ -202,7 +202,7 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.deliverymenttoapply")
     public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
                                            Long procureApplyId) {
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");
             index(p, deliverymentIds);

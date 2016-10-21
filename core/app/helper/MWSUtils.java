@@ -1,13 +1,6 @@
 package helper;
 
-import com.amazonaws.mws.MarketplaceWebService;
-import com.amazonaws.mws.model.IdList;
-import com.amazonaws.mws.model.SubmitFeedRequest;
-import com.amazonaws.mws.model.SubmitFeedResponse;
 import com.elcuk.jaxb.*;
-import com.google.common.collect.Lists;
-import models.market.Account;
-import models.market.Feed;
 import models.market.M;
 import models.market.Selling;
 import models.procure.FBAShipment;
@@ -18,15 +11,13 @@ import play.utils.FastRuntimeException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.lang.Override;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 
 /**
@@ -80,32 +71,6 @@ public class MWSUtils {
         }
     }
 
-    public static String submitFeedByXML(Feed feed, T feedType, M.MID marketId, Account account) {
-        MarketplaceWebService service = mws.MWSReports.client(account);
-        SubmitFeedRequest req = new SubmitFeedRequest();
-        req.setMerchant(account.merchantId);
-        req.setFeedType(feedType.toString());
-        if(marketId != null) {
-            req.withMarketplaceIdList(new IdList(Lists.newArrayList(marketId.name())));
-        }
-        try {
-            File file = new File("conf/res/content.txt");
-            if(!file.exists())
-                file.createNewFile();
-            FileOutputStream out = new FileOutputStream(file, false);
-            out.write(feed.content.getBytes());
-            req.setFeedContent(new FileInputStream(file));
-            SubmitFeedResponse resp = service.submitFeedFromFile(req);
-            String id = resp.getSubmitFeedResult().getFeedSubmissionInfo().getFeedSubmissionId();
-            feed.feedId = id;
-            feed.save();
-            out.close();
-            return id;
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static String buildProductXMLBySelling(Selling selling, SellingAmzPost p) {
         AmazonEnvelope envelope = new AmazonEnvelope();
         Header header = new Header();
@@ -130,102 +95,8 @@ public class MWSUtils {
             conditionInfo.setConditionType("New");
             product.setCondition(conditionInfo);
         }
-        Product.DescriptionData data = new Product.DescriptionData();
-        data.setTitle(selling.aps.title);
-        if(p.productdesc) {
-            data.setDescription(selling.aps.productDesc.trim());
-        }
-        if(p.keyfeturess) {
-            data.getBulletPoint().clear();
-            for(String text : selling.aps.keyFeturess) {
-                if(StringUtils.isNotBlank(text)) {
-                    data.getBulletPoint().add(text.trim());
-                }
-            }
-        }
-        if(p.productvolume || p.productWeight) {
-            Dimensions dimensions = new Dimensions();
-            data.setItemDimensions(dimensions);
-            if(p.productvolume) {
-                LengthDimension lengthDimension = new LengthDimension();
-                lengthDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
-                lengthDimension.setValue(new BigDecimal(p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
-                data.getItemDimensions().setLength(lengthDimension);
-                LengthDimension widthDimension = new LengthDimension();
-                widthDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
-                widthDimension.setValue(new BigDecimal(p.productWidth).setScale(2, BigDecimal.ROUND_HALF_UP));
-                data.getItemDimensions().setWidth(widthDimension);
-                LengthDimension heightDimension = new LengthDimension();
-                heightDimension.setUnitOfMeasure(LengthUnitOfMeasure.fromValue(p.volumeunit));
-                heightDimension.setValue(new BigDecimal(p.productHeigh).setScale(2, BigDecimal.ROUND_HALF_UP));
-                data.getItemDimensions().setHeight(heightDimension);
-            }
-            if(p.weight) {
-                WeightDimension weightDimension = new WeightDimension();
-                weightDimension.setUnitOfMeasure(WeightUnitOfMeasure.fromValue(p.weightUnit));
-                weightDimension.setValue(new BigDecimal(p.proWeight).setScale(2, BigDecimal.ROUND_HALF_UP));
-                data.getItemDimensions().setWeight(weightDimension);
-            }
-        }
-        if(StringUtils.isNotBlank(selling.listing.product.partNumber)) {
-            if(selling.market.toString().equals("AMAZON_JP") &&
-                    StringUtils.isNotBlank(selling.listing.product.partNumberJP)) {
-                data.setMfrPartNumber(selling.listing.product.partNumberJP);
-            } else {
-                data.setMfrPartNumber(selling.listing.product.partNumber);
-            }
-        }
-        if(p.searchtermss) {
-            data.getSearchTerms().clear();
-            for(String word : selling.aps.searchTermss) {
-                if(StringUtils.isNotBlank(word)) {
-                    data.getSearchTerms().add(word.trim());
-                }
-            }
-        }
-        product.setDescriptionData(data);
+        product.setDescriptionData(new DescriptionDataBuilder(selling, p).build());
         message.setProduct(product);
-        envelope.getMessage().add(message);
-        return JaxbUtil.convertToXml(envelope);
-    }
-
-    public static String buildPriceXMLBySelling(Selling selling, SellingAmzPost p) {
-        AmazonEnvelope envelope = new AmazonEnvelope();
-        Header header = new Header();
-        header.setDocumentVersion("1.01");
-        header.setMerchantIdentifier(selling.market.toMerchantIdentifier());
-        envelope.setHeader(header);
-        envelope.setMessageType("Price");
-        AmazonEnvelope.Message message = new AmazonEnvelope.Message();
-        message.setMessageID(BigInteger.valueOf(1));
-
-        Price price = new Price();
-        price.setSKU(selling.merchantSKU);
-        OverrideCurrencyAmount amount = new OverrideCurrencyAmount();
-        amount.setValue(new BigDecimal(selling.aps.standerPrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
-        amount.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
-        price.setStandardPrice(amount);
-        if(p.saleprice) {
-            Price.Sale sale = new Price.Sale();
-            DatatypeFactory dataTypeFactory;
-            try {
-                dataTypeFactory = DatatypeFactory.newInstance();
-            } catch(DatatypeConfigurationException e) {
-                throw new RuntimeException(e);
-            }
-            GregorianCalendar gc = new GregorianCalendar();
-            gc.setTimeInMillis(selling.aps.startDate.getTime());
-            sale.setStartDate(dataTypeFactory.newXMLGregorianCalendar(gc));
-            gc = new GregorianCalendar();
-            gc.setTimeInMillis(selling.aps.endDate.getTime());
-            sale.setEndDate(dataTypeFactory.newXMLGregorianCalendar(gc));
-            OverrideCurrencyAmount salePrice = new OverrideCurrencyAmount();
-            salePrice.setValue(new BigDecimal(selling.aps.salePrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
-            salePrice.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
-            sale.setSalePrice(salePrice);
-            price.setSale(sale);
-        }
-        message.setPrice(price);
         envelope.getMessage().add(message);
         return JaxbUtil.convertToXml(envelope);
     }
@@ -306,39 +177,11 @@ public class MWSUtils {
         ConditionInfo conditionInfo = new ConditionInfo();
         conditionInfo.setConditionType("New");
         product.setCondition(conditionInfo);
-
-        com.elcuk.jaxb.Product.DescriptionData descriptionData = new com.elcuk.jaxb.Product.DescriptionData();
-        //Title
-        descriptionData.setTitle(selling.aps.title);
-        //Description
-        descriptionData.setDescription(selling.aps.productDesc);
-        //Part Number
-        descriptionData.setMfrPartNumber(selling.aps.manufacturerPartNumber);
-        //GiftWrap
-        descriptionData.setIsGiftMessageAvailable(selling.aps.isGiftWrap);
-        //Brand
-        descriptionData.setBrand("EasyAcc");
-        //Manufacturer
-        descriptionData.setManufacturer(selling.aps.manufacturer);
-        //RBN
-        if(selling.market == M.AMAZON_US) {
-            descriptionData.getUsedFor().add(selling.aps.rbns.get(0));
-        } else {
-            descriptionData.getRecommendedBrowseNode().add(BigInteger.valueOf(Long.valueOf(selling.aps.rbns.get(0))));
-        }
-        // BulletPoints
-        for(String keyFeturess : selling.aps.keyFeturess) {
-            if(StringUtils.isNotBlank(keyFeturess)) descriptionData.getBulletPoint().add(keyFeturess);
-        }
-        //SearchTerms
-        for(String searchTerm : selling.aps.searchTermss) {
-            if(StringUtils.isNotBlank(searchTerm)) descriptionData.getSearchTerms().add(searchTerm);
-        }
-        product.setDescriptionData(descriptionData);
+        product.setDescriptionData(new DescriptionDataBuilder(selling).build());
 
         if(!skipProductData(selling.aps.templateType, selling.aps.feedProductType)) {
-            Product.ProductData productData = new Product.ProductData();
-            new ProductTypeSetter(productData, selling.aps.templateType, selling.aps.feedProductType).doSet();
+            Product.ProductData productData = new ProductDataBuilder(selling.aps.templateType,
+                    selling.aps.feedProductType).build();
             product.setProductData(productData);
         }
         message.setProduct(product);
@@ -486,41 +329,192 @@ public class MWSUtils {
         return JaxbUtil.convertToXml(envelope);
     }
 
-    public static boolean skipProductData(String templateType, String feedProductType) {
+    private static boolean skipProductData(String templateType, String feedProductType) {
         return "Computers".equalsIgnoreCase(templateType) && "NotebookComputer".equalsIgnoreCase(feedProductType);
     }
 
-    private static class ProductTypeSetter {
-        Product.ProductData productData;
-        String templateType;
-        public String feedProductType;
+    private static class DescriptionDataBuilder {
+        private Product.DescriptionData descriptionData;
+        M market;
+        String title;
+        String description;
+        String partNumber;
+        boolean giftWrap;
+        String brand = "EasyAcc";
+        String manufacturer;
+        String rbn;
+        List<String> bulletPoints;
+        List<String> searchTerms;
 
-        ProductTypeSetter(Product.ProductData productData, String templateType, String feedProductType) {
-            this.productData = productData;
-            this.templateType = templateType;
-            this.feedProductType = feedProductType;
+        String unitOfVolume; // 长度单位
+        Float length;
+        Float width;
+        Float heigh;
+        Float weight;
+        String unitOfWeight; // 重量单位
+
+        DescriptionDataBuilder() {
+            this.descriptionData = new Product.DescriptionData();
         }
 
-        void doSet() {
-            if("Computers".equalsIgnoreCase(templateType)) {
-                setComputers();
-            } else if("ConsumerElectronics".equalsIgnoreCase(templateType)) {
-                setCE();
-            } else if("Wireless".equalsIgnoreCase(templateType)) {
-                setWireless();
-            } else if("HomeImprovement".equalsIgnoreCase(templateType)) {
-                setHomeImprovement();
-            } else if("Home".equalsIgnoreCase(templateType)) {
-                setHome();
-            } else if("Games".equalsIgnoreCase(templateType)) {
-                setGames();
-            } else if("Sports".equalsIgnoreCase(templateType)) {
-                setSports();
-            } else if("Lighting".equalsIgnoreCase(templateType)) {
-                setLighting();
-            } else {
-                setCE();
+        DescriptionDataBuilder(Selling selling) {
+            this();
+            this.market = selling.market;
+            this.title = selling.aps.title;
+            this.description = selling.aps.title;
+            this.partNumber = selling.aps.manufacturerPartNumber;
+            this.giftWrap = selling.aps.isGiftWrap;
+            this.manufacturer = selling.aps.manufacturer;
+            this.rbn = selling.aps.rbns.get(0);
+            this.bulletPoints = selling.aps.keyFeturess;
+            this.searchTerms = selling.aps.searchTermss;
+        }
+
+        DescriptionDataBuilder(Selling selling, SellingAmzPost post) {
+            this(selling);
+            if(post.weight) {
+                this.weight = post.packWeight;
+                this.unitOfWeight = post.weightUnit;
             }
+            if(post.productvolume) {
+                this.unitOfVolume = post.volumeunit;
+                this.length = post.productLengths;
+                this.width = post.productWidth;
+                this.heigh = post.productHeigh;
+                this.weight = post.packWeight;
+            }
+            //删除掉未选中的属性
+            if(!post.productdesc) this.description = null;
+            if(!post.keyfeturess) this.bulletPoints = null;
+            if(!post.searchtermss) this.searchTerms = null;
+        }
+
+        Product.DescriptionData build() {
+            //Title
+            this.descriptionData.setTitle(StringUtils.trim(this.title));
+            //Description
+            this.descriptionData.setDescription(StringUtils.trim(this.description));
+            //Part Number
+            this.descriptionData.setMfrPartNumber(this.partNumber);
+            //GiftWrap
+            this.descriptionData.setIsGiftMessageAvailable(this.giftWrap);
+            //Brand
+            this.descriptionData.setBrand(this.brand);
+            //Manufacturer
+            this.descriptionData.setManufacturer(this.manufacturer);
+            //RBN
+            if(this.market == M.AMAZON_US) {
+                this.descriptionData.getUsedFor().add(this.rbn);
+            } else {
+                this.descriptionData.getRecommendedBrowseNode().add(BigInteger.valueOf(Long.valueOf(this.rbn)));
+            }
+            // BulletPoints
+            if(this.bulletPoints != null && !this.bulletPoints.isEmpty()) {
+                this.bulletPoints.stream()
+                        .filter(StringUtils::isNotBlank)
+                        .forEach(keyFeturess -> this.descriptionData.getBulletPoint().add(
+                                StringUtils.trim(keyFeturess))
+                        );
+            }
+
+            //SearchTerms
+            if(this.searchTerms != null && !this.searchTerms.isEmpty()) {
+                this.searchTerms.stream()
+                        .filter(StringUtils::isNotBlank)
+                        .forEach(searchTerm -> this.descriptionData.getSearchTerms().add(
+                                StringUtils.trim(searchTerm))
+                        );
+            }
+            //Dimensions
+            setDimensions();
+            return this.descriptionData;
+        }
+
+        void setDimensions() {
+            Dimensions dimensions = new Dimensions();
+            //Volume
+            if(StringUtils.isNotBlank(this.unitOfVolume)) {
+                LengthUnitOfMeasure measure = LengthUnitOfMeasure.fromValue(this.unitOfVolume);
+                //Length
+                if(this.length != null) {
+                    LengthDimension lengthDimension = new LengthDimension();
+                    lengthDimension.setUnitOfMeasure(measure);
+                    lengthDimension.setValue(new BigDecimal(this.length).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    dimensions.setLength(lengthDimension);
+                }
+                //width
+                if(this.width != null) {
+                    LengthDimension widthDimension = new LengthDimension();
+                    widthDimension.setUnitOfMeasure(measure);
+                    widthDimension.setValue(new BigDecimal(this.width).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    dimensions.setWidth(widthDimension);
+                }
+                //height
+                if(this.heigh != null) {
+                    LengthDimension heightDimension = new LengthDimension();
+                    heightDimension.setUnitOfMeasure(measure);
+                    heightDimension.setValue(new BigDecimal(this.heigh).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    dimensions.setHeight(heightDimension);
+                }
+            }
+            //weight
+            if(StringUtils.isNotBlank(this.unitOfWeight) && this.weight != null) {
+                WeightUnitOfMeasure measure = WeightUnitOfMeasure.fromValue(this.unitOfWeight);
+                WeightDimension weightDimension = new WeightDimension();
+                weightDimension.setUnitOfMeasure(measure);
+                weightDimension.setValue(new BigDecimal(this.weight).setScale(2, BigDecimal.ROUND_HALF_UP));
+                dimensions.setWeight(weightDimension);
+            }
+            if(isShouldSetDimensions(dimensions)) this.descriptionData.setItemDimensions(dimensions);
+        }
+
+        boolean isShouldSetDimensions(Dimensions dimensions) {
+            return dimensions.getLength() != null ||
+                    dimensions.getWidth() != null ||
+                    dimensions.getWeight() != null ||
+                    dimensions.getWeight() != null;
+        }
+
+        boolean isShouldBeSetVolumeDimensions() {
+            return StringUtils.isNotBlank(this.unitOfVolume) &&
+                    (this.length != null || this.width != null || this.heigh != null);
+        }
+    }
+
+
+    private static class ProductDataBuilder {
+        String templateType;
+        public String feedProductType;
+        private Product.ProductData productData;
+
+        ProductDataBuilder(String templateType, String feedProductType) {
+            this.templateType = templateType;
+            this.feedProductType = feedProductType;
+            this.productData = new Product.ProductData();
+        }
+
+        Product.ProductData build() {
+            switch(this.templateType) {
+                case "Computers":
+                    setComputers();
+                case "ConsumerElectronics":
+                    setWireless();
+                case "Wireless":
+                    setCE();
+                case "HomeImprovement":
+                    setHomeImprovement();
+                case "Home":
+                    setHome();
+                case "Games":
+                    setGames();
+                case "Sports":
+                    setSports();
+                case "Lighting":
+                    setLighting();
+                default:
+                    setCE();
+            }
+            return this.productData;
         }
 
         Object getInstanceByFeedProductType() {

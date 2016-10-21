@@ -4,11 +4,7 @@ import helper.Caches;
 import helper.Dates;
 import models.market.M;
 import models.procure.Shipment;
-import models.view.highchart.AbstractSeries;
-import models.view.highchart.HighChart;
-import org.apache.commons.lang3.StringUtils;
 import play.cache.Cache;
-import query.ShipmentReportESQuery;
 import services.MetricShipmentService;
 
 import java.io.Serializable;
@@ -63,7 +59,7 @@ public class CostReportDTO implements Serializable {
         if(dtos != null && dtos.size() > 0) {
             return dtos;
         } else {
-            dtos = new ArrayList<CostReportDTO>();
+            dtos = new ArrayList<>();
         }
         from = Dates.morning(from);
         to = Dates.night(to);

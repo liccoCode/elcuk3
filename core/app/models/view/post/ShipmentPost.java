@@ -51,7 +51,7 @@ public class ShipmentPost extends Post<Shipment> {
 
     public Shipment.T type;
 
-    public List<Shipment.S> states = new ArrayList<Shipment.S>();
+    public List<Shipment.S> states = new ArrayList<>();
 
     public iExpress iExpress;
 

@@ -178,7 +178,7 @@ public class Whouse extends Model {
      */
     public void exist() {
         StringBuilder sbd = buildStringHead();
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         if(this.isAIR) {
             sbd.append(" AND isAIR = ?");
             params.add(this.isAIR);

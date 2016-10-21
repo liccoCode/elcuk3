@@ -39,10 +39,10 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
      * 传递一个值
      */
     private long leftOrders = 0;
-    private List<String> orderIds = new ArrayList<String>();
-    private List<String> missingFeeType = new ArrayList<String>();
-    private List<String> warnningOrders = new ArrayList<String>();
-    private List<String> errorMsg = new ArrayList<String>();
+    private List<String> orderIds = new ArrayList<>();
+    private List<String> missingFeeType = new ArrayList<>();
+    private List<String> warnningOrders = new ArrayList<>();
+    private List<String> errorMsg = new ArrayList<>();
 
 
     public FinanceShippedPromise(Account account, M market, List<String> orderIds) {
@@ -100,7 +100,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
-        List<SaleFee> fees = new ArrayList<SaleFee>();
+        List<SaleFee> fees = new ArrayList<>();
         if(orderIds != null && orderIds.size() > 0) {
             //synchronized(this.account.cookieStore()) {
             try {
@@ -108,7 +108,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                 for(String orderId : orderIds) {
                     List<String> urls = this.transactionURLs(orderId);
 
-                    List<SaleFee> orderFees = new ArrayList<SaleFee>();
+                    List<SaleFee> orderFees = new ArrayList<>();
                     for(String url : urls) {
                         orderFees.addAll(this.saleFees(url));
                     }
@@ -184,7 +184,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
          * 2. Ohter
          * 3. Amazon Fees
          */
-        List<SaleFee> fees = new ArrayList<SaleFee>();
+        List<SaleFee> fees = new ArrayList<>();
 
         fees.addAll(productCharges(doc, url));
         fees.addAll(promotionFee(doc, url));
@@ -241,7 +241,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
      * @return
      */
     private List<SaleFee> adjustFiveOrThreeChild(Document doc, String url, String select, FeeType feeType) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
+        List<SaleFee> fees = new ArrayList<>();
         Element promotions = doc.select(select).first();
         if(promotions == null) return fees;
         Element nextPromotion = promotions.nextElementSibling();
@@ -391,7 +391,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
 
         String html = this.transactionView(orderId);
-        List<String> urls = new ArrayList<String>();
+        List<String> urls = new ArrayList<>();
         Document doc = Jsoup.parse(html);
 
         Elements tables = doc.select("#content-main-entities table");

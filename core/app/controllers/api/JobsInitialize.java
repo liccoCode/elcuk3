@@ -28,7 +28,7 @@ public class JobsInitialize extends Controller {
      * 周期：一天处理1次  凌晨 8点30执行
      */
     public static void initAbnormalFetchJob() {
-        GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<String, Object>());
+        GJob.perform(AbnormalFetchJob.class.getName(), new HashMap<>());
 
         renderJSON(new Ret(true, "提交异常信息任务成功!"));
 
@@ -39,7 +39,7 @@ public class JobsInitialize extends Controller {
      * 周期：一天处理1次  凌晨 8点40执行
      */
     public static void initCategoryInfoFetchJob() {
-        GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<String, Object>());
+        GJob.perform(CategoryInfoFetchJob.class.getName(), new HashMap<>());
 
         renderJSON(new Ret(true, "提交CATEGORY销售分析信息任务成功!"));
 

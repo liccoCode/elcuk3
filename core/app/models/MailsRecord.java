@@ -109,7 +109,7 @@ public class MailsRecord extends Model {
         DateTime travel = _from.plusDays(0); // copy 一个新的
 
         //初始化不同邮件类型 模板的使用次数
-        Map<String, Float> counts = new HashMap<String, Float>();
+        Map<String, Float> counts = new HashMap<>();
         if(templates != null)
             for(String t : templates) {
                 counts.put(t, 0f);
@@ -179,7 +179,7 @@ public class MailsRecord extends Model {
 
             StringBuilder querystr = new StringBuilder(
                     "type=? and createdAt between ? and ? and success=?");
-            List<Object> paras = new ArrayList<Object>();
+            List<Object> paras = new ArrayList<>();
             paras.add(type);
             paras.add(from);
             paras.add(to);

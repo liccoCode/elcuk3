@@ -23,8 +23,8 @@ public class ERecordBuilder implements Serializable {
     private String key;
     private String keyMsg;
 
-    private List<String> keyArgs = new ArrayList<String>();
-    private List<String> msgArgs = new ArrayList<String>();
+    private List<String> keyArgs = new ArrayList<>();
+    private List<String> msgArgs = new ArrayList<>();
     private String username;
     private String fid;
 

@@ -155,7 +155,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 }
             }
         } else {
-            if(needCompare.intValue() > outDay) {
+            if(needCompare > outDay) {
                 return 1;
             }
         }

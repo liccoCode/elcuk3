@@ -241,7 +241,7 @@ public class MetricProfitService {
      * @return
      */
     public Float calDefaultPrice() {
-        Map<String, Float> pricemap = new HashMap<String, Float>();
+        Map<String, Float> pricemap = new HashMap<>();
         //默认快递价格urrent
         pricemap.put(M.AMAZON_US.toString(), helper.Currency.CNY.toUSD(32f));
         pricemap.put(M.AMAZON_UK.toString(), helper.Currency.CNY.toUSD(33f));
@@ -355,10 +355,10 @@ public class MetricProfitService {
         /**
          * 返回三种运输方式的运费和数量
          */
-        F.T2<Float, Integer> seainfo = new F.T2<Float, Integer>(seafee, seavolume._3);
-        F.T2<Float, Integer> airinfo = new F.T2<Float, Integer>(airfee, airvolume._3);
-        F.T2<Float, Integer> expressinfo = new F.T2<Float, Integer>(expressfee, expressvolume._3);
-        return new F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>>
+        F.T2<Float, Integer> seainfo = new F.T2<>(seafee, seavolume._3);
+        F.T2<Float, Integer> airinfo = new F.T2<>(airfee, airvolume._3);
+        F.T2<Float, Integer> expressinfo = new F.T2<>(expressfee, expressvolume._3);
+        return new F.T3<>
                 (seainfo, airinfo, expressinfo);
     }
 
@@ -452,7 +452,7 @@ public class MetricProfitService {
      * @return
      */
     private Set<String> getVatMentIds(JSONArray hits) {
-        Set<String> vatMentIds = new HashSet<String>();
+        Set<String> vatMentIds = new HashSet<>();
         if(hits != null) {
             for(Object obj : hits) {
                 JSONObject hit = (JSONObject) obj;
@@ -560,7 +560,7 @@ public class MetricProfitService {
                 .leftJoin(" Product pd on pd.sku=pu.product_sku")
                 .where(insql);
         List<Map<String, Object>> rows = DBUtils.rows(itemsql.toString());
-        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        List<OrderrVO> vos = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             Object rowobject = row.get("sku");
             if(rowobject != null) {

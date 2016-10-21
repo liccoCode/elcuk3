@@ -156,7 +156,7 @@ public class AmazonReviewRecord extends GenericModel {
      */
     public static List<Account> checkNonClickAccounts(List<Account> accs,
                                                       AmazonListingReview amazonListingReview) {
-        List<Account> nonClickAccounts = new ArrayList<Account>();
+        List<Account> nonClickAccounts = new ArrayList<>();
         for(Account acc : accs) {
             if(AmazonReviewRecord
                     .count("account=? AND reviewId=?", acc, amazonListingReview.reviewId) == 0)

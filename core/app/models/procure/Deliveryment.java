@@ -75,7 +75,7 @@ public class Deliveryment extends GenericModel {
     }
 
     @OneToMany(mappedBy = "deliveryment", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
 
     @ManyToOne
     public ProcureApply apply;
@@ -188,7 +188,7 @@ public class Deliveryment extends GenericModel {
     public F.T2<Date, Date> firstAndEndDeliveryDate() {
         Date first = null;
         Date end = null;
-        List<Date> deliveryDates = new ArrayList<Date>();
+        List<Date> deliveryDates = new ArrayList<>();
         for(ProcureUnit unit : this.units) {
             if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() &&
                     unit.stage != ProcureUnit.STAGE.CLOSE)
@@ -202,7 +202,7 @@ public class Deliveryment extends GenericModel {
             first = deliveryDates.get(0);
             end = first;
         }
-        return new F.T2<Date, Date>(first, end);
+        return new F.T2<>(first, end);
     }
 
     /**
@@ -223,7 +223,7 @@ public class Deliveryment extends GenericModel {
             this.state = S.DONE;
             this.save();
         }
-        return new F.T2<Integer, Integer>(delivery, total == 0 ? 1 : total);
+        return new F.T2<>(delivery, total == 0 ? 1 : total);
     }
 
     /**
@@ -263,7 +263,7 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public Set<Category> unitsCategorys() {
-        Set<Category> categories = new HashSet<Category>();
+        Set<Category> categories = new HashSet<>();
         for(ProcureUnit unit : this.units) {
             categories.add(unit.product.category);
         }
@@ -300,7 +300,7 @@ public class Deliveryment extends GenericModel {
         if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
             Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
                     " 状态的[采购单]添加[采购单元]");
-            return new ArrayList<ProcureUnit>();
+            return new ArrayList<>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Cooperator singleCop = units.get(0).cooperator;
@@ -308,7 +308,7 @@ public class Deliveryment extends GenericModel {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
 
@@ -464,7 +464,7 @@ public class Deliveryment extends GenericModel {
      * 查找，属于该采购单的产品要求
      */
     public List<CooperItem> getCopperItems() {
-        List<CooperItem> cooperItems = new ArrayList<CooperItem>();
+        List<CooperItem> cooperItems = new ArrayList<>();
 
         for(ProcureUnit procureUnit : this.units) {
             if(procureUnit.cooperator != null) {

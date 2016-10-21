@@ -482,7 +482,7 @@ public class PaymentUnit extends Model {
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
         if(Validation.hasErrors()) return this;
         fee.amount = fee.unitPrice * fee.unitQty;
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));

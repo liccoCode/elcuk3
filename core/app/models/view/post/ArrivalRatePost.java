@@ -40,7 +40,7 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
                 .append(" (SELECT COUNT(1) AS 'earlyTimeShipNum', m.type FROM Shipment m WHERE m.state IN ('RECEIPTD','RECEIVING','DONE') ")
                 .append(" AND m.receiptDate >= ? AND m.receiptDate <= ? AND DATE_FORMAT(m.receiptDate, '%Y-%m-%d') < DATE_FORMAT(m.planArrivDateForCountRate, '%Y-%m-%d')")
                 .append(" GROUP BY m.type) t4 ON t4.type = t1.type ");
-        List<Object> param = new ArrayList<Object>();
+        List<Object> param = new ArrayList<>();
         for(int i = 0; i < 4; i++) {
             param.add(Dates.morning(this.from));
             param.add(Dates.night(this.to));
@@ -51,11 +51,11 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
     public List<ArrivalRate> query() {
         F.T2<String, List<Object>> params = params();
         List<Map<String, Object>> rows = DBUtils.rows(params._1, params._2.toArray());
-        List<ArrivalRate> list = new ArrayList<ArrivalRate>();
+        List<ArrivalRate> list = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("##0.00");
         ArrivalRate average = new ArrivalRate();   //平均
         average.shipType = "总计";
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         for(Map<String, Object> row : rows) {
             ArrivalRate rate = new ArrivalRate();
             rate.shipType = row.get("type").toString();

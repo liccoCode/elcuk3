@@ -72,7 +72,7 @@ public class SaleTargets extends Controller {
         SaleTarget yearSt = SaleTarget.findById(id);
         User user = User.findByUserName(Secure.Security.connected());
         List<String> categoryIds = User.getTeamCategorys(user);
-        List<SaleTarget> sts = new ArrayList<SaleTarget>();
+        List<SaleTarget> sts = new ArrayList<>();
         if(categoryIds != null && categoryIds.size() > 0) {
             sts = SaleTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
                     "= ? AND saleTargetType=?", yearSt.targetYear, SaleTarget.T.CATEGORY).fetch();

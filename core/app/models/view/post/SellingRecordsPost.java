@@ -94,7 +94,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         // 过滤 category
         if(StringUtils.isNotBlank(this.categoryId)) {
             final String categoryId = this.categoryId;
-            records = new ArrayList<SellingRecord>(Collections2.filter(records, new Predicate<SellingRecord>() {
+            records = new ArrayList<>(Collections2.filter(records, new Predicate<SellingRecord>() {
                 @Override
                 public boolean apply(SellingRecord record) {
                     return record.selling.sellingId.startsWith(categoryId);
@@ -114,7 +114,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         synchronized(cackeKey.intern()) {
             records = Cache.get(cackeKey, List.class);
             if(records != null) return records;
-            records = new ArrayList<SellingRecord>();
+            records = new ArrayList<>();
 
             List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
             for(Map<String, Object> row : rows) {

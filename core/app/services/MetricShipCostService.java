@@ -25,7 +25,7 @@ public class MetricShipCostService {
      * 统计当天的 [总运费] 与涉及到的 [运输单]
      */
     public F.T2<Float, Set<String>> oneDayTotalFeeAndEffectShipments(Date oneDay, Shipment.T shipType) {
-        Set<String> shipmentIds = new HashSet<String>();
+        Set<String> shipmentIds = new HashSet<>();
         float totalSeaFee = 0;
 
         SqlSelect shipIdsAndFee = new SqlSelect()
@@ -50,7 +50,7 @@ public class MetricShipCostService {
                 shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentIds").toString(), ",")));
             }
         }
-        return new F.T2<Float, Set<String>>(totalSeaFee, shipmentIds);
+        return new F.T2<>(totalSeaFee, shipmentIds);
     }
 
     /**
@@ -84,10 +84,10 @@ public class MetricShipCostService {
                 .groupBy("s.sellingid");
         List<Map<String, Object>> rows = DBUtils.rows(sellingCubicMeterSql.toString());
 
-        Map<String, Map<String, Float>> sellingGroup = new HashMap<String, Map<String, Float>>();
+        Map<String, Map<String, Float>> sellingGroup = new HashMap<>();
         for(Map<String, Object> row : rows) {
             if(row.get("sellingId") == null) continue;
-            Map<String, Float> qtyWeightAndVolumn = new HashMap<String, Float>();
+            Map<String, Float> qtyWeightAndVolumn = new HashMap<>();
             qtyWeightAndVolumn.put("m3", row.get("m3") == null ? 0 : NumberUtils.toFloat(row.get("m3").toString()));
             qtyWeightAndVolumn.put("kg", row.get("kg") == null ? 0 : NumberUtils.toFloat(row.get("kg").toString()));
             sellingGroup.put(row.get("sellingId").toString(), qtyWeightAndVolumn);
@@ -108,14 +108,14 @@ public class MetricShipCostService {
          * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
          * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
          */
-        Set<String> shipmentIds = new HashSet<String>();
+        Set<String> shipmentIds = new HashSet<>();
         // USD
         float totalSeaFee = 0;
 
         float totalQty = 0;
 
         // 1. 当天支付快递运输单中的 selling 的费用
-        Map<String, Float> sellExpressCost = new HashMap<String, Float>();
+        Map<String, Float> sellExpressCost = new HashMap<>();
         SqlSelect shipIdsAndFee = new SqlSelect()
                 .select("pu.unitPrice", "pu.currency", "pu.unitQty", "u.selling_sellingId sellingId",
                         "pu.shipment_id shipmentId", "si.qty")
@@ -214,7 +214,7 @@ public class MetricShipCostService {
 
         // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
         Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
-        Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
+        Map<String, Float> sellingSeaCost = new HashMap<>();
         float coefficienta = 1; // 从真实体积到运输体积需要一个系数用来计算抛货, 用来抵消装箱多余的空间差
 
         for(String sid : sellingGroup.keySet()) {
@@ -259,7 +259,7 @@ public class MetricShipCostService {
 
         // 4. 根据 selling 自己的 m3 与 perKg 计算出每个 selling 的运费
         Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
-        Map<String, Float> sellingAirCost = new HashMap<String, Float>();
+        Map<String, Float> sellingAirCost = new HashMap<>();
         float coefficienta = 1; // 从真实重量到运输重量需要一个系数用来计算抛货, 用来抵消装箱多余的重量差
 
         for(String sid : sellingGroup.keySet()) {
@@ -296,7 +296,7 @@ public class MetricShipCostService {
 
         // 所有关税 USD
         float totalVATFee = 0;
-        Set<String> shipmentIds = new HashSet<String>();
+        Set<String> shipmentIds = new HashSet<>();
         for(Map<String, Object> row : rows) {
             Currency currency = Currency.valueOf(row.get("currency").toString());
             totalVATFee += row.get("cost") == null ? 0 : currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
@@ -306,7 +306,7 @@ public class MetricShipCostService {
         }
         // 产出 shipmentIds 与 totalVATFee
 
-        Map<String, Float> sellingsVAT = new HashMap<String, Float>();
+        Map<String, Float> sellingsVAT = new HashMap<>();
         if(shipmentIds.size() > 0) {
             SqlSelect effectSellingSql = new SqlSelect()
                     .select("s.sellingId", "sum(si.qty) qty", "round(sum(si.qty * p.declaredValue), 2) x")
@@ -318,8 +318,8 @@ public class MetricShipCostService {
                     .where(SqlSelect.whereIn("t.id", shipmentIds))
                     .groupBy("s.sellingId");
 
-            Map<String, Float> sellingsX = new HashMap<String, Float>();
-            Map<String, Float> sellingsQty = new HashMap<String, Float>();
+            Map<String, Float> sellingsX = new HashMap<>();
+            Map<String, Float> sellingsQty = new HashMap<>();
             rows = DBUtils.rows(effectSellingSql.toString(), effectSellingSql.getParams().toArray());
 
             // (440x + 220x + 124x)[sumX] = (2000)[totalVATFee] -> x = 2.55

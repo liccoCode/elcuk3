@@ -510,7 +510,7 @@ public class ProcureUnits extends Controller {
         SqlSelect sql = new SqlSelect().select("id").from("ProcureUnit").where("cooperator_id=?").param(pro
                 .cooperator.id);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        List<Long> unitIds = new ArrayList<Long>();
+        List<Long> unitIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             unitIds.add(Long.parseLong(row.get("id").toString()));
         }

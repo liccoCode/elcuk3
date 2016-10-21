@@ -1,6 +1,5 @@
 package models.market;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
@@ -8,7 +7,6 @@ import controllers.Login;
 import exception.NotSupportChangeRegionFastException;
 import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
-import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
 import models.product.Attach;
@@ -44,6 +42,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -136,7 +135,7 @@ public class Selling extends GenericModel {
     public Listing listing;
 
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
-    public List<SellingQTY> qtys = new ArrayList<SellingQTY>();
+    public List<SellingQTY> qtys = new ArrayList<>();
 
     /**
      * 上架后用来唯一标示这个 Selling 的 Id;
@@ -236,7 +235,7 @@ public class Selling extends GenericModel {
      * 临时解决 Amazon 同步时 OrderItem 无法存入数据库， 手动添加 新旧 Selling 映射关系
      * TODO: 此代码性质为临时代码， 等到 Amazon 那边不再产生旧 Selling 的订单时可移除此代码
      */
-    private static final Map<String, String> SELLING_MAPPING = new HashMap<String, String>();
+    private static final Map<String, String> SELLING_MAPPING = new HashMap<>();
 
     /**
      * 初始化 映射 Selling 映射关系
@@ -317,7 +316,7 @@ public class Selling extends GenericModel {
         }
         this.save();
         //4.通过AMAZON,API形式同步数据回数据库
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("acc_id", this.account.id.toString()));
         params.add(new BasicNameValuePair("asin", this.asin));
         params.add(new BasicNameValuePair("market_id", this.market.name()));
@@ -327,13 +326,21 @@ public class Selling extends GenericModel {
         this.save();
     }
 
-
-    public void syncAndUpdateAmazon(SellingAmzPost p) {
-        try {
-            this.uploadFeedToAmazonForProduct(p);
-            new ElcukRecord("selling.update", "执行API操作", this.sellingId).save();
-        } catch(Exception e) {
-            throw new FastRuntimeException("提交AMAZOM feed错误, Error:" + e.toString());
+    /**
+     * 将前端勾选的部分属性同步到 Amazon
+     *
+     * @param p
+     */
+    public void partialUpdate(SellingAmzPost p) {
+        this.account = Account.findById(this.account.id);
+        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
+                p.productdesc) {
+            Feed feed = Feed.updateSellingFeed(MWSUtils.buildProductXMLBySelling(this, p), this);
+            feed.submit(this.partialUpdateParams());
+        }
+        if(p.standerprice || p.saleprice) {
+            Feed priceFeed = Feed.newAssignPriceFeed(MWSUtils.assignPriceXml(this), this);
+            priceFeed.submit(this.assignAmazonListingPriceParams());
         }
     }
 
@@ -360,7 +367,7 @@ public class Selling extends GenericModel {
         Validate.notNull(this.account);
         Validate.notNull(this.market);
         Validate.notEmpty(this.sellingId);
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("selling_id", this.sellingId)); // 作用与哪一个 Selling
@@ -374,21 +381,6 @@ public class Selling extends GenericModel {
         return params;
     }
 
-    public Feed deploy() {
-        if(!Feed.isFeedAvalible(this.account.id)) Webs.error("已经超过 Feed 的提交频率, 请等待 2 ~ 5 分钟后再提交.");
-        this.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);//将数组参数转换成字符串再进行处理
-        this.aps.quantity = null;//设置更新时将库存参数去除（使用 PartialUpdate 更新时不能存在此参数）
-        String content = Selling
-                .generateFeedTemplateFile(Lists.newArrayList(this), this.aps.templateType, this.market.toString(),
-                        "PartialUpdate");
-        Feed feed = Feed.updateSellingFeed(content, this);
-        List<NameValuePair> params = this.submitJobParams(feed);
-        params.add(new BasicNameValuePair("action", "update"));
-        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/submit_feed", params);
-        return feed;
-    }
-
     /**
      * 用Feed方式更新产品图片
      */
@@ -398,20 +390,12 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
         String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
-        if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
-            images = Arrays.copyOfRange(images, 0, 9);
+        // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
+        if(images.length >= 9) images = Arrays.copyOfRange(images, 0, 9);
         this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
-
-        String xml = MWSUtils.buildProductImageBySelling(this, images);
-        Feed feed = Feed.updateSellingFeed(xml, this);
-        String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_IMAGES_FEED, this.market.amid(),
-                this.account);
-        Logger.info(feed_submission_id);
-        List<NameValuePair> params = this.submitGetFeedParams(feed, feed_submission_id);
-        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_get_feed", params);
+        this.postImages(images);
         this.save();
     }
-
 
     /**
      * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值
@@ -453,11 +437,11 @@ public class Selling extends GenericModel {
         this.aps.rbns.remove("");
         if(this.aps.rbns.isEmpty()) Webs.error("Recommanded Browser Nodes 必须填写");
         if(this.market != M.AMAZON_US) {
-            for(String rbn : this.aps.rbns) {
-                if(!NumberUtils.isNumber(rbn)) {
-                    Webs.error(String.format("%s 市场的 Recommanded Browser Nodes 必须为数字", this.market.name()));
-                }
-            }
+            this.aps.rbns.stream()
+                    .filter(rbn -> !NumberUtils.isNumber(rbn))
+                    .forEach(rbn -> {
+                        Webs.error(String.format("%s 市场的 Recommanded Browser Nodes 必须为数字", this.market.name()));
+                    });
         }
     }
 
@@ -465,6 +449,20 @@ public class Selling extends GenericModel {
         List<NameValuePair> params = this.submitJobParams();
         params.add(new BasicNameValuePair("type", "CreateListing"));
         params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
+        return params;
+    }
+
+    public List<NameValuePair> partialUpdateParams() {
+        List<NameValuePair> params = this.submitJobParams();
+        params.add(new BasicNameValuePair("type", "PartialUpdateListing"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_FEED.toString()));
+        return params;
+    }
+
+    public List<NameValuePair> postImagesParams() {
+        List<NameValuePair> params = this.submitJobParams();
+        params.add(new BasicNameValuePair("type", "PostImages"));
+        params.add(new BasicNameValuePair("feed_type", MWSUtils.T.PRODUCT_IMAGES_FEED.toString()));
         return params;
     }
 
@@ -488,6 +486,14 @@ public class Selling extends GenericModel {
     public void saleAmazon() {
         Feed feed = Feed.newSellingFeed(MWSUtils.toSaleAmazonXml(this), this);
         feed.submit(this.saleAmazonParams());
+    }
+
+    /**
+     * 上传图片
+     */
+    public void postImages(String[] images) {
+        Feed feed = Feed.updateSellingFeed(MWSUtils.buildProductImageBySelling(this, images), this);
+        feed.submit(this.postImagesParams());
     }
 
     /**
@@ -611,9 +617,8 @@ public class Selling extends GenericModel {
     public static F.T2<List<Selling>, List<String>> sameFamilySellings(String msku) {
         List<Selling> sellings = Selling
                 .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
-        List<String> sids = new ArrayList<String>();
-        for(Selling s : sellings) sids.add(s.sellingId);
-        return new F.T2<List<Selling>, List<String>>(sellings, sids);
+        List<String> sids = sellings.stream().map(s -> s.sellingId).collect(Collectors.toList());
+        return new F.T2<>(sellings, sids);
     }
 
     /**
@@ -745,36 +750,13 @@ public class Selling extends GenericModel {
     }
 
     /**
-     * 生成Selling对象的Feed文件
-     *
-     * @param sellingList  List
-     * @param templateType String
-     * @param market       String
-     * @param action       String
-     * @return String 生成的模板数据
-     * 注意：模板文件保存的文件名格式为：Flat.File.templateType.market.txt
-     */
-    public static String generateFeedTemplateFile(List<Selling> sellingList, String templateType, String market,
-                                                  String action) {
-        Map args = GTs.newMap("sellingList", sellingList).build();
-        args.put("action", action);
-        return GTs.render(String.format("Flat.File.%s.%s", templateType, market), args);
-    }
-
-
-    public static String generateUpdateFeedTemplateFile(List<Selling> sellingList, String templateType, String market) {
-        // update
-        return generateFeedTemplateFile(sellingList, templateType, market, "Update");
-    }
-
-    /**
      * 根据传入的 ListingId 集合查找出对应的 SellingId 集合
      *
      * @param listingIds
      * @return
      */
     public static List<String> getSellingIds(List<String> listingIds) {
-        List<String> sellingIds = new ArrayList<String>();
+        List<String> sellingIds = new ArrayList<>();
         List<Map<String, Object>> rows = null;
 
         if(listingIds != null && listingIds.size() > 0) {
@@ -782,9 +764,7 @@ public class Selling extends GenericModel {
                     .andWhere(SqlSelect.whereIn("listing_listingId", listingIds));
             rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         }
-        for(Map<String, Object> row : rows) {
-            sellingIds.add(row.get("sellingId").toString());
-        }
+        sellingIds.addAll(rows.stream().map(row -> row.get("sellingId").toString()).collect(Collectors.toList()));
         return sellingIds;
     }
 
@@ -794,7 +774,7 @@ public class Selling extends GenericModel {
      * @return
      */
     public static List<String> sids(List<String> skus) {
-        List<String> listings = new ArrayList<String>();
+        List<String> listings = new ArrayList<>();
         for(String sku : skus) {
             listings.addAll(Listing.getAllListingBySKU(sku));
         }
@@ -885,10 +865,10 @@ public class Selling extends GenericModel {
          * MAIN   主图
          * PT01~08  , 2~9 号图片.
          */
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("asin", this.asin));
         params.add(new BasicNameValuePair("sku", Codec.encodeBASE64(this.merchantSKU)));
-        Map<String, F.T2<String, BufferedInputStream>> uploadImages = new HashMap<String, F.T2<String, BufferedInputStream>>();
+        Map<String, F.T2<String, BufferedInputStream>> uploadImages = new HashMap<>();
         for(int i = 0; i < images.length; i++) {
             String fileParamName;
             if(i == 0) fileParamName = "MAIN";
@@ -967,39 +947,12 @@ public class Selling extends GenericModel {
         Validate.notNull(this.market);
         Validate.notNull(feed_submission_id);
         Validate.notEmpty(this.sellingId);
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
         params.add(new BasicNameValuePair("feed_submission_id", feed_submission_id));
         return params;
-    }
-
-
-    public void uploadFeedToAmazonForProduct(SellingAmzPost p) throws Exception {
-        this.account = Account.findById(this.account.id);
-        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
-                p.productdesc) {
-            String xml = MWSUtils.buildProductXMLBySelling(this, p);
-            Feed feed = Feed.updateSellingFeed(xml, this);
-            String feed_submission_id = MWSUtils.submitFeedByXML(feed, MWSUtils.T.PRODUCT_FEED, this.market.amid(),
-                    this.account);
-            Logger.info(feed_submission_id);
-            List<NameValuePair> productParams = this.submitGetFeedParams(feed, feed_submission_id);
-            String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
-                    productParams);
-        }
-
-        if(p.standerprice || p.saleprice) {
-            String xml = MWSUtils.buildPriceXMLBySelling(this, p);
-            Feed price_feed = Feed.newAssignPriceFeed(xml, this);
-            String feed_submission_id = MWSUtils
-                    .submitFeedByXML(price_feed, MWSUtils.T.PRICING_FEED, this.market.amid(), this.account);
-            Logger.info(feed_submission_id);
-            List<NameValuePair> priceParams = this.submitGetFeedParams(price_feed, feed_submission_id);
-            String temp = HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_get_feed",
-                    priceParams);
-        }
     }
 
     /**

@@ -58,7 +58,7 @@ public class NotificationPost extends Post<Notification> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder jpql = new StringBuilder("user=?");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(Login.current());
 
         jpql.append("AND createAt>=? AND createAt<=?");
@@ -71,7 +71,7 @@ public class NotificationPost extends Post<Notification> {
         }
 
         jpql.append(" ORDER BY createAt DESC");
-        return new F.T2<String, List<Object>>(jpql.toString(), params);
+        return new F.T2<>(jpql.toString(), params);
     }
 
     @Override

@@ -80,7 +80,7 @@ public class ReportPost extends Post<ReportRecord> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder();
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sbd.append(" 1=1 ");
         if(this.year != 0) {
             sbd.append("AND year=?");

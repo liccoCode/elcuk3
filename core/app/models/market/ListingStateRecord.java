@@ -4,7 +4,10 @@ import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,7 +89,7 @@ public class ListingStateRecord extends Model {
         if(cachedRecords != null) {
             cachedRecords.add(this);
         } else {
-            cachedRecords = new ArrayList<ListingStateRecord>();
+            cachedRecords = new ArrayList<>();
         }
         Cache.delete(cacheKey);
         Cache.add(cacheKey, cachedRecords, "8h");

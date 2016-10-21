@@ -5,8 +5,6 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
-import helper.Dates;
-import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
 import models.procure.*;
@@ -31,7 +29,7 @@ import java.util.*;
  */
 public class FBA {
 
-    private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<String, FBAInboundServiceMWSClient>();
+    private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<>();
 
     public static FBAShipment plan(Account account, ProcureUnit unit) throws FBAInboundServiceMWSException {
         FBAShipment fbaShipment = new FBAShipment();
@@ -99,21 +97,13 @@ public class FBA {
             fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
 
             // FBA 仓库自适应
-            FBACenter center = FBACenter.findByCenterId(fbaShipment.centerId);
-            if(center == null) {
-                Address fbaAddress = member.getShipToAddress();
-                center = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
-                        fbaAddress.getAddressLine2(), fbaAddress.getCity(),
-                        fbaAddress.getName(), fbaAddress.getCountryCode(),
-                        fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
-                ).save();
-                Webs.systemMail(String.format("Add a new FC`s %s", center.centerId),
-                        center.toString());
-            }
-            fbaShipment.fbaCenter = center;
+            Address fbaAddress = member.getShipToAddress();
+            fbaShipment.fbaCenter = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
+                    fbaAddress.getAddressLine2(), fbaAddress.getCity(),
+                    fbaAddress.getName(), fbaAddress.getCountryCode(),
+                    fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
+            ).createOrUpdate();
         } else {
-            Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(),
-                    "创建 FBAShipment 失败.");
             throw new FBAInboundServiceMWSException("创建 FBA Plan 失败.");
         }
         return fbaShipment;
@@ -286,12 +276,12 @@ public class FBA {
         List<InboundShipmentInfo> inbounds = response.getListInboundShipmentsResult()
                 .getShipmentData().getMember();
 
-        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<String, F.T3<String, String, String>>();
+        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<>();
         for(InboundShipmentInfo info : inbounds) {
             // Amazon 对于重复提交的 FBA ShipmentId 不会做限制, 所以有过的信息不需要再记录
             if(shipmentsT3.containsKey(info.getShipmentId()))
                 continue;
-            shipmentsT3.put(info.getShipmentId(), new F.T3<String, String, String>(
+            shipmentsT3.put(info.getShipmentId(), new F.T3<>(
                     info.getShipmentStatus(), info.getDestinationFulfillmentCenterId(), info.getShipmentName())
             );
         }
@@ -312,7 +302,7 @@ public class FBA {
          * item.getQuantityShipped();
          * item.getQuantityReceived();
          */
-        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<String, F.T2<Integer, Integer>>();
+        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<>();
         ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest();
         request.setShipmentId(shipmentId);
         request.setSellerId(acc.merchantId);
@@ -322,7 +312,7 @@ public class FBA {
             // 进入系统内 msku 全变成大写
             if(fetchItems.containsKey(item.getSellerSKU().toUpperCase())) continue;
             fetchItems.put(item.getSellerSKU().toUpperCase(),
-                    new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped())
+                    new F.T2<>(item.getQuantityReceived(), item.getQuantityShipped())
             );
         }
         return fetchItems;
@@ -352,7 +342,7 @@ public class FBA {
      */
     private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems(List<ProcureUnit> units) {
 
-        List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
+        List<InboundShipmentItem> items = new ArrayList<>();
         for(ProcureUnit unit : units) {
             items.add(new InboundShipmentItem(
                     null,
