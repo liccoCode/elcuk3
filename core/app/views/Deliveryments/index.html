@@ -90,8 +90,7 @@
           <td>
             <label>
                 #{if dmt.apply == null}
-                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                         name="deliverymentIds" value="${dmt.id}">
+                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''} name="deliverymentIds" value="${dmt.id}">
                 #{/if}
             </label>
           </td>
@@ -107,7 +106,7 @@
                 没有请款单
               #{/else}
           </td>
-          <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+          <td style="cursor:pointer;" name="clickTd" dmt_id="${dmt.id}">
             <span><i class="icon-reorder"></i></span>
             <span>${dmt.name}</span>
             <span class="badge badge-info">${dmt.units.size()}</span>
@@ -128,11 +127,6 @@
           </td>
           <td>${dmt.handler.username}</td>
           <td>#{time_tooltip time:dmt.createDate/}</td>
-        </tr>
-        <tr id="dmt_${dmt_index}" style="display:none;">
-          <td colspan="12" style="padding:0;border:none">
-              #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
-          </td>
         </tr>
       #{/list}
         <tr class="tb_footer">

@@ -317,4 +317,11 @@ public class Deliveryments extends Controller {
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
     }
+
+    public static void showProcureUnitById(String id) {
+        List<ProcureUnit> units = ProcureUnit.find("deliveryment.id = ? ", id).fetch();
+        renderArgs.put("norecord", true);
+        renderArgs.put("deliveryplan", true);
+        render("ProcureUnits/_unit_list.html", units);
+    }
 }
