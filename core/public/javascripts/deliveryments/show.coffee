@@ -43,11 +43,28 @@ $ ->
     else
       window.open("/FBAs/boxLabel?id=#{$btn.data('id')}&boxNumber=#{boxNumber}", "_blank")
   ).on('click', '#deployFBAs', (e) ->
-    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'deployFBAs').modal('show')
+    $("#fba_carton_contents_modal").modal('show')
+    $("#sumbitDeployFBAs").data('url', $(@).data("url"))
+    checkboxList = $('input[name="pids"]')
+    unitIds = []
+    for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+      $("input[name='chooseType']").change(->
+        radio = $("input[name='chooseType']:checked")
+        id = radio.val()
+        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
+        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
+        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
+        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
+        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
+        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
+      )
+    )
   ).on('click', '#sumbitDeployFBAs', (e) ->
     $modal = $("#fba_carton_contents_modal")
     return if $modal.data('unit-source')
-
     $trigger = $("##{$modal.data('modal-trigger')}")
     $action = $("#sumbitDeployFBAs")
     form = $("<form method='post' action='#{$action.data('url')}'></form>")
@@ -63,14 +80,14 @@ $ ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
-        $("#tr_" + id + " input[name='dto.boxNum']").val(radio.attr("boxNum"))
-        $("#tr_" + id + " input[name='dto.num']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name='dto.boxSize']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name='dto.lastCartonNum']").val(radio.attr("lastCartonNum"))
-        $("#tr_" + id + " input[name='dto.singleBoxWeight']").val(radio.attr("singleBoxWeight"))
-        $("#tr_" + id + " input[name='dto.length']").val(radio.attr("boxLength"))
-        $("#tr_" + id + " input[name='dto.width']").val(radio.attr("boxWidth"))
-        $("#tr_" + id + " input[name='dto.height']").val(radio.attr("boxHeight"))
+        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
+        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
+        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
+        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
+        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
+        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
       )
     )
   ).on('click', '#edit_memo', (e) ->
