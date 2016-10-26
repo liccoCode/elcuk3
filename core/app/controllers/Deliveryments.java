@@ -7,10 +7,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.finance.ProcureApply;
-import models.procure.Cooperator;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Product;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
@@ -324,4 +321,21 @@ public class Deliveryments extends Controller {
         renderArgs.put("deliveryplan", true);
         render("ProcureUnits/_unit_list.html", units);
     }
+
+    public static void refreshFbaCartonContentsByIds(String[] unitIds) {
+        List<ProcureUnit> list = new ArrayList<>();
+        for(String id : unitIds) {
+            ProcureUnit unit = ProcureUnit.findById(Long.parseLong(id));
+            if(unit.cooperator != null) {
+                CooperItem item = unit.cooperator.cooperItem(unit.product.sku);
+                if(item != null) {
+                    item.getAttributes();
+                    unit.items = item.items;
+                }
+            }
+            list.add(unit);
+        }
+        render("/Deliveryments/fba_carton_contents_new.html", list);
+    }
+
 }

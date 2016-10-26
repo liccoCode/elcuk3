@@ -17,6 +17,7 @@ import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
+import models.view.dto.CooperItemDTO;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -453,6 +454,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
+
+    @Transient
+    public List<CooperItemDTO> items;
 
     /**
      * 相关联的质检任务
