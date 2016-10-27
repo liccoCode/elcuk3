@@ -43,17 +43,53 @@ $ ->
     else
       window.open("/FBAs/boxLabel?id=#{$btn.data('id')}&boxNumber=#{boxNumber}", "_blank")
   ).on('click', '#deployFBAs', (e) ->
-    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'deployFBAs').modal('show')
+    $("#fba_carton_contents_modal").modal('show')
+    $("#sumbitDeployFBAs").data('url', $(@).data("url"))
+    checkboxList = $('input[name="pids"]')
+    unitIds = []
+    for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+      $("input[name='chooseType']").change(->
+        radio = $("input[name='chooseType']:checked")
+        id = radio.val()
+        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
+        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
+        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
+        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
+        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
+        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
+      )
+    )
   ).on('click', '#sumbitDeployFBAs', (e) ->
     $modal = $("#fba_carton_contents_modal")
     return if $modal.data('unit-source')
-
     $trigger = $("##{$modal.data('modal-trigger')}")
-    form = $("<form method='post' action='#{$trigger.data('url')}'></form>")
+    $action = $("#sumbitDeployFBAs")
+    form = $("<form method='post' action='#{$action.data('url')}'></form>")
     form.hide().append($trigger.parents('form').find('input[name="pids"]:checked')).append($modal.find(":input").clone()).appendTo('body')
     form.submit().remove()
   ).on('click', '#updateFbaCartonContents', (e) ->
-    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'updateFbaCartonContents').modal('show')
+    $("#fba_carton_contents_modal").modal('show')
+    $("#sumbitDeployFBAs").data('url', $(@).data("url"))
+    checkboxList = $('input[name="pids"]')
+    unitIds = []
+    for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+      $("input[name='chooseType']").change(->
+        radio = $("input[name='chooseType']:checked")
+        id = radio.val()
+        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
+        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
+        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
+        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
+        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
+        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
+      )
+    )
   ).on('click', '#edit_memo', (e) ->
     if $("#memo").val() == null || $("#memo").val().trim().length == 0
       noty({text: '请输入备注!', type: 'error'})
@@ -63,10 +99,8 @@ $ ->
     if $("#unit_table input[name='pids']:checked").length = 0
       noty({text: '请输入备注!', type: 'error'})
     else
-      $btn=$(@)
+      $btn = $(@)
       submitForm($btn)
-
-
   )
 
   # 将字符串转化成Dom元素

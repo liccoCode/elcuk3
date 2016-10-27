@@ -17,6 +17,7 @@ import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
+import models.view.dto.CooperItemDTO;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -454,6 +455,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
 
+    @Transient
+    public List<CooperItemDTO> items;
+
     /**
      * 相关联的质检任务
      *
@@ -725,8 +729,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.purchaseSample = unit.purchaseSample;
         // 2
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(
-                    StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId));
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId));
         }
         if(Validation.hasErrors()) return;
 
