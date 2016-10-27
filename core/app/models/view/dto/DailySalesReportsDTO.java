@@ -16,7 +16,7 @@ public class DailySalesReportsDTO implements Serializable {
     public String category;
     public String sku;
     public String market;
-    public HashMap<Integer, Float> sales = new HashMap<Integer, Float>();
+    public HashMap<Integer, Float> sales = new HashMap<>();
 
     public DailySalesReportsDTO() {
     }

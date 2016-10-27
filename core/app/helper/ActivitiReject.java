@@ -118,7 +118,7 @@ public class ActivitiReject {
                 identityLinkEntity = identityLinkEntityList.next();
                 identityLinkEntity.setTask(tmpTaskEntity);
                 identityLinkEntity.setUserId(backToAssignee);
-                Map<String, Object> parameters = new HashMap<String, Object>();
+                Map<String, Object> parameters = new HashMap<>();
                 parameters.put("id", identityLinkEntity.getId());
                 sqlSession.delete("deleteIdentityLink", parameters);
                 sqlSession.insert("insertIdentityLink", identityLinkEntity);

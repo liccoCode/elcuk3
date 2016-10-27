@@ -217,7 +217,7 @@ public class Excels extends Controller {
      * 利润下载
      */
     public static void profit(ProfitPost p) {
-        List<Profit> profits = new ArrayList<Profit>();
+        List<Profit> profits = new ArrayList<>();
         String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
         List<AnalyzeDTO> dtos = null;
@@ -331,7 +331,7 @@ public class Excels extends Controller {
                     } else {
                         category_names = p.categories.replace(" ", "").toLowerCase();
                     }
-                    List<NameValuePair> params = new ArrayList<NameValuePair>();
+                    List<NameValuePair> params = new ArrayList<>();
                     params.add(new BasicNameValuePair("categories", category_names));
                     params.add(new BasicNameValuePair("market", market_key));
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
@@ -552,7 +552,7 @@ public class Excels extends Controller {
                 }.now();
                 renderText("正在处理中...请稍后几分钟再来查看...");
             } else {
-                List<Integer> months = new ArrayList<Integer>();
+                List<Integer> months = new ArrayList<>();
                 for(int i = begin; i <= end; i++) months.add(i);
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
                 request.format = "xls";

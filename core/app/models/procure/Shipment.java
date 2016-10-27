@@ -227,10 +227,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 此 Shipment 的运输项
      */
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
-    public List<ShipItem> items = new ArrayList<ShipItem>();
+    public List<ShipItem> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     @ManyToOne
     public TransportApply apply;
@@ -617,33 +617,45 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 触发采购计划阶段, 时间
          * 3. 触发运输单状态, 时间
          */
-        if(this.state != S.CONFIRM)
+        if(this.state != S.CONFIRM) {
             Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
-        if(this.items.size() <= 0)
+        }
+        if(this.items.size() <= 0) {
             Validation.addError("", "没有运输项目可以运输.");
+        }
         for(ShipItem itm : this.items) {
             if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
-                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage))
+                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage)) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
-
-            if(!itm.unit.isPlaced)
+            }
+            if(!itm.unit.isPlaced) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
-        }
-        if(this.type == T.EXPRESS && this.internationExpress == null)
-            Validation.addError("", "请填写运输单的国际快递商");
-        if(this.cooper == null)
-            Validation.addError("", "请填写运输单合作伙伴(货代)");
-        if(this.whouse == null)
-            Validation.addError("", "请填写运输单仓库信息");
-        if(StringUtils.isBlank(this.trackNo))
-            Validation.addError("", "请填写运输单的跟踪号");
+            }
 
+        }
+        if(this.type == T.EXPRESS && this.internationExpress == null) {
+            Validation.addError("", "请填写运输单的国际快递商");
+        }
+        if(this.cooper == null) {
+            Validation.addError("", "请填写运输单合作伙伴(货代)");
+        }
+        if(this.whouse == null) {
+            Validation.addError("", "请填写运输单仓库信息");
+        }
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        if(this.tracknolist == null || this.tracknolist.size() == 0) {
+            Validation.addError("", "请填写运输单的跟踪号");
+        } else {
+            if(T.EXPRESS != this.type && this.tracknolist.get(0).length() > 10) {
+                Validation.addError("", String.format("%s运输单的跟踪号的最大长度为 10.", this.type.label()));
+            }
+        }
 
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
-
         for(ShipItem shipItem : this.items) {
             if(shipItem.unit.fba != null) {
+                shipItem.unit.fba.putTransportContentRetry(3, this);
                 // 在测试环境下也不能标记 SHIPPED
                 shipItem.unit.fba.updateFBAShipmentRetry(3,
                         Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
@@ -786,7 +798,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void inboundingByComputor() {
         if(this.state != S.RECEIPTD) return;
-        List<Date> receivingDates = new ArrayList<Date>();
+        List<Date> receivingDates = new ArrayList<>();
         for(FBAShipment fba : this.fbas()) {
             if(!Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CLOSED).contains(fba.state)) continue;
             F.Option<Date> earliestDate = fba.getEarliestDate();
@@ -1033,7 +1045,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return null;
 
         float paidAmount = 0;
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         // TODO 把 Comment 更换为 record?
         lines.add(String.format("总关税 %s %s 减去 ", crcy, amount));
         for(PaymentUnit fee : this.fees) {
@@ -1083,13 +1095,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public float totalWeight() {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
-        float weight = 0f;
+        float totalWeight = 0f;
         for(ShipItem itm : this.items) {
-            Float product_weight = itm.unit.product.weight;
-            if(product_weight == null) continue;
-            weight += itm.qty * product_weight;
+            if(itm.unit == null) continue;
+            Float weight = itm.unit.product.weight;
+            if(weight != null) {
+                totalWeight += itm.qty * weight;
+            }
         }
-        return weight;
+        return totalWeight;
     }
 
     /**
@@ -1177,7 +1191,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public List<FBAShipment> fbas() {
-        List<FBAShipment> fbas = new ArrayList<FBAShipment>();
+        List<FBAShipment> fbas = new ArrayList<>();
         for(ShipItem item : this.items) {
             if(item.unit.fba == null) continue;
             if(fbas.contains(item.unit.fba)) continue;
@@ -1249,7 +1263,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         // 加载
         StringBuilder where = new StringBuilder("state IN (?,?)");
-        List<Object> params = new ArrayList<Object>(Arrays.asList(S.PLAN, S.CONFIRM));
+        List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
             where.append("AND (whouse.id=? OR whouse.id IS NULL)");
             params.add(whouseId);
@@ -1300,7 +1314,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new Shipment(planBeginDate, type, whouse).save();
     }
 
-    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<String, Integer>();
+    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<>();
 
     /**
      * 初始化不同运输方式的标准运输量对应关系
@@ -1350,7 +1364,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void sendMsgMail(Date planArrivDate, String username) {
         String subject = "";
         String content = "";
-        List<String> mailaddress = new ArrayList<String>();
+        List<String> mailaddress = new ArrayList<>();
 
         if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
             subject = String.format("更改运输单[%s]预计到库时间", this.id);
@@ -1398,7 +1412,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     this.trackNo = "[\"" + this.trackNo + "\"]";
                 }
                 try {
-                    this.tracknolist = JSON.parseArray(this.trackNo, String.class);
+                    List<String> trackingNumbers = JSON.parseArray(this.trackNo, String.class);
+                    for(int i = 0; i < trackingNumbers.size(); i++) {
+                        trackingNumbers.set(i, StringUtils.trim(trackingNumbers.get(i)));
+                    }
+                    this.tracknolist = trackingNumbers;
                 } catch(Exception e) {
                     LogUtils.JOBLOG.info(this.trackNo + "--" + e.getMessage());
                 }
@@ -1560,7 +1578,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * <<<<<<< HEAD
      * 修改运输单
      *
      * @param newShip

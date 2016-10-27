@@ -16,6 +16,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.qc.CheckTask;
+import models.qc.CheckTaskDTO;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -23,6 +24,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -40,6 +42,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 每一个采购单元
@@ -52,6 +55,13 @@ import java.util.*;
 public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public ProcureUnit() {
+    }
+
+    public ProcureUnit(Selling selling) {
+        if(selling != null) {
+            this.selling = selling;
+            this.product = this.selling.listing.product;
+        }
     }
 
     /**
@@ -199,7 +209,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     /**
      * 此采购计划的供应商信息.
@@ -227,7 +237,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 所关联的运输出去的 ShipItem.
      */
     @OneToMany(mappedBy = "unit")
-    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
+    public List<ShipItem> shipItems = new ArrayList<>();
 
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -321,6 +331,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @Expose
     public int isCheck = 0;
+
+    /**
+     * 装箱单是否核准
+     */
+    public boolean isConfirm = false;
 
     public enum S {
         NOSHIPED {
@@ -438,6 +453,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     @Transient
     public static String ACTIVITINAME = "procureunit.create";
+
+    /**
+     * 相关联的质检任务
+     *
+     * @return
+     */
+    @Expose
+    @OneToMany(mappedBy = "units", fetch = FetchType.LAZY)
+    @OrderBy("creatat DESC")
+    public List<CheckTask> taskList;
+
+    /**
+     * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)
+     * <p>
+     * 1. 由于历史原因部分采购计划需要挪市场(DE=>UK),但是此时采购计划已经不允许修改了,采购就再创建一条新的采购计划
+     * 2. B2B 采购计划
+     */
+    public String isInventory;
 
     /**
      * ProcureUnit 的检查
@@ -575,7 +608,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         new ERecordBuilder("procureunit.split")
                 .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return newUnit;
     }
@@ -638,7 +671,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs = attrs;
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         this.shipItemQty(this.qty());
         this.stage = STAGE.DONE;
@@ -660,7 +693,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
         new ERecordBuilder("procureunit.revertdelivery")
                 .msgArgs(msg)
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
     }
 
@@ -682,7 +715,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
 
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
@@ -700,10 +733,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(logs.size() > 0) {
             if(StringUtils.isBlank(reason)) {
                 new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
-                        this.generateProcureUnitStatusInfo()).fid(this.id).save();
+                        this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
             } else {
                 new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
-                        this.generateProcureUnitStatusInfo()).fid(this.id).save();
+                        this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
             }
             noty(this.sku, StringUtils.join(logs, ","));
         }
@@ -743,7 +776,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return List<String>
      */
     public List<String> beforeDoneUpdate(ProcureUnit unit) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
@@ -756,7 +789,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     private List<String> doneUpdate(ProcureUnit unit) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
@@ -825,17 +858,33 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 通过 ProcureUnit 创建 FBA
      */
-    public synchronized FBAShipment postFbaShipment() {
+    public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
         FBAShipment fba = null;
+        if(!dto.validedQtys(this.qty())) return fba;
         try {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            String errMsg = e.getMessage();
+            if(errMsg.contains("UNKNOWN_SKU")) {
+                Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
+                        this.selling.merchantSKU));
+            } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
+                Validation.addError("", String.format(
+                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 在 Amazon 后台的 Listing 的尺寸是否正确填写(数值和单位).",
+                        this.selling.merchantSKU));
+            } else if(errMsg.contains("ANDON_PULL_STRIKE_ONE")) {
+                Validation.addError("", String.format(
+                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 市场 [%s] 的其他的 FBA 是否报告了异常.",
+                        this.selling.market.name(), this.selling.merchantSKU));
+            } else {
+                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            }
             return null;
         }
         try {
+            fba.dto = dto;
             fba.state = FBA.create(fba);
-            this.fba = fba.save();
+            this.fba = fba.doCreate();
             this.save();
             new ERecordBuilder("shipment.createFBA")
                     .msgArgs(this.id, this.sku, this.fba.shipmentId)
@@ -850,6 +899,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
+
 
     /**
      * 将 ProcureUnit 添加到/移出 采购单,状态改变
@@ -918,7 +968,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
 
             //删除 质检任务相关
-            List<CheckTask> tasks = this.tasks();
+            List<CheckTask> tasks = this.taskList;
             for(CheckTask task : tasks) {
                 task.delete();
             }
@@ -945,12 +995,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        Set<Shipment> shipments = new HashSet<Shipment>();
+        Set<Shipment> shipments = new HashSet<>();
         for(ShipItem shipItem : this.shipItems) {
             if(shipItem.shipment != null)
                 shipments.add(shipItem.shipment);
         }
-        return new ArrayList<Shipment>(shipments);
+        return new ArrayList<>(shipments);
     }
 
     public int qty() {
@@ -973,7 +1023,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public int inboundingQty() {
         int inboundingQty = 0;
         for(ShipItem shipItm : this.shipItems) {
-            inboundingQty += shipItm.recivedQty;
+            inboundingQty += shipItm.adjustQty;
         }
         return inboundingQty;
     }
@@ -1002,7 +1052,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ERecordBuilder("procureunit.prepay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
     }
@@ -1040,7 +1090,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ERecordBuilder("procureunit.tailpay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
     }
@@ -1066,7 +1116,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ERecordBuilder("procureunit.reworkpay")
                 .msgArgs(this.product.sku,
                         String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id)
+                .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
     }
@@ -1193,7 +1243,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public List<PaymentUnit> fees() {
-        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+        List<PaymentUnit> fees = new ArrayList<>();
         for(PaymentUnit fee : this.fees) {
             if(fee.remove) continue;
             fees.add(fee);
@@ -1228,7 +1278,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"), 50);
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
+                50);
+    }
+
+    /**
+     * 页面上用来缓存 records 的 key
+     *
+     * @return
+     */
+    public String recordsPageCacheKey() {
+        return Webs.Md5(ElcukRecord.pageCacheKey(ProcureUnit.class, this.id));
     }
 
     @Override
@@ -1271,18 +1331,57 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ProcureUnit.find("stage=?", stage).fetch();
     }
 
-    public static void postFbaShipments(List<Long> unitIds) {
+    /**
+     * 批量创建 FBA
+     *
+     * @param unitIds
+     */
+    public static void postFbaShipments(List<Long> unitIds, List<CheckTaskDTO> dtos) {
         List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
-        if(units.size() != unitIds.size())
+        if(units.size() != unitIds.size() || units.size() != dtos.size()) {
             Validation.addError("", "加载的数量");
+        }
         if(Validation.hasErrors()) return;
 
-        for(ProcureUnit unit : units) {
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
             try {
                 if(unit.fba != null) {
                     Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
                 } else {
-                    unit.postFbaShipment();
+                    unit.postFbaShipment(dtos.get(i));
+                }
+            } catch(Exception e) {
+                Validation.addError("", Webs.E(e));
+            }
+        }
+    }
+
+    /**
+     * 批量更新 FBA 的箱内包装信息
+     *
+     * @param unitIds
+     */
+    public static void postFbaCartonContents(List<Long> unitIds, List<CheckTaskDTO> dtos) {
+        List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
+        if(units.size() != unitIds.size() || units.size() != dtos.size()) {
+            Validation.addError("", "加载的数量");
+        }
+        if(Validation.hasErrors()) return;
+
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
+            CheckTaskDTO dto = dtos.get(i);
+            if(!dto.validedQtys(unit.qty())) return;
+
+            try {
+                if(unit.fba == null) {
+                    Validation.addError("", String.format("#%s 没有相关的 FBA, 请创建 FBA.", unit.id));
+                } else {
+                    FBAShipment fba = unit.fba;
+                    fba.dto = dtos.get(i);
+                    fba.save();
+                    fba.postFbaInboundCartonContents();
                 }
             } catch(Exception e) {
                 Validation.addError("", Webs.E(e));
@@ -1324,14 +1423,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
      */
     public Set<User> editToUsers() {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         users.add(this.handler);
         if(this.deliveryment != null)
             users.add(this.deliveryment.handler);
-        for(Shipment shipment : this.relateShipment()) {
-            if(shipment.creater != null)
-                users.add(shipment.creater);
-        }
+        users.addAll(this.relateShipment().stream().filter(shipment -> shipment.creater != null)
+                .map(shipment -> shipment.creater).collect(Collectors.toList()));
         return users;
     }
 
@@ -1351,7 +1448,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     this.id
             );
 
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             String shipmentid = fba.shipmentId;
             shipmentid = shipmentid.trim() + "U";
 
@@ -1378,17 +1475,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+
     /**
      * 查看当前采购计划(对应的质检任务)的是否发货状态
      *
      * @return
      */
     public String isship() {
-        List<CheckTask> tasks = this.tasks();
-        if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).isship != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
-                return tasks.get(0).isship.label();
-        }
+        CheckTask task = this.lastCheckedTask();
+        if(task != null) return task.isship.label();
         return null;
     }
 
@@ -1398,11 +1493,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String result() {
-        List<CheckTask> tasks = this.tasks();
-        if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).result != null && tasks.get(0).checkstat != CheckTask.StatType.UNCHECK)
-                return tasks.get(0).result.label();
-        }
+        CheckTask task = this.lastCheckedTask();
+        if(task != null) return task.result.label();
         return null;
     }
 
@@ -1414,20 +1506,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String fetchCheckTaskLink() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? and checkstat!=?", this.id,
-                CheckTask.StatType.UNCHECK).fetch();
-        if(tasks.size() == 1) return String.format("/checktasks/%s/show", tasks.get(0).id);
-        if(tasks.size() > 1) return String.format("/checktasks/%s/showList", this.id);
+        if(this.haveTask()) {
+            List<CheckTask> tasks = (List) CollectionUtils.select(this.taskList, o -> {
+                CheckTask task = (CheckTask) o;
+                return task.checkstat != CheckTask.StatType.UNCHECK;
+            });
+            if(tasks != null) {
+                if(tasks.size() == 1) {
+                    return String.format("/checktasks/%s/show", tasks.get(0).id);
+                } else if(tasks.size() > 1) {
+                    return String.format("/checktasks/%s/showList", this.id);
+                }
+            }
+        }
         return null;
     }
 
     public Integer fetchCheckTaskQcSample() {
-        List<CheckTask> tasks = this.tasks();
-        if(tasks != null && tasks.size() > 0) {
-            if(tasks.get(0).qcSample != null)
-                return tasks.get(0).qcSample;
+        if(this.haveTask()) {
+            CheckTask task = this.taskList.get(0);
+            if(task != null && task.qcSample != null) {
+                return task.qcSample;
+            }
         }
         return 0;
+    }
+
+    public boolean haveTask() {
+        return this.taskList != null && this.taskList.size() != 0;
     }
 
     public int returnPurchaseSample() {
@@ -1509,7 +1615,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).active().list();
         for(Task task : tasks) {
             if(task != null) {
-                if(task.getName().indexOf("运营专员") >= 0) {
+                if(task.getName().contains("运营专员")) {
                     taskService.setAssignee(task.getId(), this.handler.username);
                 } else {
                     Role role = Role.find("roleName=?", task.getName()).first();
@@ -1524,7 +1630,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public Map<String, Object> showInfo(Long id, String username) {
         ActivitiProcess ap = ActivitiProcess.find("definition.menuCode=? and objectId=?", ACTIVITINAME, id).first();
-        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> infos = new ArrayList<>();
         int issubmit = 0;
         String taskname = "";
         if(ap == null) {
@@ -1539,7 +1645,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             infos = ActivitiProcess.processInfo(ap.processInstanceId);
         }
 
-        Map<String, Object> map = new Hashtable<String, Object>();
+        Map<String, Object> map = new Hashtable<>();
         map.put("ap", ap);
         map.put("issubmit", issubmit);
         if(taskname != null) map.put("taskname", taskname);
@@ -1548,7 +1654,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public void submitActiviti(ActivitiProcess ap, String flow, String username, String opition) {
-        Map<String, Object> variableMap = new HashMap<String, Object>();
+        Map<String, Object> variableMap = new HashMap<>();
         if(StringUtils.isNotBlank(flow)) variableMap.put("flow", flow);
 
         //如果是最后异步判断是否是生效日期当天
@@ -1574,16 +1680,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.delete();
     }
 
-    public int recommendBoxNum() {
-        CooperItem item = CooperItem.find("sku = ? and cooperator.id = ? ", this.sku, this.cooperator.id).first();
-        int boxSize = (item == null ? 1 : item.boxSize);
-        return (int) Math.ceil(this.attrs.planQty / (float) boxSize);
-    }
-
     public int fetchCheckTaskQty() {
-        CheckTask task = this.tasks().get(0);
-        if(task != null) {
-            return task.qty;
+        if(this.haveTask()) {
+            CheckTask task = this.taskList.get(0);
+            if(task != null) return task.qty;
         }
         return 0;
     }
@@ -1635,24 +1735,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         );
     }
 
-    /**
-     * 相关联的质检任务
-     *
-     * @return
-     */
-    public List<CheckTask> tasks() {
-        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.id).fetch();
+    public CheckTask lastCheckedTask() {
+        if(this.haveTask()) {
+            CheckTask task = this.taskList.get(0);
+            if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
+                return task;
+            }
+        }
+        return null;
+    }
+
+    public List<CheckTask> uncheckTaskList() {
+        return (List) CollectionUtils.select(this.taskList, o -> {
+            CheckTask task = (CheckTask) o;
+            return task.checkstat == CheckTask.StatType.UNCHECK;
+        });
     }
 
     /**
      * 更新相关的质检任务的仓库
      */
     public void flushTask() {
-        List<CheckTask> tasks = CheckTask.find("units_id=? AND checkstat='UNCHECK'", this.id).fetch();
-        if(tasks != null && !tasks.isEmpty()) {
-            Whouse wh = this.matchWhouse();
-            if(wh != null) {
-                for(CheckTask task : tasks) task.shipwhouse = wh;
+        if(this.haveTask()) {
+            List<CheckTask> tasks = this.uncheckTaskList();
+            if(tasks != null && !tasks.isEmpty()) {
+                Whouse wh = this.matchWhouse();
+                if(wh != null) {
+                    for(CheckTask task : tasks) task.shipwhouse = wh;
+                }
             }
         }
     }

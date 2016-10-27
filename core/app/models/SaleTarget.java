@@ -143,7 +143,7 @@ public class SaleTarget extends Model {
      * @return
      */
     public List<SaleTarget> loadCategorySaleTargets(List<Category> categorys) {
-        List<SaleTarget> saleTargets = new ArrayList<SaleTarget>();
+        List<SaleTarget> saleTargets = new ArrayList<>();
         for(Category category : categorys) {
             SaleTarget categorySt = new SaleTarget();
             categorySt.fid = category.categoryId;
@@ -161,7 +161,7 @@ public class SaleTarget extends Model {
      * @return
      */
     public List<SaleTarget> loadMonthSaleTargets(User user) {
-        List<SaleTarget> saleTargets = new ArrayList<SaleTarget>();
+        List<SaleTarget> saleTargets = new ArrayList<>();
         for(int i = 1; i <= 12; i++) {
             SaleTarget monthSt = new SaleTarget();
             monthSt.targetYear = this.targetYear;
@@ -233,7 +233,7 @@ public class SaleTarget extends Model {
      * @param parentId
      */
     public void beforeUpdateLog(SaleTarget newSt, Long parentId) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.updateAndLogChanges(this, "saleAmounts", newSt.saleAmounts));
         logs.addAll(Reflects.updateAndLogChanges(this, "profitMargin", newSt.profitMargin));
         if(logs.size() > 0) {

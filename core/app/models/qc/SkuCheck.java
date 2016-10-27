@@ -120,7 +120,7 @@ public class SkuCheck extends Model {
 
     public List<SkuCheck> linelist() {
         StringBuilder sql = new StringBuilder(" 1=1 ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sql.append(" AND pid=? ");
         params.add(this.id);
 

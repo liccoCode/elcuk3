@@ -16,6 +16,7 @@ import java.util.List;
  * User: mac
  * Date: 14-6-9
  * Time: AM10:12
+ * @deprecated
  */
 @With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
 public class SaleReports extends Controller {
@@ -25,7 +26,7 @@ public class SaleReports extends Controller {
      */
     @Check("salereports.salecount")
     public static void saleCount(SaleReportPost p) {
-        List<SaleReportDTO> dtos = new ArrayList<SaleReportDTO>();
+        List<SaleReportDTO> dtos = new ArrayList<>();
         try {
             if(p == null) p = new SaleReportPost();
             dtos = p.query();

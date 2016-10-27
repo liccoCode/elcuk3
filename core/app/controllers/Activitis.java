@@ -19,6 +19,7 @@ import java.util.List;
  * User: cary
  * Date: 5/10/14
  * Time: 4:25 PM
+ * @deprecated
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Activitis extends Controller {
@@ -32,7 +33,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }
@@ -47,7 +48,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }
@@ -61,7 +62,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }

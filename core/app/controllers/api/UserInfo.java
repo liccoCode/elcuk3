@@ -2,7 +2,6 @@ package controllers.api;
 
 import helper.J;
 import models.User;
-
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -24,7 +23,7 @@ public class UserInfo extends Controller {
      */
     public static void user() {
         List<User> users = User.find("closed!=true").fetch();
-        List<String> usernames = new ArrayList<String>();
+        List<String> usernames = new ArrayList<>();
         for(User user : users) usernames.add(user.username);
         renderJSON(J.json(usernames));
     }

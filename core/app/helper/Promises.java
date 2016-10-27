@@ -19,9 +19,8 @@ import java.util.concurrent.*;
  */
 public class Promises {
     public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_UK, M.AMAZON_FR, M.AMAZON_ES,
-            M.AMAZON_IT,
-            M.AMAZON_JP};
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+            M.AMAZON_IT, M.AMAZON_JP};
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(8);
 
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
@@ -34,14 +33,14 @@ public class Promises {
      * @return
      */
     public static <T> List<T> forkJoin(final Callback<T> callback) {
-        List<T> vos = new ArrayList<T>();
+        List<T> vos = new ArrayList<>();
         // 通过 Job 异步 fork 加载不同时段的数据
-        List<FutureTask<T>> futures = new ArrayList<FutureTask<T>>();
+        List<FutureTask<T>> futures = new ArrayList<>();
         long begin = System.currentTimeMillis();
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
-                FutureTask<T> task = new FutureTask<T>(new Callable<T>() {
+                FutureTask<T> task = new FutureTask<>(new Callable<T>() {
                     @Override
                     public T call() throws Exception {
                         try {
@@ -98,7 +97,7 @@ public class Promises {
      */
     public static abstract class DBCallback<T> implements Callback<T> {
 
-        private static ThreadLocal<Connection> connHolder = new ThreadLocal<Connection>();
+        private static ThreadLocal<Connection> connHolder = new ThreadLocal<>();
 
 
         public Connection getConnection() {

@@ -199,7 +199,7 @@ public class SaleOpTarget extends Model {
      * @return
      */
     public List<SaleOpTarget> loadCategorySaleTargets(List<Category> categorys) {
-        List<SaleOpTarget> saleOpTargets = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> saleOpTargets = new ArrayList<>();
         for(Category category : categorys) {
             SaleOpTarget categorySt = new SaleOpTarget();
             categorySt.fid = category.categoryId;
@@ -217,7 +217,7 @@ public class SaleOpTarget extends Model {
      * @return
      */
     public List<SaleOpTarget> loadMonthSaleTargets(User user) {
-        List<SaleOpTarget> saleOpTargets = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> saleOpTargets = new ArrayList<>();
         for(int i = 1; i <= 12; i++) {
             SaleOpTarget monthSt = new SaleOpTarget();
             monthSt.targetYear = this.targetYear;
@@ -240,7 +240,7 @@ public class SaleOpTarget extends Model {
      * @return
      */
     public List<SaleOpTarget> loadMarketSaleTargets(User user, Integer month) {
-        List<SaleOpTarget> saleOpTargets = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> saleOpTargets = new ArrayList<>();
         for(M m : M.values()) {
             if(m != M.EBAY_UK) {
                 SaleOpTarget monthSt = new SaleOpTarget();
@@ -265,7 +265,7 @@ public class SaleOpTarget extends Model {
      * @return
      */
     public List<SaleOpTarget> loadSeasonSaleTargets(User user) {
-        List<SaleOpTarget> saleOpTargets = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> saleOpTargets = new ArrayList<>();
         for(int i = 1; i <= 4; i++) {
             SaleOpTarget monthSt = new SaleOpTarget();
             monthSt.targetYear = this.targetYear;
@@ -489,7 +489,7 @@ public class SaleOpTarget extends Model {
      * @param parentId
      */
     public void beforeUpdateLog(SaleOpTarget newSt, Long parentId) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.updateAndLogChanges(this, "saleAmounts", newSt.saleAmounts));
         logs.addAll(Reflects.updateAndLogChanges(this, "saleQty", newSt.saleQty));
         if(logs.size() > 0) {

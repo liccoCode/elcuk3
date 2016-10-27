@@ -54,6 +54,7 @@ public class Orders extends Controller {
 
     public static void show(String id) {
         Orderr ord = Orderr.findById(id);
+        notFoundIfNull(ord, "未找到相关订单,请稍后再来查看 : )");
 
         if(ord.orderrate() != 0) {
             OrderInvoice invoice = OrderInvoice.findById(id);
@@ -103,7 +104,7 @@ public class Orders extends Controller {
         Orderr orderr = Orderr.findById(id);
         orderr.feeflag = 0;
         orderr.save();
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("market", orderr.market.name()));
         params.add(new BasicNameValuePair("order_id", orderr.orderId));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_finance_find_by_order_id", params);

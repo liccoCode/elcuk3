@@ -407,6 +407,17 @@ public class ProcureUnits extends Controller {
         render(unit);
     }
 
+    /**
+     * 已核单
+     * @param id
+     */
+    public static void confirmUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.isConfirm = true;
+        unit.save();
+        render(unit);
+    }
+
 
     /**
      * 预付款申请
@@ -503,7 +514,7 @@ public class ProcureUnits extends Controller {
         SqlSelect sql = new SqlSelect().select("id").from("ProcureUnit").where("cooperator_id=?").param(pro
                 .cooperator.id);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        List<Long> unitIds = new ArrayList<Long>();
+        List<Long> unitIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             unitIds.add(Long.parseLong(row.get("id").toString()));
         }

@@ -1,14 +1,13 @@
 window.jQuery = window.$
 $ ->
-  $(document).on('click', "#delunit_form_submit, #deployFBAs, #downloadProcureunitsOrder",
+  $(document).on('click', "#delunit_form_submit,  #downloadProcureunitsOrder",
     (e) ->
       $btn = $(@)
       return false unless confirm("确认 #{$btn.text().trim()} ?")
       submitForm($btn)
   ).on("blur", "input[name='boxNumbers']", (e) ->
-# 确保用户填写的是大于零的数字
     $input = $(@)
-    if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
+    if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1") # 确保用户填写的是大于零的数字
   ).on('click', '#sumbitDownloadFBAZIP', (e) ->
     submitForm($("#downloadFBAZIP"))
     $('#box_number_modal').modal('hide')
@@ -17,7 +16,7 @@ $ ->
     expressid = $("input[name='expressid']").val()
     unitIds = []
     checkboxList.each(->
-      unitIds.push($(@).val() + "-" + $(@).attr("boxNum"))
+      unitIds.push($(@).val() + "-" + $(@).data("boxnum"))
     )
     if unitIds.length is 0
       noty({text: '请选择需要下载的采购单元', type: 'error'})
@@ -43,6 +42,31 @@ $ ->
       noty({text: '请正确输入采购单元箱数', type: 'error'})
     else
       window.open("/FBAs/boxLabel?id=#{$btn.data('id')}&boxNumber=#{boxNumber}", "_blank")
+  ).on('click', '#deployFBAs', (e) ->
+    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'deployFBAs').modal('show')
+  ).on('click', '#sumbitDeployFBAs', (e) ->
+    $modal = $("#fba_carton_contents_modal")
+    return if $modal.data('unit-source')
+
+    $trigger = $("##{$modal.data('modal-trigger')}")
+    form = $("<form method='post' action='#{$trigger.data('url')}'></form>")
+    form.hide().append($trigger.parents('form').find('input[name="pids"]:checked')).append($modal.find(":input").clone()).appendTo('body')
+    form.submit().remove()
+  ).on('click', '#updateFbaCartonContents', (e) ->
+    $("#fba_carton_contents_modal").removeData("unit-source").data('modal-trigger', 'updateFbaCartonContents').modal('show')
+  ).on('click', '#edit_memo', (e) ->
+    if $("#memo").val() == null || $("#memo").val().trim().length == 0
+      noty({text: '请输入备注!', type: 'error'})
+    else
+      $("#updateDeliverymentForm").submit()
+  ).on('click', '#isConfirm_btn', (e) ->
+    if $("#unit_table input[name='pids']:checked").length = 0
+      noty({text: '请输入备注!', type: 'error'})
+    else
+      $btn=$(@)
+      submitForm($btn)
+
+
   )
 
   # 将字符串转化成Dom元素

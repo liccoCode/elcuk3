@@ -47,7 +47,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @OneToMany(mappedBy = "product",
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
                     CascadeType.REFRESH}, fetch = FetchType.LAZY)
-    public List<Listing> listings = new ArrayList<Listing>();
+    public List<Listing> listings = new ArrayList<>();
 
     @ManyToOne
     public Category category;
@@ -59,7 +59,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 产品拥有哪些扩展属性
      */
     @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
-    public List<ProductAttr> productAttrs = new ArrayList<ProductAttr>();
+    public List<ProductAttr> productAttrs = new ArrayList<>();
 
     /**
      * 唯一的标示
@@ -346,7 +346,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
     @Transient
-    public List<ProductDTO> locate = new ArrayList<ProductDTO>();
+    public List<ProductDTO> locate = new ArrayList<>();
 
     @Lob
     public String locates = "{}";
@@ -356,7 +356,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
     @Transient
-    public List<ProductDTO> sellingPoint = new ArrayList<ProductDTO>();
+    public List<ProductDTO> sellingPoint = new ArrayList<>();
 
     @Lob
     public String sellingPoints = "{}";
@@ -429,6 +429,17 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.listings != null && this.listings.size() > 0) {
             throw new FastRuntimeException(
                     "Product [" + this.sku + "] have relate Listing, cannot be delete.");
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if(StringUtils.isNotBlank(this.upc)) {
+            this.upc = this.upc.trim();
+        }
+        if(StringUtils.isNotBlank(this.upcJP)) {
+            this.upcJP = this.upcJP.trim();
         }
     }
 
@@ -589,7 +600,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 记录修改之前的记录
      */
     public List<String> beforeDoneUpdate(Product pro) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(replace(Reflects.logFieldFade(this, "lengths", pro.lengths), "lengths", "长度(包材)"));
         logs.addAll(replace(Reflects.logFieldFade(this, "width", pro.width), "width", "宽度(包材)"));
         logs.addAll(replace(Reflects.logFieldFade(this, "heigh", pro.heigh), "heigh", "高度(包材)"));
@@ -612,7 +623,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         logs.addAll(replace(Reflects.logFieldFade(this, "marketTime", pro.marketTime), "marketTime", "上市时间"));
         logs.addAll(replace(Reflects.logFieldFade(this, "delistingTime", pro.delistingTime), "delistingTime", "退市时间"));
 
-        this.productAttrs = new java.util.ArrayList<ProductAttr>();
+        this.productAttrs = new java.util.ArrayList<>();
         logs.addAll(replace(Reflects.logFieldFade(this, "productAttrs", pro.productAttrs), "productAttrs", "扩展属性"));
 
 
@@ -672,7 +683,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 这几个为从 Amazon 解析回来的 SKU 存在, 但不需要在系统中再出现的 SKU, 为 Amazon 与系统中的同步做过滤
      */
-    private static final Map<String, Integer> UN_USE_SKU = new HashMap<String, Integer>();
+    private static final Map<String, Integer> UN_USE_SKU = new HashMap<>();
 
     static {
         UN_USE_SKU.put("15HTCG14-MB2SP", 1);
@@ -731,7 +742,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public static F.T2<List<String>, List<String>> fetchSkusJson() {
         List<String> skus = Product.skus(true);
-        return new F.T2<List<String>, List<String>>(skus, skus);
+        return new F.T2<>(skus, skus);
     }
 
     public static boolean exist(String sku) {
@@ -869,7 +880,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         //扩展信息
         if(StringUtils.isNotBlank(extend) && extend.equals("1")) {
             List<ProductAttr> proattrs = copysku.productAttrs;
-            List<ProductAttr> attrs = new ArrayList<ProductAttr>();
+            List<ProductAttr> attrs = new ArrayList<>();
             for(ProductAttr p : proattrs) {
                 ProductAttr np = new ProductAttr();
                 np.product = pro;
@@ -985,7 +996,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         //扩展信息
         if(StringUtils.isNotBlank(extend) && extend.equals("1")) {
             List<ProductAttr> proattrs = pro.productAttrs;
-            List<ProductAttr> attrs = new ArrayList<ProductAttr>();
+            List<ProductAttr> attrs = new ArrayList<>();
             for(ProductAttr p : proattrs) {
                 ProductAttr np = new ProductAttr();
                 np.product = backupsku;

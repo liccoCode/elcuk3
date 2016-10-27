@@ -42,7 +42,7 @@ public class Profits extends Controller {
 
     @Check("profits.index")
     public static void index(ProfitPost p) {
-        List<Profit> profits = new ArrayList<Profit>();
+        List<Profit> profits = new ArrayList<>();
         if(p == null) {
             p = new ProfitPost();
             render(profits, p);
@@ -116,7 +116,7 @@ public class Profits extends Controller {
                                 + "&to="
                                 + new SimpleDateFormat("yyyy-MM-dd").format(p.end)
                                 + "&is_sku=" + is_sku);
-                        profits = new ArrayList<Profit>();
+                        profits = new ArrayList<>();
                         flash.error("后台事务正在计算中,请稍候...");
                     }
                 }
@@ -127,7 +127,7 @@ public class Profits extends Controller {
 
 
     public static void inventory(ProfitPost p) {
-        List<Profit> profits = new ArrayList<Profit>();
+        List<Profit> profits = new ArrayList<>();
         if(p == null) {
             p = new ProfitPost();
             render(profits, p);

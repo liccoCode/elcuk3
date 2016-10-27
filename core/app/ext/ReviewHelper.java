@@ -44,11 +44,11 @@ public class ReviewHelper extends JavaExtensions {
      */
     public static F.T3<Boolean, String, String> iconRating(AmazonListingReview review) {
         if(review.lastRating > review.rating) {
-            return new F.T3<Boolean, String, String>(true, "B94A48", "icon-arrow-down");
+            return new F.T3<>(true, "B94A48", "icon-arrow-down");
         } else if(review.lastRating < review.rating) {
-            return new F.T3<Boolean, String, String>(true, "468847", "icon-arrow-up");
+            return new F.T3<>(true, "468847", "icon-arrow-up");
         } else {
-            return new F.T3<Boolean, String, String>(false, "", "");
+            return new F.T3<>(false, "", "");
         }
     }
 

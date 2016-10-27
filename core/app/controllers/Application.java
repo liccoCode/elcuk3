@@ -1,54 +1,33 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Dates;
-import helper.J;
 import helper.Webs;
-import models.User;
-import models.market.*;
+import models.market.Account;
+import models.market.Feedback;
+import models.market.Orderr;
 import models.view.Ret;
 import models.view.dto.DashBoard;
 import models.whouse.Whouse;
-import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
-import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
-
     public static void index() {
-        //如果是有PM首页权限则跳转到PM首页
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
-        // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         render(dashborad, fbaWhouse);
     }
 
     public static void oldDashBoard() {
-        DashBoard dashborad = Orderr.frontPageOrderTable(11);
-        // Feedback 信息
-        List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render("Application/index.html", dashborad, fbaWhouse);
-    }
-
-    public static void percent(String type, Date date, String m) {
-        M market = M.val(m);
-        if(market == null) Validation.addError("", "市场填写错误");
-        if(Validation.hasErrors())
-            renderJSON(new Ret(false));
-        String json = J.json(OrderItem
-                .categoryPie(type, Dates.morning(date),
-                        Dates.morning(new DateTime(date).plusDays(1).toDate()), market));
-        renderJSON(json);
+        index();
     }
 
     public static void clearCache() {

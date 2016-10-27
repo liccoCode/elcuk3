@@ -35,7 +35,7 @@ import java.util.List;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Deliveryments extends Controller {
 
     @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
@@ -68,7 +68,7 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
         render(deliveryments, p, deliverymentIds);
@@ -93,6 +93,17 @@ public class Deliveryments extends Controller {
         dmt.save();
         flash.success("更新成功.");
         show(dmt.id);
+    }
+
+    public static void confirmUnit(String id, List<Long> pids) {
+        if(pids.size() > 0) {
+            for(Long unit_id : pids) {
+                ProcureUnit unit = ProcureUnit.findById(unit_id);
+                unit.isConfirm = true;
+                unit.save();
+            }
+        }
+        show(id);
     }
 
     /**
@@ -191,7 +202,7 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.deliverymenttoapply")
     public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
                                            Long procureApplyId) {
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");
             index(p, deliverymentIds);
@@ -257,7 +268,7 @@ public class Deliveryments extends Controller {
 
         } catch(Exception e) {
             e.printStackTrace();
-            Logger.warn("downloadFBAZIP %s:%s", id,e.getMessage());
+            Logger.warn("downloadFBAZIP %s:%s", id, e.getMessage());
         } finally {
             File zip = new File(Constant.TMP + "/FBA.zip");
             Files.zip(dirfile, zip);
@@ -295,7 +306,6 @@ public class Deliveryments extends Controller {
         dmt.handler = user;
         dmt.state = Deliveryment.S.PENDING;
         dmt.name = dmt.name.trim();
-        dmt.units.add(unit);
         dmt.deliveryType = Deliveryment.T.MANUAL;
         unit.validateManual();
         if(Validation.hasErrors()) {

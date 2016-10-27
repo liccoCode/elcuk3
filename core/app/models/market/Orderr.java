@@ -79,7 +79,7 @@ public class Orderr extends GenericModel {
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    public List<OrderItem> items = new ArrayList<OrderItem>();
+    public List<OrderItem> items = new ArrayList<>();
 
     /**
      * 订单所属的市场
@@ -99,7 +99,7 @@ public class Orderr extends GenericModel {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @OrderBy("date ASC,cost DESC")
-    public List<SaleFee> fees = new ArrayList<SaleFee>();
+    public List<SaleFee> fees = new ArrayList<>();
     //-------------- Basic ----------------
 
     /**
@@ -126,6 +126,7 @@ public class Orderr extends GenericModel {
      * 订单创建时间
      */
     public Date createDate;
+    public Date updateDate;
 
     /**
      * 订单的付款时间
@@ -404,7 +405,7 @@ public class Orderr extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("1h")
+    @Cached("2h")
     public static DashBoard frontPageOrderTable(int days) {
         DashBoard dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
         if(dashBoard != null) return dashBoard;
@@ -418,7 +419,7 @@ public class Orderr extends GenericModel {
         final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
-        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        List<OrderrVO> vos = new ArrayList<>();
         List<List<OrderrVO>> results = Promises.forkJoin(new Promises.DBCallback<List<OrderrVO>>() {
             @Override
             public List<OrderrVO> doJobWithResult(M m) {
@@ -454,7 +455,7 @@ public class Orderr extends GenericModel {
                 dashBoard.shippeds(key, vo);
         }
         dashBoard.sort();
-        Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+        Cache.add(Orderr.FRONT_TABLE, dashBoard, "2h");
         return dashBoard;
     }
 
@@ -477,8 +478,8 @@ public class Orderr extends GenericModel {
      * @return
      */
     public static List<String> ids(List<Orderr> orderrs) {
-        if(orderrs == null) orderrs = new ArrayList<Orderr>();
-        List<String> orderIds = new ArrayList<String>();
+        if(orderrs == null) orderrs = new ArrayList<>();
+        List<String> orderIds = new ArrayList<>();
         for(Orderr o : orderrs) orderIds.add(o.orderId);
         return orderIds;
     }
@@ -501,10 +502,10 @@ public class Orderr extends GenericModel {
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
                 itemamount = itemamount +
-                                new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new BigDecimal(item.quantity), 2, 4)
-                                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
-                                        .setScale(2, 4).floatValue();
+                        new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                                .divide(new BigDecimal(item.quantity), 2, 4)
+                                .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                .setScale(2, 4).floatValue();
             }
         }
 
@@ -531,7 +532,7 @@ public class Orderr extends GenericModel {
             notaxamount = itemamount;
         }
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
-        return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
+        return new F.T3<>(totalamount, notaxamount, tax);
     }
 
 
@@ -671,6 +672,32 @@ public class Orderr extends GenericModel {
                 show += item.product.sku + ";";
             }
 
+        }
+        return show;
+    }
+
+    public String showPromotionIDs() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0) {
+            for(OrderItem item : items) {
+                if(StringUtils.isNotBlank(item.promotionIDs)) {
+                    show += item.promotionIDs + ";";
+                }
+            }
+        }
+        return show;
+    }
+
+    public String showDiscountPrice() {
+        String show = "";
+        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(items != null && items.size() > 0) {
+            for(OrderItem item : items) {
+                if(item.discountPrice != null) {
+                    show += item.discountPrice + ";";
+                }
+            }
         }
         return show;
     }

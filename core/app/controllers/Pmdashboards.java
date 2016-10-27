@@ -32,6 +32,7 @@ import java.util.Set;
  * User: cary
  * Date: 14-3-17
  * Time: 下午2:44
+ * @deprecated
  */
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
@@ -49,7 +50,7 @@ public class Pmdashboards extends Controller {
         int year = DateTime.now().getYear();
         User user = User.findByUserName(Secure.Security.connected());
         Set<Team> teams = user.teams;
-        List<Category> cates = new ArrayList<Category>();
+        List<Category> cates = new ArrayList<>();
         for(Team team : teams) {
             List<Category> teamcates = team.getObjCategorys();
             if(teamcates != null) {

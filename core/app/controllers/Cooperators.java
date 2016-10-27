@@ -211,7 +211,7 @@ public class Cooperators extends Controller {
             params.add(type);
         }
         List<Cooperator> list = Cooperator.find(sql.toString(), params.toArray()).fetch();
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for(Cooperator coop : list) {
             names.add(coop.name + "-" + coop.id);
         }

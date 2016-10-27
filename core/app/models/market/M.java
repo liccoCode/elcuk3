@@ -785,7 +785,7 @@ public enum M {
      * @return
      */
     public F.T2<DateTime, DateTime> withTimeZone(Date from, Date to) {
-        return new F.T2<DateTime, DateTime>(withTimeZone(from), withTimeZone(to));
+        return new F.T2<>(withTimeZone(from), withTimeZone(to));
     }
 
 
@@ -854,88 +854,6 @@ public enum M {
                 return 0;
         }
     }
-
-    /**
-     * 模拟人工方式修改 Listing 信息的地址
-     *
-     * @return
-     */
-    public static String listingEditPage(Selling sell) {
-        //EU: https://catalog-sc.amazon.co.uk/abis/product/DisplayEditProduct?sku=71APNIP-BSLPU&asin=B007LE3Y88
-        //US: https://catalog.amazon.com/abis/product/DisplayEditProduct?sku=71KDFHD7-BHSPU%2C656605389363&asin=B009A5E1DI&marketplaceID=ATVPDKIKX0DER
-        String msku = sell.merchantSKU;
-        if("68-MAGGLASS-3X75BG,B001OQOK5U".equalsIgnoreCase(sell.merchantSKU)) {
-            msku = "68-MAGGLASS-3x75BG,B001OQOK5U";
-        } else if("80-qw1a56-be,2".equalsIgnoreCase(sell.merchantSKU)) {
-            msku = "80-qw1a56-be,2";
-        } else if("80-qw1a56-be".equalsIgnoreCase(sell.merchantSKU)) {
-            msku = "80-qw1a56-be";
-        }
-        switch(sell.market) {
-            case AMAZON_CA:
-                return String
-                        .format("https://catalog-sc.amazon.ca/abis/product/DisplayEditProduct?sku=%s&asin=%s",
-                                msku, sell.asin);
-            case AMAZON_ES:
-                return String
-                        .format("https://catalog-sc.amazon.it/abis/product/DisplayEditProduct?marketplaceID=A1RKKUPIHCS9HS&ref=xx_myiedit_cont_myifba&sku=%s&asin=%s",
-                                msku, sell.asin);
-            case AMAZON_DE:
-                return String
-                        .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
-                                msku, sell.asin);
-            case AMAZON_FR:
-                return String
-                        .format("https://catalog-sc.amazon.fr/abis/edit/RelistProduct.amzn?sku=%s&asin=%s",
-                                msku, sell.asin);
-            case AMAZON_JP:
-                return String
-                        .format("https://catalog-sc.amazon.co.jp/abis/product/DisplayEditProduct?marketplaceID=A1VC38T7YXB528&ref=xx_myiedit_cont_myifba&sku=%s&asin=%s",
-                                msku, sell.asin);
-            case AMAZON_IT:
-                return String
-                        .format("https://catalog-sc.amazon.it/abis/product/DisplayEditProduct?sku=%s&asin=%s",
-                                msku, sell.asin);
-            case AMAZON_UK:
-                return String
-                        .format("https://catalog-sc.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
-                                sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);
-            case AMAZON_US:
-                return String
-                        .format("https://catalog.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
-                                sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-
-    /**
-     * 模拟人工查询FNSKU的地址
-     *
-     * @return
-     */
-    public String listingfnSkuPage(Selling sell) {
-        String msku = sell.merchantSKU;
-        switch(sell.market) {
-            case AMAZON_CA:
-            case AMAZON_ES:
-            case AMAZON_DE:
-            case AMAZON_FR:
-            case AMAZON_JP:
-            case AMAZON_IT:
-            case AMAZON_UK:
-            case AMAZON_US:
-                return String
-                        .format("https://sellercentral.%s/gp/ssof/knights/items-list-xml.html/ref=ag_xx_cont_fbalist?searchType=genericQuery&genericQuery=%s",
-                                this.toString(), msku);
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
 
     public static M val(String str) {
         if(StringUtils.isBlank(str)) return null;
@@ -1117,6 +1035,41 @@ public enum M {
                 return "AMAZON_NA";
             default:
                 throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    /**
+     * CreateInboundShipmentPlan 时的 ShipToCountryCode 参数值
+     * <p>
+     * PS:
+     * 只支持 北美 和 欧洲 市场
+     * 印度市场请使用 ShipToCountrySubdivisionCode 参数
+     * <p>
+     * 详见:
+     * http://docs.developer.amazonservices.com/en_US/fba_inbound/FBAInbound_CreateInboundShipmentPlan.html
+     *
+     * @return
+     */
+    public String country() {
+        switch(this) {
+            case AMAZON_CA:
+                return "CA";
+            case AMAZON_DE:
+                return "DE";
+            case AMAZON_ES:
+                return "ES";
+            case AMAZON_FR:
+                return "FR";
+            case AMAZON_IT:
+                return "IT";
+            case AMAZON_JP:
+                return null;
+            case AMAZON_UK:
+                return "GB";
+            case AMAZON_US:
+                return "US";
+            default:
+                return null;
         }
     }
 }

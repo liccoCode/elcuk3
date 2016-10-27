@@ -195,10 +195,10 @@ public class BtbOrder extends Model {
     }
 
     @OneToMany(mappedBy = "btbOrder", fetch = FetchType.LAZY)
-    public List<BtbOrderItem> btbOrderItemList = new ArrayList<BtbOrderItem>();
+    public List<BtbOrderItem> btbOrderItemList = new ArrayList<>();
 
     public void saveEntity(BtbOrder btbOrder) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         if(this.id == null) {
             btbOrder.createDate = new Date();
             btbOrder.creator = Login.current();
@@ -272,7 +272,7 @@ public class BtbOrder extends Model {
     }
 
     public Map<Currency, BigDecimal> totalOrderCost() {
-        Map<Currency, BigDecimal> map = new HashMap<Currency, BigDecimal>();
+        Map<Currency, BigDecimal> map = new HashMap<>();
         /**客户运费**/
         if(this.customShipCost != null) {
             if(map.containsKey(this.customShipUnit)) {
@@ -327,7 +327,7 @@ public class BtbOrder extends Model {
 
 
     public List<String> doneUpdate(BtbOrder order) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "btbCustom.id", order.btbCustom.id));
         logs.addAll(Reflects.logFieldFade(this, "memo", order.memo));
         logs.addAll(Reflects.logFieldFade(this, "customShipCost", order.customShipCost));
@@ -346,7 +346,7 @@ public class BtbOrder extends Model {
     }
 
     public List<String> doneItemUpdate(BtbOrderItem old, BtbOrderItem item) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(old, "product", item.product));
         logs.addAll(Reflects.logFieldFade(old, "qty", item.qty));
         logs.addAll(Reflects.logFieldFade(old, "price", item.price));

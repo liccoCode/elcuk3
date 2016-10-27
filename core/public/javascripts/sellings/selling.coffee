@@ -80,35 +80,6 @@ $ ->
     )
     false
 
-  # Deploy 按钮
-  $('#amz-deploy').click ->
-# check account 与 market 不一样, 要提醒
-    switch $('[name=s\\.account\\.id]').val()
-      when 1
-        if $('[name=s\\.market]').val() != 'AMAZON_UK'
-          return unless confirm("注意! Account 是 UK 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
-      when 2
-        if $('[name=s\\.market]').val() != 'AMAZON_DE'
-          return unless confirm("注意! Account 是 DE 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
-      when 131
-        if $('[name=s\\.market]').val() != 'AMAZON_US'
-          return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
-      else
-    LoadMask.mask()
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-    .done((feed) ->
-      if feed.flag is false
-        noty({text: feed.message, type: 'error'})
-      else
-        noty({text: "成功创建 Feed(#{feed.id})", type: 'success'})
-      LoadMask.unmask()
-    )
-    .fail((r) ->
-      noty({text: r.responseText, type: 'error'})
-      LoadMask.unmask()
-    )
-    false
-
   # Sync 按钮
   $('#amz-sync').click ->
     return false if !confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")

@@ -77,7 +77,7 @@ public class TrafficRatePost extends Post<TrafficRate> {
         List<SellingRecord> dateMixRecords = SellingRecord
                 .find(sbd.toString(), params.toArray()).fetch();
 
-        List<TrafficRate> traffics = new ArrayList<TrafficRate>();
+        List<TrafficRate> traffics = new ArrayList<>();
         for(SellingRecord rcd : dateMixRecords) {
             TrafficRate traffic = new TrafficRate();
             traffic.sellingId = rcd.selling.sellingId;

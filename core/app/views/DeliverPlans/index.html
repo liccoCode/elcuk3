@@ -62,7 +62,7 @@
             <td>
               <a href="@{DeliverPlans.show(dp.id)}" target="_blank">${dp.id}</a>
             </td>
-            <td style="cursor:pointer;" data-toggle="toggle" data-target="#dp_${dp_index}">
+            <td style="cursor:pointer;" name="clickTd" deliverplan_id="${dp.id}">
               <span><i class="icon-reorder"></i></span>
               <span>${dp.name}</span>
               <span class="badge badge-info">${dp.units.size()}</span>
@@ -71,11 +71,6 @@
             <td>${dp.state.label()}</td>
             <td>${dp.handler.username}</td>
             <td>#{time_tooltip time:dp.createDate/}</td>
-          </tr>
-          <tr id="dp_${dp_index}" style="display:none;">
-            <td colspan="12" style="padding:0;border:none">
-                #{render 'ProcureUnits/_unit_list.html', units:dp.units, norecord: true, deliveryplan:true/}
-            </td>
           </tr>
         #{/list}
     </table>

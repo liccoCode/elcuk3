@@ -238,7 +238,7 @@ public class AmazonListingReview extends GenericModel {
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
      */
     @OneToMany(mappedBy = "ownerReview")
-    public List<AmazonReviewRecord> reviewRecords = new ArrayList<AmazonReviewRecord>();
+    public List<AmazonReviewRecord> reviewRecords = new ArrayList<>();
 
     /**
      * 主要是为了记录 createDate 日期
@@ -442,7 +442,7 @@ public class AmazonListingReview extends GenericModel {
             sb.append(a.id).append("|").append(a.prettyName()).append(",");
         }
         Logger.info("Account List: %s", sb.toString());
-        return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
+        return new F.T2<>(nonClickAccs.get(0), nonClickAccs.size());
     }
 
 
@@ -608,7 +608,7 @@ public class AmazonListingReview extends GenericModel {
     public static List<F.T2<String, Integer>> reviewLeftClickTimes(List<String> reviewIds) {
         List<AmazonListingReview> reviews = AmazonListingReview
                 .find("reviewId IN " + JpqlSelect.inlineParam(reviewIds)).fetch();
-        List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<F.T2<String, Integer>>();
+        List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<>();
         for(AmazonListingReview review : reviews) {
             int leftClick = 0;
             try {
@@ -616,7 +616,7 @@ public class AmazonListingReview extends GenericModel {
             } catch(FastRuntimeException e) {
                 leftClick = 0;
             }
-            reviewLeftClicks.add(new F.T2<String, Integer>(review.reviewId, leftClick));
+            reviewLeftClicks.add(new F.T2<>(review.reviewId, leftClick));
         }
         return reviewLeftClicks;
     }
@@ -654,7 +654,7 @@ public class AmazonListingReview extends GenericModel {
             JSONObject result = service.countReviewRating();
             if(result == null) return new HighChart(Series.LINE);
 
-            HashMap<Date, F.T2<Long, Long>> sumResults = new HashMap<Date, F.T2<Long, Long>>();
+            HashMap<Date, F.T2<Long, Long>> sumResults = new HashMap<>();
             for(M m : Promises.MARKETS) {
                 Series.Line line = new Series.Line(m.name(), false);
 
@@ -682,12 +682,12 @@ public class AmazonListingReview extends GenericModel {
                     //将此次计算出来的 Review 个数与 得分总数储存起来供给计算 SUM 线的时候使用
                     if(sumResults.containsKey(sunday)) {
                         F.T2<Long, Long> sunDayTotal = sumResults.get(sunday);
-                        sumResults.put(sunday, new F.T2<Long, Long>(
+                        sumResults.put(sunday, new F.T2<>(
                                 (sunDayTotal._1 + scoreSum),
                                 (sunDayTotal._2 + sumCount))
                         );
                     } else {
-                        sumResults.put(sunday, new F.T2<Long, Long>(scoreSum, sumCount));
+                        sumResults.put(sunday, new F.T2<>(scoreSum, sumCount));
                     }
                 }
                 lineChart.series(line);
@@ -728,13 +728,13 @@ public class AmazonListingReview extends GenericModel {
             List<Date> sundayList = Dates.getAllSunday(from, to);
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject aggregations = service.countPoorRatingByDateRange();
-            List<String> jsonKeys = new ArrayList<String>();
+            List<String> jsonKeys = new ArrayList<>();
             for(M m : Promises.MARKETS) jsonKeys.add(m.name());
             jsonKeys.add("SUM");
 
             for(String jsonKey : jsonKeys) {
                 Series.Line line = new Series.Line(jsonKey);
-                List<Date> sundayListCopy = new ArrayList<Date>(sundayList);
+                List<Date> sundayListCopy = new ArrayList<>(sundayList);
 
                 if(aggregations != null) {
                     JSONObject countByMarket = aggregations.getJSONObject(jsonKey);

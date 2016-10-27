@@ -261,7 +261,7 @@ public class ProfitPost {
             }
             if(dtos == null) return profitlist;
 
-            Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
+            Map<String, ProfitDto> profitmap = new HashMap<>();
             for(ProfitDto dto : dtos) {
                 profitmap.put(dto.sku, dto);
             }

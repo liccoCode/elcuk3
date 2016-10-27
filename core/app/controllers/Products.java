@@ -108,7 +108,7 @@ public class Products extends Controller {
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);
             pro.save();
-            List<String> logs = new ArrayList<String>();
+            List<String> logs = new ArrayList<>();
             logs.addAll(dbpro.beforeDoneUpdate(pro));
             if(logs.size() > 0) {
                 new ElcukRecord(Messages.get("product.update"),
@@ -341,11 +341,11 @@ public class Products extends Controller {
         Product pro = Product.findById(sku);
         Template template = Template.findById(templateId);
         List<ProductAttr> atts = pro.productAttrs;
-        for(Attribute attribute : template.attributes) {
-            if(!atts.contains(attribute)) {
+        for(TemplateAttribute templateAttribute : template.templateAttributes) {
+            if(!atts.contains(templateAttribute.attribute)) {
                 ProductAttr productAttr = new ProductAttr();
                 productAttr.product = pro;
-                productAttr.attribute = attribute;
+                productAttr.attribute = templateAttribute.attribute;
                 productAttr.save();
                 atts.add(productAttr);
             }
@@ -424,7 +424,7 @@ public class Products extends Controller {
      */
     public static void sameSku(String sku) {
         List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
-        List<String> skus = new ArrayList<String>();
+        List<String> skus = new ArrayList<>();
         for(Product p : products) skus.add(p.sku);
         renderJSON(J.json(skus));
     }

@@ -3,7 +3,6 @@ package jobs;
 import helper.Caches;
 import helper.LogUtils;
 import jobs.driver.BaseJob;
-import models.User;
 import models.market.M;
 import models.market.Selling;
 import models.view.dto.SaleReportDTO;
@@ -67,7 +66,7 @@ public class SaleReportsJob extends BaseJob {
         String runningKey = buildKey() + "_running";
         Cache.add(runningKey, runningKey);
 
-        List<SaleReportDTO> dtos = new ArrayList<SaleReportDTO>();
+        List<SaleReportDTO> dtos = new ArrayList<>();
 
         //匹配 SellingID 中的 Category
         Pattern CATEGORYID = Pattern.compile("\\d*");

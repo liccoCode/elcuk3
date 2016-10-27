@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AmazonFBAInventoryReceivedJob {
 
     public static class Rows {
-        public List<String> records = new ArrayList<String>();
-        public Map<String, AtomicInteger> mskus = new HashMap<String, AtomicInteger>();
+        public List<String> records = new ArrayList<>();
+        public Map<String, AtomicInteger> mskus = new HashMap<>();
 
         public int qty(String msku) {
             if(mskus.get(msku) == null) {
@@ -43,7 +43,7 @@ public class AmazonFBAInventoryReceivedJob {
 
         public static F.Option<Date> getEarliestDate(List<String> records) {
             if(records == null || records.size() == 0) return F.Option.None();
-            List<Date> dates = new ArrayList<Date>();
+            List<Date> dates = new ArrayList<>();
             for(String record : records) {
                 String dateStr = record.split("\t")[0];
                 dates.add(DateTime.parse(dateStr).toDate());

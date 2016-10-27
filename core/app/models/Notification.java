@@ -29,7 +29,7 @@ public class Notification extends GenericModel {
     /**
      * 用来记录用户 Notification 的 Queue Map
      */
-    private static final Map<String, BlockingQueue<Notification>> USER_QUEUE_CACHE = new ConcurrentHashMap<String, BlockingQueue<Notification>>();
+    private static final Map<String, BlockingQueue<Notification>> USER_QUEUE_CACHE = new ConcurrentHashMap<>();
 
     public static final String INDEX = "http://e.easya.cc/Notifications/index";
 
@@ -203,7 +203,7 @@ public class Notification extends GenericModel {
         if(!USER_QUEUE_CACHE.containsKey(user.username)) {
             synchronized(USER_QUEUE_CACHE) {
                 if(USER_QUEUE_CACHE.containsKey(user.username)) return; // double check
-                BlockingQueue<Notification> blockingQueue = new LinkedBlockingQueue<Notification>();
+                BlockingQueue<Notification> blockingQueue = new LinkedBlockingQueue<>();
                 List<Notification> notifications = user.unNotifiedNotification();
                 for(Notification note : notifications) {
                     blockingQueue.add(note);

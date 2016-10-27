@@ -37,33 +37,33 @@ $ ->
   # 所有的 btnFucs 下的 button action
   $('#btnFucs').on('click', '.func', ->
     funcsForm = $('#funcsForm').find('form').attr('action', @getAttribute('url')).end()
-      .find('#action').text(@textContent).end()
-      .find("input[name=date]").val($.DateUtil.fmt2(new Date())).end()
-      .modal('show');
+    .find('#action').text(@textContent).end()
+    .find("input[name=date]").val($.DateUtil.fmt2(new Date())).end()
+    .modal('show');
   )
 
-  $('#adjust_shipitems').on('click', '.btn.adjust',->
+  $('#adjust_shipitems').on('click', '.btn.adjust', ->
     shipmentId = $("input[name='shipmentId']").val()
     if shipmentId
-      $('#adjust_shipitems').attr('action',(i, v) ->
+      $('#adjust_shipitems').attr('action', (i, v) ->
         "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
       ).submit()
     false
-  ).on('click', '.btn.preview',(e) ->
+  ).on('click', '.btn.preview', (e) ->
     shipment = $("[name='shipmentId']")
     unless shipment.val()
       EF.colorAnimate(shipment)
     else
       LoadMask.mask()
       $.getScript("/shipment/#{shipment.val()}/preview")
-        .done(->
-          LoadMask.unmask()
-        )
-        .fail(->
-          LoadMask.unmask()
-        )
+      .done(->
+        LoadMask.unmask()
+      )
+      .fail(->
+        LoadMask.unmask()
+      )
     false
-  ).on('click', '.btn[data-url]:contains(L)',(e) ->
+  ).on('click', '.btn[data-url]:contains(L)', (e) ->
     $i = $(@)
     params =
       url: $i.data('url')
@@ -88,7 +88,7 @@ $ ->
         element.setAttribute('selected', 'selected')
     )
 
-    $('#popLogModel').on('change', '#compentype',(e) ->
+    $('#popLogModel').on('change', '#compentype', (e) ->
       if $('#compentype').val() == 'easyacc'
         if !$("#popLogModel input[name='compenamt']").val()
           $("#popLogModel input[name='compenamt']").val('0')
@@ -109,55 +109,48 @@ $ ->
       EF.scoll(targetTr)
       EF.colorAnimate(targetTr)
 
-
   # trace_no新增一行
-  $("#shipment_form").on("click", "#more_trackno_btn",() ->
+  $("#shipment_form").on("click", "#more_trackno_btn", () ->
     $btn = $(@)
-    $table = $("##{$btn.data("table")}")[0]
-    # 获取表格的行数
-    rowsCount = $table.rows.length
-    # 通过 js 克隆出一个新的行 由于表格的第一行是标题行，所以使用 表格的行数减去1得到最后一行
-    $tr = $("##{$btn.data("table")} tr:eq(#{rowsCount - 1})")[0]
-    $newRow = $tr.cloneNode(true)
-    # 修改 tr 元素内 textarea 的 name 属性
-    inputs = $newRow.getElementsByTagName("input")
-
-    setInputName($btn.attr("id"), rowsCount, inputs)
-    $table.appendChild($newRow)
-  ).on("click", "[name^='delete_trackno_row']", () ->
+    table = $btn.parents('table[id=trackno_table]')
+    trs = table.find("tr")
+    $(trs[trs.size() - 1]).before(
+      "<tr><td>" +
+        "<input type='text' class='input-medium' name='ship.tracknolist[#{trs.size() - 1}]'> " +
+        "<a class='btn' name='delete_trackno_row'><i class='icon-remove'></a>" +
+        "</td></tr>"
+    )
+  ).on("click", "[name='delete_trackno_row']", () ->
     $btn = $(@)
     $btn.parent("td").parent().remove()
+    trs = $('table[id=trackno_table]').find("tr")
+    $.each(trs, (index, tr) ->
+      $tr = $(tr)
+      $tr.find("input").attr('name', "ship.tracknolist[#{index}]")
+    )
   )
 
-
-  # trace_no新增一行
   $("#adjust_shipitems").on("click", "#unitbutton", () ->
-    $td =$(@)
+    $td = $(@)
     sid = $td.text().trim()
     paintProcureUnitInTimeline('sid', sid)
   )
-
-  # 根据点击按钮的不同判断text的名称
-  setInputName = (flag, rowsCount, inputs) ->
-    inputs[0].name = "ship.tracknolist[#{rowsCount - 1}]"
-    inputs[0].value = ""
-
 
   paintProcureUnitInTimeline = (type, val)->
     $("#tl").show()
     $time_line_home = $("#tl")
     LoadMask.mask($time_line_home)
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
-    (r) ->
-      try
-        if r.flag is false
-          alert(r.message)
-        else
-          eventSource = $('#tl').data('source')
-          eventSource.clear()
-          eventSource.loadJSON(r, '/')
-      finally
-        LoadMask.unmask($time_line_home)
+      (r) ->
+        try
+          if r.flag is false
+            alert(r.message)
+          else
+            eventSource = $('#tl').data('source')
+            eventSource.clear()
+            eventSource.loadJSON(r, '/')
+        finally
+          LoadMask.unmask($time_line_home)
     )
 
   $('#all_check').click (e) ->

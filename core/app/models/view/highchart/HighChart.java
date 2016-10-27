@@ -31,7 +31,7 @@ public class HighChart implements Serializable {
     public long pointInterval = TimeUnit.DAYS.toMillis(1);
 
     // 曲线
-    public List<AbstractSeries> series = new ArrayList<AbstractSeries>();
+    public List<AbstractSeries> series = new ArrayList<>();
 
     private String type = Series.LINE;
 

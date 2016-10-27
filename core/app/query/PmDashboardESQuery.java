@@ -1,33 +1,33 @@
 package query;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.Caches;
 import helper.DBUtils;
 import helper.Dates;
+import models.SaleTarget;
 import models.product.Category;
+import models.product.Team;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import models.view.report.Profit;
 import org.joda.time.DateTime;
 import play.cache.Cache;
+import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
-import models.product.Team;
+import services.MetricProfitService;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Calendar;
 import java.util.Map;
-
-import models.SaleTarget;
-import com.alibaba.fastjson.JSONArray;
-import services.MetricProfitService;
-import play.db.helper.SqlSelect;
 
 /**
  * PM首页显示图形需要的数据
  * User: cary
  * Date: 14-3-17
  * Time: 下午6:20
+ * @deprecated
  */
 public class PmDashboardESQuery {
     /**

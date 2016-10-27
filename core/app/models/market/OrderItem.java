@@ -9,7 +9,6 @@ import models.product.Product;
 import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
-import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -179,7 +178,7 @@ public class OrderItem extends GenericModel {
      * @param to  @return {series_size, days, series_n}
      */
     @Cached("2h")
-    public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
+    public static HighChart ajaxHighChartUnitOrder(String val, String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
@@ -188,23 +187,15 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            Date _from = Dates.morning(from);
+            Date _to = Dates.night(to);
 
-            final HighChart highChart = new HighChart();
-            final OrderItemESQuery esQuery = new OrderItemESQuery();
-            Promises.forkJoin(new Promises.Callback<Object>() {
-                @Override
-                public Object doJobWithResult(M m) {
-                    highChart.series(esQuery.salesFade(type, val, m, _from, _to));
-                    return null;
-                }
+            HighChart highChart = new HighChart();
+            OrderItemESQuery esQuery = new OrderItemESQuery();
 
-                @Override
-                public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
-                }
-            });
+            for(M market : Promises.MARKETS) {
+                highChart.series(esQuery.salesFade(type, val, market, _from, _to));
+            }
             highChart.series(highChart.sumSeries("销量"));
             if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length() >= 6) {
                 for(int i = 0; i < highChart.series.size(); i++) {
@@ -252,54 +243,6 @@ public class OrderItem extends GenericModel {
     }
 
     /**
-     * 不同 Category 销量的百分比;
-     * TODO 取消销售额饼图
-     *
-     * @param type units/sales
-     * @param from
-     * @param to
-     * @param
-     * @return
-     */
-    public static HighChart categoryPie(String type, final Date from, final Date to, M market) {
-        String key = Caches.Q.cacheKey(type, from, to, market.name());
-        HighChart pieChart = Cache.get(key, HighChart.class);
-        if(pieChart != null) return pieChart;
-
-        synchronized(key.intern()) {
-            pieChart = Cache.get(key, HighChart.class);
-            if(pieChart != null) return pieChart;
-
-            pieChart = new HighChart(Series.PIE);
-
-            final OrderItemESQuery esQuery = new OrderItemESQuery();
-            if("all".equals(type)) {
-                final HighChart finalPieChart = pieChart;
-                Promises.forkJoin(new Promises.Callback<Object>() {
-                    @Override
-                    public Object doJobWithResult(M m) {
-                        finalPieChart.series(esQuery.categoryPie(m, from, to));
-                        return null;
-                    }
-
-                    @Override
-                    public String id() {
-                        return "OrderItem.categoryPie";
-                    }
-                });
-                AbstractSeries pie = pieChart.sumSeries("销量百分比");
-                pieChart.series.clear();
-                pieChart.series.add(pie);
-            } else {
-                pieChart.series(esQuery.categoryPie(market, from, to));
-            }
-            Cache.add(key, pieChart, "8h");
-        }
-        return pieChart;
-    }
-
-
-    /**
      * <pre>
      * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
@@ -336,7 +279,7 @@ public class OrderItem extends GenericModel {
 
                 @Override
                 public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
+                    return "OrderItem.ajaxSkusUnitOrder(ES)";
                 }
             });
 
@@ -429,7 +372,7 @@ public class OrderItem extends GenericModel {
      * 查询传入的 SKU 的销量信息
      */
     public static List<F.T4<String, Long, Long, Double>> querySalesBySkus(Date from, Date to, String val) {
-        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<F.T4<String, Long, Long, Double>>();
+        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<>();
 
         List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
         List<String> categories = new ProductQuery().loadCategoriesBySkus(selectedSkus);
@@ -453,7 +396,7 @@ public class OrderItem extends GenericModel {
             JSONObject categoryResult = catgoriesResult.getJSONObject(m.name());
             Long categorySales = categoryResult.getJSONObject("sum_sales").getLongValue("value");
             Float rate = categorySales == 0 ? 0 : ((float) skuSales / (float) categorySales);
-            sales.add(new F.T4<String, Long, Long, Double>(m.name(), skuSales, categorySales,
+            sales.add(new F.T4<>(m.name(), skuSales, categorySales,
                     Webs.scale2Double(rate * 100))
             );
         }
@@ -466,7 +409,7 @@ public class OrderItem extends GenericModel {
             sumCategorySales += item._3;
         }
         Float sumRate = sumCategorySales == 0 ? 0 : ((float) sumSkuSales / (float) sumCategorySales);
-        sales.add(0, new F.T4<String, Long, Long, Double>("ALL", sumSkuSales, sumCategorySales,
+        sales.add(0, new F.T4<>("ALL", sumSkuSales, sumCategorySales,
                 Webs.scale2Double(sumRate * 100))
         );
         return sales;
@@ -489,7 +432,7 @@ public class OrderItem extends GenericModel {
 
             try {
                 Cache.add(runningKey, runningKey);
-                List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
+                List<String> selectedSkus = new ArrayList<>(Arrays.asList(val.replace("\"", "").split(",")));
                 if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
                 List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
 
@@ -500,7 +443,7 @@ public class OrderItem extends GenericModel {
                         .format("SkuMonthlyDailySales fetch es result.... [%sms]", System.currentTimeMillis() - begin));
                 begin = System.currentTimeMillis();
 
-                HashMap<String, Integer> units = new HashMap<String, Integer>();
+                HashMap<String, Integer> units = new HashMap<>();
                 if(esResult != null) {
                     for(M m : markets) {
                         JSONObject marketResult = esResult.getJSONObject(m.name());
@@ -518,7 +461,7 @@ public class OrderItem extends GenericModel {
                     }
                 }
 
-                dtos = new ArrayList<DailySalesReportsDTO>();
+                dtos = new ArrayList<>();
                 int beginMonth = new DateTime(from).getMonthOfYear();
                 int endMonth = new DateTime(to).getMonthOfYear();
                 DateTime currentYear = new DateTime(from);

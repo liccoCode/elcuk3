@@ -204,7 +204,7 @@ public class MWSReports {
     }
 
 
-    private static final Map<String, MarketplaceWebService> cached = new HashMap<String, MarketplaceWebService>();
+    private static final Map<String, MarketplaceWebService> cached = new HashMap<>();
 
     /**
      * 通过 JobRequest 获取缓存了的 MarketplaceWebService 对象

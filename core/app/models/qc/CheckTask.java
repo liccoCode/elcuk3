@@ -342,7 +342,7 @@ public class CheckTask extends Model {
     public String qcRequires = "";
 
     @Transient
-    public List<String> qcRequire = new ArrayList<String>();
+    public List<String> qcRequire = new ArrayList<>();
 
     /**
      * 检测方法
@@ -352,7 +352,7 @@ public class CheckTask extends Model {
     public String qcWays = "";
 
     @Transient
-    public List<String> qcWay = new ArrayList<String>();
+    public List<String> qcWay = new ArrayList<>();
 
     /**
      * 打印次数
@@ -373,7 +373,7 @@ public class CheckTask extends Model {
     public String standBoxQctInfo;
 
     @Transient
-    public List<CheckTaskDTO> standBoxQctInfos = new ArrayList<CheckTaskDTO>();
+    public List<CheckTaskDTO> standBoxQctInfos = new ArrayList<>();
 
     /**
      * 尾箱尾箱质检信息
@@ -382,7 +382,7 @@ public class CheckTask extends Model {
     public String tailBoxQctInfo;
 
     @Transient
-    public List<CheckTaskDTO> tailBoxQctInfos = new ArrayList<CheckTaskDTO>();
+    public List<CheckTaskDTO> tailBoxQctInfos = new ArrayList<>();
 
     /**
      * 不合格数量
@@ -403,7 +403,7 @@ public class CheckTask extends Model {
     public String samplingTypes = "";
 
     @Transient
-    public List<String> samplingType = new ArrayList<String>();
+    public List<String> samplingType = new ArrayList<>();
 
     /**
      * 送检次数
@@ -413,7 +413,7 @@ public class CheckTask extends Model {
     public String inspectionTimes = "";
 
     @Transient
-    public List<String> inspectionTime = new ArrayList<String>();
+    public List<String> inspectionTime = new ArrayList<>();
 
     /**
      * AQL 严重
@@ -438,7 +438,7 @@ public class CheckTask extends Model {
      * JSON 格式: [{"badDesc": "aaa", inspectionResult: [检验结果1, 检验结果2]}]
      */
     @Transient
-    public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<CheckTaskAQLDTO>();
+    public List<CheckTaskAQLDTO> aqlBadDesc = new ArrayList<>();
 
     @Lob
     public String aqlBadDescs = "[]";
@@ -465,10 +465,10 @@ public class CheckTask extends Model {
             this.inspectionTimes = StringUtils.join(this.inspectionTime, Webs.SPLIT);
             this.aqlBadDescs = J.json(this.fixNullStr(this.aqlBadDesc));
         } else {
-            this.qcRequire = new ArrayList<String>();
-            this.qcWay = new ArrayList<String>();
-            this.samplingType = new ArrayList<String>();
-            this.inspectionTime = new ArrayList<String>();
+            this.qcRequire = new ArrayList<>();
+            this.qcWay = new ArrayList<>();
+            this.samplingType = new ArrayList<>();
+            this.inspectionTime = new ArrayList<>();
 
             String temp[] = StringUtils.splitByWholeSeparator(this.qcRequires, Webs.SPLIT);
             if(temp != null) Collections.addAll(this.qcRequire, temp);
@@ -509,13 +509,13 @@ public class CheckTask extends Model {
         //查询出已经设置好的CheckList
         //1. Catrgory 的检测要求
         //2. SKU 的检测要求
-        List<SkuCheck> parents = new ArrayList<SkuCheck>();
+        List<SkuCheck> parents = new ArrayList<>();
         List<SkuCheck> cates = SkuCheck.find("SkuName=?", this.units.product.category.categoryId).fetch();
         List<SkuCheck> skus = SkuCheck.find("SkuName=?", this.units.product.sku).fetch();
         parents.addAll(cates);
         parents.addAll(skus);
 
-        List<SkuCheck> skuChecks = new ArrayList<SkuCheck>();
+        List<SkuCheck> skuChecks = new ArrayList<>();
         for(SkuCheck parent : parents) {
             //当前对象下所有的子对象
             List<SkuCheck> temps = SkuCheck.find("pid=?", parent.id).fetch();
@@ -622,7 +622,7 @@ public class CheckTask extends Model {
      * 更新时的日志
      */
     public void beforeUpdateLog(CheckTask newCt) {
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.updateAndLogChanges(this, "startTime", newCt.startTime));
         logs.addAll(Reflects.updateAndLogChanges(this, "endTime", newCt.endTime));
         logs.addAll(Reflects.updateAndLogChanges(this, "isship", newCt.isship));
@@ -728,7 +728,7 @@ public class CheckTask extends Model {
      * @return
      */
     public java.util.Map<String, Object> processProcureUnit(float wfee, int flow) {
-        java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
+        java.util.Map<String, Object> variableMap = new java.util.HashMap<>();
         this.units.shipState = ProcureUnit.S.NOSHIPWAIT;
         this.workfee = wfee;
         //修改预计交货时间
@@ -763,7 +763,7 @@ public class CheckTask extends Model {
      * @return
      */
     public java.util.Map<String, Object> processQc(int flow) {
-        java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
+        java.util.Map<String, Object> variableMap = new java.util.HashMap<>();
         //退回工厂或者到仓库返工
         //结束
         if(this.dealway == CheckTask.DealType.RETURN ||
@@ -799,7 +799,7 @@ public class CheckTask extends Model {
 
     public void submitActiviti(ActivitiProcess ap, String taskname, float wfee, int flow, String username) {
         if(this.opition == null) this.opition = "";
-        java.util.Map<String, Object> variableMap = new java.util.HashMap<String, Object>();
+        java.util.Map<String, Object> variableMap = new java.util.HashMap<>();
         if(taskname.equals("采购员")) {
             variableMap = processProcureUnit(wfee, flow);
         }
@@ -855,7 +855,7 @@ public class CheckTask extends Model {
         ProcureUnit unit = null;
         Date oldplanDeliveryDate = null;
 
-        List<Map<String, String>> infos = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> infos = new ArrayList<>();
         if(ap == null) {
             ap = new ActivitiProcess();
         } else {
@@ -876,7 +876,7 @@ public class CheckTask extends Model {
             infos = ActivitiProcess.processInfo(ap.processInstanceId);
         }
 
-        Map<String, Object> map = new Hashtable<String, Object>();
+        Map<String, Object> map = new Hashtable<>();
         map.put("ap", ap);
         map.put("issubmit", issubmit);
         if(taskname != null) map.put("taskname", taskname);

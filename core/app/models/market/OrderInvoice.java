@@ -145,9 +145,9 @@ public class OrderInvoice extends GenericModel {
      * 价格信息转化给前台显示
      */
     public void setprice() {
-        if(editprice != null) {
+        if(editprice != null && StringUtils.isNotBlank(editprice)) {
             String[] prices = editprice.split(",");
-            this.price = new ArrayList<Float>();
+            this.price = new ArrayList<>();
             for(String p : prices) {
                 this.price.add(new Float(p));
             }

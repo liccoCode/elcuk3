@@ -74,8 +74,8 @@ public class Deliveryment extends GenericModel {
         public abstract String label();
     }
 
-    @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    @OneToMany(mappedBy = "deliveryment", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    public List<ProcureUnit> units = new ArrayList<>();
 
     @ManyToOne
     public ProcureApply apply;
@@ -188,7 +188,7 @@ public class Deliveryment extends GenericModel {
     public F.T2<Date, Date> firstAndEndDeliveryDate() {
         Date first = null;
         Date end = null;
-        List<Date> deliveryDates = new ArrayList<Date>();
+        List<Date> deliveryDates = new ArrayList<>();
         for(ProcureUnit unit : this.units) {
             if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() &&
                     unit.stage != ProcureUnit.STAGE.CLOSE)
@@ -202,7 +202,7 @@ public class Deliveryment extends GenericModel {
             first = deliveryDates.get(0);
             end = first;
         }
-        return new F.T2<Date, Date>(first, end);
+        return new F.T2<>(first, end);
     }
 
     /**
@@ -223,11 +223,11 @@ public class Deliveryment extends GenericModel {
             this.state = S.DONE;
             this.save();
         }
-        return new F.T2<Integer, Integer>(delivery, total == 0 ? 1 : total);
+        return new F.T2<>(delivery, total == 0 ? 1 : total);
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     * 返回可以用来添加的 ProcureUnits
      *
      * @return
      */
@@ -263,7 +263,7 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public Set<Category> unitsCategorys() {
-        Set<Category> categories = new HashSet<Category>();
+        Set<Category> categories = new HashSet<>();
         for(ProcureUnit unit : this.units) {
             categories.add(unit.product.category);
         }
@@ -278,10 +278,10 @@ public class Deliveryment extends GenericModel {
          * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
          */
         for(ProcureUnit unit : this.units) {
-         //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
             //    Validation.addError("deliveryment.units.cancel", "validation.required");
-         //   else
-                unit.toggleAssignTodeliveryment(null, false);
+            //   else
+            unit.toggleAssignTodeliveryment(null, false);
         }
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
@@ -300,7 +300,7 @@ public class Deliveryment extends GenericModel {
         if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
             Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
                     " 状态的[采购单]添加[采购单元]");
-            return new ArrayList<ProcureUnit>();
+            return new ArrayList<>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Cooperator singleCop = units.get(0).cooperator;
@@ -308,7 +308,7 @@ public class Deliveryment extends GenericModel {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
 
@@ -326,12 +326,16 @@ public class Deliveryment extends GenericModel {
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else if(this.deliveryType == T.MANUAL && unit.selling == null) {
+                //手动采购单中的默认的采购计划(没有 Selling)不允许从采购单中移除
+                Validation.addError("", "手动单中默认的采购计划不允许被移除!");
+            } else {
                 unit.toggleAssignTodeliveryment(null, false);
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+        if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
         this.save();
 
@@ -460,7 +464,7 @@ public class Deliveryment extends GenericModel {
      * 查找，属于该采购单的产品要求
      */
     public List<CooperItem> getCopperItems() {
-        List<CooperItem> cooperItems = new ArrayList<CooperItem>();
+        List<CooperItem> cooperItems = new ArrayList<>();
 
         for(ProcureUnit procureUnit : this.units) {
             if(procureUnit.cooperator != null) {

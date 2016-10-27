@@ -84,6 +84,7 @@ public class AnalyzeSkus extends Controller {
 
     /**
      * 自定义销售报表
+     * @deprecated
      */
     @Check("analyzeskus.skusalesreport")
     public static void skuSalesReport() {
@@ -132,7 +133,7 @@ public class AnalyzeSkus extends Controller {
                 }.now();
                 renderText("正在处理中...请稍后几分钟再来查看...");
             } else {
-                List<Integer> months = new ArrayList<Integer>();
+                List<Integer> months = new ArrayList<>();
                 for(int i = begin; i <= end; i++) months.add(i);
                 render(months, dtos);
             }

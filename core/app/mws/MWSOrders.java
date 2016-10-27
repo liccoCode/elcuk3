@@ -6,7 +6,6 @@ import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersConfig;
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
 import com.amazonservices.mws.orders.model.*;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import helper.LogUtils;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
@@ -25,9 +24,10 @@ import java.util.*;
  * User: wyatt
  * Date: 5/24/13
  * Time: 10:24 AM
+ * @deprecated
  */
 public class MWSOrders {
-    private static final Map<String, MarketplaceWebServiceOrders> CLIENT_CACHE = new HashMap<String, MarketplaceWebServiceOrders>();
+    private static final Map<String, MarketplaceWebServiceOrders> CLIENT_CACHE = new HashMap<>();
 
     /**
      * The GetOrder operation has a maximum request quota of six and a restore rate of one request every minute.
@@ -69,7 +69,7 @@ public class MWSOrders {
         );
         ListOrdersByNextTokenResponse response = client(account).listOrdersByNextToken(request);
         ListOrdersByNextTokenResult result = response.getListOrdersByNextTokenResult();
-        return new F.T2<String, List<Orderr>>(result.getNextToken(),
+        return new F.T2<>(result.getNextToken(),
                 responseToOrders(result.getOrders(), account));
     }
 
@@ -83,7 +83,7 @@ public class MWSOrders {
      */
     private static List<Orderr> responseToOrders(OrderList orderList, Account account) {
         List<Order> amazonOrders = orderList.getOrder();
-        List<Orderr> orders = new ArrayList<Orderr>();
+        List<Orderr> orders = new ArrayList<>();
 
         for(Order amzOrder : amazonOrders) {
             Orderr orderr = new Orderr();
@@ -155,7 +155,7 @@ public class MWSOrders {
                 .listOrderItemsByNextToken(request);
         ListOrderItemsByNextTokenResult result = response.getListOrderItemsByNextTokenResult();
 
-        return new F.T2<String, List<models.market.OrderItem>>(result.getNextToken(),
+        return new F.T2<>(result.getNextToken(),
                 responseToOrderItems(result.getOrderItems(), orderId, account));
     }
 
@@ -169,7 +169,7 @@ public class MWSOrders {
                                                                       String orderId,
                                                                       Account acc) {
         List<OrderItem> items = orderItemList.getOrderItem();
-        List<models.market.OrderItem> orderItems = new ArrayList<models.market.OrderItem>();
+        List<models.market.OrderItem> orderItems = new ArrayList<>();
 
         for(OrderItem amzItem : items) {
             models.market.OrderItem item = new models.market.OrderItem();

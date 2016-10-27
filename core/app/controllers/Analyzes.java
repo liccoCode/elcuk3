@@ -31,7 +31,7 @@ import java.util.List;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Analyzes extends Controller {
 
     @Check("analyzes.index")
@@ -91,19 +91,29 @@ public class Analyzes extends Controller {
     /**
      * 加载指定 Selling 的时间段内的销量与销售额数据
      */
-    public static void ajaxUnit(AnalyzePost p) {
+    public static void ajaxUnit(final AnalyzePost p) {
         try {
-            HighChart chart = OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+                }
+            }.now());
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
 
-    public static void ajaxMovingAve(AnalyzePost p) {
+    public static void ajaxMovingAve(final AnalyzePost p) {
         try {
-            M m = M.val(p.market);
-            HighChart chart = OrderItem.ajaxHighChartMovinAvg(p.val, p.type, m, p.from, p.to);
+            final M m = M.val(p.market);
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartMovinAvg(p.val, p.type, m, p.from, p.to);
+                }
+            }.now());
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

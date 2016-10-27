@@ -4,7 +4,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import ext.ShipmentsHelper;
 import helper.GTs;
-import helper.LogUtils;
 import helper.Webs;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -43,7 +42,7 @@ public class TimelineEventSource {
     public String dateTimeFormat = "iso8601";
 
     @Expose
-    public List<Event> events = new ArrayList<Event>();
+    public List<Event> events = new ArrayList<>();
 
 
     /**
@@ -251,12 +250,10 @@ public class TimelineEventSource {
 
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
                 this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
                         this.unit.id, getunitstage().label(), 0,
                         0);
             } else {
                 this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
                         this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
                         this.lastDays);
             }
@@ -267,7 +264,7 @@ public class TimelineEventSource {
 
 
         public ProcureUnit.STAGE getunitstage() {
-            /**如果是入库数量相等则是已入库**/
+            //如果是入库数量相等则是已入库
             ProcureUnit.STAGE unitstage = this.unit.stage;
             if(unitstage != ProcureUnit.STAGE.CLOSE) {
                 int inboundingqty = this.unit.inboundingQty();
