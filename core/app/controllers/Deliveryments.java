@@ -314,4 +314,20 @@ public class Deliveryments extends Controller {
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
     }
+
+    public static void refreshFbaCartonContentsByIds(String[] unitIds) {
+        List<ProcureUnit> list = new ArrayList<>();
+        for(String id : unitIds) {
+            ProcureUnit unit = ProcureUnit.findById(Long.parseLong(id));
+            if(unit.cooperator != null) {
+                CooperItem item = unit.cooperator.cooperItem(unit.product.sku);
+                if(item != null) {
+                    item.getAttributes();
+                    unit.items = item.items;
+                }
+            }
+            list.add(unit);
+        }
+        render("/Deliveryments/fba_carton_contents_new.html", list);
+    }
 }

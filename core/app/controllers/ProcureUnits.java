@@ -415,7 +415,7 @@ public class ProcureUnits extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         unit.isConfirm = true;
         unit.save();
-        render(unit);
+        renderJSON(new Ret());
     }
 
 

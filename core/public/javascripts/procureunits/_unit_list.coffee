@@ -3,6 +3,25 @@ $ ->
     $("#fba_carton_contents_modal").data('unit-source', $(@).data('unit-id')).modal('show')
   ).on("click", "i[name=showFeedsPage]", (e) ->
   )
+  $('#unit_list').on('click', 'a[name=confirmUnitBtn]', (e) ->
+    $btn = $(@)
+    $.getJSON($btn.data('href'), (data) ->
+      if data.flag
+        $("##{$btn.data('tragettr')}").find("td[name=isConfirm]>span>img").attr('src', '/img/green.png')
+        noty({
+          text: '更新成功',
+          type: 'success',
+          timeout: 3000
+        })
+      else
+        noty({
+          text: data.message,
+          type: 'error',
+          timeout: 3000
+        })
+    )
+  )
+
   $("#fba_carton_contents_modal").on('click', '#sumbitDeployFBAs', (e) ->
     $modal = $("#fba_carton_contents_modal")
     if $modal.data('unit-source')
