@@ -15,7 +15,6 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -126,7 +125,7 @@ public class CooperItem extends Model {
 
     public void getAttributes() {
         if(this.items == null || this.items.isEmpty()) {
-             this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}",
+             this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "[]",
                      CooperItemDTO.class);
         }
     }
