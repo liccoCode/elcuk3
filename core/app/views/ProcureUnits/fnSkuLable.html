@@ -34,24 +34,16 @@
     </td>
   </tr>
   <tr style="height:18mm; vertical-align:top;">
-    <td style="padding-left: 18px;">
-      ${selling.aps.title.substring(0,18)}...
-      ${selling.aps.title.substring(selling.aps.title.length()-19,selling.aps.title.length())}<br>
-        <b>NEW</b><br>
-        EASMS6E-T1TPUPC
-    </td>
-    <td style="padding-left: 18px;">
-      ${selling.aps.title.substring(0,18)}...
-      ${selling.aps.title.substring(selling.aps.title.length()-19,selling.aps.title.length())}<br>
-        <b>NEW</b><br>
-        EASMS6E-T1TPUPC
-    </td>
-    <td style="padding-left: 18px;">
-      ${selling.aps.title.substring(0,18)}...
-      ${selling.aps.title.substring(selling.aps.title.length()-19,selling.aps.title.length())}<br>
-        <b>NEW</b><br>
-        EASMS6E-T1TPUPC
-    </td>
+      #{set title: selling.aps?.title/}
+      #{set length: title?.length()/}
+      #{list items:1..3}
+        <td style="padding-left: 18px;">
+          ${selling.aps?.sortTitle()}
+          <br>
+          <b>NEW</b><br>
+        ${selling.listing?.product?.sku}
+        </td>
+      #{/list}
   </tr>
 #{/list}
 </table>
