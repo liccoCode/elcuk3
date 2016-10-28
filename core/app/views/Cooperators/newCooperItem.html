@@ -50,41 +50,41 @@
         <td>最低采购量</td>
         <td><input type="text" class="input-mini" name="copItem.lowestOrderNum" value="${copItem.lowestOrderNum}"></td>
       </tr>
-    #{if copItem.items.size()>0}
+    #{if copItem.items != null && copItem.items.size() > 0}
       <tr>
         <td colspan="4" id="addTd">
-            #{list copItem.items, as:'item'}
-              <div class="alert alert-info" id="add_div_${item_index}"><h4>方案${item_index}(${item.schemeName})</h4></div>
+            #{list items: copItem.items, as:'dto'}
+              <div class="alert alert-info" id="add_div_${item_index}"><h4>方案${dto_index}(${dto.schemeName})</h4></div>
               <table class="table table-condensed table-bordered" id="add_table_${item_index}">
                 <tr>
                   <td>每箱数量</td>
                   <td>
-                    <input type="text" class="input-mini" name="copItem.items[${item_index-1}].boxSize" value="${item.boxSize}">
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].boxSize" value="${dto.boxSize}">
                   </td>
                   <td>单箱重量</td>
                   <td>
-                    <input type="text" class="input-mini" name="copItem.items[${item_index-1}].singleBoxWeight"
-                           value="${item.singleBoxWeight}">
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].singleBoxWeight"
+                           value="${dto.singleBoxWeight}">
                   </td>
                 </tr>
                 <tr>
                   <td>箱长</td>
                   <td>
-                    <input type="text" class="input-mini" name="copItem.items[${item_index-1}].length" value="${item.length}">
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].length" value="${dto.length}">
                   </td>
                   <td>箱宽</td>
                   <td>
-                    <input type="text" class="input-mini" name="copItem.items[${item_index-1}].width" value="${item.width}">
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].width" value="${dto.width}">
                   </td>
                 </tr>
                 <tr>
                   <td>箱高</td>
                   <td>
-                    <input type="text" class="input-mini" name="copItem.items[${item_index-1}].height" value="${item.height}">
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].height" value="${dto.height}">
                   </td>
                   <td>方案名</td>
                   <td>
-                    <input type="text" name="copItem.items[${item_index-1}].schemeName" value="${item.schemeName}">
+                    <input type="text" name="copItem.items[${dto_index-1}].schemeName" value="${dto.schemeName}">
                   </td>
                 </tr>
               </table>
@@ -116,7 +116,7 @@
               <td><input type="text" class="input-mini" name="copItem.items[0].height" value="${copItem.height}"></td>
               <td>方案名</td>
               <td>
-                <input type="text" name="copItem.items[${item_index-1}].schemeName" value="${item.schemeName}">
+                <input type="text" name="copItem.items[0].schemeName" value="">
               </td>
             </tr>
           </table>
