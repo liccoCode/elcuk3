@@ -661,4 +661,8 @@ public class AmazonProps implements Serializable {
         return new F.T2<>(params, doc);
     }
 
+
+    public String sortTitle() {
+        return StringUtils.abbreviateMiddle(this.title, "...", 38);
+    }
 }
