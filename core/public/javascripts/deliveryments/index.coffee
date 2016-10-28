@@ -4,12 +4,11 @@ $ ->
 
   $("td[name='clickTd']").click(->
     tr = $(@).parent("tr")
-    dmt_id = $(@).attr("dmt_id")
-    format_id = dmt_id.replace(/\|/gi, '_')
-
-    if $("#div"+format_id).html() != undefined
+    deliverplan_id = $(@).attr("deliverplan_id")
+    format_id = deliverplan_id.replace(/\|/gi, '_')
+    if tr.next("tr").find("td").find("div").length > 0
       tr.next("tr").toggle()
     else
       tr.after("<tr><td colspan='12'><div id='div#{format_id}'></div></td></tr>")
-      $("#div" + format_id).load("/Deliveryments/showProcureUnitById", id: dmt_id)
+      $("#div" + format_id).load("/DeliverPlans/showProcureUnitById", id: deliverplan_id)
   )
