@@ -186,7 +186,7 @@ public class ShipItem extends GenericModel {
         this.shipment = null;
         ProcureUnit unit = this.unit;
         this.unit = null;
-        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        return new F.T2<>(this.delete(), unit);
     }
 
     /**
