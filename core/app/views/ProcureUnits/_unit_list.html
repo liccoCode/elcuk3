@@ -121,8 +121,12 @@
     <td>
       <!-- FnSku 下载 Label -->
         #{if unit.selling?.fnSku}
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" class="btn btn-success btn-block">
-            <i class="icon-download-alt"></i>${unit.selling.fnSku}
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 SKU 信息">
+            <i class="icon-download-alt"></i> New
+          </a>
+          <br/>
+          <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank">
+            <i class="icon-download-alt"></i> Old
           </a>
         #{/if}
         #{elseif unit.selling != null}
