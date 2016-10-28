@@ -28,7 +28,7 @@ public class MetricSalesService {
      * Selling 的销量数据
      */
     public Map<String, Integer> sellingUnits(Date date) {
-        Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
+        Map<String, Integer> sellingUnits = new HashMap<>();
         for(M m : Promises.MARKETS) {
             sellingUnits.putAll(sellingUnits(date, m));
         }
@@ -48,7 +48,7 @@ public class MetricSalesService {
                 .where("oi.createDate<?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
+        Map<String, Integer> sellingUnits = new HashMap<>();
         for(Map<String, Object> row : rows) {
             String sellingId = row.get("sellingId").toString();
             if(StringUtils.isBlank(sellingId)) continue;
@@ -62,7 +62,7 @@ public class MetricSalesService {
      * @return
      */
     public Map<String, Integer> sellingOrders(Date date) {
-        Map<String, Integer> sellingOrders = new HashMap<String, Integer>();
+        Map<String, Integer> sellingOrders = new HashMap<>();
         for(M m : Promises.MARKETS) {
             sellingOrders.putAll(sellingOrders(date, m));
         }
@@ -81,7 +81,7 @@ public class MetricSalesService {
                 .where("o.createDate<?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, Integer> sellingOrders = new HashMap<String, Integer>();
+        Map<String, Integer> sellingOrders = new HashMap<>();
         for(Map<String, Object> row : rows) {
             Object sellingId = row.get("sellingId");
             if(sellingId == null || StringUtils.isBlank(sellingId.toString())) continue;
@@ -96,7 +96,7 @@ public class MetricSalesService {
      * 因为 Amazon 收费的不及时, 所以对于离当天 10 天内的数据使用系统中的订单量进行计算
      */
     public Map<String, Float> sellingSales(Date date, List<Selling> sellings, Map<String, Integer> sellingUnits) {
-        Map<String, Float> sellingSales = new HashMap<String, Float>();
+        Map<String, Float> sellingSales = new HashMap<>();
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
             for(Selling sell : sellings) {
                 Integer units = sellingUnits.get(sell.sellingId);

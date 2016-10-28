@@ -97,6 +97,7 @@ public class Cooperators extends Controller {
 
     public static void editCooperItem(long cooperId) {
         CooperItem copItem = CooperItem.findById(cooperId);
+        copItem.getAttributes();
         renderArgs.put("cop", copItem.cooperator);
         renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
         render("Cooperators/newCooperItem.html", copItem);
@@ -211,7 +212,7 @@ public class Cooperators extends Controller {
             params.add(type);
         }
         List<Cooperator> list = Cooperator.find(sql.toString(), params.toArray()).fetch();
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for(Cooperator coop : list) {
             names.add(coop.name + "-" + coop.id);
         }

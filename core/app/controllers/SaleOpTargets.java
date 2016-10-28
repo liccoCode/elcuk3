@@ -73,7 +73,7 @@ public class SaleOpTargets extends Controller {
         SaleOpTarget yearSt = SaleOpTarget.findById(id);
         User user = User.findByUserName(Secure.Security.connected());
         List<String> categoryIds = User.getTeamCategorys(user);
-        List<SaleOpTarget> sts = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> sts = new ArrayList<>();
         if(categoryIds != null && categoryIds.size() > 0) {
             sts = SaleOpTarget.find("fid IN" + SqlSelect.inlineParam(categoryIds) + "AND targetYear " +
                     "= ? AND saleTargetType=?", yearSt.targetYear, SaleOpTarget.T.CATEGORY).fetch();
@@ -120,7 +120,7 @@ public class SaleOpTargets extends Controller {
                         categorySt.targetYear,
                         SaleOpTarget.T.MONTH).fetch();
         if(months == null || months.size() == 0) months = categorySt.loadMonthSaleTargets(user);
-        List<SaleOpTarget> markets = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> markets = new ArrayList<>();
         for(SaleOpTarget st : months) {
             List<SaleOpTarget> mts = SaleOpTarget
                     .find("fid=? AND targetYear=? AND " +
@@ -179,14 +179,14 @@ public class SaleOpTargets extends Controller {
                         SaleOpTarget.T.MARKET).fetch();
         if(sts == null || sts.size() == 0) sts = categorySt.loadMarketSaleTargets(user, 1);
 
-        List<SaleOpTarget> total = new ArrayList<SaleOpTarget>();
+        List<SaleOpTarget> total = new ArrayList<>();
         for(int i = 0; i < 12; i++) {
             SaleOpTarget t = new SaleOpTarget();
             t.targetMonth = i + 1;
             total.add(t);
         }
 
-        List<List<SaleOpTarget>> sales = new ArrayList<List<SaleOpTarget>>();
+        List<List<SaleOpTarget>> sales = new ArrayList<>();
         for(SaleOpTarget target : sts) {
             List<SaleOpTarget> monthsts = SaleOpTarget
                     .find("fid=? AND targetYear=? AND saleTargetType=? AND targetMarket=? order by targetMonth",

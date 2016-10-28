@@ -174,15 +174,15 @@ public class Webs {
      * @return
      */
     public static F.T2<M, Float> amzPriceFormat(String priceStr, M defaultMarket) {
-        if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
+        if(StringUtils.isBlank(priceStr)) return new F.T2<>(defaultMarket, 999f);
         String dot = Character.toString(priceStr.charAt(priceStr.length() - 3));
         if(dot.equals(".")) { // uk/us 格式
-            return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
+            return new F.T2<>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
-            return new F.T2<M, Float>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
+            return new F.T2<>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
         } else {
             Logger.error("Not support price format.");
-            return new F.T2<M, Float>(defaultMarket, 999f);
+            return new F.T2<>(defaultMarket, 999f);
         }
     }
 
@@ -361,7 +361,7 @@ public class Webs {
      * @return
      */
     public static String VJson(List<Error> errors) {
-        List<Map<String, String>> errorList = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> errorList = new ArrayList<>();
         for(Error err : errors) {
             errorList.add(GTs.MapBuilder.map("key", err.getKey()).put("message", err.message()).build());
         }
@@ -376,7 +376,7 @@ public class Webs {
 
     public static String intArrayString(int[] results) {
         if(results == null) return "";
-        List<String> intList = new ArrayList<String>();
+        List<String> intList = new ArrayList<>();
         for(int i : results) {
             intList.add(i + "");
         }
@@ -393,16 +393,16 @@ public class Webs {
      */
     public static F.T2<M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr,
                                                                   M defaultMarket) {
-        if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
+        if(StringUtils.isBlank(priceStr)) return new F.T2<>(defaultMarket, 999f);
         StringBuilder sbd = new StringBuilder(priceStr);
         String dot = Character.toString(sbd.charAt(sbd.length() - 3));
         if(dot.equals(".")) { // uk/us 格式
-            return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
+            return new F.T2<>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
-            return new F.T2<M, Float>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
+            return new F.T2<>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
         } else {
             Logger.error("Not support price format.");
-            return new F.T2<M, Float>(defaultMarket, 999f);
+            return new F.T2<>(defaultMarket, 999f);
         }
     }
 

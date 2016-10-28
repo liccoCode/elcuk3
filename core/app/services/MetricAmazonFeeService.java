@@ -61,7 +61,7 @@ public class MetricAmazonFeeService {
      */
     public Map<String, Float> sellingAmazonFee(Date date, List<Selling> sellings, Map<String, Integer> sellingUnits) {
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
-            Map<String, Float> sellingAmzFeeMap = new HashMap<String, Float>();
+            Map<String, Float> sellingAmzFeeMap = new HashMap<>();
             for(Selling sell : sellings) {
                 if(sell.aps.salePrice == null) sell.aps.salePrice = 0f;
                 Integer units = sellingUnits.get(sell.sellingId);
@@ -72,7 +72,7 @@ public class MetricAmazonFeeService {
             return sellingAmzFeeMap;
         } else {
             List<FeeType> fees = FeeType.amazon().children;
-            List<String> feesTypeName = new ArrayList<String>();
+            List<String> feesTypeName = new ArrayList<>();
             for(FeeType feeType : fees) {
                 if(feeType == FeeType.productCharger()) continue;
                 if("shipping".equals(feeType.name)) continue;
@@ -96,7 +96,7 @@ public class MetricAmazonFeeService {
     public Map<String, Float> sellingAmazonFBAFee(Date date, List<Selling> sellings,
                                                   Map<String, Integer> sellingUnits) {
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
-            Map<String, Float> sellingAmzFbaFeeMap = new HashMap<String, Float>();
+            Map<String, Float> sellingAmzFbaFeeMap = new HashMap<>();
             for(Selling sell : sellings) {
                 Integer units = sellingUnits.get(sell.sellingId);
                 if(units == null) units = 0;
@@ -105,7 +105,7 @@ public class MetricAmazonFeeService {
             return sellingAmzFbaFeeMap;
         } else {
             List<FeeType> fees = FeeType.fbaFees();
-            List<String> feesTypeName = new ArrayList<String>();
+            List<String> feesTypeName = new ArrayList<>();
             for(FeeType feeType : fees) {
                 if(feeType == FeeType.productCharger()) continue;
                 feesTypeName.add(feeType.name);
@@ -127,7 +127,7 @@ public class MetricAmazonFeeService {
             sellingOrders = Cache.get(cacheKey, Map.class);
             if(sellingOrders != null) return sellingOrders;
 
-            sellingOrders = new HashMap<String, List<String>>();
+            sellingOrders = new HashMap<>();
             for(M m : M.values()) {
                 if(m.isEbay()) continue;
                 sellingOrders.putAll(oneDaySellingOrderIds(date, m));
@@ -148,7 +148,7 @@ public class MetricAmazonFeeService {
                 .where("createDate>=?").param(actualDatePair._1.toDate())
                 .where("createDate<=?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
-        Map<String, List<String>> sellingOrders = new HashMap<String, List<String>>();
+        Map<String, List<String>> sellingOrders = new HashMap<>();
         List<Map<String, Object>> rows = DBUtils.rows(sellingOdsSql.toString(), sellingOdsSql.getParams().toArray());
         for(Map<String, Object> row : rows) {
             String sellingId = row.get("sellingId").toString();
@@ -168,7 +168,7 @@ public class MetricAmazonFeeService {
                 .from("SaleFee")
                 // 需要统计 productcharges 销售价格, 和 shipping 加快快递(这个会在 amazon 中减去)
                 .where(SqlSelect.whereIn("type_name", feeTypes));
-        Map<String, Float> sellingSales = new HashMap<String, Float>();
+        Map<String, Float> sellingSales = new HashMap<>();
         for(String sellingId : sellingOrders.keySet()) {
             SqlSelect sellFees = new SqlSelect(sellFeesTemplate)
                     .where(SqlSelect.whereIn("order_orderId", sellingOrders.get(sellingId)));
@@ -279,7 +279,7 @@ public class MetricAmazonFeeService {
     }
 
     public Map<String, Map<String, BigDecimal>> readFeesCostInESResult(JSONObject esResult) {
-        Map<String, Map<String, BigDecimal>> feesCost = new HashMap<String, Map<String, BigDecimal>>();
+        Map<String, Map<String, BigDecimal>> feesCost = new HashMap<>();
         JSONObject dateAndMarket = esResult.getJSONObject("aggregations").getJSONObject("date_and_market_filters");
 
         //Orders & Refunds Fees
@@ -287,7 +287,7 @@ public class MetricAmazonFeeService {
             String feeCategory = stateToFeeCategory(state);
             JSONObject feeCategoryObj = dateAndMarket.getJSONObject(feeCategory);
 
-            Map<String, BigDecimal> feeCategoryMap = new HashMap<String, BigDecimal>();
+            Map<String, BigDecimal> feeCategoryMap = new HashMap<>();
             for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
                 JSONObject feeTypeObj = feeCategoryObj.getJSONObject(feeType);
                 BigDecimal cost = feeTypeObj.getJSONObject("order_fees_cost").getBigDecimal("value");

@@ -1,8 +1,12 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.J;
 import models.product.Product;
+import models.view.dto.CooperItemDTO;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Min;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -10,6 +14,8 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -100,9 +106,29 @@ public class CooperItem extends Model {
     @Lob
     public String productTerms;
 
+    @Transient
+    public List<CooperItemDTO> items;
+
+    /**
+     * 方案Json串
+     */
+    public String attributes;
+
     public CooperItem checkAndUpdate() {
         this.check();
+        this.setAttributes();
         return this.save();
+    }
+
+    public void setAttributes() {
+        this.attributes = J.json(this.items);
+    }
+
+    public void getAttributes() {
+        if(this.items == null || this.items.isEmpty()) {
+             this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "{}",
+                     CooperItemDTO.class);
+        }
     }
 
     /**

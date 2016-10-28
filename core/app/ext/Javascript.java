@@ -28,7 +28,7 @@ public class Javascript extends FastTags {
 
         try {
             Template tmpl = TemplateLoader.load(args.get("arg").toString());
-            Map<String, Object> newArgs = new HashMap<String, Object>();
+            Map<String, Object> newArgs = new HashMap<>();
             newArgs.putAll(template.getBinding().getVariables());
             for(Object key : args.keySet()) {
                 if(key.equals("arg")) continue;

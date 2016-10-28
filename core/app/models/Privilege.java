@@ -22,12 +22,12 @@ public class Privilege extends Model {
     /**
      * 将用户的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
      */
-    private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
+    private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 将角色的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
      */
-    private static final Map<String, Set<Privilege>> ROLE_PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
+    private static final Map<String, Set<Privilege>> ROLE_PRIVILEGE_CACHE = new ConcurrentHashMap<>();
 
     public Privilege() {
     }
@@ -54,7 +54,7 @@ public class Privilege extends Model {
      * 用户权限的用户
      */
     @ManyToMany(mappedBy = "privileges")
-    public List<User> users = new ArrayList<User>();
+    public List<User> users = new ArrayList<>();
 
     @PrePersist
     @PreUpdate
@@ -88,7 +88,7 @@ public class Privilege extends Model {
     public static void init() {
         // 拥有权限则跳过初始化
         if(Privilege.count() > 1) return;
-        List<Privilege> privileges = new ArrayList<Privilege>();
+        List<Privilege> privileges = new ArrayList<>();
         // 模块
         privileges.add(new Privilege("market", "市场模块"));
         privileges.add(new Privilege("listings.index", "Listing 页面"));
@@ -242,7 +242,7 @@ public class Privilege extends Model {
         Set<Privilege> privileges = PRIVILEGE_CACHE.get(username);
         if(privileges == null) {
             PRIVILEGE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<Privilege>(User.findByUserName(username).privileges));
+                    new HashSet<>(User.findByUserName(username).privileges));
             privileges = PRIVILEGE_CACHE.get(username);
         }
 
@@ -298,7 +298,7 @@ public class Privilege extends Model {
         Set<Privilege> privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
         if(privileges == null) {
             ROLE_PRIVILEGE_CACHE.put(rolename, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<Privilege>(Role.findByRoleName(rolename).privileges));
+                    new HashSet<>(Role.findByRoleName(rolename).privileges));
             privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
         }
         return privileges;
@@ -310,7 +310,7 @@ public class Privilege extends Model {
      * @return
      */
     public static Map<Long, List<Privilege>> getMenuMap(List<Privilege> modules) {
-        Map<Long, List<Privilege>> maps = new HashMap<Long, List<Privilege>>();
+        Map<Long, List<Privilege>> maps = new HashMap<>();
         for(Privilege module : modules) {
             List<Privilege> functions = Privilege.find("pid=?", module.id).fetch();
             maps.put(module.id, functions);

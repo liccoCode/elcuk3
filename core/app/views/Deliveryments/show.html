@@ -13,7 +13,7 @@
 #{set isPending: dmt.state == models.procure.Deliveryment.S.PENDING/}
 <div class="row-fluid">
   <div class="span12">
-    <form action="@{Deliveryments.update()}" method="post">
+    <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
       <table class="table table-condensed table-bordered">
         <tr>
           <th>Id</th>
@@ -132,12 +132,9 @@
     #{/power.ck}
     #{power.ck 'fbas.deploytoamazon'}
       <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
-        批量创建 FBA
-      </a>
-      <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents(dmt.id)}' data-method="POST"
-         id="updateFbaCartonContents" class="btn btn-success">
-        批量更新 FBA 箱内包装信息
-      </a>
+        批量创建FBA</a>
+      <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents(dmt.id)}' data-method="POST" id="updateFbaCartonContents" class="btn btn-success">
+        批量更新FBA箱内包装信息</a>
     #{/power.ck}
     #{power.ck 'fbas.procureunitsorder'}
       <a href="javascript:void(0);" data-url="@{Excels.procureunitsOrder(dmt.id)}" data-method="POST"
@@ -146,11 +143,11 @@
       </a>
     #{/power.ck}
       <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
-         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA
-       进行压缩打包 "><i class="icon-download-alt"></i>下载FBA ZIP 包
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
+        <i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
-
-
+      <a data-remote='true' data-method='PUT' class="btn btn-warning" id="isConfirm_btn" data-disable-with='更新中'
+         data-url="@{Deliveryments.confirmUnit(dmt.id)}">已核单</a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
@@ -186,7 +183,7 @@
 
             电      话：0755-21383192-8060/8061
 
-            收货联系人：杨上德：13724219910（保护类、蓝牙类）
+            收货联系人：杨上德：13724219110（保护类、蓝牙类）
                       陈静林：15711961308（电源、充电器类、瑞能，布兰德沃）
                       旷   杰：18692275630（仓管）
                       方   圆：15974143832（经理）
@@ -197,8 +194,7 @@
         <tr>
           <th>交易条款<br>(供应商)</th>
           <td colspan="3">
-          <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
-          .tradingTerms}</textarea>
+            <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator.tradingTerms}</textarea>
           </td>
           <th>产品要求<br>(产品线)</th>
           <td colspan="3">

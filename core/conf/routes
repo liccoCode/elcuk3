@@ -102,6 +102,7 @@ GET     /procureunits/exportlogs                            ProcureUnits.exportL
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip
 GET     /fba/{id}/outlabel                                  FBAs.boxLabel
 GET     /code128/{shipmentId}                               Login.code128
+GET     /fnSkuCode128/{fnSku}                               Login.fnSkuCode128
 
 # PaymentUnits
 POST    /paymentunit/shipitem/{id}                          PaymentUnits.fromShipItem

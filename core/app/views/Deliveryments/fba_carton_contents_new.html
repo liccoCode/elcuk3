@@ -1,0 +1,99 @@
+<table class="table table-bordered table-condensed" id="fba_carton_contents_table" width="1000px;">
+  <tr>
+    <td>采购计划</td>
+    <td><abbr title="多少个箱子(不包含尾箱)">箱数(仅含主箱)</abbr></td>
+    <td><abbr title="单个主箱内货物的个数">个数(主箱)</abbr></td>
+    <td><abbr title="单个尾箱内货物的个数(默认只有一个尾箱)">个数(尾箱)</abbr></td>
+    <td><abbr title="单个箱子的重量">箱重</abbr></td>
+    <td><abbr title="单个箱子的长度">箱长</abbr></td>
+    <td><abbr title="单个箱子的宽度">箱宽</abbr></td>
+    <td><abbr title="单个箱子的高度">箱高</abbr></td>
+    <td>选择方案</td>
+  </tr>
+#{list items:list, as:'unit'}
+  <tr id="tr_${unit.id}">
+      #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+      #{if unit.fba && unit.fba.dto}
+          #{set dto: unit.fba.dto/}
+        <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value='${dto.boxNum}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value='${dto.num}'/></td>
+        <td>
+          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' value='${dto.lastCartonNum}' placeholder='可选'/>
+        </td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${dto.singleBoxWeight}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${dto.length}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value='${dto.width}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${dto.height}'/></td>
+        <td></td>
+      #{/if}
+      #{elseif cooperItem}
+        <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value='${cooperItem.boxNum(unit.qty())}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value='${cooperItem.boxSize}'/></td>
+        <td>
+          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' value='${cooperItem.lastCartonNum(unit.qty())}' placeholder='可选'/>
+        </td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${cooperItem.singleBoxWeight}'/>
+        </td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${cooperItem.length}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value='${cooperItem.width}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${cooperItem.height}'/></td>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
+          <span><i class="icon-reorder"></i></span>
+          <span class="badge badge-info">${unit.items.size()}</span>
+        </td>
+      #{/elseif}
+      #{else }
+        <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' placeholder='可选'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height'/></td>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
+          <span><i class="icon-reorder"></i></span>
+          <span class="badge badge-info">${unit.items.size()}</span>
+        </td>
+
+      #{/else}
+  </tr>
+  <tr id="unit_${unit_index}" style="display:none;">
+    <td colspan="9">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <td></td>
+          <td>方案名</td>
+          <td>箱数(仅含主箱)</td>
+          <td>个数(主箱)</td>
+          <td>个数(尾箱)</td>
+          <td>箱重</td>
+          <td>箱长</td>
+          <td>箱宽</td>
+          <td>箱高</td>
+        </tr>
+          #{list items:unit.items, as:'i'}
+            <tr>
+              <td>
+                <input type="radio" name="chooseType" value="${unit.id}" boxNum="${i.boxNum(unit.qty())}" boxSize="${i.boxSize}"
+                       lastCartonNum="${i.lastCartonNum(unit.qty())}" singleBoxWeight="${i.singleBoxWeight}" boxLength="${i.length}"
+                       boxWidth="${i.width}" boxHeight="${i.height}">
+              </td>
+              <td>${i.schemeName}</td>
+              <td>${i.boxNum(unit.qty())}</td>
+              <td>${i.boxSize}</td>
+              <td>${i.lastCartonNum(unit.qty())}</td>
+              <td>${i.singleBoxWeight}</td>
+              <td>${i.length}</td>
+              <td>${i.width}</td>
+              <td>${i.height}</td>
+            </tr>
+          #{/list}
+      </table>
+    </td>
+  </tr>
+
+#{/list}
+</table>

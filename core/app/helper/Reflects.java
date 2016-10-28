@@ -22,7 +22,7 @@ public class Reflects {
         try {
             Field field = instance.getClass().getField(attr);
             Object oldValue = field.get(instance);
-            if(oldValue == null && value == null) return new ArrayList<String>();
+            if(oldValue == null && value == null) return new ArrayList<>();
             if((oldValue == null) || (value == null) || (!oldValue.equals(value))) {
                 String oldValueStr = oldValue == null ? "空" : oldValue.toString();
                 String valueStr = value == null ? "空" : value.toString();
@@ -40,7 +40,7 @@ public class Reflects {
             throw new RuntimeException(e);
         }
         if(log.length() > 0) return Arrays.asList(log.toString());
-        else return new ArrayList<String>();
+        else return new ArrayList<>();
     }
 
     public static boolean isType(Object instance, Class type) {

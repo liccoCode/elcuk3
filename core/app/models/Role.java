@@ -28,14 +28,14 @@ public class Role extends GenericModel {
     /**
      * 将用户的Role缓存起来, 不用每次判断都去 db 取(注:更新Team的时候也需要更新缓存)
      */
-    private static final Map<String, Set<Role>> ROLE_CACHE = new ConcurrentHashMap<String, Set<Role>>();
+    private static final Map<String, Set<Role>> ROLE_CACHE = new ConcurrentHashMap<>();
 
     /**
      * ROLE所拥有的USER
      */
     @ManyToMany(cascade = {CascadeType.REFRESH}, mappedBy = "roles",
             fetch = FetchType.LAZY)
-    public Set<User> users = new HashSet<User>();
+    public Set<User> users = new HashSet<>();
 
     @Id
     @Expose
@@ -56,7 +56,7 @@ public class Role extends GenericModel {
      * 用户所拥有的权限
      */
     @ManyToMany
-    public Set<Privilege> privileges = new HashSet<Privilege>();
+    public Set<Privilege> privileges = new HashSet<>();
 
     @Override
     public String toString() {
@@ -91,7 +91,7 @@ public class Role extends GenericModel {
         Set<Role> roles = ROLE_CACHE.get(username);
         if(roles == null) {
             ROLE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<Role>(User.findByUserName(username).roles));
+                    new HashSet<>(User.findByUserName(username).roles));
             roles = ROLE_CACHE.get(username);
         }
         return roles;
@@ -140,7 +140,7 @@ public class Role extends GenericModel {
                 .fetch();
         if(privilegeId.size() != privileges.size())
             throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-        this.privileges = new HashSet<Privilege>();
+        this.privileges = new HashSet<>();
         this.save();
         this.privileges.addAll(privileges);
         Privilege.updateRolePrivileges(this.roleName, this.privileges);

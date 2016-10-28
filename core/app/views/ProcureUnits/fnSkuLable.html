@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FBA Packing Slips</title>
+  <style>
+    body{
+      font-family:STXihei;
+    }
+
+    .small{
+      font-size:10px;
+
+    }
+  </style>
+</head>
+<body style="margin:0 0 0 0;">
+<table border="0" style="margin:0 0 0 0;width: 160mm; font-size:10px;" cellpadding="0" cellspacing="0">
+#{list items:1..9}
+  <tr style="height: 12mm; vertical-align:bottom;">
+    <td style="vertical-align:middle; text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="60mm;" height="5mm;" border="0"
+           style="padding-top:10px">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+    <td style="vertical-align:middle;text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="60mm;" height="5mm;" border="0"
+           style="padding-top:10px">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+    <td style="vertical-align:middle;text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="60mm;" height="5mm;" border="0"
+           style="padding-top:10px">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+  </tr>
+  <tr style="height:18mm; vertical-align:top;">
+    <td style="padding-left: 18px;">
+      ${selling.aps.title.substring(0,18)}...
+      ${selling.aps.title.substring(selling.aps.title.length()-19,selling.aps.title.length())}<br>
+        <b>NEW</b><br>
+        EASMS6E-T1TPUPC
+    </td>
+    <td style="padding-left: 18px;">
+      ${selling.aps.title.substring(0,18)}...
+      ${selling.aps.title.substring(selling.aps.title.length()-19,selling.aps.title.length())}<br>
+        <b>NEW</b><br>
+        EASMS6E-T1TPUPC
+    </td>
+    <td style="padding-left: 18px;">
+      ${selling.aps.title.substring(0,18)}...
+      ${selling.aps.title.substring(selling.aps.title.length()-19,selling.aps.title.length())}<br>
+        <b>NEW</b><br>
+        EASMS6E-T1TPUPC
+    </td>
+  </tr>
+#{/list}
+</table>
+</body>
+</html>
+

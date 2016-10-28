@@ -120,7 +120,7 @@ public class OrderPOST extends ESPost<Orderr> {
                 result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
             }
             hits = result.getJSONObject("hits");
-            Set<String> orderIds = new HashSet<String>();
+            Set<String> orderIds = new HashSet<>();
             for(Object obj : hits.getJSONArray("hits")) {
                 JSONObject hit = (JSONObject) obj;
                 orderIds.add(hit.getJSONObject("_source").getString("order_id"));

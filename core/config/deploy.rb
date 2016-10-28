@@ -31,7 +31,7 @@ set :deploy_to, '/root/cap_elcuk2'
 set :linked_dirs, fetch(:linked_dirs, []).push('core/logs')
 
 # Default value for default_env is {}
-# set :default_env, { path: "/opt/ruby/bin:$PATH" }
+set :default_env, { JAVA_HOME: "/opt/jdk1.8.0_102", PATH: "$JAVA_HOME/bin:$PATH", CLASSPATH: "$JAVA_HOME/lib" }
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5

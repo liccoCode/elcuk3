@@ -26,7 +26,7 @@ public class SaleReports extends Controller {
      */
     @Check("salereports.salecount")
     public static void saleCount(SaleReportPost p) {
-        List<SaleReportDTO> dtos = new ArrayList<SaleReportDTO>();
+        List<SaleReportDTO> dtos = new ArrayList<>();
         try {
             if(p == null) p = new SaleReportPost();
             dtos = p.query();

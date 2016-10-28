@@ -798,7 +798,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void inboundingByComputor() {
         if(this.state != S.RECEIPTD) return;
-        List<Date> receivingDates = new ArrayList<Date>();
+        List<Date> receivingDates = new ArrayList<>();
         for(FBAShipment fba : this.fbas()) {
             if(!Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CLOSED).contains(fba.state)) continue;
             F.Option<Date> earliestDate = fba.getEarliestDate();
@@ -1045,7 +1045,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return null;
 
         float paidAmount = 0;
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         // TODO 把 Comment 更换为 record?
         lines.add(String.format("总关税 %s %s 减去 ", crcy, amount));
         for(PaymentUnit fee : this.fees) {
@@ -1191,7 +1191,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public List<FBAShipment> fbas() {
-        List<FBAShipment> fbas = new ArrayList<FBAShipment>();
+        List<FBAShipment> fbas = new ArrayList<>();
         for(ShipItem item : this.items) {
             if(item.unit.fba == null) continue;
             if(fbas.contains(item.unit.fba)) continue;
@@ -1263,7 +1263,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         // 加载
         StringBuilder where = new StringBuilder("state IN (?,?)");
-        List<Object> params = new ArrayList<Object>(Arrays.asList(S.PLAN, S.CONFIRM));
+        List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
             where.append("AND (whouse.id=? OR whouse.id IS NULL)");
             params.add(whouseId);
@@ -1364,7 +1364,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void sendMsgMail(Date planArrivDate, String username) {
         String subject = "";
         String content = "";
-        List<String> mailaddress = new ArrayList<String>();
+        List<String> mailaddress = new ArrayList<>();
 
         if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
             subject = String.format("更改运输单[%s]预计到库时间", this.id);

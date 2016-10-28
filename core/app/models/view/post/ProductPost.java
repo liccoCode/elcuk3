@@ -79,8 +79,8 @@ public class ProductPost extends Post<Product> {
         Matcher matcher = SKU.matcher(this.search);
         if(matcher.find()) {
             String sku = matcher.group(1);
-            return new F.T3<Boolean, String, List<Object>>(true, "sku=?",
-                    new ArrayList<Object>(Arrays.asList(sku)));
+            return new F.T3<>(true, "sku=?",
+                    new ArrayList<>(Arrays.asList(sku)));
         }
         return new F.T3<>(false, null, null);
     }

@@ -9,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +57,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
 
     public List<PurchasePaymentDTO> downloadReport() {
         List<PurchasePaymentDTO> list = new ArrayList<>();
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
         sql.append(" SELECT c.name, u.deliveryment_id, u.id, u.sku, u.stage, u.price, u.currency, ");
         sql.append(" IFNULL(u.qty, u.planQty)  AS qty, ");

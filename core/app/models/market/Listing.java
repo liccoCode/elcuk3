@@ -272,7 +272,7 @@ public class Listing extends GenericModel {
                 .nonAddWishListAccs(opendAccs, this.listingId);
         if(nonWishListAccs.size() == 0)
             throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
-        return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
+        return new F.T2<>(nonWishListAccs.get(0), nonWishListAccs.size());
     }
 
     /**
@@ -284,9 +284,9 @@ public class Listing extends GenericModel {
         List<Map<String, Object>> rows = DBUtils
                 .rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')",
                         this.listingId);
-        List<F.T2<Long, Integer>> monthTable = new ArrayList<F.T2<Long, Integer>>();
+        List<F.T2<Long, Integer>> monthTable = new ArrayList<>();
         for(Map<String, Object> row : rows) {
-            monthTable.add(new F.T2<Long, Integer>(
+            monthTable.add(new F.T2<>(
                     DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
                     ((Long) row.get("count")).intValue()));
         }
@@ -395,7 +395,7 @@ public class Listing extends GenericModel {
             }
         } else {
             JsonArray offers = lst.get("offers").getAsJsonArray();
-            List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
+            List<ListingOffer> newOffers = new ArrayList<>();
             for(JsonElement offerEl : offers) {
                 JsonObject offer = offerEl.getAsJsonObject();
                 ListingOffer off = ListingOffersWork.jsonToOffer(offer);
@@ -441,7 +441,7 @@ public class Listing extends GenericModel {
      */
     public static F.T2<String, M> unLid(String lid) {
         String[] args = StringUtils.split(lid, "_");
-        return new F.T2<String, M>(args[0], M.val(args[1]));
+        return new F.T2<>(args[0], M.val(args[1]));
     }
 
     public static boolean exist(String lid) {
@@ -457,7 +457,7 @@ public class Listing extends GenericModel {
         Set<String> asins = Cache.get(cacheKey, Set.class);
         if(asins != null) return asins;
 
-        asins = new HashSet<String>();
+        asins = new HashSet<>();
         List<Listing> listings = Listing.findAll();
         for(Listing li : listings) asins.add(li.asin);
 
@@ -504,7 +504,7 @@ public class Listing extends GenericModel {
      * @return
      */
     public static List<String> getAllListingBySKU(String sku) {
-        List<String> listingIds = new ArrayList<String>();
+        List<String> listingIds = new ArrayList<>();
         SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku=?").param(sku);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {

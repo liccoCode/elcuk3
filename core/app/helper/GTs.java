@@ -81,7 +81,7 @@ public class GTs {
      * @param <V>
      */
     public static class MapBuilder<K, V> {
-        private HashMap<K, V> innerMap = new HashMap<K, V>();
+        private HashMap<K, V> innerMap = new HashMap<>();
 
         private MapBuilder() {
         }

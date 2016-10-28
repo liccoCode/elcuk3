@@ -1,6 +1,6 @@
 #{script 'procureunits/_unit_list.coffee'/}
 #{set tr_key: key ? key : 'unit'/}
-<table class="table table-condensed table-bordered">
+<table class="table table-condensed table-bordered" id="unit_table">
   <tr>
   #{if checkbox}
     <th>
@@ -32,6 +32,7 @@
     <th>实际交货时间</th>
     <th>阶段</th>
     <th>抵达货代</th>
+    <th>是否核对</th>
     <th>是否出库</th>
     <th>是否发货</th>
     <th>质检信息</th>
@@ -39,11 +40,12 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
-      #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
       #{if checkbox}
         <td>
           <label class="checkbox">
+              #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
               #{if unit.fba && unit.fba.dto}
+                <!-- 优先使用自身的 FBA 箱包装数据 -->
                   #{set dto: unit.fba.dto/}
                 <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
                        data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
@@ -51,6 +53,7 @@
                        data-width="${dto.width}" data-height="${dto.height}">
               #{/if}
               #{elseif cooperItem}
+                <!-- 使用维护好的合作伙伴的数据 -->
                 <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
                        data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
                        data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
@@ -119,8 +122,8 @@
     <td>
       <!-- FnSku 下载 Label -->
         #{if unit.selling?.fnSku}
-          <a href="@{Sellings.sellingLabel(unit.sid)}" class="btn btn-success btn-block">
-            <i class="icon-download-alt"></i> ${unit.selling.fnSku}
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" class="btn btn-success btn-block">
+            <i class="icon-download-alt"></i>${unit.selling.fnSku}
           </a>
         #{/if}
         #{elseif unit.selling != null}
@@ -135,6 +138,7 @@
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
+    <td>#{yesOrNo f:unit.isConfirm/}</td>
     <td>${unit.isOut?.label()}</td>
     <td>${unit.isship()}</td>
     <td>
@@ -147,7 +151,7 @@
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '23' : '22'}">
+    <td colspan="${checkbox ? '24' : '22'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
@@ -235,11 +239,11 @@
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
                         <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
-                           href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>
-                          抵达货代
-                        </a>
+                           href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
                       #{/ifnot}
                   #{/if}
+                <a data-remote='true' data-method='PUT' class="btn btn-small btn-warning" id="isConfirm_${unit.id}_btn"
+                   href="@{ProcureUnits.confirmUnit(unit.id)}" data-disable-with='更新中'>已核单</a>
               </div>
                 #{if unit.fba}
                     #{power.ck 'fbas.update'}

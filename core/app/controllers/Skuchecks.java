@@ -49,7 +49,7 @@ public class Skuchecks extends Controller {
 
     public static void blank() {
         SkuCheck sc = new SkuCheck();
-        List<SkuCheck> sclist = new ArrayList<SkuCheck>();
+        List<SkuCheck> sclist = new ArrayList<>();
         render(sc, sclist);
     }
 

@@ -25,7 +25,7 @@ public class ProductQuery {
     public List<String> skus() {
         SqlSelect sql = new SqlSelect().select("sku").from("Product");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
-        List<String> skus = new ArrayList<String>();
+        List<String> skus = new ArrayList<>();
 
         for(Map<String, Object> row : rows) {
             skus.add(row.get("sku").toString());
@@ -40,7 +40,7 @@ public class ProductQuery {
      * @return
      */
     public Map<String, Product.S> skuAndStates() {
-        Map<String, Product.S> products = new HashMap<String, Product.S>();
+        Map<String, Product.S> products = new HashMap<>();
         SqlSelect sql = new SqlSelect().select("sku", "state").from("Product");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         for(Map<String, Object> row : rows) {
@@ -60,7 +60,7 @@ public class ProductQuery {
      * @return
      */
     public List<String> loadCategoriesBySkus(List<String> skus) {
-        List<String> categories = new ArrayList<String>();
+        List<String> categories = new ArrayList<>();
         SqlSelect sql = new SqlSelect().select("DISTINCT category_categoryId as category").from("Product");
         sql.where("sku IN " + SqlSelect.inlineParam(skus));
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());

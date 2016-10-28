@@ -19,6 +19,7 @@ import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
 import models.whouse.Whouse;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -27,6 +28,7 @@ import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 import play.libs.Files;
+import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -34,6 +36,8 @@ import play.mvc.With;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * Created by IntelliJ IDEA.
@@ -403,6 +407,17 @@ public class ProcureUnits extends Controller {
         render(unit);
     }
 
+    /**
+     * 已核单
+     * @param id
+     */
+    public static void confirmUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.isConfirm = true;
+        unit.save();
+        render(unit);
+    }
+
 
     /**
      * 预付款申请
@@ -499,7 +514,7 @@ public class ProcureUnits extends Controller {
         SqlSelect sql = new SqlSelect().select("id").from("ProcureUnit").where("cooperator_id=?").param(pro
                 .cooperator.id);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        List<Long> unitIds = new ArrayList<Long>();
+        List<Long> unitIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             unitIds.add(Long.parseLong(row.get("id").toString()));
         }
@@ -643,6 +658,14 @@ public class ProcureUnits extends Controller {
         ActivitiProcess.endTask(processid, "procureunit.stopactiviti");
         unit.resetUnitByTerminalProcess();
         redirect("/activitis/index");
+    }
+
+    public static void fnSkuLable(String sid) {
+        Selling selling = Selling.findById(sid);
+        final PDF.Options options = new PDF.Options();
+        options.filename = selling.fnSku + ".pdf";
+        options.pageSize = IHtmlToPdfTransformer.A4P;
+        renderPDF(options, selling);
     }
 
 }

@@ -7,10 +7,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.finance.ProcureApply;
-import models.procure.Cooperator;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Product;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
@@ -68,7 +65,7 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
         render(deliveryments, p, deliverymentIds);
@@ -93,6 +90,17 @@ public class Deliveryments extends Controller {
         dmt.save();
         flash.success("更新成功.");
         show(dmt.id);
+    }
+
+    public static void confirmUnit(String id, List<Long> pids) {
+        if(pids.size() > 0) {
+            for(Long unit_id : pids) {
+                ProcureUnit unit = ProcureUnit.findById(unit_id);
+                unit.isConfirm = true;
+                unit.save();
+            }
+        }
+        show(id);
     }
 
     /**
@@ -191,7 +199,7 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.deliverymenttoapply")
     public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
                                            Long procureApplyId) {
-        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");
             index(p, deliverymentIds);
@@ -306,4 +314,28 @@ public class Deliveryments extends Controller {
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
     }
+
+    public static void showProcureUnitById(String id) {
+        List<ProcureUnit> units = ProcureUnit.find("deliveryment.id = ? ", id).fetch();
+        renderArgs.put("norecord", true);
+        renderArgs.put("deliveryplan", true);
+        render("ProcureUnits/_unit_list.html", units);
+    }
+
+    public static void refreshFbaCartonContentsByIds(String[] unitIds) {
+        List<ProcureUnit> list = new ArrayList<>();
+        for(String id : unitIds) {
+            ProcureUnit unit = ProcureUnit.findById(Long.parseLong(id));
+            if(unit.cooperator != null) {
+                CooperItem item = unit.cooperator.cooperItem(unit.product.sku);
+                if(item != null) {
+                    item.getAttributes();
+                    unit.items = item.items;
+                }
+            }
+            list.add(unit);
+        }
+        render("/Deliveryments/fba_carton_contents_new.html", list);
+    }
+
 }

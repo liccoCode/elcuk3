@@ -71,9 +71,9 @@ application.session.maxAge=24h
 %prod.jvm.memory=<%= @jvm_opts %>
 # use 1.8 PermSize was removed
 # 开发环境请使用 JAVA_OPT="-XX:PermSize=128m" 来代替
-jvm.memory=-XX:PermSize=128m -XX:MaxPermSize=128m
+jvm.memory=-XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=128m
 # Java source level => 1.6, 1.7 or 1.8 (experimental)
-java.source=1.7
+java.source=1.8
 
 # Log level
 # ~~~~~

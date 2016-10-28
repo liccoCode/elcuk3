@@ -89,7 +89,7 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
 
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT d FROM DeliverPlan d LEFT JOIN d.units u WHERE 1=1 AND");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             sbd.append(" d.createDate>=? AND d.createDate<=?");
@@ -148,8 +148,8 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
             Matcher matcher = SIZE.matcher(this.search);
             if(matcher.find()) {
                 int size = NumberUtils.toInt(matcher.group(1));
-                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(d.units)>=?",
-                        new ArrayList<Object>(Arrays.asList(size)));
+                return new F.T3<>(true, "SIZE(d.units)>=?",
+                        new ArrayList<>(Arrays.asList(size)));
             }
         }
         return new F.T3<>(false, null, null);
@@ -166,9 +166,9 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true,
+                return new F.T3<>(true,
                         "SELECT d FROM DeliverPlan d WHERE d.id=?",
-                        new ArrayList<Object>(Arrays.asList(deliverymentId)));
+                        new ArrayList<>(Arrays.asList(deliverymentId)));
             }
         }
         return new F.T3<>(false, null, null);

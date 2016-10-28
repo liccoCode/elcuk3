@@ -98,7 +98,7 @@ public class SellingRecordColumnChartPost extends Post<HighChart> {
             String sku = StringUtils.split(sid, ",")[0];
             sql.where(String.format("sr.selling_sellingId like '%s%%'", sku));
         }
-        return new F.T2<String, List<Object>>(sql.toString(), sql.getParams());
+        return new F.T2<>(sql.toString(), sql.getParams());
     }
 
 
