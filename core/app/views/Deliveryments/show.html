@@ -6,6 +6,7 @@
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
     #{script 'deliveryments/show.coffee'/}
+    #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}
@@ -146,9 +147,6 @@
          id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
         <i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
-      <a data-remote='true' data-method='PUT' class="btn btn-warning" id="isConfirm_btn" data-disable-with='更新中'
-         data-url="@{Deliveryments.confirmUnit(dmt.id)}">已核单</a>
-    </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 
