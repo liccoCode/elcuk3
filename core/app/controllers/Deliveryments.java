@@ -315,13 +315,6 @@ public class Deliveryments extends Controller {
         Deliveryments.show(dmt.id);
     }
 
-    public static void showProcureUnitById(String id) {
-        List<ProcureUnit> units = ProcureUnit.find("deliveryment.id = ? ", id).fetch();
-        renderArgs.put("norecord", true);
-        renderArgs.put("deliveryplan", true);
-        render("ProcureUnits/_unit_list.html", units);
-    }
-
     public static void refreshFbaCartonContentsByIds(String[] unitIds) {
         List<ProcureUnit> list = new ArrayList<>();
         for(String id : unitIds) {
