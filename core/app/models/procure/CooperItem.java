@@ -14,6 +14,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -106,7 +107,7 @@ public class CooperItem extends Model {
     public String productTerms;
 
     @Transient
-    public List<CooperItemDTO> items;
+    public List<CooperItemDTO> items = new ArrayList<>();
 
     /**
      * 方案Json串

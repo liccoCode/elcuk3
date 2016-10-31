@@ -21,43 +21,64 @@
         <td>
           <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' value='${dto.lastCartonNum}' placeholder='可选'/>
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${dto.singleBoxWeight}'/></td>
+        <td>
+          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${dto.singleBoxWeight}'/>
+        </td>
         <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${dto.length}'/></td>
         <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value='${dto.width}'/></td>
         <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${dto.height}'/></td>
-        <td></td>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
+          <span><i class="icon-reorder"></i></span>
+            #{if unit.items != null}
+              <span class="badge badge-info">${unit.items.size()}</span>
+            #{/if}
+            #{else }
+              <span class="badge badge-info">0</span>
+            #{/else}
+        </td>
       #{/if}
       #{elseif cooperItem}
         <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value='${cooperItem.boxNum(unit.qty())}'/></td>
+        <td>
+          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value='${cooperItem.boxNum(unit.qty())}'/>
+        </td>
         <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value='${cooperItem.boxSize}'/></td>
         <td>
           <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' value='${cooperItem.lastCartonNum(unit.qty())}' placeholder='可选'/>
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${cooperItem.singleBoxWeight}'/>
+        <td>
+          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${cooperItem.singleBoxWeight}'/>
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${cooperItem.length}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${cooperItem.length}'/>
+        </td>
         <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value='${cooperItem.width}'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${cooperItem.height}'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${cooperItem.height}'/>
+        </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
           <span><i class="icon-reorder"></i></span>
-          <span class="badge badge-info">${unit.items.size()}</span>
+            #{if unit.items != null}
+              <span class="badge badge-info">${unit.items.size()}</span>
+            #{/if}
+            #{else }
+              <span class="badge badge-info">0</span>
+            #{/else}
         </td>
       #{/elseif}
       #{else }
         <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' placeholder='可选'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height'/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value="0"/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value="0"/></td>
+        <td>
+          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' placeholder='可选' value="0"/>
+        </td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value="0"/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value="0"/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value="0"/></td>
+        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value="0"/></td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
           <span><i class="icon-reorder"></i></span>
           <span class="badge badge-info">${unit.items.size()}</span>
         </td>
-
       #{/else}
   </tr>
   <tr id="unit_${unit_index}" style="display:none;">
