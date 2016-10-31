@@ -1,6 +1,22 @@
 $ ->
   $("table").on('click', 'a#replaceUnitFBA', (e) ->
     $("#fba_carton_contents_modal").data('unit-source', $(@).data('unit-id')).modal('show')
+    $("#sumbitDeployFBAs").data('url', $(@).data("url"))
+    unitIds = [$(@).data('unit-id')]
+    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+      $("input[name='chooseType']").change(->
+        radio = $("input[name='chooseType']:checked")
+        id = radio.val()
+        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
+        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
+        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
+        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
+        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
+        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
+        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
+      )
+    )
   ).on("click", "i[name=showFeedsPage]", (e) ->
   )
   $('#unit_list').on('click', 'a[name=confirmUnitBtn]', (e) ->
