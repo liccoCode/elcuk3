@@ -14,6 +14,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Amazon FBA 操作
@@ -341,19 +342,14 @@ public class FBA {
      * @return
      */
     private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems(List<ProcureUnit> units) {
-
-        List<InboundShipmentItem> items = new ArrayList<>();
-        for(ProcureUnit unit : units) {
-            items.add(new InboundShipmentItem(
-                    null,
-                    fixHistoryMSKU(unit.selling.merchantSKU),
-                    null,
-                    unit.qty(),
-                    null,
-                    null,
-                    null));
-        }
-        return items;
+        return units.stream().map(unit -> new InboundShipmentItem(
+                null,
+                fixHistoryMSKU(unit.selling.merchantSKU),
+                null,
+                unit.qty(),
+                null,
+                null,
+                null)).collect(Collectors.toList());
     }
 
 

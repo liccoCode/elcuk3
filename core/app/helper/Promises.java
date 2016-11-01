@@ -9,7 +9,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -40,15 +43,12 @@ public class Promises {
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
-                FutureTask<T> task = new FutureTask<>(new Callable<T>() {
-                    @Override
-                    public T call() throws Exception {
-                        try {
-                            return callback.doJobWithResult(m);
-                        } finally {
-                            if(callback instanceof DBCallback<?>) {
-                                ((DBCallback) callback).close();
-                            }
+                FutureTask<T> task = new FutureTask<>(() -> {
+                    try {
+                        return callback.doJobWithResult(m);
+                    } finally {
+                        if(callback instanceof DBCallback<?>) {
+                            ((DBCallback) callback).close();
                         }
                     }
                 });
