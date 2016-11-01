@@ -869,7 +869,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
             String errMsg = e.getMessage();
-            if(errMsg.contains("UNKNOWN_SKU")) {
+            if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
                 Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
                         this.selling.merchantSKU));
             } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
