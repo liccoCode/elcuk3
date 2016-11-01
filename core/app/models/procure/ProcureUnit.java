@@ -29,6 +29,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
+import play.Logger;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -1355,7 +1356,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     unit.postFbaShipment(dtos.get(i));
                 }
             } catch(Exception e) {
-                Validation.addError("", Webs.E(e));
+                Logger.error(Webs.S(e));
+                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
             }
         }
     }
