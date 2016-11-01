@@ -8,6 +8,7 @@ import play.utils.FastRuntimeException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,10 +43,16 @@ public class Promises {
         long begin = System.currentTimeMillis();
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
-            for(final M m : Promises.MARKETS) {
+            List iterators;
+            if(callback instanceof CallbackWithContext<?>) {
+                iterators = ((CallbackWithContext) callback).getContext();
+            } else {
+                iterators = Arrays.asList(Promises.MARKETS);
+            }
+            for(final Object param : iterators) {
                 FutureTask<T> task = new FutureTask<>(() -> {
                     try {
-                        return callback.doJobWithResult(m);
+                        return callback.doJobWithResult(param);
                     } finally {
                         if(callback instanceof DBCallback<?>) {
                             ((DBCallback) callback).close();
@@ -79,14 +86,14 @@ public class Promises {
      * @param <T>
      */
     public interface Callback<T> {
-        public T doJobWithResult(M m);
+        T doJobWithResult(Object param);
 
         /**
          * 用来标记执行线程的
          *
          * @return
          */
-        public String id();
+        String id();
     }
 
     /**
@@ -121,5 +128,14 @@ public class Promises {
                 throw new FastRuntimeException(e);
             }
         }
+    }
+
+    public static abstract class CallbackWithContext<T> implements Callback<T> {
+        /**
+         * 用于 each 的 Context
+         *
+         * @return
+         */
+        public abstract List getContext();
     }
 }
