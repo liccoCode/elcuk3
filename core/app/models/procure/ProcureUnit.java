@@ -895,6 +895,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     .fid(this.id)
                     .save();
         } catch(FBAInboundServiceMWSException e) {
+            Logger.error(Webs.S(e));
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
         return fba;
