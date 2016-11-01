@@ -129,9 +129,9 @@ public class FBACenter extends Model {
             manager.countryCode = this.countryCode;
             manager.stateOrProvinceCode = this.stateOrProvinceCode;
             manager.postalCode = this.postalCode;
+            return manager.save();
         } else {
-            manager.save();
+            return this.save();
         }
-        return manager;
     }
 }
