@@ -272,8 +272,8 @@ public class OrderItem extends GenericModel {
 
             Promises.forkJoin(new Promises.Callback<Object>() {
                 @Override
-                public Object doJobWithResult(M m) {
-                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", m, _from, _to, false));
+                public Object doJobWithResult(Object param) {
+                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", (M) param, _from, _to, false));
                     return null;
                 }
 
@@ -291,7 +291,7 @@ public class OrderItem extends GenericModel {
             highChart.series(highChart.sumSeries("销量"));
             for(int i = 0; i < highChart.series.size(); i++) {
                 AbstractSeries serie = highChart.series.get(i);
-                if(serie.name.indexOf("汇总") == -1) {
+                if(!serie.name.contains("汇总")) {
                     serie.visible = false;
                     highChart.series.set(i, serie);
                 }

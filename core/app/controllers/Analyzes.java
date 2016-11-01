@@ -130,7 +130,7 @@ public class Analyzes extends Controller {
                 @Override
                 public String doJobWithResult() throws Exception {
                     return J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
-                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
+                            Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to));
                 }
             }.now());
             renderJSON(json);

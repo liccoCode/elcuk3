@@ -241,11 +241,11 @@ public class SellingSaleAnalyzeJob extends Job {
                           final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> doJobWithResult(M m) {
+            public Map<String, Integer> doJobWithResult(Object param) {
                 return query.analyzeDaySale(
                         Dates.morning(now.minusDays(1).toDate()),
                         Dates.night(now.minusDays(1).toDate()),
-                        m,
+                        (M) param,
                         isSku,
                         getConnection());
             }
@@ -278,11 +278,11 @@ public class SellingSaleAnalyzeJob extends Job {
                           final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> doJobWithResult(M m) {
+            public Map<String, Integer> doJobWithResult(Object param) {
                 return query.analyzeDaySale(
                         Dates.morning(now.minusDays(8).toDate()),
                         Dates.night(now.minusDays(1).toDate()),
-                        m,
+                        (M) param,
                         isSku,
                         getConnection());
             }
@@ -315,11 +315,11 @@ public class SellingSaleAnalyzeJob extends Job {
                            final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> doJobWithResult(M m) {
+            public Map<String, Integer> doJobWithResult(Object param) {
                 return query.analyzeDaySale(
                         Dates.morning(now.minusDays(31).toDate()),
                         Dates.night(now.minusDays(1).toDate()),
-                        m,
+                        (M) param,
                         isSku,
                         getConnection());
             }
