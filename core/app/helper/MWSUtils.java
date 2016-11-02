@@ -517,29 +517,34 @@ public class MWSUtils {
                         setCE();
                 }
                 return this.productData;
-            } catch(ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            } catch(FastRuntimeException e) {
                 Logger.error(Webs.S(e));
-                throw new FastRuntimeException(
-                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
+                throw new FastRuntimeException(String.format(
+                        "您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次. ERROR:[%s]",
+                        this.feedProductType, e.getMessage()));
             }
         }
 
-        Object getInstanceByFeedProductType()
-                throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-            Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
-            return clazz.newInstance();
+        Object getInstanceByFeedProductType() {
+            try {
+                Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
+                return clazz.newInstance();
+            } catch(IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+                throw new FastRuntimeException(e);
+            }
         }
 
-        void setType(Object setter, Object param)
-                throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-            Method method = setter.getClass().getDeclaredMethod(String.format("set%s", this.feedProductType),
-                    param.getClass());
-            method.invoke(setter, param);
+        void setType(Object setter, Object param) {
+            try {
+                Method method = setter.getClass().getDeclaredMethod(String.format("set%s", this.feedProductType),
+                        param.getClass());
+                method.invoke(setter, param);
+            } catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new FastRuntimeException(e);
+            }
         }
 
-        void setComputers()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setComputers() {
             Computers computers = new Computers();
             Computers.ProductType productType = new Computers.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -547,9 +552,7 @@ public class MWSUtils {
             productData.setComputers(computers);
         }
 
-        void setCE()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setCE() {
             CE ce = new CE();
             CE.ProductType productType = new CE.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -557,9 +560,7 @@ public class MWSUtils {
             productData.setCE(ce);
         }
 
-        void setWireless()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setWireless() {
             Wireless wireless = new Wireless();
             Wireless.ProductType productType = new Wireless.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -567,9 +568,7 @@ public class MWSUtils {
             productData.setWireless(wireless);
         }
 
-        void setHomeImprovement()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setHomeImprovement() {
             HomeImprovement homeImprovement = new HomeImprovement();
             HomeImprovement.ProductType productType = new HomeImprovement.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -577,9 +576,7 @@ public class MWSUtils {
             productData.setHomeImprovement(homeImprovement);
         }
 
-        void setHome()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setHome() {
             Home home = new Home();
             Home.ProductType productType = new Home.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -587,9 +584,7 @@ public class MWSUtils {
             productData.setHome(home);
         }
 
-        void setGames()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setGames() {
             SoftwareVideoGames videoGames = new SoftwareVideoGames();
             SoftwareVideoGames.ProductType productType = new SoftwareVideoGames.ProductType();
             setType(productType, getInstanceByFeedProductType());
@@ -603,9 +598,7 @@ public class MWSUtils {
             productData.setSports(sports);
         }
 
-        void setLighting()
-                throws IllegalAccessException, InstantiationException, ClassNotFoundException, InvocationTargetException,
-                NoSuchMethodException {
+        void setLighting() {
             Lighting lighting = new Lighting();
             Lighting.ProductType productType = new Lighting.ProductType();
             setType(productType, getInstanceByFeedProductType());
