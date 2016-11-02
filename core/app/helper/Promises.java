@@ -8,6 +8,7 @@ import play.utils.FastRuntimeException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -25,8 +26,6 @@ public class Promises {
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
      * 如果需要访问 DB, 则请使用 DBCallback 进行.
-     * ps:
-     * 1. M:market 就没有进行抽象为 Context 了, 有需要再重构
      *
      * @param callback
      * @param <T>
@@ -39,12 +38,19 @@ public class Promises {
         long begin = System.currentTimeMillis();
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
-            for(final M m : Promises.MARKETS) {
+            List iterators;
+            if(callback instanceof CallbackWithContext<?>) {
+                iterators = ((CallbackWithContext) callback).getContext();
+            } else {
+                iterators = Arrays.asList(Promises.MARKETS);
+            }
+            for(final Object param : iterators) {
+                //WARNING::  这里的 new Callable<T>... 在 java8 中可以被简写成 () -> 但是这种写法在 play 1.4.x 中无法通过 precompile!
                 FutureTask<T> task = new FutureTask<>(new Callable<T>() {
                     @Override
                     public T call() throws Exception {
                         try {
-                            return callback.doJobWithResult(m);
+                            return callback.doJobWithResult(param);
                         } finally {
                             if(callback instanceof DBCallback<?>) {
                                 ((DBCallback) callback).close();
@@ -79,14 +85,14 @@ public class Promises {
      * @param <T>
      */
     public interface Callback<T> {
-        public T doJobWithResult(M m);
+        T doJobWithResult(Object param);
 
         /**
          * 用来标记执行线程的
          *
          * @return
          */
-        public String id();
+        String id();
     }
 
     /**
@@ -121,5 +127,14 @@ public class Promises {
                 throw new FastRuntimeException(e);
             }
         }
+    }
+
+    public static abstract class CallbackWithContext<T> implements Callback<T> {
+        /**
+         * 用于 each 的 Context
+         *
+         * @return
+         */
+        public abstract List getContext();
     }
 }

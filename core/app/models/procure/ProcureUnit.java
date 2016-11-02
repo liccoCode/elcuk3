@@ -869,7 +869,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
             String errMsg = e.getMessage();
-            if(errMsg.contains("UNKNOWN_SKU")) {
+            if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
                 Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
                         this.selling.merchantSKU));
             } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
@@ -895,6 +895,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     .fid(this.id)
                     .save();
         } catch(FBAInboundServiceMWSException e) {
+            Logger.error(Webs.S(e));
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
         return fba;
@@ -1336,30 +1337,47 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 批量创建 FBA
+     * 批量创建 FBA, 返回的结果可以用来获取创建的 FBAShipment 列表
      *
      * @param unitIds
+     * @param dtos
+     * @return List<F.Promise<FBAShipment>>
      */
-    public static void postFbaShipments(List<Long> unitIds, List<CheckTaskDTO> dtos) {
-        List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
+    public static void postFbaShipments(final List<Long> unitIds,
+                                        final List<CheckTaskDTO> dtos) {
+        final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
         if(units.size() != unitIds.size() || units.size() != dtos.size()) {
-            Validation.addError("", "加载的数量");
+            Validation.addError("", "加载的数量不一致");
         }
         if(Validation.hasErrors()) return;
 
-        for(int i = 0; i < units.size(); i++) {
-            ProcureUnit unit = units.get(i);
-            try {
-                if(unit.fba != null) {
-                    Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
-                } else {
-                    unit.postFbaShipment(dtos.get(i));
-                }
-            } catch(Exception e) {
-                Logger.error(Webs.S(e));
-                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+        Promises.forkJoin(new Promises.CallbackWithContext<FBAShipment>() {
+            @Override
+            public List<ProcureUnit> getContext() {
+                return units;
             }
-        }
+
+            @Override
+            public FBAShipment doJobWithResult(Object param) {
+                ProcureUnit unit = (ProcureUnit) param;
+                if(unit.fba == null) {
+                    try {
+                        return unit.postFbaShipment(dtos.get(units.indexOf(unit)));
+                    } catch(Exception e) {
+                        Logger.error(Webs.S(e));
+                        Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+                    }
+                } else {
+                    Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+                }
+                return null;
+            }
+
+            @Override
+            public String id() {
+                return "ProcureUnit#postFbaShipments";
+            }
+        });
     }
 
     /**
