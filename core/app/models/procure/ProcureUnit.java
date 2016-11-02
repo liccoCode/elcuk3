@@ -1351,33 +1351,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         if(Validation.hasErrors()) return;
 
-        Promises.forkJoin(new Promises.CallbackWithContext<FBAShipment>() {
-            @Override
-            public List<ProcureUnit> getContext() {
-                return units;
-            }
-
-            @Override
-            public FBAShipment doJobWithResult(Object param) {
-                ProcureUnit unit = (ProcureUnit) param;
-                if(unit.fba == null) {
-                    try {
-                        return unit.postFbaShipment(dtos.get(units.indexOf(unit)));
-                    } catch(Exception e) {
-                        Logger.error(Webs.S(e));
-                        Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
-                    }
-                } else {
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
+            try {
+                if(unit.fba != null) {
                     Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+                } else {
+                    unit.postFbaShipment(dtos.get(i));
                 }
-                return null;
+            } catch(Exception e) {
+                Logger.error(Webs.S(e));
+                Validation.addError("", "向 Amazon 创建 Shipment 因 " + Webs.E(e) + " 原因失败.");
             }
-
-            @Override
-            public String id() {
-                return "ProcureUnit#postFbaShipments";
-            }
-        });
+        }
     }
 
     /**
