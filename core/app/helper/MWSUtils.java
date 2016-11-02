@@ -7,6 +7,7 @@ import models.procure.FBAShipment;
 import models.product.Attach;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.utils.FastRuntimeException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -494,36 +495,51 @@ public class MWSUtils {
         }
 
         Product.ProductData build() {
-            switch(this.templateType) {
-                case "Computers":
-                    setComputers();
-                case "ConsumerElectronics":
-                    setWireless();
-                case "Wireless":
-                    setCE();
-                case "HomeImprovement":
-                    setHomeImprovement();
-                case "Home":
-                    setHome();
-                case "Games":
-                    setGames();
-                case "Sports":
-                    setSports();
-                case "Lighting":
-                    setLighting();
-                default:
-                    setCE();
+            try {
+                switch(this.templateType) {
+                    case "Computers":
+                        setComputers();
+                        break;
+                    case "ConsumerElectronics":
+                        setCE();
+                        break;
+                    case "Wireless":
+                        setWireless();
+                        break;
+                    case "HomeImprovement":
+                        setHomeImprovement();
+                        break;
+                    case "Home":
+                        setHome();
+                        break;
+                    case "Games":
+                        setGames();
+                        break;
+                    case "Sports":
+                        setSports();
+                        break;
+                    case "Lighting":
+                        setLighting();
+                        break;
+                    default:
+                        setCE();
+                        break;
+                }
+                return this.productData;
+            } catch(FastRuntimeException e) {
+                Logger.error(Webs.S(e));
+                throw new FastRuntimeException(String.format(
+                        "您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次. ERROR:[%s]",
+                        this.feedProductType, e.getMessage()));
             }
-            return this.productData;
         }
 
         Object getInstanceByFeedProductType() {
             try {
                 Class clazz = Class.forName(String.format("com.elcuk.jaxb.%s", this.feedProductType));
                 return clazz.newInstance();
-            } catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new FastRuntimeException(
-                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
+            } catch(IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+                throw new FastRuntimeException(e);
             }
         }
 
@@ -533,8 +549,7 @@ public class MWSUtils {
                         param.getClass());
                 method.invoke(setter, param);
             } catch(NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                throw new FastRuntimeException(
-                        String.format("您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次.", this.feedProductType));
+                throw new FastRuntimeException(e);
             }
         }
 

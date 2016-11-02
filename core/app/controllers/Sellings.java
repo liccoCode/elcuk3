@@ -184,9 +184,6 @@ public class Sellings extends Controller {
         }
     }
 
-
-    /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
-
     public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {
@@ -305,7 +302,7 @@ public class Sellings extends Controller {
      */
     public static void bulkImport(File sellingFile) {
         List<String> lines = new ArrayList<>();
-        StringBuffer msg = new StringBuffer();
+        StringBuilder msg = new StringBuilder();
         // 文件基本属性校验(是否存在、格式、标题行)
         try {
             if(sellingFile == null) Webs.error("文件为空!");
@@ -313,7 +310,7 @@ public class Sellings extends Controller {
             if(!(fileName.substring(fileName.lastIndexOf(".") + 1)).equalsIgnoreCase("txt")) //文件类型校验
                 Webs.error("不支持的文件格式! 请使用 TXT 文档.");
             lines = FileUtils.readLines(sellingFile);
-            if(lines.size() == 0 || !(lines.get(0).toString().contains("SKU\tUPC\tASIN\tMarket\tAccount")))
+            if(lines.size() == 0 || !(lines.get(0).contains("SKU\tUPC\tASIN\tMarket\tAccount")))
                 Webs.error("文件校验失败, 内容为空或标题行不存在!");
         } catch(Exception e) {
             renderText(e.getMessage());
