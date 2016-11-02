@@ -29,8 +29,6 @@ public class Promises {
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
      * 如果需要访问 DB, 则请使用 DBCallback 进行.
-     * ps:
-     * 1. M:market 就没有进行抽象为 Context 了, 有需要再重构
      *
      * @param callback
      * @param <T>
