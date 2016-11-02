@@ -38,10 +38,15 @@
       #{set length: title?.length()/}
       #{list items:1..3}
         <td style="padding-left: 18px;">
-          ${selling.aps?.sortTitle()}
+        ${selling.aps?.sortTitle()}
           <br>
           <b>NEW</b><br>
-        ${selling.listing?.product?.sku}
+            #{if models.OperatorConfig.getVal("brandname")=='EASYACC'}
+              EA${selling.listing?.product?.sku.substring(2)}
+            #{/if}
+            #{else }
+            ${selling.listing?.product?.sku}
+            #{/else}
         </td>
       #{/list}
   </tr>

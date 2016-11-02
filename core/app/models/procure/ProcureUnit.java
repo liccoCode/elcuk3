@@ -457,7 +457,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public static String ACTIVITINAME = "procureunit.create";
 
     @Transient
-    public List<CooperItemDTO> items;
+    public List<CooperItemDTO> items = new ArrayList<>();
 
     /**
      * 相关联的质检任务

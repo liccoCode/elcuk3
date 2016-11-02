@@ -14,6 +14,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,7 +66,6 @@ public class CooperItem extends Model {
      */
     @Min(0)
     @Expose
-    @Required
     public Integer boxSize;
 
     /**
@@ -106,7 +106,7 @@ public class CooperItem extends Model {
     public String productTerms;
 
     @Transient
-    public List<CooperItemDTO> items;
+    public List<CooperItemDTO> items = new ArrayList<>();
 
     /**
      * 方案Json串
@@ -116,6 +116,7 @@ public class CooperItem extends Model {
     public CooperItem checkAndUpdate() {
         this.check();
         this.setAttributes();
+        this.setDefaultValue();
         return this.save();
     }
 
@@ -127,6 +128,17 @@ public class CooperItem extends Model {
         if(this.items == null || this.items.isEmpty()) {
              this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "[]",
                      CooperItemDTO.class);
+        }
+    }
+
+    public void setDefaultValue() {
+        if( this.items != null && this.items.size() > 0) {
+            CooperItemDTO dto = this.items.get(0);
+            this.height = dto.height;
+            this.width = dto.width;
+            this.length = dto.length;
+            this.singleBoxWeight = dto.singleBoxWeight;
+            this.boxSize = dto.boxSize;
         }
     }
 
@@ -157,6 +169,8 @@ public class CooperItem extends Model {
                 throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
         }
         cooperator.cooperItems.add(this);
+        this.setAttributes();
+        this.setDefaultValue();
         return this.save();
     }
 
