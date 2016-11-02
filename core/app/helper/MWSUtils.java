@@ -523,6 +523,7 @@ public class MWSUtils {
                         break;
                     default:
                         setCE();
+                        break;
                 }
                 return this.productData;
             } catch(FastRuntimeException e) {
