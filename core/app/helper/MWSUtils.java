@@ -499,20 +499,28 @@ public class MWSUtils {
                 switch(this.templateType) {
                     case "Computers":
                         setComputers();
+                        break;
                     case "ConsumerElectronics":
-                        setWireless();
-                    case "Wireless":
                         setCE();
+                        break;
+                    case "Wireless":
+                        setWireless();
+                        break;
                     case "HomeImprovement":
                         setHomeImprovement();
+                        break;
                     case "Home":
                         setHome();
+                        break;
                     case "Games":
                         setGames();
+                        break;
                     case "Sports":
                         setSports();
+                        break;
                     case "Lighting":
                         setLighting();
+                        break;
                     default:
                         setCE();
                 }
