@@ -10,10 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,12 +45,16 @@ public class Promises {
                 iterators = Arrays.asList(Promises.MARKETS);
             }
             for(final Object param : iterators) {
-                FutureTask<T> task = new FutureTask<>(() -> {
-                    try {
-                        return callback.doJobWithResult(param);
-                    } finally {
-                        if(callback instanceof DBCallback<?>) {
-                            ((DBCallback) callback).close();
+                //WARNING::  这里的 new Callable<T>... 在 java8 中可以被简写成 () -> 但是这种写法在 play 1.4.x 中无法通过 precompile!
+                FutureTask<T> task = new FutureTask<>(new Callable<T>() {
+                    @Override
+                    public T call() throws Exception {
+                        try {
+                            return callback.doJobWithResult(param);
+                        } finally {
+                            if(callback instanceof DBCallback<?>) {
+                                ((DBCallback) callback).close();
+                            }
                         }
                     }
                 });
