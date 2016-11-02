@@ -26,6 +26,8 @@ public class Promises {
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
      * 如果需要访问 DB, 则请使用 DBCallback 进行.
+     * <p>
+     * WANING: 只适用于获取数据操作,不支持涉及到持久化的操作.
      *
      * @param callback
      * @param <T>
