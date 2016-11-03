@@ -12,6 +12,7 @@ import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.ProcreApplyPost;
 import models.view.post.ShipmentPost;
+import models.view.post.TransApplyShipPost;
 import models.view.post.TransportApplyPost;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -27,34 +28,30 @@ import java.util.List;
  * Date: 3/26/13
  * Time: 3:53 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Applys extends Controller {
 
     @Before(only = {"procures", "transports"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
-
         renderArgs.put("suppliers", suppliers);
     }
 
 
     @Check("applys.index")
     public static void procures(ProcreApplyPost p) {
-        List<Apply> applyes = null;
         if(p == null) p = new ProcreApplyPost();
-        applyes = p.query();
-
+        List<Apply> applyes = p.query();
         render(applyes, p);
     }
 
     /**
-     * 物流请款  列表
+     * 物流请款列表
      */
     public static void transports(TransportApplyPost p) {
-        List<User> users = User.findAll();
-        List<TransportApply> applyes = null;
         if(p == null) p = new TransportApplyPost();
-        applyes = p.query();
+        List<User> users = User.findAll();
+        List<TransportApply> applyes = p.query();
         render(applyes, p, users);
     }
 
@@ -68,11 +65,16 @@ public class Applys extends Controller {
         render(apply);
     }
 
-    public static void transport(Long id) {
+
+    public static void transport(Long id, TransApplyShipPost p) {
         List<FeeType> feeTypes = Shipments.feeTypes(null);
-        TransportApply apply = TransportApply.findById(id);
         List<Cooperator> cooperators = Cooperator.shippers();
-        render(apply, feeTypes, cooperators);
+        TransportApply apply = TransportApply.findById(id);
+        notFoundIfNull(apply);
+
+        if(p == null) p = new TransApplyShipPost(id);
+        List<Shipment> shipments = p.query();
+        render(apply, feeTypes, cooperators, p, shipments);
     }
 
     public static void procureConfirm(Long id) {
@@ -92,12 +94,12 @@ public class Applys extends Controller {
     public static void transportAddShipment(Long id, String shipmentId) {
         TransportApply apply = TransportApply.findById(id);
         Shipment ship = Shipment.findById(shipmentId);
-        if (ship.apply!=null)
+        if(ship.apply != null)
             Validation.addError("", "已经存在请款单, 无法添加成功.");
         apply.appendShipment(Arrays.asList(ship.id));
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
-        transport(id);
+        transport(id, null);
     }
 
     /**
@@ -133,7 +135,7 @@ public class Applys extends Controller {
             Shipments.index(p);
         } else {
             if(apply != null) {
-                Applys.transport(apply.id);
+                Applys.transport(apply.id, null);
             } else {
                 flash.error("请款单创建失败.");
                 Shipments.index(p);
