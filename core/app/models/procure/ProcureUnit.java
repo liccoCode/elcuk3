@@ -1487,8 +1487,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String isship() {
-        CheckTask task = this.lastCheckedTask();
-        if(task != null) return task.isship.label();
+        if(this.haveTask()) {
+            CheckTask task = this.taskList.get(0);
+            if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
+                return task.isship.label();
+            } else if(task != null && task.isship == null && this.taskList.size() > 1) {
+                CheckTask secondTask = this.taskList.get(1);
+                if(secondTask.isship != null)
+                    return secondTask.isship.label();
+            }
+        }
         return null;
     }
 
