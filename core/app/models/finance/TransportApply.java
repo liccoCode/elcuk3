@@ -21,6 +21,7 @@ import javax.persistence.OneToOne;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -107,10 +108,8 @@ public class TransportApply extends Apply {
         if(shipments.size() != shipmentId.size())
             Validation.addError("", "提交的运输单参数与系统中的不符.");
 
-        Set<Cooperator> coopers = new HashSet<>();
-        for(Shipment ship : shipments) {
-            if(ship.cooper != null) coopers.add(ship.cooper);
-        }
+        Set<Cooperator> coopers = shipments.stream().filter(ship -> ship.cooper != null).map(ship -> ship.cooper)
+                .collect(Collectors.toSet());
 
         if(coopers.size() > 1)
             Validation.addError("", "请仅对同一个运输商.");
@@ -196,5 +195,14 @@ public class TransportApply extends Apply {
             if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
         }
         return apply;
+    }
+
+    /**
+     * 最后 10 个运输单
+     *
+     * @return
+     */
+    public List<Shipment> lastShipments() {
+        return this.shipments.stream().limit(10).collect(Collectors.toList());
     }
 }
