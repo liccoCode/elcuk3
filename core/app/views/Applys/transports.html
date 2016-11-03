@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"请款单列表" /}
 #{set 'moreScripts'}
+  #{script 'component/pagination.coffee'/}
 #{/set}
 
 #{form @Applys.transports(), class:'search_form', id:'transports_form', method:'POST'}
