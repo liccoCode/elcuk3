@@ -262,17 +262,16 @@ public class FBAShipment extends Model {
             this.state = FBA.update(this, state != null ? state : this.state);
             Thread.sleep(500);
         } catch(Exception e) {
+            Logger.error(Webs.S(e));
             String errMsg = e.getMessage();
             if(errMsg.contains("Shipment is locked. No updates allowed") ||
                     errMsg.contains("Shipment is in locked status")) {
                 this.state = FBAShipment.S.RECEIVING;
                 this.save();
-                Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
             } else if(errMsg.contains("FBA31004")) {
                 //fbaErrorCode=FBA31004, description=updates to status SHIPPED not allowed
                 this.state = FBAShipment.S.IN_TRANSIT;
                 this.save();
-                Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
             } else if(errMsg.contains("Invalid Status change")) {
                 //物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.
                 this.state = FBAShipment.S.SHIPPED;
