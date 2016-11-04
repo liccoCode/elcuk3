@@ -8,9 +8,8 @@ import models.market.M;
 import models.market.Orderr;
 import models.view.dto.OrderReportDTO;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
@@ -145,11 +144,33 @@ public class OrderPOST extends ESPost<Orderr> {
 
     @Override
     public SearchSourceBuilder params() {
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
-
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.query(QueryBuilders
-                .queryString(this.search())
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        if(this.promotion != null) {
+            ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery("promotion_ids");
+            if(this.promotion) {
+                boolQuery.must(existsQuery);
+            } else {
+                boolQuery.mustNot(existsQuery);
+            }
+        }
+        if(this.market != null) {
+            boolQuery.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()))
+                    .must(QueryBuilders.rangeQuery("date") // ES: date -> createDate
+                            // 市场变更, 具体查询时间也需要变更
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
+        } else {
+            boolQuery.must(QueryBuilders.rangeQuery("date")
+                    .from(Dates.morning(this.begin)).includeLower(true)
+                    .to(Dates.night(this.end)).includeUpper(true));
+        }
+        if(this.state != null) {
+            boolQuery.must(QueryBuilders.termQuery("state", this.state.name().toLowerCase()));
+        }
+        if(this.accountId != null) {
+            boolQuery.must(QueryBuilders.termQuery("account_id", this.accountId));
+        }
+        return new SearchSourceBuilder()
                 .field("selling_ids")
                 .field("buyer")
                 .field("email")
@@ -160,69 +181,42 @@ public class OrderPOST extends ESPost<Orderr> {
                 .field("upc")
                 .field("asin")
                 .field("promotion_ids")
-        ).postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
-
-        if(this.promotion != null) {
-            FilterBuilder boolBuilder;
-            if(this.promotion) {
-                boolBuilder = FilterBuilders.missingFilter("promotion_ids").nullValue(true);
-            } else {
-                boolBuilder = FilterBuilders.existsFilter("promotion_ids");
-            }
-            boolFilter.mustNot(boolBuilder);
-        }
-
-        if(this.market != null) {
-            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
-                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
-                            // 市场变更, 具体查询时间也需要变更
-                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
-                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
-        } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
-                    .to(Dates.night(this.end)).includeUpper(true));
-        }
-
-
-        if(this.state != null) {
-            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
-        }
-        if(this.accountId != null) {
-            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
-        }
-        return builder;
+                .query(QueryBuilders.queryStringQuery(this.search()))
+                .postFilter(boolQuery)
+                .from(this.getFrom())
+                .size(this.perSize)
+                .explain(Play.mode.isDev());
     }
 
     public SearchSourceBuilder skuParams() {
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
-
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.query(QueryBuilders
-                .queryString(this.search())
-                .field("selling_id")
-                .field("order_id"))
-                .postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
-
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         if(this.market != null) {
-            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
-                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
+            boolQuery.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()))
+                    .must(QueryBuilders.rangeQuery("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
                             .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
                             .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+            boolQuery.must(QueryBuilders.rangeQuery("date")
+                    .from(Dates.morning(this.begin)).includeLower(true)
                     .to(Dates.night(this.end)).includeUpper(true));
         }
 
 
         if(this.state != null) {
-            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+            boolQuery.must(QueryBuilders.termQuery("state", this.state.name().toLowerCase()));
         }
         if(this.sku != null) {
-            boolFilter.must(FilterBuilders.termFilter("sku", ES.parseEsString(sku).toLowerCase()));
+            boolQuery.must(QueryBuilders.termQuery("sku", ES.parseEsString(sku).toLowerCase()));
         }
-
-        return builder;
+        return new SearchSourceBuilder()
+                .query(QueryBuilders.queryStringQuery(this.search()))
+                .field("selling_id")
+                .field("order_id")
+                .postFilter(boolQuery)
+                .from(this.getFrom())
+                .size(this.perSize)
+                .explain(Play.mode.isDev());
     }
 
 }
