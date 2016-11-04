@@ -1740,7 +1740,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         );
     }
 
-    public CheckTask lastCheckedTask() {
+    public CheckTask
+    lastCheckedTask() {
         if(this.haveTask()) {
             CheckTask task = this.taskList.get(0);
             if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
