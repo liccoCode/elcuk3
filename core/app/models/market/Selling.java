@@ -77,8 +77,8 @@ public class Selling extends GenericModel {
         DOWN
     }
 
-    /*
-     * Selling 的生命周期
+    /**
+     * 生命周期
      */
     public enum SC {
         /**
@@ -129,7 +129,6 @@ public class Selling extends GenericModel {
 
         public abstract String label();
     }
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
