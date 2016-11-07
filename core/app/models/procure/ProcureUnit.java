@@ -477,6 +477,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public String isInventory;
 
+    /***
+     * 原FBACenter信息移到采购计划身上储存
+     */
+    public String centerId;
+
+    public String addressLine1;
+
+    public String addressLine2;
+
+    public String city;
+
+    public String name;
+
+    public String countryCode;
+
+    public String stateOrProvinceCode;
+
+    public String postalCode;
+
     /**
      * ProcureUnit 的检查
      */
@@ -498,6 +517,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "procureunit.validate.whouse");
             }
         }
+    }
+
+    public String codeToCountry() {
+        if(StringUtils.isBlank(this.countryCode)) return "";
+        this.countryCode = this.countryCode.toUpperCase();
+        if(this.countryCode.equals("GB")) return "United Kingdom";
+        else if(this.countryCode.equals("US")) return "United States";
+        else if(this.countryCode.equals("CA")) return "Canada";
+        else if(this.countryCode.equals("CN")) return "China (Mainland)";
+        else if(this.countryCode.equals("DE")) return "Germany";
+        else if(this.countryCode.equals("FR")) return "France";
+        else if(this.countryCode.equals("IT")) return "Italy";
+        else if(this.countryCode.equals("JP")) return "Japan";
+        return "";
     }
 
 
@@ -889,12 +922,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fba.dto = dto;
             fba.state = FBA.create(fba);
             this.fba = fba.doCreate();
+            this.centerId = fba.fbaCenter.centerId;
+            this.addressLine1 = fba.fbaCenter.addressLine1;
+            this.addressLine2 = fba.fbaCenter.addressLine2;
+            this.city = fba.fbaCenter.city;
+            this.name = fba.fbaCenter.name;
+            this.countryCode = fba.fbaCenter.countryCode;
+            this.stateOrProvinceCode = fba.fbaCenter.stateOrProvinceCode;
+            this.postalCode = fba.fbaCenter.postalCode;
+
             this.save();
-            new ERecordBuilder("shipment.createFBA")
-                    .msgArgs(this.id, this.sku, this.fba.shipmentId)
-                    .fid(this.id)
-                    .save();
+            new ERecordBuilder("shipment.createFBA").msgArgs(this.id, this.sku, this.fba.shipmentId).fid(this.id).save();
         } catch(FBAInboundServiceMWSException e) {
+            Logger.info(e.getMessage());
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
         return fba;
