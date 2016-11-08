@@ -731,6 +731,8 @@ public class Excels extends Controller {
 
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
+        //最多只允许导出 1000 个订单的数据,超过了请重新给定搜索范围
+        p.perSize = 1000;
         List<OrderReportDTO> orders = p.queryForExcel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         request.format = "xls";
