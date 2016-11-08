@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import helper.Constant;
 import helper.Dates;
 import helper.ES;
+import helper.J;
 import models.market.M;
 import models.market.Orderr;
 import models.view.dto.OrderReportDTO;
@@ -13,7 +14,6 @@ import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.Play;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
@@ -70,67 +70,51 @@ public class OrderPOST extends ESPost<Orderr> {
     public String invoiceState;
 
     public List<Orderr> query() {
-        SearchSourceBuilder builder = this.params();
-        try {
-            JSONObject result;
-            if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
-            } else {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
-            }
-
-            JSONObject hits = result.getJSONObject("hits");
-            this.count = hits.getLong("total");
-            Set<String> orderIds = new HashSet<>();
-            for(Object obj : hits.getJSONArray("hits")) {
-                JSONObject hit = (JSONObject) obj;
-                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
-            }
-            if(orderIds.size() <= 0)
-                throw new FastRuntimeException("没有结果");
-            if(StringUtils.isNotEmpty(invoiceState)) {
-                return Orderr.find("invoiceState=? and " + SqlSelect.whereIn("orderId", orderIds), invoiceState).fetch();
-            }
-            return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
-        } catch(Exception e) {
-            Logger.error(e.getMessage());
-            return new ArrayList<>();
+        JSONObject result;
+        if(StringUtils.isEmpty(this.sku)) {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
+        } else {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
         }
+
+        Set<String> orderIds = new HashSet<>();
+        Optional<JSONObject> topHits = Optional.ofNullable(result.getJSONObject("hits"));
+        topHits.map(hits -> hits.getJSONArray("hits"))
+                .ifPresent(hits -> hits.stream().map(bucket -> (JSONObject) bucket)
+                        .map(hit -> J.dig(hit, "_source.order_id"))
+                        .filter(orderId -> orderId != null)
+                        .forEach(orderId -> orderIds.add(orderId.toString()))
+                );
+        topHits.ifPresent(hits -> this.count = hits.getLong("total"));
+        if(orderIds.isEmpty()) return Collections.emptyList();
+
+        if(StringUtils.isNotEmpty(invoiceState)) {
+            return Orderr.find("invoiceState=? AND " + SqlSelect.whereIn("orderId", orderIds), invoiceState).fetch();
+        }
+        return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
+
     }
 
+    /**
+     * @return
+     */
     public List<OrderReportDTO> queryForExcel() {
-        SearchSourceBuilder builder = this.params();
-        try {
-            JSONObject result;
-            if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
-            } else {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
-            }
-
-            JSONObject hits = result.getJSONObject("hits");
-            this.count = hits.getLong("total");
-            this.perSize = hits.getInteger("total");
-            this.page = 1;
-            builder = this.params();
-            if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
-            } else {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
-            }
-            hits = result.getJSONObject("hits");
-            Set<String> orderIds = new HashSet<>();
-            for(Object obj : hits.getJSONArray("hits")) {
-                JSONObject hit = (JSONObject) obj;
-                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
-            }
-            if(orderIds.size() <= 0)
-                throw new FastRuntimeException("没有结果");
-            return OrderReportDTO.query(orderIds);
-        } catch(Exception e) {
-            Logger.error(e.getMessage());
-            return new ArrayList<>();
+        JSONObject result;
+        if(StringUtils.isEmpty(this.sku)) {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
+        } else {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
         }
+        Set<String> orderIds = new HashSet<>();
+        Optional.ofNullable(result.getJSONObject("hits"))
+                .map(hits -> hits.getJSONArray("hits"))
+                .ifPresent(hits -> hits.stream().map(bucket -> (JSONObject) bucket)
+                        .map(hit -> J.dig(hit, "_source.order_id"))
+                        .filter(orderId -> orderId != null)
+                        .forEach(orderId -> orderIds.add(orderId.toString()))
+                );
+        if(orderIds.size() <= 0) throw new FastRuntimeException("没有结果");
+        return OrderReportDTO.query(orderIds);
     }
 
     @Override
