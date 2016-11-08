@@ -151,21 +151,19 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        SearchSourceBuilder search = new SearchSourceBuilder().aggregation(
-                AggregationBuilders.filter("aggs_filters").filter(QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
-                        .must(QueryBuilders.rangeQuery("date")
-                                .gte(fromD.toString(isoFormat))
-                                .lt(toD.toString(isoFormat))
-                        ).mustNot(QueryBuilders.termQuery("state", "cancel")
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .aggregation(AggregationBuilders.filter("aggs_filters").filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(QueryBuilders.rangeQuery("date")
+                                        .gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)))
+                                .mustNot(QueryBuilders.termQuery("state", "cancel"))
+                        ).subAggregation(AggregationBuilders.dateHistogram("units")
+                                .field("date")
+                                .interval(DateHistogramInterval.DAY)
+                                .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                                .subAggregation(AggregationBuilders.sum("quantity").field("quantity"))
                         )
-                ).subAggregation(AggregationBuilders.dateHistogram("units")
-                        .field("date")
-                        .interval(DateHistogramInterval.DAY)
-                        .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                        .subAggregation(AggregationBuilders.sum("quantity").field("quantity"))
-                )
-        ).size(0);
+                ).size(0);
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
@@ -178,10 +176,14 @@ public class OrderItemESQuery {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Line line = new Series.Line(market.label() + "销量");
-        Optional buckets = Optional.ofNullable(J.dig(result, "aggregations.aggs_filters.units.buckets"))
-                .filter(bucket -> bucket.containsKey("key") && bucket.containsKey("quantity"))
-                .map(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
-                        NumberUtils.toFloat(J.dig(bucket, "quantity.value").toString())));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
+                                NumberUtils.toFloat(J.dig(bucket, "quantity.value").toString()))
+                        )
+                );
         return line.sort();
     }
 
@@ -197,10 +199,11 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave").field("quantity");
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave").field("date").subAggregation
+                (AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
-            dateRangeBuilder.addRange("date", datePointer.minusDays(7).toString(isoFormat),
+            dateRangeBuilder.addRange("quantity", datePointer.minusDays(7).toString(isoFormat),
                     datePointer.toString(isoFormat));
             // 以天为单位, 指针向前移动
             datePointer = datePointer.plusDays(1);
@@ -222,9 +225,14 @@ public class OrderItemESQuery {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Line line = new Series.Line(market.label() + " 滑动平均");
-        Optional.ofNullable(J.dig(result, "aggregations.aggs_filters.moving_ave.range.buckets"))
-                .filter(bucket -> bucket.containsKey("key") && bucket.containsKey("total"))
-                .map(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")), (bucket.getFloat("total") / 7)));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
+                                (bucket.getFloat("total") / 7))
+                        )
+                );
         return line;
     }
 
@@ -240,16 +248,15 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(QueryBuilders.matchAllQuery())
-                .aggregation(
-                        AggregationBuilders.filter("aggs_filters").filter(QueryBuilders.boolQuery()
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
                                 .must(QueryBuilders.rangeQuery("date")
                                         .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat)))
-                        ).subAggregation(AggregationBuilders.terms("units").field("category_id")
+                                        .lt(toD.toString(isoFormat))))
+                        .subAggregation(AggregationBuilders.terms("units").field("category_id")
                                 .subAggregation(AggregationBuilders.stats("quantity_stats").field("quantity"))
                                 .size(30)
                         )
@@ -258,9 +265,12 @@ public class OrderItemESQuery {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Pie pie = new Series.Pie(market.label() + " 销量百分比");
-        Optional.ofNullable(J.dig(result, "aggregations.aggs_filters.units.buckets"))
-                .filter(bucket -> bucket.containsKey("total") && bucket.containsKey("term"))
-                .map(bucket -> pie.add(bucket.getFloat("total"), bucket.getString("term")));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> pie.add(bucket.getFloat("total"), bucket.getString("term")))
+                );
         return pie;
     }
 
@@ -285,29 +295,33 @@ public class OrderItemESQuery {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
 
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .aggregation(AggregationBuilders.filter("aggs_filters").filter(
-                        QueryBuilders.boolQuery()
+        SearchSourceBuilder search = new SearchSourceBuilder().aggregation(
+                AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
                                 .must(QueryBuilders.rangeQuery("date")
                                         .gte(fromD.toString(isoFormat))
                                         .lt(toD.toString(isoFormat)))
                                 .must(skusfilter(type, val))
                         ).subAggregation(AggregationBuilders.dateHistogram("units")
-                                .field("date")
-                                .interval(DateHistogramInterval.DAY)
-                                .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                                .subAggregation(AggregationBuilders.sum("quantity").field("quantity"))
+                        .field("date")
+                        .interval(DateHistogramInterval.DAY)
+                        .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                        .subAggregation(AggregationBuilders.sum("quantity").field("quantity")
                         )
-                ).size(0);
+                )
+        ).size(0);
 
         Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Line line = new Series.Line(String.format("%s %s 销量", market.label(), issku ? val : ""));
-        Optional.ofNullable(J.dig(result, "aggregations.aggs_filters.units.buckets"))
-                .filter(bucket -> bucket.containsKey("key") && bucket.containsKey("total"))
-                .map(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")), bucket.getFloat("total")));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")), bucket.getFloat("total")))
+                );
         return line.sort();
     }
 
@@ -324,10 +338,10 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave").field("quantity");
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave").field("date");
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
-            dateRangeBuilder.addRange("date",
+            dateRangeBuilder.addRange("quantity",
                     datePointer.minusDays(7).toString(isoFormat),
                     datePointer.toString(isoFormat));
             // 以天为单位, 指针向前移动
@@ -340,14 +354,17 @@ public class OrderItemESQuery {
                                 .must(skusfilter(type, val))
                         ).subAggregation(dateRangeBuilder)
                 ).size(0);
-
+        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-
         Series.Line line = new Series.Line(String.format("%s %s 滑动平均", market.label(), issku ? val : ""));
 
-        Optional.ofNullable(J.dig(result, "aggregations.aggs_filters.moving_ave.range.buckets"))
-                .filter(bucket -> bucket.containsKey("key") && bucket.containsKey("total"))
-                .map(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")), (bucket.getFloat("total") / 7)));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave.range"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line
+                                .add(Dates.date2JDate(bucket.getDate("key")), (bucket.getFloat("total") / 7)))
+                );
         return line.sort();
     }
 
