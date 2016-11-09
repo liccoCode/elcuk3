@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import helper.Constant;
 import helper.Dates;
 import helper.ES;
-import helper.J;
 import models.market.M;
 import models.market.Orderr;
 import models.view.dto.OrderReportDTO;
@@ -15,7 +14,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import play.Play;
-import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
@@ -81,18 +79,21 @@ public class OrderPOST extends ESPost<Orderr> {
         Set<String> orderIds = new HashSet<>();
         Optional<JSONObject> topHits = Optional.ofNullable(result.getJSONObject("hits"));
         topHits.map(hits -> hits.getJSONArray("hits"))
-                .ifPresent(hits -> hits.stream().map(bucket -> (JSONObject) bucket)
-                        .map(hit -> J.dig(hit, "_source.order_id"))
-                        .filter(orderId -> orderId != null)
-                        .forEach(orderId -> orderIds.add(orderId.toString()))
+                .ifPresent(hits -> hits.stream().map(hit -> (JSONObject) hit)
+                        .map(hit -> hit.getJSONObject("fields"))
+                        .map(fields -> fields.getJSONArray("order_id"))
+                        .filter(orderId -> !orderId.isEmpty())
+                        .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
                 );
         topHits.ifPresent(hits -> this.count = hits.getLong("total"));
         if(orderIds.isEmpty()) return Collections.emptyList();
 
         if(StringUtils.isNotEmpty(invoiceState)) {
-            return Orderr.find("invoiceState=? AND " + SqlSelect.whereIn("orderId", orderIds), invoiceState).fetch();
+            return Orderr.find("invoiceState=? AND orderId IN (:orderIds)", invoiceState)
+                    .bind("orderIds", orderIds)
+                    .fetch();
         }
-        return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
+        return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
 
     }
 
@@ -106,10 +107,11 @@ public class OrderPOST extends ESPost<Orderr> {
         Set<String> orderIds = new HashSet<>();
         Optional.ofNullable(result.getJSONObject("hits"))
                 .map(hits -> hits.getJSONArray("hits"))
-                .ifPresent(hits -> hits.stream().map(bucket -> (JSONObject) bucket)
-                        .map(hit -> J.dig(hit, "_source.order_id"))
-                        .filter(orderId -> orderId != null)
-                        .forEach(orderId -> orderIds.add(orderId.toString()))
+                .ifPresent(hits -> hits.stream().map(hit -> (JSONObject) hit)
+                        .map(hit -> hit.getJSONObject("fields"))
+                        .map(fields -> fields.getJSONArray("order_id"))
+                        .filter(orderId -> !orderId.isEmpty())
+                        .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
                 );
         if(orderIds.size() <= 0) throw new FastRuntimeException("没有结果");
         return OrderReportDTO.query(orderIds);
