@@ -216,15 +216,17 @@ public class TransportApply extends Apply {
      * @return
      */
     public List<String> pickSource(String search) {
-        List<String> sources = Arrays.asList(M.amazonVals()).stream()
-                .map(M::marketAndWhouseMapping)
-                .collect(Collectors.toList());
+        List<String> sources = new ArrayList<>();
         for(Shipment shipment : this.shipments) {
             sources.addAll(shipment.fbas().stream().map(fba -> fba.shipmentId).collect(Collectors.toList()));
             sources.addAll(Stream.concat(Stream.of(shipment.id, shipment.trackNo),
                     shipment.allFees().stream().map(fee -> fee.memo)).collect(Collectors.toList())
             );
         }
+        sources.addAll(Arrays.asList(M.amazonVals()).stream()
+                .map(M::marketAndWhouseMapping)
+                .collect(Collectors.toList()));
+
         if(StringUtils.isNotBlank(search)) {
             return sources.stream()
                     .filter(source -> StringUtils.isNotBlank(source) &&
