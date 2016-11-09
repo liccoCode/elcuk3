@@ -3,28 +3,39 @@
 #{set 'moreScripts'}
     #{script 'applys/transport.coffee'/}
     #{script 'shipments/paymentunits.coffee'/}
+    #{script 'component/pagination.coffee'/}
 #{/set}
 #{flash_alert /}
 
 <div class="row-fluid">
-  <div class="span4">
-  #{power.ck 'applys.handlshipment'}
-    <form action='@{Applys.transportAddShipment(apply.id)}' class="form-inline" id='addShipment' method="POST">
-      <label>运输单 ID
-        <input type="text" required="" name='shipmentId' class="input-small">
-      </label>
-      <button class="btn btn-success preview" data-disable-with='添加中...'>添加运输单</button>
-    </form>
-  #{/power.ck}
-  </div>
-  <div class="span4">
-  ${apply.serialNumber}
+  <div class="span12">
+    <div class="span3">
+    #{power.ck 'applys.handlshipment'}
+      <form action='@{Applys.transportAddShipment(apply.id)}' class="form-inline" id='addShipment' method="POST">
+        <input type="text" required="" name='shipmentId' class="input-small" placeholder="运输单 ID">
+        <button class="btn btn-warning preview" data-disable-with='添加中...'>添加运输单到当前请款单</button>
+      </form>
+    #{/power.ck}
+    </div>
+    <div class="span2">
+      <span class="label label-info">${apply.serialNumber}</span>
+    </div>
+    <div class="span7">
+      <form action="@{Applys.transport(apply.id)}" method="GET" class="form-inline">
+        <input type="hidden" name="p.page" value="${p.page}">
+        <input type="hidden" name="p.applyId" value="${p.applyId}">
+        <input type="text" class="" style="width: 300px;" name="p.search"
+               placeholder="支持运输单 ID、TrackNo、FBA、费用备注" autocomplete="off" value="${p.search}">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </form>
+    </div>
   </div>
 </div>
 
 <hr style="border-top: 1px dashed;">
+#{bootstrap_pager pi:p, url: ''/}
 <div id='shipments'>
-#{list items:apply.shipments, as:'ship'}
+#{list items: shipments, as:'ship'}
   <div class="row-fluid" id="shipment_${ship.id}">
     <div class="span3">
       <div class="row-fluid">
@@ -38,19 +49,18 @@
             <dd>${ship.type.label()}</dd>
             <dt>国际快递</dt>
             <dd>
-              #{if ship.internationExpress}
-                 ${ship.internationExpress}
-              #{/if}
-              #{else }&nbsp;#{/else}
+                #{if ship.internationExpress}
+                ${ship.internationExpress}#{/if}
+                #{else }&nbsp;#{/else}
             </dd>
             <dt>TrackNo:</dt>
             <dd>${ship.trackNo}
-              #{if ship.trackNo}
-                <a href="${ship.internationExpress?.trackUrl(ship.trackNo)}" target="_blank">
-                  <i class="icon-external-link"></i>
-                </a>
-              #{/if}
-              #{else }&nbsp;#{/else}
+                #{if ship.trackNo}
+                  <a href="${ship.internationExpress?.trackUrl(ship.trackNo)}" target="_blank">
+                    <i class="icon-external-link"></i>
+                  </a>
+                #{/if}
+                #{else }&nbsp;#{/else}
             </dd>
             <dt>FBAs:</dt>
             <dd>

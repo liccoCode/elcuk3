@@ -1,5 +1,6 @@
 package helper;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.db.DB;
@@ -144,6 +145,14 @@ public class DBUtils {
         String value = orlineParam(column, param);
         if(value.length() == 0) return value;
         return value;
+    }
+
+    public static long count(String sql, Object... params) {
+        Map<String, Object> row = row(sql, params);
+        if(row == null || !row.containsKey("count")) {
+            throw new FastRuntimeException("未找到 count 结果, 请检查查询语句是否正确!");
+        }
+        return NumberUtils.toLong(row.get("count").toString());
     }
 
     public static String orlineParam(String column, Object param) {

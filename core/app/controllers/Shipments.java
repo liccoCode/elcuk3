@@ -16,7 +16,6 @@ import models.view.post.ShipmentPost;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
@@ -131,12 +130,7 @@ public class Shipments extends Controller {
     public static List<FeeType> feeTypes(Shipment.T shipType) {
         List<FeeType> feeTypes = FeeType.transports();
         if(shipType == Shipment.T.EXPRESS) {
-            CollectionUtils.filter(feeTypes, new Predicate() {
-                @Override
-                public boolean evaluate(Object o) {
-                    return !((FeeType) o).name.equals("transportshipping");
-                }
-            });
+            CollectionUtils.filter(feeTypes, o -> !((FeeType) o).name.equals("transportshipping"));
         }
         return feeTypes;
     }
