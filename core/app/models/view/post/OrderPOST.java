@@ -39,6 +39,7 @@ public class OrderPOST extends ESPost<Orderr> {
         this.begin = now.minusDays(7).toDate();
         this.perSize = 25;
         this.page = 1;
+        this.count = 0;
     }
 
     public OrderPOST(int perSize) {
@@ -95,9 +96,6 @@ public class OrderPOST extends ESPost<Orderr> {
 
     }
 
-    /**
-     * @return
-     */
     public List<OrderReportDTO> queryForExcel() {
         JSONObject result;
         if(StringUtils.isEmpty(this.sku)) {
