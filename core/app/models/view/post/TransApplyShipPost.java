@@ -42,9 +42,10 @@ public class TransApplyShipPost extends Post<Shipment> {
             sql.append(" AND (")
                     .append(" s.id LIKE ?")
                     .append(" OR s.trackNo LIKE ?")
+                    .append(" OR s.whouse.name LIKE ?")
                     .append(" OR i.unit.fba.shipmentId LIKE ?")
                     .append(" OR f.memo LIKE ?");
-            for(int i = 0; i <= 3; i++) params.add("%" + this.search + "%");
+            for(int i = 0; i <= 4; i++) params.add("%" + this.search + "%");
             if(NumberUtils.isNumber(this.search)) {
                 sql.append(" OR f.id=?");
                 params.add(NumberUtils.toLong(this.search));
