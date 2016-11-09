@@ -95,8 +95,10 @@ public class MetricHopeProfitService {
         return 0f;
     }
 
-    /*
-    关税和VAT单价
+    /**
+     * 关税和VAT单价
+     *
+     * @return
      */
     public float vatPrice() {
         return profit.esVatPrice();

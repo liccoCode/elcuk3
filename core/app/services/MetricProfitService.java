@@ -120,7 +120,7 @@ public class MetricProfitService {
     public Float esSaleFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .aggregation(AggregationBuilders.filter("public_filters")
+                .aggregation(AggregationBuilders.filter("aggs_filters")
                         .filter(QueryBuilders.boolQuery()
                                 //销售费用项目
                                 .must(QueryBuilders.termQuery("fee_type", "productcharges")))
@@ -135,7 +135,7 @@ public class MetricProfitService {
     public Float esAmazonFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .aggregation(AggregationBuilders.filter("public_filters")
+                .aggregation(AggregationBuilders.filter("aggs_filters")
                         .filter(QueryBuilders.boolQuery()
                                 //销售费用项目
                                 .must(QueryBuilders.termQuery("fee_type", "commission")))
@@ -150,7 +150,7 @@ public class MetricProfitService {
     public Float esFBAFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .aggregation(AggregationBuilders.filter("public_filters")
+                .aggregation(AggregationBuilders.filter("aggs_filters")
                         .filter(QueryBuilders.boolQuery()
                                 //销售费用项目
                                 .must(QueryBuilders.prefixQuery("fee_type", "fba")))
@@ -168,7 +168,7 @@ public class MetricProfitService {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(qb)
-                .aggregation(AggregationBuilders.filter("public_filters")
+                .aggregation(AggregationBuilders.filter("aggs_filters")
                         .filter(this.filterbuilder(true))
                         .subAggregation(AggregationBuilders.stats("units").field("quantity"))
                 ).size(0);
@@ -290,11 +290,12 @@ public class MetricProfitService {
                 .postFilter(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("sku", this.parseEsSku().toLowerCase()))
                         .must(this.filterbuilder(false)))
-                .aggregation(AggregationBuilders.filter("public_filters")
+                .aggregation(AggregationBuilders.filter("aggs_filters")
                         .filter(this.filterbuilder(false)
                                 .must(QueryBuilders.termsQuery("ship_type", "sea", "express", "air"))
                                 .must(QueryBuilders.termQuery("sku", this.parseEsSku().toLowerCase()))
-
+                        ).subAggregation(AggregationBuilders.terms("units").field("ship_type")
+                                .subAggregation(AggregationBuilders.stats("cost_sum").field("cost_in_usd"))
                         )
                 ).size(100000);
         //总运费
@@ -302,21 +303,24 @@ public class MetricProfitService {
         if(esresult._1 == null) {
             return new F.T3<>(new F.T2<>(0f, 0), new F.T2<>(0f, 0), new F.T2<>(0f, 0));
         }
-        JSONArray feearray = esresult._1.getJSONArray("terms");
+        JSONArray feearray = esresult._1.getJSONArray("buckets");
         float seatotalfee = 0f;
         float airtotalfee = 0f;
         float expresstotalfee = 0f;
         for(Object o : feearray) {
             JSONObject term = (JSONObject) o;
-            if(term.getString("term").equals("sea")) {
+            float costSum = Optional.ofNullable(term.getJSONObject("cost_sum"))
+                    .map(cost -> cost.getFloat("sum"))
+                    .orElse(0f);
+            if(term.getString("key").equals("sea")) {
                 //海运总运费
-                seatotalfee = term.getFloat("total");
-            } else if(term.getString("term").equals("air")) {
+                seatotalfee = costSum;
+            } else if(term.getString("key").equals("air")) {
                 //空运总运费
-                airtotalfee = term.getFloat("total");
-            } else if(term.getString("term").equals("express")) {
+                airtotalfee = costSum;
+            } else if(term.getString("key").equals("express")) {
                 //快递总运费
-                expresstotalfee = term.getFloat("total");
+                expresstotalfee = costSum;
             }
         }
         /**
@@ -354,17 +358,16 @@ public class MetricProfitService {
 
     /**
      * 关税和VAT单价
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Float esVatPrice() {
         //关税
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .postFilter(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat")))
-                .aggregation(AggregationBuilders.filter("public_filters")
-                        .filter(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat"))
-                        .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(false)
+                                .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat"))
+                        ).subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(100000);
         //总关税和VAT
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
@@ -390,7 +393,6 @@ public class MetricProfitService {
             price = (Float) rows.get(0).get("declaredvalue");
         }
         if(price == null) price = 0f;
-
         return price * param;
     }
 
@@ -591,7 +593,7 @@ public class MetricProfitService {
     }
 
     /**
-     * 查询ES的结果
+     * 获取 ES 查询结果
      *
      * @param search
      * @param estype
@@ -599,20 +601,13 @@ public class MetricProfitService {
      */
     private float getEsTermsTotal(SearchSourceBuilder search, String estype) {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), estype, search);
-        if(result == null) {
-            throw new FastRuntimeException("ES连接异常!");
-        }
-        JSONObject facets = J.dig(result, "aggregations.units");
-        float totalcost = 0;
-        if(facets != null) {
-            JSONObject units = facets.getJSONObject("units");
-            totalcost = units.getFloat("total");
-        }
-        return totalcost;
+        return Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getFloat("sum"))
+                .orElse(0f);
     }
 
     /**
-     * 查询ES运费的结果
+     * 获取查询 ES 运费的结果
      *
      * @param search
      * @param estype
@@ -620,20 +615,8 @@ public class MetricProfitService {
      */
     private F.T2<JSONObject, JSONArray> getEsShipTerms(SearchSourceBuilder search, String estype) {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), estype, search);
-        if(result == null) {
-            throw new FastRuntimeException("ES连接异常!");
-        }
-        JSONObject facets = result.getJSONObject("facets");
-        JSONObject units = null;
-        if(facets != null) {
-            units = facets.getJSONObject("units");
-        }
-        JSONObject hits = result.getJSONObject("hits");
-        JSONArray hitmentids = null;
-        if(facets != null) {
-            hitmentids = hits.getJSONArray("hits");
-        }
-        return new F.T2<>(units, hitmentids);
+        return new F.T2(Optional.of(J.dig(result, "aggregations.aggs_filters.units")),
+                Optional.of(result.getJSONObject("hits")).map(hits -> hits.getJSONArray("hits")));
     }
 
     /**
@@ -827,7 +810,10 @@ public class MetricProfitService {
                 .query(querybuilder())
                 .aggregation(AggregationBuilders.stats("units").field("quantity"))
                 .size(0);
-        return getEsTermsTotal(search, "procurepayunit");
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "procurepayunit", search);
+        return Optional.of(J.dig(result, "aggregations.units"))
+                .map(units -> units.getFloat("sum"))
+                .orElse(0f);
     }
 
 
