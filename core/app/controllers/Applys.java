@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import helper.Webs;
 import models.User;
 import models.finance.Apply;
@@ -141,5 +142,16 @@ public class Applys extends Controller {
                 Shipments.index(p);
             }
         }
+    }
+
+    /**
+     * 输出给 typeahead 所使用的 source, 暂时只支持 TransportApply
+     * <p>
+     * 需要支持: 运输单 ID 、TrackNo、FBA
+     */
+    public static void source(Long applyId, String search) {
+        TransportApply apply = TransportApply.findById(applyId);
+        notFoundIfNull(apply);
+        renderJSON(J.json(apply.pickSource(search)));
     }
 }
