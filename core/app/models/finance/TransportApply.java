@@ -5,6 +5,7 @@ import helper.Dates;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.view.dto.ApplyPaymentDTO;
@@ -210,20 +211,25 @@ public class TransportApply extends Apply {
     /**
      * 输出给 typeahead 所使用的 source
      * <p>
-     * 需要支持: 运输单 ID 、TrackNo、FBA
+     * 需要支持: 运输单 ID 、TrackNo、FBA、备注
      *
      * @return
      */
     public List<String> pickSource(String search) {
-        List<String> sources = new ArrayList<>();
-        this.shipments.stream().forEach(shipment -> sources.addAll(Stream.concat(
-                shipment.fbas().stream().map(fba -> fba.shipmentId),
-                Arrays.asList(shipment.id, shipment.trackNo).stream()).collect(Collectors.toList())));
+        List<String> sources = Arrays.asList(M.amazonVals()).stream().map(Enum::name).collect(Collectors.toList());
+        for(Shipment shipment : this.shipments) {
+            sources.addAll(shipment.fbas().stream().map(fba -> fba.shipmentId).collect(Collectors.toList()));
+            sources.addAll(Stream.concat(Stream.of(shipment.id, shipment.trackNo),
+                    shipment.allFees().stream().map(fee -> fee.memo)).collect(Collectors.toList())
+            );
+        }
         if(StringUtils.isNotBlank(search)) {
             return sources.stream()
-                    .filter(source -> StringUtils.isNotBlank(source) && source.contains(search.toUpperCase()))
+                    .filter(source -> StringUtils.isNotBlank(source) &&
+                            source.toUpperCase().contains(search.toUpperCase()))
+                    .limit(10)
                     .collect(Collectors.toList());
         }
-        return sources;
+        return sources.stream().filter(StringUtils::isNotBlank).limit(10).collect(Collectors.toList());
     }
 }
