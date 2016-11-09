@@ -199,11 +199,12 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave").field("date").subAggregation
-                (AggregationBuilders.sum("quantity_sum").field("quantity"));
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
+                .field("date")
+                .subAggregation(AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
-            dateRangeBuilder.addRange("quantity", datePointer.minusDays(7).toString(isoFormat),
+            dateRangeBuilder.addRange(datePointer.minusDays(7).toString(isoFormat),
                     datePointer.toString(isoFormat));
             // 以天为单位, 指针向前移动
             datePointer = datePointer.plusDays(1);
@@ -227,10 +228,13 @@ public class OrderItemESQuery {
         Series.Line line = new Series.Line(market.label() + " 滑动平均");
         Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave"))
                 .map(units -> units.getJSONArray("buckets"))
-                .ifPresent(buckets -> buckets.stream()
-                        .map(bucket -> (JSONObject) bucket)
-                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
-                                (bucket.getFloat("total") / 7))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(
+                                Dates.date2JDate(bucket.getDate("to")),
+                                (float) (Optional.ofNullable(bucket.getJSONObject("quantity_sum"))
+                                        .map(sum -> sum.getFloat("value"))
+                                        .orElse(0f) / 7)
+                                )
                         )
                 );
         return line;
@@ -267,16 +271,20 @@ public class OrderItemESQuery {
         Series.Pie pie = new Series.Pie(market.label() + " 销量百分比");
         Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
                 .map(units -> units.getJSONArray("buckets"))
-                .ifPresent(buckets -> buckets.stream()
-                        .map(bucket -> (JSONObject) bucket)
-                        .forEach(bucket -> pie.add(bucket.getFloat("total"), bucket.getString("term")))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> pie.add(
+                                (Float) Optional.ofNullable(bucket.getJSONObject("quantity_stats"))
+                                        .map(stats -> stats.getFloat("sum"))
+                                        .orElse(0f),
+                                bucket.getString("key"))
+                        )
                 );
         return pie;
     }
 
     private TermsQueryBuilder skusfilter(String type, String val) {
         String[] skus = val.replace("\"", "").split(",");
-        return QueryBuilders.termsQuery("type", Arrays.asList(skus));
+        return QueryBuilders.termsQuery(type, Arrays.asList(skus));
     }
 
     /**
@@ -311,7 +319,6 @@ public class OrderItemESQuery {
                         )
                 )
         ).size(0);
-
         Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
@@ -320,7 +327,13 @@ public class OrderItemESQuery {
                 .map(units -> units.getJSONArray("buckets"))
                 .ifPresent(buckets -> buckets.stream()
                         .map(bucket -> (JSONObject) bucket)
-                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")), bucket.getFloat("total")))
+                        .forEach(bucket -> line.add(
+                                Dates.date2JDate(bucket.getDate("key")),
+                                (float) Optional.ofNullable(bucket.getJSONObject("quantity"))
+                                        .map(qty -> qty.getFloat("value"))
+                                        .orElse(0f)
+                                )
+                        )
                 );
         return line.sort();
     }
@@ -338,12 +351,12 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave").field("date");
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
+                .field("date")
+                .subAggregation(AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
-            dateRangeBuilder.addRange("quantity",
-                    datePointer.minusDays(7).toString(isoFormat),
-                    datePointer.toString(isoFormat));
+            dateRangeBuilder.addRange(datePointer.minusDays(7).toString(isoFormat), datePointer.toString(isoFormat));
             // 以天为单位, 指针向前移动
             datePointer = datePointer.plusDays(1);
         }
@@ -356,14 +369,18 @@ public class OrderItemESQuery {
                 ).size(0);
         Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        Series.Line line = new Series.Line(String.format("%s %s 滑动平均", market.label(), issku ? val : ""));
 
-        Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave.range"))
+        Series.Line line = new Series.Line(String.format("%s %s 滑动平均", market.label(), issku ? val : ""));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave"))
                 .map(units -> units.getJSONArray("buckets"))
-                .ifPresent(buckets -> buckets.stream()
-                        .map(bucket -> (JSONObject) bucket)
-                        .forEach(bucket -> line
-                                .add(Dates.date2JDate(bucket.getDate("key")), (bucket.getFloat("total") / 7)))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(
+                                Dates.date2JDate(bucket.getDate("to")),
+                                (float) (Optional.ofNullable(bucket.getJSONObject("quantity_sum"))
+                                        .map(sum -> sum.getFloat("value"))
+                                        .orElse(0f) / 7)
+                                )
+                        )
                 );
         return line.sort();
     }
