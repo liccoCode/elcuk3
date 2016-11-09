@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -204,5 +205,25 @@ public class TransportApply extends Apply {
      */
     public List<Shipment> lastShipments() {
         return this.shipments.stream().limit(10).collect(Collectors.toList());
+    }
+
+    /**
+     * 输出给 typeahead 所使用的 source
+     * <p>
+     * 需要支持: 运输单 ID 、TrackNo、FBA
+     *
+     * @return
+     */
+    public List<String> pickSource(String search) {
+        List<String> sources = new ArrayList<>();
+        this.shipments.stream().forEach(shipment -> sources.addAll(Stream.concat(
+                shipment.fbas().stream().map(fba -> fba.shipmentId),
+                Arrays.asList(shipment.id, shipment.trackNo).stream()).collect(Collectors.toList())));
+        if(StringUtils.isNotBlank(search)) {
+            return sources.stream()
+                    .filter(source -> StringUtils.isNotBlank(source) && source.contains(search.toUpperCase()))
+                    .collect(Collectors.toList());
+        }
+        return sources;
     }
 }

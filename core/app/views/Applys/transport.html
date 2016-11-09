@@ -18,16 +18,14 @@
     #{/power.ck}
     </div>
     <div class="span2">
-      <span class="label label-info">
-      ${apply.serialNumber}
-      </span>
+      <span class="label label-info">${apply.serialNumber}</span>
     </div>
     <div class="span7">
       <form action="@{Applys.transport(apply.id)}" method="GET" class="form-inline">
         <input type="hidden" name="p.page" value="${p.page}">
         <input type="hidden" name="p.applyId" value="${p.applyId}">
         <input type="text" class="" style="width: 300px;" name="p.search"
-               placeholder="支持运输单 ID、TrackNo、FBA、费用ID、费用备注" value="${p.search}">
+               placeholder="支持运输单 ID、TrackNo、FBA、费用ID、费用备注" autocomplete="off" value="${p.search}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </form>
     </div>
@@ -35,7 +33,7 @@
 </div>
 
 <hr style="border-top: 1px dashed;">
-#{bootstrap_pager pi:p, url:'' /}
+#{bootstrap_pager pi:p, url: ''/}
 <div id='shipments'>
 #{list items: shipments, as:'ship'}
   <div class="row-fluid" id="shipment_${ship.id}">
