@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 控制 Selling
@@ -85,9 +86,7 @@ public class Sellings extends Controller {
         if(product != null && product.family != null) {
             List<Selling> sellings = Selling.find("listing.product.family=?", product.family).fetch();
             if(!sellings.isEmpty()) {
-                for(Selling s : sellings) {
-                    sids.add(s.sellingId);
-                }
+                sids.addAll(sellings.stream().map(s -> s.sellingId).collect(Collectors.toList()));
             }
 
         }
@@ -103,8 +102,7 @@ public class Sellings extends Controller {
     public static void sameSidSellings(String sid) {
         List<Selling> sellings = Selling
                 .find("sellingId like '" + sid + "%'").fetch();
-        List<String> sids = new ArrayList<>();
-        for(Selling s : sellings) sids.add(s.sellingId);
+        List<String> sids = sellings.stream().map(s -> s.sellingId).collect(Collectors.toList());
         renderJSON(J.json(sids));
     }
 
