@@ -10,6 +10,8 @@ import models.embedded.ERecordBuilder;
 import models.procure.*;
 import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -29,6 +31,7 @@ import java.util.List;
  * Time: 11:34 AM
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class PaymentUnit extends Model {
     public enum S {
         /**
@@ -99,7 +102,7 @@ public class PaymentUnit extends Model {
         this.payment.save();
     }
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Payment payment;
 
     /**
@@ -118,16 +121,16 @@ public class PaymentUnit extends Model {
      * 各种不同的关联关系, 由于无法像动态语言那样灵活, 所以将复杂性交给 Hibernate, 手动去选择不同的关联类型
      */
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public ProcureUnit procureUnit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Deliveryment deliveryment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public ShipItem shipItem;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Shipment shipment;
 
     /**
@@ -343,7 +346,8 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue))).floatValue();
+        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue)))
+                .floatValue();
     }
 
     public BigDecimal decimalamount() {
