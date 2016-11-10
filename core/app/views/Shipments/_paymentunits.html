@@ -23,7 +23,7 @@
           <th class="span2">申请时间</th>
           <th class="span3"></th>
         </tr>
-      #{list items:ship.allFees(), as:'fee'}
+      #{list items:ship.fees, as:'fee'}
         <tr id='fee_${fee.id}'>
           <td>${fee.id}</td>
           <td><span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span></td>
