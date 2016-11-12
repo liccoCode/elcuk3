@@ -5,7 +5,6 @@ import helper.*;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -48,7 +47,7 @@ public class OrderItemESQuery {
                 throw new FastRuntimeException("不支持的类型!");
             }
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
         return null;
     }
@@ -181,7 +180,7 @@ public class OrderItemESQuery {
                 .ifPresent(buckets -> buckets.stream()
                         .map(bucket -> (JSONObject) bucket)
                         .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
-                                NumberUtils.toFloat(J.dig(bucket, "quantity.value").toString()))
+                                bucket.getJSONObject("quantity").getFloat("value"))
                         )
                 );
         return line.sort();
