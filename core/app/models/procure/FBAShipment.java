@@ -262,17 +262,16 @@ public class FBAShipment extends Model {
             this.state = FBA.update(this, state != null ? state : this.state);
             Thread.sleep(500);
         } catch(Exception e) {
+            Logger.error(Webs.S(e));
             String errMsg = e.getMessage();
             if(errMsg.contains("Shipment is locked. No updates allowed") ||
                     errMsg.contains("Shipment is in locked status")) {
                 this.state = FBAShipment.S.RECEIVING;
                 this.save();
-                Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
             } else if(errMsg.contains("FBA31004")) {
                 //fbaErrorCode=FBA31004, description=updates to status SHIPPED not allowed
                 this.state = FBAShipment.S.IN_TRANSIT;
                 this.save();
-                Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
             } else if(errMsg.contains("Invalid Status change")) {
                 //物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.
                 this.state = FBAShipment.S.SHIPPED;
@@ -280,7 +279,7 @@ public class FBAShipment extends Model {
             } else if(errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
                 throw new FastRuntimeException("向 Amazon 更新失败. 请检查 MSKU(SKU+UPC) 是否正确.");
             } else if(errMsg.contains("MISSING_DIMENSIONS") || errMsg.contains("NON_SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的尺寸是否正确填写(数值和单位).");
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的尺寸已经正确填写(数值和单位)且对应的 FBA 仓库库存容量充足.");
             } else {
                 //TODO: NOT_ELIGIBLE_FC_FOR_ITEM 这个看起来是创建 FBA 时选择的 center 暂时在 MWS 内被标记了不可用
                 //暂时考虑可选的处理方案:

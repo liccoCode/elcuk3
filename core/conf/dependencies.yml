@@ -22,17 +22,18 @@ require:
         exclude:
           - org.codehaus.woodstox -> *
     # 取消 es 的所有依赖, 因为只使用到 es 的搜索 Builder API
-    - org.elasticsearch -> elasticsearch 1.1.0:
+    - org.elasticsearch -> elasticsearch 2.4.1:
         transitive: false
+    - com.fasterxml.jackson.core -> jackson-core 2.8.4
     # 跟随 es 走的 lucene 版本
-    - org.apache.lucene -> lucene-core 4.7.0
+    - org.apache.lucene -> lucene-core 5.5.2
     - org.jsoup -> jsoup 1.8.3
     - org.apache.httpcomponents -> httpclient 4.5
     - org.apache.httpcomponents -> httpmime 4.5
     - commons-httpclient -> commons-httpclient 3.1
     - xerces -> xercesImpl 2.10.0
     - com.google.guava -> guava 18.0
-    # fastjson 运行时不需要依赖
+    # fastjson 运行时不需要依赖其他的
     - com.alibaba -> fastjson 1.1.46:
         transitive: false
     - org.activiti -> activiti-engine 5.15.1:
@@ -46,7 +47,7 @@ require:
           - org.eclipse.jdt.core.compiler -> *
     - org.activiti -> activiti-bpmn-model 5.15.1
     # 暂时没有看到有代码使用到 org.activiti.rest 这个包, 但这个会引入一大堆的依赖.
-#    - org.activiti -> activiti-modeler 5.15.1
+    # - org.activiti -> activiti-modeler 5.15.1
     - org.hibernate -> hibernate-ehcache 4.2.19.Final # 1.4.2
     - javax.activation  -> activation 1.1.1 # 1.4.2
     - net.sf.barcode4j -> barcode4j 2.1:

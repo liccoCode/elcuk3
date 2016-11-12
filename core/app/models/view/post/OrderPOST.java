@@ -8,15 +8,12 @@ import models.market.M;
 import models.market.Orderr;
 import models.view.dto.OrderReportDTO;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.Play;
-import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
@@ -40,6 +37,7 @@ public class OrderPOST extends ESPost<Orderr> {
         this.begin = now.minusDays(7).toDate();
         this.perSize = 25;
         this.page = 1;
+        this.count = 0;
     }
 
     public OrderPOST(int perSize) {
@@ -71,67 +69,52 @@ public class OrderPOST extends ESPost<Orderr> {
     public String invoiceState;
 
     public List<Orderr> query() {
-        SearchSourceBuilder builder = this.params();
-        try {
-            JSONObject result;
-            if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
-            } else {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
-            }
-
-            JSONObject hits = result.getJSONObject("hits");
-            this.count = hits.getLong("total");
-            Set<String> orderIds = new HashSet<>();
-            for(Object obj : hits.getJSONArray("hits")) {
-                JSONObject hit = (JSONObject) obj;
-                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
-            }
-            if(orderIds.size() <= 0)
-                throw new FastRuntimeException("没有结果");
-            if(StringUtils.isNotEmpty(invoiceState)) {
-                return Orderr.find("invoiceState=? and " + SqlSelect.whereIn("orderId", orderIds), invoiceState).fetch();
-            }
-            return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
-        } catch(Exception e) {
-            Logger.error(e.getMessage());
-            return new ArrayList<>();
+        JSONObject result;
+        if(StringUtils.isEmpty(this.sku)) {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
+        } else {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
         }
+
+        Set<String> orderIds = new HashSet<>();
+        Optional<JSONObject> topHits = Optional.ofNullable(result.getJSONObject("hits"));
+        topHits.map(hits -> hits.getJSONArray("hits"))
+                .ifPresent(hits -> hits.stream().map(hit -> (JSONObject) hit)
+                        .map(hit -> hit.getJSONObject("fields"))
+                        .map(fields -> fields.getJSONArray("order_id"))
+                        .filter(orderId -> !orderId.isEmpty())
+                        .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
+                );
+        topHits.ifPresent(hits -> this.count = hits.getLong("total"));
+        if(orderIds.isEmpty()) return Collections.emptyList();
+
+        if(StringUtils.isNotEmpty(invoiceState)) {
+            return Orderr.find("invoiceState=? AND orderId IN (:orderIds)", invoiceState)
+                    .bind("orderIds", orderIds)
+                    .fetch();
+        }
+        return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
+
     }
 
     public List<OrderReportDTO> queryForExcel() {
-        SearchSourceBuilder builder = this.params();
-        try {
-            JSONObject result;
-            if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
-            } else {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
-            }
-
-            JSONObject hits = result.getJSONObject("hits");
-            this.count = hits.getLong("total");
-            this.perSize = hits.getInteger("total");
-            this.page = 1;
-            builder = this.params();
-            if(StringUtils.isEmpty(this.sku)) {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "order", builder);
-            } else {
-                result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
-            }
-            hits = result.getJSONObject("hits");
-            Set<String> orderIds = new HashSet<>();
-            for(Object obj : hits.getJSONArray("hits")) {
-                JSONObject hit = (JSONObject) obj;
-                orderIds.add(hit.getJSONObject("_source").getString("order_id"));
-            }
-            if(orderIds.size() <= 0)
-                throw new FastRuntimeException("没有结果");
-            return OrderReportDTO.query(orderIds);
-        } catch(Exception e) {
-            Logger.error(e.getMessage());
-            return new ArrayList<>();
+        JSONObject result;
+        if(StringUtils.isEmpty(this.sku)) {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
+        } else {
+            result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
         }
+        Set<String> orderIds = new HashSet<>();
+        Optional.ofNullable(result.getJSONObject("hits"))
+                .map(hits -> hits.getJSONArray("hits"))
+                .ifPresent(hits -> hits.stream().map(hit -> (JSONObject) hit)
+                        .map(hit -> hit.getJSONObject("fields"))
+                        .map(fields -> fields.getJSONArray("order_id"))
+                        .filter(orderId -> !orderId.isEmpty())
+                        .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
+                );
+        if(orderIds.size() <= 0) throw new FastRuntimeException("没有结果");
+        return OrderReportDTO.query(orderIds);
     }
 
     @Override
@@ -145,11 +128,33 @@ public class OrderPOST extends ESPost<Orderr> {
 
     @Override
     public SearchSourceBuilder params() {
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
-
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.query(QueryBuilders
-                .queryString(this.search())
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        if(this.promotion != null) {
+            ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery("promotion_ids");
+            if(this.promotion) {
+                boolQuery.must(existsQuery);
+            } else {
+                boolQuery.mustNot(existsQuery);
+            }
+        }
+        if(this.market != null) {
+            boolQuery.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()))
+                    .must(QueryBuilders.rangeQuery("date") // ES: date -> createDate
+                            // 市场变更, 具体查询时间也需要变更
+                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
+                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
+        } else {
+            boolQuery.must(QueryBuilders.rangeQuery("date")
+                    .from(Dates.morning(this.begin)).includeLower(true)
+                    .to(Dates.night(this.end)).includeUpper(true));
+        }
+        if(this.state != null) {
+            boolQuery.must(QueryBuilders.termQuery("state", this.state.name().toLowerCase()));
+        }
+        if(this.accountId != null) {
+            boolQuery.must(QueryBuilders.termQuery("account_id", this.accountId));
+        }
+        return new SearchSourceBuilder()
                 .field("selling_ids")
                 .field("buyer")
                 .field("email")
@@ -160,69 +165,42 @@ public class OrderPOST extends ESPost<Orderr> {
                 .field("upc")
                 .field("asin")
                 .field("promotion_ids")
-        ).postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
-
-        if(this.promotion != null) {
-            FilterBuilder boolBuilder;
-            if(this.promotion) {
-                boolBuilder = FilterBuilders.missingFilter("promotion_ids").nullValue(true);
-            } else {
-                boolBuilder = FilterBuilders.existsFilter("promotion_ids");
-            }
-            boolFilter.mustNot(boolBuilder);
-        }
-
-        if(this.market != null) {
-            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
-                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
-                            // 市场变更, 具体查询时间也需要变更
-                            .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
-                            .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
-        } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
-                    .to(Dates.night(this.end)).includeUpper(true));
-        }
-
-
-        if(this.state != null) {
-            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
-        }
-        if(this.accountId != null) {
-            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
-        }
-        return builder;
+                .query(QueryBuilders.queryStringQuery(this.search()))
+                .postFilter(boolQuery)
+                .from(this.getFrom())
+                .size(this.perSize)
+                .explain(Play.mode.isDev());
     }
 
     public SearchSourceBuilder skuParams() {
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
-
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.query(QueryBuilders
-                .queryString(this.search())
-                .field("selling_id")
-                .field("order_id"))
-                .postFilter(boolFilter).from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
-
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         if(this.market != null) {
-            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
-                    .must(FilterBuilders.rangeFilter("date") // ES: date -> createDate
+            boolQuery.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()))
+                    .must(QueryBuilders.rangeQuery("date") // ES: date -> createDate
                             // 市场变更, 具体查询时间也需要变更
                             .from(Dates.morning(this.market.withTimeZone(this.begin).toDate())).includeLower(true)
                             .to(Dates.night(this.market.withTimeZone(this.end).toDate())).includeUpper(true));
         } else {
-            boolFilter.must(FilterBuilders.rangeFilter("date").from(Dates.morning(this.begin)).includeLower(true)
+            boolQuery.must(QueryBuilders.rangeQuery("date")
+                    .from(Dates.morning(this.begin)).includeLower(true)
                     .to(Dates.night(this.end)).includeUpper(true));
         }
 
 
         if(this.state != null) {
-            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+            boolQuery.must(QueryBuilders.termQuery("state", this.state.name().toLowerCase()));
         }
         if(this.sku != null) {
-            boolFilter.must(FilterBuilders.termFilter("sku", ES.parseEsString(sku).toLowerCase()));
+            boolQuery.must(QueryBuilders.termQuery("sku", ES.parseEsString(sku).toLowerCase()));
         }
-
-        return builder;
+        return new SearchSourceBuilder()
+                .query(QueryBuilders.queryStringQuery(this.search()))
+                .field("selling_id")
+                .field("order_id")
+                .postFilter(boolQuery)
+                .from(this.getFrom())
+                .size(this.perSize)
+                .explain(Play.mode.isDev());
     }
 
 }

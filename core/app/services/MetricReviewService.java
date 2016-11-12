@@ -8,20 +8,20 @@ import models.market.AmazonListingReview;
 import models.market.ListingStateRecord;
 import models.market.M;
 import models.product.Category;
-import org.elasticsearch.index.query.AndFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import play.Logger;
 import play.utils.FastRuntimeException;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,30 +63,29 @@ public class MetricReviewService {
 
             //市场的 aggregation 过滤
             FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name()).filter(
-                    FilterBuilders.termFilter("market", m)
+                    QueryBuilders.termQuery("market", m)
             );
             // 每一个时间点作为一个单独的 Aggregation
             for(Date sunday : sundays) {
                 List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday);
                 //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
                 if(filteredAsins == null || filteredAsins.isEmpty()) continue;
-
-                //时间过滤、ASIN 过滤
-                FilterAggregationBuilder dateAndAsinAggregation = AggregationBuilders.filter(formatter.format(sunday))
-                        .filter(FilterBuilders.andFilter(
-                                FilterBuilders.termsFilter("listing_asin", filteredAsins),
-                                FilterBuilders.rangeFilter("review_date")
+                marketAggregation.subAggregation(AggregationBuilders.filter(formatter.format(sunday))
+                        .filter(QueryBuilders.boolQuery()
+                                //ASIN 过滤
+                                .must(QueryBuilders.termsQuery("listing_asin", filteredAsins))
+                                //时间过滤
+                                .must(QueryBuilders.rangeQuery("review_date")
                                         .gte(formatter.format(firstReviewDate))
                                         .lte(formatter.format(sunday)))
-                        );
-                // 按照 Review 的 rating 分组
-                TermsBuilder groupByRatingAggregation = AggregationBuilders.terms("group_by_rating").field("rating");
-                dateAndAsinAggregation.subAggregation(groupByRatingAggregation);
-                marketAggregation.subAggregation(dateAndAsinAggregation);
+                        ).subAggregation(
+                                // 按照 Review 的 rating 分组
+                                AggregationBuilders.terms("group_by_rating").field("rating")
+                        ));
             }
             search.aggregation(marketAggregation);
         }
-        Logger.info("countReviewRating:::" + search.toString());
+        Logger.info(search.toString());
         JSONObject result = ES.searchOnEtrackerES("etracker", "review", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
@@ -108,7 +107,7 @@ public class MetricReviewService {
         }
         //还有一个 统计的 Aggregation
         search.aggregation(buildPoorRatingAggregation("SUM", null, Category.asins(category, null, true)));
-        Logger.info("PoorRatingByDateRange:::" + search.toString());
+        Logger.info(search.toString());
 
         JSONObject result = ES.searchOnEtrackerES("etracker", "review", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
@@ -118,28 +117,22 @@ public class MetricReviewService {
     public AggregationBuilder buildPoorRatingAggregation(String name, M m, List<String> asins) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         //市场、ASIN、from、to aggregation
-        AndFilterBuilder andFilter = FilterBuilders.andFilter(
-                FilterBuilders.termsFilter("listing_asin", asins),
-                FilterBuilders.rangeFilter("review_date")
-                        .gte(formatter.format(this.from))
-                        .lte(formatter.format(this.to))
-
-        );
-        if(m != null) andFilter.add(FilterBuilders.termFilter("market", m));
-
-        FilterAggregationBuilder marketAggregation = AggregationBuilders
-                .filter(name).filter(andFilter);
-        //进行日期单位为 周 分组展现数据 aggregation
-        DateHistogramBuilder intervalAggregation = AggregationBuilders
-                .dateHistogram("count_by_review_date")
-                .field("review_date")
-                .interval(DateHistogram.Interval.WEEK);
-        //负评分 aggregation
-        FilterAggregationBuilder poorRatingAggregation = AggregationBuilders.filter("poor_rating_review").filter(
-                FilterBuilders.rangeFilter("rating").gte(1).lte(3)
-        );
-        intervalAggregation.subAggregation(poorRatingAggregation);
-        return marketAggregation.subAggregation(intervalAggregation);
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termsQuery("listing_asin", asins))
+                .must(QueryBuilders.rangeQuery("review_date").gte(formatter.format(this.from))
+                        .lte(formatter.format(this.to)));
+        if(m != null) boolQuery.must(QueryBuilders.termQuery("market", m));
+        return AggregationBuilders.filter(name)
+                .filter(boolQuery)
+                //日期单位为 周 分组展现数据 aggregation
+                .subAggregation(AggregationBuilders.dateHistogram("count_by_review_date")
+                        .field("review_date")
+                        .interval(DateHistogramInterval.WEEK)
+                        //负评分 aggregation
+                        .subAggregation(AggregationBuilders.filter("poor_rating_review")
+                                .filter(QueryBuilders.rangeQuery("rating").gte(1).lte(3))
+                        )
+                );
     }
 
     /**
@@ -153,12 +146,7 @@ public class MetricReviewService {
         for(int i = 0; i < listingIds.size(); i++) {
             List<ListingStateRecord> records = ListingStateRecord.getCacheByListingId(listingIds.get(i));//取到对应的缓存
             //排序
-            Collections.sort(records, new Comparator<ListingStateRecord>() {
-                @Override
-                public int compare(ListingStateRecord o1, ListingStateRecord o2) {
-                    return o1.changedDate.compareTo(o2.changedDate);
-                }
-            });
+            Collections.sort(records, (o1, o2) -> o1.changedDate.compareTo(o2.changedDate));
 
             for(int j = records.size() - 1; j >= 0; j--) {//倒序循环
                 ListingStateRecord record = records.get(j);
