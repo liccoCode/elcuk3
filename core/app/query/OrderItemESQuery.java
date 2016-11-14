@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 通过向 ElasticSearch 进行搜索的 OrderItem Query
@@ -432,43 +433,33 @@ public class OrderItemESQuery {
      * @return
      */
     public JSONObject skusMonthlyDailySale(Date from, Date to, List<String> skus, List<M> markets) {
-        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
+        //每一个市场都要查询一次
         for(M m : markets) {
-            FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name())
-                    .filter(QueryBuilders.boolQuery()
-                            //市场
-                            .must(QueryBuilders.termQuery("market", m.name().toLowerCase()))
-                            //日期间隔
-                            .must(QueryBuilders.rangeQuery("date")
-                                    .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
-                                    .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
-                            ).mustNot(QueryBuilders.termQuery("state", "cancel"))
-                    );
-            for(String sku : skus) {
-                if(StringUtils.isBlank(sku)) continue;
-                String prettySku = ES.parseEsString(sku).toLowerCase();
-
-                marketAggregation.subAggregation(
-                        AggregationBuilders.filter(prettySku)
-                                //SKU
-                                .filter(QueryBuilders.termQuery("sku", prettySku))
-                                .subAggregation(AggregationBuilders.dateHistogram("monthly_avg")
-                                        .field("date")
-                                        .timeZone(Dates.timeZone(m).getShortName(System.currentTimeMillis()))
-                                        //时间间隔为每个月
-                                        .interval(DateHistogramInterval.MONTH)
-                                        //求和 quantity 的数量
-                                        .subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"))
-                                )
-                );
-            }
-            search.aggregation(marketAggregation);
+            search.aggregation(AggregationBuilders.filter(m.name()).filter(QueryBuilders.boolQuery()
+                    //SKUs
+                    .must(QueryBuilders.termsQuery("sku", skus.stream()
+                            .map(sku -> ES.parseEsString(sku).toLowerCase())
+                            .collect(Collectors.toList())))
+                    //市场
+                    .must(QueryBuilders.termQuery("market", m.name().toLowerCase()))
+                    //日期间隔
+                    .must(QueryBuilders.rangeQuery("date")
+                            .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
+                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
+                    ).mustNot(QueryBuilders.termQuery("state", "cancel")))
+                    .subAggregation(AggregationBuilders.terms("skus").field("sku")
+                            .subAggregation(AggregationBuilders.dateHistogram("monthly_avg")
+                                    .field("date")
+                                    .timeZone(Dates.timeZone(m).getShortName(System.currentTimeMillis()))
+                                    //时间间隔为每个月
+                                    .interval(DateHistogramInterval.MONTH)
+                                    //求和 quantity 的数量
+                                    .subAggregation(AggregationBuilders.sum("sum_sales").field("quantity")
+                                    ))));
         }
         Logger.info(search.toString());
-        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        if(result == null) throw new FastRuntimeException("ES连接异常!");
-        return result.getJSONObject("aggregations");
+        return ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
     }
 }
