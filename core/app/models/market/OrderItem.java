@@ -1,6 +1,5 @@
 package models.market;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import helper.Currency;
@@ -10,17 +9,14 @@ import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hibernate.annotations.DynamicUpdate;
-import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
-import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
 import query.ProductQuery;
 
@@ -29,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 订单的具体订单项
@@ -417,94 +414,57 @@ public class OrderItem extends GenericModel {
 
     public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
                                             String val) {
-        long begin = System.currentTimeMillis();
-
         String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
         String runningKey = String.format("%s_running", cacheKey);
         if(StringUtils.isNotBlank(Cache.get(runningKey, String.class))) return;
 
-        List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
-        if(dtos != null && dtos.size() > 0) return;
-
+        if(Cache.get(cacheKey, List.class) != null) return;
         synchronized(cacheKey.intern()) {
-            dtos = Cache.get(cacheKey, List.class);
-            if(dtos != null && dtos.size() > 0) return;
+            if(Cache.get(cacheKey, List.class) != null) return;
 
             try {
                 Cache.add(runningKey, runningKey);
                 List<String> selectedSkus = new ArrayList<>(Arrays.asList(val.replace("\"", "").split(",")));
-                if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
-                List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
+                if(StringUtils.isNotBlank(category)) {
+                    selectedSkus.addAll(Category.getSKUs(category));
+                }
+                List<M> markets = Optional.ofNullable(market)
+                        .map(Collections::singletonList)
+                        .orElse(Arrays.asList(M.amazonVals()));
 
                 OrderItemESQuery service = new OrderItemESQuery();
                 JSONObject esResult = service.skusMonthlyDailySale(from, to, selectedSkus, markets);
 
-                LogUtils.JOBLOG.info(String
-                        .format("SkuMonthlyDailySales fetch es result.... [%sms]", System.currentTimeMillis() - begin));
-                begin = System.currentTimeMillis();
-
-                HashMap<String, Integer> units = new HashMap<>();
-                if(esResult != null) {
-                    for(M m : markets) {
-                        JSONObject marketResult = esResult.getJSONObject(m.name());
-                        for(String sku : selectedSkus) {
-                            if(StringUtils.isBlank(sku)) continue;
-                            JSONObject skuResult = marketResult.getJSONObject(ES.parseEsString(sku).toLowerCase());
-                            JSONArray buckets = skuResult.getJSONObject("monthly_avg").getJSONArray("buckets");
-                            for(Object o : buckets) {
-                                JSONObject entry = (JSONObject) o;
-                                DateTime month = new DateTime(Dates.date2JDate(entry.getDate("key")));
-                                units.put(String.format("%s|%s|%s", sku, m.name(), month.getMonthOfYear()),
-                                        entry.getJSONObject("sum_sales").getIntValue("value"));
-                            }
-                        }
-                    }
+                List<DailySalesReportsDTO> dtos = new ArrayList<>();
+                for(M m : markets) {
+                    //aggregations.aggs_filters.AMAZON_UK.skus
+                    Optional.ofNullable(J.dig(esResult, String.format("aggregations.aggs_filters.%s.skus", m.name())))
+                            .map(skus -> skus.getJSONArray("buckets"))
+                            .ifPresent(buckets -> buckets.stream()
+                                    .map(bucket -> (JSONObject) bucket)
+                                    .forEach(bucket -> dtos.add(DailySalesReportsDTO.buildFromJSONObject(bucket, m)))
+                            );
                 }
-
-                dtos = new ArrayList<>();
-                int beginMonth = new DateTime(from).getMonthOfYear();
-                int endMonth = new DateTime(to).getMonthOfYear();
-                DateTime currentYear = new DateTime(from);
                 for(String sku : selectedSkus) {
                     if(StringUtils.isBlank(sku)) continue;
-                    String cate = sku.substring(0, 2);
-                    DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
-                    if(market == null) dtos.add(sumDto);
-
-                    for(M m : markets) {
-                        DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
-
-                        for(int i = beginMonth; i <= endMonth; i++) {
-                            String key = String.format("%s|%s|%s", sku, m.name(), i);
-                            int days = Dates.getDays(currentYear.withMonthOfYear(i).toDate());
-                            Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
-                            dto.sales.put(i, Webs.scalePointUp(0, unit / days));
-
-                            //使用 sumDto 对象临时储存一下汇总的数据
-                            if(sumDto.sales.containsKey(i)) {
-                                sumDto.sales.put(i, sumDto.sales.get(i) + unit);
-                            } else {
-                                sumDto.sales.put(i, unit);
-                            }
-                        }
-                        dtos.add(dto);
-                    }
-
-                    //最后在计算汇总的数据
-                    for(int key : sumDto.sales.keySet()) {
-                        Date month = new DateTime(from).withMonthOfYear(key).toDate();
-                        sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
-                    }
+                    List<DailySalesReportsDTO> skuDtos = dtos.stream()
+                            .filter(dto -> dto != null && StringUtils.equalsIgnoreCase(dto.sku, ES.parseEsString(sku)))
+                            .collect(Collectors.toList());
+                    skuDtos.forEach(dto -> dto.sku = sku); //将 ES 化的 SKU 替换成正常的 SKU(70apipgpuenp -> 70APIP-GPUENP)
+                    dtos.add(DailySalesReportsDTO.buildSumDTO(skuDtos, sku));//把计算好的 sku 汇总对象加入到 dtos 结果集
                 }
 
-                LogUtils.JOBLOG.info(String
-                        .format("SkuMonthlyDailySales calculate.... [%sms]", System.currentTimeMillis() - begin));
-
-                Cache.add(cacheKey, dtos, "4h");
+                List<DailySalesReportsDTO> finalDtos = dtos.stream()
+                        .filter(dto -> dto != null)
+                        //计算日平均销量
+                        .map(DailySalesReportsDTO::processDailySales)
+                        //将相同的 SKU 的放到一起, 便于前端输出查看
+                        .sorted((dto1, dto2) -> dto1.sku.compareTo(dto2.sku))
+                        .collect(Collectors.toList());
+                Cache.add(cacheKey, finalDtos, "4h");
                 Cache.delete(runningKey);
-            } catch(Exception e) {
+            } finally {
                 Cache.delete(runningKey);
-                throw new FastRuntimeException(Webs.S(e));
             }
         }
     }
