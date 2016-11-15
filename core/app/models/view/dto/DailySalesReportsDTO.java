@@ -54,8 +54,11 @@ public class DailySalesReportsDTO implements Serializable {
     public DailySalesReportsDTO processDailySales() {
         if(this.sales.isEmpty()) {
             for(Date date : this.saleMap.keySet()) {
-                this.sales.put(new DateTime(date).getMonthOfYear(),
-                        Webs.scalePointUp(0, (float) this.saleMap.get(date) / Dates.getDays(date)));
+                float saleQty = Webs.scalePointUp(0, (float) this.saleMap.get(date) / Dates.getDays(date));
+                if(saleQty > 0) {
+                    this.sales.put(new DateTime(date).getMonthOfYear(),
+                            Webs.scalePointUp(0, (float) this.saleMap.get(date) / Dates.getDays(date)));
+                }
             }
         }
         this.saleMap = null;//计算完成后清除掉 saleMap 对象, 避免序列化的时候存储了 sales 和 saleMap 两分数据
