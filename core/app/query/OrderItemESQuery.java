@@ -434,22 +434,26 @@ public class OrderItemESQuery {
      */
     public JSONObject skusMonthlyDailySale(Date from, Date to, List<String> skus, List<M> markets) {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
+        FilterAggregationBuilder aggregationBuilder = AggregationBuilders.filter("aggs_filters")
+                .filter(QueryBuilders.boolQuery()
+                        //SKUs
+                        .must(QueryBuilders.termsQuery("sku", skus.stream()
+                                .map(sku -> ES.parseEsString(sku).toLowerCase())
+                                .filter(StringUtils::isNotBlank)
+                                .collect(Collectors.toList())))
+                        .mustNot(QueryBuilders.termQuery("state", "cancel"))
+                );
         //每一个市场都要查询一次
         for(M m : markets) {
-            search.aggregation(AggregationBuilders.filter(m.name()).filter(QueryBuilders.boolQuery()
-                    //SKUs
-                    .must(QueryBuilders.termsQuery("sku", skus.stream()
-                            .map(sku -> ES.parseEsString(sku).toLowerCase())
-                            .collect(Collectors.toList())))
+            aggregationBuilder.subAggregation(AggregationBuilders.filter(m.name()).filter(QueryBuilders.boolQuery()
                     //市场
                     .must(QueryBuilders.termQuery("market", m.name().toLowerCase()))
                     //日期间隔
                     .must(QueryBuilders.rangeQuery("date")
                             .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
-                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
-                    ).mustNot(QueryBuilders.termQuery("state", "cancel")))
-                    .subAggregation(AggregationBuilders.terms("skus").field("sku")
+                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))))
+                    .subAggregation(AggregationBuilders.terms("skus")
+                            .field("sku")
                             .subAggregation(AggregationBuilders.dateHistogram("monthly_avg")
                                     .field("date")
                                     .timeZone(Dates.timeZone(m).getShortName(System.currentTimeMillis()))
@@ -459,6 +463,7 @@ public class OrderItemESQuery {
                                     .subAggregation(AggregationBuilders.sum("sum_sales").field("quantity")
                                     ))));
         }
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0).aggregation(aggregationBuilder);
         Logger.info(search.toString());
         return ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
     }
