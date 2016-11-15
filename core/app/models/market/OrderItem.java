@@ -451,7 +451,7 @@ public class OrderItem extends GenericModel {
                             .filter(dto -> dto != null && StringUtils.equalsIgnoreCase(dto.sku, ES.parseEsString(sku)))
                             .collect(Collectors.toList());
                     skuDtos.forEach(dto -> dto.sku = sku); //将 ES 化的 SKU 替换成正常的 SKU(70apipgpuenp -> 70APIP-GPUENP)
-                    dtos.add(DailySalesReportsDTO.buildSumDTO(skuDtos));//把计算好的 sku 汇总对象加入到 dtos 结果集
+                    dtos.add(DailySalesReportsDTO.buildSumDTO(skuDtos, sku));//把计算好的 sku 汇总对象加入到 dtos 结果集
                 }
 
                 List<DailySalesReportsDTO> finalDtos = dtos.stream()

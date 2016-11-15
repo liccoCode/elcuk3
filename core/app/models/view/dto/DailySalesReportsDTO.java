@@ -65,10 +65,10 @@ public class DailySalesReportsDTO implements Serializable {
     /**
      * 生成计算 SKU 的汇总对象
      */
-    public static DailySalesReportsDTO buildSumDTO(List<DailySalesReportsDTO> dtos) {
+    public static DailySalesReportsDTO buildSumDTO(List<DailySalesReportsDTO> dtos, String sku) {
         if(dtos.isEmpty()) return null;
 
-        DailySalesReportsDTO sumDTO = new DailySalesReportsDTO();
+        DailySalesReportsDTO sumDTO = new DailySalesReportsDTO(sku.substring(0, 2), sku, "ALL");
         for(DailySalesReportsDTO dto : dtos) {
             for(Date date : dto.saleMap.keySet()) {
                 if(sumDTO.saleMap.containsKey(date)) {
