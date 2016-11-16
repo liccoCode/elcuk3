@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 每一个运输单的运输项
@@ -369,7 +370,8 @@ public class ShipItem extends GenericModel {
         fee.feeType = feeType;
         fee.payee = User.current();
         fee.amount = fee.unitPrice * fee.unitQty;
-        fee.save();
+        this.shipment.fees.add(fee);
+        this.shipment.save();
 
         new ERecordBuilder("paymentunit.applynew")
                 .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
@@ -419,9 +421,9 @@ public class ShipItem extends GenericModel {
         if(templates == null || templates.size() == 0) {
             return "";
         } else {
-            for(Template template : templates) {
-                ids.add(template.id.toString());
-            }
+            ids.addAll(templates.stream()
+                    .map(template -> template.id.toString())
+                    .collect(Collectors.toList()));
         }
         String message = "";
         StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");

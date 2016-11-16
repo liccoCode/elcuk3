@@ -254,10 +254,14 @@ public class PaymentUnit extends Model {
     public PaymentUnit transportFeeRemove(String reason) {
         basicRemoveValidate(reason);
         if(Validation.hasErrors()) return this;
-        this.delete();
+        this.shipment.fees.remove(this);
+        this.shipment.save();
         String fid;
-        if(this.shipment != null) fid = this.shipment.id;
-        else fid = this.shipItem.shipment.id;
+        if(this.shipment != null) {
+            fid = this.shipment.id;
+        } else {
+            fid = this.shipItem.shipment.id;
+        }
         this.clearRecords();
         new ERecordBuilder("paymentunit.destroy")
                 .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
