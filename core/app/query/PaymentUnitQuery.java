@@ -94,7 +94,6 @@ public class PaymentUnitQuery {
      *
      * @param from
      * @param to
-     * @param skus
      * @return
      */
     public Float avgSkuAIRTransportshippingFee(Date from, Date to) {
@@ -107,7 +106,6 @@ public class PaymentUnitQuery {
      *
      * @param from
      * @param to
-     * @param skus
      * @return
      */
     public Float avgSkuSEATransportshippingFee(Date from, Date to) {
@@ -130,10 +128,9 @@ public class PaymentUnitQuery {
          */
         Map<Currency, Map<String, Float>> currencyAvgFeeMap = new HashMap<>();
         List<Currency> currencies = transportshippingCurrencies(from, to, skus);
-        for(Currency currency : currencies) {
-            if(!currencyAvgFeeMap.containsKey(currency))
-                currencyAvgFeeMap.put(currency, new HashMap<>());
-        }
+        currencies.stream()
+                .filter(currency -> !currencyAvgFeeMap.containsKey(currency))
+                .forEach(currency -> currencyAvgFeeMap.put(currency, new HashMap<>()));
 
         // 2
         for(Currency crcy : currencyAvgFeeMap.keySet()) {

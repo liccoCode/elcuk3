@@ -110,7 +110,7 @@
           #{/if}
       </form>
         #{if ship.whouse.country.contains('DE') }
-          <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits  .applyDutyFromShipment(ship.id)}' style="display: none">
+          <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}' style="display: none">
             计算预交关税
           </a>
         #{/if}

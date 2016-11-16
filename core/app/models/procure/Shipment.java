@@ -229,7 +229,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
     public List<ShipItem> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @OneToMany(mappedBy = "shipment", orphanRemoval = true, cascade = {CascadeType.PERSIST})
     public List<PaymentUnit> fees = new ArrayList<>();
 
     @ManyToOne
@@ -436,11 +437,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public boolean calcuPlanArriveDate() {
         if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
-        int plusDay = 7;
-//        if(type == T.EXPRESS) plusDay = 7;
-//        else if(type == T.AIR) plusDay = 15;
-//        else if(type == T.SEA) plusDay = 60;
-        plusDay = shipDay();
+        int plusDay = shipDay();
         this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
                 .toDate();
         this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
@@ -537,9 +534,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.calcuPlanArriveDate();
         this.creater = User.current();
         this.save();
-        for(ProcureUnit unit : procureUnits) {
-            this.addToShip(unit);
-        }
+        procureUnits.forEach(this::addToShip);
         return this;
     }
 
@@ -653,14 +648,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
-        for(ShipItem shipItem : this.items) {
-            if(shipItem.unit.fba != null) {
-                shipItem.unit.fba.putTransportContentRetry(3, this);
-                // 在测试环境下也不能标记 SHIPPED
-                shipItem.unit.fba.updateFBAShipmentRetry(3,
-                        Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
-            }
-        }
+        // 在测试环境下也不能标记 SHIPPED
+        this.items.stream().filter(shipItem -> shipItem.unit.fba != null)
+                .forEach(shipItem -> {
+                    shipItem.unit.fba.putTransportContentRetry(3, this);
+                    // 在测试环境下也不能标记 SHIPPED
+                    shipItem.unit.fba.updateFBAShipmentRetry(3,
+                            Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+                });
 
         for(ShipItem shipItem : this.items) {
             shipItem.shipDate = datetime;
@@ -993,7 +988,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.shipment = this;
         fee.payee = User.current();
         fee.amount = fee.unitQty * fee.unitPrice;
-        fee.save();
+        this.fees.add(fee);
+        this.save();
         new ERecordBuilder("paymentunit.applynew")
                 .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
                 .fid(fee.shipment.id)
@@ -1035,12 +1031,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         FeeType duty = FeeType.dutyAndVAT();
         if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
-        for(PaymentUnit fee : this.fees) {
-            if(fee.feeType.equals(duty)) {
-                if(!fee.currency.equals(crcy))
-                    Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息.");
-            }
-        }
+        this.fees.stream().filter(fee -> fee.feeType.equals(duty) && !fee.currency.equals(crcy))
+                .forEach(fee -> Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息."));
 
         if(Validation.hasErrors()) return null;
 
@@ -1064,6 +1056,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         leftDuty.shipment = this;
         leftDuty.state = PaymentUnit.S.APPLY;
         leftDuty.memo = StringUtils.join(lines, ", ");
+        this.fees.add(leftDuty);
+        this.save();
         new ERecordBuilder("paymentunit.applynew")
                 .msgArgs(leftDuty.currency, leftDuty.amount(), leftDuty.feeType.nickName)
                 .fid(leftDuty.shipment.id)
