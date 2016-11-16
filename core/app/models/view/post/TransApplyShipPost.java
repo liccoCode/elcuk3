@@ -57,8 +57,7 @@ public class TransApplyShipPost extends Post<Shipment> {
 
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = this.count(params);
-        return Shipment.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        return Shipment.find(params._1, params._2.toArray()).fetch(this.page(), this.perSize);
     }
 
     public Long getTotalCount() {
