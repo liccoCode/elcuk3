@@ -297,7 +297,7 @@ public class MetricProfitService {
                         ).subAggregation(AggregationBuilders.terms("units").field("ship_type")
                                 .subAggregation(AggregationBuilders.stats("cost_sum").field("cost_in_usd"))
                         )
-                ).size(100000);
+                ).size(10000);
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
         if(esresult._1 == null) {
@@ -368,7 +368,7 @@ public class MetricProfitService {
                         .filter(this.filterbuilder(false)
                                 .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat"))
                         ).subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
-                ).size(100000);
+                ).size(10000);
         //总关税和VAT
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
         if(esresult._1 == null)
