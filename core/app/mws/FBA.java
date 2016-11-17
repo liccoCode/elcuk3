@@ -45,7 +45,7 @@ public class FBA {
 
         // 要发送的货物
         plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
-                Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
+                Collections.singletonList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
         //单账户跨市场相关的处理
         plan.setMarketplace(unit.selling.market.amid().name());
