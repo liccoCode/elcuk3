@@ -18,7 +18,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -704,9 +703,6 @@ public class MetricProfitService {
                 .aggregation(builder
                 )
                 .size(0);
-
-        Logger.info("salefeeline:::" + search.toString());
-
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");

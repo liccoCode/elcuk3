@@ -23,10 +23,7 @@ import play.libs.F;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -305,6 +302,10 @@ public class ShipItem extends GenericModel {
         this.compentype = compentype;
         this.memo = msg;
         this.save();
+        if(Objects.equals(this.adjustQty, this.qty)) {
+            this.unit.stage = ProcureUnit.STAGE.CLOSE;
+            this.unit.save();
+        }
         new ERecordBuilder("shipitem.receviedQty")
                 .msgArgs(msg, oldQty, adjustQty)
                 .fid(this.id)
