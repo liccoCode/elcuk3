@@ -172,9 +172,7 @@ public class OrderItemESQuery {
                     .defaultOperator(QueryStringQueryBuilder.Operator.AND));
         }
 
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-
         Series.Line line = new Series.Line(market.label() + "销量");
         Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
                 .map(units -> units.getJSONArray("buckets"))
@@ -222,7 +220,6 @@ public class OrderItemESQuery {
                     .defaultOperator(QueryStringQueryBuilder.Operator.AND)
             );
         }
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Line line = new Series.Line(market.label() + " 滑动平均");
@@ -265,7 +262,6 @@ public class OrderItemESQuery {
                                 .size(30)
                         )
                 ).size(0);
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Pie pie = new Series.Pie(market.label() + " 销量百分比");
@@ -319,7 +315,6 @@ public class OrderItemESQuery {
                         )
                 )
         ).size(0);
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Line line = new Series.Line(String.format("%s %s 销量", market.label(), issku ? val : ""));
@@ -367,7 +362,6 @@ public class OrderItemESQuery {
                                 .must(skusfilter(type, val))
                         ).subAggregation(dateRangeBuilder)
                 ).size(0);
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
 
         Series.Line line = new Series.Line(String.format("%s %s 滑动平均", market.label(), issku ? val : ""));
@@ -398,7 +392,6 @@ public class OrderItemESQuery {
         for(M m : Promises.MARKETS) {
             search.aggregation(skuSalesBaseSalesAggregation(m, from, to, params, type));
         }
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
@@ -464,7 +457,6 @@ public class OrderItemESQuery {
                                     ))));
         }
         SearchSourceBuilder search = new SearchSourceBuilder().size(0).aggregation(aggregationBuilder);
-        Logger.info(search.toString());
         return ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
     }
 }

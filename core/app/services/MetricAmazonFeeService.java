@@ -17,7 +17,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.libs.F;
@@ -232,8 +231,6 @@ public class MetricAmazonFeeService {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .size(0)
                 .aggregation(dateAndMarketAggregation);
-        Logger.info(search.toString());
-
         JSONObject result = ES.search("elcuk2", "salefee", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         return readFeesCostInESResult(result);
