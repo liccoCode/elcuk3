@@ -3,6 +3,7 @@ package helper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import play.Logger;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +23,7 @@ public class ES {
     }
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
+        Logger.info(builder.toString());
         return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
     }
 
