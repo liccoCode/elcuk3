@@ -3,7 +3,7 @@ $ ->
     $("#fba_carton_contents_modal").data('unit-source', $(@).data('unit-id')).modal('show')
     $("#sumbitDeployFBAs").data('url', $(@).data("url"))
     unitIds = [$(@).data('unit-id')]
-    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()

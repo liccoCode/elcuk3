@@ -48,7 +48,7 @@ $ ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
-    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
@@ -76,7 +76,7 @@ $ ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
-    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
