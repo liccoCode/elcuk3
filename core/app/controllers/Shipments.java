@@ -176,7 +176,7 @@ public class Shipments extends Controller {
             render("Shipments/show.html");
         }
         dbship.updateShipment();
-        /**像采购计划负责人发送邮件**/
+        //向采购计划负责人发送邮件
         dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
         flash.success("更新成功.");
 

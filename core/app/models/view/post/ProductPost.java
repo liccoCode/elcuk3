@@ -27,7 +27,7 @@ public class ProductPost extends Post<Product> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return new Long(Product.find(params._1, params._2.toArray()).fetch().size());
+        return (long) Product.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override

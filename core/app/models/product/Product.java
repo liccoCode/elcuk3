@@ -1077,4 +1077,33 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 输出给 typeahead 所使用的 source
+     *
+     * @return
+     */
+    public static List<String> pickSourceItems(String search) {
+        List<String> sources = new ArrayList<>();
+        String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value" +
+                " FROM Product p, Selling s, ProductAttr pa" +
+                " WHERE p.sku=s.product_sku" +
+                " AND p.sku=pa.product_sku" +
+                " AND p.sku LIKE ?" +
+                " AND p.family_family LIKE ?" +
+                " AND s.fnSku LIKE ?" +
+                " AND pa.value LIKE ?" +
+                " LIMIT 5";
+        String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
+        List<Map<String, Object>> rows = DBUtils.rows(sql, Arrays.asList(word, word, word, word).toArray());
+        rows.stream()
+                .filter(row -> row != null && !row.isEmpty())
+                .map(Map::values)
+                .filter(vals -> !vals.isEmpty())
+                .forEach(vals -> {
+                    vals.forEach(val -> {
+                        if(val != null) sources.add(val.toString());
+                    });
+                });
+        return sources;
+    }
 }

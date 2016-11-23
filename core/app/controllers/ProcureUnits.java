@@ -10,6 +10,7 @@ import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -409,6 +410,7 @@ public class ProcureUnits extends Controller {
 
     /**
      * 已核单
+     *
      * @param id
      */
     public static void confirmUnit(long id) {
@@ -450,7 +452,7 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
-            if(unit.isNeedPay == false)
+            if(!unit.isNeedPay)
                 renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingPrePay();
@@ -668,4 +670,25 @@ public class ProcureUnits extends Controller {
         renderPDF(options, selling);
     }
 
+
+    /**
+     * FBA 箱包装信息
+     *
+     * @param unitIds
+     */
+    public static void fbaCartonContents(String[] unitIds) {
+        List<ProcureUnit> list = new ArrayList<>();
+        for(String id : unitIds) {
+            ProcureUnit unit = ProcureUnit.findById(Long.parseLong(id));
+            if(unit.cooperator != null) {
+                CooperItem item = unit.cooperator.cooperItem(unit.product.sku);
+                if(item != null) {
+                    item.getAttributes();
+                    unit.items = item.items;
+                }
+            }
+            list.add(unit);
+        }
+        render(list);
+    }
 }
