@@ -24,6 +24,7 @@ import play.mvc.With;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 采购单控制器
@@ -73,12 +74,11 @@ public class Deliveryments extends Controller {
     //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        String expressid = ",,";
-        for(ProcureUnit unit : dmt.units) {
-            if(unit.shipType == Shipment.T.EXPRESS) {
-                expressid = expressid + unit.id + ",";
-            }
-        }
+        List<Long> expressUnitIds = dmt.units.stream()
+                .filter(unit -> unit.shipType == Shipment.T.EXPRESS)
+                .map(unit -> unit.id)
+                .collect(Collectors.toList());
+        String expressid = StringUtils.join(expressUnitIds, ",");
         render(dmt, expressid);
     }
 
