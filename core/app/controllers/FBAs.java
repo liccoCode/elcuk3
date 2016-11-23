@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Constant;
+import helper.LinkHelper;
 import helper.Webs;
 import models.market.Account;
 import models.procure.FBAShipment;
@@ -8,11 +10,15 @@ import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.qc.CheckTaskDTO;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.data.validation.Validation;
+import play.libs.Files;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.List;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -25,9 +31,9 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class FBAs extends Controller {
-
     @Check("fbas.deploytoamazon")
-    public static void deploysToAmazon(String deliveryId,
+    public static void deploysToAmazon(String target,
+                                       String id,
                                        List<Long> pids,
                                        List<CheckTaskDTO> dtos) {
         if(pids == null || pids.size() == 0) {
@@ -35,18 +41,13 @@ public class FBAs extends Controller {
         } else if(pids.size() != dtos.size()) {
             Validation.addError("", "FBA 箱内信息的个数与采购计划的数量不一致");
         }
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            Deliveryments.show(deliveryId);
-        }
-
-        ProcureUnit.postFbaShipments(pids, dtos);
+        if(!Validation.hasErrors()) ProcureUnit.postFbaShipments(pids, dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
             flash.success("选择的采购计划全部成功创建 FBA");
         }
-        Deliveryments.show(deliveryId);
+        redirect(LinkHelper.getRedirect(id, target));
     }
 
     @Check("fbas.update")
@@ -147,30 +148,71 @@ public class FBAs extends Controller {
     /**
      * 更新 FBA 的箱内包装信息
      *
-     * @param deliveryId
+     * @param target
+     * @param id
      * @param pids
      * @param dtos
      */
-    public static void updateCartonContents(String deliveryId,
+    public static void updateCartonContents(String target,
+                                            String id,
                                             List<Long> pids,
                                             List<CheckTaskDTO> dtos) {
-
-        if(pids == null || pids.size() == 0) {
+        if(pids == null || pids.isEmpty()) {
             Validation.addError("", "必须选择需要创建 FBA 的采购计划");
         } else if(pids.size() != dtos.size()) {
             Validation.addError("", "FBA 箱内信息的个数与采购计划的数量不一致");
         }
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            Deliveryments.show(deliveryId);
-        }
-
-        ProcureUnit.postFbaCartonContents(pids, dtos);
+        if(!Validation.hasErrors()) ProcureUnit.postFbaCartonContents(pids, dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
             flash.success("选择的采购计划全部成功提交更新 FBA, 请等待 3~5 分钟后查看.");
         }
-        Deliveryments.show(deliveryId);
+        redirect(LinkHelper.getRedirect(id, target));
+    }
+
+    /**
+     * 将选定的 出货 FBA 打成 ZIP 包并下载
+     *
+     * @param target
+     * @param id
+     * @param pids
+     * @param boxNumbers
+     */
+    public static void downloadZip(String target,
+                                   String id,
+                                   List<Long> pids,
+                                   List<Long> boxNumbers) {
+        if(pids == null || pids.size() == 0)
+            Validation.addError("", "必须选择需要下载的采购计划");
+        if(boxNumbers == null || boxNumbers.size() == 0 || pids.size() != boxNumbers.size())
+            Validation.addError("", "采购单元箱数填写错误");
+        if(Validation.hasErrors()) {
+            redirect(LinkHelper.getRedirect(id, target));
+        } else {
+            //创建FBA根目录，存放工厂FBA文件
+            File dirfile = new File(Constant.TMP, "FBA");
+            try {
+                Files.delete(dirfile);
+                dirfile.mkdir();
+
+                //生成工厂的文件夹. 格式：选中的采购单的id的组合a,b,c
+                File factoryDir = new File(dirfile,
+                        String.format("采购单元-%s-出货FBA", StringUtils.join(pids.toArray(), ",")));
+                factoryDir.mkdir();
+                for(int i = 0; i < pids.size(); i++) {
+                    ProcureUnit procureunit = ProcureUnit.findById(pids.get(i));
+                    procureunit.fbaAsPDF(factoryDir, boxNumbers.get(i));
+                }
+
+            } catch(Exception e) {
+                Logger.error(Webs.S(e));
+            } finally {
+                File zip = new File(Constant.TMP + "/FBA.zip");
+                Files.zip(dirfile, zip);
+                zip.deleteOnExit();
+                renderBinary(zip);
+            }
+        }
     }
 }

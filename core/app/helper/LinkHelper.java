@@ -9,6 +9,8 @@ import org.apache.commons.lang.math.NumberUtils;
 import play.mvc.Router;
 import play.templates.JavaExtensions;
 
+import java.util.Map;
+
 /**
  * Created by IntelliJ IDEA.
  * User: mac
@@ -80,6 +82,18 @@ public class LinkHelper extends JavaExtensions {
 
             default:
                 return "#";
+        }
+    }
+
+    public static String getRedirect(String id, String target) {
+        Map params = GTs.newMap("id", id).build();
+        switch(target) {
+            case "DeliverPlans":
+                return Router.getFullUrl("DeliverPlans.show", params);
+            case "Deliveryments":
+                return Router.getFullUrl("Deliveryments.show", params);
+            default:
+                return Router.getFullUrl("Deliveryments.show", params);
         }
     }
 }

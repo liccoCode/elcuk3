@@ -131,9 +131,11 @@
       </a>
     #{/power.ck}
     #{power.ck 'fbas.deploytoamazon'}
-      <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon(dmt.id)}' data-method="POST" id="deployFBAs" class="btn btn-success">
+      <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("Deliveryments", dmt.id)}' data-method="POST"
+         id="deployFBAs" class="btn btn-success">
         批量创建FBA</a>
-      <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents(dmt.id)}' data-method="POST" id="updateFbaCartonContents" class="btn btn-success">
+      <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents("Deliveryments", dmt.id)}' data-method="POST"
+         id="updateFbaCartonContents" class="btn btn-success">
         批量更新FBA箱内包装信息</a>
     #{/power.ck}
     #{power.ck 'fbas.procureunitsorder'}
@@ -142,7 +144,7 @@
         <i class="icon-download-alt"></i>下载出货单
       </a>
     #{/power.ck}
-      <a href="javascript:void(0);" data-url="@{Deliveryments.downloadFBAZIP(dmt.id)}" data-method="POST"
+      <a href="javascript:void(0);" data-url="@{FBAs.downloadZip("Deliveryments", dmt.id)}" data-method="POST"
          id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
         <i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
