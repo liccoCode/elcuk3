@@ -15,7 +15,6 @@ import models.view.dto.ProductDTO;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.cache.Cache;
@@ -1084,13 +1083,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public static List<String> pickSourceItems(String search) {
-        if(StringUtils.startsWith(search, "X")) {//FnSKU
-
-        } else if(NumberUtils.isNumber(search)) {//SKU Family
-
-        } else {//ALL
-
-        }
         List<String> sources = new ArrayList<>();
         String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value" +
                 " FROM Product p, Selling s, ProductAttr pa" +
