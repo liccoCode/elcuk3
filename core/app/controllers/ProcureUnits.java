@@ -452,7 +452,7 @@ public class ProcureUnits extends Controller {
         if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
         for(Long unitid : unitids) {
             ProcureUnit unit = ProcureUnit.findById(unitid);
-            if(unit.isNeedPay == false)
+            if(!unit.isNeedPay)
                 renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
             try {
                 unit.billingPrePay();
