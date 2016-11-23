@@ -14,6 +14,7 @@ $ ->
   ).on('click', '#downloadFBAZIP', (e) ->
     checkboxs = $('input[name="pids"]:checked')
     expressid = $("input[name='expressid']").val()
+    expressids = if _.isEmpty(expressid) then [] else expressid.split(",")
 
     if _.isEmpty(checkboxs)
       noty({text: '请选择需要下载的采购单元', type: 'error'})
@@ -28,7 +29,7 @@ $ ->
            "<td><div class='input-append'>" +
            "<input type='text' class='input-mini' name='boxNumbers' value='#{$checkbox.data('boxnum') + $checkbox.data('lastcartonnum')}' maxlength='3'/>" +
            "<span class='add-on'>" +
-           "箱 #{if expressid.indexOf(',' + $checkbox.val() + ',') > 0 then '(不加后缀)' else ''}" +
+           "箱 #{if expressids.includes($checkbox.val()) > 0 then '(不加后缀)' else ''}" +
            "</span>" +
            "</div></td>" +
            "</tr>"
