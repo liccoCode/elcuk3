@@ -1,7 +1,6 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Constant;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
@@ -15,17 +14,14 @@ import models.product.Product;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
-import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -235,46 +231,6 @@ public class Deliveryments extends Controller {
         else
             flash.success("%s 剥离成功.", id);
         Applys.procure(applyId);
-    }
-
-
-    /**
-     * 将选定的采购单的 出货FBA 打成ZIP包，进行下载
-     */
-    public static synchronized void downloadFBAZIP(String id, List<Long> pids, List<Long> boxNumbers)
-            throws Exception {
-        if(pids == null || pids.size() == 0)
-            Validation.addError("", "必须选择需要下载的采购计划");
-        if(boxNumbers == null || boxNumbers.size() == 0 || pids.size() != boxNumbers.size())
-            Validation.addError("", "采购单元箱数填写错误");
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            show(id);
-        }
-        //创建FBA根目录，存放工厂FBA文件
-        File dirfile = new File(Constant.TMP, "FBA");
-        try {
-            Files.delete(dirfile);
-            dirfile.mkdir();
-
-            //生成工厂的文件夹. 格式：选中的采购单的id的组合a,b,c
-            File factoryDir = new File(dirfile, String.format("采购单元-%s-出货FBA", StringUtils.join(pids.toArray(), ",")));
-            factoryDir.mkdir();
-            for(int i = 0; i < pids.size(); i++) {
-                ProcureUnit procureunit = ProcureUnit.findById(pids.get(i));
-
-                procureunit.fbaAsPDF(factoryDir, boxNumbers.get(i));
-            }
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            Logger.warn("downloadFBAZIP %s:%s", id, e.getMessage());
-        } finally {
-            File zip = new File(Constant.TMP + "/FBA.zip");
-            Files.zip(dirfile, zip);
-            zip.deleteOnExit();
-            renderBinary(zip);
-        }
     }
 
     @Check("deliveryments.manual")
