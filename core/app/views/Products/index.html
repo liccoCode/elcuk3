@@ -2,7 +2,7 @@
 #{set title:'Product' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'products/copysku.coffee'/}
+    #{script 'products/index.coffee'/}
 #{/set}
 
 <div style="margin:5px 0 0;" class="row">
@@ -21,8 +21,7 @@
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="hidden" name="p.page" value="${p.page}">
-        <input type="text" autocomplete="off" data-provide="typeahead" data-items="5" data-source="${families}"
-               name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU、附加属性、条码">
+        <input type="text" autocomplete="off" name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU、附加属性、条码">
         <a href="javascript:void(0)" data-href="@{Products.index()}" class="btn btn-primary" id="searchBtn"
            data-loading>搜索</a>
       </div>
