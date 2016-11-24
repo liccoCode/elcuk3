@@ -25,14 +25,14 @@ $ ->
     _.each(checkboxs, (checkbox) ->
       $checkbox = $(checkbox)
       tr = "<tr>" +
-           "<td>#{$checkbox.val()}</td>" +
-           "<td><div class='input-append'>" +
-           "<input type='text' class='input-mini' name='boxNumbers' value='#{$checkbox.data('boxnum') + $checkbox.data('lastcartonnum')}' maxlength='3'/>" +
-           "<span class='add-on'>" +
-           "箱 #{if expressids.includes($checkbox.val()) > 0 then '(不加后缀)' else ''}" +
-           "</span>" +
-           "</div></td>" +
-           "</tr>"
+        "<td>#{$checkbox.val()}</td>" +
+        "<td><div class='input-append'>" +
+        "<input type='text' class='input-mini' name='boxNumbers' value='#{$checkbox.data('boxnum') + $checkbox.data('lastcartonnum')}' maxlength='3'/>" +
+        "<span class='add-on'>" +
+        "箱 #{if expressids.includes($checkbox.val()) > 0 then '(不加后缀)' else ''}" +
+        "</span>" +
+        "</div></td>" +
+        "</tr>"
       $table.append(tr)
     )
     $('#box_number_modal').modal('show')
@@ -77,6 +77,7 @@ $ ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    return if _.isEmpty(unitIds)
     $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")

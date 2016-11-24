@@ -332,7 +332,7 @@ public class FBA {
                 null,
                 unit.qty(),
                 null
-        );
+        );//.withPrepDetailsList(new PrepDetailsList(Collections.singletonList(new PrepDetails("Labeling", "SELLER"))))
     }
 
     /**
