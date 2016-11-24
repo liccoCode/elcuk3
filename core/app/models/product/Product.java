@@ -1085,13 +1085,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public static List<String> pickSourceItems(String search) {
         String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value" +
-                " FROM Product p, Selling s, ProductAttr pa" +
-                " WHERE p.sku=s.product_sku" +
-                " AND p.sku=pa.product_sku" +
+                " FROM Product p, ProductAttr pa, Listing l, Selling s" +
+                " WHERE p.sku=l.product_sku AND p.sku=pa.product_sku AND l.listingId=s.listing_listingId" +
                 " AND p.sku LIKE ?" +
-                " AND p.family_family LIKE ?" +
-                " AND s.fnSku LIKE ?" +
-                " AND pa.value LIKE ?" +
+                " OR p.family_family LIKE ?" +
+                " OR s.fnSku LIKE ?" +
+                " OR pa.value LIKE ?" +
                 " LIMIT 5";
         String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
         List<Map<String, Object>> rows = DBUtils.rows(sql, Arrays.asList(word, word, word, word).toArray());
@@ -1101,7 +1100,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 .filter(val -> val != null)
                 .distinct()
                 .limit(10)
-                .map(Object::toString)
+                .map(val -> StringUtils.abbreviate(val.toString(), 20))
                 .collect(Collectors.toList());
     }
 }
