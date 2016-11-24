@@ -25,6 +25,7 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Listing 对应的是不同渠道上 Listing 的信息
@@ -204,7 +205,8 @@ public class Listing extends GenericModel {
         if(newListing.totalOffers != null) this.totalOffers = newListing.totalOffers;
         if(StringUtils.isNotBlank(newListing.picUrls)) this.picUrls = newListing.picUrls;
         if(newListing.offers != null && newListing.offers.size() > 0) {
-            for(ListingOffer lo : this.offers) lo.delete(); //清理掉原来的 ListingOffers
+            //清理掉原来的 ListingOffers
+            this.offers.forEach(ListingOffer::delete);
             this.offers = newListing.offers;
         }
         this.lastUpdateTime = System.currentTimeMillis();
@@ -284,12 +286,11 @@ public class Listing extends GenericModel {
         List<Map<String, Object>> rows = DBUtils
                 .rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')",
                         this.listingId);
-        List<F.T2<Long, Integer>> monthTable = new ArrayList<>();
-        for(Map<String, Object> row : rows) {
-            monthTable.add(new F.T2<>(
-                    DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
-                    ((Long) row.get("count")).intValue()));
-        }
+        List<F.T2<Long, Integer>> monthTable = rows.stream()
+                .map(row -> new F.T2<>(
+                        DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
+                        ((Long) row.get("count")).intValue()))
+                .collect(Collectors.toList());
         return monthTable;
     }
 
@@ -383,7 +384,7 @@ public class Listing extends GenericModel {
         tobeChangeed.likes = lst.get("likes").getAsInt();
 
         if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
-            for(ListingOffer of : tobeChangeed.offers) of.delete();
+            tobeChangeed.offers.forEach(ListingOffer::delete);
         }
         if(fullOffer) {
             try {
@@ -467,6 +468,7 @@ public class Listing extends GenericModel {
 
     /**
      * 获得被跟踪的Listing
+     *
      * @deprecated
      */
     public static List<Listing> trackedListings() {
@@ -507,9 +509,9 @@ public class Listing extends GenericModel {
         List<String> listingIds = new ArrayList<>();
         SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku=?").param(sku);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        for(Map<String, Object> row : rows) {
-            listingIds.add(row.get("listingId").toString());
-        }
+        listingIds.addAll(rows.stream()
+                .map(row -> row.get("listingId").toString())
+                .collect(Collectors.toList()));
         return listingIds;
     }
 
@@ -528,7 +530,7 @@ public class Listing extends GenericModel {
         if(this.sellings.size() > 0) {
             Webs.error("此 Listing 拥有 " + size + " 个 Selling 关联, 无法删除");
         }
-        for(ListingStateRecord record : this.stateRecords) record.delete();
+        this.stateRecords.forEach(ListingStateRecord::delete);
         this.delete();
     }
 
