@@ -312,7 +312,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             event.startAndEndDate(type)
                     .titleAndDesc()
                     .color(unit);
-
             eventSource.events.add(event);
         }
 

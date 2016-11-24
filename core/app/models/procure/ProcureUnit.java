@@ -35,6 +35,7 @@ import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
+import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
 import play.modules.pdf.PDF;
 import play.utils.FastRuntimeException;
@@ -741,13 +742,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param unit
      */
     public void update(ProcureUnit unit, String shipmentId, String reason) {
+        Shipment.T oldShipType = this.shipType;
         /**
          * 1. 修改不同阶段可以修改的信息
          * 2. 根据运输类型修改运输单
          */
         // 1
         //采购计划的FBA已存在后再次编辑该采购计划的 运输方式 或采购数量 时对修改原因做不为空校验
-        if(this.fba != null && (unit.shipType != this.shipType || (int) unit.attrs.planQty != (int) this.attrs.planQty))
+        if(this.fba != null &&
+                (unit.shipType != this.shipType || !Objects.equals(unit.attrs.planQty, this.attrs.planQty)))
             Validation.required("procureunit.update.reason", reason);
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
@@ -763,7 +766,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.purchaseSample = unit.purchaseSample;
         // 2
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId));
+            this.changeShipItemShipment(
+                    StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
         }
         if(Validation.hasErrors()) return;
 
@@ -851,43 +856,50 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
             if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
         }
-        String procureUnitStatus = String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
+        return String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
                 this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
-        return procureUnitStatus;
     }
 
     /**
      * 调整采购计划所产生的运输项目的运输单
      *
+     * @param oldShipType
      * @param shipment
      */
-    public void changeShipItemShipment(Shipment shipment) {
-        if(shipment != null && shipment.state != Shipment.S.PLAN) {
-            Validation.addError("", "涉及的运输单已经为" + shipment.state.label() + "状态, 只有"
-                    + Shipment.S.PLAN.label() + "状态的运输单才可调整.");
+    public void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
+        if(this.shipItems.stream()
+                .anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
+            Validation.addError("", String.format("当前采购计划已经存在运输单, 且该运输单不是 %s 状态.", Shipment.S.PLAN.label()));
             return;
         }
-        if(this.shipItems.size() == 0) {
-            // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
-            if(shipment == null) return;
-            shipment.addToShip(this);
+        if(shipment != null && shipment.state != Shipment.S.PLAN) {
+            Validation.addError("", String.format(
+                    "需要关联的运输单 %s 为 %s 状态, 只有 %s 状态的运输单才可调整.", shipment.id, shipment.state.label(),
+                    Shipment.S.PLAN.label()));
+            return;
+        }
+        if(shipment == null) {
+            // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
+            // 2. 用户更改了运输方式但未选择运输单
+            if(this.shipType == Shipment.T.EXPRESS || oldShipType != this.shipType) {
+                this.shipItems.forEach(GenericModel::delete);
+            }
         } else {
-            for(ShipItem shipItem : this.shipItems) {
-                if(this.shipType == Shipment.T.EXPRESS) {
-                    if(shipItem.shipment.state == Shipment.S.PLAN) {
-                        // 快递运输单调整, 运输项目全部删除, 重新设计.
-                        shipItem.delete();
-                    }
-                } else {
-                    if(shipment == null) return;
-                    Shipment originShipment = shipItem.shipment;
-                    shipItem.adjustShipment(shipment);
-                    if(Validation.hasErrors()) {
-                        shipItem.shipment = originShipment;
-                        shipItem.save();
-                        return;
-                    }
-                }
+            if(this.shipItems.isEmpty()) {
+                // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
+                shipment.addToShip(this);
+            } else {
+                // 采购计划已经有运输项目, 调整运输项的运输单
+                this.shipItems.stream()
+                        .filter(item -> item.shipment != shipment)
+                        .forEach(item -> {
+                            Shipment originShipment = item.shipment;
+                            item.adjustShipment(shipment);//调整运输项的运输单
+                            if(Validation.hasErrors()) {
+                                item.shipment = originShipment;
+                                item.save();
+                            }
+                        });
             }
         }
     }
@@ -1039,12 +1051,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        Set<Shipment> shipments = new HashSet<>();
-        for(ShipItem shipItem : this.shipItems) {
-            if(shipItem.shipment != null)
-                shipments.add(shipItem.shipment);
-        }
-        return new ArrayList<>(shipments);
+        return this.shipItems.stream()
+                .filter(shipItem -> shipItem.shipment != null)
+                .map(shipItem -> shipItem.shipment)
+                .collect(Collectors.toList());
     }
 
     public int qty() {
@@ -1053,9 +1063,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int realQty() {
-        int qty = this.qty() - this.fetchCheckTaskQcSample().intValue();
-        if(purchaseSample != null)
-            qty = qty - purchaseSample.intValue();
+        int qty = this.qty() - this.fetchCheckTaskQcSample();
+        if(purchaseSample != null) qty -= purchaseSample;
         return qty;
     }
 
