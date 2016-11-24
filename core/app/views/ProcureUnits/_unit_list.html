@@ -78,7 +78,7 @@
     </td>
     <td>
         #{if unit.fba}
-            #{cache unit.fba.feedsPageCacheKey(), for:'3h'}
+            #{cache unit.fba.cacheKey(), for:'6h'}
             ${unit.fba.shipmentId}
                 #{set feeds: unit.fba.feeds()/}
                 #{if feeds.size() > 0}
@@ -121,7 +121,7 @@
     <td>
       <!-- FnSku 下载 Label -->
         #{if unit.selling?.fnSku}
-            ${unit.selling.fnSku}
+        ${unit.selling.fnSku}
           <br/>
           <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 SKU 信息">
             <i class="icon-download-alt"></i> New
