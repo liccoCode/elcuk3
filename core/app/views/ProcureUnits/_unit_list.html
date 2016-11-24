@@ -78,28 +78,26 @@
     </td>
     <td>
         #{if unit.fba}
-            #{cache unit.fba.feedsPageCacheKey(), for:'3h'}
-            ${unit.fba.shipmentId}
-                #{set feeds: unit.fba.feeds()/}
-                #{if feeds.size() > 0}
-                    #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                    #{set lastFeed: feeds.get(0)/}
-                    #{if lastFeed.isFailed()}
-                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
-                    #{/if}
-                    #{elseif lastFeed.isSussess()}
-                      <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
-                      </i>
-                    #{/elseif}
-                    #{else }
-                      <i class="icon-search" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
-                      </i>
-                    #{/else}
+        ${unit.fba.shipmentId}
+            #{set feeds: unit.fba.feeds/}
+            #{if feeds.size() > 0}
+                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                #{set lastFeed: feeds.get(0)/}
+                #{if lastFeed.isFailed()}
+                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
                 #{/if}
-            #{/cache}
+                #{elseif lastFeed.isSussess()}
+                  <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                  </i>
+                #{/elseif}
+                #{else }
+                  <i class="icon-search" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                  </i>
+                #{/else}
+            #{/if}
         #{/if}
     </td>
     <td>
@@ -121,7 +119,7 @@
     <td>
       <!-- FnSku 下载 Label -->
         #{if unit.selling?.fnSku}
-            ${unit.selling.fnSku}
+        ${unit.selling.fnSku}
           <br/>
           <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 SKU 信息">
             <i class="icon-download-alt"></i> New

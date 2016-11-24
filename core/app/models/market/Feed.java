@@ -232,14 +232,6 @@ public class Feed extends Model {
                 StringUtils.lowerCase(Feed.class.getSimpleName()));
     }
 
-    public static List<Map<String, Object>> countFeedByFid(String fid, T type) {
-        SqlSelect sql = new SqlSelect().select("count(id) AS count").from("Feed")
-                .where("fid=? AND type=? AND analyzeResult IS NOT NULL")
-                .groupBy("analyzeResult")
-                .params(fid, type.name());
-        return DBUtils.rows(sql.toString(), sql.getParams().toArray());
-    }
-
     public String checkResult() {
         String[] lines = StringUtils.split(this.result, "\r\n");
         for(String line : lines) {
