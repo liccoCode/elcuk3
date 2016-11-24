@@ -17,8 +17,6 @@ import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.data.validation.Validation;
@@ -30,7 +28,6 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * User: wyattpan
@@ -237,12 +234,6 @@ public class FBAShipment extends Model {
     public String toString() {
         return this.shipmentId;
     }
-
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    @OneToMany(cascade = {CascadeType.PERSIST})
-    @JoinColumn(name = "fid")
-    @OrderBy("createdAt DESC")
-    public List<Feed> feeds = new ArrayList<>();
 
     /**
      * 在签收状态之后
@@ -508,6 +499,28 @@ public class FBAShipment extends Model {
         return new NonPartneredLtlDataInput("Other", shipment.tracknolist.get(0));
     }
 
+    public List<Feed> feeds() {
+        return Feed.find("fid=? AND type=? ORDER BY createdAt DESC",
+                this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS).fetch();
+    }
+
+    /**
+     * 页面上用来缓存 feeds 的 key
+     *
+     * @return
+     */
+    public String feedsPageCacheKey() {
+        List<Map<String, Object>> rows = Feed.countFeedByFid(this.id.toString(), Feed.T.FBA_INBOUND_CARTON_CONTENTS);
+        StringBuilder feedCountDigest = new StringBuilder("");
+        if(rows != null && !rows.isEmpty()) {
+            for(Map<String, Object> row : rows) {
+                feedCountDigest.append(row.get("count"));
+            }
+        }
+        return Webs.Md5(
+                String.format("%s|%s", Feed.pageCacheKey(FBAShipment.class, this.id), feedCountDigest.toString()));
+    }
+
     public FBAShipment doCreate() {
         this.save();
         if(this.dto != null) {
@@ -522,8 +535,7 @@ public class FBAShipment extends Model {
                 Feed.T.FBA_INBOUND_CARTON_CONTENTS,
                 this.id.toString());
         feed.owner = FBAShipment.class;
-        this.feeds.add(feed);
-        this.save();
+        feed.save();
         feed.submit(this.submitParams());
     }
 
@@ -547,9 +559,7 @@ public class FBAShipment extends Model {
     }
 
     public void postFbaInboundCartonContents() {
-        List<Feed> feeds = this.feeds.stream()
-                .filter(feed -> feed.type == Feed.T.FBA_INBOUND_CARTON_CONTENTS)
-                .collect(Collectors.toList());
+        List<Feed> feeds = this.feeds();
         if(feeds.size() > 0 && feeds.get(0).analyzeResult == null) {
             Validation.addError("", "请勿重复生成 Feed.");
             return;
