@@ -42,13 +42,6 @@ set :ssh_options, {keys: %w(/home/dev/.ssh/dev.key)}
 # 注册 play 命令
 SSHKit.config.command_map[:play] = '/opt/play-1.4.2/play'
 
-# rbenv
-set :rbenv_type, :user
-set :rbenv_ruby, '2.3.0'
-set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
-set :rbenv_map_bins, %w{rake gem bundle ruby}
-set :rbenv_roles, :all
-
 namespace :deploy do
   task :restart do
     on roles(:app) do
