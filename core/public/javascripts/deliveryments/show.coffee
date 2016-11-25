@@ -49,6 +49,7 @@ $ ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
+    return if _.isEmpty(unitIds)
     $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
