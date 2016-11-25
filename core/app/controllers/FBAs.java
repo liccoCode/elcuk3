@@ -27,9 +27,7 @@ import static play.modules.pdf.PDF.renderPDF;
 public class FBAs extends Controller {
 
     @Check("fbas.deploytoamazon")
-    public static void deploysToAmazon(String deliveryId,
-                                       List<Long> pids,
-                                       List<CheckTaskDTO> dtos) {
+    public static void deploysToAmazon(String deliveryId, List<Long> pids, List<CheckTaskDTO> dtos) {
         if(pids == null || pids.size() == 0) {
             Validation.addError("", "必须选择需要创建 FBA 的采购计划");
         } else if(pids.size() != dtos.size()) {
@@ -151,10 +149,7 @@ public class FBAs extends Controller {
      * @param pids
      * @param dtos
      */
-    public static void updateCartonContents(String deliveryId,
-                                            List<Long> pids,
-                                            List<CheckTaskDTO> dtos) {
-
+    public static void updateCartonContents(String deliveryId, List<Long> pids, List<CheckTaskDTO> dtos) {
         if(pids == null || pids.size() == 0) {
             Validation.addError("", "必须选择需要创建 FBA 的采购计划");
         } else if(pids.size() != dtos.size()) {

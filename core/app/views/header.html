@@ -202,6 +202,10 @@
                   <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
               <li class="divider"></li>
+                #{power.ck "procures.indexwhouse"}
+                  <li><a href="@{ProcureUnits.indexWhouse()}">采购计划列表(仓库)</a></li>
+                #{/power.ck}
+              <li><a href="@{Inbounds.index()}">收货入库单</a></li>
                 #{power.ck "whouseitems.index"}
                   <li><a href="@{WhouseItems.index()}">库存</a></li>
                 #{/power.ck}

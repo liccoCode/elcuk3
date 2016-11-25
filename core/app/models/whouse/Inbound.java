@@ -1,20 +1,38 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
+import helper.Reflects;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import models.procure.DeliverPlan;
+import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.hibernate.annotations.DynamicUpdate;
+import org.joda.time.DateTime;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import java.util.Date;
+import javax.persistence.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by licco on 2016/11/2.
  * 收货入库
  */
-public class Inbound extends Model {
+@Entity
+@DynamicUpdate
+public class Inbound extends GenericModel {
+
+    @Id
+    @Column(length = 30)
+    @Expose
+    @Required
+    public String id;
 
     /**
      * 名称
@@ -51,7 +69,20 @@ public class Inbound extends Model {
      * 供应商
      */
     @Required
+    @OneToOne
     public Cooperator cooperator;
+
+    /**
+     * 出货单
+     */
+    @ManyToOne
+    public DeliverPlan plan;
+
+    /**
+     * 入库单元
+     */
+    @OneToMany(mappedBy = "inbound", cascade = {CascadeType.PERSIST})
+    public List<InboundUnit> units = new ArrayList<>();
 
     /**
      * 状态
@@ -99,23 +130,146 @@ public class Inbound extends Model {
     public Date receiveDate;
 
     /**
-     * 入库时间
-     */
-    public Date inboundDate;
-
-    /**
      * 收货人
      */
+    @OneToOne
     public User receiver;
 
+
     /**
-     * 确认入库人
+     * 项目名称
      */
-    public User comfirmName;
+    @Required
+    public String projectName;
 
     /**
      * 备注
      */
     public String memo;
+
+    /**
+     * 是否B2B
+     */
+    @Transient
+    public boolean isb2b = false;
+
+    @Transient
+    public List<String> qcDtos = new ArrayList<>();
+
+    @Transient
+    public List<String> inboundDtos = new ArrayList<>();
+
+    public void create(List<InboundUnit> units) {
+        for(InboundUnit unit : units) {
+            unit.inbound = this;
+            unit.unit = ProcureUnit.findById(unit.unitId);
+            unit.save();
+        }
+    }
+
+    /**
+     * index页面时间展示格式化
+     */
+    public void showTime() {
+        Map<String, String> map = new HashMap<>();
+        Map<String, String> qcMap = new HashMap<>();
+        Map<String, String> inboundMap = new HashMap<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        for(InboundUnit unit : this.units) {
+            if(unit.qcUser != null) {
+                String key = unit.qcUser.username + " / " + formatter.format(unit.qcDate);
+                if(!qcMap.containsKey(key)) {
+                    qcDtos.add(key);
+                    qcMap.put(key, "");
+                }
+            }
+            if(unit.confirmUser != null) {
+                String key = unit.confirmUser.username + " / " + formatter.format(unit.inboundDate);
+                if(!inboundMap.containsKey(key)) {
+                    inboundDtos.add(key);
+                    inboundMap.put(key, "");
+                }
+            }
+        }
+    }
+
+
+    public static String id() {
+        DateTime dt = DateTime.now();
+        DateTime nextMonth = dt.plusMonths(1);
+        String count = Inbound.count("createDate>=? AND createDate<?",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
+                "";
+        return String.format("SR|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+    }
+
+    public void confirmReceive(List<InboundUnit> units) {
+        for(InboundUnit unit : units) {
+            InboundUnit u = InboundUnit.findById(unit.id);
+            u.status = InboundUnit.S.Receive;
+            u.save();
+            ProcureUnit punit = u.unit;
+            punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
+            punit.stage = ProcureUnit.STAGE.DONE;
+            punit.save();
+        }
+    }
+
+    public void confirmQC(List<InboundUnit> units) {
+        for(InboundUnit unit : units) {
+            InboundUnit u = InboundUnit.findById(unit.id);
+            if(u.status == InboundUnit.S.Receive && u.result == InboundUnit.R.Unqualified) {
+                u.status = InboundUnit.S.Abort;
+                u.save();
+                ProcureUnit punit = u.unit;
+                punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
+                if(punit.attrs.qty == 0) {
+                    punit.stage = ProcureUnit.STAGE.PLAN;
+                }
+                punit.save();
+            } else if(u.status == InboundUnit.S.Receive && !(u.result == null || (u.result == InboundUnit.R.Qualified
+                    && u.qualifiedQty == 0))) {
+                u.status = InboundUnit.S.Check;
+                u.save();
+                ProcureUnit punit = u.unit;
+                punit.result = u.result;
+                punit.save();
+            }
+
+        }
+    }
+
+    /**
+     * 入库
+     * @param units
+     */
+    public void confirmInbound(List<InboundUnit> units) {
+        for(InboundUnit unit : units) {
+            InboundUnit u = InboundUnit.findById(unit.id);
+            if(u.status == InboundUnit.S.Check && u.inboundQty != 0) {
+                u.status = InboundUnit.S.Inbound;
+                u.save();
+                ProcureUnit punit = u.unit;
+                punit.stage = ProcureUnit.STAGE.IN_STORAGE;
+                punit.inboundQty += u.inboundQty;
+                punit.unqualifiedQty += u.unqualifiedQty;
+                punit.availableQty += u.inboundQty;
+                punit.save();
+                this.createStockRecord(u);
+            }
+        }
+    }
+
+    public void createStockRecord(InboundUnit unit) {
+        StockRecord record = new StockRecord();
+        record.whouse = unit.target;
+        record.unit = unit.unit;
+        record.qty = unit.inboundQty;
+        record.type = StockRecord.T.Inbound;
+        record.recordId = unit.id;
+
+        record.save();
+    }
 
 }

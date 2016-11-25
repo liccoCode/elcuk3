@@ -4,6 +4,7 @@ import helper.Webs;
 import models.market.M;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.Inbound;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.templates.BaseTemplate;
@@ -34,6 +35,31 @@ public class ProcuresHelper extends JavaExtensions {
             case CLOSE:
             default:
                 return "#5BB75B";
+        }
+    }
+
+    public static String rgb(Inbound.S status) {
+        switch(status) {
+            case Create:
+                return "#B0BFD6";
+            case Handing:
+                return "#006ACC";
+            case End:
+                return "#3DA4C2";
+            default:
+                return "#5BB75B";
+        }
+    }
+
+    public static String overLong(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            if(value.length() > 12) {
+                return value.substring(0, 11) + "...";
+            } else {
+                return value;
+            }
+        } else {
+            return "";
         }
     }
 

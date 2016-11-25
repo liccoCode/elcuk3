@@ -18,6 +18,7 @@ import models.product.Product;
 import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import models.view.dto.CooperItemDTO;
+import models.whouse.InboundUnit;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -132,6 +133,31 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return "已交货";
             }
         },
+        /**
+         * 深圳仓已入库
+         */
+        IN_STORAGE {
+            @Override
+            public String label() {
+                return "已入库";
+            }
+        },
+        PROCESSING {
+            @Override
+            public String label() {
+                return "仓库加工";
+            }
+        },
+        /**
+         * 出库中
+         */
+        OUTBOUND {
+            @Override
+            public String label() {
+                return "已出库";
+            }
+        },
+
         /**
          * 运输中; 运输单的点击开始运输
          */
@@ -468,6 +494,28 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @OneToMany(mappedBy = "units", fetch = FetchType.LAZY)
     @OrderBy("creatat DESC")
     public List<CheckTask> taskList;
+
+    /**
+     * 质检结果
+     */
+    @Enumerated(EnumType.STRING)
+    public InboundUnit.R result;
+
+    /**
+     * 入库数
+     */
+    public int inboundQty;
+
+    /**
+     * 不合格数量
+     */
+    public int unqualifiedQty;
+
+    /**
+     * 可用库存数
+     */
+    public int availableQty;
+
 
     /**
      * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)

@@ -80,12 +80,14 @@ DELETE  /payment/{id}/lock                                  Payments.unlock
 # ProcureUnits
 GET     /procureunits                                       ProcureUnits.index
 POST    /procureunits                                       ProcureUnits.index
+GET     /procureunits/indexWhouse                           ProcureUnits.indexWhouse
+POST    /procureunits/indexWhouse                           ProcureUnits.indexWhouse
 GET     /sellings/{sid}/procureunit/new/{totalFive}/{day}   ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
-POST     /procureunit/{id}                                   ProcureUnits.update
-POST    /procureunits/updateprocess/{id}                     ProcureUnits.updateprocess
+POST     /procureunit/{id}                                  ProcureUnits.update
+POST    /procureunits/updateprocess/{id}                    ProcureUnits.updateprocess
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
