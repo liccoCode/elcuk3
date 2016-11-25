@@ -59,17 +59,6 @@ namespace :deploy do
     end
   end
 
-  # 清除 CloudFlare 上的缓存
-  task :purge_cache do
-    run_locally roles(:app, filter: :production) do
-      puts '正在清除 CloudFlare 缓存.'
-      resp = HTTParty.delete('https://api.cloudflare.com/client/v4/zones/67bb7f5bb1fa7d5944b96838a34e162a/purge_cache',
-                             headers: {'Content-Type' => 'application/json', 'X-Auth-Key' => 'b5ca2092465f6465526f861dca21c3a510c40', 'X-Auth-Email' => 'wyatt@easya.cc'},
-                             body: {'purge_everything' => true}.to_json)
-      puts "CloudFlare 处理结果: #{resp.body}"
-    end
-  end
-
   # 在完成发布之后
   after 'deploy:publishing', 'conf:application'
   after 'deploy:published', :purge_cache
