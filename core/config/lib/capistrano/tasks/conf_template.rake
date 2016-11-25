@@ -1,9 +1,9 @@
 namespace :conf do
-  desc "use erb to render template conf file"
+  desc 'use erb to render template conf file'
   task :application do
     on roles(:all) do |host|
       @jvm_opts = fetch(:jvm_opts)
-      template("application.conf.erb", "#{current_path}/core/conf/application.conf", true)
+      template('application.conf.erb', "#{current_path}/core/conf/application.conf", true)
     end
   end
 end
@@ -14,5 +14,5 @@ def template(from, to, as_root = false)
   upload! StringIO.new(template), to
 
   execute :sudo, :chmod, "644 #{to}"
-  execute :sudo, :chown, "root:root #{to}" if as_root == true
+  execute :sudo, :chown, "root:root #{to}" if as_root
 end

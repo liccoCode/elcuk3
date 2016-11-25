@@ -31,7 +31,7 @@ set :deploy_to, '/root/cap_elcuk2'
 set :linked_dirs, fetch(:linked_dirs, []).push('core/logs')
 
 # Default value for default_env is {}
-set :default_env, { JAVA_HOME: "/opt/jdk1.8.0_102", PATH: "$JAVA_HOME/bin:$PATH", CLASSPATH: "$JAVA_HOME/lib" }
+set :default_env, {JAVA_HOME: '/opt/jdk1.8.0_102', PATH: '$JAVA_HOME/bin:$PATH', CLASSPATH: '$JAVA_HOME/lib'}
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
@@ -40,21 +40,38 @@ set :keep_releases, 3
 set :ssh_options, {keys: %w(/home/dev/.ssh/dev.key)}
 
 # 注册 play 命令
-SSHKit.config.command_map[:play] = "/opt/play-1.4.2/play"
+SSHKit.config.command_map[:play] = '/opt/play-1.4.2/play'
 
+# rbenv
+set :rbenv_type, :user
+set :rbenv_ruby, '2.3.0'
+set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
+set :rbenv_map_bins, %w{rake gem bundle ruby}
+set :rbenv_roles, :all
 
 namespace :deploy do
-
   task :restart do
     on roles(:app) do
       within("#{current_path}/core") do
-        execute(:play, "deps --sync")
+        execute(:play, 'deps --sync')
         execute(:supervisorctl, 'restart', 'erp')
       end
     end
   end
 
+  # 清除 CloudFlare 上的缓存
+  task :purge_cache do
+    run_locally roles(:app, filter: :production) do
+      puts '正在清除 CloudFlare 缓存.'
+      resp = HTTParty.delete('https://api.cloudflare.com/client/v4/zones/67bb7f5bb1fa7d5944b96838a34e162a/purge_cache',
+                             headers: {'Content-Type' => 'application/json', 'X-Auth-Key' => 'b5ca2092465f6465526f861dca21c3a510c40', 'X-Auth-Email' => 'wyatt@easya.cc'},
+                             body: {'purge_everything' => true}.to_json)
+      puts "CloudFlare 处理结果: #{resp.body}"
+    end
+  end
+
   # 在完成发布之后
-  after 'deploy:publishing', "conf:application"
+  after 'deploy:publishing', 'conf:application'
+  after 'deploy:published', :purge_cache
   after 'deploy:published', :restart
 end
