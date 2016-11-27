@@ -24,7 +24,6 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -108,8 +107,7 @@ public class Products extends Controller {
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);
             pro.save();
-            List<String> logs = new ArrayList<>();
-            logs.addAll(dbpro.beforeDoneUpdate(pro));
+            List<String> logs = dbpro.beforeDoneUpdate(pro);
             if(logs.size() > 0) {
                 new ElcukRecord(Messages.get("product.update"),
                         Messages.get("action.base", StringUtils.join(logs, "<br>")),
@@ -341,15 +339,14 @@ public class Products extends Controller {
         Product pro = Product.findById(sku);
         Template template = Template.findById(templateId);
         List<ProductAttr> atts = pro.productAttrs;
-        for(TemplateAttribute templateAttribute : template.templateAttributes) {
-            if(!atts.contains(templateAttribute.attribute)) {
-                ProductAttr productAttr = new ProductAttr();
-                productAttr.product = pro;
-                productAttr.attribute = templateAttribute.attribute;
-                productAttr.save();
-                atts.add(productAttr);
-            }
-        }
+        template.templateAttributes.stream().filter(templateAttribute -> !atts.contains(templateAttribute.attribute))
+                .forEach(templateAttribute -> {
+                    ProductAttr productAttr = new ProductAttr();
+                    productAttr.product = pro;
+                    productAttr.attribute = templateAttribute.attribute;
+                    productAttr.save();
+                    atts.add(productAttr);
+                });
         Collections.sort(atts);
         render(pro);
     }

@@ -1,5 +1,5 @@
 $ ->
-  # 图片
+# 图片
   dropbox = $('#dropbox')
   # 包装
   packageDropbox = $('#packageDropbox')
@@ -25,7 +25,7 @@ $ ->
   window.dropUpload.iniDropbox(fidCallBack, silkscreenDropbox)
 
   # 产品定位和产品卖点 点击按钮新增一行
-  $("#update_product_form").on("click", "#more_locate_btn, #more_selling_point_btn",() ->
+  $("#update_product_form").on("click", "#more_locate_btn, #more_selling_point_btn", () ->
     $btn = $(@)
     $table = $("##{$btn.data("table")}")[0]
     # 获取表格的行数
@@ -63,7 +63,7 @@ $ ->
     objE.innerHTML = arg
     objE.childNodes[0]
 
-  $("#extends").on("click", "#add_template_btn",() ->
+  $("#extends").on("click", "#add_template_btn", () ->
     temp_id = $("select[name='templateId']").val()
     if temp_id is ""
       noty({text: "请选择要加载的模板", type: 'error', timeout: 5000})
@@ -72,36 +72,36 @@ $ ->
       $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
         LoadMask.unmask()
       )
-  ).on("click", "#remove_attr_btn",() ->
+  ).on("click", "#remove_attr_btn", () ->
     LoadMask.mask()
     $btn = $(@)
     $.ajax('/products/delAttr',
-    {type: 'GET', data: {sku: $btn.data("sku"), attrId: $btn.data("attr")}, dataType: 'json'})
+      {type: 'GET', data: {sku: $btn.data("sku"), attrId: $btn.data("attr")}, dataType: 'json'})
     .done((r) ->
-        msg = if r.flag is true
-          # 删除 tr
-          $btn.parent("td").parent().remove()
-          {text: "附加属性 #{r.message} 删除成功.", type: 'success', timeout: 5000}
-        else
-          {text: "#{r.message}", type: 'error', timeout: 5000}
-        noty(msg)
-        LoadMask.unmask()
-      )
+      msg = if r.flag is true
+# 删除 tr
+        $btn.parent("td").parent().remove()
+        {text: "附加属性 #{r.message} 删除成功.", type: 'success', timeout: 5000}
+      else
+        {text: "#{r.message}", type: 'error', timeout: 5000}
+      noty(msg)
+      LoadMask.unmask()
+    )
   ).on("click", "#save_attrs_btn", () ->
     LoadMask.mask()
     $form = $("#save_attrs_form")
     $.ajax('/products/saveAttrs', {type: 'GET', data: $form.serialize(), dataType: 'json'})
     .done((r) ->
-        msg = if r.flag is true
-          {text: "保存成功.", type: 'success', timeout: 5000}
-        else
-          {text: "#{r.message}", type: 'error', timeout: 5000}
-        noty(msg)
-        LoadMask.unmask()
-      )
+      msg = if r.flag is true
+        {text: "保存成功.", type: 'success', timeout: 5000}
+      else
+        {text: "#{r.message}", type: 'error', timeout: 5000}
+      noty(msg)
+      LoadMask.unmask()
+    )
   )
 
-  $("#basicinfo").on("click", "#save_basic_btn",() ->
+  $("#basicinfo").on("click", "#save_basic_btn", () ->
     if !validUpcAndPartNumber()
       return
     if $('input[name="pro.iscopy"]').val() is "2"
@@ -113,15 +113,28 @@ $ ->
     $form = $("#update_product_form")
     $.ajax('/products/update', {type: 'POST', data: $form.serialize(), dataType: 'json'})
     .done((r) ->
-        msg = if r.flag is true
-          {text: "保存成功.", type: 'success', timeout: 5000}
-        else
-          {text: "#{r.message}", type: 'error', timeout: 5000}
-        noty(msg)
-        LoadMask.unmask()
-      )
+      msg = if r.flag is true
+        {text: "保存成功.", type: 'success', timeout: 5000}
+      else
+        {text: "#{r.message}", type: 'error', timeout: 5000}
+      noty(msg)
+      LoadMask.unmask()
+    )
   ).on("change", "#proabbreviation", () ->
     $('input[name="pro.iscopy"]').val("1")
+  )
+
+  $("#whouseAttrs").on('click', '#saveWhouseAttsBtn', (e) ->
+    $form = $(@).parents('form')
+    $.ajax($form.attr('action'), {type: 'POST', data: $form.serialize(), dataType: 'json'})
+    .done((r) ->
+      msg = if r.flag is true
+        {text: "保存成功.", type: 'success', timeout: 5000}
+      else
+        {text: "#{r.message}", type: 'error', timeout: 5000}
+      noty(msg)
+      LoadMask.unmask()
+    )
   )
 
   # 将输入的长度、宽度、高度换算成英寸(inch)
@@ -134,7 +147,7 @@ $ ->
       $input.parent().next().empty()
       $input.parent().after($span)
   ).on("change", "input[name='pro.weight'], input[name='pro.productWeight']", (r) ->
-    # 将输入的重量换算成盎司(oz)
+# 将输入的重量换算成盎司(oz)
     $input = $(@)
     if($input.val() is "" or $input.val() < 0 or isNaN($input.val()))
       false
@@ -150,7 +163,9 @@ $ ->
   )
 
   # 页面初始化时触发一次
-  inputs = ["input[name='pro.lengths']", "input[name='pro.width']", "input[name='pro.heigh']", "input[name='pro.productLengths']", "input[name='pro.productWidth']", "input[name='pro.productHeigh']", "input[name='pro.weight']", "input[name='pro.productWeight']"]
+  inputs = ["input[name='pro.lengths']", "input[name='pro.width']", "input[name='pro.heigh']",
+    "input[name='pro.productLengths']", "input[name='pro.productWidth']", "input[name='pro.productHeigh']",
+    "input[name='pro.weight']", "input[name='pro.productWeight']"]
   _.each(inputs, (value) ->
     $(value).trigger("change")
   )

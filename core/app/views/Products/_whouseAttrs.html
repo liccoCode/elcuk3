@@ -1,0 +1,62 @@
+<div class="row-fluid">
+  <form action="@{Products.update()}" method="post">
+    <table class="table table-bordered">
+      <tr>
+        <td width="6%">SKU</td>
+        <td>
+        #{set sku: pro.whouseAttrs.whSku? pro.whouseAttrs.whSku : pro.sku/}
+          <input type="text" name="pro.whouseAttrs.whSku" value="${sku}" title="SKU" class="input-block-level"/>
+          <input type="hidden" name="pro.sku" value="${pro.sku}">
+        </td>
+        <td width="10%">产品名称</td>
+        <td>
+        #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
+          <textarea title="产品名称" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">
+          ${productName}
+          </textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>产品型号</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whModel" value="${pro.whouseAttrs.whModel}" title="产品型号" class="input-block-level"/>
+        </td>
+        <td>产品规格</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whFormat" value="${pro.whouseAttrs.whFormat}" title="产品规格" class="input-block-level"/>
+        </td>
+      </tr>
+      <tr>
+        <td>产品颜色</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whColor" value="${pro.whouseAttrs.whColor}" title="产品颜色"
+                 class="input-block-level"/>
+        </td>
+
+        <td>包装内产品数量</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whQty" value="${pro.whouseAttrs.whQty}" title="包装内产品数量"
+                 class="input-mini"/>
+        </td>
+      </tr>
+      <tr>
+        <td>产品尺寸</td>
+        <td>
+          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">
+             ${pro.whouseAttrs.whDimensions}
+          </textarea>
+        </td>
+        <td>产品重量</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whWeight" value="${pro.whouseAttrs.whWeight}" title="产品重量"
+                 class="input-mini"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <a class="btn btn-success" id="saveWhouseAttsBtn">保存</a>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
