@@ -135,6 +135,17 @@ $ ->
       noty(msg)
       LoadMask.unmask()
     )
+  ).on('click', '#whouseAttrsAttachButton', (e) ->
+    $file_home = $('#file_home')
+    $.post('/attachs/uploadForBase64', {
+      p: 'PRODUCTWHOUSE',
+      fid: $file_home.data('fid'),
+      base64File: $file_home.data('base64_file'),
+      originName: $file_home.data('origin_name')
+    }).done((r) ->
+      alert(r.message)
+      window.location.reload()
+    )
   )
 
   # 将输入的长度、宽度、高度换算成英寸(inch)
@@ -179,3 +190,24 @@ $ ->
       noty({text: "Part Number必须填写.", type: 'error', timeout: 5000})
       flag = false
     flag
+
+  whouseAttachsFidCallBack = ->
+    {
+      fid: $('#p_sku').val(),
+      p: 'PRODUCTWHOUSE'
+    }
+
+  initWhouseAttachs = ->
+    dropbox = $('#whouseAttrsDropbox')
+    window.dropUpload.loadImages(whouseAttachsFidCallBack()['fid'], dropbox, whouseAttachsFidCallBack()['p'], 'span1')
+    window.dropUpload.iniDropbox(whouseAttachsFidCallBack, dropbox)
+
+  $(document).ready ->
+    lr = new LocalResize(document.getElementById('file_home'), {})
+    lr.success (stop, data) ->
+      $file_home = $('#file_home')
+      $file_home.data('base64_file', data['base64Clean'])
+      $file_home.data('origin_name', data['original']['name'])
+      stop()
+
+    initWhouseAttachs()
