@@ -564,7 +564,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 + " lengths,width,heigh,weight,declaredvalue,productname,"
                 + " marketstate,procurestate,productstate,saleslevel,productlengths,"
                 + " productwidth,productheigh,productweight,declaredvalue,declarename,abbreviation,"
-                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber "
+                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber,whColor,whDimensions,whFormat," +
+                "whModel,whProductName,whQty,whSku,whWeight "
                 + " from Product where sku='" + sku + "'";
         Map<String, Object> map = DBUtils.rows(sql).get(0);
         dbpro.lengths = (Float) map.get("lengths");
@@ -598,6 +599,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         dbpro.marketTime = (Date) map.get("markettime");
         dbpro.delistingTime = (Date) map.get("delistingtime");
         dbpro.partNumber = (String) map.get("partNumber");
+        dbpro.whouseAttrs.whColor = (String) map.get("whColor");
+        dbpro.whouseAttrs.whDimensions = (String) map.get("whDimensions");
+        dbpro.whouseAttrs.whFormat = (String) map.get("whFormat");
+        dbpro.whouseAttrs.whModel = (String) map.get("whModel");
+        dbpro.whouseAttrs.whProductName = (String) map.get("whProductName");
+        dbpro.whouseAttrs.whQty = (Integer) map.get("whQty");
+        dbpro.whouseAttrs.whSku = (String) map.get("whSku");
+        dbpro.whouseAttrs.whWeight = (Double) map.get("whWeight");
         return dbpro;
     }
 

@@ -94,7 +94,11 @@ public class Products extends Controller {
         render("Products/show.html", pro);
     }
 
-
+    /**
+     * TODO:: 重构
+     *
+     * @param pro
+     */
     public static void update(Product pro) {
         try {
             validation.valid(pro);
