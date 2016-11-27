@@ -11,9 +11,7 @@
         <td width="10%">产品名称</td>
         <td>
         #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
-          <textarea title="产品名称" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">
-          ${productName}
-          </textarea>
+          <textarea title="产品名称" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">${productName}</textarea>
         </td>
       </tr>
       <tr>
@@ -42,9 +40,7 @@
       <tr>
         <td>产品尺寸</td>
         <td>
-          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">
-             ${pro.whouseAttrs.whDimensions}
-          </textarea>
+          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">${pro.whouseAttrs.whDimensions}</textarea>
         </td>
         <td>产品重量</td>
         <td>
