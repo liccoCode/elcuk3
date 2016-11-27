@@ -97,7 +97,12 @@ public class Attach extends Model {
         /**
          * 质检的凭证
          */
-        CHECKTASK;
+        CHECKTASK,
+
+        /**
+         * 仓库上传的和产品相关的图片
+         */
+        PRODUCTWHOUSE;
 
         /**
          * 默认的附件删除方法.物理删除

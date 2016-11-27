@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
+import models.embedded.WhouseAttrs;
 import models.market.Listing;
 import models.market.M;
 import models.market.OrderItem;
@@ -403,6 +404,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public String upcJP;
 
+    @Expose
+    public WhouseAttrs whouseAttrs = new WhouseAttrs();
+
     @Transient
     public int iscopy = 0;
 
@@ -602,31 +606,45 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public List<String> beforeDoneUpdate(Product pro) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(replace(Reflects.logFieldFade(this, "lengths", pro.lengths), "lengths", "长度(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "width", pro.width), "width", "宽度(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "heigh", pro.heigh), "heigh", "高度(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "weight", pro.weight), "weight", "重量(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "declaredValue", pro.declaredValue), "declaredValue", "申报价格"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productName", pro.productName), "productName", "产品名称"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "marketState", pro.marketState), "marketState", "上架状态"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "procureState", pro.procureState), "procureState", "采购状态"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productState", pro.productState), "productState", "生命周期"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "salesLevel", pro.salesLevel), "salesLevel", "销售等级"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productLengths", pro.productLengths), "productLengths", "长度"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productWidth", pro.productWidth), "productWidth", "宽度"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productHeigh", pro.productHeigh), "productHeigh", "高度"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productWeight", pro.productWeight), "productWeight", "重量"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "declareName", pro.declareName), "declareName", "产品品名"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "abbreviation", pro.abbreviation), "abbreviation", "产品简称"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "locates", pro.locates), "locates", "产品定位"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "sellingPoints", pro.sellingPoints), "sellingPoints", "产品卖点"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "subtitle", pro.subtitle), "subtitle", "副标题"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "marketTime", pro.marketTime), "marketTime", "上市时间"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "delistingTime", pro.delistingTime), "delistingTime", "退市时间"));
+        logs.addAll(Reflects.logFieldFade(this, "lengths", "长度(包材)", pro.lengths));
+        logs.addAll(Reflects.logFieldFade(this, "width", "宽度(包材)", pro.width));
+        logs.addAll(Reflects.logFieldFade(this, "heigh", "高度(包材)", pro.heigh));
+        logs.addAll(Reflects.logFieldFade(this, "weight", "重量(包材)", pro.weight));
+        logs.addAll(Reflects.logFieldFade(this, "declaredValue", "申报价格", pro.declaredValue));
+        logs.addAll(Reflects.logFieldFade(this, "productName", "产品名称", pro.productName));
+        logs.addAll(Reflects.logFieldFade(this, "marketState", "上架状态", pro.marketState));
+        logs.addAll(Reflects.logFieldFade(this, "procureState", "采购状态", pro.procureState));
+        logs.addAll(Reflects.logFieldFade(this, "productState", "生命周期", pro.productState));
+        logs.addAll(Reflects.logFieldFade(this, "salesLevel", "销售等级", pro.salesLevel));
+        logs.addAll(Reflects.logFieldFade(this, "productLengths", "长度", pro.productLengths));
+        logs.addAll(Reflects.logFieldFade(this, "productWidth", "宽度", pro.productWidth));
+        logs.addAll(Reflects.logFieldFade(this, "productHeigh", "高度", pro.productHeigh));
+        logs.addAll(Reflects.logFieldFade(this, "productWeight", "重量", pro.productWeight));
+        logs.addAll(Reflects.logFieldFade(this, "declareName", "产品品名", pro.declareName));
+        logs.addAll(Reflects.logFieldFade(this, "abbreviation", "产品简称", pro.abbreviation));
+        logs.addAll(Reflects.logFieldFade(this, "locates", "产品定位", pro.locates));
+        logs.addAll(Reflects.logFieldFade(this, "sellingPoints", "产品卖点", pro.sellingPoints));
+        logs.addAll(Reflects.logFieldFade(this, "subtitle", "副标题", pro.subtitle));
+        logs.addAll(Reflects.logFieldFade(this, "marketTime", "上市时间", pro.marketTime));
+        logs.addAll(Reflects.logFieldFade(this, "delistingTime", "退市时间", pro.delistingTime));
 
+        //productAttrs
         this.productAttrs = new java.util.ArrayList<>();
-        logs.addAll(replace(Reflects.logFieldFade(this, "productAttrs", pro.productAttrs), "productAttrs", "扩展属性"));
+        logs.addAll(Reflects.logFieldFade(this, "productAttrs", "扩展属性", pro.productAttrs));
 
+        //whouseAttrs
+        if(this.whouseAttrs != null) {
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whSku", "SKU(仓库)", pro.whouseAttrs.whSku));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whProductName", "产品名称(仓库)",
+                    StringUtils.trimToNull(pro.whouseAttrs.whProductName)));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whModel", "产品型号(仓库)", pro.whouseAttrs.whModel));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whFormat", "产品规格(仓库)", pro.whouseAttrs.whFormat));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whColor", "产品颜色(仓库)", pro.whouseAttrs.whColor));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whQty", "包装内产品数量(仓库)", pro.whouseAttrs.whQty));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDimensions", "产品尺寸(仓库)",
+                    StringUtils.trimToNull(pro.whouseAttrs.whDimensions)));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whWeight", "产品重量(仓库)", pro.whouseAttrs.whWeight));
+        }
 
         return logs;
     }

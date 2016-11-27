@@ -1,0 +1,81 @@
+<div class="row-fluid">
+  <form action="@{Products.update()}" method="post">
+    <table class="table table-bordered">
+      <tr>
+        <td width="6%">SKU</td>
+        <td>
+        #{set sku: pro.whouseAttrs.whSku? pro.whouseAttrs.whSku : pro.sku/}
+          <input type="text" name="pro.whouseAttrs.whSku" value="${sku}" title="SKU" class="input-block-level"/>
+          <input type="hidden" name="pro.sku" value="${pro.sku}">
+        </td>
+        <td width="10%">产品名称</td>
+        <td>
+        #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
+          <textarea title="产品名称" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">
+          ${productName}
+          </textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>产品型号</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whModel" value="${pro.whouseAttrs.whModel}" title="产品型号" class="input-block-level"/>
+        </td>
+        <td>产品规格</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whFormat" value="${pro.whouseAttrs.whFormat}" title="产品规格" class="input-block-level"/>
+        </td>
+      </tr>
+      <tr>
+        <td>产品颜色</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whColor" value="${pro.whouseAttrs.whColor}" title="产品颜色"
+                 class="input-block-level"/>
+        </td>
+
+        <td>包装内产品数量</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whQty" value="${pro.whouseAttrs.whQty}" title="包装内产品数量"
+                 class="input-mini"/>
+        </td>
+      </tr>
+      <tr>
+        <td>产品尺寸</td>
+        <td>
+          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">
+             ${pro.whouseAttrs.whDimensions}
+          </textarea>
+        </td>
+        <td>产品重量</td>
+        <td>
+          <input type="text" name="pro.whouseAttrs.whWeight" value="${pro.whouseAttrs.whWeight}" title="产品重量"
+                 class="input-mini"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <a class="btn btn-success" id="saveWhouseAttsBtn">保存</a>
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <div class="row-fluid">
+    <div class="span12">
+      <h4 class="alert alert-success">附件<i class="icon-sort-down"></i></h4>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div style="min-height:300px;" class="span12 well" id="whouseAttrsDropbox">
+      <ul class="thumbnails uploaded"></ul>
+      <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span2">
+      <div id="file_home" data-fid="${pro.sku}"></div>
+      <input type="button" class="btn btn-default btn-block" value="上传" id="whouseAttrsAttachButton" data-loading>
+    </div>
+  </div>
+</div>

@@ -28,7 +28,6 @@ $ ->
     else
       return unless confirm('确认提交?')
 
-
     $form = $("#update_form")
     $ship = $("select[name='check.isship']")
     $form.attr("action", "/checktasks/#{$btn.attr("id").split("_")[0]}")
@@ -37,7 +36,6 @@ $ ->
     $form.submit()
     $ship.val("NOTSHIP").attr("disabled", 'true')
   )
-
 
   $("#update_form").on("click", "#submitqc_btn", (r) ->
     $btn = $(@)
@@ -55,7 +53,6 @@ $ ->
     $ship.val("NOTSHIP").attr("disabled", 'true')
   )
 
-
   $("#update_form").on("click", "#submitqcroll_btn", (r) ->
     $btn = $(@)
     return unless confirm('取消费用将流转到采购,确认提交?')
@@ -66,7 +63,6 @@ $ ->
     $form.submit()
   )
 
-
   $("#update_form").on("click", "#planactiviti_btn", (r) ->
     $btn = $(@)
     $dealway = $("select[name='check.dealway']")
@@ -74,7 +70,6 @@ $ ->
       alert('请填写处理方式!')
       return
     return unless confirm('确认提交?')
-
 
     $form = $("#update_form")
     $ship = $("select[name='check.isship']")
@@ -84,7 +79,6 @@ $ ->
     $form.submit()
     $ship.val("NOTSHIP").attr("disabled", 'true')
   )
-
 
   $("#update_form").on("click", "#operateactiviti_btn", (r) ->
     return unless confirm('确认后则表示已确认该采购计划的预计时间,确认提交?')
@@ -112,11 +106,11 @@ $ ->
   $('#submit_button').click ->
     $file_home = $('#file_home')
     $.post('/attachs/uploadForBase64', {
-        p: 'CHECKTASK',
-        fid: $file_home.data('fid'),
-        base64File: $file_home.data('base64_file'),
-        originName: $file_home.data('origin_name')
-      }, (r) ->
+      p: 'CHECKTASK',
+      fid: $file_home.data('fid'),
+      base64File: $file_home.data('base64_file'),
+      originName: $file_home.data('origin_name')
+    }).done((r) ->
       alert(r.message)
       window.location.reload()
     )
@@ -165,7 +159,7 @@ $ ->
       value *= $(@).val()
     )
     $returnValue.text((value / 1000000).toFixed(2))
-  ).on('click', '#more_desc_btn',(r) ->
+  ).on('click', '#more_desc_btn', (r) ->
     $btn = $(@)
     size = $btn.data('descsize')
     $table = $("#aqlTable")
