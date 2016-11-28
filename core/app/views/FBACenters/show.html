@@ -1,0 +1,58 @@
+#{extends 'main.html'/}
+#{set title:'修改 FBACenter ' + center.centerId /}
+#{set 'moreScripts'}
+#{/set}
+#{errorMsgs /}
+#{flash_alert /}
+#{info_row title:'修改 FBACenter' /}
+
+<div class="row">
+  <div class="span12">
+    <form action="@{FBACenters.update()}" method="POST">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>CenterId</th>
+          <td><input type="text" name="center.centerId" value="${center.centerId}" readonly></td>
+
+          <th>AddressLine1</th>
+          <td><input type="text" name="center.addressLine1" value="${center.addressLine1}"></td>
+
+          <th>AddressLine2</th>
+          <td><input type="text" name="center.addressLine2" value="${center.addressLine2}"></td>
+        </tr>
+        <tr>
+          <th>City</th>
+          <td><input type="text" name="center.city" value="${center.city}"></td>
+
+          <th>Name</th>
+          <td>
+            <input type="text" name="center.name" value="${center.name}">
+          </td>
+
+          <th>CountryCode</th>
+          <td>
+            <input type="text" name="center.countryCode" value="${center.countryCode}">
+          </td>
+        </tr>
+        <tr>
+          <th>StateOrProvinceCode</th>
+          <td>
+            <input type="text" name="center.stateOrProvinceCode" value="${center.stateOrProvinceCode}">
+          </td>
+
+          <th>PostalCode</th>
+          <td>
+            <input type="text" name="center.postalCode" value="${center.postalCode}">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="6">
+            <input type="hidden" name="id" value="${center.id}">
+            <a href="@{FBACenters.index()}" class="btn btn-success">返回</a>
+            <button class="btn btn-primary">更新</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>

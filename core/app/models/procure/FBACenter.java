@@ -2,6 +2,7 @@ package models.procure;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
 
@@ -57,22 +58,33 @@ public class FBACenter extends Model {
    }
     */
 
+    @Required
     @Column(unique = true, nullable = false)
     public String centerId;
 
+    @Required
     public String addressLine1;
 
     public String addressLine2;
 
+    @Required
     public String city;
 
+    @Required
     public String name;
 
+    @Required
     public String countryCode;
 
     public String stateOrProvinceCode;
 
+    @Required
     public String postalCode;
+
+    /**
+     * 是否使用 Amazon 返回的地址来自动同步数据
+     */
+    public boolean autoSync = false;
 
     /**
      * 向当前 FBA Center 发货的 FBA 数量
@@ -133,5 +145,24 @@ public class FBACenter extends Model {
         } else {
             return this.save();
         }
+    }
+
+    public void update(FBACenter center) {
+        this.addressLine1 = center.addressLine1;
+        this.city = center.city;
+        this.countryCode = center.countryCode;
+        this.name = center.name;
+        this.postalCode = center.postalCode;
+        this.save();
+    }
+
+    public void enableAutoSync() {
+        this.autoSync = true;
+        this.save();
+    }
+
+    public void disableAutoSync() {
+        this.autoSync = false;
+        this.save();
     }
 }

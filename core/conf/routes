@@ -182,6 +182,10 @@ GET     /checktasks/{id}/doprints                            checktasks.doprints
 *       /checktasks/{id}/show                                checktasks.show
 GET     /checktasks/{id}/showList                            checktasks.showList
 
+# FBACenters
+POST    /fbacenters/{id}/enableautosync                      FBACenters.enableAutoSync
+POST    /fbacenters/{id}/disableautosync                     FBACenters.disableAutoSync
+
 # Elcuk
 GET     /elcuks                                             Elcuk.index
 PUT     /elcuk/config                                       Elcuk.updateConfig
