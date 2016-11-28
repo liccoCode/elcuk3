@@ -182,8 +182,8 @@ GET     /checktasks/{id}/doprints                            checktasks.doprints
 GET     /checktasks/{id}/showList                            checktasks.showList
 
 # FBACenters
-POST    /fbacenters/{id}/enableautosync                      FBACenters.enableAutoSync
-POST    /fbacenters/{id}/disableautosync                     FBACenters.disableAutoSync
+POST    /fbacenters/{id}/enableAutoSync                      FBACenters.enableAutoSync
+POST    /fbacenters/{id}/disableAutoSync                     FBACenters.disableAutoSync
 
 # Elcuk
 GET     /elcuks                                             Elcuk.index

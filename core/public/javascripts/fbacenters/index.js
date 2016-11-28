@@ -1,19 +1,18 @@
 $(() => {
   $('table[name=fbacenterList]').on('click', 'a[name=enableAutoSync], a[name=disableAutoSync]', function () {
-    if (!confirm('确认关闭该用户吗?')) return;
+    if (!confirm('确认操作?')) return;
 
     const $a = $(this);
     const $img = $($a.prev('span').find('img'));
     const $masker = $a.parents('tr');
 
     LoadMask.mask($masker);
-    $.post(`/fbacenters/${id}/${$a.attr('id') === 'enableAutoSync' ? 'enableAutoSync' : 'disableAutoSync'}`, (r)
-    ).done((r) => {
+    $.post(`/fbacenters/${$a.data('centerid')}/${$a.attr('name') === 'enableAutoSync' ? 'enableAutoSync' : 'disableAutoSync'}`).done((r) => {
       if (r.flag) {
-        if ($a.attr('id') === 'enableAutoSync') {//当前为 Close 状态
+        if ($a.attr('name') == 'enableAutoSync') {//当前为 Close 状态
           $img.attr('src', '/img/green.png');
           $a.attr('id', 'disableAutoSync').text('Disable').attr('data-original-title', '禁用自动同步');
-        } else if ($a.attr('id') === 'disableAutoSync') {//当前为 Open 状态
+        } else if ($a.attr('name') == 'disableAutoSync') {//当前为 Open 状态
           $img.attr('src', '/img/red.png');
           $a.attr('id', 'enableAutoSync').text('Enable').attr('data-original-title', '启用自动同步');
         }

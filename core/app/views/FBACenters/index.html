@@ -4,10 +4,10 @@
     #{script 'fbacenters/index.js'/}
 #{/set}
 #{flash_alert /}
-#{info_row title:'' /}
+#{info_row title:'FBACenters' /}
 <div class="row-fluid">
-  <div class="span12" name="fbacenterList">
-    <table class="table table-condensed table-bordered">
+  <div class="span12">
+    <table class="table table-condensed table-bordered" name="fbacenterList">
       <tr>
         <th>#</th>
         <th>CenterId</th>
@@ -18,7 +18,7 @@
         <th>CountryCode</th>
         <th>StateOrProvinceCode</th>
         <th>PostalCode</th>
-        <th>Action</th>
+        <th width="6%">Action</th>
       </tr>
     #{list items:centers, as:'center'}
       <tr>
@@ -32,14 +32,14 @@
         <td>${center.stateOrProvinceCode}</td>
         <td>${center.postalCode}</td>
         <td>
-            #{yesOrNo f:!center.autoSync, id:center.id/}
+            #{yesOrNo f:center.autoSync, id:center.id/}
             #{if center.autoSync}
-              <a href="#" rel="tooltip" placement="top" title="启用自动同步" data-centerid="${center.id}"
-                 name="enableAutoSync">Enable</a>
-            #{/if}
-            #{else}
               <a href="#" rel="tooltip" placement="top" title="禁用自动同步" data-centerid="${center.id}"
                  name="disableAutoSync">Disable</a>
+            #{/if}
+            #{else}
+              <a href="#" rel="tooltip" placement="top" title="启用自动同步" data-centerid="${center.id}"
+                 name="enableAutoSync">Enable</a>
             #{/else}
         </td>
       </tr>

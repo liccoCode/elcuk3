@@ -25,12 +25,14 @@ public class FBACenters extends Controller {
         render(centers);
     }
 
+    @Check("fbacenters.index")
     public static void show(Long id) {
         FBACenter center = FBACenter.findById(id);
         notFoundIfNull(center);
         render(center);
     }
 
+    @Check("fbacenters.index")
     public static void update(FBACenter center, Long id) {
         validation.valid(center);
         if(Validation.hasErrors()) {
@@ -48,6 +50,7 @@ public class FBACenters extends Controller {
     /**
      * 打开自动同步
      */
+    @Check("fbacenters.index")
     public static void enableAutoSync(Long id) {
         FBACenter center = FBACenter.findById(id);
         center.enableAutoSync();
@@ -57,6 +60,7 @@ public class FBACenters extends Controller {
     /**
      * 关闭自动同步
      */
+    @Check("fbacenters.index")
     public static void disableAutoSync(Long id) {
         FBACenter center = FBACenter.findById(id);
         center.disableAutoSync();
