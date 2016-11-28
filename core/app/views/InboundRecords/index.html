@@ -134,7 +134,7 @@
           <td style="min-width:130px;">
               #{set fnsku: r.stockObj?.fnsku()/}
               #{if fnsku != null && fnsku != ""}
-                <a href="${r.stockObj?.sellingLabelLink()}" class="btn btn-success">
+                <a href="${r.stockObj?.fnSKULabelLink()}" class="btn btn-success">
                 ${fnsku} <i class="icon-download-alt"></i>
                 </a>
               #{/if}
