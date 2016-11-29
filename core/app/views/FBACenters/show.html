@@ -1,0 +1,75 @@
+#{extends 'main.html'/}
+#{set title:'修改 FBACenter ' + center.centerId /}
+#{set 'moreScripts'}
+#{/set}
+#{errorMsgs /}
+#{flash_alert /}
+#{info_row title:'修改 FBACenter' /}
+
+<div class="row">
+  <div class="span12">
+    <form action="@{FBACenters.update()}" method="POST">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th rel="popover" content="<img src='/img/helper/fbaCenterId.jpg'>"
+              full-width="true" placement="bottom">CenterId
+          </th>
+          <td><input type="text" name="center.centerId" value="${center.centerId}" readonly></td>
+
+          <th rel="popover" content="<img src='/img/helper/fbaAddressLine1.jpg'>"
+              full-width="true" placement="bottom">AddressLine1
+          </th>
+          <td><input type="text" name="center.addressLine1" value="${center.addressLine1}"></td>
+
+          <th rel="popover" content="<img src='/img/helper/fbaAddressLine2.jpg'>"
+              full-width="true" placement="bottom">AddressLine2
+          </th>
+          <td><input type="text" class="input-xlarge" name="center.addressLine2" placeholder="请确认 FBACenter 是否拥有这个属性."
+                     value="${center.addressLine2}"></td>
+        </tr>
+        <tr>
+          <th rel="popover" content="<img src='/img/helper/fbaCity.jpg'>"
+              full-width="true" placement="bottom">City
+          </th>
+          <td><input type="text" name="center.city" value="${center.city}"></td>
+
+          <th rel="popover" content="<img src='/img/helper/fbaName.jpg'>"
+              full-width="true" placement="bottom">Name
+          </th>
+          <td>
+            <input type="text" name="center.name" value="${center.name}">
+          </td>
+
+          <th rel="popover" content="<img src='/img/helper/fbaCountryCode.jpg'>"
+              full-width="true" placement="bottom">CountryCode
+          </th>
+          <td>
+            <input type="text" class="input-mini" name="center.countryCode" value="${center.countryCode}">
+          </td>
+        </tr>
+        <tr>
+          <th rel="popover" content="<img src='/img/helper/fbaStateOrProvinceCode.jpg'>"
+              full-width="true" placement="bottom">StateOrProvinceCode
+          </th>
+          <td>
+            <input type="text" name="center.stateOrProvinceCode" value="${center.stateOrProvinceCode}">
+          </td>
+
+          <th rel="popover" content="<img src='/img/helper/fbaPostalCode.jpg'>"
+              full-width="true" placement="bottom">PostalCode
+          </th>
+          <td colspan="3">
+            <input type="text" class="input-small" name="center.postalCode" value="${center.postalCode}">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="6">
+            <input type="hidden" name="id" value="${center.id}">
+            <a href="@{FBACenters.index()}" class="btn btn-success">返回</a>
+            <button class="btn btn-primary">更新</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>

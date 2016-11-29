@@ -242,6 +242,7 @@ public class Sellings extends Controller {
      * 下载 Selling 的 FBA_
      *
      * @param id sellingId
+     * @deprecated 已转移到 ProcureUnits.fnSkuLable
      */
     public static void sellingLabel(final String id) {
         File file = await(new Job<File>() {

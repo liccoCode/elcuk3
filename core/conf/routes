@@ -134,7 +134,6 @@ GET     /product/{id}/amazon                                Products.saleAmazon
 
 # Sellings
 GET     /selling/{id}                                       Sellings.selling
-GET     /selling/{id}/label                                 Sellings.sellingLabel
 
 # Users
 POST    /users/{id}/closeUser                               Users.closeUser
@@ -181,6 +180,10 @@ GET     /checktasks/{id}/prints                              checktasks.prints
 GET     /checktasks/{id}/doprints                            checktasks.doprints
 *       /checktasks/{id}/show                                checktasks.show
 GET     /checktasks/{id}/showList                            checktasks.showList
+
+# FBACenters
+POST    /fbacenters/{id}/enableAutoSync                      FBACenters.enableAutoSync
+POST    /fbacenters/{id}/disableAutoSync                     FBACenters.disableAutoSync
 
 # Elcuk
 GET     /elcuks                                             Elcuk.index

@@ -149,7 +149,7 @@
           <td>${plan.fba?.shipmentId}</td>
           <td>
               #{if plan.selling?.fnSku}
-                <a href="@{Sellings.sellingLabel(plan.selling?.sellingId)}" class="btn btn-success btn-block">
+                <a href="@{ProcureUnits.fnSkuLable(plan.selling?.sellingId, false)}" class="btn btn-success btn-block">
                   <i class="icon-download-alt"></i> ${plan.selling?.fnSku}
                 </a>
               #{/if}

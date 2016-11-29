@@ -57,14 +57,14 @@ public class LinkHelper extends JavaExtensions {
         }
     }
 
-    public static String sellingLabelLink(StockObj obj) {
+    public static String fnSKULabelLink(StockObj obj) {
         if(!obj.attributes().isEmpty() && obj.attributes().containsKey("procureunitId") &&
                 StringUtils.isNotBlank(obj.fnsku())) {
             ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(obj.attrs.get("procureunitId")
                     .toString()));
             if(procureUnit != null && procureUnit.selling != null) {
-                return Router.getFullUrl("Sellings.sellingLabel",
-                        GTs.newMap("id", procureUnit.selling.sellingId).build()
+                return Router.getFullUrl("ProcureUnits.fnSkuLable",
+                        GTs.newMap("id", procureUnit.selling.sellingId).put("includeSku", false).build()
                 );
             }
         }

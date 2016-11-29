@@ -662,12 +662,12 @@ public class ProcureUnits extends Controller {
         redirect("/activitis/index");
     }
 
-    public static void fnSkuLable(String sid) {
+    public static void fnSkuLable(String sid, boolean includeSku) {
         Selling selling = Selling.findById(sid);
         final PDF.Options options = new PDF.Options();
         options.filename = selling.fnSku + ".pdf";
         options.pageSize = IHtmlToPdfTransformer.A4P;
-        renderPDF(options, selling);
+        renderPDF(options, selling, includeSku);
     }
 
 

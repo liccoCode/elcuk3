@@ -24,8 +24,12 @@
       <b> SHIP TO:</b><br>
       <b>${fba?.fbaCenter?.name}</b><br>
       <b>${fba?.fbaCenter?.addressLine1}</b><br>
-      <b>${fba?.fbaCenter?.postalCode}</b>
-      <b>${fba?.fbaCenter?.city}</b><br>
+    #{if fba?.fbaCenter?.addressLine2}
+      <b>${fba?.fbaCenter?.addressLine2}</b><br>
+    #{/if}
+      <b>${fba?.fbaCenter?.city}${fba.fbaCenter?.city? ',' : ''}</b>
+      <b>${fba?.fbaCenter?.stateOrProvinceCode}</b>
+      <b>${fba?.fbaCenter?.postalCode}</b><br>
       <b>${fba?.codeToCounrty()}</b><br>
     </td>
   </tr>

@@ -1,0 +1,66 @@
+#{extends 'main.html'/}
+#{set title:'FBACenter(' + centers.size() + ')'/}
+#{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'fbacenters/index.js'/}
+#{/set}
+#{flash_alert /}
+#{info_row title:'FBACenters' /}
+<div class="row-fluid">
+  <table class="table table-condensed table-bordered" name="fbacenterList">
+    <thead>
+    <tr>
+      <th rel="popover" content="<img src='/img/helper/fbaCenterId.jpg'>"
+          full-width="true" placement="bottom">CenterId
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaAddressLine1.jpg'>"
+          full-width="true" placement="bottom">AddressLine1
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaAddressLine2.jpg'>"
+          full-width="true" placement="bottom">AddressLine2
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaCity.jpg'>"
+          full-width="true" placement="bottom">City
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaName.jpg'>"
+          full-width="true" placement="bottom">Name
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaCountryCode.jpg'>"
+          full-width="true" placement="bottom">CountryCode
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaStateOrProvinceCode.jpg'>"
+          full-width="true" placement="bottom">StateOrProvinceCode
+      </th>
+      <th rel="popover" content="<img src='/img/helper/fbaPostalCode.jpg'>"
+          full-width="true" placement="bottom">PostalCode
+      </th>
+      <th width="6%">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:centers, as:'center'}
+    <tr>
+      <td><a href="@{FBACenters.show(center.id)}">${center.centerId}</a></td>
+      <td>${center.addressLine1}</td>
+      <td>${center.addressLine2}</td>
+      <td>${center.city}</td>
+      <td>${center.name}</td>
+      <td>${center.countryCode}</td>
+      <td>${center.stateOrProvinceCode}</td>
+      <td>${center.postalCode}</td>
+      <td>
+          #{yesOrNo f:center.autoSync, id:center.id/}
+          #{if center.autoSync}
+            <a href="#" rel="tooltip" placement="top" title="禁用自动同步" data-centerid="${center.id}"
+               name="disableAutoSync">Disable</a>
+          #{/if}
+          #{else}
+            <a href="#" rel="tooltip" placement="top" title="启用自动同步" data-centerid="${center.id}"
+               name="enableAutoSync">Enable</a>
+          #{/else}
+      </td>
+    </tr>
+    #{/list}
+    </tbody>
+  </table>
+</div>
