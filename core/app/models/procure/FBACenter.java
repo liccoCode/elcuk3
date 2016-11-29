@@ -134,14 +134,17 @@ public class FBACenter extends Model {
     public FBACenter createOrUpdate() {
         FBACenter manager = FBACenter.findByCenterId(this.centerId);
         if(manager != null) {
-            manager.addressLine1 = this.addressLine1;
-            manager.addressLine2 = this.addressLine2;
-            manager.city = this.city;
-            manager.name = this.name;
-            manager.countryCode = this.countryCode;
-            manager.stateOrProvinceCode = this.stateOrProvinceCode;
-            manager.postalCode = this.postalCode;
-            return manager.save();
+            if(manager.autoSync) {
+                manager.addressLine1 = this.addressLine1;
+                manager.addressLine2 = this.addressLine2;
+                manager.city = this.city;
+                manager.name = this.name;
+                manager.countryCode = this.countryCode;
+                manager.stateOrProvinceCode = this.stateOrProvinceCode;
+                manager.postalCode = this.postalCode;
+                manager.save();
+            }
+            return manager;
         } else {
             return this.save();
         }
