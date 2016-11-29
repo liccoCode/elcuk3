@@ -21,7 +21,8 @@ import java.util.List;
 public class FBACenters extends Controller {
     @Check("fbacenters.index")
     public static void index() {
-        List<FBACenter> centers = FBACenter.findAll();
+        //暂时不做分页, 后续如果数据量上来后再处理.(PS: FBACenter 的数量不会很大)
+        List<FBACenter> centers = FBACenter.all().fetch(100);
         render(centers);
     }
 

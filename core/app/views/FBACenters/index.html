@@ -1,49 +1,52 @@
 #{extends 'main.html'/}
 #{set title:'FBACenter(' + centers.size() + ')'/}
 #{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
     #{script 'fbacenters/index.js'/}
 #{/set}
 #{flash_alert /}
 #{info_row title:'FBACenters' /}
 <div class="row-fluid">
-  <div class="span12">
-    <table class="table table-condensed table-bordered" name="fbacenterList">
-      <tr>
-        <th>#</th>
-        <th>CenterId</th>
-        <th>AddressLine1</th>
-        <th>AddressLine2</th>
-        <th>City</th>
-        <th>Name</th>
-        <th>CountryCode</th>
-        <th>StateOrProvinceCode</th>
-        <th>PostalCode</th>
-        <th width="6%">Action</th>
-      </tr>
+  <table class="table table-condensed table-bordered" name="fbacenterList">
+    <thead>
+    <tr>
+      <th>#</th>
+      <th>CenterId</th>
+      <th>AddressLine1</th>
+      <th>AddressLine2</th>
+      <th>City</th>
+      <th>Name</th>
+      <th>CountryCode</th>
+      <th>StateOrProvinceCode</th>
+      <th>PostalCode</th>
+      <th width="6%">Action</th>
+    </tr>
+    </thead>
+    <tbody>
     #{list items:centers, as:'center'}
-      <tr>
-        <td>${center.id}</td>
-        <td>${center.centerId}</td>
-        <td>${center.addressLine1}</td>
-        <td>${center.addressLine2}</td>
-        <td>${center.city}</td>
-        <td>${center.name}</td>
-        <td>${center.countryCode}</td>
-        <td>${center.stateOrProvinceCode}</td>
-        <td>${center.postalCode}</td>
-        <td>
-            #{yesOrNo f:center.autoSync, id:center.id/}
-            #{if center.autoSync}
-              <a href="#" rel="tooltip" placement="top" title="禁用自动同步" data-centerid="${center.id}"
-                 name="disableAutoSync">Disable</a>
-            #{/if}
-            #{else}
-              <a href="#" rel="tooltip" placement="top" title="启用自动同步" data-centerid="${center.id}"
-                 name="enableAutoSync">Enable</a>
-            #{/else}
-        </td>
-      </tr>
+    <tr>
+      <td>${center.id}</td>
+      <td>${center.centerId}</td>
+      <td>${center.addressLine1}</td>
+      <td>${center.addressLine2}</td>
+      <td>${center.city}</td>
+      <td>${center.name}</td>
+      <td>${center.countryCode}</td>
+      <td>${center.stateOrProvinceCode}</td>
+      <td>${center.postalCode}</td>
+      <td>
+          #{yesOrNo f:center.autoSync, id:center.id/}
+          #{if center.autoSync}
+            <a href="#" rel="tooltip" placement="top" title="禁用自动同步" data-centerid="${center.id}"
+               name="disableAutoSync">Disable</a>
+          #{/if}
+          #{else}
+            <a href="#" rel="tooltip" placement="top" title="启用自动同步" data-centerid="${center.id}"
+               name="enableAutoSync">Enable</a>
+          #{/else}
+      </td>
+    </tr>
     #{/list}
-    </table>
-  </div>
+    </tbody>
+  </table>
 </div>

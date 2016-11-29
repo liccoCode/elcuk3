@@ -31,4 +31,15 @@ $(() => {
     });
     LoadMask.unmask($masker);
   });
+
+  $(document).ready(function () {
+    $('table[name=fbacenterList]').dataTable({
+      "aaSorting": [[0, "asc"]],
+      "bPaginate": false,
+      "bLengthChange": false,
+      "bFilter": true,
+      "bInfo": false,
+      "bAutoWidth": false
+    })
+  })
 });
