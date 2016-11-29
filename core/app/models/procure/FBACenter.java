@@ -152,10 +152,12 @@ public class FBACenter extends Model {
 
     public void update(FBACenter center) {
         this.addressLine1 = center.addressLine1;
+        this.addressLine2 = center.addressLine2;
         this.city = center.city;
         this.countryCode = center.countryCode;
         this.name = center.name;
         this.postalCode = center.postalCode;
+        this.stateOrProvinceCode = center.stateOrProvinceCode;
         this.save();
     }
 
