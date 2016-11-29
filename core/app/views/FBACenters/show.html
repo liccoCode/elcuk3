@@ -11,36 +11,52 @@
     <form action="@{FBACenters.update()}" method="POST">
       <table class="table table-condensed table-bordered">
         <tr>
-          <th>CenterId</th>
+          <th rel="popover" content="<img src='/img/helper/fbaCenterId.jpg'>"
+              full-width="true" placement="bottom">CenterId
+          </th>
           <td><input type="text" name="center.centerId" value="${center.centerId}" readonly></td>
 
-          <th>AddressLine1</th>
+          <th rel="popover" content="<img src='/img/helper/fbaAddressLine1.jpg'>"
+              full-width="true" placement="bottom">AddressLine1
+          </th>
           <td><input type="text" name="center.addressLine1" value="${center.addressLine1}"></td>
 
-          <th>AddressLine2</th>
+          <th rel="popover" content="<img src='/img/helper/fbaAddressLine2.jpg'>"
+              full-width="true" placement="bottom">AddressLine2
+          </th>
           <td><input type="text" name="center.addressLine2" value="${center.addressLine2}"></td>
         </tr>
         <tr>
-          <th>City</th>
+          <th rel="popover" content="<img src='/img/helper/fbaCity.jpg'>"
+              full-width="true" placement="bottom">City
+          </th>
           <td><input type="text" name="center.city" value="${center.city}"></td>
 
-          <th>Name</th>
+          <th rel="popover" content="<img src='/img/helper/fbaName.jpg'>"
+              full-width="true" placement="bottom">Name
+          </th>
           <td>
             <input type="text" name="center.name" value="${center.name}">
           </td>
 
-          <th>CountryCode</th>
+          <th rel="popover" content="<img src='/img/helper/fbaCountryCode.jpg'>"
+              full-width="true" placement="bottom">CountryCode
+          </th>
           <td>
             <input type="text" name="center.countryCode" value="${center.countryCode}">
           </td>
         </tr>
         <tr>
-          <th>StateOrProvinceCode</th>
+          <th rel="popover" content="<img src='/img/helper/fbaStateOrProvinceCode.jpg'>"
+              full-width="true" placement="bottom">StateOrProvinceCode
+          </th>
           <td>
             <input type="text" name="center.stateOrProvinceCode" value="${center.stateOrProvinceCode}">
           </td>
 
-          <th>PostalCode</th>
+          <th rel="popover" content="<img src='/img/helper/fbaPostalCode.jpg'>"
+              full-width="true" placement="bottom">PostalCode
+          </th>
           <td>
             <input type="text" name="center.postalCode" value="${center.postalCode}">
           </td>
