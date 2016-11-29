@@ -30,7 +30,49 @@ $(() => {
       });
     });
     LoadMask.unmask($masker);
+  }).on('click', 'a[name=checkFBALabel]', function () {
+    const $tds = $(this).parents('tr').find('td');
+    $('#fba_ship_to_body').html(new FbaShipToBuilder($tds).buildBody());
+    $('#fba_ship_to_modal').modal('show');
   });
+
+  class FbaShipToBuilder {
+    constructor (tds) {
+      this.addressLine1 = $(tds[1]).text();
+      this.addressLine2 = $(tds[2]).text();
+      this.city = $(tds[3]).text();
+      this.name = $(tds[4]).text();
+      this.countryCode = $(tds[5]).text();
+      this.stateOrProvinceCode = $(tds[6]).text();
+      this.postalCode = $(tds[7]).text();
+    }
+
+    buildBody () {
+      var body = "<b> SHIP TO:</b><br>";
+      if (!_.isEmpty(this.name)) {
+        body += `<b>${this.name}</b><br>`;
+      }
+      if (!_.isEmpty(this.addressLine1)) {
+        body += `<b>${this.addressLine1}</b><br>`;
+      }
+      if (!_.isEmpty(this.addressLine2)) {
+        body += `<b>${this.addressLine2}</b><br>`;
+      }
+      if (!_.isEmpty(this.city)) {
+        body += `<b>${this.city}</b>`;
+      }
+      if (!_.isEmpty(this.stateOrProvinceCode)) {
+        body += `<b>${this.stateOrProvinceCode}</b>`;
+      }
+      if (!_.isEmpty(this.postalCode)) {
+        body += `<b>${this.postalCode}</b><br>`;
+      }
+      if (!_.isEmpty(this.countryCode)) {
+        body += `<b>${CountryCodeMap[this.countryCode]}</b><br>`;
+      }
+      return body;
+    }
+  }
 
   $(document).ready(function () {
     $('table[name=fbacenterList]').dataTable({
@@ -41,5 +83,16 @@ $(() => {
       "bInfo": false,
       "bAutoWidth": false
     })
-  })
+  });
+
+  const CountryCodeMap = {
+    "GB": "United Kingdom",
+    "US": "United States",
+    "CA": "Canada",
+    "CN": "China (Mainland)",
+    "DE": "Germany",
+    "FR": "France",
+    "IT": "Italy",
+    "JP": "Japan"
+  }
 });
