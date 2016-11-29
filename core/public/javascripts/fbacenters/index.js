@@ -59,10 +59,10 @@ $(() => {
         body += `<b>${this.addressLine2}</b><br>`;
       }
       if (!_.isEmpty(this.city)) {
-        body += `<b>${this.city}</b>`;
+        body += `<b>${this.city},</b>&nbsp;`;
       }
       if (!_.isEmpty(this.stateOrProvinceCode)) {
-        body += `<b>${this.stateOrProvinceCode}</b>`;
+        body += `<b>${this.stateOrProvinceCode}</b>&nbsp;`;
       }
       if (!_.isEmpty(this.postalCode)) {
         body += `<b>${this.postalCode}</b><br>`;
