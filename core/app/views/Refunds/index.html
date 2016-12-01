@@ -1,18 +1,13 @@
 #{extends 'main_full.html' /}
-#{set title:"收货入库列表"  /}
+#{set title:"退货单列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
 #{errorMsgs /}
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{Inbounds.index()}" method="get" class="search_form" id="search_Form">
+  <form action="@{Refunds.index()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
@@ -24,7 +19,7 @@
 
         <select name="p.dateType" class="inline">
           <option value="">状态</option>
-        #{list items:models.whouse.Inbound.S, as:'t'}
+        #{list items:models.whouse.Refund.S, as:'t'}
           <option value="${t.name()}">${t.label()}</option>
         #{/list}
         </select>
@@ -38,14 +33,14 @@
 
         <select name="p.dateType" class="inline">
           <option value="">收货类型</option>
-        #{list items:models.whouse.Inbound.T, as:'t'}
+        #{list items:models.whouse.Refund.T, as:'t'}
           <option value="${t.name()}">${t.label()}</option>
         #{/list}
         </select>
 
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" class="input-medium" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+          <input type="text" class="input-medium" name="p.search" placeholder="搜索ID自动识别" value="${p.search}">
           <input type="hidden" name="p.page" value="${p.page}">
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
@@ -58,45 +53,37 @@
             <th style="width:15px;">
               <input type="checkbox">
             </th>
-            <th>收货入库单ID</th>
+            <th>退货单ID</th>
             <th>名称</th>
-            <th>收货类型</th>
+            <th>物流信息</th>
             <th>供应商</th>
             <th>项目名称</th>
+            <th>退货类型</th>
             <th>状态</th>
-            <th width="150px;">制单时间</th>
-            <th width="200px;">收货人/收货日期</th>
-            <th>质检人/质检日期</th>
-            <th>确认人/入库日期</th>
+            <th width="150px;">退货日期</th>
+            <th width="200px;">制单人</th>
+            <th>仓库交接人</th>
             <th>备注</th>
           </tr>
-        #{list items: inbounds, as: 'i'}
+        #{list items: refunds, as: 'r'}
           <tr>
-            <td><input type="checkbox" value="${i.id}"></td>
-            <td><a href="@{Inbounds.edit(i.id)}">${i.id}</a></td>
-            <td>${i.name}</td>
-            <td>${i.type?.label()}</td>
-            <td>${i.cooperator?.name}</td>
-            <td>${i.projectName}</td>
-            <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>
-            <td>#{time_tooltip time:i.createDate, datetime:true/}</td>
-            <td>${i.receiver?.username} / #{time_tooltip time:i.receiveDate, datetime:true/}</td>
-            <td>
-                #{list items:i.qcDtos, as:'d'}
-                ${d}<br>
-                #{/list}
-            </td>
-            <td>
-                #{list items:i.inboundDtos, as:'d'}
-                ${d}<br>
-                #{/list}
-            </td>
-            <td title="${i.memo}">${i.memo}</td>
+            <td><input type="checkbox" value="${r.id}"></td>
+            <td><a href="@{Refunds.edit(r.id)}">${r.id}</a></td>
+            <td>${r.name}</td>
+            <td>${r.info}</td>
+            <td>${r.cooperator?.name}</td>
+            <td>${r.projectName}</td>
+            <td>${r.type?.label()}</td>
+            <td>${r.status?.label()}</td>
+            <td>#{time_tooltip time:r.refundDate, datetime:true/}</td>
+            <td>${r.creator?.username}</td>
+            <td>${r.whouseUser?.username}</td>
+            <td title="${r.memo}">${r.memo}</td>
           </tr>
         #{/list}
           <tr>
             <td colspan="12">
-            #{if inbounds.size() == 0}
+            #{if refunds.size() == 0}
               暂时还没有入库记录
             #{/if}
             #{else }

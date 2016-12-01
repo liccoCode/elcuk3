@@ -83,8 +83,10 @@ public class ProcureUnits extends Controller {
 
     @Check("procures.indexWhouse")
     public static void indexWhouse(ProcurePost p) {
-        if(p == null) p = new ProcurePost();
-        p.stage = ProcureUnit.STAGE.DELIVERY;
+        if(p == null) {
+            p = new ProcurePost();
+            p.stage = ProcureUnit.STAGE.DELIVERY;
+        }
         render(p);
     }
 

@@ -1,17 +1,22 @@
 package models.whouse;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import helper.Dates;
+import helper.J;
 import helper.Reflects;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -19,6 +24,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 入库单元
@@ -174,6 +180,17 @@ public class InboundUnit extends Model {
     }
 
     /**
+     * 主箱信息
+     */
+    @Lob
+    public String mainBoxInfo;
+    /**
+     * 尾箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+    /**
      * 合格数
      */
     public int qualifiedQty;
@@ -225,26 +242,46 @@ public class InboundUnit extends Model {
     public Long unitId;
 
 
+    @Transient
+    public CheckTaskDTO mainBox = new CheckTaskDTO();
+
+    @Transient
+    public CheckTaskDTO lastBox = new CheckTaskDTO();
+
+
     public void updateAttr(String attr, String value) {
         List<String> logs = new ArrayList<>();
         switch(attr) {
+            case "qty":
+                if(this.unit.qty() - NumberUtils.toInt(value) != 0) {
+                    this.handType = H.Actual;
+                }
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                break;
             case "handType":
                 logs.addAll(Reflects.logFieldFade(this, "handType", H.valueOf(value)));
                 break;
             case "result":
+                if(value.equals("Unqualified")) {
+                    this.way = W.Return;
+                } else {
+                    this.way = null;
+                }
                 logs.addAll(Reflects.logFieldFade(this, "result", R.valueOf(value)));
                 break;
             case "way":
-                logs.addAll(Reflects.logFieldFade(this, "result", W.valueOf(value)));
+                logs.addAll(Reflects.logFieldFade(this, "way", W.valueOf(value)));
                 break;
-            case "qty":
             case "qualifiedQty":
+                this.unqualifiedQty = this.qty - NumberUtils.toInt(value);
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                break;
             case "unqualifiedQty":
             case "inboundQty":
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "target":
-                logs.addAll(Reflects.logFieldFade(this, attr,  Whouse.findById(NumberUtils.toLong(value))));
+                logs.addAll(Reflects.logFieldFade(this, attr, Whouse.findById(NumberUtils.toLong(value))));
                 break;
             case "mainBox.length":
             case "mainBox.width":
@@ -264,4 +301,31 @@ public class InboundUnit extends Model {
                 .save();
         this.save();
     }
+
+    @PostLoad
+    public void postPersist() {
+        this.mainBox = JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
+
+
+    public void marshalBoxs() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
+    }
+
+    /**
+     * 创建收货入库单条件判断
+     *
+     * @param id
+     * @return
+     */
+    public static boolean isAllInbound(Long id) {
+        SqlSelect sql = new SqlSelect().select("count(1) as num").from("Inbound i ").leftJoin("InboundUnit u " +
+                " ON u.inbound_id= i.id ").andWhere(" i.status = 'END'").andWhere("u.unit_id = ? ").param(id);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        long i = (long) rows.get(0).get("num");
+        return i == 0 ? true : false;
+    }
+
 }

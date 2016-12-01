@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:'采购收货入库单' /}
+#{set title:'退货单' /}
 #{set 'moreScripts'}
     #{script 'inbounds/edit.js'/}
 #{/set}
@@ -12,36 +12,30 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @Inbounds.update(), method:'POST', id: 'edit_inbound_form'}
-    #{info_row title:'编辑收货入库单'/}
+#{form @Refunds.update(), method:'POST', id: 'edit_refund_form'}
+    #{info_row title:'编辑退货单'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-bordered">
       <tr>
-        <th>收货入库单ID</th>
+        <th>退货单ID</th>
         <td>
-          <input type="text" name="inbound.id" value="${inbound.id}" readonly>
+          <input type="text" name="refund.id" value="${refund.id}" readonly>
         </td>
         <th>状态</th>
-        <td style="width: 40%;">${inbound.status?.label()}</td>
+        <td style="width: 40%;">${refund.status?.label()}</td>
       </tr>
       <tr>
-        <th>出货单</th>
-        <td>${inbound.plan?.id}</td>
+        <th>退货单名称<span style="color:red">*</span></th>
+        <td><input type="text" name="refund.name" value="${refund.name}" readonly></td>
         <th>供应商</th>
         <td>
           <input type="text" value="${inbound.cooperator?.name}" readonly/>
         </td>
       </tr>
       <tr>
-        <th>收货入库单名称<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="inbound.name" value="${inbound.name}"></td>
-        <th>收货类型</th>
-        <td>${inbound.type?.label()}</td>
-      </tr>
-      <tr>
-        <th>收货日期<span style="color:red">*</span></th>
-        <td><input type="date" name="inbound.receiveDate" value="${inbound.receiveDate.date()}"></td>
+        <th>退货类型<span style="color:red">*</span></th>
+        <td><input type="text" value="${refund.type.name}" readonly></td>
         <th>B2B选项</th>
         <td>
           <label class="checkbox">
@@ -49,30 +43,36 @@
           </label>
         </td>
       </tr>
+
+      <tr>
+        <th>制单人</th>
+        <td>${refund.creator?.username}</td>
+        <th>仓库交接人<span style="color:red">*</span></th>
+        <td></td>
+      </tr>
+
       <tr>
         <th>创建日期</th>
-        <td>#{time_tooltip time:inbound.createDate/}</td>
-        <th>创建人</th>
-        <td>${inbound.receiver?.username}</td>
+        <td>#{time_tooltip time:refund.createDate/}</td>
+        <th></th>
+        <td><input type="text" name="refund.info" value="${refund.info}"></td>
       </tr>
       <tr>
         <th>备注</th>
         <td colspan="4">
-          <textarea name="inbound.memo" rows="4" class="input-block-level">${inbound.memo}</textarea>
+          <textarea name="refund.memo" rows="4" class="input-block-level">${refund.memo}</textarea>
         </td>
       </tr>
       <tr>
         <td colspan="4">
-          <input type="hidden" name="record.origin" value="">
-          <input type="hidden" name="record.state" value="">
           <button class="btn btn-primary" id="update">更新</button>
-          <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
+          <a href="@{Refunds.index()}" class="btn btn-success">取消</a>
         </td>
       </tr>
     </table>
   </div>
 </div>
-    #{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
+    #{info_row title:'已添加进入【退货单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-bordered" id="unit_table">
@@ -101,7 +101,7 @@
         <th>实际入库数</th>
         <th>目标仓库</th>
       </tr>
-        #{list items:inbound.units, as:'unit'}
+        #{list items:refund.unitList, as:'unit'}
           <tr class="text-center">
             <td>
               <input type="checkbox" value="${unit.id}">
@@ -137,14 +137,14 @@
                       #{/if}
                   #{/list}
               </select>
+
             </td>
-            <td>
-              <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+            <td><input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
             </td>
             <td>${unit.fba?.shipmentId}</td>
             <td>${unit.unit?.whouse?.name()}</td>
             <td>${unit.unit?.shipType?.label()}</td>
-            <td style="background-color:${unit.status.rgb()}">${unit.status?.label()}</td>
+            <td>${unit.status?.label()}</td>
             <td>
               <select name="result" style="width:60px;"
                   #{if unit.status.name() != "Receive"}
@@ -167,12 +167,13 @@
                     <option ${w.name() == unit.way?.name() ? 'selected' : ''} value="${w.name()}">${w.label()}</option>
                   #{/list}
               </select>
+
             </td>
             <td>
-              <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}"
+              <input type="text" name="qualifiedQty" value="${unit.qualifiedQty}" style="width:35px;"
                   #{if unit.status.name() != "Receive"}
                      disabled
-                  #{/if} style="width:35px;"/>
+                  #{/if}/>
             </td>
             <td>
               <input type="text" name="unqualifiedQty" value="${unit.unqualifiedQty}" style="width:35px;"
@@ -204,9 +205,6 @@
         #{/list}
     </table>
     <button class="btn btn-danger">解除</button>
-    <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
-    <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
-    <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
   </div>
 </div>
 

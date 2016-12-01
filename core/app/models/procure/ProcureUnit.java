@@ -19,6 +19,7 @@ import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import models.view.dto.CooperItemDTO;
 import models.whouse.InboundUnit;
+import models.whouse.Outbound;
 import models.whouse.OutboundRecord;
 import models.whouse.Whouse;
 import mws.FBA;
@@ -515,6 +516,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 可用库存数
      */
     public int availableQty;
+
+    /**
+     * 实际出库数
+     */
+    public int outQty;
+
+    /**
+     * 出库单
+     */
+    @ManyToOne
+    public Outbound outbound;
 
 
     /**
@@ -1856,4 +1868,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         return "暂无出库信息.";
     }
+
+    public static String validateIsInbound(List<Long> pids) {
+        Map<STAGE, Integer> status_map = new HashMap<>();
+        for(Long id : pids) {
+            ProcureUnit unit = ProcureUnit.findById(id);
+            if(!(unit.stage == STAGE.DELIVERY || unit.stage == STAGE.IN_STORAGE)) {
+                return "请选择阶段为【采购中】和【已入库】的采购计划";
+            }
+
+            if(!status_map.isEmpty() && !status_map.containsKey(unit.stage)) {
+                 return "请选择阶段一致的采购计划";
+            } else {
+                status_map.put(unit.stage, 0);
+            }
+            if(InboundUnit.isAllInbound(unit.id)){
+                return "";
+            }
+
+        }
+        return "";
+    }
+
 }

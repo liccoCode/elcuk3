@@ -1,20 +1,19 @@
 package models.view.post;
 
-import models.whouse.Inbound;
-import models.whouse.InboundRecord;
+import models.whouse.Outbound;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by licco on 2016/11/11.
+ * Created by licco on 2016/11/30.
  */
-public class InboundPost extends Post<Inbound> {
+public class OutboundPost extends Post<Outbound>{
 
     public String search;
 
-    public InboundPost() {
+    public OutboundPost() {
         this.perSize = 25;
         this.page = 1;
     }
@@ -29,12 +28,11 @@ public class InboundPost extends Post<Inbound> {
         return new F.T2<>(sbd.toString(), params);
     }
 
-
     @Override
-    public List<Inbound> query() {
+    public List<Outbound> query() {
         this.count = this.count();
         F.T2<String, List<Object>> params = params();
-        return Inbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     @Override
@@ -45,7 +43,9 @@ public class InboundPost extends Post<Inbound> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return Inbound.count(params._1, params._2.toArray());
+        return Outbound.count(params._1, params._2.toArray());
     }
+
+
 
 }

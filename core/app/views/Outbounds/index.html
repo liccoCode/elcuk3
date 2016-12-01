@@ -1,18 +1,13 @@
 #{extends 'main_full.html' /}
-#{set title:"收货入库列表"  /}
+#{set title:"出库单列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
 #{errorMsgs /}
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{Inbounds.index()}" method="get" class="search_form" id="search_Form">
+  <form action="@{Outbounds.index()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
@@ -24,7 +19,7 @@
 
         <select name="p.dateType" class="inline">
           <option value="">状态</option>
-        #{list items:models.whouse.Inbound.S, as:'t'}
+        #{list items:models.whouse.Outbound.S, as:'t'}
           <option value="${t.name()}">${t.label()}</option>
         #{/list}
         </select>
@@ -50,6 +45,18 @@
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
       </div>
+
+      <div class="row-fluid">
+        <div class="span12">
+          <div class="inline">
+            <a href="javascript:void(0)" data-url="@{Ou.blank()}" class="btn btn btn-info inline"
+               id="createInbound">确认出库</a>
+            <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-primary inline"
+               id="createInboundBtn">导出</a>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="row-fluid">
       <div class="span12">
@@ -58,45 +65,39 @@
             <th style="width:15px;">
               <input type="checkbox">
             </th>
-            <th>收货入库单ID</th>
+            <th>出库单ID</th>
             <th>名称</th>
-            <th>收货类型</th>
+            <th>目的国家</th>
             <th>供应商</th>
             <th>项目名称</th>
+            <th>出库类型</th>
             <th>状态</th>
-            <th width="150px;">制单时间</th>
-            <th width="200px;">收货人/收货日期</th>
-            <th>质检人/质检日期</th>
-            <th>确认人/入库日期</th>
+            <th>运输方式</th>
+            <th>货代公司</th>
+            <th width="150px;">出库日期</th>
+            <th>发货人</th>
             <th>备注</th>
           </tr>
-        #{list items: inbounds, as: 'i'}
+        #{list items: outbounds, as: 'o'}
           <tr>
-            <td><input type="checkbox" value="${i.id}"></td>
-            <td><a href="@{Inbounds.edit(i.id)}">${i.id}</a></td>
-            <td>${i.name}</td>
-            <td>${i.type?.label()}</td>
-            <td>${i.cooperator?.name}</td>
-            <td>${i.projectName}</td>
-            <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>
-            <td>#{time_tooltip time:i.createDate, datetime:true/}</td>
-            <td>${i.receiver?.username} / #{time_tooltip time:i.receiveDate, datetime:true/}</td>
-            <td>
-                #{list items:i.qcDtos, as:'d'}
-                ${d}<br>
-                #{/list}
-            </td>
-            <td>
-                #{list items:i.inboundDtos, as:'d'}
-                ${d}<br>
-                #{/list}
-            </td>
-            <td title="${i.memo}">${i.memo}</td>
+            <td><input type="checkbox" value="${o.id}"></td>
+            <td><a href="@{Outbounds.edit(o.id)}">${o.id}</a></td>
+            <td>${o.name}</td>
+            <td></td>
+            <td>${o.cooperator?.name}</td>
+            <td>${o.projectName}</td>
+            <td>${o.type?.label()}</td>
+            <td>${o.status?.label()}</td>
+            <td></td>
+            <td></td>
+            <td>#{time_tooltip time:o.outboundDate, datetime:true/}</td>
+            <td>${o.consignor?.username}</td>
+            <td title="${o.memo}">${o.memo}</td>
           </tr>
         #{/list}
           <tr>
-            <td colspan="12">
-            #{if inbounds.size() == 0}
+            <td colspan="13">
+            #{if outbounds.size() == 0}
               暂时还没有入库记录
             #{/if}
             #{else }

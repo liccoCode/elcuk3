@@ -1,7 +1,6 @@
 /**
  * Created by licco on 2016/11/17.
  */
-
 $(() => {
   $('#confirmReceiveBtn,#confirmQCBtn,#confirmInboundBtn').click(function(e) {
     e.stopPropagation();
@@ -27,6 +26,11 @@ $(() => {
       $(this).parent('td').next().find('select').hide();
     }
 
+    if (attr == 'qualifiedQty') {
+      let qty = $(this).data('qty');
+      $(this).parent('td').next().find('input').attr("value", qty - value);
+    }
+
     if ($(this).val()) {
       $.post('/Inbounds/updateUnit', {
         id: id,
@@ -48,6 +52,34 @@ $(() => {
       });
     }
   });
+
+  $("input[name='editBoxInfo']").click(function(e) {
+    e.stopPropagation();
+    $("#fba_carton_contents_modal").modal('show');
+    let id = $(this).data("id");
+    $("#refresh_div").load("/Inbounds/refreshFbaCartonContentsByIds", {id: id}, function(r) {
+      $("#submitBoxInfoBtn").click(() => {
+        let action = $(this).data('action');
+        let form = $("<form method='post' action='#{action}'></form>")
+        form = form.append($("#box_info_table").clone())
+        $.post('/Inbounds/updateBoxInfo', form.serialize(), function(re) {
+          if (re) {
+            $("#fba_carton_contents_modal").modal('hide');
+            noty({
+              text: '更新包装信息成功!',
+              type: 'success'
+            });
+          } else {
+            noty({
+              text: r.message,
+              type: 'error'
+            });
+          }
+        });
+      });
+    });
+  });
+
 });
 
 const attrsFormat = {

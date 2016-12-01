@@ -5,6 +5,7 @@ import models.market.M;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import models.whouse.Inbound;
+import models.whouse.InboundUnit;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.templates.BaseTemplate;
@@ -43,9 +44,25 @@ public class ProcuresHelper extends JavaExtensions {
             case Create:
                 return "#B0BFD6";
             case Handing:
-                return "#006ACC";
+                return "#F9A021";
             case End:
+            default:
+                return "#5BB75B";
+        }
+    }
+
+    public static String rgb(InboundUnit.S status) {
+        switch(status) {
+            case Create:
+                return "#B0BFD6";
+            case Receive:
+                return "#F9A021";
+            case Check:
                 return "#3DA4C2";
+            case Inbound:
+                return "#5BB75B";
+            case Abort:
+                return "#F9A021";
             default:
                 return "#5BB75B";
         }

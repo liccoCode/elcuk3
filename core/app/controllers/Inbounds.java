@@ -5,11 +5,13 @@ import models.OperatorConfig;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
+import models.qc.CheckTaskDTO;
 import models.view.Ret;
 import models.view.post.InboundPost;
 import models.whouse.Inbound;
 import models.whouse.InboundUnit;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
 import play.db.helper.JpqlSelect;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -41,6 +43,16 @@ public class Inbounds extends Controller {
         render(p, inbounds);
     }
 
+    public static void createValidate(List<Long> pids) {
+        String msg = ProcureUnit.validateIsInbound(pids);
+        if(StringUtils.isNotBlank(msg)) {
+            renderJSON(new Ret(false, msg));
+        } else {
+            renderJSON(new Ret(true));
+        }
+    }
+
+
     public static void blank(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         List<DeliverPlan> plans = DeliverPlan.find("state = ? ", DeliverPlan.P.CREATE).fetch();
@@ -51,6 +63,7 @@ public class Inbounds extends Controller {
 
     public static void create(Inbound inbound, List<InboundUnit> dtos) {
         inbound.id = Inbound.id();
+        inbound.receiver = Login.current();
         inbound.createDate = new Date();
         inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         inbound.save();
@@ -94,7 +107,6 @@ public class Inbounds extends Controller {
         inbound.status = Inbound.S.Handing;
         inbound.save();
         inbound.confirmReceive(dtos);
-
         flash.success("收货成功!");
         index(new InboundPost());
     }
@@ -107,6 +119,7 @@ public class Inbounds extends Controller {
      */
     public static void confirmQC(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmQC(dtos);
+        inbound.checkIsFinish();
         flash.success("质检成功!");
         index(new InboundPost());
 
@@ -121,8 +134,22 @@ public class Inbounds extends Controller {
      */
     public static void confirmInbound(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmInbound(dtos);
+        inbound.checkIsFinish();
         flash.success("入库成功!");
         index(new InboundPost());
+    }
+
+    public static void refreshFbaCartonContentsByIds(String id) {
+        InboundUnit unit = InboundUnit.findById(Long.parseLong(id));
+
+        render("/Inbounds/boxInfo.html", unit);
+    }
+
+    public static void updateBoxInfo(InboundUnit unit) {
+        unit = InboundUnit.findById(unit.id);
+        unit.marshalBoxs();
+        unit.save();
+        renderJSON(new Ret(true));
     }
 
 }

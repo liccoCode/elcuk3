@@ -1,6 +1,7 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.Dates;
 import helper.Reflects;
 import models.User;
@@ -22,7 +23,7 @@ import java.util.*;
 
 /**
  * Created by licco on 2016/11/2.
- * 收货入库
+ * 收货入库单
  */
 @Entity
 @DynamicUpdate
@@ -163,6 +164,7 @@ public class Inbound extends GenericModel {
         for(InboundUnit unit : units) {
             unit.inbound = this;
             unit.unit = ProcureUnit.findById(unit.unitId);
+            unit.status = InboundUnit.S.Create;
             unit.save();
         }
     }
@@ -208,6 +210,7 @@ public class Inbound extends GenericModel {
         for(InboundUnit unit : units) {
             InboundUnit u = InboundUnit.findById(unit.id);
             u.status = InboundUnit.S.Receive;
+            u.result = InboundUnit.R.Qualified;
             u.save();
             ProcureUnit punit = u.unit;
             punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
@@ -221,6 +224,8 @@ public class Inbound extends GenericModel {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.status == InboundUnit.S.Receive && u.result == InboundUnit.R.Unqualified) {
                 u.status = InboundUnit.S.Abort;
+                u.qcUser = Login.current();
+                u.qcDate = new Date();
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
@@ -231,12 +236,14 @@ public class Inbound extends GenericModel {
             } else if(u.status == InboundUnit.S.Receive && !(u.result == null || (u.result == InboundUnit.R.Qualified
                     && u.qualifiedQty == 0))) {
                 u.status = InboundUnit.S.Check;
+                u.inboundQty = u.qualifiedQty;
+                u.qcDate = new Date();
+                u.qcUser = Login.current();
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.result = u.result;
                 punit.save();
             }
-
         }
     }
 
@@ -249,6 +256,8 @@ public class Inbound extends GenericModel {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.status == InboundUnit.S.Check && u.inboundQty != 0) {
                 u.status = InboundUnit.S.Inbound;
+                u.confirmUser = Login.current();
+                u.inboundDate = new Date();
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.stage = ProcureUnit.STAGE.IN_STORAGE;
@@ -270,6 +279,30 @@ public class Inbound extends GenericModel {
         record.recordId = unit.id;
 
         record.save();
+    }
+
+    public void checkIsFinish() {
+        int count = InboundUnit.find("inbound.id = ? and status NOT IN (?,?)", this.id,
+                InboundUnit.S.Inbound,
+                InboundUnit.S.Abort).fetch().size();
+        if(count == 0) {
+            List<InboundUnit> units = this.units;
+            List<InboundUnit> return_units = new ArrayList<>();
+            for(InboundUnit iunit : units) {
+                if(iunit.status == InboundUnit.S.Abort && iunit.way == InboundUnit.W.Return) {
+                    return_units.add(iunit);
+                }
+            }
+            this.status = S.End;
+            this.save();
+            if(return_units.size() > 0) {
+                Refund refund = new Refund();
+                refund.cooperator = this.cooperator;
+                refund.type = Refund.T.After_Receive;
+                refund.projectName = this.projectName;
+                refund.createRefund(return_units);
+            }
+        }
     }
 
 }

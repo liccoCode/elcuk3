@@ -147,11 +147,12 @@
          id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
         <i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
-  </div>
-  <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
+    </div>
+    <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 
-#{render 'Deliveryments/box_number_model.html'/}
-#{render 'Deliveryments/fba_carton_contents.html'/}
+  #{render 'Deliveryments/box_number_model.html'/}
+  #{render 'Deliveryments/fba_carton_contents.html'/}
+  </div>
 </form>
 *{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
 *{#{power.ck 'excels.deliveryment'}}*
