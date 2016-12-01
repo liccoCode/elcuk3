@@ -59,6 +59,12 @@ public class Products extends Controller {
         render(prods, p);
     }
 
+    public static void whouseAttrs(ProductPost p) {
+        if(p == null) p = new ProductPost();
+        Product pro = p.pickup();
+        render(pro, p);
+    }
+
     @Before(only = {"show", "update", "delete"})
     public static void setUpShowPage() {
         String sku = Products.extarSku();
