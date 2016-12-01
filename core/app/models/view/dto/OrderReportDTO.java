@@ -5,11 +5,16 @@ import models.market.M;
 import play.db.helper.SqlSelect;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Created by licco on 16/3/18.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 16/3/18
+ * Time: 3:08 PM
  */
 public class OrderReportDTO {
 
@@ -28,14 +33,14 @@ public class OrderReportDTO {
     public float percent;
 
     public static List<OrderReportDTO> query(Set<String> orderIds) {
-        StringBuffer sql = new StringBuffer("SELECT r.orderId,r.market,group_concat(DISTINCT f.product_sku) AS sku,");
-        sql.append("DATE_FORMAT(r.paymentDate,'%Y-%m-%d %H:%i:%s') AS paymentDate,");
-        sql.append("ROUND(sum(IF(f.usdCost>0, f.usdCost, 0)), 2) AS positivePrice, ");
-        sql.append("ROUND(sum(IF(f.usdCost<0, f.usdCost, 0)), 2)  AS negativePrice ");
-        sql.append("FROM Orderr r LEFT JOIN SaleFee f ON f.order_orderId = r.orderId ");
-        sql.append("WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds));
-        sql.append("GROUP BY r.orderId");
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        String sql = "SELECT r.orderId,r.market,group_concat(DISTINCT f.product_sku) AS sku," +
+                "DATE_FORMAT(r.paymentDate,'%Y-%m-%d %H:%i:%s') AS paymentDate," +
+                "ROUND(sum(IF(f.usdCost>0, f.usdCost, 0)), 2) AS positivePrice, " +
+                "ROUND(sum(IF(f.usdCost<0, f.usdCost, 0)), 2)  AS negativePrice " +
+                "FROM Orderr r LEFT JOIN SaleFee f ON f.order_orderId = r.orderId " +
+                "WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds) +
+                "GROUP BY r.orderId";
+        List<Map<String, Object>> rows = DBUtils.rows(sql);
         List<OrderReportDTO> dtos = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             OrderReportDTO dto = new OrderReportDTO();

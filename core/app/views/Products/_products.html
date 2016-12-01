@@ -4,16 +4,16 @@
 #{else }
 <table class="table table-condensed table-bordered">
   <tr>
-    <th width="150px;">SKU</th>
-    <th width="100px;">Family</th>
-    <th width="220px;">Name</th>
-    <th width="120px;">最近采购价格</th>
-    <th width="140px;">最近采购供应商</th>
-    <th width="120px;">产品状态</th>
-    <th width="120px;">销售级别</th>
-    <th width="120px;">上市时间</th>
-    <th width="120px;">退市时间</th>
-    <th width="220px;">Action</th>
+    <th style="min-width:120px;">SKU</th>
+    <th style="width:100px;">Family</th>
+    <th>Name</th>
+    <th style="width:80px;">最近采购价格</th>
+    <th style="width:100px;">最近采购供应商</th>
+    <th style="width:80px;">产品状态</th>
+    <th style="width:80px;">销售级别</th>
+    <th>上市时间</th>
+    <th>退市时间</th>
+    <th style="width:80px;">Action</th>
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
@@ -42,12 +42,16 @@
         <td>#{time_tooltip time:prod.marketTime/}</td>
         <td>#{time_tooltip time:prod.delistingTime/}</td>
         <td>
-          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
-            <i class="icon-refresh"></i>同步
+          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-success" rel="tooltip" title="同步">
+            <i class="icon-refresh"></i>
           </a>
-          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info">复制</a>
+          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info" rel="tooltip" title="复制">
+            <i class="icon-copy"></i>
+          </a>
             #{power.ck "products.destroy"}
-              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-mini btn-danger">删除</a>
+              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-mini btn-danger" rel="tooltip" title="删除">
+                <i class="icon-trash"></i>
+              </a>
             #{/power.ck}
         </td>
       </tr>
@@ -70,9 +74,7 @@
   <div class="modal-body">
   #{form @Products.copy(), id:'update_form'}
     <dl class="dl-horizontal">
-
-      <input type="hidden" id="target_choseid" name="choseid" value="3333">
-
+      <input type="hidden" id="target_choseid" name="choseid" value="3333"/>
       <dt>选择SKU</dt>
       <dd>
         <input type="text" autocomplete="off" data-provide="typeahead" data-items="5" data-source="${products}"
@@ -125,7 +127,7 @@
       <dt>选择复制的信息:</dt>
       <dd>
         <label class="checkbox">
-          <input disabled="true" type="checkbox" name="base" value="1" checked>
+          <input disabled type="checkbox" name="base" value="1" checked>
           <a>基本属性</a>
         </label>
         <label class="checkbox">
@@ -146,5 +148,4 @@
   #{/form}
   </div>
 </div>
-
 #{include 'Products/_destroyLogForm.html'/}

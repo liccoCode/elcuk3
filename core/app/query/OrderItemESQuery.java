@@ -1,21 +1,19 @@
 package query;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Optional;
 import helper.*;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.facet.range.RangeFacetBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -25,6 +23,8 @@ import play.utils.FastRuntimeException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 通过向 ElasticSearch 进行搜索的 OrderItem Query
@@ -48,7 +48,7 @@ public class OrderItemESQuery {
                 throw new FastRuntimeException("不支持的类型!");
             }
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
         return null;
     }
@@ -151,63 +151,42 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        SearchSourceBuilder search = new SearchSourceBuilder().aggregation(
-                AggregationBuilders.filter("aggs_filter").filter(
-                        FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("date")
-                                        .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat))
-                                ).mustNot(FilterBuilders.termFilter("state", "cancel")
-                        )).subAggregation(
-                        AggregationBuilders.dateHistogram("units")
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .aggregation(AggregationBuilders.filter("aggs_filters").filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(QueryBuilders.rangeQuery("date")
+                                        .gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)))
+                                .mustNot(QueryBuilders.termQuery("state", "cancel"))
+                        ).subAggregation(AggregationBuilders.dateHistogram("units")
                                 .field("date")
-                                .interval(DateHistogram.Interval.DAY)
-                                .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                                .subAggregation(
-                                        AggregationBuilders.sum("quantity").field("quantity")
-                                )
-                )
-        ).size(0);
+                                .interval(DateHistogramInterval.DAY)
+                                .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                                .subAggregation(AggregationBuilders.sum("quantity").field("quantity"))
+                        )
+                ).size(0);
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
-            search.query(QueryBuilders.queryString(val)
+            search.query(QueryBuilders.queryStringQuery(val)
                     .defaultField(type)
                     .defaultOperator(QueryStringQueryBuilder.Operator.AND));
         }
 
-        Logger.info(search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-
         Series.Line line = new Series.Line(market.label() + "销量");
-        Optional<JSONObject> units = Optional.fromNullable(J.dig(result, "aggregations.aggs_filter.units"));
-        if(units.isPresent()) {
-            Optional<JSONArray> buckets = Optional.fromNullable(units.get().getJSONArray("buckets"));
-            if(buckets.isPresent()) {
-                for(Object o : buckets.get()) {
-                    JSONObject entry = (JSONObject) o;
-                    Optional<JSONObject> quantity = Optional.fromNullable(entry.getJSONObject("quantity"));
-                    line.add(
-                            Dates.date2JDate(entry.getDate("key")),
-                            quantity.isPresent() ? quantity.get().getFloat("value") : 0f
-                    );
-                }
-                DateTime datePointer = new DateTime(from);
-                while(datePointer.getMillis() <= to.getTime()) {
-                    line.add(0f, Dates.date2JDate(from));
-                    datePointer = datePointer.plusDays(1);
-                }
-                line.sort();
-            }
-        }
-        return line;
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
+                                bucket.getJSONObject("quantity").getFloat("value"))
+                        )
+                );
+        return line.sort();
     }
 
     /**
      * 计算滑动平均
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Series.Line baseMoveingAve(String val, String type, M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -218,37 +197,43 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
-                .keyField("date").valueField("quantity")
-                .facetFilter(FilterBuilders.termFilter("market", market.name().toLowerCase()));
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
+                .field("date")
+                .subAggregation(AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
-            facetBuilder.addRange(datePointer.minusDays(7).toString(isoFormat), datePointer.toString(isoFormat));
+            dateRangeBuilder.addRange(datePointer.minusDays(7).toString(isoFormat),
+                    datePointer.toString(isoFormat));
             // 以天为单位, 指针向前移动
             datePointer = datePointer.plusDays(1);
         }
-
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .facet(facetBuilder)
-                .size(0);
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                        .subAggregation(dateRangeBuilder)
+                ).size(0);
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
-            search.query(QueryBuilders.queryString(val)
+            search.query(QueryBuilders.queryStringQuery(val)
                     .defaultField(type)
                     .defaultOperator(QueryStringQueryBuilder.Operator.AND)
             );
         }
-
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        JSONObject facets = result.getJSONObject("facets");
-        JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
 
         Series.Line line = new Series.Line(market.label() + " 滑动平均");
-        for(Object o : movingAveRanges) {
-            JSONObject range = (JSONObject) o;
-            line.add(Dates.date2JDate(range.getDate("to")), range.getFloat("total") / 7);
-        }
+        Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(
+                                Dates.date2JDate(bucket.getDate("to")),
+                                (float) (Optional.ofNullable(bucket.getJSONObject("quantity_sum"))
+                                        .map(sum -> sum.getFloat("value"))
+                                        .orElse(0f) / 7)
+                                )
+                        )
+                );
         return line;
     }
 
@@ -256,7 +241,6 @@ public class OrderItemESQuery {
      * @param market
      * @param from
      * @param to
-     * @deprecated facetFilter 查询需要替换
      */
     public Series.Pie categoryPie(M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -267,49 +251,41 @@ public class OrderItemESQuery {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(QueryBuilders.matchAllQuery())
-                .facet(FacetBuilders.termsStatsFacet("units")
-                        .keyField("category_id")
-                        .valueField("quantity")
-                        .size(30) // category 数量
-                        .facetFilter(FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("date")
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(QueryBuilders.rangeQuery("date")
                                         .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat))
-                                )
+                                        .lt(toD.toString(isoFormat))))
+                        .subAggregation(AggregationBuilders.terms("units").field("category_id")
+                                .subAggregation(AggregationBuilders.stats("quantity_stats").field("quantity"))
+                                .size(30)
                         )
                 ).size(0);
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        JSONObject facets = result.getJSONObject("facets");
-        JSONArray terms = facets.getJSONObject("units").getJSONArray("terms");
 
         Series.Pie pie = new Series.Pie(market.label() + " 销量百分比");
-
-        for(Object o : terms) {
-            JSONObject term = (JSONObject) o;
-            pie.add(term.getFloat("total"), term.getString("term"));
-        }
-
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> pie.add(
+                                (Float) Optional.ofNullable(bucket.getJSONObject("quantity_stats"))
+                                        .map(stats -> stats.getFloat("sum"))
+                                        .orElse(0f),
+                                bucket.getString("key"))
+                        )
+                );
         return pie;
     }
 
-    public OrFilterBuilder skusfilter(String type, String val) {
+    private TermsQueryBuilder skusfilter(String type, String val) {
         String[] skus = val.replace("\"", "").split(",");
-        OrFilterBuilder builders = FilterBuilders.orFilter();
-        for(int i = 0; i < skus.length; i++) {
-            if(StringUtils.isNotBlank(skus[i])) {
-                builders.add(FilterBuilders.termFilter(type,
-                        ES.parseEsString(skus[i]).toLowerCase().trim()));
-            }
-        }
-        return builders;
+        return QueryBuilders.termsQuery(type, Arrays.asList(skus));
     }
-
 
     /**
      * @param val
      * @param type sku/msku/cat
-     * @deprecated facetFilter 查询需要替换
      */
     public Series.Line skusSearch(String type, String val, M market, Date from, Date to, boolean issku) {
 
@@ -323,55 +299,43 @@ public class OrderItemESQuery {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
 
-        SearchSourceBuilder search = new SearchSourceBuilder()
-                .facet(FacetBuilders.dateHistogramFacet("units")
-                        .keyField("date")
-                        .valueField("quantity")
-                        .interval("day")
-                        .preZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
-                        .facetFilter(FilterBuilders.boolFilter()
-                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                                .must(FilterBuilders.rangeFilter("date")
+        SearchSourceBuilder search = new SearchSourceBuilder().aggregation(
+                AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(QueryBuilders.rangeQuery("date")
                                         .gte(fromD.toString(isoFormat))
-                                        .lt(toD.toString(isoFormat))
-                                ).must(skusfilter(type, val))
+                                        .lt(toD.toString(isoFormat)))
+                                .must(skusfilter(type, val))
+                        ).subAggregation(AggregationBuilders.dateHistogram("units")
+                        .field("date")
+                        .interval(DateHistogramInterval.DAY)
+                        .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
+                        .subAggregation(AggregationBuilders.sum("quantity").field("quantity")
                         )
-                ).size(0);
-
-        Logger.info(search.toString());
+                )
+        ).size(0);
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        Logger.info(result.toString());
-        JSONObject facets = result.getJSONObject("facets");
-        if(facets != null && facets.getJSONObject("units") != null) {
-            JSONArray entries = facets.getJSONObject("units").getJSONArray("entries");
-            Series.Line line = new Series.Line(market.label() + "销量");
-            if(issku)
-                line = new Series.Line(market.label() + val + "销量");
-            for(Object o : entries) {
-                JSONObject entry = (JSONObject) o;
-                line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
-            }
 
-            DateTime datePointer = new DateTime(from);
-            while(datePointer.getMillis() <= to.getTime()) {
-                line.add(0f, Dates.date2JDate(from));
-                datePointer = datePointer.plusDays(1);
-            }
-            line.sort();
-            return line;
-        } else {
-            Series.Line line = new Series.Line(market.label() + "销量");
-            if(issku)
-                line = new Series.Line(market.label() + val + "销量");
-            return line;
-        }
+        Series.Line line = new Series.Line(String.format("%s %s 销量", market.label(), issku ? val : ""));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream()
+                        .map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(
+                                Dates.date2JDate(bucket.getDate("key")),
+                                (float) Optional.ofNullable(bucket.getJSONObject("quantity"))
+                                        .map(qty -> qty.getFloat("value"))
+                                        .orElse(0f)
+                                )
+                        )
+                );
+        return line.sort();
     }
 
 
     /**
      * 计算滑动平均
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Series.Line skusMoveingAve(String type, String val, M market, Date from, Date to, boolean issku) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
@@ -382,35 +346,37 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
-                .keyField("date").valueField("quantity")
-                .facetFilter(FilterBuilders.boolFilter()
-                        .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                        .must(skusfilter(type, val))
-                );
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
+                .field("date")
+                .subAggregation(AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
         while(datePointer.getMillis() <= toD.getMillis()) {
-            facetBuilder.addRange(datePointer.minusDays(7).toString(isoFormat), datePointer.toString(isoFormat));
+            dateRangeBuilder.addRange(datePointer.minusDays(7).toString(isoFormat), datePointer.toString(isoFormat));
             // 以天为单位, 指针向前移动
             datePointer = datePointer.plusDays(1);
         }
-
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .facet(facetBuilder)
-                .size(0);
-
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(skusfilter(type, val))
+                        ).subAggregation(dateRangeBuilder)
+                ).size(0);
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        JSONObject facets = result.getJSONObject("facets");
-        JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
 
-        Series.Line line = new Series.Line(market.label() + " 滑动平均");
-        if(issku)
-            line = new Series.Line(market.label() + val + " 滑动平均");
-        for(Object o : movingAveRanges) {
-            JSONObject range = (JSONObject) o;
-            line.add(Dates.date2JDate(range.getDate("to")), range.getFloat("total") / 7);
-        }
-        return line;
+        Series.Line line = new Series.Line(String.format("%s %s 滑动平均", market.label(), issku ? val : ""));
+        Optional.of(J.dig(result, "aggregations.aggs_filters.moving_ave"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(
+                                Dates.date2JDate(bucket.getDate("to")),
+                                (float) (Optional.ofNullable(bucket.getJSONObject("quantity_sum"))
+                                        .map(sum -> sum.getFloat("value"))
+                                        .orElse(0f) / 7)
+                                )
+                        )
+                );
+        return line.sort();
     }
 
     /**
@@ -426,7 +392,6 @@ public class OrderItemESQuery {
         for(M m : Promises.MARKETS) {
             search.aggregation(skuSalesBaseSalesAggregation(m, from, to, params, type));
         }
-        Logger.info("countSkuSales:::" + search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
         if(result == null) throw new FastRuntimeException("ES连接异常!");
         return result.getJSONObject("aggregations");
@@ -441,19 +406,18 @@ public class OrderItemESQuery {
         DateTime fromD = market.withTimeZone(Dates.morning(from));
         DateTime toD = market.withTimeZone(Dates.night(to));
 
-        BoolFilterBuilder filter = FilterBuilders.boolFilter()
-                //市场
-                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
-                //日期
-                .must(FilterBuilders.rangeFilter("date")
-                        .gte(fromD.toString(isoFormat))
-                        .lt(toD.toString(isoFormat)))
-                //SKU
-                .must(FilterBuilders.termsFilter(type, params))
-                .mustNot(FilterBuilders.termFilter("state", "cancel"));
-        aggregation.filter(filter);
-        aggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
-        return aggregation;
+        return AggregationBuilders.filter(market.name())
+                .filter(QueryBuilders.boolQuery()
+                        //市场
+                        .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                        //日期
+                        .must(QueryBuilders.rangeQuery("date")
+                                .gte(fromD.toString(isoFormat))
+                                .lt(toD.toString(isoFormat)))
+                        //SKU
+                        .must(QueryBuilders.termsQuery(type, params))
+                        .mustNot(QueryBuilders.termQuery("state", "cancel"))
+                ).subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
     }
 
     /**
@@ -462,42 +426,37 @@ public class OrderItemESQuery {
      * @return
      */
     public JSONObject skusMonthlyDailySale(Date from, Date to, List<String> skus, List<M> markets) {
-        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+        FilterAggregationBuilder aggregationBuilder = AggregationBuilders.filter("aggs_filters")
+                .filter(QueryBuilders.boolQuery()
+                        //SKUs
+                        .must(QueryBuilders.termsQuery("sku", skus.stream()
+                                .map(sku -> ES.parseEsString(sku).toLowerCase())
+                                .filter(StringUtils::isNotBlank)
+                                .collect(Collectors.toList())))
+                        .mustNot(QueryBuilders.termQuery("state", "cancel"))
+                );
+        //每一个市场都要查询一次
         for(M m : markets) {
-            FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name());
-            BoolFilterBuilder filter = FilterBuilders.boolFilter()
+            aggregationBuilder.subAggregation(AggregationBuilders.filter(m.name()).filter(QueryBuilders.boolQuery()
                     //市场
-                    .must(FilterBuilders.termFilter("market", m.name().toLowerCase()))
+                    .must(QueryBuilders.termQuery("market", m.name().toLowerCase()))
                     //日期间隔
-                    .must(FilterBuilders.rangeFilter("date")
+                    .must(QueryBuilders.rangeQuery("date")
                             .gte(m.withTimeZone(Dates.monthBegin(from)).toString(isoFormat))
-                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))
-                    ).mustNot(FilterBuilders.termFilter("state", "cancel"));
-            marketAggregation.filter(filter);
-            for(String sku : skus) {
-                if(StringUtils.isBlank(sku)) continue;
-                //SKU
-                String prettySku = ES.parseEsString(sku).toLowerCase();
-                FilterAggregationBuilder skuAggregation = AggregationBuilders.filter(prettySku);
-                skuAggregation.filter(FilterBuilders.termFilter("sku", prettySku));
-
-                //时间间隔为每个月
-                DateHistogramBuilder monthAvgAggregation = AggregationBuilders.dateHistogram("monthly_avg")
-                        .field("date")
-                        .preZone(Dates.timeZone(m).toString())
-                        .interval(DateHistogram.Interval.MONTH);
-
-                //求和 quantity 的数量
-                monthAvgAggregation.subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
-                skuAggregation.subAggregation(monthAvgAggregation);
-                marketAggregation.subAggregation(skuAggregation);
-            }
-            search.aggregation(marketAggregation);
+                            .lt(m.withTimeZone(Dates.monthEnd(to)).toString(isoFormat))))
+                    .subAggregation(AggregationBuilders.terms("skus")
+                            .field("sku")
+                            .subAggregation(AggregationBuilders.dateHistogram("monthly_avg")
+                                    .field("date")
+                                    .timeZone(Dates.timeZone(m).getShortName(System.currentTimeMillis()))
+                                    //时间间隔为每个月
+                                    .interval(DateHistogramInterval.MONTH)
+                                    //求和 quantity 的数量
+                                    .subAggregation(AggregationBuilders.sum("sum_sales").field("quantity")
+                                    ))));
         }
-        Logger.info("SkusMonthlyDailySale:::" + search.toString());
-        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        if(result == null) throw new FastRuntimeException("ES连接异常!");
-        return result.getJSONObject("aggregations");
+        SearchSourceBuilder search = new SearchSourceBuilder().size(0).aggregation(aggregationBuilder);
+        return ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
     }
 }

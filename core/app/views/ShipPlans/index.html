@@ -3,6 +3,7 @@
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'shipplans/index.coffee'/}
+    #{script 'deliveryments/fba_carton_contents.coffee'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}
@@ -66,8 +67,8 @@
         </div>
       </div>
     </div>
-  #{render 'Deliveryments/box_number_model.html'/}
-  #{render 'Deliveryments/fba_carton_contents.html'/}
+  #{render 'Deliveryments/_box_number_model.html'/}
+  #{render 'Deliveryments/_fba_carton_contents.html'/}
   </form>
 
   <div class="row-fluid">
@@ -148,7 +149,7 @@
           <td>${plan.fba?.shipmentId}</td>
           <td>
               #{if plan.selling?.fnSku}
-                <a href="@{Sellings.sellingLabel(plan.selling?.sellingId)}" class="btn btn-success btn-block">
+                <a href="@{ProcureUnits.fnSkuLable(plan.selling?.sellingId, false)}" class="btn btn-success btn-block">
                   <i class="icon-download-alt"></i> ${plan.selling?.fnSku}
                 </a>
               #{/if}

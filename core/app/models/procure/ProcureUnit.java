@@ -37,6 +37,7 @@ import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
+import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
 import play.modules.pdf.PDF;
 import play.utils.FastRuntimeException;
@@ -537,6 +538,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public String isInventory;
 
+    /***
+     * 原FBACenter信息移到采购计划身上储存
+     */
+    public String centerId;
+
+    public String addressLine1;
+
+    public String addressLine2;
+
+    public String city;
+
+    public String name;
+
+    public String countryCode;
+
+    public String stateOrProvinceCode;
+
+    public String postalCode;
+
     /**
      * ProcureUnit 的检查
      */
@@ -558,6 +578,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "procureunit.validate.whouse");
             }
         }
+    }
+
+    public String codeToCountry() {
+        if(StringUtils.isBlank(this.countryCode)) return "";
+        this.countryCode = this.countryCode.toUpperCase();
+        if(this.countryCode.equals("GB")) return "United Kingdom";
+        else if(this.countryCode.equals("US")) return "United States";
+        else if(this.countryCode.equals("CA")) return "Canada";
+        else if(this.countryCode.equals("CN")) return "China (Mainland)";
+        else if(this.countryCode.equals("DE")) return "Germany";
+        else if(this.countryCode.equals("FR")) return "France";
+        else if(this.countryCode.equals("IT")) return "Italy";
+        else if(this.countryCode.equals("JP")) return "Japan";
+        return "";
     }
 
 
@@ -768,13 +802,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param unit
      */
     public void update(ProcureUnit unit, String shipmentId, String reason) {
+        Shipment.T oldShipType = this.shipType;
         /**
          * 1. 修改不同阶段可以修改的信息
          * 2. 根据运输类型修改运输单
          */
         // 1
         //采购计划的FBA已存在后再次编辑该采购计划的 运输方式 或采购数量 时对修改原因做不为空校验
-        if(this.fba != null && (unit.shipType != this.shipType || (int) unit.attrs.planQty != (int) this.attrs.planQty))
+        if(this.fba != null &&
+                (unit.shipType != this.shipType || !Objects.equals(unit.attrs.planQty, this.attrs.planQty)))
             Validation.required("procureunit.update.reason", reason);
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
@@ -790,7 +826,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.purchaseSample = unit.purchaseSample;
         // 2
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId));
+            this.changeShipItemShipment(
+                    StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
         }
         if(Validation.hasErrors()) return;
 
@@ -878,43 +916,50 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
             if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
         }
-        String procureUnitStatus = String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
+        return String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
                 this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
-        return procureUnitStatus;
     }
 
     /**
      * 调整采购计划所产生的运输项目的运输单
      *
+     * @param oldShipType
      * @param shipment
      */
-    public void changeShipItemShipment(Shipment shipment) {
-        if(shipment != null && shipment.state != Shipment.S.PLAN) {
-            Validation.addError("", "涉及的运输单已经为" + shipment.state.label() + "状态, 只有"
-                    + Shipment.S.PLAN.label() + "状态的运输单才可调整.");
+    public void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
+        if(this.shipItems.stream()
+                .anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
+            Validation.addError("", String.format("当前采购计划已经存在运输单, 且该运输单不是 %s 状态.", Shipment.S.PLAN.label()));
             return;
         }
-        if(this.shipItems.size() == 0) {
-            // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
-            if(shipment == null) return;
-            shipment.addToShip(this);
+        if(shipment != null && shipment.state != Shipment.S.PLAN) {
+            Validation.addError("", String.format(
+                    "需要关联的运输单 %s 为 %s 状态, 只有 %s 状态的运输单才可调整.", shipment.id, shipment.state.label(),
+                    Shipment.S.PLAN.label()));
+            return;
+        }
+        if(shipment == null) {
+            // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
+            // 2. 用户更改了运输方式但未选择运输单
+            if(this.shipType == Shipment.T.EXPRESS || oldShipType != this.shipType) {
+                this.shipItems.forEach(GenericModel::delete);
+            }
         } else {
-            for(ShipItem shipItem : this.shipItems) {
-                if(this.shipType == Shipment.T.EXPRESS) {
-                    if(shipItem.shipment.state == Shipment.S.PLAN) {
-                        // 快递运输单调整, 运输项目全部删除, 重新设计.
-                        shipItem.delete();
-                    }
-                } else {
-                    if(shipment == null) return;
-                    Shipment originShipment = shipItem.shipment;
-                    shipItem.adjustShipment(shipment);
-                    if(Validation.hasErrors()) {
-                        shipItem.shipment = originShipment;
-                        shipItem.save();
-                        return;
-                    }
-                }
+            if(this.shipItems.isEmpty()) {
+                // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
+                shipment.addToShip(this);
+            } else {
+                // 采购计划已经有运输项目, 调整运输项的运输单
+                this.shipItems.stream()
+                        .filter(item -> item.shipment != shipment)
+                        .forEach(item -> {
+                            Shipment originShipment = item.shipment;
+                            item.adjustShipment(shipment);//调整运输项的运输单
+                            if(Validation.hasErrors()) {
+                                item.shipment = originShipment;
+                                item.save();
+                            }
+                        });
             }
         }
     }
@@ -929,7 +974,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fba = FBA.plan(this.selling.account, this);
         } catch(FBAInboundServiceMWSException e) {
             String errMsg = e.getMessage();
-            if(errMsg.contains("UNKNOWN_SKU")) {
+            if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
                 Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
                         this.selling.merchantSKU));
             } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
@@ -949,12 +994,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fba.dto = dto;
             fba.state = FBA.create(fba);
             this.fba = fba.doCreate();
+            this.centerId = fba.fbaCenter.centerId;
+            this.addressLine1 = fba.fbaCenter.addressLine1;
+            this.addressLine2 = fba.fbaCenter.addressLine2;
+            this.city = fba.fbaCenter.city;
+            this.name = fba.fbaCenter.name;
+            this.countryCode = fba.fbaCenter.countryCode;
+            this.stateOrProvinceCode = fba.fbaCenter.stateOrProvinceCode;
+            this.postalCode = fba.fbaCenter.postalCode;
+
             this.save();
-            new ERecordBuilder("shipment.createFBA")
-                    .msgArgs(this.id, this.sku, this.fba.shipmentId)
-                    .fid(this.id)
-                    .save();
+            new ERecordBuilder("shipment.createFBA").msgArgs(this.id, this.sku, this.fba.shipmentId).fid(this.id).save();
         } catch(FBAInboundServiceMWSException e) {
+            Logger.error(Webs.S(e));
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
         return fba;
@@ -1059,12 +1111,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        Set<Shipment> shipments = new HashSet<>();
-        for(ShipItem shipItem : this.shipItems) {
-            if(shipItem.shipment != null)
-                shipments.add(shipItem.shipment);
-        }
-        return new ArrayList<>(shipments);
+        return this.shipItems.stream()
+                .filter(shipItem -> shipItem.shipment != null)
+                .map(shipItem -> shipItem.shipment)
+                .collect(Collectors.toList());
     }
 
     public int qty() {
@@ -1073,9 +1123,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int realQty() {
-        int qty = this.qty() - this.fetchCheckTaskQcSample().intValue();
-        if(purchaseSample != null)
-            qty = qty - purchaseSample.intValue();
+        int qty = this.qty() - this.fetchCheckTaskQcSample();
+        if(purchaseSample != null) qty -= purchaseSample;
         return qty;
     }
 
@@ -1396,14 +1445,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 批量创建 FBA
+     * 批量创建 FBA, 返回的结果可以用来获取创建的 FBAShipment 列表
      *
      * @param unitIds
+     * @param dtos
+     * @return List<F.Promise<FBAShipment>>
      */
-    public static void postFbaShipments(List<Long> unitIds, List<CheckTaskDTO> dtos) {
-        List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
+    public static void postFbaShipments(final List<Long> unitIds,
+                                        final List<CheckTaskDTO> dtos) {
+        final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
         if(units.size() != unitIds.size() || units.size() != dtos.size()) {
-            Validation.addError("", "加载的数量");
+            Validation.addError("", "加载的数量不一致");
         }
         if(Validation.hasErrors()) return;
 
@@ -1417,7 +1469,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             } catch(Exception e) {
                 Logger.error(Webs.S(e));
-                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+                Validation.addError("", "向 Amazon 创建 Shipment 因 " + Webs.E(e) + " 原因失败.");
             }
         }
     }
@@ -1547,8 +1599,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String isship() {
-        CheckTask task = this.lastCheckedTask();
-        if(task != null) return task.isship.label();
+        if(this.haveTask()) {
+            CheckTask task = this.taskList.get(0);
+            if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
+                return task.isship.label();
+            } else if(task != null && task.isship == null && this.taskList.size() > 1) {
+                CheckTask secondTask = this.taskList.get(1);
+                if(secondTask.isship != null)
+                    return secondTask.isship.label();
+            }
+        }
         return null;
     }
 

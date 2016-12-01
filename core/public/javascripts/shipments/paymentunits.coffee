@@ -189,18 +189,19 @@ $ ->
       .modal('show')
   ).on('mouseenter', 'td:has(.icon-search)', (e) ->
     $td = $(@)
+    $table = $td.parents('table.paymentInfo')
     if $td.data('shipitemid')
       if $td.data('shipItem')
         text = _.template($('#shipItem-template').html())({itm: $td.data('shipItem')})
         $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
       else
-        LoadMask.mask()
+        LoadMask.mask($table)
         $.ajax("/shipitem/#{$td.data('shipitemid')}.json", {dataType: 'json', type: 'GET'})
           .done((r) ->
             $td.data('shipItem', r)
             text = _.template($('#shipItem-template').html())({itm: r})
             $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
-            LoadMask.unmask()
+            LoadMask.unmask($table)
           )
     false
   )

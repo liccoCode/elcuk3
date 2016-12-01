@@ -14,6 +14,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Amazon FBA 操作
@@ -44,7 +45,7 @@ public class FBA {
 
         // 要发送的货物
         plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
-                Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
+                Collections.singletonList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
         //单账户跨市场相关的处理
         plan.setMarketplace(unit.selling.market.amid().name());
@@ -331,7 +332,7 @@ public class FBA {
                 null,
                 unit.qty(),
                 null
-        );
+        );//.withPrepDetailsList(new PrepDetailsList(Collections.singletonList(new PrepDetails("Labeling", "SELLER"))))
     }
 
     /**
@@ -341,19 +342,14 @@ public class FBA {
      * @return
      */
     private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems(List<ProcureUnit> units) {
-
-        List<InboundShipmentItem> items = new ArrayList<>();
-        for(ProcureUnit unit : units) {
-            items.add(new InboundShipmentItem(
-                    null,
-                    fixHistoryMSKU(unit.selling.merchantSKU),
-                    null,
-                    unit.qty(),
-                    null,
-                    null,
-                    null));
-        }
-        return items;
+        return units.stream().map(unit -> new InboundShipmentItem(
+                null,
+                fixHistoryMSKU(unit.selling.merchantSKU),
+                null,
+                unit.qty(),
+                null,
+                null,
+                null)).collect(Collectors.toList());
     }
 
 

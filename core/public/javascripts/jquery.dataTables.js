@@ -1,4 +1,6 @@
 /**
+ *
+ * 相关文档: https://legacy.datatables.net/release-datatables/examples/basic_init/filter_only.html
  * @summary     DataTables
  * @description Paginate, search and sort HTML tables
  * @version     1.9.4

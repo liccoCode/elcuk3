@@ -131,4 +131,16 @@ public abstract class Post<T> implements Serializable, Cloneable {
         Duration duration = new Duration(fromD, toD);
         return duration.getStandardDays();
     }
+
+    /**
+     * 当 count 小于等于 perSize 时(也就是查询出来的结果只够一页输出展示)
+     * 将 page 设置为 1, 避免翻页后用户再进行搜索导致没有数据
+     *
+     * @return
+     */
+    public int page() {
+        this.count = this.count(this.params());
+        if(this.count <= this.perSize) this.page = 1;
+        return this.page;
+    }
 }

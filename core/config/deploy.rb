@@ -31,7 +31,7 @@ set :deploy_to, '/root/cap_elcuk2'
 set :linked_dirs, fetch(:linked_dirs, []).push('core/logs')
 
 # Default value for default_env is {}
-set :default_env, { JAVA_HOME: "/opt/jdk1.8.0_102", PATH: "$JAVA_HOME/bin:$PATH", CLASSPATH: "$JAVA_HOME/lib" }
+set :default_env, {JAVA_HOME: '/opt/jdk1.8.0_102', PATH: '$JAVA_HOME/bin:$PATH', CLASSPATH: '$JAVA_HOME/lib'}
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
@@ -40,21 +40,20 @@ set :keep_releases, 3
 set :ssh_options, {keys: %w(/home/dev/.ssh/dev.key)}
 
 # 注册 play 命令
-SSHKit.config.command_map[:play] = "/opt/play-1.4.2/play"
-
+SSHKit.config.command_map[:play] = '/opt/play-1.4.2/play'
 
 namespace :deploy do
-
   task :restart do
     on roles(:app) do
       within("#{current_path}/core") do
-        execute(:play, "deps --sync")
+        execute(:play, 'deps --sync')
         execute(:supervisorctl, 'restart', 'erp')
       end
     end
   end
 
   # 在完成发布之后
-  after 'deploy:publishing', "conf:application"
+  after 'deploy:publishing', 'conf:application'
+  after 'deploy:published', :purge_cache
   after 'deploy:published', :restart
 end

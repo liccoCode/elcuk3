@@ -41,12 +41,14 @@
         ${selling.aps?.sortTitle()}
           <br>
           <b>NEW</b><br>
-            #{if models.OperatorConfig.getVal("brandname")=='EASYACC'}
-              EA${selling.listing?.product?.sku.substring(2)}
+            #{if includeSku}
+                #{if models.OperatorConfig.getVal("brandname")=='EASYACC'}
+                  EA${selling.listing?.product?.sku?.substring(2)}
+                #{/if}
+                #{else }
+                ${selling.listing?.product?.sku}
+                #{/else}
             #{/if}
-            #{else }
-            ${selling.listing?.product?.sku}
-            #{/else}
         </td>
       #{/list}
   </tr>

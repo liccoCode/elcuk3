@@ -223,12 +223,12 @@
     #{list items:pro.sellingPoint, as:'point'}
       <tr>
         <td class="span4">
-          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">${point
-          .title}</textarea>
+          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">
+          ${point.title}</textarea>
         </td>
         <td>
-          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">${point
-          .content}</textarea>
+          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">
+          ${point.content}</textarea>
         </td>
         <td>
           <a class="btn" name='delete_selling_point_row'>删除</a>

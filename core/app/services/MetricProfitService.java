@@ -7,16 +7,17 @@ import helper.Currency;
 import models.market.M;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.facet.FacetBuilders;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -114,59 +115,51 @@ public class MetricProfitService {
 
     /**
      * SKU总销售额
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Float esSaleFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                                .field("cost_in_usd")
-                                .facetFilter(this.filterbuilder(true)
-                                        //销售费用项目
-                                        .must(FilterBuilders.termFilter("fee_type", "productcharges")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                //销售费用项目
+                                .must(QueryBuilders.termQuery("fee_type", "productcharges")))
+                        .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * SKU亚马逊费用
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Float esAmazonFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                                .field("cost_in_usd")
-                                .facetFilter(this.filterbuilder(true)
-                                        //FBA亚马逊项目
-                                        .must(FilterBuilders.termFilter("fee_type", "commission")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                //销售费用项目
+                                .must(QueryBuilders.termQuery("fee_type", "commission")))
+                        .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * SKUFBA费用
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Float esFBAFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                                .field("cost_in_usd")
-                                .facetFilter(this.filterbuilder(true)
-                                        //FBAFBA项目
-                                        .must(FilterBuilders.prefixFilter("fee_type", "fba")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                //销售费用项目
+                                .must(QueryBuilders.prefixQuery("fee_type", "fba")))
+                        .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
     }
 
     /**
      * 总销量
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Float esSaleQty() {
         BoolQueryBuilder qb = (BoolQueryBuilder) querybuilder();
@@ -174,9 +167,9 @@ public class MetricProfitService {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(qb)
-                .facet(FacetBuilders.statisticalFacet("units")
-                                .field("quantity")
-                                .facetFilter(this.filterbuilder(true))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(true))
+                        .subAggregation(AggregationBuilders.stats("units").field("quantity"))
                 ).size(0);
         return getEsTermsTotal(search, "orderitem");
     }
@@ -225,10 +218,8 @@ public class MetricProfitService {
         //运费的平均单价=运费/SKu的数量
         Integer skuqty = seainfo._2 + airinfo._2 + expressinfo._2;
         float price = 0;
-        if(skuqty != 0) {
-            price = (seainfo._1 + airinfo._1 + expressinfo._1) / skuqty;
-        }
-        /**计算标准运价**/
+        if(skuqty != 0) price = (seainfo._1 + airinfo._1 + expressinfo._1) / skuqty;
+        //计算标准运价
         if(price == 0) {
             return calDefaultPrice();
         }
@@ -290,43 +281,45 @@ public class MetricProfitService {
 
     /**
      * 不同运输方式运价
-     *
-     * @deprecated facetFilter 查询需要替换
+     * <p>
+     * 从ES同时查出符合sku条件的列表，以及按照ship_type分组的求和
      */
     public F.T3<F.T2<Float, Integer>, F.T2<Float, Integer>, F.T2<Float, Integer>> shipTypePrice() {
-        /**
-         * 从ES同时查出符合sku条件的列表，以及按照ship_type分组的求和
-         */
-        TermsFilterBuilder orfilter = FilterBuilders.termsFilter("ship_type", "sea", "express", "air");
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .postFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("sku",
-                        this.parseEsSku().toLowerCase())).must(this.filterbuilder(false))).size(100000)
-                .facet(FacetBuilders.termsStatsFacet("units")
-                        .keyField("ship_type")
-                        .valueField("cost_in_usd")
-                        .facetFilter(this.filterbuilder(false).must(orfilter
-                                ).must(FilterBuilders.termFilter("sku", this.parseEsSku().toLowerCase()))
-                        ));
+                .postFilter(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery("sku", this.parseEsSku().toLowerCase()))
+                        .must(this.filterbuilder(false)))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(false)
+                                .must(QueryBuilders.termsQuery("ship_type", "sea", "express", "air"))
+                                .must(QueryBuilders.termQuery("sku", this.parseEsSku().toLowerCase()))
+                        ).subAggregation(AggregationBuilders.terms("units").field("ship_type")
+                                .subAggregation(AggregationBuilders.stats("cost_sum").field("cost_in_usd"))
+                        )
+                ).size(10000);
         //总运费
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
         if(esresult._1 == null) {
             return new F.T3<>(new F.T2<>(0f, 0), new F.T2<>(0f, 0), new F.T2<>(0f, 0));
         }
-        JSONArray feearray = esresult._1.getJSONArray("terms");
+        JSONArray feearray = esresult._1.getJSONArray("buckets");
         float seatotalfee = 0f;
         float airtotalfee = 0f;
         float expresstotalfee = 0f;
         for(Object o : feearray) {
             JSONObject term = (JSONObject) o;
-            if(term.getString("term").equals("sea")) {
+            float costSum = Optional.ofNullable(term.getJSONObject("cost_sum"))
+                    .map(cost -> cost.getFloat("sum"))
+                    .orElse(0f);
+            if(term.getString("key").equals("sea")) {
                 //海运总运费
-                seatotalfee = term.getFloat("total");
-            } else if(term.getString("term").equals("air")) {
+                seatotalfee = costSum;
+            } else if(term.getString("key").equals("air")) {
                 //空运总运费
-                airtotalfee = term.getFloat("total");
-            } else if(term.getString("term").equals("express")) {
+                airtotalfee = costSum;
+            } else if(term.getString("key").equals("express")) {
                 //快递总运费
-                expresstotalfee = term.getFloat("total");
+                expresstotalfee = costSum;
             }
         }
         /**
@@ -364,21 +357,17 @@ public class MetricProfitService {
 
     /**
      * 关税和VAT单价
-     *
-     * @deprecated facetFilter 查询需要替换
      */
     public Float esVatPrice() {
         //关税
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .postFilter(FilterBuilders.boolFilter().must(FilterBuilders.termsFilter("fee_type",
-                        "banlancedutyandvat", "dutyandvat"))).size(100000)
-                .facet(FacetBuilders.statisticalFacet("units")
-                        .field("cost_in_usd")
-                        .facetFilter(this.filterbuilder(false).must(
-                                        FilterBuilders.termsFilter("fee_type",
-                                                "banlancedutyandvat", "dutyandvat")
-                                )
-                        ));
+                .postFilter(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(false)
+                                .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat"))
+                        ).subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
+                ).size(10000);
         //总关税和VAT
         F.T2<JSONObject, JSONArray> esresult = getEsShipTerms(search, "shippayunit");
         if(esresult._1 == null)
@@ -403,7 +392,6 @@ public class MetricProfitService {
             price = (Float) rows.get(0).get("declaredvalue");
         }
         if(price == null) price = 0f;
-
         return price * param;
     }
 
@@ -604,7 +592,7 @@ public class MetricProfitService {
     }
 
     /**
-     * 查询ES的结果
+     * 获取 ES 查询结果
      *
      * @param search
      * @param estype
@@ -612,20 +600,13 @@ public class MetricProfitService {
      */
     private float getEsTermsTotal(SearchSourceBuilder search, String estype) {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), estype, search);
-        if(result == null) {
-            throw new FastRuntimeException("ES连接异常!");
-        }
-        JSONObject facets = result.getJSONObject("facets");
-        float totalcost = 0;
-        if(facets != null) {
-            JSONObject units = facets.getJSONObject("units");
-            totalcost = units.getFloat("total");
-        }
-        return totalcost;
+        return Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getFloat("sum"))
+                .orElse(0f);
     }
 
     /**
-     * 查询ES运费的结果
+     * 获取查询 ES 运费的结果
      *
      * @param search
      * @param estype
@@ -633,20 +614,8 @@ public class MetricProfitService {
      */
     private F.T2<JSONObject, JSONArray> getEsShipTerms(SearchSourceBuilder search, String estype) {
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), estype, search);
-        if(result == null) {
-            throw new FastRuntimeException("ES连接异常!");
-        }
-        JSONObject facets = result.getJSONObject("facets");
-        JSONObject units = null;
-        if(facets != null) {
-            units = facets.getJSONObject("units");
-        }
-        JSONObject hits = result.getJSONObject("hits");
-        JSONArray hitmentids = null;
-        if(facets != null) {
-            hitmentids = hits.getJSONArray("hits");
-        }
-        return new F.T2<>(units, hitmentids);
+        return new F.T2(Optional.of(J.dig(result, "aggregations.aggs_filters.units")),
+                Optional.of(result.getJSONObject("hits")).map(hits -> hits.getJSONArray("hits")));
     }
 
     /**
@@ -687,9 +656,9 @@ public class MetricProfitService {
      *
      * @return
      */
-    private BoolFilterBuilder filterbuilder(boolean dateFilter) {
-        DateTime fromD = null;
-        DateTime toD = null;
+    private BoolQueryBuilder filterbuilder(boolean dateFilter) {
+        DateTime fromD;
+        DateTime toD;
         if(this.market == null) {
             fromD = new DateTime(begin);
             toD = new DateTime(end);
@@ -698,15 +667,17 @@ public class MetricProfitService {
             toD = this.market.withTimeZone(end);
         }
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         if(this.market != null) {
-            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()));
+            boolQuery.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
         if(dateFilter) {
-            boolFilter.must(FilterBuilders.rangeFilter("date").gte(fromD.toString(isoFormat))
+            boolQuery.must(QueryBuilders.rangeQuery("date")
+                    .gte(fromD.toString(isoFormat))
                     .lt(toD.toString(isoFormat)));
         }
-        return boolFilter;
+        return boolQuery;
     }
 
 
@@ -718,7 +689,7 @@ public class MetricProfitService {
         DateHistogramBuilder builder = AggregationBuilders.
                 dateHistogram("units")
                 .field("date")
-                .interval(DateHistogram.Interval.WEEK)
+                .interval(DateHistogramInterval.WEEK)
                 .subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname));
 
         BoolQueryBuilder qb = querybuilder(true, categoryFilter);
@@ -732,9 +703,6 @@ public class MetricProfitService {
                 .aggregation(builder
                 )
                 .size(0);
-
-        Logger.info("salefeeline:::" + search.toString());
-
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
@@ -796,13 +764,14 @@ public class MetricProfitService {
         DateHistogramBuilder builder = AggregationBuilders.
                 dateHistogram("units")
                 .field("date")
-                .interval(DateHistogram.Interval.DAY);
+                .interval(DateHistogramInterval.DAY);
         /**
          * 求平均值
          */
         if(caltype.equals("avg")) {
-            builder.subAggregation(
-                    AggregationBuilders.avg("fieldvalue").script("doc['cost_in_usd'].value/doc['quantity'].value"));
+            builder.subAggregation(AggregationBuilders
+                    .avg("fieldvalue")
+                    .script(new Script("doc['cost_in_usd'].value/doc['quantity'].value")));
         }
         /**
          * 求和
@@ -835,10 +804,12 @@ public class MetricProfitService {
     public Float esProcureQty() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .facet(FacetBuilders.statisticalFacet("units")
-                                .field("quantity")
-                ).size(0);
-        return getEsTermsTotal(search, "procurepayunit");
+                .aggregation(AggregationBuilders.stats("units").field("quantity"))
+                .size(0);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "procurepayunit", search);
+        return Optional.of(J.dig(result, "aggregations.units"))
+                .map(units -> units.getFloat("sum"))
+                .orElse(0f);
     }
 
 

@@ -12,27 +12,28 @@ $ ->
     submitForm($("#downloadFBAZIP"))
     $('#box_number_modal').modal('hide')
   ).on('click', '#downloadFBAZIP', (e) ->
-    checkboxList = $('input[name="pids"]:checked')
+    checkboxs = $('input[name="pids"]:checked')
     expressid = $("input[name='expressid']").val()
-    unitIds = []
-    checkboxList.each(->
-      unitIds.push($(@).val() + "-" + $(@).data("boxnum"))
-    )
-    if unitIds.length is 0
-      noty({text: '请选择需要下载的采购单元', type: 'error'})
-      return false
+    expressids = if _.isEmpty(expressid) then [] else expressid.split(",")
 
-    $table = $("#box_number_table")[0]
-    # 删除表格内所有 tr
-    while($table.hasChildNodes())
-      $table.removeChild($table.lastChild)
-    # 使用选择的采购单 ID 生成新的 tr
-    _.each(unitIds, (value) ->
-      if expressid.indexOf(',' + value + ',') > 0
-        $tr = parseDom1("<tr><td>#{value.split('-')[0]}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='#{value.split('-')[1]}' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
-      else
-        $tr = parseDom1("<tr><td>#{value.split('-')[0]}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='#{value.split('-')[1]}' maxlength='3'/><span class='add-on'>箱(不加后缀)</span></div></td></tr>")
-      $table.appendChild($tr)
+    if _.isEmpty(checkboxs)
+      noty({text: '请选择需要下载的采购单元', type: 'error'})
+      return true
+
+    $table = $("#box_number_table")
+    $table.find('tr').remove() # 删除表格内所有 tr
+    _.each(checkboxs, (checkbox) ->
+      $checkbox = $(checkbox)
+      tr = "<tr>" +
+        "<td>#{$checkbox.val()}</td>" +
+        "<td><div class='input-append'>" +
+        "<input type='text' class='input-mini' name='boxNumbers' value='#{$checkbox.data('boxnum') + $checkbox.data('lastcartonnum')}' maxlength='3'/>" +
+        "<span class='add-on'>" +
+        "箱 #{if expressids.includes($checkbox.val()) > 0 then '(不加后缀)' else ''}" +
+        "</span>" +
+        "</div></td>" +
+        "</tr>"
+      $table.append(tr)
     )
     $('#box_number_modal').modal('show')
   ).on("click", "a[name='boxLabelBtn']", (e) ->
@@ -48,7 +49,8 @@ $ ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
-    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+    return if _.isEmpty(unitIds)
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
@@ -76,7 +78,8 @@ $ ->
     checkboxList = $('input[name="pids"]')
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
-    $("#refresh_div").load("/Deliveryments/refreshFbaCartonContentsByIds", unitIds: unitIds, ->
+    return if _.isEmpty(unitIds)
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()

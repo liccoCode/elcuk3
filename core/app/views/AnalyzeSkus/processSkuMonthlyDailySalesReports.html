@@ -16,7 +16,7 @@
     <td>${dto.sku}</td>
     <td>${dto.market}</td>
       #{list items:months, as:'month'}
-      <td>${dto.sales.get(month).format("#")}</td>
+        <td>${dto.sales.get(month).format("#")}</td>
       #{/list}
   #{/list}
   </tbody>

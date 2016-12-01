@@ -4,16 +4,18 @@
     #{script 'highstock.js'/}
     #{script 'jquery.filedrop.js' /}
     #{script 'component/dropUpload.coffee'/}
-    #{script 'products/product_detail.coffee'/}
+    #{script 'products/show.coffee'/}
     #{script 'products/skulinechart.coffee'/}
+    #{script 'localResize.coffee'/}
+    #{script 'localResize.ui.coffee'/}
 #{/set}
+#{errorMsgs /}
+#{flash_alert /}
 
 #{if pro == null}
 读取的 Product 不存在!
 #{/if}
 #{else }
-    #{errorMsgs /}
-    #{flash_alert /}
 <ul class="nav nav-tabs">
   <li class="active">
     <a href="#basicinfo" data-toggle='tab'>基本信息</a>
@@ -24,20 +26,23 @@
   <li>
     <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
   </li>
-
   <li>
     <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
   </li>
   <li>
     <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
   </li>
+    #{power.ck "whouses.index"}
+      <li>
+        <a href="#whouseAttrs" data-toggle="tab" id="showWhouseAttr">仓库信息</a>
+      </li>
+    #{/power.ck}
 </ul>
 
 <div id="selling_tabs" class="tab-content">
   <div class="tab-pane fade active in" id='basicinfo'>
       #{include 'Products/_basicInfo.html'/}
   </div>
-
   <div class="tab-pane fade" id='extends'>
     <div class="row-fluid">
       <form class="search_form" id="select_template_form">
@@ -53,7 +58,7 @@
 
         #{info_row title:'Attributes'/}
       <div id="extends_atts_home">
-          #{include 'Products/attrs.html'/}
+          #{include 'Products/_attrs.html'/}
       </div>
     </div>
   </div>
@@ -81,11 +86,10 @@
 
   <div class="tab-pane fade" id='procureinfo'>
     <input type="hidden" name="skuprocurevalue" value="0">
-
     <div class="row-fluid">
       <table class="table table-bordered">
         <tr>
-          <td class="span2" style="font:bold">总采购数量</td>
+          <td class="span2">总采购数量</td>
           <td>${procureqty}</td>
         </tr>
       </table>
@@ -99,6 +103,10 @@
       <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
     </div>
   </div>
-
+    #{power.ck "whouses.index"}
+      <div class="tab-pane fade" id='whouseAttrs'>
+          #{include 'Products/_whouseAttrs.html'/}
+      </div>
+    #{/power.ck}
 </div>
 #{/else}

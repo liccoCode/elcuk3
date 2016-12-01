@@ -77,8 +77,8 @@ public class Selling extends GenericModel {
         DOWN
     }
 
-    /*
-     * Selling 的生命周期
+    /**
+     * 生命周期
      */
     public enum SC {
         /**
@@ -129,7 +129,6 @@ public class Selling extends GenericModel {
 
         public abstract String label();
     }
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
@@ -345,9 +344,14 @@ public class Selling extends GenericModel {
     }
 
 
+    /**
+     * @return
+     * @deprecated
+     */
     public byte[] downloadFnSkuLabel() {
         if(StringUtils.isBlank(this.fnSku))
             throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
+        this.account.loginAmazonSellerCenter();
         synchronized(this.account.cookieStore()) {
             Map<String, String> params = GTs.MapBuilder
                     .map("labelType", "ItemLabel_A4_27")

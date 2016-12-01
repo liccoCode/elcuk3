@@ -8,16 +8,15 @@ import models.market.Orderr;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import play.Logger;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.libs.F;
@@ -202,64 +201,53 @@ public class MetricAmazonFeeService {
             .build();
 
     public Map<String, Map<String, BigDecimal>> orderFeesCost() {
-        SearchSourceBuilder search = new SearchSourceBuilder().size(0);
         FilterAggregationBuilder dateAndMarketAggregation = AggregationBuilders.filter("date_and_market_filters")
                 .filter(dateAndmarketFilters());
         //Orders & Refunds Fees
         for(Orderr.S state : Arrays.asList(Orderr.S.SHIPPED, Orderr.S.REFUNDED)) {
-            FilterAggregationBuilder feeCategoryAggregation = AggregationBuilders.filter(stateToFeeCategory(state));
-
-            //套上一层便于区分
-            feeCategoryAggregation.filter(FilterBuilders.matchAllFilter());
-            for(String feeType : Arrays
-                    .asList("productcharges", "promorebates", "commission", "other")) {
+            FilterAggregationBuilder feeCategoryAggregation = AggregationBuilders.filter(stateToFeeCategory(state))
+                    .filter(QueryBuilders.matchAllQuery());
+            for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
                 //使用 cost 的正负来判断是属于 Order 还是 Refunds
-                FilterAggregationBuilder feeTypeAggregation = AggregationBuilders.filter(feeType);
-                feeTypeAggregation.filter(
-                        FilterBuilders.boolFilter().must(
-                                FilterBuilders.termsFilter("fee_type", TypeMaps.get(feeType)),
-                                costRangeFilter(state, feeType)
-                        )
-                );
-
-                feeTypeAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
-                feeCategoryAggregation.subAggregation(feeTypeAggregation);
+                feeCategoryAggregation.subAggregation(
+                        AggregationBuilders.filter(feeType)
+                                .filter(QueryBuilders.boolQuery()
+                                        .must(QueryBuilders.termsQuery("fee_type", TypeMaps.get(feeType)))
+                                        .must(costRangeFilter(state, feeType))
+                                ).subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost")));
             }
             dateAndMarketAggregation.subAggregation(feeCategoryAggregation);
         }
         //Other transactionType: free_replacement_refund_items incorrect_fees_items reversalreimbursement
-        // REVERSAL_REIMBURSEMENT
-
-        //TODO Selling Fees 好像 Amazon 统计的是 ServiceFees
-        FilterAggregationBuilder fbaFeeAggregation = AggregationBuilders.filter("selling_fees");
-        fbaFeeAggregation.filter(
-                FilterBuilders.termsFilter("fee_type",
-                        Arrays.asList("fbaweightbasedfee", "fbaperorderfulfilmentfee", "fbaperunitfulfillmentfee"))
+        //REVERSAL_REIMBURSEMENT
+        //Selling Fees 好像 Amazon 统计的是 ServiceFees
+        dateAndMarketAggregation.subAggregation(
+                AggregationBuilders.filter("selling_fees")
+                        .filter(QueryBuilders.termsQuery("fee_type",
+                                Arrays.asList("fbaweightbasedfee", "fbaperorderfulfilmentfee",
+                                        "fbaperunitfulfillmentfee"))
+                        ).subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"))
         );
-        fbaFeeAggregation.subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"));
-        dateAndMarketAggregation.subAggregation(fbaFeeAggregation);
-
-        //Other Transactions
-        search.aggregation(dateAndMarketAggregation);
-        Logger.info("orderFeesCost:::" + search.toString());
-
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .size(0)
+                .aggregation(dateAndMarketAggregation);
         JSONObject result = ES.search("elcuk2", "salefee", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         return readFeesCostInESResult(result);
     }
 
-    public BoolFilterBuilder dateAndmarketFilters() {
+    public BoolQueryBuilder dateAndmarketFilters() {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-        return FilterBuilders.boolFilter()
-                .must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
-                .must(FilterBuilders.rangeFilter("date")
+        return QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()))
+                .must(QueryBuilders.rangeQuery("date")
                         .gte(this.market.withTimeZone(Dates.morning(this.from)).toString(isoFormat))
                         .lt(this.market.withTimeZone(Dates.night(this.to)).toString(isoFormat))
                 );
     }
 
-    public RangeFilterBuilder costRangeFilter(Orderr.S state, String feeType) {
-        RangeFilterBuilder costRangeFilter = FilterBuilders.rangeFilter("cost");
+    public RangeQueryBuilder costRangeFilter(Orderr.S state, String feeType) {
+        RangeQueryBuilder costRangeFilter = QueryBuilders.rangeQuery("cost");
         if(state == Orderr.S.SHIPPED) {
             if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType) ||
                     "other".equalsIgnoreCase(feeType)) {

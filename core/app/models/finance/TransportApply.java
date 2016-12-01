@@ -5,6 +5,7 @@ import helper.Dates;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.view.dto.ApplyPaymentDTO;
@@ -21,6 +22,8 @@ import javax.persistence.OneToOne;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -107,10 +110,8 @@ public class TransportApply extends Apply {
         if(shipments.size() != shipmentId.size())
             Validation.addError("", "提交的运输单参数与系统中的不符.");
 
-        Set<Cooperator> coopers = new HashSet<>();
-        for(Shipment ship : shipments) {
-            if(ship.cooper != null) coopers.add(ship.cooper);
-        }
+        Set<Cooperator> coopers = shipments.stream().filter(ship -> ship.cooper != null).map(ship -> ship.cooper)
+                .collect(Collectors.toSet());
 
         if(coopers.size() > 1)
             Validation.addError("", "请仅对同一个运输商.");
@@ -196,5 +197,43 @@ public class TransportApply extends Apply {
             if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
         }
         return apply;
+    }
+
+    /**
+     * 最后 10 个运输单
+     *
+     * @return
+     */
+    public List<Shipment> lastShipments() {
+        return this.shipments.stream().limit(10).collect(Collectors.toList());
+    }
+
+    /**
+     * 输出给 typeahead 所使用的 source
+     * <p>
+     * 需要支持: 运输单 ID 、TrackNo、FBA、备注
+     *
+     * @return
+     */
+    public List<String> pickSource(String search) {
+        List<String> sources = new ArrayList<>();
+        for(Shipment shipment : this.shipments) {
+            sources.addAll(shipment.fbas().stream().map(fba -> fba.shipmentId).collect(Collectors.toList()));
+            sources.addAll(Stream.concat(Stream.of(shipment.id, shipment.trackNo),
+                    shipment.fees.stream().map(fee -> fee.memo)).collect(Collectors.toList())
+            );
+        }
+        sources.addAll(Arrays.asList(M.amazonVals()).stream()
+                .map(M::marketAndWhouseMapping)
+                .collect(Collectors.toList()));
+
+        if(StringUtils.isNotBlank(search)) {
+            return sources.stream()
+                    .filter(source -> StringUtils.isNotBlank(source) &&
+                            source.toUpperCase().contains(search.toUpperCase()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+        }
+        return sources.stream().filter(StringUtils::isNotBlank).limit(10).collect(Collectors.toList());
     }
 }

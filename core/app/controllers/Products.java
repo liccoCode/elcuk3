@@ -24,9 +24,9 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 产品模块的基本的类别的基本操作在此
@@ -56,7 +56,6 @@ public class Products extends Controller {
     public static void index(ProductPost p) {
         if(p == null) p = new ProductPost();
         List<Product> prods = p.query();
-
         render(prods, p);
     }
 
@@ -95,7 +94,11 @@ public class Products extends Controller {
         render("Products/show.html", pro);
     }
 
-
+    /**
+     * TODO:: 重构
+     *
+     * @param pro
+     */
     public static void update(Product pro) {
         try {
             validation.valid(pro);
@@ -108,8 +111,7 @@ public class Products extends Controller {
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);
             pro.save();
-            List<String> logs = new ArrayList<>();
-            logs.addAll(dbpro.beforeDoneUpdate(pro));
+            List<String> logs = dbpro.beforeDoneUpdate(pro);
             if(logs.size() > 0) {
                 new ElcukRecord(Messages.get("product.update"),
                         Messages.get("action.base", StringUtils.join(logs, "<br>")),
@@ -341,15 +343,14 @@ public class Products extends Controller {
         Product pro = Product.findById(sku);
         Template template = Template.findById(templateId);
         List<ProductAttr> atts = pro.productAttrs;
-        for(TemplateAttribute templateAttribute : template.templateAttributes) {
-            if(!atts.contains(templateAttribute.attribute)) {
-                ProductAttr productAttr = new ProductAttr();
-                productAttr.product = pro;
-                productAttr.attribute = templateAttribute.attribute;
-                productAttr.save();
-                atts.add(productAttr);
-            }
-        }
+        template.templateAttributes.stream().filter(templateAttribute -> !atts.contains(templateAttribute.attribute))
+                .forEach(templateAttribute -> {
+                    ProductAttr productAttr = new ProductAttr();
+                    productAttr.product = pro;
+                    productAttr.attribute = templateAttribute.attribute;
+                    productAttr.save();
+                    atts.add(productAttr);
+                });
         Collections.sort(atts);
         render(pro);
     }
@@ -424,8 +425,7 @@ public class Products extends Controller {
      */
     public static void sameSku(String sku) {
         List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
-        List<String> skus = new ArrayList<>();
-        for(Product p : products) skus.add(p.sku);
+        List<String> skus = products.stream().map(p -> p.sku).collect(Collectors.toList());
         renderJSON(J.json(skus));
     }
 
@@ -437,5 +437,16 @@ public class Products extends Controller {
     public static void findProductName(String sku) {
         Product pro = Product.findById(sku);
         renderJSON(J.json(GTs.MapBuilder.map("name", pro.abbreviation).build()));
+    }
+
+    /**
+     * 输出给 typeahead 所使用的 source
+     * <p>
+     * 需要支持: SKU、Family、附加属性、Selling 的 Fnsku
+     *
+     * @param search
+     */
+    public static void source(String search) {
+        renderJSON(J.json(Product.pickSourceItems(search)));
     }
 }

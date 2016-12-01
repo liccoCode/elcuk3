@@ -422,7 +422,8 @@ public class Orderr extends GenericModel {
         List<OrderrVO> vos = new ArrayList<>();
         List<List<OrderrVO>> results = Promises.forkJoin(new Promises.DBCallback<List<OrderrVO>>() {
             @Override
-            public List<OrderrVO> doJobWithResult(M m) {
+            public List<OrderrVO> doJobWithResult(Object param) {
+                M m = (M) param;
                 return new OrderrQuery().dashBoardOrders(
                         m.withTimeZone(pre7Day).toDate(),
                         m.withTimeZone(now.toDate()).toDate(),
@@ -435,9 +436,7 @@ public class Orderr extends GenericModel {
                 return "Orderr.frontPageOrderTable";
             }
         });
-        for(List<OrderrVO> result : results) {
-            vos.addAll(result);
-        }
+        results.forEach(vos::addAll);
 
         for(OrderrVO vo : vos) {
             String key = Dates.date2Date(vo.market.toTimeZone(vo.createDate));

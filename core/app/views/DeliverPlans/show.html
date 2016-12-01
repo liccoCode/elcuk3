@@ -7,12 +7,12 @@
     #{script 'analyzes/timeline.coffee'/}
     #{script 'deliveryments/show.coffee'/}
     #{script 'deliverplans/show.coffee'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+    #{script 'deliveryments/fba_carton_contents.coffee'/}
 #{/set}
 
 #{errorMsgs /}
-
 #{flash_alert /}
-
 <div class="row-fluid">
   <div class="span12">
     <form method="post" id="plan_form">
@@ -88,10 +88,24 @@
         解除
       </a>
     #{/power.ck}
+    #{power.ck 'fbas.deploytoamazon'}
+      <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("DeliverPlans", dp.id)}' data-method="POST"
+         id="deployFBAs"
+         class="btn btn-success">
+        批量创建FBA</a>
+      <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents("DeliverPlans", dp.id)}' data-method="POST"
+         id="updateFbaCartonContents" class="btn btn-success">
+        批量更新FBA箱内包装信息</a>
+    #{/power.ck}
+      <a href="javascript:void(0);" data-url="@{FBAs.downloadZip("DeliverPlans", dp.id)}" data-method="POST"
+         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
+        <i class="icon-download-alt"></i>下载FBA ZIP 包
+      </a>
     </div>
   </div>
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
-
+#{render 'Deliveryments/_box_number_model.html'/}
+#{render 'Deliveryments/_fba_carton_contents.html'/}
 </form>
 
 #{info_row title:'可添加进入[出货单]的[采购单元]'/}
