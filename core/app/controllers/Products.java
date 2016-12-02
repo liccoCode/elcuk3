@@ -59,6 +59,7 @@ public class Products extends Controller {
         render(prods, p);
     }
 
+    @Check("products.whouseattrs")
     public static void whouseAttrs(ProductPost p) {
         if(p == null) p = new ProductPost();
         Product pro = p.pickup();
@@ -105,6 +106,7 @@ public class Products extends Controller {
      *
      * @param pro
      */
+    @Check("products.update")
     public static void update(Product pro) {
         try {
             validation.valid(pro);

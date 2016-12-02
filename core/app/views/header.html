@@ -208,7 +208,9 @@
                   <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
               <li class="divider"></li>
-              <li><a href="@{Products.whouseAttrs()}">产品</a></li>
+                #{power.ck "products.whouseattrs"}
+                  <li><a href="@{Products.whouseAttrs()}">产品</a></li>
+                #{/power.ck}
                 #{power.ck "whouseitems.index"}
                   <li><a href="@{WhouseItems.index()}">库存</a></li>
                 #{/power.ck}

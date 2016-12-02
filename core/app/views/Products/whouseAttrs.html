@@ -78,11 +78,13 @@
                  class="input-mini"/>
         </td>
       </tr>
-      <tr>
-        <td colspan="4">
-          <a class="btn btn-success" id="save_whouse_atts_btn">保存</a>
-        </td>
-      </tr>
+        #{power.ck "products.update"}
+          <tr>
+            <td colspan="4">
+              <a class="btn btn-success" id="save_whouse_atts_btn">保存</a>
+            </td>
+          </tr>
+        #{/power.ck}
     </table>
   </form>
 
@@ -96,11 +98,13 @@
       <ul class="thumbnails uploaded"></ul>
     </div>
   </div>
-  <div class="row-fluid">
-    <div id="file_home" data-fid="${pro.sku}" class="row-fluid"></div>
-    <input type="button" class="btn btn-default btn-block" value="上传" id="whouse_attrs_attach_btn"
-           data-loading="正在上传">
-  </div>
+    #{power.ck "products.update"}
+      <div class="row-fluid">
+        <div id="file_home" data-fid="${pro.sku}" class="row-fluid"></div>
+        <input type="button" class="btn btn-default btn-block" value="上传" id="whouse_attrs_attach_btn"
+               data-loading="正在上传">
+      </div>
+    #{/power.ck}
 </div>
 #{/if}
 #{else}
