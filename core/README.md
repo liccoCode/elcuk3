@@ -27,8 +27,6 @@ ROOT_URL="http://127.0.0.1:9000"
 KOD_HOST="http://127.0.0.1:8080"
 ES_INDEX="elcuk2"
 ES_HOST="http://----:9200"
-ETRACKER_ES_HOST="http://---:9200"
-ETRACKER_HOST="http://127.0.0.1"
 ```
 
 ## 产品环境部署
