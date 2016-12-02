@@ -1129,4 +1129,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 .map(val -> StringUtils.abbreviate(val.toString(), 20))
                 .collect(Collectors.toList());
     }
+
+    public String dimensions() {
+        return String.format("%s*%s*%s", this.productLengths, this.productWidth, this.productHeigh);
+    }
+
+    public float weightWithGram() {
+        return this.productWeight * 1000;
+    }
 }

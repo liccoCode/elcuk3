@@ -16,7 +16,7 @@ $(() => {
         }
       } else {
         msg = {
-          text: "#{r.message}",
+          text: "保存失败.",
           type: 'error',
           timeout: 5000
         }

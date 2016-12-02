@@ -109,12 +109,10 @@ public class Products extends Controller {
     @Check("products.update")
     public static void update(Product pro) {
         try {
-            validation.valid(pro);
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
-
-            if(Validation.hasErrors())
+            if(Validation.hasErrors()) {
                 renderJSON(Webs.VJson(Validation.errors()));
-
+            }
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);

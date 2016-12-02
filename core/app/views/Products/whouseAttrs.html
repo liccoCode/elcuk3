@@ -66,16 +66,21 @@
         </td>
       </tr>
       <tr>
-        <td>产品尺寸</td>
+        <td>产品尺寸(长*宽*高)</td>
         <td>
-          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">${pro.whouseAttrs.whDimensions}</textarea>
+            #{set dimensions: pro.whouseAttrs.whDimensions? pro.whouseAttrs.whDimensions : pro.dimensions()/}
+          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">${dimensions}</textarea>
         </td>
       </tr>
       <tr>
         <td>产品重量</td>
         <td>
-          <input type="text" name="pro.whouseAttrs.whWeight" value="${pro.whouseAttrs.whWeight}" title="产品重量"
-                 class="input-mini"/>
+            #{set weight: pro.whouseAttrs.whWeight? pro.whouseAttrs.whWeight : pro.weightWithGram()/}
+          <div class="input-append">
+            <input type="text" name="pro.whouseAttrs.whWeight" value="${weight}" title="产品重量"
+                   class="input-mini"/>
+            <span class="add-on">g</span>
+          </div>
         </td>
       </tr>
         #{power.ck "products.update"}
