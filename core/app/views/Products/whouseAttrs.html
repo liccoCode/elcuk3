@@ -1,16 +1,41 @@
+#{extends 'main_full.html' /}
+#{set title:'Product' /}
+#{set 'moreScripts'}
+    #{script 'mobileBUGFix.mini.js'/}
+    #{script 'localResize.coffee'/}
+    #{script 'localResize.ui.coffee'/}
+    #{script 'jquery.filedrop.js' /}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'products/whouseAttrs.js'/}
+#{/set}
+
 <div class="row-fluid">
-  <form action="@{Products.update()}" method="post">
+  <form action="#" method="post" id="search_form">
+    <div class="span12">
+      <div class="input-append inline">
+        <input type="text" autocomplete="off" name="p.search" value="${p.search}" placeHolder="SKU、条码">
+        <a href="javascript:void(0)" data-href="@{Products.whouseAttrs()}" class="btn btn-primary" id="search_btn"
+           data-loading><i class="icon-search"></i></a>
+      </div>
+    </div>
+  </form>
+</div>
+#{if pro}
+<div class="row-fluid">
+  <form action="@{Products.update()}" method="post" id="whouse_attrs_form">
     <table class="table table-bordered">
       <tr>
         <td width="6%">SKU</td>
         <td>
-        #{set sku: pro.whouseAttrs.whSku? pro.whouseAttrs.whSku : pro.sku/}
+            #{set sku: pro.whouseAttrs.whSku? pro.whouseAttrs.whSku : pro.sku/}
           <input type="text" name="pro.whouseAttrs.whSku" value="${sku}" title="SKU" class="input-block-level"/>
           <input type="hidden" name="pro.sku" value="${pro.sku}">
         </td>
+      </tr>
+      <tr>
         <td width="10%">产品名称</td>
         <td>
-        #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
+            #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
           <textarea title="产品名称" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">${productName}</textarea>
         </td>
       </tr>
@@ -19,6 +44,8 @@
         <td>
           <input type="text" name="pro.whouseAttrs.whModel" value="${pro.whouseAttrs.whModel}" title="产品型号" class="input-block-level"/>
         </td>
+      </tr>
+      <tr>
         <td>产品规格</td>
         <td>
           <input type="text" name="pro.whouseAttrs.whFormat" value="${pro.whouseAttrs.whFormat}" title="产品规格" class="input-block-level"/>
@@ -30,7 +57,8 @@
           <input type="text" name="pro.whouseAttrs.whColor" value="${pro.whouseAttrs.whColor}" title="产品颜色"
                  class="input-block-level"/>
         </td>
-
+      </tr>
+      <tr>
         <td>包装内产品数量</td>
         <td>
           <input type="text" name="pro.whouseAttrs.whQty" value="${pro.whouseAttrs.whQty}" title="包装内产品数量"
@@ -42,6 +70,8 @@
         <td>
           <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">${pro.whouseAttrs.whDimensions}</textarea>
         </td>
+      </tr>
+      <tr>
         <td>产品重量</td>
         <td>
           <input type="text" name="pro.whouseAttrs.whWeight" value="${pro.whouseAttrs.whWeight}" title="产品重量"
@@ -50,7 +80,7 @@
       </tr>
       <tr>
         <td colspan="4">
-          <a class="btn btn-success" id="saveWhouseAttsBtn">保存</a>
+          <a class="btn btn-success" id="save_whouse_atts_btn">保存</a>
         </td>
       </tr>
     </table>
@@ -62,16 +92,17 @@
     </div>
   </div>
   <div class="row-fluid">
-    <div style="min-height:300px;" class="span12 well" id="whouseAttrsDropbox">
+    <div style="min-height:300px;" class="span12 well" id="whouse_attrs_dropbox">
       <ul class="thumbnails uploaded"></ul>
-      <div class="message" style="height:150px;padding-top:145px;text-align:center;">拖拽文件到此上传</div>
     </div>
   </div>
-
   <div class="row-fluid">
-    <div class="span2">
-      <div id="file_home" data-fid="${pro.sku}"></div>
-      <input type="button" class="btn btn-default btn-block" value="上传" id="whouseAttrsAttachButton" data-loading>
-    </div>
+    <div id="file_home" data-fid="${pro.sku}" class="row-fluid"></div>
+    <input type="button" class="btn btn-default btn-block" value="上传" id="whouse_attrs_attach_btn"
+           data-loading="正在上传">
   </div>
 </div>
+#{/if}
+#{else}
+<p class="muted text-center">未匹配到相关的 Product.</p>
+#{/else}

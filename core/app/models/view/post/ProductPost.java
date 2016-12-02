@@ -68,4 +68,9 @@ public class ProductPost extends Post<Product> {
         this.count = this.count(params);
         return Product.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
+
+    public Product pickup() {
+        F.T2<String, List<Object>> params = params();
+        return Product.find(params._1, params._2.toArray()).first();
+    }
 }

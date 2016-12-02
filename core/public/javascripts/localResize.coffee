@@ -6,6 +6,8 @@
  * @param {number} options.rWidth=800 压缩图片的宽度，高度会跟随适应。
  * @param {number} options.quality=0.7 压缩质量,取值 0-1
  * @param {boolean} options.UI 是否需要内置操作界面
+ *
+ * Github: https://github.com/think2011/localResizeIMG
 ###
 class LocalResize
   constructor: (el, options = {}) ->
