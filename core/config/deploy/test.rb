@@ -8,7 +8,6 @@
 # server 'db.example.com', user: 'deploy', roles: %w{db}
 
 set :branch, 'develop'
-set :jvm_opts, '-Xms1024m -Xmx1024m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2'
 server '192.168.1.170', user: 'root', roles: %w{app}
 
 
