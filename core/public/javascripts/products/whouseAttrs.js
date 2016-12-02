@@ -1,14 +1,58 @@
 $(() => {
+  $('#whouse_attrs_form').on('click', '#save_whouse_atts_btn', function () {
+    const form = $(this).parents('form');
+    LoadMask.mask(form);
+    $.ajax(form.attr('action'), {
+      type: 'POST',
+      data: form.serialize(),
+      dataType: 'json'
+    }).done(function (r) {
+      let msg;
+      if (r.flag) {
+        msg = {
+          text: "保存成功.",
+          type: 'success',
+          timeout: 5000
+        }
+      } else {
+        msg = {
+          text: "#{r.message}",
+          type: 'error',
+          timeout: 5000
+        }
+      }
+      noty(msg);
+      LoadMask.unmask(form)
+    })
+  });
+
+  $('#search_form').on('click', '#search_btn', function () {
+    const btn = $(this);
+    btn.parents('form').attr('action', btn.data('href')).submit();
+  });
+
+  $(document).on('click', '#whouse_attrs_attach_btn', function () {
+    const file_home = $('#file_home');
+    $.post('/attachs/uploadForBase64', {
+      p: 'PRODUCTWHOUSE',
+      fid: file_home.data('fid'),
+      base64File: file_home.data('base64_file'),
+      originName: file_home.data('origin_name')
+    }).done(function (r) {
+      alert(r.message);
+      window.location.reload();
+    })
+  });
+
   var whouseAttachsFidCallBack = function () {
     return {
-      fid: $('#p_sku').val(),
+      fid: $("input[name='pro.sku']").val(),
       p: 'PRODUCTWHOUSE'
     };
   };
   var attachsLoder = function () {
-    const dropbox = $('#whouseAttrsDropbox');
+    const dropbox = $('#whouse_attrs_dropbox');
     window.dropUpload.loadImages(whouseAttachsFidCallBack()['fid'], dropbox, whouseAttachsFidCallBack()['p'], 'span1');
-    window.dropUpload.iniDropbox(whouseAttachsFidCallBack, dropbox);
   };
 
   var typeaheader = function () {
