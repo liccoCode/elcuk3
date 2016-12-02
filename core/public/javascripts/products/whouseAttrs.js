@@ -52,7 +52,7 @@ $(() => {
   };
   var attachsLoder = function () {
     const dropbox = $('#whouse_attrs_dropbox');
-    window.dropUpload.loadImages(whouseAttachsFidCallBack()['fid'], dropbox, whouseAttachsFidCallBack()['p'], 'span1');
+    window.dropUpload.loadImages(whouseAttachsFidCallBack()['fid'], dropbox, whouseAttachsFidCallBack()['p'], 'span1', !_.isEmpty($('#save_whouse_atts_btn')));
   };
 
   var typeaheader = function () {

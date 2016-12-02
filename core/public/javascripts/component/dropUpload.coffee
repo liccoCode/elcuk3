@@ -182,7 +182,7 @@ window.dropUpload =
     )
 
   # 初始化页面的时候加载此 Product 对应的图片; dropbox 图片展示的 div
-  loadImages: (fid, dropbox, p = '', cls = 'span2') ->
+  loadImages: (fid, dropbox, p = '', cls = 'span2', removable = true) ->
     uploaded = dropbox.find('.uploaded')
     message = dropbox.find('.message')
     $.getJSON('/attachs/images', {
@@ -197,7 +197,7 @@ window.dropUpload =
           imgUrl = "/attachs/image?a.fileName=" + img['fileName']
           window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl)
           imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
-          imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
+          imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage) if removable
           imgEl.find('div.progress').remove()
           imgEl.find('div.title').text(img['originName'])
           imgEl.appendTo(uploaded)

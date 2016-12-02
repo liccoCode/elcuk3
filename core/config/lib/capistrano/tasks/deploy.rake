@@ -13,7 +13,7 @@ namespace :deploy do
       run_locally do
         execute(:curl,
                 '-X DELETE',
-                'https://api.cloudflare.com/client/v4/zones/67bb7f5bb1fa7d5944b96838a34e162a/purge_cache',
+                "https://api.cloudflare.com/client/v4/zones/#{fetch(:zone_identifier)}/purge_cache",
                 '-H "X-Auth-Email: wyatt@easya.cc"',
                 '-H "X-Auth-Key: b5ca2092465f6465526f861dca21c3a510c40"',
                 '-H "Content-Type: application/json"',

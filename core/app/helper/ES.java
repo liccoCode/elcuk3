@@ -35,7 +35,7 @@ public class ES {
      * @deprecated
      */
     public static JSONObject searchOnEtrackerES(String index, String type, SearchSourceBuilder builder) {
-        return processSearch(index, type, builder, System.getenv(Constant.ETRACKER_ES_HOST));
+        return null;
     }
 
     public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
@@ -49,7 +49,7 @@ public class ES {
     }
 
     public static JSONObject getOnEtrackerES(String index, String type, String id) {
-        return processGet(index, type, id, System.getenv(Constant.ETRACKER_ES_HOST));
+        return null;
     }
 
     public static JSONObject processGet(String index, String type, String id, String esHost) {
