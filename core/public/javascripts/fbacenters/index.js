@@ -47,6 +47,19 @@ $(() => {
       this.postalCode = $(tds[7]).text();
     }
 
+    static get countryCodeMap () {
+      return {
+        "GB": "United Kingdom",
+        "US": "United States",
+        "CA": "Canada",
+        "CN": "China (Mainland)",
+        "DE": "Germany",
+        "FR": "France",
+        "IT": "Italy",
+        "JP": "Japan"
+      }
+    };
+
     buildBody () {
       var body = "<b> SHIP TO:</b><br>";
       if (!_.isEmpty(this.name)) {
@@ -68,9 +81,13 @@ $(() => {
         body += `<b>${this.postalCode}</b><br>`;
       }
       if (!_.isEmpty(this.countryCode)) {
-        body += `<b>${CountryCodeMap[this.countryCode]}</b><br>`;
+        body += `<b>${this.formatCountryCode()}</b><br>`;
       }
       return body;
+    }
+
+    formatCountryCode () {
+      return FbaShipToBuilder.countryCodeMap[this.countryCode]
     }
   }
 
@@ -84,15 +101,4 @@ $(() => {
       "bAutoWidth": false
     })
   });
-
-  const CountryCodeMap = {
-    "GB": "United Kingdom",
-    "US": "United States",
-    "CA": "Canada",
-    "CN": "China (Mainland)",
-    "DE": "Germany",
-    "FR": "France",
-    "IT": "Italy",
-    "JP": "Japan"
-  }
 });
