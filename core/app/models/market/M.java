@@ -930,12 +930,13 @@ public enum M {
             case AMAZON_JP:
             case AMAZON_CA:
             case AMAZON_IT:
-                return "https://catalog-sc." + market.toString() +
-                        "/abis/product/ProcessEditProduct" +
-                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+                return String.format("https://catalog-sc.%s/abis/product/ProcessEditProduct%s",
+                        market.toString(),
+                        jsessionId);
             case AMAZON_US:
-                return "https://catalog." + market.toString() + "/abis/product/ProcessEditProduct" +
-                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+                return String.format("https://catalog.%s/abis/product/ProcessEditProduct%s",
+                        market.toString(),
+                        jsessionId);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
