@@ -650,6 +650,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whFormat", "产品规格(仓库)", pro.whouseAttrs.whFormat));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whColor", "产品颜色(仓库)", pro.whouseAttrs.whColor));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whQty", "包装内产品数量(仓库)", pro.whouseAttrs.whQty));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDescription", "包装内描述(仓库)", pro.whouseAttrs.whDescription));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDimensions", "产品尺寸(仓库)",
                     StringUtils.trimToNull(pro.whouseAttrs.whDimensions)));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whWeight", "产品重量(仓库)", pro.whouseAttrs.whWeight));
@@ -1131,10 +1132,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     public String dimensions() {
-        return String.format("%s*%s*%s", this.productLengths, this.productWidth, this.productHeigh);
+        return String.format("%s*%s*%s", this.lengths, this.width, this.heigh);
     }
 
     public float weightWithGram() {
-        return this.productWeight * 1000;
+        return this.weight * 1000;
     }
 }

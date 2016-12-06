@@ -6,6 +6,9 @@
     #{script 'component/dropUpload.coffee'/}
     #{script 'products/show.coffee'/}
     #{script 'products/skulinechart.coffee'/}
+    #{script 'localResize.coffee'/}
+    #{script 'localResize.ui.coffee'/}
+    #{script 'mobileBUGFix.mini.js'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert /}
@@ -30,6 +33,11 @@
   <li>
     <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
   </li>
+    #{power.ck "products.whouseattrs"}
+      <li>
+        <a href="#whouseAttrs" data-toggle="tab" id="showWhouseAttr">仓库信息</a>
+      </li>
+    #{/power.ck}
 </ul>
 
 <div id="selling_tabs" class="tab-content">
@@ -96,5 +104,10 @@
       <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
     </div>
   </div>
+    #{power.ck "products.whouseattrs"}
+      <div class="tab-pane fade" id='whouseAttrs'>
+          #{include 'Products/_whouseAttrsForm.html'/}
+      </div>
+    #{/power.ck}
 </div>
 #{/else}
