@@ -33,10 +33,10 @@
         </td>
       </tr>
       <tr>
-        <td width="10%">产品名称</td>
+        <td width="10%">产品描述</td>
         <td>
             #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
-          <textarea title="产品名称" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">${productName}</textarea>
+          <textarea title="产品描述" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">${productName}</textarea>
         </td>
       </tr>
       <tr>
@@ -59,25 +59,28 @@
         </td>
       </tr>
       <tr>
-        <td>包装内产品数量</td>
+        <td>包装内描述</td>
         <td>
-          <input type="text" name="pro.whouseAttrs.whQty" value="${pro.whouseAttrs.whQty}" title="包装内产品数量"
-                 class="input-mini"/>
+          <textarea title="包装内描述" rows="3" name="pro.whouseAttrs.whDescription" class="input-block-level">${pro.whouseAttrs.whDescription}</textarea>
         </td>
       </tr>
       <tr>
-        <td>产品尺寸(长*宽*高)</td>
+        <td>包材尺寸(长*宽*高)</td>
         <td>
             #{set dimensions: pro.whouseAttrs.whDimensions? pro.whouseAttrs.whDimensions : pro.dimensions()/}
-          <textarea title="产品尺寸" rows="3" name="pro.whouseAttrs.whDimensions" class="input-block-level">${dimensions}</textarea>
+          <div class="input-append">
+            <input type="text" name="pro.whouseAttrs.whDimensions" value="${dimensions}" title="包材尺寸"
+                   class="input-xxlarge"/>
+            <span class="add-on">mm</span>
+          </div>
         </td>
       </tr>
       <tr>
-        <td>产品重量</td>
+        <td>包材重量</td>
         <td>
             #{set weight: pro.whouseAttrs.whWeight? pro.whouseAttrs.whWeight : pro.weightWithGram()/}
           <div class="input-append">
-            <input type="text" name="pro.whouseAttrs.whWeight" value="${weight}" title="产品重量"
+            <input type="text" name="pro.whouseAttrs.whWeight" value="${weight}" title="包材重量"
                    class="input-mini"/>
             <span class="add-on">g</span>
           </div>
