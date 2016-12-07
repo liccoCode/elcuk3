@@ -650,7 +650,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whFormat", "产品规格(仓库)", pro.whouseAttrs.whFormat));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whColor", "产品颜色(仓库)", pro.whouseAttrs.whColor));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whQty", "包装内产品数量(仓库)", pro.whouseAttrs.whQty));
-            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDescription", "包装内描述(仓库)", pro.whouseAttrs.whDescription));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDescription", "包装内描述(仓库)",
+                    pro.whouseAttrs.whDescription));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDimensions", "产品尺寸(仓库)",
                     StringUtils.trimToNull(pro.whouseAttrs.whDimensions)));
             logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whWeight", "产品重量(仓库)", pro.whouseAttrs.whWeight));
@@ -1112,12 +1113,13 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public static List<String> pickSourceItems(String search) {
-        String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value" +
-                " FROM Product p, ProductAttr pa, Listing l, Selling s" +
-                " WHERE p.sku=l.product_sku AND p.sku=pa.product_sku AND l.listingId=s.listing_listingId" +
-                " AND (p.sku LIKE ?" +
+        String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value FROM Product p" +
+                " LEFT JOIN ProductAttr pa ON p.sku=pa.product_sku" +
+                " LEFT JOIN Listing l ON p.sku=l.product_sku" +
+                " LEFT JOIN Selling s ON l.listingId=s.listing_listingId" +
+                " WHERE p.sku LIKE ?" +
                 " OR s.fnSku LIKE ?" +
-                " OR pa.value LIKE ?)" +
+                " OR pa.value LIKE ?" +
                 " LIMIT 5";
         String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
         List<Map<String, Object>> rows = DBUtils.rows(sql, Arrays.asList(word, word, word).toArray());
