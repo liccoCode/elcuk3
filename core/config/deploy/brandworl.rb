@@ -6,8 +6,8 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-set :jvm_opts, "-Xms1024m -Xmx1024m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
-server '47.88.8.182', user: 'root', roles: %w{app}
+set :zone_identifier, '99e0a8d4f1775edf514909614023bd13'
+server '47.88.8.182', user: 'root', roles: %w{app}, production: true
 
 
 # role-based syntax

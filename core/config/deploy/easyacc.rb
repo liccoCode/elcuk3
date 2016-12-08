@@ -6,13 +6,8 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-
-# 三个子项目的部署
-set :jvm_opts, "-Xms1024m -Xmx1024m -XX:-UseGCOverheadLimit -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
-server '47.88.6.96', user: 'root', roles: %w{app}
-server '47.88.8.182', user: 'root', roles: %w{app}
-
-
+set :zone_identifier, '67bb7f5bb1fa7d5944b96838a34e162a'
+server '45.33.102.74', user: 'root', roles: %w{app}, production: true
 
 
 # role-based syntax
@@ -28,7 +23,6 @@ server '47.88.8.182', user: 'root', roles: %w{app}
 # role :db,  %w{deploy@example.com}
 
 
-
 # Configuration
 # =============
 # You can set any configuration variable like in config/deploy.rb
@@ -36,7 +30,6 @@ server '47.88.8.182', user: 'root', roles: %w{app}
 # For available Capistrano configuration variables see the documentation page.
 # http://capistranorb.com/documentation/getting-started/configuration/
 # Feel free to add new variables to customise your setup.
-
 
 
 # Custom SSH Options
@@ -65,3 +58,5 @@ server '47.88.8.182', user: 'root', roles: %w{app}
 #     auth_methods: %w(publickey password)
 #     # password: 'please use keys'
 #   }
+
+

@@ -59,6 +59,13 @@ public class Products extends Controller {
         render(prods, p);
     }
 
+    @Check("products.whouseattrs")
+    public static void whouseAttrs(ProductPost p) {
+        if(p == null) p = new ProductPost();
+        Product pro = p.pickup();
+        render(pro, p);
+    }
+
     @Before(only = {"show", "update", "delete"})
     public static void setUpShowPage() {
         String sku = Products.extarSku();
@@ -99,14 +106,13 @@ public class Products extends Controller {
      *
      * @param pro
      */
+    @Check("products.update")
     public static void update(Product pro) {
         try {
-            validation.valid(pro);
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
-
-            if(Validation.hasErrors())
+            if(Validation.hasErrors()) {
                 renderJSON(Webs.VJson(Validation.errors()));
-
+            }
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);

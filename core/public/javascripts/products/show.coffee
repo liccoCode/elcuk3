@@ -16,7 +16,10 @@ $ ->
     if _.isEmpty(sku)
       alert("没有 SKU, 错误页面!")
       return false
-    {fid: sku, p: 'SKU'}
+    {
+      fid: sku,
+      p: 'SKU'
+    }
 
   # 初始化 上传 div
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
@@ -66,7 +69,11 @@ $ ->
   $("#extends").on("click", "#add_template_btn", () ->
     temp_id = $("select[name='templateId']").val()
     if temp_id is ""
-      noty({text: "请选择要加载的模板", type: 'error', timeout: 5000})
+      noty({
+        text: "请选择要加载的模板",
+        type: 'error',
+        timeout: 5000
+      })
     else
       LoadMask.mask()
       $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), (r)->
@@ -76,26 +83,53 @@ $ ->
     LoadMask.mask()
     $btn = $(@)
     $.ajax('/products/delAttr',
-      {type: 'GET', data: {sku: $btn.data("sku"), attrId: $btn.data("attr")}, dataType: 'json'})
+      {
+        type: 'GET',
+        data: {
+          sku: $btn.data("sku"),
+          attrId: $btn.data("attr")
+        },
+        dataType: 'json'
+      })
     .done((r) ->
       msg = if r.flag is true
 # 删除 tr
         $btn.parent("td").parent().remove()
-        {text: "附加属性 #{r.message} 删除成功.", type: 'success', timeout: 5000}
+        {
+          text: "附加属性 #{r.message} 删除成功.",
+          type: 'success',
+          timeout: 5000
+        }
       else
-        {text: "#{r.message}", type: 'error', timeout: 5000}
+        {
+          text: "#{r.message}",
+          type: 'error',
+          timeout: 5000
+        }
       noty(msg)
       LoadMask.unmask()
     )
   ).on("click", "#save_attrs_btn", () ->
     LoadMask.mask()
     $form = $("#save_attrs_form")
-    $.ajax('/products/saveAttrs', {type: 'GET', data: $form.serialize(), dataType: 'json'})
+    $.ajax('/products/saveAttrs', {
+      type: 'GET',
+      data: $form.serialize(),
+      dataType: 'json'
+    })
     .done((r) ->
       msg = if r.flag is true
-        {text: "保存成功.", type: 'success', timeout: 5000}
+        {
+          text: "保存成功.",
+          type: 'success',
+          timeout: 5000
+        }
       else
-        {text: "#{r.message}", type: 'error', timeout: 5000}
+        {
+          text: "#{r.message}",
+          type: 'error',
+          timeout: 5000
+        }
       noty(msg)
       LoadMask.unmask()
     )
@@ -107,16 +141,32 @@ $ ->
     if $('input[name="pro.iscopy"]').val() is "2"
       return unless confirm('该SKU的产品名称与选择的SKU的产品名称一致,确定保存?')
     if $("#proabbreviation").val() is ""
-      noty({text: "产品名称不允许为空.", type: 'error', timeout: 5000})
+      noty({
+        text: "产品名称不允许为空.",
+        type: 'error',
+        timeout: 5000
+      })
       return
     LoadMask.mask()
     $form = $("#update_product_form")
-    $.ajax('/products/update', {type: 'POST', data: $form.serialize(), dataType: 'json'})
+    $.ajax('/products/update', {
+      type: 'POST',
+      data: $form.serialize(),
+      dataType: 'json'
+    })
     .done((r) ->
       msg = if r.flag is true
-        {text: "保存成功.", type: 'success', timeout: 5000}
+        {
+          text: "保存成功.",
+          type: 'success',
+          timeout: 5000
+        }
       else
-        {text: "#{r.message}", type: 'error', timeout: 5000}
+        {
+          text: "#{r.message}",
+          type: 'error',
+          timeout: 5000
+        }
       noty(msg)
       LoadMask.unmask()
     )
@@ -124,18 +174,30 @@ $ ->
     $('input[name="pro.iscopy"]').val("1")
   )
 
-  $("#whouseAttrs").on('click', '#saveWhouseAttsBtn', (e) ->
+  $("#whouseAttrs").on('click', '#save_whouse_atts_btn', (e) ->
     $form = $(@).parents('form')
-    $.ajax($form.attr('action'), {type: 'POST', data: $form.serialize(), dataType: 'json'})
+    $.ajax($form.attr('action'), {
+      type: 'POST',
+      data: $form.serialize(),
+      dataType: 'json'
+    })
     .done((r) ->
       msg = if r.flag is true
-        {text: "保存成功.", type: 'success', timeout: 5000}
+        {
+          text: "保存成功.",
+          type: 'success',
+          timeout: 5000
+        }
       else
-        {text: "#{r.message}", type: 'error', timeout: 5000}
+        {
+          text: "#{r.message}",
+          type: 'error',
+          timeout: 5000
+        }
       noty(msg)
       LoadMask.unmask()
     )
-  ).on('click', '#whouseAttrsAttachButton', (e) ->
+  ).on('click', '#whouse_attrs_attach_btn', (e) ->
     $file_home = $('#file_home')
     $.post('/attachs/uploadForBase64', {
       p: 'PRODUCTWHOUSE',
@@ -184,10 +246,18 @@ $ ->
   validUpcAndPartNumber = () ->
     flag = true
     if !$("#upc").val()
-      noty({text: "UPC必须填写.", type: 'error', timeout: 5000})
+      noty({
+        text: "UPC必须填写.",
+        type: 'error',
+        timeout: 5000
+      })
       flag = false
     if !$("#partNumber").val()
-      noty({text: "Part Number必须填写.", type: 'error', timeout: 5000})
+      noty({
+        text: "Part Number必须填写.",
+        type: 'error',
+        timeout: 5000
+      })
       flag = false
     flag
 
@@ -198,16 +268,13 @@ $ ->
     }
 
   initWhouseAttachs = ->
-    dropbox = $('#whouseAttrsDropbox')
+    dropbox = $('#whouse_attrs_dropbox')
     window.dropUpload.loadImages(whouseAttachsFidCallBack()['fid'], dropbox, whouseAttachsFidCallBack()['p'], 'span1')
     window.dropUpload.iniDropbox(whouseAttachsFidCallBack, dropbox)
 
   $(document).ready ->
-    lr = new LocalResize(document.getElementById('file_home'), {})
-    lr.success (stop, data) ->
-      $file_home = $('#file_home')
-      $file_home.data('base64_file', data['base64Clean'])
-      $file_home.data('origin_name', data['original']['name'])
+    new LocalResize(document.getElementById('file_home')).success (stop, data) ->
+      $('#file_home').data('base64_file', data['base64Clean']).data('origin_name', data['original']['name'])
       stop()
 
     initWhouseAttachs()

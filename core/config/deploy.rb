@@ -31,7 +31,7 @@ set :deploy_to, '/root/cap_elcuk2'
 set :linked_dirs, fetch(:linked_dirs, []).push('core/logs')
 
 # Default value for default_env is {}
-set :default_env, {JAVA_HOME: '/opt/jdk1.8.0_102', PATH: '$JAVA_HOME/bin:$PATH', CLASSPATH: '$JAVA_HOME/lib'}
+set :default_env, {JAVA_HOME: '/opt/jdk1.8.0_112', PATH: '$JAVA_HOME/bin:$PATH', CLASSPATH: '$JAVA_HOME/lib'}
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
@@ -53,7 +53,6 @@ namespace :deploy do
   end
 
   # 在完成发布之后
-  after 'deploy:publishing', 'conf:application'
   after 'deploy:published', :purge_cache
   after 'deploy:published', :restart
 end

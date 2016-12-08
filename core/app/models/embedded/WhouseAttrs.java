@@ -1,6 +1,7 @@
 package models.embedded;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Lob;
 import java.io.Serializable;
 
 /**
@@ -19,8 +20,9 @@ public class WhouseAttrs implements Serializable {
     public String whSku;
 
     /**
-     * 产品名称
+     * 产品描述
      */
+    @Lob
     public String whProductName;
 
     /**
@@ -44,12 +46,18 @@ public class WhouseAttrs implements Serializable {
     public int whQty;
 
     /**
-     * 产品尺寸
+     * 包装内描述
+     */
+    @Lob
+    public String whDescription;
+
+    /**
+     * 尺寸(包材)
      */
     public String whDimensions;
 
     /**
-     * 产品重量
+     * 重量(包材)
      */
     public double whWeight;
 }

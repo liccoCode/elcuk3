@@ -95,16 +95,6 @@ public class Constant {
      */
     public static final String ES_HOST = "ES_HOST";
     /**
-     * Elcuk2 使用的 Etracker 的 ES Host 地址
-     */
-    public static final String ETRACKER_ES_HOST = "ETRACKER_ES_HOST";
-    /**
-     * Elcuk2 所使用的 Etracker Host
-     * TODO: 这个真的需要吗?
-     */
-    public static final String ETRACKER_HOST = "ETRACKER_HOST";
-
-    /**
      * Elcuk2 在 ElasticSearch 中的索引 Index 名称.
      */
     public static final String ES_INDEX = "ES_INDEX";

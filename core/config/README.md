@@ -30,9 +30,7 @@
 * ROCKEND_HOST: 后端任务项目的 ROCKEND_HOST 地址, 主要用于提交后端任务. ex: http://10.117.234.4:4567
 * ES_INDEX: 系统使用 ES 时, 在 ES 中的 index 命令(类似 mysql 的数据库名称). ex: elcuk2
 * ES_HOST: 系统使用的 ES 的 Host 地址. ex: http://10.117.239.66:9200
-* ETRACKER_ES_HOST: 系统可连接 etracker 项目使用的 ES 的地址, 主要用于从这个 es 中搜索数据. ex: http://10.117.239.66:9200
 * KOD_HOST: 系统后端附件项目使用的 HOST 地址. ex: http://47.88.6.96:8080
-* ETRACKER_HOST: 系统使用的后端任务项目提交任务的 API 地址. ex: http://10.117.239.66
 
 这些环境变量会被使用在如下的地方:
 1. conf/application.conf 文件中, Play 会自行处理, 可以在配置文件中使用 `${ENV}` 来使用.
