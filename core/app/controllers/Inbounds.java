@@ -17,6 +17,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -43,8 +44,8 @@ public class Inbounds extends Controller {
         render(p, inbounds);
     }
 
-    public static void createValidate(List<Long> pids) {
-        String msg = ProcureUnit.validateIsInbound(pids);
+    public static void createValidate(List<Long> pids, String type) {
+        String msg = ProcureUnit.validateIsInbound(pids, type);
         if(StringUtils.isNotBlank(msg)) {
             renderJSON(new Ret(false, msg));
         } else {
@@ -53,12 +54,11 @@ public class Inbounds extends Controller {
     }
 
 
-    public static void blank(List<Long> pids) {
+    public static void blank(List<Long> pids, String planId) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        List<DeliverPlan> plans = DeliverPlan.find("state = ? ", DeliverPlan.P.CREATE).fetch();
         ProcureUnit proUnit = units.get(0);
-
-        render(units, plans, proUnit);
+        Inbound.T it = proUnit.stage == ProcureUnit.STAGE.DELIVERY ? Inbound.T.Purchase : Inbound.T.Machining;
+        render(units, proUnit, planId, it);
     }
 
     public static void create(Inbound inbound, List<InboundUnit> dtos) {
@@ -66,10 +66,27 @@ public class Inbounds extends Controller {
         inbound.receiver = Login.current();
         inbound.createDate = new Date();
         inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        inbound.status = inbound.type == Inbound.T.Purchase ? Inbound.S.Create : Inbound.S.Handing;
         inbound.save();
         inbound.create(dtos);
         flash.success("创建成功!");
         index(new InboundPost());
+    }
+
+    /**
+     * 通过出货单创建收货入库单
+     *
+     * @param id
+     */
+    public static void createByPlanId(String id) {
+        DeliverPlan plan = DeliverPlan.findById(id);
+        List<Long> ids = new ArrayList<>();
+        for(ProcureUnit unit : plan.units) {
+            if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
+                ids.add(unit.id);
+            }
+        }
+        blank(ids, id);
     }
 
     public static void update(Inbound inbound) {

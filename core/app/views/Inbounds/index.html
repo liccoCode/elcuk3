@@ -17,35 +17,35 @@
       <div class="span12">
         <div class="input-prepend input-append inline">
           <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="">
+          <input type="date" name="p.from" value="${p.from.date()}">
           <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="">
+          <input type="date" name="p.to" value="${p.to.date()}">
         </div>
 
-        <select name="p.dateType" class="inline">
+        <select name="p.status" class="inline">
           <option value="">状态</option>
         #{list items:models.whouse.Inbound.S, as:'t'}
-          <option value="${t.name()}">${t.label()}</option>
+          <option #{if p.status==t} selected #{/if} value="${t.name()}">${t.label()}</option>
         #{/list}
         </select>
 
         <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
-          <option value="${cop.id}">${cop.name}</option>
+          <option #{if p.cooperatorId==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
         #{/list}
         </select>
 
-        <select name="p.dateType" class="inline">
+        <select name="p.type" class="inline">
           <option value="">收货类型</option>
         #{list items:models.whouse.Inbound.T, as:'t'}
-          <option value="${t.name()}">${t.label()}</option>
+          <option #{if p.type == t} selected #{/if} value="${t.name()}">${t.label()}</option>
         #{/list}
         </select>
 
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" class="input-medium" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+          <input type="text" style="width:200px;"  name="p.search" placeholder="收货入库单ID or SKU" value="${p.search}">
           <input type="hidden" name="p.page" value="${p.page}">
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
@@ -74,8 +74,12 @@
           <tr>
             <td><input type="checkbox" value="${i.id}"></td>
             <td><a href="@{Inbounds.edit(i.id)}">${i.id}</a></td>
-            <td>${i.name}</td>
-            <td>${i.type?.label()}</td>
+            <td style="cursor:pointer;" data-toggle="toggle" data-target="#sr_${i_index}">
+              <span><i class="icon-reorder"></i></span>
+              <span>${i.name}</span>
+              <span class="badge badge-info">${i.units.size()}</span>
+            </td>
+            <td><i class="${i.type.flag()}"> </i>${i.type?.label()}</td>
             <td>${i.cooperator?.name}</td>
             <td>${i.projectName}</td>
             <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>
@@ -92,6 +96,13 @@
                 #{/list}
             </td>
             <td title="${i.memo}">${i.memo}</td>
+          </tr>
+          <tr id="sr_${i_index}" style="display:none;">
+            <td colspan="12">
+              <div>
+                #{render 'Inbounds/_units.html', units:i.units, is_check: true/}
+              </div>
+            </td>
           </tr>
         #{/list}
           <tr>

@@ -1,6 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:'采购收货入库单' /}
 #{set 'moreScripts'}
+    #{script 'inbounds/blank.js'/}
 #{/set}
 <style>
   .table td{
@@ -12,7 +13,7 @@
 #{flash_alert/}
 
 #{form @Inbounds.create(), method:'POST', id: 'new_inbound'}
-    #{info_row title:'采购收货入库单'/}
+    #{info_row title: it.label() + '入库单'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-bordered">
@@ -22,22 +23,11 @@
           <input type="text" name="inbound.id" disabled>
         </td>
         <th>状态</th>
-        <td style="width: 40%;">
-          <select name="inbound.status">
-            <option value="Create">已创建</option>
-          </select>
-        </td>
+        <td style="width: 40%;"><input type="text" name="inbound.status" value="Create" readonly></td>
       </tr>
       <tr>
         <th>出货单</th>
-        <td>
-          <select name="inbound.plan.id" class="inline selectize" style="width:250px;">
-            <option value="">出货单</option>
-              #{list items:plans, as:'p'}
-                <option value="${p.id}">${p.name}</option>
-              #{/list}
-          </select>
-        </td>
+        <td><input type="text" name="inbound.plan.id" value="${planId}" readonly></td>
         <th>供应商</th>
         <td>
           <input type="text" value="${proUnit.cooperator.name}" readonly/>
@@ -46,14 +36,11 @@
       </tr>
       <tr>
         <th>收货入库单名称<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="inbound.name"></td>
+        <td><input type="text" class="span8" name="inbound.name" required></td>
         <th>收货类型</th>
         <td>
-          <select name="inbound.type">
-              #{list items:models.whouse.Inbound.T, as:'t'}
-                <option value="${t.name()}">${t.label()}</option>
-              #{/list}
-          </select>
+          <input type="text" value="${it.label()}" readonly>
+          <input type="hidden" name="inbound.type" value="${it.name()}">
         </td>
       </tr>
       <tr>
@@ -89,7 +76,7 @@
     </table>
   </div>
 </div>
-    #{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
+    #{info_row title:'已添加进入【'+it.label()+'入库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-bordered">
@@ -112,6 +99,8 @@
         <th>阶段</th>
       </tr>
         #{list items:units, as:'unit'}
+            #{set planQty:it.name()=='Machining'? unit.availableQty : unit.qty()/}
+
           <tr class="text-center">
             <td>
               <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
@@ -124,10 +113,13 @@
             <td>${unit.product.abbreviation}</td>
             <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
             <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
-            <td>${unit.qty()}</td>
-            <td><input type="text" name="dtos[${unit_index-1}].qty" style="width:55px;"/></td>
+            <td>${planQty}</td>
             <td>
-              <select name="dtos[${unit_index-1}].handType" style="width:120px;">
+              <input type="text" name="dtos[${unit_index-1}].qty" value="${planQty}" data-qty="${planQty}"
+                     style="width:55px;" #{if it.name()=='Machining'} readonly #{/if}/>
+            </td>
+            <td>
+              <select name="dtos[${unit_index-1}].handType" style="width:120px;display:none;">
                   #{list items:models.whouse.InboundUnit.H, as:'h'}
                     <option value="${h.name()}">${h.label()}</option>
                   #{/list}

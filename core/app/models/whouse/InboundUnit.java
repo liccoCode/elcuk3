@@ -41,6 +41,11 @@ public class InboundUnit extends Model {
     public ProcureUnit unit;
 
     /**
+     * 计划交货数量
+     */
+    public int planQty;
+
+    /**
      * 实际交货数量
      */
     public int qty;
@@ -52,12 +57,6 @@ public class InboundUnit extends Model {
     public H handType;
 
     public enum H {
-        Null {
-            @Override
-            public String label() {
-                return "";
-            }
-        },
         Actual {
             @Override
             public String label() {
@@ -277,6 +276,9 @@ public class InboundUnit extends Model {
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "unqualifiedQty":
+                this.qualifiedQty = this.qty - NumberUtils.toInt(value);
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                break;
             case "inboundQty":
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
@@ -315,17 +317,18 @@ public class InboundUnit extends Model {
     }
 
     /**
-     * 创建收货入库单条件判断
-     *
+     *  采购计划对应的入库单是不是全部已结束
      * @param id
      * @return
      */
-    public static boolean isAllInbound(Long id) {
-        SqlSelect sql = new SqlSelect().select("count(1) as num").from("Inbound i ").leftJoin("InboundUnit u " +
-                " ON u.inbound_id= i.id ").andWhere(" i.status = 'END'").andWhere("u.unit_id = ? ").param(id);
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        long i = (long) rows.get(0).get("num");
-        return i == 0 ? true : false;
+    public static String isAllInbound(Long id) {
+        List<Inbound> inbounds = Inbound.find("SELECT DISTINCT i FROM Inbound i LEFT JOIN i.units u " +
+                "WHERE i.status <> ? AND u.unit.id = ? ", Inbound.S.End, id).fetch();
+        if(inbounds.size() > 0) {
+            return inbounds.get(0).id;
+        } else {
+            return "";
+        }
     }
 
 }

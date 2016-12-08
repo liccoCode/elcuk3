@@ -5,7 +5,7 @@
 #{/set}
 #{set 'moreScripts'}
     #{script 'bootstrap-multiselect.js'/}
-    #{script 'shipments/index.coffee'/}
+    #{script 'shipments/index.js'/}
 #{/set}
 #{info_row}
 <ul>
@@ -13,6 +13,7 @@
   <li><span class="text-warning">特殊搜索:</span> 直接输入 id 可直接访问对应 id 的运输单 (其他搜索条件会被忽略)</li>
 </ul>
 #{/info_row}
+
 #{flash_alert /}
 
 <form action="@{Shipments.index()}" method="POST" class="search_form" id='search_form'>
@@ -98,8 +99,7 @@
         <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
 
     #{power.ck 'outboundrecords.index'}
-      <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" data-target="_blank" class="btn btn-primary"
-         id="outboundBtn">
+      <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-primary" id="outboundBtn">
         创建出库
       </a>
     #{/power.ck}

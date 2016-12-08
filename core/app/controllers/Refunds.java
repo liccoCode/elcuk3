@@ -5,6 +5,7 @@ import models.procure.Cooperator;
 import models.view.post.RefundPost;
 import models.whouse.Refund;
 import models.whouse.Whouse;
+import play.db.helper.SqlSelect;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -30,14 +31,22 @@ public class Refunds extends Controller {
         render(p, refunds);
     }
 
-    public static void edit(Long id) {
+    public static void edit(String id) {
         Refund refund = Refund.findById(id);
         render(refund);
     }
 
     public static void update(Refund refund) {
+        refund.save();
+        flash.success("退货单【" + refund.id + "】更新成功!");
+        index(new RefundPost());
 
+    }
 
+    public static void confirmRefund(List<String> ids) {
+        Refund.confirmRefund(ids);
+        flash.success(SqlSelect.inlineParam(ids) + "出库成功!");
+        index(new RefundPost());
     }
 
 }

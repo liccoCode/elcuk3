@@ -30,16 +30,16 @@
         <td><input type="text" name="refund.name" value="${refund.name}" readonly></td>
         <th>供应商</th>
         <td>
-          <input type="text" value="${inbound.cooperator?.name}" readonly/>
+          <input type="text" value="${refund.cooperator?.name}" readonly/>
         </td>
       </tr>
       <tr>
         <th>退货类型<span style="color:red">*</span></th>
-        <td><input type="text" value="${refund.type.name}" readonly></td>
+        <td><input type="text" value="${refund.type?.name()}" readonly></td>
         <th>B2B选项</th>
         <td>
           <label class="checkbox">
-            <input type="checkbox" name="inbound.isb2b" value="true"> B2B
+            <input type="checkbox" name="refund.isb2b" value="true"> B2B
           </label>
         </td>
       </tr>
@@ -75,135 +75,7 @@
     #{info_row title:'已添加进入【退货单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-    <table class="table table-condensed table-bordered" id="unit_table">
-      <tr>
-        <th><input type="checkbox"></th>
-        <th style="width:40px;">记录ID</th>
-        <th style="width:40px;">采购计划ID</th>
-        <th>采购单</th>
-        <th style="width:120px;">Selling</th>
-        <th>SKU</th>
-        <th style="width:100px;">产品名称</th>
-        <th>预计交货时间</th>
-        <th>预计运输时间</th>
-        <th style="width:45px;">计划交货数量</th>
-        <th style="width:50px;">实际交货数量</th>
-        <th>交货不足处理方式</th>
-        <th>包装信息</th>
-        <th>FBA-ShipmentId</th>
-        <th>去往仓库</th>
-        <th>运输方式</th>
-        <th>阶段</th>
-        <th>质检结果</th>
-        <th>质检不合格处理方式</th>
-        <th>合格数</th>
-        <th>不良品数</th>
-        <th>实际入库数</th>
-        <th>目标仓库</th>
-      </tr>
-        #{list items:refund.unitList, as:'unit'}
-          <tr class="text-center">
-            <td>
-              <input type="checkbox" value="${unit.id}">
-              <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
-            </td>
-            <td>${unit.id}</td>
-            <td>${unit.unit?.id}</td>
-            <td>${unit.unit?.deliveryment.id}</td>
-            <td>${unit.unit?.selling?.sellingId}</td>
-            <td>${unit.unit?.product.sku}</td>
-            <td title="${unit.unit?.product.abbreviation}">${unit.unit?.product.abbreviation.overLong()}</td>
-            <td>#{time_tooltip time:unit.unit?.attrs.planDeliveryDate/}</td>
-            <td>#{time_tooltip time:unit.unit?.attrs.planShipDate /}</td>
-            <td>${unit.unit?.qty()}</td>
-            <td>
-              <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.qty()}"
-                     style="width:35px;" value="${unit.qty}"
-                  #{if unit.status.name() != "Create"}
-                     readonly
-                  #{/if}/>
-            </td>
-            <td>
-              <select name="handType" style="width:120px;
-                  #{if unit.qty == unit.unit.qty()}
-                      display:none;
-                  #{/if}"
-                  #{if unit.status.name() != "Create"}
-                      disabled
-                  #{/if}>
-                  #{list items:models.whouse.InboundUnit.H, as:'h'}
-                      #{if h.name() != "Null"}
-                        <option value="${h.name()}">${h.label()}</option>
-                      #{/if}
-                  #{/list}
-              </select>
-
-            </td>
-            <td><input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
-            </td>
-            <td>${unit.fba?.shipmentId}</td>
-            <td>${unit.unit?.whouse?.name()}</td>
-            <td>${unit.unit?.shipType?.label()}</td>
-            <td>${unit.status?.label()}</td>
-            <td>
-              <select name="result" style="width:60px;"
-                  #{if unit.status.name() != "Receive"}
-                      disabled
-                  #{/if}>
-                  #{list items:models.whouse.InboundUnit.R, as:'r'}
-                    <option ${r.name() == unit.result?.name() ? 'selected' : ''} value="${r.name()}">${r.label()}</option>
-                  #{/list}
-              </select>
-            </td>
-            <td>
-              <select name="way" style="width:120px;
-                  #{if unit.result?.name() == 'Qualified'}
-                      display:none;
-                  #{/if}"
-                  #{if unit.status.name() != "Receive"}
-                      disabled
-                  #{/if}>
-                  #{list items:models.whouse.InboundUnit.W, as:'w'}
-                    <option ${w.name() == unit.way?.name() ? 'selected' : ''} value="${w.name()}">${w.label()}</option>
-                  #{/list}
-              </select>
-
-            </td>
-            <td>
-              <input type="text" name="qualifiedQty" value="${unit.qualifiedQty}" style="width:35px;"
-                  #{if unit.status.name() != "Receive"}
-                     disabled
-                  #{/if}/>
-            </td>
-            <td>
-              <input type="text" name="unqualifiedQty" value="${unit.unqualifiedQty}" style="width:35px;"
-                  #{if unit.status.name() != "Receive"}
-                     disabled
-                  #{/if}/>
-            </td>
-            <td>
-              <input type="text" name="inboundQty" value="${unit.inboundQty}" style="width:35px;"
-                  #{if unit.status.name() != "Check"}
-                     disabled
-                  #{/if}/>
-            </td>
-            <td>
-              <select name="target" style="max-width: 100px;"
-                  #{if unit.status.name() != "Check"}
-                      disabled
-                  #{/if}>
-                <option value="">仓库</option>
-                  #{list items:whouses, as:'whouse'}
-                    <option ${whouse.id == unit.target?.id ? 'selected' : ''} value="${whouse.id}">
-                    ${whouse.name}
-                    </option>
-                  #{/list}
-              </select>
-
-            </td>
-          </tr>
-        #{/list}
-    </table>
+      #{render '/Refunds/_units.html', units:refund.unitList, is_check:true/}
     <button class="btn btn-danger">解除</button>
   </div>
 </div>

@@ -6,6 +6,8 @@ import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -116,11 +118,16 @@ public class Outbound extends GenericModel {
         public abstract String label();
     }
 
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Expose
+    public Shipment.T shipType;
+
     /**
-     * 供应商
+     * 目的国家
      */
     @OneToOne
-    public Cooperator cooperator;
+    public Whouse whouse;
 
     /**
      * 项目名称
@@ -158,10 +165,22 @@ public class Outbound extends GenericModel {
     public String memo;
 
     /**
+     * 运输单ID
+     */
+    public String shipmentId;
+
+    /**
      * 是否B2B
      */
     @Transient
     public boolean isb2b = false;
+
+    public void init() {
+        this.id = id();
+        this.status = S.Create;
+        this.createDate = new Date();
+        this.creator = Login.current();
+    }
 
 
     public static String id() {
@@ -175,16 +194,58 @@ public class Outbound extends GenericModel {
     }
 
     public void create(List<Long> pids) {
-        this.id = id();
-        this.status = S.Create;
-        this.createDate = new Date();
-        this.creator = Login.current();
+        this.init();
         this.projectName = this.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         this.save();
         for(Long id : pids) {
             ProcureUnit unit = ProcureUnit.findById(id);
             unit.outbound = this;
+            unit.outQty = unit.availableQty;
             unit.save();
+        }
+    }
+
+    public static void initCreateByShipItem(Shipment shipment) {
+        Outbound out = new Outbound();
+        out.init();
+        ProcureUnit first = shipment.items.get(0).unit;
+        out.projectName = first.projectName;
+        out.shipType = shipment.type;
+        out.type = T.Normal;
+        out.whouse = shipment.whouse;
+        out.targetId = shipment.cooper.id.toString();
+        out.shipmentId = shipment.id;
+        out.save();
+        for(ShipItem item : shipment.items) {
+            ProcureUnit unit = item.unit;
+            unit.outbound = out;
+            unit.outQty = unit.availableQty;
+            unit.save();
+        }
+    }
+
+    public static void confirmOutBound(List<String> ids) {
+        for(String id : ids) {
+            Outbound out = Outbound.findById(id);
+            out.status = S.Outbound;
+            out.outboundDate = new Date();
+            out.save();
+            for(ProcureUnit p : out.units) {
+                p.stage = ProcureUnit.STAGE.OUTBOUND;
+                p.save();
+            }
+        }
+    }
+
+    public String showCompany() {
+        switch(this.type) {
+            case Normal:
+            case B2B:
+            case Refund:
+                Cooperator c = Cooperator.findById(Long.parseLong(this.targetId));
+                return c.name;
+            default:
+                return this.targetId;
         }
     }
 

@@ -4,9 +4,11 @@ import com.google.gson.annotations.Expose;
 import controllers.Login;
 import models.User;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -148,9 +150,11 @@ public class Refund extends GenericModel {
         this.save();
         for(InboundUnit unit : list) {
             RefundUnit runit = new RefundUnit();
+            runit.unit = unit.unit;
             runit.refund = this;
             runit.planQty = unit.qty;
             runit.mainBoxInfo = unit.mainBoxInfo;
+            runit.lastBoxInfo = unit.lastBoxInfo;
             runit.save();
         }
     }
@@ -163,6 +167,43 @@ public class Refund extends GenericModel {
                 DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
                 "";
         return String.format("PTT|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+    }
+
+    public static void confirmRefund(List<String> ids) {
+        List<Refund> list = Refund.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        if(list.size() > 0) {
+            for(Refund refund : list) {
+                refund.status = S.Refund;
+                for(RefundUnit u : refund.unitList) {
+                    ProcureUnit unit = u.unit;
+                    if(refund.type == T.After_Inbound) {
+                        unit.inboundQty -= u.qty;
+                        unit.availableQty -= u.qty;
+                        if(u.qty == unit.attrs.qty) {
+                            unit.stage = ProcureUnit.STAGE.DELIVERY;
+                        }
+
+                    }
+                    refund.save();
+                    unit.save();
+                }
+            }
+        }
+    }
+
+    /**
+     * 采购计划对应的退货单是不是全部已退货
+     * @param id
+     * @return
+     */
+    public static String isAllReufund(Long id) {
+        List<Refund> refunds = Refund.find("SELECT DISTINCT r FROM Refund r LEFT JOIN r.unitList u " +
+                "WHERE r.status <> ? AND u.unit.id = ? ", S.Refund, id).fetch();
+        if(refunds.size() > 0) {
+            return refunds.get(0).id;
+        } else {
+            return "";
+        }
     }
 
 }

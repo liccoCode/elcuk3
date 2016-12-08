@@ -18,10 +18,7 @@ import models.product.Product;
 import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import models.view.dto.CooperItemDTO;
-import models.whouse.InboundUnit;
-import models.whouse.Outbound;
-import models.whouse.OutboundRecord;
-import models.whouse.Whouse;
+import models.whouse.*;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -150,9 +147,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return "仓库加工";
             }
         },
-        /**
-         * 出库中
-         */
         OUTBOUND {
             @Override
             public String label() {
@@ -295,6 +289,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @OneToOne
     public Whouse whouse;
+
+    /**
+     * 当前仓库（深圳仓库）
+     */
+    @OneToOne
+    public Whouse currWhouse;
 
     // ----------- 将不同阶段的数据封装到不同的对象当中去.
 
@@ -522,6 +522,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 实际出库数
      */
     public int outQty;
+
+    /**
+     * 项目名称
+     */
+    public String projectName;
 
     /**
      * 出库单
@@ -1929,25 +1934,57 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return "暂无出库信息.";
     }
 
-    public static String validateIsInbound(List<Long> pids) {
+    /**
+     * @param pids
+     * @return
+     */
+    public static String validateIsInbound(List<Long> pids, String type) {
         Map<STAGE, Integer> status_map = new HashMap<>();
-        for(Long id : pids) {
-            ProcureUnit unit = ProcureUnit.findById(id);
-            if(!(unit.stage == STAGE.DELIVERY || unit.stage == STAGE.IN_STORAGE)) {
-                return "请选择阶段为【采购中】和【已入库】的采购计划";
-            }
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : units) {
+            if(type.equals("createMachiningInboundBtn")) {
+                if(unit.stage != STAGE.PROCESSING) {
+                    return "请选择阶段为【仓库加工】的采购计划！";
+                }
+                validInbound(unit);
+                validRefund(unit);
+            } else if(type.equals("createInboundBtn")) {
+                if(!(unit.stage == STAGE.DELIVERY || unit.stage == STAGE.IN_STORAGE)) {
+                    return "请选择阶段为【采购中】和【已入库】的采购计划";
+                }
+                validInbound(unit);
+                validRefund(unit);
+            } else if(type.equals("createOutboundBtn")) {
+                if(unit.stage != STAGE.IN_STORAGE) {
+                    return "请选择阶段为【已入库】的采购计划！";
+                }
+                if(unit.outbound != null) {
+                    return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中！";
+                }
+                validRefund(unit);
+            } else if(type.equals("createRefundBtn")) {
+                if(!(unit.stage == STAGE.DONE || unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
+                    return "请选择阶段为【已交货】和【已入库】或【仓库加工】的采购计划";
+                }
 
-            if(!status_map.isEmpty() && !status_map.containsKey(unit.stage)) {
-                 return "请选择阶段一致的采购计划";
-            } else {
-                status_map.put(unit.stage, 0);
             }
-            if(InboundUnit.isAllInbound(unit.id)){
-                return "";
-            }
-
         }
         return "";
     }
+
+    public static String validInbound(ProcureUnit unit) {
+        if(StringUtils.isNotEmpty(InboundUnit.isAllInbound(unit.id))) {
+            return "采购计划【" + unit.id + "】已经存在收货入库单 【" + InboundUnit.isAllInbound(unit.id) + "】";
+        }
+        return "";
+    }
+
+    public static String validRefund(ProcureUnit unit) {
+        if(StringUtils.isNotEmpty(Refund.isAllReufund(unit.id))) {
+            return "采购计划【" + unit.id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(unit.id) + "】";
+        }
+        return "";
+    }
+
 
 }

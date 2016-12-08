@@ -1,6 +1,8 @@
 package models.view.post;
 
+import helper.Dates;
 import models.whouse.Refund;
+import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -11,10 +13,12 @@ import java.util.List;
  */
 public class RefundPost extends Post<Refund> {
 
-
     public String search;
 
     public RefundPost() {
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        this.from = now.minusDays(5).toDate();
+        this.to = now.toDate();
         this.perSize = 25;
         this.page = 1;
     }

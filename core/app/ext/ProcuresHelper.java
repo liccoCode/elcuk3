@@ -6,6 +6,8 @@ import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import models.whouse.Inbound;
 import models.whouse.InboundUnit;
+import models.whouse.Outbound;
+import models.whouse.Refund;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.templates.BaseTemplate;
@@ -22,49 +24,75 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(ProcureUnit.STAGE stage) {
         switch(stage) {
             case PLAN:
-                return "#B0BFD6";
+                return "#E8ECF1";
             case DELIVERY:
-                return "#006ACC";
+                return "#0C81F6";
             case DONE:
-                return "#3DA4C2";
+                return "#88BEF5";
+            case IN_STORAGE:
+                return "#FFE559";
+            case PROCESSING:
+                return "#FF8A69";
+            case OUTBOUND:
+                return "#3BB873";
             case SHIPPING:
-                return "#49A4C6";
+                return "#FFDBC5";
             case SHIP_OVER:
-                return "#108080";
+                return "#FF7676";
             case INBOUND:
-                return "#F9A021";
+                return "#96D373";
             case CLOSE:
             default:
-                return "#5BB75B";
+                return "#42CFC4";
+        }
+    }
+
+    public static String rgb(Outbound.S status) {
+        switch(status) {
+            case Create:
+                return "#E8ECF1";
+            case Outbound:
+            default:
+                return "#3BB873";
         }
     }
 
     public static String rgb(Inbound.S status) {
         switch(status) {
             case Create:
-                return "#B0BFD6";
+                return "#E8ECF1";
             case Handing:
-                return "#F9A021";
+                return "#FFB37B";
             case End:
             default:
-                return "#5BB75B";
+                return "#42CFC4";
         }
     }
 
     public static String rgb(InboundUnit.S status) {
         switch(status) {
             case Create:
-                return "#B0BFD6";
+                return "#E8ECF1";
             case Receive:
-                return "#F9A021";
+                return "#88BEF5";
             case Check:
-                return "#3DA4C2";
+                return "#73CFF0";
             case Inbound:
-                return "#5BB75B";
+                return "#FFE559";
             case Abort:
-                return "#F9A021";
+                return "#FF6464";
             default:
                 return "#5BB75B";
+        }
+    }
+
+    public static String rgb(Refund.S status) {
+        switch(status) {
+            case Create:
+                return "#E8ECF1";
+            case Refund:
+            default:
+                return "#FF6464";
         }
     }
 
@@ -148,6 +176,16 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#BD4A48";
             default:
                 return "#333333";
+        }
+    }
+
+    public static String flag(Inbound.T type) {
+        switch(type) {
+            case Machining:
+                return "icon-wrench";
+            case Purchase:
+            default:
+                return "icon-shopping-cart";
         }
     }
 

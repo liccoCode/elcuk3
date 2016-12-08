@@ -8,7 +8,7 @@
       </label>
     </th>
   #{/if}
-    <th>#</th>
+    <th width="60px;">#</th>
     <th>Selling</th>
     <th>Sku</th>
     <th>FBA-ShipmentId</th>
@@ -69,7 +69,7 @@
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-      <i class="icon-reorder"></i> ${unit.id}</td>
+      <i class="icon-reorder"></i>${unit.id}</td>
     <td class="selling_id">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>

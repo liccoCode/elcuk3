@@ -31,6 +31,11 @@ $(() => {
       $(this).parent('td').next().find('input').attr("value", qty - value);
     }
 
+    if (attr == 'unqualifiedQty') {
+      let qty = $(this).data('qty');
+      $(this).parent('td').prev().find('input').attr("value", qty - value);
+    }
+
     if ($(this).val()) {
       $.post('/Inbounds/updateUnit', {
         id: id,

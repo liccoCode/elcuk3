@@ -161,11 +161,19 @@ public class Inbound extends GenericModel {
     public List<String> inboundDtos = new ArrayList<>();
 
     public void create(List<InboundUnit> units) {
-        for(InboundUnit unit : units) {
-            unit.inbound = this;
-            unit.unit = ProcureUnit.findById(unit.unitId);
-            unit.status = InboundUnit.S.Create;
-            unit.save();
+        for(InboundUnit u : units) {
+            u.inbound = this;
+            u.unit = ProcureUnit.findById(u.unitId);
+            u.planQty = this.type == T.Purchase ? u.unit.qty() : u.unit.availableQty;
+            if(this.type == T.Machining) {
+                u.status = InboundUnit.S.Receive;
+                u.result = InboundUnit.R.Qualified;
+                u.qualifiedQty = u.qty;
+                u.inboundQty = u.qty;
+            } else {
+                u.status = InboundUnit.S.Create;
+            }
+            u.save();
         }
     }
 
@@ -227,12 +235,14 @@ public class Inbound extends GenericModel {
                 u.qcUser = Login.current();
                 u.qcDate = new Date();
                 u.save();
-                ProcureUnit punit = u.unit;
-                punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
-                if(punit.attrs.qty == 0) {
-                    punit.stage = ProcureUnit.STAGE.PLAN;
+                if(this.type == T.Purchase) {
+                    ProcureUnit punit = u.unit;
+                    punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
+                    if(punit.attrs.qty == 0) {
+                        punit.stage = ProcureUnit.STAGE.DELIVERY;
+                    }
+                    punit.save();
                 }
-                punit.save();
             } else if(u.status == InboundUnit.S.Receive && !(u.result == null || (u.result == InboundUnit.R.Qualified
                     && u.qualifiedQty == 0))) {
                 u.status = InboundUnit.S.Check;
@@ -240,15 +250,18 @@ public class Inbound extends GenericModel {
                 u.qcDate = new Date();
                 u.qcUser = Login.current();
                 u.save();
-                ProcureUnit punit = u.unit;
-                punit.result = u.result;
-                punit.save();
+                if(this.type == T.Purchase) {
+                    ProcureUnit punit = u.unit;
+                    punit.result = u.result;
+                    punit.save();
+                }
             }
         }
     }
 
     /**
-     * 入库
+     * 确认入库
+     *
      * @param units
      */
     public void confirmInbound(List<InboundUnit> units) {
@@ -261,9 +274,15 @@ public class Inbound extends GenericModel {
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.stage = ProcureUnit.STAGE.IN_STORAGE;
-                punit.inboundQty += u.inboundQty;
-                punit.unqualifiedQty += u.unqualifiedQty;
-                punit.availableQty += u.inboundQty;
+                if(this.type == T.Purchase) {
+                    punit.inboundQty += u.inboundQty;
+                    punit.unqualifiedQty += u.unqualifiedQty;
+                    punit.availableQty += u.inboundQty;
+                } else {
+                    punit.unqualifiedQty += u.unqualifiedQty;
+                    punit.availableQty = u.inboundQty;
+                }
+                punit.currWhouse = u.target;
                 punit.save();
                 this.createStockRecord(u);
             }
@@ -283,14 +302,17 @@ public class Inbound extends GenericModel {
 
     public void checkIsFinish() {
         int count = InboundUnit.find("inbound.id = ? and status NOT IN (?,?)", this.id,
-                InboundUnit.S.Inbound,
-                InboundUnit.S.Abort).fetch().size();
+                InboundUnit.S.Inbound, InboundUnit.S.Abort).fetch().size();
         if(count == 0) {
             List<InboundUnit> units = this.units;
             List<InboundUnit> return_units = new ArrayList<>();
+            List<InboundUnit> tail_units = new ArrayList<>();
             for(InboundUnit iunit : units) {
                 if(iunit.status == InboundUnit.S.Abort && iunit.way == InboundUnit.W.Return) {
                     return_units.add(iunit);
+                }
+                if(iunit.result == InboundUnit.R.Qualified && iunit.handType == InboundUnit.H.Delivery) {
+                    tail_units.add(iunit);
                 }
             }
             this.status = S.End;
@@ -302,6 +324,35 @@ public class Inbound extends GenericModel {
                 refund.projectName = this.projectName;
                 refund.createRefund(return_units);
             }
+            /**创建尾货单**/
+            if(tail_units.size() > 0) {
+                this.createTailInbound(tail_units);
+            }
+        }
+    }
+
+    public void createTailInbound(List<InboundUnit> tail_units) {
+        Inbound inbound = new Inbound();
+        inbound.id = this.id();
+        inbound.name = this.name + "--尾货单";
+        inbound.type = this.type;
+        inbound.cooperator = this.cooperator;
+        inbound.plan = this.plan;
+        inbound.status = S.Create;
+        inbound.createDate = new Date();
+        inbound.receiver = this.receiver;
+        inbound.projectName = this.projectName;
+        inbound.save();
+        for(InboundUnit i : tail_units) {
+            InboundUnit u = new InboundUnit();
+            u.status = InboundUnit.S.Create;
+            u.inbound = inbound;
+            u.planQty = i.planQty - i.qty;
+            u.qty = u.planQty;
+            u.unit = i.unit;
+            u.mainBoxInfo = i.mainBoxInfo;
+            u.lastBoxInfo = i.lastBoxInfo;
+            u.save();
         }
     }
 

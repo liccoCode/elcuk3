@@ -1,7 +1,6 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -26,6 +25,7 @@ public class Outbounds extends Controller {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("whouses", Whouse.selfWhouses(false));
+        renderArgs.put("tragets", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("suppliers", Cooperator.suppliers());
         renderArgs.put("users", User.findAll());
@@ -34,13 +34,11 @@ public class Outbounds extends Controller {
     public static void index(OutboundPost p) {
         if(p == null) p = new OutboundPost();
         List<Outbound> outbounds = p.query();
-
         render(p, outbounds);
     }
 
     public static void edit(String id) {
         Outbound outbound = Outbound.findById(id);
-
         render(outbound);
     }
 
@@ -52,6 +50,18 @@ public class Outbounds extends Controller {
 
     public static void create(Outbound outbound, List<Long> pids) {
         outbound.create(pids);
+        index(new OutboundPost());
+    }
+
+    public static void update(Outbound outbound) {
+        outbound.save();
+        flash.success("更新成功!");
+        index(new OutboundPost());
+    }
+
+    public static void confirmOutBound(List<String> ids) {
+        Outbound.confirmOutBound(ids);
+        flash.success("出库成功!");
         index(new OutboundPost());
     }
 

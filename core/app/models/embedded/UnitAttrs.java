@@ -64,6 +64,7 @@ public class UnitAttrs implements Serializable {
 
     /**
      * 实际交货数量
+     * 目前版本对应 收货数量
      */
     public Integer qty;
 

@@ -276,7 +276,7 @@ public class ProcureUnits extends Controller {
         }
         unit.save();
         //生成质检任务
-        unit.triggerCheck();
+        //unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);

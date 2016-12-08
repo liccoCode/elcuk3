@@ -1,10 +1,21 @@
 /**
  * Created by licco on 2016/11/30.
  */
-
 $(() => {
+  $("#confirmOutboundBtn").click(function(e) {
+    e.stopPropagation();
+    let num = $("input[name='ids']:checked").length;
+    if (num == 0) {
+      noty({
+        text: '请选择需要出库的数据!',
+        type: 'error'
+      });
+    } else if (confirm("确认出库 " + num + " 条出库单吗?")) {
+        $("#submit_form").submit();
+    }
+  });
 
-  $("select[name='outbound.type']").change(function(e) {
+  $("select[name='outbound.type']").change(() => {
     showTypeSelect();
   });
 
@@ -29,7 +40,6 @@ $(() => {
         $select.empty();
 
     }
-
   }
 
   showTypeSelect();

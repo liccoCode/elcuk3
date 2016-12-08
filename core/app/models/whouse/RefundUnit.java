@@ -39,6 +39,13 @@ public class RefundUnit extends Model {
     @Lob
     public String mainBoxInfo;
 
+    /**
+     * 主箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+
 
 
 }

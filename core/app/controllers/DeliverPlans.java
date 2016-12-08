@@ -85,6 +85,12 @@ public class DeliverPlans extends Controller {
         render(deliverplans, p, deliverplanIds);
     }
 
+    public static void indexWhouse(DeliverPlanPost p) {
+        if(p == null) p = new DeliverPlanPost();
+        List<DeliverPlan> plans = p.query();
+        render(p, plans);
+    }
+
 
     public static void update(DeliverPlan dp) {
         try {
