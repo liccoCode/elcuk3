@@ -3,6 +3,7 @@ package models.whouse;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
+import models.procure.ProcureUnit;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -29,6 +30,11 @@ public class StockRecord extends Model {
     @ManyToOne
     public Whouse whouse;
 
+    @Required
+    @Expose
+    @ManyToOne
+    public ProcureUnit unit;
+
     /**
      * 数量
      */
@@ -54,7 +60,7 @@ public class StockRecord extends Model {
         Inbound {
             @Override
             public String label() {
-                return "入库";
+                return "采购入库";
             }
         },
         Outbound {
@@ -63,10 +69,28 @@ public class StockRecord extends Model {
                 return "出库";
             }
         },
+        Split {
+            @Override
+            public String label() {
+                return "拆库存";
+            }
+        },
+        Refund {
+            @Override
+            public String label() {
+                return "入库后退货";
+            }
+        },
         Stocktaking {
             @Override
             public String label() {
-                return "盘库";
+                return "库存调整";
+            }
+        },
+        Split_Stock {
+            @Override
+            public String label() {
+                return "拆库存修改";
             }
         };
 

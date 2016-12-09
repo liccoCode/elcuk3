@@ -16,16 +16,17 @@
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.applyId}" way="${ship.type}">
+      <input type="checkbox" name="shipmentId" value="${ship.id}" coop="${ship.cooper?.name}" apply="${ship.applyId}"
+             way="${ship.type}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
     </td>
     <td style="cursor:pointer;" name="clickTd" shipment_id="${ship.id}" memo="${ship.memo.raw()}">
       <i class="icon-reorder"></i>
-      #{list items:ship.tracknolist, as:'trackno'}
+        #{list items:ship.tracknolist, as:'trackno'}
         ${trackno+" "}
-      #{/list}
+        #{/list}
       <span class="badge badge-info">${ship.itemsNum}</span>
     </td>
     <td>${ship.cname}</td>

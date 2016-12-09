@@ -1,0 +1,250 @@
+#{extends 'main_full.html' /}
+#{set title:"采购单元列表 (${p.count()})"  /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+    #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.js'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{ProcureUnits.indexWhouse()}" method="get" class="search_form" id="search_Form">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${p.from.date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${p.to.date()}">
+        </div>
+
+        <select name="p.dateType" class="inline">
+        #{list items:models.view.post.ProcurePost.DATE_TYPES, as:'t'}
+          <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+        #{/list}
+        </select>
+
+        <select name="p.whouseId" class="inline">
+          <option value="0">仓库</option>
+        #{list items:whouses, as:'wh'}
+          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+        #{/list}
+        </select>
+
+        <select name="p.stage" class="inline" style="width:82px;">
+          <option value="">阶段</option>
+        #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+            #{if stage.label() != '审批中'}
+              <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
+            #{/if}
+        #{/list}
+        </select>
+
+        <select name="p.shipType" class="inline" style="width:82px;">
+          <option value="">运输方式</option>
+        #{list items:models.procure.Shipment.T.values(), as:'t'}
+          <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.isPlaced" class="inline">
+          <option value="">是否抵达货代处</option>
+        #{list items:models.view.post.ProcurePost.PLACEDSTATE, as:'t'}
+          <option ${t == p.isPlaced  ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.isOut" class="inline">
+          <option value="">是否出库</option>
+        #{list items:models.procure.ProcureUnit.OST.values(), as:'o'}
+          <option ${o == p.isOut ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.cooperatorId" class="inline selectize" style="width:120px;">
+          <option value="">供应商</option>
+        #{list items:cooperators, as:'cop'}
+          <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+        #{/list}
+        </select>
+        <div class="input-prepend input-append inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" style="width:300px;" class="input-medium" name="p.search" placeholder="sellingId or SKU"
+                 value="${p.search}">
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="inline">
+          <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn btn-info inline"
+             id="createMachiningInboundBtn"><i class="icon-wrench"> </i>加工收货入库单</a>
+          <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-primary inline"
+             id="createInboundBtn"><i class="icon-shopping-cart"> </i>采购收货入库单</a>
+          <a href="javascript:void(0)" data-url="@{Outbounds.blank()}" class="btn btn-success inline"
+             id="createOutboundBtn"><i class="icon-plane"> </i>创建出库单</a>
+          <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-warning inline"
+             id="createRefundBtn"><i class="icon-retweet"> </i>创建退货单</a>
+          <input type="hidden" name="p.unitIds" id="unitIds"/>
+          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+            <i class="icon-download-alt"></i>下载ZIP</a>
+          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
+            <i class="icon-list-alt"> </i>导出修改日志</a>
+        #{power.ck "procures.downloadreports"}
+          <a href="javascript:void(0)" id="download_excel" class="btn btn-info">
+            <i class="icon-download-alt"></i>导出采购计划</a>
+        #{/power.ck}
+
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<form method="post" id="create_deliveryment">
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered" id="unit_table">
+        <tr>
+          <th><input type="checkbox"></th>
+          <th>采购计划ID</th>
+          <th>阶段</th>
+          <th width="45px;">操作</th>
+          <th width="100px;">Selling</th>
+          <th>Sku<br>产品名称</th>
+          <th>FBA-ShipmentId</th>
+          <th>去往仓库</th>
+          <th>深圳仓库</th>
+          <th>供应商</th>
+          <th>采购单</th>
+          <th>出货单</th>
+          <th width="100px;">数量<br>(计划/交货/入库)</th>
+          <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="auto">FnSku</th>
+          <th width="140px;">时间<br>(预计交货/预计运输)</th>
+          <th width="80px;">实际交货时间</th>
+          <th>质检结果</th>
+          <th>项目名称</th>
+          <th width="80px;">创建人<br>创建时间</th>
+        </tr>
+      #{list items:p.query(), as:'unit'}
+        <tr>
+          <td><input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
+                     value="${unit.id}"></td>
+          <td><i class="icon-reorder"></i>${unit.id}</td>
+          <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+          <td><a class="btn btn-mini btn-info">变更<br>详情</a></td>
+          <td><a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
+          <td title="${unit.product?.abbreviation}">
+            <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
+            <br>${unit.product?.abbreviation.overLong()}
+          </td>
+          <td>
+              #{if unit.fba}
+                  #{cache unit.fba.cacheKey(), for:'6h'}
+                  ${unit.fba.shipmentId}
+                      #{set feeds: unit.fba.feeds()/}
+                      #{if feeds.size() > 0}
+                          #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                          #{set lastFeed: feeds.get(0)/}
+                          #{if lastFeed.isFailed()}
+                            <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
+                          #{/if}
+                          #{elseif lastFeed.isSussess()}
+                            <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                            </i>
+                          #{/elseif}
+                          #{else }
+                            <i class="icon-search" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                            </i>
+                          #{/else}
+                      #{/if}
+                  #{/cache}
+              #{/if}
+          </td>
+          <td>${unit.whouse?.name()}</td>
+          <td>${unit.currWhouse?.name}</td>
+          <td>${unit.cooperator?.name}</td>
+          <td><a href="@{Deliveryments.show(unit.deliveryment?.id)}">${unit.deliveryment?.id}</a></td>
+          <td>${unit.deliverplan?.id}</td>
+          <td>${unit.attrs.planQty} / ${unit.attrs.qty} / ${unit.inboundQty}</td>
+          <td>
+              #{if unit.selling?.fnSku}
+                <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank" class="btn btn-success">
+                  <i class="icon-download-alt"></i>${unit.selling.fnSku}
+                </a>
+              #{/if}
+              #{elseif unit.selling != null}
+                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+                  补全 FnSku
+                </a>
+              #{/elseif}
+          </td>
+          <td>
+            预计交货:#{time_tooltip time:unit.attrs.planDeliveryDate/} <br>
+            预计运输:#{time_tooltip time:unit.attrs.planShipDate /}
+          </td>
+          <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+          <td>
+              #{if unit.result?.name()=='Qualified'}
+                <i style="color:green" class="icon-ok"></i>
+              #{/if}
+              #{elseif unit.result?.name()=='Unqualified'}
+                <i style="color:red" class="icon-remove"></i>
+              #{/elseif}
+          </td>
+          <td>${unit.projectName}</td>
+          <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate/}</td>
+        </tr>
+      #{/list}
+      #{if p != null}
+        <tr class="tb_footer">
+          <td colspan="25">
+              #{bootstrap_pager pi:p, url:'' /}
+          </td>
+        </tr>
+      #{/if}
+      </table>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span12">
+    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
+        #{power.ck "procures.createdeliveryment"}
+          <div class="input-append">
+            <input type="text" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
+            <button id="create_deliveryment_btn" class="btn btn-primary" data-disable-with='添加中'>
+              添加采购单
+            </button>
+          </div>
+        #{/power.ck}
+    #{/if}
+
+    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+
+      <div class="input-append">
+        <input type="text" id="name_deliverplan" name="name" value="${name}" placeHolder="出货单的别名(必须)">
+        <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>
+          添加出货单
+        </button>
+      </div>
+
+    #{/if}
+
+    </div>
+  </div>
+</form>
+
+#{records records:logs/}

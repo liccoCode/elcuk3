@@ -49,7 +49,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
@@ -79,6 +79,15 @@ public class ProcureUnits extends Controller {
     @Check("procures.index")
     public static void index(ProcurePost p) {
         if(p == null) p = new ProcurePost();
+        render(p);
+    }
+
+    @Check("procures.indexWhouse")
+    public static void indexWhouse(ProcurePost p) {
+        if(p == null) {
+            p = new ProcurePost();
+            p.stage = ProcureUnit.STAGE.DELIVERY;
+        }
         render(p);
     }
 
@@ -267,7 +276,7 @@ public class ProcureUnits extends Controller {
         }
         unit.save();
         //生成质检任务
-        unit.triggerCheck();
+        //unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);

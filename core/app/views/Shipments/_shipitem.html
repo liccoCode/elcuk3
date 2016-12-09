@@ -15,6 +15,8 @@
     </th>
   #{/if}
     <th>#</th>
+    <th>采购计划</th>
+    <th>阶段</th>
     <th>Sku</th>
     <th>Selling</th>
   #{if useCheckbox}
@@ -31,13 +33,10 @@
     <th>供应商</th>
     <th>总重量(kg)</th>
     <th>抵达?</th>
-    <th>是否发货</th>
-    <th>质检信息</th>
+    <th>质检结果</th>
   #{if useCheckbox}
     <th>运往仓库</th>
   #{/if}
-    <th>采购计划</th>
-    <th>是否出库</th>
     <th>运营创建人</th>
     <th>采购创建人</th>
     <th>丢失量/赔偿金额</th>
@@ -59,6 +58,8 @@
         </td>
       #{/if}
     <td>${itm.id}</td>
+    <td><a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.id}</a></td>
+    <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
     <td><a id="unitbutton">${itm.unit.sid}</a></td>
       #{if useCheckbox}
@@ -124,24 +125,17 @@
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()}</td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
-    <td>${itm.unit.isship()}</td>
     <td>
-        #{if itm.unit.fetchCheckTaskLink() != null}
-          <a href="${itm.unit.fetchCheckTaskLink()}" target="_blank">查看</a>
+        #{if itm.unit.result?.name()=='Qualified'}
+          <i style="color:green" class="icon-ok"></i>
         #{/if}
+        #{elseif itm.unit.result?.name()=='Unqualified'}
+          <i style="color:red" class="icon-remove"></i>
+        #{/elseif}
     </td>
-
       #{if useCheckbox}
         <td>${itm.unit.whouse.name()}</td>
       #{/if}
-    <td>
-      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
-      ${itm.unit.id}
-      </a>
-    </td>
-    <td placement='top' rel='popover' content="${itm.unit.outboundMsg()}">
-    ${itm.unit?.isOut?.label()}
-    </td>
     <td>${itm.unit.handler.username}</td>
     <td>${itm.unit.deliveryment?.handler?.username}</td>
     <td>${itm.lossqty}/${itm.compenamt}${itm.currency?.name()}</td>

@@ -16,7 +16,7 @@ $(() => {
         }
       } else {
         msg = {
-          text: "#{r.message}",
+          text: "保存失败.",
           type: 'error',
           timeout: 5000
         }
@@ -66,9 +66,8 @@ $(() => {
   };
 
   var localResizer = function () {
-    const lr = new LocalResize(document.getElementById('file_home'), {});
-    lr.success(function (stop, data) {
-      const file_home = $('#file_home').data('base64_file', data['base64Clean']).data('origin_name', data['original']['name']);
+    new LocalResize(document.getElementById('file_home')).success(function (stop, data) {
+      $('#file_home').data('base64_file', data['base64Clean']).data('origin_name', data['original']['name']);
       stop()
     });
   };

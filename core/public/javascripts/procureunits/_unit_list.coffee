@@ -3,7 +3,8 @@ $ ->
     $("#fba_carton_contents_modal").data('unit-source', $(@).data('unit-id')).modal('show')
     $("#sumbitDeployFBAs").data('url', $(@).data("url"))
     unitIds = [$(@).data('unit-id')]
-    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
+      unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
@@ -18,6 +19,9 @@ $ ->
       )
     )
   ).on("click", "i[name=showFeedsPage]", (e) ->
+  ).on('click', 'a[name=checkFBALabel]', (e) ->
+    $('#fba_ship_to_body').html(new FbaShipToBuilder($(@)).buildBody())
+    $('#fba_ship_to_modal').modal('show');
   )
   $('#unit_list').on('click', 'a[name=confirmUnitBtn]', (e) ->
     $btn = $(@)
@@ -43,6 +47,44 @@ $ ->
     if $modal.data('unit-source')
       window.location.replace("/FBAs/changeFBA?procureUnitId=#{$modal.data('unit-source')}&#{$modal.find(":input").serialize()}")
   )
+
+  class FbaShipToBuilder
+    constructor: ($a) ->
+      @addressLine1 = $a.data('addressline1')
+      @addressLine2 = $a.data('addressline2')
+      @city = $a.data('city')
+      @name = $a.data('name')
+      @countryCode = $a.data('countrycode')
+      @stateOrProvinceCode = $a.data('stateorprovincecode')
+      @postalCode = $a.data('postalcode')
+
+    countryCodeMap: ->
+      return {
+        "GB": "United Kingdom",
+        "US": "United States",
+        "CA": "Canada",
+        "CN": "China (Mainland)",
+        "DE": "Germany",
+        "FR": "France",
+        "IT": "Italy",
+        "JP": "Japan"
+      }
+
+    formatCountryCode: ->
+      return @countryCodeMap[@countryCode]
+
+    buildBody: ->
+      body = "<b> SHIP TO:</b><br>";
+      if !_.isEmpty(@name) then body += "<b>#{@name}</b><br>"
+      if !_.isEmpty(@addressLine1) then body += "<b>#{@addressLine1}</b><br>"
+      if !_.isEmpty(@addressLine2) then body += "<b>#{@addressLine2}</b><br>"
+      if !_.isEmpty(@city) then body += "<b>#{@city},</b>&nbsp;"
+      if !_.isEmpty(@stateOrProvinceCode) then body += "<b>#{@stateOrProvinceCode}</b>&nbsp;"
+      if !_.isEmpty(@postalCode) then body += "<b>#{@postalCode}</b><br>"
+      if !_.isEmpty(@countryCode)
+        code = @formatCountryCode()
+        if !_.isEmpty(code) then body += "<b>#{code}</b><br>"
+      return body;
 
   $(document).ready ->
     for trigger in $("i[name=showFeedsPage]")

@@ -8,7 +8,7 @@
       </label>
     </th>
   #{/if}
-    <th>#</th>
+    <th width="60px;">#</th>
     <th>Selling</th>
     <th>Sku</th>
     <th>FBA-ShipmentId</th>
@@ -69,7 +69,7 @@
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-      <i class="icon-reorder"></i> ${unit.id}</td>
+      <i class="icon-reorder"></i>${unit.id}</td>
     <td class="selling_id">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
@@ -100,6 +100,19 @@
                     #{/else}
                 #{/if}
             #{/cache}
+            #{set fbaCenter: unit.fba.fbaCenter/}
+            #{if fbaCenter}
+              <a href="javascript:void(0)" rel="tooltip" placement="top" title="检查 FBA Label 中的 Ship To 是否正确"
+                 name="checkFBALabel"
+                 data-addressline1="${fbaCenter.addressLine1}"
+                 data-addressline2="${fbaCenter.addressLine2}"
+                 data-city="${fbaCenter.city}"
+                 data-name="${fbaCenter.name}"
+                 data-countrycode="${fbaCenter.countryCode}"
+                 data-stateorprovincecode="${fbaCenter.stateOrProvinceCode}"
+                 data-postalcode="${fbaCenter.postalCode}"><i class="icon-eye-open"></i>
+              </a>
+            #{/if}
         #{/if}
     </td>
     <td>
@@ -286,3 +299,11 @@
   </tr>
 #{/if}
 </table>
+
+<!-- Ship To Modal -->
+<div id="fba_ship_to_modal" class="modal hide fade">
+  <div class="modal-body" id="fba_ship_to_body"></div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+  </div>
+</div>

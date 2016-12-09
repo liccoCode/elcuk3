@@ -1,0 +1,132 @@
+#{extends 'main_full.html' /}
+#{set title:'编辑出库单' /}
+#{set 'moreScripts'}
+    #{script 'outbounds/blank.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Outbounds.update(), method:'POST', id: 'new_outbound'}
+    #{info_row title:'出库单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>出库单ID</th>
+        <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
+        <th>B2B选项</th>
+        <td>
+          <label class="checkbox">
+            <input type="checkbox" name="outbound.isb2b" value="true"
+                #{if outbound.projectName=='B2B'} checked #{/if}> B2B
+          </label>
+        </td>
+        <th>状态</th>
+        <td style="background-color:${outbound.status.rgb()}"><b>${outbound.status.label()}</b></td>
+      </tr>
+      <tr>
+        <th>目的国家</th>
+        <td><input type="text" value="${outbound.whouse?.name}" readonly>
+        </td>
+        <th>运输方式</th>
+        <td>
+          <input type="text" value="${outbound.shipType?.label()}" readonly/>
+        </td>
+        <th>运输单号</th>
+        <td><input type="text" value="" readonly/></td>
+      </tr>
+      <tr>
+        <th>出库单名称<span style="color:red">*</span></th>
+        <td><input type="text" class="span8" name="outbound.name" value="${outbound.name}" required></td>
+        <th>出库类型</th>
+        <td>
+          <select name="outbound.type">
+              #{list items:models.whouse.Outbound.T, as:'t'}
+                <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
+              #{/list}
+          </select>
+        </td>
+        <th>货代公司</th>
+        <td>
+          <!-------------------------- targetId 备选项 ---------------------------------------------------------->
+          <select style="display:none;" id="shipperOptions">
+              #{list items:shippers, as: 'ship'}
+                <option ${ship.id.toString() == outbound?.targetId ? 'selected' : ''} value="${ship.id}">
+                ${ship.name}
+                </option>
+              #{/list}
+          </select>
+          <select style="display:none;" id="supplierOptions">
+              #{list items:suppliers, as: 'sup'}
+                <option ${sup.id.toString() == outbound?.targetId ? 'selected' : ''} value="${sup.id}">
+                ${sup.name}
+                </option>
+              #{/list}
+          </select>
+          <select style="display:none;" id="sampleOptions">
+              #{list items: ["质检部", "采购部", "运营部", "研发部", "生产部"], as: 'target'}
+                <option ${outbound?.targetId == target ? 'selected' : ''} value="${target}">
+                ${target}
+                </option>
+              #{/list}
+          </select>
+          <select style="display:none;" id="processOptions">
+            <option ${outbound?.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
+              品拓生产部
+            </option>
+          </select>
+          <!--------------------------------------------------------------------------------------------------->
+          <select name="outbound.targetId" style="width: 230px;">
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>出库日期<span style="color:red">*</span></th>
+        <td><input type="date" name="outbound.outboundDate" value="${outbound.outboundDate}" required></td>
+        <th>发货人</th>
+        <td>
+          <select name="outbound.consignor.id" class="inline selectize" style="width:120px;">
+            <option value="">发货人</option>
+              #{list items:users, as:'u'}
+                <option value="${u.id}" #{if outbound.consignor?.id==u.id}selected#{/if}>${u.username}</option>
+              #{/list}
+          </select>
+        </td>
+        <th>创建人</th>
+        <td><input type="text" value="${outbound.creator?.username}" readonly="true"></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="5">
+          <textarea name="outbound.memo" rows="4" class="input-block-level">${outbound.memo}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6">
+            #{if outbound.status.name()=='Create'}
+              <button class="btn btn-primary" name="create_record">更新</button>
+            #{/if}
+          <a href="@{Outbounds.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+    #{info_row title:'已添加进入【出库单】的【采购单元】'/}
+<div class="row-fluid">
+  <div class="span12">
+      #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
+      #{if outbound.status.name()=='Create'}
+        <button class="btn btn-danger">解除</button>
+      #{/if}
+  </div>
+</div>
+
+#{/form}
+

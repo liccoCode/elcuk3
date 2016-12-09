@@ -1,0 +1,99 @@
+#{extends 'main_full.html' /}
+#{set title:'退货单' /}
+#{set 'moreScripts'}
+    #{script 'inbounds/edit.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Refunds.update(), method:'POST', id: 'edit_refund_form'}
+    #{info_row title:'编辑退货单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>退货单ID</th>
+        <td>
+          <input type="text" name="refund.id" value="${refund.id}" readonly>
+        </td>
+        <th>状态</th>
+        <td style="width: 40%;">${refund.status?.label()}</td>
+      </tr>
+      <tr>
+        <th>退货单名称<span style="color:red">*</span></th>
+        <td><input type="text" name="refund.name" value="${refund.name}" readonly></td>
+        <th>供应商</th>
+        <td>
+          <input type="text" value="${refund.cooperator?.name}" readonly/>
+        </td>
+      </tr>
+      <tr>
+        <th>退货类型<span style="color:red">*</span></th>
+        <td><input type="text" value="${refund.type?.name()}" readonly></td>
+        <th>B2B选项</th>
+        <td>
+          <label class="checkbox">
+            <input type="checkbox" name="refund.isb2b" value="true"> B2B
+          </label>
+        </td>
+      </tr>
+
+      <tr>
+        <th>制单人</th>
+        <td>${refund.creator?.username}</td>
+        <th>仓库交接人<span style="color:red">*</span></th>
+        <td></td>
+      </tr>
+
+      <tr>
+        <th>创建日期</th>
+        <td>#{time_tooltip time:refund.createDate/}</td>
+        <th></th>
+        <td><input type="text" name="refund.info" value="${refund.info}"></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea name="refund.memo" rows="4" class="input-block-level">${refund.memo}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary" id="update">更新</button>
+          <a href="@{Refunds.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+    #{info_row title:'已添加进入【退货单】的【采购单元】'/}
+<div class="row-fluid">
+  <div class="span12">
+      #{render '/Refunds/_units.html', units:refund.unitList, is_check:true/}
+    <button class="btn btn-danger">解除</button>
+  </div>
+</div>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>FBA Carton Contents</h3>
+    <p class="muted">默认数据来源于供应商的产品</p>
+  </div>
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
+  </div>
+</div>
+
+#{/form}
+
