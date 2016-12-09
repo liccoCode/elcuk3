@@ -99,8 +99,7 @@
         <th>阶段</th>
       </tr>
         #{list items:units, as:'unit'}
-            #{set planQty:it.name()=='Machining'? unit.availableQty : unit.qty()/}
-
+            #{set planQty:it.name()=='Machining'? unit.availableQty : unit.attrs.planQty/}
           <tr class="text-center">
             <td>
               <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">

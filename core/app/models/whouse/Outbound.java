@@ -8,6 +8,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -242,8 +243,10 @@ public class Outbound extends GenericModel {
             case Normal:
             case B2B:
             case Refund:
-                Cooperator c = Cooperator.findById(Long.parseLong(this.targetId));
-                return c.name;
+                if(StringUtils.isNotEmpty(this.targetId)) {
+                    Cooperator c = Cooperator.findById(Long.parseLong(this.targetId));
+                    return c.name;
+                }
             default:
                 return this.targetId;
         }

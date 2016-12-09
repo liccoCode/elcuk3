@@ -23,9 +23,16 @@ public class StockRecordPost extends Post<StockRecord> {
     public Date from;
     public Date to;
     public Whouse whouse;
+    public Long unitId;
 
 
     public StockRecordPost() {
+        this.page = 1;
+        this.perSize = 20;
+    }
+
+    public StockRecordPost(Long unitId) {
+        this.unitId = unitId;
         this.page = 1;
         this.perSize = 20;
     }
@@ -40,9 +47,9 @@ public class StockRecordPost extends Post<StockRecord> {
             params.add(this.whouse.id);
         }
 
-        if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND stockObjId LIKE ?");
-            params.add(this.word());
+        if(unitId != null) {
+            sbd.append(" AND unit.id = ? ");
+            params.add(unitId);
         }
 
         if(this.from != null) {

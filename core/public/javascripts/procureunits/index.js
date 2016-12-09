@@ -28,7 +28,8 @@ $(() => {
   function validProNameAndCooperName ($btn) {
     let firstProjectName = $("input[name='pids']:checked").first().attr("project");
     let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
-    let i, j = 0;
+    let i = 0;
+    let j = 0;
     if ($btn.attr("id") == 'createInboundBtn' || $btn.attr("id") == 'createRefundBtn') {
       $("input[name='pids']:checked").each(function() {
         if ($(this).attr("project") != firstProjectName) {
@@ -45,9 +46,8 @@ $(() => {
         });
         return false;
       }
-    } else {
-      return true;
     }
+    return true;
   }
 
 });

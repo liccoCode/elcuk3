@@ -30,7 +30,7 @@ public class ProcuresHelper extends JavaExtensions {
             case DONE:
                 return "#88BEF5";
             case IN_STORAGE:
-                return "#FFE559";
+                return "#FBBC05";
             case PROCESSING:
                 return "#FF8A69";
             case OUTBOUND:
@@ -78,7 +78,7 @@ public class ProcuresHelper extends JavaExtensions {
             case Check:
                 return "#73CFF0";
             case Inbound:
-                return "#FFE559";
+                return "#FBBC05";
             case Abort:
                 return "#FF6464";
             default:

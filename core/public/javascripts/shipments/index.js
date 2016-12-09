@@ -55,13 +55,27 @@ $(() => {
       noty({
         text: "请选择运输单！",
         type: 'warning'
-      })
+      });
       return;
     } else if (confirm("确认为 " + checkboxs.length + " 条运输单创建出库单吗？")) {
-      let $form = $('<form method="post" action=""></form>');
-      $form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
-      $form.hide().append(checkboxs.clone()).appendTo('body');
-      $form.submit().remove();
+      let flag = 0;
+      checkboxs.each(function() {
+        let ck = $(this);
+        if (ck.attr("coop") == "") {
+          noty({
+            text: "运输单【" + ck.val() + "】未填运输商！",
+            type: 'warning'
+          });
+          flag++;
+          return false;
+        }
+      });
+      if (flag == 0) {
+        let $form = $('<form method="post" action=""></form>');
+        $form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
+        $form.hide().append(checkboxs.clone()).appendTo('body');
+        $form.submit().remove();
+      }
     }
   });
 

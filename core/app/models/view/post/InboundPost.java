@@ -2,24 +2,24 @@ package models.view.post;
 
 import helper.Dates;
 import models.whouse.Inbound;
-import models.whouse.InboundRecord;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by licco on 2016/11/11.
  */
 public class InboundPost extends Post<Inbound> {
+    private static final Pattern ID = Pattern.compile("^SR(\\|\\d{6}\\|\\d+)$");
 
     public Inbound.S status;
-
     public Long cooperatorId;
-
     public Inbound.T type;
-
     public String search;
 
     public InboundPost() {
@@ -35,12 +35,18 @@ public class InboundPost extends Post<Inbound> {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("1=1");
         List<Object> params = new ArrayList<>();
+        String id = isSearchForId();
+        if(StringUtils.isNotEmpty(id)) {
+            sbd.append(" AND id = ? ");
+            params.add(id);
+            return new F.T2<>(sbd.toString(), params);
+        }
         sbd.append(" AND createDate >= ? AND createDate <= ? ");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
         if(status != null) {
-             sbd.append(" AND status = ? ");
-             params.add(this.status);
+            sbd.append(" AND status = ? ");
+            params.add(this.status);
         }
         if(cooperatorId != null) {
             sbd.append(" AND cooperator.id = ? ");
@@ -73,4 +79,11 @@ public class InboundPost extends Post<Inbound> {
         return Inbound.count(params._1, params._2.toArray());
     }
 
+    private String isSearchForId() {
+        if(StringUtils.isNotBlank(this.search)) {
+            Matcher matcher = ID.matcher(this.search);
+            if(matcher.find()) return matcher.group(1);
+        }
+        return null;
+    }
 }

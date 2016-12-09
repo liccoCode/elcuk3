@@ -87,17 +87,18 @@
       <div class="span12">
         <div class="inline">
           <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn btn-info inline"
-             id="createMachiningInboundBtn">加工收货入库单</a>
+             id="createMachiningInboundBtn"><i class="icon-wrench"> </i>加工收货入库单</a>
           <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-primary inline"
-             id="createInboundBtn">采购收货入库单</a>
+             id="createInboundBtn"><i class="icon-shopping-cart"> </i>采购收货入库单</a>
           <a href="javascript:void(0)" data-url="@{Outbounds.blank()}" class="btn btn-success inline"
-             id="createOutboundBtn">创建出库单</a>
+             id="createOutboundBtn"><i class="icon-plane"> </i>创建出库单</a>
           <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-warning inline"
-             id="createRefundBtn">创建退货单</a>
+             id="createRefundBtn"><i class="icon-retweet"> </i>创建退货单</a>
           <input type="hidden" name="p.unitIds" id="unitIds"/>
           <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
             <i class="icon-download-alt"></i>下载ZIP</a>
-          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">导出修改日志</a>
+          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
+            <i class="icon-list-alt"> </i>导出修改日志</a>
         #{power.ck "procures.downloadreports"}
           <a href="javascript:void(0)" id="download_excel" class="btn btn-info">
             <i class="icon-download-alt"></i>导出采购计划</a>
@@ -117,7 +118,7 @@
           <th><input type="checkbox"></th>
           <th>采购计划ID</th>
           <th>阶段</th>
-          <th>操作</th>
+          <th width="45px;">操作</th>
           <th width="100px;">Selling</th>
           <th>Sku<br>产品名称</th>
           <th>FBA-ShipmentId</th>
@@ -140,7 +141,7 @@
                      value="${unit.id}"></td>
           <td><i class="icon-reorder"></i>${unit.id}</td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-          <td><a class="btn btn-mini btn-default">变更<br>详情</a></td>
+          <td><a class="btn btn-mini btn-info">变更<br>详情</a></td>
           <td><a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
           <td title="${unit.product?.abbreviation}">
             <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>

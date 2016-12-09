@@ -29,20 +29,20 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.dateType" style="width: 150px;" class="inline selectize">
+      <select name="p.dateType" style="width: 150px;" class="inline">
       #{list items:dateTypes, as:'t'}
         <option value="${t._1}" ${t._1 == p.dateType ? 'selected' : ''}>${t._2}</option>
       #{/list}
       </select>
 
-      <select name="p.type" style="width: 100px;" class="inline selectize">
+      <select name="p.type" style="width: 100px;" class="inline">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
         <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t}</option>
       #{/list}
       </select>
 
-      <select name="p.iExpress" style="width: 80px;" class="inline selectize">
+      <select name="p.iExpress" style="width: 100px;" class="inline">
         <option value="">国际快递商</option>
       #{list items:models.procure.Shipment.Express(), as:'express'}
         <option ${express == p.iExpress ? 'selected' : ''} value="${express.name()}">${express}</option>
@@ -57,7 +57,7 @@
         </select>
       </div>
 
-      <select name="p.cooperId" style="width: 150px;" class="inline selectize">
+      <select name="p.cooperId" style="width: 150px;" class="inline">
         <option value="">运输商</option>
       #{list items:cooperators, as:'cooper'}
         <option ${p.cooperId == cooper.id ? 'selected' : ''} value="${cooper.id}">${cooper.name}</option>
@@ -100,7 +100,7 @@
 
     #{power.ck 'outboundrecords.index'}
       <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-primary" id="outboundBtn">
-        创建出库
+        创建出库单
       </a>
     #{/power.ck}
     </div>

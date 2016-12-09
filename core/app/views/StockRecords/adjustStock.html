@@ -1,0 +1,66 @@
+#{extends 'main.html' /}
+#{set title:'库存调整' /}
+#{set 'moreScripts'}
+    #{script 'inbounds/edit.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+  .table th{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @StockRecords.saveRecord(), method:'POST', id: 'edit_inbound_form'}
+    #{info_row title:'库存调整'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>收货入库单ID</th>
+        <td>
+          <input type="text" name="record.id" value="${record.id}" readonly>
+        </td>
+        <th>采购计划ID</th>
+        <td width="300px;"><input type="text" name="record.unit.id" value="${unit.id}" readonly></td>
+      </tr>
+      <tr>
+        <th>SKU</th>
+        <td><input type="text" value="${unit.sku}" readonly/></td>
+        <th>产品名称</th>
+        <td>
+          <input type="text" class="input-xxlarge" value="${unit.product?.abbreviation}" readonly/>
+        </td>
+      </tr>
+      <tr>
+        <th>当前库存</th>
+        <td><input type="text" value="${unit.availableQty}" readonly></td>
+        <th>调整类型</th>
+        <td><input type="text" value="${models.whouse.StockRecord.T.Stocktaking.label()}" readonly></td>
+      </tr>
+      <tr>
+        <th>调整数量<i class="icon-asterisk" style="color:red"></i></th>
+        <td colspan="3"><input type="text" name="record.qty" value="" required></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea name="inbound.memo" rows="4" class="input-block-level"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary" id="update">提交</button>
+          <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+#{/form}
+
