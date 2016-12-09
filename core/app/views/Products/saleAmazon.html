@@ -42,7 +42,7 @@
   </div>
   <div class="span5">
       #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku/}
-      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc, readonly:true /}
+      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc/}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer',
       value: "${models.OperatorConfig.getVal("addressname")}" /}
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: "${models.OperatorConfig.getVal("addressname")}"/}
