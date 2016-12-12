@@ -21,10 +21,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 入库单元
@@ -317,7 +314,8 @@ public class InboundUnit extends Model {
     }
 
     /**
-     *  采购计划对应的入库单是不是全部已结束
+     * 采购计划对应的入库单是不是全部已结束
+     *
      * @param id
      * @return
      */
@@ -329,6 +327,20 @@ public class InboundUnit extends Model {
         } else {
             return "";
         }
+    }
+
+    public static Map<Integer, List<InboundUnit>> pageNumForTen(List<Inbound> inbounds) {
+        Map<Integer, List<InboundUnit>> ten = new HashMap<>();
+        int k = 0;
+        for(Inbound inbound : inbounds) {
+            List<InboundUnit> iu = inbound.units;
+            for(int i = 0; i < iu.size(); i += 10) {
+                int max = iu.size();
+                ten.put(k, iu.subList(i, max >= 10 ? i + 10 : i + max));
+                k++;
+            }
+        }
+        return ten;
     }
 
 }

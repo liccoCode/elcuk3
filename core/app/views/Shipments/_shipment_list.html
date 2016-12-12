@@ -12,6 +12,7 @@
     <th style="width:8%">创建时间</th>
     <th style="width:8%">预计到库时间</th>
     <th style="width:8%">创建者</th>
+    <t>出库单ID</t>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
@@ -38,6 +39,7 @@
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.uname}</td>
+    <td></td>
   </tr>
 
 #{/list}
