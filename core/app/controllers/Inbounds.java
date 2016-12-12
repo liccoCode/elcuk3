@@ -11,8 +11,11 @@ import models.view.post.InboundPost;
 import models.whouse.Inbound;
 import models.whouse.InboundUnit;
 import models.whouse.Whouse;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
+import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -20,6 +23,9 @@ import play.mvc.With;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * Created by licco on 2016/11/9.
@@ -167,6 +173,16 @@ public class Inbounds extends Controller {
         unit.marshalBoxs();
         unit.save();
         renderJSON(new Ret(true));
+    }
+
+    public static void printQuaternionForm(List<String> ids) {
+        final PDF.Options options = new PDF.Options();
+        options.filename = "TEST001.pdf";
+        options.pageSize = IHtmlToPdfTransformer.A4L;
+        List<Inbound> inbounds = Inbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        Map<Integer, List<InboundUnit>> ten = InboundUnit.pageNumForTen(inbounds);
+        int page = ten.keySet().size();
+        renderPDF(options, ten, page);
     }
 
 }

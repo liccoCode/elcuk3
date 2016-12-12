@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
+import org.springframework.core.annotation.Order;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
