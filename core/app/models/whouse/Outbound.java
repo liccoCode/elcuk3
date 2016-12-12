@@ -176,6 +176,16 @@ public class Outbound extends GenericModel {
     @Transient
     public boolean isb2b = false;
 
+    public Outbound () {
+
+    }
+
+    public Outbound (ProcureUnit unit) {
+        this.shipType = unit.shipType;
+        this.whouse = unit.whouse;
+        this.status = S.Create;
+    }
+
     public void init() {
         this.id = id();
         this.status = S.Create;

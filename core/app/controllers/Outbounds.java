@@ -45,7 +45,8 @@ public class Outbounds extends Controller {
     public static void blank(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         ProcureUnit proUnit = units.get(0);
-        render(units, proUnit);
+        Outbound outbound = new Outbound(proUnit);
+        render(units, proUnit, outbound);
     }
 
     public static void create(Outbound outbound, List<Long> pids) {
