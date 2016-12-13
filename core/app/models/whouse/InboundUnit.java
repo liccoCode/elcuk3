@@ -337,7 +337,7 @@ public class InboundUnit extends Model {
             int max = iu.size();
             for(int i = 0; i < iu.size(); i += 10) {
                 int num = max - i;
-                ten.put(k, iu.subList(i, max < 10 ? i + 10 : i + max));
+                ten.put(k, iu.subList(i, num > 10 ? i + 10 : i + num));
                 k++;
             }
         }
