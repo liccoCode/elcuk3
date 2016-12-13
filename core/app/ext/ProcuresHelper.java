@@ -108,6 +108,18 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String xxLong(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            if(value.length() > 20) {
+                return value.substring(0, 20) + "...";
+            } else {
+                return value;
+            }
+        } else {
+            return "";
+        }
+    }
+
     public static String rgb(Deliveryment.S state) {
         switch(state) {
             case PENDING:

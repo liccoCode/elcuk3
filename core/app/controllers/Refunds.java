@@ -2,12 +2,14 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
+import models.view.Ret;
 import models.view.post.RefundPost;
-import models.whouse.InboundUnit;
 import models.whouse.Refund;
 import models.whouse.RefundUnit;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -43,11 +45,35 @@ public class Refunds extends Controller {
         render(refund);
     }
 
+    public static void blank(List<Long> pids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        ProcureUnit proUnit = units.get(0);
+        Refund refund = new Refund(proUnit);
+        render(proUnit, refund, units);
+    }
+
+    public static void create(Refund refund, List<RefundUnit> dtos) {
+        refund.createRefund(dtos);
+        flash.success("退货单【" + refund.id + "】创建成功!");
+        index(new RefundPost());
+    }
+
     public static void update(Refund refund) {
         refund.save();
         flash.success("退货单【" + refund.id + "】更新成功!");
         index(new RefundPost());
+    }
 
+    public static void refreshFbaCartonContentsByIds(String id) {
+        RefundUnit unit = RefundUnit.findById(Long.parseLong(id));
+        render("/Inbounds/boxInfo.html", unit);
+    }
+
+    public static void updateBoxInfo(RefundUnit unit) {
+        unit = RefundUnit.findById(unit.id);
+        unit.marshalBoxs();
+        unit.save();
+        renderJSON(new Ret(true));
     }
 
     public static void confirmRefund(List<String> ids) {

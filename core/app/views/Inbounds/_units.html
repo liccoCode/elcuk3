@@ -1,27 +1,26 @@
 <table class="table table-condensed table-bordered" id="unit_table">
   <tr>
+  #{if !is_check}
     <th><input type="checkbox"></th>
-    <th style="width:40px;">记录ID</th>
-    <th style="width:40px;">采购计划ID</th>
-    <th>采购单</th>
-    <th style="width:120px;">Selling</th>
-    <th>SKU</th>
-    <th style="width:100px;">产品名称</th>
-    <th>预计交货时间</th>
-    <th>预计运输时间</th>
+  #{/if}
+    <th width="40px;">采购计划ID</th>
+    <th width="80px;">采购单</th>
+    <th width="120px;">Selling</th>
+    <th width="250px;">SKU<br>产品名称</th>
+    <th width="140px;">预计交货时间/<br>预计运输时间</th>
     <th style="width:45px;">计划交货数量</th>
     <th style="width:50px;">实际交货数量</th>
     <th>交货不足处理方式</th>
-    <th>包装信息</th>
+    <th width="60px;">包装信息</th>
     <th>FBA-ShipmentId</th>
     <th>去往仓库</th>
     <th>运输方式</th>
     <th>状态</th>
     <th>质检结果</th>
-      #{if !is_check}
-      <th>质检不合格
-      处理方式</th>
-      #{/if}
+  #{if !is_check}
+    <th>质检不合格<br>处理方式
+    </th>
+  #{/if}
     <th>合格数</th>
     <th>不良品数</th>
     <th>实际入库数</th>
@@ -34,14 +33,17 @@
           <input type="checkbox" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
         </td>
-        <td>${unit.id}</td>
-        <td>${unit.unit?.id}</td>
-        <td>${unit.unit?.deliveryment.id}</td>
+        <td>${unit.unit?.id} </td>
+        <td><a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}" target="_blank">${unit.unit?.deliveryment?.id}</a></td>
         <td>${unit.unit?.selling?.sellingId}</td>
-        <td>${unit.unit?.product.sku}</td>
-        <td title="${unit.unit?.product.abbreviation}">${unit.unit?.product.abbreviation.overLong()}</td>
-        <td>#{time_tooltip time:unit.unit?.attrs.planDeliveryDate/}</td>
-        <td>#{time_tooltip time:unit.unit?.attrs.planShipDate /}</td>
+        <td title="${unit.unit?.product.abbreviation}">
+          <a href="@{Products.show(unit.unit?.product?.sku)}" target="_blank">${unit.unit?.product?.sku}</a><br>
+        (${unit.unit?.product.abbreviation?.xxLong()})
+        </td>
+        <td>
+          预计交货:#{time_tooltip time:unit.unit?.attrs.planDeliveryDate/}<br>
+          预计运输:#{time_tooltip time:unit.unit?.attrs.planShipDate /}
+        </td>
         <td>${unit.planQty}</td>
         <td>
           <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.qty()}"
@@ -64,7 +66,7 @@
           </select>
         </td>
         <td>
-          <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+          <input type="button" class="btn btn-success btn-mini" data-id="${unit.id}" name="editBoxInfo" value="填写">
         </td>
         <td>${unit.fba?.shipmentId}</td>
         <td>${unit.unit?.whouse?.name()}</td>
@@ -134,22 +136,25 @@
     #{else }
       <tr class="text-center">
         <td>
-          <input type="checkbox" value="${unit.id}">
-          <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
+          <a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}#${unit.unit?.id}" target="_blank">${unit.unit?.id}</a>
         </td>
-        <td>${unit.id}</td>
-        <td>${unit.unit?.id}</td>
-        <td>${unit.unit?.deliveryment?.id}</td>
+        <td>
+          <a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}" target="_blank">${unit.unit?.deliveryment?.id}</a>
+        </td>
         <td>${unit.unit?.selling?.sellingId}</td>
-        <td>${unit.unit?.product?.sku}</td>
-        <td title="${unit.unit?.product?.abbreviation}">${unit.unit?.product?.abbreviation.overLong()}</td>
-        <td>#{time_tooltip time:unit.unit?.attrs?.planDeliveryDate/}</td>
-        <td>#{time_tooltip time:unit.unit?.attrs?.planShipDate /}</td>
+        <td title="${unit.unit?.product?.abbreviation}">
+          <a href="@{Products.show(unit.unit?.product?.sku)}" target="_blank">${unit.unit?.product?.sku}</a><br>
+        ${unit.unit?.product?.abbreviation.xxLong()}
+        </td>
+        <td>
+          预计交货:#{time_tooltip time:unit.unit?.attrs?.planDeliveryDate/}<br>
+          预计运输:#{time_tooltip time:unit.unit?.attrs?.planShipDate /}
+        </td>
         <td>${unit.planQty}</td>
         <td>${unit.qty}</td>
         <td>#{if unit.qty != unit.planQty}${unit.handType?.label()}#{/if}</td>
         <td>
-          <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="查看">
+          <input type="button" class="btn btn-success btn-mini" data-id="${unit.id}" name="editBoxInfo" value="查看">
         </td>
         <td>${unit.fba?.shipmentId}</td>
         <td>${unit.unit?.whouse?.name()}</td>

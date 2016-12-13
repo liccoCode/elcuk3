@@ -1941,19 +1941,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public static String validateIsInbound(List<Long> pids, String type) {
         Map<STAGE, Integer> status_map = new HashMap<>();
         List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        String msg = "";
         for(ProcureUnit unit : units) {
             if(type.equals("createMachiningInboundBtn")) {
                 if(unit.stage != STAGE.PROCESSING) {
                     return "请选择阶段为【仓库加工】的采购计划！";
                 }
-                validInbound(unit);
-                validRefund(unit);
+                msg = validInbound(unit);
+                if(StringUtils.isNotEmpty(msg)) {
+                    return msg;
+                } else {
+                    msg = validRefund(unit);
+                }
             } else if(type.equals("createInboundBtn")) {
                 if(!(unit.stage == STAGE.DELIVERY || unit.stage == STAGE.IN_STORAGE)) {
                     return "请选择阶段为【采购中】和【已入库】的采购计划";
                 }
-                validInbound(unit);
-                validRefund(unit);
+                return StringUtils.isNotEmpty(validInbound(unit)) ? validInbound(unit) : validRefund(unit);
             } else if(type.equals("createOutboundBtn")) {
                 if(unit.stage != STAGE.IN_STORAGE) {
                     return "请选择阶段为【已入库】的采购计划！";
@@ -1961,15 +1965,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 if(unit.outbound != null) {
                     return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中！";
                 }
-                validRefund(unit);
+                msg = validRefund(unit);
             } else if(type.equals("createRefundBtn")) {
                 if(!(unit.stage == STAGE.DONE || unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
                     return "请选择阶段为【已交货】和【已入库】或【仓库加工】的采购计划";
                 }
-
+                msg = validRefund(unit);
             }
         }
-        return "";
+        return msg;
     }
 
     public static String validInbound(ProcureUnit unit) {
