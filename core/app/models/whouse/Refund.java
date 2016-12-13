@@ -145,7 +145,17 @@ public class Refund extends GenericModel {
         this.refundDate = new Date();
     }
 
-    public void createRefund(List<InboundUnit> list) {
+    public Refund(ProcureUnit unit) {
+        this.status = S.Create;
+        this.creator = Login.current();
+        this.createDate = new Date();
+        this.refundDate = new Date();
+        this.projectName = unit.projectName;
+        this.cooperator = unit.cooperator;
+        this.type = T.After_Inbound;
+    }
+
+    public void createRefundByInbound(List<InboundUnit> list) {
         this.id = id();
         this.save();
         for(InboundUnit unit : list) {
@@ -156,6 +166,17 @@ public class Refund extends GenericModel {
             runit.mainBoxInfo = unit.mainBoxInfo;
             runit.lastBoxInfo = unit.lastBoxInfo;
             runit.save();
+        }
+    }
+
+    public void createRefund(List<RefundUnit> list) {
+        this.id = id();
+        this.createDate = new Date();
+        this.creator = Login.current();
+        this.save();
+        for(RefundUnit unit : list) {
+            unit.refund = this;
+            unit.save();
         }
     }
 
@@ -193,6 +214,7 @@ public class Refund extends GenericModel {
 
     /**
      * 采购计划对应的退货单是不是全部已退货
+     *
      * @param id
      * @return
      */

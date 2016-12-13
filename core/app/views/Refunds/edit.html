@@ -1,7 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:'退货单' /}
 #{set 'moreScripts'}
-    #{script 'inbounds/edit.js'/}
+    #{script 'refunds/edit.es6'/}
 #{/set}
 <style>
   .table td{
@@ -18,16 +18,16 @@
   <div class="span12">
     <table class="table table-bordered">
       <tr>
-        <th>退货单ID</th>
-        <td>
+        <th width="10%;">退货单ID</th>
+        <td width="40%">
           <input type="text" name="refund.id" value="${refund.id}" readonly>
         </td>
-        <th>状态</th>
-        <td style="width: 40%;">${refund.status?.label()}</td>
+        <th width="10%;">状态</th>
+        <td width="40%;" style="width: 40%;">${refund.status?.label()}</td>
       </tr>
       <tr>
         <th>退货单名称<span style="color:red">*</span></th>
-        <td><input type="text" name="refund.name" value="${refund.name}" readonly></td>
+        <td><input type="text" name="refund.name" class="input-xxlarge" value="${refund.name}"></td>
         <th>供应商</th>
         <td>
           <input type="text" value="${refund.cooperator?.name}" readonly/>
@@ -35,7 +35,7 @@
       </tr>
       <tr>
         <th>退货类型<span style="color:red">*</span></th>
-        <td><input type="text" value="${refund.type?.name()}" readonly></td>
+        <td><input type="text" value="${refund.type?.label()}" readonly></td>
         <th>B2B选项</th>
         <td>
           <label class="checkbox">
@@ -54,8 +54,8 @@
       <tr>
         <th>创建日期</th>
         <td>#{time_tooltip time:refund.createDate/}</td>
-        <th></th>
-        <td><input type="text" name="refund.info" value="${refund.info}"></td>
+        <th>物流信息</th>
+        <td><input type="text" class="input-xxlarge" name="refund.info" value="${refund.info}"></td>
       </tr>
       <tr>
         <th>备注</th>
