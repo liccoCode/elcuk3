@@ -17,36 +17,34 @@
       <td colspan="2" style="font-size:20px;font-weight:900;"><b>深圳品拓科技有限公司</b></td>
     </tr>
     <tr style="text-align:center;height:7mm;">
-      <td colspan="2" style="font-size:16px;font-weight:900;"><b>收货入库单</b></td>
+      <td colspan="2" style="font-size:16px;font-weight:900;"><b>退货单</b></td>
     </tr>
     <tr style="height:5mm;">
-      <td>出货单：${first_o.inbound?.plan?.id}</td>
-      <td>交货项目：${first_o.inbound?.projectName}</td>
+      <td>退货单号：${first_o.refund?.id}</td>
+      <td>退货项目：${first_o.refund?.projectName}</td>
     </tr>
     <tr style="height:5mm;">
-      <td>供应商名称：${first_o.inbound?.cooperator?.name}</td>
-      <td>交货时间：${first_o.inbound?.receiveDate.date()}</td>
+      <td>供应商：${first_o.refund?.cooperator?.name}</td>
+      <td>退货时间：${first_o.refund?.refundDate.date()}</td>
     </tr>
   </table>
   <table border="1" style="width:290mm;height:13mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
          class="table table-condensed table-bordered">
     <tr style="vertical-align:middle;">
-      <td rowspan="2" style="width:10mm;height:9mm;">采购计划ID</td>
+      <td rowspan="2" style="width:12mm;height:9mm;">采购计划ID</td>
       <td rowspan="2" style="width:15mm;">采购单编号</td>
-      <td rowspan="2" style="width:20mm;">产品名称</td>
+      <td rowspan="2" style="width:30mm;">产品名称</td>
       <td rowspan="2" style="width:20mm;">SKU</td>
       <td rowspan="2" style="width:15mm;">FBA ID</td>
       <td rowspan="2" style="width:15mm;">产品条码</td>
-      <td rowspan="2" style="width:10mm;">计划交<br>货数量</td>
-      <td rowspan="2" style="width:10mm;">实际交<br>货数量</td>
+      <td rowspan="2" style="width:12mm;">计划退<br>货数量</td>
+      <td rowspan="2" style="width:12mm;">实际退<br>货数量</td>
       <td rowspan="2" style="width:7mm;">每箱<br>数量</td>
       <td rowspan="2" style="width:7mm;">箱数</td>
       <td rowspan="2" style="width:7mm;">每箱<br>重量</td>
-      <td colspan="3" style="width:8mm;">箱子规格</td>
+      <td colspan="3" style="width:8mm;text-align:center;">箱子规格</td>
       <td rowspan="2" style="width:10mm;">去往国家</td>
       <td rowspan="2" style="width:10mm;">运输方式</td>
-      <td rowspan="2" style="width:10mm;">检验数量</td>
-      <td rowspan="2" style="width:10mm;">检验结果</td>
     </tr>
     <tr>
       <td style="width: 8mm;">长</td>
@@ -61,7 +59,7 @@
             <div style="height:10mm;overflow:hidden;">${i.unit?.product?.abbreviation}</div>
           </td>
           <td>${i.unit?.sku}</td>
-          <td>${i.fba?.id}</td>
+          <td>${i.unit?.fba?.id}</td>
           <td>${i.unit?.selling?.fnSku}</td>
           <td>${i.planQty}</td>
           <td>${i.qty}</td>
@@ -73,19 +71,19 @@
           <td>${i.mainBox?.height}</td>
           <td>${i.unit?.whouse?.name}</td>
           <td>${i.unit?.shipType?.label()}</td>
-          <td>${i.qty}</td>
-          <td>${i.result?.label()}</td>
         </tr>
       #{/list}
     <tr style="height:10mm;">
+      <td colspan="16">物流信息：  ${first_o.refund?.info}</td>
+    </tr>
+    <tr style="height:10mm;">
+      <td colspan="2">Total</td>
       <td></td>
       <td></td>
-      <td>合计：</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td colspan="2">总数量：</td>
-      <td colspan="2">总箱数：</td>
+      <td>100</td>
+      <td>100</td>
       <td></td>
       <td></td>
       <td></td>
@@ -99,8 +97,8 @@
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="height:10mm;">
       <td width="40%;">制单：</td>
-      <td width="30%;">质检：</td>
-      <td width="30%;">入库：</td>
+      <td width="30%;">仓储：</td>
+      <td width="30%;">供应商：</td>
     </tr>
   </table>
 </div>
