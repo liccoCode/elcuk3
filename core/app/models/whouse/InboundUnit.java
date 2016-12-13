@@ -336,7 +336,7 @@ public class InboundUnit extends Model {
             List<InboundUnit> iu = inbound.units;
             for(int i = 0; i < iu.size(); i += 10) {
                 int max = iu.size();
-                ten.put(k, iu.subList(i, max >= 10 ? i + 10 : i + max));
+                ten.put(k, iu.subList(i, max >= 10 ? 10 : i + max));
                 k++;
             }
         }
