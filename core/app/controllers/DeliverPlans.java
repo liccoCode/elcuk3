@@ -27,7 +27,7 @@ import java.util.List;
  * Date: 16-1-21
  * Time: 上午10:40
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class DeliverPlans extends Controller {
 
 
@@ -122,17 +122,19 @@ public class DeliverPlans extends Controller {
      */
     public static void delunits(String id, List<Long> pids) {
         DeliverPlan dp = DeliverPlan.findById(id);
+        notFoundIfNull(dp);
+
         Validation.required("deliverplans.delunits", pids);
-        if(Validation.hasErrors())
-            render("DeliverPlans/show.html", dp);
+        if(Validation.hasErrors()) render("DeliverPlans/show.html", dp);
         dp.unassignUnitToDeliverplan(pids);
+        if(Validation.hasErrors()) render("DeliverPlans/show.html", dp);
 
-        if(Validation.hasErrors())
-            render("DeliverPlans/show.html", dp);
-
-        flash.success("成功将 %s 采购计划从当前采购单中移除.", StringUtils.join(pids, ","));
-        show(dp.id);
+        flash.success("成功将 %s 采购计划从出货单 %s 中移除.", StringUtils.join(pids, ","), id);
+        if(dp.units.isEmpty()) {
+            dp.delete();
+            index(null, null);
+        } else {
+            show(dp.id);
+        }
     }
-
-
 }

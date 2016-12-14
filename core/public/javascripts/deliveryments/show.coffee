@@ -1,10 +1,14 @@
 window.jQuery = window.$
 $ ->
-  $(document).on('click', "#delunit_form_submit,  #downloadProcureunitsOrder",
-    (e) ->
-      $btn = $(@)
-      return false unless confirm("确认 #{$btn.text().trim()} ?")
-      submitForm($btn)
+  $(document).on('click', "#delunit_form_submit,  #downloadProcureunitsOrder", (e) ->
+    $btn = $(@)
+    checkboxs = $btn.parents('form').find('input[name="pids"]')
+    msg = "确认 #{$btn.text().trim()} ?"
+    # 移除出货单选中全部 checkbox
+    if $btn.attr('id') == 'delunit_form_submit' && $btn.data('url').indexOf('deliverplans') != -1 && checkboxs.size() != 0 && checkboxs.size() == checkboxs.filter(':checked').size()
+      msg += " (注: 移除所有的采购单元后默认会删除掉当前出货单)"
+    return false unless confirm(msg)
+    submitForm($btn)
   ).on("blur", "input[name='boxNumbers']", (e) ->
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1") # 确保用户填写的是大于零的数字
@@ -17,7 +21,10 @@ $ ->
     expressids = if _.isEmpty(expressid) then [] else expressid.split(",")
 
     if _.isEmpty(checkboxs)
-      noty({text: '请选择需要下载的采购单元', type: 'error'})
+      noty({
+        text: '请选择需要下载的采购单元',
+        type: 'error'
+      })
       return true
 
     $table = $("#box_number_table")
@@ -40,7 +47,10 @@ $ ->
     $btn = $(@)
     boxNumber = prompt("请输入采购单元箱数(0-999)", 1)
     if(boxNumber is "" or boxNumber <= 0 or isNaN(boxNumber) or boxNumber > 999)
-      noty({text: '请正确输入采购单元箱数', type: 'error'})
+      noty({
+        text: '请正确输入采购单元箱数',
+        type: 'error'
+      })
     else
       window.open("/FBAs/boxLabel?id=#{$btn.data('id')}&boxNumber=#{boxNumber}", "_blank")
   ).on('click', '#deployFBAs', (e) ->
@@ -50,7 +60,8 @@ $ ->
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     return if _.isEmpty(unitIds)
-    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
+      unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
@@ -79,7 +90,8 @@ $ ->
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     return if _.isEmpty(unitIds)
-    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", unitIds: unitIds, ->
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
+      unitIds: unitIds, ->
       $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
@@ -95,7 +107,10 @@ $ ->
     )
   ).on('click', '#edit_memo', (e) ->
     if $("#memo").val() == null || $("#memo").val().trim().length == 0
-      noty({text: '请输入备注!', type: 'error'})
+      noty({
+        text: '请输入备注!',
+        type: 'error'
+      })
     else
       $("#updateDeliverymentForm").submit()
   )
@@ -120,7 +135,10 @@ $ ->
       $("input:checkbox.#{region}").prop("checked", o.prop("checked"))
 
   fidCallBack = () ->
-    {fid: $('#deliverymentId').text(), p: 'DELIVERYMENT'}
+    {
+      fid: $('#deliverymentId').text(),
+      p: 'DELIVERYMENT'
+    }
   dropbox = $('#dropbox')
   window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
@@ -129,7 +147,11 @@ $ ->
     return unless $(@).val()
     mask = $('#generate_excel')
     mask.mask('加载中...')
-    $.ajax("/users/showJson", {type: 'POST', dataType: 'json', data: {id: $(@).val()}})
+    $.ajax("/users/showJson", {
+      type: 'POST',
+      dataType: 'json',
+      data: {id: $(@).val()}
+    })
     .done((r)->
       unless r.flag
         $('#excel_buyer').val(r['username'])
@@ -143,7 +165,8 @@ $ ->
     a.removeAttribute("target")
   )
   $("#unit_list").on("mouseenter focus", "table td.selling_id a", (e) ->
-    $(@).css('cursor': 'pointer')
+    $(@).css(
+      'cursor': 'pointer')
   ).on("click", "table td.selling_id a", (e) ->
     $("#tl").show()
     $td = $(@)
@@ -153,7 +176,10 @@ $ ->
   loadTimeLine = (type, val)->
     $time_line_home = $("#tl")
     LoadMask.mask($time_line_home)
-    $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
+    $.post('/analyzes/ajaxProcureUnitTimeline', {
+      type: type,
+      val: val
+    },
       (r) ->
         try
           if r.flag is false
