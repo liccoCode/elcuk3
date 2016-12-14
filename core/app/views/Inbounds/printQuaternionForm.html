@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
 #{stylesheet 'bootstrap.min.css'/}
@@ -10,7 +10,7 @@
 </head>
 <body style="margin:0 0 0 0;">
 #{list items:ten.keySet().iterator(), as:'p'}
-#{set first_o:ten.get(0).get(0) /}
+    #{set first_o:ten.get(0).get(0) /}
 <div style="margin:0 0 0 0; height:188mm;width:100%;">
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
@@ -20,7 +20,7 @@
       <td colspan="2" style="font-size:16px;font-weight:900;"><b>收货入库单</b></td>
     </tr>
     <tr style="height:5mm;">
-      <td>出货单：${first_o.inbound?.plan?.id}</td>
+      <td style="width:60%;">出货单：${first_o.inbound?.plan?.id}</td>
       <td>交货项目：${first_o.inbound?.projectName}</td>
     </tr>
     <tr style="height:5mm;">
@@ -28,10 +28,10 @@
       <td>交货时间：${first_o.inbound?.receiveDate.date()}</td>
     </tr>
   </table>
-  <table border="1" style="width:290mm;height:13mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
-         class="table table-condensed table-bordered">
+  <table border="1" style="width:290mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
+         class="table table-condensed table-bordered" cellpadding="0" cellspacing="0">
     <tr style="vertical-align:middle;">
-      <td rowspan="2" style="width:10mm;height:9mm;">采购计划ID</td>
+      <td rowspan="2" style="width:10mm;">采购计划ID</td>
       <td rowspan="2" style="width:15mm;">采购单编号</td>
       <td rowspan="2" style="width:20mm;">产品名称</td>
       <td rowspan="2" style="width:20mm;">SKU</td>
@@ -54,30 +54,38 @@
       <td style="width: 8mm;">高</td>
     </tr>
       #{list items:ten.get(p), as:'i'}
-        <tr>
-          <td style="height:9mm;">${i.unit?.id}</td>
-          <td>${i.unit?.deliveryment?.id}</td>
-          <td>
+        <tr style="height:7mm;">
+          <td rowspan="2">${i.unit?.id}</td>
+          <td rowspan="2">${i.unit?.deliveryment?.id}</td>
+          <td rowspan="2">
             <div style="height:10mm;overflow:hidden;">${i.unit?.product?.abbreviation}</div>
           </td>
-          <td>${i.unit?.sku}</td>
-          <td>${i.fba?.id}</td>
-          <td>${i.unit?.selling?.fnSku}</td>
-          <td>${i.planQty}</td>
-          <td>${i.qty}</td>
-          <td>${i.mainBox?.num}</td>
-          <td>${i.mainBox?.boxNum}</td>
-          <td>${i.mainBox?.singleBoxWeight}</td>
-          <td>${i.mainBox?.length}</td>
-          <td>${i.mainBox?.width}</td>
-          <td>${i.mainBox?.height}</td>
-          <td>${i.unit?.whouse?.name}</td>
-          <td>${i.unit?.shipType?.label()}</td>
-          <td>${i.qty}</td>
-          <td>${i.result?.label()}</td>
+          <td rowspan="2">${i.unit?.sku}</td>
+          <td rowspan="2">${i.fba?.id}</td>
+          <td rowspan="2">${i.unit?.selling?.fnSku}</td>
+          <td rowspan="2">${i.planQty}</td>
+          <td rowspan="2">${i.qty}</td>
+          <td style="font-size:9px;" height="3.5mm;"><div style="height:3mm;">${i.mainBox?.num}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.boxNum}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.singleBoxWeight}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.length}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.width}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.height}</div></td>
+          <td rowspan="2">${i.unit?.whouse?.name}</td>
+          <td rowspan="2">${i.unit?.shipType?.label()}</td>
+          <td rowspan="2">${i.qty}</td>
+          <td rowspan="2">${i.result?.label()}</td>
+        </tr>
+        <tr>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.num}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.boxNum}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.length}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.width}</div></td>
+          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.height}</div></td>
         </tr>
       #{/list}
-    <tr style="height:10mm;">
+    <tr style="height:9mm;">
       <td></td>
       <td></td>
       <td>合计：</td>
@@ -97,7 +105,7 @@
     </tr>
   </table>
   <table border="0" style="width:290mm;margin:0 0 0 0;">
-    <tr style="height:10mm;">
+    <tr style="height:9mm;">
       <td width="40%;">制单：</td>
       <td width="30%;">质检：</td>
       <td width="30%;">入库：</td>

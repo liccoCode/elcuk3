@@ -10,7 +10,7 @@
 </head>
 <body style="margin:0 0 0 0;">
 #{list items:ten.keySet().iterator(), as:'p'}
-#{set first_o:ten.get(0).get(0) /}
+    #{set first_o:ten.get(0).get(0) /}
 <div style="margin:0 0 0 0; height:188mm;width:100%;">
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
@@ -53,24 +53,56 @@
     </tr>
       #{list items:ten.get(p), as:'i'}
         <tr>
-          <td style="height:9mm;">${i.unit?.id}</td>
-          <td>${i.unit?.deliveryment?.id}</td>
-          <td>
+          <td rowspan="2" style="height:9mm;">${i.unit?.id}</td>
+          <td rowspan="2">${i.unit?.deliveryment?.id}</td>
+          <td rowspan="2">
             <div style="height:10mm;overflow:hidden;">${i.unit?.product?.abbreviation}</div>
           </td>
-          <td>${i.unit?.sku}</td>
-          <td>${i.unit?.fba?.id}</td>
-          <td>${i.unit?.selling?.fnSku}</td>
-          <td>${i.planQty}</td>
-          <td>${i.qty}</td>
-          <td>${i.mainBox?.num}</td>
-          <td>${i.mainBox?.boxNum}</td>
-          <td>${i.mainBox?.singleBoxWeight}</td>
-          <td>${i.mainBox?.length}</td>
-          <td>${i.mainBox?.width}</td>
-          <td>${i.mainBox?.height}</td>
-          <td>${i.unit?.whouse?.name}</td>
-          <td>${i.unit?.shipType?.label()}</td>
+          <td rowspan="2">${i.unit?.sku}</td>
+          <td rowspan="2">${i.unit?.fba?.id}</td>
+          <td rowspan="2">${i.unit?.selling?.fnSku}</td>
+          <td rowspan="2">${i.planQty}</td>
+          <td rowspan="2">${i.qty}</td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.num}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.boxNum}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.length}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.width}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.height}</div>
+          </td>
+          <td rowspan="2">${i.unit?.whouse?.name}</td>
+          <td rowspan="2">${i.unit?.shipType?.label()}</td>
+        </tr>
+        <tr>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.num}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.length}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.width}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.height}</div>
+          </td>
         </tr>
       #{/list}
     <tr style="height:10mm;">
