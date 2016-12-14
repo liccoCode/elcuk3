@@ -38,10 +38,22 @@ $(() => {
         break;
       default:
         $select.empty();
-
     }
   }
-
   showTypeSelect();
+
+  $("#printBtn").click(function(e) {
+    e.stopPropagation();
+    if ($("input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: '请选择需要打印的出库单',
+        type: 'error'
+      });
+      return;
+    }
+    let $form = $("#submit_form");
+    window.open("/Outbounds/printOutboundForm?" + $form.serialize(), "_blank");
+  });
+
 
 });

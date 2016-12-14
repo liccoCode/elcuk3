@@ -1990,5 +1990,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return "";
     }
 
+    public static Map<Integer, List<ProcureUnit>> pageNumForTen(List<Outbound> outbounds) {
+        Map<Integer, List<ProcureUnit>> ten = new HashMap<>();
+        int k = 0;
+        for(Outbound outbound : outbounds) {
+            List<ProcureUnit> iu = outbound.units;
+            int max = iu.size();
+            for(int i = 0; i < iu.size(); i += 10) {
+                int num = max - i;
+                ten.put(k, iu.subList(i, num > 10 ? i + 10 : i + num));
+                k++;
+            }
+        }
+        return ten;
+    }
 
 }
