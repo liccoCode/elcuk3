@@ -7,9 +7,9 @@ import play.db.jpa.Model;
 import play.i18n.Messages;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 系统内的操作日志的记录;
@@ -116,20 +116,14 @@ public class ElcukRecord extends Model {
     }
 
     public static List<ElcukRecord> records(String fid, List<String> actions, int size) {
-        List<String> actionMsgs = new ArrayList<>();
-        for(String action : actions) {
-            actionMsgs.add(Messages.get(action));
-        }
+        List<String> actionMsgs = actions.stream().map(action -> Messages.get(action)).collect(Collectors.toList());
         return ElcukRecord.find(
                 String.format("fid=? AND %s ORDER BY createAt DESC", JpqlSelect.whereIn("action", actionMsgs)),
                 fid).fetch(size);
     }
 
     public static List<ElcukRecord> records(List<String> actions, int size) {
-        List<String> actionMsgs = new ArrayList<>();
-        for(String action : actions) {
-            actionMsgs.add(Messages.get(action));
-        }
+        List<String> actionMsgs = actions.stream().map(action -> Messages.get(action)).collect(Collectors.toList());
         return ElcukRecord.find(JpqlSelect.whereIn("action", actionMsgs) + " ORDER BY createAt DESC").fetch(size);
     }
 

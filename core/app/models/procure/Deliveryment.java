@@ -233,7 +233,7 @@ public class Deliveryment extends GenericModel {
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
         if(this.units.size() == 0) {
-            return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
+            return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch(100);
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
             return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN)

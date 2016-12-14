@@ -215,13 +215,13 @@ public class DeliverPlan extends GenericModel {
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     * 返回此 DeliverPlan 可以用来添加的 ProcureUnits
      *
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
         if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
+            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch(50);
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
             return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
