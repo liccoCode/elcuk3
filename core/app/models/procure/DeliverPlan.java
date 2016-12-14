@@ -200,10 +200,11 @@ public class DeliverPlan extends GenericModel {
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else {
                 unit.toggleAssignTodeliverplan(null, false);
+            }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
