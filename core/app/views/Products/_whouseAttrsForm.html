@@ -12,7 +12,7 @@
       <tr>
         <td width="10%">产品描述</td>
         <td>
-        #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.productName/}
+        #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.abbreviation/}
           <textarea title="产品描述" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">${productName}</textarea>
         </td>
       </tr>
@@ -25,7 +25,7 @@
       <tr>
         <td>产品规格</td>
         <td>
-          <input type="text" name="pro.whouseAttrs.whFormat" value="${pro.whouseAttrs.whFormat}" title="产品规格" class="input-block-level"/>
+          <textarea rows="6" name="pro.whouseAttrs.whFormat" title="产品规格" class="input-block-level">${pro.whouseAttrs.whFormat}</textarea>
         </td>
       </tr>
       <tr>
@@ -84,12 +84,12 @@
     </div>
   </div>
 #{power.ck "products.update"}
-<div class="row-fluid">
-  <div class="span2">
-    <div id="file_home" data-fid="${pro.sku}" class="row-fluid"></div>
-    <input type="button" class="btn btn-default btn-block" value="上传" id="whouse_attrs_attach_btn"
-           data-loading="正在上传">
+  <div class="row-fluid">
+    <div class="span2">
+      <div id="file_home" data-fid="${pro.sku}" class="row-fluid"></div>
+      <input type="button" class="btn btn-default btn-block" value="上传" id="whouse_attrs_attach_btn"
+             data-loading="正在上传">
+    </div>
   </div>
-</div>
 #{/power.ck}
 </div>
