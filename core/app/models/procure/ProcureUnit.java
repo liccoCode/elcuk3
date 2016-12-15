@@ -925,6 +925,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", String.format(
                         "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 市场 [%s] 的其他的 FBA 是否报告了异常.",
                         this.selling.market.name(), this.selling.merchantSKU));
+            } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
+                throw new FastRuntimeException("向 Amazon 创建 Shipment PLAN 失败, 请检查 FBA 仓库库存容量.");
             } else {
                 Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
             }

@@ -279,7 +279,9 @@ public class FBAShipment extends Model {
             } else if(errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
                 throw new FastRuntimeException("向 Amazon 更新失败. 请检查 MSKU(SKU+UPC) 是否正确.");
             } else if(errMsg.contains("MISSING_DIMENSIONS") || errMsg.contains("NON_SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的尺寸已经正确填写(数值和单位)且对应的 FBA 仓库库存容量充足.");
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的尺寸已经正确填写(数值和单位.");
+            } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
+                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 FBA 仓库库存容量.");
             } else {
                 //TODO: NOT_ELIGIBLE_FC_FOR_ITEM 这个看起来是创建 FBA 时选择的 center 暂时在 MWS 内被标记了不可用
                 //暂时考虑可选的处理方案:

@@ -1,18 +1,15 @@
 $ ->
   $('.profits_form').ajaxForm({
-  dataType: 'json',
-  success: (r) ->
-    alert(r.message)
+    dataType: 'json',
+    success: (r) ->
+      alert(r.message)
   })
-
 
   $.extend $.fn.dataTableExt.oStdClasses,
     sWrapper: "dataTables_wrapper form-inline"
 
-
   $(document).ready ->
-    oTable = $("#profit").dataTable(
-      sDom: "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
+    $("#profit").dataTable(
       bPaginate: false
       aaSorting: [
         [0, "desc"]
@@ -30,7 +27,7 @@ $ ->
     e.preventDefault()
     $form = $('#profits_form')
     $.post('/Profits/inventory', $form.serialize(),
-    (r) ->
-      alert(r.message)
+      (r) ->
+        alert(r.message)
     )
   )
