@@ -517,7 +517,7 @@ public class ProfitPost {
         return StringUtils.isNotBlank(this.sku) ? 1 : 0;
     }
 
-    public List<Profit> fetche() {
+    public List<Profit> fetch() {
         this.valid();
         if(Validation.hasErrors()) return Collections.emptyList();
         if(StringUtils.isBlank(Caches.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE)) ||

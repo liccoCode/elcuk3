@@ -47,7 +47,7 @@ public class Profits extends Controller {
         if(p == null) {
             p = new ProfitPost();
         } else {
-            profits = p.fetche();
+            profits = p.fetch();
         }
         render(profits, p);
     }
