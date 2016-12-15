@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+#{stylesheet 'bootstrap.min.css'/}
+  <style>
+    body{
+      font-family:STXihei;
+    }
+  </style>
+</head>
+<body style="margin:0 0 0 0;">
+#{list items:ten.keySet().iterator(), as:'p'}
+    #{set first_o:ten.get(p).get(0) /}
+<div style="margin:0 0 0 0; height:275mm;width:100%;">
+  <table border="0" style="width:188mm;margin:0 0 0 0;">
+    <tr style="text-align:center;height:8mm;">
+      <td colspan="3" style="font-size:20px;font-weight:900;"><b>深圳品拓科技有限公司</b></td>
+    </tr>
+    <tr style="text-align:center;height:7mm;">
+      <td colspan="3" style="font-size:16px;font-weight:900;"><b>出库单</b></td>
+    </tr>
+    <tr style="height:5mm;">
+      <td>出货日期：${first_o.outbound?.outboundDate?.date()}</td>
+      <td>出库项目：${first_o.outbound?.projectName}</td>
+      <td>出库单号：${first_o.outbound?.id}</td>
+    </tr>
+    <tr style="height:5mm;">
+      <td>目的国家：${first_o.outbound?.whouse?.name}</td>
+      <td>运输方式：${first_o.outbound?.shipType?.label()}</td>
+      <td>货代公司：${first_o.outbound?.showCompany()}</td>
+    </tr>
+  </table>
+  <table border="1" style="width:290mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
+         class="table table-condensed table-bordered" cellpadding="0" cellspacing="0">
+    <tr style="vertical-align:middle;">
+      <th width="22mm;">shipment ID</th>
+      <th width="40mm">SKU</th>
+      <th>供应商</th>
+      <th width="8mm;">数量</th>
+      <th width="8mm;">件数</th>
+      <th width="15mm">重量</th>
+      <th width="15mm">体积</th>
+      <th width="12mm;">目的地</th>
+      <th width="8mm;">分组</th>
+    </tr>
+      #{list items:ten.get(p), as:'i'}
+          #{set mainBoxNum: i.mainBox?.boxNum==null ? 0 : i.mainBox?.boxNum /}
+          #{set lastBoxNum: i.lastBox?.boxNum==null ? 0 : i.lastBox?.boxNum /}
+          #{set mainNum: i.mainBox?.num==null ? 0 : i.mainBox?.num /}
+          #{set lastNum: i.lastBox?.num==null ? 0 : i.lastBox?.num /}
+          #{set mainW: i.mainBox?.singleBoxWeight==null ? 0 : i.mainBox?.singleBoxWeight /}
+          #{set lastW: i.lastBox?.singleBoxWeight==null ? 0 : i.lastBox?.singleBoxWeight /}
+          #{set mainV: i.mainBox?.totalVolume()==null ? 0 : i.mainBox?.totalVolume()/}
+          #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
+
+        <tr style="height:7mm;">
+          <td>${i.fba?.shipmentId}</td>
+          <td>${i.sku}</td>
+          <td>${i.cooperator?.name}</td>
+          <td>${mainBoxNum + lastBoxNum}</td>
+          <td>${mainNum + lastNum}</td>
+          <td>${mainW + lastW}</td>
+          <td>${mainV + lastV}</td>
+          <td>${i.fba?.centerId}</td>
+          <td></td>
+        </tr>
+      #{/list}
+    <tr style="height:9mm;">
+      <td>合计：</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+  <table border="0" style="width:290mm;margin:0 0 0 0;">
+    <tr style="height:9mm;">
+      <td width="60%;">发货：</td>
+      <td width="40%;">提货：</td>
+    </tr>
+  </table>
+</div>
+#{/list}
+</body>
+</html>
+

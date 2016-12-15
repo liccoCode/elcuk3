@@ -307,7 +307,6 @@ public class InboundUnit extends Model {
         this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
     }
 
-
     public void marshalBoxs() {
         this.mainBoxInfo = J.json(this.mainBox);
         this.lastBoxInfo = J.json(this.lastBox);

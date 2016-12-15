@@ -17,6 +17,8 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -76,8 +78,9 @@ public class Outbounds extends Controller {
 
     public static void printOutboundForm(List<String> ids) {
         final PDF.Options options = new PDF.Options();
-        options.filename = "TEST001.pdf";
-        options.pageSize = IHtmlToPdfTransformer.A4L;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        options.filename = "PTC" + formatter.format(new Date()) + ".pdf";
+        options.pageSize = IHtmlToPdfTransformer.A4P;
         List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
         int page = ten.keySet().size();

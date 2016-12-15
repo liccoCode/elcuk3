@@ -1,5 +1,6 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.*;
@@ -534,6 +535,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @ManyToOne
     public Outbound outbound;
 
+    /**
+     * 主箱信息
+     */
+    @Lob
+    public String mainBoxInfo;
+    /**
+     * 尾箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+    @Transient
+    public CheckTaskDTO mainBox = new CheckTaskDTO();
+
+    @Transient
+    public CheckTaskDTO lastBox = new CheckTaskDTO();
+
 
     /**
      * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)
@@ -561,6 +579,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String stateOrProvinceCode;
 
     public String postalCode;
+
+    @PostLoad
+    public void postPersist() {
+        this.mainBox = JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
+
+    public void marshalBoxs() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
+    }
 
     /**
      * ProcureUnit 的检查
@@ -1996,9 +2025,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         for(Outbound outbound : outbounds) {
             List<ProcureUnit> iu = outbound.units;
             int max = iu.size();
-            for(int i = 0; i < iu.size(); i += 10) {
+            for(int i = 0; i < iu.size(); i += 25) {
                 int num = max - i;
-                ten.put(k, iu.subList(i, num > 10 ? i + 10 : i + num));
+                ten.put(k, iu.subList(i, num > 25 ? i + 25 : i + num));
                 k++;
             }
         }
