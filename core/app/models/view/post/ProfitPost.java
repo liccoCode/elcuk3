@@ -520,12 +520,18 @@ public class ProfitPost {
     public List<Profit> fetch() {
         this.valid();
         if(Validation.hasErrors()) return Collections.emptyList();
-        if(StringUtils.isBlank(Caches.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE)) ||
-                StringUtils.isBlank(Caches.get(this.runningKey()))) {
+        List<Profit> profits = Cache.get(this.cacheKey(), List.class);
+        if(profits != null && profits.size() > 0) {
+            return profits;
+        } else {
+            if(StringUtils.isBlank(Caches.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE))) {
+                HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
+            } else if(StringUtils.isBlank(Caches.get(this.runningKey()))) {
+                this.reCalculate();
+            }
             Validation.addError("", "正在计算中, 请稍后再来查看 :)");
             return Collections.emptyList();
         }
-        return Cache.get(this.cacheKey(), List.class);
     }
 
     public void valid() {
