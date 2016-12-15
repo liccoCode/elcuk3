@@ -549,13 +549,11 @@ public class FBAShipment extends Model {
         return params;
     }
 
-    public boolean reSubmit(Long feedId) {
+    public void reSubmit(Long feedId) {
         Feed feed = Feed.findById(feedId);
-        if(feed == null || !feed.isFailed()) {
-            return false;
-        }
+        if(feed == null) throw new FastRuntimeException(String.format("未找到 ID 为 [%s] 的 Feed 记录.", feedId));
+        if(feed.isSussess()) throw new FastRuntimeException(String.format("Feed[%s] 已经处理成功, 请勿重复提交.", feedId));
         feed.submit(this.submitParams());
-        return true;
     }
 
     public void postFbaInboundCartonContents() {
