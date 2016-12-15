@@ -180,8 +180,7 @@ public class Inbounds extends Controller {
         options.pageSize = IHtmlToPdfTransformer.A4L;
         List<Inbound> inbounds = Inbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Map<Integer, List<InboundUnit>> ten = InboundUnit.pageNumForTen(inbounds);
-        int page = ten.keySet().size();
-        renderPDF(options, ten, page);
+        renderPDF(options, ten);
     }
 
 }

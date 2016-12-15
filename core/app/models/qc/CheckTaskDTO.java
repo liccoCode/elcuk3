@@ -55,6 +55,10 @@ public class CheckTaskDTO implements Serializable {
 
     }
 
+    public double totalVolume() {
+        return this.length * this.width * this.height;
+    }
+
     public boolean validedQtys(int shipedQty) {
         if(this.boxNum == 0) Validation.addError("", "箱数不能为 0");
         if(this.num == 0) Validation.addError("", "单箱个数不能为空");
