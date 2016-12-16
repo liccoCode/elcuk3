@@ -120,7 +120,6 @@ public class DeliverPlan extends GenericModel {
             Validation.addError("deliveryment.units.create", "%s");
             return deliverplan;
         }
-
         Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
             isUnitToDeliverymentValid(unit, cop);
@@ -130,10 +129,8 @@ public class DeliverPlan extends GenericModel {
         deliverplan.handler = user;
         deliverplan.name = name.trim();
         deliverplan.units.addAll(units);
+        // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
         for(ProcureUnit unit : deliverplan.units) {
-            if(unit.deliverplan != null)
-                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
-            // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
             unit.toggleAssignTodeliverplan(deliverplan, true);
         }
         deliverplan.state = P.CREATE;
@@ -170,6 +167,10 @@ public class DeliverPlan extends GenericModel {
         }
         if(!cop.equals(unit.cooperator)) {
             Validation.addError("", "添加一个出库单只能一个供应商!");
+            return false;
+        }
+        if(unit.deliverplan != null) {
+            Validation.addError("", String.format("采购计划 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
             return false;
         }
         return true;
