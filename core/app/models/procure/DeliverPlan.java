@@ -5,6 +5,8 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -17,6 +19,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -146,16 +149,19 @@ public class DeliverPlan extends GenericModel {
     public static String id() {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
-        String count = DeliverPlan.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
-                        .toDate(),
-                DateTime.parse(
-                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
-                        .toDate()) + "";
-        return String.format("DP|%s|%s", dt.toString("yyyyMM"),
-                count.length() == 1 ? "0" + count : count);
+        DeliverPlan deliverPlan = DeliverPlan.find("createDate>=? AND createDate<? ORDER BY id DESC",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
+        ).first();
+        String numStr = Optional.ofNullable(deliverPlan)
+                .map(plan -> StringUtils.split(plan.id, "|"))
+                .filter(charts -> ArrayUtils.isNotEmpty(charts) && charts.length == 3)
+                .map(charts -> NumberUtils.toLong(charts[2]))//00 => 0, 01 => 1
+                .map(num -> num + 1 + "")//0 => 1, 2 => 2, 10 => 11
+                .map(num -> num.length() == 1 ? "0" + num : num)
+                .orElse("00");
+        return String.format("DP|%s|%s", dt.toString("yyyyMM"), numStr);
     }
-
 
     private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
