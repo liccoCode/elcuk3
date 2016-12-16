@@ -547,12 +547,26 @@ public class ProfitPost {
     }
 
     public String cacheKey() {
-        return helper.Caches.Q.cacheKey("profitpost", this.begin, this.end, this.category(), this.sku, this.pmarket);
+        return helper.Caches.Q.cacheKey("profitpost",
+                this.begin,
+                this.end,
+                this.category != null ? this.category.toLowerCase() : "",
+                this.sku,
+                this.pmarket);
     }
 
     public String runningKey() {
         SimpleDateFormat dateFormater = new SimpleDateFormat("yyyyMMdd");
-        return helper.Caches.Q.cacheKey("profitpost", this.category(), this.pmarket, dateFormater.format(this.begin),
+        String cate = "";
+        if(StringUtils.isNotBlank(this.sku)) {
+            cate = this.sku;
+        } else if(StringUtils.isNotBlank(this.category)) {
+            cate = this.category.toLowerCase();
+        }
+        return String.format("profitpost_%s_%s_%s_%s",
+                cate,
+                StringUtils.isNotBlank(this.pmarket) ? this.pmarket : "",
+                dateFormater.format(this.begin),
                 dateFormater.format(this.end));
     }
 }
