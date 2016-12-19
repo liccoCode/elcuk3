@@ -13,12 +13,14 @@ import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -450,23 +452,17 @@ public class Shipments extends Controller {
     public static void outbound(List<String> shipmentId) {
         String msg = "";
         if(shipmentId != null && !shipmentId.isEmpty()) {
-            for(String sid : shipmentId) {
-                Shipment shipment = Shipment.findById(sid);
-                int i = 0;
-                for(ShipItem it : shipment.items) {
-                    if(it.unit.stage != ProcureUnit.STAGE.IN_STORAGE)
-                        i++;
-                }
-                if(i == 0) {
-                    shipment.initOutbound();
-                } else {
-                    msg += "【" + sid + "】";
-                }
+            List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i " +
+                    "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentId) +
+                    " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
+            if(shipments.size() > 0 ) {
+                msg += "【" + shipments.get(0).id + "】";
             }
         }
         if(StringUtils.isNotEmpty(msg)) {
-            flash.error("运输单：" + msg + " 未成功创建，可能是由于采购计划还不是【已入库】状态，可通知运营采购或仓库尽快收货入库或通过修改变换到其它运输单名下,其余运输单已经成功创建出库单！");
+            flash.error("运输单：" + msg + " 未能成功创建，可能是由于采购计划还不是【已入库】状态，可通知运营采购或仓库尽快收货入库或通过修改变换到其它运输单名下,其余运输单已经成功创建出库单！");
         } else {
+            Outbound.initCreateByShipItem(shipmentId);
             flash.success("已成功创建出库单!");
         }
         index(new ShipmentPost());
