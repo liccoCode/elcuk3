@@ -52,9 +52,8 @@
           #{set lastW: i.lastBox?.singleBoxWeight==null ? 0 : i.lastBox?.singleBoxWeight /}
           #{set mainV: i.mainBox?.totalVolume()==null ? 0 : i.mainBox?.totalVolume()/}
           #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
-
         <tr style="height:7mm;">
-          <td>${i.fba?.shipmentId}</td>
+          <td style="font-size:11px;">${i.fba?.shipmentId}</td>
           <td>${i.sku}</td>
           <td>${i.cooperator?.name}</td>
           <td>${mainBoxNum + lastBoxNum}</td>
@@ -62,7 +61,7 @@
           <td>${mainW + lastW}</td>
           <td>${mainV + lastV}</td>
           <td>${i.fba?.centerId}</td>
-          <td></td>
+          <td>${i.groupNum}</td>
         </tr>
       #{/list}
     <tr style="height:9mm;">

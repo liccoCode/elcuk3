@@ -546,6 +546,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Lob
     public String lastBoxInfo;
 
+    /**
+     * 分组编号
+     * 打印出库单时用
+     */
+    @Transient
+    public int groupNum;
+
     @Transient
     public CheckTaskDTO mainBox = new CheckTaskDTO();
 
@@ -2023,7 +2030,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Map<Integer, List<ProcureUnit>> ten = new HashMap<>();
         int k = 0;
         for(Outbound outbound : outbounds) {
-            List<ProcureUnit> iu = outbound.units;
+            int groupNum = 1;
+            List<ProcureUnit> iu = ProcureUnit.findUnitOrderByShipment(outbound.id);
+            String pre_shipment_id = iu.get(0).shipItems.get(0).shipment.id;
+            for(ProcureUnit u : iu) {
+                if(!u.shipItems.get(0).shipment.id.equals(pre_shipment_id)) {
+                    groupNum ++;
+                    pre_shipment_id = u.shipItems.get(0).shipment.id;
+                }
+                u.groupNum = groupNum;
+            }
+
             int max = iu.size();
             for(int i = 0; i < iu.size(); i += 25) {
                 int num = max - i;
@@ -2032,6 +2049,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         return ten;
+    }
+
+    public static List<ProcureUnit> findUnitOrderByShipment(String out_id) {
+        String sql = "Select u FROM ShipItem i LEFT JOIN i.unit u WHERE u.outbound.id = ? " +
+                "ORDER BY i.shipment.id ";
+        return ProcureUnit.find(sql, out_id).fetch();
     }
 
 }

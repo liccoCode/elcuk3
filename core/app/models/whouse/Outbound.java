@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -176,11 +177,11 @@ public class Outbound extends GenericModel {
     @Transient
     public boolean isb2b = false;
 
-    public Outbound () {
+    public Outbound() {
 
     }
 
-    public Outbound (ProcureUnit unit) {
+    public Outbound(ProcureUnit unit) {
         this.shipType = unit.shipType;
         this.whouse = unit.whouse;
         this.status = S.Create;
@@ -216,22 +217,28 @@ public class Outbound extends GenericModel {
         }
     }
 
-    public static void initCreateByShipItem(Shipment shipment) {
+    public static void initCreateByShipItem(List<String> shipmentId) {
+        List<Shipment> shipments = Shipment.find("id IN " + SqlSelect.inlineParam(shipmentId)).fetch();
         Outbound out = new Outbound();
         out.init();
+        Shipment shipment = shipments.get(0);
         ProcureUnit first = shipment.items.get(0).unit;
         out.projectName = first.projectName;
         out.shipType = shipment.type;
         out.type = T.Normal;
         out.whouse = shipment.whouse;
         out.targetId = shipment.cooper.id.toString();
-        out.shipmentId = shipment.id;
+        out.shipmentId = SqlSelect.inlineParam(shipmentId);
         out.save();
-        for(ShipItem item : shipment.items) {
-            ProcureUnit unit = item.unit;
-            unit.outbound = out;
-            unit.outQty = unit.availableQty;
-            unit.save();
+        for(Shipment s : shipments) {
+            for(ShipItem item : s.items) {
+                ProcureUnit unit = item.unit;
+                unit.outbound = out;
+                unit.outQty = unit.availableQty;
+                unit.save();
+            }
+            s.out = out;
+            s.save();
         }
     }
 

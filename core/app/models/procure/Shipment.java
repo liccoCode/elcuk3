@@ -374,6 +374,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String invoiceNo;
 
     /**
+     * 对应出库单
+     * 可能为空
+     */
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public Outbound out;
+
+    /**
      * 多个traceno
      */
     @Transient
@@ -1613,14 +1620,4 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         Validation.current().valid(this);
     }
 
-    /**
-     * 初始化出库信息
-     * 创建出库单
-     */
-    public void initOutbound() {
-        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        if(this.items != null && !this.items.isEmpty()) {
-            Outbound.initCreateByShipItem(this);
-        }
-    }
 }

@@ -6,19 +6,19 @@
     <th style="width:10%">运输商</th>
     <th style="width:5%">国际快递</th>
     <th style="width:5%">运输方式</th>
-    <th style="width:10%">去往仓库</th>
+    <th style="width:5%">去往仓库</th>
     <th style="width:10%">状态</th>
-    <th style="width:8%">预计开始时间</th>
-    <th style="width:8%">创建时间</th>
-    <th style="width:8%">预计到库时间</th>
+    <th style="width:7%">预计开始时间</th>
+    <th style="width:7%">创建时间</th>
+    <th style="width:7%">预计到库时间</th>
     <th style="width:8%">创建者</th>
-    <t>出库单ID</t>
+    <th style="width:8%">出库单ID</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
       <input type="checkbox" name="shipmentId" value="${ship.id}" coop="${ship.cname}" apply="${ship.applyId}"
-             way="${ship.type}">
+             way="${ship.type}" country="${ship.wname}" company="${ship.cname}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>

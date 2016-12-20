@@ -81,14 +81,13 @@
           <th width="120px;">出库单ID</th>
           <th>名称</th>
           <th width="80px;">目的国家</th>
-          <th width="200px;">项目名称</th>
+          <th width="80px;">项目名称</th>
           <th width="80px;">状态</th>
           <th width="80px;">运输方式</th>
           <th width="100px;">出库类型</th>
-          <th width="100px;">货代公司</th>
+          <th width="200px;">货代公司</th>
           <th width="120px;">出库日期</th>
           <th>发货人</th>
-          <th width="100px;">运输单</th>
           <th>备注</th>
         </tr>
       #{list items: outbounds, as: 'o'}
@@ -108,11 +107,10 @@
           <td>${o.showCompany()}</td>
           <td>#{time_tooltip time:o.outboundDate/}</td>
           <td>${o.consignor?.username}</td>
-          <td>${o.shipmentId}</td>
           <td title="${o.memo}">${o.memo.overLong()}</td>
         </tr>
         <tr id="ptc_${o_index}" style="display:none;">
-          <td colspan="14">
+          <td colspan="13">
             <div>
                 #{render 'Outbounds/_units.html', units:o.units, is_check: false/}
             </div>

@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.whouse.Inbound;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -257,5 +258,9 @@ public class DeliverPlan extends GenericModel {
         }
     }
 
-
+    public String showInbounds() {
+        List<Inbound> list = Inbound.find("plan.id=?",this.id).fetch();
+        if(list == null || list.size() ==0) return "";
+        return list.get(0).id;
+    }
 }
