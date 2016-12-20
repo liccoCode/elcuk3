@@ -61,8 +61,8 @@ $ ->
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     return if _.isEmpty(unitIds)
     $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
-      unitIds: unitIds, ->
-      $("input[name='chooseType']").change(->
+      unitIds: unitIds,
+      -> $("input[name='chooseType']").change(->
         radio = $("input[name='chooseType']:checked")
         id = radio.val()
         $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
@@ -152,7 +152,7 @@ $ ->
       dataType: 'json',
       data: {id: $(@).val()}
     })
-    .done((r)->
+      .done((r)->
       unless r.flag
         $('#excel_buyer').val(r['username'])
         $("#excel_buyerPhone").val(r['phone'])
