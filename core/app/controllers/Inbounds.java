@@ -7,6 +7,7 @@ import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
 import models.qc.CheckTaskDTO;
 import models.view.Ret;
+import models.view.post.DeliverPlanPost;
 import models.view.post.InboundPost;
 import models.whouse.Inbound;
 import models.whouse.InboundUnit;
@@ -61,9 +62,16 @@ public class Inbounds extends Controller {
 
 
     public static void blank(List<Long> pids, String planId) {
+        if(pids == null || pids.size() == 0)
+            renderText("无可创建收货入库单的采购计划！请重新选择！");
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         ProcureUnit proUnit = units.get(0);
-        Inbound.T it = proUnit.stage == ProcureUnit.STAGE.DELIVERY ? Inbound.T.Purchase : Inbound.T.Machining;
+        Inbound.T it;
+        if(proUnit.stage == ProcureUnit.STAGE.DELIVERY || proUnit.stage == ProcureUnit.STAGE.IN_STORAGE) {
+            it = Inbound.T.Purchase;
+        } else {
+            it = Inbound.T.Machining;
+        }
         render(units, proUnit, planId, it);
     }
 
@@ -84,13 +92,17 @@ public class Inbounds extends Controller {
      *
      * @param id
      */
-    public static void createByPlanId(String id) {
+    public static void createByPlanId(String id, DeliverPlanPost p) {
         DeliverPlan plan = DeliverPlan.findById(id);
         List<Long> ids = new ArrayList<>();
         for(ProcureUnit unit : plan.units) {
             if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
                 ids.add(unit.id);
             }
+        }
+        if(ids.size() == 0) {
+            flash.error("已无符合收货入库条件的采购计划");
+            DeliverPlans.indexWhouse(p);
         }
         blank(ids, id);
     }

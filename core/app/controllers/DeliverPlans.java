@@ -41,7 +41,7 @@ public class DeliverPlans extends Controller {
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
     }
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex(DeliveryPost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
         renderArgs.put("suppliers", suppliers);

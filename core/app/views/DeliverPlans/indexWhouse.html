@@ -2,7 +2,7 @@
 #{set title:"出货单关联收货" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'deliveryments/index.coffee'/}
+    #{script 'deliveryments/index.es6'/}
 #{/set}
 
 #{flash_alert /}
@@ -19,7 +19,7 @@
     </div>
 
 
-    <select name="p.cooperId" class="inline">
+    <select name="p.cooperId" class="inline selectize" style="width:150px;">
       <option value="">供应商</option>
         #{list items:suppliers, as:'sp'}
           <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
@@ -43,7 +43,7 @@
         <th width="30%;">Name</th>
         <th width="120px;">供应商</th>
         <th width="100px;">Create</th>
-        <th width="120px;">操作</th>
+        <th width="140px;">操作</th>
         <th>收货入库单ID</th>
       </tr>
         #{list items:plans, as:'dp'}
@@ -59,9 +59,10 @@
             <td>${dp.supplier()?.name}</td>
             <td>#{time_tooltip time:dp.createDate/}</td>
             <td>
-              <a href="@{Inbounds.createByPlanId(dp.id)}" class="btn btn-mini btn-success">创建收货入库单</a>
+              <input type="button" url="@{Inbounds.createByPlanId(dp.id)}" data-ids="${dp.showInbounds()}"
+                     name="createInboundBtn" class="btn btn-success" value="创建收货入库单">
             </td>
-            <td></td>
+            <td>${dp.showInbounds()}</td>
           </tr>
           <tr id="dp_${dp_index}" style="display:none;">
             <td colspan="12" style="padding:0;border:none">
