@@ -431,6 +431,16 @@ public class Selling extends GenericModel {
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.rbnsValid();
+        this.productPackageDimensionValid();
+    }
+
+    /**产品上架时，验证包材信息是否全部填写完整**/
+    public void productPackageDimensionValid() {
+        Product product = Product.findByMerchantSKU(this.merchantSKU);
+        if(product.lengths == null) Webs.error("产品长(包材)需填写!");
+        if(product.width == null) Webs.error("产品宽(包材)需填写!");
+        if(product.heigh == null) Webs.error("产品高(包材)需填写!");
+        if(product.weight == null) Webs.error("产品重量(包材)需填写!");
     }
 
     /**
