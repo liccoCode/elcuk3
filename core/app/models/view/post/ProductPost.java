@@ -16,7 +16,7 @@ import java.util.List;
  * Time: 5:56 PM
  */
 public class ProductPost extends Post<Product> {
-    public String state = "Active";
+    public String state;
 
     public ProductPost() {
         this.perSize = 25;

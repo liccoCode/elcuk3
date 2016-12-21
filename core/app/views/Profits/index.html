@@ -1,15 +1,10 @@
 #{extends 'main_full.html'/}
-#{set title:"SKU利润分析" /}
+#{set title:"SKU 利润分析" /}
 #{set 'moreScripts'}
     #{script 'jquery.dataTables.js'/}
     #{script 'profits/index.coffee'/}
 #{/set}
 
-#{info_row}
-<ul>
-  <li><strong>[SKU利润查询]</strong>SKU利润查询</li>
-</ul>
-#{/info_row}
 #{flash_alert /}
 #{errorMsgs /}
 
@@ -22,24 +17,19 @@
       <span class="add-on">To:</span>
       <input type="date" name="p.end" value="${p.end.date()}">
     </div>
-
     <div class="inline">
         #{select_enum name:'p.pmarket', items:models.market.M.values(), value:p.market}
           <option value="market">Market</option>
           <option value="total">汇总</option>
         #{/select_enum}
-
         #{select 'p.category', items:categorys, value: p.category}
             #{option ''}Category#{/option}
         #{/select}
-
-
       <th>SKU:</th>
       <td>
         <input type="text" name="p.sku" data-provide="typeahead" data-source="${skus}"
                value="${p?.sku}" id="unit_sku">
       </td>
-
     </div>
 
     <div class="input-prepend input-append inline">

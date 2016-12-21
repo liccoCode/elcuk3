@@ -1,10 +1,11 @@
 package helper;
 
 import com.elcuk.jaxb.*;
+import com.elcuk.jaxb.Product;
 import models.market.M;
 import models.market.Selling;
 import models.procure.FBAShipment;
-import models.product.Attach;
+import models.product.*;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -178,6 +179,7 @@ public class MWSUtils {
         ConditionInfo conditionInfo = new ConditionInfo();
         conditionInfo.setConditionType("New");
         product.setCondition(conditionInfo);
+
         product.setDescriptionData(new DescriptionDataBuilder(selling).build());
 
         if(!skipProductData(selling.aps.templateType, selling.aps.feedProductType)) {
@@ -353,6 +355,7 @@ public class MWSUtils {
         Float heigh;
         Float weight;
         String unitOfWeight; // 重量单位
+        models.product.Product p;
 
         DescriptionDataBuilder() {
             this.descriptionData = new Product.DescriptionData();
@@ -360,6 +363,7 @@ public class MWSUtils {
 
         DescriptionDataBuilder(Selling selling) {
             this();
+            this.p = models.product.Product.findByMerchantSKU(selling.merchantSKU);
             this.market = selling.market;
             this.title = selling.aps.title;
             this.description = selling.aps.title;
@@ -369,6 +373,7 @@ public class MWSUtils {
             this.rbn = selling.aps.rbns.get(0);
             this.bulletPoints = selling.aps.keyFeturess;
             this.searchTerms = selling.aps.searchTermss;
+
         }
 
         DescriptionDataBuilder(Selling selling, SellingAmzPost post) {
@@ -428,11 +433,41 @@ public class MWSUtils {
             }
             //Dimensions
             setDimensions();
+            setPackageDimensions();
             return this.descriptionData;
+        }
+
+        void setPackageDimensions() {
+            Dimensions dimensions = new Dimensions();
+
+            LengthUnitOfMeasure measure = LengthUnitOfMeasure.fromValue("MM");
+            LengthDimension lengthDimension = new LengthDimension();
+            /**长（包材）**/
+            lengthDimension.setUnitOfMeasure(measure);
+            lengthDimension.setValue(new BigDecimal(this.p.lengths).setScale(2, BigDecimal.ROUND_HALF_UP));
+            dimensions.setLength(lengthDimension);
+            /**宽（包材）**/
+            LengthDimension widthDimension = new LengthDimension();
+            widthDimension.setUnitOfMeasure(measure);
+            widthDimension.setValue(new BigDecimal(this.p.width).setScale(2, BigDecimal.ROUND_HALF_UP));
+            dimensions.setWidth(widthDimension);
+            /**高（包材）**/
+            LengthDimension heightDimension = new LengthDimension();
+            heightDimension.setUnitOfMeasure(measure);
+            heightDimension.setValue(new BigDecimal(this.p.heigh).setScale(2, BigDecimal.ROUND_HALF_UP));
+            dimensions.setHeight(heightDimension);
+            /**重量（包材）**/
+            WeightUnitOfMeasure wm = WeightUnitOfMeasure.fromValue("KG");
+            WeightDimension weightDimension = new WeightDimension();
+            weightDimension.setUnitOfMeasure(wm);
+            weightDimension.setValue(new BigDecimal(this.p.weight).setScale(2, BigDecimal.ROUND_HALF_UP));
+            dimensions.setWeight(weightDimension);
+            this.descriptionData.setPackageDimensions(dimensions);
         }
 
         void setDimensions() {
             Dimensions dimensions = new Dimensions();
+
             //Volume
             if(StringUtils.isNotBlank(this.unitOfVolume)) {
                 LengthUnitOfMeasure measure = LengthUnitOfMeasure.fromValue(this.unitOfVolume);
@@ -440,21 +475,21 @@ public class MWSUtils {
                 if(this.length != null) {
                     LengthDimension lengthDimension = new LengthDimension();
                     lengthDimension.setUnitOfMeasure(measure);
-                    lengthDimension.setValue(new BigDecimal(this.length).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    lengthDimension.setValue(new BigDecimal(this.p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
                     dimensions.setLength(lengthDimension);
                 }
                 //width
                 if(this.width != null) {
                     LengthDimension widthDimension = new LengthDimension();
                     widthDimension.setUnitOfMeasure(measure);
-                    widthDimension.setValue(new BigDecimal(this.width).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    widthDimension.setValue(new BigDecimal(this.p.productWidth).setScale(2, BigDecimal.ROUND_HALF_UP));
                     dimensions.setWidth(widthDimension);
                 }
                 //height
                 if(this.heigh != null) {
                     LengthDimension heightDimension = new LengthDimension();
                     heightDimension.setUnitOfMeasure(measure);
-                    heightDimension.setValue(new BigDecimal(this.heigh).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    heightDimension.setValue(new BigDecimal(this.p.productHeigh).setScale(2, BigDecimal.ROUND_HALF_UP));
                     dimensions.setHeight(heightDimension);
                 }
             }
@@ -463,7 +498,7 @@ public class MWSUtils {
                 WeightUnitOfMeasure measure = WeightUnitOfMeasure.fromValue(this.unitOfWeight);
                 WeightDimension weightDimension = new WeightDimension();
                 weightDimension.setUnitOfMeasure(measure);
-                weightDimension.setValue(new BigDecimal(this.weight).setScale(2, BigDecimal.ROUND_HALF_UP));
+                weightDimension.setValue(new BigDecimal(this.p.productWeight).setScale(2, BigDecimal.ROUND_HALF_UP));
                 dimensions.setWeight(weightDimension);
             }
             if(isShouldSetDimensions(dimensions)) this.descriptionData.setItemDimensions(dimensions);

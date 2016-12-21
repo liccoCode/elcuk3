@@ -6,6 +6,8 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.whouse.Inbound;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -18,6 +20,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -118,7 +121,6 @@ public class DeliverPlan extends GenericModel {
             Validation.addError("deliveryment.units.create", "%s");
             return deliverplan;
         }
-
         Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
             isUnitToDeliverymentValid(unit, cop);
@@ -128,10 +130,8 @@ public class DeliverPlan extends GenericModel {
         deliverplan.handler = user;
         deliverplan.name = name.trim();
         deliverplan.units.addAll(units);
+        // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
         for(ProcureUnit unit : deliverplan.units) {
-            if(unit.deliverplan != null)
-                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
-            // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
             unit.toggleAssignTodeliverplan(deliverplan, true);
         }
         deliverplan.state = P.CREATE;
@@ -147,16 +147,19 @@ public class DeliverPlan extends GenericModel {
     public static String id() {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
-        String count = DeliverPlan.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
-                        .toDate(),
-                DateTime.parse(
-                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
-                        .toDate()) + "";
-        return String.format("DP|%s|%s", dt.toString("yyyyMM"),
-                count.length() == 1 ? "0" + count : count);
+        DeliverPlan deliverPlan = DeliverPlan.find("createDate>=? AND createDate<? ORDER BY id DESC",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
+        ).first();
+        String numStr = Optional.ofNullable(deliverPlan)
+                .map(plan -> StringUtils.split(plan.id, "|"))
+                .filter(charts -> ArrayUtils.isNotEmpty(charts) && charts.length == 3)
+                .map(charts -> NumberUtils.toLong(charts[2]))//00 => 0, 01 => 1
+                .map(num -> num + 1 + "")//0 => 1, 2 => 2, 10 => 11
+                .map(num -> num.length() == 1 ? "0" + num : num)
+                .orElse("00");
+        return String.format("DP|%s|%s", dt.toString("yyyyMM"), numStr);
     }
-
 
     private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
@@ -165,6 +168,10 @@ public class DeliverPlan extends GenericModel {
         }
         if(!cop.equals(unit.cooperator)) {
             Validation.addError("", "添加一个出库单只能一个供应商!");
+            return false;
+        }
+        if(unit.deliverplan != null) {
+            Validation.addError("", String.format("采购计划 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
             return false;
         }
         return true;
@@ -201,10 +208,11 @@ public class DeliverPlan extends GenericModel {
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else {
                 unit.toggleAssignTodeliverplan(null, false);
+            }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
         this.units.removeAll(units);
@@ -216,13 +224,13 @@ public class DeliverPlan extends GenericModel {
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     * 返回此 DeliverPlan 可以用来添加的 ProcureUnits
      *
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
         if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
+            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch(50);
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
             return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,

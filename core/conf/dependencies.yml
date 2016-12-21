@@ -14,7 +14,7 @@ require:
     - org.hamcrest -> hamcrest-library 1.3:
         id: test
     - redis -> redis 0.4
-    # - es6 -> es6 0.1
+    - es6 -> es6 0.2
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...

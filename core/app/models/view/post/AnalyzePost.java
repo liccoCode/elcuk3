@@ -81,9 +81,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
         List<AnalyzeDTO> dtos = null;
         String cache_str = Caches.get(cacke_key);
-        if(!StringUtils.isBlank(cache_str)) {
-            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
-        }
+        if(StringUtils.isNotBlank(cache_str)) dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
         // 用于提示后台正在运行计算
         if(StringUtils.isBlank(cache_str) || dtos == null || dtos.isEmpty()) {
             HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
