@@ -458,11 +458,11 @@ public class MWSUtils {
             dimensions.setHeight(heightDimension);
             /**重量（包材）**/
             WeightUnitOfMeasure wm = WeightUnitOfMeasure.fromValue("KG");
-            WeightDimension weightDimension = new WeightDimension();
+            this.descriptionData.setPackageDimensions(dimensions);
+            PositiveWeightDimension weightDimension = new PositiveWeightDimension();
             weightDimension.setUnitOfMeasure(wm);
             weightDimension.setValue(new BigDecimal(this.p.weight).setScale(2, BigDecimal.ROUND_HALF_UP));
-            dimensions.setWeight(weightDimension);
-            this.descriptionData.setPackageDimensions(dimensions);
+            this.descriptionData.setPackageWeight(weightDimension);
         }
 
         void setDimensions() {
@@ -475,7 +475,8 @@ public class MWSUtils {
                 if(this.length != null) {
                     LengthDimension lengthDimension = new LengthDimension();
                     lengthDimension.setUnitOfMeasure(measure);
-                    lengthDimension.setValue(new BigDecimal(this.p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    lengthDimension
+                            .setValue(new BigDecimal(this.p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
                     dimensions.setLength(lengthDimension);
                 }
                 //width
