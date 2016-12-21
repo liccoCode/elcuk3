@@ -16,15 +16,14 @@
     <th>仓库</th>
     <th>供应商</th>
     <th>采购数量</th>
-
-  #{if deliveryplan!=true}
+  #{ifnot deliveryplan}
     <th>单价</th>
     <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
       <abbr title=" ">总价</abbr>
     </th>
     <th>剩余请款金额</th>
-  #{/if}
-    <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="auto">FnSku</th>
+  #{/ifnot}
+    <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="auto">FnSku</th>
     <th>运输方式</th>
     <th>预计交货时间</th>
     <th>预计运输时间</th>
@@ -123,14 +122,11 @@
     <td>${unit.whouse?.name()}</td>
     <td>${unit.cooperator?.name}</td>
     <td>${unit.attrs.planQty}</td>
-
-      #{if deliveryplan!=true}
-        <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-        <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.qty() * unit.attrs.price).setScale(2,4).floatValue().format('#,###.##')}</td>
-        <td>${unit.attrs.currency.symbol()} ${new java.math.BigDecimal(unit.leftAmount()).setScale(2,4).floatValue().format('#,###.##')}</td>
-      #{/if}
-
-
+      #{ifnot deliveryplan}
+        <td>${unit.attrs.currency.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
+        <td>${unit.attrs.currency.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
+        <td>${unit.attrs.currency.symbol()} ${unit.leftAmount().format('#,###.##')}</td>
+      #{/ifnot}
     <td>
       <!-- FnSku 下载 Label -->
         #{if unit.selling?.fnSku}
