@@ -217,14 +217,16 @@ public class Inbound extends GenericModel {
 
     public void confirmReceive(List<InboundUnit> units) {
         for(InboundUnit unit : units) {
-            InboundUnit u = InboundUnit.findById(unit.id);
-            u.status = InboundUnit.S.Receive;
-            u.result = InboundUnit.R.Qualified;
-            u.save();
-            ProcureUnit punit = u.unit;
-            punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
-            punit.stage = ProcureUnit.STAGE.DONE;
-            punit.save();
+            if(unit.status.name().equals(InboundUnit.S.Create)) {
+                InboundUnit u = InboundUnit.findById(unit.id);
+                u.status = InboundUnit.S.Receive;
+                u.result = InboundUnit.R.Qualified;
+                u.save();
+                ProcureUnit punit = u.unit;
+                punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
+                punit.stage = ProcureUnit.STAGE.DONE;
+                punit.save();
+            }
         }
     }
 
