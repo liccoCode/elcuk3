@@ -60,21 +60,7 @@ $ ->
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     return if _.isEmpty(unitIds)
-    $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
-      unitIds: unitIds,
-      -> $("input[name='chooseType']").change(->
-        radio = $("input[name='chooseType']:checked")
-        id = radio.val()
-        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
-        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
-        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
-        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
-        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
-        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
-      )
-    )
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", {unitIds: unitIds})
   ).on('click', '#sumbitDeployFBAs', (e) ->
     $modal = $("#fba_carton_contents_modal")
     return if $modal.data('unit-source')
@@ -90,21 +76,7 @@ $ ->
     unitIds = []
     for checkbox in checkboxList when checkbox.checked then unitIds.push(checkbox.value)
     return if _.isEmpty(unitIds)
-    $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
-      unitIds: unitIds, ->
-      $("input[name='chooseType']").change(->
-        radio = $("input[name='chooseType']:checked")
-        id = radio.val()
-        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
-        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
-        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
-        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
-        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
-        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
-      )
-    )
+    $("#refresh_div").load("/ProcureUnits/fbaCartonContents", {unitIds: unitIds})
   ).on('click', '#edit_memo', (e) ->
     if $("#memo").val() == null || $("#memo").val().trim().length == 0
       noty({
@@ -113,6 +85,18 @@ $ ->
       })
     else
       $("#updateDeliverymentForm").submit()
+  )
+
+  $("#fba_carton_contents_modal").on('change', "input[name='chooseType']", (e) ->
+    radio = $("input[name='chooseType']:checked")
+    $("#tr_" + radio.val() + " input[name$='boxNum']").val(radio.attr("boxNum"))
+    $("#tr_" + radio.val() + " input[name$='num']").val(radio.attr("boxSize"))
+    $("#tr_" + radio.val() + " input[name$='boxSize']").val(radio.attr("boxSize"))
+    $("#tr_" + radio.val() + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
+    $("#tr_" + radio.val() + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
+    $("#tr_" + radio.val() + " input[name$='length']").val(radio.attr("boxLength"))
+    $("#tr_" + radio.val() + " input[name$='width']").val(radio.attr("boxWidth"))
+    $("#tr_" + radio.val() + " input[name$='height']").val(radio.attr("boxHeight"))
   )
 
   # 将字符串转化成Dom元素
@@ -151,8 +135,7 @@ $ ->
       type: 'POST',
       dataType: 'json',
       data: {id: $(@).val()}
-    })
-      .done((r)->
+    }).done((r)->
       unless r.flag
         $('#excel_buyer').val(r['username'])
         $("#excel_buyerPhone").val(r['phone'])
