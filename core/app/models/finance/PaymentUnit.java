@@ -350,12 +350,14 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue)))
+        return new BigDecimal(String.valueOf(this.amount))
+                .add(new BigDecimal(String.valueOf(this.fixValue)))
                 .floatValue();
     }
 
     public BigDecimal decimalamount() {
-        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue)));
+        return new BigDecimal(String.valueOf(this.amount))
+                .add(new BigDecimal(String.valueOf(this.fixValue)));
     }
 
     /**
@@ -365,8 +367,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amountForReport() {
-        float amountPrice = amount();
-        return Currency.CNY.toUSD(amountPrice);
+        return Currency.CNY.toUSD(this.amount());
     }
 
     /**
@@ -375,8 +376,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     private boolean isApproval() {
-        return this.state == S.APPROVAL
-                || this.state == S.PAID;
+        return this.state == S.APPROVAL || this.state == S.PAID;
     }
 
     /**
