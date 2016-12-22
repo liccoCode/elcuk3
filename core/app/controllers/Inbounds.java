@@ -138,12 +138,13 @@ public class Inbounds extends Controller {
      * @param inbound
      * @param dtos
      */
+    @Check("inbounds.confirmreceivebtn")
     public static void confirmReceive(Inbound inbound, List<InboundUnit> dtos) {
         inbound.status = Inbound.S.Handing;
         inbound.save();
         inbound.confirmReceive(dtos);
         flash.success("收货成功!");
-        index(new InboundPost());
+        edit(inbound.id);
     }
 
     /**
@@ -152,12 +153,12 @@ public class Inbounds extends Controller {
      * @param inbound
      * @param dtos
      */
+    @Check("inbounds.confirmqcbtn")
     public static void confirmQC(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmQC(dtos);
         inbound.checkIsFinish();
         flash.success("质检成功!");
-        index(new InboundPost());
-
+        edit(inbound.id);
     }
 
     /**
@@ -166,11 +167,12 @@ public class Inbounds extends Controller {
      * @param inbound
      * @param dtos
      */
+    @Check("inbounds.confirminboundbtn")
     public static void confirmInbound(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmInbound(dtos);
         inbound.checkIsFinish();
         flash.success("入库成功!");
-        index(new InboundPost());
+        edit(inbound.id);
     }
 
     public static void refreshFbaCartonContentsByIds(String id) {
@@ -183,6 +185,14 @@ public class Inbounds extends Controller {
         unit = InboundUnit.findById(unit.id);
         unit.marshalBoxs();
         unit.save();
+        renderJSON(new Ret(true));
+    }
+
+    public static void deleteUnit(Long[] ids) {
+        List<InboundUnit> list = InboundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        for(InboundUnit unit : list) {
+            unit.delete();
+        }
         renderJSON(new Ret(true));
     }
 

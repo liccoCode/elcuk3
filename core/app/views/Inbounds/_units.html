@@ -1,7 +1,11 @@
 <table class="table table-condensed table-bordered" id="unit_table">
   <tr>
   #{if !is_check}
-    <th><input type="checkbox"></th>
+    <th>
+      <label class="checkbox">
+        <input type="checkbox" id="checkbox_all" class="checkall">
+      </label>
+    </th>
   #{/if}
     <th width="40px;">采购计划ID</th>
     <th width="80px;">采购单</th>
@@ -14,8 +18,8 @@
     <th width="60px;">包装信息</th>
     <th>FBA-ShipmentId</th>
     <th>去往仓库</th>
-    <th>运输方式</th>
-    <th>状态</th>
+    <th width="30px;">运输方式</th>
+    <th width="35px;">状态</th>
     <th>质检结果</th>
   #{if !is_check}
     <th>质检不合格<br>处理方式
@@ -24,8 +28,9 @@
     <th>合格数</th>
     <th>不良品数</th>
     <th>实际入库数</th>
-    <th>目标仓库</th>
+    <th width="80px;">目标仓库</th>
   </tr>
+
 #{list items:units, as:'unit'}
     #{if !is_check}
       <tr class="text-center">
@@ -34,11 +39,13 @@
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
         </td>
         <td>${unit.unit?.id} </td>
-        <td><a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}" target="_blank">${unit.unit?.deliveryment?.id}</a></td>
+        <td>
+          <a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}" target="_blank">${unit.unit?.deliveryment?.id}</a>
+        </td>
         <td>${unit.unit?.selling?.sellingId}</td>
         <td title="${unit.unit?.product.abbreviation}">
           <a href="@{Products.show(unit.unit?.product?.sku)}" target="_blank">${unit.unit?.product?.sku}</a><br>
-        (${unit.unit?.product.abbreviation?.xxLong()})
+          (${unit.unit?.product.abbreviation?.xxLong()})
         </td>
         <td>
           预计交货:#{time_tooltip time:unit.unit?.attrs.planDeliveryDate/}<br>
@@ -46,8 +53,11 @@
         </td>
         <td>${unit.planQty}</td>
         <td>
-          <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.qty()}"
-                 style="width:35px;" value="${unit.qty}"
+          <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.attrs.planQty}"
+                 style="width:35px;
+                     #{if unit.qty/unit.planQty<0.9 && unit.handType?.name()=='Delivery'}
+                         background-color:yellow;
+                     #{/if}" value="${unit.qty}" data-origin="${unit.qty}"
               #{if unit.status.name() != "Create"}
                  readonly
               #{/if}/>
@@ -104,22 +114,23 @@
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}"
               #{if unit.status.name() != "Receive"}
                  disabled
-              #{/if} style="width:35px;"/>
+              #{/if} style="width:35px; #{if unit.result?.name() != 'Qualified'} display:none; #{/if}"/>
         </td>
         <td>
-          <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" value="${unit.unqualifiedQty}" style="width:35px;"
+          <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
+                 value="${unit.unqualifiedQty}"
               #{if unit.status.name() != "Receive"}
                  disabled
-              #{/if}/>
+              #{/if} style="width:35px; #{if unit.result?.name() != 'Qualified'} display:none; #{/if}"/>
         </td>
         <td>
-          <input type="text" name="inboundQty" value="${unit.inboundQty}" style="width:35px;"
+          <input type="text" name="inboundQty" value="${unit.inboundQty}" style="width:35px;" data-qty="${unit.qty}"
               #{if unit.status.name() != "Check"}
                  disabled
-              #{/if}/>
+              #{/if} data-origin="${unit.inboundQty}" />
         </td>
         <td>
-          <select name="target" style="max-width: 100px;"
+          <select name="target" style="max-width: 80px;"
               #{if unit.status.name() != "Check"}
                   disabled
               #{/if}>

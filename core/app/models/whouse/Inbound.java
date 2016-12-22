@@ -217,10 +217,11 @@ public class Inbound extends GenericModel {
 
     public void confirmReceive(List<InboundUnit> units) {
         for(InboundUnit unit : units) {
-            if(unit.status.name().equals(InboundUnit.S.Create)) {
-                InboundUnit u = InboundUnit.findById(unit.id);
+            InboundUnit u = InboundUnit.findById(unit.id);
+            if(u.status.equals(InboundUnit.S.Create)) {
                 u.status = InboundUnit.S.Receive;
                 u.result = InboundUnit.R.Qualified;
+                u.qualifiedQty = u.qty;
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
@@ -250,6 +251,9 @@ public class Inbound extends GenericModel {
                     && u.qualifiedQty == 0))) {
                 u.status = InboundUnit.S.Check;
                 u.inboundQty = u.qualifiedQty;
+                if(u.unit.selling != null && Whouse.autoMatching(u) != null) {
+                    u.target = Whouse.autoMatching(u);
+                }
                 u.qcDate = new Date();
                 u.qcUser = Login.current();
                 u.save();

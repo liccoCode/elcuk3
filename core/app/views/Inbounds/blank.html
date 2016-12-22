@@ -45,10 +45,10 @@
       </tr>
       <tr>
         <th>收货日期<span style="color:red">*</span></th>
-        <td><input type="date" name="inbound.receiveDate"></td>
+        <td><input type="date" name="inbound.receiveDate" required></td>
         <th>B2B选项</th>
         <td>
-          <label class="checkbox">
+          <label class="checkbox inline">
             <input type="checkbox" name="inbound.isb2b" value="true"> B2B
           </label>
         </td>
@@ -132,7 +132,7 @@
           </tr>
         #{/list}
     </table>
-    <button class="btn btn-danger">解除</button>
+    <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
   </div>
 </div>
 

@@ -23,7 +23,7 @@
           <input type="text" name="inbound.id" value="${inbound.id}" readonly>
         </td>
         <th>状态</th>
-        <td style="background-color:${inbound.status.rgb()}">${inbound.status?.label()}</td>
+        <td style="color:${inbound.status.rgb()}">${inbound.status?.label()}</td>
       </tr>
       <tr>
         <th>出货单</th>
@@ -41,7 +41,7 @@
       </tr>
       <tr>
         <th>收货日期<span style="color:red">*</span></th>
-        <td><input type="date" name="inbound.receiveDate" value="${inbound.receiveDate.date()}"></td>
+        <td><input type="date" name="inbound.receiveDate" value="${inbound.receiveDate.date()}" required></td>
         <th>B2B选项</th>
         <td>
           <label class="checkbox">
@@ -75,11 +75,19 @@
     #{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-    #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses/}
-    <button class="btn btn-danger">解除</button>
-    <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
-    <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
-    <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
+      #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses/}
+      #{if inbound.status?.name()=='Create'}
+        <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+      #{/if}
+      #{power.ck 'inbounds.confirmreceivebtn'}
+        <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
+      #{/power.ck}
+      #{power.ck 'inbounds.confirmqcbtn'}
+        <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
+      #{/power.ck}
+      #{power.ck 'inbounds.confirminboundbtn'}
+        <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
+      #{/power.ck}
   </div>
 </div>
 
