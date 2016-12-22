@@ -2033,7 +2033,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             String pre_shipment_id = iu.get(0).shipItems.get(0).shipment.id;
             for(ProcureUnit u : iu) {
                 if(!u.shipItems.get(0).shipment.id.equals(pre_shipment_id)) {
-                    groupNum ++;
+                    groupNum++;
                     pre_shipment_id = u.shipItems.get(0).shipment.id;
                 }
                 u.groupNum = groupNum;
@@ -2053,6 +2053,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         String sql = "Select u FROM ShipItem i LEFT JOIN i.unit u WHERE u.outbound.id = ? " +
                 "ORDER BY i.shipment.id ";
         return ProcureUnit.find(sql, out_id).fetch();
+    }
+
+    public String showInboundIds() {
+        List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
+        String ids = "";
+        for(InboundUnit unit : list) {
+            ids += unit.inbound.id;
+        }
+        return ids;
     }
 
 }

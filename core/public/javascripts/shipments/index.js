@@ -69,6 +69,14 @@ $(() => {
           flag++;
           return false;
         }
+        if (ck.attr("outId") != "") {
+          noty({
+            text: "运输单【" + ck.val() + "】已经创建出库单【" + ck.attr("outId") + "】！",
+            type:'warning'
+          });
+          flag++;
+          return false;
+        }
       });
       if (valid() && flag == 0) {
         let $form = $('<form method="post" action=""></form>');

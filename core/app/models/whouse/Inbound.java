@@ -2,6 +2,7 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import controllers.Refunds;
 import helper.Dates;
 import helper.Reflects;
 import models.User;
@@ -9,6 +10,7 @@ import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -225,7 +227,9 @@ public class Inbound extends GenericModel {
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
-                punit.stage = ProcureUnit.STAGE.DONE;
+                if(punit.stage != ProcureUnit.STAGE.IN_STORAGE) {
+                    punit.stage = ProcureUnit.STAGE.DONE;
+                }
                 punit.save();
             }
         }
@@ -330,6 +334,7 @@ public class Inbound extends GenericModel {
                 refund.type = Refund.T.After_Receive;
                 refund.projectName = this.projectName;
                 refund.createRefundByInbound(return_units);
+                Refund.confirmRefund(Arrays.asList(refund.id));
             }
             /**创建尾货单**/
             if(tail_units.size() > 0) {

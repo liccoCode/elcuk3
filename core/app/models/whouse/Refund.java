@@ -118,6 +118,7 @@ public class Refund extends GenericModel {
     /**
      * 仓库交接人
      */
+    @OneToOne
     public User whouseUser;
 
     /**
@@ -152,7 +153,7 @@ public class Refund extends GenericModel {
         this.refundDate = new Date();
         this.projectName = unit.projectName;
         this.cooperator = unit.cooperator;
-        this.type = T.After_Inbound;
+        this.type = (unit.stage == ProcureUnit.STAGE.IN_STORAGE ? T.After_Inbound : T.After_Receive);
     }
 
     public void createRefundByInbound(List<InboundUnit> list) {
@@ -203,7 +204,6 @@ public class Refund extends GenericModel {
                         if(u.qty == unit.attrs.qty) {
                             unit.stage = ProcureUnit.STAGE.DELIVERY;
                         }
-
                     }
                     refund.save();
                     unit.save();

@@ -1,7 +1,11 @@
-<table class="table table-condensed table-bordered">
+<table class="table table-condensed table-bordered" id="unit_table">
   <tr>
   #{if is_check}
-    <th><input type="checkbox"></th>
+    <th>
+      <label class="checkbox">
+        <input type="checkbox" id="checkbox_all" class="checkall">
+      </label>
+    </th>
   #{/if}
     <th>采购计划ID</th>
     <th>采购单</th>
@@ -43,9 +47,10 @@
     <td>
       <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
     </td>
-    <td></td>
-    <td></td>
+    <td>${unit.currWhouse?.name}</td>
+    <td>${unit.showInboundIds()}</td>
     <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
   </tr>
 #{/list}
 </table>
+

@@ -2,7 +2,6 @@
  * Created by licco on 2016/12/13.
  */
 $(() => {
-
   $("input[name='editBoxInfo']").click(function(e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
@@ -30,5 +29,62 @@ $(() => {
       }
     });
   });
+
+  $("input[name$='qty']").change(function() {
+    let $input = $(this);
+    let value = $input.val();
+    let origin = $input.data('origin');
+    if (value > origin) {
+      noty({
+        text: '退货数超过计划数量!',
+        type: 'error'
+      });
+      $(this).val($(this).data('origin'));
+      $(this).focus();
+      return false;
+    }
+  });
+
+  $("#deleteBtn").click(function(e) {
+    e.stopPropagation();
+    if ($("#unit_table input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: "请选择需要解除的采购计划！",
+        type: 'error'
+      });
+      return false;
+    }
+    if ($("#unit_table input[type='checkbox']").not("input:checked").length == 0) {
+      noty({
+        text: "不能全部删除采购计划!",
+        type: 'error'
+      });
+      return false;
+    }
+
+    if (confirm("确认解除选中采购计划吗？")) {
+      let ids = [];
+      $("#unit_table input[type='checkbox']:checked").each(function() {
+        ids.push($(this).val());
+      });
+      $.post("/Inbounds/deleteUnit", {ids: ids}, function(r) {
+        if (r) {
+          $("#unit_table input[type='checkbox']:checked").each(function() {
+            $(this).parent("td").parent("tr").remove();
+          });
+          noty({
+            text: "解除计划成功!",
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: "解除计划失败，请稍后再试，或者联系管理员!",
+            type: 'error'
+          });
+        }
+      });
+    }
+  });
+
 
 });

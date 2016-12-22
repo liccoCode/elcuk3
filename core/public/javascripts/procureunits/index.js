@@ -28,6 +28,7 @@ $(() => {
   function validProNameAndCooperName ($btn) {
     let firstProjectName = $("input[name='pids']:checked").first().attr("project");
     let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
+    let firstStage = $("input[name='pids']:checked").first().attr("stage");
     let i = 0;
     let j = 0;
     if ($btn.attr("id") == 'createInboundBtn' || $btn.attr("id") == 'createRefundBtn') {
@@ -42,6 +43,19 @@ $(() => {
       if (i > 0 || j > 0) {
         noty({
           text: '请选择相同【供应商】或者相同【项目名称】的采购单元',
+          type: 'error'
+        });
+        return false;
+      }
+    }
+    if ($btn.attr("id") == 'createRefundBtn') {
+      i = 0;
+      if ($(this).attr("stage") != firstStage) {
+        i++;
+      }
+      if (i > 0) {
+        noty({
+          text: '请选择相同【阶段】的采购单元',
           type: 'error'
         });
         return false;

@@ -83,10 +83,7 @@ public class Outbounds extends Controller {
         options.pageSize = IHtmlToPdfTransformer.A4P;
         List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
-
-
         renderPDF(options, ten);
-
     }
 
 }

@@ -11,7 +11,7 @@ $(() => {
         type: 'error'
       });
     } else if (confirm("确认出库 " + num + " 条出库单吗?")) {
-        $("#submit_form").submit();
+      $("#submit_form").submit();
     }
   });
 
@@ -40,6 +40,7 @@ $(() => {
         $select.empty();
     }
   }
+
   showTypeSelect();
 
   $("#printBtn").click(function(e) {
@@ -55,5 +56,73 @@ $(() => {
     window.open("/Outbounds/printOutboundForm?" + $form.serialize(), "_blank");
   });
 
+  $("input[name='editBoxInfo']").click(function(e) {
+    e.stopPropagation();
+    $("#fba_carton_contents_modal").modal('show');
+    let id = $(this).data("id");
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id});
+  });
+
+  $("#submitBoxInfoBtn").click(function(e) {
+    e.stopPropagation();
+    let action = $(this).data('action');
+    let form = $("<form method='post' action='#{action}'></form>")
+    form = form.append($("#box_info_table").clone())
+    $.post('/ProcureUnits/updateBoxInfo', form.serialize(), function(re) {
+      if (re) {
+        $("#fba_carton_contents_modal").modal('hide');
+        noty({
+          text: '更新包装信息成功!',
+          type: 'success'
+        });
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
+  });
+
+  $("#deleteBtn").click(function(e) {
+    e.stopPropagation();
+    if ($("#unit_table input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: "请选择需要解除的采购计划！",
+        type: 'error'
+      });
+      return false;
+    }
+    if ($("#unit_table input[type='checkbox']").not("input:checked").length == 0) {
+      noty({
+        text: "不能全部删除采购计划!",
+        type: 'error'
+      });
+      return false;
+    }
+
+    if (confirm("确认解除选中采购计划吗？")) {
+      let ids = [];
+      $("#unit_table input[type='checkbox']:checked").each(function() {
+        ids.push($(this).val());
+      });
+      $.post("/ProcureUnits/deleteUnit", {ids: ids}, function(r) {
+        if (r) {
+          $("#unit_table input[type='checkbox']:checked").each(function() {
+            $(this).parent("td").parent("tr").remove();
+          });
+          noty({
+            text: "解除计划成功!",
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: "解除计划失败，请稍后再试，或者联系管理员!",
+            type: 'error'
+          });
+        }
+      });
+    }
+  });
 
 });

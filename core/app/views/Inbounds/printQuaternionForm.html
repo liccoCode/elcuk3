@@ -54,6 +54,10 @@
       <td style="width: 8mm;">高</td>
     </tr>
       #{list items:ten.get(p), as:'i'}
+          #{set totalQty: i.qty + (totalQty==null ? 0 : totalQty) /}
+          #{set totalBoxNum: (i.mainBox?.boxNum==null ? 0 : i.mainBox?.boxNum) +
+          (i.lastBox?.boxNum==null ? 0 : i.lastBox?.boxNum) +
+          (totalBoxNum==null ? 0 : totalBoxNum) /}
         <tr style="height:7mm;">
           <td rowspan="2">${i.unit?.id}</td>
           <td rowspan="2">${i.unit?.deliveryment?.id}</td>
@@ -65,24 +69,48 @@
           <td rowspan="2">${i.unit?.selling?.fnSku}</td>
           <td rowspan="2">${i.planQty}</td>
           <td rowspan="2">${i.qty}</td>
-          <td style="font-size:9px;" height="3.5mm;"><div style="height:3mm;">${i.mainBox?.num}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.boxNum}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.singleBoxWeight}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.length}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.width}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.mainBox?.height}</div></td>
+          <td style="font-size:9px;" height="3.5mm;">
+            <div style="height:3mm;">${i.mainBox?.num}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.boxNum}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.length}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.width}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.height}</div>
+          </td>
           <td rowspan="2">${i.unit?.whouse?.name}</td>
           <td rowspan="2">${i.unit?.shipType?.label()}</td>
           <td rowspan="2">${i.qty}</td>
           <td rowspan="2">${i.result?.label()}</td>
         </tr>
         <tr>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.num}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.boxNum}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.length}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.width}</div></td>
-          <td style="font-size:9px;"><div style="height:3mm;">${i.lastBox?.height}</div></td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.num}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.length}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.width}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.height}</div>
+          </td>
         </tr>
       #{/list}
     <tr style="height:9mm;">
@@ -91,10 +119,8 @@
       <td>合计：</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td colspan="2">总数量：</td>
-      <td colspan="2">总箱数：</td>
-      <td></td>
+      <td colspan="3">总数量：${totalQty}</td>
+      <td colspan="3">总箱数：${totalBoxNum}</td>
       <td></td>
       <td></td>
       <td></td>

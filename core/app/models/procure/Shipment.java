@@ -380,6 +380,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Outbound out;
 
+    @Transient
+    public String outId;
+
     /**
      * 多个traceno
      */

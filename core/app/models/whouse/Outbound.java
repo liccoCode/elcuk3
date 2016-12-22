@@ -223,6 +223,7 @@ public class Outbound extends GenericModel {
         out.init();
         Shipment shipment = shipments.get(0);
         ProcureUnit first = shipment.items.get(0).unit;
+        out.name = "运输单【" + SqlSelect.inlineParam(shipmentId) + "】--关联的出库单";
         out.projectName = first.projectName;
         out.shipType = shipment.type;
         out.type = T.Normal;
