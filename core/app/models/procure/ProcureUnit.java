@@ -1026,6 +1026,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", String.format(
                         "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 市场 [%s] 的其他的 FBA 是否报告了异常.",
                         this.selling.market.name(), this.selling.merchantSKU));
+            } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
+                throw new FastRuntimeException("向 Amazon 创建 Shipment PLAN 失败, 请检查 FBA 仓库库存容量.");
             } else {
                 Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
             }
@@ -1110,9 +1112,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(Validation.hasErrors()) return;
         }
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            for(PaymentUnit fee : this.fees) {
-                fee.permanentRemove();
-            }
+            this.fees.forEach(PaymentUnit::permanentRemove);
             // 删除 FBA
             FBAShipment fba = this.fba;
             if(fba != null) {
@@ -1120,15 +1120,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 fba.removeFBAShipment();
             }
             // 删除运输相关
-            for(ShipItem item : this.shipItems) {
-                item.delete();
-            }
+            this.shipItems.forEach(ShipItem::delete);
 
             //删除 质检任务相关
             List<CheckTask> tasks = this.taskList;
-            for(CheckTask task : tasks) {
-                task.delete();
-            }
+            tasks.forEach(CheckTask::delete);
             //删除采购单关联
             Deliveryment deliveryment = this.deliveryment;
             if(deliveryment != null && deliveryment.units != null) {
@@ -1325,7 +1321,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalAmount() {
-        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2, 4)
+        return new BigDecimal(this.attrs.price.toString())
+                .multiply(new BigDecimal(this.qty()))
+                .setScale(2, 4)
                 .floatValue();
     }
 
@@ -2035,7 +2033,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             String pre_shipment_id = iu.get(0).shipItems.get(0).shipment.id;
             for(ProcureUnit u : iu) {
                 if(!u.shipItems.get(0).shipment.id.equals(pre_shipment_id)) {
-                    groupNum ++;
+                    groupNum++;
                     pre_shipment_id = u.shipItems.get(0).shipment.id;
                 }
                 u.groupNum = groupNum;
@@ -2055,6 +2053,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         String sql = "Select u FROM ShipItem i LEFT JOIN i.unit u WHERE u.outbound.id = ? " +
                 "ORDER BY i.shipment.id ";
         return ProcureUnit.find(sql, out_id).fetch();
+    }
+
+    public String showInboundIds() {
+        List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
+        String ids = "";
+        for(InboundUnit unit : list) {
+            ids += unit.inbound.id;
+        }
+        return ids;
     }
 
 }

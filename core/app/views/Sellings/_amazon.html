@@ -68,15 +68,15 @@
         #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
 
         #{checkbox_product_volume id:'productvolume',readonly:true,
-        checkboxname: 'p.productvolume', label:'长宽高(产品)',
+        checkboxname: 'p.productvolume', label:'长宽高(包材)',
         id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
         hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
         name1: 'p.productLengths',
-        label1: '长(产品)', value1: s.listing.product.productLengths,
+        label1: '长(包材)', value1: s.listing.product.lengths,
         name2: 'p.productWidth',
-        label2: '宽(产品)', value2: s.listing.product.productWidth,
+        label2: '宽(包材)', value2: s.listing.product.width,
         name3: 'p.productHeigh',
-        label3: '高(产品)', value3: s.listing.product.productHeigh /}
+        label3: '高(包材)', value3: s.listing.product.heigh /}
 
     </div>
     <div class="span5">

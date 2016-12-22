@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.Ret;
@@ -32,6 +33,7 @@ public class Refunds extends Controller {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("whouses", Whouse.selfWhouses(false));
+        renderArgs.put("users", User.findAll());
     }
 
     public static void index(RefundPost p) {
@@ -78,7 +80,7 @@ public class Refunds extends Controller {
 
     public static void confirmRefund(List<String> ids) {
         Refund.confirmRefund(ids);
-        flash.success(SqlSelect.inlineParam(ids) + "出库成功!");
+        flash.success(SqlSelect.inlineParam(ids) + "退货成功!");
         index(new RefundPost());
     }
 

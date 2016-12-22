@@ -18,7 +18,7 @@
   <tr>
     <td>
       <input type="checkbox" name="shipmentId" value="${ship.id}" coop="${ship.cname}" apply="${ship.applyId}"
-             way="${ship.type}" country="${ship.wname}" company="${ship.cname}">
+             way="${ship.type}" country="${ship.wname}" company="${ship.cname}" outId="${ship.outId}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
@@ -39,7 +39,7 @@
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.uname}</td>
-    <td></td>
+    <td>${ship.outId}</td>
   </tr>
 
 #{/list}

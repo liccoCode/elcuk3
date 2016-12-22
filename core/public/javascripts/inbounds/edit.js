@@ -14,26 +14,87 @@ $(() => {
     let attr = $input.attr('name');
     let value = $input.val();
 
+    //实际交货数量
     if (attr == 'qty' && $(this).val() == $(this).data('qty')) {
       $(this).parent('td').next().find('select').hide();
+      $(this).attr("style", "width:35px;");
     } else if (attr == 'qty' && $(this).val() != $(this).data('qty')) {
+      if ($(this).val() / $(this).data('qty') < 0.9 && $(this).parent('td').next().find('select').val() == 'Delivery') {
+        $(this).attr("style", "width:35px;background-color:yellow;");
+      } else {
+        $(this).attr("style", "width:35px;");
+      }
+      if ($(this).val() > $(this).data('qty')) {
+        noty({
+          text: '收货数超过计划数量!',
+          type: 'error'
+        });
+        $(this).val($(this).data('origin'));
+        $(this).focus();
+        return false;
+      }
       $(this).parent('td').next().find('select').show();
     }
 
+    //交货不足处理方式
+    if (attr == 'handType' && value == 'Delivery') {
+      let $input = $(this).parent('td').prev().find("input");
+      if ($input.val() / $input.data('qty') < 0.9) {
+        $input.attr("style", "width:35px;background-color:yellow;");
+      }
+    } else {
+      $(this).parent('td').prev().find("input").attr("style", "width:35px;");
+    }
+
+    //质检结果
     if (attr == 'result' && value == 'Unqualified') {
       $(this).parent('td').next().find('select').show();
+      $(this).parent('td').next().next().next().find('input').hide();
+      $(this).parent('td').next().next().find('input').hide();
     } else if (attr == 'result' && value == 'Qualified') {
       $(this).parent('td').next().find('select').hide();
+      $(this).parent('td').next().next().next().find('input').show();
+      $(this).parent('td').next().next().find('input').show();
     }
 
     if (attr == 'qualifiedQty') {
       let qty = $(this).data('qty');
+      if (value > qty) {
+        noty({
+          text: '合格数超过实际收货数量!',
+          type: 'error'
+        });
+        $(this).val(qty);
+        return false;
+      }
       $(this).parent('td').next().find('input').attr("value", qty - value);
     }
 
     if (attr == 'unqualifiedQty') {
       let qty = $(this).data('qty');
-      $(this).parent('td').prev().find('input').attr("value", qty - value);
+      if (value > qty) {
+        noty({
+          text: '不合格数超过实际收货数量!',
+          type: 'error'
+        });
+        $(this).val($(this).data('origin'));
+        return false;
+      }
+      $(this).parent('td').prev().find('input').val(qty - value);
+      $(this).data('origin', value);
+    }
+
+    if (attr == 'inboundQty') {
+      let qty = $(this).data('qty');
+      if (value > qty) {
+        noty({
+          text: '入库数超过实际收货数量!',
+          type: 'error'
+        });
+        $(this).val($(this).data('origin'));
+        return false;
+      }
+      $(this).data('origin', value);
     }
 
     if ($(this).val()) {
@@ -56,7 +117,8 @@ $(() => {
         }
       });
     }
-  });
+  }
+  );
 
   $("input[name='editBoxInfo']").click(function(e) {
     e.stopPropagation();
@@ -84,6 +146,47 @@ $(() => {
         });
       }
     });
+  });
+
+  $("#deleteBtn").click(function(e) {
+    e.stopPropagation();
+    if ($("#unit_table input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: "请选择需要解除的采购计划！",
+        type: 'error'
+      });
+      return false;
+    }
+    if ($("#unit_table input[type='checkbox']").not("input:checked").length == 0) {
+      noty({
+        text: "不能全部删除采购计划!",
+        type: 'error'
+      });
+      return false;
+    }
+
+    if (confirm("确认解除选中采购计划吗？")) {
+      let ids = [];
+      $("#unit_table input[type='checkbox']:checked").each(function() {
+        ids.push($(this).val());
+      });
+      $.post("/Inbounds/deleteUnit", {ids: ids}, function(r) {
+        if (r) {
+          $("#unit_table input[type='checkbox']:checked").each(function() {
+            $(this).parent("td").parent("tr").remove();
+          });
+          noty({
+            text: "解除计划成功!",
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: "解除计划失败，请稍后再试，或者联系管理员!",
+            type: 'error'
+          });
+        }
+      });
+    }
   });
 
 });

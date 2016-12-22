@@ -58,7 +58,9 @@
         </td>
       #{/if}
     <td>${itm.id}</td>
-    <td><a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.id}</a></td>
+    <td>
+      <a href="@{Deliveryments.show(itm.unit?.deliveryment?.id)}#${itm.unit?.id}">${itm.unit?.id}</a>
+    </td>
     <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
     <td><a id="unitbutton">${itm.unit.sid}</a></td>

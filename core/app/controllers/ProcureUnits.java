@@ -700,4 +700,26 @@ public class ProcureUnits extends Controller {
         }
         render(list);
     }
+
+    public static void updateBoxInfo(ProcureUnit unit) {
+        unit = ProcureUnit.findById(unit.id);
+        unit.marshalBoxs();
+        unit.save();
+        renderJSON(new Ret(true));
+    }
+
+    public static void deleteUnit(Long[] ids) {
+        List<ProcureUnit> list = ProcureUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        for(ProcureUnit unit : list) {
+            unit.outbound = null;
+            unit.save();
+        }
+        renderJSON(new Ret(true));
+    }
+
+    public static void refreshFbaCartonContentsByIds(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        render("/Inbounds/boxInfo.html", unit);
+    }
+
 }

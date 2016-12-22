@@ -9,6 +9,7 @@ import play.data.validation.Validation;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -102,4 +103,7 @@ public class UnitAttrs implements Serializable {
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
     }
 
+    public float formatPrice() {
+        return new BigDecimal(this.price).setScale(2, 4).floatValue();
+    }
 }
