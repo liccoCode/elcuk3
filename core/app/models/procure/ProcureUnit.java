@@ -1112,9 +1112,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(Validation.hasErrors()) return;
         }
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            for(PaymentUnit fee : this.fees) {
-                fee.permanentRemove();
-            }
+            this.fees.forEach(PaymentUnit::permanentRemove);
             // 删除 FBA
             FBAShipment fba = this.fba;
             if(fba != null) {
@@ -1122,15 +1120,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 fba.removeFBAShipment();
             }
             // 删除运输相关
-            for(ShipItem item : this.shipItems) {
-                item.delete();
-            }
+            this.shipItems.forEach(ShipItem::delete);
 
             //删除 质检任务相关
             List<CheckTask> tasks = this.taskList;
-            for(CheckTask task : tasks) {
-                task.delete();
-            }
+            tasks.forEach(CheckTask::delete);
             //删除采购单关联
             Deliveryment deliveryment = this.deliveryment;
             if(deliveryment != null && deliveryment.units != null) {
@@ -1327,7 +1321,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalAmount() {
-        return new BigDecimal(this.attrs.price.toString()).multiply(new BigDecimal(this.qty())).setScale(2, 4)
+        return new BigDecimal(this.attrs.price.toString())
+                .multiply(new BigDecimal(this.qty()))
+                .setScale(2, 4)
                 .floatValue();
     }
 

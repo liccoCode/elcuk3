@@ -147,7 +147,7 @@ public class DeliverPlan extends GenericModel {
     public static String id() {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
-        DeliverPlan deliverPlan = DeliverPlan.find("createDate>=? AND createDate<? ORDER BY id DESC",
+        DeliverPlan deliverPlan = DeliverPlan.find("createDate>=? AND createDate<? ORDER BY createDate DESC",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
                 DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
         ).first();
