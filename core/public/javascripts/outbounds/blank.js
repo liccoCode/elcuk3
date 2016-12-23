@@ -11,7 +11,20 @@ $(() => {
         type: 'error'
       });
     } else if (confirm("确认出库 " + num + " 条出库单吗?")) {
-      $("#submit_form").submit();
+      let i = 0;
+      $("input[name='ids']:checked").each(function() {
+        if ($(this).attr("status") != "Create") {
+          i++;
+          noty({
+            text: $(this).val() + '已经出库，请选择【已创建】的出库单',
+            type: 'error'
+          });
+          return false;
+        }
+      });
+      if (i == 0) {
+        $("#submit_form").submit();
+      }
     }
   });
 

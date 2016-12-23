@@ -9,9 +9,11 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
@@ -246,6 +248,20 @@ public class Outbound extends GenericModel {
     public static void confirmOutBound(List<String> ids) {
         for(String id : ids) {
             Outbound out = Outbound.findById(id);
+            for(ProcureUnit p : out.units) {
+                if(p.stage != ProcureUnit.STAGE.IN_STORAGE) {
+                    Validation.addError("", "出库单【" + id + "】下的采购计划" + p.id + "不是已入库状态，请查证");
+                    return;
+                }
+                String msg = ProcureUnit.validRefund(p);
+                if(StringUtils.isNotEmpty(msg)) {
+                    Validation.addError("", "出库单【" + id + "】下的" + msg);
+                    return;
+                }
+            }
+            if(Validation.hasErrors()) {
+                return;
+            }
             out.status = S.Outbound;
             out.outboundDate = new Date();
             out.save();
