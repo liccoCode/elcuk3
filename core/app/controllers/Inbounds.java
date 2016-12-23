@@ -140,8 +140,13 @@ public class Inbounds extends Controller {
      */
     @Check("inbounds.confirmreceivebtn")
     public static void confirmReceive(Inbound inbound, List<InboundUnit> dtos) {
-        inbound.status = Inbound.S.Handing;
-        inbound.save();
+        if(inbound.status == Inbound.S.Create) {
+            inbound.status = Inbound.S.Handing;
+            inbound.save();
+        } else {
+            flash.error("此单已经完成收货操作!");
+            edit(inbound.id);
+        }
         inbound.confirmReceive(dtos);
         flash.success("收货成功!");
         edit(inbound.id);
