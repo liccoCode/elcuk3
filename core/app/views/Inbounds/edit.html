@@ -72,22 +72,23 @@
     </table>
   </div>
 </div>
-    #{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
+#{/form}
+#{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-      #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses/}
-      #{if inbound.status?.name()=='Create'}
-        <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
-      #{/if}
-      #{power.ck 'inbounds.confirmreceivebtn'}
-        <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
-      #{/power.ck}
-      #{power.ck 'inbounds.confirmqcbtn'}
-        <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
-      #{/power.ck}
-      #{power.ck 'inbounds.confirminboundbtn'}
-        <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
-      #{/power.ck}
+  #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses/}
+  #{if inbound.status?.name()=='Create'}
+    <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+  #{/if}
+  #{power.ck 'inbounds.confirmreceivebtn'}
+    <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
+  #{/power.ck}
+  #{power.ck 'inbounds.confirmqcbtn'}
+    <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
+  #{/power.ck}
+  #{power.ck 'inbounds.confirminboundbtn'}
+    <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
+  #{/power.ck}
   </div>
 </div>
 
@@ -100,6 +101,4 @@
     <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
   </div>
 </div>
-
-#{/form}
 

@@ -3,8 +3,21 @@
  */
 $(() => {
   $('#confirmReceiveBtn,#confirmQCBtn,#confirmInboundBtn').click(function(e) {
-    e.stopPropagation();
     $('#edit_inbound_form').attr('action', $(this).data('url'));
+    if ($("input[name='inbound.receiveDate']").val() == "") {
+      noty({
+        text: '收货日期必填!',
+        type: 'error'
+      });
+      $("input[name='inbound.receiveDate']").focus();
+    }
+    if ($("input[name='inbound.name']").val() == "") {
+      noty({
+        text: '收货入库单名称必填!',
+        type: 'error'
+      });
+      $("input[name='inbound.name']").focus();
+    }
     $('#edit_inbound_form').submit();
   });
 
