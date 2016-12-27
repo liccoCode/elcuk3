@@ -267,8 +267,12 @@ public class DeliverPlan extends GenericModel {
     }
 
     public String showInbounds() {
-        List<Inbound> list = Inbound.find("plan.id=?",this.id).fetch();
-        if(list == null || list.size() ==0) return "";
-        return list.get(0).id;
+        List<Inbound> list = Inbound.find("plan.id=?", this.id).fetch();
+        if(list == null || list.size() == 0) return "";
+        String ids = "";
+        for(Inbound inbound : list) {
+            ids += inbound.id + ",";
+        }
+        return ids;
     }
 }
