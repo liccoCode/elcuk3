@@ -82,7 +82,7 @@ public class InboundPost extends Post<Inbound> {
     private String isSearchForId() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return matcher.group(1);
+            if(matcher.find()) return matcher.group(0);
         }
         return null;
     }

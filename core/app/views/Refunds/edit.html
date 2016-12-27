@@ -59,8 +59,8 @@
       </tr>
 
       <tr>
-        <th>创建日期</th>
-        <td>#{time_tooltip time:refund.createDate/}</td>
+        <th>退货日期<span style="color:red">*</span></th>
+        <td><input type="date" name="refund.refundDate" value="${refund.refundDate?.date()}" required></td>
         <th>物流信息</th>
         <td><input type="text" class="input-xxlarge" name="refund.info" value="${refund.info}"></td>
       </tr>
@@ -88,7 +88,7 @@
   <div class="span12">
   #{render '/Refunds/_units.html', units:refund.unitList, is_check:true/}
   #{if refund.status.name() == "Create"}
-    <button class="btn btn-danger">解除</button>
+    <button class="btn btn-danger" id="deleteBtn">解除</button>
   #{/if}
   </div>
 </div>

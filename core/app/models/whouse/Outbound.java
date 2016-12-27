@@ -257,7 +257,7 @@ public class Outbound extends GenericModel {
                     Validation.addError("", "出库单【" + id + "】下的" + msg);
                     return;
                 }
-                if(p.mainBox.num == 0) {
+                if(p.mainBox == null || p.mainBox.num == 0) {
                     Validation.addError("", "采购计划【" + p.id + "】的包装信息没填，请先填写！");
                     return;
                 }

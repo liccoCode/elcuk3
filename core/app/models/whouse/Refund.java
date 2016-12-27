@@ -55,6 +55,12 @@ public class Refund extends GenericModel {
             public String label() {
                 return "已退货";
             }
+        },
+        Cancel {
+            @Override
+            public String label() {
+                return "已取消";
+            }
         };
 
         public abstract String label();
