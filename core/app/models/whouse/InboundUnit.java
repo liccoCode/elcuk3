@@ -130,6 +130,12 @@ public class InboundUnit extends Model {
     public R result;
 
     public enum R {
+        UnCheck {
+            @Override
+            public String label() {
+                return "未检";
+            }
+        },
         Qualified {
             @Override
             public String label() {
@@ -263,6 +269,10 @@ public class InboundUnit extends Model {
                 } else {
                     this.way = null;
                 }
+                if(this.qualifiedQty == 0) {
+                    this.qualifiedQty = this.qty;
+                    this.unqualifiedQty = 0;
+                }
                 logs.addAll(Reflects.logFieldFade(this, "result", R.valueOf(value)));
                 break;
             case "way":
@@ -296,7 +306,7 @@ public class InboundUnit extends Model {
         }
         new ERecordBuilder("outboundrecord.update")
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>"))
-                .fid(this.id)
+                .fid(this.inbound.id)
                 .save();
         this.save();
     }

@@ -45,7 +45,7 @@
         <th>B2B选项</th>
         <td>
           <label class="checkbox">
-            <input type="checkbox" name="inbound.isb2b" value="true"> B2B
+            <input type="checkbox" name="inbound.isb2b" value="true" #{if inbound.projectName=='B2B'} checked #{/if}> B2B
           </label>
         </td>
       </tr>
@@ -65,7 +65,10 @@
         <td colspan="4">
           <input type="hidden" name="record.origin" value="">
           <input type="hidden" name="record.state" value="">
-          <button class="btn btn-primary" id="update">更新</button>
+          #{if inbound.status.name()!='End'}
+            <button class="btn btn-primary" id="update">更新</button>
+          #{/if}
+
           <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
         </td>
       </tr>
@@ -101,4 +104,6 @@
     <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
   </div>
 </div>
+
+#{records records:logs/}
 

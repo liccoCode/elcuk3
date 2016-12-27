@@ -17,6 +17,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import org.springframework.core.annotation.Order;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
@@ -222,8 +223,7 @@ public class Inbound extends GenericModel {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.status.equals(InboundUnit.S.Create)) {
                 u.status = InboundUnit.S.Receive;
-                u.result = InboundUnit.R.Qualified;
-                u.qualifiedQty = u.qty;
+                u.result = InboundUnit.R.UnCheck;
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
@@ -280,6 +280,10 @@ public class Inbound extends GenericModel {
         for(InboundUnit unit : units) {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.status == InboundUnit.S.Check && u.inboundQty != 0) {
+                if(unit.target == null) {
+                    Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
+                    return;
+                }
                 u.status = InboundUnit.S.Inbound;
                 u.confirmUser = Login.current();
                 u.inboundDate = new Date();

@@ -7,6 +7,7 @@
       </label>
     </th>
   #{/if}
+    <th width="30px;">ID</th>
     <th width="40px;">采购计划ID</th>
     <th width="80px;">采购单</th>
     <th width="120px;">Selling</th>
@@ -22,13 +23,12 @@
     <th width="35px;">状态</th>
     <th>质检结果</th>
   #{if !is_check}
-    <th>质检不合格<br>处理方式
-    </th>
+    <th width="80px;">质检不合格<br>处理方式</th>
   #{/if}
     <th>合格数</th>
     <th>不良品数</th>
     <th>实际入库数</th>
-    <th width="80px;">目标仓库</th>
+    <th width="60px;">目标仓库</th>
   </tr>
 
 #{list items:units, as:'unit'}
@@ -38,6 +38,7 @@
           <input type="checkbox" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
         </td>
+        <td>${unit.id}</td>
         <td>${unit.unit?.id} </td>
         <td>
           <a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}" target="_blank">${unit.unit?.deliveryment?.id}</a>
@@ -83,7 +84,7 @@
         <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
         <td style="background-color:${unit.status.rgb()}">${unit.status?.label()}</td>
         <td>
-          <select name="result" style="width:60px;"
+          <select name="result" style="width:60px;" qty="${unit.qty}"
               #{if unit.status.name() != "Receive"}
                   disabled
               #{/if}>
@@ -93,8 +94,8 @@
           </select>
         </td>
         <td>
-          <select name="way" style="width:120px;
-              #{if unit.result?.name() == 'Qualified'}
+          <select name="way" style="width:80px;
+              #{if unit.result?.name() != 'Unqualified'}
                   display:none;
               #{/if}"
               #{if unit.status.name() != "Receive"}
@@ -127,10 +128,10 @@
           <input type="text" name="inboundQty" value="${unit.inboundQty}" style="width:35px;" data-qty="${unit.qty}"
               #{if unit.status.name() != "Check"}
                  disabled
-              #{/if} data-origin="${unit.inboundQty}" />
+              #{/if} data-origin="${unit.inboundQty}"/>
         </td>
         <td>
-          <select name="target" style="max-width: 80px;"
+          <select name="target" style="max-width: 60px;"
               #{if unit.status.name() != "Check"}
                   disabled
               #{/if}>
@@ -146,6 +147,7 @@
     #{/if}
     #{else }
       <tr class="text-center">
+        <td>${unit.id}</td>
         <td>
           <a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}#${unit.unit?.id}" target="_blank">${unit.unit?.id}</a>
         </td>
