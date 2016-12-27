@@ -28,7 +28,7 @@
           </label>
         </td>
         <th>状态</th>
-        <td style="background-color:${outbound.status.rgb()}"><b>${outbound.status.label()}</b></td>
+        <td style="color:${outbound.status.rgb()}"><b>${outbound.status.label()}</b></td>
       </tr>
       <tr>
         <th>目的国家</th>
@@ -88,7 +88,7 @@
       </tr>
       <tr>
         <th>出库日期<span style="color:red">*</span></th>
-        <td><input type="date" name="outbound.outboundDate" value="${outbound.outboundDate}" required></td>
+        <td><input type="date" name="outbound.outboundDate" value="${outbound.outboundDate.date()}" required></td>
         <th>发货人</th>
         <td>
           <select name="outbound.consignor.id" class="inline selectize" style="width:120px;">

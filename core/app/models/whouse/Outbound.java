@@ -224,7 +224,7 @@ public class Outbound extends GenericModel {
         out.init();
         Shipment shipment = shipments.get(0);
         ProcureUnit first = shipment.items.get(0).unit;
-        out.name = "运输单【" + SqlSelect.inlineParam(shipmentId) + "】--关联的出库单";
+        out.name = shipment.cooper.name + "-" + shipment.type.label() + "-" + shipment.whouse.name;
         out.projectName = first.projectName;
         out.shipType = shipment.type;
         out.type = T.Normal;
@@ -255,6 +255,10 @@ public class Outbound extends GenericModel {
                 String msg = ProcureUnit.validRefund(p);
                 if(StringUtils.isNotEmpty(msg)) {
                     Validation.addError("", "出库单【" + id + "】下的" + msg);
+                    return;
+                }
+                if(p.mainBox.num == 0) {
+                    Validation.addError("", "采购计划【" + p.id + "】的包装信息没填，请先填写！");
                     return;
                 }
             }
