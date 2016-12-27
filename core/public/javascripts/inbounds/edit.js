@@ -68,6 +68,11 @@ $(() => {
       $(this).parent('td').next().find('select').hide();
       $(this).parent('td').next().next().next().find('input').show();
       $(this).parent('td').next().next().find('input').show();
+      $(this).parent('td').next().next().find('input').val($(this).attr("qty"));
+    } else if (attr == 'result' && value == 'UnCheck') {
+      $(this).parent('td').next().find('select').hide();
+      $(this).parent('td').next().next().next().find('input').hide();
+      $(this).parent('td').next().next().find('input').hide();
     }
 
     if (attr == 'qualifiedQty') {

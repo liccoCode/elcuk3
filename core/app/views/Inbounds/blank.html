@@ -13,7 +13,7 @@
 #{flash_alert/}
 
 #{form @Inbounds.create(), method:'POST', id: 'new_inbound'}
-    #{info_row title: it.label() + '入库单'/}
+    #{info_row title: it.label() + '单'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-bordered">
@@ -49,7 +49,8 @@
         <th>B2B选项</th>
         <td>
           <label class="checkbox inline">
-            <input type="checkbox" name="inbound.isb2b" value="true"> B2B
+            <input type="checkbox" name="inbound.isb2b" value="true" #{if proUnit.projectName=='B2B'} checked #{/if}>
+            B2B
           </label>
         </td>
       </tr>
@@ -76,7 +77,7 @@
     </table>
   </div>
 </div>
-    #{info_row title:'已添加进入【'+it.label()+'入库单】的【采购单元】'/}
+    #{info_row title:'已添加进入【'+it.label()+'单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-bordered">

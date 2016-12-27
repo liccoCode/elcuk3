@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Webs;
+import models.ElcukRecord;
 import models.OperatorConfig;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
@@ -14,6 +16,7 @@ import models.whouse.InboundUnit;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.modules.pdf.PDF;
@@ -21,10 +24,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -108,6 +108,7 @@ public class Inbounds extends Controller {
     }
 
     public static void update(Inbound inbound) {
+        inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         inbound.save();
         flash.success("更新成功!");
         index(new InboundPost());
@@ -115,7 +116,7 @@ public class Inbounds extends Controller {
 
     public static void edit(String id) {
         Inbound inbound = Inbound.findById(id);
-
+        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("outboundrecord.update"), 50));
         render(inbound);
     }
 
@@ -175,6 +176,10 @@ public class Inbounds extends Controller {
     @Check("inbounds.confirminboundbtn")
     public static void confirmInbound(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmInbound(dtos);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            edit(inbound.id);
+        }
         inbound.checkIsFinish();
         flash.success("入库成功!");
         edit(inbound.id);
