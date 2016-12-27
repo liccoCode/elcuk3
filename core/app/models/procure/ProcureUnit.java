@@ -2059,7 +2059,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
         String ids = "";
         for(InboundUnit unit : list) {
-            ids += unit.inbound.id;
+            ids += unit.inbound.id + ",";
+        }
+        return ids;
+    }
+
+
+    public String showInboundUnitIds() {
+        List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
+        String ids = "";
+        for(InboundUnit unit : list) {
+            ids += unit.id + ",";
         }
         return ids;
     }

@@ -46,9 +46,15 @@
     <td>${unit.outQty}</td>
     <td>
       <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+      #{if unit.mainBox == null || unit.mainBox.num==0}
+        <i class="icon-remove" style="color:red"></i>
+      #{/if}
+      #{else }
+        <i class="icon-ok" style="color:green"></i>
+      #{/else}
     </td>
     <td>${unit.currWhouse?.name}</td>
-    <td>${unit.showInboundIds()}</td>
+    <td>${unit.showInboundUnitIds()}</td>
     <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
   </tr>
 #{/list}

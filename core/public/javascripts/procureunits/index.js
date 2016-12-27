@@ -48,11 +48,11 @@ $(() => {
     }
     if ($btn.attr("id") == 'createOutboundBtn') {
       let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
-      i = 0;
+      let o = 0;
       if ($(this).attr("whouse") != firstWhouse) {
         i++;
       }
-      if (i > 0) {
+      if (o > 0) {
         noty({
           text: '请选择【目的国家】一致的采购计划！',
           type: 'error'
