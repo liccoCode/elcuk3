@@ -63,7 +63,7 @@
         <table class="table table-condensed table-bordered">
           <tr>
             <th style="width:15px;">
-              <input type="checkbox">
+              <input type="checkbox" id="checkbox_all" class="checkall">
             </th>
             <th>收货入库单ID</th>
             <th>名称</th>
@@ -75,7 +75,7 @@
             <th width="200px;">收货人/收货日期</th>
             <th>质检人/质检日期</th>
             <th>确认人/入库日期</th>
-            <th>备注</th>
+            <th width="250px;">备注</th>
           </tr>
         #{list items: inbounds, as: 'i'}
           <tr>
@@ -102,7 +102,7 @@
                 ${d}<br>
                 #{/list}
             </td>
-            <td title="${i.memo}">${i.memo}</td>
+            <td title="${i.memo}">${i.memo.xxLong()}</td>
           </tr>
           <tr id="sr_${i_index}" style="display:none;">
             <td colspan="12">

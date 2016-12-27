@@ -35,7 +35,7 @@
       </tr>
       <tr>
         <th>收货入库单名称<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="inbound.name" value="${inbound.name}"></td>
+        <td><input type="text" class="span8" name="inbound.name" value="${inbound.name}" required></td>
         <th>收货类型</th>
         <td>${inbound.type?.label()}</td>
       </tr>
@@ -65,10 +65,9 @@
         <td colspan="4">
           <input type="hidden" name="record.origin" value="">
           <input type="hidden" name="record.state" value="">
-          #{if inbound.status.name()!='End'}
-            <button class="btn btn-primary" id="update">更新</button>
-          #{/if}
-
+            #{if inbound.status.name()!='End'}
+              <button class="btn btn-primary" id="update">更新</button>
+            #{/if}
           <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
         </td>
       </tr>
@@ -79,18 +78,21 @@
 <div class="row-fluid">
   <div class="span12">
       #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses/}
-      #{if inbound.status?.name()=='Create'}
-        <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+
+      #{if inbound.status?.name()!='End'}
+          #{if inbound.status?.name()=='Create'}
+            <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+          #{/if}
+          #{power.ck 'inbounds.confirmreceivebtn'}
+            <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
+          #{/power.ck}
+          #{power.ck 'inbounds.confirmqcbtn'}
+            <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
+          #{/power.ck}
+          #{power.ck 'inbounds.confirminboundbtn'}
+            <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
+          #{/power.ck}
       #{/if}
-      #{power.ck 'inbounds.confirmreceivebtn'}
-        <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
-      #{/power.ck}
-      #{power.ck 'inbounds.confirmqcbtn'}
-        <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
-      #{/power.ck}
-      #{power.ck 'inbounds.confirminboundbtn'}
-        <input type="button" class="btn btn-success" id="confirmInboundBtn" data-url="@{Inbounds.confirmInbound()}" value="确认入库">
-      #{/power.ck}
   </div>
 </div>
 #{/form}

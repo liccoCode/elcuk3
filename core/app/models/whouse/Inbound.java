@@ -247,7 +247,7 @@ public class Inbound extends GenericModel {
                 if(this.type == T.Purchase) {
                     ProcureUnit punit = u.unit;
                     punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
-                    if(punit.attrs.qty == 0) {
+                    if(punit.attrs.qty == 0 || u.way == InboundUnit.W.PTRework) {
                         punit.stage = ProcureUnit.STAGE.DELIVERY;
                     }
                     punit.save();
