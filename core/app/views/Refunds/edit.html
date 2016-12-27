@@ -72,7 +72,9 @@
       </tr>
       <tr>
         <td colspan="4">
-          <button class="btn btn-primary" id="update">更新</button>
+            #{if refund.status.name() == "Create"}
+              <button class="btn btn-primary" id="update">更新</button>
+            #{/if}
           <a href="@{Refunds.index()}" class="btn btn-success">取消</a>
         </td>
       </tr>
@@ -85,7 +87,9 @@
 <div class="row-fluid">
   <div class="span12">
   #{render '/Refunds/_units.html', units:refund.unitList, is_check:true/}
+  #{if refund.status.name() == "Create"}
     <button class="btn btn-danger">解除</button>
+  #{/if}
   </div>
 </div>
 
