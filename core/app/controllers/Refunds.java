@@ -28,7 +28,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Refunds extends Controller {
 
-    @Before(only = {"index", "edit"})
+    @Before(only = {"index", "edit", "blank"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
