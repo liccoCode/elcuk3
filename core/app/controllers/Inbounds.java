@@ -96,12 +96,12 @@ public class Inbounds extends Controller {
         DeliverPlan plan = DeliverPlan.findById(id);
         List<Long> ids = new ArrayList<>();
         for(ProcureUnit unit : plan.units) {
-            if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
+            if(unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id)) {
                 ids.add(unit.id);
             }
         }
         if(ids.size() == 0) {
-            flash.error("已无符合收货入库条件的采购计划");
+            flash.error("出货单【" + id + "】已无符合收货入库条件的采购计划");
             DeliverPlans.indexWhouse(p);
         }
         blank(ids, id);

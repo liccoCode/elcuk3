@@ -343,4 +343,14 @@ public class InboundUnit extends Model {
         return ten;
     }
 
+    /**
+     * 根据采购计划ID验证是否可以创建入库单
+     *
+     * @return
+     */
+    public static boolean vaildIsCreate(Long id) {
+        List<InboundUnit> list = InboundUnit.find("unit.id = ? ", id).fetch();
+        return list.size() == 0;
+    }
+
 }
