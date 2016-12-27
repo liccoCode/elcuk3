@@ -31,23 +31,36 @@ $(() => {
     let firstStage = $("input[name='pids']:checked").first().attr("stage");
     let i = 0;
     let j = 0;
-    if ($btn.attr("id") == 'createInboundBtn' || $btn.attr("id") == 'createRefundBtn') {
-      $("input[name='pids']:checked").each(function() {
-        if ($(this).attr("project") != firstProjectName) {
-          i++;
-        }
-        if ($(this).attr("cooperName") != firstCooper) {
-          j++;
-        }
+    $("input[name='pids']:checked").each(function() {
+      if ($(this).attr("project") != firstProjectName) {
+        i++;
+      }
+      if ($(this).attr("cooperName") != firstCooper) {
+        j++;
+      }
+    });
+    if (i > 0 || j > 0) {
+      noty({
+        text: '请选择【供应商】【项目名称】一致的采购计划！',
+        type: 'error'
       });
-      if (i > 0 || j > 0) {
+      return false;
+    }
+    if ($btn.attr("id") == 'createOutboundBtn') {
+      let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
+      i = 0;
+      if ($(this).attr("whouse") != firstWhouse) {
+        i++;
+      }
+      if (i > 0) {
         noty({
-          text: '请选择相同【供应商】或者相同【项目名称】的采购单元',
+          text: '请选择【目的国家】一致的采购计划！',
           type: 'error'
         });
         return false;
       }
     }
+
     if ($btn.attr("id") == 'createRefundBtn') {
       i = 0;
       if ($(this).attr("stage") != firstStage) {

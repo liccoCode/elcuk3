@@ -9,7 +9,6 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -268,9 +267,21 @@ public class Outbound extends GenericModel {
             for(ProcureUnit p : out.units) {
                 p.stage = ProcureUnit.STAGE.OUTBOUND;
                 p.save();
+                createStockRecord(p);
             }
         }
     }
+
+    public static void createStockRecord(ProcureUnit unit) {
+        StockRecord record = new StockRecord();
+        record.whouse = unit.whouse;
+        record.unit = unit;
+        record.qty = unit.outQty;
+        record.type = StockRecord.T.Outbound;
+        record.recordId = unit.id;
+        record.save();
+    }
+
 
     public String showCompany() {
         switch(this.type) {

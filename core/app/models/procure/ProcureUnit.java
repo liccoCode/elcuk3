@@ -1989,7 +1989,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             } else if(type.equals("createInboundBtn")) {
                 if(!(unit.stage == STAGE.DELIVERY || unit.stage == STAGE.IN_STORAGE)) {
-                    return "请选择阶段为【采购中】和【已入库】的采购计划";
+                    return "请统一选择阶段为【采购中】或【已入库】的采购计划！";
                 }
                 return StringUtils.isNotEmpty(validInbound(unit)) ? validInbound(unit) : validRefund(unit);
             } else if(type.equals("createOutboundBtn")) {
@@ -2002,7 +2002,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 msg = validRefund(unit);
             } else if(type.equals("createRefundBtn")) {
                 if(!(unit.stage == STAGE.DONE || unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
-                    return "请选择阶段为【已交货】和【已入库】或【仓库加工】的采购计划";
+                    return "请统一选择阶段为【已交货】或【已入库】、【仓库加工】的采购计划！";
                 }
                 msg = validRefund(unit);
             }

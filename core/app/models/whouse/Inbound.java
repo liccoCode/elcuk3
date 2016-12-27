@@ -230,6 +230,7 @@ public class Inbound extends GenericModel {
                 if(punit.stage != ProcureUnit.STAGE.IN_STORAGE) {
                     punit.stage = ProcureUnit.STAGE.DONE;
                 }
+                punit.attrs.deliveryDate = new Date();
                 punit.save();
             }
         }

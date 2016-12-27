@@ -54,20 +54,6 @@
         #{/list}
         </select>
 
-        <select name="p.isPlaced" class="inline">
-          <option value="">是否抵达货代处</option>
-        #{list items:models.view.post.ProcurePost.PLACEDSTATE, as:'t'}
-          <option ${t == p.isPlaced  ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
-        #{/list}
-        </select>
-
-        <select name="p.isOut" class="inline">
-          <option value="">是否出库</option>
-        #{list items:models.procure.ProcureUnit.OST.values(), as:'o'}
-          <option ${o == p.isOut ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
-        #{/list}
-        </select>
-
         <select name="p.cooperatorId" class="inline selectize" style="width:120px;">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
@@ -143,7 +129,7 @@
       #{list items:p.query(), as:'unit'}
         <tr>
           <td><input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
-                     value="${unit.id}"></td>
+                     value="${unit.id}" whouse="${unit.whouse?.name()}"></td>
           <td><i class="icon-reorder"></i>${unit.id}</td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
           <td><a class="btn btn-mini btn-info">变更<br>详情</a></td>
