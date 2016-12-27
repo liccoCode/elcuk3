@@ -68,7 +68,10 @@ public class Orders extends Controller {
             Float tax = amt._3;
             if(invoice != null) {
                 notaxamount = invoice.notaxamount;
-                tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+                tax = new BigDecimal(totalamount)
+                        .subtract(new BigDecimal(notaxamount))
+                        .setScale(2, 4)
+                        .floatValue();
             }
             List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
                     + "action like '%orderinvoice.invoice%' ORDER BY "
