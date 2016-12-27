@@ -253,7 +253,7 @@ public class Inbound extends GenericModel {
                     punit.save();
                 }
             } else if(u.status == InboundUnit.S.Receive && !(u.result == null || (u.result == InboundUnit.R.Qualified
-                    && u.qualifiedQty == 0))) {
+                    && u.qualifiedQty == 0)) && u.result != InboundUnit.R.UnCheck) {
                 u.status = InboundUnit.S.Check;
                 u.inboundQty = u.qualifiedQty;
                 if(u.unit.selling != null && Whouse.autoMatching(u) != null) {
