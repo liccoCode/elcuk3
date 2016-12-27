@@ -263,9 +263,9 @@ public class Orderr extends GenericModel {
      */
     public Long itemCount() {
         BigDecimal qty = (BigDecimal) DBUtils
-                .row("select sum(quantity) as qty from OrderItem where order_orderId=?",
-                        this.orderId).get("qty");
-        return qty == null ? 0l : qty.longValue();
+                .row("select sum(quantity) as qty from OrderItem where order_orderId=?", this.orderId)
+                .get("qty");
+        return qty == null ? 0L : qty.longValue();
     }
 
     /**
@@ -369,12 +369,8 @@ public class Orderr extends GenericModel {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         Orderr orderr = (Orderr) o;
-
-        if(!orderId.equals(orderr.orderId)) return false;
-
-        return true;
+        return orderId.equals(orderr.orderId);
     }
 
     @Override
@@ -722,7 +718,7 @@ public class Orderr extends GenericModel {
 
         if(this.items != null && this.items.size() > 0) {
             for(OrderItem item : this.items) {
-                if(item.quantity.intValue() > 0) {
+                if(item.quantity > 0) {
                     invoice.price.add(new BigDecimal(item.price - item.discountPrice)
                             .divide(new BigDecimal(item.quantity), 2, 4)
                             .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).floatValue());
@@ -748,4 +744,8 @@ public class Orderr extends GenericModel {
         return invoice;
     }
 
+
+    public boolean canBeProvidedInvoice() {
+        return M.europeMarkets().contains(this.market);
+    }
 }

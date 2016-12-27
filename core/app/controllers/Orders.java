@@ -60,10 +60,8 @@ public class Orders extends Controller {
             OrderInvoice invoice = OrderInvoice.findById(id);
             if(invoice != null) {
                 invoice.setprice();
-                boolean check = invoice.checkInvoice(ord);
-                if(!check) invoice = null;
+                if(!invoice.checkInvoice(ord)) invoice = null;
             }
-
             F.T3<Float, Float, Float> amt = ord.amount();
             Float totalamount = amt._1;
             Float notaxamount = amt._2;

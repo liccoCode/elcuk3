@@ -363,19 +363,17 @@ public class SaleFee extends Model {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SaleFee");
-        sb.append("{type=").append(type);
-        sb.append(", id='").append(id).append('\'');
-        sb.append(", market=").append(market);
-        sb.append(", memo='").append(memo).append('\'');
-        sb.append(", orderId='").append(orderId).append('\'');
-        sb.append(", date=").append(date);
-        sb.append(", cost=").append(cost);
-        sb.append(", currency=").append(currency);
-        sb.append(", usdCost=").append(usdCost);
-        sb.append(", qty=").append(qty);
-        sb.append('}');
-        return sb.toString();
+        return "SaleFee" +
+                "{type=" + type +
+                ", id='" + id + '\'' +
+                ", market=" + market +
+                ", memo='" + memo + '\'' +
+                ", orderId='" + orderId + '\'' +
+                ", date=" + date +
+                ", cost=" + cost +
+                ", currency=" + currency +
+                ", usdCost=" + usdCost +
+                ", qty=" + qty +
+                '}';
     }
 }

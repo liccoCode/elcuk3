@@ -281,7 +281,6 @@ public class OrderInvoice extends GenericModel {
                         Logger.info(e.getMessage());
                         new ElcukRecord("自动生成发票", ord.orderId + " 生成时报错; " + e.getMessage(), "licco",
                                 ord.orderId, new Date()).save();
-                        continue;
                     }
                 }
             }
@@ -290,5 +289,7 @@ public class OrderInvoice extends GenericModel {
         Files.zip(folder, zip);
     }
 
-
+    public boolean isEurope() {
+        return this.europevat == VAT.EUROPE;
+    }
 }
