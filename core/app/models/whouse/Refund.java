@@ -207,9 +207,20 @@ public class Refund extends GenericModel {
                     }
                     refund.save();
                     unit.save();
+                    createStockRecord(u);
                 }
             }
         }
+    }
+
+    public static void createStockRecord(RefundUnit unit) {
+        StockRecord record = new StockRecord();
+        record.whouse = unit.unit.whouse;
+        record.unit = unit.unit;
+        record.qty = unit.qty;
+        record.type = StockRecord.T.Refund;
+        record.recordId = unit.id;
+        record.save();
     }
 
     /**
