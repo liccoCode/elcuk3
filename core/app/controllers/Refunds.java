@@ -6,6 +6,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.RefundPost;
+import models.whouse.InboundUnit;
 import models.whouse.Refund;
 import models.whouse.RefundUnit;
 import models.whouse.Whouse;
@@ -90,6 +91,19 @@ public class Refunds extends Controller {
         List<Refund> refunds = Refund.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Map<Integer, List<RefundUnit>> ten = RefundUnit.pageNumForTen(refunds);
         renderPDF(options, ten);
+    }
+
+    public static void deleteUnit(Long[] ids) {
+        List<RefundUnit> list = RefundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        Refund refund = list.get(0).refund;
+        for(RefundUnit unit : list) {
+            unit.delete();
+        }
+        if(refund.unitList.size() == 0) {
+            refund.status = Refund.S.Cancel;
+            refund.save();
+        }
+        renderJSON(new Ret(true));
     }
 
 }

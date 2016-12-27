@@ -47,7 +47,7 @@
       <tr>
         <th>制单人</th>
         <td>${refund.creator?.username}</td>
-        <th>仓库交接人<span style="color:red">*</span></th>
+        <th>仓库交接人</th>
         <td>
           <select name="refund.whouseUser.id" class="inline selectize" style="width:120px;">
             <option value=""></option>
@@ -59,8 +59,8 @@
       </tr>
 
       <tr>
-        <th>退货日期</th>
-        <td><input type="date" name="refund.refundDate" value="${refund.refundDate?.date()}" readonly></td>
+        <th>退货日期<span style="color:red">*</span></th>
+        <td><input type="date" name="refund.refundDate" value="${refund.refundDate?.date()}" required></td>
         <th>物流信息</th>
         <td><input type="text" class="input-xxlarge" name="refund.info" value="${refund.info}"></td>
       </tr>
@@ -102,7 +102,6 @@
         <th style="width:85px;">产品条码</th>
         <th style="width:80px;">计划退货数量</th>
         <th style="width:80px;">实际退货数量</th>
-        <th style="width:60px;">包装信息</th>
         <th style="width:100px;">去往仓库</th>
         <th style="width:60px;">运输方式</th>
         <th style="width:45px;">阶段</th>
@@ -110,7 +109,7 @@
         #{list items:units, as:'unit'}
           <tr class="text-center">
             <td>
-              <input type="checkbox" value="${unit.id}">
+              <input type="checkbox" name="ck" value="${unit.id}">
               <input type="hidden" name="dtos[${unit_index-1}].unit.id" value="${unit.id}">
             </td>
             <td>${unit.id}</td>
@@ -126,9 +125,6 @@
                      data-origin="${unit.availableQty}">
               <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.availableQty}">
             </td>
-            <td>
-              <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
-            </td>
             <td>${unit.whouse?.name()}</td>
             <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
             <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
@@ -138,7 +134,7 @@
   </div>
 </div>
 #{/form}
-<input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+<input type="button" class="btn btn-danger" id="deleteBtnByCreate" value="解除"/>
 
 <div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
   <div class="modal-body">

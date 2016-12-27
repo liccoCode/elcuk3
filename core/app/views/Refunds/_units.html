@@ -22,7 +22,7 @@
   <tr class="text-center">
       #{if is_check}
         <td>
-          <input type="checkbox" value="${unit.id}">
+          <input type="checkbox" name="ck" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
         </td>
       #{/if}
