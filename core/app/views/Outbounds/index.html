@@ -52,7 +52,7 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" style="width:200px;" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+        <input type="text" style="width:200px;" name="p.search" placeholder="出库单ID,采购计划ID,SKU" value="${p.search}">
         <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
@@ -87,8 +87,8 @@
           <th width="100px;">出库类型</th>
           <th width="200px;">货代公司</th>
           <th width="120px;">出库日期</th>
-          <th>发货人</th>
-          <th>备注</th>
+          <th width="80px;">发货人</th>
+          <th width="200px;">备注</th>
         </tr>
       #{list items: outbounds, as: 'o'}
         <tr>

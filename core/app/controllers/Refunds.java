@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
@@ -12,6 +13,7 @@ import models.whouse.Refund;
 import models.whouse.RefundUnit;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.modules.pdf.PDF;
@@ -89,7 +91,13 @@ public class Refunds extends Controller {
     }
 
     public static void confirmRefund(List<String> ids) {
-        Refund.confirmRefund(ids);
+        List<Refund> refunds = Refund.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        Refund.validConfirmRefund(refunds);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(new RefundPost());
+        }
+        Refund.confirmRefund(refunds);
         flash.success(SqlSelect.inlineParam(ids) + "退货成功!");
         index(new RefundPost());
     }

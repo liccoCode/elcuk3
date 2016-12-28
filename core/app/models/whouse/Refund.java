@@ -8,6 +8,7 @@ import models.procure.ProcureUnit;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
@@ -197,23 +198,41 @@ public class Refund extends GenericModel {
         return String.format("PTT|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
-    public static void confirmRefund(List<String> ids) {
-        List<Refund> list = Refund.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
-        if(list.size() > 0) {
-            for(Refund refund : list) {
-                refund.status = S.Refund;
-                for(RefundUnit u : refund.unitList) {
-                    ProcureUnit unit = u.unit;
-                    if(refund.type == T.After_Inbound) {
-                        unit.inboundQty -= u.qty;
-                        unit.availableQty -= u.qty;
-                        if(u.qty == unit.attrs.qty) {
-                            unit.stage = ProcureUnit.STAGE.DELIVERY;
-                        }
+    public static void confirmRefund(List<Refund> refunds) {
+        for(Refund refund : refunds) {
+            refund.status = S.Refund;
+            refund.save();
+            for(RefundUnit u : refund.unitList) {
+                ProcureUnit unit = u.unit;
+                if(refund.type == T.After_Inbound) {
+                    unit.attrs.qty -= u.qty;
+                    unit.inboundQty -= u.qty;
+                    unit.availableQty -= u.qty;
+                    if(u.qty == unit.attrs.qty) {
+                        unit.stage = ProcureUnit.STAGE.DELIVERY;
                     }
-                    refund.save();
-                    unit.save();
-                    createStockRecord(u);
+                }
+                unit.save();
+                createStockRecord(u);
+            }
+        }
+    }
+
+    public static void validConfirmRefund(List<Refund> list) {
+        if(list.size() == 0) {
+            Validation.addError("", "无效退货单ID");
+            return;
+        }
+        for(Refund refund : list) {
+            if(refund.status != S.Create) {
+                Validation.addError("", "退货单【" + refund.id + "】状态为【" + refund.status.label() + "】" +
+                        "，请选择状态为【已创建】的托货单！");
+            }
+            for(RefundUnit u : refund.unitList) {
+                ProcureUnit unit = u.unit;
+                if(unit.outbound != null) {
+                    Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
+                            "【" + unit.outbound.id + "】中，请先处理！");
                 }
             }
         }
