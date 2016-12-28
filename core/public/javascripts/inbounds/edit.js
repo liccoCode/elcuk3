@@ -135,8 +135,7 @@ $(() => {
         }
       });
     }
-  }
-  );
+  });
 
   $("input[name='editBoxInfo']").click(function(e) {
     e.stopPropagation();

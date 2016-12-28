@@ -304,7 +304,7 @@ public class InboundUnit extends Model {
             default:
                 throw new FastRuntimeException("不支持的属性类型!");
         }
-        new ERecordBuilder("outboundrecord.update")
+        new ERecordBuilder("inboundrecord.update")
                 .msgArgs(this.id, StringUtils.join(logs, "<br/>"))
                 .fid(this.inbound.id)
                 .save();

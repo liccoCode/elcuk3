@@ -54,7 +54,7 @@
         #{/list}
         </select>
 
-        <select name="p.cooperatorId" class="inline selectize" style="width:120px;">
+        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
@@ -106,13 +106,13 @@
               <input type="checkbox" id="checkbox_all" class="checkall">
             </label>
           </th>
-          <th>采购计划ID</th>
+          <th width="60px;">采购计划ID</th>
           <th>阶段</th>
           <th width="45px;">操作</th>
-          <th width="100px;">Selling</th>
-          <th>Sku<br>产品名称</th>
+          <th width="80px;">Selling</th>
+          <th width="160px;">Sku<br>产品名称</th>
           <th>FBA-ShipmentId</th>
-          <th>去往仓库</th>
+          <th width="60px;">去往仓库</th>
           <th>深圳仓库</th>
           <th>供应商</th>
           <th>采购单</th>
