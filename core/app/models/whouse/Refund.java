@@ -205,6 +205,7 @@ public class Refund extends GenericModel {
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
                 if(refund.type == T.After_Inbound) {
+                    unit.attrs.qty -= u.qty;
                     unit.inboundQty -= u.qty;
                     unit.availableQty -= u.qty;
                     if(u.qty == unit.attrs.qty) {
