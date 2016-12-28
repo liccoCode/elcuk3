@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -18,6 +19,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +47,7 @@ public class Refunds extends Controller {
 
     public static void edit(String id) {
         Refund refund = Refund.findById(id);
+        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("refundrecord.update"), 50));
         render(refund);
     }
 
@@ -65,6 +68,12 @@ public class Refunds extends Controller {
         refund.save();
         flash.success("退货单【" + refund.id + "】更新成功!");
         index(new RefundPost());
+    }
+
+    public static void updateUnit(String id, String value, String attr) {
+        RefundUnit unit = RefundUnit.findById(Long.parseLong(id));
+        unit.updateAttr(attr, value);
+        renderJSON(new Ret());
     }
 
     public static void refreshFbaCartonContentsByIds(String id) {

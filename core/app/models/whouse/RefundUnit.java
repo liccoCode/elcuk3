@@ -2,12 +2,18 @@ package models.whouse;
 
 import com.alibaba.fastjson.JSON;
 import helper.J;
+import helper.Reflects;
+import models.embedded.ERecordBuilder;
 import models.procure.ProcureUnit;
 import models.qc.CheckTaskDTO;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +85,22 @@ public class RefundUnit extends Model {
     public void marshalBoxs() {
         this.mainBoxInfo = J.json(this.mainBox);
         this.lastBoxInfo = J.json(this.lastBox);
+    }
+
+    public void updateAttr(String attr, String value) {
+        List<String> logs = new ArrayList<>();
+        switch(attr) {
+            case "qty":
+                logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                break;
+            default:
+                throw new FastRuntimeException("不支持的属性类型!");
+        }
+        new ERecordBuilder("refundrecord.update")
+                .msgArgs(this.id, StringUtils.join(logs, "<br/>"))
+                .fid(this.refund.id)
+                .save();
+        this.save();
     }
 
 }

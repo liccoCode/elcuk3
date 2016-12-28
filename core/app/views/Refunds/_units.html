@@ -31,11 +31,12 @@
     <td>${unit.unit?.deliveryment?.id}</td>
     <td>${unit.unit?.selling?.sellingId}</td>
     <td>${unit.unit?.product?.sku}</td>
-    <td title="${unit.unit?.product?.abbreviation}">${unit.unit?.product?.abbreviation?.overLong()}</td>
+    <td title="${unit.unit?.product?.abbreviation}">${unit.unit?.product?.abbreviation}</td>
     <td>${unit.unit?.fba?.shipmentId}</td>
     <td>${unit.unit?.selling?.fnSku}</td>
     <td>${unit.planQty}</td>
-    <td><input type="text" style="width:40px;" value="${unit.qty}" #{if !is_check} readonly #{/if}></td>
+    <td><input type="text" style="width:40px;" name="qty" data-origin="${unit.planQty}" data-id="${unit.id}"
+               value="${unit.qty}" #{if !is_check} readonly #{/if}></td>
     <td>
         #{if is_check}
           <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">

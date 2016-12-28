@@ -30,8 +30,10 @@ $(() => {
     });
   });
 
-  $("input[name$='qty']").change(function() {
+  $("input[name='qty']").change(function() {
     let $input = $(this);
+    let id = $(this).data("id");
+    let attr = $input.attr('name');
     let value = $input.val();
     let origin = $input.data('origin');
     if (value > origin) {
@@ -43,6 +45,28 @@ $(() => {
       $(this).focus();
       return false;
     }
+
+    if ($(this).val()) {
+      $.post('/Refunds/updateUnit', {
+        id: id,
+        attr: attr,
+        value: value
+      }, (r) => {
+        if (r) {
+          const msg = attrsFormat[attr];
+          noty({
+            text: '更新' + msg + '成功!',
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    }
+
   });
 
   $("#deleteBtn").click(function(e) {
@@ -107,3 +131,7 @@ $(() => {
   });
 
 });
+
+const attrsFormat = {
+  'qty': "实际退货数量"
+};
