@@ -5,13 +5,15 @@ import helper.Dates;
 import models.whouse.StockObj;
 import models.whouse.StockRecord;
 import models.whouse.Whouse;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,6 +26,7 @@ public class StockRecordPost extends Post<StockRecord> {
     public Date to;
     public Whouse whouse;
     public Long unitId;
+    private static Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
 
 
     public StockRecordPost() {
@@ -39,27 +42,34 @@ public class StockRecordPost extends Post<StockRecord> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("1=1");
+        StringBuilder sbd = new StringBuilder("SELECT s FROM StockRecord s WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
+        Matcher matcher = ID.matcher(this.search);
+        if(matcher.find()) {
+            sbd.append(" AND s.unit.id = ?");
+            params.add(Long.parseLong(StringUtils.trim(this.search)));
+            return new F.T2<>(sbd.toString(), params);
+        }
+
         if(this.whouse != null && this.whouse.id != null) {
-            sbd.append(" AND whouse_id=?");
+            sbd.append(" AND s.whouse_id=?");
             params.add(this.whouse.id);
         }
 
-        if(unitId != null) {
-            sbd.append(" AND unit.id = ? ");
-            params.add(unitId);
-        }
-
         if(this.from != null) {
-            sbd.append(" AND createDate>=?");
+            sbd.append(" AND s.createDate>=?");
             params.add(Dates.morning(this.from));
         }
 
         if(this.to != null) {
-            sbd.append(" AND createDate<=?");
+            sbd.append(" AND s.createDate<=?");
             params.add(Dates.night(this.to));
+        }
+        if(StringUtils.isNotEmpty(this.search)) {
+            sbd.append("AND ( s.unit.sku LIKE ? OR s.unit.fba.shipmentId LIKE ? )");
+            params.add("%" + search + "%");
+            params.add("%" + search + "%");
         }
         return new F.T2<>(sbd.toString(), params);
     }
@@ -69,7 +79,7 @@ public class StockRecordPost extends Post<StockRecord> {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
 
-        String sql = params._1 + " ORDER BY whouse.id, createDate DESC";
+        String sql = params._1 + " ORDER BY s.whouse.id, s.createDate DESC";
         if(this.pagination) {
             return StockRecord.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
         } else {
@@ -79,7 +89,7 @@ public class StockRecordPost extends Post<StockRecord> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return StockRecord.count(params._1, params._2.toArray());
+        return (long) StockRecord.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
