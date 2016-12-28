@@ -90,21 +90,19 @@ $(() => {
   function valid () {
     if ($("input[name='shipmentId']:checked").length > 1) {
       let firstProjectName = $("input[name='shipmentId']:checked").first().attr("project");
-      let firstCooper = $("input[name='shipmentId']:checked").first().attr("cooperName");
       let firstCountry = $("input[name='shipmentId']:checked").first().attr("country");
       let firstShipType = $("input[name='shipmentId']:checked").first().attr("way");
       let firstCompany = $("input[name='shipmentId']:checked").first().attr("company");
       let i = 0;
       $("input[name='shipmentId']:checked").each(function() {
-        if ($(this).attr("project") != firstProjectName || $(this).attr("cooperName") != firstCooper
-        || $(this).attr("country") != firstCountry || $(this).attr("way") != firstShipType
-        || $(this).attr("company") != firstCompany) {
+        if ($(this).attr("project") != firstProjectName || $(this).attr("company") != firstCompany
+        || $(this).attr("country") != firstCountry || $(this).attr("way") != firstShipType) {
           i++;
         }
       });
       if (i > 0) {
         noty({
-          text: '请选择相同【供应商】【项目名称】【运输方式】【货代公司】【去往仓库】的采购单元',
+          text: '请选择相同【项目名称】【运输方式】【货代公司】【去往仓库】的采购单元',
           type: 'error'
         });
         return false;
