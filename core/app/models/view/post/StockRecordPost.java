@@ -42,14 +42,22 @@ public class StockRecordPost extends Post<StockRecord> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT s FROM StockRecord s WHERE 1=1 ");
+        StringBuilder sbd = new StringBuilder("SELECT s FROM StockRecord s ");
+        sbd.append(" LEFT JOIN  s.unit u ");
+        sbd.append(" LEFT JOIN  u.fba f ");
+        sbd.append(" WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
-        Matcher matcher = ID.matcher(this.search);
-        if(matcher.find()) {
-            sbd.append(" AND s.unit.id = ?");
-            params.add(Long.parseLong(StringUtils.trim(this.search)));
-            return new F.T2<>(sbd.toString(), params);
+        if(StringUtils.isNotEmpty(this.search)) {
+            Matcher matcher = ID.matcher(this.search);
+            if(matcher.find()) {
+                sbd.append(" AND s.unit.id = ?");
+                params.add(Long.parseLong(StringUtils.trim(this.search)));
+                return new F.T2<>(sbd.toString(), params);
+            }
+            sbd.append("AND (u.sku LIKE ? OR f.shipmentId LIKE ? )");
+            params.add("%" + search + "%");
+            params.add("%" + search + "%");
         }
 
         if(this.whouse != null && this.whouse.id != null) {
@@ -65,11 +73,6 @@ public class StockRecordPost extends Post<StockRecord> {
         if(this.to != null) {
             sbd.append(" AND s.createDate<=?");
             params.add(Dates.night(this.to));
-        }
-        if(StringUtils.isNotEmpty(this.search)) {
-            sbd.append("AND ( s.unit.sku LIKE ? OR s.unit.fba.shipmentId LIKE ? )");
-            params.add("%" + search + "%");
-            params.add("%" + search + "%");
         }
         return new F.T2<>(sbd.toString(), params);
     }
