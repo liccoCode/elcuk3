@@ -280,7 +280,7 @@ public class Inbound extends GenericModel {
         for(InboundUnit unit : units) {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.status == InboundUnit.S.Check && u.inboundQty != 0) {
-                if(unit.target == null) {
+                if(u.target == null) {
                     Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
                     return;
                 }
