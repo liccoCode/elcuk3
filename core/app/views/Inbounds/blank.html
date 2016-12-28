@@ -128,8 +128,8 @@
             <td></td>
             <td>${unit.fba?.shipmentId}</td>
             <td>${unit.whouse?.name()}</td>
-            <td>${unit.shipType?.label()}</td>
-            <td>${unit.stage?.label()}</td>
+            <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
+            <td style="background-color:${unit.stage?.rgb()}">${unit.stage?.label()}</td>
           </tr>
         #{/list}
     </table>
