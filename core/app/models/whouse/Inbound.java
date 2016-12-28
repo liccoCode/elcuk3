@@ -343,7 +343,7 @@ public class Inbound extends GenericModel {
                 refund.type = Refund.T.After_Receive;
                 refund.projectName = this.projectName;
                 refund.createRefundByInbound(return_units);
-                Refund.confirmRefund(Arrays.asList(refund.id));
+                Refund.confirmRefund(Arrays.asList(refund));
             }
             /**创建尾货单**/
             if(tail_units.size() > 0) {

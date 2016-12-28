@@ -23,24 +23,24 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.dateType" class="inline">
+      <select name="p.status" class="inline">
         <option value="">状态</option>
       #{list items:models.whouse.Refund.S, as:'t'}
-        <option value="${t.name()}">${t.label()}</option>
+        <option value="${t.name()}" #{if t==p.status} selected #{/if}>${t.label()}</option>
       #{/list}
       </select>
 
       <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
         <option value="">供应商</option>
       #{list items:cooperators, as:'cop'}
-        <option value="${cop.id}">${cop.name}</option>
+        <option value="${cop.id}" #{if cop.id==p.cooperatorId} selected #{/if}>${cop.name}</option>
       #{/list}
       </select>
 
-      <select name="p.dateType" class="inline">
-        <option value="">收货类型</option>
+      <select name="p.type" class="inline">
+        <option value="">退货类型</option>
       #{list items:models.whouse.Refund.T, as:'t'}
-        <option value="${t.name()}">${t.label()}</option>
+        <option value="${t.name()}" #{if t==p.type} selected #{/if}>${t.label()}</option>
       #{/list}
       </select>
 
