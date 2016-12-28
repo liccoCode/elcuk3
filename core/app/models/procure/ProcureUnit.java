@@ -2004,6 +2004,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 if(!(unit.stage == STAGE.DONE || unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
                     return "请统一选择阶段为【已交货】或【已入库】、【仓库加工】的采购计划！";
                 }
+                if(unit.outbound != null) {
+                    return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中,请先解除！";
+                }
                 msg = validRefund(unit);
             }
         }
