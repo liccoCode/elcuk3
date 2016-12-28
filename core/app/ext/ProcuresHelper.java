@@ -50,29 +50,31 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(Outbound.S status) {
         switch(status) {
             case Create:
-                return "#E8ECF1";
+                return "#DEFBC2";
             case Outbound:
-            default:
                 return "#3BB873";
+            default:
+                return "#E8ECF1";
         }
     }
 
     public static String rgb(Inbound.S status) {
         switch(status) {
             case Create:
-                return "#E8ECF1";
+                return "#DEFBC2";
             case Handing:
                 return "#FFB37B";
             case End:
-            default:
                 return "#42CFC4";
+            default:
+                return "#E8ECF1";
         }
     }
 
     public static String rgb(InboundUnit.S status) {
         switch(status) {
             case Create:
-                return "#E8ECF1";
+                return "#DEFBC2";
             case Receive:
                 return "#88BEF5";
             case Check:
@@ -82,17 +84,18 @@ public class ProcuresHelper extends JavaExtensions {
             case Abort:
                 return "#FF6464";
             default:
-                return "#5BB75B";
+                return "#E8ECF1";
         }
     }
 
     public static String rgb(Refund.S status) {
         switch(status) {
             case Create:
-                return "#E8ECF1";
+                return "#DEFBC2";
             case Refund:
-            default:
                 return "#FF6464";
+            default:
+                return "#E8ECF1";
         }
     }
 
