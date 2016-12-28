@@ -32,6 +32,7 @@
     <th>实际交货时间</th>
     <th>供应商</th>
     <th>总重量(kg)</th>
+    <th>包装信息</th>
     <th>抵达?</th>
     <th>质检结果</th>
   #{if useCheckbox}
@@ -126,6 +127,9 @@
     <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()}</td>
+    <td>
+      <input type="button" class="btn btn-mini btn-info" value="查看" name="editBoxInfo" data-id="${itm.unit.id}">
+    </td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
     <td>
         #{if itm.unit.result?.name()=='Qualified'}

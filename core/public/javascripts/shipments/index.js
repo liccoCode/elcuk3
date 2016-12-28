@@ -72,7 +72,7 @@ $(() => {
         if (ck.attr("outId") != "") {
           noty({
             text: "运输单【" + ck.val() + "】已经创建出库单【" + ck.attr("outId") + "】！",
-            type:'warning'
+            type: 'warning'
           });
           flag++;
           return false;
@@ -122,13 +122,22 @@ $(() => {
     let tr = $(this).parent("tr");
     let shipment_id = $(this).attr("shipment_id");
     let format_id = shipment_id.replace(/\|/gi, '_');
+    let memo = $(this).attr("memo");
     if ($("#div" + format_id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      tr.after("<tr><td colspan='13'><div id='div" + format_id + "'></div></td></tr>");
+      let html = "<tr><td colspan='13'><div><h4 class='text-info'>Comment</h4>" + memo + "</div><hr>";
+      html += "<div id='div" + format_id + "'></div></td></tr>";
+      tr.after(html);
       $("#div" + format_id).load("/Shipments/showProcureUnitList", {id: shipment_id});
     }
+  });
 
+  $("#shipmentTable").on("click", "input[name='editBoxInfo']", function(e) {
+    e.stopPropagation();
+    $("#fba_carton_contents_modal").modal('show');
+    let id = $(this).data("id");
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id});
   });
 
   $("#states").multiselect({
