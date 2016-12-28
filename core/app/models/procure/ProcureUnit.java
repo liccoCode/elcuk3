@@ -1988,8 +1988,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     msg = validRefund(unit);
                 }
             } else if(type.equals("createInboundBtn")) {
-                if(!(unit.stage == STAGE.DELIVERY || unit.stage == STAGE.IN_STORAGE)) {
-                    return "请统一选择阶段为【采购中】或【已入库】的采购计划！";
+                if(unit.stage != STAGE.DELIVERY) {
+                    return "请统一选择阶段为【采购中】的采购计划！";
                 }
                 return StringUtils.isNotEmpty(validInbound(unit)) ? validInbound(unit) : validRefund(unit);
             } else if(type.equals("createOutboundBtn")) {
