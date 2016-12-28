@@ -3,6 +3,7 @@
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'outbounds/blank.js'/}
+    #{script 'outbounds/index.es6'/}
 #{/set}
 <style>
   .table td{
@@ -94,7 +95,7 @@
         <tr>
           <td><input type="checkbox" name="ids" value="${o.id}" status="${o.status.name()}"></td>
           <td><a href="@{Outbounds.edit(o.id)}">${o.id}</a></td>
-          <td style="cursor:pointer;" data-toggle="toggle" data-target="#ptc_${o_index}">
+          <td style="cursor:pointer;" name="clickTd" data-id="${o.id}">
             <span><i class="icon-reorder"></i></span>
             <span>${o.name}</span>
             <span class="badge badge-info">${o.units.size()}</span>
@@ -109,13 +110,7 @@
           <td>${o.consignor?.username}</td>
           <td title="${o.memo}">${o.memo.overLong()}</td>
         </tr>
-        <tr id="ptc_${o_index}" style="display:none;">
-          <td colspan="13">
-            <div>
-                #{render 'Outbounds/_units.html', units:o.units, is_check: false/}
-            </div>
-          </td>
-        </tr>
+
       #{/list}
         <tr>
           <td colspan="14">
