@@ -79,7 +79,7 @@
         <td>
           <input type="button" class="btn btn-success btn-mini" data-id="${unit.id}" name="editBoxInfo" value="填写">
         </td>
-        <td>${unit.fba?.shipmentId}</td>
+        <td>${unit.unit?.fba?.shipmentId}</td>
         <td>${unit.unit?.whouse?.name()}</td>
         <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
         <td style="background-color:${unit.status.rgb()}">${unit.status?.label()}</td>
@@ -169,7 +169,7 @@
         <td>
           <input type="button" class="btn btn-success btn-mini" data-id="${unit.id}" name="editBoxInfo" value="查看">
         </td>
-        <td>${unit.fba?.shipmentId}</td>
+        <td>${unit.unit?.fba?.shipmentId}</td>
         <td>${unit.unit?.whouse?.name()}</td>
         <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
         <td style="background-color:${unit.status.rgb()}">${unit.status?.label()}</td>
