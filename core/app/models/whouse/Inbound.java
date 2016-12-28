@@ -298,6 +298,8 @@ public class Inbound extends GenericModel {
                     punit.unqualifiedQty += u.unqualifiedQty;
                     punit.availableQty = u.inboundQty;
                 }
+                punit.mainBoxInfo = u.mainBoxInfo;
+                punit.lastBoxInfo = u.lastBoxInfo;
                 punit.currWhouse = u.target;
                 punit.save();
                 this.createStockRecord(u);
