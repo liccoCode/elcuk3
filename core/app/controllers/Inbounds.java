@@ -215,4 +215,10 @@ public class Inbounds extends Controller {
         renderPDF(options, ten);
     }
 
+    public static void showProcureUnitList(String id) {
+        Inbound inbound = Inbound.findById(id);
+        List<InboundUnit> units = inbound.units;
+        render("/Inbounds/_units.html", units);
+    }
+
 }

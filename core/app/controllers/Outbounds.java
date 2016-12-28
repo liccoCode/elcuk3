@@ -92,4 +92,10 @@ public class Outbounds extends Controller {
         renderPDF(options, ten);
     }
 
+    public static void showProcureUnitList(String id) {
+        Outbound outbound = Outbound.findById(id);
+        List<ProcureUnit> units = outbound.units;
+        render("/Outbounds/_units.html", units);
+    }
+
 }
