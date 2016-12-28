@@ -168,7 +168,7 @@ public class Inbound extends GenericModel {
         for(InboundUnit u : units) {
             u.inbound = this;
             u.unit = ProcureUnit.findById(u.unitId);
-            u.planQty = this.type == T.Purchase ? u.unit.qty() : u.unit.availableQty;
+            u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
             if(this.type == T.Machining) {
                 u.status = InboundUnit.S.Receive;
                 u.result = InboundUnit.R.Qualified;

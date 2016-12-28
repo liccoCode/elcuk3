@@ -368,6 +368,9 @@ public class Whouse extends Model {
 
     public static Whouse autoMatching(InboundUnit unit) {
         StringBuffer sql = new StringBuffer("type=?  ");
+        if(unit.unit.shipType == null) {
+            return null;
+        }
         switch(unit.unit.shipType) {
             case AIR:
                 sql.append("AND isAIR=true");
