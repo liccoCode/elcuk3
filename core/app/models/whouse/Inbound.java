@@ -337,6 +337,8 @@ public class Inbound extends GenericModel {
             this.save();
             if(return_units.size() > 0) {
                 Refund refund = new Refund();
+                refund.name = String.format("%s-%s", this.cooperator != null ? this.cooperator.name : "",
+                        this.plan != null ? this.plan.id : "");
                 refund.cooperator = this.cooperator;
                 refund.type = Refund.T.After_Receive;
                 refund.projectName = this.projectName;

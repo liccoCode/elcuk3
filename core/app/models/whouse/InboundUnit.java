@@ -71,18 +71,6 @@ public class InboundUnit extends Model {
     }
 
     /**
-     * fba
-     */
-    @ManyToOne
-    public FBAShipment fba;
-
-    /**
-     * 运输方式
-     */
-    @Enumerated(EnumType.STRING)
-    public Shipment.T type;
-
-    /**
      * 状态
      */
     @Enumerated(EnumType.STRING)
