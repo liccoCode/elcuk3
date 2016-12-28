@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"出库单列表"  /}
+#{set title:"库存列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'outbounds/blank.js'/}
@@ -55,13 +55,8 @@
         <th width="200px;">操作</th>
       </tr>
     #{list items: units, as: 'u'}
-        #{set preUnit: u_isFirst ? null : units.get(u_index - 2)/}
       <tr>
-        <td>
-            #{if u.currWhouse?.name != preUnit?.currWhouse?.name}
-                 ${u.currWhouse?.name}
-            #{/if}
-        </td>
+        <td>${u.currWhouse?.name}</td>
         <td>${u.id}</td>
         <td>${u.selling}</td>
         <td>${u.sku}</td>

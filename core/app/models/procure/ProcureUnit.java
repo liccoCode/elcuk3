@@ -2031,17 +2031,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Map<Integer, List<ProcureUnit>> ten = new HashMap<>();
         int k = 0;
         for(Outbound outbound : outbounds) {
-            int groupNum = 1;
+            int groupNum = 0;
             List<ProcureUnit> iu = ProcureUnit.findUnitOrderByShipment(outbound.id);
-            String pre_shipment_id = iu.get(0).shipItems.get(0).shipment.id;
+            Map<String, Integer> map = new HashMap<>();
             for(ProcureUnit u : iu) {
-                if(!u.shipItems.get(0).shipment.id.equals(pre_shipment_id)) {
-                    groupNum++;
-                    pre_shipment_id = u.shipItems.get(0).shipment.id;
+                if(u.shipItems.size() == 0) {
+                    u.groupNum = 0;
+                } else {
+                    String shipment_id = u.shipItems.get(0).shipment.id;
+                    if(map.containsKey(shipment_id)) {
+                        u.groupNum = map.get(shipment_id);
+                    } else {
+                        groupNum++;
+                        map.put(shipment_id, groupNum);
+                        u.groupNum = groupNum;
+                    }
                 }
-                u.groupNum = groupNum;
             }
-
             int max = iu.size();
             for(int i = 0; i < iu.size(); i += 25) {
                 int num = max - i;
@@ -2053,7 +2059,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public static List<ProcureUnit> findUnitOrderByShipment(String out_id) {
-        String sql = "Select u FROM ShipItem i LEFT JOIN i.unit u WHERE u.outbound.id = ? " +
+        String sql = "Select DISTINCT u FROM ProcureUnit u LEFT JOIN u.shipItems i WHERE u.outbound.id = ? " +
                 "ORDER BY i.shipment.id ";
         return ProcureUnit.find(sql, out_id).fetch();
     }
