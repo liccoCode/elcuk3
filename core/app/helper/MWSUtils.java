@@ -1,11 +1,10 @@
 package helper;
 
 import com.elcuk.jaxb.*;
-import com.elcuk.jaxb.Product;
 import models.market.M;
 import models.market.Selling;
 import models.procure.FBAShipment;
-import models.product.*;
+import models.product.Attach;
 import models.view.post.SellingAmzPost;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -343,7 +342,7 @@ public class MWSUtils {
         String description;
         String partNumber;
         boolean giftWrap;
-        String brand = "EasyAcc";
+        String brand;
         String manufacturer;
         String rbn;
         List<String> bulletPoints;
@@ -369,6 +368,7 @@ public class MWSUtils {
             this.description = selling.aps.title;
             this.partNumber = selling.aps.manufacturerPartNumber;
             this.giftWrap = selling.aps.isGiftWrap;
+            this.brand = selling.aps.brand;
             this.manufacturer = selling.aps.manufacturer;
             this.rbn = selling.aps.rbns.get(0);
             this.bulletPoints = selling.aps.keyFeturess;
@@ -475,7 +475,8 @@ public class MWSUtils {
                 if(this.length != null) {
                     LengthDimension lengthDimension = new LengthDimension();
                     lengthDimension.setUnitOfMeasure(measure);
-                    lengthDimension.setValue(new BigDecimal(this.p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    lengthDimension
+                            .setValue(new BigDecimal(this.p.productLengths).setScale(2, BigDecimal.ROUND_HALF_UP));
                     dimensions.setLength(lengthDimension);
                 }
                 //width
