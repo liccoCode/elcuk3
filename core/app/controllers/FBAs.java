@@ -1,14 +1,13 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Constant;
-import helper.LinkHelper;
-import helper.Webs;
+import helper.*;
 import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.qc.CheckTaskDTO;
+import models.view.Ret;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -77,6 +76,44 @@ public class FBAs extends Controller {
             flash.success("FBA %s 更换成功.", unit.fba.shipmentId);
         }
         Deliveryments.show(unit.deliveryment.id);
+    }
+
+    /**
+     * 创建 FBAInboundShipmentPlan
+     *
+     * @param unitId 采购计划
+     */
+    public static void plan(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        FBAShipment fba = unit.planFBA();
+        renderJSON(J.json(GTs.newMap("fba", fba)
+                .put("message", Webs.V(Validation.errors()))
+                .build()));
+    }
+
+    /**
+     * 确认 FBAInboundShipmentPlan 并关联上采购计划
+     *
+     * @param unitId 采购计划
+     * @param fbaId  FBAShipment
+     * @param result 是否需要这个 FBA
+     */
+    public static void confirm(Long unitId, Long fbaId, boolean result) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        FBAShipment fba = FBAShipment.findById(fbaId);
+        if(result) {
+            //取出旧的 FBA 上已经提交过的 CheckTaskDTO 信息
+            CheckTaskDTO dto = unit.loadCheckTaskDTO();
+            //确认新的 FBA
+            unit.confirmFBA(fba);
+            //提交 FBA 包装信息到新的 FBA
+            if(dto != null) unit.submitFBACartonContent(dto);
+        } else {
+            //向 Amazon 请求删除 FBA(最多三次)
+            fba.removeFBAShipmentRetry(3);
+            fba.delete();
+        }
+        renderJSON(new Ret(!Validation.hasErrors(), Webs.V(Validation.errors())));
     }
 
     /**
