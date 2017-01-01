@@ -102,14 +102,10 @@ public class FBAs extends Controller {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         FBAShipment fba = FBAShipment.findById(fbaId);
         if(result) {
-            //取出旧的 FBA 上已经提交过的 CheckTaskDTO 信息
-            CheckTaskDTO dto = unit.loadCheckTaskDTO();
             //删除旧的 FBA
             unit.fba.removeFBAShipmentRetry(3);
             //确认新的 FBA 并关联上 unit
             unit.confirmFBA(fba);
-            //提交 FBA 包装信息到新的 FBA
-            if(dto != null) unit.submitFBACartonContent(dto);
         } else {
             //向 Amazon 请求删除 FBA(最多三次)
             fba.removeFBAShipmentRetry(3);
