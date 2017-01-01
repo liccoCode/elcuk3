@@ -12,6 +12,7 @@ $ ->
     )
 
   $("#reports").on("click", "#repeatcalculate", (r) ->
+    return false if !confirm("确认重新计算?")
     $.ajax($(@).data('url'), {type: 'POST', data: "" })
     .done((r) ->
       msg = if r.flag is true

@@ -8,7 +8,6 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-
 <ul class="nav nav-tabs" id="below_tab">
   <li class="active">
     <a href="#orderinfo" data-toggle='tab'>订单信息</a>
@@ -138,30 +137,23 @@
           #{/list}
       </table>
     </div>
-
     <div class="label label-info">Order Fees</div>
     <div>
-        #{render './_order_fees.html', fees:ord.fees/}
+        #{render 'Orders/_order_fees.html', fees:ord.fees/}
     </div>
   #{/else}
   </div>
-
   <div class="tab-pane fade" id='invoiceinfo'>
-  #{if ord.market==models.market.M.AMAZON_DE || ord.market==models.market.M.AMAZON_UK  || ord.market==models.market.M
-  .AMAZON_IT || ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_ES}
-    #{render 'Orders/_invoice.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
-  invoice: invoice,records:records,editaddress:editaddress,invoiceformat:invoiceformat/}
+  #{if ord.canBeProvidedInvoice()}
+    #{render 'Orders/_invoice.html', ord: ord, totalamount: totalamount, notaxamount: notaxamount, tax: tax,
+  invoice: invoice, records: records, editaddress: editaddress, invoiceformat: invoiceformat/}
   #{/if}
   </div>
   <div class="tab-pane fade" id='returninfo'>
-  #{if isreturn==1 &&
-  (ord.market==models.market.M.AMAZON_DE || ord.market==models.market.M.AMAZON_UK
-  || ord.market==models.market.M.AMAZON_IT
-  || ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_ES)}
-      #{render 'Orders/_invoice_return.html',ord:ord,totalamount:totalamount,notaxamount:notaxamount,tax:tax,
-  invoice: invoice,records:records,editaddress:editaddress,invoiceformat:invoiceformat,returndate:returndate/}
+  #{if isreturn==1 && ord.canBeProvidedInvoice()}
+      #{render 'Orders/_invoice_return.html',ord: ord, totalamount: totalamount, notaxamount: notaxamount,
+  tax: tax, invoice: invoice, records: records, editaddress: editaddress, invoiceformat: invoiceformat,
+  returndate:returndate/}
     #{/if}
   </div>
-
-
 </div>
