@@ -1,24 +1,34 @@
 $ ->
   $("table").on('click', 'a#replaceUnitFBA', (e) ->
-    $("#fba_carton_contents_modal").data('unit-source', $(@).data('unit-id')).modal('show')
-    $("#sumbitDeployFBAs").data('url', $(@).data("url"))
-    unitIds = [$(@).data('unit-id')]
-    $("#refresh_div").load("/ProcureUnits/fbaCartonContents",
-      unitIds: unitIds, ->
-      $("input[name='chooseType']").change(->
-        radio = $("input[name='chooseType']:checked")
-        id = radio.val()
-        $("#tr_" + id + " input[name$='boxNum']").val(radio.attr("boxNum"))
-        $("#tr_" + id + " input[name$='num']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name$='boxSize']").val(radio.attr("boxSize"))
-        $("#tr_" + id + " input[name$='lastCartonNum']").val(radio.attr("lastCartonNum"))
-        $("#tr_" + id + " input[name$='singleBoxWeight']").val(radio.attr("singleBoxWeight"))
-        $("#tr_" + id + " input[name$='length']").val(radio.attr("boxLength"))
-        $("#tr_" + id + " input[name$='width']").val(radio.attr("boxWidth"))
-        $("#tr_" + id + " input[name$='height']").val(radio.attr("boxHeight"))
-      )
+    $btn = $(@)
+    LoadMask.mask($btn)
+    $.getJSON('FBAs/plan', {unitId: $btn.data('unit-id')}, (r) ->
+      fba = r.fba;
+      if _.isEmpty(fba)
+        noty({
+          text: r.message,
+          type: 'error',
+          timeout: 3000
+        })
+      else
+        result = confirm("请确认 FBA 信息: [ShipmentId: #{r.shipmentId}, CenterId: #{r.centerId}]") # TODO 让用户确认当前 FBA 是否需要采用
+        $.getJSON('FBAs/confirm', {unitId: $btn.data('unit-id'), fbaId: fba.id, result: result}, (r) ->
+          msg = if r.flag
+            {
+              text: '成功确认 FBA!',
+              type: 'success',
+              timeout: 3000
+            }
+          else
+            {
+              text: r.message,
+              type: 'error',
+              timeout: 3000
+            }
+          noty(msg)
+        )
     )
-  ).on("click", "i[name=showFeedsPage]", (e) ->
+    LoadMask.unmask($btn)
   ).on('click', 'a[name=checkFBALabel]', (e) ->
     $('#fba_ship_to_body').html(new FbaShipToBuilder($(@)).buildBody())
     $('#fba_ship_to_modal').modal('show');
@@ -40,12 +50,6 @@ $ ->
           timeout: 3000
         })
     )
-  )
-
-  $("#fba_carton_contents_modal").on('click', '#sumbitDeployFBAs', (e) ->
-    $modal = $("#fba_carton_contents_modal")
-    if $modal.data('unit-source')
-      window.location.replace("/FBAs/changeFBA?procureUnitId=#{$modal.data('unit-source')}&#{$modal.find(":input").serialize()}")
   )
 
   class FbaShipToBuilder

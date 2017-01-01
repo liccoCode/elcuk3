@@ -87,7 +87,7 @@ public class FBAs extends Controller {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         FBAShipment fba = unit.planFBA();
         renderJSON(J.json(GTs.newMap("fba", fba)
-                .put("messages", Webs.V(Validation.errors()))
+                .put("message", Webs.V(Validation.errors()))
                 .build()));
     }
 
