@@ -17,7 +17,7 @@ $ ->
           if r.flag
             if result
               noty({
-                text: '成功确认 FBA!',
+                text: '成功确认 FBA! 即将刷新页面...',
                 type: 'success',
                 timeout: 3000
               })
@@ -29,6 +29,9 @@ $ ->
             })
         )
       LoadMask.unmask()
+      setTimeout(->
+        location.reload()
+      , 2000)
     )
   ).on('click', 'a[name=checkFBALabel]', (e) ->
     $('#fba_ship_to_body').html(new FbaShipToBuilder($(@)).buildBody())
