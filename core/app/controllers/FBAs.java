@@ -90,8 +90,8 @@ public class FBAs extends Controller {
             //确认新的 FBA 并关联上 unit
             unit.confirmFBA(fba);
         } else {
-            //向 Amazon 请求删除 FBA(最多三次)
-            fba.removeFBAShipmentRetry(3);
+            //由于用户会重试多次来得到想要的 FBA(与 FBACenter 相关), 所以这里还是需要删除掉 DB 内的
+            fba.delete();
         }
         renderJSON(new Ret(!Validation.hasErrors(), Webs.V(Validation.errors())));
     }
