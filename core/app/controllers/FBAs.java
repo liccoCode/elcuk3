@@ -69,9 +69,10 @@ public class FBAs extends Controller {
     public static void plan(Long unitId) {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         FBAShipment fba = unit.planFBA();
-        renderJSON(J.json(GTs.newMap("fba", fba)
-                .put("message", Webs.V(Validation.errors()))
-                .build()));
+        renderJSON(J.json(GTs.newMap("fba", GTs.newMap("id", fba.id)
+                .put("shipmentId", fba.shipmentId).put("centerId", fba.centerId)
+                .build()
+        ).put("message", Webs.V(Validation.errors())).build()));
     }
 
     /**
