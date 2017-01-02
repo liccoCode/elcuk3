@@ -62,23 +62,6 @@ public class FBAs extends Controller {
     }
 
     /**
-     * 更换FBA
-     *
-     * @param procureUnitId
-     */
-    public static void changeFBA(Long procureUnitId, List<CheckTaskDTO> dtos) {
-        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
-        unit.fba.removeFBAShipment();
-        unit.postFbaShipment(dtos.get(0));
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-        } else {
-            flash.success("FBA %s 更换成功.", unit.fba.shipmentId);
-        }
-        Deliveryments.show(unit.deliveryment.id);
-    }
-
-    /**
      * 创建 FBAInboundShipmentPlan
      *
      * @param unitId 采购计划
