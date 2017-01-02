@@ -1,9 +1,10 @@
 $ ->
   $("table").on('click', 'a#replaceUnitFBA', (e) ->
+    return if !confirm('确定?')
+    LoadMask.mask()
     $btn = $(@)
-    LoadMask.mask($btn)
-    $.getJSON('FBAs/plan', {unitId: $btn.data('unit-id')}, (r) ->
-      fba = r.fba;
+    $.getJSON('/FBAs/plan', {unitId: $btn.data('unit-id')}, (r) ->
+      fba = r.fba
       if _.isEmpty(fba)
         noty({
           text: r.message,
@@ -11,24 +12,27 @@ $ ->
           timeout: 3000
         })
       else
-        result = confirm("请确认 FBA 信息: [ShipmentId: #{r.shipmentId}, CenterId: #{r.centerId}]") # TODO 让用户确认当前 FBA 是否需要采用
-        $.getJSON('FBAs/confirm', {unitId: $btn.data('unit-id'), fbaId: fba.id, result: result}, (r) ->
-          msg = if r.flag
-            {
-              text: '成功确认 FBA!',
-              type: 'success',
-              timeout: 3000
-            }
+        result = confirm("是否采用? FBA[ShipmentId: #{fba.shipmentId}, CenterId: #{fba.centerId}]")
+        $.getJSON('/FBAs/confirm', {unitId: $btn.data('unit-id'), fbaId: fba.id, result: result}, (r) ->
+          if r.flag
+            if result
+              noty({
+                text: '成功确认 FBA! 即将刷新页面...',
+                type: 'success',
+                timeout: 3000
+              })
           else
-            {
+            noty({
               text: r.message,
               type: 'error',
               timeout: 3000
-            }
-          noty(msg)
+            })
         )
+      LoadMask.unmask()
+      setTimeout(->
+        location.reload()
+      , 2000)
     )
-    LoadMask.unmask($btn)
   ).on('click', 'a[name=checkFBALabel]', (e) ->
     $('#fba_ship_to_body').html(new FbaShipToBuilder($(@)).buildBody())
     $('#fba_ship_to_modal').modal('show');

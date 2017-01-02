@@ -142,6 +142,7 @@ public class FBAShipment extends Model {
     @OneToOne
     public Account account;
 
+    @Expose
     @Column(unique = true, nullable = false, length = 20)
     public String shipmentId;
 
@@ -157,6 +158,7 @@ public class FBAShipment extends Model {
     @OneToOne
     public FBACenter fbaCenter;
 
+    @Expose
     public String centerId;
 
     /**
@@ -186,11 +188,13 @@ public class FBAShipment extends Model {
     @Expose
     public String fbaCartonContents;
 
+    @Expose
     public Date createAt;
 
     /**
      * 关闭/取消 时间
      */
+    @Expose
     public Date closeAt;
 
     @Override

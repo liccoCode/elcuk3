@@ -62,23 +62,6 @@ public class FBAs extends Controller {
     }
 
     /**
-     * 更换FBA
-     *
-     * @param procureUnitId
-     */
-    public static void changeFBA(Long procureUnitId, List<CheckTaskDTO> dtos) {
-        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
-        unit.fba.removeFBAShipment();
-        unit.postFbaShipment(dtos.get(0));
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-        } else {
-            flash.success("FBA %s 更换成功.", unit.fba.shipmentId);
-        }
-        Deliveryments.show(unit.deliveryment.id);
-    }
-
-    /**
      * 创建 FBAInboundShipmentPlan
      *
      * @param unitId 采购计划
@@ -86,9 +69,10 @@ public class FBAs extends Controller {
     public static void plan(Long unitId) {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         FBAShipment fba = unit.planFBA();
-        renderJSON(J.json(GTs.newMap("fba", fba)
-                .put("message", Webs.V(Validation.errors()))
-                .build()));
+        renderJSON(J.json(GTs.newMap("fba", GTs.newMap("id", fba.id)
+                .put("shipmentId", fba.shipmentId).put("centerId", fba.centerId)
+                .build()
+        ).put("message", Webs.V(Validation.errors())).build()));
     }
 
     /**
@@ -102,15 +86,12 @@ public class FBAs extends Controller {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         FBAShipment fba = FBAShipment.findById(fbaId);
         if(result) {
-            //取出旧的 FBA 上已经提交过的 CheckTaskDTO 信息
-            CheckTaskDTO dto = unit.loadCheckTaskDTO();
-            //确认新的 FBA
+            //删除旧的 FBA
+            unit.fba.removeFBAShipmentRetry(3);
+            //确认新的 FBA 并关联上 unit
             unit.confirmFBA(fba);
-            //提交 FBA 包装信息到新的 FBA
-            if(dto != null) unit.submitFBACartonContent(dto);
         } else {
-            //向 Amazon 请求删除 FBA(最多三次)
-            fba.removeFBAShipmentRetry(3);
+            //由于用户会重试多次来得到想要的 FBA(与 FBACenter 相关), 所以这里还是需要删除掉 DB 内的
             fba.delete();
         }
         renderJSON(new Ret(!Validation.hasErrors(), Webs.V(Validation.errors())));
