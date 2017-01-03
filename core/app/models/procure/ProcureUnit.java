@@ -1423,6 +1423,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             try {
                 if(unit.fba != null) {
                     Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+                } else if(unit.selling == null) {
+                    Validation.addError("", String.format("#%s 没有 Selling 无法创建 FBA", unit.id));
                 } else {
                     unit.postFbaShipment(dtos.get(i));
                 }
