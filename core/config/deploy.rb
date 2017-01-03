@@ -1,5 +1,5 @@
 # config valid only for current version of Capistrano
-lock '3.5.0'
+lock '3.6.1'
 
 set :application, 'elcuk2'
 set :repo_url, 'ssh://git@tig.easyacc.com:21022/ea/elcuk2.git'
