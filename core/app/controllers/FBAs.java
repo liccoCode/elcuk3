@@ -1,14 +1,13 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Constant;
-import helper.LinkHelper;
-import helper.Webs;
+import helper.*;
 import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.qc.CheckTaskDTO;
+import models.view.Ret;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -63,20 +62,39 @@ public class FBAs extends Controller {
     }
 
     /**
-     * 更换FBA
+     * 创建 FBAInboundShipmentPlan
      *
-     * @param procureUnitId
+     * @param unitId 采购计划
      */
-    public static void changeFBA(Long procureUnitId, List<CheckTaskDTO> dtos) {
-        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
-        unit.fba.removeFBAShipment();
-        unit.postFbaShipment(dtos.get(0));
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
+    public static void plan(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        FBAShipment fba = unit.planFBA();
+        renderJSON(J.json(GTs.newMap("fba", GTs.newMap("id", fba.id)
+                .put("shipmentId", fba.shipmentId).put("centerId", fba.centerId)
+                .build()
+        ).put("message", Webs.V(Validation.errors())).build()));
+    }
+
+    /**
+     * 确认 FBAInboundShipmentPlan 并关联上采购计划
+     *
+     * @param unitId 采购计划
+     * @param fbaId  FBAShipment
+     * @param result 是否需要这个 FBA
+     */
+    public static void confirm(Long unitId, Long fbaId, boolean result) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        FBAShipment fba = FBAShipment.findById(fbaId);
+        if(result) {
+            //删除旧的 FBA
+            unit.fba.removeFBAShipmentRetry(3);
+            //确认新的 FBA 并关联上 unit
+            unit.confirmFBA(fba);
         } else {
-            flash.success("FBA %s 更换成功.", unit.fba.shipmentId);
+            //由于用户会重试多次来得到想要的 FBA(与 FBACenter 相关), 所以这里还是需要删除掉 DB 内的
+            fba.delete();
         }
-        Deliveryments.show(unit.deliveryment.id);
+        renderJSON(new Ret(!Validation.hasErrors(), Webs.V(Validation.errors())));
     }
 
     /**

@@ -458,11 +458,11 @@ public class MWSUtils {
             dimensions.setHeight(heightDimension);
             /**重量（包材）**/
             WeightUnitOfMeasure wm = WeightUnitOfMeasure.fromValue("KG");
-            WeightDimension weightDimension = new WeightDimension();
+            this.descriptionData.setPackageDimensions(dimensions);
+            PositiveWeightDimension weightDimension = new PositiveWeightDimension();
             weightDimension.setUnitOfMeasure(wm);
             weightDimension.setValue(new BigDecimal(this.p.weight).setScale(2, BigDecimal.ROUND_HALF_UP));
-            dimensions.setWeight(weightDimension);
-            this.descriptionData.setPackageDimensions(dimensions);
+            this.descriptionData.setPackageWeight(weightDimension);
         }
 
         void setDimensions() {
