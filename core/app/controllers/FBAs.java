@@ -201,6 +201,8 @@ public class FBAs extends Controller {
                                    List<Long> boxNumbers) {
         if(pids == null || pids.size() == 0)
             Validation.addError("", "必须选择需要下载的采购计划");
+        if(pids.size() >= 15)
+            Validation.addError("", "最多只能够下载 15 个采购计划的 FBA ZIP 包");
         if(boxNumbers == null || boxNumbers.size() == 0 || pids.size() != boxNumbers.size())
             Validation.addError("", "采购单元箱数填写错误");
         if(Validation.hasErrors()) {
