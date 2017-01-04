@@ -395,9 +395,7 @@ public class FBAShipment extends Model {
             } else {
                 this.state = FBA.update(this, S.DELETED);
                 if(this.state == S.DELETED) {
-                    /**
-                     * 标记删除这个 FBA, 与其有关的采购计划全部清理
-                     */
+                    //标记删除这个 FBA, 与其有关的采购计划全部清理
                     for(ProcureUnit unit : this.units) {
                         unit.fba = null;
                         unit.save();
