@@ -2254,8 +2254,4 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return null;
     }
 
-    public boolean isParent() {
-        return ProcureUnit.find("parent.id = ? ", this.id).fetch().size() > 0;
-    }
-
 }
