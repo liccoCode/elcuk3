@@ -321,7 +321,7 @@ public class Dates {
      * @return
      */
     public static Date getMonthFirst(int month) {
-        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        DateTime dateTime = DateTime.now().withMonthOfYear(month);
         return monthBegin(dateTime.toDate());
     }
 
@@ -331,7 +331,7 @@ public class Dates {
      * @return
      */
     public static Date getMonthLast(int month) {
-        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        DateTime dateTime = DateTime.now().withMonthOfYear(month);
         return monthEnd(dateTime.toDate());
     }
 

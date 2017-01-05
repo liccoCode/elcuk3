@@ -9,7 +9,9 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 不同的 Market place
@@ -1072,5 +1074,9 @@ public enum M {
             default:
                 return null;
         }
+    }
+
+    public static List<M> europeMarkets() {
+        return Arrays.asList(M.AMAZON_DE, M.AMAZON_UK, M.AMAZON_IT, M.AMAZON_FR, M.AMAZON_ES);
     }
 }

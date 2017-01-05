@@ -142,6 +142,7 @@ public class FBAShipment extends Model {
     @OneToOne
     public Account account;
 
+    @Expose
     @Column(unique = true, nullable = false, length = 20)
     public String shipmentId;
 
@@ -157,6 +158,7 @@ public class FBAShipment extends Model {
     @OneToOne
     public FBACenter fbaCenter;
 
+    @Expose
     public String centerId;
 
     /**
@@ -186,11 +188,13 @@ public class FBAShipment extends Model {
     @Expose
     public String fbaCartonContents;
 
+    @Expose
     public Date createAt;
 
     /**
      * 关闭/取消 时间
      */
+    @Expose
     public Date closeAt;
 
     @Override
@@ -391,9 +395,7 @@ public class FBAShipment extends Model {
             } else {
                 this.state = FBA.update(this, S.DELETED);
                 if(this.state == S.DELETED) {
-                    /**
-                     * 标记删除这个 FBA, 与其有关的采购计划全部清理
-                     */
+                    //标记删除这个 FBA, 与其有关的采购计划全部清理
                     for(ProcureUnit unit : this.units) {
                         unit.fba = null;
                         unit.save();
@@ -523,14 +525,6 @@ public class FBAShipment extends Model {
                 feedCountDigest.toString()));
     }
 
-    public FBAShipment doCreate() {
-        this.save();
-        if(this.dto != null) {
-            this.submitFbaInboundCartonContentsFeed();
-        }
-        return this;
-    }
-
     public void submitFbaInboundCartonContentsFeed() {
         Feed feed = new Feed(
                 MWSUtils.fbaInboundCartonContentsXml(this),
@@ -541,7 +535,7 @@ public class FBAShipment extends Model {
         feed.submit(this.submitParams());
     }
 
-    public List<NameValuePair> submitParams() {
+    private List<NameValuePair> submitParams() {
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
         params.add(new BasicNameValuePair("market", this.market().name()));// 向哪一个市场
@@ -567,6 +561,18 @@ public class FBAShipment extends Model {
         if(this.dto != null) {
             this.updateFbaInboundCartonContentsRetry(3); //更新 IntendedBoxContentsSource 为 FEED
             this.submitFbaInboundCartonContentsFeed(); //提交 Feed
+        }
+    }
+
+    public synchronized void removeFBAShipmentRetry(int times) {
+        try {
+            this.removeFBAShipment();
+        } catch(Exception e) {
+            if(times > 0) {
+                this.removeFBAShipment();
+            } else {
+                throw new FastRuntimeException(e.getMessage());
+            }
         }
     }
 }

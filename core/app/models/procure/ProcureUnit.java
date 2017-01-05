@@ -1110,10 +1110,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 通过 ProcureUnit 创建 FBA
      */
     public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
-        FBAShipment fba = null;
-        if(!dto.validedQtys(this.qty())) return fba;
+        if(dto != null && !dto.validedQtys(this.qty())) return null;
+        FBAShipment fba = this.planFBA();
+        this.confirmFBA(fba);
+        this.submitFBACartonContent(dto);
+        return fba;
+    }
+
+    /**
+     * 1. 创建 FBAInboundShipmentPlan
+     *
+     * @return
+     */
+    public FBAShipment planFBA() {
         try {
-            fba = FBA.plan(this.selling.account, this);
+            FBAShipment fba = FBA.plan(this.selling.account, this);
+            return fba.save();
         } catch(FBAInboundServiceMWSException e) {
             String errMsg = e.getMessage();
             if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
@@ -1134,19 +1146,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             return null;
         }
-        try {
-            fba.dto = dto;
-            fba.state = FBA.create(fba);
-            this.fba = fba.doCreate();
-            this.centerId = fba.fbaCenter.centerId;
-            this.addressLine1 = fba.fbaCenter.addressLine1;
-            this.addressLine2 = fba.fbaCenter.addressLine2;
-            this.city = fba.fbaCenter.city;
-            this.name = fba.fbaCenter.name;
-            this.countryCode = fba.fbaCenter.countryCode;
-            this.stateOrProvinceCode = fba.fbaCenter.stateOrProvinceCode;
-            this.postalCode = fba.fbaCenter.postalCode;
+    }
 
+    /**
+     * 2. 确认 FBAInboundShipmentPlan
+     *
+     * @param fba
+     * @return
+     */
+    public FBAShipment confirmFBA(FBAShipment fba) {
+        if(fba == null) return fba;
+        try {
+            fba.state = FBA.create(fba);
+            this.fba = fba.save();
             this.save();
             new ERecordBuilder("shipment.createFBA").msgArgs(this.id, this.sku, this.fba.shipmentId).fid(this.id).save();
         } catch(FBAInboundServiceMWSException e) {
@@ -1156,10 +1168,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return fba;
     }
 
+    /**
+     * 3. 提交 FBAInboundCartonContent 包装信息
+     */
+    public void submitFBACartonContent(CheckTaskDTO dto) {
+        if(this.fba != null && dto != null) {
+            this.fba.dto = dto;
+            this.fba.submitFbaInboundCartonContentsFeed();
+        }
+    }
+
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
-
 
     /**
      * 将 ProcureUnit 添加到/移出 采购单,状态改变
@@ -1610,6 +1631,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             try {
                 if(unit.fba != null) {
                     Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+                } else if(unit.selling == null) {
+                    Validation.addError("", String.format("#%s 没有 Selling 无法创建 FBA", unit.id));
                 } else {
                     unit.postFbaShipment(dtos.get(i));
                 }
@@ -2076,6 +2099,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+<<<<<<< HEAD
      * @param pids
      * @return
      */
@@ -2190,4 +2214,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ids;
     }
 
+    /* 加载出 CheckTaskDTO 对象
+     *
+     * @return
+     */
+    public CheckTaskDTO loadCheckTaskDTO() {
+        if(this.fba != null && StringUtils.isNotBlank(this.fba.fbaCartonContents)) {
+            return J.from(this.fba.fbaCartonContents, CheckTaskDTO.class);
+        }
+        return null;
+    }
 }
