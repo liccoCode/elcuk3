@@ -421,4 +421,11 @@ public class Sellings extends Controller {
         if(!Validation.hasErrors()) flash.success("成功提交请求到 Rockend, 请等待 2~5 分钟后查看执行结果!");
         selling(sellingId);
     }
+
+    public static void findSellingBySkuAndMarket(String sku, String market) {
+        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku + "%", M.valueOf(market)).fetch();
+        List<String> sids = new ArrayList<>();
+        for(Selling s : list) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
+    }
 }

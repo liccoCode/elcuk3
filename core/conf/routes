@@ -82,7 +82,7 @@ GET     /procureunits                                       ProcureUnits.index
 POST    /procureunits                                       ProcureUnits.index
 GET     /procureunits/indexWhouse                           ProcureUnits.indexWhouse
 POST    /procureunits/indexWhouse                           ProcureUnits.indexWhouse
-GET     /sellings/{sid}/procureunit/new/{totalFive}/{day}   ProcureUnits.blank
+GET     /sellings/{sid}/procureunit/new                     ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update

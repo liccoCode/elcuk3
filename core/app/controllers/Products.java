@@ -9,10 +9,12 @@ import models.market.Account;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -24,6 +26,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -435,13 +438,37 @@ public class Products extends Controller {
         renderJSON(J.json(skus));
     }
 
+    public static void sameSkuAndCooper(String sku, Long cooperId) {
+        List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
+        List<String> same_sku = products.stream().map(p -> p.sku).collect(Collectors.toList());
+        Cooperator cooperator = Cooperator.findById(cooperId);
+        List<String> existList = cooperator.cooperItems.stream().map(itm -> itm.product.sku)
+                .collect(Collectors.toList());
+        CollectionUtils.filter(same_sku, o -> {
+            for(String exist_sku : existList) {
+                if(exist_sku.equals(o.toString())) return true;
+            }
+            return true;
+        });
+        renderJSON(J.json(existList));
+    }
+
     public static void findUPC(String sku) {
         Product pro = Product.findById(sku);
         renderJSON(J.json(GTs.MapBuilder.map("upc", pro.upc).put("upcJP", pro.upcJP).build()));
     }
 
-    public static void findProductName(String sku) {
+    public static void findProductName(String sku, Long cooperId) {
         Product pro = Product.findById(sku);
+        if(cooperId != null) {
+            CooperItem item = CooperItem.find("cooperator.id = ? AND sku = ? ", cooperId, sku).first();
+            if(item != null) {
+                renderJSON(J.json(GTs.MapBuilder
+                        .map("name", pro.abbreviation).put("price", item.price.toString())
+                        .put("currency",item.currency.name()).put("period", item.period.toString())
+                        .put("boxSize", item.boxSize.toString()).build()));
+            }
+        }
         renderJSON(J.json(GTs.MapBuilder.map("name", pro.abbreviation).build()));
     }
 

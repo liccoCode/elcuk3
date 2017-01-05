@@ -2,33 +2,31 @@
 #{set title:'ProcureUnit Create' /}
 #{set 'moreScripts'}
     #{script 'procureunits/blank.coffee'/}
+    #{script 'procureunits/blank.es6'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @ProcureUnits.create(), method: 'POST', id: 'new_procureunit'}
-<table class="table table-condensed table-bordered">
-    #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus/}
-  <tr>
-    <td colspan="4">
-        #{if unit.selling != null}
+#{info_row title:'创建采购计划' /}
+<div class="row-fluid">
+#{form @ProcureUnits.create(), method: 'POST', id: 'new_procure_unit'}
+  <table class="table table-bordered">
+      #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus/}
+    <tr>
+      <td colspan="6">
+          #{if unit.selling}
           #{render 'ProcureUnits/_shipments.html'/}
         #{/if}
-    </td>
-  </tr>
-  <tr>
-    <td colspan="4">
-      <button class="btn btn-primary" id="create_unit">创建</button>
-    </td>
-  </tr>
-</table>
-<input type="hidden" id="isNeedApply" name="isNeedApply" value="${isNeedApply}">
-<input type="hidden" id="totalFive" name="totalFive" value="${totalFive}">
-<input type="hidden" id="day" name="day" value="${day}">
-<input type="hidden" id="addressName" value="${models.OperatorConfig.getVal("addressname")}">
-
+      </td>
+    </tr>
+    <tr>
+      <td colspan="6">
+        <button class="btn btn-primary" id="create_unit">创建</button>
+        <input type="button" id="refreshShipmentBtn" title="刷新运输单" class="btn btn-inverse" value="刷新">
+      </td>
+    </tr>
+  </table>
 #{/form}
-
-
+</div>
 
 
