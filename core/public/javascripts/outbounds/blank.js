@@ -69,7 +69,7 @@ $(() => {
     window.open("/Outbounds/printOutboundForm?" + $form.serialize(), "_blank");
   });
 
-  $("input[name='editBoxInfo']").click(function(e) {
+  $("#data_table").on("click", "input[name='editBoxInfo']", function(e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
     let id = $(this).data("id");

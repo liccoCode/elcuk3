@@ -761,6 +761,9 @@ public class ProcureUnits extends Controller {
                 }
             }
         }
+
+        renderArgs.put("logs", ElcukRecord.records(id.toString(), Arrays.asList("procureunit.split"), 50));
+
         render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
     }
 

@@ -66,7 +66,7 @@
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-      <i class="icon-reorder"></i>#{if unit.parent} <i class="icon-retweet" title="拆" style="color:red"></i> #{/if}
+      <i class="icon-reorder"></i>#{if unit.isParent()} <i class="icon-retweet" title="拆" style="color:red"></i>#{/if}<br>
     ${unit.id}
     </td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
@@ -123,7 +123,9 @@
     </td>
     <td>${unit.whouse?.name()}</td>
     <td>${unit.originQty}</td>
-    <td>${unit.attrs.planQty}/${unit.attrs.qty}/${unit.availableQty}</td>
+    <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
+    ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.availableQty}
+    </td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
         <td>${unit.attrs.currency.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
@@ -225,13 +227,15 @@
                   删除
                 </a>
               #{/if}
-            <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
-            #{if unit.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
-              <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">采购分拆</a>
-            #{/if}
-            #{if unit.stage == models.procure.ProcureUnit.STAGE.IN_STORAGE}
-              <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">库存分拆</a>
-            #{/if}
+              #{power.ck "procures.dosplitunit"}
+                <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
+                  #{if unit.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">采购分拆</a>
+                  #{/if}
+                  #{if unit.stage == models.procure.ProcureUnit.STAGE.IN_STORAGE}
+                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">库存分拆</a>
+                  #{/if}
+              #{/power.ck}
           </div>
 
             #{if delivery}
@@ -241,13 +245,6 @@
                         <!-- 交货页面（没有Selling不允许） -->
                         <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
                       #{/if}
-                  #{/power.ck}
-                  #{power.ck "procures.dosplitunit"}
-                    <!-- 分拆采购单元 -->
-                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
-                       rel='tooltip' title='因工厂延期交货而分拆'>
-                      分拆
-                    </a>
                   #{/power.ck}
                 <!-- 确认到货代处 -->
                   #{if unit.selling}
