@@ -130,8 +130,8 @@
           <td><input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
                      value="${unit.id}" whouse="${unit.whouse?.name()}"></td>
           <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-            <i class="icon-reorder"></i>#{if unit.parent}
-            <i class="icon-retweet" title="拆" style="color:red"></i> #{/if}<br>
+            <i class="icon-reorder"></i>
+            #{if unit.isParent()}<i class="icon-retweet" title="拆" style="color:red"></i> #{/if}<br>
           ${unit.id}
           </td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
