@@ -13,7 +13,7 @@
 
 #{info_row title:'采购计划' /}
 <div class="row-fluid">
-  <table class="table table-bordered">
+  <table class="table table-condensed table-bordered">
     <tr>
       <th rowspan="2">汇总</th>
       <th>采购计划数</th>
@@ -25,11 +25,15 @@
       <td>${totalPlanQty}</td>
       <td>${totalQty}</td>
       <td>${totalInboundQty}</td>
-      <td></td>
+      <td>
+        #{list items:map.keySet(), as:'c'}
+          ${c.symbol()} ${map.get(c)}  &nbsp; &nbsp; &nbsp; &nbsp;
+        #{/list}
+      </td>
     </tr>
   </table>
 
-  <table class="table table-bordered">
+  <table class="table table-condensed table-bordered">
     <tr>
       <th>ID</th>
       <th>selling</th>
@@ -64,15 +68,15 @@
       <td>${unit.whouse?.name}</td>
       <td>${unit.cooperator?.name}</td>
       <td>${unit.attrs.price}</td>
-      <td></td>
+      <td>${unit.attrs.currency.symbol()} ${unit.leftAmount().format('#,###.##')}</td>
       <td>${unit.attrs.planQty}</td>
       <td>${unit.attrs.qty}</td>
       <td>${unit.inboundQty}</td>
       <td>${unit.availableQty}</td>
       <td>${unit.currWhouse?.name}</td>
       <td>${unit.result?.label()}</td>
-      <td>${unit.stage?.label()}</td>
-      <td>${unit.shipType?.label()}</td>
+      <td style="background-color:${unit.stage?.rgb()}">${unit.stage?.label()}</td>
+      <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
       <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
       <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
       <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
@@ -87,7 +91,7 @@
 
 #{success_row title:'子采购计划' /}
 <div class="row-fluid">
-  <table class="table table-bordered">
+  <table class="table table-condensed table-bordered">
     <tr>
       <th>#</th>
       <th>selling</th>
@@ -123,15 +127,15 @@
       <td>${u.whouse?.name}</td>
       <td>${u.cooperator?.name}</td>
       <td>${u.attrs.price}</td>
-      <td></td>
+      <td>${u.attrs.currency.symbol()} ${u.leftAmount().format('#,###.##')}</td>
       <td>${u.attrs.planQty}</td>
       <td>${u.attrs.qty}</td>
       <td>${u.inboundQty}</td>
       <td>${u.availableQty}</td>
       <td>${u.currWhouse?.name}</td>
       <td>${u.result?.label()}</td>
-      <td>${u.stage?.label()}</td>
-      <td>${u.shipType?.label()}</td>
+      <td style="background-color:${u.stage?.rgb()}">${u.stage?.label()}</td>
+      <td style="color:${u.shipType?.rgb()}">${u.shipType?.label()}</td>
       <td>#{time_tooltip time:u.attrs.planDeliveryDate/}</td>
       <td>#{time_tooltip time:u.attrs.planShipDate/}</td>
       <td>#{time_tooltip time:u.attrs.deliveryDate/}</td>

@@ -99,14 +99,12 @@
   </div>
 </div>
 <input type="hidden" id="cooperId" value="${unit.cooperator?.id}">
-
     #{success_row title:'子采购计划'/}
-
 <div class="row-fluid">
   <div class="span12">
     <form action="@{ProcureUnits.doSplitUnit(unit.id)}" method="POST" id="splitUnitForm">
         #{authenticityToken /}
-      <table class="table table-bordered">
+      <table class="table ta table-bordered" >
           #{include 'ProcureUnits/_splitOnSelling.html'/}
         <tr>
           <td colspan="6">

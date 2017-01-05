@@ -507,6 +507,29 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @OrderBy("creatat DESC")
     public List<CheckTask> taskList;
 
+    public enum T {
+        ProcureSplit {
+            @Override
+            public String label() {
+                return "采购分拆";
+            }
+        },
+        StockSplit {
+            @Override
+            public String label() {
+                return "库存分拆";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 分拆类型
+     */
+    @Enumerated(EnumType.STRING)
+    public T type;
+
     /**
      * 质检结果
      */
@@ -727,7 +750,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.product = unit.product;
         newUnit.sku = unit.product.sku;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-
+        newUnit.type = T.ProcureSplit;
         if(unit.selling == null) {
             //手动单拆分时将 拆分的采购计划 归属到 此采购计划 的采购单身上
         } else {
@@ -818,11 +841,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.price = unit.attrs.price;
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
-        if(StringUtils.isNotEmpty(unit.selling.sellingId)) {
-            newUnit.selling = Selling.findById(unit.selling.sellingId);
-            newUnit.sid = unit.selling.sellingId;
+        if(unit.selling != null) {
+            newUnit.selling = unit.selling;
+            newUnit.sid = unit.sid;
         }
-
+        newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
@@ -1282,7 +1305,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public int qty() {
-        if(this.availableQty > 0) return this.availableQty;
+        if(this.attrs.qty != null) return this.attrs.qty;
+        return this.attrs.planQty;
+    }
+
+    public int qtyForFba() {
+        if(this.availableQty != 0) return this.availableQty;
         if(this.attrs.qty != null) return this.attrs.qty;
         return this.attrs.planQty;
     }
@@ -2099,7 +2127,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-<<<<<<< HEAD
+     * <<<<<<< HEAD
+     *
      * @param pids
      * @return
      */

@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.*;
+import helper.Currency;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
@@ -741,12 +742,26 @@ public class ProcureUnits extends Controller {
         int totalPlanQty = unit.attrs.planQty == null ? 0 : unit.attrs.planQty;
         int totalQty = unit.attrs.qty == null ? 0 : unit.attrs.qty;
         int totalInboundQty = unit.inboundQty;
+        float totalAmount = unit.appliedAmount();
+        Map<Currency, Float> map = new HashMap<>();
+        map.put(unit.attrs.currency, totalAmount);
+
         for(ProcureUnit child : child_units) {
-            totalPlanQty += child.attrs.planQty == null ? 0 : child.attrs.planQty;
-            totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
-            totalInboundQty += child.inboundQty;
+            if(child.stage == ProcureUnit.STAGE.DELIVERY) {
+                totalPlanQty += child.attrs.planQty == null ? 0 : child.attrs.planQty;
+                totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
+                totalInboundQty += child.inboundQty;
+            }
+            if(child.type != null && child.type == ProcureUnit.T.ProcureSplit) {
+                if(map.containsKey(child.attrs.currency)) {
+                    float current = map.get(child.attrs.currency);
+                    map.put(child.attrs.currency, current + child.appliedAmount());
+                } else {
+                    map.put(child.attrs.currency, child.appliedAmount());
+                }
+            }
         }
-        render(child_units, unit, totalPlanQty, totalQty, totalInboundQty);
+        render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
     }
 
 }
