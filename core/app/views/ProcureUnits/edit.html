@@ -2,7 +2,13 @@
 #{set title:'ProcureUnit #' + unit.id + ' Edit' /}
 #{set 'moreScripts'}
     #{script 'procureunits/blank.coffee'/}
+    #{script 'procureunits/blank.es6'/}
 #{/set}
+<style>
+  .table td, .table th{
+    vertical-align:middle;
+  }
+</style>
 
 #{errorMsgs /}
 #{flash_alert/}
@@ -17,10 +23,10 @@
 
 <div class="row-fluid">
   <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
-    <table class="table table-condensed table-bordered">
+    <table class="table table-bordered">
     #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
       <tr>
-        <td colspan="4">
+        <td colspan="6">
         #{render 'ProcureUnits/_shipments.html'/}
         </td>
       </tr>

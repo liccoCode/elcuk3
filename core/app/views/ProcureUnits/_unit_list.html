@@ -8,14 +8,15 @@
       </label>
     </th>
   #{/if}
-    <th width="60px;">#</th>
-    <th>Selling</th>
+    <th width="40px;">#</th>
+    <th width="40px;">阶段</th>
+    <th width="80px;">Selling</th>
     <th>Sku</th>
     <th>FBA-ShipmentId</th>
-    <th>采购单</th>
-    <th>仓库</th>
-    <th>供应商</th>
-    <th>采购数量</th>
+    <th>采购单<br>供应商</th>
+    <th>去往仓库</th>
+    <th width="60px;">初始计划数</th>
+    <th width="100px;">数量<br>(计划/交货/入库)</th>
   #{ifnot deliveryplan}
     <th>单价</th>
     <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
@@ -25,16 +26,13 @@
   #{/ifnot}
     <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="auto">FnSku</th>
     <th>运输方式</th>
-    <th>预计交货时间</th>
-    <th>预计运输时间</th>
+    <th>当前仓库</th>
+    <th width="140px;">预计交货时间<br>预计运输时间<br></th>
     <th>实际交货时间</th>
-    <th>阶段</th>
-    <th>抵达货代</th>
-    <th>是否核对</th>
-    <th>是否出库</th>
-    <th>是否发货</th>
-    <th>质检信息</th>
-    <th>创建时间</th>
+    <th>是否核准</th>
+    <th>质检结果</th>
+    <th>项目名称</th>
+    <th width="70px;">创建人/<br>创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
@@ -68,7 +66,10 @@
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-      <i class="icon-reorder"></i>${unit.id}</td>
+      <i class="icon-reorder"></i>#{if unit.parent} <i class="icon-retweet" title="拆" style="color:red"></i> #{/if}
+    ${unit.id}
+    </td>
+    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td class="selling_id">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
@@ -118,10 +119,11 @@
         #{if unit.deliveryment}
           <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
         #{/if}
+      <br>${unit.cooperator?.name}
     </td>
     <td>${unit.whouse?.name()}</td>
-    <td>${unit.cooperator?.name}</td>
-    <td>${unit.attrs.planQty}</td>
+    <td>${unit.originQty}</td>
+    <td>${unit.attrs.planQty}/${unit.attrs.qty}/${unit.availableQty}</td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
         <td>${unit.attrs.currency.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
@@ -132,12 +134,8 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid, true)}" target="_blank" rel="tooltip" title="增加了 SKU 信息">
-            <i class="icon-download-alt"></i> New
-          </a>
-          <br/>
           <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank">
-            <i class="icon-download-alt"></i> Old
+            <i class="icon-download-alt"></i> 下载
           </a>
         #{/if}
         #{elseif unit.selling != null}
@@ -147,21 +145,16 @@
         #{/elseif}
     </td>
     <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
-    <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
-    <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
-    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
-    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-    <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
-    <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
-    <td>${unit.isOut?.label()}</td>
-    <td>${unit.isship()}</td>
+    <td>${unit.currWhouse?.name}</td>
     <td>
-        #{set taskLink: unit.fetchCheckTaskLink()/}
-        #{if taskLink}
-          <a href="${taskLink}" target="_blank">查看</a>
-        #{/if}
+      预计交货:#{time_tooltip time:unit.attrs.planDeliveryDate/}<br>
+      预计运输:#{time_tooltip time:unit.attrs.planShipDate/}<br>
     </td>
-    <td>#{time_tooltip time:unit.createDate/}</td>
+    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+    <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
+    <td>${unit.result?.label()}</td>
+    <td>${unit.projectName}</td>
+    <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate /}</td>
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
@@ -232,6 +225,13 @@
                   删除
                 </a>
               #{/if}
+            <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
+            #{if unit.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+              <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">采购分拆</a>
+            #{/if}
+            #{if unit.stage == models.procure.ProcureUnit.STAGE.IN_STORAGE}
+              <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">库存分拆</a>
+            #{/if}
           </div>
 
             #{if delivery}
@@ -263,7 +263,7 @@
                     #{power.ck 'fbas.update'}
                       <div class="btn-toolbar">
                         <a href="javascript:void(0)" class="btn btn-small btn-warning" id="replaceUnitFBA"
-                           data-unit-id="${unit.id}" title="由于FBA过期或者需要更换">更换 ${unit.fba?.shipmentId}
+                           data-unit-id="${unit.id}">更换 ${unit.fba?.shipmentId}
                         </a>
                       </div>
                     #{/power.ck}

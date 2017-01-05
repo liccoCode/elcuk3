@@ -2,7 +2,6 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Constant;
-import helper.HTTP;
 import helper.Webs;
 import models.ReportRecord;
 import models.procure.Cooperator;
@@ -56,9 +55,9 @@ public class ReportDownloads extends Controller {
      */
     public static void repeatCalculate(Long id) {
         ReportRecord record = ReportRecord.findById(id);
+        notFoundIfNull(record);
         try {
-            HTTP.get(String.format("%s/sku_month_profit_repeat?year=%s&month=%s",
-                    System.getenv(Constant.ROCKEND_HOST), record.year, record.month));
+            record.recalculate();
             renderJSON(new Ret(true, String.valueOf("重新计算请求成功,请稍候!")));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -79,6 +78,7 @@ public class ReportDownloads extends Controller {
 
     /**
      * 采购报表
+     *
      * @deprecated
      */
     @Check("report.procurereports")

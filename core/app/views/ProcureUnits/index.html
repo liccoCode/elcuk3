@@ -5,6 +5,11 @@
     #{script 'procureunits/index.coffee'/}
     #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 #{errorMsgs /}
 #{flash_alert /}
 
@@ -69,7 +74,7 @@
         #{/list}
         </select>
 
-        <select name="p.cooperatorId" class="inline selectize">
+        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>

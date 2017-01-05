@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.*;
+import helper.Currency;
 import models.ElcukRecord;
 import models.User;
 import models.activiti.ActivitiProcess;
@@ -150,7 +151,7 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void blank(String sid, float day, int totalFive) {
+    public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
@@ -158,7 +159,7 @@ public class ProcureUnits extends Controller {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
         }
-        render(unit, whouses, day, totalFive);
+        render(unit, whouses);
     }
 
 
@@ -369,6 +370,7 @@ public class ProcureUnits extends Controller {
      */
     public static void splitUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        unit.setPeriod();
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
         newUnit.attrs.qty = 0;
@@ -376,7 +378,7 @@ public class ProcureUnits extends Controller {
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         render(unit, newUnit);
     }
 
@@ -391,7 +393,12 @@ public class ProcureUnits extends Controller {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
-        ProcureUnit nUnit = unit.split(newUnit);
+        ProcureUnit nUnit;
+        if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
+            nUnit = unit.split(newUnit);
+        } else {
+            nUnit = unit.stockSplit(newUnit);
+        }
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findAll();
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
@@ -720,6 +727,41 @@ public class ProcureUnits extends Controller {
     public static void refreshFbaCartonContentsByIds(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         render("/Inbounds/boxInfo.html", unit);
+    }
+
+    public static void detail(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        List<ProcureUnit> child_units = new ArrayList<>();
+        if(unit.parent == null) {
+            child_units = ProcureUnit.find("parent.id = ? ", id).fetch();
+        } else {
+            Long parentId = unit.parent.id;
+            child_units = ProcureUnit.find("parent.id = ? ", parentId).fetch();
+            unit = ProcureUnit.findById(parentId);
+        }
+        int totalPlanQty = unit.attrs.planQty == null ? 0 : unit.attrs.planQty;
+        int totalQty = unit.attrs.qty == null ? 0 : unit.attrs.qty;
+        int totalInboundQty = unit.inboundQty;
+        float totalAmount = unit.appliedAmount();
+        Map<Currency, Float> map = new HashMap<>();
+        map.put(unit.attrs.currency, totalAmount);
+
+        for(ProcureUnit child : child_units) {
+            if(child.stage == ProcureUnit.STAGE.DELIVERY) {
+                totalPlanQty += child.attrs.planQty == null ? 0 : child.attrs.planQty;
+                totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
+                totalInboundQty += child.inboundQty;
+            }
+            if(child.type != null && child.type == ProcureUnit.T.ProcureSplit) {
+                if(map.containsKey(child.attrs.currency)) {
+                    float current = map.get(child.attrs.currency);
+                    map.put(child.attrs.currency, current + child.appliedAmount());
+                } else {
+                    map.put(child.attrs.currency, child.appliedAmount());
+                }
+            }
+        }
+        render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
     }
 
 }
