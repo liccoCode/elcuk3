@@ -123,7 +123,9 @@
     </td>
     <td>${unit.whouse?.name()}</td>
     <td>${unit.originQty}</td>
-    <td>${unit.attrs.planQty}/${unit.attrs.qty}/${unit.availableQty}</td>
+    <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
+    ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.availableQty}
+    </td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
         <td>${unit.attrs.currency.symbol()} ${unit.totalAmount().format('#,###.##')}</td>

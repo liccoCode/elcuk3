@@ -171,7 +171,9 @@
           <td>${unit.cooperator?.name}</td>
           <td><a href="@{Deliveryments.show(unit.deliveryment?.id)}">${unit.deliveryment?.id}</a></td>
           <td>${unit.deliverplan?.id}</td>
-          <td>${unit.attrs.planQty} / ${unit.attrs.qty} / ${unit.inboundQty}</td>
+          <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
+          ${unit.attrs.planQty} / ${unit.attrs.qty} / ${unit.inboundQty}
+          </td>
           <td>
               #{if unit.selling?.fnSku}
                 <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank">
