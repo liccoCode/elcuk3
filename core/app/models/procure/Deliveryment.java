@@ -478,4 +478,9 @@ public class Deliveryment extends GenericModel {
         }
         return cooperItems;
     }
+
+    public List<ProcureUnit> applyUnit() {
+        return ProcureUnit.find("deliveryment.id=? AND type=?", this.id, ProcureUnit.T.ProcureSplit).fetch();
+
+    }
 }

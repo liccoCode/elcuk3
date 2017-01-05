@@ -26,9 +26,9 @@
       <td>${totalQty}</td>
       <td>${totalInboundQty}</td>
       <td>
-        #{list items:map.keySet(), as:'c'}
-          ${c.symbol()} ${map.get(c)}  &nbsp; &nbsp; &nbsp; &nbsp;
-        #{/list}
+      #{list items:map.keySet(), as:'c'}
+      ${c.symbol()} ${map.get(c)}  &nbsp; &nbsp; &nbsp; &nbsp;
+      #{/list}
       </td>
     </tr>
   </table>
@@ -72,7 +72,14 @@
       <td>${unit.inboundQty}</td>
       <td>${unit.availableQty}</td>
       <td>${unit.currWhouse?.name}</td>
-      <td>${unit.result?.label()}</td>
+      <td>
+      #{if unit.result?.name()=='Qualified'}
+        <i style="color:green" class="icon-ok"></i>
+      #{/if}
+      #{elseif unit.result?.name()=='Unqualified'}
+        <i style="color:red" class="icon-remove"></i>
+      #{/elseif}
+      </td>
       <td style="background-color:${unit.stage?.rgb()}">${unit.stage?.label()}</td>
       <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
       <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
@@ -128,7 +135,14 @@
       <td>${u.inboundQty}</td>
       <td>${u.availableQty}</td>
       <td>${u.currWhouse?.name}</td>
-      <td>${u.result?.label()}</td>
+      <td>
+          #{if u.result?.name()=='Qualified'}
+            <i style="color:green" class="icon-ok"></i>
+          #{/if}
+          #{elseif u.result?.name()=='Unqualified'}
+            <i style="color:red" class="icon-remove"></i>
+          #{/elseif}
+      </td>
       <td style="background-color:${u.stage?.rgb()}">${u.stage?.label()}</td>
       <td style="color:${u.shipType?.rgb()}">${u.shipType?.label()}</td>
       <td>

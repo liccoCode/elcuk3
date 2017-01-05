@@ -26,7 +26,7 @@ public class ProcuresHelper extends JavaExtensions {
             case PLAN:
                 return "#E8ECF1";
             case DELIVERY:
-                return "#0C81F6";
+                return "#40B0F9";
             case DONE:
                 return "#88BEF5";
             case IN_STORAGE:
@@ -50,7 +50,7 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(ProcureUnit.T type) {
         switch(type) {
             case ProcureSplit:
-                return "#0C81F6";
+                return "#40B0F9";
             case StockSplit:
                 return "#FBBC05";
             default:
