@@ -47,6 +47,17 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String rgb(ProcureUnit.T type) {
+        switch(type) {
+            case ProcureSplit:
+                return "#0C81F6";
+            case StockSplit:
+                return "#FBBC05";
+            default:
+                return "#E8ECF1";
+        }
+    }
+
     public static String rgb(Outbound.S status) {
         switch(status) {
             case Create:

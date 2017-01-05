@@ -228,9 +228,9 @@ public class Inbound extends GenericModel {
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
                 if(punit.stage != ProcureUnit.STAGE.IN_STORAGE) {
+                    punit.attrs.deliveryDate = new Date();
                     punit.stage = ProcureUnit.STAGE.DONE;
                 }
-                punit.attrs.deliveryDate = new Date();
                 punit.save();
             }
         }
