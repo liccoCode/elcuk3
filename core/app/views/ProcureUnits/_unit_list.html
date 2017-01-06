@@ -127,9 +127,9 @@
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.availableQty}
     </td>
       #{ifnot deliveryplan}
-        <td>${unit.attrs.currency.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
-        <td>${unit.attrs.currency.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
-        <td>${unit.attrs.currency.symbol()} ${unit.leftAmount().format('#,###.##')}</td>
+        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
+        <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
+        <td>${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}</td>
       #{/ifnot}
     <td>
       <!-- FnSku 下载 Label -->
