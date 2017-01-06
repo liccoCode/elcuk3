@@ -47,7 +47,7 @@ public class OutboundPost extends Post<Outbound> {
                 return new F.T2<>(sbd.toString(), params);
             }
             if(isNumForSearch() != null) {
-                sbd.append(" AND o.unit.id = ? ");
+                sbd.append(" AND u.id = ? ");
                 params.add(isNumForSearch());
                 return new F.T2<>(sbd.toString(), params);
             }
