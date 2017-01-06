@@ -22,12 +22,11 @@
 #{set copers:product.cooperators() /}
   <th><i class="icon-asterisk" style="color:red"></i>采购数量/库存数量</th>
   <td colspan="3">
-    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty"
-           value="${unit.attrs.planQty}" required>
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty" required
+           value="${unit.attrs.planQty}" data-origin="${unit.attrs.planQty}"  #{if unit.isParent()} readonly#{/if}>
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isParent()} readonly#{/if}>
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-
     <select name="unit.cooperator.id" native='true'>
       <option>供应商</option>
     #{list items:copers, as:'c'}
@@ -44,17 +43,19 @@
   </td>
 </tr>
 
-<tr style="display:none;" id="">
+#{if unit.parent}
+<tr style="display:none;background-color:#F2DEDE;" id="return_tr">
   <th>差数是否退回</th>
   <td colspan="5">
     <label class="radio inline">
-      <input type="radio" value="">退回到父计划
+      <input type="radio" value="true" name="unit.isReturn" checked>退回到父计划
     </label>
     <label class="radio inline">
-      <input type="radio" value="">否
+      <input type="radio" value="false" name="unit.isReturn">否
     </label>
   </td>
 </tr>
+#{/if}
 
 <tr>
   <th><i class="icon-asterisk" style="color:red"></i>预计交货日期</th>
@@ -124,6 +125,7 @@
   #{list items: unit.relateShipment()}
     <div>
       <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      <input type="hidden" id="shipmentId" value="${_.id}">
       <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
       <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
     </div>

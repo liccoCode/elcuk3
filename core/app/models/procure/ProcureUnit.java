@@ -606,6 +606,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean isb2b;
 
     /**
+     * 差数是否退回
+     */
+    @Transient
+    public boolean isReturn;
+
+    /**
      * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)
      * <p>
      * 1. 由于历史原因部分采购计划需要挪市场(DE=>UK),但是此时采购计划已经不允许修改了,采购就再创建一条新的采购计划
@@ -982,8 +988,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
 
         List<String> logs = new ArrayList<>();
-        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.PROCESSING).contains(this.stage)) {
             logs.addAll(this.beforeDoneUpdate(unit));
+            if(this.parent != null) {
+                ProcureUnit it = ProcureUnit.findById(this.parent.id);
+
+
+            }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
@@ -2252,6 +2263,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return J.from(this.fba.fbaCartonContents, CheckTaskDTO.class);
         }
         return null;
+    }
+
+    public boolean isParent() {
+        return ProcureUnit.find("parent.id =?", this.id).fetch().size() > 0;
     }
 
 }
