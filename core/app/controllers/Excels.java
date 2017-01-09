@@ -224,7 +224,7 @@ public class Excels extends Controller {
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
         } else {
-            renderText("正在计算中, 请稍后再来查看 :)");
+            renderText(Webs.V(Validation.errors()));
         }
     }
 
