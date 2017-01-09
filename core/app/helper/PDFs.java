@@ -5,12 +5,10 @@ import org.allcolor.yahp.cl.converter.CHtmlToPdfFlyingSaucerTransformer;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.exceptions.TemplateNotFoundException;
 import play.modules.pdf.PDF;
 import play.modules.pdf.PDF.PDFDocument;
 import play.modules.pdf.RenderPDFTemplate;
 import play.mvc.Http;
-import play.templates.Template;
 import play.templates.TemplateLoader;
 
 import java.io.*;
@@ -73,10 +71,8 @@ public class PDFs {
             new CHtmlToPdfFlyingSaucerTransformer().transform(
                     new ByteArrayInputStream(content.getBytes("UTF-8")), "", pageSize,
                     new ArrayList(), new HashMap(), out);
-        } catch(UnsupportedEncodingException | IHtmlToPdfTransformer.CConvertException e) {
-            e.printStackTrace();
-        } catch(FileNotFoundException e) {
-            e.printStackTrace();
+        } catch(UnsupportedEncodingException | IHtmlToPdfTransformer.CConvertException | FileNotFoundException e) {
+            Logger.error(Webs.S(e));
         }
     }
 

@@ -555,12 +555,12 @@ public class AmazonListingReview extends GenericModel {
 
     public static Date parseDate(String reviewdate) {
         Date reviewDate = new Date();
-        if(reviewdate != null && reviewdate.length() > 0 && reviewdate.indexOf(",") != -1) {
+        if(reviewdate != null && reviewdate.length() > 0 && reviewdate.contains(",")) {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.ENGLISH);
             try {
                 reviewDate = sdf.parse(reviewdate);
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         } else {
             if(reviewdate != null && reviewdate.length() > 0) {

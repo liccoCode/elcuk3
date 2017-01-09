@@ -4,6 +4,7 @@ import models.market.M;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
+import play.Logger;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -37,7 +38,7 @@ public class Dates {
         try {
             df = DatatypeFactory.newInstance();
         } catch(DatatypeConfigurationException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
     }
 

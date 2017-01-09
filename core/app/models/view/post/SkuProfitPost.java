@@ -11,7 +11,6 @@ import models.view.report.SkuProfit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.libs.F;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -115,8 +114,7 @@ public class SkuProfitPost {
 
             return skuProfit;
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.info("sku_profit.esProfit:::" + e.toString());
+            Logger.error(Webs.S(e));
         }
         return initProfit(market, pro_sku, sellingId);
     }

@@ -1,8 +1,10 @@
 package jobs;
 
+import helper.Webs;
 import models.finance.SaleFee;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.cache.Cache;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -55,12 +57,12 @@ public class AmazonFinanceCheckJob {
             }
             psmt.executeBatch();
         } catch(SQLException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         } finally {
             try {
                 if(psmt != null) psmt.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         }
     }

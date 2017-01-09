@@ -219,7 +219,7 @@ public class Webs {
                 throw new FastRuntimeException("Unsupport dot format on FormatToPrice. [" + dot + "]");
             }
         } catch(ParseException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
             throw new FastRuntimeException(e);
         }
     }

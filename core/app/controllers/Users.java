@@ -13,6 +13,7 @@ import models.view.post.UserPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import play.Logger;
 import play.data.validation.Validation;
 import play.libs.Crypto;
 import play.mvc.Before;
@@ -124,7 +125,7 @@ public class Users extends Controller {
                 user.update();
             }
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
             Validation.addError("", Webs.E(e));
             render("Users/home.html", user);
         }
