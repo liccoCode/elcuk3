@@ -29,6 +29,31 @@ $(() => {
     }
   });
 
+  //快递同步预计到达时间
+
+  $("[name='unit.attrs.planShipDate']").change(() => {
+    let shipType = $("[name='unit.shipType']:checked").val();
+    if (shipType != 'EXPRESS') {
+      return;
+    }
+    let planShipDate = $("[name='unit.attrs.planShipDate']").val();
+    let warehouseid = $("[name='unit.whouse.id']").val()
+    $.get('/shipments/planArriveDate', {
+      planShipDate: planShipDate,
+      shipType: shipType,
+      warehouseid
+    }, function(r) {
+      $("[name='unit.attrs.planArrivDate']").val(r['arrivedate']);
+      showDay();
+    });
+  });
+
+  $("#planQty").change(function() {
+    if ($(this).val() < $(this).data("origin")) {
+      $("#return_tr").show();
+    }
+  });
+
   $('#box_num').change(function(e) {
     e.preventDefault()
     let coperId = $("select[name='unit.cooperator.id']").val();
@@ -74,6 +99,14 @@ $(() => {
     }, function(html) {
       shipment.html(html);
       LoadMask.unmask();
+      if ($("#shipmentId").val()) {
+        $("#shipments input[type='radio']").each(function() {
+          if ($(this).val() == $("#shipmentId").val()) {
+            $(this).prop("checked", true);
+            showTrColor();
+          }
+        });
+      }
     });
 
     if (shipType != 'EXPRESS') {
@@ -117,8 +150,19 @@ $(() => {
       $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin']);
       $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end']);
       LoadMask.unmask();
+      showTrColor();
     });
   });
+
+  function showTrColor () {
+    $("#shipments input[type='radio']").each(function() {
+      if ($(this).prop("checked")) {
+        $(this).parent("td").parent("tr").attr("style", "background-color:#F2DEDE;");
+      } else {
+        $(this).parent("td").parent("tr").attr("style", "");
+      }
+    });
+  }
 
   $("#create_unit").click(function(e) {
     e.preventDefault();
