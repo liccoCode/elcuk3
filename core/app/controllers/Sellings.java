@@ -423,7 +423,7 @@ public class Sellings extends Controller {
     }
 
     public static void findSellingBySkuAndMarket(String sku, String market) {
-        List<Selling> list = Selling.find("sellingId like ? AND market=?", sku + "%", M.valueOf(market)).fetch();
+        List<Selling> list = Selling.find("listing.product.sku=? AND market=?", sku, M.valueOf(market)).fetch();
         List<String> sids = new ArrayList<>();
         for(Selling s : list) sids.add(s.sellingId);
         renderJSON(J.json(sids));
