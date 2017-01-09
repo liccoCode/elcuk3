@@ -421,8 +421,7 @@ public class ProfitPost {
             profit.inboundfee = Webs.scale2Double(profit.inboundfee);
             return profit;
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.info("profit.esProfit:::" + e.toString());
+            Logger.error(Webs.S(e));
         }
         return initProfit(market,
                 prosku, sellingId);

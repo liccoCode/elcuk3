@@ -1,9 +1,6 @@
 package controllers.api;
 
-import helper.Constant;
-import helper.J;
-import helper.OrderInvoiceFormat;
-import helper.PDFs;
+import helper.*;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingProfitSearch;
 import jobs.analyze.SkuSaleProfitJob;
@@ -191,7 +188,7 @@ public class ReportDeal extends Controller {
             OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market);
             renderText("后台正在处理, 请稍后去服务器查看.");
         } catch(ParseException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
     }
 
