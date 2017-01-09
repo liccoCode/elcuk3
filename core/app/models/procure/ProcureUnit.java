@@ -927,8 +927,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } catch(FBAInboundServiceMWSException e) {
             String errMsg = e.getMessage();
             if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
-                Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
-                        this.selling.merchantSKU));
+                Validation.addError("",
+                        String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查: " +
+                                        "1. Amazon sellercentral 是否存在 MSKU 为 [%s] 的 Listing? " +
+                                        "2. Selling[%s] 的 Merchant SKU 属性 %s 是否正确?(正确的格式应该为 [SKU,UPC])",
+                                this.selling.merchantSKU,
+                                this.selling.sellingId,
+                                this.selling.merchantSKU));
             } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
                 Validation.addError("", String.format(
                         "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 在 Amazon 后台的 Listing 的尺寸是否正确填写(数值和单位).",
