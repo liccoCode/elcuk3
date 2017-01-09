@@ -4,7 +4,7 @@ import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.MailsRecord;
-import models.view.Ret;
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -16,9 +16,10 @@ import java.util.List;
  * User: rose
  * Date: 13-4-3
  * Time: 下午1:48
+ *
  * @deprecated 已经无用
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class MailsRecords extends Controller {
 
     @Check("mailsRecords.index")
@@ -36,12 +37,14 @@ public class MailsRecords extends Controller {
      * @param success
      * @param group
      */
-    public static void ajaxRecord(Date from, Date to, MailsRecord.T type, List<String> templates, boolean success, String group) {
+    public static void ajaxRecord(Date from, Date to, MailsRecord.T type, List<String> templates, boolean success,
+                                  String group) {
         try {
             renderJSON(J.json(MailsRecord.ajaxRecordBy(from, to, type, templates, success, group)));
         } catch(Exception e) {
-            e.printStackTrace();
-            renderJSON(new Ret(Webs.S(e)));
+            String errMsg = Webs.S(e);
+            Logger.error(errMsg);
+            renderJSON(errMsg);
         }
 
     }

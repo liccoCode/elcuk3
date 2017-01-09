@@ -2,7 +2,9 @@ package ext;
 
 import controllers.Secure;
 import groovy.lang.Closure;
+import helper.Webs;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.exceptions.TemplateNotFoundException;
 import play.templates.FastTags;
 import play.templates.GroovyTemplate;
@@ -36,7 +38,7 @@ public class FTags extends FastTags {
         } catch(TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
             throw new TemplateNotFoundException("FastTag", template.template, fromLine);
         }
     }

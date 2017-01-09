@@ -64,7 +64,7 @@ public class DBUtils {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                play.Logger.error(Webs.S(e));
             }
         }
         return row;
@@ -131,7 +131,7 @@ public class DBUtils {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                play.Logger.error(Webs.S(e));
             }
         }
         return rows;
