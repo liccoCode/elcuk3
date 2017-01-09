@@ -46,10 +46,8 @@
     <div class="span5">
       <input type="hidden" name="s.sellingId" value="${s.sellingId}">
       <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
-        #{text_field id:'msku',name: 's.merchantSKU', readonly: true,
-        label: 'Merchant SKU',
-        value: s.merchantSKU/}
-        #{text_field id:'upc',name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
+        #{text_field id:'msku',name: 's.merchantSKU', label: 'Merchant SKU', value: s.merchantSKU/}
+        #{text_field id:'upc',name: 's.aps.upc', label: 'UPC', value: s.aps.upc /}
         #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
         #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
         #{checkbox_text_field id:'standerPrice',checkboxname: 'p.standerprice', name: 's.aps.standerPrice',
