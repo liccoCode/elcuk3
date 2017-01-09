@@ -5,6 +5,7 @@ import exception.PaymentException;
 import helper.*;
 import helper.Currency;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.activiti.ActivitiProcess;
 import models.embedded.UnitAttrs;
@@ -275,6 +276,7 @@ public class ProcureUnits extends Controller {
         if(isNeedApply != null && isNeedApply.equals("need")) {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
+        unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         unit.save();
         //生成质检任务
         //unit.triggerCheck();

@@ -20,11 +20,20 @@
 
 <tr>
 #{set copers:product.cooperators() /}
-  <th><i class="icon-asterisk" style="color:red"></i>采购数量/库存数量</th>
+  <th><i class="icon-asterisk" style="color:red"></i>
+  #{if unit.type==models.procure.ProcureUnit.T.StockSplit}库存数量#{/if}
+  #{else }采购数量#{/else}
+  </th>
   <td colspan="3">
+  #{if unit.type==models.procure.ProcureUnit.T.StockSplit}
+    <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
+           value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isParentUnit()} readonly#{/if}>
+  #{/if}
+  #{else }
     <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty" required
-           value="${unit.attrs.planQty}" data-origin="${unit.attrs.planQty}"  #{if unit.isParent()} readonly#{/if}>
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isParent()} readonly#{/if}>
+           value="${unit.attrs.planQty}" data-origin="${unit.attrs.planQty}"  #{if unit.isParentUnit()} readonly#{/if}>
+  #{/else}
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isParentUnit()} readonly#{/if}>
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
     <select name="unit.cooperator.id" native='true'>
@@ -44,17 +53,29 @@
 </tr>
 
 #{if unit.parent}
-<tr style="display:none;background-color:#F2DEDE;" id="return_tr">
-  <th>差数是否退回</th>
-  <td colspan="5">
-    <label class="radio inline">
-      <input type="radio" value="true" name="unit.isReturn" checked>退回到父计划
-    </label>
-    <label class="radio inline">
-      <input type="radio" value="false" name="unit.isReturn">否
-    </label>
-  </td>
-</tr>
+    #{if unit.parent.stage != unit.stage}
+    <tr style="display:none;background-color:#F2DEDE;" id="return_tr">
+      <td colspan="6">
+        因为父计划<a href="@{ProcureUnits.detail(unit.parent.id)}" target="_blank">${unit.parent.id}</a>
+        状态为【${unit.parent.stage?.label()}】，无法退回！
+        <input type="hidden" value="false" name="unit.isReturn">否
+      </td>
+    </tr>
+    #{/if}
+    #{else }
+    <tr style="display:none;background-color:#F2DEDE;" id="return_tr">
+      <th>差数是否退回</th>
+      <td colspan="5">
+        <label class="radio inline">
+          <input type="radio" value="true" name="unit.isReturn" checked>退回到父计划
+          <a href="@{ProcureUnits.detail(unit.parent.id)}" target="_blank">${unit.parent.id}</a>
+        </label>
+        <label class="radio inline">
+          <input type="radio" value="false" name="unit.isReturn">否
+        </label>
+      </td>
+    </tr>
+    #{/else}
 #{/if}
 
 <tr>

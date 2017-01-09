@@ -31,7 +31,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.ManyToAny;
 import play.Logger;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -986,14 +985,36 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
+        if(this.parent != null && unit.isReturn
+                && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        if(this.parent != null && unit.isReturn && this.stage == STAGE.IN_STORAGE) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
 
         List<String> logs = new ArrayList<>();
-        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.PROCESSING).contains(this.stage)) {
-            logs.addAll(this.beforeDoneUpdate(unit));
-            if(this.parent != null) {
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(this.parent != null && unit.isReturn) {
                 ProcureUnit it = ProcureUnit.findById(this.parent.id);
-
-
+                if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(it.stage)) {
+                    it.attrs.planQty += (this.attrs.planQty - unit.attrs.planQty);
+                    it.save();
+                }
+            }
+            logs.addAll(this.beforeDoneUpdate(unit));
+        } else if(this.stage == STAGE.PROCESSING) {
+            //仓库加工修改
+            if(this.parent != null && unit.isReturn) {
+                ProcureUnit it = ProcureUnit.findById(this.parent.id);
+                if(it.stage == STAGE.IN_STORAGE) {
+                    it.availableQty += (this.availableQty - unit.availableQty);
+                    it.save();
+                }
             }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
@@ -1062,13 +1083,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.price", unit.attrs.price));
         logs.addAll(Reflects.logFieldFade(this, "attrs.currency", unit.attrs.currency));
         logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
+        logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         return logs;
     }
 
     private List<String> doneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
@@ -2265,8 +2286,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return null;
     }
 
-    public boolean isParent() {
+    public boolean isParentUnit() {
         return ProcureUnit.find("parent.id =?", this.id).fetch().size() > 0;
+    }
+
+    public boolean isEdit() {
+
+
+        return false;
     }
 
 }
