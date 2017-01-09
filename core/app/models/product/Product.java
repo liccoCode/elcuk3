@@ -1126,7 +1126,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         return rows.stream()
                 .filter(row -> row != null && !row.isEmpty())
                 .flatMap(row -> row.values().stream())
-                .filter(val -> val != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .limit(10)
                 .map(val -> StringUtils.abbreviate(val.toString(), 20))
@@ -1138,6 +1138,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     public float weightWithGram() {
-        return this.weight * 1000;
+        return this.weight != null ? this.weight * 1000 : 0;
     }
 }
