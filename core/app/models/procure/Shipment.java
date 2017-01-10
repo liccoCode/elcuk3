@@ -619,8 +619,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "没有运输项目可以运输.");
         }
         for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
-                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage)) {
+            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY).contains(itm.unit.stage)) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
             }
             if(!itm.unit.isPlaced) {
@@ -1425,13 +1424,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     private List<String> fixNullStr(List<String> target) {
-        Iterator<String> iterator = target.iterator();
-        while(iterator.hasNext()) {
-            String p = iterator.next();
-            if(null == p) {
-                iterator.remove();
-            }
-        }
+        target.removeIf(Objects::isNull);
         return target;
     }
 
