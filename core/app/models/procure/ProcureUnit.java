@@ -31,7 +31,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.ManyToAny;
 import play.Logger;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -735,6 +734,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(unit.attrs.planQty <= 0)
                 Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
         }
+        if(unit.selling == null) {
+            Validation.addError("", "分拆的子采购计划必须要有selling！");
+        }
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
         ProcureUnit newUnit = new ProcureUnit();
@@ -757,13 +759,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.sku = unit.product.sku;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         newUnit.type = T.ProcureSplit;
-        if(unit.selling == null) {
-            //手动单拆分时将 拆分的采购计划 归属到 此采购计划 的采购单身上
-        } else {
-            newUnit.selling = unit.selling;
-            newUnit.sid = unit.sid;
-            newUnit.attrs.planQty = unit.attrs.planQty;
-        }
+        newUnit.selling = unit.selling;
+        newUnit.sid = unit.sid;
+        newUnit.attrs.planQty = unit.attrs.planQty;
         if(unit.selling == null) {
             newUnit.manualValidate();
         } else {
@@ -986,15 +984,28 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
-
-        List<String> logs = new ArrayList<>();
-        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.PROCESSING).contains(this.stage)) {
-            logs.addAll(this.beforeDoneUpdate(unit));
-            if(this.parent != null) {
-                ProcureUnit it = ProcureUnit.findById(this.parent.id);
-
-
+        if(this.parent != null && unit.isReturn
+                && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
             }
+        }
+        if(this.parent != null && unit.isReturn && this.stage == STAGE.IN_STORAGE) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        if(Validation.hasErrors()) return;
+        List<String> logs = new ArrayList<>();
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(this.parent != null && unit.isReturn) {
+                ProcureUnit it = ProcureUnit.findById(this.parent.id);
+                if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(it.stage)) {
+                    it.attrs.planQty += (this.attrs.planQty - unit.attrs.planQty);
+                    it.save();
+                }
+            }
+            logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
@@ -1016,6 +1027,59 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
                         this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
             }
+            noty(this.sku, StringUtils.join(logs, ","));
+        }
+        this.shipItemQty(this.qty());
+        this.save();
+    }
+
+    /**
+     * 库存修改  和采购修改分开
+     *
+     * @param unit
+     * @param shipmentId
+     * @param reason
+     */
+    public void stockUpdate(ProcureUnit unit, String shipmentId, String reason) {
+        Shipment.T oldShipType = this.shipType;
+        /**
+         * 1. 修改不同阶段可以修改的信息
+         * 2. 根据运输类型修改运输单
+         */
+        if(this.fba != null && (unit.shipType != this.shipType || unit.availableQty != this.availableQty))
+            Validation.required("procureunit.update.reason", reason);
+        if(this.stage == STAGE.CLOSE)
+            Validation.addError("", "已经结束, 无法再修改");
+        if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
+        if(this.parent != null && unit.isReturn &&
+                Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
+            if(unit.availableQty - this.availableQty > this.parent.availableQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        List<String> logs = new ArrayList<>();
+        this.comment = unit.comment;
+        this.purchaseSample = unit.purchaseSample;
+        if(Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
+        }
+        if(Validation.hasErrors()) return;
+        //仓库加工修改
+        if(this.parent != null && unit.isReturn) {
+            ProcureUnit it = ProcureUnit.findById(this.parent.id);
+            if(it.stage == STAGE.IN_STORAGE) {
+                it.availableQty += (this.availableQty - unit.availableQty);
+                it.save();
+            }
+        }
+        logs.addAll(this.changeStageUpdate(unit));
+        if(logs.size() > 0)
+            this.stage = STAGE.PROCESSING;
+        logs.addAll(this.afterDoneUpdate(unit));
+        if(logs.size() > 0) {
+            new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
+                    this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
             noty(this.sku, StringUtils.join(logs, ","));
         }
         this.shipItemQty(this.qty());
@@ -1062,15 +1126,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.price", unit.attrs.price));
         logs.addAll(Reflects.logFieldFade(this, "attrs.currency", unit.attrs.currency));
         logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
+        logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
+        logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
+        logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
         return logs;
     }
 
     private List<String> doneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
+        return logs;
+    }
+
+    private List<String> afterDoneUpdate(ProcureUnit unit) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
+        logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
+        return logs;
+    }
+
+    private List<String> changeStageUpdate(ProcureUnit unit) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         return logs;
     }
@@ -1103,8 +1186,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param shipment
      */
     public void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
-        if(this.shipItems.stream()
-                .anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
+        if(this.shipItems.stream().anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
             Validation.addError("", String.format("当前采购计划已经存在运输单, 且该运输单不是 %s 状态.", Shipment.S.PLAN.label()));
             return;
         }
@@ -1163,8 +1245,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } catch(FBAInboundServiceMWSException e) {
             String errMsg = e.getMessage();
             if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
-                Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查[%s]在 Amazon 后台是否存在.",
-                        this.selling.merchantSKU));
+                Validation.addError("",
+                        String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查: " +
+                                        "1. Amazon sellercentral 是否存在 MSKU 为 [%s] 的 Listing? " +
+                                        "2. Selling[%s] 的 Merchant SKU 属性 %s 是否正确?(正确的格式应该为 [SKU,UPC])",
+                                this.selling.merchantSKU,
+                                this.selling.sellingId,
+                                this.selling.merchantSKU));
             } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
                 Validation.addError("", String.format(
                         "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 在 Amazon 后台的 Listing 的尺寸是否正确填写(数值和单位).",
@@ -1225,6 +1312,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(assign) {
             this.deliveryment = deliveryment;
             this.stage = ProcureUnit.STAGE.DELIVERY;
+            this.originQty = this.attrs.planQty;
         } else {
             this.deliveryment = null;
             this.stage = STAGE.PLAN;
@@ -2265,8 +2353,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return null;
     }
 
-    public boolean isParent() {
+    public boolean isParentUnit() {
         return ProcureUnit.find("parent.id =?", this.id).fetch().size() > 0;
+    }
+
+    public boolean isEdit() {
+
+
+        return false;
     }
 
 }

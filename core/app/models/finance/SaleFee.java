@@ -321,7 +321,7 @@ public class SaleFee extends Model {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         }
     }
@@ -356,7 +356,7 @@ public class SaleFee extends Model {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         }
     }

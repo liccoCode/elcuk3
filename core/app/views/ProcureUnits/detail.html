@@ -128,7 +128,10 @@
       <td>${u.whouse?.name}</td>
       <td>${u.cooperator?.name}</td>
       <td>${u.attrs.price}</td>
-      <td>${u.attrs.currency.symbol()} ${u.leftAmount().format('#,###.##')}</td>
+      <td>
+          #{if u.type==models.procure.ProcureUnit.T.StockSplit} 0 #{/if}
+          #{else } ${u.attrs.currency.symbol()} ${u.leftAmount().format('#,###.##')} #{/else}
+      </td>
       <td style="background-color:${u.type?.rgb()}">${u.type?.label()}</td>
       <td>${u.attrs.planQty}</td>
       <td>${u.attrs.qty}</td>

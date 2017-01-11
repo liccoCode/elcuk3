@@ -413,8 +413,7 @@ public class Deliveryment extends GenericModel {
      *
      * @param pids
      */
-    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name,
-                                                               User user) {
+    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
         if(pids.size() != units.size()) {

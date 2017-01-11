@@ -1,5 +1,6 @@
 package models.market;
 
+import helper.Webs;
 import mws.MWSReports;
 import mws.v2.MWSFeeds;
 import play.Logger;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  * User: wyattpan
  * Date: 1/23/12
  * Time: 5:29 PM
+ *
  * @deprecated
  */
 @Entity
@@ -334,7 +336,7 @@ public class JobRequest extends Model {
                 job.state = S.CLOSE;
                 job.save();
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         }
     }

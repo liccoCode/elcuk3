@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
 import org.hibernate.annotations.DynamicUpdate;
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -954,7 +955,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         FileUtils.copyFile(skuatt.file, new File(skuatt.location));
                         skuatt.save();
                     } catch(Exception e) {
-                        e.printStackTrace();
+                        Logger.error(Webs.S(e));
                     }
                 }
             }
@@ -1075,7 +1076,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         if(!Validation.hasErrors())
                             skuatt.save();
                     } catch(Exception e) {
-                        e.printStackTrace();
+                        Logger.error(Webs.S(e));
                     }
                 }
             }
@@ -1126,7 +1127,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         return rows.stream()
                 .filter(row -> row != null && !row.isEmpty())
                 .flatMap(row -> row.values().stream())
-                .filter(val -> val != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .limit(10)
                 .map(val -> StringUtils.abbreviate(val.toString(), 20))
@@ -1138,6 +1139,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     public float weightWithGram() {
-        return this.weight * 1000;
+        return this.weight != null ? this.weight * 1000 : 0;
     }
 }

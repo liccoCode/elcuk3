@@ -1,3 +1,10 @@
+#{if unit.stage.name()=='DELIVERY' && showNotice}
+<tr>
+  <td colspan="6">
+    <span style="color:red">注意：该采购计划已到预计交货期，请核实货物在工厂还是到了深圳仓，如果已经到了深圳仓，请在深圳仓办理完入库手续后再进行分拆!</span>
+  </td>
+</tr>
+#{/if}
 <tr>
   <th>采购计划ID</th>
   <td width="320px;">&nbsp;</td>
@@ -11,18 +18,19 @@
 </tr>
 <tr>
   <th>Selling</th>
-  <td><input type="text" id="sellingId" name="newUnit.selling.sellingId" style="width:300px;"
-             value="${unit.selling?.sellingId}" readonly></td>
+  <td><input type="text" id="sellingId" name="newUnit.selling.sellingId" style="width:300px;" readonly
+             value="${unit.selling?.sellingId}" data-origin="${unit.selling?.sellingId}"></td>
   <th>SKU</th>
-  <td><input type="text" id="select_sku" name="newUnit.product.sku" value="${unit.sku}"></td>
+  <td><input type="text" id="select_sku" name="newUnit.product.sku" value="${unit.sku}" autocomplete="off"></td>
   <th>产品名称</th>
   <td><input type="text" id="productName" style="width:300px;" value="${unit.product?.abbreviation}" readonly></td>
 </tr>
 <tr>
 #{if unit.stage.name()=='IN_STORAGE'}
-  <th>库存数量</th>
+  <th><i class="icon-asterisk" style="color:red"></i>库存数量</th>
   <td>
-    <input type="text" class="input-mini" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}" required>
+    <input type="text" class="input-mini" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}"
+           data-max="${unit.availableQty}" required>
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
     <span class="add-on">箱</span>
   </td>
@@ -65,8 +73,7 @@
 <tr>
   <th>去往仓库</th>
   <td>
-    <select name="newUnit.whouse.id" id="warehouse_select">
-      <option value="">请选择</option>
+    <select name="newUnit.whouse.id" id="warehouse_select" data-origin="${unit.id}">
     #{list items:whouses, as:'w'}
       <option value="${w.id}" #{if w.id==unit.whouse?.id} selected #{/if}>${w.name}</option>
     #{/list}

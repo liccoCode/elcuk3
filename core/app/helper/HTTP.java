@@ -233,8 +233,7 @@ public class HTTP {
             response = doRequest(get, getContextWithCookieStore(cookieStore), requestConfig);
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch(IOException e) {
-            e.printStackTrace();
-            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.S(e));
             return "";
         } finally {
             closeResponse(response);
@@ -259,8 +258,7 @@ public class HTTP {
             response = doRequest(new HttpGet(url), context, requestConfig);
             return context;
         } catch(IOException e) {
-            e.printStackTrace();
-            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.S(e));
             return null;
         } finally {
             closeResponse(response);
@@ -274,8 +272,7 @@ public class HTTP {
             response = doRequest(new HttpGet(url), context);
             return context;
         } catch(IOException e) {
-            e.printStackTrace();
-            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.S(e));
             return null;
         } finally {
             closeResponse(response);
@@ -479,8 +476,7 @@ public class HTTP {
             response = doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig());
             return EntityUtils.toString(response.getEntity());
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.S(e));
             return "";
         } finally {
             closeResponse(response);

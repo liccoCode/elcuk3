@@ -4,9 +4,8 @@
     #{script 'procureunits/blank.coffee'/}
     #{script 'procureunits/blank.es6'/}
 #{/set}
-#{errorMsgs /}
-#{flash_alert/}
 
+#{errorMsgs /}
 #{info_row title:'创建采购计划' /}
 <div class="row-fluid">
 #{form @ProcureUnits.create(), method: 'POST', id: 'new_procure_unit'}
@@ -21,7 +20,7 @@
     </tr>
     <tr>
       <td colspan="6">
-        <button class="btn btn-primary" id="create_unit">创建</button>
+        <input type="button" class="btn btn-primary" id="create_unit" value="创建">
         <input type="button" id="refreshShipmentBtn" title="刷新运输单" class="btn btn-inverse" value="刷新">
       </td>
     </tr>

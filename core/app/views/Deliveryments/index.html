@@ -25,16 +25,20 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-    #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType, class:'inline selectize' /}
+      <select name="p.dateType" style="width: 150px;" class="inline">
+      #{list items:models.view.post.DeliveryPost.DateType.values(), as:'d'}
+        <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
+      #{/list}
+      </select>
 
-      <select name="p.state" style="width: 150px;" class="inline selectize">
+      <select name="p.state" style="width: 150px;" class="inline">
         <option value="">状态</option>
       #{list items:models.procure.Deliveryment.S.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.deliveryType" style="width: 150px;" class="inline selectize">
+      <select name="p.deliveryType" style="width: 150px;" class="inline">
         <option value="">类型</option>
       #{list items:models.procure.Deliveryment.T.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.deliveryType?.name() ? 'selected' : ''}>${t.label()}</option>

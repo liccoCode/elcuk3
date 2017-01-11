@@ -1,8 +1,10 @@
 package query;
 
 import helper.Caches;
+import helper.Webs;
 import models.product.Team;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.cache.Cache;
 
 import java.util.List;
@@ -30,10 +32,9 @@ public class PmDashboardCache {
                  * 销量曲线
                  */
                 deleteCache("saleqtyline", year, teamobject);
-                PmDashboardESQuery
-                        .saleqtyline("saleqtyline", year, teamobject);
+                PmDashboardESQuery.saleqtyline("saleqtyline", year, teamobject);
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
 
         }
@@ -92,11 +93,10 @@ public class PmDashboardCache {
                         .ajaxHighChartCategorySalesAmount(cateid, year);
                 /**产品线CATEGORY的利润率**/
                 deleteCache("%s_%s_categoryinfo_salesprofit", "", year);
-                PmDashboardESQuery
-                        .ajaxHighChartCategorySalesProfit(cateid, year);
+                PmDashboardESQuery.ajaxHighChartCategorySalesProfit(cateid, year);
             }
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
     }
 

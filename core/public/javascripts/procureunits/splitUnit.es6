@@ -44,14 +44,15 @@ $(() => {
         market: "AMAZON_" + country
       }, function(c) {
         $("#sellingId").val(c);
-        if (!$("#sellingId").val()) {
+        if (c) {
+          getShipmentList();
+        } else {
           noty({
             text: "市场对应无Selling",
             type: 'error'
           });
           $("#warehouse_select").prop("value", "");
         }
-        getShipmentList();
       });
     } else {
       $("#sellingId").val("");
@@ -98,15 +99,17 @@ $(() => {
   function getShipmentList () {
     let whouseId = $("[name='newUnit.whouse.id']").val();
     let shipType = $("[name='newUnit.shipType']:checked").val();
+    let planDeliveryDate = $("[name='newUnit.attrs.planDeliveryDate']").val();
     let shipment = $("#shipments");
-    if (whouseId && shipType && shipment) {
+    if (planDeliveryDate && whouseId && shipType && shipment) {
       if (shipType == 'EXPRESS') {
         $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.');
       } else {
         shipment.mask();
         $.get('/shipments/unitShipments', {
           whouseId: whouseId,
-          shipType: shipType
+          shipType: shipType,
+          planDeliveryDate: planDeliveryDate
         }, function(html) {
           shipment.html(html);
           shipment.unmask();
@@ -114,7 +117,7 @@ $(() => {
       }
     } else {
       noty({
-        text: "请先填写【去往仓库】和【运输方式】！",
+        text: "请先填写【预计交货时间】【去往仓库】和【运输方式】！",
         type: 'error'
       });
     }
@@ -124,6 +127,16 @@ $(() => {
     let boxSize = $("#size_of_box").val();
     let boxNum = $("#box_num").val();
     $("#planQty").val(boxSize * boxNum);
+  });
+
+  $("#planQty").change(function() {
+    if ($(this).val() > $(this).data('max')) {
+      noty({
+        text: "分拆数量不能大于" + $(this).data('max'),
+        type: 'error'
+      });
+      $(this).val(0);
+    }
   });
 
 });

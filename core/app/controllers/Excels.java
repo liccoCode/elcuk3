@@ -1,16 +1,13 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
-import jobs.analyze.SellingSaleAnalyzeJob;
 import models.RevenueAndCostDetail;
 import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.*;
-import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
@@ -217,70 +214,7 @@ public class Excels extends Controller {
      * 利润下载
      */
     public static void profit(ProfitPost p) {
-        List<Profit> profits = new ArrayList<>();
-        String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
-        // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-        List<AnalyzeDTO> dtos = null;
-        String cache_str = Caches.get(cacke_key);
-        if(!StringUtils.isBlank(cache_str)) {
-            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
-        }
-        if(dtos == null) {
-            renderText("Analyze后台事务正在执行中,请稍候...");
-        }
-
-        if(StringUtils.isBlank(p.category) && StringUtils.isBlank(p.sku)) {
-            renderText("未选择category或者sku!");
-        } else {
-            if(!StringUtils.isBlank(p.sku)) {
-                if(!Product.exist(p.sku)) {
-                    renderText("系统不存在sku:" + p.sku);
-                }
-            }
-            if(!StringUtils.isBlank(p.category)) {
-                if(!Category.exist(p.category)) {
-                    renderText("系统不存在category:" + p.category);
-                }
-            }
-            String skukey = "";
-            String marketkey = "";
-            String categorykey = "";
-            if(p.pmarket != null) marketkey = p.pmarket;
-            if(p.category != null) categorykey = p.category.toLowerCase();
-
-            String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
-                    "excel");
-            profits = Cache.get(postkey, List.class);
-            if(profits == null) {
-                if(StringUtils.isNotBlank(p.sku)) {
-                    categorykey = p.sku;
-                }
-                SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
-                postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
-                        + formater.format(p.begin) + "_"
-                        + formater.format(p.end);
-                String postvalue = Caches.get(postkey);
-                if(StringUtils.isBlank(postvalue)) {
-                    String categoryname = "";
-                    int is_sku = 0;
-                    if(StringUtils.isNotBlank(p.sku)) {
-                        categoryname = p.sku;
-                        is_sku = 1;
-                    } else {
-                        categoryname = p.category.toLowerCase();
-                    }
-                    String url = String.format("%s/profit_batch_work?category=%s&&market=%s&from=%s&to=%s&is_sku=%s",
-                            System.getenv(Constant.ROCKEND_HOST),
-                            categoryname,
-                            marketkey,
-                            formater.format(p.begin),
-                            formater.format(p.end),
-                            is_sku);
-                    HTTP.get(url);
-                }
-            }
-        }
-
+        List<Profit> profits = p.fetch();
         if(profits != null && profits.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
@@ -290,7 +224,7 @@ public class Excels extends Controller {
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
         } else {
-            renderText("正在后台计算生成Excel文件！");
+            renderText(Webs.V(Validation.errors()));
         }
     }
 

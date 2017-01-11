@@ -52,8 +52,8 @@ public class DeliverPlans extends Controller {
      * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
-    public static void deliverplan(List<Long> pids, String name) {
-        if(StringUtils.isBlank(name))
+    public static void deliverplan(List<Long> pids, String deliverName) {
+        if(StringUtils.isBlank(deliverName))
             Validation.addError("", "出货单名称必须填写!");
         if(pids == null || pids.size() <= 0)
             Validation.addError("", "必须选择采购计划单!");
@@ -62,7 +62,7 @@ public class DeliverPlans extends Controller {
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
         DeliverPlan deliverplan = DeliverPlan
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+                .createFromProcures(pids, deliverName, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));

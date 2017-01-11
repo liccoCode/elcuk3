@@ -1,5 +1,7 @@
 package helper;
 
+import play.Logger;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -38,7 +40,7 @@ public class JaxbUtil {
             marshaller.marshal(obj, writer);
             result = writer.toString();
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
 
         return result;
@@ -59,7 +61,7 @@ public class JaxbUtil {
             Unmarshaller unmarshaller = context.createUnmarshaller();
             t = (T) unmarshaller.unmarshal(new StringReader(xml));
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
         return t;
     }
