@@ -38,6 +38,8 @@ import play.mvc.With;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -320,12 +322,16 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        managedUnit.update(unit, shipmentId, msg);
+        if(Arrays.asList(ProcureUnit.STAGE.IN_STORAGE,ProcureUnit.STAGE.PROCESSING).contains(managedUnit.stage)) {
+            managedUnit.stockUpdate(unit, shipmentId, msg);
+        } else {
+            managedUnit.update(unit, shipmentId, msg);
+        }
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
+            List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
         flash.success("成功修改采购计划!", id);
@@ -372,6 +378,9 @@ public class ProcureUnits extends Controller {
      */
     public static void splitUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        if(StringUtils.isNotEmpty(ProcureUnit.validRefund(unit))) {
+            renderText(ProcureUnit.validRefund(unit));
+        }
         unit.setPeriod();
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
@@ -381,7 +390,9 @@ public class ProcureUnits extends Controller {
         renderArgs.put("skus", J.json(skusToJson._2));
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
-        render(unit, newUnit);
+        Date date = new Date();
+        boolean showNotice = date.getTime() >= unit.attrs.planDeliveryDate.getTime() ? true : false;
+        render(unit, newUnit, showNotice);
     }
 
     /**
@@ -402,10 +413,9 @@ public class ProcureUnits extends Controller {
             nUnit = unit.stockSplit(newUnit);
         }
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findAll();
+            List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
         }
-
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
         Deliveryments.show(unit.deliveryment.id);
     }

@@ -14,7 +14,7 @@
 #{if unit.parent}
     #{danger_row  title:'分拆注意事项'}
     <ul>
-      <li>改采购计划已经是子采购计划，父节点为 <a href="@{ProcureUnits.detail(unit.id)}#${unit.id}">${unit.id}</a></li>
+      <li>改采购计划已经是子采购计划，父节点为 <a href="@{ProcureUnits.detail(unit.parent.id)}#${unit.id}">${unit.parent.id}</a></li>
     </ul>
     #{/danger_row}
 #{/if}
@@ -33,7 +33,7 @@
         <td width="320px;">${unit.id}</td>
         <th>历史变更</th>
         <td width="300px;">
-          <a href="">查看>></a>
+          <a href="@{ProcureUnits.detail(unit.id)}" target="_blank">查看>> </a>
         </td>
         <td></td>
         <td width="320px;"></td>

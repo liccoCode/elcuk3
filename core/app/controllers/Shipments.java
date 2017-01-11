@@ -28,6 +28,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -398,8 +399,9 @@ public class Shipments extends Controller {
      *
      * @param whouseId
      */
-    public static void unitShipments(Long whouseId, Shipment.T shipType) {
-        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId, shipType);
+    public static void unitShipments(Long whouseId, Shipment.T shipType, Date planDeliveryDate) {
+        List<Shipment> unitRelateShipments = Shipment
+                .findUnitRelateShipmentByWhouse(whouseId, shipType, planDeliveryDate);
         render(unitRelateShipments);
     }
 
@@ -455,7 +457,7 @@ public class Shipments extends Controller {
             List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i " +
                     "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentId) +
                     " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
-            if(shipments.size() > 0 ) {
+            if(shipments.size() > 0) {
                 msg += "【" + shipments.get(0).id + "】";
             }
         }

@@ -42,6 +42,9 @@ public class Refund extends GenericModel {
     @Required
     public String name;
 
+    @Required
+    @Expose
+    @Enumerated(EnumType.STRING)
     public S status;
 
     public enum S {

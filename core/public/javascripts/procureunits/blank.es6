@@ -48,9 +48,11 @@ $(() => {
     });
   });
 
-  $("#planQty").change(function() {
+  $("#planQty,#availableQty").change(function() {
     if ($(this).val() < $(this).data("origin")) {
       $("#return_tr").show();
+    } else {
+      $("#return_tr").hide();
     }
   });
 
@@ -79,12 +81,46 @@ $(() => {
     }
   });
 
+  $("#warehouse_select").change(function() {
+    if ($(this).val()) {
+      let country = $("#warehouse_select :selected").text().split('_')[1];
+      let sku = $("#unit_sku").val();
+      $.get("/sellings/findSellingBySkuAndMarket", {
+        sku: sku,
+        market: "AMAZON_" + country
+      }, function(c) {
+        $("#sellingId").val(c);
+        if (!$("#sellingId").val()) {
+          noty({
+            text: "市场对应无Selling",
+            type: 'error'
+          });
+        } else {
+          getShipmentList();
+        }
+      });
+    }
+  });
+
+  $("input[name='unit.shipType']").change(function() {
+    let planDeliveryDate = $("input[name='unit.attrs.planDeliveryDate']").val();
+    let whouseId = $("[name='unit.whouse.id']").val();
+    if (planDeliveryDate && whouseId) {
+      getShipmentList();
+    }
+  });
+
   //异步加载 Shipment
-  $("[name='unit.shipType'],[name='unit.whouse.id']").on('change', () => {
+  function getShipmentList () {
     let whouseId = $("[name='unit.whouse.id']").val();
     let shipType = $("[name='unit.shipType']:checked").val();
+    let planDeliveryDate = $("input[name='unit.attrs.planDeliveryDate']").val();
     let shipment = $("#shipments");
-    if (!(whouseId && shipType && shipment.size() > 0)) {
+    if (!(planDeliveryDate && whouseId && shipType && shipment)) {
+      noty({
+        text: "请先填写【预计交货时间】【去往仓库】和【运输方式】！",
+        type: 'error'
+      });
       return false;
     }
     if (shipType == 'EXPRESS') {
@@ -95,7 +131,8 @@ $(() => {
     }
     $.post('/shipments/unitShipments', {
       whouseId: whouseId,
-      shipType: shipType
+      shipType: shipType,
+      planDeliveryDate: planDeliveryDate
     }, function(html) {
       shipment.html(html);
       LoadMask.unmask();
@@ -123,7 +160,7 @@ $(() => {
     }, function(r) {
       $("[name='unit.attrs.planArrivDate']").val(r['arrivedate']);
     });
-  });
+  }
 
   $("#new_procure_unit [name='unit.product.sku']").on('change', function(e) {
     let $cooperators = $("select[name='unit.cooperator.id']")
@@ -166,11 +203,11 @@ $(() => {
 
   $("#create_unit").click(function(e) {
     e.preventDefault();
-    if ($("#planQty").val()) {
+    if ($("#planQty").val() && $("input[name='unit.attrs.planDeliveryDate']").val()) {
       $("#new_procure_unit").submit();
     } else {
       noty({
-        text: "请先填写采购数量！",
+        text: "请先填写采购数量和预计交货日期！",
         type: 'error'
       });
     }

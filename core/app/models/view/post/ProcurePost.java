@@ -46,15 +46,10 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Date to;
 
     public long whouseId;
-
     public long cooperatorId;
-
     public ProcureUnit.STAGE stage;
-
     public PLACEDSTATE isPlaced;
-
     public Shipment.T shipType;
-
     public String unitIds;
     /**
      * 选择过滤的日期类型
@@ -84,7 +79,45 @@ public class ProcurePost extends Post<ProcureUnit> {
         public abstract String label();
     }
 
+    public enum C {
+        YES {
+            @Override
+            public String label() {
+                return "已核单";
+            }
+        },
+        NO {
+            @Override
+            public String label() {
+                return "未核单";
+            }
+
+        };
+
+        public abstract String label();
+    }
+
+    public enum P {
+        EASYACC {
+            @Override
+            public String label() {
+                return "EASYACC";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B";
+            }
+
+        };
+
+        public abstract String label();
+    }
+
+    public String projectName;
     public ProcureUnit.OST isOut;
+    public C isConfirm;
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -163,6 +196,16 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.shipType != null) {
             sbd.append(" AND shipType=? ");
             params.add(this.shipType);
+        }
+
+        if(this.isConfirm != null) {
+            sbd.append(" AND isConfirm=? ");
+            params.add(this.isConfirm == C.YES ? true : false);
+        }
+
+        if(StringUtils.isNotEmpty(this.projectName)) {
+            sbd.append(" AND projectName=? ");
+            params.add(this.projectName);
         }
 
         if(this.isPlaced != null) {

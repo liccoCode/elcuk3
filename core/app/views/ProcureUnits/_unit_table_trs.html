@@ -21,11 +21,13 @@
 <tr>
 #{set copers:product.cooperators() /}
   <th><i class="icon-asterisk" style="color:red"></i>
-  #{if unit.type==models.procure.ProcureUnit.T.StockSplit}库存数量#{/if}
+  #{if Arrays.asList(models.procure.ProcureUnit.STAGE.IN_STORAGE, models.procure.ProcureUnit.STAGE.PROCESSING).contains(unit.stage)}
+    库存数量
+  #{/if}
   #{else }采购数量#{/else}
   </th>
   <td colspan="3">
-  #{if unit.type==models.procure.ProcureUnit.T.StockSplit}
+  #{if Arrays.asList(models.procure.ProcureUnit.STAGE.IN_STORAGE, models.procure.ProcureUnit.STAGE.PROCESSING).contains(unit.stage)}
     <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
            value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isParentUnit()} readonly#{/if}>
   #{/if}
@@ -36,8 +38,8 @@
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isParentUnit()} readonly#{/if}>
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-    <select name="unit.cooperator.id" native='true'>
-      <option>供应商</option>
+    <select name="unit.cooperator.id" native='true' required>
+      <option value="">供应商</option>
     #{list items:copers, as:'c'}
       <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
     #{/list}
@@ -53,7 +55,7 @@
 </tr>
 
 #{if unit.parent}
-    #{if unit.parent.stage != unit.stage}
+    #{if Arrays.asList('IN_STORAGE', 'DELIVERY','PLAN').contains(unit.parent.stage)}
     <tr style="display:none;background-color:#F2DEDE;" id="return_tr">
       <td colspan="6">
         因为父计划<a href="@{ProcureUnits.detail(unit.parent.id)}" target="_blank">${unit.parent.id}</a>
@@ -102,7 +104,7 @@
 <tr>
   <th>去往仓库</th>
   <td>
-    <select name="unit.whouse.id">
+    <select name="unit.whouse.id" id="warehouse_select">
     #{list items:whouses, as:'w'}
       <option value="${w.id}" #{if w.id==unit.whouse?.id} selected #{/if}>${w.name}</option>
     #{/list}
@@ -125,7 +127,7 @@
   <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
-      <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>
+      <input type="radio" name="unit.shipType" value="${t.name()}" ${t == unit.shipType ? 'checked': 'unchecked'}>
     ${t.label()}
     </label>
   #{/list}
@@ -137,7 +139,7 @@
   <th>B2B选项</th>
   <td>
     <label class="checkbox inline">
-      <input type="checkbox"> B2B
+      <input type="checkbox" name="unit.isb2b" value="true"> B2B
     </label>
   </td>
 </tr>

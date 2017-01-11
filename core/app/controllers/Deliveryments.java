@@ -115,8 +115,7 @@ public class Deliveryments extends Controller {
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
 
-        Deliveryment deliveryment = Deliveryment
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+        Deliveryment deliveryment = Deliveryment.createFromProcures(pids, name, Login.current());
 
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

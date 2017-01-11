@@ -129,4 +129,14 @@ $(() => {
     $("#planQty").val(boxSize * boxNum);
   });
 
+  $("#planQty").change(function() {
+    if ($(this).val() > $(this).data('max')) {
+      noty({
+        text: "分拆数量不能大于" + $(this).data('max'),
+        type: 'error'
+      });
+      $(this).val(0);
+    }
+  });
+
 });
