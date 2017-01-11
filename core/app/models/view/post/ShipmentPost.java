@@ -85,6 +85,7 @@ public class ShipmentPost extends Post<Shipment> {
             shipment.uname = this.returnStringOrNull(row.get("username"));
             shipment.memo = this.returnStringOrNull(row.get("memo"));
             shipment.applyId = this.returnStringOrNull(row.get("applyId"));
+            shipment.realDay = row.get("realDay") == null ? null : Integer.parseInt(row.get("realDay").toString());
             list.add(shipment);
         }
         return list;
@@ -98,8 +99,9 @@ public class ShipmentPost extends Post<Shipment> {
     @Override
     public F.T2<String, List<Object>> params() {
         SqlSelect sql = new SqlSelect().select("s.id, s.internationExpress, s.memo, s.apply_id as applyId, s.trackNo, " +
-                "(SELECT count(1) FROM ShipItem si WHERE si.shipment_id=s.id) as itemsNum, c.name as cname, " +
-                "s.type, w.name AS wname, s.target, s.state, s.planBeginDate, s.createDate, s.planArrivDate, u.username "
+                "(SELECT count(1) FROM ShipItem si WHERE si.shipment_id=s.id) as itemsNum, c.name as cname, s.type," +
+                " w.name AS wname, s.target, s.state, s.planBeginDate, s.createDate, s.planArrivDate, u.username, " +
+                " TO_DAYS(s.arriveDate) - TO_DAYS(s.beginDate) as realDay "
         ).from(" Shipment s ").leftJoin(" ShipItem i ON i.shipment_id = s.id "
         ).leftJoin(" Cooperator c ON c.id = s.cooper_id "
         ).leftJoin(" ProcureUnit pu ON pu.id = i.unit_id "
