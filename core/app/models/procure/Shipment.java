@@ -402,6 +402,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Transient
     public String iExpressName;
 
+    /**
+     * 完成天数
+     * 完成时间 - 开始运输时间
+     */
+    @Transient
+    public Integer realDay;
+
     @Transient
     public String applyId;
 
@@ -1621,4 +1628,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         }
     }
+
+    public String showRealDay() {
+        if(this.dates.beginDate != null && this.dates.arriveDate != null) {
+            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime())/1000/3600/24;
+            return day + "";
+        }
+        return "";
+    }
+
 }
