@@ -30,7 +30,7 @@ $(() => {
     });
   });
 
-  $("input[name='qty']").change(function() {
+  $("input[name='qty'],input[name$='qty']").change(function() {
     let $input = $(this);
     let id = $(this).data("id");
     let attr = $input.attr('name');
@@ -39,6 +39,16 @@ $(() => {
     if (value > origin) {
       noty({
         text: '退货数超过计划数量!',
+        type: 'error'
+      });
+      $(this).val($(this).data('origin'));
+      $(this).focus();
+      return false;
+    }
+
+    if (value <= 0) {
+      noty({
+        text: '退货数不能小于等于0!',
         type: 'error'
       });
       $(this).val($(this).data('origin'));

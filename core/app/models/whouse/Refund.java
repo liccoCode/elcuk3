@@ -174,6 +174,7 @@ public class Refund extends GenericModel {
             runit.unit = unit.unit;
             runit.refund = this;
             runit.planQty = unit.qty;
+            runit.qty = unit.qty;
             runit.mainBoxInfo = unit.mainBoxInfo;
             runit.lastBoxInfo = unit.lastBoxInfo;
             runit.save();
@@ -209,8 +210,12 @@ public class Refund extends GenericModel {
                 ProcureUnit unit = u.unit;
                 if(refund.type == T.After_Inbound) {
                     unit.attrs.qty -= u.qty;
-                    unit.inboundQty -= u.qty;
-                    unit.availableQty -= u.qty;
+                    if(refund.type == T.After_Receive) {
+                        unit.attrs.qty -= u.qty;
+                    } else {
+                        unit.inboundQty -= u.qty;
+                        unit.availableQty -= u.qty;
+                    }
                     if(u.qty == unit.attrs.qty) {
                         unit.stage = ProcureUnit.STAGE.DELIVERY;
                     }

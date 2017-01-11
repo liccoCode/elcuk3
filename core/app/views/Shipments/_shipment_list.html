@@ -39,7 +39,7 @@
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.uname}</td>
-    <td>${ship.outId}</td>
+    <td><a target="_blank" href="@{Outbounds.edit(ship.outId)}">${ship.outId}</a></td>
   </tr>
 
 #{/list}

@@ -1,6 +1,7 @@
 package models.view.post;
 
 import helper.Dates;
+import models.procure.Shipment;
 import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -20,6 +21,9 @@ public class OutboundPost extends Post<Outbound> {
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     public Outbound.S status;
     public Outbound.T type;
+
+    public String projectName;
+    public Shipment.T shipType;
 
     public String search;
 
@@ -62,6 +66,15 @@ public class OutboundPost extends Post<Outbound> {
             sbd.append(" AND o.type = ? ");
             params.add(this.type);
         }
+        if(StringUtils.isNotEmpty(this.projectName)) {
+            sbd.append(" AND o.projectName=? ");
+            params.add(this.projectName);
+        }
+        if(this.shipType != null) {
+            sbd.append(" AND o.shipType=? ");
+            params.add(this.shipType);
+        }
+
         sbd.append(" ORDER BY o.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }

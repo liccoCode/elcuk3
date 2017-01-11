@@ -121,9 +121,17 @@
             <td>${unit.selling?.fnSku}</td>
             <td>${unit.availableQty}</td>
             <td>
-              <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.availableQty}"
-                     data-origin="${unit.availableQty}">
-              <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.availableQty}">
+                #{if refund.type==models.whouse.Refund.T.After_Receive}
+                  <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.attrs.qty}"
+                         data-origin="${unit.attrs.qty}">
+                  <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.attrs.qty}">
+
+                #{/if}
+                #{else }
+                  <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.availableQty}"
+                         data-origin="${unit.availableQty}">
+                  <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.availableQty}">
+                #{/else}
             </td>
             <td>${unit.whouse?.name()}</td>
             <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
