@@ -22,6 +22,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class StockRecords extends Controller {
+
     @Before(only = {"index", "stockIndex"})
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses());
@@ -53,12 +54,20 @@ public class StockRecords extends Controller {
         ProcureUnit unit = ProcureUnit.findById(record.unit.id);
         unit.availableQty += record.qty;
         unit.save();
+        record.recordId = record.id;
+        record.whouse = unit.currWhouse;
+        record.save();
         flash.success("调整库存成功");
         index(new StockRecordPost());
     }
 
+    public static void show(Long id) {
+        StockRecord record = StockRecord.findById(id);
+        render(record);
+    }
+
     public static void changeRecords(Long id) {
-          index(new StockRecordPost(id));
+        index(new StockRecordPost(id));
     }
 
 }

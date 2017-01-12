@@ -882,7 +882,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class)
                 .save();
+        this.createStockRecord(newUnit);
         return newUnit;
+    }
+
+    public void createStockRecord(ProcureUnit unit) {
+        StockRecord record = new StockRecord();
+        record.whouse = unit.currWhouse;
+        record.unit = unit;
+        record.qty = unit.outQty;
+        record.type = StockRecord.T.Split;
+        record.recordId = unit.id;
+        record.save();
     }
 
     /**

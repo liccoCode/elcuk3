@@ -86,7 +86,7 @@ GET     /sellings/{sid}/procureunit/new                     ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
-POST     /procureunit/{id}                                  ProcureUnits.update
+POST    /procureunit/{id}                                   ProcureUnits.update
 POST    /procureunits/updateprocess/{id}                    ProcureUnits.updateprocess
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
@@ -99,6 +99,9 @@ GET     /procureunit/{id}/delivery                          ProcureUnits.deliver
 DELETE  /procureunit/{id}/delivery                          ProcureUnits.reverDelivery
 GET     /procureunits/downloadFBAZIP                        ProcureUnits.downloadFBAZIP
 GET     /procureunits/exportlogs                            ProcureUnits.exportLogs
+
+# Inbounds
+GET     /inbounds/edit/{id}                                 Inbounds.edit
 
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip

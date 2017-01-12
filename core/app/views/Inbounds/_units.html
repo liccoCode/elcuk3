@@ -7,7 +7,7 @@
       </label>
     </th>
   #{/if}
-    <th width="30px;">ID</th>
+    <th width="30px;">#</th>
     <th width="40px;">采购计划ID</th>
     <th width="80px;">采购单</th>
     <th width="120px;">Selling</th>
@@ -33,7 +33,7 @@
 
 #{list items:units, as:'unit'}
     #{if !is_check}
-      <tr class="text-center">
+      <tr id="inboundUnit_${unit.id}">
         <td>
           <input type="checkbox" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">

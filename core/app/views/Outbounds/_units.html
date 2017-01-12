@@ -25,7 +25,7 @@
     <th>阶段</th>
   </tr>
 #{list items:units, as:'unit'}
-  <tr class="text-center">
+  <tr class="text-center" id="unit_${unit.id}">
       #{if is_check}
         <td>
           <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">

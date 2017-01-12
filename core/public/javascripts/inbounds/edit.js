@@ -206,6 +206,13 @@ $(() => {
     }
   });
 
+  let inboundUnitId = window.location.hash.slice(1);
+  let targetTr = $("#inboundUnit_" + inboundUnitId);
+  if (targetTr.size() > 0) {
+    EF.scoll(targetTr)
+    EF.colorAnimate(targetTr)
+  }
+
 });
 
 const attrsFormat = {

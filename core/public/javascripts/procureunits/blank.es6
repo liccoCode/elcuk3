@@ -243,4 +243,12 @@ $(() => {
     }
   }
 
+  let unitId = window.location.hash.slice(1);
+  let targetTr = $("#unit_" + unitId);
+  if (targetTr.size() > 0) {
+    EF.scoll(targetTr)
+    EF.colorAnimate(targetTr)
+  }
+
+
 });
