@@ -9,6 +9,7 @@
     <th style="width:80px;">去往仓库</th>
     <th style="width:80px;">状态</th>
     <th style="width:120px;">预计开始时间</th>
+    <th style="width:6%;">实际完成天数</th>
     <th style="width:120px;">创建时间</th>
     <th style="width:120px;">预计到库时间</th>
     <th style="width:30px;">创建者</th>
@@ -36,11 +37,11 @@
     <td>${ship.wname}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
+    <td>${ship.realDay}</td>
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.uname}</td>
     <td><a target="_blank" href="@{Outbounds.edit(ship.outId)}">${ship.outId}</a></td>
   </tr>
-
 #{/list}
 </table>
