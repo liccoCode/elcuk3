@@ -2400,6 +2400,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             /**如果父采购计划是采购中，入库中才能修改**/
             if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage)) {
                 return false;
+            } else if(this.parent.stage == STAGE.PROCESSING) {
+                /*父节点为仓库加工不能修改数量*/
+                return true;
             }
             return this.stage != this.parent.stage;
         }
