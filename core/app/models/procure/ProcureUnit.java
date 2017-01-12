@@ -2386,6 +2386,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return true;
         }
         if(this.parent != null) {
+            /**如果父采购计划是采购中，入库中才能修改**/
+            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage)) {
+                return false;
+            }
             return this.stage != this.parent.stage;
         }
         return false;
