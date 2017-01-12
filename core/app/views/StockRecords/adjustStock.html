@@ -41,7 +41,7 @@
         <td><input type="text" value="${unit.availableQty}" readonly></td>
         <th>调整类型</th>
         <td>
-          <select>
+          <select name="record.category">
               #{list items:models.whouse.StockRecord.C, as:'c'}
                 <option value="${c.name()}">${c.label()}</option>
               #{/list}

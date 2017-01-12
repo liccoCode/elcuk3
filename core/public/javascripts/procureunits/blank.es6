@@ -49,7 +49,7 @@ $(() => {
   });
 
   $("#planQty,#availableQty").change(function() {
-    if ($(this).val() < $(this).data("origin")) {
+    if ($(this).val() < $(this).data("origin") && $("#unit_type").val()!='StockSplit') {
       $("#return_tr").show();
     } else {
       $("#return_tr").hide();
