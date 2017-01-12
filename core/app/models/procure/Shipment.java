@@ -13,6 +13,7 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
 import models.whouse.Outbound;
+import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -412,6 +413,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Transient
     public String iExpressName;
 
+    /**
+     * 完成天数
+     * 完成时间 - 开始运输时间
+     */
+    @Transient
+    public Integer realDay;
+
     @Transient
     public String applyId;
 
@@ -629,8 +637,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "没有运输项目可以运输.");
         }
         for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
-                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage)) {
+            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY).contains(itm.unit.stage)) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
             }
             if(!itm.unit.isPlaced) {
@@ -1435,13 +1442,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     private List<String> fixNullStr(List<String> target) {
-        Iterator<String> iterator = target.iterator();
-        while(iterator.hasNext()) {
-            String p = iterator.next();
-            if(null == p) {
-                iterator.remove();
-            }
-        }
+        target.removeIf(Objects::isNull);
         return target;
     }
 
@@ -1620,6 +1621,31 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.validate();
         Validation.current().valid(this);
+    }
+
+    /**
+     * 初始化出库信息
+     */
+    public void initOutbound() {
+        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
+        if(this.items != null && !this.items.isEmpty()) {
+            for(ShipItem item : this.items) {
+                ShipPlan plan = new ShipPlan(item);
+                plan.valid();
+                if(!plan.exist() && !Validation.hasErrors()) {
+                    plan.save();
+                    plan.triggerRecord(cooperator != null ? cooperator.id.toString() : "");
+                }
+            }
+        }
+    }
+
+    public String showRealDay() {
+        if(this.dates.beginDate != null && this.dates.arriveDate != null) {
+            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime())/1000/3600/24;
+            return day + "";
+        }
+        return "";
     }
 
 }

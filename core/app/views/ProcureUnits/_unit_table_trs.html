@@ -21,21 +21,21 @@
 <tr>
 #{set copers:product.cooperators() /}
   <th><i class="icon-asterisk" style="color:red"></i>
-  #{if Arrays.asList(models.procure.ProcureUnit.STAGE.IN_STORAGE, models.procure.ProcureUnit.STAGE.PROCESSING).contains(unit.stage)}
+  #{if Arrays.asList('IN_STORAGE', 'PROCESSING').contains(unit.stage.name())}
     库存数量
   #{/if}
   #{else }采购数量#{/else}
   </th>
   <td colspan="3">
-  #{if Arrays.asList(models.procure.ProcureUnit.STAGE.IN_STORAGE, models.procure.ProcureUnit.STAGE.PROCESSING).contains(unit.stage)}
+  #{if Arrays.asList('IN_STORAGE', 'PROCESSING').contains(unit.stage.name())}
     <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
-           value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isParentUnit()} readonly#{/if}>
+           value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isEditInput()} readonly#{/if}>
   #{/if}
   #{else }
     <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" id="planQty" required
-           value="${unit.attrs.planQty}" data-origin="${unit.attrs.planQty}"  #{if unit.isParentUnit()} readonly#{/if}>
+           value="${unit.attrs.planQty}" data-origin="${unit.attrs.planQty}"  #{if unit.isEditInput()} readonly#{/if}>
   #{/else}
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isParentUnit()} readonly#{/if}>
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isEditInput()} readonly#{/if}>
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
     <select name="unit.cooperator.id" native='true' required>
@@ -135,11 +135,12 @@
   <th>阶段</th>
   <td>
     <span style="color:${unit.stage.rgb()}">${unit.stage.label()}</span>
+    <input type="hidden" name="unit.stage" value="${unit.stage.name()}">
   </td>
   <th>B2B选项</th>
   <td>
     <label class="checkbox inline">
-      <input type="checkbox" name="unit.isb2b" value="true"> B2B
+      <input type="checkbox" name="unit.isb2b" value="true" ${unit.projectName=='B2B' ? 'checked':''}> B2B
     </label>
   </td>
 </tr>

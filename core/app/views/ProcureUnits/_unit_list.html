@@ -129,7 +129,14 @@
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
-        <td>${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}</td>
+        <td>
+            #{if unit.type?.name() == 'StockSplit'}
+              0
+            #{/if}
+            #{else }
+            ${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
+            #{/else}
+        </td>
       #{/ifnot}
     <td>
       <!-- FnSku 下载 Label -->

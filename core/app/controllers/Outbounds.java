@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Webs;
+import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -67,6 +68,7 @@ public class Outbounds extends Controller {
     }
 
     public static void update(Outbound outbound) {
+        outbound.projectName = outbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         outbound.save();
         flash.success("更新成功!");
         index(new OutboundPost());

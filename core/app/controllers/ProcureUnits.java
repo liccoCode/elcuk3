@@ -82,7 +82,11 @@ public class ProcureUnits extends Controller {
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
-        if(p == null) p = new ProcurePost();
+        if(p == null) {
+            p = new ProcurePost();
+            p.stages.add(ProcureUnit.STAGE.PLAN);
+            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+        }
         render(p);
     }
 
@@ -90,7 +94,9 @@ public class ProcureUnits extends Controller {
     public static void indexWhouse(ProcurePost p) {
         if(p == null) {
             p = new ProcurePost();
-            p.stage = ProcureUnit.STAGE.DELIVERY;
+            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+            p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
+            p.stages.add(ProcureUnit.STAGE.PROCESSING);
         }
         render(p);
     }
@@ -323,7 +329,7 @@ public class ProcureUnits extends Controller {
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        if(Arrays.asList(ProcureUnit.STAGE.IN_STORAGE,ProcureUnit.STAGE.PROCESSING).contains(managedUnit.stage)) {
+        if(Arrays.asList(ProcureUnit.STAGE.IN_STORAGE, ProcureUnit.STAGE.PROCESSING).contains(managedUnit.stage)) {
             managedUnit.stockUpdate(unit, shipmentId, msg);
         } else {
             managedUnit.update(unit, shipmentId, msg);
@@ -332,7 +338,7 @@ public class ProcureUnits extends Controller {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
             List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
-            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
+            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses, msg);
         }
         flash.success("成功修改采购计划!", id);
         edit(id);
@@ -760,22 +766,23 @@ public class ProcureUnits extends Controller {
 
         for(ProcureUnit child : child_units) {
             if(child.stage == ProcureUnit.STAGE.DELIVERY) {
-                totalPlanQty += child.attrs.planQty == null ? 0 : child.attrs.planQty;
                 totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
-                totalInboundQty += child.inboundQty;
             }
-            if(child.type != null && child.type == ProcureUnit.T.ProcureSplit) {
-                if(map.containsKey(child.attrs.currency)) {
-                    float current = map.get(child.attrs.currency);
-                    map.put(child.attrs.currency, current + child.appliedAmount());
-                } else {
-                    map.put(child.attrs.currency, child.appliedAmount());
+            if(child.type != null) {
+                if(child.type == ProcureUnit.T.ProcureSplit) {
+                    if(map.containsKey(child.attrs.currency)) {
+                        float current = map.get(child.attrs.currency);
+                        map.put(child.attrs.currency, current + child.appliedAmount());
+                    } else {
+                        map.put(child.attrs.currency, child.appliedAmount());
+                    }
+                    totalPlanQty += child.attrs.planQty == null ? 0 : child.attrs.planQty;
+                    totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
+                    totalInboundQty += child.inboundQty;
                 }
             }
         }
-
         renderArgs.put("logs", ElcukRecord.records(id.toString(), Arrays.asList("procureunit.split"), 50));
-
         render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
     }
 
