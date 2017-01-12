@@ -162,6 +162,8 @@ public class StockRecord extends Model {
     @Expose
     public Date updateDate;
 
+    public String memo;
+
     public StockRecord() {
         this.updateDate = new Date();
     }

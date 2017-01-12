@@ -1,6 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:'ProcureUnit #' + unit.id + ' 历史变更详情' /}
 #{set 'moreScripts'}
+    #{script 'procureunits/blank.es6'/}
 #{/set}
 <style>
   .table td, .table th{
@@ -58,7 +59,7 @@
       <th>出库时间</th>
       <th>项目名称</th>
     </tr>
-    <tr>
+    <tr id="unit_${unit.id}">
       <td>${unit.id}</td>
       <td>${unit.selling?.sellingId}</td>
       <td>${unit.product?.sku}</td>
@@ -120,7 +121,7 @@
       <th>项目名称</th>
     </tr>
   #{list items:child_units, as:'u'}
-    <tr>
+    <tr id="unit_${u.id}">
       <td>${u.id}</td>
       <td>${u.selling?.sellingId}</td>
       <td>${u.product?.sku}</td>
