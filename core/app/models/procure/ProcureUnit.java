@@ -826,6 +826,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(unit.availableQty <= 0)
                 Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
         }
+        if(unit.selling == null) {
+            Validation.addError("", "分拆的子采购计划必须要有selling！");
+        }
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
@@ -2383,6 +2386,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return true;
         }
         if(this.parent != null) {
+            /**如果父采购计划是采购中，入库中才能修改**/
+            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage)) {
+                return false;
+            }
             return this.stage != this.parent.stage;
         }
         return false;
