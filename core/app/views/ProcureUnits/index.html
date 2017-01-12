@@ -1,8 +1,13 @@
 #{extends 'main_full.html' /}
 #{set title:"采购单元列表 (${p.count()})"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
 #{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
 <style>
@@ -44,15 +49,6 @@
         #{/list}
         </select>
 
-        <select name="p.stage" class="inline" style="width:82px;">
-          <option value="">阶段</option>
-        #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
-            #{if stage.label() != '审批中'}
-              <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
-            #{/if}
-        #{/list}
-        </select>
-
         <select name="p.shipType" class="inline" style="width:82px;">
           <option value="">运输方式</option>
         #{list items:models.procure.Shipment.T.values(), as:'t'}
@@ -66,6 +62,16 @@
           <option ${c == p.isConfirm ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
         #{/list}
         </select>
+
+        <div class="input-prepend inline">
+          <select name="p.stages" multiple="multiple" id="stage">
+          #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+              #{if stage.label() != '审批中'}
+                <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+              #{/if}
+          #{/list}
+          </select>
+        </div>
 
         <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
@@ -129,7 +135,7 @@
 
   <div class="row-fluid">
     <div class="span12">
-    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
+    #{if p.stages.contains(models.procure.ProcureUnit.STAGE.PLAN)}
         #{power.ck "procures.createdeliveryment"}
           <div class="input-append">
             <input type="text" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
@@ -140,7 +146,7 @@
         #{/power.ck}
     #{/if}
 
-    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+    #{if p.stages.contains(models.procure.ProcureUnit.STAGE.DELIVERY)}
       <div class="input-append">
         <input type="text" id="name_deliverplan" name="deliverName" value="${name}" placeHolder="出货单的别名(必须)">
         <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>

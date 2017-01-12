@@ -82,7 +82,11 @@ public class ProcureUnits extends Controller {
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
-        if(p == null) p = new ProcurePost();
+        if(p == null) {
+            p = new ProcurePost();
+            p.stages.add(ProcureUnit.STAGE.PLAN);
+            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+        }
         render(p);
     }
 
@@ -90,7 +94,9 @@ public class ProcureUnits extends Controller {
     public static void indexWhouse(ProcurePost p) {
         if(p == null) {
             p = new ProcurePost();
-            p.stage = ProcureUnit.STAGE.DELIVERY;
+            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+            p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
+            p.stages.add(ProcureUnit.STAGE.PROCESSING);
         }
         render(p);
     }

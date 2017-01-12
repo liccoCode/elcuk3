@@ -47,7 +47,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public long whouseId;
     public long cooperatorId;
-    public ProcureUnit.STAGE stage;
+    public List<ProcureUnit.STAGE> stages = new ArrayList<>();
     public PLACEDSTATE isPlaced;
     public Shipment.T shipType;
     public String unitIds;
@@ -122,14 +122,14 @@ public class ProcurePost extends Post<ProcureUnit> {
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.stage = ProcureUnit.STAGE.DONE;
+        this.stages.add(ProcureUnit.STAGE.DONE);
         this.dateType = "createDate";
         this.perSize = 70;
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {
         this();
-        this.stage = stage;
+        this.stages.add(stage);
     }
 
     public Long getTotalCount() {
@@ -187,9 +187,8 @@ public class ProcurePost extends Post<ProcureUnit> {
             params.add(this.cooperatorId);
         }
 
-        if(this.stage != null) {
-            sbd.append(" AND stage=? ");
-            params.add(this.stage);
+        if(stages.size() > 0) {
+            sbd.append(" AND stage IN " + SqlSelect.inlineParam(stages));
         }
         sbd.append(" AND stage != 'APPROVE'");
 

@@ -77,5 +77,12 @@ $(() => {
     return true;
   }
 
+  $("#stage").multiselect({
+    buttonWidth: '120px',
+    nonSelectedText: '状态',
+    maxHeight: 200,
+    includeSelectAllOption: true
+  });
+
 });
 
