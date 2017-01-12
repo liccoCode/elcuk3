@@ -67,7 +67,7 @@ public class StockRecordPost extends Post<StockRecord> {
         }
 
         if(this.whouse != null && this.whouse.id != null) {
-            sbd.append(" AND s.whouse_id=?");
+            sbd.append(" AND s.whouse.id=?");
             params.add(this.whouse.id);
         }
 
