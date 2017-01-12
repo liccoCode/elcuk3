@@ -67,7 +67,7 @@ $ ->
     if tr.next("tr").find("td").find("div").length > 0
       tr.next("tr").toggle()
     else
-      tr.after("<tr><td colspan='12'><div><h4 class='text-info'>Comment</h4>#{memo}</div><hr><div id='div#{format_id}'></div></td></tr>")
+      tr.after("<tr><td colspan='13'><div><h4 class='text-info'>Comment</h4>#{memo}</div><hr><div id='div#{format_id}'></div></td></tr>")
       $("#div" + format_id).load("/Shipments/showProcureUnitList", id: shipment_id)
   )
 
