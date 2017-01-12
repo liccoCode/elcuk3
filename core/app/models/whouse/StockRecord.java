@@ -97,6 +97,60 @@ public class StockRecord extends Model {
         public abstract String label();
     }
 
+    public enum C {
+        Check {
+            @Override
+            public String label() {
+                return "盘点";
+            }
+        },
+        Normal {
+            @Override
+            public String label() {
+                return "Amazon 出库";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B 出库";
+            }
+        },
+        Refund {
+            @Override
+            public String label() {
+                return "退回工厂";
+            }
+        },
+        Process {
+            @Override
+            public String label() {
+                return "品拓生产";
+            }
+        },
+        Sample {
+            @Override
+            public String label() {
+                return "取样";
+            }
+        },
+        Other {
+            @Override
+            public String label() {
+                return "其他出库";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 类别
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public C category;
+
     /**
      * 记录 ID(入库 Or 出库)
      */

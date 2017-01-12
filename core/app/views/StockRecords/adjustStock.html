@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'库存调整' /}
 #{set 'moreScripts'}
-    #{script 'inbounds/edit.js'/}
+  #{script 'stockrecords/adjust.es6'/}
 #{/set}
 <style>
   .table td{
@@ -21,7 +21,7 @@
   <div class="span12">
     <table class="table table-bordered">
       <tr>
-        <th>收货入库单ID</th>
+        <th>库存调整ID</th>
         <td>
           <input type="text" name="record.id" value="${record.id}" readonly>
         </td>
@@ -40,11 +40,19 @@
         <th>当前库存</th>
         <td><input type="text" value="${unit.availableQty}" readonly></td>
         <th>调整类型</th>
-        <td><input type="text" value="${models.whouse.StockRecord.T.Stocktaking.label()}" readonly></td>
+        <td>
+          <select>
+              #{list items:models.whouse.StockRecord.C, as:'c'}
+                <option value="${c.name()}">${c.label()}</option>
+              #{/list}
+          </select>
+        </td>
       </tr>
       <tr>
         <th>调整数量<i class="icon-asterisk" style="color:red"></i></th>
-        <td colspan="3"><input type="text" name="record.qty" value="" placeholder="请填写 ± 数值" required></td>
+        <td colspan="3">
+          <input type="text" name="record.qty" placeholder="请填写 ± 数值" data-max="${unit.availableQty}" required>
+        </td>
       </tr>
       <tr>
         <th>备注</th>

@@ -15,17 +15,17 @@
 <div class="row-fluid">
   <form action="@{StockRecords.stockIndex()}" method="get" class="search_form" id="search_Form">
     <div class="span12">
-      <select name="p.whouse" class="inline " style="width:150px;">
+      <select name="p.whouse.id" class="inline " style="width:150px;">
         <option value="">仓库</option>
       #{list items:whouses, as:'w'}
-        <option value="${w.id}">${w.name}</option>
+        <option value="${w.id}" ${p.whouse?.id==w.id? 'selected' : ''}>${w.name}</option>
       #{/list}
       </select>
 
       <select name="p.projectName" class="inline">
         <option value="">项目名称</option>
-        <option value="EASYACC">EASYACC</option>
-        <option value="B2B">B2B</option>
+        <option value="EASYACC" ${p.projectName=='EASYACC'?'selected':''}>EASYACC</option>
+        <option value="B2B" ${p.projectName=='B2B'?'selected':''}>B2B</option>
       </select>
 
       <div class="input-prepend input-append inline">
@@ -58,7 +58,7 @@
       <tr>
         <td>${u.currWhouse?.name}</td>
         <td>${u.id}</td>
-        <td>${u.selling}</td>
+        <td>${u.selling?.sellingId}</td>
         <td>${u.sku}</td>
         <td title="${u.product?.abbreviation}">${u.product?.abbreviation.overLong()}</td>
         <td>${u.inboundQty}</td>

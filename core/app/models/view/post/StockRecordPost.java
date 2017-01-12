@@ -48,6 +48,12 @@ public class StockRecordPost extends Post<StockRecord> {
         sbd.append(" WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
+        if(this.unitId != null) {
+            sbd.append(" AND s.unit.id = ?");
+            params.add(this.unitId);
+            return new F.T2<>(sbd.toString(), params);
+        }
+
         if(StringUtils.isNotEmpty(this.search)) {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
