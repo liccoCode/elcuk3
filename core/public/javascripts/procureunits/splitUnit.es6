@@ -137,6 +137,13 @@ $(() => {
       });
       $(this).val(0);
     }
+    if ($(this).val() < 0) {
+      noty({
+        text: "分拆数量不能小于0",
+        type: 'error'
+      });
+      $(this).val(0);
+    }
   });
 
 });

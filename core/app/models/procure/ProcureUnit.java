@@ -750,6 +750,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.planstage = PLANSTAGE.PLAN;
         newUnit.shipType = unit.shipType;
         newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.originQty = unit.attrs.planQty;
         newUnit.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         newUnit.attrs.planShipDate = unit.attrs.planShipDate;
         newUnit.attrs.planArrivDate = unit.attrs.planArrivDate;
@@ -995,7 +996,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)) {
+            Validation.addError("", "请选择运输单！");
+        }
+        if(StringUtils.isNotEmpty(shipmentId)) {
+            Shipment shipment = Shipment.findById(shipmentId);
+            if(!shipment.type.name().equals(unit.shipType.name())) {
+                Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
+            }
+        }
         if(Validation.hasErrors()) return;
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
+        }
+        if(Validation.hasErrors()) return;
+
         List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             if(this.parent != null && unit.isReturn) {
@@ -1009,16 +1025,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
-        // 2
-        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(
-                    StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
-                    oldShipType);
-        }
-        if(Validation.hasErrors()) return;
-
         if(logs.size() > 0) {
             if(StringUtils.isBlank(reason)) {
                 new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
@@ -1057,9 +1066,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)) {
+            Validation.addError("", "请选择运输单！");
+        }
+        if(StringUtils.isNotEmpty(shipmentId)) {
+            Shipment shipment = Shipment.findById(shipmentId);
+            if(!shipment.type.name().equals(unit.shipType.name())) {
+                Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
+            }
+        }
+        if(Validation.hasErrors()) return;
         List<String> logs = new ArrayList<>();
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         if(Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
             this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
                     oldShipType);
@@ -1077,6 +1097,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(logs.size() > 0)
             this.stage = STAGE.PROCESSING;
         logs.addAll(this.afterDoneUpdate(unit));
+        this.attrs.planQty = this.availableQty;
+        this.attrs.qty = this.availableQty;
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
                     this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
@@ -1143,7 +1165,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     private List<String> afterDoneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(Reflects.logFieldFade(this, "attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
         logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
@@ -2356,13 +2377,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return null;
     }
 
-    public boolean isParentUnit() {
-        return ProcureUnit.find("parent.id =?", this.id).fetch().size() > 0;
-    }
-
-    public boolean isEdit() {
-
-
+    public boolean isEditInput() {
+        int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
+        if(size > 0) {
+            return true;
+        }
+        if(this.parent != null) {
+            return this.stage != this.parent.stage;
+        }
         return false;
     }
 
