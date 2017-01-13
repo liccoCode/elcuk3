@@ -1021,12 +1021,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(Validation.hasErrors()) return;
-        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
-                    oldShipType);
-        }
-        if(Validation.hasErrors()) return;
-
         List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             if(this.parent != null && unit.isReturn) {
@@ -1040,6 +1034,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
+        if(Validation.hasErrors()) return;
+        if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
+        }
+
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
@@ -1096,10 +1096,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        if(Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
-            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
-                    oldShipType);
-        }
         if(Validation.hasErrors()) return;
         //仓库加工修改
         if(this.parent != null && unit.isReturn) {
@@ -1110,6 +1106,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         logs.addAll(this.changeStageUpdate(unit));
+        if(Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
+        }
         if(logs.size() > 0)
             this.stage = STAGE.PROCESSING;
         logs.addAll(this.afterDoneUpdate(unit));

@@ -13,7 +13,7 @@
     <th>SKU</th>
     <td>
       <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}"
-                 value="${unit.product?.sku}" id="unit_sku" readonly= true>
+             value="${unit.product?.sku}" id="unit_sku" readonly=true>
     </td>
 
     <th>供应商</th>
@@ -36,8 +36,9 @@
     <th>采购数量</th>
     <td>
       <div class="input-append">
-        <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
-        <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+        <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
+            #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
+        <input type="text" id="box_num" class="input-mini" placeHolder="箱数" #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
         <span class="add-on">箱</span>
       </div>
       <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
