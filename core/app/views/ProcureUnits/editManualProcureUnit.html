@@ -37,7 +37,7 @@
     <td>
       <div class="input-append">
         <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
-            #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
+            #{if unit.isManualEdit()} readonly #{/if}>
         <input type="text" id="box_num" class="input-mini" placeHolder="箱数" #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
         <span class="add-on">箱</span>
       </div>

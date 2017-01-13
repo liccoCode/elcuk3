@@ -2414,4 +2414,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return false;
     }
 
+    public boolean isManualEdit() {
+        if(this.stage != STAGE.DELIVERY) {
+            return true;
+        }
+        int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
+        if(size > 0) {
+            return true;
+        }
+        return false;
+    }
+
 }
