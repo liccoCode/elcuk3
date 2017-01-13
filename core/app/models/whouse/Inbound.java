@@ -166,18 +166,20 @@ public class Inbound extends GenericModel {
 
     public void create(List<InboundUnit> units) {
         for(InboundUnit u : units) {
-            u.inbound = this;
-            u.unit = ProcureUnit.findById(u.unitId);
-            u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
-            if(this.type == T.Machining) {
-                u.status = InboundUnit.S.Receive;
-                u.result = InboundUnit.R.Qualified;
-                u.qualifiedQty = u.qty;
-                u.inboundQty = u.qty;
-            } else {
-                u.status = InboundUnit.S.Create;
+            if(u != null) {
+                u.inbound = this;
+                u.unit = ProcureUnit.findById(u.unitId);
+                u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
+                if(this.type == T.Machining) {
+                    u.status = InboundUnit.S.Receive;
+                    u.result = InboundUnit.R.Qualified;
+                    u.qualifiedQty = u.qty;
+                    u.inboundQty = u.qty;
+                } else {
+                    u.status = InboundUnit.S.Create;
+                }
+                u.save();
             }
-            u.save();
         }
     }
 
