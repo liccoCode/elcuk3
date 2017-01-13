@@ -925,28 +925,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             FBAShipment fba = FBA.plan(this.selling.account, this);
             return fba.save();
         } catch(FBAInboundServiceMWSException e) {
-            String errMsg = e.getMessage();
-            if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
-                Validation.addError("",
-                        String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查: " +
-                                        "1. Amazon sellercentral 是否存在 MSKU 为 [%s] 的 Listing? " +
-                                        "2. Selling[%s] 的 Merchant SKU 属性 %s 是否正确?(正确的格式应该为 [SKU,UPC])",
-                                this.selling.merchantSKU,
-                                this.selling.sellingId,
-                                this.selling.merchantSKU));
-            } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
-                Validation.addError("", String.format(
-                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 在 Amazon 后台的 Listing 的尺寸是否正确填写(数值和单位).",
-                        this.selling.merchantSKU));
-            } else if(errMsg.contains("ANDON_PULL_STRIKE_ONE")) {
-                Validation.addError("", String.format(
-                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 市场 [%s] 的其他的 FBA 是否报告了异常.",
-                        this.selling.market.name(), this.selling.merchantSKU));
-            } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 创建 Shipment PLAN 失败, 请检查 FBA 仓库库存容量.");
-            } else {
-                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
-            }
+            FBA.FBA_ERROR_TYPE errorType = FBA.fbaErrorFormat(e);
+            Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, %s", errorType.message()));
             return null;
         }
     }
