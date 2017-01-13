@@ -5,9 +5,11 @@ import helper.Currency;
 import helper.J;
 import helper.Webs;
 import models.finance.Payment;
+import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.Ret;
+import models.view.post.PaymentUnitPost;
 import models.view.post.PaymentsPost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
@@ -29,7 +31,7 @@ import java.util.List;
  * Date: 1/24/13
  * Time: 4:43 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Payments extends Controller {
 
     @Before(only = {"index"})
@@ -60,9 +62,12 @@ public class Payments extends Controller {
     }
 
     @Check("payments.show")
-    public static void show(Long id) {
+    public static void show(Long id, Integer p) {
+        if(p == null) p = 1;
         Payment payment = Payment.findById(id);
-        render(payment);
+        PaymentUnitPost post = new PaymentUnitPost(id, p);
+        List<PaymentUnit> units = post.query();
+        render(payment, units, p, post);
     }
 
     /**
@@ -75,7 +80,7 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("成功锁定, 新请款不会再进入这个付款单.");
-        show(id);
+        show(id, null);
     }
 
     public static void unlock(Long id) {
@@ -85,7 +90,7 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("成功解锁, 新请款可以再次进入这个付款单.");
-        show(id);
+        show(id, null);
     }
 
     /**
@@ -106,7 +111,7 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            show(id);
+            show(id, null);
         }
 
         payment.payIt(paymentTargetId, currency, ratio, ratio_publish_date, actualPaid);
@@ -115,7 +120,7 @@ public class Payments extends Controller {
         else
             flash.success("支付成功.");
 
-        show(id);
+        show(id, null);
     }
 
     @Check("payments.shouldpaidupdate")
@@ -155,7 +160,7 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("付款单取消成功.");
-        show(id);
+        show(id, null);
     }
 
 
