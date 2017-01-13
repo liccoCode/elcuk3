@@ -79,7 +79,7 @@ public class PaymentUnits extends Controller {
                 Webs.errorToFlash(flash);
             else
                 flash.success("成功驳回");
-            Payments.show(paymentUnit.payment.id);
+            Payments.show(paymentUnit.payment.id, null);
         }
     }
 
@@ -118,7 +118,7 @@ public class PaymentUnits extends Controller {
             Validation.addError("", "请选择需要批准的请款");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            Payments.show(id);
+            Payments.show(id, null);
         }
 
         payment.unitsApproval(paymentUnitIds);
@@ -127,7 +127,7 @@ public class PaymentUnits extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("批复成功");
-        Payments.show(id);
+        Payments.show(id, null);
     }
 
     /**
