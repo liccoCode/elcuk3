@@ -2403,6 +2403,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             } else if(this.parent.stage == STAGE.PROCESSING) {
                 /*父节点为仓库加工不能修改数量*/
                 return true;
+            } else if(T.ProcureSplit == this.type && this.stage == STAGE.IN_STORAGE) {
+                return true;
             }
             return this.stage != this.parent.stage;
         }
