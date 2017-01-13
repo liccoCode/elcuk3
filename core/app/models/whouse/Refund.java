@@ -187,8 +187,10 @@ public class Refund extends GenericModel {
         this.creator = Login.current();
         this.save();
         for(RefundUnit unit : list) {
-            unit.refund = this;
-            unit.save();
+            if(unit != null) {
+                unit.refund = this;
+                unit.save();
+            }
         }
     }
 

@@ -211,10 +211,12 @@ public class Outbound extends GenericModel {
         this.projectName = this.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         this.save();
         for(Long id : pids) {
-            ProcureUnit unit = ProcureUnit.findById(id);
-            unit.outbound = this;
-            unit.outQty = unit.availableQty;
-            unit.save();
+            if(id != null) {
+                ProcureUnit unit = ProcureUnit.findById(id);
+                unit.outbound = this;
+                unit.outQty = unit.availableQty;
+                unit.save();
+            }
         }
     }
 
