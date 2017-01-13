@@ -1010,7 +1010,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
-        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)) {
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
+                && unit.shipType.name() != "EXPRESS") {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1080,7 +1081,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
-        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)) {
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
+                && unit.shipType.name() != "EXPRESS") {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -2398,7 +2400,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         if(this.parent != null) {
             /**如果父采购计划是采购中，入库中才能修改**/
-            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage) && T.StockSplit == this.type) {
+            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage) &&
+                    T.StockSplit == this.type) {
                 return false;
             } else if(this.parent.stage == STAGE.PROCESSING) {
                 /*父节点为仓库加工不能修改数量*/
