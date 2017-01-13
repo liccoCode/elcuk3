@@ -49,9 +49,11 @@ $(() => {
     if ($btn.attr("id") == 'createOutboundBtn') {
       let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
       let o = 0;
-      if ($(this).attr("whouse") != firstWhouse) {
-        i++;
-      }
+      $("input[name='pids']:checked").each(function() {
+        if ($(this).attr("whouse") != firstWhouse) {
+          o++;
+        }
+      });
       if (o > 0) {
         noty({
           text: '请选择【目的国家】一致的采购计划！',
@@ -63,9 +65,11 @@ $(() => {
 
     if ($btn.attr("id") == 'createRefundBtn') {
       i = 0;
-      if ($(this).attr("stage") != firstStage) {
-        i++;
-      }
+      $("input[name='pids']:checked").each(function() {
+        if ($(this).attr("stage") != firstStage) {
+          i++;
+        }
+      });
       if (i > 0) {
         noty({
           text: '请选择相同【阶段】的采购单元',
