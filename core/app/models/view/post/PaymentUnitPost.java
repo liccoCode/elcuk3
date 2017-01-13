@@ -16,11 +16,11 @@ public class PaymentUnitPost extends Post<PaymentUnit> {
     public Long paymentId;
 
     public PaymentUnitPost() {
-        this.perSize = 50;
+        this.perSize = 100;
     }
 
     public PaymentUnitPost(long paymentId, int page) {
-        this.perSize = 50;
+        this.perSize = 100;
         this.page = page;
         this.paymentId = paymentId;
     }
