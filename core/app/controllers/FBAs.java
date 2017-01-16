@@ -20,7 +20,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -70,11 +72,16 @@ public class FBAs extends Controller {
      */
     public static void plan(Long unitId) {
         ProcureUnit unit = ProcureUnit.findById(unitId);
-        FBAShipment fba = unit.planFBA();
-        renderJSON(J.json(GTs.newMap("fba", GTs.newMap("id", fba.id)
-                .put("shipmentId", fba.shipmentId).put("centerId", fba.centerId)
-                .build()
-        ).put("message", Webs.V(Validation.errors())).build()));
+        Map<String, Object> renderMap = new HashMap();
+        if(unit.postFBAValidate(null)) {
+            FBAShipment fba = unit.planFBA();
+            renderMap.put("fba", GTs.newMap("fba", GTs.newMap("id", fba.id)
+                    .put("shipmentId", fba.shipmentId)
+                    .put("centerId", fba.centerId)
+                    .build()));
+        }
+        renderMap.put("message", Webs.V(Validation.errors()));
+        renderJSON(renderMap);
     }
 
     /**

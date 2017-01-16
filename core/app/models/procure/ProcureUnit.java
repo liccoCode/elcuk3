@@ -909,7 +909,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 通过 ProcureUnit 创建 FBA
      */
     public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
-        if(dto != null && !dto.validedQtys(this.qty())) return null;
+        this.postFBAValidate(dto);
+        if(Validation.hasErrors()) return null;
         FBAShipment fba = this.planFBA();
         this.confirmFBA(fba);
         this.submitFBACartonContent(dto);
@@ -1885,5 +1886,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return J.from(this.fba.fbaCartonContents, CheckTaskDTO.class);
         }
         return null;
+    }
+
+    public boolean postFBAValidate(CheckTaskDTO dto) {
+        if(this.qty() == 0) {
+            Validation.addError("", "数量不允许为 0!");
+        }
+        if(this.selling == null || StringUtils.isBlank(this.selling.merchantSKU)) {
+            Validation.addError("", "Selling(MerchantSKU) 不允许为空!");
+        }
+        if(dto != null) dto.validedQtys(this.qty());
+        return Validation.hasErrors();
     }
 }
