@@ -266,6 +266,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors()) {
             render("Deliveryments/manual.html", dmt, unit);
         }
+        unit.originQty = unit.attrs.planQty;
         unit.save();
 
         dmt.save();

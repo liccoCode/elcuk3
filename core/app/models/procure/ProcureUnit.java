@@ -1441,7 +1441,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public int qty() {
-        if(this.attrs.qty != null) return this.attrs.qty;
+        if(this.attrs.qty != null && this.attrs.qty != 0) return this.attrs.qty;
         return this.attrs.planQty;
     }
 
