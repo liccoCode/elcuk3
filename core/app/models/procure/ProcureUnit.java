@@ -25,6 +25,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1528,7 +1529,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零
-            options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+            options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
 
             //生成箱外卖 PDF
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
