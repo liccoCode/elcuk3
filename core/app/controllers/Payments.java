@@ -16,6 +16,7 @@ import play.Logger;
 import play.cache.CacheFor;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.jobs.Job;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -53,12 +54,23 @@ public class Payments extends Controller {
 
     @CacheFor("5mn")
     public static void bocRates() {
-        renderHtml(Currency.bocRatesHtml());
+        String html = await(new Job<String>() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return Currency.bocRatesHtml();
+            }
+        }.now());
     }
 
     @CacheFor("5mn")
     public static void xeRates(Currency currency) {
-        renderHtml(Currency.xeRatesHtml(currency));
+        String html = await(new Job<String>() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return Currency.xeRatesHtml(currency);
+            }
+        }.now());
+        renderHtml(html);
     }
 
     @Check("payments.show")

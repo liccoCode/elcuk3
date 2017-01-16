@@ -2,6 +2,7 @@ package helper;
 
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -461,7 +462,9 @@ public enum Currency {
     public static String xeRatesHtml(Currency from) {
         String html = HTTP.get("http://www.xe.com/zh-CN/currencytables/?from=" + from.name());
         Document doc = Jsoup.parse(html);
-        Elements trs = doc.select("#historicalRateTbl tr");
+        Elements trs = doc.select("#historicalRateTbl tbody tr");
+        if(trs.isEmpty()) return StringUtils.EMPTY;
+
         for(Element tr : trs.subList(1, trs.size() - 1)) {
             boolean find = false;
             for(Currency c : Currency.values()) {
