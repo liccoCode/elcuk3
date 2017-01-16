@@ -121,14 +121,14 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S create(FBAShipment fbashipment)
+    public static FBAShipment.S create(FBAShipment fbashipment, List<ProcureUnit> units)
             throws FBAInboundServiceMWSException {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
         //TODO effects: 计算 FBA title 算法需要调整
         StringBuilder fbaTitle = new StringBuilder();
         Set<Shipment> shipments = new HashSet<>();
         int qty = 0;
-        for(ProcureUnit unit : fbashipment.units) {
+        for(ProcureUnit unit : units) {
             for(ShipItem item : unit.shipItems) {
                 if(item.shipment == null) continue;
                 shipments.add(item.shipment);
@@ -157,7 +157,7 @@ public class FBA {
 
         // 设置 items
         //TODO effect: 创建 FBA 的算法需要调整
-        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbashipment.units);
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(units);
         create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);

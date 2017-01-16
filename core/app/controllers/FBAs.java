@@ -75,13 +75,13 @@ public class FBAs extends Controller {
         Map<String, Object> renderMap = new HashMap();
         if(unit.postFBAValidate(null)) {
             FBAShipment fba = unit.planFBA();
-            renderMap.put("fba", GTs.newMap("fba", GTs.newMap("id", fba.id)
+            renderMap.put("fba", GTs.newMap("id", fba.id)
                     .put("shipmentId", fba.shipmentId)
                     .put("centerId", fba.centerId)
-                    .build()));
+                    .build());
         }
         renderMap.put("message", Webs.V(Validation.errors()));
-        renderJSON(renderMap);
+        renderJSON(J.json(renderMap));
     }
 
     /**

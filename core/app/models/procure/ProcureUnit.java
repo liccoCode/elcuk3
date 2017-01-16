@@ -942,7 +942,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public FBAShipment confirmFBA(FBAShipment fba) {
         if(fba == null) return fba;
         try {
-            fba.state = FBA.create(fba);
+            fba.state = FBA.create(fba, Collections.singletonList(this));
             this.fba = fba.save();
             this.save();
             new ERecordBuilder("shipment.createFBA").msgArgs(this.id, this.sku, this.fba.shipmentId).fid(this.id).save();
@@ -1896,6 +1896,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "Selling(MerchantSKU) 不允许为空!");
         }
         if(dto != null) dto.validedQtys(this.qty());
-        return Validation.hasErrors();
+        return !Validation.hasErrors();
     }
 }
