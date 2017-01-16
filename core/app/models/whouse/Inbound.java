@@ -187,7 +187,6 @@ public class Inbound extends GenericModel {
      * index页面时间展示格式化
      */
     public void showTime() {
-        Map<String, String> map = new HashMap<>();
         Map<String, String> qcMap = new HashMap<>();
         Map<String, String> inboundMap = new HashMap<>();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -265,11 +264,9 @@ public class Inbound extends GenericModel {
                 u.qcDate = new Date();
                 u.qcUser = Login.current();
                 u.save();
-                if(this.type == T.Purchase) {
-                    ProcureUnit punit = u.unit;
-                    punit.result = u.result;
-                    punit.save();
-                }
+                ProcureUnit punit = u.unit;
+                punit.result = u.result;
+                punit.save();
             }
         }
     }
