@@ -34,7 +34,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Inbounds extends Controller {
 
-    @Before(only = {"index", "edit"})
+    @Before(only = {"index", "edit", "showProcureUnitList"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
