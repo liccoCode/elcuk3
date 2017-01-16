@@ -347,7 +347,8 @@ public class InboundUnit extends Model {
      * @return
      */
     public static boolean vaildIsCreate(Long id) {
-        List<InboundUnit> list = InboundUnit.find("unit.id = ? ", id).fetch();
+        List<InboundUnit> list = InboundUnit.find("unit.id = ? AND inbound.status <> '" + Inbound.S.End + "'", id)
+                .fetch();
         return list.size() == 0;
     }
 
