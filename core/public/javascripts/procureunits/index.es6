@@ -39,13 +39,14 @@ $(() => {
         j++;
       }
     });
-    if (i > 0 || j > 0) {
+    if ((i > 0 || j > 0 ) && $btn.attr("id") != 'createOutboundBtn') {
       noty({
         text: '请选择【供应商】【项目名称】一致的采购计划！',
         type: 'error'
       });
       return false;
     }
+
     if ($btn.attr("id") == 'createOutboundBtn') {
       let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
       let o = 0;

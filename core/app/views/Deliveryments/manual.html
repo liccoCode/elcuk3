@@ -1,16 +1,14 @@
 #{extends 'main.html' /}
 #{set title:'新增手动单' /}
 #{set 'moreScripts'}
-    #{script 'deliveryments/manual.coffee'/}
+    #{script 'deliveryments/manual.es6'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert/}
 
+#{info_row title:'手动添加采购单'/}
 #{form @Deliveryments.createManual(), method: 'POST',id: 'new_procureunit'}
-<h4>手动添加采购单</h4>
-
     #{set copers:unit.product?.cooperators() /}
-
 <table class="table table-condensed table-bordered">
   <tr>
     <th>采购单别名</th>
@@ -21,16 +19,19 @@
     <th>SKU</th>
     <td>
       <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${skus}"
-             value="${unit.product?.sku}" id="unit_sku">
+             value="${unit.product?.sku}" id="unit_sku" autocomplete="off">
     </td>
   </tr>
 
   <tr>
     <th>供应商</th>
     <td>
-        #{select 'dmt.cooperator.id', items: copers, labelProperty: 'name', value: dmt.cooperator?.id, native: true}
-            #{option ''}请选择#{/option}
-        #{/select}
+      <select name="dmt.cooperator.id">
+        <option value="">请选择</option>
+          #{list items:copers, as:'c'}
+            <option value="${c.id}">${c.name}</option>
+          #{/list}
+      </select>
       <input type="hidden" name="dmt.id" value="${dmt.id}">
     </td>
 
@@ -57,8 +58,17 @@
 
     <th>预计交货日期</th>
     <td colspan="4">
-      <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+      <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}"
+             autocomplete="off">
       <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
+    </td>
+  </tr>
+  <tr>
+    <th>B2B选项</th>
+    <td colspan="3">
+      <label class="checkbox inline">
+        <input type="checkbox" name="unit.isb2b" value="true">B2B
+      </label>
     </td>
   </tr>
 

@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
@@ -257,6 +258,7 @@ public class Deliveryments extends Controller {
         unit.handler = user;
         unit.deliveryment = dmt;
         unit.stage = ProcureUnit.STAGE.DELIVERY;
+        unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
 
         dmt.handler = user;
         dmt.state = Deliveryment.S.PENDING;

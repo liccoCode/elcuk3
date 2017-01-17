@@ -117,6 +117,12 @@ public class Inbound extends GenericModel {
             public String label() {
                 return "已结束";
             }
+        },
+        Cancel {
+            @Override
+            public String label() {
+                return "已取消";
+            }
         };
 
 

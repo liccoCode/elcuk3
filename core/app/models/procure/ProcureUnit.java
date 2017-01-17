@@ -1175,7 +1175,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
-        logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         return logs;
     }
 
@@ -1201,19 +1200,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return String
      */
     public String generateProcureUnitStatusInfo() {
-        String paymentInfo = "";
-        PaymentUnit prePay = this.fetchPrePay();
-        PaymentUnit tailPay = this.fetchTailPay();
-        if(prePay != null) {
-            if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
-            if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+        String msg = "";
+        PaymentUnit pre_pay = this.fetchPrePay();
+        PaymentUnit tail_pay = this.fetchTailPay();
+        if(pre_pay != null) {
+            if(pre_pay.state == PaymentUnit.S.APPLY) msg += "已申请预付款";
+            if(pre_pay.state == PaymentUnit.S.PAID) msg += "已付预付款";
         }
-        if(tailPay != null) {
-            if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
-            if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
+        if(tail_pay != null) {
+            if(tail_pay.state == PaymentUnit.S.APPLY) msg += " 已申请尾款";
+            if(tail_pay.state == PaymentUnit.S.PAID) msg += " 已付尾款";
         }
         return String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
-                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
+                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(msg) ? "无" : msg);
     }
 
     /**

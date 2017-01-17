@@ -267,11 +267,11 @@ public class DeliverPlan extends GenericModel {
     }
 
     public String showInbounds() {
-        List<Inbound> list = Inbound.find("plan.id=?", this.id).fetch();
+        List<Inbound> list = Inbound.find("plan.id=? AND status<> ? ", this.id, Inbound.S.Cancel).fetch();
         if(list == null || list.size() == 0) return "";
         String ids = "";
         for(Inbound inbound : list) {
-            ids += inbound.id + ",";
+            ids += inbound.id + "; ";
         }
         return ids;
     }
