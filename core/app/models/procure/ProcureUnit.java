@@ -2410,7 +2410,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             return this.stage != this.parent.stage;
         }
-        return false;
+        if(Arrays.asList(STAGE.PLAN,STAGE.DELIVERY).contains(this.stage))
+            return false;
+        return true;
     }
 
     public boolean isManualEdit() {
