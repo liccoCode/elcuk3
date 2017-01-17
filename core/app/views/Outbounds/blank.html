@@ -118,7 +118,7 @@
     #{info_row title:'已添加进入【出库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-    <table class="table table-condensed table-bordered">
+    <table class="table table-condensed table-bordered" id="data_table">
       <tr>
         <th><input type="checkbox"></th>
         <th>采购计划ID</th>
@@ -165,7 +165,7 @@
           </tr>
         #{/list}
     </table>
-    <button class="btn btn-danger">解除</button>
+    <button class="btn btn-danger" id="deleteByCreateBtn">解除</button>
   </div>
 </div>
 

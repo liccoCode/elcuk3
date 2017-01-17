@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  */
 public class StockPost extends Post<ProcureUnit> {
 
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
+    private static final Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
     public Whouse whouse;
     public String projectName;
 
@@ -55,7 +55,7 @@ public class StockPost extends Post<ProcureUnit> {
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
-        String sql = params._1 + " ORDER BY currWhouse.id ASC, createDate DESC";
+        String sql = params._1 + " ORDER BY currWhouse.id DESC, createDate DESC";
         return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
@@ -79,7 +79,7 @@ public class StockPost extends Post<ProcureUnit> {
     private Long isSearchForId() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
+            if(matcher.find()) return NumberUtils.toLong(matcher.group(0));
         }
         return null;
     }

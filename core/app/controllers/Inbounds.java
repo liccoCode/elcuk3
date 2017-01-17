@@ -200,8 +200,13 @@ public class Inbounds extends Controller {
 
     public static void deleteUnit(Long[] ids) {
         List<InboundUnit> list = InboundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        Inbound inbound = list.get(0).inbound;
         for(InboundUnit unit : list) {
             unit.delete();
+        }
+        if(inbound.units.size() == 0) {
+            inbound.status = Inbound.S.Cancel;
+            inbound.save();
         }
         renderJSON(new Ret(true));
     }

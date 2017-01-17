@@ -28,6 +28,15 @@ $(() => {
     let value = $input.val();
 
     //实际交货数量
+    if (attr == 'qty' && $(this).val() < 0) {
+      noty({
+        text: '收货数量不能小于0!',
+        type: 'error'
+      });
+      $(this).val(0);
+      return;
+    }
+
     if (attr == 'qty' && $(this).val() == $(this).data('qty')) {
       $(this).parent('td').next().find('select').hide();
       $(this).attr("style", "width:35px;");
@@ -76,6 +85,14 @@ $(() => {
     }
 
     if (attr == 'qualifiedQty') {
+      if (value < 0) {
+        noty({
+          text: '合格数不能小于0!',
+          type: 'error'
+        });
+        $(this).val($(this).data("origin"));
+        return;
+      }
       let qty = $(this).data('qty');
       if (value > qty) {
         noty({
@@ -90,6 +107,14 @@ $(() => {
 
     if (attr == 'unqualifiedQty') {
       let qty = $(this).data('qty');
+      if (value < 0) {
+        noty({
+          text: '不合格数不能小于0!',
+          type: 'error'
+        });
+        $(this).val($(this).data("origin"));
+        return;
+      }
       if (value > qty) {
         noty({
           text: '不合格数超过实际收货数量!',

@@ -214,12 +214,15 @@ public class Refund extends GenericModel {
                     unit.attrs.qty -= u.qty;
                     if(refund.type == T.After_Receive) {
                         unit.attrs.qty -= u.qty;
+                        if(unit.attrs.qty == 0) {
+                            unit.stage = ProcureUnit.STAGE.DELIVERY;
+                        }
                     } else {
                         unit.inboundQty -= u.qty;
                         unit.availableQty -= u.qty;
-                    }
-                    if(u.qty == unit.attrs.qty) {
-                        unit.stage = ProcureUnit.STAGE.DELIVERY;
+                        if(unit.inboundQty == 0) {
+                            unit.stage = ProcureUnit.STAGE.DELIVERY;
+                        }
                     }
                 }
                 unit.save();
@@ -236,7 +239,7 @@ public class Refund extends GenericModel {
         for(Refund refund : list) {
             if(refund.status != S.Create) {
                 Validation.addError("", "退货单【" + refund.id + "】状态为【" + refund.status.label() + "】" +
-                        "，请选择状态为【已创建】的托货单！");
+                        "，请选择状态为【已创建】的退货单！");
             }
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;

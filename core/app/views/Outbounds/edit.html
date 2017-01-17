@@ -110,7 +110,9 @@
       <tr>
         <td colspan="6">
             #{if outbound.status.name()=='Create'}
-              <button class="btn btn-primary" name="create_record">更新</button>
+                #{power.ck 'outbounds.update'}
+                  <button class="btn btn-primary" name="create_record">更新</button>
+                #{/power.ck}
             #{/if}
           <a href="@{Outbounds.index()}" class="btn btn-success">取消</a>
         </td>
@@ -125,11 +127,28 @@
   <div class="span12">
   #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
   #{if outbound.status.name()=='Create'}
-    <button class="btn btn-danger" id="deleteBtn">解除</button>
+      #{power.ck 'outbounds.delete'}
+        <button class="btn btn-danger" id="deleteBtn">解除</button>
+      #{/power.ck}
   #{/if}
   </div>
 </div>
+<br>
 
+#{warning_row title:'可添加进入[出库单]的[采购单元]'/}
+<form action="@{Outbounds.addUnits()}" method="post">
+  <div class="row-fluid">
+    <div class="span12">
+    #{render 'Outbounds/_units.html', units:outbound.availableUnits(), is_check: true/}
+    #{if outbound.status.name()=='Create'}
+        #{power.ck 'outbounds.add'}
+          <button class="btn btn-success" id="addBtn">添加</button>
+        #{/power.ck}
+    #{/if}
+      <input type="hidden" name="outId" value="${outbound.id}">
+    </div>
+  </div>
+</form>
 
 <div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
   <div class="modal-body">

@@ -112,7 +112,7 @@
           </select>
         </td>
         <td>
-          <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}"
+          <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
               #{if unit.status.name() != "Receive"}
                  disabled
               #{/if} style="width:35px; #{if unit.result?.name() != 'Qualified'} display:none; #{/if}"/>

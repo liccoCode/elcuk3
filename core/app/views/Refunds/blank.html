@@ -119,13 +119,15 @@
             <td title="${unit.product?.abbreviation}">${unit.product?.abbreviation?.xxLong()}</td>
             <td>${unit.fba?.shipmentId}</td>
             <td>${unit.selling?.fnSku}</td>
-            <td>${unit.availableQty}</td>
+            <td>
+                #{if refund.type.name()=='After_Receive'} ${unit.attrs.qty} #{/if}
+                #{else } ${unit.availableQty} #{/else}
+            </td>
             <td>
                 #{if refund.type==models.whouse.Refund.T.After_Receive}
                   <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.attrs.qty}"
                          data-origin="${unit.attrs.qty}">
                   <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.attrs.qty}">
-
                 #{/if}
                 #{else }
                   <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.availableQty}"

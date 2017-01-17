@@ -213,7 +213,9 @@
                   <li><a href="@{ProcureUnits.indexWhouse()}">采购计划(仓库)</a></li>
                 #{/power.ck}
               <li><a href="@{Inbounds.index()}">收货入库单</a></li>
-              <li><a href="@{Outbounds.index()}">出库单</a></li>
+                #{power.ck "outbounds.index"}
+                  <li><a href="@{Outbounds.index()}">出库单</a></li>
+                #{/power.ck}
               <li><a href="@{Refunds.index()}">退货单</a></li>
                 #{power.ck "products.whouseattrs"}
                   <li><a href="@{Products.whouseAttrs()}">产品</a></li>
