@@ -27,7 +27,7 @@ public class PaymentUnitPost extends Post<PaymentUnit> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sql = new StringBuilder("remove=1");
+        StringBuilder sql = new StringBuilder("remove=0");
         List<Object> params = new ArrayList<>();
 
         if(paymentId != null) {
