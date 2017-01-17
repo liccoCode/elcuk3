@@ -267,34 +267,32 @@ public class FBAShipment extends Model {
             Thread.sleep(500);
         } catch(Exception e) {
             Logger.error(Webs.S(e));
-            String errMsg = e.getMessage();
-            if(errMsg.contains("Shipment is locked. No updates allowed") ||
-                    errMsg.contains("Shipment is in locked status")) {
-                this.state = FBAShipment.S.RECEIVING;
-                this.save();
-            } else if(errMsg.contains("FBA31004")) {
-                //fbaErrorCode=FBA31004, description=updates to status SHIPPED not allowed
-                this.state = FBAShipment.S.IN_TRANSIT;
-                this.save();
-            } else if(errMsg.contains("Invalid Status change")) {
-                //物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.
-                this.state = FBAShipment.S.SHIPPED;
-                this.save();
-            } else if(errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 MSKU(SKU+UPC) 是否正确.");
-            } else if(errMsg.contains("MISSING_DIMENSIONS") || errMsg.contains("NON_SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 Amazon Listing 的尺寸已经正确填写(数值和单位.");
-            } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 更新失败. 请检查 FBA 仓库库存容量.");
-            } else {
-                //TODO: NOT_ELIGIBLE_FC_FOR_ITEM 这个看起来是创建 FBA 时选择的 center 暂时在 MWS 内被标记了不可用
-                //暂时考虑可选的处理方案:
-                //1. 等着(一般会自行恢复)
-                //2. 替换 FBA(重新选择 center)
-                if(e.getClass() == FBAInboundServiceMWSException.class) {
-                    Webs.systemMail("UpdateFBAShipment 出现未知异常", Webs.S(e),
-                            Arrays.asList("duan@easya.cc", "licco@easya.cc"));
+            if(e.getClass() == FBAInboundServiceMWSException.class) {
+                FBA.FBA_ERROR_TYPE errorType = FBA.fbaErrorFormat((FBAInboundServiceMWSException) e);
+                switch(errorType) {
+                    case LOCKED:
+                        this.state = FBAShipment.S.RECEIVING;
+                        this.save();
+                        break;
+                    case IN_TRANSIT:
+                        this.state = FBAShipment.S.IN_TRANSIT;
+                        this.save();
+                        break;
+                    case INVALID_STATUS_CHANGE:
+                        this.state = FBAShipment.S.SHIPPED;
+                        this.save();
+                        break;
+                    case UNKNOWN_SKU:
+                    case MISSING_DIMENSIONS:
+                    case ANDON_PULL_STRIKE_ONE:
+                    case NON_SORTABLE:
+                    case NOT_ELIGIBLE_FC_FOR_ITEM:
+                    case UNKNOWN_ERROR:
+                        throw new FastRuntimeException(String.format("向 Amazon 更新失败. %s", errorType.message()));
+                    default:
+                        throw new FastRuntimeException(String.format("向 Amazon 更新出现未知错误. %s", Webs.E(e)));
                 }
+            } else {
                 throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
             }
         }

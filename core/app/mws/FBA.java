@@ -5,6 +5,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
+import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
 import models.procure.*;
@@ -120,14 +121,14 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S create(FBAShipment fbashipment)
+    public static FBAShipment.S create(FBAShipment fbashipment, List<ProcureUnit> units)
             throws FBAInboundServiceMWSException {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
         //TODO effects: 计算 FBA title 算法需要调整
         StringBuilder fbaTitle = new StringBuilder();
         Set<Shipment> shipments = new HashSet<>();
         int qty = 0;
-        for(ProcureUnit unit : fbashipment.units) {
+        for(ProcureUnit unit : units) {
             for(ShipItem item : unit.shipItems) {
                 if(item.shipment == null) continue;
                 shipments.add(item.shipment);
@@ -156,7 +157,7 @@ public class FBA {
 
         // 设置 items
         //TODO effect: 创建 FBA 的算法需要调整
-        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbashipment.units);
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(units);
         create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
@@ -332,7 +333,7 @@ public class FBA {
                 null,
                 unit.qty(),
                 null
-        );//.withPrepDetailsList(new PrepDetailsList(Collections.singletonList(new PrepDetails("Labeling", "SELLER"))))
+        ).withPrepDetailsList(new PrepDetailsList(Collections.singletonList(new PrepDetails("Labeling", "SELLER"))));
     }
 
     /**
@@ -415,5 +416,100 @@ public class FBA {
             }
         }
         return client;
+    }
+
+
+    public enum FBA_ERROR_TYPE {
+        LOCKED {
+            @Override
+            public String message() {
+                return "FBA 已经被锁定！";
+            }
+        },
+        IN_TRANSIT {
+            @Override
+            public String message() {
+                return "运输商已经向 Amazon fulfillment center 报告接收到了运输信息！";
+            }
+        },
+        INVALID_STATUS_CHANGE {
+            @Override
+            public String message() {
+                return "物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.";
+            }
+        },
+        UNKNOWN_SKU {
+            @Override
+            public String message() {
+                return "请检查 Selling 的 Merchant SKU 属性: " +
+                        " 1. 格式是否正确？(正确的格式应该为 \"SKU,UPC\")" +
+                        " 2. 是否能够在 Amazon sellercentral 上找到对应的产品?";
+            }
+        },
+        MISSING_DIMENSIONS {
+            @Override
+            public String message() {
+                return "Selling 在 Amazon sellercentral 中对应的产品的尺寸或单位错误.";
+            }
+        },
+        ANDON_PULL_STRIKE_ONE {
+            @Override
+            public String message() {
+                return "Amazon fulfillment center 中有其他 FBA 在入库时出现了错误.";
+            }
+        },
+        NON_SORTABLE {
+            @Override
+            public String message() {
+                return "请检查 Amazon sellercentral: " +
+                        " 1. FBA 仓库剩余可用容量是否不足?" +
+                        " 2. Selling 在 Amazon sellercentral 中对应的产品的尺寸或单位错误导致匹配的仓库类型错误.";
+            }
+        },
+        NOT_ELIGIBLE_FC_FOR_ITEM {
+            @Override
+            public String message() {
+                return "当前 FBA 的 FBACenter 暂时不可用，请等待或更换 FBA.";
+            }
+        },
+        UNKNOWN_ERROR {
+            @Override
+            public String message() {
+                return "出现了一个未知错误，请向开发部报告.";
+            }
+        };
+
+        public abstract String message();
+    }
+
+    /**
+     * 格式化 Amazon 报告的 FBA 相关的错误
+     *
+     * @param e
+     * @return
+     */
+    public static FBA_ERROR_TYPE fbaErrorFormat(FBAInboundServiceMWSException e) {
+        String errMsg = e.getMessage();
+        if(errMsg.contains("Shipment is locked. No updates allowed") ||
+                errMsg.contains("Shipment is in locked status")) {
+            return FBA_ERROR_TYPE.LOCKED;
+        } else if(errMsg.contains("FBA31004")) {
+            return FBA_ERROR_TYPE.IN_TRANSIT;
+        } else if(errMsg.contains("Invalid Status change")) {
+            return FBA_ERROR_TYPE.INVALID_STATUS_CHANGE;
+        } else if(errMsg.contains("NOT_IN_PRODUCT_CATALOG") || errMsg.contains("UNKNOWN_SKU")) {
+            return FBA_ERROR_TYPE.UNKNOWN_SKU;
+        } else if(errMsg.contains("MISSING_DIMENSIONS") || errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP")) {
+            return FBA_ERROR_TYPE.MISSING_DIMENSIONS;
+        } else if(errMsg.contains("ANDON_PULL_STRIKE_ONE")) {
+            return FBA_ERROR_TYPE.ANDON_PULL_STRIKE_ONE;
+        } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
+            return FBA_ERROR_TYPE.NON_SORTABLE;
+        } else if(errMsg.contains("NOT_ELIGIBLE_FC_FOR_ITEM")) {
+            return FBA_ERROR_TYPE.NOT_ELIGIBLE_FC_FOR_ITEM;
+        } else {
+            Webs.systemMail("FBA 相关操作出现未知错误", Webs.S(e), Arrays.asList("duan@easya.cc", "licco@easya.cc"));
+            return FBA_ERROR_TYPE.UNKNOWN_ERROR;
+        }
     }
 }
