@@ -60,6 +60,7 @@ public class Payments extends Controller {
                 return Currency.bocRatesHtml();
             }
         }.now());
+        renderHtml(html);
     }
 
     @CacheFor("5mn")
