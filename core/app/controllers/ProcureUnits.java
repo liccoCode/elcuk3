@@ -21,6 +21,7 @@ import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
+import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.io.FileUtils;
@@ -735,9 +736,15 @@ public class ProcureUnits extends Controller {
 
     public static void deleteUnit(Long[] ids) {
         List<ProcureUnit> list = ProcureUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        String outId = list.get(0).outbound.id;
+        Outbound outbound = Outbound.findById(outId);
         for(ProcureUnit unit : list) {
             unit.outbound = null;
             unit.save();
+        }
+        if(outbound.units.size() == 0) {
+            outbound.status = Outbound.S.Cancel;
+            outbound.save();
         }
         renderJSON(new Ret(true));
     }

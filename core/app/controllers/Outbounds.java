@@ -12,6 +12,7 @@ import models.whouse.InboundUnit;
 import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
@@ -21,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +100,17 @@ public class Outbounds extends Controller {
         Outbound outbound = Outbound.findById(id);
         List<ProcureUnit> units = outbound.units;
         render("/Outbounds/_units.html", units);
+    }
+
+    public static void addUnits(String outId, List<Long> pids){
+        Outbound out = Outbound.findById(outId);
+        if(pids ==null || pids.size()==0){
+            flash.error("请先勾选需要添加的采购计划");
+            edit(outId);
+        }
+        out.addUnits(pids);
+        flash.success("成功将 %s 采购计划添加到当前出库单.", StringUtils.join(pids, ","));
+        edit(outId);
     }
 
 }

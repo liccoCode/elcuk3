@@ -81,7 +81,7 @@ public class OrderInvoice extends GenericModel {
      * 价格
      */
     @Transient
-    public List<Float> price;
+    public List<Float> price = new ArrayList<>();
 
     /**
      * 修改的价格
@@ -145,9 +145,9 @@ public class OrderInvoice extends GenericModel {
      * 价格信息转化给前台显示
      */
     public void setprice() {
+        this.price = new ArrayList<>();
         if(editprice != null && StringUtils.isNotBlank(editprice)) {
             String[] prices = editprice.split(",");
-            this.price = new ArrayList<>();
             for(String p : prices) {
                 this.price.add(new Float(p));
             }

@@ -49,7 +49,16 @@ $(() => {
   });
 
   $("#planQty,#availableQty").change(function() {
-    if ($(this).val() < $(this).data("origin") && $("#unit_type").val()!='StockSplit') {
+    if ($(this).val() < 0) {
+      noty({
+        text: "修改数值不能小于0",
+        type: 'error'
+      });
+      let origin = $(this).data("origin");
+      $(this).val(origin);
+      return;
+    }
+    if ($(this).val() < $(this).data("origin") && $("#unit_type").val() != 'StockSplit') {
       $("#return_tr").show();
     } else {
       $("#return_tr").hide();
@@ -249,6 +258,5 @@ $(() => {
     EF.scoll(targetTr)
     EF.colorAnimate(targetTr)
   }
-
 
 });

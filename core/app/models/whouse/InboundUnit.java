@@ -243,7 +243,7 @@ public class InboundUnit extends Model {
         List<String> logs = new ArrayList<>();
         switch(attr) {
             case "qty":
-                if(this.unit.qty() - NumberUtils.toInt(value) != 0) {
+                if(this.unit.attrs.planQty - NumberUtils.toInt(value) != 0 && this.handType == null) {
                     this.handType = H.Actual;
                 }
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));

@@ -28,7 +28,7 @@
       <th>状态</th>
       <th>#</th>
     </tr>
-      #{list items:payment.units(), as:'fee'}
+      #{list items: units, as:'fee'}
         <tr id="paymentUnit_${fee.id}">
             #{set punit: fee.procureUnit/}
             #{set records:fee.fixValueRecords()/}
@@ -85,6 +85,9 @@
           </td>
         </tr>
       #{/list}
+    <tr>
+      <td colspan="13">#{bootstrap_pager pi:post, url: "/Payments/show/" + payment.id/}</td>
+    </tr>
   </table>
 </div>
 #{/form}

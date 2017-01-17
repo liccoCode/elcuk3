@@ -97,31 +97,43 @@ $(() => {
     });
   });
 
-  $("#deleteBtn").click(function(e) {
+  $("#deleteByCreateBtn").click(function(e) {
     e.stopPropagation();
-    if ($("#unit_table input[type='checkbox']:checked").length == 0) {
+    if ($("#data_table input[type='checkbox']:checked").length == 0) {
       noty({
         text: "请选择需要解除的采购计划！",
         type: 'error'
       });
       return false;
     }
-    if ($("#unit_table input[type='checkbox']").not("input:checked").length == 0) {
+    if (confirm("确认解除选中采购计划吗？")) {
+      $("#data_table input[type='checkbox']:checked").each(function() {
+        $(this).parent("td").parent("tr").remove();
+      });
       noty({
-        text: "不能全部删除采购计划!",
+        text: "解除计划成功!",
+        type: 'success'
+      });
+    }
+  });
+
+  $("#deleteBtn").click(function(e) {
+    e.stopPropagation();
+    if ($("#data_table input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: "请选择需要解除的采购计划！",
         type: 'error'
       });
       return false;
     }
-
     if (confirm("确认解除选中采购计划吗？")) {
       let ids = [];
-      $("#unit_table input[type='checkbox']:checked").each(function() {
+      $("#data_table input[type='checkbox']:checked").each(function() {
         ids.push($(this).val());
       });
       $.post("/ProcureUnits/deleteUnit", {ids: ids}, function(r) {
         if (r) {
-          $("#unit_table input[type='checkbox']:checked").each(function() {
+          $("#data_table input[type='checkbox']:checked").each(function() {
             $(this).parent("td").parent("tr").remove();
           });
           noty({

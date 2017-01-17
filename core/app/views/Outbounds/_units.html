@@ -1,4 +1,4 @@
-<table class="table table-condensed table-bordered" id="unit_table">
+<table class="table table-condensed table-bordered" id="data_table">
   <tr>
   #{if is_check}
     <th>
@@ -28,8 +28,8 @@
   <tr class="text-center" id="unit_${unit.id}">
       #{if is_check}
         <td>
-          <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
-          <input type="hidden" name="pids" value="${unit.id}">
+          <input type="checkbox" name="pids" value="${unit.id}">
+          <input type="hidden" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
         </td>
       #{/if}
     <td>${unit.id}</td>
@@ -46,12 +46,12 @@
     <td>${unit.outQty}</td>
     <td>
       <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
-      #{if unit.mainBox == null || unit.mainBox.num==0}
-        <i class="icon-remove" style="color:red"></i>
-      #{/if}
-      #{else }
-        <i class="icon-ok" style="color:green"></i>
-      #{/else}
+        #{if unit.mainBox == null || unit.mainBox.num==0}
+          <i class="icon-remove" style="color:red"></i>
+        #{/if}
+        #{else }
+          <i class="icon-ok" style="color:green"></i>
+        #{/else}
     </td>
     <td>${unit.currWhouse?.name}</td>
     <td>${unit.showInboundUnitIds()}</td>

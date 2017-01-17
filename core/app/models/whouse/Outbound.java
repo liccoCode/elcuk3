@@ -116,6 +116,12 @@ public class Outbound extends GenericModel {
             public String label() {
                 return "已出库";
             }
+        },
+        Cancel {
+            @Override
+            public String label() {
+                return "已取消";
+            }
         };
 
         public abstract String label();
@@ -301,6 +307,20 @@ public class Outbound extends GenericModel {
                 }
             default:
                 return this.targetId;
+        }
+    }
+
+    public List<ProcureUnit> availableUnits() {
+        return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? " +
+                        "AND outbound.id = null",
+                ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType, this.projectName).fetch();
+    }
+
+    public void addUnits(List<Long> pids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : units) {
+            unit.outbound = this;
+            unit.save();
         }
     }
 

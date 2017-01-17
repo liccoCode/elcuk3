@@ -27,6 +27,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1113,6 +1114,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(logs.size() > 0)
             this.stage = STAGE.PROCESSING;
         logs.addAll(this.afterDoneUpdate(unit));
+        this.originQty = this.availableQty;
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
         if(logs.size() > 0) {
@@ -1175,7 +1177,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
-        logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         return logs;
     }
 
@@ -1201,19 +1202,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return String
      */
     public String generateProcureUnitStatusInfo() {
-        String paymentInfo = "";
-        PaymentUnit prePay = this.fetchPrePay();
-        PaymentUnit tailPay = this.fetchTailPay();
-        if(prePay != null) {
-            if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
-            if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+        String msg = "";
+        PaymentUnit pre_pay = this.fetchPrePay();
+        PaymentUnit tail_pay = this.fetchTailPay();
+        if(pre_pay != null) {
+            if(pre_pay.state == PaymentUnit.S.APPLY) msg += "已申请预付款";
+            if(pre_pay.state == PaymentUnit.S.PAID) msg += "已付预付款";
         }
-        if(tailPay != null) {
-            if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
-            if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
+        if(tail_pay != null) {
+            if(tail_pay.state == PaymentUnit.S.APPLY) msg += " 已申请尾款";
+            if(tail_pay.state == PaymentUnit.S.PAID) msg += " 已付尾款";
         }
         return String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
-                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
+                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(msg) ? "无" : msg);
     }
 
     /**
@@ -1239,6 +1240,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(this.shipType == Shipment.T.EXPRESS || oldShipType != this.shipType) {
                 this.shipItems.forEach(GenericModel::delete);
             }
+            this.outbound = null;
         } else {
             if(this.shipItems.isEmpty()) {
                 // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
@@ -1256,6 +1258,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                             }
                         });
             }
+            this.outbound = shipment.out;
         }
     }
 
@@ -1263,7 +1266,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 通过 ProcureUnit 创建 FBA
      */
     public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
-        if(dto != null && !dto.validedQtys(this.qty())) return null;
+        this.postFBAValidate(dto);
+        if(Validation.hasErrors()) return null;
         FBAShipment fba = this.planFBA();
         this.confirmFBA(fba);
         this.submitFBACartonContent(dto);
@@ -1280,28 +1284,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             FBAShipment fba = FBA.plan(this.selling.account, this);
             return fba.save();
         } catch(FBAInboundServiceMWSException e) {
-            String errMsg = e.getMessage();
-            if(errMsg.contains("UNKNOWN_SKU") || errMsg.contains("NOT_IN_PRODUCT_CATALOG")) {
-                Validation.addError("",
-                        String.format("向 Amazon 创建 Shipment PLAN 失败, 请检查: " +
-                                        "1. Amazon sellercentral 是否存在 MSKU 为 [%s] 的 Listing? " +
-                                        "2. Selling[%s] 的 Merchant SKU 属性 %s 是否正确?(正确的格式应该为 [SKU,UPC])",
-                                this.selling.merchantSKU,
-                                this.selling.sellingId,
-                                this.selling.merchantSKU));
-            } else if(errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP") || errMsg.contains("MISSING_DIMENSIONS")) {
-                Validation.addError("", String.format(
-                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 在 Amazon 后台的 Listing 的尺寸是否正确填写(数值和单位).",
-                        this.selling.merchantSKU));
-            } else if(errMsg.contains("ANDON_PULL_STRIKE_ONE")) {
-                Validation.addError("", String.format(
-                        "向 Amazon 创建 Shipment PLAN 失败, 请检查 [%s] 市场 [%s] 的其他的 FBA 是否报告了异常.",
-                        this.selling.market.name(), this.selling.merchantSKU));
-            } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
-                throw new FastRuntimeException("向 Amazon 创建 Shipment PLAN 失败, 请检查 FBA 仓库库存容量.");
-            } else {
-                Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
-            }
+            FBA.FBA_ERROR_TYPE errorType = FBA.fbaErrorFormat(e);
+            Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, %s", errorType.message()));
             return null;
         }
     }
@@ -1315,7 +1299,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public FBAShipment confirmFBA(FBAShipment fba) {
         if(fba == null) return fba;
         try {
-            fba.state = FBA.create(fba);
+            fba.state = FBA.create(fba, Collections.singletonList(this));
             this.fba = fba.save();
             this.save();
             new ERecordBuilder("shipment.createFBA").msgArgs(this.id, this.sku, this.fba.shipmentId).fid(this.id).save();
@@ -1915,7 +1899,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零
-            options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+            options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
 
             //生成箱外卖 PDF
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
@@ -2263,8 +2247,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * <<<<<<< HEAD
-     *
      * @param pids
      * @return
      */
@@ -2411,7 +2393,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             return this.stage != this.parent.stage;
         }
-        return false;
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            return false;
+        return true;
     }
 
     public boolean isManualEdit() {
@@ -2423,6 +2407,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return true;
         }
         return false;
+    }
+
+    public boolean postFBAValidate(CheckTaskDTO dto) {
+        if(this.qty() == 0) {
+            Validation.addError("", "数量不允许为 0!");
+        }
+        if(this.selling == null || StringUtils.isBlank(this.selling.merchantSKU)) {
+            Validation.addError("", "Selling(MerchantSKU) 不允许为空!");
+        }
+        if(dto != null) dto.validedQtys(this.qty());
+        return !Validation.hasErrors();
     }
 
 }
