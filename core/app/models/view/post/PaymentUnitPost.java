@@ -27,11 +27,11 @@ public class PaymentUnitPost extends Post<PaymentUnit> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sql = new StringBuilder();
+        StringBuilder sql = new StringBuilder("remove=1");
         List<Object> params = new ArrayList<>();
 
         if(paymentId != null) {
-            sql.append("payment_id=?");
+            sql.append("AND payment_id=?");
             params.add(paymentId);
         }
         return new F.T2(sql.toString(), params);
