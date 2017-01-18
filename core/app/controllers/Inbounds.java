@@ -25,6 +25,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -94,12 +95,9 @@ public class Inbounds extends Controller {
      */
     public static void createByPlanId(String id, DeliverPlanPost p) {
         DeliverPlan plan = DeliverPlan.findById(id);
-        List<Long> ids = new ArrayList<>();
-        for(ProcureUnit unit : plan.units) {
-            if(unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id)) {
-                ids.add(unit.id);
-            }
-        }
+        List<Long> ids = plan.units.stream()
+                .filter(unit -> unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id))
+                .map(unit -> unit.id).collect(Collectors.toList());
         if(ids.size() == 0) {
             flash.error("出货单【" + id + "】已无符合收货入库条件的采购计划");
             DeliverPlans.indexWhouse(p);
@@ -201,9 +199,7 @@ public class Inbounds extends Controller {
     public static void deleteUnit(Long[] ids) {
         List<InboundUnit> list = InboundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Inbound inbound = list.get(0).inbound;
-        for(InboundUnit unit : list) {
-            unit.delete();
-        }
+        list.stream().forEach(unit -> unit.delete());
         if(inbound.units.size() == 0) {
             inbound.status = Inbound.S.Cancel;
             inbound.save();

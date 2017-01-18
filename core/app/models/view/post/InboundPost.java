@@ -38,7 +38,7 @@ public class InboundPost extends Post<Inbound> {
         List<Object> params = new ArrayList<>();
         if(StringUtils.isNotEmpty(this.search)) {
             if(StringUtils.isNotEmpty(isSearchForId())) {
-                sbd.append(" AND id = ? ");
+                sbd.append(" AND i.id = ? ");
                 params.add(isSearchForId());
                 return new F.T2<>(sbd.toString(), params);
             }
