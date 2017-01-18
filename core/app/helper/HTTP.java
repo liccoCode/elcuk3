@@ -64,6 +64,7 @@ public class HTTP {
                 .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5)) // 连接超时时间
                 .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(1)) // 从 pool 获取 connection超时时间
                 .setRedirectsEnabled(true) //允许 Redirect
+                .setMaxRedirects(6)
                 .build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
