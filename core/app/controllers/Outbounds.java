@@ -7,6 +7,7 @@ import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.post.OutboundPost;
+import models.view.post.ProcurePost;
 import models.whouse.Inbound;
 import models.whouse.InboundUnit;
 import models.whouse.Outbound;

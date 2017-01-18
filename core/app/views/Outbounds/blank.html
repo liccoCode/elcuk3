@@ -31,11 +31,14 @@
       </tr>
       <tr>
         <th>目的国家</th>
-        <td><input type="text" value="${outbound?.whouse?.name}" readonly>
+        <td>
+          <input type="text" value="${outbound?.whouse?.name}" readonly>
+          <input type="hidden" name="outbound.whouse.id" value="${outbound?.whouse?.id}">
         </td>
         <th>运输方式</th>
         <td>
-          <input type="text" value="${outbound?.shipType?.label()}" readonly/>
+          <input type="text" value="${outbound?.shipType?.label()}"  readonly/>
+          <input type="hidden" name="outbound.shipType" value="${outbound.shipType?.name()}">
         </td>
         <th>运输单号</th>
         <td><input type="text" value="" readonly/></td>
