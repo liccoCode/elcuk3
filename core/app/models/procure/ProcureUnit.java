@@ -2253,14 +2253,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Map<STAGE, Integer> status_map = new HashMap<>();
         List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
         String msg = "";
-        if(type.equals("createMachiningInboundBtn")) {
-
-
-        }
-
-
-
-
         for(ProcureUnit unit : units) {
             if(type.equals("createMachiningInboundBtn")) {
                 if(unit.stage != STAGE.PROCESSING) {

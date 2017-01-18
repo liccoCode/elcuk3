@@ -113,9 +113,7 @@ public class Refunds extends Controller {
     public static void deleteUnit(Long[] ids) {
         List<RefundUnit> list = RefundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Refund refund = list.get(0).refund;
-        for(RefundUnit unit : list) {
-            unit.delete();
-        }
+        list.forEach(unit -> unit.delete());
         if(refund.unitList.size() == 0) {
             refund.status = Refund.S.Cancel;
             refund.save();
