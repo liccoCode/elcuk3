@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -268,7 +269,8 @@ public class Account extends Model {
      * @return
      */
     public String loginAmazonSellerCenterStep1() {
-        HttpClientContext context = HTTP.request(this.cookieStore(), this.type.sellerCentralHomePage());
+        HttpClientContext context = HTTP.request(this.cookieStore(), this.type.sellerCentralHomePage(),
+                RequestConfig.custom().setMaxRedirects(6).build());
         List<URI> uris = context.getRedirectLocations();
         if(uris != null && uris.size() > 0) {
             return uris.get(uris.size() - 1).toString();
