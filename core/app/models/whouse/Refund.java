@@ -210,19 +210,16 @@ public class Refund extends GenericModel {
             refund.save();
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
+                unit.attrs.qty -= u.qty;
                 if(refund.type == T.After_Inbound) {
-                    unit.attrs.qty -= u.qty;
-                    if(refund.type == T.After_Receive) {
-                        unit.attrs.qty -= u.qty;
-                        if(unit.attrs.qty == 0) {
-                            unit.stage = ProcureUnit.STAGE.DELIVERY;
-                        }
-                    } else {
-                        unit.inboundQty -= u.qty;
-                        unit.availableQty -= u.qty;
-                        if(unit.inboundQty == 0) {
-                            unit.stage = ProcureUnit.STAGE.DELIVERY;
-                        }
+                    unit.inboundQty -= u.qty;
+                    unit.availableQty -= u.qty;
+                    if(unit.inboundQty == 0) {
+                        unit.stage = ProcureUnit.STAGE.DELIVERY;
+                    }
+                } else {
+                    if(unit.attrs.qty == 0) {
+                        unit.stage = ProcureUnit.STAGE.DELIVERY;
                     }
                 }
                 unit.save();
