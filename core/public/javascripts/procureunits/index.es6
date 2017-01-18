@@ -29,14 +29,24 @@ $(() => {
     let firstProjectName = $("input[name='pids']:checked").first().attr("project");
     let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
     let firstStage = $("input[name='pids']:checked").first().attr("stage");
+    let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
+    let firstShipType = $("input[name='pids']:checked").first().attr("shipType");
+    let o = 0;
     let i = 0;
     let j = 0;
+    let k = 0;
     $("input[name='pids']:checked").each(function() {
       if ($(this).attr("project") != firstProjectName) {
         i++;
       }
       if ($(this).attr("cooperName") != firstCooper) {
         j++;
+      }
+      if ($(this).attr("whouse") != firstWhouse) {
+        o++;
+      }
+      if ($(this).attr("shipType") != firstShipType) {
+        k++;
       }
     });
     if ((i > 0 || j > 0 ) && $btn.attr("id") != 'createOutboundBtn') {
@@ -48,19 +58,32 @@ $(() => {
     }
 
     if ($btn.attr("id") == 'createOutboundBtn') {
-      let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
-      let o = 0;
-      $("input[name='pids']:checked").each(function() {
-        if ($(this).attr("whouse") != firstWhouse) {
-          o++;
-        }
-      });
+      if (!firstWhouse) {
+        noty({
+          text: '采购计划的【目的国家】未填写！',
+          type: 'error'
+        });
+        return false;
+      }
+      if (!firstShipType) {
+        noty({
+          text: '采购计划的【运输方式】未填写！',
+          type: 'error'
+        });
+        return false;
+      }
       if (o > 0) {
         noty({
           text: '请选择【目的国家】一致的采购计划！',
           type: 'error'
         });
         return false;
+      }
+      if (i > 0) {
+        noty({
+          text: '请选择【项目名称】一致的采购计划！',
+          type: 'error'
+        });
       }
     }
 
