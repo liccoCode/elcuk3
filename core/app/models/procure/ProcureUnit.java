@@ -2278,8 +2278,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
                 msg = validRefund(unit);
             } else if(type.equals("createRefundBtn")) {
-                if(!(unit.stage == STAGE.DONE || unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
-                    return "请统一选择阶段为【已交货】或【已入库】、【仓库加工】的采购计划！";
+                if(!(unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
+                    return "请统一选择阶段为【已入库】、【仓库加工】的采购计划！";
                 }
                 if(unit.parent != null && T.StockSplit == unit.type) {
                     return "库存分拆的子采购计划【" + unit.id + "】无法进行退货！";

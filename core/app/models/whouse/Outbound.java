@@ -216,14 +216,12 @@ public class Outbound extends GenericModel {
         this.init();
         this.projectName = this.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         this.save();
-        for(Long id : pids) {
-            if(id != null) {
-                ProcureUnit unit = ProcureUnit.findById(id);
-                unit.outbound = this;
-                unit.outQty = unit.availableQty;
-                unit.save();
-            }
-        }
+        pids.stream().filter(id -> id != null).forEach(id -> {
+            ProcureUnit unit = ProcureUnit.findById(id);
+            unit.outbound = this;
+            unit.outQty = unit.availableQty;
+            unit.save();
+        });
     }
 
     public static void initCreateByShipItem(List<String> shipmentId) {
@@ -240,16 +238,16 @@ public class Outbound extends GenericModel {
         out.targetId = shipment.cooper.id.toString();
         out.shipmentId = SqlSelect.inlineParam(shipmentId);
         out.save();
-        for(Shipment s : shipments) {
-            for(ShipItem item : s.items) {
-                ProcureUnit unit = item.unit;
-                unit.outbound = out;
-                unit.outQty = unit.availableQty;
-                unit.save();
-            }
+        shipments.stream().peek(s -> {
             s.out = out;
             s.save();
-        }
+        }).flatMap(s -> s.items.stream())
+                .forEach(item -> {
+                    ProcureUnit unit = item.unit;
+                    unit.outbound = out;
+                    unit.outQty = unit.availableQty;
+                    unit.save();
+                });
     }
 
     public static void confirmOutBound(List<String> ids) {
@@ -276,12 +274,12 @@ public class Outbound extends GenericModel {
             out.status = S.Outbound;
             out.outboundDate = new Date();
             out.save();
-            for(ProcureUnit p : out.units) {
+            out.units.forEach(p -> {
                 p.stage = ProcureUnit.STAGE.OUTBOUND;
                 p.availableQty = 0;
                 p.save();
                 createStockRecord(p);
-            }
+            });
         }
     }
 
@@ -318,10 +316,10 @@ public class Outbound extends GenericModel {
 
     public void addUnits(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
-        for(ProcureUnit unit : units) {
+        units.forEach(unit -> {
             unit.outbound = this;
             unit.save();
-        }
+        });
     }
 
 }

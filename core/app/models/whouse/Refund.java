@@ -208,6 +208,8 @@ public class Refund extends GenericModel {
         for(Refund refund : refunds) {
             refund.status = S.Refund;
             refund.save();
+
+
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
                 unit.attrs.qty -= u.qty;

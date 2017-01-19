@@ -171,22 +171,20 @@ public class Inbound extends GenericModel {
     public List<String> inboundDtos = new ArrayList<>();
 
     public void create(List<InboundUnit> units) {
-        for(InboundUnit u : units) {
-            if(u != null) {
-                u.inbound = this;
-                u.unit = ProcureUnit.findById(u.unitId);
-                u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
-                if(this.type == T.Machining) {
-                    u.status = InboundUnit.S.Receive;
-                    u.result = InboundUnit.R.Qualified;
-                    u.qualifiedQty = u.qty;
-                    u.inboundQty = u.qty;
-                } else {
-                    u.status = InboundUnit.S.Create;
-                }
-                u.save();
+        units.stream().filter(Objects::nonNull).forEach(u -> {
+            u.inbound = this;
+            u.unit = ProcureUnit.findById(u.unitId);
+            u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
+            if(this.type == T.Machining) {
+                u.status = InboundUnit.S.Receive;
+                u.result = InboundUnit.R.Qualified;
+                u.qualifiedQty = u.qty;
+                u.inboundQty = u.qty;
+            } else {
+                u.status = InboundUnit.S.Create;
             }
-        }
+            u.save();
+        });
     }
 
     /**
@@ -226,7 +224,7 @@ public class Inbound extends GenericModel {
     }
 
     public void confirmReceive(List<InboundUnit> units) {
-        for(InboundUnit unit : units) {
+        units.stream().filter(unit -> Inbound.cap(unit.id)).forEach(unit -> {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.status.equals(InboundUnit.S.Create)) {
                 u.status = InboundUnit.S.Receive;
@@ -240,7 +238,12 @@ public class Inbound extends GenericModel {
                 }
                 punit.save();
             }
-        }
+        });
+    }
+
+    public static boolean cap(Long id) {
+        InboundUnit u = InboundUnit.findById(id);
+        return u.status.equals(InboundUnit.S.Create);
     }
 
     public void confirmQC(List<InboundUnit> units) {
@@ -370,7 +373,7 @@ public class Inbound extends GenericModel {
         inbound.receiver = this.receiver;
         inbound.projectName = this.projectName;
         inbound.save();
-        for(InboundUnit i : tail_units) {
+        tail_units.forEach(i -> {
             InboundUnit u = new InboundUnit();
             u.status = InboundUnit.S.Create;
             u.inbound = inbound;
@@ -380,7 +383,7 @@ public class Inbound extends GenericModel {
             u.mainBoxInfo = i.mainBoxInfo;
             u.lastBoxInfo = i.lastBoxInfo;
             u.save();
-        }
+        });
     }
 
 }

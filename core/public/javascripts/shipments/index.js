@@ -124,7 +124,7 @@ $(() => {
     if ($("#div" + format_id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      let html = "<tr><td colspan='13'><div><h4 class='text-info'>Comment</h4>" + memo + "</div><hr>";
+      let html = "<tr><td colspan='14'><div><h4 class='text-info'>Comment</h4>" + memo + "</div><hr>";
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + format_id).load("/Shipments/showProcureUnitList", {id: shipment_id});

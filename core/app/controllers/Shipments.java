@@ -450,7 +450,7 @@ public class Shipments extends Controller {
     /**
      * 创建出库
      */
-    @Check("outboundrecords.index")
+    @Check("outbounds.index")
     public static void outbound(List<String> shipmentId) {
         String msg = "";
         if(shipmentId != null && !shipmentId.isEmpty()) {
