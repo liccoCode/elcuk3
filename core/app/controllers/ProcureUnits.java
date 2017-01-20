@@ -97,7 +97,6 @@ public class ProcureUnits extends Controller {
             p = new ProcurePost();
             p.stages.add(ProcureUnit.STAGE.DELIVERY);
             p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
-            p.stages.add(ProcureUnit.STAGE.PROCESSING);
         }
         render(p);
     }
@@ -330,7 +329,7 @@ public class ProcureUnits extends Controller {
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        if(Arrays.asList(ProcureUnit.STAGE.IN_STORAGE, ProcureUnit.STAGE.PROCESSING).contains(managedUnit.stage)) {
+        if(ProcureUnit.STAGE.IN_STORAGE == managedUnit.stage) {
             managedUnit.stockUpdate(unit, shipmentId, msg);
         } else {
             managedUnit.update(unit, shipmentId, msg);
@@ -348,8 +347,13 @@ public class ProcureUnits extends Controller {
 
 
     /**
+     *
      * @param unitid
+     * @param checkid
      * @param oldPlanQty
+     * @param unit
+     * @param shipmentId
+     * @param msg
      */
     public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
                                      String shipmentId, String msg) {

@@ -31,8 +31,6 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#88BEF5";
             case IN_STORAGE:
                 return "#FBBC05";
-            case PROCESSING:
-                return "#FF8A69";
             case OUTBOUND:
                 return "#3BB873";
             case SHIPPING:

@@ -145,12 +145,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return "已入库";
             }
         },
-        PROCESSING {
-            @Override
-            public String label() {
-                return "仓库加工";
-            }
-        },
         OUTBOUND {
             @Override
             public String label() {
@@ -836,7 +830,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.deliveryment = this.deliveryment;
         newUnit.deliverplan = this.deliverplan;
         newUnit.whouse = unit.whouse;
-        newUnit.stage = STAGE.PROCESSING;
+        newUnit.stage = STAGE.IN_STORAGE;
         newUnit.planstage = PLANSTAGE.DONE;
         newUnit.shipType = unit.shipType;
         newUnit.originQty = unit.availableQty;
@@ -1076,8 +1070,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
-        if(this.parent != null && unit.isReturn &&
-                Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
+        if(this.parent != null && unit.isReturn && STAGE.IN_STORAGE == this.stage) {
             if(unit.availableQty - this.availableQty > this.parent.availableQty) {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
@@ -1107,12 +1100,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         logs.addAll(this.changeStageUpdate(unit));
-        if(Arrays.asList(STAGE.IN_STORAGE, STAGE.PROCESSING).contains(this.stage)) {
-            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
-                    oldShipType);
+        if(STAGE.IN_STORAGE == this.stage) {
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId), oldShipType);
         }
         if(logs.size() > 0)
-            this.stage = STAGE.PROCESSING;
+            this.stage = STAGE.IN_STORAGE;
         logs.addAll(this.afterDoneUpdate(unit));
         this.originQty = this.availableQty;
         this.attrs.planQty = this.availableQty;
@@ -2254,17 +2246,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
         String msg = "";
         for(ProcureUnit unit : units) {
-            if(type.equals("createMachiningInboundBtn")) {
-                if(unit.stage != STAGE.PROCESSING) {
-                    return "请选择阶段为【仓库加工】的采购计划！";
-                }
-                msg = validInbound(unit);
-                if(StringUtils.isNotEmpty(msg)) {
-                    return msg;
-                } else {
-                    msg = validRefund(unit);
-                }
-            } else if(type.equals("createInboundBtn")) {
+            if(type.equals("createInboundBtn")) {
                 if(unit.stage != STAGE.DELIVERY) {
                     return "请统一选择阶段为【采购中】的采购计划！";
                 }
@@ -2278,7 +2260,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
                 msg = validRefund(unit);
             } else if(type.equals("createRefundBtn")) {
-                if(!(unit.stage == STAGE.IN_STORAGE || unit.stage == STAGE.PROCESSING)) {
+                if(unit.stage != STAGE.IN_STORAGE) {
                     return "请统一选择阶段为【已入库】、【仓库加工】的采购计划！";
                 }
                 if(unit.parent != null && T.StockSplit == unit.type) {
@@ -2384,9 +2366,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage) &&
                     T.StockSplit == this.type) {
                 return false;
-            } else if(this.parent.stage == STAGE.PROCESSING) {
-                /*父节点为仓库加工不能修改数量*/
-                return true;
             } else if(T.ProcureSplit == this.type && this.stage == STAGE.IN_STORAGE) {
                 return true;
             }
