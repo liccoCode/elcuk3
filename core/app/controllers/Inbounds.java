@@ -93,9 +93,9 @@ public class Inbounds extends Controller {
      *
      * @param id
      */
-    public static void createByPlanId(String id, DeliverPlanPost p) {
-        DeliverPlan plan = DeliverPlan.findById(id);
-        List<Long> ids = plan.units.stream()
+    public static void createByPlanId(String id, DeliverPlanPost p, List<Long> pids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        List<Long> ids = units.stream()
                 .filter(unit -> unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id))
                 .map(unit -> unit.id).collect(Collectors.toList());
         if(ids.size() == 0) {

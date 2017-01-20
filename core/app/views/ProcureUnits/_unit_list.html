@@ -2,10 +2,15 @@
 <table class="table table-condensed table-bordered" id="unit_table">
   <tr>
   #{if checkbox}
-    <th>
+    <th width="20px;">
       <label class="checkbox">
         <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall">
       </label>
+    </th>
+  #{/if}
+  #{if relationPage}
+    <th width="20px;">
+      <input type="checkbox" name="checkAll" data-index="${dpIndex}">
     </th>
   #{/if}
     <th width="40px;">#</th>
@@ -63,6 +68,11 @@
                        data-width="" data-height="">
               #{/else}
           </label>
+        </td>
+      #{/if}
+      #{if relationPage}
+        <td>
+          <input type="checkbox" name="pids" value="${unit.id}">
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
