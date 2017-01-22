@@ -93,9 +93,9 @@ public class Inbounds extends Controller {
      *
      * @param id
      */
-    public static void createByPlanId(String id, DeliverPlanPost p) {
-        DeliverPlan plan = DeliverPlan.findById(id);
-        List<Long> ids = plan.units.stream()
+    public static void createByPlanId(String id, DeliverPlanPost p, List<Long> pids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        List<Long> ids = units.stream()
                 .filter(unit -> unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id))
                 .map(unit -> unit.id).collect(Collectors.toList());
         if(ids.size() == 0) {
@@ -160,26 +160,12 @@ public class Inbounds extends Controller {
     @Check("inbounds.confirmqcbtn")
     public static void confirmQC(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmQC(dtos);
-        inbound.checkIsFinish();
-        flash.success("质检成功!");
-        edit(inbound.id);
-    }
-
-    /**
-     * 确认入库
-     *
-     * @param inbound
-     * @param dtos
-     */
-    @Check("inbounds.confirminboundbtn")
-    public static void confirmInbound(Inbound inbound, List<InboundUnit> dtos) {
-        inbound.confirmInbound(dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             edit(inbound.id);
         }
         inbound.checkIsFinish();
-        flash.success("入库成功!");
+        flash.success("质检成功!");
         edit(inbound.id);
     }
 

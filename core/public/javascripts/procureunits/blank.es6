@@ -105,11 +105,23 @@ $(() => {
             type: 'error'
           });
         } else {
+          getCurrWhouse();
           getShipmentList();
         }
       });
     }
   });
+
+  function getCurrWhouse () {
+    let country = $("#warehouse_select :selected").text().split('_')[1];
+    let shipType = $("input[name='unit.shipType']:checked").val();
+    $.get("/whouses/autoMatching", {
+      country: country,
+      shipType: shipType
+    }, function(r) {
+       $('#curr_warehouse_select').find("option[value="+r.id+"]").prop("selected",true);
+    })
+  }
 
   $("input[name='unit.shipType']").change(function() {
     let planDeliveryDate = $("input[name='unit.attrs.planDeliveryDate']").val();

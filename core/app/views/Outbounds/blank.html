@@ -127,7 +127,6 @@
         <th>采购计划ID</th>
         <th>采购单</th>
         <th>Selling</th>
-        <th>SKU</th>
         <th>产品名称</th>
         <th>供应商</th>
         <th>去往仓库</th>
@@ -140,6 +139,7 @@
         <th>仓库名称</th>
         <th>收货入库记录ID</th>
         <th>阶段</th>
+        <th>备注</th>
       </tr>
         #{list items:units, as:'unit'}
           <tr class="text-center">
@@ -150,11 +150,10 @@
             <td>${unit.id}</td>
             <td>${unit.deliveryment.id}</td>
             <td>${unit.selling?.sellingId}</td>
-            <td>${unit.product.sku}</td>
             <td>${unit.product.abbreviation}</td>
             <td>${unit.cooperator?.name}</td>
-            <td>${unit.whouse?.name()}</td>
-            <td>${unit.shipType?.label()}</td>
+            <td>${unit.whouse?.name}</td>
+            <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
             <td>${unit.fba?.shipmentId}</td>
             <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
             <td>${unit.availableQty}</td>
@@ -164,7 +163,8 @@
             </td>
             <td>${unit.currWhouse?.name}</td>
             <td>${unit.showInboundIds()}</td>
-            <td>${unit.stage?.label()}</td>
+            <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+            <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
           </tr>
         #{/list}
     </table>

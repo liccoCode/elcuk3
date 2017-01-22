@@ -2,7 +2,7 @@
  * Created by licco on 2016/11/14.
  */
 $(() => {
-  $("#createInboundBtn,#createOutboundBtn,#createMachiningInboundBtn,#createRefundBtn").click(function(e) {
+  $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function(e) {
     e.stopPropagation();
     let $btn = $(this);
     if ($("input[name='pids']:checked").length == 0) {
@@ -26,7 +26,7 @@ $(() => {
   });
 
   function validProNameAndCooperName ($btn) {
-    let firstProjectName = $("input[name='pids']:checked").first().attr("project");
+    let firstProjectName = $('input[name="pids"]:checked').first().attr("project");
     let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
     let firstStage = $("input[name='pids']:checked").first().attr("stage");
     let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");

@@ -24,7 +24,7 @@
 <div class="row-fluid">
   <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
     <table class="table table-bordered">
-    #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
+    #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses /}
       <tr>
         <td colspan="6">
         #{render 'ProcureUnits/_shipments.html'/}

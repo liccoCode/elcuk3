@@ -64,14 +64,17 @@
             <td>${dp.supplier()?.name}</td>
             <td>#{time_tooltip time:dp.createDate/}</td>
             <td>
-              <input type="button" url="@{Inbounds.createByPlanId(dp.id)}" data-ids="${dp.showInbounds()}"
-                     name="createInboundBtn" class="btn btn-success" value="创建收货入库单">
+              <input type="button" url="@{Inbounds.createByPlanId(dp.id)}" class="btn btn-mini btn-success"
+                     name="createInboundBtn" data-index="${dp_index}" value="创建收货入库单">
             </td>
             <td>${dp.showInbounds()}</td>
           </tr>
           <tr id="dp_${dp_index}" style="display:none;">
-            <td colspan="12" style="padding:0;border:none">
-                #{render 'ProcureUnits/_unit_list.html', units:dp.units, norecord: true, deliveryplan:true/}
+            <td colspan="12">
+              <div>
+                  #{render 'ProcureUnits/_unit_list.html', relationPage:true, units:dp.units, norecord: true,
+                  deliveryplan:true, dpIndex:"dp_"+dp_index /}
+              </div>
             </td>
           </tr>
         #{/list}
