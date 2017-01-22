@@ -160,26 +160,12 @@ public class Inbounds extends Controller {
     @Check("inbounds.confirmqcbtn")
     public static void confirmQC(Inbound inbound, List<InboundUnit> dtos) {
         inbound.confirmQC(dtos);
-        inbound.checkIsFinish();
-        flash.success("质检成功!");
-        edit(inbound.id);
-    }
-
-    /**
-     * 确认入库
-     *
-     * @param inbound
-     * @param dtos
-     */
-    @Check("inbounds.confirminboundbtn")
-    public static void confirmInbound(Inbound inbound, List<InboundUnit> dtos) {
-        inbound.confirmInbound(dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             edit(inbound.id);
         }
         inbound.checkIsFinish();
-        flash.success("入库成功!");
+        flash.success("质检成功!");
         edit(inbound.id);
     }
 

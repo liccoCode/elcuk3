@@ -2,24 +2,15 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
-import controllers.Refunds;
-import helper.Dates;
-import helper.Reflects;
 import models.User;
-import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
-import org.springframework.core.annotation.Order;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
@@ -229,6 +220,14 @@ public class Inbound extends GenericModel {
             if(u.status.equals(InboundUnit.S.Create)) {
                 u.status = InboundUnit.S.Receive;
                 u.result = InboundUnit.R.UnCheck;
+                if(u.unit.selling != null && Whouse.autoMatching(u) != null) {
+                    u.target = Whouse.autoMatching(u);
+                }
+                u.qualifiedQty = u.qty;
+                u.unqualifiedQty = 0;
+                u.inboundQty = u.qty;
+
+
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
@@ -241,7 +240,7 @@ public class Inbound extends GenericModel {
         });
     }
 
-    public static boolean cap(Long id) {
+    private static boolean cap(Long id) {
         InboundUnit u = InboundUnit.findById(id);
         return u.status.equals(InboundUnit.S.Create);
     }
@@ -249,6 +248,10 @@ public class Inbound extends GenericModel {
     public void confirmQC(List<InboundUnit> units) {
         for(InboundUnit unit : units) {
             InboundUnit u = InboundUnit.findById(unit.id);
+            if(u.target == null) {
+                Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
+                return;
+            }
             if(u.status == InboundUnit.S.Receive && u.result == InboundUnit.R.Unqualified) {
                 u.status = InboundUnit.S.Abort;
                 u.qcUser = Login.current();
@@ -257,7 +260,7 @@ public class Inbound extends GenericModel {
                 if(this.type == T.Purchase) {
                     ProcureUnit punit = u.unit;
                     punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
-                    if(punit.attrs.qty == 0 || u.way == InboundUnit.W.PTRework) {
+                    if(punit.attrs.qty == 0) {
                         punit.stage = ProcureUnit.STAGE.DELIVERY;
                         punit.result = u.result;
                     }
@@ -265,7 +268,9 @@ public class Inbound extends GenericModel {
                 }
             } else if(u.status == InboundUnit.S.Receive && !(u.result == null || (u.result == InboundUnit.R.Qualified
                     && u.qualifiedQty == 0)) && u.result != InboundUnit.R.UnCheck) {
-                u.status = InboundUnit.S.Check;
+                u.status = InboundUnit.S.Inbound;
+                u.confirmUser = Login.current();
+                u.inboundDate = new Date();
                 u.inboundQty = u.qualifiedQty;
                 if(u.unit.selling != null && Whouse.autoMatching(u) != null) {
                     u.target = Whouse.autoMatching(u);
@@ -275,29 +280,6 @@ public class Inbound extends GenericModel {
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.result = u.result;
-                punit.save();
-            }
-        }
-    }
-
-    /**
-     * 确认入库
-     *
-     * @param units
-     */
-    public void confirmInbound(List<InboundUnit> units) {
-        for(InboundUnit unit : units) {
-            InboundUnit u = InboundUnit.findById(unit.id);
-            if(u.status == InboundUnit.S.Check && u.inboundQty != 0) {
-                if(u.target == null) {
-                    Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
-                    return;
-                }
-                u.status = InboundUnit.S.Inbound;
-                u.confirmUser = Login.current();
-                u.inboundDate = new Date();
-                u.save();
-                ProcureUnit punit = u.unit;
                 punit.stage = ProcureUnit.STAGE.IN_STORAGE;
                 if(this.type == T.Purchase) {
                     punit.inboundQty += u.inboundQty;
@@ -316,14 +298,13 @@ public class Inbound extends GenericModel {
         }
     }
 
-    public void createStockRecord(InboundUnit unit) {
+    private void createStockRecord(InboundUnit unit) {
         StockRecord record = new StockRecord();
         record.whouse = unit.target;
         record.unit = unit.unit;
         record.qty = unit.inboundQty;
         record.type = StockRecord.T.Inbound;
         record.recordId = unit.id;
-
         record.save();
     }
 
@@ -335,9 +316,6 @@ public class Inbound extends GenericModel {
             List<InboundUnit> return_units = new ArrayList<>();
             List<InboundUnit> tail_units = new ArrayList<>();
             for(InboundUnit iunit : units) {
-                if(iunit.status == InboundUnit.S.Abort && iunit.way == InboundUnit.W.Return) {
-                    return_units.add(iunit);
-                }
                 if(iunit.result == InboundUnit.R.Qualified && iunit.handType == InboundUnit.H.Delivery) {
                     tail_units.add(iunit);
                 }
@@ -361,7 +339,7 @@ public class Inbound extends GenericModel {
         }
     }
 
-    public void createTailInbound(List<InboundUnit> tail_units) {
+    private void createTailInbound(List<InboundUnit> tail_units) {
         Inbound inbound = new Inbound();
         inbound.id = this.id();
         inbound.name = this.name + "--尾货单";

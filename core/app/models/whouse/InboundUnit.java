@@ -2,21 +2,16 @@ package models.whouse;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.DBUtils;
-import helper.Dates;
 import helper.J;
 import helper.Reflects;
 import models.User;
 import models.embedded.ERecordBuilder;
-import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
-import models.procure.Shipment;
 import models.qc.CheckTaskDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
-import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -141,35 +136,6 @@ public class InboundUnit extends Model {
     }
 
     /**
-     * 质检不合格处理方式
-     */
-    @Enumerated(EnumType.STRING)
-    public W way;
-
-    public enum W {
-        Return {
-            @Override
-            public String label() {
-                return "退货处理";
-            }
-        },
-        PTRework {
-            @Override
-            public String label() {
-                return "品拓返工";
-            }
-        },
-        FactoryRework {
-            @Override
-            public String label() {
-                return "工厂返工";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
      * 主箱信息
      */
     @Lob
@@ -252,19 +218,15 @@ public class InboundUnit extends Model {
                 logs.addAll(Reflects.logFieldFade(this, "handType", H.valueOf(value)));
                 break;
             case "result":
-                if(value.equals("Unqualified")) {
-                    this.way = W.Return;
-                } else {
-                    this.way = null;
-                }
                 if(this.qualifiedQty == 0) {
                     this.qualifiedQty = this.qty;
                     this.unqualifiedQty = 0;
                 }
+                if(R.valueOf(value) == R.Unqualified) {
+                    this.qualifiedQty = 0;
+                    this.unqualifiedQty = this.qty;
+                }
                 logs.addAll(Reflects.logFieldFade(this, "result", R.valueOf(value)));
-                break;
-            case "way":
-                logs.addAll(Reflects.logFieldFade(this, "way", W.valueOf(value)));
                 break;
             case "qualifiedQty":
                 this.unqualifiedQty = this.qty - NumberUtils.toInt(value);
@@ -347,9 +309,7 @@ public class InboundUnit extends Model {
      * @return
      */
     public static boolean vaildIsCreate(Long id) {
-        List<InboundUnit> list = InboundUnit.find("unit.id = ? AND inbound.status <> '" + Inbound.S.End + "'", id)
-                .fetch();
-        return list.size() == 0;
+        return InboundUnit.count("unit.id = ? AND inbound.status <> '" + Inbound.S.End + "'", id) == 0;
     }
 
 }

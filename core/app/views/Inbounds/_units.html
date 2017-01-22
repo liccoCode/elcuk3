@@ -20,15 +20,11 @@
     <th>FBA-ShipmentId</th>
     <th>去往仓库</th>
     <th width="30px;">运输方式</th>
-    <th width="35px;">状态</th>
+    <th width="50px;">状态</th>
     <th>质检结果</th>
-  #{if !is_check}
-    <th width="80px;">质检不合格<br>处理方式</th>
-  #{/if}
     <th>合格数</th>
     <th>不良品数</th>
-    <th>实际入库数</th>
-    <th width="60px;">目标仓库</th>
+    <th width="100px;">目标仓库</th>
   </tr>
 
 #{list items:units, as:'unit'}
@@ -84,7 +80,7 @@
         <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
         <td style="background-color:${unit.status.rgb()}">${unit.status?.label()}</td>
         <td>
-          <select name="result" style="width:60px;" qty="${unit.qty}"
+          <select name="result" style="width:70px;" qty="${unit.qty}"
               #{if unit.status.name() != "Receive"}
                   disabled
               #{/if}>
@@ -94,45 +90,21 @@
           </select>
         </td>
         <td>
-          <select name="way" style="width:80px;
-              #{if unit.result?.name() != 'Unqualified'}
-                  display:none;
-              #{/if}"
-              #{if unit.status.name() != "Receive"}
-                  disabled
-              #{/if}>
-              #{if unit.inbound.type.name()=='Machining'}
-                <option value="PTRework">品拓返工</option>
-              #{/if}
-              #{else }
-                  #{list items:models.whouse.InboundUnit.W, as:'w'}
-                    <option ${w.name() == unit.way?.name() ? 'selected' : ''} value="${w.name()}">${w.label()}</option>
-                  #{/list}
-              #{/else}
-          </select>
-        </td>
-        <td>
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
-              #{if unit.status.name() != "Receive"}
+              #{if unit.status.name() != "Receive" || unit.result.name()=='Unqualified'}
                  disabled
-              #{/if} style="width:35px; #{if unit.result?.name() != 'Qualified'} display:none; #{/if}"/>
+              #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
                  value="${unit.unqualifiedQty}"
+              #{if unit.status.name()!="Receive" || unit.result.name()=='Unqualified'}
+                 disabled
+              #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
+        </td>
+        <td>
+          <select name="target" style="max-width: 80px;"
               #{if unit.status.name() != "Receive"}
-                 disabled
-              #{/if} style="width:35px; #{if unit.result?.name() != 'Qualified'} display:none; #{/if}"/>
-        </td>
-        <td>
-          <input type="text" name="inboundQty" value="${unit.inboundQty}" style="width:35px;" data-qty="${unit.qty}"
-              #{if unit.status.name() != "Check"}
-                 disabled
-              #{/if} data-origin="${unit.inboundQty}"/>
-        </td>
-        <td>
-          <select name="target" style="max-width: 60px;"
-              #{if unit.status.name() != "Check"}
                   disabled
               #{/if}>
             <option value="">仓库</option>
@@ -178,12 +150,11 @@
               <i style="color:green" class="icon-ok"></i>
             #{/if}
             #{elseif unit.result?.name()=='Unqualified'}
-              <i style="color:red" class="icon-remove">${unit.way?.label()}</i>
+              <i style="color:red" class="icon-remove"></i>
             #{/elseif}
         </td>
         <td>${unit.qualifiedQty}</td>
         <td>${unit.unqualifiedQty}</td>
-        <td>${unit.inboundQty}</td>
         <td>${unit.target?.name}</td>
       </tr>
     #{/else}

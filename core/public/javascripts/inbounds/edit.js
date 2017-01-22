@@ -70,18 +70,17 @@ $(() => {
 
     //质检结果
     if (attr == 'result' && value == 'Unqualified') {
-      $(this).parent('td').next().find('select').show();
-      $(this).parent('td').next().next().next().find('input').hide();
       $(this).parent('td').next().next().find('input').hide();
+      $(this).parent('td').next().find('input').show().val(0).prop("readonly", true);
+      $(this).parent('td').next().next().find('input').show().val($(this).attr("qty")).prop("readonly", true);
     } else if (attr == 'result' && value == 'Qualified') {
-      $(this).parent('td').next().find('select').hide();
-      $(this).parent('td').next().next().next().find('input').show();
       $(this).parent('td').next().next().find('input').show();
-      $(this).parent('td').next().next().find('input').val($(this).attr("qty"));
+      $(this).parent('td').next().find('input').show();
+      $(this).parent('td').next().find('input').val($(this).attr("qty")).prop("readonly", false);
+      $(this).parent('td').next().next().find('input').show().val(0).prop("readonly", false);
     } else if (attr == 'result' && value == 'UnCheck') {
-      $(this).parent('td').next().find('select').hide();
-      $(this).parent('td').next().next().next().find('input').hide();
       $(this).parent('td').next().next().find('input').hide();
+      $(this).parent('td').next().find('input').hide();
     }
 
     if (attr == 'qualifiedQty') {
