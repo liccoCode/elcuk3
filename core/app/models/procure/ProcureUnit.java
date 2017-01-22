@@ -47,6 +47,7 @@ import javax.persistence.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1088,6 +1089,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
         List<String> logs = new ArrayList<>();
         this.comment = unit.comment;
+        this.autoUpdateComment(unit);
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         if(Validation.hasErrors()) return;
@@ -1101,7 +1103,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         logs.addAll(this.changeStageUpdate(unit));
         if(STAGE.IN_STORAGE == this.stage) {
-            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId), oldShipType);
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
         }
         if(logs.size() > 0)
             this.stage = STAGE.IN_STORAGE;
@@ -1116,6 +1119,27 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         this.shipItemQty(this.qty());
         this.save();
+    }
+
+    /**
+     * 去往仓库和运输方式变更日志添加到comment
+     *
+     * @param unit
+     */
+    public void autoUpdateComment(ProcureUnit unit) {
+        StringBuilder log = new StringBuilder();
+        if(this.whouse != unit.whouse) {
+            log.append(" 修改去往国家：").append(this.whouse == null ? "空" : this.whouse.country)
+                    .append(" => ").append(unit.whouse == null ? "空" : unit.whouse.country).append("; ");
+        }
+        if(this.shipType != unit.shipType) {
+            log.append(" 修改运输方式：").append(this.shipType == null ? "空" : this.shipType.label())
+                    .append(" => ").append(unit.shipType == null ? "空" : unit.shipType.label()).append("; ");
+        }
+        if(log.length() > 0) {
+            log.insert(0, LocalDate.now());
+        }
+        this.comment += log.toString();
     }
 
     /**
