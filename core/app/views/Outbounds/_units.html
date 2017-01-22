@@ -10,7 +10,6 @@
     <th>采购计划ID</th>
     <th>采购单</th>
     <th>Selling</th>
-    <th>SKU</th>
     <th>产品名称</th>
     <th>供应商</th>
     <th>去往仓库</th>
@@ -23,6 +22,7 @@
     <th>仓库名称</th>
     <th>收货入库记录ID</th>
     <th>阶段</th>
+    <th>备注</th>
   </tr>
 #{list items:units, as:'unit'}
   <tr class="text-center" id="unit_${unit.id}">
@@ -34,8 +34,7 @@
       #{/if}
     <td>${unit.id}</td>
     <td>${unit.deliveryment?.id}</td>
-    <td>${unit.selling?.sellingId}</td>
-    <td>${unit.product.sku}</td>
+    <td><a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
     <td title="${unit.product.abbreviation}">${unit.product.abbreviation.overLong()}</td>
     <td>${unit.cooperator?.name}</td>
     <td>${unit.whouse?.name()}</td>
@@ -56,6 +55,7 @@
     <td>${unit.currWhouse?.name}</td>
     <td>${unit.showInboundUnitIds()}</td>
     <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+    <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
   </tr>
 #{/list}
 </table>
