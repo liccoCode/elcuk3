@@ -145,7 +145,7 @@
   </td>
 </tr>
 <tr>
-  <td colspan="6">
+  <td colspan="${unit.stage.name()=='IN_STORAGE'? 2 : 6}">
   #{list items: unit.relateShipment()}
     <div>
       <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
@@ -155,8 +155,17 @@
     </div>
   #{/list}
   </td>
+#{if unit.stage.name()=='IN_STORAGE'}
+  <th>当前仓库</th>
+  <td colspan="3">
+    <select readonly="readonly" id="curr_warehouse_select" name="unit.currWhouse.id">
+        #{list items:currWhouses, as:'w'}
+          <option value="${w.id}" #{if w.id==unit.currWhouse?.id} selected #{/if}>${w.name}</option>
+        #{/list}
+    </select>
+  </td>
+#{/if}
 </tr>
-
 <tr>
   <td colspan="6">
     <h4>Memo</h4>

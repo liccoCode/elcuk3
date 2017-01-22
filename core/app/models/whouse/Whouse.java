@@ -367,11 +367,15 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        StringBuffer sql = new StringBuffer("type=?  ");
-        if(unit.unit.shipType == null) {
+        return Whouse.autoMatching(unit.unit.shipType, unit.unit.selling.market.country());
+    }
+
+    public static Whouse autoMatching(Shipment.T shipType, String country) {
+        StringBuffer sql = new StringBuffer("type=? ");
+        if(shipType == null) {
             return null;
         }
-        switch(unit.unit.shipType) {
+        switch(shipType) {
             case AIR:
                 sql.append("AND isAIR=true");
                 break;
@@ -381,10 +385,11 @@ public class Whouse extends Model {
             case SEA:
                 sql.append("AND isSEA=true");
                 break;
-
         }
         sql.append(" AND country = ? ");
-        return Whouse.find(sql.toString(), T.SELF, unit.unit.selling.market.country()).first();
+        return Whouse.find(sql.toString(), T.SELF, country).first();
+
+
     }
 
 }

@@ -248,7 +248,7 @@ public class Inbound extends GenericModel {
     public void confirmQC(List<InboundUnit> units) {
         for(InboundUnit unit : units) {
             InboundUnit u = InboundUnit.findById(unit.id);
-            if(u.target == null) {
+            if(u.result == InboundUnit.R.Qualified && u.target == null) {
                 Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
                 return;
             }
@@ -272,9 +272,6 @@ public class Inbound extends GenericModel {
                 u.confirmUser = Login.current();
                 u.inboundDate = new Date();
                 u.inboundQty = u.qualifiedQty;
-                if(u.unit.selling != null && Whouse.autoMatching(u) != null) {
-                    u.target = Whouse.autoMatching(u);
-                }
                 u.qcDate = new Date();
                 u.qcUser = Login.current();
                 u.save();
@@ -291,6 +288,7 @@ public class Inbound extends GenericModel {
                 }
                 punit.mainBoxInfo = u.mainBoxInfo;
                 punit.lastBoxInfo = u.lastBoxInfo;
+                punit.currWhouse = u.target;
                 punit.currWhouse = u.target;
                 punit.save();
                 this.createStockRecord(u);

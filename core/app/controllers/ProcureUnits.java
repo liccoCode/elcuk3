@@ -317,8 +317,9 @@ public class ProcureUnits extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
         List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
+        List<Whouse> currWhouses = Whouse.findByType(Whouse.T.SELF);
         unit.setPeriod();
-        render(unit, oldPlanQty, whouses);
+        render(unit, oldPlanQty, whouses, currWhouses);
     }
 
     /**

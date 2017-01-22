@@ -1185,6 +1185,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
+        logs.addAll(Reflects.logFieldFade(this, "currWhouse", unit.currWhouse));
         return logs;
     }
 
