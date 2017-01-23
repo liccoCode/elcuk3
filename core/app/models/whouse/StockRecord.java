@@ -4,6 +4,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
 import models.procure.ProcureUnit;
+import org.apache.xmlbeans.impl.jam.internal.classrefs.UnqualifiedJClassRef;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -92,7 +93,20 @@ public class StockRecord extends Model {
             public String label() {
                 return "拆库存修改";
             }
+        },
+        Unqualified_Refund {
+            @Override
+            public String label() {
+                return "不良品退货";
+            }
+        },
+        Unqualified_Transfer {
+            @Override
+            public String label() {
+                return "不良品转入";
+            }
         };
+
 
         public abstract String label();
     }

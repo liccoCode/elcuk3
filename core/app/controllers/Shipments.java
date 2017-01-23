@@ -17,6 +17,7 @@ import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
@@ -452,21 +453,23 @@ public class Shipments extends Controller {
      */
     @Check("outbounds.index")
     public static void outbound(List<String> shipmentId) {
+        Outbound.initCreateByShipItem(shipmentId);
+        flash.success("已成功创建出库单!");
+        index(new ShipmentPost());
+    }
+
+    public static void validCreateOutbound(String[] shipmentIds) {
         String msg = "";
-        if(shipmentId != null && !shipmentId.isEmpty()) {
+        if(ArrayUtils.isNotEmpty(shipmentIds)) {
             List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i " +
-                    "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentId) +
+                    "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentIds) +
                     " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
             if(shipments.size() > 0) {
                 msg += "【" + shipments.get(0).id + "】";
+                renderJSON(new Ret(false, "运输单：" + msg + " " +
+                        "下的采购计划还不是【已入库】状态，是否继续？"));
             }
         }
-        if(StringUtils.isNotEmpty(msg)) {
-            flash.error("运输单：" + msg + " 未能成功创建，可能是由于采购计划还不是【已入库】状态，可通知运营采购或仓库尽快收货入库或通过修改变换到其它运输单名下,其余运输单已经成功创建出库单！");
-        } else {
-            Outbound.initCreateByShipItem(shipmentId);
-            flash.success("已成功创建出库单!");
-        }
-        index(new ShipmentPost());
+        renderJSON(new Ret(true, ""));
     }
 }

@@ -7,7 +7,9 @@ import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.Ret;
+import models.view.post.ProcurePost;
 import models.view.post.RefundPost;
+import models.view.post.StockPost;
 import models.whouse.InboundUnit;
 import models.whouse.Refund;
 import models.whouse.RefundUnit;
@@ -119,6 +121,27 @@ public class Refunds extends Controller {
             refund.save();
         }
         renderJSON(new Ret(true));
+    }
+
+    public static void unQualifiedIndex(StockPost p) {
+        if(p == null) {
+            p = new StockPost();
+        }
+        p.flag = true;
+        List<ProcureUnit> units = p.query();
+        render(p, units);
+    }
+
+    public static void unQualifiedHandle(Long unitId, int qty, String memo) {
+        Refund.unQualifiedHandle(unitId, qty, memo);
+        flash.success("不良品退货成功!");
+        unQualifiedIndex(null);
+    }
+
+    public static void transferQty(Long unitId, int qty, String memo) {
+        Refund.transferQty(unitId, qty, memo);
+        flash.success("不良品转入成功!");
+        unQualifiedIndex(null);
     }
 
 }

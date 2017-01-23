@@ -208,8 +208,6 @@ public class Refund extends GenericModel {
         for(Refund refund : refunds) {
             refund.status = S.Refund;
             refund.save();
-
-
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
                 unit.attrs.qty -= u.qty;
@@ -225,7 +223,7 @@ public class Refund extends GenericModel {
                     }
                 }
                 unit.save();
-                createStockRecord(u);
+                createStockRecord(u, StockRecord.T.Refund, "");
             }
         }
     }
@@ -250,13 +248,14 @@ public class Refund extends GenericModel {
         }
     }
 
-    public static void createStockRecord(RefundUnit unit) {
+    public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo) {
         StockRecord record = new StockRecord();
         record.whouse = unit.unit.whouse;
         record.unit = unit.unit;
         record.qty = unit.qty;
-        record.type = StockRecord.T.Refund;
+        record.type = type;
         record.recordId = unit.id;
+        record.memo = memo;
         record.save();
     }
 
@@ -274,6 +273,56 @@ public class Refund extends GenericModel {
         } else {
             return "";
         }
+    }
+
+    /**
+     * 不良品退货
+     *
+     * @param unitId
+     * @param qty
+     * @param memo
+     */
+    public static void unQualifiedHandle(Long unitId, int qty, String memo) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        unit.unqualifiedQty -= qty;
+        unit.save();
+        Refund refund = new Refund(unit);
+        refund.id = id();
+        refund.memo = memo;
+        refund.whouseUser = Login.current();
+        refund.status = S.Refund;
+        refund.type = T.After_Inbound;
+        refund.save();
+        RefundUnit u = new RefundUnit();
+        u.unit = unit;
+        u.refund = refund;
+        u.planQty = qty;
+        u.qty = qty;
+        u.save();
+        createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
+    }
+
+    /**
+     * 不良品转入
+     *
+     * @param unitId
+     * @param qty
+     * @param memo
+     */
+    public static void transferQty(Long unitId, int qty, String memo) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        unit.unqualifiedQty -= qty;
+        unit.availableQty += qty;
+        unit.save();
+        /**异动记录**/
+        StockRecord record = new StockRecord();
+        record.whouse = unit.whouse;
+        record.unit = unit;
+        record.qty = qty;
+        record.type = StockRecord.T.Unqualified_Transfer;
+        record.recordId = unit.id;
+        record.memo = memo;
+        record.save();
     }
 
 }

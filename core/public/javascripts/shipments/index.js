@@ -57,8 +57,9 @@ $(() => {
         type: 'warning'
       });
       return;
-    } else if (confirm("确认为 " + checkboxs.length + " 条运输单创建出库单吗？")) {
+    } else {
       let flag = 0;
+      let shipmentIds = [];
       checkboxs.each(function() {
         let ck = $(this);
         if (ck.attr("coop") == "") {
@@ -77,12 +78,24 @@ $(() => {
           flag++;
           return false;
         }
+        shipmentIds.push(ck.val())
       });
       if (valid() && flag == 0) {
-        let $form = $('<form method="post" action=""></form>');
-        $form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
-        $form.hide().append(checkboxs.clone()).appendTo('body');
-        $form.submit().remove();
+        $.get('/shipments/validCreateOutbound', {shipmentIds: shipmentIds}, function(r) {
+          if (r.flag) {
+            let $form = $('<form method="post" action=""></form>');
+            $form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
+            $form.hide().append(checkboxs.clone()).appendTo('body');
+            $form.submit().remove();
+          } else {
+            if (confirm(r.message)) {
+              let $form = $('<form method="post" action=""></form>');
+              $form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
+              $form.hide().append(checkboxs.clone()).appendTo('body');
+              $form.submit().remove();
+            }
+          }
+        });
       }
     }
   });
