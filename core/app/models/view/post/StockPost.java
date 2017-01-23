@@ -1,5 +1,6 @@
 package models.view.post;
 
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ public class StockPost extends Post<ProcureUnit> {
 
     private static final Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
     public Whouse whouse;
+    public Cooperator cooperator;
     public String projectName;
 
     public boolean flag = false;
@@ -42,6 +44,11 @@ public class StockPost extends Post<ProcureUnit> {
             sbd.append(" AND currWhouse.id=?");
             params.add(this.whouse.id);
         }
+        if(cooperator != null && this.cooperator.id != null) {
+            sbd.append(" AND cooperator.id=?");
+            params.add(this.cooperator.id);
+        }
+
         if(StringUtils.isNotBlank(this.projectName)) {
             sbd.append(" AND projectName=?");
             params.add(this.projectName);

@@ -128,8 +128,9 @@ public class Refunds extends Controller {
             p = new StockPost();
         }
         p.flag = true;
+        List<Cooperator> cooperators = Cooperator.suppliers();
         List<ProcureUnit> units = p.query();
-        render(p, units);
+        render(p, units, cooperators);
     }
 
     public static void unQualifiedHandle(Long unitId, int qty, String memo) {

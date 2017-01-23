@@ -15,10 +15,10 @@
 <div class="row-fluid">
   <form action="@{Refunds.unQualifiedIndex()}" method="get" class="search_form" id="search_Form">
     <div class="span12">
-      <select name="p.whouse.id" class="inline " style="width:150px;">
-        <option value="">仓库</option>
-      #{list items:whouses, as:'w'}
-        <option value="${w.id}" ${p.whouse?.id==w.id? 'selected' : ''}>${w.name}</option>
+      <select name="p.cooperator.id" class="inline selectize" style="width:150px;">
+        <option value="">供应商</option>
+      #{list items:cooperators, as:'c'}
+        <option value="${c.id}" ${p.cooperator?.id==c.id? 'selected' : ''}>${c.name}</option>
       #{/list}
       </select>
 
@@ -65,11 +65,11 @@
         <td>${u.unqualifiedQty}</td>
         <td><input type="text" name="memo" value=""></td>
         <td>
-          <input type="text" style="width:35px;" name="qty" value="${u.unqualifiedQty}">
+          <input type="text" style="width:35px;" name="qty" value="${u.unqualifiedQty}" data-origin="${u.unqualifiedQty}">
           <input type="button" class="btn btn-warning" name="refundBtn" value="退货"
-                 data-url="@{Refunds.unQualifiedHandle}" data-id="${u.id}">
-          <input type="button" class="btn btn-success" name="transferBtn " value="转入成品"
-                 data-url="@{Refunds.transferQty}" data-id="${u.id}" >
+                 data-url="@{Refunds.unQualifiedHandle()}" data-id="${u.id}">
+          <input type="button" class="btn btn-success" name="transferBtn" value="转入成品"
+                 data-url="@{Refunds.transferQty()}" data-id="${u.id}">
         </td>
       </tr>
     #{/list}
