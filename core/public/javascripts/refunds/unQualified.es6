@@ -1,6 +1,6 @@
 $(() => {
 
-  $("#data_table").on("click", "input[name='refundBtn'],input[name='transferBtn']", function(e) {
+  $("#data_table").on("click", "[name='refundBtn'],[name='transferBtn']", function(e) {
     e.preventDefault();
     let memo = $(this).parent("td").parent("tr").find("input[name='memo']").val();
     let qty = $(this).parent("td").parent("tr").find("input[name='qty']").val();
@@ -16,7 +16,17 @@ $(() => {
         type: 'warning'
       });
     }
+  });
 
+  $("input[name='qty']").change(function() {
+    let origin = $(this).data("origin");
+    if ($(this).val() < 0 || $(this).val() > origin) {
+      noty({
+        text: '数量不能小于0或初始大于不良品数!',
+        type: 'warning'
+      });
+      $(this).val(origin);
+    }
   });
 
 });

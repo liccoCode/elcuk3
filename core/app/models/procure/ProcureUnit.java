@@ -1281,6 +1281,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     /**
      * 修改采购计划后更换出库单
+     *
      * @param out
      */
     public void changeOutbound(Outbound out) {
