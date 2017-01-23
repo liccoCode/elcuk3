@@ -20,9 +20,14 @@ public class StockPost extends Post<ProcureUnit> {
     public Whouse whouse;
     public String projectName;
 
+    public boolean flag = false;
+
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("1=1");
+        if(this.flag) {
+            sbd.append(" AND unqualifiedQty > 0 ");
+        }
         List<Object> params = new ArrayList<>();
 
         Long unit_id = isSearchForId();
@@ -31,6 +36,7 @@ public class StockPost extends Post<ProcureUnit> {
             params.add(unit_id);
             return new F.T2<>(sbd.toString(), params);
         }
+
 
         if(this.whouse != null && this.whouse.id != null) {
             sbd.append(" AND currWhouse.id=?");
@@ -59,6 +65,13 @@ public class StockPost extends Post<ProcureUnit> {
         return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
+
+    public List<ProcureUnit> queryUnQualifiedIndex() {
+        F.T2<String, List<Object>> params = this.params();
+        this.count = this.count(params);
+        String sql = params._1 + " ORDER BY id DESC";
+        return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
+    }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
