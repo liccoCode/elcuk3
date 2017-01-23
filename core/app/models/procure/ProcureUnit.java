@@ -1257,7 +1257,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(this.shipType == Shipment.T.EXPRESS || oldShipType != this.shipType) {
                 this.shipItems.forEach(GenericModel::delete);
             }
-            this.outbound = null;
+            this.changeOutbound(null);
         } else {
             if(this.shipItems.isEmpty()) {
                 // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
@@ -1275,7 +1275,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                             }
                         });
             }
-            this.outbound = shipment.out;
+            this.changeOutbound(shipment.out);
+        }
+    }
+
+    /**
+     * 修改采购计划后更换出库单
+     * @param out
+     */
+    public void changeOutbound(Outbound out) {
+        if(this.outbound != null) {
+            if(outbound.status != Outbound.S.Outbound) {
+                this.outbound = out;
+            }
+        } else {
+            this.outbound = out;
         }
     }
 
