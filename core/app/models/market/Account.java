@@ -13,7 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -204,10 +203,17 @@ public class Account extends Model {
             this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
     }
 
+    public boolean logged() {
+        String html = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
+        Document doc = Jsoup.parse(html);
+        return doc.select("form[name=signIn]").isEmpty();
+    }
+
     /**
      * 销售账号需要登陆的后台系统
      */
     public void loginAmazonSellerCenter() {
+        if(this.logged()) return;
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -269,8 +275,7 @@ public class Account extends Model {
      * @return
      */
     public String loginAmazonSellerCenterStep1() {
-        HttpClientContext context = HTTP.request(this.cookieStore(), this.type.sellerCentralHomePage(),
-                RequestConfig.custom().setMaxRedirects(6).build());
+        HttpClientContext context = HTTP.request(this.cookieStore(), this.type.sellerCentralHomePage());
         List<URI> uris = context.getRedirectLocations();
         if(uris != null && uris.size() > 0) {
             return uris.get(uris.size() - 1).toString();

@@ -23,8 +23,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -293,7 +291,7 @@ public class Selling extends GenericModel {
         String html = "";
         String fnskuhtml = "";
         synchronized(this.account.cookieStore()) {
-            checkAmazonLogin();
+            this.account.loginAmazonSellerCenter();
             // 1. 切换 Selling 所在区域
             this.account.changeRegion(this.market);
             // 2. 获取修改 Selling 的页面, 获取参数
@@ -434,7 +432,9 @@ public class Selling extends GenericModel {
         this.productPackageDimensionValid();
     }
 
-    /**产品上架时，验证包材信息是否全部填写完整**/
+    /**
+     * 产品上架时，验证包材信息是否全部填写完整
+     **/
     public void productPackageDimensionValid() {
         Product product = Product.findByMerchantSKU(this.merchantSKU);
         if(product.lengths == null) Webs.error("产品长(包材)需填写!");
@@ -904,7 +904,6 @@ public class Selling extends GenericModel {
             usedAmazonFileName.get(fileParamName).set(true);
         }
         synchronized(this.account.cookieStore()) {
-            checkAmazonLogin();
             this.account.changeRegion(this.market);
             Logger.info("Upload Picture to Amazon AND Synchronized[%s].",
                     this.account.prettyName());
@@ -938,21 +937,6 @@ public class Selling extends GenericModel {
             }
         }
         this.save();
-    }
-
-
-    /**
-     * 检测是否能正常登陆amazon
-     */
-    public void checkAmazonLogin() {
-        // 1. 切换 Selling 所在区域
-        this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
-        // 2. 获取修改 Selling 的页面, 获取参数
-        String html = HTTP.get(this.account.cookieStore(), this.amzListingEditPage());
-        Document doc = Jsoup.parse(html);
-        // ----- Input 框框
-        Elements inputs = doc.select("form[name=productForm] input");
-        if(inputs.size() == 0) this.account.loginAmazonSellerCenter();
     }
 
     public List<NameValuePair> submitGetFeedParams(Feed feed, String feed_submission_id) {
