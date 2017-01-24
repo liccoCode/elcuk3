@@ -1,6 +1,6 @@
 $(() => {
 
-  $("td[name='clickTd']").click(function() {
+  $("td[name='clickTd']").click(function () {
     let tr = $(this).parent("tr");
     let id = $(this).data("id");
     let format_id = id.replace(/\|/gi, '_');
