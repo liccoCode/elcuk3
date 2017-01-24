@@ -313,6 +313,7 @@ public class Refund extends GenericModel {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         unit.unqualifiedQty -= qty;
         unit.availableQty += qty;
+        unit.result = InboundUnit.R.Qualified;
         unit.save();
         /**异动记录**/
         StockRecord record = new StockRecord();

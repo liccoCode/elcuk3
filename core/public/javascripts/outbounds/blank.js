@@ -2,7 +2,7 @@
  * Created by licco on 2016/11/30.
  */
 $(() => {
-  $("#confirmOutboundBtn").click(function(e) {
+  $("#confirmOutboundBtn").click(function (e) {
     e.stopPropagation();
     let num = $("input[name='ids']:checked").length;
     if (num == 0) {
@@ -12,7 +12,7 @@ $(() => {
       });
     } else if (confirm("确认出库 " + num + " 条出库单吗?")) {
       let i = 0;
-      $("input[name='ids']:checked").each(function() {
+      $("input[name='ids']:checked").each(function () {
         if ($(this).attr("status") != "Create") {
           i++;
           noty({
@@ -56,7 +56,7 @@ $(() => {
 
   showTypeSelect();
 
-  $("#printBtn").click(function(e) {
+  $("#printBtn").click(function (e) {
     e.stopPropagation();
     if ($("input[type='checkbox']:checked").length == 0) {
       noty({
@@ -69,19 +69,19 @@ $(() => {
     window.open("/Outbounds/printOutboundForm?" + $form.serialize(), "_blank");
   });
 
-  $("#data_table").on("click", "input[name='editBoxInfo']", function(e) {
+  $("#data_table").on("click", "input[name='editBoxInfo']", function (e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
     let id = $(this).data("id");
     $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id});
   });
 
-  $("#submitBoxInfoBtn").click(function(e) {
+  $("#submitBoxInfoBtn").click(function (e) {
     e.stopPropagation();
     let action = $(this).data('action');
     let form = $("<form method='post' action='#{action}'></form>")
     form = form.append($("#box_info_table").clone())
-    $.post('/ProcureUnits/updateBoxInfo', form.serialize(), function(re) {
+    $.post('/ProcureUnits/updateBoxInfo', form.serialize(), function (re) {
       if (re) {
         $("#fba_carton_contents_modal").modal('hide');
         noty({
@@ -97,7 +97,7 @@ $(() => {
     });
   });
 
-  $("#deleteByCreateBtn").click(function(e) {
+  $("#deleteByCreateBtn").click(function (e) {
     e.stopPropagation();
     if ($("#data_table input[type='checkbox']:checked").length == 0) {
       noty({
@@ -107,7 +107,7 @@ $(() => {
       return false;
     }
     if (confirm("确认解除选中采购计划吗？")) {
-      $("#data_table input[type='checkbox']:checked").each(function() {
+      $("#data_table input[type='checkbox']:checked").each(function () {
         $(this).parent("td").parent("tr").remove();
       });
       noty({
@@ -117,7 +117,7 @@ $(() => {
     }
   });
 
-  $("#deleteBtn").click(function(e) {
+  $("#deleteBtn").click(function (e) {
     e.stopPropagation();
     if ($("#data_table input[type='checkbox']:checked").length == 0) {
       noty({
@@ -128,12 +128,12 @@ $(() => {
     }
     if (confirm("确认解除选中采购计划吗？")) {
       let ids = [];
-      $("#data_table input[type='checkbox']:checked").each(function() {
+      $("#data_table input[type='checkbox']:checked").each(function () {
         ids.push($(this).val());
       });
-      $.post("/ProcureUnits/deleteUnit", {ids: ids}, function(r) {
+      $.post("/ProcureUnits/deleteUnit", {ids: ids}, function (r) {
         if (r) {
-          $("#data_table input[type='checkbox']:checked").each(function() {
+          $("#data_table input[type='checkbox']:checked").each(function () {
             $(this).parent("td").parent("tr").remove();
           });
           noty({
