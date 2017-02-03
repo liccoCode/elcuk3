@@ -72,7 +72,7 @@
       #{/if}
       #{if relationPage}
         <td>
-          <input type="checkbox" name="pids" value="${unit.id}">
+          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}">
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">

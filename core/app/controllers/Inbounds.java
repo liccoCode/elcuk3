@@ -96,6 +96,12 @@ public class Inbounds extends Controller {
      */
     public static void createByPlanId(String id, DeliverPlanPost p, List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : units) {
+            if(StringUtils.isNotEmpty(Refund.isAllReufund(unit.id))) {
+                flash.error("采购计划【" + unit.id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(unit.id) + "】");
+                DeliverPlans.indexWhouse(p);
+            }
+        }
         List<Long> ids = units.stream()
                 .filter(unit -> unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id))
                 .map(unit -> unit.id).collect(Collectors.toList());
