@@ -17,9 +17,9 @@
     <th width="40px;">阶段</th>
     <th width="80px;">Selling</th>
     <th>Sku</th>
-    <th>FBA-ShipmentId</th>
+    <th width="120px;">FBA-ShipmentId<br>CenterId</th>
     <th>采购单<br>供应商</th>
-    <th>去往仓库</th>
+    <th>去往市场</th>
     <th width="60px;">初始计划数</th>
     <th width="100px;">数量<br>(计划/交货/入库)</th>
   #{ifnot deliveryplan}
@@ -124,6 +124,7 @@
               </a>
             #{/if}
         #{/if}
+      <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
     </td>
     <td>
         #{if unit.deliveryment}

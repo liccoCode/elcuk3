@@ -13,6 +13,7 @@ import models.view.post.DeliverPlanPost;
 import models.view.post.InboundPost;
 import models.whouse.Inbound;
 import models.whouse.InboundUnit;
+import models.whouse.Refund;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;

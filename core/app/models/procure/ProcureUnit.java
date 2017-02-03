@@ -143,7 +143,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         IN_STORAGE {
             @Override
             public String label() {
-                return "已入库";
+                return "已入仓";
             }
         },
         OUTBOUND {
@@ -1284,13 +1284,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param out
      */
-    public void changeOutbound(Outbound out) {
-        if(this.outbound != null) {
-            if(outbound.status != Outbound.S.Outbound) {
-                this.outbound = out;
-            }
-        } else {
-            this.outbound = out;
+    private void changeOutbound(Outbound out) {
+        if(!(this.outbound != null && this.outbound.status == Outbound.S.Outbound)) {
+            Optional<Outbound> optional = Optional.ofNullable(out);
+            optional.ifPresent(value -> this.outbound = (value.status != Outbound.S.Outbound ? out : this.outbound));
         }
     }
 

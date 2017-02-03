@@ -83,7 +83,8 @@
 <tr>
   <th><i class="icon-asterisk" style="color:red"></i>预计交货日期</th>
   <td>
-    <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required>
+    <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required
+    #{if unit.stage.name()=='IN_STORAGE'} readonly #{/if}>
   #{if oldplanDeliveryDate!=null}
     <span class="add-on">比原预计交货日期${oldplanDeliveryDate.date()}推迟${(unit.attrs
     .planDeliveryDate.getTime()-oldplanDeliveryDate.getTime())/(24*60*60*1000)}天</span>
