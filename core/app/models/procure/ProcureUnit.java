@@ -881,18 +881,32 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class)
                 .save();
-        this.createStockRecord(newUnit);
+        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split);
         return newUnit;
     }
 
-    public void createStockRecord(ProcureUnit unit) {
+    /**
+     * 创建异动记录
+     *
+     * @param unit
+     * @param qty
+     * @param type
+     */
+    public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type) {
         StockRecord record = new StockRecord();
         record.whouse = unit.currWhouse;
         record.unit = unit;
-        record.qty = unit.outQty;
-        record.type = StockRecord.T.Split;
+        record.qty = qty;
+        record.type = type;
         record.recordId = unit.id;
         record.save();
+        StockRecord parent = new StockRecord();
+        parent.whouse = unit.parent.currWhouse;
+        parent.unit = unit.parent;
+        parent.qty = 0 - qty;
+        parent.type = type;
+        parent.recordId = unit.parent.id;
+        parent.save();
     }
 
     /**
@@ -1112,6 +1126,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(logs.size() > 0)
             this.stage = STAGE.IN_STORAGE;
         logs.addAll(this.afterDoneUpdate(unit));
+        int diffQty = this.availableQty - this.originQty;
         this.originQty = this.availableQty;
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
@@ -1123,6 +1138,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         this.shipItemQty(this.qty());
         this.save();
+        this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock);
     }
 
     /**

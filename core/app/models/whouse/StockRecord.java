@@ -4,7 +4,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
 import models.procure.ProcureUnit;
-import org.apache.xmlbeans.impl.jam.internal.classrefs.UnqualifiedJClassRef;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -73,7 +72,7 @@ public class StockRecord extends Model {
         Split {
             @Override
             public String label() {
-                return "拆库存";
+                return "库存分拆";
             }
         },
         Refund {
@@ -91,7 +90,7 @@ public class StockRecord extends Model {
         Split_Stock {
             @Override
             public String label() {
-                return "拆库存修改";
+                return "库存分拆修改";
             }
         },
         Unqualified_Refund {
