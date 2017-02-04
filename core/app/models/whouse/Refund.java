@@ -311,6 +311,11 @@ public class Refund extends GenericModel {
      */
     public static void transferQty(Long unitId, int qty, String memo) {
         ProcureUnit unit = ProcureUnit.findById(unitId);
+        if (unit.stage == ProcureUnit.STAGE.DELIVERY) {
+             unit.stage = ProcureUnit.STAGE.IN_STORAGE;
+             unit.attrs.qty += qty;
+             unit.inboundQty += qty;
+        }
         unit.unqualifiedQty -= qty;
         unit.availableQty += qty;
         unit.result = InboundUnit.R.Qualified;

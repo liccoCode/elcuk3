@@ -385,11 +385,11 @@ public class Whouse extends Model {
             case SEA:
                 sql.append("AND isSEA=true");
                 break;
+            default:
+                sql.append("");
         }
         sql.append(" AND country = ? ");
         return Whouse.find(sql.toString(), T.SELF, country).first();
-
-
     }
 
 }

@@ -41,7 +41,14 @@
     <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
     <td>${unit.fba?.shipmentId}</td>
     <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
-    <td>${unit.availableQty}</td>
+    <td>
+        #{if Arrays.asList('OUTBOUND','SHIPPING','SHIP_OVER','INBOUND','CLOSE').contains(unit.stage.name())}
+          ${unit.outQty}
+        #{/if}
+        #{else }
+          ${unit.availableQty}
+        #{/else}
+    </td>
     <td>${unit.outQty}</td>
     <td>
       <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">

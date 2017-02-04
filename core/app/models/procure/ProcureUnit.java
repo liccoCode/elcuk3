@@ -138,18 +138,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 深圳仓已入库
+         * 深圳仓已入仓
          */
         IN_STORAGE {
             @Override
             public String label() {
-                return "已入库";
+                return "已入仓";
             }
         },
         OUTBOUND {
             @Override
             public String label() {
-                return "已出库";
+                return "已出仓";
             }
         },
 
@@ -845,6 +845,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.price = unit.attrs.price;
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
+        newUnit.comment = unit.comment;
+        newUnit.result = unit.result;
+        newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.country());
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.sid;
@@ -1112,6 +1115,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.originQty = this.availableQty;
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
+        this.inboundQty = this.availableQty;
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
                     this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
@@ -1151,6 +1155,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
     }
 
     public void noty(String sku, String content) {
@@ -1284,13 +1289,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param out
      */
-    public void changeOutbound(Outbound out) {
-        if(this.outbound != null) {
-            if(outbound.status != Outbound.S.Outbound) {
-                this.outbound = out;
-            }
-        } else {
-            this.outbound = out;
+    private void changeOutbound(Outbound out) {
+        if(!(this.outbound != null && this.outbound.status == Outbound.S.Outbound)) {
+            Optional<Outbound> optional = Optional.ofNullable(out);
+            optional.ifPresent(value -> this.outbound = (value.status != Outbound.S.Outbound ? out : this.outbound));
         }
     }
 
@@ -2293,7 +2295,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return StringUtils.isNotEmpty(validInbound(unit)) ? validInbound(unit) : validRefund(unit);
             } else if(type.equals("createOutboundBtn")) {
                 if(unit.stage != STAGE.IN_STORAGE) {
-                    return "请选择阶段为【已入库】的采购计划！";
+                    return "请选择阶段为【已入仓】的采购计划！";
                 }
                 if(unit.outbound != null) {
                     return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中！";
@@ -2301,7 +2303,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 msg = validRefund(unit);
             } else if(type.equals("createRefundBtn")) {
                 if(unit.stage != STAGE.IN_STORAGE) {
-                    return "请统一选择阶段为【已入库】、【仓库加工】的采购计划！";
+                    return "请统一选择阶段为【已入仓】的采购计划！";
                 }
                 if(unit.parent != null && T.StockSplit == unit.type) {
                     return "库存分拆的子采购计划【" + unit.id + "】无法进行退货！";

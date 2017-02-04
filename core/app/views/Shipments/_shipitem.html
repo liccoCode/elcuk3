@@ -24,12 +24,11 @@
     <th>CenterId</th>
   #{/if}
     <th><abbr rel='tooltip' title='运输数量 (计划数量 | 交货数量)'>Qty</abbr></th>
-    <th class="five">Receive</th>
+    <th>Receive</th>
     <th>Qty1</th>
     <th>采购单</th>
-    <th>预计发货时间</th>
-    <th>预计到库时间</th>
-    <th>实际交货时间</th>
+    <th width="140px;">预计发货时间<br>预计到库时间</th>
+    <th width="140px;">预计交货时间<br>实际交货时间</th>
     <th>供应商</th>
     <th>总重量(kg)</th>
     <th>包装信息</th>
@@ -87,7 +86,7 @@
         <td>${itm.unit.fba?.centerId}</td>
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
-    ${itm.qty - itm.unit.returnPurchaseSample() - itm.unit.fetchCheckTaskQcSample()}
+    ${itm.unit.availableQty}
       (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
       #{if itmRecord}
@@ -121,10 +120,13 @@
       </a>
     </td>
     <td style="background:${itm.overdue()}">
-        #{time_tooltip time: itm.unit.attrs.planShipDate/}
+      预计发货:#{time_tooltip time: itm.unit.attrs.planShipDate/}<br>
+      预计到库:#{time_tooltip time: itm.unit.attrs.planArrivDate/}
     </td>
-    <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
-    <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
+    <td>
+      预计交货:#{time_tooltip time: itm.unit.attrs.planDeliveryDate/}<br>
+      实际交货:#{time_tooltip time: itm.unit.attrs.deliveryDate/}
+    </td>
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()}</td>
     <td>

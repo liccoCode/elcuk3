@@ -2,7 +2,7 @@
  * Created by licco on 2016/11/17.
  */
 $(() => {
-  $('#confirmReceiveBtn,#confirmQCBtn,#confirmInboundBtn').click(function(e) {
+  $('#confirmReceiveBtn,#confirmQCBtn,#confirmInboundBtn').click(function (e) {
     $('#edit_inbound_form').attr('action', $(this).data('url'));
     if ($("input[name='inbound.receiveDate']").val() == "") {
       noty({
@@ -21,7 +21,7 @@ $(() => {
     $('#edit_inbound_form').submit();
   });
 
-  $('#unit_table').on('change', 'td>:input[name]', function() {
+  $('#unit_table').on('change', 'td>:input[name]', function () {
     let $input = $(this);
     let id = $(this).parents('tr').find('input[name$=id]').val();
     let attr = $input.attr('name');
@@ -101,7 +101,7 @@ $(() => {
         $(this).val(qty);
         return false;
       }
-      $(this).parent('td').next().find('input').attr("value", qty - value);
+      $(this).parent('td').next().find('input').prop("value", qty - value);
     }
 
     if (attr == 'unqualifiedQty') {
@@ -161,19 +161,19 @@ $(() => {
     }
   });
 
-  $("input[name='editBoxInfo']").click(function(e) {
+  $("input[name='editBoxInfo']").click(function (e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
     let id = $(this).data("id");
     $("#refresh_div").load("/Inbounds/refreshFbaCartonContentsByIds", {id: id});
   });
 
-  $("#submitBoxInfoBtn").click(function(e) {
+  $("#submitBoxInfoBtn").click(function (e) {
     e.stopPropagation();
     let action = $(this).data('action');
     let form = $("<form method='post' action='#{action}'></form>")
     form = form.append($("#box_info_table").clone())
-    $.post('/Inbounds/updateBoxInfo', form.serialize(), function(re) {
+    $.post('/Inbounds/updateBoxInfo', form.serialize(), function (re) {
       if (re) {
         $("#fba_carton_contents_modal").modal('hide');
         noty({
@@ -189,7 +189,7 @@ $(() => {
     });
   });
 
-  $("#deleteBtn").click(function(e) {
+  $("#deleteBtn").click(function (e) {
     e.stopPropagation();
     if ($("#unit_table input[type='checkbox']:checked").length == 0) {
       noty({
@@ -208,12 +208,12 @@ $(() => {
 
     if (confirm("确认解除选中采购计划吗？")) {
       let ids = [];
-      $("#unit_table input[type='checkbox']:checked").each(function() {
+      $("#unit_table input[type='checkbox']:checked").each(function () {
         ids.push($(this).val());
       });
-      $.post("/Inbounds/deleteUnit", {ids: ids}, function(r) {
+      $.post("/Inbounds/deleteUnit", {ids: ids}, function (r) {
         if (r) {
-          $("#unit_table input[type='checkbox']:checked").each(function() {
+          $("#unit_table input[type='checkbox']:checked").each(function () {
             $(this).parent("td").parent("tr").remove();
           });
           noty({

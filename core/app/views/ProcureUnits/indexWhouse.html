@@ -121,9 +121,9 @@
           <th width="60px;">采购计划ID</th>
           <th>阶段</th>
           <th width="80px;">Selling</th>
-          <th width="160px;">Sku<br>产品名称</th>
-          <th>FBA-ShipmentId</th>
-          <th width="60px;">去往仓库</th>
+          <th width="140px;">Sku<br>产品名称</th>
+          <th>FBA-ShipmentId<br>CenterId</th>
+          <th width="60px;">去往市场</th>
           <th>深圳仓库</th>
           <th>供应商</th>
           <th>采购单</th>
@@ -178,6 +178,7 @@
                       #{/if}
                   #{/cache}
               #{/if}
+            <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
           </td>
           <td>${unit.whouse?.name()}</td>
           <td>${unit.currWhouse?.name}</td>

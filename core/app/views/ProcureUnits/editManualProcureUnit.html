@@ -3,75 +3,84 @@
 #{set 'moreScripts'}
     #{script 'procureunits/blank.coffee'/}
 #{/set}
+<style>
+  .table td, .table th{
+    vertical-align:middle;
+  }
+</style>
 #{errorMsgs /}
 #{flash_alert/}
-#{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
 
-<h4>手动单采购计划</h4>
-<table class="table table-condensed table-bordered">
-  <tr>
-    <th>SKU</th>
-    <td>
-      <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}"
-             value="${unit.product?.sku}" id="unit_sku" readonly=true>
-    </td>
+#{info_row title:'手动单采购计划' /}
+<div class="row-fluid">
+  <div class="span12">
+  #{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>SKU</th>
+        <td>
+          <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}" value="${unit.product?.sku}" id="unit_sku" readonly>
+        </td>
 
-    <th>供应商</th>
-    <td>
-        #{select 'unit.cooperator.id', items: unit.product?.cooperators(), labelProperty: 'name', value: unit.cooperator?.id}
-            #{option ''}请选择#{/option}
-        #{/select}
-    </td>
-  </tr>
+        <th>供应商</th>
+        <td>
+          <select name="unit.cooperator.id">
+              #{list items:unit.product?.cooperators(), as:'c'}
+                <option value="${c.id}" #{if c.id == unit.cooperator?.id} selected #{/if}>${c.name}</option>
+              #{/list}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>价格</th>
+        <td>
+          <input type="text" width="60px;" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+            #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
+        </td>
 
-  <tr>
-    <th>价格</th>
-    <td>
-      <div class="input-append">
-        <input type="text" class="span1" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
-          #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
-      </div>
-    </td>
+        <th>采购数量</th>
+        <td>
+          <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
+              #{if unit.isManualEdit()} readonly #{/if}>
+          <input type="text" id="box_num" class="input-mini" placeHolder="箱数" #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
+          <span class="add-on">箱</span>
+          <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+        </td>
+      </tr>
 
-    <th>采购数量</th>
-    <td>
-      <div class="input-append">
-        <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
-            #{if unit.isManualEdit()} readonly #{/if}>
-        <input type="text" id="box_num" class="input-mini" placeHolder="箱数" #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
-        <span class="add-on">箱</span>
-      </div>
-      <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-    </td>
-  </tr>
+      <tr>
+        <th>采购取样</th>
+        <td>
+          <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/> <span class="add-on">个</span>
+        </td>
+        <th>质检取样</th>
+        <td>
+          <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
+        </td>
+      </tr>
+      <tr>
+        <th>预计交货日期</th>
+        <td>
+          <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+          <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
+        </td>
+        <th>B2B选项</th>
+        <td>
+          <label class="checkbox inline">
+            <input type="checkbox" name="unit.isb2b" value="true" #{if unit.projectName=='B2B'} checked #{/if}>
+            B2B
+          </label>
+        </td>
+      </tr>
 
-  <tr>
-    <th>采购取样</th>
-    <td>
-      <div class="input-append">
-        <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/> <span class="add-on">个</span>
-      </div>
-    </td>
-    <th>质检取样</th>
-    <td>
-      <div class="input-append">
-        <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
-      </div>
-    </td>
-  </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary">保存</button>
+        </td>
+      </tr>
+    </table>
+  #{/form}
+  </div>
+</div>
 
-  <tr>
-    <th>预计交货日期</th>
-    <td colspan="4">
-      <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
-      <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
-    </td>
-  </tr>
 
-  <tr>
-    <td colspan="4">
-      <button class="btn btn-primary">保存</button>
-    </td>
-  </tr>
-</table>
-#{/form}
