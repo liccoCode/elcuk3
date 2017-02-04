@@ -388,8 +388,6 @@ public class Whouse extends Model {
         }
         sql.append(" AND country = ? ");
         return Whouse.find(sql.toString(), T.SELF, country).first();
-
-
     }
 
 }

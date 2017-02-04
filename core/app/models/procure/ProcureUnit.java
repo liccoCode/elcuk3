@@ -845,6 +845,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.price = unit.attrs.price;
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
+        newUnit.result = unit.result;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.sid;
