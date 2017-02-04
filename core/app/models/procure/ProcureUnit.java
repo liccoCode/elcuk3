@@ -138,7 +138,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 深圳仓已入库
+         * 深圳仓已入仓
          */
         IN_STORAGE {
             @Override
@@ -149,7 +149,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         OUTBOUND {
             @Override
             public String label() {
-                return "已出库";
+                return "已出仓";
             }
         },
 
@@ -2295,7 +2295,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return StringUtils.isNotEmpty(validInbound(unit)) ? validInbound(unit) : validRefund(unit);
             } else if(type.equals("createOutboundBtn")) {
                 if(unit.stage != STAGE.IN_STORAGE) {
-                    return "请选择阶段为【已入库】的采购计划！";
+                    return "请选择阶段为【已入仓】的采购计划！";
                 }
                 if(unit.outbound != null) {
                     return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中！";
@@ -2303,7 +2303,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 msg = validRefund(unit);
             } else if(type.equals("createRefundBtn")) {
                 if(unit.stage != STAGE.IN_STORAGE) {
-                    return "请统一选择阶段为【已入库】、【仓库加工】的采购计划！";
+                    return "请统一选择阶段为【已入仓】的采购计划！";
                 }
                 if(unit.parent != null && T.StockSplit == unit.type) {
                     return "库存分拆的子采购计划【" + unit.id + "】无法进行退货！";

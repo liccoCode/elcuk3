@@ -255,7 +255,7 @@ public class Outbound extends GenericModel {
             Outbound out = Outbound.findById(id);
             for(ProcureUnit p : out.units) {
                 if(p.stage != ProcureUnit.STAGE.IN_STORAGE) {
-                    Validation.addError("", "出库单【" + id + "】下的采购计划" + p.id + "不是已入库状态，请查证");
+                    Validation.addError("", "出库单【" + id + "】下的采购计划" + p.id + "不是已入仓状态，请查证");
                     return;
                 }
                 String msg = ProcureUnit.validRefund(p);

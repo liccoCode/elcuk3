@@ -467,7 +467,7 @@ public class Shipments extends Controller {
             if(shipments.size() > 0) {
                 msg += "【" + shipments.get(0).id + "】";
                 renderJSON(new Ret(false, "运输单：" + msg + " " +
-                        "下的采购计划还不是【已入库】状态，是否继续？"));
+                        "下的采购计划还不是【已入仓】状态，是否继续？"));
             }
         }
         renderJSON(new Ret(true, ""));
