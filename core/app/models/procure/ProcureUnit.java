@@ -1155,6 +1155,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
     }
 
     public void noty(String sku, String content) {
