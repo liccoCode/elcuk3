@@ -16,7 +16,7 @@ $(() => {
             text: '项目名称必须一致！',
             type: 'error'
           });
-          return;
+          return false;
         }
       });
       $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
