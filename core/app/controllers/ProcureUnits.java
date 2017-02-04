@@ -348,7 +348,6 @@ public class ProcureUnits extends Controller {
 
 
     /**
-     *
      * @param unitid
      * @param checkid
      * @param oldPlanQty
@@ -395,7 +394,8 @@ public class ProcureUnits extends Controller {
         }
         unit.setPeriod();
         ProcureUnit newUnit = new ProcureUnit();
-        newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
+        newUnit.comment(String.format("此采购计划由于 #%s 采购计划%s创建.", unit.id,
+                unit.stage == ProcureUnit.STAGE.IN_STORAGE ? "库存分拆" : "采购分拆"));
         newUnit.attrs.qty = 0;
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(unit.sku);
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();

@@ -846,6 +846,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
         newUnit.result = unit.result;
+        newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.country());
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.sid;
