@@ -21,7 +21,9 @@ $(() => {
           return false;
         }
       });
-      $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+      if (flag) {
+        $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+      }
     } else {
       noty({
         text: '请先选择需要收货入库的采购计划！',

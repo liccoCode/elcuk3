@@ -98,7 +98,7 @@
           #{/if}
       </td>
       <td>${(p.page-1)*p.perSize + s_index}</td>
-      <td>${s.sellingId}</td>
+      <td><a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a></td>
       <td>${s.listing?.product?.sku}</td>
       <td>${s.market.countryName()}</td>
       <td>${s.aps.salePrice}</td>

@@ -31,13 +31,13 @@ public class StockRecordPost extends Post<StockRecord> {
 
     public StockRecordPost() {
         this.page = 1;
-        this.perSize = 20;
+        this.perSize = 50;
     }
 
     public StockRecordPost(Long unitId) {
         this.unitId = unitId;
         this.page = 1;
-        this.perSize = 20;
+        this.perSize = 50;
     }
 
     @Override
