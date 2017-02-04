@@ -63,10 +63,15 @@
           <tr>
             <td>${r.id}</td>
             <td>${r.whouse?.name}</td>
-            <td>${r.unit?.id}</td>
+            <td>
+              <a href="@{ProcureUnits.detail(r.unit?.id)}#${r.unit?.id}" target="_blank">${r.unit?.id}</a>
+            </td>
             <td>${r.unit?.selling?.sellingId}</td>
-            <td>${r.unit?.sku}</td>
-            <td>${r.unit?.product?.abbreviation}</td>
+            <td><a target="_blank" href="@{Products.show(r.unit?.sku)}">${r.unit?.sku}</a></td>
+            <td>
+              <a href="#" rel="tooltip" title="${r.unit?.product?.abbreviation}">
+              ${r.unit?.product?.abbreviation?.xxLong()}</a>
+            </td>
             <td>${r.unit?.fba?.shipmentId}</td>
             <td>${r.unit?.whouse?.name}</td>
             <td>${r.unit?.shipType?.label()}</td>

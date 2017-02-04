@@ -901,11 +901,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         record.recordId = unit.id;
         record.save();
         StockRecord parent = new StockRecord();
-        parent.whouse = unit.parent.currWhouse;
+        parent.whouse = unit.parent == null ? null : unit.parent.currWhouse;
         parent.unit = unit.parent;
         parent.qty = 0 - qty;
         parent.type = type;
-        parent.recordId = unit.parent.id;
+        parent.recordId = unit.parent == null ? null : unit.parent.id;
         parent.save();
     }
 
@@ -1138,7 +1138,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         this.shipItemQty(this.qty());
         this.save();
-        this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock);
+        if(diffQty != 0) {
+            this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock);
+        }
     }
 
     /**

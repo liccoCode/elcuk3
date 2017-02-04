@@ -8,6 +8,7 @@ $(() => {
 
   $("input[name='createInboundBtn']").click(function () {
     let ck = $("#dp_" + $(this).data("index") + " input[type='checkbox']:checked");
+    let flag = true;
     if (ck.length > 0) {
       let firstProjectName = ck.eq(0).attr("project");
       ck.each(function () {
@@ -16,10 +17,13 @@ $(() => {
             text: '项目名称必须一致！',
             type: 'error'
           });
+          flag = false;
           return false;
         }
       });
-      $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+      if (flag) {
+        $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+      }
     } else {
       noty({
         text: '请先选择需要收货入库的采购计划！',
