@@ -845,6 +845,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.price = unit.attrs.price;
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
+        newUnit.comment = unit.comment;
         newUnit.result = unit.result;
         newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.country());
         if(unit.selling != null) {
@@ -1114,6 +1115,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.originQty = this.availableQty;
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
+        this.inboundQty = this.availableQty;
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
                     this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
