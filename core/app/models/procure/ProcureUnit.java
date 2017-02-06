@@ -730,6 +730,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         this.stage = STAGE.DELIVERY;
+        this.attrs.qty = 0;
         this.save();
         new ERecordBuilder("procureunit.revertdelivery")
                 .msgArgs(msg)
