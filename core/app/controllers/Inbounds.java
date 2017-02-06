@@ -112,16 +112,17 @@ public class Inbounds extends Controller {
         blank(ids, id);
     }
 
-    public static void update(Inbound inbound) {
+    public static void update(Inbound inbound, String inboundId) {
+        Inbound in = Inbound.findById(inboundId);
         inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        inbound.save();
+        in.saveAndLog(inbound);
         flash.success("更新成功!");
-        index(new InboundPost());
+        edit(in.id);
     }
 
     public static void edit(String id) {
         Inbound inbound = Inbound.findById(id);
-        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("outboundrecord.update"), 50));
+        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("inbound.update"), 50));
         render(inbound);
     }
 
@@ -145,17 +146,19 @@ public class Inbounds extends Controller {
      * @param dtos
      */
     @Check("inbounds.confirmreceivebtn")
-    public static void confirmReceive(Inbound inbound, List<InboundUnit> dtos) {
-        if(inbound.status == Inbound.S.Create) {
-            inbound.status = Inbound.S.Handing;
-            inbound.save();
+    public static void confirmReceive(Inbound inbound, List<InboundUnit> dtos, String inboundId) {
+        Inbound bound = Inbound.findById(inboundId);
+        if(bound.status == Inbound.S.Create) {
+            bound.status = Inbound.S.Handing;
+            bound.saveLog("确认收货", inboundId);
+            bound.save();
         } else {
             flash.error("此单已经完成收货操作!");
             edit(inbound.id);
         }
-        inbound.confirmReceive(dtos);
+        bound.confirmReceive(dtos);
         flash.success("收货成功!");
-        edit(inbound.id);
+        edit(inboundId);
     }
 
     /**
@@ -165,15 +168,17 @@ public class Inbounds extends Controller {
      * @param dtos
      */
     @Check("inbounds.confirmqcbtn")
-    public static void confirmQC(Inbound inbound, List<InboundUnit> dtos) {
-        inbound.confirmQC(dtos);
+    public static void confirmQC(Inbound inbound, List<InboundUnit> dtos, String inboundId) {
+        Inbound bound = Inbound.findById(inboundId);
+        bound.confirmQC(dtos);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            edit(inbound.id);
+            edit(inboundId);
         }
-        inbound.checkIsFinish();
+        bound.saveLog("确认质检", inbound.id);
+        bound.checkIsFinish();
         flash.success("质检成功!");
-        edit(inbound.id);
+        edit(inboundId);
     }
 
     public static void refreshFbaCartonContentsByIds(String id) {
@@ -192,7 +197,7 @@ public class Inbounds extends Controller {
     public static void deleteUnit(Long[] ids) {
         List<InboundUnit> list = InboundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Inbound inbound = list.get(0).inbound;
-        list.stream().forEach(unit -> unit.delete());
+        list.forEach(InboundUnit::delete);
         if(inbound.units.size() == 0) {
             inbound.status = Inbound.S.Cancel;
             inbound.save();

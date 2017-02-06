@@ -236,7 +236,7 @@ public class Outbound extends GenericModel {
             if(map.containsKey(key)) {
                 map.get(key).add(shipment);
             } else {
-                map.put(key, new ArrayList<Shipment>(Arrays.asList(shipment)));
+                map.put(key, new ArrayList<>(Arrays.asList(shipment)));
             }
         });
 
