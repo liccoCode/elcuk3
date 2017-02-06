@@ -2,10 +2,13 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.Reflects;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -129,6 +132,7 @@ public class Inbound extends GenericModel {
     /**
      * 收货时间
      */
+    @Expose
     public Date receiveDate;
 
     /**
@@ -361,6 +365,18 @@ public class Inbound extends GenericModel {
             u.lastBoxInfo = i.lastBoxInfo;
             u.save();
         });
+    }
+
+    public void saveAndLog(Inbound in) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "name", in.name));
+        logs.addAll(Reflects.logFieldFade(this, "receiveDate", in.receiveDate));
+        logs.addAll(Reflects.logFieldFade(this, "projectName", in.projectName));
+        logs.addAll(Reflects.logFieldFade(this, "memo", in.memo));
+        if(logs.size() > 0) {
+            new ERecordBuilder("inboundrecord.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
+                    .save();
+        }
     }
 
 }

@@ -20,7 +20,8 @@
       <tr>
         <th>收货入库单ID</th>
         <td>
-          <input type="text" name="inbound.id" value="${inbound.id}" readonly>
+          <input type="text" value="${inbound.id}" readonly>
+          <input type="hidden" name="inboundId" value="${inbound.id}">
         </td>
         <th>状态</th>
         <td style="color:${inbound.status.rgb()}">${inbound.status?.label()}</td>

@@ -112,16 +112,17 @@ public class Inbounds extends Controller {
         blank(ids, id);
     }
 
-    public static void update(Inbound inbound) {
+    public static void update(Inbound inbound, String inboundId) {
+        Inbound in = Inbound.findById(inboundId);
         inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        inbound.save();
+        in.saveAndLog(inbound);
         flash.success("更新成功!");
-        index(new InboundPost());
+        edit(in.id);
     }
 
     public static void edit(String id) {
         Inbound inbound = Inbound.findById(id);
-        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("outboundrecord.update"), 50));
+        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("inboundrecord.update"), 50));
         render(inbound);
     }
 
@@ -192,7 +193,7 @@ public class Inbounds extends Controller {
     public static void deleteUnit(Long[] ids) {
         List<InboundUnit> list = InboundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Inbound inbound = list.get(0).inbound;
-        list.stream().forEach(unit -> unit.delete());
+        list.forEach(InboundUnit::delete);
         if(inbound.units.size() == 0) {
             inbound.status = Inbound.S.Cancel;
             inbound.save();
