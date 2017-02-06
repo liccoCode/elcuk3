@@ -15,8 +15,9 @@
         <th>PostCode</th>
         <th>Country</th>
         <th>Type</th>
+        <th>运输方式</th>
         <th>Account</th>
-        <th></th>
+        <th width="60px;">操作</th>
       </tr>
     #{list items:whs, as:'wh'}
       <tr>
@@ -27,9 +28,14 @@
         <td>${wh.postalCode}</td>
         <td>${wh.country}</td>
         <td>${wh.type}</td>
+        <td>
+          #{if wh.isAIR}<span style="color:#49A4C6">空运</span>#{/if}
+          #{if wh.isSEA}<span style="color:#C09853">海运</span>#{/if}
+          #{if wh.isEXPRESS}<span style="color:#468847">快递</span>#{/if}
+        </td>
         <td>${wh.account?.prettyName()}</td>
         <td>
-          <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-primary">更新</a>
+          <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-mini btn-primary">更新</a>
         </td>
       </tr>
       <tr id="whouse_${wh.id}" style="display:none;">

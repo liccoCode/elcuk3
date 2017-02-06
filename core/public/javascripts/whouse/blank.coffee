@@ -2,8 +2,7 @@ $ ->
   $(document).on("showOrHide", "select[name='wh.type']", (r) ->
     $self = $(@)
     $tr = $("#forward_shipment_tr")
-
-    if $self.val() is "FORWARD"
+    if $self.val() != "FBA"
       $tr.show("slow")
     else
       $tr.hide('slow')
