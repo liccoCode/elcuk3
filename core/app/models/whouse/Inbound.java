@@ -3,6 +3,7 @@ package models.whouse;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.Reflects;
+import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
@@ -10,6 +11,7 @@ import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -127,12 +129,13 @@ public class Inbound extends GenericModel {
      * 创建时间
      */
     @Required
+    @Temporal(TemporalType.DATE)
     public Date createDate;
 
     /**
      * 收货时间
      */
-    @Expose
+    @Temporal(TemporalType.DATE)
     public Date receiveDate;
 
     /**
@@ -367,16 +370,21 @@ public class Inbound extends GenericModel {
         });
     }
 
-    public void saveAndLog(Inbound in) {
+    public void saveAndLog(Inbound inbound) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(Reflects.logFieldFade(this, "name", in.name));
-        logs.addAll(Reflects.logFieldFade(this, "receiveDate", in.receiveDate));
-        logs.addAll(Reflects.logFieldFade(this, "projectName", in.projectName));
-        logs.addAll(Reflects.logFieldFade(this, "memo", in.memo));
+        logs.addAll(Reflects.logFieldFade(this, "name", inbound.name));
+        logs.addAll(Reflects.logFieldFade(this, "receiveDate", inbound.receiveDate));
+        logs.addAll(Reflects.logFieldFade(this, "projectName", inbound.projectName));
+        logs.addAll(Reflects.logFieldFade(this, "memo", inbound.memo));
         if(logs.size() > 0) {
-            new ERecordBuilder("inboundrecord.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
+            new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
                     .save();
         }
+        this.save();
+    }
+
+    public void saveLog(String info, String fid) {
+        new ElcukRecord("inbound.update", info, fid).save();
     }
 
 }
