@@ -75,6 +75,7 @@ public class Deliveryments extends Controller {
     //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
+        notFoundIfNull(dmt);
         List<Long> expressUnitIds = dmt.units.stream()
                 .filter(unit -> unit.shipType == Shipment.T.EXPRESS)
                 .map(unit -> unit.id)

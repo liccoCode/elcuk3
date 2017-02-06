@@ -8,6 +8,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -17,9 +18,9 @@ import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 出库单model
@@ -226,28 +227,44 @@ public class Outbound extends GenericModel {
 
     public static void initCreateByShipItem(List<String> shipmentId) {
         List<Shipment> shipments = Shipment.find("id IN " + SqlSelect.inlineParam(shipmentId)).fetch();
-        Outbound out = new Outbound();
-        out.init();
-        Shipment shipment = shipments.get(0);
-        ProcureUnit first = shipment.items.get(0).unit;
-        out.name = shipment.cooper.name + "-" + shipment.type.label() + "-" + shipment.whouse.name;
-        out.projectName = first.projectName;
-        out.shipType = shipment.type;
-        out.type = T.Normal;
-        out.whouse = shipment.whouse;
-        out.targetId = shipment.cooper.id.toString();
-        out.shipmentId = SqlSelect.inlineParam(shipmentId);
-        out.save();
-        shipments.stream().peek(s -> {
-            s.out = out;
-            s.save();
-        }).flatMap(s -> s.items.stream())
-                .forEach(item -> {
-                    ProcureUnit unit = item.unit;
-                    unit.outbound = out;
-                    unit.outQty = unit.availableQty;
-                    unit.save();
-                });
+        Map<String, List<Shipment>> map = new HashMap<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        shipments.forEach(shipment -> {
+            ProcureUnit first = shipment.items.get(0).unit;
+            String key = String.format("%s_%s_%s_%s_%s", first.projectName, shipment.cooper.name, shipment.whouse.name,
+                    shipment.type.label(), formatter.format(shipment.dates.planBeginDate));
+            if(map.containsKey(key)) {
+                map.get(key).add(shipment);
+            } else {
+                map.put(key, new ArrayList<Shipment>(Arrays.asList(shipment)));
+            }
+        });
+
+        map.keySet().forEach(key -> {
+            Outbound out = new Outbound();
+            out.init();
+            Shipment shipment = map.get(key).get(0);
+            ProcureUnit first = shipment.items.get(0).unit;
+            out.name = key;
+            out.projectName = first.projectName;
+            out.shipType = shipment.type;
+            out.type = T.Normal;
+            out.whouse = shipment.whouse;
+            out.targetId = shipment.cooper.id.toString();
+            out.shipmentId = SqlSelect
+                    .inlineParam(map.get(key).stream().map(ship -> ship.id).collect(Collectors.toList()));
+            out.save();
+            map.get(key).stream().peek(s -> {
+                s.out = out;
+                s.save();
+            }).flatMap(s -> s.items.stream())
+                    .forEach(item -> {
+                        ProcureUnit unit = item.unit;
+                        unit.outbound = out;
+                        unit.outQty = unit.availableQty;
+                        unit.save();
+                    });
+        });
     }
 
     public static void confirmOutBound(List<String> ids) {
