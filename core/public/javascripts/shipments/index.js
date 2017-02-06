@@ -80,7 +80,7 @@ $(() => {
         }
         shipmentIds.push(ck.val())
       });
-      if (valid() && flag == 0) {
+      if (flag == 0) {
         $.get('/shipments/validCreateOutbound', {shipmentIds: shipmentIds}, function(r) {
           if (r.flag) {
             let $form = $('<form method="post" action=""></form>');
@@ -99,30 +99,6 @@ $(() => {
       }
     }
   });
-
-  function valid () {
-    if ($("input[name='shipmentId']:checked").length > 1) {
-      let firstProjectName = $("input[name='shipmentId']:checked").first().attr("project");
-      let firstCountry = $("input[name='shipmentId']:checked").first().attr("country");
-      let firstShipType = $("input[name='shipmentId']:checked").first().attr("way");
-      let firstCompany = $("input[name='shipmentId']:checked").first().attr("company");
-      let i = 0;
-      $("input[name='shipmentId']:checked").each(function() {
-        if ($(this).attr("project") != firstProjectName || $(this).attr("company") != firstCompany
-        || $(this).attr("country") != firstCountry || $(this).attr("way") != firstShipType) {
-          i++;
-        }
-      });
-      if (i > 0) {
-        noty({
-          text: '请选择相同【项目名称】【运输方式】【货代公司】【去往仓库】的采购单元',
-          type: 'error'
-        });
-        return false;
-      }
-    }
-    return true;
-  }
 
   $(':checkbox[class=checkbox_all]').change(function(e) {
     $ck = $(this);
