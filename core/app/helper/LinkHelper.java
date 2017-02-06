@@ -83,6 +83,9 @@ public class LinkHelper extends JavaExtensions {
             case Refund:
                 RefundUnit refundUnit = RefundUnit.findById(idMatch);
                 return fullUrl("Refunds.edit", refundUnit.refund.id, idMatch.toString());
+            case Split:
+            case Split_Stock:
+                return fullUrl("ProcureUnits.detail", idMatch.toString(), idMatch.toString());
             default:
                 return "#";
         }
