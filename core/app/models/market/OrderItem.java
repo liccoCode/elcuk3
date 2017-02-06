@@ -455,7 +455,7 @@ public class OrderItem extends GenericModel {
                 }
 
                 List<DailySalesReportsDTO> finalDtos = dtos.stream()
-                        .filter(dto -> dto != null)
+                        .filter(Objects::nonNull)
                         //计算日平均销量
                         .map(DailySalesReportsDTO::processDailySales)
                         //将相同的 SKU 的放到一起, 便于前端输出查看
