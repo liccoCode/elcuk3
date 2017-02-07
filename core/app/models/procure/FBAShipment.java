@@ -188,6 +188,12 @@ public class FBAShipment extends Model {
     @Expose
     public String fbaCartonContents;
 
+    /**
+     * Amazon Reference ID
+     */
+    @Expose
+    public String arn;
+
     @Expose
     public Date createAt;
 
