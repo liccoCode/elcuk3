@@ -203,6 +203,11 @@ public class FBAShipment extends Model {
     @Expose
     public Date closeAt;
 
+    /**
+     * 更新时间
+     */
+    public Date updateAt;
+
     @Override
     public <T extends JPABase> T save() {
         if(this.dto != null) {
