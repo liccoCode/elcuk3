@@ -51,7 +51,7 @@ public class Refunds extends Controller {
 
     public static void edit(String id) {
         Refund refund = Refund.findById(id);
-        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("refundrecord.update"), 50));
+        renderArgs.put("logs", ElcukRecord.records(id, Arrays.asList("refund.update"), 50));
         render(refund);
     }
 
@@ -68,10 +68,11 @@ public class Refunds extends Controller {
         index(new RefundPost());
     }
 
-    public static void update(Refund refund) {
-        refund.save();
-        flash.success("退货单【" + refund.id + "】更新成功!");
-        index(new RefundPost());
+    public static void update(Refund refund, String rid) {
+        Refund old = Refund.findById(rid);
+        old.saveAndLog(refund);
+        flash.success("退货单【" + rid + "】更新成功!");
+        edit(rid);
     }
 
     public static void updateUnit(String id, String value, String attr) {
