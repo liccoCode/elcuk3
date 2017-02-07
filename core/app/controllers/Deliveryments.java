@@ -238,40 +238,38 @@ public class Deliveryments extends Controller {
     public static void manual() {
         Deliveryment dmt = new Deliveryment();
         ProcureUnit unit = new ProcureUnit();
-        F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
-        renderArgs.put("skus", J.json(skusToJson._2));
-        render(dmt, unit);
+        List<ProcureUnit> units = dmt.units;
+        render(dmt, unit, units);
     }
 
     /**
      * 创建手动单
      *
-     * @param dmt  Deliveryment
-     * @param unit ProcureUnit
+     * @param dmt
+     * @param units
      */
     @Check("deliveryments.manual")
-    public static void createManual(Deliveryment dmt, ProcureUnit unit) {
+    public static void createManual(Deliveryment dmt, List<ProcureUnit> units) {
         Validation.required("供应商", dmt.cooperator);
         Validation.required("采购单别名", dmt.name);
         dmt.id = Deliveryment.id();
-        User user = User.findByUserName(Secure.Security.connected());
-        unit.cooperator = dmt.cooperator;
-        unit.handler = user;
-        unit.deliveryment = dmt;
-        unit.stage = ProcureUnit.STAGE.DELIVERY;
-        unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-
-        dmt.handler = user;
+        dmt.handler = Login.current();
         dmt.state = Deliveryment.S.PENDING;
         dmt.name = dmt.name.trim();
         dmt.deliveryType = Deliveryment.T.MANUAL;
-        unit.validateManual();
-        if(Validation.hasErrors()) {
-            render("Deliveryments/manual.html", dmt, unit);
-        }
-        unit.originQty = unit.attrs.planQty;
-        unit.save();
-
+        units.stream().filter(unit -> unit.product != null).forEach(unit -> {
+            unit.cooperator = dmt.cooperator;
+            unit.handler = Login.current();
+            unit.deliveryment = dmt;
+            unit.stage = ProcureUnit.STAGE.DELIVERY;
+            unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+            unit.validateManual();
+            if(Validation.hasErrors()) {
+                render("Deliveryments/manual.html", dmt, units);
+            }
+            unit.originQty = unit.attrs.planQty;
+            unit.save();
+        });
         dmt.save();
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
