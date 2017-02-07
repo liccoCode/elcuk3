@@ -20,7 +20,8 @@
       <tr>
         <th width="10%;">退货单ID</th>
         <td width="40%">
-          <input type="text" name="refund.id" value="${refund.id}" readonly>
+          <input type="text" value="${refund.id}" readonly>
+          <input type="hidden" name="rid" value="${refund.id}">
         </td>
         <th width="10%;">状态</th>
         <td width="40%;" style="width: 40%;">${refund.status?.label()}</td>

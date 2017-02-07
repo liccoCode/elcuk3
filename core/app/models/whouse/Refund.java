@@ -2,9 +2,12 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.Reflects;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -117,18 +120,21 @@ public class Refund extends GenericModel {
      * 创建时间
      */
     @Required
+    @Temporal(TemporalType.DATE)
     public Date createDate;
 
     /**
      * 退货时间
      */
     @Required
+    @Temporal(TemporalType.DATE)
     public Date refundDate;
 
     /**
      * 仓库交接人
      */
     @OneToOne
+    @Expose
     public User whouseUser;
 
     /**
@@ -311,10 +317,10 @@ public class Refund extends GenericModel {
      */
     public static void transferQty(Long unitId, int qty, String memo) {
         ProcureUnit unit = ProcureUnit.findById(unitId);
-        if (unit.stage == ProcureUnit.STAGE.DELIVERY) {
-             unit.stage = ProcureUnit.STAGE.IN_STORAGE;
-             unit.attrs.qty += qty;
-             unit.inboundQty += qty;
+        if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
+            unit.stage = ProcureUnit.STAGE.IN_STORAGE;
+            unit.attrs.qty += qty;
+            unit.inboundQty += qty;
         }
         unit.unqualifiedQty -= qty;
         unit.availableQty += qty;
@@ -329,6 +335,22 @@ public class Refund extends GenericModel {
         record.recordId = unit.id;
         record.memo = memo;
         record.save();
+    }
+
+    public void saveAndLog(Refund refund) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "name", refund.name));
+        logs.addAll(Reflects.logFieldFade(this, "refundDate", refund.refundDate));
+        logs.addAll(Reflects.logFieldFade(this, "projectName", refund.projectName));
+        if(refund.whouseUser != null)
+            logs.addAll(Reflects.logFieldFade(this, "whouseUser.id", refund.whouseUser.id));
+        logs.addAll(Reflects.logFieldFade(this, "memo", refund.memo));
+        if(logs.size() > 0) {
+            new ERecordBuilder("refund.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
+                    .save();
+        }
+        this.save();
+
     }
 
 }
