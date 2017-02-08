@@ -12,6 +12,7 @@ import play.mvc.With;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 库存异动控制器
@@ -37,6 +38,11 @@ public class StockRecords extends Controller {
 
     public static void stockIndex(StockPost p) {
         if(p == null) p = new StockPost();
+        Optional.ofNullable(p.whouse).ifPresent(w -> {
+            if(w.id == 22) {
+                Refunds.unQualifiedIndex(new StockPost());
+            }
+        });
         List<ProcureUnit> units = p.query();
         render(p, units);
     }
