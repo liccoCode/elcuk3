@@ -759,6 +759,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.selling = unit.selling;
         newUnit.sid = unit.sid;
         newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.comment = unit.comment;
         if(unit.selling == null) {
             newUnit.manualValidate();
         } else {
