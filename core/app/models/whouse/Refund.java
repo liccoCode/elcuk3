@@ -320,8 +320,8 @@ public class Refund extends GenericModel {
         if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
             unit.stage = ProcureUnit.STAGE.IN_STORAGE;
             unit.attrs.qty += qty;
-            unit.inboundQty += qty;
         }
+        unit.inboundQty += qty;
         unit.unqualifiedQty -= qty;
         unit.availableQty += qty;
         unit.result = InboundUnit.R.Qualified;

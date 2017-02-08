@@ -27,10 +27,13 @@ public class StockPost extends Post<ProcureUnit> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("1=1");
+        List<Object> params = new ArrayList<>();
         if(this.flag) {
             sbd.append(" AND unqualifiedQty > 0 ");
+        } else {
+            sbd.append(" AND stage = ? ");
+            params.add(ProcureUnit.STAGE.IN_STORAGE);
         }
-        List<Object> params = new ArrayList<>();
 
         Long unit_id = isSearchForId();
         if(unit_id != null) {
