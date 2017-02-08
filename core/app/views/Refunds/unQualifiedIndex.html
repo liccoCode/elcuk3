@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"库存列表"  /}
+#{set title:"不良品列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'refunds/unQualified.es6'/}
@@ -68,8 +68,10 @@
           <input type="text" style="width:35px;" name="qty" value="${u.unqualifiedQty}" data-origin="${u.unqualifiedQty}">
           <input type="button" class="btn btn-warning" name="refundBtn" value="退货"
                  data-url="@{Refunds.unQualifiedHandle()}" data-id="${u.id}">
-          <input type="button" class="btn btn-success" name="transferBtn" value="转入成品"
-                 data-url="@{Refunds.transferQty()}" data-id="${u.id}">
+            #{if Arrays.asList('IN_STORAGE','DELIVERY','DONE').contains(u.stage.name())}
+              <input type="button" class="btn btn-success" name="transferBtn" value="转入成品"
+                     data-url="@{Refunds.transferQty()}" data-id="${u.id}">
+            #{/if}
         </td>
       </tr>
     #{/list}
