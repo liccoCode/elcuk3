@@ -58,7 +58,8 @@ public class ProcureUnits extends Controller {
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
-        renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
+        renderArgs.put("logs",
+                ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
         renderArgs.put("cooperators", cooperators);
 
         //为视图提供日期
@@ -76,8 +77,10 @@ public class ProcureUnits extends Controller {
 
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
-        List<ElcukRecord> logs = ElcukRecord
-                .records(id.toString(), Arrays.asList("procureunit.update", "procureunit.deepUpdate"), 50);
+        List<ElcukRecord> logs = ElcukRecord.records(id.toString(),
+                Arrays.asList("procureunit.update", "procureunit.deepUpdate",
+                        "procureunit.delivery", "procureunit.revertdelivery", "procureunit.prepay",
+                        "procureunit.tailpay", "procureunit.reworkpay"), 50);
         renderArgs.put("logs", logs);
     }
 

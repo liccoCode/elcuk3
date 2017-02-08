@@ -188,6 +188,12 @@ public class FBAShipment extends Model {
     @Expose
     public String fbaCartonContents;
 
+    /**
+     * Amazon Reference ID
+     */
+    @Expose
+    public String arn;
+
     @Expose
     public Date createAt;
 
@@ -196,6 +202,11 @@ public class FBAShipment extends Model {
      */
     @Expose
     public Date closeAt;
+
+    /**
+     * 更新时间
+     */
+    public Date updateAt;
 
     @Override
     public <T extends JPABase> T save() {

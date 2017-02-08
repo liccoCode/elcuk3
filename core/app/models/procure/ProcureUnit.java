@@ -759,6 +759,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.selling = unit.selling;
         newUnit.sid = unit.sid;
         newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.comment = unit.comment;
         if(unit.selling == null) {
             newUnit.manualValidate();
         } else {
@@ -986,6 +987,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         this.stage = STAGE.DELIVERY;
+        this.attrs.qty = 0;
         this.save();
         new ERecordBuilder("procureunit.revertdelivery")
                 .msgArgs(msg)

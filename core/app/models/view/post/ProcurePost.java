@@ -190,7 +190,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(stages.size() > 0) {
             sbd.append(" AND stage IN " + SqlSelect.inlineParam(stages));
         }
-        sbd.append(" AND stage != 'APPROVE'");
 
         if(this.shipType != null) {
             sbd.append(" AND shipType=? ");
@@ -223,15 +222,13 @@ public class ProcurePost extends Post<ProcureUnit> {
                     .append("product.sku LIKE ? OR ")
                     .append("selling.sellingId LIKE ? OR ")
                     .append("deliverplan.id LIKE ? ")
-//                        .append("fba.shipmentId LIKE ?")
                     .append(") ");
             for(int i = 0; i < 3; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
-            sbd.append(" AND id IN " + SqlSelect.inlineParam(unitIdList));
+            sbd.append(" AND id IN ").append(SqlSelect.inlineParam(unitIdList));
         }
-        sbd.append(" AND planQty != 0");
         return new F.T2<>(sbd.toString(), params);
     }
 
