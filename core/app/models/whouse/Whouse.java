@@ -367,7 +367,7 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        return Whouse.autoMatching(unit.unit.shipType, unit.unit.selling.market.country());
+        return Whouse.autoMatching(unit.unit.shipType, unit.unit.selling.market.shortHand());
     }
 
     public static Whouse autoMatching(Shipment.T shipType, String country) {
