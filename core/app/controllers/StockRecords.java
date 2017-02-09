@@ -39,7 +39,7 @@ public class StockRecords extends Controller {
     public static void stockIndex(StockPost p) {
         if(p == null) p = new StockPost();
         Optional.ofNullable(p.whouse).ifPresent(w -> {
-            if(w.id == 22) {
+            if(w.id != null && w.id == 22) {
                 Refunds.unQualifiedIndex(new StockPost());
             }
         });

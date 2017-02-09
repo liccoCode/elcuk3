@@ -306,4 +306,17 @@ public class ProcuresHelper extends JavaExtensions {
         float amountUSD = priceUSD * unit.qty();
         return new F.T2<>(priceUSD, amountUSD);
     }
+
+    public static String bgcolor(F.T2<Integer, Integer> process) {
+        double num = (double) process._1 / process._2 ;
+        if(num == 1) {
+            return "progress-success";
+        } else if(num >= 0.66 && num < 1) {
+            return "progress-info";
+        } else if(num >= 0.33 && num < 0.66) {
+            return "progress-warning";
+        } else {
+            return "progress-danger";
+        }
+    }
 }

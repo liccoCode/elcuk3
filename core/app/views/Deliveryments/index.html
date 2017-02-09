@@ -93,12 +93,10 @@
           #{set procress: dmt.deliveryProcress()/}
         <tr>
           <td>
-            <label>
-                #{if dmt.apply == null}
-                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                         name="deliverymentIds" value="${dmt.id}">
-                #{/if}
-            </label>
+              #{if dmt.apply == null}
+                <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
+                       name="deliverymentIds" value="${dmt.id}">
+              #{/if}
           </td>
           <td>
             <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
@@ -108,9 +106,7 @@
                 <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
                 <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
               #{/if}
-              #{else }
-                没有请款单
-              #{/else}
+              #{else }没有请款单#{/else}
           </td>
           <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
             <span><i class="icon-reorder"></i></span>
@@ -123,11 +119,9 @@
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
           <td>
-            <div class="progress progress-striped" style="margin-bottom:0;">
+            <div class="progress ${procress.bgcolor()} progress-striped" style="margin-bottom:0;">
               <div class="bar" style="width: ${(procress._1 / procress._2).format('#%')};">
-                <p class="text-error">
-                ${procress._1} / ${procress._2}
-                </p>
+                <p style="color:black;">${procress._1} / ${procress._2}</p>
               </div>
             </div>
           </td>

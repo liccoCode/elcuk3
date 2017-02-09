@@ -463,6 +463,18 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret());
     }
 
+    /**
+     * 采购计划是否进入 未请款金额
+     *
+     * @param id
+     */
+    public static void noPayment(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        boolean noPayment = unit.noPayment;
+        unit.noPayment = !noPayment;
+        unit.save();
+        renderJSON(new Ret());
+    }
 
     /**
      * 预付款申请
