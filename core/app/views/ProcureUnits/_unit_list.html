@@ -265,9 +265,6 @@
                         <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
                       #{/if}
                   #{/power.ck}
-<<<<<<< HEAD
-                <!-- 确认到货代处 -->
-=======
                   #{power.ck "procures.dosplitunit"}
                     <!-- 分拆采购单元 -->
                     <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
@@ -276,7 +273,6 @@
                     </a>
                   #{/power.ck}
                 <!-- 确认到    货代处 -->
->>>>>>> 74fc7141abf3fbb509e32a5c2eb3fd00ae75aea3
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
                         <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"

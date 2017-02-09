@@ -29,15 +29,6 @@
         <td>${wh.country}</td>
         <td>${wh.type}</td>
         <td>
-<<<<<<< HEAD
-          #{if wh.isAIR}<span style="color:#49A4C6">空运</span>#{/if}
-          #{if wh.isSEA}<span style="color:#C09853">海运</span>#{/if}
-          #{if wh.isEXPRESS}<span style="color:#468847">快递</span>#{/if}
-        </td>
-        <td>${wh.account?.prettyName()}</td>
-        <td>
-          <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-mini btn-primary">更新</a>
-=======
             #{if wh.isAIR}<span style="color:#49A4C6">空运</span>#{/if}
             #{if wh.isSEA}<span style="color:#C09853">海运</span>#{/if}
             #{if wh.isEXPRESS}<span style="color:#468847">快递</span>#{/if}
@@ -45,7 +36,6 @@
         <td>${wh.account?.prettyName()}</td>
         <td>
           <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-mini btn-warning">Update</a>
->>>>>>> 74fc7141abf3fbb509e32a5c2eb3fd00ae75aea3
         </td>
       </tr>
       <tr id="whouse_${wh.id}" style="display:none;">
