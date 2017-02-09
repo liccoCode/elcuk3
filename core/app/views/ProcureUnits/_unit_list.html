@@ -265,15 +265,29 @@
                         <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
                       #{/if}
                   #{/power.ck}
+<<<<<<< HEAD
                 <!-- 确认到货代处 -->
+=======
+                  #{power.ck "procures.dosplitunit"}
+                    <!-- 分拆采购单元 -->
+                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
+                       rel='tooltip' title='因工厂延期交货而分拆'>
+                      分拆
+                    </a>
+                  #{/power.ck}
+                <!-- 确认到    货代处 -->
+>>>>>>> 74fc7141abf3fbb509e32a5c2eb3fd00ae75aea3
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
                         <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
                            href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
                       #{/ifnot}
                   #{/if}
-                <a href="javascript:void(0)" class="btn btn-small btn-warning" data-href="@{ProcureUnits.confirmUnit(unit.id)}"
-                   name="confirmUnitBtn" data-tragettr="procureUnit_${unit.id}">已核单</a>
+                <a href="javascript:void(0)" class="btn btn-small btn-warning" data-tragettr="procureUnit_${unit.id}"
+                   data-href="@{ProcureUnits.confirmUnit(unit.id)}" name="confirmUnitBtn">已核单</a>
+                <a href="javascript:void(0)" class="btn btn-small ${unit.noPayment?'btn-success':'btn-danger'}"
+                   data-tragettr="procureUnit_${unit.id}" data-href="@{ProcureUnits.noPayment(unit.id)}" name="noPaymentBtn"
+                   rel='tooltip' title='因各种原因而不需要纳入 未进请款单金额 统计'>${unit.noPayment?'统计':'不统计'}</a>
               </div>
                 #{if unit.fba}
                     #{power.ck 'fbas.update'}
