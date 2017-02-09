@@ -2,6 +2,7 @@ package models.finance;
 
 import exception.PaymentException;
 import helper.Currency;
+import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
@@ -11,11 +12,13 @@ import models.procure.Cooperator;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 支付单, 真正用于一次的支付操作.
@@ -355,7 +359,7 @@ public class Payment extends Model {
      * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
     public F.T3<Float, Float, Float> totalFees() {
-        // todo: 将付款的金额限制在 USD 与 CNY
+        // TODO: 将付款的金额限制在 USD 与 CNY
         float currenctCurrencyAmount = 0;
         float usd = 0;
         float cny = 0;
@@ -377,27 +381,23 @@ public class Payment extends Model {
      * @param state
      * @return
      */
-    public int unitsStateSize(PaymentUnit.S state) {
-        int size = 0;
-        for(PaymentUnit unit : this.units) {
-            if(!unit.remove && unit.state == state)
-                size++;
-        }
-        return size;
+    public long unitsStateSize(PaymentUnit.S state) {
+        return this.units.stream()
+                .filter(unit -> !unit.remove && unit.state == state)
+                .count();
     }
 
     /**
      * 返回 Payment 没有删除的 PaymentUnit
+     * <p>
+     * 数据量比较大的时候用时间换 CPU 和内存: (scroll: https://dzone.com/articles/bulk-fetching-hibernate)
      *
      * @return
      */
     public List<PaymentUnit> units() {
-        List<PaymentUnit> unRemove = new ArrayList<>();
-        for(PaymentUnit unit : this.units) {
-            if(unit.remove) continue;
-            unRemove.add(unit);
-        }
-        return unRemove;
+        return this.units.stream()
+                .filter(unit -> !unit.remove)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -408,12 +408,17 @@ public class Payment extends Model {
      * @return
      */
     public List<Cooperator> cooperators() {
-        Set<Cooperator> cooperatorSet = new HashSet<>();
-        for(PaymentUnit unit : this.units()) {
-            if(unit.cooperator() == null) continue;
-            cooperatorSet.add(unit.cooperator());
+        String sql = "SELECT DISTINCT(p.cooperator_id) AS cooperator_id FROM PaymentUnit p WHERE p.payment_id=?";
+        List<Map<String, Object>> rows = DBUtils.rows(sql, this.id);
+        List<Long> cooperatorIds = rows.stream().map(row -> row.get("cooperator_id"))
+                .filter(Objects::nonNull)
+                .map(cooperatorId -> NumberUtils.toLong(cooperatorId.toString()))
+                .collect(Collectors.toList());
+        if(cooperatorIds != null && cooperatorIds.size() > 0) {
+            return Cooperator.find("id IN" + SqlSelect.inlineParam(cooperatorIds)).fetch();
+        } else {
+            return Collections.EMPTY_LIST;
         }
-        return new ArrayList<>(cooperatorSet);
     }
 
 
@@ -437,7 +442,7 @@ public class Payment extends Model {
             for(String shipmentid : shipments) {
                 BigDecimal unitamount = new BigDecimal(0);
                 for(PaymentUnit fee : this.units()) {
-                    if(shipmentid == fee.shipment.id) {
+                    if(Objects.equals(shipmentid, fee.shipment.id)) {
                         if(PaymentUnit.S.DENY != fee.state)
                             unitamount = unitamount.add(fee.decimalamount());
                     }
@@ -454,11 +459,17 @@ public class Payment extends Model {
     }
 
     public List<User> applyers() {
-        Set<User> users = new HashSet<>();
-        for(PaymentUnit unit : this.units()) {
-            users.add(unit.payee);
+        String sql = "SELECT DISTINCT(p.payee_id) AS payee_id FROM PaymentUnit p WHERE p.payment_id=?";
+        List<Map<String, Object>> rows = DBUtils.rows(sql, this.id);
+        List<Long> payeeIds = rows.stream().map(row -> row.get("payee_id"))
+                .filter(Objects::nonNull)
+                .map(payeeId -> NumberUtils.toLong(payeeId.toString()))
+                .collect(Collectors.toList());
+        if(payeeIds != null && payeeIds.size() > 0) {
+            return User.find("id IN" + SqlSelect.inlineParam(payeeIds)).fetch();
+        } else {
+            return Collections.EMPTY_LIST;
         }
-        return new ArrayList<>(users);
     }
 
 
@@ -500,8 +511,8 @@ public class Payment extends Model {
             payment.currency = currency;
             payment.generatePaymentNumber(apply).save();
             Logger.info("新增支付单:" + payment.paymentNumber + " totalUSD:" + payment.totalFees()._1 + currency.toUSD(amount)
-                + "totalCNY:" + payment.totalFees()._2 + currency.toCNY(amount) + "apply:" + apply
-                + "createdAt:>=" +now.minusHours(24).toDate() + "createdAt:<=" + now.toDate());
+                    + "totalCNY:" + payment.totalFees()._2 + currency.toCNY(amount) + "apply:" + apply
+                    + "createdAt:>=" + now.minusHours(24).toDate() + "createdAt:<=" + now.toDate());
         }
         return payment;
     }

@@ -203,10 +203,17 @@ public class Account extends Model {
             this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
     }
 
+    public boolean logged() {
+        String html = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
+        Document doc = Jsoup.parse(html);
+        return doc.select("form[name=signIn]").isEmpty();
+    }
+
     /**
      * 销售账号需要登陆的后台系统
      */
     public void loginAmazonSellerCenter() {
+        if(this.logged()) return;
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:

@@ -9,11 +9,10 @@
 #{flash_alert /}
 
 #{if payment.pApply}
-    #{render './_procreApply.html', payment: payment/}
+    #{render './_procreApply.html', payment: payment, units: units, post: post/}
 #{/if}
-
 #{if payment.tApply}
-    #{render './_transportApply.html', payment: payment/}
+    #{render './_transportApply.html', payment: payment, units: units, post: post/}
 #{/if}
 
 <div class="row-fluid">

@@ -1,6 +1,6 @@
 <div class="row-fluid">
   <div class="btn-toolbar">
-   <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
+    <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
   </div>
   <table class="table table-bordered table-condensed">
     <tr>
@@ -16,7 +16,7 @@
       <th class="span2">状态</th>
       <th class='span3'>#</th>
     </tr>
-  #{list items:payment.units(), as:'fee'}
+  #{list items: units, as:'fee'}
     <tr>
       <td></td>
       <td>
@@ -46,5 +46,8 @@
       </td>
     </tr>
   #{/list}
+    <tr>
+      <td colspan="11">#{bootstrap_pager pi:post, url: "/Payments/show/" + payment.id/}</td>
+    </tr>
   </table>
 </div>
