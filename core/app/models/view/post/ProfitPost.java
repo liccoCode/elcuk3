@@ -278,7 +278,6 @@ public class ProfitPost {
             } else {
                 Category cat = Category.find("lower(categoryId)=?", category.toLowerCase()).first();
                 for(Product pro : cat.products) {
-                    ;
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                     if(profit.totalfee != 0 || profit.amazonfee != 0
                             || profit.fbafee != 0 || profit.quantity != 0

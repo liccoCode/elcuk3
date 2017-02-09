@@ -31,10 +31,17 @@ $ ->
     $table.find('tr').remove() # 删除表格内所有 tr
     _.each(checkboxs, (checkbox) ->
       $checkbox = $(checkbox)
+      # 箱数
+      boxNum = $checkbox.data('boxnum')
+      # 尾箱箱内产品数量
+      lastCartonNum = $checkbox.data('lastcartonnum')
+      # 如果尾箱内有数量则表示箱数需要 + 1
+      boxNum += 1 if !_.isNil(lastCartonNum) && lastCartonNum != 0
+
       tr = "<tr>" +
         "<td>#{$checkbox.val()}</td>" +
         "<td><div class='input-append'>" +
-        "<input type='text' class='input-mini' name='boxNumbers' value='#{$checkbox.data('boxnum') + $checkbox.data('lastcartonnum')}' maxlength='3'/>" +
+        "<input type='text' class='input-mini' name='boxNumbers' value='#{boxNum}' maxlength='3'/>" +
         "<span class='add-on'>" +
         "箱 #{if expressids.includes($checkbox.val()) > 0 then '(不加后缀)' else ''}" +
         "</span>" +
