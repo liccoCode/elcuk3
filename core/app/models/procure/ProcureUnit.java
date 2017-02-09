@@ -341,6 +341,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isConfirm = false;
 
+    /**
+     * 统计报表用
+     * 采购计划不进入 未请款金额
+     */
+    public boolean noPayment = false;
+
     public enum S {
         NOSHIPED {
             @Override
