@@ -1076,6 +1076,34 @@ public enum M {
         }
     }
 
+    /**
+     * 简写
+     *
+     * @return
+     */
+    public String shortHand() {
+        switch(this) {
+            case AMAZON_CA:
+                return "CA";
+            case AMAZON_DE:
+                return "DE";
+            case AMAZON_ES:
+                return "ES";
+            case AMAZON_FR:
+                return "FR";
+            case AMAZON_IT:
+                return "IT";
+            case AMAZON_JP:
+                return "JP";
+            case AMAZON_UK:
+                return "UK";
+            case AMAZON_US:
+                return "US";
+            default:
+                return null;
+        }
+    }
+
     public static List<M> europeMarkets() {
         return Arrays.asList(M.AMAZON_DE, M.AMAZON_UK, M.AMAZON_IT, M.AMAZON_FR, M.AMAZON_ES);
     }
