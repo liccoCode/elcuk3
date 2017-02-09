@@ -52,7 +52,7 @@
         <td>
           <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.attrs.planQty}"
                  style="width:35px;
-                     #{if unit.qty/unit.planQty<0.9 && unit.handType?.name()=='Delivery'}
+                     #{if unit.planQty>0 && unit.qty/unit.planQty<0.9 && unit.handType?.name()=='Delivery'}
                          background-color:yellow;
                      #{/if}" value="${unit.qty}" data-origin="${unit.qty}"
               #{if unit.status.name() != "Create"}
