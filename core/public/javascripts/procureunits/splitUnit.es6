@@ -44,7 +44,7 @@ $(() => {
         market: "AMAZON_" + country
       }, function(c) {
         $("#sellingId").val(c);
-        if (c) {
+        if ($("#sellingId").val()) {
           getShipmentList();
         } else {
           noty({
