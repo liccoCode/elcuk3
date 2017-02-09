@@ -77,7 +77,7 @@ public class LinkHelper extends JavaExtensions {
                 InboundUnit unit = InboundUnit.findById(idMatch);
                 return fullUrl("Inbounds.edit", unit.inbound.id, idMatch.toString());
             case Outbound:
-                return fullUrl("Refunds.edit", stockRecord.unit.outbound.id, idMatch.toString());
+                return fullUrl("Outbounds.edit", stockRecord.unit.outbound.id, idMatch.toString());
             case Stocktaking:
                 return Router.getFullUrl("StockRecords.show", GTs.newMap("id", idMatch).build());
             case Unqualified_Refund:
