@@ -36,7 +36,7 @@
         </select>
 
         <select name="p.whouseId" class="inline">
-          <option value="0">仓库</option>
+          <option value="0">去往仓库</option>
         #{list items:whouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
         #{/list}

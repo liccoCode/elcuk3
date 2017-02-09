@@ -129,7 +129,6 @@ public class Inbound extends GenericModel {
      * 创建时间
      */
     @Required
-    @Temporal(TemporalType.DATE)
     public Date createDate;
 
     /**
@@ -169,7 +168,7 @@ public class Inbound extends GenericModel {
     public List<String> inboundDtos = new ArrayList<>();
 
     public void create(List<InboundUnit> units) {
-        units.stream().filter(Objects::nonNull).forEach(u -> {
+        units.stream().filter(Objects::nonNull).filter(unit -> validIsNotExist(unit.unitId)).forEach(u -> {
             u.inbound = this;
             u.unit = ProcureUnit.findById(u.unitId);
             u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
@@ -183,6 +182,10 @@ public class Inbound extends GenericModel {
             }
             u.save();
         });
+    }
+
+    public static boolean validIsNotExist(Long unitId) {
+        return InboundUnit.count("unit.id = ? AND inbound.status = ? ", unitId, S.Create) == 0;
     }
 
     /**
