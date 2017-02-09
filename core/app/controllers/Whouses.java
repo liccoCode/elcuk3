@@ -6,8 +6,10 @@ import helper.J;
 import helper.Webs;
 import models.User;
 import models.market.Account;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.FBACenter;
+import models.procure.Shipment;
 import models.product.Product;
 import models.view.Ret;
 import models.whouse.StockObj;
@@ -115,4 +117,14 @@ public class Whouses extends Controller {
         StockObj stockObj = new StockObj(id, StockObj.guessType(id));
         renderJSON(GTs.newMap("type", stockObj.stockObjType).put("name", stockObj.name()).build());
     }
+
+    /**
+     * @param country
+     * @param shipType
+     */
+    public static void autoMatching(String country, String shipType) {
+        Whouse whouse = Whouse.autoMatching(Shipment.T.valueOf(shipType), country);
+        renderJSON(GTs.newMap("id", whouse.id).build());
+    }
+
 }

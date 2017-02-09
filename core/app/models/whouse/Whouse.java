@@ -365,4 +365,31 @@ public class Whouse extends Model {
     public static Whouse defectiveWhouse() {
         return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
     }
+
+    public static Whouse autoMatching(InboundUnit unit) {
+        return Whouse.autoMatching(unit.unit.shipType, unit.unit.selling.market.country());
+    }
+
+    public static Whouse autoMatching(Shipment.T shipType, String country) {
+        StringBuffer sql = new StringBuffer("type=? ");
+        if(shipType == null) {
+            return null;
+        }
+        switch(shipType) {
+            case AIR:
+                sql.append("AND isAIR=true");
+                break;
+            case EXPRESS:
+                sql.append("AND isEXPRESS=true");
+                break;
+            case SEA:
+                sql.append("AND isSEA=true");
+                break;
+            default:
+                sql.append("");
+        }
+        sql.append(" AND country = ? ");
+        return Whouse.find(sql.toString(), T.SELF, country).first();
+    }
+
 }

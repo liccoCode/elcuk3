@@ -1,0 +1,346 @@
+#{extends 'main_full.html' /}
+#{set title:"采购单元列表 (${p.count()})"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.es6'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{ProcureUnits.indexWhouse()}" method="get" class="search_form" id="search_Form">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${p.from.date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${p.to.date()}">
+        </div>
+
+        <select name="p.dateType" class="inline">
+        #{list items:models.view.post.ProcurePost.DATE_TYPES, as:'t'}
+          <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+        #{/list}
+        </select>
+
+        <select name="p.whouseId" class="inline">
+          <option value="0">仓库</option>
+        #{list items:whouses, as:'wh'}
+          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+        #{/list}
+        </select>
+
+        <select name="p.shipType" class="inline" style="width:82px;">
+          <option value="">运输方式</option>
+        #{list items:models.procure.Shipment.T.values(), as:'t'}
+          <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <div class="input-prepend inline">
+          <select name="p.stages" multiple="multiple" id="stage">
+          #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+              #{if stage.name() != 'APPROVE'}
+                <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+              #{/if}
+          #{/list}
+          </select>
+        </div>
+
+        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
+          <option value="">供应商</option>
+        #{list items:cooperators, as:'cop'}
+          <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+        #{/list}
+        </select>
+
+        <select name="p.projectName" class="inline">
+          <option value="">项目名称</option>
+        #{list items:models.view.post.ProcurePost.P, as:'n'}
+          <option ${n.name() == p.projectName ? 'selected' : ''} value="${n.name()}">${n.label()}</option>
+        #{/list}
+        </select>
+
+
+        <div class="input-prepend input-append inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" style="width:300px;" class="input-medium" name="p.search" placeholder="出货单ID or sellingId or SKU"
+                 value="${p.search}">
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="inline">
+          <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-primary inline"
+             id="createInboundBtn"><i class="icon-shopping-cart"> </i>采购收货入库单</a>
+          <a href="javascript:void(0)" data-url="@{Outbounds.blank()}" class="btn btn-success inline"
+             id="createOutboundBtn"><i class="icon-plane"> </i>创建出库单</a>
+          <a href="javascript:void(0)" data-url="@{Refunds.blank()}" class="btn btn-warning inline"
+             id="createRefundBtn"><i class="icon-retweet"> </i>创建退货单</a>
+          <input type="hidden" name="p.unitIds" id="unitIds"/>
+          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+            <i class="icon-download-alt"></i>下载ZIP</a>
+          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
+            <i class="icon-list-alt"> </i>导出修改日志</a>
+        #{power.ck "procures.downloadreports"}
+          <a href="javascript:void(0)" id="download_excel" class="btn btn-info">
+            <i class="icon-download-alt"></i>导出采购计划</a>
+        #{/power.ck}
+
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<form method="post" id="create_deliveryment">
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered" id="unit_table">
+        <tr>
+          <th>
+            <label class="checkbox">
+              <input type="checkbox" id="checkbox_all" class="checkall">
+            </label>
+          </th>
+          <th width="60px;">采购计划ID</th>
+          <th>阶段</th>
+          <th width="80px;">Selling</th>
+          <th width="140px;">Sku<br>产品名称</th>
+          <th>FBA-ShipmentId<br>CenterId</th>
+          <th width="60px;">去往市场</th>
+          <th>深圳仓库</th>
+          <th>供应商</th>
+          <th>采购单</th>
+          <th>出货单</th>
+          <th width="100px;">数量<br>(计划/交货/入库)</th>
+          <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="100px;">FnSku</th>
+          <th>运输方式</th>
+          <th width="140px;">时间<br>(预计交货/预计运输)</th>
+          <th width="80px;">实际交货时间</th>
+          <th width="30px;">质检结果</th>
+          <th>项目名称</th>
+          <th width="80px;">创建人<br>创建时间</th>
+        </tr>
+      #{list items:p.query(), as:'unit'}
+        <tr>
+          <td><input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
+                     value="${unit.id}" whouse="${unit.whouse?.name()}" stage="${unit.stage?.name()}"
+                     shipType="${unit.shipType?.name()}"></td>
+          <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
+            <i class="icon-reorder"></i>
+              #{if unit.parent}<i class="icon-retweet" title="拆" style="color:red"></i> #{/if}<br>
+          ${unit.id}
+          </td>
+          <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+          <td><a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
+          <td title="${unit.product?.abbreviation}">
+            <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
+            <br>${unit.product?.abbreviation.overLong()}
+          </td>
+          <td>
+              #{if unit.fba}
+                  #{cache unit.fba.cacheKey(), for:'6h'}
+                  ${unit.fba.shipmentId}
+                      #{set feeds: unit.fba.feeds()/}
+                      #{if feeds.size() > 0}
+                          #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                          #{set lastFeed: feeds.get(0)/}
+                          #{if lastFeed.isFailed()}
+                            <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
+                          #{/if}
+                          #{elseif lastFeed.isSussess()}
+                            <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                            </i>
+                          #{/elseif}
+                          #{else }
+                            <i class="icon-search" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                            </i>
+                          #{/else}
+                      #{/if}
+                  #{/cache}
+              #{/if}
+            <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
+          </td>
+          <td>${unit.whouse?.name()}</td>
+          <td>${unit.currWhouse?.name}</td>
+          <td>${unit.cooperator?.name}</td>
+          <td><a href="@{Deliveryments.show(unit.deliveryment?.id)}">${unit.deliveryment?.id}</a></td>
+          <td>${unit.deliverplan?.id}</td>
+          <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
+          ${unit.attrs.planQty} / ${unit.attrs.qty} / ${unit.inboundQty}
+          </td>
+          <td>
+              #{if unit.selling?.fnSku}
+                <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank">
+                  <i class="icon-download-alt"></i>${unit.selling.fnSku}
+                </a>
+              #{/if}
+              #{elseif unit.selling != null}
+                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+                  补全 FnSku
+                </a>
+              #{/elseif}
+          </td>
+          <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
+          <td>
+            预计交货:#{time_tooltip time:unit.attrs.planDeliveryDate/} <br>
+            预计运输:#{time_tooltip time:unit.attrs.planShipDate /}
+          </td>
+          <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+          <td>
+              #{if unit.result?.name()=='Qualified'}
+                <i style="color:green" class="icon-ok"></i>
+              #{/if}
+              #{elseif unit.result?.name()=='Unqualified'}
+                <i style="color:red" class="icon-remove"></i>
+              #{/elseif}
+          </td>
+          <td>${unit.projectName}</td>
+          <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate/}</td>
+        </tr>
+        <tr id="${tr_key}_${unit.id}" style="display:none;">
+          <td colspan="19">
+            <div class="row-fluid" id="actions_${unit.id}">
+
+              <div class="span3">
+                <dl>
+                  <dt>Comment</dt>
+                  <dd>${unit.comment}</dd>
+                </dl>
+
+              </div>
+              <div class="span3">
+                <dl>
+                  <dt>关联运输单</dt>
+                  <dd>
+                    <ul>
+                        #{list items:unit.relateShipment(), as:'sp'}
+                          <li>
+                            <a href="@{Shipments.show(sp.id)}">${sp}</a>
+                            预计 #{time_tooltip time: sp.dates.planBeginDate /} 开船
+                          </li>
+                        #{/list}
+                    </ul>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>关联 FBA</dt>
+                  <dd>
+                      #{if unit.fba}
+                        <a href="${unit.fba.fbaLink()}">
+                          <i class="icon-external-link"></i>
+                        ${unit.fba.shipmentId}
+                        </a>
+                      #{/if}
+                      #{else }
+                        <span class="text-warning">还没有 FBA</span>
+                      #{/else}
+                  </dd>
+                </dl>
+              </div>
+
+              <div class="span3">
+                <table class="table table-condensed table-bordered">
+                  <tr>
+                    <td>实际交货量</td>
+                    <td>实际交货日期</td>
+                  </tr>
+                  <tr>
+                    <td>${unit.attrs.qty}</td>
+                    <td>${unit.attrs.deliveryDate.los()}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="span3">
+                <div class="btn-toolbar">
+                    #{power.ck "procures.dosplitunit"}
+                      <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
+                        #{if unit.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
+                          <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">采购分拆</a>
+                        #{/if}
+                        #{if unit.stage == models.procure.ProcureUnit.STAGE.IN_STORAGE}
+                          <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">库存分拆</a>
+                        #{/if}
+                    #{/power.ck}
+                </div>
+
+                  #{if delivery}
+                    <div class="btn-toolbar">
+                        #{power.ck "procures.delivery"}
+                            #{if unit.selling}
+                              <!-- 交货页面（没有Selling不允许） -->
+                              <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
+                            #{/if}
+                        #{/power.ck}
+                      <!-- 确认到货代处 -->
+                        #{if unit.selling}
+                            #{ifnot unit.isPlaced}
+                              <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
+                                 href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
+                            #{/ifnot}
+                        #{/if}
+                      <a href="javascript:void(0)" class="btn btn-small btn-warning" data-href="@{ProcureUnits.confirmUnit(unit.id)}"
+                         name="confirmUnitBtn" data-tragettr="procureUnit_${unit.id}">已核单</a>
+                    </div>
+                      #{if unit.fba}
+                          #{power.ck 'fbas.update'}
+                            <div class="btn-toolbar">
+                              <a href="javascript:void(0)" class="btn btn-small btn-warning" id="replaceUnitFBA"
+                                 data-unit-id="${unit.id}">更换 ${unit.fba?.shipmentId}
+                              </a>
+                            </div>
+                          #{/power.ck}
+                      #{/if}
+                    <div class="btn-toolbar">
+                        #{if unit.fba}
+                          <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
+                          <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
+                        #{/if}
+                    </div>
+                  #{/if}
+              </div>
+            </div>
+              #{ifnot norecord}
+                  #{cache unit.recordsPageCacheKey(), for:'3h'}
+                    <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                        #{records_ul  records: unit.records()/}
+                    </div>
+                  #{/cache}
+              #{/ifnot}
+          </td>
+        </tr>
+      #{/list}
+      #{if p != null}
+        <tr class="tb_footer">
+          <td colspan="25">
+              #{bootstrap_pager pi:p, url:'' /}
+          </td>
+        </tr>
+      #{/if}
+      </table>
+    </div>
+  </div>
+
+</form>
+
+#{records records:logs/}

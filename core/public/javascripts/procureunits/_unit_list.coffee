@@ -13,7 +13,11 @@ $ ->
         })
       else
         result = confirm("是否采用? FBA[ShipmentId: #{fba.shipmentId}, CenterId: #{fba.centerId}]")
-        $.getJSON('/FBAs/confirm', {unitId: $btn.data('unit-id'), fbaId: fba.id, result: result}, (r) ->
+        $.getJSON('/FBAs/confirm', {
+          unitId: $btn.data('unit-id'),
+          fbaId: fba.id,
+          result: result
+        }, (r) ->
           if r.flag
             if result
               noty({
@@ -47,6 +51,31 @@ $ ->
           type: 'success',
           timeout: 3000
         })
+      else
+        noty({
+          text: data.message,
+          type: 'error',
+          timeout: 3000
+        })
+    )
+  )
+
+  $('#unit_list').on('click', 'a[name=noPaymentBtn]', (e) ->
+    e.preventDefault()
+    $btn = $(@)
+    $.getJSON($btn.data('href'), (data) ->
+      if data.flag
+        noty({
+          text: '设置成功',
+          type: 'success',
+          timeout: 3000
+        })
+        if $btn.text() == '统计'
+          $btn.prop("class", "btn btn-small btn-danger")
+          $btn.text('不统计')
+        else
+          $btn.prop("class", "btn btn-small btn-success")
+          $btn.text('统计')
       else
         noty({
           text: data.message,

@@ -6,7 +6,6 @@
 #{/set}
 #{flash_alert /}
 
-
 <form action="@{StockRecords.index()}" method="get" class="search_form" id="search_form">
   <div class="row-fluid">
     <div class="span12">
@@ -28,57 +27,58 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" placeholder="物料编码" value="${p.search}" style="width:
-        100px;">
+        <input type="text" name="p.search" placeholder="SKU,采购计划ID,FBA" value="${p.search}" style="width:200px;">
         <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
-      <a href="javascript:void(0)" data-url="@{Excels.stockRecords(p)}" data-target="_blank" class="btn btn-info
-      inline" id="exportBtn">
+      <a href="javascript:void(0)" data-url="@{Excels.stockRecords(p)}" data-target="_blank" class="btn btn-info inline"
+         id="exportBtn">
         开始盘点
       </a>
       <div class="inline">
       </div>
     </div>
 
-
     <div class="row-fluid">
       <div class="span12">
         <table class="table table-condensed table-bordered">
           <tr>
+            <th>ID</th>
             <th>仓库</th>
-            <th>物料编码</th>
+            <th>采购计划ID</th>
+            <th>Selling</th>
+            <th>SKU</th>
             <th>名称</th>
             <th>FBA</th>
             <th>FBA 仓库</th>
             <th>运输方式</th>
+            <th>项目名称</th>
             <th>异动时间</th>
             <th>异动数量</th>
-            <th>异动来源</th>
-            <th>记录 ID</th>
+            <th>异动类型</th>
+            <th>来源记录ID</th>
           </tr>
         #{list items: records, as: 'r'}
-            #{set preRecord: r_isFirst ? null : records.get(r_index - 2)/}
-            #{set atts: r.stockObj.attributes()/}
-          <tr class="${atts.get('fba') != null && atts.get('fba') != preRecord?.stockObj?.attributes()?.get('fba')? 'striped' : ''}">
+          <tr>
+            <td>${r.id}</td>
+            <td>${r.whouse?.name}</td>
             <td>
-                #{if r.whouse.name != preRecord?.whouse?.name}
-                  ${r.whouse.name}
-                #{/if}
+              <a href="@{ProcureUnits.detail(r.unit?.id)}#${r.unit?.id}" target="_blank">${r.unit?.id}</a>
             </td>
+            <td>${r.unit?.selling?.sellingId}</td>
+            <td><a target="_blank" href="@{Products.show(r.unit?.sku)}">${r.unit?.sku}</a></td>
             <td>
-              <a href="${r.stockObj.showStockObjLink()}" target="_blank">${r.stockObj.stockObjId}</a>
+              <a href="#" rel="tooltip" title="${r.unit?.product?.abbreviation}">
+              ${r.unit?.product?.abbreviation?.xxLong()}</a>
             </td>
-            <td style="max-width: 280px;">${r.stockObj.name()}</td>
-            <td>
-            ${atts.get('fba')}
-            </td>
-            <td>${atts.get('whouseName')}</td>
-            <td>${atts.get('shipType')}</td>
+            <td>${r.unit?.fba?.shipmentId}</td>
+            <td>${r.unit?.whouse?.name}</td>
+            <td>${r.unit?.shipType?.label()}</td>
+            <td>${r.unit?.projectName}</td>
             <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
             <td>${r.qty}</td>
-            <td>${r.recordOrigin()}</td>
+            <td>${r.type.label()}</td>
             <td>
               <a href="${r.showRecordLink()}" target="_blank">${r.type.label()}记录 ${r.recordId}</a>
             </td>

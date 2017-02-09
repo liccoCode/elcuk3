@@ -2,8 +2,7 @@ package helper;
 
 import models.market.Selling;
 import models.procure.ProcureUnit;
-import models.whouse.StockObj;
-import models.whouse.StockRecord;
+import models.whouse.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.mvc.Router;
@@ -72,17 +71,30 @@ public class LinkHelper extends JavaExtensions {
     }
 
     public static String showRecordLink(StockRecord stockRecord) {
-        String idMatch = String.format("id:%s", stockRecord.recordId);
+        Long idMatch = stockRecord.recordId;
         switch(stockRecord.type) {
             case Inbound:
-                return Router.getFullUrl("InboundRecords.index", GTs.newMap("p.search", idMatch).build());
+                InboundUnit unit = InboundUnit.findById(idMatch);
+                return fullUrl("Inbounds.edit", unit.inbound.id, idMatch.toString());
             case Outbound:
-                return Router.getFullUrl("OutboundRecords.index", GTs.newMap("p.search", idMatch).build());
+                return fullUrl("Refunds.edit", stockRecord.unit.outbound.id, idMatch.toString());
             case Stocktaking:
-
+                return Router.getFullUrl("StockRecords.show", GTs.newMap("id", idMatch).build());
+            case Unqualified_Refund:
+            case Refund:
+                RefundUnit refundUnit = RefundUnit.findById(idMatch);
+                return fullUrl("Refunds.edit", refundUnit.refund.id, idMatch.toString());
+            case Split:
+            case Split_Stock:
+            case Unqualified_Transfer:
+                return fullUrl("ProcureUnits.detail", idMatch.toString(), idMatch.toString());
             default:
                 return "#";
         }
+    }
+
+    private static String fullUrl(String action, String id, String append) {
+        return Router.getFullUrl(action, GTs.newMap("id", id).build()) + "#" + append;
     }
 
     public static String getRedirect(String id, String target) {

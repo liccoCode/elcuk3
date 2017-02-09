@@ -46,15 +46,10 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Date to;
 
     public long whouseId;
-
     public long cooperatorId;
-
-    public ProcureUnit.STAGE stage;
-
+    public List<ProcureUnit.STAGE> stages = new ArrayList<>();
     public PLACEDSTATE isPlaced;
-
     public Shipment.T shipType;
-
     public String unitIds;
     /**
      * 选择过滤的日期类型
@@ -84,19 +79,57 @@ public class ProcurePost extends Post<ProcureUnit> {
         public abstract String label();
     }
 
+    public enum C {
+        YES {
+            @Override
+            public String label() {
+                return "已核单";
+            }
+        },
+        NO {
+            @Override
+            public String label() {
+                return "未核单";
+            }
+
+        };
+
+        public abstract String label();
+    }
+
+    public enum P {
+        EASYACC {
+            @Override
+            public String label() {
+                return "EASYACC";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B";
+            }
+
+        };
+
+        public abstract String label();
+    }
+
+    public String projectName;
     public ProcureUnit.OST isOut;
+    public C isConfirm;
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.stage = ProcureUnit.STAGE.DONE;
+        this.stages.add(ProcureUnit.STAGE.DONE);
         this.dateType = "createDate";
         this.perSize = 70;
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {
         this();
-        this.stage = stage;
+        this.stages.add(stage);
     }
 
     public Long getTotalCount() {
@@ -154,14 +187,23 @@ public class ProcurePost extends Post<ProcureUnit> {
             params.add(this.cooperatorId);
         }
 
-        if(this.stage != null) {
-            sbd.append(" AND stage=? ");
-            params.add(this.stage);
+        if(stages.size() > 0) {
+            sbd.append(" AND stage IN " + SqlSelect.inlineParam(stages));
         }
 
         if(this.shipType != null) {
             sbd.append(" AND shipType=? ");
             params.add(this.shipType);
+        }
+
+        if(this.isConfirm != null) {
+            sbd.append(" AND isConfirm=? ");
+            params.add(this.isConfirm == C.YES ? true : false);
+        }
+
+        if(StringUtils.isNotEmpty(this.projectName)) {
+            sbd.append(" AND projectName=? ");
+            params.add(this.projectName);
         }
 
         if(this.isPlaced != null) {
@@ -178,9 +220,10 @@ public class ProcurePost extends Post<ProcureUnit> {
             String word = this.word();
             sbd.append(" AND (")
                     .append("product.sku LIKE ? OR ")
-                    .append("selling.sellingId LIKE ?")
+                    .append("selling.sellingId LIKE ? OR ")
+                    .append("deliverplan.id LIKE ? ")
                     .append(") ");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i < 3; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));

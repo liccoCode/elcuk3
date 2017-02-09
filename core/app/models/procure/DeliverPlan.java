@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.whouse.Inbound;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -265,5 +266,13 @@ public class DeliverPlan extends GenericModel {
         }
     }
 
-
+    public String showInbounds() {
+        List<Inbound> list = Inbound.find("plan.id=? AND status<> ? ", this.id, Inbound.S.Cancel).fetch();
+        if(list == null || list.size() == 0) return "";
+        String ids = "";
+        for(Inbound inbound : list) {
+            ids += inbound.id + "; ";
+        }
+        return ids;
+    }
 }

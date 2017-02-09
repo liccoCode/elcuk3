@@ -25,16 +25,20 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-    #{select_enum name:'p.dateType', items:models.view.post.DeliveryPost.DateType.values(), value:p.dateType, class:'inline selectize' /}
+      <select name="p.dateType" style="width: 150px;" class="inline">
+      #{list items:models.view.post.DeliveryPost.DateType.values(), as:'d'}
+        <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
+      #{/list}
+      </select>
 
-      <select name="p.state" style="width: 150px;" class="inline selectize">
+      <select name="p.state" style="width: 150px;" class="inline">
         <option value="">状态</option>
       #{list items:models.procure.Deliveryment.S.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.deliveryType" style="width: 150px;" class="inline selectize">
+      <select name="p.deliveryType" style="width: 150px;" class="inline">
         <option value="">类型</option>
       #{list items:models.procure.Deliveryment.T.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.deliveryType?.name() ? 'selected' : ''}>${t.label()}</option>
@@ -71,7 +75,7 @@
     <div class="span12">
       <table class="table table-condensed table-bordered">
         <tr>
-          <th></th>
+          <th width="20px;"></th>
           <th>#</th>
           <th>请款单</th>
           <th>Name</th>
@@ -89,12 +93,10 @@
           #{set procress: dmt.deliveryProcress()/}
         <tr>
           <td>
-            <label>
-                #{if dmt.apply == null}
-                  <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                         name="deliverymentIds" value="${dmt.id}">
-                #{/if}
-            </label>
+              #{if dmt.apply == null}
+                <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
+                       name="deliverymentIds" value="${dmt.id}">
+              #{/if}
           </td>
           <td>
             <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
@@ -104,9 +106,7 @@
                 <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
                 <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
               #{/if}
-              #{else }
-                没有请款单
-              #{/else}
+              #{else }没有请款单#{/else}
           </td>
           <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
             <span><i class="icon-reorder"></i></span>
@@ -119,11 +119,9 @@
           <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
           <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
           <td>
-            <div class="progress progress-striped" style="margin-bottom:0;">
+            <div class="progress ${procress.bgcolor()} progress-striped" style="margin-bottom:0;">
               <div class="bar" style="width: ${(procress._1 / procress._2).format('#%')};">
-                <p class="text-error">
-                ${procress._1} / ${procress._2}
-                </p>
+                <p style="color:black;">${procress._1} / ${procress._2}</p>
               </div>
             </div>
           </td>

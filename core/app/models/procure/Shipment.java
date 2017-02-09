@@ -12,6 +12,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
+import models.whouse.Outbound;
 import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import notifiers.Mails;
@@ -371,6 +372,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Column(unique = true)
     @Expose
     public String invoiceNo;
+
+    /**
+     * 对应出库单
+     * 可能为空
+     */
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public Outbound out;
+
+    @Transient
+    public String outId;
 
     /**
      * 多个traceno
@@ -1234,7 +1245,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param shipType
      * @return
      */
-    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType) {
+    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType, Date planDeliveryDate) {
         /**
          * 1. 判断是否有过期的周期型运输单, 有的话自动关闭
          * 2. 判断是否需要创建新的周期型运输单, 有的话自动创建
@@ -1272,9 +1283,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         where.append(" AND type =?");
         params.add(shipType);
-
+        where.append(" AND dates.planBeginDate >= ?");
+        params.add(planDeliveryDate);
         where.append(" ORDER BY planBeginDate");
-
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
 

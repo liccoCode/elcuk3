@@ -65,7 +65,7 @@
   <tr>
     <td class="sid">${dto.fid}</td>
     <td style="min-width: 105px;">
-      <a href="@{ProcureUnits.blank(dto.fid, dto.totalfive(), dto.day())}" target="_blank">采购计划</a>&nbsp;
+      <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank">采购计划</a>&nbsp;
       <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
       <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
     </td>

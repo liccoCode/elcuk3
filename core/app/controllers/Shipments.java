@@ -13,12 +13,15 @@ import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -26,6 +29,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -396,8 +400,9 @@ public class Shipments extends Controller {
      *
      * @param whouseId
      */
-    public static void unitShipments(Long whouseId, Shipment.T shipType) {
-        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId, shipType);
+    public static void unitShipments(Long whouseId, Shipment.T shipType, Date planDeliveryDate) {
+        List<Shipment> unitRelateShipments = Shipment
+                .findUnitRelateShipmentByWhouse(whouseId, shipType, planDeliveryDate);
         render(unitRelateShipments);
     }
 
@@ -446,15 +451,25 @@ public class Shipments extends Controller {
     /**
      * 创建出库
      */
-    @Check("outboundrecords.index")
+    @Check("outbounds.index")
     public static void outbound(List<String> shipmentId) {
-        if(shipmentId != null && !shipmentId.isEmpty()) {
-            for(String sid : shipmentId) {
-                Shipment shipment = Shipment.findById(sid);
-                shipment.initOutbound();
+        Outbound.initCreateByShipItem(shipmentId);
+        flash.success("已成功创建出库单!");
+        index(new ShipmentPost());
+    }
+
+    public static void validCreateOutbound(String[] shipmentIds) {
+        String msg = "";
+        if(ArrayUtils.isNotEmpty(shipmentIds)) {
+            List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i " +
+                    "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentIds) +
+                    " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
+            if(shipments.size() > 0) {
+                msg += "【" + shipments.get(0).id + "】";
+                renderJSON(new Ret(false, "运输单：" + msg + " " +
+                        "下的采购计划还不是【已入仓】状态，是否继续？"));
             }
         }
-        flash.success("创建出库成功!");
-        redirect("/OutboundRecords/index");
+        renderJSON(new Ret(true, ""));
     }
 }

@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import models.procure.ProcureUnit;
+import models.view.post.StockPost;
 import models.view.post.StockRecordPost;
 import models.whouse.StockRecord;
 import models.whouse.Whouse;
@@ -8,7 +10,9 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 库存异动控制器
@@ -19,7 +23,8 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class StockRecords extends Controller {
-    @Before(only = {"index"})
+
+    @Before(only = {"index", "stockIndex"})
     public static void setWhouses() {
         renderArgs.put("whouses", Whouse.selfWhouses());
     }
@@ -30,4 +35,45 @@ public class StockRecords extends Controller {
         List<StockRecord> records = p.query();
         render(p, records);
     }
+
+    public static void stockIndex(StockPost p) {
+        if(p == null) p = new StockPost();
+        Optional.ofNullable(p.whouse).ifPresent(w -> {
+            if(w.id != null && w.id == 22) {
+                Refunds.unQualifiedIndex(new StockPost());
+            }
+        });
+        List<ProcureUnit> units = p.query();
+        render(p, units);
+    }
+
+    public static void adjustStock(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        StockRecord record = new StockRecord();
+        render(unit, record);
+    }
+
+    public static void saveRecord(StockRecord record) {
+        record.type = StockRecord.T.Stocktaking;
+        record.createDate = new Date();
+        record.save();
+        ProcureUnit unit = ProcureUnit.findById(record.unit.id);
+        unit.availableQty += record.qty;
+        unit.save();
+        record.recordId = record.id;
+        record.whouse = unit.currWhouse;
+        record.save();
+        flash.success("调整库存成功");
+        index(new StockRecordPost());
+    }
+
+    public static void show(Long id) {
+        StockRecord record = StockRecord.findById(id);
+        render(record);
+    }
+
+    public static void changeRecords(Long id) {
+        index(new StockRecordPost(id));
+    }
+
 }

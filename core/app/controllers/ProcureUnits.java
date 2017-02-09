@@ -3,7 +3,9 @@ package controllers;
 import controllers.api.SystemOperation;
 import exception.PaymentException;
 import helper.*;
+import helper.Currency;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.activiti.ActivitiProcess;
 import models.embedded.UnitAttrs;
@@ -19,6 +21,7 @@ import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
+import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.io.FileUtils;
@@ -36,6 +39,8 @@ import play.mvc.With;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -49,7 +54,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
@@ -81,7 +86,21 @@ public class ProcureUnits extends Controller {
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
-        if(p == null) p = new ProcurePost();
+        if(p == null) {
+            p = new ProcurePost();
+            p.stages.add(ProcureUnit.STAGE.PLAN);
+            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+        }
+        render(p);
+    }
+
+    @Check("procures.indexWhouse")
+    public static void indexWhouse(ProcurePost p) {
+        if(p == null) {
+            p = new ProcurePost();
+            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+            p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
+        }
         render(p);
     }
 
@@ -144,7 +163,7 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void blank(String sid, float day, int totalFive) {
+    public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
@@ -152,7 +171,7 @@ public class ProcureUnits extends Controller {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
         }
-        render(unit, whouses, day, totalFive);
+        render(unit, whouses);
     }
 
 
@@ -268,9 +287,10 @@ public class ProcureUnits extends Controller {
         if(isNeedApply != null && isNeedApply.equals("need")) {
             unit.stage = ProcureUnit.STAGE.APPROVE;
         }
+        unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         unit.save();
         //生成质检任务
-        unit.triggerCheck();
+        //unit.triggerCheck();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
             Shipment ship = Shipment.findById(shipmentId);
@@ -299,9 +319,10 @@ public class ProcureUnits extends Controller {
     public static void edit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+        List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
+        List<Whouse> currWhouses = Whouse.findByType(Whouse.T.SELF);
         unit.setPeriod();
-        render(unit, oldPlanQty, whouses);
+        render(unit, oldPlanQty, whouses, currWhouses);
     }
 
     /**
@@ -311,13 +332,17 @@ public class ProcureUnits extends Controller {
      * @param oldPlanQty
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        managedUnit.update(unit, shipmentId, msg);
+        if(ProcureUnit.STAGE.IN_STORAGE == managedUnit.stage) {
+            managedUnit.stockUpdate(unit, shipmentId, msg);
+        } else {
+            managedUnit.update(unit, shipmentId, msg);
+        }
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
             unit.id = managedUnit.id;
-            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
+            List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
+            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses, msg);
         }
         flash.success("成功修改采购计划!", id);
         edit(id);
@@ -327,7 +352,11 @@ public class ProcureUnits extends Controller {
 
     /**
      * @param unitid
+     * @param checkid
      * @param oldPlanQty
+     * @param unit
+     * @param shipmentId
+     * @param msg
      */
     public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
                                      String shipmentId, String msg) {
@@ -363,15 +392,22 @@ public class ProcureUnits extends Controller {
      */
     public static void splitUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        if(StringUtils.isNotEmpty(ProcureUnit.validRefund(unit))) {
+            renderText(ProcureUnit.validRefund(unit));
+        }
+        unit.setPeriod();
         ProcureUnit newUnit = new ProcureUnit();
-        newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
+        newUnit.comment(String.format("此采购计划由于 #%s 采购计划%s创建.", unit.id,
+                unit.stage == ProcureUnit.STAGE.IN_STORAGE ? "库存分拆" : "采购分拆"));
         newUnit.attrs.qty = 0;
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(unit.sku);
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
-        renderArgs.put("whouses", Whouse.findAll());
-        render(unit, newUnit);
+        renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
+        Date date = new Date();
+        boolean showNotice = date.getTime() >= unit.attrs.planDeliveryDate.getTime() ? true : false;
+        render(unit, newUnit, showNotice);
     }
 
     /**
@@ -385,12 +421,16 @@ public class ProcureUnits extends Controller {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
-        ProcureUnit nUnit = unit.split(newUnit);
+        ProcureUnit nUnit;
+        if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
+            nUnit = unit.split(newUnit);
+        } else {
+            nUnit = unit.stockSplit(newUnit);
+        }
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findAll();
+            List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
         }
-
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
         Deliveryments.show(unit.deliveryment.id);
     }
@@ -423,6 +463,18 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret());
     }
 
+    /**
+     * 采购计划是否进入 未请款金额
+     *
+     * @param id
+     */
+    public static void noPayment(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        boolean noPayment = unit.noPayment;
+        unit.noPayment = !noPayment;
+        unit.save();
+        renderJSON(new Ret());
+    }
 
     /**
      * 预付款申请
@@ -694,4 +746,71 @@ public class ProcureUnits extends Controller {
         }
         render(list);
     }
+
+    public static void updateBoxInfo(ProcureUnit unit) {
+        unit = ProcureUnit.findById(unit.id);
+        unit.marshalBoxs();
+        unit.save();
+        renderJSON(new Ret(true));
+    }
+
+    public static void deleteUnit(Long[] ids) {
+        List<ProcureUnit> list = ProcureUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        String outId = list.get(0).outbound.id;
+        Outbound outbound = Outbound.findById(outId);
+        for(ProcureUnit unit : list) {
+            unit.outbound = null;
+            unit.save();
+        }
+        if(outbound.units.size() == 0) {
+            outbound.status = Outbound.S.Cancel;
+            outbound.save();
+        }
+        renderJSON(new Ret(true));
+    }
+
+    public static void refreshFbaCartonContentsByIds(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        render("/Inbounds/boxInfo.html", unit);
+    }
+
+    public static void detail(Long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        List<ProcureUnit> child_units = new ArrayList<>();
+        if(unit.parent == null) {
+            child_units = ProcureUnit.find("parent.id = ? ", id).fetch();
+        } else {
+            Long parentId = unit.parent.id;
+            child_units = ProcureUnit.find("parent.id = ? ", parentId).fetch();
+            unit = ProcureUnit.findById(parentId);
+        }
+        int totalPlanQty = unit.attrs.planQty == null ? 0 : unit.attrs.planQty;
+        int totalQty = unit.attrs.qty == null ? 0 : unit.attrs.qty;
+        int totalInboundQty = unit.inboundQty;
+        float totalAmount = unit.appliedAmount();
+        Map<Currency, Float> map = new HashMap<>();
+        map.put(unit.attrs.currency, totalAmount);
+
+        for(ProcureUnit child : child_units) {
+            if(child.stage == ProcureUnit.STAGE.DELIVERY) {
+                totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
+            }
+            if(child.type != null) {
+                if(child.type == ProcureUnit.T.ProcureSplit) {
+                    if(map.containsKey(child.attrs.currency)) {
+                        float current = map.get(child.attrs.currency);
+                        map.put(child.attrs.currency, current + child.appliedAmount());
+                    } else {
+                        map.put(child.attrs.currency, child.appliedAmount());
+                    }
+                    totalPlanQty += child.attrs.planQty == null ? 0 : child.attrs.planQty;
+                    totalQty += child.attrs.qty == null ? 0 : child.attrs.qty;
+                    totalInboundQty += child.inboundQty;
+                }
+            }
+        }
+        renderArgs.put("logs", ElcukRecord.records(id.toString(), Arrays.asList("procureunit.split"), 50));
+        render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
+    }
+
 }

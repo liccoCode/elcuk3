@@ -1,9 +1,12 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.Role;
 import models.User;
 import models.activiti.ActivitiDefinition;
@@ -18,8 +21,7 @@ import models.product.Product;
 import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import models.view.dto.CooperItemDTO;
-import models.whouse.OutboundRecord;
-import models.whouse.Whouse;
+import models.whouse.*;
 import mws.FBA;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -45,6 +47,7 @@ import javax.persistence.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -134,6 +137,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return "已交货";
             }
         },
+        /**
+         * 深圳仓已入仓
+         */
+        IN_STORAGE {
+            @Override
+            public String label() {
+                return "已入仓";
+            }
+        },
+        OUTBOUND {
+            @Override
+            public String label() {
+                return "已出仓";
+            }
+        },
+
         /**
          * 运输中; 运输单的点击开始运输
          */
@@ -270,6 +289,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @OneToOne
     public Whouse whouse;
 
+    /**
+     * 当前仓库（深圳仓库）
+     */
+    @OneToOne
+    public Whouse currWhouse;
+
     // ----------- 将不同阶段的数据封装到不同的对象当中去.
 
     /**
@@ -341,6 +366,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isConfirm = false;
 
+    /**
+     * 统计报表用
+     * 采购计划不进入 未请款金额
+     */
+    public boolean noPayment = false;
+
     public enum S {
         NOSHIPED {
             @Override
@@ -371,13 +402,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public Integer period;
 
+    /**
+     * 一箱的数量
+     */
+    @Transient
+    public Integer boxSize;
+
     public void setPeriod() {
         if(this.product.cooperators().size() > 0) {
             Long cid = this.cooperator.id;
             CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", cid, this.sku).first();
             this.period = cooperItem.period;
+            this.boxSize = cooperItem.boxSize;
         }
-
     }
 
     public enum OPCONFIRM {
@@ -471,6 +508,110 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @OrderBy("creatat DESC")
     public List<CheckTask> taskList;
 
+    public enum T {
+        ProcureSplit {
+            @Override
+            public String label() {
+                return "采购分拆";
+            }
+        },
+        StockSplit {
+            @Override
+            public String label() {
+                return "库存分拆";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 分拆类型
+     */
+    @Enumerated(EnumType.STRING)
+    public T type;
+
+    /**
+     * 质检结果
+     */
+    @Enumerated(EnumType.STRING)
+    public InboundUnit.R result;
+
+    /**
+     * 初始采购数量
+     */
+    public int originQty;
+
+    /**
+     * 入库数
+     */
+    public int inboundQty;
+
+    /**
+     * 不合格数量
+     */
+    public int unqualifiedQty;
+
+    /**
+     * 可用库存数
+     */
+    public int availableQty;
+
+    /**
+     * 实际出库数
+     */
+    public int outQty;
+
+    /**
+     * 项目名称
+     */
+    public String projectName;
+
+    /**
+     * 父节点ID
+     */
+    @ManyToOne
+    public ProcureUnit parent;
+
+    /**
+     * 出库单
+     */
+    @ManyToOne
+    public Outbound outbound;
+
+    /**
+     * 主箱信息
+     */
+    @Lob
+    public String mainBoxInfo;
+    /**
+     * 尾箱信息
+     */
+    @Lob
+    public String lastBoxInfo;
+
+    /**
+     * 分组编号
+     * 打印出库单时用
+     */
+    @Transient
+    public int groupNum;
+
+    @Transient
+    public CheckTaskDTO mainBox = new CheckTaskDTO();
+
+    @Transient
+    public CheckTaskDTO lastBox = new CheckTaskDTO();
+
+    @Transient
+    public boolean isb2b;
+
+    /**
+     * 差数是否退回
+     */
+    @Transient
+    public boolean isReturn;
+
     /**
      * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)
      * <p>
@@ -497,6 +638,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String stateOrProvinceCode;
 
     public String postalCode;
+
+    @PostLoad
+    public void postPersist() {
+        this.mainBox = JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
+        this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
+    }
+
+    public void marshalBoxs() {
+        this.mainBoxInfo = J.json(this.mainBox);
+        this.lastBoxInfo = J.json(this.lastBox);
+    }
 
     /**
      * ProcureUnit 的检查
@@ -577,80 +729,191 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param unit
      */
     public ProcureUnit split(ProcureUnit unit) {
-        int originQty = this.qty();
+        int planQty = this.attrs.planQty;
         if(unit.attrs.planQty != null) {
-            if(unit.attrs.planQty > originQty)
+            if(unit.attrs.planQty > planQty)
                 Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
             if(unit.attrs.planQty <= 0)
                 Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
         }
+        if(unit.selling == null) {
+            Validation.addError("", "分拆的子采购计划必须要有selling！");
+        }
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
-        ProcureUnit newUnit = null;
-        if(this.selling == null) {
-            //手动单拆分时将 拆分的采购计划 归属到 此采购计划 的采购单身上
-            newUnit = unit;
-            newUnit.deliveryment = this.deliveryment;
-        } else {
-            newUnit = new ProcureUnit(this);
-            newUnit.attrs.planQty = unit.attrs.planQty;
-        }
+        ProcureUnit newUnit = new ProcureUnit();
+
+        newUnit.cooperator = this.cooperator;
+        newUnit.handler = Login.current();
+        newUnit.deliveryment = this.deliveryment;
+        newUnit.deliverplan = this.deliverplan;
+        newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.DELIVERY;
+        newUnit.planstage = PLANSTAGE.PLAN;
+        newUnit.shipType = unit.shipType;
+        newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.originQty = unit.attrs.planQty;
+        newUnit.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+        newUnit.attrs.planShipDate = unit.attrs.planShipDate;
+        newUnit.attrs.planArrivDate = unit.attrs.planArrivDate;
+        newUnit.attrs.price = unit.attrs.price;
+        newUnit.attrs.currency = unit.attrs.currency;
+        newUnit.product = unit.product;
+        newUnit.sku = unit.product.sku;
+        newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        newUnit.type = T.ProcureSplit;
+        newUnit.selling = unit.selling;
+        newUnit.sid = unit.sid;
+        newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.comment = unit.comment;
         if(unit.selling == null) {
             newUnit.manualValidate();
         } else {
             newUnit.validate();
         }
 
-
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
                 newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS
-                && shipments.size() <= 0)
-            Validation.addError("",
-                    String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
-                            newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
-
+        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+            Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
+                    newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
         if(Validation.hasErrors()) return newUnit;
         //无selling的手动单不做处理
         Shipment shipment = null;
         if(unit.selling != null && shipments.size() > 0) shipment = shipments.get(0);
+        // 原采购计划数量变更
+        this.attrs.planQty = planQty - newUnit.attrs.planQty;
+        this.shipItemQty(this.attrs.planQty);
         // FBA 变更
         if(this.fba != null)
             this.fba.updateFBAShipment(null);
-
-        // 原采购计划数量变更
-        this.attrs.planQty = originQty - newUnit.attrs.planQty;
-        if(this.attrs.qty != null)
-            this.attrs.qty = this.attrs.planQty;
-        this.shipItemQty(this.qty());
         this.save();
 
+        /**
+         * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
+         */
         // 原采购计划的运输量变更
-        int average = (int) Math.ceil((float) this.qty() / this.shipItems.size());
-        for(int i = 0; i < this.shipItems.size(); i++) {
-            // 平均化, 包含除不尽的情况
-            if(i == this.shipItems.size() - 1) {
-                this.shipItems.get(i).qty =
-                        this.qty() - (average * this.shipItems.size() - 1);
-            } else {
-                this.shipItems.get(i).qty = average;
-            }
-        }
+//        int average = (int) Math.ceil((float) this.attrs.planQty / this.shipItems.size());
+//        for(int i = 0; i < this.shipItems.size(); i++) {
+//            // 平均化, 包含除不尽的情况
+//            if(i == this.shipItems.size() - 1) {
+//                this.shipItems.get(i).qty = this.qty() - (average * this.shipItems.size() - 1);
+//            } else {
+//                this.shipItems.get(i).qty = average;
+//            }
+//        }
 
+        newUnit.parent = this;
         // 分拆出的新采购计划变更
         newUnit.save();
-        //生成质检任务
-        newUnit.triggerCheck();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
-
         new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
+                .msgArgs(this.id, planQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class)
                 .save();
         return newUnit;
+    }
+
+    /**
+     * 库存分拆
+     *
+     * @return
+     */
+    public ProcureUnit stockSplit(ProcureUnit unit) {
+        int availableQty = this.availableQty;
+        if(unit.attrs.planQty != null) {
+            if(unit.availableQty > availableQty)
+                Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
+            if(unit.availableQty <= 0)
+                Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
+        }
+        if(unit.selling == null) {
+            Validation.addError("", "分拆的子采购计划必须要有selling！");
+        }
+        ProcureUnit newUnit = new ProcureUnit();
+        newUnit.cooperator = this.cooperator;
+        newUnit.handler = Login.current();
+        newUnit.deliveryment = this.deliveryment;
+        newUnit.deliverplan = this.deliverplan;
+        newUnit.whouse = unit.whouse;
+        newUnit.stage = STAGE.IN_STORAGE;
+        newUnit.planstage = PLANSTAGE.DONE;
+        newUnit.shipType = unit.shipType;
+        newUnit.originQty = unit.availableQty;
+        newUnit.attrs.planQty = unit.availableQty;
+        newUnit.attrs.qty = unit.availableQty;
+        newUnit.inboundQty = unit.availableQty;
+        newUnit.availableQty = unit.availableQty;
+        newUnit.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+        newUnit.attrs.planShipDate = unit.attrs.planShipDate;
+        newUnit.attrs.planArrivDate = unit.attrs.planArrivDate;
+        newUnit.attrs.price = unit.attrs.price;
+        newUnit.attrs.currency = unit.attrs.currency;
+        newUnit.product = unit.product;
+        newUnit.comment = unit.comment;
+        newUnit.result = unit.result;
+        newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.country());
+        if(unit.selling != null) {
+            newUnit.selling = unit.selling;
+            newUnit.sid = unit.sid;
+        }
+        newUnit.type = T.StockSplit;
+        newUnit.sku = unit.product.sku;
+        newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
+                newUnit.whouse, newUnit.shipType);
+        //无selling的手动单不做处理
+        //快递不做判断
+        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+            Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
+                    newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
+        if(Validation.hasErrors()) return newUnit;
+        //无selling的手动单不做处理
+        Shipment shipment = null;
+        if(unit.selling != null && shipments.size() > 0) shipment = shipments.get(0);
+        this.availableQty = availableQty - newUnit.availableQty;
+        this.shipItemQty(this.availableQty);
+        // FBA 变更
+        if(this.fba != null)
+            this.fba.updateFBAShipment(null);
+        // 原采购计划数量变更
+        this.save();
+        newUnit.parent = this;
+        // 分拆出的新采购计划变更
+        newUnit.save();
+        if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
+        new ERecordBuilder("procureunit.split")
+                .msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
+                .fid(this.id, ProcureUnit.class)
+                .save();
+        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split);
+        return newUnit;
+    }
+
+    /**
+     * 创建异动记录
+     *
+     * @param unit
+     * @param qty
+     * @param type
+     */
+    public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type) {
+        StockRecord record = new StockRecord();
+        record.whouse = unit.currWhouse;
+        record.unit = unit;
+        record.qty = qty;
+        record.type = type;
+        record.recordId = unit.id;
+        record.save();
+        StockRecord parent = new StockRecord();
+        parent.whouse = unit.parent == null ? null : unit.parent.currWhouse;
+        parent.unit = unit.parent;
+        parent.qty = 0 - qty;
+        parent.type = type;
+        parent.recordId = unit.parent == null ? null : unit.parent.id;
+        parent.save();
     }
 
     /**
@@ -757,23 +1020,50 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
-
+        if(this.parent != null && unit.isReturn
+                && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        if(this.parent != null && unit.isReturn && this.stage == STAGE.IN_STORAGE) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
+                && unit.shipType.name() != "EXPRESS") {
+            Validation.addError("", "请选择运输单！");
+        }
+        if(StringUtils.isNotEmpty(shipmentId)) {
+            Shipment shipment = Shipment.findById(shipmentId);
+            if(!shipment.type.name().equals(unit.shipType.name())) {
+                Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
+            }
+        }
+        if(Validation.hasErrors()) return;
         List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(this.parent != null && unit.isReturn) {
+                ProcureUnit it = ProcureUnit.findById(this.parent.id);
+                if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(it.stage)) {
+                    it.attrs.planQty += (this.attrs.planQty - unit.attrs.planQty);
+                    it.save();
+                }
+            }
             logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
-        this.comment = unit.comment;
-        this.purchaseSample = unit.purchaseSample;
-        // 2
+        if(Validation.hasErrors()) return;
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
-            this.changeShipItemShipment(
-                    StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
                     oldShipType);
         }
-        if(Validation.hasErrors()) return;
 
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        this.comment = unit.comment;
+        this.purchaseSample = unit.purchaseSample;
         if(logs.size() > 0) {
             if(StringUtils.isBlank(reason)) {
                 new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
@@ -789,6 +1079,100 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 库存修改  和采购修改分开
+     *
+     * @param unit
+     * @param shipmentId
+     * @param reason
+     */
+    public void stockUpdate(ProcureUnit unit, String shipmentId, String reason) {
+        Shipment.T oldShipType = this.shipType;
+        /**
+         * 1. 修改不同阶段可以修改的信息
+         * 2. 根据运输类型修改运输单
+         */
+        if(this.fba != null && (unit.shipType != this.shipType || unit.availableQty != this.availableQty))
+            Validation.required("procureunit.update.reason", reason);
+        if(this.stage == STAGE.CLOSE)
+            Validation.addError("", "已经结束, 无法再修改");
+        if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
+        if(this.parent != null && unit.isReturn && STAGE.IN_STORAGE == this.stage) {
+            if(unit.availableQty - this.availableQty > this.parent.availableQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
+                && unit.shipType.name() != "EXPRESS") {
+            Validation.addError("", "请选择运输单！");
+        }
+        if(StringUtils.isNotEmpty(shipmentId)) {
+            Shipment shipment = Shipment.findById(shipmentId);
+            if(!shipment.type.name().equals(unit.shipType.name())) {
+                Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
+            }
+        }
+        if(Validation.hasErrors()) return;
+        List<String> logs = new ArrayList<>();
+        this.comment = unit.comment;
+        this.autoUpdateComment(unit);
+        this.purchaseSample = unit.purchaseSample;
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        if(Validation.hasErrors()) return;
+        //仓库加工修改
+        if(this.parent != null && unit.isReturn) {
+            ProcureUnit it = ProcureUnit.findById(this.parent.id);
+            if(it.stage == STAGE.IN_STORAGE) {
+                it.availableQty += (this.availableQty - unit.availableQty);
+                it.save();
+            }
+        }
+        logs.addAll(this.changeStageUpdate(unit));
+        if(STAGE.IN_STORAGE == this.stage) {
+            this.changeShipItemShipment(StringUtils.isBlank(shipmentId) ? null : Shipment.findById(shipmentId),
+                    oldShipType);
+        }
+        if(logs.size() > 0)
+            this.stage = STAGE.IN_STORAGE;
+        logs.addAll(this.afterDoneUpdate(unit));
+        int diffQty = this.availableQty - this.originQty;
+        this.originQty = this.availableQty;
+        this.attrs.planQty = this.availableQty;
+        this.attrs.qty = this.availableQty;
+        this.inboundQty = this.availableQty;
+        if(logs.size() > 0) {
+            new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
+                    this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
+            noty(this.sku, StringUtils.join(logs, ","));
+        }
+        this.shipItemQty(this.qty());
+        this.save();
+        if(diffQty != 0) {
+            this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock);
+        }
+    }
+
+    /**
+     * 去往仓库和运输方式变更日志添加到comment
+     *
+     * @param unit
+     */
+    public void autoUpdateComment(ProcureUnit unit) {
+        StringBuilder log = new StringBuilder();
+        if(this.whouse != unit.whouse) {
+            log.append(" 修改去往国家：").append(this.whouse == null ? "空" : this.whouse.country)
+                    .append(" => ").append(unit.whouse == null ? "空" : unit.whouse.country).append("; ");
+        }
+        if(this.shipType != unit.shipType) {
+            log.append(" 修改运输方式：").append(this.shipType == null ? "空" : this.shipType.label())
+                    .append(" => ").append(unit.shipType == null ? "空" : unit.shipType.label()).append("; ");
+        }
+        if(log.length() > 0) {
+            log.insert(0, LocalDate.now());
+        }
+        this.comment += log.toString();
+    }
+
+    /**
      * 修改手动单数据
      */
     public void updateManualData(ProcureUnit unit) {
@@ -797,6 +1181,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
+        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
     }
 
     public void noty(String sku, String content) {
@@ -828,16 +1213,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.price", unit.attrs.price));
         logs.addAll(Reflects.logFieldFade(this, "attrs.currency", unit.attrs.currency));
         logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
+        logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
+        logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
+        logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
         return logs;
     }
 
     private List<String> doneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        return logs;
+    }
+
+    private List<String> afterDoneUpdate(ProcureUnit unit) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
+        logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
+        return logs;
+    }
+
+    private List<String> changeStageUpdate(ProcureUnit unit) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
+        logs.addAll(Reflects.logFieldFade(this, "currWhouse", unit.currWhouse));
         return logs;
     }
 
@@ -847,19 +1250,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return String
      */
     public String generateProcureUnitStatusInfo() {
-        String paymentInfo = "";
-        PaymentUnit prePay = this.fetchPrePay();
-        PaymentUnit tailPay = this.fetchTailPay();
-        if(prePay != null) {
-            if(prePay.state == PaymentUnit.S.APPLY) paymentInfo += "已申请预付款";
-            if(prePay.state == PaymentUnit.S.PAID) paymentInfo += "已付预付款";
+        String msg = "";
+        PaymentUnit pre_pay = this.fetchPrePay();
+        PaymentUnit tail_pay = this.fetchTailPay();
+        if(pre_pay != null) {
+            if(pre_pay.state == PaymentUnit.S.APPLY) msg += "已申请预付款";
+            if(pre_pay.state == PaymentUnit.S.PAID) msg += "已付预付款";
         }
-        if(tailPay != null) {
-            if(tailPay.state == PaymentUnit.S.APPLY) paymentInfo += " 已申请尾款";
-            if(tailPay.state == PaymentUnit.S.PAID) paymentInfo += " 已付尾款";
+        if(tail_pay != null) {
+            if(tail_pay.state == PaymentUnit.S.APPLY) msg += " 已申请尾款";
+            if(tail_pay.state == PaymentUnit.S.PAID) msg += " 已付尾款";
         }
         return String.format("抵达货代: %s, FBA: %s, 付款信息: %s", this.isPlaced,
-                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(paymentInfo) ? "无" : paymentInfo);
+                this.fba != null ? this.fba.shipmentId : "无", StringUtils.isBlank(msg) ? "无" : msg);
     }
 
     /**
@@ -869,8 +1272,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param shipment
      */
     public void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
-        if(this.shipItems.stream()
-                .anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
+        if(this.shipItems.stream().anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
             Validation.addError("", String.format("当前采购计划已经存在运输单, 且该运输单不是 %s 状态.", Shipment.S.PLAN.label()));
             return;
         }
@@ -886,6 +1288,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(this.shipType == Shipment.T.EXPRESS || oldShipType != this.shipType) {
                 this.shipItems.forEach(GenericModel::delete);
             }
+            this.changeOutbound(null);
         } else {
             if(this.shipItems.isEmpty()) {
                 // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
@@ -903,6 +1306,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                             }
                         });
             }
+            this.changeOutbound(shipment.out);
+        }
+    }
+
+    /**
+     * 修改采购计划后更换出库单
+     *
+     * @param out
+     */
+    private void changeOutbound(Outbound out) {
+        if(!(this.outbound != null && this.outbound.status == Outbound.S.Outbound)) {
+            Optional<Outbound> optional = Optional.ofNullable(out);
+            optional.ifPresent(value -> this.outbound = (value.status != Outbound.S.Outbound ? out : this.outbound));
         }
     }
 
@@ -977,6 +1393,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(assign) {
             this.deliveryment = deliveryment;
             this.stage = ProcureUnit.STAGE.DELIVERY;
+            this.originQty = this.attrs.planQty;
         } else {
             this.deliveryment = null;
             this.stage = STAGE.PLAN;
@@ -1062,7 +1479,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 优先返回可用库存作为第一参考值
+     *
+     * @return
+     */
     public int qty() {
+        if(this.attrs.qty != null && this.attrs.qty != 0) return this.attrs.qty;
+        return this.attrs.planQty;
+    }
+
+    public int qtyForFba() {
+        if(this.availableQty != 0) return this.availableQty;
         if(this.attrs.qty != null) return this.attrs.qty;
         return this.attrs.planQty;
     }
@@ -1878,7 +2306,114 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 加载出 CheckTaskDTO 对象
+     * @param pids
+     * @return
+     */
+    public static String validateIsInbound(List<Long> pids, String type) {
+        Map<STAGE, Integer> status_map = new HashMap<>();
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        String msg = "";
+        for(ProcureUnit unit : units) {
+            if(type.equals("createInboundBtn")) {
+                if(unit.stage != STAGE.DELIVERY) {
+                    return "请统一选择阶段为【采购中】的采购计划！";
+                }
+                return StringUtils.isNotEmpty(validInbound(unit)) ? validInbound(unit) : validRefund(unit);
+            } else if(type.equals("createOutboundBtn")) {
+                if(unit.stage != STAGE.IN_STORAGE) {
+                    return "请选择阶段为【已入仓】的采购计划！";
+                }
+                if(unit.outbound != null) {
+                    return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中！";
+                }
+                msg = validRefund(unit);
+            } else if(type.equals("createRefundBtn")) {
+                if(unit.stage != STAGE.IN_STORAGE) {
+                    return "请统一选择阶段为【已入仓】的采购计划！";
+                }
+                if(unit.parent != null && T.StockSplit == unit.type) {
+                    return "库存分拆的子采购计划【" + unit.id + "】无法进行退货！";
+                }
+                if(unit.outbound != null) {
+                    return "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中,请先解除！";
+                }
+                msg = validRefund(unit);
+            }
+        }
+        return msg;
+    }
+
+    public static String validInbound(ProcureUnit unit) {
+        if(StringUtils.isNotEmpty(InboundUnit.isAllInbound(unit.id))) {
+            return "采购计划【" + unit.id + "】已经存在收货入库单 【" + InboundUnit.isAllInbound(unit.id) + "】";
+        }
+        return "";
+    }
+
+    public static String validRefund(ProcureUnit unit) {
+        if(StringUtils.isNotEmpty(Refund.isAllReufund(unit.id))) {
+            return "采购计划【" + unit.id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(unit.id) + "】";
+        }
+        return "";
+    }
+
+    public static Map<Integer, List<ProcureUnit>> pageNumForTen(List<Outbound> outbounds) {
+        Map<Integer, List<ProcureUnit>> ten = new HashMap<>();
+        int k = 0;
+        for(Outbound outbound : outbounds) {
+            int groupNum = 0;
+            List<ProcureUnit> iu = ProcureUnit.findUnitOrderByShipment(outbound.id);
+            Map<String, Integer> map = new HashMap<>();
+            for(ProcureUnit u : iu) {
+                if(u.shipItems.size() == 0) {
+                    u.groupNum = 0;
+                } else {
+                    String shipment_id = u.shipItems.get(0).shipment.id;
+                    if(map.containsKey(shipment_id)) {
+                        u.groupNum = map.get(shipment_id);
+                    } else {
+                        groupNum++;
+                        map.put(shipment_id, groupNum);
+                        u.groupNum = groupNum;
+                    }
+                }
+            }
+            int max = iu.size();
+            for(int i = 0; i < iu.size(); i += 25) {
+                int num = max - i;
+                ten.put(k, iu.subList(i, num > 25 ? i + 25 : i + num));
+                k++;
+            }
+        }
+        return ten;
+    }
+
+    public static List<ProcureUnit> findUnitOrderByShipment(String out_id) {
+        String sql = "Select DISTINCT u FROM ProcureUnit u LEFT JOIN u.shipItems i WHERE u.outbound.id = ? " +
+                "ORDER BY i.shipment.id ";
+        return ProcureUnit.find(sql, out_id).fetch();
+    }
+
+    public String showInboundIds() {
+        List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
+        String ids = "";
+        for(InboundUnit unit : list) {
+            ids += unit.inbound.id + ",";
+        }
+        return ids;
+    }
+
+
+    public String showInboundUnitIds() {
+        List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
+        String ids = "";
+        for(InboundUnit unit : list) {
+            ids += unit.id + ",";
+        }
+        return ids;
+    }
+
+    /* 加载出 CheckTaskDTO 对象
      *
      * @return
      */
@@ -1887,6 +2422,37 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return J.from(this.fba.fbaCartonContents, CheckTaskDTO.class);
         }
         return null;
+    }
+
+    public boolean isEditInput() {
+        int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
+        if(size > 0) {
+            return true;
+        }
+        if(this.parent != null) {
+            /**如果父采购计划是采购中，入库中才能修改**/
+            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage) &&
+                    T.StockSplit == this.type) {
+                return false;
+            } else if(T.ProcureSplit == this.type && this.stage == STAGE.IN_STORAGE) {
+                return true;
+            }
+            return this.stage != this.parent.stage;
+        }
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            return false;
+        return true;
+    }
+
+    public boolean isManualEdit() {
+        if(this.stage != STAGE.DELIVERY) {
+            return true;
+        }
+        int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
+        if(size > 0) {
+            return true;
+        }
+        return false;
     }
 
     public boolean postFBAValidate(CheckTaskDTO dto) {
@@ -1899,4 +2465,5 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(dto != null) dto.validedQtys(this.qty());
         return !Validation.hasErrors();
     }
+
 }

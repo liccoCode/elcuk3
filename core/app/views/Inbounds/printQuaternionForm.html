@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+#{stylesheet 'bootstrap.min.css'/}
+  <style>
+    body{
+      font-family:STXihei;
+    }
+  </style>
+</head>
+<body style="margin:0 0 0 0;">
+#{list items:ten.keySet().iterator(), as:'p'}
+    #{set first_o:ten.get(p).get(0) /}
+<div style="margin:0 0 0 0; height:188mm;width:100%;">
+  <table border="0" style="width:290mm;margin:0 0 0 0;">
+    <tr style="text-align:center;height:8mm;">
+      <td colspan="2" style="font-size:20px;font-weight:900;"><b>深圳品拓科技有限公司</b></td>
+    </tr>
+    <tr style="text-align:center;height:7mm;">
+      <td colspan="2" style="font-size:16px;font-weight:900;"><b>收货入库单</b></td>
+    </tr>
+    <tr style="height:5mm;">
+      <td style="width:60%;">出货单：${first_o.inbound?.plan?.id}</td>
+      <td>交货项目：${first_o.inbound?.projectName}</td>
+    </tr>
+    <tr style="height:5mm;">
+      <td>供应商名称：${first_o.inbound?.cooperator?.name}</td>
+      <td>交货时间：${first_o.inbound?.receiveDate.date()}</td>
+    </tr>
+  </table>
+  <table border="1" style="width:290mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
+         class="table table-condensed table-bordered" cellpadding="0" cellspacing="0">
+    <tr style="vertical-align:middle;">
+      <td rowspan="2" style="width:10mm;">采购计划ID</td>
+      <td rowspan="2" style="width:15mm;">采购单编号</td>
+      <td rowspan="2" style="width:20mm;">产品名称</td>
+      <td rowspan="2" style="width:20mm;">SKU</td>
+      <td rowspan="2" style="width:15mm;">FBA ID</td>
+      <td rowspan="2" style="width:15mm;">产品条码</td>
+      <td rowspan="2" style="width:10mm;">计划交<br>货数量</td>
+      <td rowspan="2" style="width:10mm;">实际交<br>货数量</td>
+      <td rowspan="2" style="width:7mm;">每箱<br>数量</td>
+      <td rowspan="2" style="width:7mm;">箱数</td>
+      <td rowspan="2" style="width:7mm;">每箱<br>重量</td>
+      <td colspan="3" style="width:8mm;">箱子规格</td>
+      <td rowspan="2" style="width:10mm;">去往国家</td>
+      <td rowspan="2" style="width:10mm;">运输方式</td>
+      <td rowspan="2" style="width:10mm;">检验数量</td>
+      <td rowspan="2" style="width:10mm;">检验结果</td>
+    </tr>
+    <tr>
+      <td style="width: 8mm;">长</td>
+      <td style="width: 8mm;">宽</td>
+      <td style="width: 8mm;">高</td>
+    </tr>
+      #{list items:ten.get(p), as:'i'}
+          #{set totalQty: i.qty + (totalQty==null ? 0 : totalQty) /}
+          #{set totalBoxNum: (i.mainBox?.boxNum==null ? 0 : i.mainBox?.boxNum) +
+          (i.lastBox?.boxNum==null ? 0 : i.lastBox?.boxNum) +
+          (totalBoxNum==null ? 0 : totalBoxNum) /}
+        <tr style="height:7mm;">
+          <td rowspan="2">${i.unit?.id}</td>
+          <td rowspan="2">${i.unit?.deliveryment?.id}</td>
+          <td rowspan="2">
+            <div style="height:10mm;overflow:hidden;">${i.unit?.product?.abbreviation}</div>
+          </td>
+          <td rowspan="2">${i.unit?.sku}</td>
+          <td rowspan="2">${i.unit?.fba?.id}</td>
+          <td rowspan="2">${i.unit?.selling?.fnSku}</td>
+          <td rowspan="2">${i.planQty}</td>
+          <td rowspan="2">${i.qty}</td>
+          <td style="font-size:9px;" height="3.5mm;">
+            <div style="height:3mm;">${i.mainBox?.num}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.boxNum}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.length}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.width}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.mainBox?.height}</div>
+          </td>
+          <td rowspan="2">${i.unit?.whouse?.name}</td>
+          <td rowspan="2">${i.unit?.shipType?.label()}</td>
+          <td rowspan="2">${i.qty}</td>
+          <td rowspan="2">${i.result?.label()}</td>
+        </tr>
+        <tr>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.num}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.length}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.width}</div>
+          </td>
+          <td style="font-size:9px;">
+            <div style="height:3mm;">${i.lastBox?.height}</div>
+          </td>
+        </tr>
+      #{/list}
+    <tr style="height:9mm;">
+      <td></td>
+      <td></td>
+      <td>合计：</td>
+      <td></td>
+      <td></td>
+      <td colspan="3">总数量：${totalQty}</td>
+      <td colspan="3">总箱数：${totalBoxNum}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+  <table border="0" style="width:290mm;margin:0 0 0 0;">
+    <tr style="height:9mm;">
+      <td width="40%;">制单：</td>
+      <td width="30%;">质检：</td>
+      <td width="30%;">入库：</td>
+    </tr>
+  </table>
+</div>
+#{/list}
+</body>
+</html>
+

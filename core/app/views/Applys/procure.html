@@ -36,7 +36,6 @@
 
 <hr style="border-top: 1px dashed;">
 
-
 #{list items:apply.deliveryments, as:'dmt'}
     #{set tr_key: key ? key : 'unit'/}
 <div class="row-fluid">
@@ -88,9 +87,7 @@
         <th>抵达货代</th>
         <th>FBA</th>
       </tr>
-
-        #{list items:dmt.units, as:'procureUnit'}
-
+        #{list items:dmt.applyUnit(), as:'procureUnit'}
             #{if procureUnit.isNeedPay}
             <tr>
             #{/if}
@@ -121,7 +118,7 @@
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
           <td class="price" amount="${procureUnit.totalAmount()}">
           ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
-          <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
+          <td style="background-color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
           <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
           <td>
               #{if procureUnit.fba}
@@ -320,14 +317,6 @@
 </div>
 #{/power.ck }
 
-
-
-
-
-
-
-
-
 #{power.ck 'procureunits.billingprepay'}
 <div class="modal hide fade" id="edit_pay">
   <form action="#" method="POST" id="edit_pay_form">
@@ -350,15 +339,6 @@
   </form>
 </div>
 #{/power.ck }
-
-
-
-
-
-
-
-
-
 
 #{render './_relate_payments.html', payments: apply.payments, showtotal:true/}
 
