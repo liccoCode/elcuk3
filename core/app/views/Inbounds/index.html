@@ -3,7 +3,6 @@
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'inbounds/index.es6'/}
-    #{script 'inbounds/edit.js'/}
 #{/set}
 <style>
   .table td{
@@ -60,7 +59,7 @@
   <form method="post" id="inboundForm">
     <div class="row-fluid">
       <div class="span12">
-        <table class="table table-condensed table-bordered">
+        <table class="table table-condensed table-bordered" id="data-table">
           <tr>
             <th style="width:15px;">
               <input type="checkbox" id="checkbox_all" class="checkall">
