@@ -635,8 +635,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * ProcureUnit 的检查
      */
     public void validate() {
-        Validation.current().valid(this);
-        Validation.current().valid(this.attrs);
         Validation.required("procureunit.selling", this.selling);
         if(this.selling != null) this.sid = this.selling.sellingId;
         Validation.required("procureunit.whouse", this.whouse);
@@ -651,6 +649,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(!this.selling.account.uniqueName.equals(this.whouse.account.uniqueName)) {
                 Validation.addError("", "procureunit.validate.whouse");
             }
+        }
+        if(this.shipType != Shipment.T.EXPRESS) {
+            Validation.required("procureunit.planShipDate", this.attrs.planShipDate);
+            Validation.required("procureunit.planArrivDate", this.attrs.planArrivDate);
         }
     }
 
@@ -702,13 +704,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(unit.attrs.planQty <= 0)
                 Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
         }
-        if(unit.selling == null) {
+        if(unit.selling == null)
             Validation.addError("", "分拆的子采购计划必须要有selling！");
-        }
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
         ProcureUnit newUnit = new ProcureUnit();
-
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
         newUnit.deliveryment = this.deliveryment;
@@ -732,12 +732,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.sid = unit.sid;
         newUnit.attrs.planQty = unit.attrs.planQty;
         newUnit.comment = unit.comment;
-        if(unit.selling == null) {
-            newUnit.manualValidate();
-        } else {
-            newUnit.validate();
-        }
-
+        newUnit.validate();
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
                 newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
@@ -829,8 +824,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
-                newUnit.whouse, newUnit.shipType);
+        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate, newUnit.whouse,
+                newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
         if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
@@ -851,10 +846,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
-        new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
-                .fid(this.id, ProcureUnit.class)
-                .save();
+        new ERecordBuilder("procureunit.split").msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
+                .fid(this.id, ProcureUnit.class).save();
         this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split);
         return newUnit;
     }
