@@ -122,4 +122,25 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         }
         return "";
     }
+
+    public void payablesReport() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT t1.id, t1.name, t1.currency,t1.a1 AS 'total', t2.a2 AS 'rtotal', t3.a3 AS 'nopayment', ");
+        sql.append(" t4.a4 AS 'payment' FROM (SELECT m.id, c.name, p.currency, ");
+        sql.append(" round(sum(p.price * IFNULL(p.qty, p.planQty)),2) AS 'a1'");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+
+    }
+
 }

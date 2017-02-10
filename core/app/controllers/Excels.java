@@ -663,6 +663,15 @@ public class Excels extends Controller {
         render(dtos, dateFormat);
     }
 
+    /**
+     * 采购应付未付报表
+     *
+     * @param p
+     */
+    public static void purchaseReport(PurchaseOrderPost p) {
+
+    }
+
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
         //最多只允许导出 2000 个订单的数据,超过了请重新给定搜索范围
