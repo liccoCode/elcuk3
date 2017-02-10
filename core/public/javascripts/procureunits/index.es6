@@ -2,7 +2,7 @@
  * Created by licco on 2016/11/14.
  */
 $(() => {
-  $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function(e) {
+  $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function (e) {
     e.stopPropagation();
     let $btn = $(this);
     if ($("input[name='pids']:checked").length == 0) {
@@ -35,7 +35,7 @@ $(() => {
     let i = 0;
     let j = 0;
     let k = 0;
-    $("input[name='pids']:checked").each(function() {
+    $("input[name='pids']:checked").each(function () {
       if ($(this).attr("project") != firstProjectName) {
         i++;
       }
@@ -84,12 +84,20 @@ $(() => {
           text: '请选择【项目名称】一致的采购计划！',
           type: 'error'
         });
+        return false;
+      }
+      if (k > 0) {
+        noty({
+          text: '请选择【运输方式】一致的采购计划！',
+          type: 'error'
+        });
+        return false;
       }
     }
 
     if ($btn.attr("id") == 'createRefundBtn') {
       i = 0;
-      $("input[name='pids']:checked").each(function() {
+      $("input[name='pids']:checked").each(function () {
         if ($(this).attr("stage") != firstStage) {
           i++;
         }

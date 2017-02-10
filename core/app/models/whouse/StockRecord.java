@@ -43,6 +43,13 @@ public class StockRecord extends Model {
     public Integer qty;
 
     /**
+     * 调整前库存
+     */
+    @Required
+    @Expose
+    public Integer currQty;
+
+    /**
      * 异动对象(SKU or 物料)
      */
     @Embedded
