@@ -54,10 +54,11 @@ public class StockRecords extends Controller {
     }
 
     public static void saveRecord(StockRecord record) {
+        ProcureUnit unit = ProcureUnit.findById(record.unit.id);
         record.type = StockRecord.T.Stocktaking;
+        record.currQty = unit.availableQty;
         record.createDate = new Date();
         record.save();
-        ProcureUnit unit = ProcureUnit.findById(record.unit.id);
         unit.availableQty += record.qty;
         unit.save();
         record.recordId = record.id;
