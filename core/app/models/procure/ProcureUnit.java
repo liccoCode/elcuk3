@@ -620,25 +620,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public String isInventory;
 
-    /***
-     * 原FBACenter信息移到采购计划身上储存
-     */
-    public String centerId;
-
-    public String addressLine1;
-
-    public String addressLine2;
-
-    public String city;
-
-    public String name;
-
-    public String countryCode;
-
-    public String stateOrProvinceCode;
-
-    public String postalCode;
-
     @PostLoad
     public void postPersist() {
         this.mainBox = JSON.parseObject(this.mainBoxInfo, CheckTaskDTO.class);
@@ -672,21 +653,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
     }
-
-    public String codeToCountry() {
-        if(StringUtils.isBlank(this.countryCode)) return "";
-        this.countryCode = this.countryCode.toUpperCase();
-        if(this.countryCode.equals("GB")) return "United Kingdom";
-        else if(this.countryCode.equals("US")) return "United States";
-        else if(this.countryCode.equals("CA")) return "Canada";
-        else if(this.countryCode.equals("CN")) return "China (Mainland)";
-        else if(this.countryCode.equals("DE")) return "Germany";
-        else if(this.countryCode.equals("FR")) return "France";
-        else if(this.countryCode.equals("IT")) return "Italy";
-        else if(this.countryCode.equals("JP")) return "Japan";
-        return "";
-    }
-
 
     /**
      * 手动单检查
@@ -858,7 +824,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand());
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
-            newUnit.sid = unit.sid;
+            newUnit.sid = unit.selling.sellingId;
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
