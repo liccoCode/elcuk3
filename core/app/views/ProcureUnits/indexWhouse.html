@@ -286,12 +286,6 @@
 
                   #{if delivery}
                     <div class="btn-toolbar">
-                        #{power.ck "procures.delivery"}
-                            #{if unit.selling}
-                              <!-- 交货页面（没有Selling不允许） -->
-                              <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
-                            #{/if}
-                        #{/power.ck}
                       <!-- 确认到货代处 -->
                         #{if unit.selling}
                             #{ifnot unit.isPlaced}
