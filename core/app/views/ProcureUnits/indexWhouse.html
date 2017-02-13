@@ -315,13 +315,11 @@
                   #{/if}
               </div>
             </div>
-              #{ifnot norecord}
-                  #{cache unit.recordsPageCacheKey(), for:'3h'}
-                    <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-                        #{records_ul  records: unit.records()/}
-                    </div>
-                  #{/cache}
-              #{/ifnot}
+              #{cache unit.recordsPageCacheKey(), for:'3h'}
+                <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                    #{records_ul  records: unit.records()/}
+                </div>
+              #{/cache}
           </td>
         </tr>
       #{/list}
