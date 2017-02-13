@@ -267,3 +267,7 @@ outboundrecord.confirm.msg=ID[%s]
 
 refund.update=\u66f4\u65b0\u005b\u9000\u8d27\u4fe1\u606f\u005d
 refund.update.msg=\u66f4\u65b0\u5165\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+refund.confirm=\u786e\u8ba4\u9000\u8d27
+refund.confirm.msg=\u9000\u8d27\u6570\u91cf[%s] \u5907\u6ce8\u8bf4\u660e %s
+refund.transfer=\u4e0d\u826f\u54c1\u8f6c\u5165
+refund.transfer.msg=\u8f6c\u5165\u6570\u91cf %s \u5907\u6ce8\u8bf4\u660e %s

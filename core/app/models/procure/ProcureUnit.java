@@ -1729,7 +1729,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
                         "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay",
-                        "procureunit.adjuststock"),
+                        "procureunit.adjuststock", "refund.confirm"),
                 50);
     }
 
