@@ -867,13 +867,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         record.type = type;
         record.recordId = unit.id;
         record.save();
-        StockRecord parent = new StockRecord();
-        parent.whouse = unit.parent == null ? null : unit.parent.currWhouse;
-        parent.unit = unit.parent;
-        parent.qty = 0 - qty;
-        parent.type = type;
-        parent.recordId = unit.parent == null ? null : unit.parent.id;
-        parent.save();
+        if(unit.parent != null) {
+            StockRecord parent = new StockRecord();
+            parent.whouse = unit.parent.currWhouse;
+            parent.unit = unit.parent;
+            parent.qty = 0 - qty;
+            parent.type = type;
+            parent.recordId = unit.parent.id;
+            parent.save();
+        }
     }
 
     /**
@@ -1726,7 +1728,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
-                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"),
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay",
+                        "procureunit.adjuststock", "refund.confirm"),
                 50);
     }
 
