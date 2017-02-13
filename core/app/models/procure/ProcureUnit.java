@@ -1093,8 +1093,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         if(logs.size() > 0)
             this.stage = STAGE.IN_STORAGE;
+        int diffQty = this.availableQty - unit.availableQty;
         logs.addAll(this.afterDoneUpdate(unit));
-        int diffQty = this.availableQty - this.originQty;
         this.originQty = this.availableQty;
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
