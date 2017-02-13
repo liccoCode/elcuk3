@@ -271,6 +271,7 @@ public class Inbound extends GenericModel {
                     ProcureUnit punit = u.unit;
                     punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
                     punit.unqualifiedQty += u.unqualifiedQty;
+                    punit.currWhouse = u.target;
                     if(punit.attrs.qty == 0) {
                         punit.stage = ProcureUnit.STAGE.DELIVERY;
                         punit.result = u.result;
@@ -300,7 +301,6 @@ public class Inbound extends GenericModel {
                 punit.outQty = punit.availableQty;
                 punit.mainBoxInfo = u.mainBoxInfo;
                 punit.lastBoxInfo = u.lastBoxInfo;
-                punit.currWhouse = u.target;
                 punit.currWhouse = u.target;
                 punit.save();
                 this.createStockRecord(u);
