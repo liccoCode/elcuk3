@@ -306,7 +306,7 @@ public class Refund extends GenericModel {
         u.qty = qty;
         u.save();
         createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
-        new ERecordBuilder("refund.confirm").msgArgs(u.qty).fid(unitId).save();
+        new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unitId).save();
     }
 
     /**
