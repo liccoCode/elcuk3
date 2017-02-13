@@ -159,7 +159,7 @@
 #{if unit.stage.name()=='IN_STORAGE'}
   <th>当前仓库</th>
   <td colspan="3">
-    <select readonly="readonly" id="curr_warehouse_select" name="unit.currWhouse.id">
+    <select id="curr_warehouse_select" name="unit.currWhouse.id" disabled>
         #{list items:currWhouses, as:'w'}
           <option value="${w.id}" #{if w.id==unit.currWhouse?.id} selected #{/if}>${w.name}</option>
         #{/list}

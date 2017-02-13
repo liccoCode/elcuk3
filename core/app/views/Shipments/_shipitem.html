@@ -18,12 +18,12 @@
     <th>采购计划</th>
     <th>阶段</th>
     <th>Sku</th>
-    <th>Selling</th>
+    <th width="100px;">Selling</th>
   #{if useCheckbox}
     <th>FBA</th>
     <th>CenterId</th>
   #{/if}
-    <th><abbr rel='tooltip' title='运输数量 (计划数量 | 交货数量)'>Qty</abbr></th>
+    <th><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
     <th>Receive</th>
     <th>Qty1</th>
     <th>采购单</th>
@@ -86,8 +86,7 @@
         <td>${itm.unit.fba?.centerId}</td>
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
-    ${itm.unit.availableQty}
-      (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
+      ${itm.unit.attrs.planQty}/${itm.unit.attrs.qty}/${itm.unit.availableQty == 0 ? itm.unit.outQty : itm.unit.availableQty}
     </td>
       #{if itmRecord}
         <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
