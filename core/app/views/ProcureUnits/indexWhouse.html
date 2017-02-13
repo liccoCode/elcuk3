@@ -282,6 +282,7 @@
                           <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">库存分拆</a>
                         #{/if}
                     #{/power.ck}
+                  <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
                 </div>
 
                   #{if delivery}
@@ -314,13 +315,11 @@
                   #{/if}
               </div>
             </div>
-              #{ifnot norecord}
-                  #{cache unit.recordsPageCacheKey(), for:'3h'}
-                    <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-                        #{records_ul  records: unit.records()/}
-                    </div>
-                  #{/cache}
-              #{/ifnot}
+              #{cache unit.recordsPageCacheKey(), for:'3h'}
+                <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                    #{records_ul  records: unit.records()/}
+                </div>
+              #{/cache}
           </td>
         </tr>
       #{/list}
