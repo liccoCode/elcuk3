@@ -80,7 +80,7 @@ public class ProcureUnits extends Controller {
         List<ElcukRecord> logs = ElcukRecord.records(id.toString(),
                 Arrays.asList("procureunit.update", "procureunit.deepUpdate",
                         "procureunit.delivery", "procureunit.revertdelivery", "procureunit.prepay",
-                        "procureunit.tailpay", "procureunit.reworkpay"), 50);
+                        "procureunit.tailpay", "procureunit.reworkpay", "procureunit.adjuststock"), 50);
         renderArgs.put("logs", logs);
     }
 
