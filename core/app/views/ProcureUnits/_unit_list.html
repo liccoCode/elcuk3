@@ -259,13 +259,6 @@
 
             #{if delivery}
               <div class="btn-toolbar">
-                  #{power.ck "procures.dosplitunit"}
-                    <!-- 分拆采购单元 -->
-                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
-                       rel='tooltip' title='因工厂延期交货而分拆'>
-                      分拆
-                    </a>
-                  #{/power.ck}
                 <!-- 确认到    货代处 -->
                   #{if unit.selling}
                       #{ifnot unit.isPlaced}
