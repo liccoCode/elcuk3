@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import models.ElcukRecord;
+import models.embedded.ERecordBuilder;
 import models.procure.ProcureUnit;
 import models.view.post.StockPost;
 import models.view.post.StockRecordPost;
@@ -65,6 +67,10 @@ public class StockRecords extends Controller {
         record.whouse = unit.currWhouse;
         record.save();
         flash.success("调整库存成功");
+        new ERecordBuilder("procureunit.adjuststock")
+                .msgArgs(record.qty, unit.availableQty -= record.qty, unit.availableQty)
+                .fid(unit.id, ProcureUnit.class)
+                .save();
         index(new StockRecordPost());
     }
 
