@@ -76,7 +76,9 @@
   <div class="span9">
     <table class="table table-bordered table-condensed">
       <tr>
-        <th><input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall"></th>
+        <th width="15px;">
+          <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key}checkall">
+        </th>
         <th>#</th>
         <th>SKU</th>
         <th>Selling</th>
@@ -101,6 +103,9 @@
           </td>
           <td data-toggle="toggle" data-target="#unit_${pid}">
             <i class="icon-reorder"></i>
+              #{if procureUnit.parent}
+                <i class="icon-retweet" style="color:${procureUnit.type.name()=='ProcureSplit'?'blue':'orange'}"></i>
+              #{/if}
           ${procureUnit.id}
           </td>
           <td>

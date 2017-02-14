@@ -144,7 +144,9 @@
                      shipType="${unit.shipType?.name()}"></td>
           <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
             <i class="icon-reorder"></i>
-              #{if unit.parent}<i class="icon-retweet" title="拆" style="color:red"></i> #{/if}<br>
+              #{if unit.parent}
+                <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"></i>
+              #{/if}<br>
           ${unit.id}
           </td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
