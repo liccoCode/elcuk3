@@ -154,7 +154,7 @@ public class Inbounds extends Controller {
             bound.save();
         } else {
             flash.error("此单已经完成收货操作!");
-            edit(inbound.id);
+            edit(inboundId);
         }
         bound.confirmReceive(dtos);
         flash.success("收货成功!");
