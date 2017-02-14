@@ -38,7 +38,6 @@ public class Inbound extends GenericModel {
     /**
      * 名称
      */
-    @Required
     public String name;
 
     /**

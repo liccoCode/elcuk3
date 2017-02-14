@@ -74,7 +74,8 @@ public class Inbounds extends Controller {
         } else {
             it = Inbound.T.Machining;
         }
-        render(units, proUnit, planId, it);
+        String username = Login.current().username;
+        render(units, proUnit, planId, it, username);
     }
 
     public static void create(Inbound inbound, List<InboundUnit> dtos) {
@@ -154,7 +155,7 @@ public class Inbounds extends Controller {
             bound.save();
         } else {
             flash.error("此单已经完成收货操作!");
-            edit(inbound.id);
+            edit(inboundId);
         }
         bound.confirmReceive(dtos);
         flash.success("收货成功!");

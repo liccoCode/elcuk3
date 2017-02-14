@@ -12,7 +12,7 @@ $(() => {
         if (!r.flag) {
           alert(r.message);
         } else {
-          $("#unit_currency option:contains(" + r.currency + ")").prop('selected', true);
+          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
           $("#unit_price").val(r.price);
           $("#box_num").attr("boxSize", r.boxSize);
           calu_box_size();

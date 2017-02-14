@@ -20,7 +20,6 @@
     <th width="120px;">FBA-ShipmentId<br>CenterId</th>
     <th>采购单<br>供应商</th>
     <th>去往市场</th>
-    <th width="60px;">初始计划数</th>
     <th width="100px;">数量<br>(计划/交货/入库)</th>
   #{ifnot deliveryplan}
     <th>单价</th>
@@ -137,7 +136,6 @@
       <br>${unit.cooperator?.name}
     </td>
     <td>${unit.whouse?.name()}</td>
-    <td>${unit.originQty}</td>
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
     </td>
@@ -183,7 +181,7 @@
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '24' : '22'}">
+    <td colspan="${checkbox ? '23' : '21'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
