@@ -145,7 +145,8 @@
           <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
             <i class="icon-reorder"></i>
               #{if unit.parent}
-                <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"></i>
+                <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"
+                   rel="tooltip" title="${unit.type?.label()}"></i>
               #{/if}<br>
           ${unit.id}
           </td>
