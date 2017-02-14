@@ -274,19 +274,15 @@ public class Deliveryment extends GenericModel {
      * 取消采购单
      */
     public void cancel(String msg) {
-        /**
-         * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
-         */
-        for(ProcureUnit unit : this.units) {
-            //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
-            //    Validation.addError("deliveryment.units.cancel", "validation.required");
-            //   else
-            unit.toggleAssignTodeliveryment(null, false);
+        // 只允许所有都是 units 都为 采购中 的才能够取消.
+        if(this.units.stream().anyMatch(unit -> unit.stage != ProcureUnit.STAGE.DELIVERY)) {
+            Validation.addError("", "采购计划必须全部都是采购中的才能取消采购单！");
+            return;
         }
+        this.units.forEach(unit -> unit.toggleAssignTodeliveryment(null, false));
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
         this.save();
-
         new ElcukRecord(Messages.get("deliveryment.cancel"),
                 Messages.get("deliveryment.cancel.msg", this.id, msg.trim()), this.id).save();
     }

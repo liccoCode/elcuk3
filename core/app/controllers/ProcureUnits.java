@@ -327,10 +327,13 @@ public class ProcureUnits extends Controller {
     }
 
     /**
-     * TODO effect: 需要调整的采购计划的修改
+     * 采购计划修改
      *
      * @param id
      * @param oldPlanQty
+     * @param unit
+     * @param shipmentId
+     * @param msg
      */
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId, String msg) {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
@@ -341,15 +344,14 @@ public class ProcureUnits extends Controller {
         }
         if(Validation.hasErrors()) {
             flash.error(Validation.errors().toString());
-            unit.id = managedUnit.id;
+            unit = ProcureUnit.findById(id);
             List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
-            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses, msg);
+            List<Whouse> currWhouses = Whouse.findByType(Whouse.T.SELF);
+            render("ProcureUnits/edit.html", unit, oldPlanQty, whouses, currWhouses, msg);
         }
         flash.success("成功修改采购计划!", id);
         edit(id);
-
     }
-
 
     /**
      * @param unitid
@@ -406,8 +408,7 @@ public class ProcureUnits extends Controller {
         renderArgs.put("skus", J.json(skusToJson._2));
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
-        Date date = new Date();
-        boolean showNotice = date.getTime() >= unit.attrs.planDeliveryDate.getTime();
+        boolean showNotice = new Date().getTime() >= unit.attrs.planDeliveryDate.getTime();
         render(unit, newUnit, showNotice, type);
     }
 
@@ -430,7 +431,9 @@ public class ProcureUnits extends Controller {
         }
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
-            render("ProcureUnits/splitUnit.html", unit, newUnit, whouses);
+            boolean showNotice = new Date().getTime() >= unit.attrs.planDeliveryDate.getTime();
+            render(unit, newUnit, showNotice, type);
+            render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
         Deliveryments.show(unit.deliveryment.id);
