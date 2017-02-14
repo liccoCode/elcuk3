@@ -391,7 +391,7 @@ public class ProcureUnits extends Controller {
      *
      * @param id
      */
-    public static void splitUnit(long id) {
+    public static void splitUnit(long id, boolean type) {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(StringUtils.isNotEmpty(ProcureUnit.validRefund(unit))) {
             renderText(ProcureUnit.validRefund(unit));
@@ -407,8 +407,8 @@ public class ProcureUnits extends Controller {
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         Date date = new Date();
-        boolean showNotice = date.getTime() >= unit.attrs.planDeliveryDate.getTime() ? true : false;
-        render(unit, newUnit, showNotice);
+        boolean showNotice = date.getTime() >= unit.attrs.planDeliveryDate.getTime();
+        render(unit, newUnit, showNotice, type);
     }
 
     /**
@@ -418,15 +418,15 @@ public class ProcureUnits extends Controller {
      * @param newUnit
      */
     @Check("procures.dosplitunit")
-    public static void doSplitUnit(long id, ProcureUnit newUnit) {
+    public static void doSplitUnit(long id, ProcureUnit newUnit, boolean type) {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
         ProcureUnit nUnit;
         if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
-            nUnit = unit.split(newUnit);
+            nUnit = unit.split(newUnit, type);
         } else {
-            nUnit = unit.stockSplit(newUnit);
+            nUnit = unit.stockSplit(newUnit, type);
         }
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);

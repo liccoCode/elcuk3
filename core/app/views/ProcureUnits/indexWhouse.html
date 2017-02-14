@@ -277,13 +277,10 @@
               <div class="span3">
                 <div class="btn-toolbar">
                     #{power.ck "procures.dosplitunit"}
-                      <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
-                        #{if unit.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
-                          <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">采购分拆</a>
-                        #{/if}
-                        #{if unit.stage == models.procure.ProcureUnit.STAGE.IN_STORAGE}
-                          <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning">库存分拆</a>
-                        #{/if}
+                      #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
+                        <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
+                        ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
+                      #{/if}
                     #{/power.ck}
                   <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
                 </div>
