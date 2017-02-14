@@ -76,7 +76,11 @@
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-      <i class="icon-reorder"></i>#{if unit.parent} <i class="icon-retweet" title="拆" style="color:red"></i>#{/if}<br>
+      <i class="icon-reorder"></i>
+        #{if unit.parent}
+          <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"
+             rel="tooltip" title="${unit.type?.label()}"></i>
+        #{/if}<br>
     ${unit.id}
     </td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
@@ -240,6 +244,8 @@
               #{/if}
               #{else }
                 <a href="@{ProcureUnits.editManual(unit.id)}" target="_blank" class="btn btn-small btn-primary">修改</a>
+                <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-small" rel="tooltip"
+                   title="如样品，试用等操作">SKU分拆</a>
               #{/else}
               #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
                 <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-small btn-danger">
@@ -248,11 +254,9 @@
               #{/if}
               #{power.ck "procures.dosplitunit"}
                 <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
-                  #{if unit.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
-                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning" target="_blank">采购分拆</a>
-                  #{/if}
-                  #{if unit.stage == models.procure.ProcureUnit.STAGE.IN_STORAGE}
-                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-warning" target="_blank">库存分拆</a>
+                  #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
+                    <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
+                    ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
                   #{/if}
               #{/power.ck}
           </div>

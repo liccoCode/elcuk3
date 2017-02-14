@@ -104,8 +104,13 @@
   <div class="span12">
     <form action="@{ProcureUnits.doSplitUnit(unit.id)}" method="POST" id="splitUnitForm">
         #{authenticityToken /}
-      <table class="table ta table-bordered" >
-          #{include 'ProcureUnits/_splitOnSelling.html'/}
+      <table class="table ta table-bordered">
+      #{if type}
+        #{include 'ProcureUnits/_splitOnSelling.html'/}
+      #{/if}
+      #{else }
+        #{include 'ProcureUnits/_splitOnNoSelling.html'/}
+      #{/else}
         <tr>
           <td colspan="6">
             <h4>Comment</h4>
@@ -124,6 +129,7 @@
           </td>
         </tr>
       </table>
+      <input type="hidden" name="type" value="${type}">
     </form>
   </div>
 </div>

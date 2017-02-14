@@ -76,7 +76,9 @@
   <div class="span9">
     <table class="table table-bordered table-condensed">
       <tr>
-        <th><input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall"></th>
+        <th width="15px;">
+          <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key}checkall">
+        </th>
         <th>#</th>
         <th>SKU</th>
         <th>Selling</th>
@@ -86,6 +88,7 @@
         <th>阶段</th>
         <th>抵达货代</th>
         <th>FBA</th>
+        <th>Detail</th>
       </tr>
         #{list items:dmt.applyUnit(), as:'procureUnit'}
             #{if procureUnit.isNeedPay}
@@ -101,6 +104,10 @@
           </td>
           <td data-toggle="toggle" data-target="#unit_${pid}">
             <i class="icon-reorder"></i>
+              #{if procureUnit.parent}
+                <i class="icon-retweet" style="color:${procureUnit.type.name()=='ProcureSplit'?'blue':'orange'}"
+                   rel="tooltip" title="${procureUnit.type?.label()}"></i>
+              #{/if}
           ${procureUnit.id}
           </td>
           <td>
@@ -128,9 +135,12 @@
                 暂时还没有 FBA
               #{/else}
           </td>
+          <td>
+            <a href="@{ProcureUnits.detail(procureUnit.id)}#${procureUnit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
+          </td>
         </tr>
           <tr id="unit_${pid}" style="display:none">
-            <td colspan="9">
+            <td colspan="11">
               <div class="row-fluid">
                 <div class="span2">
                     #{if procureUnit.isNeedPay}
@@ -172,7 +182,6 @@
                           #{/else}
                       </div>
                     #{/power.ck}
-
                 </div>
                 <div class="span10">
                     #{if procureUnit.fees().size() > 0}
@@ -263,7 +272,7 @@
         <td rel='tooltip' title='汇总美金' class="usd"></td>
         <td rel='tooltip' title="汇总人民币" class="cny"></td>
         <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
-        <td colspan="2"></td>
+        <td colspan="3"></td>
       </tr>
     </table>
   </div>
