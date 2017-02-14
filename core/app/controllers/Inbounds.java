@@ -74,7 +74,8 @@ public class Inbounds extends Controller {
         } else {
             it = Inbound.T.Machining;
         }
-        render(units, proUnit, planId, it);
+        String username = Login.current().username;
+        render(units, proUnit, planId, it, username);
     }
 
     public static void create(Inbound inbound, List<InboundUnit> dtos) {
