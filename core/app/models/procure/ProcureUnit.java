@@ -1014,6 +1014,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
             logs.addAll(this.beforeDoneUpdate(unit));
+            this.sid = unit.selling.sellingId;
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
