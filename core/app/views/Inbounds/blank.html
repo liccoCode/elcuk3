@@ -35,8 +35,9 @@
         </td>
       </tr>
       <tr>
-        <th>收货入库单名称<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="inbound.name" required></td>
+        <th>收货入库单名称</th>
+        <td><input type="text" class="span8" name="inbound.name"
+                   value="${proUnit.cooperator.name}_${it.label()}_${new Date().date()}_${username}"></td>
         <th>收货类型</th>
         <td>
           <input type="text" value="${it.label()}" readonly>

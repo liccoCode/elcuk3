@@ -81,9 +81,11 @@
     <th>价格</th>
     <td>
       <input type="text" class="span1 inline" id="unit_price" name="units[<%= num %>].attrs.price">
-    #{pickCurrency name:'units[0].attrs.currency',class: 'span1 inline',
-    c:units[0]?.attrs?.currency?:helper.Currency.CNY, native: 'aaa'/}
-    </td>
+      <select name="units[<%= num %>].attrs.currency" class="span1">
+        #{list items:helper.Currency.values(), as:'cr'}
+          <option ${cr == 'CNY' ? 'selected' : ''} value="${cr}">${cr}</option>
+        #{/list}
+      </select>
   </tr>
   <tr>
     <th>采购数量</th>
