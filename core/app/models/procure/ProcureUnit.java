@@ -1014,7 +1014,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
             logs.addAll(this.beforeDoneUpdate(unit));
-            this.sid = unit.selling.sellingId;
+            this.sid = unit.selling != null ? unit.selling.sellingId : null;
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
@@ -1102,6 +1102,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
         this.inboundQty = this.availableQty;
+        this.sid = unit.selling != null ? unit.selling.sellingId : null;
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
                     this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
