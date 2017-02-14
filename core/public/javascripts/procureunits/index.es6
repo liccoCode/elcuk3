@@ -120,5 +120,17 @@ $(() => {
     includeSelectAllOption: true
   });
 
+  $(".btn:contains(搜索)").click(function (e) {
+    e.preventDefault();
+    $("#type").val("");
+    $("#search_Form").submit();
+  });
+
+  $("button[name='splitBtn']").click(function (e) {
+    e.preventDefault();
+    $("#type").val($(this).text() == '采购分拆' ? 'ProcureSplit' : 'StockSplit');
+    $("#search_Form").submit();
+  });
+
 });
 
