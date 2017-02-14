@@ -108,9 +108,15 @@
               同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
         </div>
 
+        <div class="input-prepend input-append inline">
+          <button class="btn btn-info" name="splitBtn" data-loading>采购分拆</button>
+          <button class="btn btn-warning" name="splitBtn" data-loading>库存分拆</button>
+          <input type="hidden" name="p.type" value="${p.type}" id="type">
+        </div>
+
         <div class="inline">
           <input type="hidden" name="p.unitIds" id="unitIds"/>
-          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+          <a target="_blank" class="btn btn-inverse inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
             <i class="icon-download-alt"></i>下载ZIP
           </a>
           <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>

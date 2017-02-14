@@ -163,6 +163,15 @@ public class ProcureUnits extends Controller {
         ProcureUnits.index(p);
     }
 
+    /**
+     *
+     */
+    public static void splitIndex(ProcurePost p) {
+
+
+
+    }
+
 
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
