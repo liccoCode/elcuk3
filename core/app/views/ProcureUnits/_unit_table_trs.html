@@ -105,7 +105,8 @@
 <tr>
   <th>去往仓库</th>
   <td>
-    <select name="unit.whouse.id" id="warehouse_select">
+    <select name="unit.whouse.id" id="warehouse_select" data-origin="${unit.whouse?.id}"
+    #{if unit.stage.name()=='DONE'} disabled #{/if}>
     #{list items:whouses, as:'w'}
       <option value="${w.id}" #{if w.id==unit.whouse?.id} selected #{/if}>${w.name}</option>
     #{/list}
@@ -128,7 +129,8 @@
   <td>
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
-      <input type="radio" name="unit.shipType" value="${t.name()}" ${t == unit.shipType ? 'checked': 'unchecked'}>
+      <input type="radio" name="unit.shipType" value="${t.name()}" ${t == unit.shipType ? 'checked': 'unchecked'}
+          #{if unit.stage.name()=='DONE'} disabled #{/if}>
     ${t.label()}
     </label>
   #{/list}

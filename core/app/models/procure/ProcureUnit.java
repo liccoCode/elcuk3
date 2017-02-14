@@ -1002,7 +1002,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
             Shipment shipment = Shipment.findById(shipmentId);
-            if(!shipment.type.name().equals(unit.shipType.name())) {
+            if(this.stage != STAGE.DONE && !shipment.type.name().equals(unit.shipType.name())) {
                 Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
             }
         }

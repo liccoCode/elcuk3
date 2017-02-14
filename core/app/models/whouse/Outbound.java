@@ -220,7 +220,6 @@ public class Outbound extends GenericModel {
         pids.stream().filter(id -> id != null).forEach(id -> {
             ProcureUnit unit = ProcureUnit.findById(id);
             unit.outbound = this;
-            unit.outQty = unit.availableQty;
             unit.save();
         });
     }
