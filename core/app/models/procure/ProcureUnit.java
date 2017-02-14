@@ -1148,13 +1148,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 修改手动单数据
      */
-    public void updateManualData(ProcureUnit unit) {
+    public void updateManualData(ProcureUnit unit, int diff) {
         this.attrs.price = unit.attrs.price;
         this.attrs.planQty = unit.attrs.planQty;
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        if(this.parent != null) {
+            this.parent.attrs.planQty += diff;
+            this.parent.originQty += diff;
+            this.parent.save();
+        }
     }
 
     public void noty(String sku, String content) {

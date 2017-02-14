@@ -628,7 +628,11 @@ public class ProcureUnits extends Controller {
      */
     public static void updateManual(Long id, ProcureUnit unit) {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        managedUnit.updateManualData(unit);
+        int diff = 0;
+        if(managedUnit.stage.name().equals("DELIVERY")) {
+            diff = managedUnit.attrs.planQty - unit.attrs.planQty;
+        }
+        managedUnit.updateManualData(unit, diff);
         managedUnit.validateManual();
         if(Validation.hasErrors()) {
             render("ProcureUnits/editManualProcureUnit.html", unit);
