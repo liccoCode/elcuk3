@@ -1479,6 +1479,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return qty;
     }
 
+    public int shipmentQty() {
+        if(this.stage == STAGE.IN_STORAGE) {
+            return availableQty;
+        } else if(Arrays.asList("OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE").contains(this.stage.name())) {
+            return outQty;
+        } else {
+            return qty();
+        }
+    }
+
     /**
      * 入库中的数量
      *
