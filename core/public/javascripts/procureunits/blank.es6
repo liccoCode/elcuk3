@@ -1,14 +1,14 @@
 $(() => {
 
   //切换供应商, 自行寻找价格
-  $("select[name='unit.cooperator.id']").change(function() {
+  $("select[name='unit.cooperator.id']").change(function () {
     let id = $(this).val();
     if (id) {
       LoadMask.mask();
       $.post('/Cooperators/price', {
         id: id,
         sku: $('#unit_sku').val()
-      }, function(r) {
+      }, function (r) {
         if (r.flag) {
           $("#unit_currency option:contains('#{r.currency}')").prop('selected', true);
           $("#unit_price").val(r.price);
@@ -42,13 +42,13 @@ $(() => {
       planShipDate: planShipDate,
       shipType: shipType,
       warehouseid
-    }, function(r) {
+    }, function (r) {
       $("[name='unit.attrs.planArrivDate']").val(r['arrivedate']);
       showDay();
     });
   });
 
-  $("#planQty,#availableQty").change(function() {
+  $("#planQty,#availableQty").change(function () {
     if ($(this).val() < 0) {
       noty({
         text: "修改数值不能小于0",
@@ -65,7 +65,7 @@ $(() => {
     }
   });
 
-  $('#box_num').change(function(e) {
+  $('#box_num').change(function (e) {
     e.preventDefault()
     let coperId = $("select[name='unit.cooperator.id']").val();
     if (coperId) {
@@ -73,7 +73,7 @@ $(() => {
         size: $('#box_num').val(),
         coperId: coperId,
         sku: $('#unit_sku').val()
-      }, function(r) {
+      }, function (r) {
         if (r.flag) {
           $("input[name='unit.attrs.planQty']").val(r['message']);
         }
@@ -90,14 +90,14 @@ $(() => {
     }
   });
 
-  $("#warehouse_select").change(function() {
+  $("#warehouse_select").change(function () {
     if ($(this).val()) {
       let country = $("#warehouse_select :selected").text().split('_')[1];
       let sku = $("#unit_sku").val();
       $.get("/sellings/findSellingBySkuAndMarket", {
         sku: sku,
         market: "AMAZON_" + country
-      }, function(c) {
+      }, function (c) {
         $("#sellingId").val(c);
         if (!$("#sellingId").val()) {
           noty({
@@ -118,12 +118,12 @@ $(() => {
     $.get("/whouses/autoMatching", {
       country: country,
       shipType: shipType
-    }, function(r) {
-       $('#curr_warehouse_select').find("option[value="+r.id+"]").prop("selected",true);
+    }, function (r) {
+      $('#curr_warehouse_select').find("option[value=" + r.id + "]").prop("selected", true);
     })
   }
 
-  $("input[name='unit.shipType']").change(function() {
+  $("input[name='unit.shipType']").change(function () {
     let planDeliveryDate = $("input[name='unit.attrs.planDeliveryDate']").val();
     let whouseId = $("[name='unit.whouse.id']").val();
     if (planDeliveryDate && whouseId) {
@@ -154,11 +154,11 @@ $(() => {
       whouseId: whouseId,
       shipType: shipType,
       planDeliveryDate: planDeliveryDate
-    }, function(html) {
+    }, function (html) {
       shipment.html(html);
       LoadMask.unmask();
       if ($("#shipmentId").val()) {
-        $("#shipments input[type='radio']").each(function() {
+        $("#shipments input[type='radio']").each(function () {
           if ($(this).val() == $("#shipmentId").val()) {
             $(this).prop("checked", true);
             showTrColor();
@@ -178,22 +178,22 @@ $(() => {
       planShipDate: planShipDate,
       shipType: shipType,
       warehouseid: whouseId
-    }, function(r) {
+    }, function (r) {
       $("[name='unit.attrs.planArrivDate']").val(r['arrivedate']);
     });
   }
 
-  $("#new_procure_unit [name='unit.product.sku']").on('change', function(e) {
+  $("#new_procure_unit [name='unit.product.sku']").on('change', function (e) {
     let $cooperators = $("select[name='unit.cooperator.id']")
     // 当输入的 sku 长度大于5才发起 Ajax 请求获取供应商列表
     if ($(this).val().length > 5) {
       LoadMask.mask();
       // Ajax 加载供应商列表
-      $.post('/products/cooperators', {sku: this.value}, function(r) {
+      $.post('/products/cooperators', {sku: this.value}, function (r) {
         alert(r);
         $cooperators.empty();
         $cooperators.append("<option value=''>请选择</option>");
-        r.forEach(function(value) {
+        r.forEach(function (value) {
           $cooperators.append("<option value='#{value.id}'>value.name</option>");
           LoadMask.unmask();
         });
@@ -201,10 +201,10 @@ $(() => {
     }
   });
 
-  $('#shipments').on('change', '[name=shipmentId]', function() {
+  $('#shipments').on('change', '[name=shipmentId]', function () {
     LoadMask.mask();
     let shipmentId = $(this).val();
-    $.get("/shipment/" + shipmentId + "/dates", "", function(r) {
+    $.get("/shipment/" + shipmentId + "/dates", "", function (r) {
       $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin']);
       $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end']);
       LoadMask.unmask();
@@ -213,7 +213,7 @@ $(() => {
   });
 
   function showTrColor () {
-    $("#shipments input[type='radio']").each(function() {
+    $("#shipments input[type='radio']").each(function () {
       if ($(this).prop("checked")) {
         $(this).parent("td").parent("tr").attr("style", "background-color:#F2DEDE;");
       } else {
@@ -222,7 +222,7 @@ $(() => {
     });
   }
 
-  $("#create_unit").click(function(e) {
+  $("#create_unit").click(function (e) {
     e.preventDefault();
     if ($("#planQty").val() && $("input[name='unit.attrs.planDeliveryDate']").val()) {
       $("#new_procure_unit").submit();
@@ -245,7 +245,7 @@ $(() => {
       planShipDate: planShipDate,
       shipType: shipType,
       warehouseid: warehouseid
-    }, function(r) {
+    }, function (r) {
       $("[name='unit.attrs.planArrivDate']").val(r['arrivedate']);
     });
   });
@@ -270,5 +270,12 @@ $(() => {
     EF.scoll(targetTr)
     EF.colorAnimate(targetTr)
   }
+
+  $(document).ready(function () {
+    let $shipType = $("[name='unit.shipType']");
+    if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS') {
+      getShipmentList();
+    }
+  });
 
 });

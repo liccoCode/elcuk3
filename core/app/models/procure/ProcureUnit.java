@@ -1002,7 +1002,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
             Shipment shipment = Shipment.findById(shipmentId);
-            if(!shipment.type.name().equals(unit.shipType.name())) {
+            if(this.stage != STAGE.DONE && !shipment.type.name().equals(unit.shipType.name())) {
                 Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
             }
         }
@@ -1017,7 +1017,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
             logs.addAll(this.beforeDoneUpdate(unit));
-            this.sid = unit.selling != null ? unit.selling.sellingId : null;
+            if(unit.selling != null) {
+                this.sid = unit.selling.sellingId;
+                this.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand());
+            }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
         }
@@ -1105,7 +1108,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planQty = this.availableQty;
         this.attrs.qty = this.availableQty;
         this.inboundQty = this.availableQty;
-        this.sid = unit.selling != null ? unit.selling.sellingId : null;
+        if(unit.selling != null) {
+            this.sid = unit.selling.sellingId;
+            this.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand());
+        }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
                     this.generateProcureUnitStatusInfo()).fid(this.id, ProcureUnit.class).save();
@@ -1142,13 +1148,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 修改手动单数据
      */
-    public void updateManualData(ProcureUnit unit) {
+    public void updateManualData(ProcureUnit unit, int diff) {
         this.attrs.price = unit.attrs.price;
         this.attrs.planQty = unit.attrs.planQty;
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        if(this.parent != null) {
+            this.parent.attrs.planQty += diff;
+            this.parent.originQty += diff;
+            this.parent.save();
+        }
     }
 
     public void noty(String sku, String content) {
@@ -1466,6 +1477,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int qty = this.qty() - this.fetchCheckTaskQcSample();
         if(purchaseSample != null) qty -= purchaseSample;
         return qty;
+    }
+
+    public int shipmentQty() {
+        if(this.stage == STAGE.IN_STORAGE) {
+            return availableQty;
+        } else if(Arrays.asList("OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE").contains(this.stage.name())) {
+            return outQty;
+        } else {
+            return qty();
+        }
     }
 
     /**

@@ -118,6 +118,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     public String projectName;
     public ProcureUnit.OST isOut;
     public C isConfirm;
+    public ProcureUnit.T type;
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -204,6 +205,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(StringUtils.isNotEmpty(this.projectName)) {
             sbd.append(" AND projectName=? ");
             params.add(this.projectName);
+        }
+
+        if(type != null) {
+            sbd.append(" AND type = ? ");
+            params.add(this.type);
         }
 
         if(this.isPlaced != null) {
