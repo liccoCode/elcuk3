@@ -73,7 +73,9 @@ $(() => {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
     let id = $(this).data("id");
-    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id});
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id}, function () {
+      $.getScript('/public/javascripts/inbounds/boxInfo.js');
+    });
   });
 
   $("#submitBoxInfoBtn").click(function (e) {

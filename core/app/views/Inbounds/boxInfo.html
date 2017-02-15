@@ -1,4 +1,4 @@
-#{info_row }总共数量为 ${unit.unit.shipmentQty()}#{/info_row}
+#{info_row }总共数量为 ${totalQty}#{/info_row}
 <table class="table table-bordered table-condensed" id="box_info_table" width="1000px;">
   <tr>
     <th colspan="6" style="text-align:center">主箱</th>
@@ -44,5 +44,5 @@
   </tr>
 </table>
 
-<input type="hidden" id="totalQty" value="${unit.unit.shipmentQty()}">
+<input type="hidden" id="totalQty" value="${totalQty}">
 
