@@ -52,7 +52,7 @@
     <td>${unit.outQty}</td>
     <td>
       <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
-        #{if unit.mainBox == null || unit.mainBox.num==0}
+        #{if !unit.validBoxInfoIsComplete()}
           <i class="icon-remove" style="color:red"></i>
         #{/if}
         #{else }
