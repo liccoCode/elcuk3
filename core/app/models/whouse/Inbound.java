@@ -297,7 +297,6 @@ public class Inbound extends GenericModel {
                     punit.unqualifiedQty += u.unqualifiedQty;
                     punit.availableQty = u.inboundQty;
                 }
-                punit.outQty = punit.availableQty;
                 punit.mainBoxInfo = u.mainBoxInfo;
                 punit.lastBoxInfo = u.lastBoxInfo;
                 punit.currWhouse = u.target;
