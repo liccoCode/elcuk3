@@ -28,7 +28,7 @@ $(() => {
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + format_id).load("/Inbounds/showProcureUnitList", {id: id}, function () {
-        $.getScript('../public/javascripts/inbounds/edit.js')
+        $.getScript('../public/javascripts/inbounds/edit.js');
       });
     }
   });

@@ -1,7 +1,8 @@
+#{info_row }总共数量为 ${totalQty}#{/info_row}
 <table class="table table-bordered table-condensed" id="box_info_table" width="1000px;">
   <tr>
-    <th colspan="6">主箱</th>
-    <th colspan="6">尾箱</th>
+    <th colspan="6" style="text-align:center">主箱</th>
+    <th colspan="6" style="text-align:center">尾箱</th>
   </tr>
   <tr>
     <td>每箱数量</td>
@@ -38,5 +39,10 @@
     <td><input type='text' style='width: 30px;' name='unit.lastBox.width' value='${unit.lastBox?.width}'/></td>
     <td><input type='text' style='width: 30px;' name='unit.lastBox.height' value='${unit.lastBox?.height}'/></td>
   </tr>
+  <tr id="noticeTr" style="display:none;">
+    <td colspan="12" style="color:red"></td>
+  </tr>
 </table>
+
+<input type="hidden" id="totalQty" value="${totalQty}">
 

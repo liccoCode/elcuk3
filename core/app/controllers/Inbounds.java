@@ -184,8 +184,8 @@ public class Inbounds extends Controller {
 
     public static void refreshFbaCartonContentsByIds(String id) {
         InboundUnit unit = InboundUnit.findById(Long.parseLong(id));
-
-        render("/Inbounds/boxInfo.html", unit);
+        int totalQty = unit.unit.shipmentQty();
+        render("/Inbounds/boxInfo.html", unit, totalQty);
     }
 
     public static void updateBoxInfo(InboundUnit unit) {

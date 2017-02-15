@@ -163,16 +163,6 @@ public class ProcureUnits extends Controller {
         ProcureUnits.index(p);
     }
 
-    /**
-     *
-     */
-    public static void splitIndex(ProcurePost p) {
-
-
-
-    }
-
-
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
@@ -788,7 +778,8 @@ public class ProcureUnits extends Controller {
 
     public static void refreshFbaCartonContentsByIds(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("/Inbounds/boxInfo.html", unit);
+        int totalQty = unit.shipmentQty();
+        render("/Inbounds/boxInfo.html", unit, totalQty);
     }
 
     public static void detail(Long id) {

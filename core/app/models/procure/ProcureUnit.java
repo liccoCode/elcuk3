@@ -2457,4 +2457,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return !Validation.hasErrors();
     }
 
+    public boolean validBoxInfoIsComplete() {
+        if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
+                this.mainBox.height == 0)
+            return false;
+        return true;
+    }
+
 }
