@@ -292,6 +292,7 @@ public class Outbound extends GenericModel {
             out.save();
             out.units.forEach(p -> {
                 p.stage = ProcureUnit.STAGE.OUTBOUND;
+                p.outQty = p.availableQty;
                 p.availableQty = 0;
                 p.save();
                 createStockRecord(p);
