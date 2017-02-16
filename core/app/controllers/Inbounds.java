@@ -128,6 +128,20 @@ public class Inbounds extends Controller {
     }
 
     /**
+     * 根据采购计划ID 进入修改页面
+     *
+     * @param unitId
+     */
+    public static void editByUnitId(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        if(unit.parent != null && unit.type == ProcureUnit.T.StockSplit) {
+            unitId = unit.parent.id;
+        }
+        InboundUnit inboundUnit = InboundUnit.find("unit.id = ? ORDER BY id DESC ", unitId).first();
+        edit(inboundUnit.inbound.id);
+    }
+
+    /**
      * 更新入库单信息
      *
      * @param id
@@ -148,6 +162,10 @@ public class Inbounds extends Controller {
      */
     @Check("inbounds.confirmreceivebtn")
     public static void confirmReceive(Inbound inbound, List<InboundUnit> dtos, String inboundId) {
+        if(dtos.stream().anyMatch(Inbound::validTailInbound)) {
+            flash.error("采购计划已经出库，不能进行收货操作");
+            edit(inboundId);
+        }
         Inbound bound = Inbound.findById(inboundId);
         if(bound.status == Inbound.S.Create) {
             bound.status = Inbound.S.Handing;

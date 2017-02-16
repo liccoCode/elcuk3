@@ -244,9 +244,15 @@ public class Inbound extends GenericModel {
                     punit.attrs.deliveryDate = new Date();
                     punit.stage = ProcureUnit.STAGE.DONE;
                 }
+                punit.result = InboundUnit.R.UnCheck;
                 punit.save();
             }
         });
+    }
+
+    public static boolean validTailInbound(InboundUnit dto) {
+        InboundUnit unit = InboundUnit.findById(dto.id);
+        return Arrays.asList("OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE").contains(unit.unit.stage.name());
     }
 
     private static boolean cap(Long id) {
