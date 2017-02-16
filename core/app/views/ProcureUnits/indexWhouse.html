@@ -133,7 +133,7 @@
           <th width="60px;">去往市场</th>
           <th>深圳仓库</th>
           <th>供应商</th>
-          <th>采购单</th>
+          <th width="80px;">采购单</th>
           <th>出货单</th>
           <th width="100px;">数量<br>(计划/交货/入库)</th>
           <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="100px;">FnSku</th>
@@ -192,7 +192,7 @@
               #{/if}
             <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
           </td>
-          <td>${unit.whouse?.name()}</td>
+          <td style="word-break:break-all;">${unit.whouse?.name()}</td>
           <td>${unit.currWhouse?.name}</td>
           <td>${unit.cooperator?.name}</td>
           <td><a href="@{Deliveryments.show(unit.deliveryment?.id)}">${unit.deliveryment?.id}</a></td>
@@ -235,7 +235,7 @@
           <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate/}</td>
         </tr>
         <tr id="${tr_key}_${unit.id}" style="display:none;">
-          <td colspan="19">
+          <td colspan="20">
             <div class="row-fluid" id="actions_${unit.id}">
 
               <div class="span3">
