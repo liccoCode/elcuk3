@@ -244,6 +244,7 @@ public class Inbound extends GenericModel {
                     punit.attrs.deliveryDate = new Date();
                     punit.stage = ProcureUnit.STAGE.DONE;
                 }
+                punit.result = InboundUnit.R.UnCheck;
                 punit.save();
             }
         });

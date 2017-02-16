@@ -128,6 +128,20 @@ public class Inbounds extends Controller {
     }
 
     /**
+     * 根据采购计划ID 进入修改页面
+     *
+     * @param unitId
+     */
+    public static void editByUnitId(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        if(unit.parent != null && unit.type == ProcureUnit.T.StockSplit) {
+            unitId = unit.parent.id;
+        }
+        InboundUnit inboundUnit = InboundUnit.find("unit.id = ? ORDER BY id DESC ", unitId).first();
+        edit(inboundUnit.inbound.id);
+    }
+
+    /**
      * 更新入库单信息
      *
      * @param id

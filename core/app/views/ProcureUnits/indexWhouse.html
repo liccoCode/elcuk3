@@ -66,6 +66,13 @@
         #{/list}
         </select>
 
+        <select name="p.result" class="inline">
+          <option value="">状态</option>
+        #{list items:models.whouse.InboundUnit.R.values(), as:'r'}
+          <option value="${r.name()}" ${r.name() == p.result?.name()? 'selected' : ''}>${r.label()}</option>
+        #{/list}
+        </select>
+
         <select name="p.projectName" class="inline">
           <option value="">项目名称</option>
         #{list items:models.view.post.ProcurePost.P, as:'n'}
@@ -122,7 +129,7 @@
           <th>阶段</th>
           <th width="80px;">Selling</th>
           <th width="140px;">Sku<br>产品名称</th>
-          <th>FBA-ShipmentId<br>CenterId</th>
+          <th width="120px;">FBA-ShipmentId<br>CenterId</th>
           <th width="60px;">去往市场</th>
           <th>深圳仓库</th>
           <th>供应商</th>
@@ -133,6 +140,7 @@
           <th>运输方式</th>
           <th width="140px;">时间<br>(预计交货/预计运输)</th>
           <th width="80px;">实际交货时间</th>
+          <th width="30px;">质检状态</th>
           <th width="30px;">质检结果</th>
           <th>项目名称</th>
           <th width="80px;">创建人<br>创建时间</th>
@@ -210,6 +218,16 @@
           </td>
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>
+              #{if unit.result}
+                <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">已检</a>#{/if}
+              #{else }
+                  #{if unit.stage.name()=='DONE'}
+                    <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">未检</a>
+                  #{/if}
+                  #{else }未检#{/else}
+              #{/else}
+          </td>
+          <td>
               #{if unit.result?.name()=='Qualified'}
                 <i style="color:green" class="icon-ok"></i>
               #{/if}
@@ -277,10 +295,10 @@
               <div class="span3">
                 <div class="btn-toolbar">
                     #{power.ck "procures.dosplitunit"}
-                      #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
-                        <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
-                        ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
-                      #{/if}
+                        #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
+                          <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
+                          ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
+                        #{/if}
                     #{/power.ck}
                   <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
                 </div>
