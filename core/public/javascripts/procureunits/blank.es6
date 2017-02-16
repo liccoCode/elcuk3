@@ -273,7 +273,7 @@ $(() => {
 
   $(document).ready(function () {
     let $shipType = $("[name='unit.shipType']");
-    if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS') {
+    if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS' && $("#unitId").val()) {
       getShipmentList();
     }
   });
