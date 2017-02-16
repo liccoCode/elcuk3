@@ -127,8 +127,8 @@
           </th>
           <th width="60px;">采购计划ID</th>
           <th>阶段</th>
-          <th width="80px;">Selling</th>
-          <th width="140px;">Sku<br>产品名称</th>
+          <th width="150px;">Selling</th>
+          <th width="155px;">Sku<br>产品名称</th>
           <th width="120px;">FBA-ShipmentId<br>CenterId</th>
           <th width="60px;">去往市场</th>
           <th>深圳仓库</th>
@@ -159,8 +159,9 @@
           ${unit.id}
           </td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-          <td><a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
-          <td title="${unit.product?.abbreviation}">
+          <td style="word-break:break-all;">
+            <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
+          <td rel="tooltip" title="${unit.product?.abbreviation}" style="word-break:break-all">
             <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
             <br>${unit.product?.abbreviation.overLong()}
           </td>
@@ -219,13 +220,8 @@
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>
               #{if unit.result}
-                <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">已检</a>#{/if}
-              #{else }
-                  #{if unit.stage.name()=='DONE'}
-                    <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">未检</a>
-                  #{/if}
-                  #{else }未检#{/else}
-              #{/else}
+                <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">${unit.result.label()}</a>#{/if}
+              #{else }未检#{/else}
           </td>
           <td>
               #{if unit.result?.name()=='Qualified'}

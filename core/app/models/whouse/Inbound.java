@@ -250,6 +250,11 @@ public class Inbound extends GenericModel {
         });
     }
 
+    public static boolean validTailInbound(InboundUnit dto) {
+        InboundUnit unit = InboundUnit.findById(dto.id);
+        return Arrays.asList("OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE").contains(unit.unit.stage.name());
+    }
+
     private static boolean cap(Long id) {
         InboundUnit u = InboundUnit.findById(id);
         return u.status.equals(InboundUnit.S.Create);

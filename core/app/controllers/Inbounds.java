@@ -162,6 +162,10 @@ public class Inbounds extends Controller {
      */
     @Check("inbounds.confirmreceivebtn")
     public static void confirmReceive(Inbound inbound, List<InboundUnit> dtos, String inboundId) {
+        if(dtos.stream().anyMatch(Inbound::validTailInbound)) {
+            flash.error("采购计划已经出库，不能进行收货操作");
+            edit(inboundId);
+        }
         Inbound bound = Inbound.findById(inboundId);
         if(bound.status == Inbound.S.Create) {
             bound.status = Inbound.S.Handing;
