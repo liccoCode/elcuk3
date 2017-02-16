@@ -168,6 +168,10 @@ public class Inbounds extends Controller {
         }
         Inbound bound = Inbound.findById(inboundId);
         if(bound.status == Inbound.S.Create) {
+            bound.receiveDate = inbound.receiveDate;
+            bound.name = inbound.name;
+            bound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+            bound.memo = inbound.memo;
             bound.status = Inbound.S.Handing;
             bound.saveLog("确认收货", inboundId);
             bound.save();
