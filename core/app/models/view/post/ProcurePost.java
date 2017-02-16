@@ -6,6 +6,7 @@ import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.whouse.InboundUnit;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -51,6 +52,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     public PLACEDSTATE isPlaced;
     public Shipment.T shipType;
     public String unitIds;
+    public InboundUnit.R result;
     /**
      * 选择过滤的日期类型
      */
@@ -205,6 +207,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(StringUtils.isNotEmpty(this.projectName)) {
             sbd.append(" AND projectName=? ");
             params.add(this.projectName);
+        }
+
+        if(result != null) {
+            sbd.append(" AND result = ? ");
+            params.add(this.result);
         }
 
         if(type != null) {
