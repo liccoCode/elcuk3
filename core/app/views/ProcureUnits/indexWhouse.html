@@ -220,8 +220,8 @@
           <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
           <td>
               #{if unit.result}
-                <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">${unit.result.label()}</a>#{/if}
-              #{else }未检#{/else}
+                <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">${unit.result.label()}</a>
+              #{/if}
           </td>
           <td>
               #{if unit.result?.name()=='Qualified'}
