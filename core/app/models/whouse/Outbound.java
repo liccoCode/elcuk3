@@ -260,7 +260,6 @@ public class Outbound extends GenericModel {
                     .forEach(item -> {
                         ProcureUnit unit = item.unit;
                         unit.outbound = out;
-                        unit.outQty = unit.availableQty;
                         unit.save();
                     });
         });
