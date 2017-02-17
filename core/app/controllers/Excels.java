@@ -722,6 +722,7 @@ public class Excels extends Controller {
      */
     public static void exportInventoryManagement(StockPost p) {
         if(p == null) p = new StockPost();
+        p.pagination = false;
         List<ProcureUnit> units = p.query();
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "库存管理.xls");
