@@ -819,15 +819,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.comment = unit.comment;
         newUnit.result = this.result;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
+        newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
-            newUnit.currWhouse = Whouse.autoMatching(unit.shipType,
-                    unit.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+            newUnit.currWhouse = Whouse
+                    .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
-        newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate, newUnit.whouse,
                 newUnit.shipType);
         //无selling的手动单不做处理
@@ -1020,8 +1021,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             logs.addAll(this.beforeDoneUpdate(unit));
             if(unit.selling != null) {
                 this.sid = unit.selling.sellingId;
-                this.currWhouse = Whouse.autoMatching(unit.shipType,
-                        unit.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+                this.currWhouse = Whouse
+                        .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
             }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
@@ -1113,7 +1114,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null) {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
-                    unit.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+                    this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
         }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
