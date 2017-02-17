@@ -566,11 +566,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
 
-        for(ShipItem itm : this.items) {
+        this.items.forEach(itm -> {
             itm.shipment = null;
             itm.save();
-        }
-        this.delete();
+        });
+        this.state = S.CANCEL;
+        this.save();
     }
 
     public void updateShipment() {
@@ -1642,7 +1643,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public String showRealDay() {
         if(this.dates.beginDate != null && this.dates.arriveDate != null) {
-            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime())/1000/3600/24;
+            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime()) / 1000 / 3600 / 24;
             return day + "";
         }
         return "";
