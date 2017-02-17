@@ -1,13 +1,13 @@
 $(() => {
   //Ajax 加载 Shipment
-  $("#splitUnitForm input[name='newUnit.shipType']").change(function() {
+  $('input[name="newUnit.shipType"],input[name="newUnit.attrs.planDeliveryDate"]').change(function () {
     getShipmentList();
   });
 
-  $('#shipments').on('change', '[name=shipmentId]', function() {
+  $('#shipments').on('change', '[name=shipmentId]', function () {
     LoadMask.mask();
     let shipmentId = $(this).val();
-    $.get("/shipment/" + shipmentId + "/dates", "", function(r) {
+    $.get("/shipment/" + shipmentId + "/dates", "", function (r) {
       $("input[name='newUnit.attrs.planShipDate']").data('dateinput').setValue(r['begin']);
       $("input[name='newUnit.attrs.planArrivDate']").data('dateinput').setValue(r['end']);
       LoadMask.unmask();
@@ -22,7 +22,7 @@ $(() => {
       $.get('/products/sameSkuAndCooper', {
         sku: sku,
         cooperId: cooperId
-      }, function(c) {
+      }, function (c) {
         process(c);
       });
     },
@@ -35,14 +35,14 @@ $(() => {
 
   getSelling($sku.val());
 
-  $("#warehouse_select").change(function() {
+  $("#warehouse_select").change(function () {
     if ($(this).val()) {
       let country = $("#warehouse_select :selected").text().split('_')[1];
       let sku = $("#select_sku").val();
       $.get("/sellings/findSellingBySkuAndMarket", {
         sku: sku,
         market: "AMAZON_" + country
-      }, function(c) {
+      }, function (c) {
         $("#sellingId").val(c);
         if ($("#sellingId").val()) {
           getShipmentList();
@@ -56,7 +56,7 @@ $(() => {
       });
     } else {
       $("#sellingId").val("");
-      $("input[name='newUnit.shipType']").each(function() {
+      $("input[name='newUnit.shipType']").each(function () {
         $(this).prop("checked", false);
       });
     }
@@ -68,7 +68,7 @@ $(() => {
     $.get("/products/findProductName", {
       sku: sku,
       cooperId: cooperId
-    }, function(r) {
+    }, function (r) {
       $("#productName").val(r.name);
       $("#price_input").val(r['price']);
       $("#unit_currency").prop("value", r['currency']);
@@ -83,7 +83,7 @@ $(() => {
       $.get("/sellings/findSellingBySkuAndMarket", {
         sku: sku,
         market: "AMAZON_" + country
-      }, function(r) {
+      }, function (r) {
         $("#sellingId").val(r);
         if (!$("#sellingId").val()) {
           noty({
@@ -110,7 +110,7 @@ $(() => {
           whouseId: whouseId,
           shipType: shipType,
           planDeliveryDate: planDeliveryDate
-        }, function(html) {
+        }, function (html) {
           shipment.html(html);
           shipment.unmask();
         });
@@ -123,13 +123,13 @@ $(() => {
     }
   }
 
-  $('#box_num').change(function() {
+  $('#box_num').change(function () {
     let boxSize = $("#size_of_box").val();
     let boxNum = $("#box_num").val();
     $("#planQty").val(boxSize * boxNum);
   });
 
-  $("#planQty").change(function() {
+  $("#planQty").change(function () {
     if ($(this).val() > $(this).data('max')) {
       noty({
         text: "分拆数量不能大于" + $(this).data('max'),
@@ -143,6 +143,22 @@ $(() => {
         type: 'error'
       });
       $(this).val(0);
+    }
+  });
+
+  $('input[name="newUnit.isb2b"]').click(function () {
+    if ($(this).prop("checked")) {
+      $('input[name="newUnit.shipType"]').each(function () {
+        if ($(this).val() == 'EXPRESS') {
+          $(this).trigger("click");
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $('input[name="newUnit.shipType"]').each(function () {
+        $(this).show();
+      });
     }
   });
 

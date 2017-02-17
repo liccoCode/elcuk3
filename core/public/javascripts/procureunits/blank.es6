@@ -114,8 +114,9 @@ $(() => {
 
   function getCurrWhouse () {
     let country = $("#warehouse_select :selected").text().split('_')[1];
-    if ($("input[name='unit.isb2b']").prop("checked"))
+    if ($("input[name='unit.isb2b']").prop("checked")) {
       country = "B2B";
+    }
     let shipType = $("input[name='unit.shipType']:checked").val();
     $.get("/whouses/autoMatching", {
       country: country,
@@ -265,6 +266,22 @@ $(() => {
       planArriveDate.next().text((new Date(planArriveDate.val()) - new Date(planShipDate.val())) / (24 * 3600 * 1000) + "天");
     }
   }
+
+  $('input[name="unit.isb2b"]').click(function () {
+    if ($(this).prop("checked")) {
+      $('input[name="unit.shipType"]').each(function () {
+        if ($(this).val() == 'EXPRESS') {
+          $(this).trigger("click");
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $('input[name="unit.shipType"]').each(function () {
+        $(this).show();
+      });
+    }
+  });
 
   let unitId = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unitId);
