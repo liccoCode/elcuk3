@@ -714,4 +714,18 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(items);
     }
+
+    /**
+     * 库存管理列表导出
+     *
+     * @param p
+     */
+    public static void exportInventoryManagement(StockPost p) {
+        if(p == null) p = new StockPost();
+        List<ProcureUnit> units = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存管理.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(units);
+    }
 }

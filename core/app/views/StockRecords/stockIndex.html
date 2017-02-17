@@ -1,8 +1,8 @@
 #{extends 'main_full.html' /}
-#{set title:"库存列表"  /}
+#{set title:"库存管理"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'outbounds/blank.js'/}
+    #{script 'stockrecords/index.coffee'/}
 #{/set}
 <style>
   .table td{
@@ -33,6 +33,11 @@
         <input type="text" style="width:300px;" name="p.search" placeholder="SKU,采购计划ID,FBA" value="${p.search}">
         <input type="hidden" name="p.page" value="${p.page}">
         <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="input-prepend input-append inline">
+        <a href="javascript:void(0)" data-url="@{Excels.exportInventoryManagement()}"
+           class="btn btn-info" id="exportBtn">导出</a>
       </div>
     </div>
   </form>
