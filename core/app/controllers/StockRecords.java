@@ -71,7 +71,7 @@ public class StockRecords extends Controller {
                 .msgArgs(record.qty, unit.availableQty -= record.qty, unit.availableQty)
                 .fid(unit.id, ProcureUnit.class)
                 .save();
-        index(new StockRecordPost());
+        stockIndex(new StockPost());
     }
 
     public static void show(Long id) {
