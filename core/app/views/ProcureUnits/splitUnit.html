@@ -10,6 +10,11 @@
 </style>
 #{errorMsgs /}
 
+#{if unit.isShipmentPlan()}
+    #{error_row }
+    <li>当前采购计划所在的运输单已不是“计划中”状态，请与物流确认后再操作</li>
+    #{/error_row}
+#{/if}
 
 #{if unit.parent}
     #{danger_row  title:'分拆注意事项'}
@@ -105,12 +110,12 @@
     <form action="@{ProcureUnits.doSplitUnit(unit.id)}" method="POST" id="splitUnitForm">
         #{authenticityToken /}
       <table class="table ta table-bordered">
-      #{if type}
-        #{include 'ProcureUnits/_splitOnSelling.html'/}
-      #{/if}
-      #{else }
-        #{include 'ProcureUnits/_splitOnNoSelling.html'/}
-      #{/else}
+          #{if type}
+              #{include 'ProcureUnits/_splitOnSelling.html'/}
+          #{/if}
+          #{else }
+              #{include 'ProcureUnits/_splitOnNoSelling.html'/}
+          #{/else}
         <tr>
           <td colspan="6">
             <h4>Comment</h4>

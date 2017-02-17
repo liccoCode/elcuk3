@@ -20,6 +20,12 @@
 </ol>
 #{/warning_row}
 
+#{if unit.isShipmentPlan()}
+    #{error_row }
+    <li>当前采购计划所在的运输单已不是“计划中”状态，请与物流确认后再操作</li>
+    #{/error_row}
+#{/if}
+
 <div class="row-fluid">
   <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
     <table class="table table-bordered">
