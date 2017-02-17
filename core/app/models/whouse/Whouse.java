@@ -367,10 +367,15 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        return Whouse.autoMatching(unit.unit.shipType, unit.unit.selling.market.shortHand());
+        return Whouse.autoMatching(unit.unit.shipType,
+                unit.unit.projectName.equals("B2B") ? "B2B" : unit.unit.selling.market.shortHand());
     }
 
     public static Whouse autoMatching(Shipment.T shipType, String country) {
+        if(country.equals("B2B")) {
+            //B2B综合仓
+            return Whouse.findById((long) 19);
+        }
         StringBuffer sql = new StringBuffer("type=? ");
         if(shipType == null) {
             return null;

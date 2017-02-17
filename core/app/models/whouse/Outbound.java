@@ -259,9 +259,10 @@ public class Outbound extends GenericModel {
             }).flatMap(s -> s.items.stream())
                     .forEach(item -> {
                         ProcureUnit unit = item.unit;
-                        unit.outbound = out;
-                        unit.outQty = unit.availableQty;
-                        unit.save();
+                        if(Arrays.asList("PLAN", "DELIVERY", "DONE", "IN_STORAGE").contains(unit.stage.name())) {
+                            unit.outbound = out;
+                            unit.save();
+                        }
                     });
         });
     }

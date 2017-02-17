@@ -114,6 +114,9 @@ $(() => {
 
   function getCurrWhouse () {
     let country = $("#warehouse_select :selected").text().split('_')[1];
+    if ($("input[name='unit.isb2b']").prop("checked")) {
+      country = "B2B";
+    }
     let shipType = $("input[name='unit.shipType']:checked").val();
     $.get("/whouses/autoMatching", {
       country: country,
@@ -264,6 +267,22 @@ $(() => {
     }
   }
 
+  $('input[name="unit.isb2b"]').click(function () {
+    if ($(this).prop("checked")) {
+      $('input[name="unit.shipType"]').each(function () {
+        if ($(this).val() == 'EXPRESS') {
+          $(this).trigger("click");
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $('input[name="unit.shipType"]').each(function () {
+        $(this).show();
+      });
+    }
+  });
+
   let unitId = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unitId);
   if (targetTr.size() > 0) {
@@ -273,7 +292,7 @@ $(() => {
 
   $(document).ready(function () {
     let $shipType = $("[name='unit.shipType']");
-    if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS') {
+    if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS' && $("#unitId").val()) {
       getShipmentList();
     }
   });

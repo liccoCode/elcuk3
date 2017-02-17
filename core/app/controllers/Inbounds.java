@@ -138,6 +138,9 @@ public class Inbounds extends Controller {
             unitId = unit.parent.id;
         }
         InboundUnit inboundUnit = InboundUnit.find("unit.id = ? ORDER BY id DESC ", unitId).first();
+        if(inboundUnit == null) {
+            renderText("该采购计划属于老数据，无收货入库单据！");
+        }
         edit(inboundUnit.inbound.id);
     }
 
