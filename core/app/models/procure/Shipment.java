@@ -638,13 +638,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "没有运输项目可以运输.");
         }
         for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY).contains(itm.unit.stage)) {
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
+            if(itm.unit.stage== ProcureUnit.STAGE.OUTBOUND) {
+                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有出仓.请联系仓库部门");
             }
-            if(!itm.unit.isPlaced) {
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
-            }
-
         }
         if(this.type == T.EXPRESS && this.internationExpress == null) {
             Validation.addError("", "请填写运输单的国际快递商");

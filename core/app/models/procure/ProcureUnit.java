@@ -2468,4 +2468,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return true;
     }
 
+    /**
+     * 对应运输单是否 计划中 状态
+     *
+     * @return
+     */
+    public boolean isShipmentPlan() {
+        if(this.shipItems.size() > 0) {
+            return this.shipItems.get(0).shipment.state != Shipment.S.PLAN;
+        } else {
+            return false;
+        }
+    }
+
 }
