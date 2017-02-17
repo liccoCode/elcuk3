@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -224,15 +225,16 @@ public class Account extends Model {
             case AMAZON_JP:
                 String body = "";
                 try {
-                    /**
-                     * 1. Visit the website, fetch the new Cookie.
-                     * 2. With the website params and user/password to login.
+                    /*
+                      1. Visit the website, fetch the new Cookie.
+                      2. With the website params and user/password to login.
                      */
                     this.cookieStore().clear();
                     String uri = this.loginAmazonSellerCenterStep1();
                     loginAmazonSellerCenterStep2(uri);
                     F.T3<List<NameValuePair>, List<BasicHeader>, String> params = loginAmazonSellerCenterStep3(uri);
-                    body = HTTP.post(this.cookieStore(), params._3, params._2, params._1);
+                    body = HTTP.post(this.cookieStore(), params._3, params._2, params._1,
+                            RequestConfig.custom().setCookieSpec("amazon").build());
 
                     if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
