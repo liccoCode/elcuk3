@@ -822,7 +822,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
-            newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand());
+            newUnit.currWhouse = Whouse.autoMatching(unit.shipType,
+                    unit.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
@@ -1019,7 +1020,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             logs.addAll(this.beforeDoneUpdate(unit));
             if(unit.selling != null) {
                 this.sid = unit.selling.sellingId;
-                this.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand());
+                this.currWhouse = Whouse.autoMatching(unit.shipType,
+                        unit.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
             }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
@@ -1110,7 +1112,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.inboundQty = this.availableQty;
         if(unit.selling != null) {
             this.sid = unit.selling.sellingId;
-            this.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand());
+            this.currWhouse = Whouse.autoMatching(unit.shipType,
+                    unit.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
         }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),

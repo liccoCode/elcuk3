@@ -114,6 +114,8 @@ $(() => {
 
   function getCurrWhouse () {
     let country = $("#warehouse_select :selected").text().split('_')[1];
+    if ($("input[name='unit.isb2b']").prop("checked"))
+      country = "B2B";
     let shipType = $("input[name='unit.shipType']:checked").val();
     $.get("/whouses/autoMatching", {
       country: country,
