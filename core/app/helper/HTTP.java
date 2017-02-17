@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.*;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
@@ -13,17 +15,27 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.config.ConnectionConfig;
-import org.apache.http.cookie.ClientCookie;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.util.PublicSuffixMatcher;
+import org.apache.http.conn.util.PublicSuffixMatcherLoader;
+import org.apache.http.cookie.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.impl.cookie.DefaultCookieSpec;
+import org.apache.http.impl.cookie.DefaultCookieSpecProvider;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.Args;
 import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.Play;
@@ -105,7 +117,15 @@ public class HTTP {
             }
         };
 
-        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+        // 注册 Cookie 策略(http://hc.apache.org/httpcomponents-client-ga/tutorial/html/statemgmt.html#d5e499)
+        PublicSuffixMatcher publicSuffixMatcher = PublicSuffixMatcherLoader.getDefault();
+        Registry<CookieSpecProvider> cookieSpecProviderRegistry = RegistryBuilder.<CookieSpecProvider>create()
+                .register(CookieSpecs.DEFAULT,
+                        new DefaultCookieSpecProvider(publicSuffixMatcher))
+                .register("amazon", new AmazonCookieSpecProvider())
+                .build();
+
+        return HttpClients.custom()
                 .setDefaultRequestConfig(defaultRequestConfig)
                 .setConnectionManager(connManager)
                 .setDefaultConnectionConfig(connectionConfig)
@@ -113,8 +133,9 @@ public class HTTP {
                 .addInterceptorLast(new RequestAcceptEncoding())
                 .addInterceptorLast(new ResponseContentEncoding())
                 .setRedirectStrategy(defaultRedirectStrategy)
-                .setDefaultCookieStore(HTTP.COOKIE_STORE);
-        return httpClientBuilder.build();
+                .setDefaultCookieStore(HTTP.COOKIE_STORE)
+                .setDefaultCookieSpecRegistry(cookieSpecProviderRegistry)
+                .build();
     }
 
     public static synchronized void stop() {
@@ -548,5 +569,68 @@ public class HTTP {
         }
     }
 
+    private static class AmazonCookieSpec implements CookieSpec {
+        public final DefaultCookieSpec defaultCookieSpec;
 
+        public AmazonCookieSpec() {
+            this.defaultCookieSpec = new DefaultCookieSpec();
+        }
+
+        @Override
+        public int getVersion() {
+            return this.defaultCookieSpec.getVersion();
+        }
+
+        @Override
+        public List<Cookie> parse(Header header,
+                                  CookieOrigin origin) throws MalformedCookieException {
+            Args.notNull(header, "Header");
+            Args.notNull(origin, "Cookie origin");
+            HeaderElement[] helems = header.getElements();
+            for(final HeaderElement helem : helems) {
+                //删掉 Set-Cookie 中的 version 字段
+                if(helem.getParameterByName("version") != null
+                        && helem.getParameterByName("expires") == null
+                        && StringUtils.contains(origin.getHost(), "amazon")) {
+                    header = new BasicHeader(header.getName(), StringUtils.remove(header.getValue(), "Version"));
+                }
+            }
+            return this.defaultCookieSpec.parse(header, origin);
+        }
+
+        @Override
+        public void validate(Cookie cookie, CookieOrigin origin) throws MalformedCookieException {
+            this.defaultCookieSpec.validate(cookie, origin);
+        }
+
+        @Override
+        public boolean match(Cookie cookie, CookieOrigin origin) {
+            return this.defaultCookieSpec.match(cookie, origin);
+        }
+
+        @Override
+        public List<Header> formatCookies(List<Cookie> cookies) {
+            return this.defaultCookieSpec.formatCookies(cookies);
+        }
+
+        @Override
+        public Header getVersionHeader() {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "custom";
+        }
+    }
+
+    private static class AmazonCookieSpecProvider implements CookieSpecProvider {
+        public AmazonCookieSpecProvider() {
+        }
+
+        @Override
+        public CookieSpec create(HttpContext context) {
+            return new AmazonCookieSpec();
+        }
+    }
 }
