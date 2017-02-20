@@ -5,8 +5,8 @@ $(() => {
   $("input[name='editBoxInfo']").click(function(e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
-    let id = $(this).data("id");
-    $("#refresh_div").load("/Refunds/refreshFbaCartonContentsByIds", {id: id});
+    let ids = $(this).data("id");
+    $("#refresh_div").load("/Refunds/refreshFbaCartonContentsByIds", {ids: ids});
   });
 
   $("#submitBoxInfoBtn").click(function(e) {

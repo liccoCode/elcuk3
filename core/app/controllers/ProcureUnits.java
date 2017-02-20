@@ -776,10 +776,10 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(true));
     }
 
-    public static void refreshFbaCartonContentsByIds(Long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        int totalQty = unit.shipmentQty();
-        render("/Inbounds/boxInfo.html", unit, totalQty);
+    public static void refreshFbaCartonContentsByIds(Long[] ids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        boolean flag = true;
+        render("/Inbounds/boxInfo.html", units, flag);
     }
 
     public static void detail(Long id) {
