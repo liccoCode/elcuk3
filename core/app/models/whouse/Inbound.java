@@ -96,21 +96,21 @@ public class Inbound extends GenericModel {
         Create {
             @Override
             public String label() {
-                return "已创建";
+                return "待收货";
             }
         },
 
         Handing {
             @Override
             public String label() {
-                return "处理中";
+                return "质检中";
             }
         },
 
         End {
             @Override
             public String label() {
-                return "已结束";
+                return "已入库";
             }
         },
         Cancel {
