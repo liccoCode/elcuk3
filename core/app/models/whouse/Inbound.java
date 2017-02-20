@@ -96,21 +96,21 @@ public class Inbound extends GenericModel {
         Create {
             @Override
             public String label() {
-                return "已创建";
+                return "待收货";
             }
         },
 
         Handing {
             @Override
             public String label() {
-                return "处理中";
+                return "质检中";
             }
         },
 
         End {
             @Override
             public String label() {
-                return "已结束";
+                return "已入库";
             }
         },
         Cancel {
@@ -375,6 +375,16 @@ public class Inbound extends GenericModel {
             u.mainBoxInfo = i.mainBoxInfo;
             u.lastBoxInfo = i.lastBoxInfo;
             u.save();
+        });
+    }
+
+    public static void updateBoxInfo(List<InboundUnit> units) {
+        units.forEach(unit -> {
+            InboundUnit old = InboundUnit.findById(unit.id);
+            if(old.status == InboundUnit.S.Create)
+                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            unit.marshalBoxs(old);
+            old.save();
         });
     }
 
