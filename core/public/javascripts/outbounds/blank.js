@@ -72,8 +72,8 @@ $(() => {
   $("#data_table").on("click", "input[name='editBoxInfo']", function (e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
-    let id = $(this).data("id");
-    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id}, function () {
+    let ids = $(this).data("id");
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: ids}, function () {
       $.getScript('/public/javascripts/inbounds/boxInfo.js');
     });
   });

@@ -22,28 +22,45 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr>
-    <td>${unit.unit.id}</td>
-    <td>${unit.unit.shipmentQty()}</td>
+    <td>#{if flag}${unit.id}#{/if}#{else }${unit.unit.id}#{/else}</td>
+    <td>#{if flag}${unit.shipmentQty()}#{/if}#{else }${unit.unit.shipmentQty()}#{/else}</td>
     <td>
       <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.num' value='${unit.mainBox?.num}'
-             data-real="${unit.unit.shipmentQty()}"/>
+             data-real="${flag ? unit.shipmentQty() : unit.unit.shipmentQty()}"/>
       <input type="hidden" name="units[${unit_index-1}].id" value="${unit.id}">
     </td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.boxNum' value='${unit.mainBox?.boxNum}'/></td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.boxNum' value='${unit.mainBox?.boxNum}'/>
+    </td>
     <td>
       <input type='text' style='width: 60px;' name='units[${unit_index-1}].mainBox.singleBoxWeight' value='${unit.mainBox?.singleBoxWeight}'/>
     </td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.length' value='${unit.mainBox?.length}'/></td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.width' value='${unit.mainBox?.width}'/></td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.height' value='${unit.mainBox?.height}'/></td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.num' value='${unit.lastBox?.num}'/></td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.boxNum' value='${unit.lastBox?.boxNum}'/></td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.length' value='${unit.mainBox?.length}'/>
+    </td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.width' value='${unit.mainBox?.width}'/>
+    </td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.height' value='${unit.mainBox?.height}'/>
+    </td>
+    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.num' value='${unit.lastBox?.num}'/>
+    </td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.boxNum' value='${unit.lastBox?.boxNum}'/>
+    </td>
     <td>
       <input type='text' style='width: 60px;' name='units[${unit_index-1}].lastBox.singleBoxWeight' value='${unit.lastBox?.singleBoxWeight}'/>
     </td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.length' value='${unit.lastBox?.length}'/></td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.width' value='${unit.lastBox?.width}'/></td>
-    <td><input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.height' value='${unit.lastBox?.height}'/></td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.length' value='${unit.lastBox?.length}'/>
+    </td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.width' value='${unit.lastBox?.width}'/>
+    </td>
+    <td>
+      <input type='text' style='width: 30px;' name='units[${unit_index-1}].lastBox.height' value='${unit.lastBox?.height}'/>
+    </td>
   </tr>
   <tr style="display:none;">
     <td colspan="12" style="color:red"></td>

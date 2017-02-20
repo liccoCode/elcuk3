@@ -104,7 +104,7 @@ public class Inbounds extends Controller {
             }
         }
         List<Long> ids = units.stream()
-                .filter(unit -> unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.vaildIsCreate(unit.id))
+                .filter(unit -> unit.stage == ProcureUnit.STAGE.DELIVERY && InboundUnit.validIsCreate(unit.id))
                 .map(unit -> unit.id).collect(Collectors.toList());
         if(ids.size() == 0) {
             flash.error("出货单【" + id + "】已无符合收货入库条件的采购计划");

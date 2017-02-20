@@ -31,7 +31,7 @@
         <th>供应商</th>
         <td>
           <input type="text" value="${proUnit.cooperator.name}" readonly/>
-          <input type="hidden" name="inbound.cooperator.id" value="${proUnit.cooperator.id}">
+          <input type="hidden" name="inbound.cooperator.id" value="${proUnit.cooperator.id}" id="cooperId">
         </td>
       </tr>
       <tr>
@@ -76,7 +76,7 @@
     #{info_row title:'已添加进入【'+it.label()+'单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-    <table class="table table-condensed table-bordered">
+    <table class="table table-condensed table-bordered" id="data_table">
       <tr>
         <th><input type="checkbox"></th>
         <th>采购计划ID</th>
@@ -95,7 +95,7 @@
       </tr>
         #{list items:units, as:'unit'}
             #{set planQty:it.name()=='Machining'? unit.availableQty : unit.attrs.planQty/}
-          <tr class="text-center">
+          <tr class="text-center" id="tr_${unit.id}">
             <td>
               <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
               <input type="hidden" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
@@ -117,7 +117,14 @@
           </tr>
         #{/list}
     </table>
-    <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+    <div class="input-append">
+      <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+    </div>
+    <div class="input-append">
+      <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId">
+      <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+    </div>
+
   </div>
 </div>
 
