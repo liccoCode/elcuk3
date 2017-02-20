@@ -163,11 +163,8 @@ $(() => {
 
   $("input[name='editBoxInfo']").click(function (e) {
     e.stopPropagation();
-    $("#fba_carton_contents_modal").modal('show');
     let id = $(this).data("id");
-    $("#refresh_div").load("/Inbounds/refreshFbaCartonContentsByIds", {id: id}, function () {
-      $.getScript('/public/javascripts/inbounds/boxInfo.js');
-    });
+    refreshDiv(id);
   });
 
   $("#submitBoxInfoBtn").click(function (e) {
@@ -177,11 +174,11 @@ $(() => {
     form = form.append($("#box_info_table").clone())
     $.post('/Inbounds/updateBoxInfo', form.serialize(), function (re) {
       if (re) {
-        $("#fba_carton_contents_modal").modal('hide');
         noty({
           text: '更新包装信息成功!',
           type: 'success'
         });
+        window.location.reload();
       } else {
         noty({
           text: r.message,
@@ -231,6 +228,23 @@ $(() => {
       });
     }
   });
+
+  $("#batchUpdateBoxInfoBtn").click(function () {
+    let ids = [];
+    $("input[type=checkbox]:checked").each(function () {
+      if ($(this).val()) {
+        ids.push($(this).val());
+      }
+    });
+    refreshDiv(ids);
+  });
+
+  function refreshDiv (ids) {
+    $("#refresh_div").load("/Inbounds/refreshFbaCartonContentsByIds", {ids: ids}, function () {
+      $("#fba_carton_contents_modal").modal('show');
+      $.getScript('/public/javascripts/inbounds/boxInfo.js');
+    });
+  }
 
   let inboundUnitId = window.location.hash.slice(1);
   let targetTr = $("#inboundUnit_" + inboundUnitId);

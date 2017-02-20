@@ -1,24 +1,27 @@
 $(() => {
 
-  $("input[name='unit.mainBox.num']").change(function () {
-    let total = $("#totalQty").val();
+  $("input[name$='mainBox.num']").change(function () {
+    let total = $(this).parent().prev().text();
     let num = $(this).val();
-    $("input[name='unit.mainBox.boxNum']").val(parseInt(total / num));
-    $("input[name='unit.lastBox.boxNum']").val(total % num != 0 ? 1 : 0);
-    $("input[name='unit.lastBox.num']").val(total % num);
+    $(this).parent().parent().find("input[name$='mainBox.boxNum']").val(parseInt(total / num));
+    $(this).parent().parent().find("input[name$='lastBox.boxNum']").val(total % num != 0 ? 1 : 0);
+    $(this).parent().parent().find("input[name$='lastBox.num']").val(total % num);
   });
 
   $("#box_info_table").change(function () {
-    let totalBoxNum = $("input[name='unit.mainBox.boxNum']").val() * $("input[name='unit.mainBox.num']").val();
-    let totalLastBoxNum = $("input[name='unit.lastBox.boxNum']").val() * $("input[name='unit.lastBox.num']").val();
+    $("input[name$='mainBox.num']").each(function () {
+      let $tr = $(this).parent("td").parent("tr");
+      let realTotalQty = $(this).data("real");
+      let totalBoxNum = $(this).val() * $tr.find("input[name$='mainBox.boxNum']").val();
+      let totalLastBoxNum = $tr.find("input[name$='lastBox.boxNum']").val() * $tr.find("[name$='lastBox.num']").val()
 
-    if (totalBoxNum + totalLastBoxNum > $("#totalQty").val()) {
-      $("#noticeTr").find("td").text("输入的总数为" + (totalBoxNum + totalLastBoxNum) + ",大于收货数量" + $("#totalQty").val());
-      $("#noticeTr").show();
-    } else {
-      $("#noticeTr").hide();
-    }
-
+      if (totalBoxNum + totalLastBoxNum > realTotalQty) {
+        $tr.next().find("td").text("输入的总数为" + (totalBoxNum + totalLastBoxNum) + ",大于收货数量" + realTotalQty);
+        $tr.next().show();
+      } else {
+        $tr.next().hide();
+      }
+    });
   });
 
 });

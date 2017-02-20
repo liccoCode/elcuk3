@@ -378,6 +378,16 @@ public class Inbound extends GenericModel {
         });
     }
 
+    public static void updateBoxInfo(List<InboundUnit> units) {
+        units.forEach(unit -> {
+            InboundUnit old = InboundUnit.findById(unit.id);
+            if(old.status == InboundUnit.S.Create)
+                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            unit.marshalBoxs(old);
+            old.save();
+        });
+    }
+
     public void saveAndLog(Inbound inbound) {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "name", inbound.name));

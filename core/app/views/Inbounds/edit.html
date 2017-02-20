@@ -84,6 +84,8 @@
           #{if inbound.status?.name()=='Create'}
             <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
           #{/if}
+          <input type="button" class="btn btn-primary" id="batchUpdateBoxInfoBtn" value="批量更新包装信息">
+
           #{power.ck 'inbounds.confirmreceivebtn'}
             <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
           #{/power.ck}
@@ -95,7 +97,7 @@
 </div>
 #{/form}
 
-<div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;">
   <div class="modal-body">
     <div id="refresh_div"></div>
   </div>

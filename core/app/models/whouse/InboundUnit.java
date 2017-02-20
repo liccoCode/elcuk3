@@ -75,13 +75,13 @@ public class InboundUnit extends Model {
         Create {
             @Override
             public String label() {
-                return "已创建";
+                return "待收货";
             }
         },
         Receive {
             @Override
             public String label() {
-                return "已收货";
+                return "质检中";
             }
         },
         Check {
@@ -268,6 +268,11 @@ public class InboundUnit extends Model {
     public void marshalBoxs() {
         this.mainBoxInfo = J.json(this.mainBox);
         this.lastBoxInfo = J.json(this.lastBox);
+    }
+
+    public void marshalBoxs(InboundUnit unit) {
+        unit.mainBoxInfo = J.json(this.mainBox);
+        unit.lastBoxInfo = J.json(this.lastBox);
     }
 
     /**

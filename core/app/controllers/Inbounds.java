@@ -87,7 +87,7 @@ public class Inbounds extends Controller {
         inbound.save();
         inbound.create(dtos);
         flash.success("创建成功!");
-        index(new InboundPost());
+        edit(inbound.id);
     }
 
     /**
@@ -207,17 +207,18 @@ public class Inbounds extends Controller {
         edit(inboundId);
     }
 
-    public static void refreshFbaCartonContentsByIds(String id) {
-        InboundUnit unit = InboundUnit.findById(Long.parseLong(id));
-        int totalQty = unit.unit.shipmentQty();
-        render("/Inbounds/boxInfo.html", unit, totalQty);
+    public static void refreshFbaCartonContentsByIds(String[] ids) {
+        List<InboundUnit> units = InboundUnit.find(" id IN " + SqlSelect.inlineParam(ids)).fetch();
+        render("/Inbounds/boxInfo.html", units);
     }
 
-    public static void updateBoxInfo(InboundUnit unit) {
-        unit = InboundUnit.findById(unit.id);
-        unit.marshalBoxs();
-        unit.save();
-        renderJSON(new Ret(true));
+    public static void updateBoxInfo(List<InboundUnit> units) {
+        try {
+            Inbound.updateBoxInfo(units);
+            renderJSON(new Ret(true));
+        } catch(Exception e) {
+            renderJSON(new Ret(false));
+        }
     }
 
     public static void deleteUnit(Long[] ids) {
