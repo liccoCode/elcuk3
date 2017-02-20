@@ -566,11 +566,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
 
-        for(ShipItem itm : this.items) {
+        this.items.forEach(itm -> {
             itm.shipment = null;
             itm.save();
-        }
-        this.delete();
+        });
+        this.state = S.CANCEL;
+        this.save();
     }
 
     public void updateShipment() {
@@ -637,13 +638,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "没有运输项目可以运输.");
         }
         for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY).contains(itm.unit.stage)) {
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
+            if(itm.unit.stage== ProcureUnit.STAGE.OUTBOUND) {
+                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有出仓.请联系仓库部门");
             }
-            if(!itm.unit.isPlaced) {
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
-            }
-
         }
         if(this.type == T.EXPRESS && this.internationExpress == null) {
             Validation.addError("", "请填写运输单的国际快递商");
@@ -1642,7 +1639,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public String showRealDay() {
         if(this.dates.beginDate != null && this.dates.arriveDate != null) {
-            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime())/1000/3600/24;
+            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime()) / 1000 / 3600 / 24;
             return day + "";
         }
         return "";

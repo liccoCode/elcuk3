@@ -81,9 +81,9 @@ public class Refunds extends Controller {
         renderJSON(new Ret());
     }
 
-    public static void refreshFbaCartonContentsByIds(String id) {
-        RefundUnit unit = RefundUnit.findById(Long.parseLong(id));
-        render("/Inbounds/boxInfo.html", unit);
+    public static void refreshFbaCartonContentsByIds(String[] ids) {
+        List<RefundUnit> units = RefundUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        render("/Inbounds/boxInfo.html", units);
     }
 
     public static void updateBoxInfo(RefundUnit unit) {

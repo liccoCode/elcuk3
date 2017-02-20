@@ -8,13 +8,26 @@ $(() => {
 
   $("input[name='createInboundBtn']").click(function () {
     let ck = $("#dp_" + $(this).data("index") + " input[type='checkbox']:checked");
+    if (ck.length > 0) {
+      $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+    } else {
+      noty({
+        text: '请先选择需要收货入库的采购计划！',
+        type: 'error'
+      });
+    }
+  });
+
+  $("#batchReceiveBtn").click(function (e) {
+    e.preventDefault();
+    let ck = $("#data_table input[name='pids']:checked");
     let flag = true;
     if (ck.length > 0) {
-      let firstProjectName = ck.eq(0).attr("project");
+      let firstCooper = ck.eq(0).attr("cooper");
       ck.each(function () {
-        if ($(this).attr("project") != firstProjectName) {
+        if ($(this).attr("cooper") != firstCooper) {
           noty({
-            text: '项目名称必须一致！',
+            text: '供应商必须一致！',
             type: 'error'
           });
           flag = false;
@@ -22,7 +35,7 @@ $(() => {
         }
       });
       if (flag) {
-        $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+        $('#deliverys_form').attr('method', 'post').attr('action', $(this).data("url")).submit();
       }
     } else {
       noty({
@@ -30,7 +43,6 @@ $(() => {
         type: 'error'
       });
     }
-
   });
 
   $("input[name='checkAll']").change(function (e) {
