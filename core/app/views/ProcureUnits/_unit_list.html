@@ -4,7 +4,7 @@
   #{if checkbox}
     <th width="20px;">
       <label class="checkbox">
-        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall">
+        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
       </label>
     </th>
   #{/if}
@@ -71,7 +71,8 @@
       #{/if}
       #{if relationPage}
         <td>
-          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}">
+          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}"
+                 cooper="${unit.cooperator?.id}">
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">

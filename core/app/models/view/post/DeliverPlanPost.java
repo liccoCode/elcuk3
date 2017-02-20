@@ -35,6 +35,8 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
     public Date from;
     public Date to;
 
+    public boolean showAll = false;
+
     public enum DateType {
         /**
          * 创建时间
