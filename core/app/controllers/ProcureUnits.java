@@ -21,7 +21,9 @@ import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
+import models.whouse.InboundUnit;
 import models.whouse.Outbound;
+import models.whouse.Refund;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.io.FileUtils;
@@ -819,6 +821,29 @@ public class ProcureUnits extends Controller {
         }
         renderArgs.put("logs", ElcukRecord.records(id.toString(), Arrays.asList("procureunit.split"), 50));
         render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
+    }
+
+    public static void findProcureById(Long id, int index) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        render("/Inbounds/copyTd.html", unit, index);
+    }
+
+    public static void validProcureId(Long id, Long cooperId) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
+            renderJSON(new Ret(false, "该采购计划状态不是采购中！"));
+        }
+        if(unit.cooperator != null && unit.cooperator.id != cooperId) {
+            renderJSON(new Ret(false, "请输入同供应商下的采购计划！"));
+        }
+        if(!InboundUnit.validIsCreate(unit.id)) {
+            renderJSON(new Ret(false, "该采购计划已经创建收货单！"));
+        }
+        if(StringUtils.isNotEmpty(Refund.isAllReufund(id))) {
+            renderJSON(new Ret(false, "采购计划【" + id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(id) + "】"));
+        }
+        renderJSON(new Ret(true));
+
     }
 
 }

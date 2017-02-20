@@ -311,7 +311,7 @@ public class InboundUnit extends Model {
      *
      * @return
      */
-    public static boolean vaildIsCreate(Long id) {
+    public static boolean validIsCreate(Long id) {
         return InboundUnit.count("unit.id = ? AND inbound.status <> '" + Inbound.S.End + "'", id) == 0;
     }
 

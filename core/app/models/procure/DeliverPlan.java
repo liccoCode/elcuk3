@@ -282,14 +282,14 @@ public class DeliverPlan extends GenericModel {
         if(showAll)
             return this.units.size();
         return this.units.stream()
-                .filter(unit -> InboundUnit.vaildIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY).count();
+                .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY).count();
     }
 
     public List<ProcureUnit> showUnits(boolean showAll) {
         if(showAll)
             return this.units;
         return this.units.stream()
-                .filter(unit -> InboundUnit.vaildIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY)
+                .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY)
                 .collect(Collectors.toList());
     }
 }
