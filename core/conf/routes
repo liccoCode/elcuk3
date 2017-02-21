@@ -162,6 +162,7 @@ POST    /shipment/{id}/inbounding                           Shipments.inbounding
 DELETE  /shipment/{id}/state                                Shipments.revertState
 POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
+GET     /shipment/{id}/arns                                 Shipments.arns
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
