@@ -5,6 +5,7 @@ import models.procure.ProcureUnit;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -18,7 +19,8 @@ import java.util.regex.Pattern;
 public class StockPost extends Post<ProcureUnit> {
 
     private static final Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
-    public Whouse whouse;
+
+    public Long[] whouses;
     public Cooperator cooperator;
     public String projectName;
 
@@ -42,11 +44,10 @@ public class StockPost extends Post<ProcureUnit> {
             return new F.T2<>(sbd.toString(), params);
         }
 
-
-        if(this.whouse != null && this.whouse.id != null) {
-            sbd.append(" AND currWhouse.id=?");
-            params.add(this.whouse.id);
+        if(this.whouses != null && this.whouses.length > 0) {
+            sbd.append(" AND currWhouse.id IN  " + SqlSelect.inlineParam(whouses));
         }
+
         if(cooperator != null && this.cooperator.id != null) {
             sbd.append(" AND cooperator.id=?");
             params.add(this.cooperator.id);
