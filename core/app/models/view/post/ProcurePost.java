@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * Time: 4:32 PM
  */
 public class ProcurePost extends Post<ProcureUnit> {
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
+    private static final Pattern ID = Pattern.compile("^[0-9]*$");
     private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
@@ -167,13 +167,6 @@ public class ProcurePost extends Post<ProcureUnit> {
             return new F.T2<>(sbd.toString(), params);
         }
 
-        String fba = isSearchFBA();
-        if(fba != null) {
-            sbd.append("fba.shipmentId=?");
-            params.add(fba);
-            return new F.T2<>(sbd.toString(), params);
-        }
-
         if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
         sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
                 .append("<=?");
@@ -201,7 +194,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
         if(this.isConfirm != null) {
             sbd.append(" AND isConfirm=? ");
-            params.add(this.isConfirm == C.YES ? true : false);
+            params.add(this.isConfirm == C.YES);
         }
 
         if(StringUtils.isNotEmpty(this.projectName)) {
@@ -234,9 +227,10 @@ public class ProcurePost extends Post<ProcureUnit> {
             sbd.append(" AND (")
                     .append("product.sku LIKE ? OR ")
                     .append("selling.sellingId LIKE ? OR ")
-                    .append("deliverplan.id LIKE ? ")
+                    .append("deliverplan.id LIKE ? OR ")
+                    .append("fba.shipmentId LIKE ?  ")
                     .append(") ");
-            for(int i = 0; i < 3; i++) params.add(word);
+            for(int i = 0; i < 4; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
