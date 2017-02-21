@@ -15,12 +15,13 @@
   #{/if}
     <th width="40px;">#</th>
     <th width="40px;">阶段</th>
-    <th width="80px;">Selling</th>
+    <th width="150px;">Selling</th>
     <th>Sku</th>
     <th width="120px;">FBA-ShipmentId<br>CenterId</th>
     <th>采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="100px;">数量<br>(计划/交货/入库)</th>
+    <th>可用库存</th>
   #{ifnot deliveryplan}
     <th>单价</th>
     <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
@@ -84,7 +85,7 @@
     ${unit.id}
     </td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-    <td class="selling_id">
+    <td class="selling_id" style="word-break:break-all;">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
     <td>
@@ -140,6 +141,7 @@
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
     </td>
+    <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
@@ -182,7 +184,7 @@
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '23' : '21'}">
+    <td colspan="${checkbox ? '24' : '22'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">

@@ -367,8 +367,14 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        return Whouse.autoMatching(unit.unit.shipType,
-                unit.unit.projectName.equals("B2B") ? "B2B" : unit.unit.selling.market.shortHand());
+        if(unit.unit.selling != null)
+            return Whouse.autoMatching(unit.unit.shipType,
+                    unit.unit.projectName.equals("B2B") ? "B2B" : unit.unit.selling.market.shortHand());
+        else if(unit.unit.projectName.equals("B2B")) {
+            return Whouse.autoMatching(unit.unit.shipType, "B2B");
+        } else {
+            return null;
+        }
     }
 
     public static Whouse autoMatching(Shipment.T shipType, String country) {
