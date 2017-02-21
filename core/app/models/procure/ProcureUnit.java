@@ -631,6 +631,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.lastBoxInfo = J.json(this.lastBox);
     }
 
+    public void marshalBoxs(ProcureUnit unit) {
+        unit.mainBoxInfo = J.json(this.mainBox);
+        unit.lastBoxInfo = J.json(this.lastBox);
+    }
+
     /**
      * ProcureUnit 的检查
      */

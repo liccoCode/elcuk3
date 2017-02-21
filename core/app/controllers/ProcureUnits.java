@@ -758,10 +758,12 @@ public class ProcureUnits extends Controller {
         render(list);
     }
 
-    public static void updateBoxInfo(ProcureUnit unit) {
-        unit = ProcureUnit.findById(unit.id);
-        unit.marshalBoxs();
-        unit.save();
+    public static void updateBoxInfo(List<ProcureUnit> units) {
+        units.forEach(unit -> {
+            ProcureUnit old = ProcureUnit.findById(unit.id);
+            unit.marshalBoxs(old);
+            old.save();
+        });
         renderJSON(new Ret(true));
     }
 

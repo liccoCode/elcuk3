@@ -123,8 +123,8 @@ $(() => {
   $("#shipmentTable").on("click", "input[name='editBoxInfo']", function(e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
-    let id = $(this).data("id");
-    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id});
+    let ids = $(this).data("id");
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: ids});
   });
 
   $("#states").multiselect({
