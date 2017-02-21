@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.modules.excel.RenderExcel;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -456,5 +457,14 @@ public class Shipments extends Controller {
         }
         flash.success("创建出库成功!");
         redirect("/OutboundRecords/index");
+    }
+
+    public static void arns(String shipmentId) {
+        Shipment shipment = Shipment.findById(shipmentId);
+        notFoundIfNull(shipment);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s-AmazonReferenceID.xls", shipmentId));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(shipment);
     }
 }
