@@ -632,6 +632,8 @@ public class ProcureUnits extends Controller {
         int diff = 0;
         if(managedUnit.stage.name().equals("DELIVERY")) {
             diff = managedUnit.attrs.planQty - unit.attrs.planQty;
+        } else if(managedUnit.stage.name().equals("IN_STORAGE")) {
+            diff = managedUnit.availableQty - unit.availableQty;
         }
         managedUnit.updateManualData(unit, diff);
         managedUnit.validateManual();

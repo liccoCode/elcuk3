@@ -1,7 +1,9 @@
 $(() => {
   //Ajax 加载 Shipment
   $('input[name="newUnit.shipType"],input[name="newUnit.attrs.planDeliveryDate"]').change(function () {
-    getShipmentList();
+    if ($("#splitType").val() != "false") {
+      getShipmentList();
+    }
   });
 
   $('#shipments').on('change', '[name=shipmentId]', function () {

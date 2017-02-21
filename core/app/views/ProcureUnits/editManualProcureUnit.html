@@ -37,11 +37,20 @@
             #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
         </td>
 
-        <th>采购数量</th>
+        <th>
+            #{if unit.stage.name() == 'IN_STORAGE'}库存数量#{/if}
+            #{else }采购数量#{/else}
+        </th>
         <td>
-          <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
-              #{if unit.isManualEdit()} readonly #{/if}>
-          <input type="text" id="box_num" class="input-mini" placeHolder="箱数" #{if unit.stage.name() == 'DELIVERY'} readonly #{/if}>
+            #{if unit.stage.name() == 'IN_STORAGE'}
+              <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
+                     value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isEditInput()} readonly#{/if}>
+            #{/if}
+            #{else }
+              <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
+                  #{if unit.isEditInput()} readonly #{/if}>
+            #{/else}
+          <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isEditInput()} readonly #{/if}>
           <span class="add-on">箱</span>
           <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
         </td>
