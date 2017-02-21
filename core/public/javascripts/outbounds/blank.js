@@ -80,9 +80,8 @@ $(() => {
 
   $("#submitBoxInfoBtn").click(function (e) {
     e.stopPropagation();
-    let action = $(this).data('action');
-    let form = $("<form method='post' action='#{action}'></form>")
-    form = form.append($("#box_info_table").clone())
+    let form = $("<form method='post'></form>");
+    form = form.append($("#box_info_table").clone());
     $.post('/ProcureUnits/updateBoxInfo', form.serialize(), function (re) {
       if (re) {
         $("#fba_carton_contents_modal").modal('hide');

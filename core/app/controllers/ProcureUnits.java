@@ -632,6 +632,8 @@ public class ProcureUnits extends Controller {
         int diff = 0;
         if(managedUnit.stage.name().equals("DELIVERY")) {
             diff = managedUnit.attrs.planQty - unit.attrs.planQty;
+        } else if(managedUnit.stage.name().equals("IN_STORAGE")) {
+            diff = managedUnit.availableQty - unit.availableQty;
         }
         managedUnit.updateManualData(unit, diff);
         managedUnit.validateManual();
@@ -756,10 +758,12 @@ public class ProcureUnits extends Controller {
         render(list);
     }
 
-    public static void updateBoxInfo(ProcureUnit unit) {
-        unit = ProcureUnit.findById(unit.id);
-        unit.marshalBoxs();
-        unit.save();
+    public static void updateBoxInfo(List<ProcureUnit> units) {
+        units.forEach(unit -> {
+            ProcureUnit old = ProcureUnit.findById(unit.id);
+            unit.marshalBoxs(old);
+            old.save();
+        });
         renderJSON(new Ret(true));
     }
 

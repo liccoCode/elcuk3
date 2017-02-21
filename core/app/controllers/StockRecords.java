@@ -1,8 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.post.StockPost;
 import models.view.post.StockRecordPost;
@@ -14,7 +14,6 @@ import play.mvc.With;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 库存异动控制器
@@ -28,6 +27,7 @@ public class StockRecords extends Controller {
 
     @Before(only = {"index", "stockIndex"})
     public static void setWhouses() {
+        renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("whouses", Whouse.selfWhouses());
     }
 
@@ -40,11 +40,6 @@ public class StockRecords extends Controller {
 
     public static void stockIndex(StockPost p) {
         if(p == null) p = new StockPost();
-        Optional.ofNullable(p.whouse).ifPresent(w -> {
-            if(w.id != null && w.id == 22) {
-                Refunds.unQualifiedIndex(new StockPost());
-            }
-        });
         List<ProcureUnit> units = p.query();
         render(p, units);
     }

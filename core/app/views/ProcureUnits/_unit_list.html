@@ -15,12 +15,13 @@
   #{/if}
     <th width="40px;">#</th>
     <th width="40px;">阶段</th>
-    <th width="80px;">Selling</th>
+    <th width="150px;">Selling</th>
     <th>Sku</th>
     <th width="120px;">FBA-ShipmentId<br>CenterId</th>
     <th>采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="100px;">数量<br>(计划/交货/入库)</th>
+    <th>可用库存</th>
   #{ifnot deliveryplan}
     <th>单价</th>
     <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
@@ -84,7 +85,7 @@
     ${unit.id}
     </td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-    <td class="selling_id">
+    <td class="selling_id" style="word-break:break-all;">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
     <td>
@@ -140,6 +141,7 @@
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
     </td>
+    <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
@@ -182,7 +184,7 @@
   </tr>
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '23' : '21'}">
+    <td colspan="${checkbox ? '24' : '22'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
@@ -243,17 +245,19 @@
               #{/if}
               #{else }
                 <a href="@{ProcureUnits.editManual(unit.id)}" target="_blank" class="btn btn-small btn-primary">修改</a>
-                <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-small" rel="tooltip"
-                   title="如样品，试用等操作">SKU分拆</a>
               #{/else}
               #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
                 <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-small btn-danger">
                   删除
                 </a>
               #{/if}
+            <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
               #{power.ck "procures.dosplitunit"}
-                <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
                   #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
+                      #{if !unit.selling}
+                        <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-small" rel="tooltip"
+                           title="如样品，试用等操作">SKU分拆</a>
+                      #{/if}
                     <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
                     ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
                   #{/if}

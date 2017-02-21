@@ -631,6 +631,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.lastBoxInfo = J.json(this.lastBox);
     }
 
+    public void marshalBoxs(ProcureUnit unit) {
+        unit.mainBoxInfo = J.json(this.mainBox);
+        unit.lastBoxInfo = J.json(this.lastBox);
+    }
+
     /**
      * ProcureUnit 的检查
      */
@@ -1021,8 +1026,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             logs.addAll(this.beforeDoneUpdate(unit));
             if(unit.selling != null) {
                 this.sid = unit.selling.sellingId;
-                this.currWhouse = Whouse
-                        .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
             }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
@@ -1115,6 +1118,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
                     this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+        } else if(this.projectName.equals("B2B")) {
+            this.currWhouse = Whouse.autoMatching(unit.shipType, "B2B");
         }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
@@ -1154,15 +1159,28 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public void updateManualData(ProcureUnit unit, int diff) {
         this.attrs.price = unit.attrs.price;
-        this.attrs.planQty = unit.attrs.planQty;
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        if(this.parent != null) {
-            this.parent.attrs.planQty += diff;
-            this.parent.originQty += diff;
-            this.parent.save();
+        if(diff != 0 && this.stage.name().equals("IN_STORAGE")) {
+            this.availableQty = unit.availableQty;
+            this.originQty = this.availableQty;
+            this.attrs.planQty = this.availableQty;
+            this.attrs.qty = this.availableQty;
+            this.inboundQty = this.availableQty;
+            if(this.parent != null) {
+                this.parent.availableQty += diff;
+                this.parent.save();
+            }
+            this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
+        } else if(diff != 0) {
+            this.attrs.planQty = unit.attrs.planQty;
+            if(this.parent != null) {
+                this.parent.attrs.planQty += diff;
+                this.parent.originQty += diff;
+                this.parent.save();
+            }
         }
     }
 
@@ -2431,12 +2449,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return false;
             } else if(T.ProcureSplit == this.type && this.stage == STAGE.IN_STORAGE) {
                 return true;
+            } else if(Arrays.asList(STAGE.DONE, STAGE.OUTBOUND).contains(this.stage)) {
+                return true;
             }
             return this.stage != this.parent.stage;
         }
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
-            return false;
-        return true;
+        return !Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage);
     }
 
     public boolean isManualEdit() {
