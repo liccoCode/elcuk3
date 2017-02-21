@@ -13,6 +13,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -695,12 +696,12 @@ public class Excels extends Controller {
         if(p.dateRange() > 90) renderText("时间区间过大!");
 
         p.pagination = false;
-        List<Map<String, Object>> records = p.checkRecords();
+        List<StockRecord> records = p.query();
         if(records == null || records.isEmpty()) renderText("未找到任何数据!");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME, "库存异动盘点.xls");
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存异动记录.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(records, dateFormat, p);
     }

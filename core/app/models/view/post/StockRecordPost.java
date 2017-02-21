@@ -26,6 +26,9 @@ public class StockRecordPost extends Post<StockRecord> {
     public Date to;
     public Whouse whouse;
     public Long unitId;
+    public StockRecord.T type;
+    public Long cooperatorId;
+
     private static Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
 
 
@@ -64,6 +67,16 @@ public class StockRecordPost extends Post<StockRecord> {
             sbd.append("AND (u.sku LIKE ? OR f.shipmentId LIKE ? )");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
+        }
+
+        if(this.type != null) {
+            sbd.append(" AND s.type=? ");
+            params.add(this.type);
+        }
+
+        if(this.cooperatorId != null) {
+            sbd.append(" AND u.cooperator.id=?");
+            params.add(this.cooperatorId);
         }
 
         if(this.whouse != null && this.whouse.id != null) {
