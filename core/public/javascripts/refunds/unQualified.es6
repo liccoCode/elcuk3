@@ -1,15 +1,14 @@
 $(() => {
 
-  $("#data_table").on("click", "[name='refundBtn'],[name='transferBtn']", function(e) {
+  $("#data_table").on("click", "[name='refundBtn'],[name='transferBtn']", function (e) {
     e.preventDefault();
     let memo = $(this).parent("td").parent("tr").find("input[name='memo']").val();
-    let qty = $(this).parent("td").parent("tr").find("input[name='qty']").val();
+    let qty = $(this).parent("td").parent("tr").find("input[name$='attrs.qty']").val();
     if (memo && qty) {
       $("#id_input").val($(this).data("id"));
       $("#qty_input").val(qty);
       $("#memo_input").val(memo);
       $("#data_form").attr("action", $(this).data("url")).submit();
-
     } else {
       noty({
         text: '必须填写处理说明和数量!',
@@ -18,7 +17,7 @@ $(() => {
     }
   });
 
-  $("input[name='qty']").change(function() {
+  $("input[name='qty']").change(function () {
     let origin = $(this).data("origin");
     if ($(this).val() < 0 || $(this).val() > origin) {
       noty({
@@ -26,6 +25,45 @@ $(() => {
         type: 'warning'
       });
       $(this).val(origin);
+    }
+  });
+
+  $("#batchBtn").click(function (e) {
+    e.preventDefault();
+    let checks = $("input[name$='id']:checked");
+    if (checks.length == 0) {
+      noty({
+        text: '请先选择需要退货的采购计划！',
+        type: 'warning'
+      });
+      return false;
+    }
+    let firstCooper = checks.first().data("cooper");
+    let i = 0;
+    checks.each(function () {
+      if ($(this).data("cooper") != firstCooper) {
+        i++;
+      }
+    });
+    if (i > 0) {
+      noty({
+        text: '请选择相同供应商的采购计划！',
+        type: 'error'
+      });
+      return false;
+    }
+    $("#batch_refund_modal").modal("show");
+  });
+
+  $("#submitBtn").click(function (e) {
+    if ($("#refundMemo").val()) {
+      $("#batchMemo").val($("#refundMemo").val());
+      $("#commitForm").submit();
+    } else {
+      noty({
+        text: '退货说明必填！',
+        type: 'error'
+      })
     }
   });
 
