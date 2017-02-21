@@ -85,7 +85,7 @@ public class Refund extends GenericModel {
         After_Receive {
             @Override
             public String label() {
-                return "收货退货";
+                return "不良品退货";
             }
         },
         After_Inbound {
@@ -297,7 +297,7 @@ public class Refund extends GenericModel {
         refund.memo = memo;
         refund.whouseUser = Login.current();
         refund.status = S.Refund;
-        refund.type = T.After_Inbound;
+        refund.type = T.After_Receive;
         refund.save();
         RefundUnit u = new RefundUnit();
         u.unit = unit;
