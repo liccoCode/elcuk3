@@ -247,7 +247,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     private Long isSearchForId() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
+            if(matcher.find()) return NumberUtils.toLong(matcher.group(0));
         }
         return null;
     }
