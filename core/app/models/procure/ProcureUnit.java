@@ -1021,8 +1021,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             logs.addAll(this.beforeDoneUpdate(unit));
             if(unit.selling != null) {
                 this.sid = unit.selling.sellingId;
-                this.currWhouse = Whouse
-                        .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
             }
         } else if(this.stage == STAGE.DONE) {
             logs.addAll(this.doneUpdate(unit));
@@ -1115,6 +1113,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
                     this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+        } else if(this.projectName.equals("B2B")) {
+            this.currWhouse = Whouse.autoMatching(unit.shipType, "B2B");
         }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),

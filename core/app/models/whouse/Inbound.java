@@ -229,13 +229,10 @@ public class Inbound extends GenericModel {
             if(u.status.equals(InboundUnit.S.Create)) {
                 u.status = InboundUnit.S.Receive;
                 u.result = InboundUnit.R.UnCheck;
-                if(u.unit.selling != null && Whouse.autoMatching(u) != null) {
-                    u.target = Whouse.autoMatching(u);
-                }
+                u.target = Whouse.autoMatching(u);
                 u.qualifiedQty = u.qty;
                 u.unqualifiedQty = 0;
                 u.inboundQty = u.qty;
-
 
                 u.save();
                 ProcureUnit punit = u.unit;
