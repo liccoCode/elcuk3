@@ -48,6 +48,7 @@
       <th>收货数</th>
       <th>入库数</th>
       <th>可用库存</th>
+      <th>出库数</th>
       <th>当前仓库</th>
       <th>质检结果</th>
       <th>阶段</th>
@@ -72,6 +73,7 @@
       <td>${unit.attrs.qty}</td>
       <td>${unit.inboundQty}</td>
       <td>${unit.availableQty}</td>
+      <td>${unit.outQty}</td>
       <td>${unit.currWhouse?.name}</td>
       <td>
       #{if unit.result?.name()=='Qualified'}
@@ -110,6 +112,7 @@
       <th>收货数</th>
       <th>入库数</th>
       <th>可用库存</th>
+      <th>出库数</th>
       <th>当前仓库</th>
       <th>质检结果</th>
       <th>阶段</th>
@@ -138,6 +141,7 @@
       <td>${u.attrs.qty}</td>
       <td>${u.inboundQty}</td>
       <td>${u.availableQty}</td>
+      <td>${u.outQty}</td>
       <td>${u.currWhouse?.name}</td>
       <td>
           #{if u.result?.name()=='Qualified'}
