@@ -21,13 +21,11 @@
 <tr>
 #{set copers:product.cooperators() /}
   <th><i class="icon-asterisk" style="color:red"></i>
-  #{if Arrays.asList('IN_STORAGE', 'PROCESSING').contains(unit.stage.name())}
-    库存数量
-  #{/if}
+  #{if unit.stage.name() == 'IN_STORAGE'}库存数量#{/if}
   #{else }采购数量#{/else}
   </th>
   <td colspan="3">
-  #{if Arrays.asList('IN_STORAGE', 'PROCESSING').contains(unit.stage.name())}
+  #{if unit.stage.name() == 'IN_STORAGE'}
     <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
            value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isEditInput()} readonly#{/if}>
   #{/if}
