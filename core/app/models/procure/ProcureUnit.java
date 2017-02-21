@@ -1168,6 +1168,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 this.parent.availableQty += diff;
                 this.parent.save();
             }
+            this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
         } else if(diff != 0) {
             this.attrs.planQty = unit.attrs.planQty;
             if(this.parent != null) {
