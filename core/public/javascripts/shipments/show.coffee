@@ -176,5 +176,5 @@ $ ->
   $('input[name="editBoxInfo"]').click ->
     $("#fba_carton_contents_modal").modal('show')
     id = $(this).data("id")
-    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {id: id})
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: id})
 

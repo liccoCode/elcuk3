@@ -9,6 +9,11 @@
     #{script 'shipments/show.coffee'/}
     #{script 'shipments/paymentunits.coffee'/}
 #{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 
 <ul class="nav nav-tabs" id="below_tab">
   <li class="active">
@@ -91,7 +96,7 @@ models.procure.Shipment.T.EXPRESS/}
   </div>
 </div>
 
-<div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;">
   <div class="modal-body">
     <div id="refresh_div"></div>
   </div>
