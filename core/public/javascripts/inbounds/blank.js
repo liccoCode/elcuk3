@@ -55,6 +55,7 @@ $(() => {
             $("#data_table").append(r);
             slippingTr(id);
           });
+          $("#procureId").val("");
         } else {
           noty({
             text: r.message,
