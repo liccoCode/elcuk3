@@ -1,6 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'手动单采购计划'/}
 #{set 'moreScripts'}
+  #{script 'deliveryments/manual.es6'/}
 #{/set}
 <style>
   .table td, .table th{
@@ -9,7 +10,7 @@
 </style>
 #{errorMsgs /}
 #{flash_alert/}
-
+                                1
 #{info_row title:'手动单采购计划' /}
 <div class="row-fluid">
   <div class="span12">

@@ -135,7 +135,10 @@ public class Refunds extends Controller {
     }
 
     public static void unQualifiedHandle(Long unitId, int qty, String memo) {
-        Refund.unQualifiedHandle(unitId, qty, memo);
+        ProcureUnit unit = new ProcureUnit();
+        unit.id = unitId;
+        unit.attrs.qty = qty;
+        Refund.unQualifiedHandle(Arrays.asList(unit), memo);
         flash.success("不良品退货成功!");
         unQualifiedIndex(null);
     }
@@ -143,6 +146,17 @@ public class Refunds extends Controller {
     public static void transferQty(Long unitId, int qty, String memo) {
         Refund.transferQty(unitId, qty, memo);
         flash.success("不良品转入成功!");
+        unQualifiedIndex(null);
+    }
+
+    /**
+     *
+     * @param units
+     * @param batchMemo
+     */
+    public static void batchRefund(List<ProcureUnit> units, String batchMemo) {
+        Refund.unQualifiedHandle(units, batchMemo);
+        flash.success("不良品退货成功!");
         unQualifiedIndex(null);
     }
 

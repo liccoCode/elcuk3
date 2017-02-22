@@ -2499,4 +2499,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    public Date qcDate() {
+        InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id ", this.id).first();
+        return unit != null ? unit.qcDate : null;
+    }
+
 }
