@@ -3,6 +3,8 @@ package models.whouse;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
+import models.User;
 import models.procure.ProcureUnit;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -49,12 +51,6 @@ public class StockRecord extends Model {
     @Expose
     public Integer currQty;
 
-    /**
-     * 异动对象(SKU or 物料)
-     */
-    @Embedded
-    @Expose
-    public StockObj stockObj;
 
     /**
      * 类型
@@ -179,101 +175,15 @@ public class StockRecord extends Model {
     @Expose
     public Date createDate = new Date();
 
+    @OneToOne
     @Expose
-    public Date updateDate;
+    public User creator;
 
     public String memo;
 
     public StockRecord() {
-        this.updateDate = new Date();
+        this.creator = Login.current();
+        this.createDate = new Date();
     }
 
-    public StockRecord(StockObj stockObj) {
-        this();
-        this.stockObj = stockObj.dump();
-        this.pickAttrs();
-    }
-
-    public StockRecord(InboundRecord in, boolean normal) {
-        this(in.stockObj);
-        if(normal) {
-            this.qty = in.qty;
-            this.whouse = in.targetWhouse;
-        } else {
-            this.qty = in.badQty;
-            this.whouse = Whouse.defectiveWhouse();
-            if(this.whouse == null) throw new FastRuntimeException("未找到不良品仓,请初始化不良品仓后再进行确认入库.");
-        }
-        this.type = T.Inbound;
-        this.recordId = in.id;
-    }
-
-    public StockRecord(OutboundRecord out) {
-        this(out.stockObj);
-        this.type = T.Outbound;
-        this.qty = -out.qty;
-        this.recordId = out.id;
-        this.whouse = out.whouse;
-    }
-
-    public InboundRecord getInboundRecord() {
-        if(this.type == T.Inbound) {
-            return InboundRecord.findById(this.recordId);
-        }
-        throw new FastRuntimeException("类型(type) 错误, 无法找到对应的入库记录.");
-    }
-
-    public OutboundRecord getOutboundRecord() {
-        if(this.type == T.Outbound) {
-            return OutboundRecord.findById(this.recordId);
-        }
-        throw new FastRuntimeException("类型(type) 错误, 无法找到对应的出库记录.");
-
-    }
-
-    /**
-     * 异动来源
-     *
-     * @return
-     */
-    public String recordOrigin() {
-        return String.format("%s-%s", this.whouse.name, this.type.label());
-    }
-
-    public StockRecord valid() {
-        Validation.required("仓库", this.whouse);
-        Validation.required("数量", this.qty);
-        this.stockObj.valid();
-        return this;
-    }
-
-    public void doCerate() {
-        this.save();
-        this.updateWhouseQty();
-    }
-
-    /**
-     * 更新相关仓库的库存数据
-     */
-    public void updateWhouseQty() {
-        WhouseItem whouseItem = WhouseItem.findItem(this.stockObj, this.whouse);
-        if(whouseItem != null) {
-            whouseItem.qty += this.qty;
-            whouseItem.save();
-        }
-    }
-
-    /**
-     * 库存异动的 attributes 只存储 fba shipType 信息
-     *
-     * @return
-     */
-    public void pickAttrs() {
-        if(this.stockObj != null && !this.stockObj.attributes().isEmpty()) {
-            this.stockObj.attrs = Maps
-                    .filterKeys(this.stockObj.attrs, Predicates.in(Arrays.asList("fba", "shipType", "whouseName"
-                    )));
-            this.stockObj.setAttributes();
-        }
-    }
 }

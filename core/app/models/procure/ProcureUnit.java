@@ -2281,42 +2281,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 尝试找出对应的出库记录
-     *
-     * @return
-     */
-    public OutboundRecord outboundRecord() {
-        return OutboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + this.id.toString() + "%").first();
-    }
-
-    /**
-     * 出库信息
-     *
-     * @return
-     */
-    public String outboundMsg() {
-        if(this.isOut == OST.Outbound) {
-            OutboundRecord outboundRecord = this.outboundRecord();
-            if(outboundRecord != null && outboundRecord.state == OutboundRecord.S.Outbound) {
-                StringBuilder msg = new StringBuilder();
-                msg.append(String.format("出库数量: %s, ", outboundRecord.qty));
-
-                List<CheckTask> tasks = CheckTask.find("units_id=? and checkstat!=? ORDER BY creatat DESC",
-                        this.id, CheckTask.StatType.REPEATCHECK).fetch();
-                if(tasks != null && !tasks.isEmpty()) {
-                    msg.append(String.format("箱数: %s, ", tasks.get(0).totalBoxNum()));
-                } else {
-                    msg.append("箱数: 未知, ");
-                }
-                msg.append(String.format("出库时间: %s",
-                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(outboundRecord.outboundDate)));
-                return msg.toString();
-            }
-        }
-        return "暂无出库信息.";
-    }
-
-    /**
      * @param pids
      * @return
      */
