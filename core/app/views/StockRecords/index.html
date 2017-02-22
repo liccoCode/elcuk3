@@ -71,6 +71,7 @@
             <th>异动数量</th>
             <th>异动类型</th>
             <th>来源记录ID</th>
+            <th>操作人</th>
           </tr>
         #{list items: records, as: 'r'}
           <tr>
@@ -96,6 +97,7 @@
             <td>
               <a href="${r.showRecordLink()}" target="_blank">${r.type.label()}记录 ${r.recordId}</a>
             </td>
+            <td>${r.creator?.username}</td>
           </tr>
         #{/list}
         </table>
