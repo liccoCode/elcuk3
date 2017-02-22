@@ -1004,7 +1004,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && unit.shipType.name() != "EXPRESS") {
+                && unit.stage != STAGE.DONE && unit.shipType.name() != "EXPRESS") {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1110,10 +1110,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.stage = STAGE.IN_STORAGE;
         int diffQty = this.availableQty - unit.availableQty;
         logs.addAll(this.afterDoneUpdate(unit));
-        this.originQty = this.availableQty;
-        this.attrs.planQty = this.availableQty;
-        this.attrs.qty = this.availableQty;
-        this.inboundQty = this.availableQty;
+        if(this.parent != null) {
+            this.originQty = this.availableQty;
+            this.attrs.planQty = this.availableQty;
+            this.attrs.qty = this.availableQty;
+            this.inboundQty = this.availableQty;
+        }
+        Optional.ofNullable(this.parent).ifPresent(value -> {
+            this.originQty = this.availableQty;
+            this.attrs.planQty = this.availableQty;
+            this.attrs.qty = this.availableQty;
+            this.inboundQty = this.availableQty;
+        });
         if(unit.selling != null) {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
