@@ -86,11 +86,13 @@ public class Refunds extends Controller {
         render("/Inbounds/boxInfo.html", units);
     }
 
-    public static void updateBoxInfo(RefundUnit unit) {
-        unit = RefundUnit.findById(unit.id);
-        unit.marshalBoxs();
-        unit.save();
-        renderJSON(new Ret(true));
+    public static void updateBoxInfo(List<RefundUnit> units) {
+        try {
+            Refund.updateBoxInfo(units);
+            renderJSON(new Ret(true));
+        } catch(Exception e) {
+            renderJSON(new Ret(false));
+        }
     }
 
     public static void confirmRefund(List<String> ids) {
@@ -150,7 +152,6 @@ public class Refunds extends Controller {
     }
 
     /**
-     *
      * @param units
      * @param batchMemo
      */

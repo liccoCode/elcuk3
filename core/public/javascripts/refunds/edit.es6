@@ -2,21 +2,20 @@
  * Created by licco on 2016/12/13.
  */
 $(() => {
-  $("input[name='editBoxInfo']").click(function(e) {
+  $("input[name='editBoxInfo']").click(function (e) {
     e.stopPropagation();
-    $("#fba_carton_contents_modal").modal('show');
     let ids = $(this).data("id");
-    $("#refresh_div").load("/Refunds/refreshFbaCartonContentsByIds", {ids: ids});
+    refreshBoxInfoModal(ids);
   });
 
-  $("#submitBoxInfoBtn").click(function(e) {
+  $("#submitBoxInfoBtn").click(function (e) {
     e.stopPropagation();
     let action = $(this).data('action');
     let form = $("<form method='post' action='#{action}'></form>")
     form = form.append($("#box_info_table").clone())
-    $.post('/Refunds/updateBoxInfo', form.serialize(), function(re) {
+    $.post('/Refunds/updateBoxInfo', form.serialize(), function (re) {
       if (re) {
-        $("#fba_carton_contents_modal").modal('hide');
+        $("#refund_box_info_modal").modal('hide');
         noty({
           text: '更新包装信息成功!',
           type: 'success'
@@ -30,7 +29,24 @@ $(() => {
     });
   });
 
-  $("input[name='qty'],input[name$='qty']").change(function() {
+  $("#batchUpdateBoxInfoBtn").click(function () {
+    let ids = [];
+    $("input[type=checkbox]:checked").each(function () {
+      if ($(this).val()) {
+        ids.push($(this).val());
+      }
+    });
+    refreshBoxInfoModal(ids);
+  });
+
+  function refreshBoxInfoModal (ids) {
+    $("#refresh_div").load("/Refunds/refreshFbaCartonContentsByIds", {ids: ids}, function () {
+      $("#refund_box_info_modal").modal('show');
+      $.getScript('/public/javascripts/inbounds/boxInfo.js');
+    });
+  }
+
+  $("input[name='qty'],input[name$='qty']").change(function () {
     let $input = $(this);
     let id = $(this).data("id");
     let attr = $input.attr('name');
@@ -79,7 +95,7 @@ $(() => {
 
   });
 
-  $("#deleteBtn").click(function(e) {
+  $("#deleteBtn").click(function (e) {
     e.stopPropagation();
     if ($("#unit_table input[type='checkbox']:checked").length == 0) {
       noty({
@@ -89,7 +105,7 @@ $(() => {
       return false;
     }
     let ids = [];
-    $("#unit_table input[type='checkbox']:checked").each(function() {
+    $("#unit_table input[type='checkbox']:checked").each(function () {
       ids.push($(this).val());
     });
     let msg = "确认解除选中采购计划吗？";
@@ -98,9 +114,9 @@ $(() => {
     }
 
     if (confirm(msg)) {
-      $.post("/Refunds/deleteUnit", {ids: ids}, function(r) {
+      $.post("/Refunds/deleteUnit", {ids: ids}, function (r) {
         if (r) {
-          $("#unit_table input[type='checkbox']:checked").each(function() {
+          $("#unit_table input[type='checkbox']:checked").each(function () {
             $(this).parent("td").parent("tr").remove();
           });
           noty({
@@ -117,7 +133,7 @@ $(() => {
     }
   });
 
-  $("#deleteBtnByCreate").click(function(e) {
+  $("#deleteBtnByCreate").click(function (e) {
     e.stopPropagation();
     if ($("#unit_table input[type='checkbox']:checked").length == 0) {
       noty({
@@ -134,7 +150,7 @@ $(() => {
       return false;
     }
     if (confirm("确认解除选中采购计划吗？")) {
-      $("#unit_table input[type='checkbox']:checked").each(function() {
+      $("#unit_table input[type='checkbox']:checked").each(function () {
         $(this).parent("td").parent("tr").remove();
       });
     }
