@@ -359,7 +359,16 @@ public class Refund extends GenericModel {
                     .save();
         }
         this.save();
+    }
 
+    public static void updateBoxInfo(List<RefundUnit> units) {
+        units.forEach(unit -> {
+            RefundUnit old = RefundUnit.findById(unit.id);
+            if(old.refund.status == S.Create)
+                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            unit.marshalBoxs(old);
+            old.save();
+        });
     }
 
 }

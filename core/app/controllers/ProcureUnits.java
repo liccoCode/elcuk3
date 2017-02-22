@@ -837,7 +837,7 @@ public class ProcureUnits extends Controller {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
             renderJSON(new Ret(false, "该采购计划状态不是采购中！"));
         }
-        if(unit.cooperator != null && unit.cooperator.id != cooperId) {
+        if(unit.cooperator != null && !Objects.equals(unit.cooperator.id, cooperId)) {
             renderJSON(new Ret(false, "请输入同供应商下的采购计划！"));
         }
         if(!InboundUnit.validIsCreate(unit.id)) {

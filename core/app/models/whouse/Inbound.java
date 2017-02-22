@@ -369,8 +369,6 @@ public class Inbound extends GenericModel {
             u.planQty = i.planQty - i.qty;
             u.qty = u.planQty;
             u.unit = i.unit;
-            u.mainBoxInfo = i.mainBoxInfo;
-            u.lastBoxInfo = i.lastBoxInfo;
             u.save();
         });
     }
