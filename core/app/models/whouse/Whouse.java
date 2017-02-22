@@ -264,7 +264,7 @@ public class Whouse extends Model {
          * 1. 处理 60 天内的运输单;
          * 2. 规则:
          *  空运: 每周三;
-         *  海运: DE/US 周一, IT 周五, UK 周五
+         *  海运: DE/US 周一, IT 周五, UK 周四
          */
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
@@ -285,8 +285,12 @@ public class Whouse extends Model {
                         M.AMAZON_JP).contains(type)) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
                 }
+            } else if(nextBeginDate.getDayOfWeek() == 4) {
+                if(M.AMAZON_UK == type) {
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                }
             } else if(nextBeginDate.getDayOfWeek() == 5) {
-                if(Arrays.asList(M.AMAZON_UK, M.AMAZON_IT).contains(type)) {
+                if(M.AMAZON_IT == type) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                 }
                 //else
