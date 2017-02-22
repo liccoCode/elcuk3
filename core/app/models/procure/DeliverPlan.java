@@ -279,14 +279,14 @@ public class DeliverPlan extends GenericModel {
     }
 
     public long showNum(boolean showAll) {
-        if(showAll)
+        if(!showAll)
             return this.units.size();
         return this.units.stream()
                 .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY).count();
     }
 
     public List<ProcureUnit> showUnits(boolean showAll) {
-        if(showAll)
+        if(!showAll)
             return this.units;
         return this.units.stream()
                 .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY)
