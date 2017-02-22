@@ -68,7 +68,6 @@
             <th>名称</th>
             <th>收货类型</th>
             <th>供应商</th>
-            <th>项目名称</th>
             <th>状态</th>
             <th width="150px;">制单时间</th>
             <th width="150px;">收货人/收货日期</th>
@@ -87,7 +86,6 @@
             </td>
             <td><i class="${i.type.flag()}"> </i>${i.type?.label()}</td>
             <td>${i.cooperator?.name}</td>
-            <td>${i.projectName}</td>
             <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>
             <td>#{time_tooltip time:i.createDate, datetime:true/}</td>
             <td>${i.receiver?.username} / #{time_tooltip time:i.receiveDate, datetime:false/}</td>

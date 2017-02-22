@@ -107,12 +107,6 @@ public class Refund extends GenericModel {
     public Cooperator cooperator;
 
     /**
-     * 项目名称
-     */
-    @Required
-    public String projectName;
-
-    /**
      * 备注
      */
     public String memo;
@@ -167,7 +161,6 @@ public class Refund extends GenericModel {
         this.creator = Login.current();
         this.createDate = new Date();
         this.refundDate = new Date();
-        this.projectName = unit.projectName;
         this.cooperator = unit.cooperator;
         this.type = (unit.stage == ProcureUnit.STAGE.IN_STORAGE ? T.After_Inbound : T.After_Receive);
     }
@@ -302,7 +295,6 @@ public class Refund extends GenericModel {
             ProcureUnit pro = ProcureUnit.findById(unit.id);
             pro.unqualifiedQty -= unit.attrs.qty;
             pro.save();
-            refund.projectName = pro.projectName;
             refund.cooperator = pro.cooperator;
             RefundUnit u = new RefundUnit();
             u.unit = unit;
@@ -350,7 +342,6 @@ public class Refund extends GenericModel {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "name", refund.name));
         logs.addAll(Reflects.logFieldFade(this, "refundDate", refund.refundDate));
-        logs.addAll(Reflects.logFieldFade(this, "projectName", refund.projectName));
         if(refund.whouseUser != null)
             logs.addAll(Reflects.logFieldFade(this, "whouseUser.id", refund.whouseUser.id));
         logs.addAll(Reflects.logFieldFade(this, "memo", refund.memo));

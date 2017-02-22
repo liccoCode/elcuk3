@@ -82,7 +82,6 @@ public class Inbounds extends Controller {
         inbound.id = Inbound.id();
         inbound.receiver = Login.current();
         inbound.createDate = new Date();
-        inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         inbound.status = inbound.type == Inbound.T.Purchase ? Inbound.S.Create : Inbound.S.Handing;
         inbound.save();
         inbound.create(dtos);
@@ -115,7 +114,6 @@ public class Inbounds extends Controller {
 
     public static void update(Inbound inbound, String inboundId) {
         Inbound in = Inbound.findById(inboundId);
-        inbound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         in.saveAndLog(inbound);
         flash.success("更新成功!");
         edit(in.id);
@@ -173,7 +171,6 @@ public class Inbounds extends Controller {
         if(bound.status == Inbound.S.Create) {
             bound.receiveDate = inbound.receiveDate;
             bound.name = inbound.name;
-            bound.projectName = inbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
             bound.memo = inbound.memo;
             bound.status = Inbound.S.Handing;
             bound.saveLog("确认收货", inboundId);

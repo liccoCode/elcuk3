@@ -77,7 +77,6 @@
           <th width="250px;">名称</th>
           <th>物流信息</th>
           <th>供应商</th>
-          <th>项目名称</th>
           <th>退货类型</th>
           <th>状态</th>
           <th width="150px;">退货日期</th>
@@ -96,7 +95,6 @@
           </td>
           <td>${r.info}</td>
           <td>${r.cooperator?.name}</td>
-          <td>${r.projectName}</td>
           <td>${r.type?.label()}</td>
           <td style="background-color:${r.status.rgb()}">${r.status?.label()}</td>
           <td>#{time_tooltip time:r.refundDate/}</td>
@@ -105,7 +103,7 @@
           <td title="${r.memo}">${r.memo}</td>
         </tr>
         <tr id="ptt_${r_index}" style="display:none; background-color:#F2F2F2">
-          <td colspan="12">
+          <td colspan="11">
             <div>
                 #{render 'Refunds/_units.html', units:r.unitList, is_check: false/}
             </div>
