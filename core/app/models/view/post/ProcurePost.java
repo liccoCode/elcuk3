@@ -142,93 +142,94 @@ public class ProcurePost extends Post<ProcureUnit> {
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray())
+        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray())
                 .fetch(this.page, this.perSize);
     }
 
     public List<ProcureUnit> queryForExcel() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
+        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureUnit.count(params._1, params._2.toArray());
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<>();
-
+        sbd.append("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.fba f LEFT JOIN p.selling s ");
+        sbd.append("LEFT JOIN p.deliverplan d WHERE 1=1 ");
         Long procrueId = isSearchForId();
         if(procrueId != null) {
-            sbd.append("id=?");
+            sbd.append("p.id=?");
             params.add(procrueId);
             return new F.T2<>(sbd.toString(), params);
         }
 
         if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
-        sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
+        sbd.append(" AND p.").append(this.dateType).append(">=?").append(" AND p.").append(this.dateType)
                 .append("<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 
         if(this.whouseId > 0) {
-            sbd.append(" AND whouse.id=?");
+            sbd.append(" AND p.whouse.id=?");
             params.add(this.whouseId);
         }
 
         if(this.cooperatorId > 0) {
-            sbd.append(" AND cooperator.id=? ");
+            sbd.append(" AND p.cooperator.id=? ");
             params.add(this.cooperatorId);
         }
 
         if(stages.size() > 0) {
-            sbd.append(" AND stage IN " + SqlSelect.inlineParam(stages));
+            sbd.append(" AND p.stage IN " + SqlSelect.inlineParam(stages));
         }
 
         if(this.shipType != null) {
-            sbd.append(" AND shipType=? ");
+            sbd.append(" AND p.shipType=? ");
             params.add(this.shipType);
         }
 
         if(this.isConfirm != null) {
-            sbd.append(" AND isConfirm=? ");
+            sbd.append(" AND p.isConfirm=? ");
             params.add(this.isConfirm == C.YES);
         }
 
         if(StringUtils.isNotEmpty(this.projectName)) {
-            sbd.append(" AND projectName=? ");
+            sbd.append(" AND p.projectName=? ");
             params.add(this.projectName);
         }
 
         if(result != null) {
-            sbd.append(" AND result = ? ");
+            sbd.append(" AND p.result = ? ");
             params.add(this.result);
         }
 
         if(type != null) {
-            sbd.append(" AND type = ? ");
+            sbd.append(" AND p.type = ? ");
             params.add(this.type);
         }
 
         if(this.isPlaced != null) {
-            sbd.append(" AND isPlaced=? ");
+            sbd.append(" AND p.isPlaced=? ");
             params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
         }
 
         if(this.isOut != null) {
-            sbd.append(" AND isOut=?");
+            sbd.append(" AND p.isOut=?");
             params.add(this.isOut);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append("product.sku LIKE ? OR ")
-                    .append("selling.sellingId LIKE ? OR ")
-                    .append("deliverplan.id LIKE ? OR ")
-                    .append("fba.shipmentId LIKE ?  ")
+                    .append("p.product.sku LIKE ? OR ")
+                    .append("s.sellingId LIKE ? OR ")
+                    .append("d.id LIKE ? OR ")
+                    .append("f.shipmentId LIKE ?  ")
                     .append(") ");
             for(int i = 0; i < 4; i++) params.add(word);
         }
