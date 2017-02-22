@@ -163,7 +163,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         sbd.append("LEFT JOIN p.deliverplan d WHERE 1=1 ");
         Long procrueId = isSearchForId();
         if(procrueId != null) {
-            sbd.append("p.id=?");
+            sbd.append(" AND p.id=?");
             params.add(procrueId);
             return new F.T2<>(sbd.toString(), params);
         }

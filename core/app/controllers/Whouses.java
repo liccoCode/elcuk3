@@ -6,13 +6,11 @@ import helper.J;
 import helper.Webs;
 import models.User;
 import models.market.Account;
-import models.market.M;
 import models.procure.Cooperator;
 import models.procure.FBACenter;
 import models.procure.Shipment;
 import models.product.Product;
 import models.view.Ret;
-import models.whouse.StockObj;
 import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -106,16 +104,6 @@ public class Whouses extends Controller {
         for(Product p : products) skus.add(p.sku);
         //TODO 物料编码查询
         renderJSON(J.json(skus));
-    }
-
-    /**
-     * 根据 ID 查询出对应的对象(SKU 产品物料 包材物料)
-     *
-     * @param id
-     */
-    public static void loadStockObj(String id) {
-        StockObj stockObj = new StockObj(id, StockObj.guessType(id));
-        renderJSON(GTs.newMap("type", stockObj.stockObjType).put("name", stockObj.name()).build());
     }
 
     /**
