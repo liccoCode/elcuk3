@@ -104,6 +104,7 @@ public class ProcureUnits extends Controller {
             p.stages.add(ProcureUnit.STAGE.DELIVERY);
             p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         }
+        p.pagination = false;
         render(p);
     }
 

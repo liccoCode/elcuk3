@@ -142,8 +142,12 @@ public class ProcurePost extends Post<ProcureUnit> {
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count();
-        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray())
-                .fetch(this.page, this.perSize);
+        if(this.pagination)
+            return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray())
+                    .fetch(this.page, this.perSize);
+        else
+            return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
+
     }
 
     public List<ProcureUnit> queryForExcel() {
