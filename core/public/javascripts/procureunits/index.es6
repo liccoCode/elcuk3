@@ -49,7 +49,7 @@ $(() => {
         k++;
       }
     });
-    if (j > 0  && $btn.attr("id") != 'createOutboundBtn') {
+    if (j > 0 && $btn.attr("id") != 'createOutboundBtn') {
       noty({
         text: '请选择【供应商】【项目名称】一致的采购计划！',
         type: 'error'
@@ -130,6 +130,17 @@ $(() => {
     e.preventDefault();
     $("#type").val($(this).text() == '采购分拆' ? 'ProcureSplit' : 'StockSplit');
     $("#search_Form").submit();
+  });
+
+  $(document).ready(function () {
+    $("#unit_table").dataTable({
+      "sDom": "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+      "sPaginationType": "full_numbers",
+      "iDisplayLength": 50,
+      "aoColumnDefs":[
+        {"bSortable": false, "aTargets": [0]}
+      ]
+    });
   });
 
 });

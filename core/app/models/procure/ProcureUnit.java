@@ -1171,17 +1171,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        if(diff != 0 && this.stage.name().equals("IN_STORAGE")) {
-            this.availableQty = unit.availableQty;
-            this.originQty = this.availableQty;
-            this.attrs.planQty = this.availableQty;
-            this.attrs.qty = this.availableQty;
-            this.inboundQty = this.availableQty;
-            if(this.parent != null) {
-                this.parent.availableQty += diff;
-                this.parent.save();
+        if(this.stage.name().equals("IN_STORAGE")) {
+            if(diff != 0) {
+                this.availableQty = unit.availableQty;
+                this.originQty = this.availableQty;
+                this.attrs.planQty = this.availableQty;
+                this.attrs.qty = this.availableQty;
+                this.inboundQty = this.availableQty;
+                if(this.parent != null) {
+                    this.parent.availableQty += diff;
+                    this.parent.save();
+                }
+                this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
             }
-            this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
+            this.currWhouse = unit.isb2b ? Whouse.findById(19) : this.currWhouse;
         } else if(diff != 0) {
             this.attrs.planQty = unit.attrs.planQty;
             if(this.parent != null) {
