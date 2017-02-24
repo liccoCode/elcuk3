@@ -37,9 +37,7 @@
         </td>
         <td>${unit.id}</td>
         <td>${unit.unit?.id} </td>
-        <td>
-          <a href="@{Deliveryments.show(unit.unit?.deliveryment?.id)}" target="_blank">${unit.unit?.deliveryment?.id}</a>
-        </td>
+        <td>${unit.unit?.deliveryment?.id}</td>
         <td style="word-break:break-all;">
           <a href="@{Sellings.selling(unit.unit?.selling?.sellingId)}" target="_blank">${unit.unit?.selling?.sellingId}</a>
         </td>
