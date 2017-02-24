@@ -54,6 +54,7 @@
         <th width="60px;">入库数</th>
         <th width="60px;">可用库存</th>
         <th width="60px;">不良品数</th>
+        <th>预计收货时间</th>
         <th>实际收货时间</th>
         <th width="120px;">FBA-ShipmentId</th>
         <th>项目名称</th>
@@ -69,6 +70,7 @@
         <td>${u.inboundQty}</td>
         <td>${u.availableQty}</td>
         <td>${u.unqualifiedQty}</td>
+        <td>#{time_tooltip time:u.attrs.planDeliveryDate/}</td>
         <td>#{time_tooltip time:u.attrs.deliveryDate/}</td>
         <td>${u.fba?.shipmentId}</td>
         <td>${u.projectName}</td>

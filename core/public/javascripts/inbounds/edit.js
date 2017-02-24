@@ -18,7 +18,22 @@ $(() => {
       });
       $("input[name='inbound.name']").focus();
     }
-    $('#edit_inbound_form').submit();
+
+    let valid = true;
+    $("input[name='qty']").each(function () {
+      if ($(this).val() <= 0) {
+        noty({
+          text: '实际交货数量不能等于0!',
+          type: 'warning'
+        });
+        $(this).focus();
+        valid = false;
+        return false;
+      }
+    });
+    if (valid) {
+      $('#edit_inbound_form').submit();
+    }
   });
 
   $('#unit_table').on('change', 'td>:input[name]', function () {

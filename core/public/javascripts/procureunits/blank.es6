@@ -227,11 +227,13 @@ $(() => {
 
   $("#create_unit").click(function (e) {
     e.preventDefault();
-    if ($("#planQty").val() && $("input[name='unit.attrs.planDeliveryDate']").val()) {
+    let planDeliveryDate = $("input[name='unit.attrs.planDeliveryDate']").val();
+    let planShipDate = $("input[name='unit.attrs.planShipDate']").val();
+    if ($("#planQty").val() && planDeliveryDate && planShipDate) {
       $("#new_procure_unit").submit();
     } else {
       noty({
-        text: "请先填写采购数量和预计交货日期！",
+        text: "写采购数量、预计交货日期、预计运输时间 必填",
         type: 'error'
       });
     }
