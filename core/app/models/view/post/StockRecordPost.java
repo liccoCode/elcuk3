@@ -1,8 +1,6 @@
 package models.view.post;
 
-import helper.DBUtils;
 import helper.Dates;
-import models.whouse.StockObj;
 import models.whouse.StockRecord;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
@@ -11,7 +9,6 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,25 +116,4 @@ public class StockRecordPost extends Post<StockRecord> {
         return this.count();
     }
 
-    /**
-     * 盘点
-     *
-     * @return
-     */
-    public List<Map<String, Object>> checkRecords() {
-        F.T2<String, List<Object>> params = this.params();
-
-        String sql = String.format(
-                "SELECT SUM(s.qty) as qty,s.stockObjId,s.stockObjType,w.name as whouse_name,s.attributes" +
-                        " FROM StockRecord s " +
-                        " LEFT JOIN Whouse w ON s.whouse_id=w.id" +
-                        " WHERE %s AND s.qty!=0" +
-                        " GROUP BY s.whouse_id,s.stockObjType,s.stockObjId,s.attributes", //whouseName fba shipType
-                //如何处理多种类型的 StockObj(SKU 物料)
-                params._1);
-
-        List<Map<String, Object>> records = DBUtils.rows(sql, params._2.toArray());
-        for(Map<String, Object> record : records) record.put("stockObj", new StockObj(record));
-        return records;
-    }
 }

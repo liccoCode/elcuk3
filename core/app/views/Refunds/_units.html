@@ -1,12 +1,12 @@
 <table class="table table-condensed table-bordered" id="unit_table">
   <tr>
   #{if is_check}
-    <th width="20px;"><input type="checkbox"></th>
+    <th width="18px;"><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
   #{/if}
-    <th style="width:40px;">记录ID</th>
+    <th style="width:30px;">#</th>
     <th style="width:60px;">采购计划</th>
     <th style="width:60px;">采购单</th>
-    <th style="width:320px;">Selling</th>
+    <th style="width:300px;">Selling</th>
     <th width="200px;">SKU</th>
     <th>产品名称</th>
     <th style="width:120px;">FBA-ShipmentId</th>
@@ -17,6 +17,7 @@
     <th style="width:100px;">去往仓库</th>
     <th style="width:60px;">运输方式</th>
     <th style="width:45px;">阶段</th>
+    <th>项目名称</th>
   </tr>
 #{list items:units, as:'unit'}
   <tr class="text-center" id="unit_${unit.id}">
@@ -48,6 +49,7 @@
     <td>${unit.unit?.whouse?.name()}</td>
     <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
     <td style="background-color:${unit.unit?.stage.rgb()}">${unit.unit?.stage?.label()}</td>
+    <td>${unit.unit.projectName}</td>
   </tr>
 #{/list}
 </table>

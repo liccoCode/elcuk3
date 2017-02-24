@@ -23,7 +23,7 @@
 #{list items:units, as:'unit'}
   <tr>
     <td>#{if flag}${unit.id}#{/if}#{else }${unit.unit.id}#{/else}</td>
-    <td>#{if flag}${unit.shipmentQty()}#{/if}#{else }${unit.unit.shipmentQty()}#{/else}</td>
+    <td>#{if flag}${unit.shipmentQty()}#{/if}#{else }${unit.planQty}#{/else}</td>
     <td>
       <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.num' value='${unit.mainBox?.num}'
              data-real="${flag ? unit.shipmentQty() : unit.unit.shipmentQty()}"/>

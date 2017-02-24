@@ -829,7 +829,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
             newUnit.currWhouse = Whouse
-                    .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
+                    .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand(), unit.fba);
+        } else {
+            newUnit.currWhouse = unit.isb2b ? Whouse.findById((long) 19) : null;
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
@@ -1004,7 +1006,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && unit.shipType.name() != "EXPRESS") {
+                && unit.stage != STAGE.DONE && unit.shipType.name() != "EXPRESS") {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1110,16 +1112,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.stage = STAGE.IN_STORAGE;
         int diffQty = this.availableQty - unit.availableQty;
         logs.addAll(this.afterDoneUpdate(unit));
-        this.originQty = this.availableQty;
-        this.attrs.planQty = this.availableQty;
-        this.attrs.qty = this.availableQty;
-        this.inboundQty = this.availableQty;
+        if(this.parent != null && this.type == T.StockSplit) {
+            this.originQty = this.availableQty;
+            this.attrs.planQty = this.availableQty;
+            this.attrs.qty = this.availableQty;
+            this.inboundQty = this.availableQty;
+        }
         if(unit.selling != null) {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
-                    this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+                    this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand(), this.fba);
         } else if(this.projectName.equals("B2B")) {
-            this.currWhouse = Whouse.autoMatching(unit.shipType, "B2B");
+            this.currWhouse = Whouse.autoMatching(unit.shipType, "B2B", this.fba);
         }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
@@ -1163,17 +1167,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
-        if(diff != 0 && this.stage.name().equals("IN_STORAGE")) {
-            this.availableQty = unit.availableQty;
-            this.originQty = this.availableQty;
-            this.attrs.planQty = this.availableQty;
-            this.attrs.qty = this.availableQty;
-            this.inboundQty = this.availableQty;
-            if(this.parent != null) {
-                this.parent.availableQty += diff;
-                this.parent.save();
+        if(this.stage.name().equals("IN_STORAGE")) {
+            if(diff != 0) {
+                this.availableQty = unit.availableQty;
+                this.originQty = this.availableQty;
+                this.attrs.planQty = this.availableQty;
+                this.attrs.qty = this.availableQty;
+                this.inboundQty = this.availableQty;
+                if(this.parent != null) {
+                    this.parent.availableQty += diff;
+                    this.parent.save();
+                }
+                this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
             }
-            this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
+            this.currWhouse = unit.isb2b ? Whouse.findById((long) 19) : this.currWhouse;
         } else if(diff != 0) {
             this.attrs.planQty = unit.attrs.planQty;
             if(this.parent != null) {
@@ -2281,42 +2288,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 尝试找出对应的出库记录
-     *
-     * @return
-     */
-    public OutboundRecord outboundRecord() {
-        return OutboundRecord.find("attributes LIKE ?", "%\"procureunitId\":" + this.id.toString() + "%").first();
-    }
-
-    /**
-     * 出库信息
-     *
-     * @return
-     */
-    public String outboundMsg() {
-        if(this.isOut == OST.Outbound) {
-            OutboundRecord outboundRecord = this.outboundRecord();
-            if(outboundRecord != null && outboundRecord.state == OutboundRecord.S.Outbound) {
-                StringBuilder msg = new StringBuilder();
-                msg.append(String.format("出库数量: %s, ", outboundRecord.qty));
-
-                List<CheckTask> tasks = CheckTask.find("units_id=? and checkstat!=? ORDER BY creatat DESC",
-                        this.id, CheckTask.StatType.REPEATCHECK).fetch();
-                if(tasks != null && !tasks.isEmpty()) {
-                    msg.append(String.format("箱数: %s, ", tasks.get(0).totalBoxNum()));
-                } else {
-                    msg.append("箱数: 未知, ");
-                }
-                msg.append(String.format("出库时间: %s",
-                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(outboundRecord.outboundDate)));
-                return msg.toString();
-            }
-        }
-        return "暂无出库信息.";
-    }
-
-    /**
      * @param pids
      * @return
      */
@@ -2462,10 +2433,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return true;
         }
         int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
-        if(size > 0) {
-            return true;
-        }
-        return false;
+        return size > 0;
     }
 
     public boolean postFBAValidate(CheckTaskDTO dto) {
@@ -2483,7 +2451,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
                 this.mainBox.height == 0)
             return false;
-        return true;
+        int total_main = this.mainBox.num * this.mainBox.boxNum;
+        int total_last = this.lastBox.num * this.lastBox.boxNum;
+        int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
+                this.availableQty : this.outQty;
+        return total_main + total_last == real_qty;
     }
 
     /**
@@ -2497,6 +2469,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             return false;
         }
+    }
+
+    public Date qcDate() {
+        InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id ", this.id).first();
+        return unit != null ? unit.qcDate : null;
     }
 
 }

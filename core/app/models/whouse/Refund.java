@@ -19,6 +19,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by licco on 2016/11/25.
@@ -106,12 +107,6 @@ public class Refund extends GenericModel {
     public Cooperator cooperator;
 
     /**
-     * 项目名称
-     */
-    @Required
-    public String projectName;
-
-    /**
      * 备注
      */
     public String memo;
@@ -120,7 +115,6 @@ public class Refund extends GenericModel {
      * 创建时间
      */
     @Required
-    @Temporal(TemporalType.DATE)
     public Date createDate;
 
     /**
@@ -167,7 +161,6 @@ public class Refund extends GenericModel {
         this.creator = Login.current();
         this.createDate = new Date();
         this.refundDate = new Date();
-        this.projectName = unit.projectName;
         this.cooperator = unit.cooperator;
         this.type = (unit.stage == ProcureUnit.STAGE.IN_STORAGE ? T.After_Inbound : T.After_Receive);
     }
@@ -284,29 +277,35 @@ public class Refund extends GenericModel {
     /**
      * 不良品退货
      *
-     * @param unitId
-     * @param qty
+     * @param units
      * @param memo
      */
-    public static void unQualifiedHandle(Long unitId, int qty, String memo) {
-        ProcureUnit unit = ProcureUnit.findById(unitId);
-        unit.unqualifiedQty -= qty;
-        unit.save();
-        Refund refund = new Refund(unit);
+    public static void unQualifiedHandle(List<ProcureUnit> units, String memo) {
+        Refund refund = new Refund();
         refund.id = id();
         refund.memo = memo;
         refund.whouseUser = Login.current();
         refund.status = S.Refund;
         refund.type = T.After_Receive;
+        refund.creator = Login.current();
+        refund.createDate = new Date();
+        refund.refundDate = new Date();
         refund.save();
-        RefundUnit u = new RefundUnit();
-        u.unit = unit;
-        u.refund = refund;
-        u.planQty = qty;
-        u.qty = qty;
-        u.save();
-        createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
-        new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unitId).save();
+        units.stream().filter(unit -> Optional.ofNullable(unit.id).isPresent()).forEach(unit -> {
+            ProcureUnit pro = ProcureUnit.findById(unit.id);
+            pro.unqualifiedQty -= unit.attrs.qty;
+            pro.save();
+            refund.cooperator = pro.cooperator;
+            RefundUnit u = new RefundUnit();
+            u.unit = unit;
+            u.refund = refund;
+            u.planQty = unit.attrs.qty;
+            u.qty = unit.attrs.qty;
+            u.save();
+            createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
+            new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unit.id).save();
+        });
+        refund.save();
     }
 
     /**
@@ -343,7 +342,6 @@ public class Refund extends GenericModel {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "name", refund.name));
         logs.addAll(Reflects.logFieldFade(this, "refundDate", refund.refundDate));
-        logs.addAll(Reflects.logFieldFade(this, "projectName", refund.projectName));
         if(refund.whouseUser != null)
             logs.addAll(Reflects.logFieldFade(this, "whouseUser.id", refund.whouseUser.id));
         logs.addAll(Reflects.logFieldFade(this, "memo", refund.memo));
@@ -352,7 +350,16 @@ public class Refund extends GenericModel {
                     .save();
         }
         this.save();
+    }
 
+    public static void updateBoxInfo(List<RefundUnit> units) {
+        units.forEach(unit -> {
+            RefundUnit old = RefundUnit.findById(unit.id);
+            if(old.refund.status == S.Create)
+                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            unit.marshalBoxs(old);
+            old.save();
+        });
     }
 
 }

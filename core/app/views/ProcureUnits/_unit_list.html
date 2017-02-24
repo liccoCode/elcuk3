@@ -1,5 +1,5 @@
 #{set tr_key: key ? key : 'unit'/}
-<table class="table table-condensed table-bordered" id="unit_table">
+<table class="table table-condensed table-bordered dataTable" id="unit_table">
   <tr>
   #{if checkbox}
     <th width="20px;">
@@ -14,6 +14,7 @@
     </th>
   #{/if}
     <th width="40px;">#</th>
+    <th>父ID</th>
     <th width="40px;">阶段</th>
     <th width="150px;">Selling</th>
     <th>Sku</th>
@@ -84,6 +85,7 @@
         #{/if}<br>
     ${unit.id}
     </td>
+    <td>${unit.parent?.id}</td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td class="selling_id" style="word-break:break-all;">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>

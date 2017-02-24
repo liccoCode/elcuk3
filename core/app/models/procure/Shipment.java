@@ -13,7 +13,6 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
 import models.whouse.Outbound;
-import models.whouse.ShipPlan;
 import models.whouse.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -1618,23 +1617,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.validate();
         Validation.current().valid(this);
-    }
-
-    /**
-     * 初始化出库信息
-     */
-    public void initOutbound() {
-        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        if(this.items != null && !this.items.isEmpty()) {
-            for(ShipItem item : this.items) {
-                ShipPlan plan = new ShipPlan(item);
-                plan.valid();
-                if(!plan.exist() && !Validation.hasErrors()) {
-                    plan.save();
-                    plan.triggerRecord(cooperator != null ? cooperator.id.toString() : "");
-                }
-            }
-        }
     }
 
     public String showRealDay() {

@@ -1,6 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'手动单采购计划'/}
 #{set 'moreScripts'}
+    #{script 'deliveryments/manual.es6'/}
 #{/set}
 <style>
   .table td, .table th{
@@ -33,7 +34,8 @@
       <tr>
         <th>价格</th>
         <td>
-          <input type="text" width="60px;" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+          <input type="text" width="60px;" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}"
+              #{if !Arrays.asList("PLAN","DELIVERY").contains(unit.stage.name())} readonly #{/if}>
             #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
         </td>
 

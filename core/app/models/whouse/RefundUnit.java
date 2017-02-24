@@ -87,6 +87,11 @@ public class RefundUnit extends Model {
         this.lastBoxInfo = J.json(this.lastBox);
     }
 
+    public void marshalBoxs(RefundUnit unit) {
+        unit.mainBoxInfo = J.json(this.mainBox);
+        unit.lastBoxInfo = J.json(this.lastBox);
+    }
+
     public void updateAttr(String attr, String value) {
         List<String> logs = new ArrayList<>();
         switch(attr) {
@@ -102,7 +107,6 @@ public class RefundUnit extends Model {
                 .save();
         this.save();
     }
-
 
 
 }

@@ -41,35 +41,6 @@ public class LinkHelper extends JavaExtensions {
         return "#";
     }
 
-    public static String showStockObjLink(StockObj obj) {
-        switch(obj.stockObjType) {
-            case SKU:
-                return Router.getFullUrl("Products.show", GTs.newMap("id", obj.stockObjId).build());
-            case PRODUCT_MATERIEL:
-                //TODO
-                return "";
-            case PACKAGE_MATERIEL:
-                //TODO
-                return "";
-            default:
-                return "";
-        }
-    }
-
-    public static String fnSKULabelLink(StockObj obj) {
-        if(!obj.attributes().isEmpty() && obj.attributes().containsKey("procureunitId") &&
-                StringUtils.isNotBlank(obj.fnsku())) {
-            ProcureUnit procureUnit = ProcureUnit.findById(NumberUtils.toLong(obj.attrs.get("procureunitId")
-                    .toString()));
-            if(procureUnit != null && procureUnit.selling != null) {
-                return Router.getFullUrl("ProcureUnits.fnSkuLable",
-                        GTs.newMap("id", procureUnit.selling.sellingId).put("includeSku", false).build()
-                );
-            }
-        }
-        return "";
-    }
-
     public static String showRecordLink(StockRecord stockRecord) {
         Long idMatch = stockRecord.recordId;
         switch(stockRecord.type) {

@@ -142,13 +142,6 @@ public class Inbound extends GenericModel {
     @OneToOne
     public User receiver;
 
-
-    /**
-     * 项目名称
-     */
-    @Required
-    public String projectName;
-
     /**
      * 备注
      */
@@ -339,7 +332,6 @@ public class Inbound extends GenericModel {
                         this.plan != null ? this.plan.id : "");
                 refund.cooperator = this.cooperator;
                 refund.type = Refund.T.After_Receive;
-                refund.projectName = this.projectName;
                 refund.createRefundByInbound(return_units);
                 Refund.confirmRefund(Arrays.asList(refund));
             }
@@ -360,7 +352,6 @@ public class Inbound extends GenericModel {
         inbound.status = S.Create;
         inbound.createDate = new Date();
         inbound.receiver = this.receiver;
-        inbound.projectName = this.projectName;
         inbound.save();
         tail_units.forEach(i -> {
             InboundUnit u = new InboundUnit();
@@ -369,8 +360,6 @@ public class Inbound extends GenericModel {
             u.planQty = i.planQty - i.qty;
             u.qty = u.planQty;
             u.unit = i.unit;
-            u.mainBoxInfo = i.mainBoxInfo;
-            u.lastBoxInfo = i.lastBoxInfo;
             u.save();
         });
     }
@@ -389,7 +378,6 @@ public class Inbound extends GenericModel {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "name", inbound.name));
         logs.addAll(Reflects.logFieldFade(this, "receiveDate", inbound.receiveDate));
-        logs.addAll(Reflects.logFieldFade(this, "projectName", inbound.projectName));
         logs.addAll(Reflects.logFieldFade(this, "memo", inbound.memo));
         if(logs.size() > 0) {
             new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)

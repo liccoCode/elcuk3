@@ -1,6 +1,8 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.procure.FBAShipment;
+import org.apache.commons.lang.StringUtils;
 import helper.Dates;
 import models.User;
 import models.market.Account;
@@ -57,6 +59,18 @@ public class Whouse extends Model {
             public String label() {
                 return "货代仓库";
             }
+        },
+        NO_FBA {
+            @Override
+            public String label() {
+                return "综合仓";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B";
+            }
         };
 
         public abstract String label();
@@ -91,6 +105,7 @@ public class Whouse extends Model {
     @Column(nullable = false)
     @Expose
     @Required
+    @Enumerated(EnumType.STRING)
     public T type;
 
     @Lob
@@ -132,6 +147,11 @@ public class Whouse extends Model {
      */
     @Expose
     public boolean isEXPRESS = false;
+
+    /**
+     * 逻辑删除
+     */
+    public boolean del = false;
 
     @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
@@ -367,40 +387,39 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        if(unit.unit.selling != null)
-            return Whouse.autoMatching(unit.unit.shipType,
-                    unit.unit.projectName.equals("B2B") ? "B2B" : unit.unit.selling.market.shortHand());
-        else if(unit.unit.projectName.equals("B2B")) {
-            return Whouse.autoMatching(unit.unit.shipType, "B2B");
-        } else {
-            return null;
-        }
+        String country = unit.unit.selling == null ? "" : unit.unit.selling.market.shortHand();
+        return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
     }
 
-    public static Whouse autoMatching(Shipment.T shipType, String country) {
+    public static Whouse autoMatching(Shipment.T shipType, String country, FBAShipment fba) {
         if(country.equals("B2B")) {
             //B2B综合仓
-            return Whouse.findById((long) 19);
+            return Whouse.find("type=?", T.B2B).first();
         }
-        StringBuffer sql = new StringBuffer("type=? ");
-        if(shipType == null) {
-            return null;
+        if(fba == null) {
+            return Whouse.find("country = ? AND type = ? ", country, T.NO_FBA).first();
+        } else {
+            StringBuilder sql = new StringBuilder("1=1 ");
+            List<Object> params = new ArrayList<>();
+            switch(shipType) {
+                case AIR:
+                    sql.append("AND isAIR=true AND country = ? ");
+                    params.add(country);
+                    break;
+                case EXPRESS:
+                    sql.append("AND isEXPRESS=true");
+                    break;
+                case SEA:
+                    sql.append("AND isSEA=true AND country = ? ");
+                    params.add(country);
+                    break;
+                default:
+                    sql.append("");
+            }
+            sql.append(" AND type=? AND del=false");
+            params.add(T.SELF);
+            return Whouse.find(sql.toString(), params.toArray()).first();
         }
-        switch(shipType) {
-            case AIR:
-                sql.append("AND isAIR=true");
-                break;
-            case EXPRESS:
-                sql.append("AND isEXPRESS=true");
-                break;
-            case SEA:
-                sql.append("AND isSEA=true");
-                break;
-            default:
-                sql.append("");
-        }
-        sql.append(" AND country = ? ");
-        return Whouse.find(sql.toString(), T.SELF, country).first();
     }
 
 }

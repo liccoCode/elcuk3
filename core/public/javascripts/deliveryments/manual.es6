@@ -90,7 +90,7 @@ $(() => {
               alert(r.message);
             } else {
               $input.parent("td").parent("tr").find("input[name$='attrs.price']").val(r.price);
-              $input.parent("td").parent("tr").next("tr").find("input[name='box_size']").attr("boxSize",r.boxSize);
+              $input.parent("td").parent("tr").next("tr").find("input[name='box_size']").attr("boxSize", r.boxSize);
               $input.parent("td").parent("tr").find("option:contains(" + r.currency + ")").prop('selected', true);
               calu_box_size();
             }
@@ -105,14 +105,29 @@ $(() => {
   $("#addSkuBtn").click(function (e) {
     e.preventDefault();
     if (!$("select[name='dmt.cooperator.id']").val()) {
-       alert("请先选择 供应商！");
-       return;
+      alert("请先选择 供应商！");
+      return;
     }
     let index = $("input[name$='product.sku']").length;
     let html = _.template($("#copy").text())({"num": index});
     $("#btn_tr").before(html);
     window.$ui.dateinput();
     init();
+    validQty();
   });
+
+  function validQty () {
+    $("input[name$='attrs.planQty'],input[name$='availableQty']").change(function () {
+      if ($(this).val() < 0) {
+        noty({
+          text: '数量不能小于0！',
+          type: 'error'
+        });
+        $(this).val(0);
+      }
+    });
+  }
+
+  validQty();
 
 });
