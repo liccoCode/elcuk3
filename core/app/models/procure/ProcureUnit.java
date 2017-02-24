@@ -2433,10 +2433,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return true;
         }
         int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
-        if(size > 0) {
-            return true;
-        }
-        return false;
+        return size > 0;
     }
 
     public boolean postFBAValidate(CheckTaskDTO dto) {
@@ -2454,7 +2451,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
                 this.mainBox.height == 0)
             return false;
-        return true;
+        int total_main = this.mainBox.num * this.mainBox.boxNum;
+        int total_last = this.lastBox.num * this.lastBox.boxNum;
+        int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
+                this.availableQty : this.outQty;
+        return total_main + total_last == real_qty;
     }
 
     /**
