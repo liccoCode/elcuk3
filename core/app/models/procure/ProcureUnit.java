@@ -1112,18 +1112,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.stage = STAGE.IN_STORAGE;
         int diffQty = this.availableQty - unit.availableQty;
         logs.addAll(this.afterDoneUpdate(unit));
-        if(this.parent != null) {
+        if(this.parent != null && this.type == T.StockSplit) {
             this.originQty = this.availableQty;
             this.attrs.planQty = this.availableQty;
             this.attrs.qty = this.availableQty;
             this.inboundQty = this.availableQty;
         }
-        Optional.ofNullable(this.parent).ifPresent(value -> {
-            this.originQty = this.availableQty;
-            this.attrs.planQty = this.availableQty;
-            this.attrs.qty = this.availableQty;
-            this.inboundQty = this.availableQty;
-        });
         if(unit.selling != null) {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
