@@ -830,6 +830,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.sid = unit.selling.sellingId;
             newUnit.currWhouse = Whouse
                     .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
+        } else {
+            newUnit.currWhouse = unit.isb2b ? Whouse.findById((long) 19) : null;
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
