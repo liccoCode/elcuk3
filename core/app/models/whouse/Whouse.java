@@ -384,7 +384,7 @@ public class Whouse extends Model {
         }
         StringBuffer sql = new StringBuffer("type=? ");
         if(shipType == null) {
-            return null;
+            return Whouse.findById((long) 21);
         }
         switch(shipType) {
             case AIR:
