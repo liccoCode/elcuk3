@@ -3,7 +3,7 @@
  */
 $(() => {
 
-  $("#printBtn").click(function(e) {
+  $("#printBtn").click(function (e) {
     e.stopPropagation();
     if ($("input[type='checkbox']:checked").length == 0) {
       noty({
@@ -16,8 +16,7 @@ $(() => {
     window.open("/Inbounds/printQuaternionForm?" + $form.serialize(), "_blank");
   });
 
-
-  $("td[name='clickTd']").click(function() {
+  $("td[name='clickTd']").click(function () {
     let tr = $(this).parent("tr");
     let id = $(this).data("id");
     let format_id = id.replace(/\|/gi, '_');
@@ -28,9 +27,41 @@ $(() => {
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + format_id).load("/Inbounds/showProcureUnitList", {id: id}, function () {
-        $.getScript('../public/javascripts/inbounds/edit.js');
+        $("input[name='editBoxInfo']").click(function (e) {
+          e.stopPropagation();
+          let id = $(this).data("id");
+          refreshDiv(id);
+        });
       });
     }
+  });
+
+  function refreshDiv (ids) {
+    $("#refresh_div").load("/Inbounds/refreshFbaCartonContentsByIds", {ids: ids}, function () {
+      $("#fba_carton_contents_modal").modal('show');
+      $.getScript('/public/javascripts/inbounds/boxInfo.js');
+    });
+  }
+
+  $("#submitBoxInfoBtn").click(function (e) {
+    e.stopPropagation();
+    let action = $(this).data('action');
+    let form = $("<form method='post' action='#{action}'></form>")
+    form = form.append($("#box_info_table").clone())
+    $.post('/Inbounds/updateBoxInfo', form.serialize(), function (re) {
+      if (re) {
+        noty({
+          text: '更新包装信息成功!',
+          type: 'success'
+        });
+        window.location.reload();
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
   });
 
 });

@@ -829,7 +829,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
             newUnit.currWhouse = Whouse
-                    .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand());
+                    .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand(), unit.fba);
         } else {
             newUnit.currWhouse = unit.isb2b ? Whouse.findById((long) 19) : null;
         }
@@ -1121,9 +1121,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null) {
             this.sid = unit.selling.sellingId;
             this.currWhouse = Whouse.autoMatching(unit.shipType,
-                    this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand());
+                    this.projectName.equals("B2B") ? "B2B" : unit.selling.market.shortHand(), this.fba);
         } else if(this.projectName.equals("B2B")) {
-            this.currWhouse = Whouse.autoMatching(unit.shipType, "B2B");
+            this.currWhouse = Whouse.autoMatching(unit.shipType, "B2B", this.fba);
         }
         if(logs.size() > 0) {
             new ERecordBuilder("procureunit.deepUpdate").msgArgs(reason, this.id, StringUtils.join(logs, "<br>"),
@@ -2433,10 +2433,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return true;
         }
         int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
-        if(size > 0) {
-            return true;
-        }
-        return false;
+        return size > 0;
     }
 
     public boolean postFBAValidate(CheckTaskDTO dto) {
@@ -2454,7 +2451,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
                 this.mainBox.height == 0)
             return false;
-        return true;
+        int total_main = this.mainBox.num * this.mainBox.boxNum;
+        int total_last = this.lastBox.num * this.lastBox.boxNum;
+        int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
+                this.availableQty : this.outQty;
+        return total_main + total_last == real_qty;
     }
 
     /**

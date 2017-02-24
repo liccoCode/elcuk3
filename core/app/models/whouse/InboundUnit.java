@@ -315,4 +315,13 @@ public class InboundUnit extends Model {
         return InboundUnit.count("unit.id = ? AND inbound.status <> '" + Inbound.S.End + "'", id) == 0;
     }
 
+    public boolean validBoxInfoIsComplete() {
+        if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
+                this.mainBox.height == 0)
+            return false;
+        int total_main = this.mainBox.num * this.mainBox.boxNum;
+        int total_last = this.lastBox.num * this.lastBox.boxNum;
+        return total_main + total_last == this.qty;
+    }
+
 }
