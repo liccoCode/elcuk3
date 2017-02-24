@@ -1184,7 +1184,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
                 this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
             }
-            this.currWhouse = unit.isb2b ? Whouse.findById(19) : this.currWhouse;
+            this.currWhouse = unit.isb2b ? Whouse.findById((long) 19) : this.currWhouse;
         } else if(diff != 0) {
             this.attrs.planQty = unit.attrs.planQty;
             if(this.parent != null) {
