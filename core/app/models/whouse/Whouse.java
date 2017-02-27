@@ -378,6 +378,10 @@ public class Whouse extends Model {
         return Whouse.find(sql, T.SELF).fetch();
     }
 
+    public static List<Whouse> exceptAMZWhoses() {
+        return Whouse.find("type<>?", T.FBA).fetch();
+    }
+
     /**
      * 不良品仓库
      *
