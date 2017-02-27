@@ -374,8 +374,12 @@ public class Whouse extends Model {
      */
     public static List<Whouse> selfWhouses(boolean includeDefective) {
         String sql = "type=?";
-        if(!includeDefective) sql += " AND name NOT LIKE '%不良品仓%'";
+        if(!includeDefective) sql += " AND name NOT LIKE '%不良品仓%' AND del=false ";
         return Whouse.find(sql, T.SELF).fetch();
+    }
+
+    public static List<Whouse> exceptAMZWhoses() {
+        return Whouse.find("type<>? AND del=false", T.FBA).fetch();
     }
 
     /**
@@ -423,7 +427,7 @@ public class Whouse extends Model {
                 return Whouse.find(sql.toString(), params.toArray()).first();
             }
         } else {
-            return Whouse.find("type=?", fba == null ? T.NO_FBA : T.SELF).first();
+            return Whouse.find("type=? AND del=false", fba == null ? T.NO_FBA : T.SELF).first();
         }
     }
 

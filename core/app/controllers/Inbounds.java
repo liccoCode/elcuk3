@@ -40,7 +40,7 @@ public class Inbounds extends Controller {
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
-        renderArgs.put("whouses", Whouse.selfWhouses(false));
+        renderArgs.put("whouses", Whouse.exceptAMZWhoses());
     }
 
 
