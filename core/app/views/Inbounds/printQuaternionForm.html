@@ -21,7 +21,7 @@
     </tr>
     <tr style="height:5mm;">
       <td style="width:60%;">出货单：${first_o.inbound?.plan?.id}</td>
-      <td>交货项目：${first_o.inbound?.projectName}</td>
+      <td>交货项目：${models.OperatorConfig.getVal("brandname")}</td>
     </tr>
     <tr style="height:5mm;">
       <td>供应商名称：${first_o.inbound?.cooperator?.name}</td>

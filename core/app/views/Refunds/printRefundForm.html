@@ -21,7 +21,7 @@
     </tr>
     <tr style="height:5mm;">
       <td>退货单号：${first_o.refund?.id}</td>
-      <td>退货项目：${first_o.refund?.projectName}</td>
+      <td>退货项目：${models.OperatorConfig.getVal("brandname")}</td>
     </tr>
     <tr style="height:5mm;">
       <td>供应商：${first_o.refund?.cooperator?.name}</td>
