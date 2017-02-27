@@ -239,7 +239,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
-            sbd.append(" AND id IN ").append(SqlSelect.inlineParam(unitIdList));
+            sbd.append(" AND p.id IN ").append(SqlSelect.inlineParam(unitIdList));
         }
         return new F.T2<>(sbd.toString(), params);
     }
