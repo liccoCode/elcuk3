@@ -41,8 +41,6 @@ import play.mvc.With;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -59,7 +57,7 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
-        renderArgs.put("whouses", Whouse.find("type!=?", Whouse.T.FORWARD).fetch());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
         renderArgs.put("cooperators", cooperators);
