@@ -36,12 +36,8 @@
       <tr>
         <th>退货类型<span style="color:red">*</span></th>
         <td><input type="text" value="${refund.type?.label()}" readonly></td>
-        <th>B2B选项</th>
-        <td>
-          <label class="checkbox">
-            <input type="checkbox" name="refund.isb2b" value="true" ${proUnit.projectName=='B2B'?'checked':''}> B2B
-          </label>
-        </td>
+        <th>物流信息</th>
+        <td><input type="text" class="input-xxlarge" name="refund.info" value="${refund.info}"></td>
       </tr>
 
       <tr>
@@ -61,8 +57,8 @@
       <tr>
         <th>退货日期<span style="color:red">*</span></th>
         <td><input type="date" name="refund.refundDate" value="${refund.refundDate?.date()}" required></td>
-        <th>物流信息</th>
-        <td><input type="text" class="input-xxlarge" name="refund.info" value="${refund.info}"></td>
+        <th></th>
+        <td></td>
       </tr>
       <tr>
         <th>备注</th>
@@ -104,6 +100,7 @@
         <th style="width:100px;">去往仓库</th>
         <th style="width:60px;">运输方式</th>
         <th style="width:45px;">阶段</th>
+        <th style="width:80px;">项目名称</th>
       </tr>
         #{list items:units, as:'unit'}
           <tr class="text-center">
@@ -137,6 +134,7 @@
             <td>${unit.whouse?.name()}</td>
             <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
             <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+            <td>${unit.projectName}</td>
           </tr>
         #{/list}
     </table>
