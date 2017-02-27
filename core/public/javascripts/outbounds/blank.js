@@ -74,6 +74,7 @@ $(() => {
     $("#fba_carton_contents_modal").modal('show');
     let ids = $(this).data("id");
     $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: ids}, function () {
+      $.getScript('/public/javascripts/inbounds/boxInfo.js');
     });
   });
 
