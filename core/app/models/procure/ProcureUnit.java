@@ -3,6 +3,7 @@ package models.procure;
 import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import com.sun.xml.xsom.impl.UName;
 import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
@@ -1861,6 +1862,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     Validation.addError("", String.format("#%s 没有 Selling 无法创建 FBA", unit.id));
                 } else {
                     unit.postFbaShipment(dtos.get(i));
+                    if(unit.stage == STAGE.IN_STORAGE) {
+                        unit.currWhouse = Whouse.autoMatching(unit.shipType, unit.selling.market.shortHand(), unit.fba);
+                        unit.save();
+                    }
                 }
             } catch(Exception e) {
                 Logger.error(Webs.S(e));

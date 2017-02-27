@@ -1,6 +1,7 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.OperatorConfig;
 import models.procure.FBAShipment;
 import org.apache.commons.lang.StringUtils;
 import helper.Dates;
@@ -392,33 +393,37 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(Shipment.T shipType, String country, FBAShipment fba) {
-        if(country.equals("B2B")) {
-            //B2B综合仓
-            return Whouse.find("type=?", T.B2B).first();
-        }
-        if(fba == null) {
-            return Whouse.find("country = ? AND type = ? ", country, T.NO_FBA).first();
-        } else {
-            StringBuilder sql = new StringBuilder("1=1 ");
-            List<Object> params = new ArrayList<>();
-            switch(shipType) {
-                case AIR:
-                    sql.append("AND isAIR=true AND country = ? ");
-                    params.add(country);
-                    break;
-                case EXPRESS:
-                    sql.append("AND isEXPRESS=true");
-                    break;
-                case SEA:
-                    sql.append("AND isSEA=true AND country = ? ");
-                    params.add(country);
-                    break;
-                default:
-                    sql.append("");
+        if(OperatorConfig.getVal("brandname").equals("EASYACC")) {
+            if(country.equals("B2B")) {
+                //B2B综合仓
+                return Whouse.find("type=?", T.B2B).first();
             }
-            sql.append(" AND type=? AND del=false");
-            params.add(T.SELF);
-            return Whouse.find(sql.toString(), params.toArray()).first();
+            if(fba == null) {
+                return Whouse.find("country = ? AND type = ? ", country, T.NO_FBA).first();
+            } else {
+                StringBuilder sql = new StringBuilder("1=1 ");
+                List<Object> params = new ArrayList<>();
+                switch(shipType) {
+                    case AIR:
+                        sql.append("AND isAIR=true AND country = ? ");
+                        params.add(country);
+                        break;
+                    case EXPRESS:
+                        sql.append("AND isEXPRESS=true");
+                        break;
+                    case SEA:
+                        sql.append("AND isSEA=true AND country = ? ");
+                        params.add(country);
+                        break;
+                    default:
+                        sql.append("");
+                }
+                sql.append(" AND type=? AND del=false");
+                params.add(T.SELF);
+                return Whouse.find(sql.toString(), params.toArray()).first();
+            }
+        } else {
+            return Whouse.find("type=?", fba == null ? T.NO_FBA : T.SELF).first();
         }
     }
 
