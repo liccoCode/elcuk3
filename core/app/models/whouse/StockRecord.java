@@ -181,8 +181,8 @@ public class StockRecord extends Model {
 
     public String memo;
 
+
     public StockRecord() {
-        this.creator = Login.current();
         this.createDate = new Date();
     }
 

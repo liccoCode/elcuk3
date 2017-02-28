@@ -303,6 +303,7 @@ public class Outbound extends GenericModel {
 
     public static void createStockRecord(ProcureUnit unit) {
         StockRecord record = new StockRecord();
+        record.creator = Login.current();
         record.whouse = unit.whouse;
         record.unit = unit;
         record.qty = unit.outQty;

@@ -249,6 +249,7 @@ public class Refund extends GenericModel {
 
     public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo) {
         StockRecord record = new StockRecord();
+        record.creator = Login.current();
         record.whouse = unit.unit.whouse;
         record.unit = unit.unit;
         record.qty = unit.qty;
@@ -328,6 +329,7 @@ public class Refund extends GenericModel {
         unit.save();
         /**异动记录**/
         StockRecord record = new StockRecord();
+        record.creator = Login.current();
         record.whouse = unit.whouse;
         record.unit = unit;
         record.qty = qty;
