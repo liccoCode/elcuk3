@@ -35,7 +35,8 @@
 #{/else}
   <th>预计交货时间</th>
   <td>
-    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required>
+    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required
+    ${unit.stage.name()=='IN_STORAGE'?'readonly':''}>
   </td>
   <th>单价</th>
   <td>
