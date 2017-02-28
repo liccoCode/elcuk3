@@ -20,10 +20,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 不同的仓库的抽象
@@ -396,7 +393,8 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        String country = unit.unit.selling == null ? "" : unit.unit.selling.market.shortHand();
+        String country = unit.unit.selling != null ? unit.unit.selling.market.shortHand() : "";
+        country = unit.unit.projectName.equals("B2B") ? "B2B" : country;
         return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
     }
 
