@@ -72,7 +72,7 @@
         <th>预计交货日期</th>
         <td>
           <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}"
-          ${unit.stage.name()=='DELIVERY'? 'readonly' : ''}>
+          ${unit.stage.name()=='DELIVERY'? '' : 'readonly'}>
           <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
         </td>
         <th>B2B选项</th>
