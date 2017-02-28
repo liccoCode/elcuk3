@@ -40,7 +40,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         DATE_TYPES.add(new F.T2<>("attrs.deliveryDate", "实际 [交货] 时间"));
         DATE_TYPES.add(new F.T2<>("attrs.planArrivDate", "预计 [到库] 时间"));
         DATE_TYPES.add(new F.T2<>("attrs.planShipDate", "预计 [发货] 时间"));
-       
     }
 
     /**
@@ -113,6 +112,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.stages.add(ProcureUnit.STAGE.DONE);
         this.dateType = "createDate";
         this.perSize = 70;
+        projectNames.clear();
         projectNames.add(OperatorConfig.getVal("brandname"));
         projectNames.add("B2B");
     }
