@@ -874,6 +874,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type) {
         StockRecord record = new StockRecord();
+        record.creator = Login.current();
         record.whouse = unit.currWhouse;
         record.unit = unit;
         record.qty = qty;
@@ -887,6 +888,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             parent.qty = 0 - qty;
             parent.type = type;
             parent.recordId = unit.parent.id;
+            parent.creator = Login.current();
             parent.save();
         }
     }
