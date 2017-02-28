@@ -137,7 +137,7 @@
       <li class="stripe">
         <div class="block">
           <label>平均<abbr>总运输</abbr></label>
-              <span>
+          <span>
                 ${atport.toInteger() + clearance.toInteger() + pick.toInteger() + book.toInteger() + deliver.toInteger() + receipt.toInteger() + inbound.toInteger()}
               </span>
         </div>
@@ -238,6 +238,9 @@
     </a>
     <a href="@{Excels.declare(ship.id)}" class="btn btn-success" target="_blank">
       报关要素下载 <i class="icon-download-alt"></i>
+    </a>
+    <a href="@{Shipments.arns(ship.id)}" class="btn btn-success" target="_blank">
+      AmazonReferenceID 下载 <i class="icon-download-alt"></i>
     </a>
   #{/if}
   </div>
