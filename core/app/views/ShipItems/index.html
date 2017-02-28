@@ -53,10 +53,11 @@
   <form action="@{Shipments.procureUnitToShipment()}" method="POST" id="new_shipment">
     <table class="table table-bordered table-condensed">
       <tr>
-        <th><label><input type="checkbox" class="checkall"></label></th>
+        <th><input type="checkbox" class="checkall"></th>
         <th>#</th>
+        <th>阶段</th>
         <th>SKU</th>
-        <th>计划数量</th>
+        <th width="130px;">数量(计划/交货/入库)</th>
         <th>供应商</th>
         <th>重量</th>
         <th>仓库</th>
@@ -69,10 +70,8 @@
         <th>实际交货时间</th>
         <th>抵达货代</th>
         <th>Selling</th>
-
-        <th>是否合格</th>
-        <th>是否发货</th>
-        <th>质检信息</th>
+        <th>质检结果</th>
+        <th>项目名称</th>
       </tr>
     #{list items: units, as:'unit'}
       <tr>
@@ -85,8 +84,9 @@
         <td>
           <a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a>
         </td>
+        <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
         <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
-        <td>${unit.qty()}</td>
+        <td>${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}</td>
         <td>${unit.cooperator?.name}</td>
         <td>${unit.totalWeight()} kg</td>
         <td>${unit.whouse?.name}</td>
@@ -99,14 +99,8 @@
         <td>#{time_tooltip time: unit.attrs.deliveryDate/}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
         <td>${unit.sid}</td>
-
-        <td>${unit.result()}</td>
-        <td>${unit.isship()}</td>
-        <td>
-          #{if unit.fetchCheckTaskLink() != null}
-            <a href="${unit.fetchCheckTaskLink()}" target="_blank">查看</a>
-          #{/if}
-        </td>
+        <td>${unit.result?.label()}</td>
+        <td>${unit.projectName}</td>
       </tr>
     #{/list}
     </table>

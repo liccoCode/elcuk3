@@ -1,32 +1,34 @@
 <table class="table table-condensed table-bordered" id="shipmentTable">
   <tr>
-    <th style="width:2%"><input type="checkbox" class="checkbox_all" value="0"/></th>
-    <th style="width:10% ">#</th>
-    <th style="width:15%">Track No.</th>
-    <th style="width:10%">运输商</th>
-    <th style="width:5%">国际快递</th>
-    <th style="width:5%">运输方式</th>
-    <th style="width:10%">去往仓库</th>
-    <th style="width:10%">状态</th>
-    <th style="width:8%">预计开始时间</th>
+    <th style="width:15px;"><input type="checkbox" class="checkbox_all" value="0"/></th>
+    <th style="width:60px;">#</th>
+    <th style="width:150px;">Track No.</th>
+    <th style="width:200px;">运输商</th>
+    <th style="width:80px;">国际快递</th>
+    <th style="width:60px;">运输方式</th>
+    <th style="width:80px;">去往仓库</th>
+    <th style="width:80px;">状态</th>
+    <th style="width:120px;">预计开始时间</th>
     <th style="width:6%;">实际完成天数</th>
-    <th style="width:8%">创建时间</th>
-    <th style="width:8%">预计到库时间</th>
-    <th style="width:8%">创建者</th>
+    <th style="width:120px;">创建时间</th>
+    <th style="width:120px;">预计到库时间</th>
+    <th style="width:30px;">创建者</th>
+    <th style="width:100px;">出库单ID</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-      <input type="checkbox" name="shipmentId" value="${ship.id}" apply="${ship.applyId}" way="${ship.type}">
+      <input type="checkbox" name="shipmentId" value="${ship.id}" coop="${ship.cname}" apply="${ship.applyId}"
+             way="${ship.type}" country="${ship.wname}" company="${ship.cname}" outId="${ship.outId}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
     </td>
     <td style="cursor:pointer;" name="clickTd" shipment_id="${ship.id}" memo="${ship.memo.raw()}">
       <i class="icon-reorder"></i>
-      #{list items:ship.tracknolist, as:'trackno'}
+        #{list items:ship.tracknolist, as:'trackno'}
         ${trackno+" "}
-      #{/list}
+        #{/list}
       <span class="badge badge-info">${ship.itemsNum}</span>
     </td>
     <td>${ship.cname}</td>
@@ -39,7 +41,7 @@
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.uname}</td>
+    <td><a target="_blank" href="@{Outbounds.edit(ship.outId)}">${ship.outId}</a></td>
   </tr>
-
 #{/list}
 </table>

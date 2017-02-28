@@ -1,0 +1,365 @@
+package models.whouse;
+
+import com.google.gson.annotations.Expose;
+import controllers.Login;
+import helper.Reflects;
+import models.User;
+import models.embedded.ERecordBuilder;
+import models.procure.Cooperator;
+import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
+import org.joda.time.DateTime;
+import play.data.validation.Required;
+import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
+import play.db.jpa.GenericModel;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Created by licco on 2016/11/25.
+ */
+@Entity
+@DynamicUpdate
+public class Refund extends GenericModel {
+
+    @Id
+    @Column(length = 30)
+    @Expose
+    @Required
+    public String id;
+
+    /**
+     * 退货单元
+     */
+    @OneToMany(mappedBy = "refund", cascade = {CascadeType.PERSIST})
+    public List<RefundUnit> unitList = new ArrayList<>();
+
+    /**
+     * 名称
+     */
+    @Required
+    public String name;
+
+    @Required
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public S status;
+
+    public enum S {
+        Create {
+            @Override
+            public String label() {
+                return "已创建";
+            }
+        },
+        Refund {
+            @Override
+            public String label() {
+                return "已退货";
+            }
+        },
+        Cancel {
+            @Override
+            public String label() {
+                return "已取消";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 收货类型
+     */
+    @Required
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public T type;
+
+    public enum T {
+        After_Receive {
+            @Override
+            public String label() {
+                return "不良品退货";
+            }
+        },
+        After_Inbound {
+            @Override
+            public String label() {
+                return "入库后退货";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 供应商
+     */
+    @Required
+    @OneToOne
+    public Cooperator cooperator;
+
+    /**
+     * 备注
+     */
+    public String memo;
+
+    /**
+     * 创建时间
+     */
+    @Required
+    public Date createDate;
+
+    /**
+     * 退货时间
+     */
+    @Required
+    @Temporal(TemporalType.DATE)
+    public Date refundDate;
+
+    /**
+     * 仓库交接人
+     */
+    @OneToOne
+    @Expose
+    public User whouseUser;
+
+    /**
+     * 制单人
+     */
+    @OneToOne
+    public User creator;
+
+    /**
+     * 物流信息
+     */
+    public String info;
+
+    /**
+     * 是否B2B
+     */
+    @Transient
+    public boolean isb2b = false;
+
+
+    public Refund() {
+        this.status = S.Create;
+        this.creator = Login.current();
+        this.createDate = new Date();
+        this.refundDate = new Date();
+    }
+
+    public Refund(ProcureUnit unit) {
+        this.status = S.Create;
+        this.creator = Login.current();
+        this.createDate = new Date();
+        this.refundDate = new Date();
+        this.cooperator = unit.cooperator;
+        this.type = (unit.stage == ProcureUnit.STAGE.IN_STORAGE ? T.After_Inbound : T.After_Receive);
+    }
+
+    public void createRefundByInbound(List<InboundUnit> list) {
+        this.id = id();
+        this.save();
+        for(InboundUnit unit : list) {
+            RefundUnit runit = new RefundUnit();
+            runit.unit = unit.unit;
+            runit.refund = this;
+            runit.planQty = unit.qty;
+            runit.qty = unit.qty;
+            runit.mainBoxInfo = unit.mainBoxInfo;
+            runit.lastBoxInfo = unit.lastBoxInfo;
+            runit.save();
+        }
+    }
+
+    public void createRefund(List<RefundUnit> list) {
+        this.id = id();
+        this.createDate = new Date();
+        this.creator = Login.current();
+        this.save();
+        for(RefundUnit unit : list) {
+            if(unit != null) {
+                unit.refund = this;
+                unit.save();
+            }
+        }
+    }
+
+    public static String id() {
+        DateTime dt = DateTime.now();
+        DateTime nextMonth = dt.plusMonths(1);
+        String count = Refund.count("createDate>=? AND createDate<?",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
+                "";
+        return String.format("PTT|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+    }
+
+    public static void confirmRefund(List<Refund> refunds) {
+        for(Refund refund : refunds) {
+            refund.status = S.Refund;
+            refund.save();
+            for(RefundUnit u : refund.unitList) {
+                ProcureUnit unit = u.unit;
+                unit.attrs.qty -= u.qty;
+                if(refund.type == T.After_Inbound) {
+                    unit.inboundQty -= u.qty;
+                    unit.availableQty -= u.qty;
+                    if(unit.inboundQty == 0) {
+                        unit.stage = ProcureUnit.STAGE.DELIVERY;
+                    }
+                } else {
+                    if(unit.attrs.qty == 0) {
+                        unit.stage = ProcureUnit.STAGE.DELIVERY;
+                    }
+                }
+                unit.save();
+                createStockRecord(u, StockRecord.T.Refund, "");
+            }
+        }
+    }
+
+    public static void validConfirmRefund(List<Refund> list) {
+        if(list.size() == 0) {
+            Validation.addError("", "无效退货单ID");
+            return;
+        }
+        for(Refund refund : list) {
+            if(refund.status != S.Create) {
+                Validation.addError("", "退货单【" + refund.id + "】状态为【" + refund.status.label() + "】" +
+                        "，请选择状态为【已创建】的退货单！");
+            }
+            for(RefundUnit u : refund.unitList) {
+                ProcureUnit unit = u.unit;
+                if(unit.outbound != null) {
+                    Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
+                            "【" + unit.outbound.id + "】中，请先处理！");
+                }
+            }
+        }
+    }
+
+    public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo) {
+        StockRecord record = new StockRecord();
+        record.whouse = unit.unit.whouse;
+        record.unit = unit.unit;
+        record.qty = unit.qty;
+        record.type = type;
+        record.recordId = unit.id;
+        record.memo = memo;
+        record.save();
+    }
+
+    /**
+     * 采购计划对应的退货单是不是全部已退货
+     *
+     * @param id
+     * @return
+     */
+    public static String isAllReufund(Long id) {
+        List<Refund> refunds = Refund.find("SELECT DISTINCT r FROM Refund r LEFT JOIN r.unitList u " +
+                "WHERE r.status <> ? AND u.unit.id = ? ", S.Refund, id).fetch();
+        if(refunds.size() > 0) {
+            return refunds.get(0).id;
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * 不良品退货
+     *
+     * @param units
+     * @param memo
+     */
+    public static void unQualifiedHandle(List<ProcureUnit> units, String memo) {
+        Refund refund = new Refund();
+        refund.id = id();
+        refund.memo = memo;
+        refund.whouseUser = Login.current();
+        refund.status = S.Refund;
+        refund.type = T.After_Receive;
+        refund.creator = Login.current();
+        refund.createDate = new Date();
+        refund.refundDate = new Date();
+        refund.save();
+        units.stream().filter(unit -> Optional.ofNullable(unit.id).isPresent()).forEach(unit -> {
+            ProcureUnit pro = ProcureUnit.findById(unit.id);
+            pro.unqualifiedQty -= unit.attrs.qty;
+            pro.save();
+            refund.cooperator = pro.cooperator;
+            RefundUnit u = new RefundUnit();
+            u.unit = unit;
+            u.refund = refund;
+            u.planQty = unit.attrs.qty;
+            u.qty = unit.attrs.qty;
+            u.save();
+            createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
+            new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unit.id).save();
+        });
+        refund.save();
+    }
+
+    /**
+     * 不良品转入
+     *
+     * @param unitId
+     * @param qty
+     * @param memo
+     */
+    public static void transferQty(Long unitId, int qty, String memo) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
+            unit.stage = ProcureUnit.STAGE.IN_STORAGE;
+            unit.attrs.qty += qty;
+        }
+        unit.inboundQty += qty;
+        unit.unqualifiedQty -= qty;
+        unit.availableQty += qty;
+        unit.result = InboundUnit.R.Qualified;
+        unit.save();
+        /**异动记录**/
+        StockRecord record = new StockRecord();
+        record.whouse = unit.whouse;
+        record.unit = unit;
+        record.qty = qty;
+        record.type = StockRecord.T.Unqualified_Transfer;
+        record.recordId = unit.id;
+        record.memo = memo;
+        record.save();
+        new ERecordBuilder("refund.transfer").msgArgs(record.qty, record.memo).fid(unitId).save();
+    }
+
+    public void saveAndLog(Refund refund) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "name", refund.name));
+        logs.addAll(Reflects.logFieldFade(this, "refundDate", refund.refundDate));
+        if(refund.whouseUser != null)
+            logs.addAll(Reflects.logFieldFade(this, "whouseUser.id", refund.whouseUser.id));
+        logs.addAll(Reflects.logFieldFade(this, "memo", refund.memo));
+        if(logs.size() > 0) {
+            new ERecordBuilder("refund.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
+                    .save();
+        }
+        this.save();
+    }
+
+    public static void updateBoxInfo(List<RefundUnit> units) {
+        units.forEach(unit -> {
+            RefundUnit old = RefundUnit.findById(unit.id);
+            if(old.refund.status == S.Create)
+                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            unit.marshalBoxs(old);
+            old.save();
+        });
+    }
+
+}

@@ -204,24 +204,36 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">仓库模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
-                #{power.ck "whouses.index"}
-                  <li><a href="@{Whouses.index()}">仓库</a></li>
+                #{power.ck "procures.indexwhouse"}
+                  <li><a href="@{ProcureUnits.indexWhouse()}">采购计划</a></li>
                 #{/power.ck}
-              <li class="divider"></li>
-                #{power.ck "products.whouseattrs"}
-                  <li><a href="@{Products.whouseAttrs()}">产品</a></li>
+                #{power.ck 'deliverplans.indexwhouse'}
+                  <li><a href="@{DeliverPlans.indexwhouse()}">收货</a></li>
                 #{/power.ck}
-                #{power.ck "whouseitems.index"}
-                  <li><a href="@{WhouseItems.index()}">库存</a></li>
+                #{power.ck 'inbounds.index'}
+                  <li><a href="@{Inbounds.index()}">质检入库</a></li>
                 #{/power.ck}
-                #{power.ck "inboundrecords.index"}
-                  <li><a href="@{InboundRecords.index()}">入库记录</a></li>
+                #{power.ck "refunds.unqualifiedindex"}
+                  <li><a href="@{Refunds.unQualifiedIndex()}">不良品处理</a></li>
                 #{/power.ck}
-                #{power.ck "outboundrecords.index"}
-                  <li><a href="@{OutboundRecords.index()}">出库记录</a></li>
+                #{power.ck 'refunds.index'}
+                  <li><a href="@{Refunds.index()}">退货</a></li>
+                #{/power.ck}
+                #{power.ck "outbounds.index"}
+                  <li><a href="@{Outbounds.index()}">出库</a></li>
+                #{/power.ck}
+                #{power.ck 'whouseitems.index'}
+                  <li><a href="@{StockRecords.stockIndex()}">库存管理</a></li>
                 #{/power.ck}
                 #{power.ck "stockrecords.index"}
                   <li><a href="@{StockRecords.index()}">库存异动</a></li>
+                #{/power.ck}
+                #{power.ck "products.whouseattrs"}
+                  <li><a href="@{Products.whouseAttrs()}">产品</a></li>
+                #{/power.ck}
+              <li class="divider"></li>
+                #{power.ck "whouses.index"}
+                  <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
             </ul>
           </li>
@@ -279,9 +291,6 @@
               <b id="notifyimg"></b>
               流程(<b id="notifyNumber"></b>)
             </a>
-          </li>
-          <li>
-            <a class="small" href="http://goo.gl/P2bwaJ" target="_blank">需求</a>
           </li>
           <li>
             <a class="small" href="javascript:;" id="notification_btn">Notify</a>

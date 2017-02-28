@@ -5,14 +5,20 @@
 #{/set}
 #{set 'moreScripts'}
     #{script 'bootstrap-multiselect.js'/}
-    #{script 'shipments/index.coffee'/}
+    #{script 'shipments/index.js'/}
 #{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 #{info_row}
 <ul>
   <li>带有 <i style="color:#dc143c;" class="icon-warning-sign"></i> 符号表示此运输单没有创建者,没有确认负责人,需要进行确认</li>
   <li><span class="text-warning">特殊搜索:</span> 直接输入 id 可直接访问对应 id 的运输单 (其他搜索条件会被忽略)</li>
 </ul>
 #{/info_row}
+
 #{flash_alert /}
 
 <form action="@{Shipments.index()}" method="POST" class="search_form" id='search_form'>
@@ -28,20 +34,20 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.dateType" style="width: 150px;" class="inline selectize">
+      <select name="p.dateType" style="width: 150px;" class="inline">
       #{list items:dateTypes, as:'t'}
         <option value="${t._1}" ${t._1 == p.dateType ? 'selected' : ''}>${t._2}</option>
       #{/list}
       </select>
 
-      <select name="p.type" style="width: 100px;" class="inline selectize">
+      <select name="p.type" style="width: 100px;" class="inline">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
         <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t}</option>
       #{/list}
       </select>
 
-      <select name="p.iExpress" style="width: 80px;" class="inline selectize">
+      <select name="p.iExpress" style="width: 100px;" class="inline">
         <option value="">国际快递商</option>
       #{list items:models.procure.Shipment.Express(), as:'express'}
         <option ${express == p.iExpress ? 'selected' : ''} value="${express.name()}">${express}</option>
@@ -56,7 +62,7 @@
         </select>
       </div>
 
-      <select name="p.cooperId" style="width: 150px;" class="inline selectize">
+      <select name="p.cooperId" style="width: 150px;" class="inline">
         <option value="">运输商</option>
       #{list items:cooperators, as:'cooper'}
         <option ${p.cooperId == cooper.id ? 'selected' : ''} value="${cooper.id}">${cooper.name}</option>
@@ -97,12 +103,20 @@
       <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary">
         <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
 
-    #{power.ck 'outboundrecords.index'}
-      <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" data-target="_blank" class="btn btn-primary"
-         id="outboundBtn">
-        创建出库
+    #{power.ck 'outbounds.index'}
+      <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-primary" id="outboundBtn">
+        创建出库单
       </a>
     #{/power.ck}
     </div>
   </div>
 </form>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+  </div>
+</div>

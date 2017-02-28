@@ -347,7 +347,7 @@ public class FBA {
                 null,
                 fixHistoryMSKU(unit.selling.merchantSKU),
                 null,
-                unit.qty(),
+                unit.qtyForFba(),
                 null,
                 null,
                 null)).collect(Collectors.toList());

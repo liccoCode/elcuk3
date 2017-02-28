@@ -9,6 +9,11 @@
     #{script 'shipments/show.coffee'/}
     #{script 'shipments/paymentunits.coffee'/}
 #{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 
 <ul class="nav nav-tabs" id="below_tab">
   <li class="active">
@@ -70,7 +75,7 @@
     </div>
   </div>
 
-<!-- 请款信息 -->
+  <!-- 请款信息 -->
 #{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type ==
 models.procure.Shipment.T.EXPRESS/}
 
@@ -88,5 +93,14 @@ models.procure.Shipment.T.EXPRESS/}
       <ul class="thumbnails uploaded"></ul>
       <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
     </div>
+  </div>
+</div>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
   </div>
 </div>

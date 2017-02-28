@@ -1,104 +1,62 @@
 #{set copers:newUnit.product?.cooperators() /}
 
 <tr>
-  <th>#</th>
-  <td>&nbsp;</td>
-
+  <th>采购计划ID</th>
+  <td></td>
   <th>SKU</th>
-    <td>
-      <input type="text" name="newUnit.product.sku" data-provide="typeahead" data-source="${skus}"
-                 value="${newUnit.product?.sku}" id="unit_sku" rel="popover"content="允许拆分出 SKU 为新的采购计划（同类产品但规格不同导致 SKU
-                 不同）"placement="right">
-  </td>
-
-  <th>Selling</th>
   <td>
-    <input type="text" name="newUnit.selling.sellingId" data-provide="typeahead" data-source="${sids}" data-items='15'
-           value="${newUnit.selling?.sellingId}" rel="popover"content="SellingId 需要与 SKU 和仓库对应" placement="right">
+    <input type="text" id="select_sku" name="newUnit.product.sku" value="${unit.sku}" autocomplete="off"></td>
   </td>
-</tr>
-
-<tr>
-  <th>仓库</th>
-  <td>
-  #{select 'newUnit.whouse.id', items: whouses, labelProperty: 'name', value: newUnit.whouse?.id}
-      #{option ''}请选择#{/option}
-  #{/select}
-  </td>
-
   <th>供应商</th>
-  <td>
-    #{select 'newUnit.cooperator.id', items: copers, labelProperty: 'name', value: newUnit.cooperator?.id}
-      #{option ''}请选择#{/option}
-    #{/select}
-  </td>
-
-  <th>采购数量</th>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" placeHolder="具体数量" name="newUnit.attrs.planQty" value="${newUnit.attrs.planQty}">
-      <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-      <span class="add-on">箱</span>
-    </div>
+  <td>${unit.cooperator.name}
+    <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
+    <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
+    <input type="hidden" id="size_of_box" value="${unit.boxSize}">
   </td>
 </tr>
-
 <tr>
+#{if unit.stage.name()=='IN_STORAGE'}
+  <th><i class="icon-asterisk" style="color:red"></i>库存数量</th>
+  <td>
+    <input type="text" class="input-mini" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}"
+           data-max="${unit.availableQty}" required autocomplete="off">
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+    <span class="add-on">箱</span>
+  </td>
+#{/if}
+#{else }
+  <th><i class="icon-asterisk" style="color:red"></i>采购数量</th>
+  <td>
+    <input type="text" class="input-mini" name="newUnit.attrs.planQty" id="planQty" required autocomplete="off"
+           placeholder="小于${unit.attrs.planQty}">
+    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+    <span class="add-on">箱</span>
+  </td>
+#{/else}
   <th>预计交货时间</th>
   <td>
-    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${newUnit.attrs.planDeliveryDate.date()}">
+    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required
+    ${unit.stage.name()=='IN_STORAGE'?'readonly':''}>
   </td>
-
-  <th>预计运输时间</th>
-  <td>
-    <input type="date" name="newUnit.attrs.planShipDate" value="${newUnit.attrs.planShipDate.date()}">
-  </td>
-
-  <th>预计到库时间</th>
-  <td>
-    <input type="date" name="newUnit.attrs.planArrivDate" value="${newUnit.attrs.planArrivDate.date()}">
-  </td>
-</tr>
-
-<tr>
   <th>单价</th>
   <td>
-    <div class="input-append">
-      <input type="text" class="span4" id="unit_price" name="newUnit.attrs.price" value="${unit.attrs.price}">
-      #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'span7',
-      c:unit.attrs.currency?:helper.Currency.CNY /}
-    </div>
+    <input type="text" class="span3" id="price_input" name="newUnit.attrs.price" value="${unit.attrs.price}">
+  #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'span3', c:unit.attrs.currency?:helper.Currency.CNY /}
   </td>
-
+</tr>
+<tr>
   <th>阶段</th>
-  <td>${models.procure.ProcureUnit.STAGE.DELIVERY}</td>
-
+  <td style="color:${unit.stage.rgb()}">${unit.stage.label()}</td>
   <th>采购单</th>
   <td>
     <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">${unit.deliveryment.id}</a>
   </td>
-</tr>
-
-<tr>
-  <th>运输方式</th>
+  <th>B2B选项</th>
   <td>
-    #{list items:models.procure.Shipment.T.values(), as:'t'}
-      <label class="radio">
-        <input type="radio" name="newUnit.shipType" value="${t.name()}" ${ t == newUnit.shipType ? 'checked': 'unchecked'}>
-          ${t.label()}
-      </label>
-    #{/list}
-  </td>
-
-  <th>是否到货代</th>
-  <td>#{yesOrNo f: unit.isPlaced/}</td>
-
-  <td colspan="2"></td>
-</tr>
-#{if !unit.shipType?.label()}
-<tr>
-  <td colspan="6">
-      #{render 'ProcureUnits/_shipments.html'/}
+    <label class="checkbox inline">
+      <input type="checkbox" name="newUnit.isb2b" value="true" #{if unit.projectName=='B2B'} checked #{/if}>
+      B2B
+    </label>
   </td>
 </tr>
-#{/if}
+

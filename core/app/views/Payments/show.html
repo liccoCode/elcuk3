@@ -5,7 +5,11 @@
     #{script  'component/dropUpload.coffee'/}
     #{script  'payments/show.coffee'/}
 #{/set}
-
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 #{flash_alert /}
 
 #{if payment.pApply}

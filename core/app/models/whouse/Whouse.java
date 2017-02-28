@@ -1,6 +1,9 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import models.OperatorConfig;
+import models.procure.FBAShipment;
+import org.apache.commons.lang.StringUtils;
 import helper.Dates;
 import models.User;
 import models.market.Account;
@@ -17,10 +20,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 不同的仓库的抽象
@@ -57,6 +57,18 @@ public class Whouse extends Model {
             public String label() {
                 return "货代仓库";
             }
+        },
+        NO_FBA {
+            @Override
+            public String label() {
+                return "综合仓";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B";
+            }
         };
 
         public abstract String label();
@@ -91,6 +103,7 @@ public class Whouse extends Model {
     @Column(nullable = false)
     @Expose
     @Required
+    @Enumerated(EnumType.STRING)
     public T type;
 
     @Lob
@@ -132,6 +145,11 @@ public class Whouse extends Model {
      */
     @Expose
     public boolean isEXPRESS = false;
+
+    /**
+     * 逻辑删除
+     */
+    public boolean del = false;
 
     @OneToMany(mappedBy = "whouse", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
@@ -357,8 +375,12 @@ public class Whouse extends Model {
      */
     public static List<Whouse> selfWhouses(boolean includeDefective) {
         String sql = "type=?";
-        if(!includeDefective) sql += " AND name NOT LIKE '%不良品仓%'";
+        if(!includeDefective) sql += " AND name NOT LIKE '%不良品仓%' AND del=false ";
         return Whouse.find(sql, T.SELF).fetch();
+    }
+
+    public static List<Whouse> exceptAMZWhoses() {
+        return Whouse.find("type<>? AND del=false", T.FBA).fetch();
     }
 
     /**
@@ -369,4 +391,46 @@ public class Whouse extends Model {
     public static Whouse defectiveWhouse() {
         return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
     }
+
+    public static Whouse autoMatching(InboundUnit unit) {
+        String country = unit.unit.selling != null ? unit.unit.selling.market.shortHand() : "";
+        country = unit.unit.projectName.equals("B2B") ? "B2B" : country;
+        return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
+    }
+
+    public static Whouse autoMatching(Shipment.T shipType, String country, FBAShipment fba) {
+        if(OperatorConfig.getVal("brandname").equals("EASYACC")) {
+            if(country.equals("B2B")) {
+                //B2B综合仓
+                return Whouse.find("type=?", T.B2B).first();
+            }
+            if(fba == null) {
+                return Whouse.find("country = ? AND type = ? ", country, T.NO_FBA).first();
+            } else {
+                StringBuilder sql = new StringBuilder("1=1 ");
+                List<Object> params = new ArrayList<>();
+                switch(shipType) {
+                    case AIR:
+                        sql.append("AND isAIR=true AND country = ? ");
+                        params.add(country);
+                        break;
+                    case EXPRESS:
+                        sql.append("AND isEXPRESS=true");
+                        break;
+                    case SEA:
+                        sql.append("AND isSEA=true AND country = ? ");
+                        params.add(country);
+                        break;
+                    default:
+                        sql.append("");
+                }
+                sql.append(" AND type=? AND del=false");
+                params.add(T.SELF);
+                return Whouse.find(sql.toString(), params.toArray()).first();
+            }
+        } else {
+            return Whouse.find("type=? AND del=false", fba == null ? T.NO_FBA : T.SELF).first();
+        }
+    }
+
 }

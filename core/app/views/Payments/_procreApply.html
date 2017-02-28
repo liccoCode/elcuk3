@@ -24,7 +24,7 @@
       <th>总额修正价</th>
       <th>付款金额</th>
       <th>请款人</th>
-      <th>是否发货</th>
+      <th>质检结果</th>
       <th>状态</th>
       <th>#</th>
     </tr>
@@ -34,9 +34,7 @@
             #{set records:fee.fixValueRecords()/}
             #{set denyRecords: fee.denyRecords()/}
           <td>
-            <label>
               <input type="checkbox" name="paymentUnitIds" value="${fee.id}">
-            </label>
           </td>
           <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${fee.id}'>
               #{if (records.size() + denyRecords.size()) > 0}
@@ -54,7 +52,7 @@
           <td>${payment.currency.symbol()} ${fee.fixValue}</td>
           <td>${payment.currency.symbol()} ${fee.amount()}</td>
           <td>${fee.payee.username}</td>
-          <td>${punit.isship()}</td>
+          <td>${punit.result?.label()}</td>
           <td>
             <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
               #{power.ck 'paymentunits.deny'}

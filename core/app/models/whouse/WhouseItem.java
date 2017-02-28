@@ -21,12 +21,6 @@ public class WhouseItem extends Model {
     @ManyToOne
     public Whouse whouse;
 
-    /**
-     * 库存对象(到底存的是什么东西, SKU or 物料)
-     */
-    @Embedded
-    @Expose
-    public StockObj stockObj;
 
     @Expose
     public Integer qty = 0;
@@ -46,17 +40,4 @@ public class WhouseItem extends Model {
     public WhouseItem() {
     }
 
-    public WhouseItem(StockObj stockObj, Whouse whouse) {
-        this.stockObj = stockObj.dump();
-        this.whouse = whouse;
-    }
-
-    public static WhouseItem findItem(StockObj stockObj, Whouse whouse) {
-        WhouseItem whouseItem = WhouseItem.find("stockObjId=? AND stockObjType=? AND whouse_id=?",
-                stockObj.stockObjId, stockObj.stockObjType.name(), whouse.id).first();
-        if(whouseItem == null) {
-            return new WhouseItem(stockObj, whouse).save();
-        }
-        return whouseItem;
-    }
 }
