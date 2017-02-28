@@ -31,18 +31,16 @@ public class ProcurePost extends Post<ProcureUnit> {
     private static final Pattern ID = Pattern.compile("^[0-9]*$");
     private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
-    public static final List<String> projectNames;
+    public static final List<String> projectNames = new ArrayList<>();
 
     static {
-        projectNames = new ArrayList<>();
         DATE_TYPES = new ArrayList<>();
         DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
         DATE_TYPES.add(new F.T2<>("attrs.planDeliveryDate", "预计 [交货] 时间"));
         DATE_TYPES.add(new F.T2<>("attrs.deliveryDate", "实际 [交货] 时间"));
         DATE_TYPES.add(new F.T2<>("attrs.planArrivDate", "预计 [到库] 时间"));
         DATE_TYPES.add(new F.T2<>("attrs.planShipDate", "预计 [发货] 时间"));
-        projectNames.add(OperatorConfig.getVal("brandname"));
-        projectNames.add("B2B");
+       
     }
 
     /**
@@ -115,6 +113,8 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.stages.add(ProcureUnit.STAGE.DONE);
         this.dateType = "createDate";
         this.perSize = 70;
+        projectNames.add(OperatorConfig.getVal("brandname"));
+        projectNames.add("B2B");
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {
