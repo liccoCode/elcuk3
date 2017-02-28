@@ -51,7 +51,7 @@ $(() => {
     });
     if (j > 0 && $btn.attr("id") != 'createOutboundBtn') {
       noty({
-        text: '请选择【供应商】【项目名称】一致的采购计划！',
+        text: '请选择【供应商】一致的采购计划！',
         type: 'error'
       });
       return false;
