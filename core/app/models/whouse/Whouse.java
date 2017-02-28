@@ -20,10 +20,7 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 不同的仓库的抽象
@@ -285,7 +282,7 @@ public class Whouse extends Model {
          * 1. 处理 60 天内的运输单;
          * 2. 规则:
          *  空运: 每周三;
-         *  海运: DE/US 周一, IT 周五, UK 周五
+         *  海运: DE/US 周一, IT 周五, UK 周四
          */
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
@@ -306,8 +303,12 @@ public class Whouse extends Model {
                         M.AMAZON_JP).contains(type)) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
                 }
+            } else if(nextBeginDate.getDayOfWeek() == 4) {
+                if(M.AMAZON_UK == type) {
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                }
             } else if(nextBeginDate.getDayOfWeek() == 5) {
-                if(Arrays.asList(M.AMAZON_UK, M.AMAZON_IT).contains(type)) {
+                if(M.AMAZON_IT == type) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                 }
                 //else
@@ -392,7 +393,8 @@ public class Whouse extends Model {
     }
 
     public static Whouse autoMatching(InboundUnit unit) {
-        String country = unit.unit.selling == null ? "" : unit.unit.selling.market.shortHand();
+        String country = unit.unit.selling != null ? unit.unit.selling.market.shortHand() : "";
+        country = unit.unit.projectName.equals("B2B") ? "B2B" : country;
         return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
     }
 
