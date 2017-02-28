@@ -28,7 +28,7 @@ public class StockRecords extends Controller {
     @Before(only = {"index", "stockIndex"})
     public static void setWhouses() {
         renderArgs.put("cooperators", Cooperator.suppliers());
-        renderArgs.put("whouses", Whouse.selfWhouses());
+        renderArgs.put("whouses", Whouse.exceptAMZWhoses());
     }
 
     @Check("stockrecords.index")
