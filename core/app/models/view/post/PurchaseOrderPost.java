@@ -123,24 +123,113 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         return "";
     }
 
-    public void payablesReport() {
+    public List<PurchasePaymentDTO> payablesReport() {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT t1.id, t1.name, t1.currency,t1.a1 AS 'total', t2.a2 AS 'rtotal', t3.a3 AS 'nopayment', ");
-        sql.append(" t4.a4 AS 'payment' FROM (SELECT m.id, c.name, p.currency, ");
-        sql.append(" round(sum(p.price * IFNULL(p.qty, p.planQty)),2) AS 'a1'");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
-        sql.append("");
+        List<Object> params = new ArrayList<>();
+        sql.append("SELECT t1.id,");
+        sql.append("       t1.name,");
+        sql.append("       t1.currency,");
+        sql.append("       t1.a1 AS 'totalPurchases',");
+        sql.append("       IFNULL(t2.a2, 0) AS 'totalPayment',");
+        sql.append("       IFNULL(t3.a3, 0) AS 'notPayAmount',");
+        sql.append("       IFNULL(t4.a4, 0) AS 'paidAmount'");
+        sql.append(" FROM ");
+        sql.append("  (SELECT m.id,");
+        sql.append("          c.name,");
+        sql.append("          p.currency,");
+        sql.append("          round(sum(p.price * IFNULL(p.qty, p.planQty)),2) AS 'a1'");
+        sql.append("   FROM Deliveryment m");
+        sql.append("   LEFT JOIN ProcureUnit p ON p.deliveryment_id = m.id");
+        sql.append("   LEFT JOIN Cooperator c ON c.id = m.`cooperator_id`");
+        sql.append("   WHERE m.createDate>= ? ");
+        sql.append("     AND m.createDate<= ? ");
+        params.add(from);
+        params.add(to);
+        sql.append("   GROUP BY m.id) t1 ,");
+        sql.append("  (SELECT m.id,");
+        sql.append("          round(sum(p.amount+p.fixValue),2) AS 'a2'");
+        sql.append("   FROM Deliveryment m");
+        sql.append("   LEFT JOIN PaymentUnit p ON p.deliveryment_id = m.id");
+        sql.append("   AND p.remove= 0");
+        sql.append("   WHERE m.createDate>= ? ");
+        sql.append("     AND m.createDate<= ? ");
+        params.add(from);
+        params.add(to);
+        sql.append("   GROUP BY m.id) t2,");
+        sql.append("  (SELECT m.id,");
+        sql.append("          round(sum(t.amount+t.fixValue),2) AS 'a3'");
+        sql.append("   FROM Deliveryment m");
+        sql.append("   LEFT JOIN PaymentUnit t ON t.deliveryment_id = m.id");
+        sql.append("   AND t.state <> 'PAID'");
+        sql.append("   AND t.remove= 0");
+        sql.append("   LEFT JOIN Cooperator c ON c.id = m.cooperator_id");
+        sql.append("   WHERE m.createDate>= ? ");
+        sql.append("     AND m.createDate<= ? ");
+        params.add(from);
+        params.add(to);
+        sql.append("   GROUP BY m.id) t3,");
+        sql.append("  (SELECT m.id,");
+        sql.append("          round(sum(pu.amount+pu.fixValue),2) AS 'a4'");
+        sql.append("   FROM Deliveryment m");
+        sql.append("   LEFT JOIN PaymentUnit pu ON pu.deliveryment_id = m.id");
+        sql.append("   AND pu.state = 'PAID'");
+        sql.append("   AND pu.remove= 0");
+        sql.append("   WHERE m.createDate>= ? ");
+        sql.append("     AND m.createDate<= ? ");
+        params.add(from);
+        params.add(to);
+        sql.append("   GROUP BY m.id) t4");
+        sql.append(" WHERE t1.id = t2.id");
+        sql.append("  AND t2.id = t3.id");
+        sql.append("  AND t3.id =t4.id");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
+        List<PurchasePaymentDTO> list = new ArrayList<>();
+        rows.forEach(row -> {
+            PurchasePaymentDTO dto = new PurchasePaymentDTO();
+            dto.deliverymentId = row.get("id").toString();
+            dto.cooperator = row.get("name").toString();
+            dto.currency = row.get("currency").toString();
+            dto.totalPurchases = Float.valueOf(row.get("totalPurchases").toString());
+            dto.totalPayment = Float.valueOf(row.get("totalPayment").toString());
+            dto.paidAmount = Float.valueOf(row.get("paidAmount").toString());
+            dto.notPayAmount = Float.valueOf(row.get("notPayAmount").toString());
+            list.add(dto);
+        });
+        return list;
+    }
 
+    public List<PurchasePaymentDTO> shipmentReport() {
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+        sql.append("SELECT t.id,");
+        sql.append("       u.currency,");
+        sql.append("       sum(IF(u.state='PAID', u.amount +u.fixValue, 0)) AS paidAmount,");
+        sql.append("       sum(IF(u.state<>'PAID', u.amount +u.fixValue, 0)) AS notPayAmount,");
+        sql.append("       u.state,");
+        sql.append("       IFNULL(m.paymentNumber,'') as paymentNumber ");
+        sql.append(" FROM Shipment t");
+        sql.append(" LEFT JOIN PaymentUnit u ON u.shipment_id = t.id");
+        sql.append(" LEFT JOIN Payment m ON m.id = u.`payment_id`");
+        sql.append(" WHERE t.createDate >= ? ");
+        sql.append("  AND t.createDate <= ? ");
+        sql.append("  AND u.currency IS NOT NULL");
+        sql.append(" GROUP BY t.id,");
+        sql.append("         u.currency");
+        sql.append(" ORDER BY t.id");
+        params.add(from);
+        params.add(to);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
+        List<PurchasePaymentDTO> list = new ArrayList<>();
+        rows.forEach(row -> {
+            PurchasePaymentDTO dto = new PurchasePaymentDTO();
+            dto.deliverymentId = row.get("id").toString();
+            dto.currency = row.get("currency").toString();
+            dto.paidAmount = Float.valueOf(row.get("paidAmount").toString());
+            dto.notPayAmount = Float.valueOf(row.get("notPayAmount").toString());
+            dto.payment = row.get("paymentNumber").toString();
+            list.add(dto);
+        });
+        return list;
     }
 
 }

@@ -745,6 +745,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.attrs.planQty = unit.attrs.planQty;
         newUnit.comment = unit.comment;
+        newUnit.isDedicated = unit.isDedicated;
         if(type)
             newUnit.validate();
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
@@ -831,6 +832,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.result = this.result;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        newUnit.isDedicated = unit.isDedicated;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
@@ -1249,6 +1251,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
         logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
         logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
+        logs.addAll(Reflects.logFieldFade(this, "isDedicated", unit.isDedicated));
         return logs;
     }
 
@@ -2469,7 +2472,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
                 this.availableQty : this.outQty;
         return total_main + total_last == real_qty;
-    }
+    }                                                                          
 
     /**
      * 对应运输单是否 计划中 状态
@@ -2485,7 +2488,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public Date qcDate() {
-        InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id ", this.id).first();
+        InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id DESC", this.id).first();
         return unit != null ? unit.qcDate : null;
     }
 

@@ -110,6 +110,8 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
         this.stages.add(ProcureUnit.STAGE.DONE);
+        this.stages.add(ProcureUnit.STAGE.DELIVERY);
+        this.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         this.dateType = "createDate";
         this.perSize = 70;
         projectNames.clear();

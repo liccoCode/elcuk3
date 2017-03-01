@@ -90,7 +90,7 @@ public class ProcureUnits extends Controller {
         if(p == null) {
             p = new ProcurePost();
             p.stages.add(ProcureUnit.STAGE.PLAN);
-            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+            p.stages.add(ProcureUnit.STAGE.OUTBOUND);
         }
         render(p);
     }
@@ -99,8 +99,6 @@ public class ProcureUnits extends Controller {
     public static void indexWhouse(ProcurePost p) {
         if(p == null) {
             p = new ProcurePost();
-            p.stages.add(ProcureUnit.STAGE.DELIVERY);
-            p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         }
         p.pagination = false;
         render(p);
@@ -426,7 +424,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
-        Deliveryments.show(unit.deliveryment.id);
+            Deliveryments.show(unit.deliveryment.id);
     }
 
     /**
