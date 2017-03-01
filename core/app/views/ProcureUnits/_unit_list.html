@@ -73,8 +73,7 @@
       #{/if}
       #{if relationPage}
         <td>
-          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}"
-                 cooper="${unit.cooperator?.id}">
+          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}" cooper="${unit.cooperator?.id}">
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
@@ -172,7 +171,9 @@
           </a>
         #{/elseif}
     </td>
-    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
+    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}<br>
+      <span style="color:red">${unit.isDedicated?'(专线)':''}</span>
+    </td>
     <td>${unit.currWhouse?.name}</td>
     <td>
       预计交货:#{time_tooltip time:unit.attrs.planDeliveryDate/}<br>
