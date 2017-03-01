@@ -12,7 +12,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.whouse.ShipPlan;
+import models.whouse.Outbound;
 import models.whouse.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -373,6 +373,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String invoiceNo;
 
     /**
+     * 对应出库单
+     * 可能为空
+     */
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public Outbound out;
+
+    @Transient
+    public String outId;
+
+    /**
      * 多个traceno
      */
     @Transient
@@ -555,11 +565,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
 
-        for(ShipItem itm : this.items) {
+        this.items.forEach(itm -> {
             itm.shipment = null;
             itm.save();
-        }
-        this.delete();
+        });
+        this.state = S.CANCEL;
+        this.save();
     }
 
     public void updateShipment() {
@@ -626,13 +637,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "没有运输项目可以运输.");
         }
         for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY).contains(itm.unit.stage)) {
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
+            if(itm.unit.stage== ProcureUnit.STAGE.OUTBOUND) {
+                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有出仓.请联系仓库部门");
             }
-            if(!itm.unit.isPlaced) {
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
-            }
-
         }
         if(this.type == T.EXPRESS && this.internationExpress == null) {
             Validation.addError("", "请填写运输单的国际快递商");
@@ -1234,7 +1241,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param shipType
      * @return
      */
-    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType) {
+    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType, Date planDeliveryDate) {
         /**
          * 1. 判断是否有过期的周期型运输单, 有的话自动关闭
          * 2. 判断是否需要创建新的周期型运输单, 有的话自动创建
@@ -1272,9 +1279,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         where.append(" AND type =?");
         params.add(shipType);
-
+        where.append(" AND dates.planBeginDate >= ?");
+        params.add(planDeliveryDate);
         where.append(" ORDER BY planBeginDate");
-
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
 
@@ -1612,26 +1619,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         Validation.current().valid(this);
     }
 
-    /**
-     * 初始化出库信息
-     */
-    public void initOutbound() {
-        Cooperator cooperator = Cooperator.find("name LIKE '%欧嘉国际%'").first();
-        if(this.items != null && !this.items.isEmpty()) {
-            for(ShipItem item : this.items) {
-                ShipPlan plan = new ShipPlan(item);
-                plan.valid();
-                if(!plan.exist() && !Validation.hasErrors()) {
-                    plan.save();
-                    plan.triggerRecord(cooperator != null ? cooperator.id.toString() : "");
-                }
-            }
-        }
-    }
-
     public String showRealDay() {
         if(this.dates.beginDate != null && this.dates.arriveDate != null) {
-            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime())/1000/3600/24;
+            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime()) / 1000 / 3600 / 24;
             return day + "";
         }
         return "";

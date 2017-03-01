@@ -299,7 +299,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
         DateTime dt = DateTime.now();
         List<ProcureUnit> units = ProcureUnit.find(
-                String.format("createDate>=? AND createDate<=? AND %s=? AND planQty>0", type),
+                String.format(
+                        "createDate>=? AND createDate<=? AND %s=? AND planQty>0 AND (projectName IS NULL OR projectName!='B2B')",
+                        type),
                 Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
 
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)

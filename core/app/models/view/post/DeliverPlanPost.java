@@ -35,6 +35,8 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
     public Date from;
     public Date to;
 
+    public boolean showAll = false;
+
     public enum DateType {
         /**
          * 创建时间
@@ -62,6 +64,11 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
      * 解析 Id 的正则表达式
      */
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d*)$");
+
+    /**
+     * 纯数字
+     */
+    private static final Pattern NUM = Pattern.compile("^[0-9]*$");
 
     /**
      * 解析 +N 这样的数字, 解析出含有 N 个 ProcureUnit 的 Deliveryment
@@ -169,6 +176,13 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
                 return new F.T3<>(true,
                         "SELECT d FROM DeliverPlan d WHERE d.id=?",
                         new ArrayList<>(Arrays.asList(deliverymentId)));
+            }
+            matcher = NUM.matcher(this.search);
+            if(matcher.find()) {
+                Long unitId = Long.parseLong(matcher.group(0));
+                return new F.T3<>(true,
+                        "SELECT DISTINCT d FROM DeliverPlan d LEFT JOIN d.units u WHERE 1=1 AND u.id = ? ",
+                        new ArrayList<>(Arrays.asList(unitId)));
             }
         }
         return new F.T3<>(false, null, null);

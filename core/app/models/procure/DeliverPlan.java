@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.whouse.Inbound;
+import models.whouse.InboundUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -265,5 +268,28 @@ public class DeliverPlan extends GenericModel {
         }
     }
 
+    public String showInbounds() {
+        List<Inbound> list = Inbound.find("plan.id=? AND status<> ? ", this.id, Inbound.S.Cancel).fetch();
+        if(list == null || list.size() == 0) return "";
+        String ids = "";
+        for(Inbound inbound : list) {
+            ids += inbound.id + "; ";
+        }
+        return ids;
+    }
 
+    public long showNum(boolean showAll) {
+        if(!showAll)
+            return this.units.size();
+        return this.units.stream()
+                .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY).count();
+    }
+
+    public List<ProcureUnit> showUnits(boolean showAll) {
+        if(!showAll)
+            return this.units;
+        return this.units.stream()
+                .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY)
+                .collect(Collectors.toList());
+    }
 }

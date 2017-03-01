@@ -17,7 +17,7 @@
         <th>Type</th>
         <th>Ship Type</th>
         <th>Account</th>
-        <th width="60px;">Action</th>
+        <th width="120px;">Action</th>
       </tr>
     #{list items:whs, as:'wh'}
       <tr>
@@ -36,6 +36,7 @@
         <td>${wh.account?.prettyName()}</td>
         <td>
           <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-mini btn-warning">Update</a>
+          <a href="@{Whouses.del(wh.id)}" class="btn btn-mini btn-danger">DEL</a>
         </td>
       </tr>
       <tr id="whouse_${wh.id}" style="display:none;">

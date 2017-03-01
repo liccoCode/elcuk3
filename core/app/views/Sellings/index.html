@@ -49,9 +49,9 @@
         <span class="add-on">品线</span>
         <select name="p.categoryid">
           <option value="">ALL</option>
-          #{list items:categorys, as:'c'}
-            <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
-          #{/list}
+        #{list items:categorys, as:'c'}
+          <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
+        #{/list}
         </select>
       </div>
       <div class="input-prepend inline">
@@ -98,7 +98,7 @@
           #{/if}
       </td>
       <td>${(p.page-1)*p.perSize + s_index}</td>
-      <td>${s.sellingId}</td>
+      <td><a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a></td>
       <td>${s.listing?.product?.sku}</td>
       <td>${s.market.countryName()}</td>
       <td>${s.aps.salePrice}</td>
@@ -121,6 +121,9 @@
                     data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
             </button>
           #{/if}
+        <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" class="btn btn-mini btn-inverse" rel="popover"
+           title="创建采购计划">Create</a>
+
       </td>
     </tr>
   #{/list}

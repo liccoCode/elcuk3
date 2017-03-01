@@ -1,10 +1,20 @@
 #{extends 'main_full.html' /}
 #{set title:"采购单元列表 (${p.count()})"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
 #{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 #{errorMsgs /}
 #{flash_alert /}
 
@@ -33,18 +43,9 @@
         </select>
 
         <select name="p.whouseId" class="inline">
-          <option value="0">仓库</option>
+          <option value="0">去往市场</option>
         #{list items:whouses, as:'wh'}
           <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
-        #{/list}
-        </select>
-
-        <select name="p.stage" class="inline" style="width:82px;">
-          <option value="">阶段</option>
-        #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
-            #{if stage.label() != '审批中'}
-              <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
-            #{/if}
         #{/list}
         </select>
 
@@ -55,29 +56,40 @@
         #{/list}
         </select>
 
-        <select name="p.isPlaced" class="inline">
-          <option value="">是否抵达货代处</option>
-        #{list items:models.view.post.ProcurePost.PLACEDSTATE, as:'t'}
-          <option ${t == p.isPlaced  ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+        <select name="p.isConfirm" class="inline">
+          <option value="">是否核单</option>
+        #{list items:models.view.post.ProcurePost.C, as:'c'}
+          <option ${c == p.isConfirm ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
         #{/list}
         </select>
 
-        <select name="p.isOut" class="inline">
-          <option value="">是否出库</option>
-        #{list items:models.procure.ProcureUnit.OST.values(), as:'o'}
-          <option ${o == p.isOut ? 'selected' : ''} value="${o.name()}">${o.label()}</option>
-        #{/list}
-        </select>
+        <div class="input-prepend inline">
+          <select name="p.stages" multiple="multiple" id="stage">
+          #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+              #{if stage.label() != '审批中'}
+                <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+              #{/if}
+          #{/list}
+          </select>
+        </div>
 
-        <select name="p.cooperatorId" class="inline selectize">
+        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
           <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
         #{/list}
         </select>
+
+        <select name="p.projectName" class="inline">
+          <option value="">项目名称</option>
+          #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
+            <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
+          #{/list}
+        </select>
+
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" class="input-medium" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+          <input type="text" style="width:200px;" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
           <input type="hidden" name="p.page" value="${p.page}">
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
@@ -96,9 +108,15 @@
               同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
         </div>
 
+        <div class="input-prepend input-append inline">
+          <button class="btn btn-info" name="splitBtn" data-loading>采购分拆</button>
+          <button class="btn btn-warning" name="splitBtn" data-loading>库存分拆</button>
+          <input type="hidden" name="p.type" value="${p.type}" id="type">
+        </div>
+
         <div class="inline">
           <input type="hidden" name="p.unitIds" id="unitIds"/>
-          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+          <a target="_blank" class="btn btn-inverse inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
             <i class="icon-download-alt"></i>下载ZIP
           </a>
           <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>
@@ -123,7 +141,7 @@
 
   <div class="row-fluid">
     <div class="span12">
-    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
+    #{if p.stages.contains(models.procure.ProcureUnit.STAGE.PLAN)}
         #{power.ck "procures.createdeliveryment"}
           <div class="input-append">
             <input type="text" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
@@ -134,10 +152,9 @@
         #{/power.ck}
     #{/if}
 
-    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.DELIVERY}
-
+    #{if p.stages.contains(models.procure.ProcureUnit.STAGE.DELIVERY)}
       <div class="input-append">
-        <input type="text" id="name_deliverplan" name="name" value="${name}" placeHolder="出货单的别名(必须)">
+        <input type="text" id="name_deliverplan" name="deliverName" value="${name}" placeHolder="出货单的别名(必须)">
         <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>
           添加出货单
         </button>

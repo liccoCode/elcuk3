@@ -1,0 +1,55 @@
+<table class="table table-condensed table-bordered" id="unit_table">
+  <tr>
+  #{if is_check}
+    <th width="18px;"><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
+  #{/if}
+    <th style="width:30px;">#</th>
+    <th style="width:60px;">采购计划</th>
+    <th style="width:60px;">采购单</th>
+    <th style="width:300px;">Selling</th>
+    <th width="200px;">SKU</th>
+    <th>产品名称</th>
+    <th style="width:120px;">FBA-ShipmentId</th>
+    <th style="width:85px;">产品条码</th>
+    <th style="width:80px;">计划退货数量</th>
+    <th style="width:80px;">实际退货数量</th>
+    <th style="width:60px;">包装信息</th>
+    <th style="width:100px;">去往仓库</th>
+    <th style="width:60px;">运输方式</th>
+    <th style="width:45px;">阶段</th>
+    <th>项目名称</th>
+  </tr>
+#{list items:units, as:'unit'}
+  <tr class="text-center" id="unit_${unit.id}">
+      #{if is_check}
+        <td>
+          <input type="checkbox" name="ck" value="${unit.id}">
+          <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
+        </td>
+      #{/if}
+    <td>${unit.id}</td>
+    <td>${unit.unit?.id}</td>
+    <td>${unit.unit?.deliveryment?.id}</td>
+    <td>${unit.unit?.selling?.sellingId}</td>
+    <td>${unit.unit?.product?.sku}</td>
+    <td title="${unit.unit?.product?.abbreviation}">${unit.unit?.product?.abbreviation}</td>
+    <td>${unit.unit?.fba?.shipmentId}</td>
+    <td>${unit.unit?.selling?.fnSku}</td>
+    <td>${unit.planQty}</td>
+    <td><input type="text" style="width:40px;" name="qty" data-origin="${unit.planQty}" data-id="${unit.id}"
+               value="${unit.qty}" #{if !is_check} readonly #{/if}></td>
+    <td>
+        #{if is_check}
+          <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+        #{/if}
+        #{else }
+          <input type="button" class="btn btn-mini btn-info" data-id="${unit.id}" name="editBoxInfo" value="查看">
+        #{/else}
+    </td>
+    <td>${unit.unit?.whouse?.name()}</td>
+    <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
+    <td style="background-color:${unit.unit?.stage.rgb()}">${unit.unit?.stage?.label()}</td>
+    <td>${unit.unit.projectName}</td>
+  </tr>
+#{/list}
+</table>

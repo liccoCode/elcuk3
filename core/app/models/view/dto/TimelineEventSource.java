@@ -192,7 +192,7 @@ public class TimelineEventSource {
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
             }
 
-            this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
+            this.lastDays = Webs.scale2PointUp((this.getUnitQty() - this.unit.inboundingQty()) / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
@@ -250,11 +250,11 @@ public class TimelineEventSource {
 
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
                 this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        this.unit.id, getunitstage().label(), 0,
+                        this.unit.id, this.getunitstage().label(), 0,
                         0);
             } else {
                 this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
+                        this.unit.id, this.getunitstage().label(), this.getUnitQty() - this.unit.inboundingQty(),
                         this.lastDays);
             }
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
@@ -276,6 +276,25 @@ public class TimelineEventSource {
                 }
             }
             return unitstage;
+        }
+
+        public int getUnitQty() {
+            switch(this.unit.stage) {
+                case PLAN:
+                case DELIVERY:
+                    return this.unit.attrs.planQty;
+                case DONE:
+                    return this.unit.attrs.qty;
+                case IN_STORAGE:
+                    return this.unit.availableQty;
+                case OUTBOUND:
+                case SHIPPING:
+                case SHIP_OVER:
+                case INBOUND:
+                    return this.unit.outQty;
+                default:
+                    return this.unit.attrs.planQty;
+            }
         }
 
         /**

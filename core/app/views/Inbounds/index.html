@@ -1,0 +1,133 @@
+#{extends 'main_full.html' /}
+#{set title:"收货入库列表"  /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+    #{script 'inbounds/index.es6'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{Inbounds.index()}" method="get" class="search_form" id="search_Form">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${p.from.date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${p.to.date()}">
+        </div>
+
+        <select name="p.status" class="inline">
+          <option value="">状态</option>
+        #{list items:models.whouse.Inbound.S, as:'t'}
+          <option #{if p.status==t} selected #{/if} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
+          <option value="">供应商</option>
+        #{list items:cooperators, as:'cop'}
+          <option #{if p.cooperatorId==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+        #{/list}
+        </select>
+
+        <select name="p.type" class="inline">
+          <option value="">收货类型</option>
+        #{list items:models.whouse.Inbound.T, as:'t'}
+          <option #{if p.type == t} selected #{/if} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <div class="input-prepend input-append inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" style="width:220px;" name="p.search" placeholder="收货入库单ID or SKU or 采购计划ID" value="${p.search}">
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+        <a class="btn btn-info" href="javascript:void(0)" id="printBtn" target="_blank">
+          <i class="icon-print"></i> 打印收货入库四联单</a>
+      </div>
+    </div>
+  </form>
+
+  <form method="post" id="inboundForm">
+    <div class="row-fluid">
+      <div class="span12">
+        <table class="table table-condensed table-bordered" id="data-table">
+          <tr>
+            <th style="width:15px;">
+              <input type="checkbox" id="checkbox_all" class="checkall">
+            </th>
+            <th>收货入库单ID</th>
+            <th>名称</th>
+            <th>收货类型</th>
+            <th>供应商</th>
+            <th>状态</th>
+            <th width="150px;">制单时间</th>
+            <th width="150px;">收货人/收货日期</th>
+            <th width="150px;">质检人/质检日期</th>
+            <th width="150px;">确认人/入库日期</th>
+            <th width="250px;">备注</th>
+          </tr>
+        #{list items: inbounds, as: 'i'}
+          <tr>
+            <td><input type="checkbox" name="ids" value="${i.id}"></td>
+            <td><a href="@{Inbounds.edit(i.id)}">${i.id}</a></td>
+            <td style="cursor:pointer;" name="clickTd" data-id="${i.id}">
+              <span><i class="icon-reorder"></i></span>
+              <span>${i.name}</span>
+              <span class="badge badge-info">${i.units.size()}</span>
+            </td>
+            <td><i class="${i.type.flag()}"> </i>${i.type?.label()}</td>
+            <td>${i.cooperator?.name}</td>
+            <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>
+            <td>#{time_tooltip time:i.createDate, datetime:true/}</td>
+            <td>${i.receiver?.username} / #{time_tooltip time:i.receiveDate, datetime:false/}</td>
+            <td>
+                #{list items:i.qcDtos, as:'d'}
+                ${d}<br>
+                #{/list}
+            </td>
+            <td>
+                #{list items:i.inboundDtos, as:'d'}
+                ${d}<br>
+                #{/list}
+            </td>
+            <td title="${i.memo}">${i.memo.xxLong()}</td>
+          </tr>
+        #{/list}
+          <tr>
+            <td colspan="12">
+            #{if inbounds.size() == 0}
+              暂时还没有入库记录
+            #{/if}
+            #{else }
+                #{bootstrap_pager pi:p, url:'' /}
+            #{/else}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;">
+  <div class="modal-header">
+    <h4>包装信息</h4>
+  </div>
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
+  </div>
+</div>
+

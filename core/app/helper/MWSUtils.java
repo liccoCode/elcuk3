@@ -472,7 +472,7 @@ public class MWSUtils {
             if(StringUtils.isNotBlank(this.unitOfVolume)) {
                 LengthUnitOfMeasure measure = LengthUnitOfMeasure.fromValue(this.unitOfVolume);
                 //Length
-                if(this.length != null) {
+                if(this.p.productLengths != null) {
                     LengthDimension lengthDimension = new LengthDimension();
                     lengthDimension.setUnitOfMeasure(measure);
                     lengthDimension
@@ -480,14 +480,14 @@ public class MWSUtils {
                     dimensions.setLength(lengthDimension);
                 }
                 //width
-                if(this.width != null) {
+                if(this.p.productWidth != null) {
                     LengthDimension widthDimension = new LengthDimension();
                     widthDimension.setUnitOfMeasure(measure);
                     widthDimension.setValue(new BigDecimal(this.p.productWidth).setScale(2, BigDecimal.ROUND_HALF_UP));
                     dimensions.setWidth(widthDimension);
                 }
                 //height
-                if(this.heigh != null) {
+                if(this.p.productHeigh != null) {
                     LengthDimension heightDimension = new LengthDimension();
                     heightDimension.setUnitOfMeasure(measure);
                     heightDimension.setValue(new BigDecimal(this.p.productHeigh).setScale(2, BigDecimal.ROUND_HALF_UP));
@@ -495,7 +495,7 @@ public class MWSUtils {
                 }
             }
             //weight
-            if(StringUtils.isNotBlank(this.unitOfWeight) && this.weight != null) {
+            if(StringUtils.isNotBlank(this.unitOfWeight) && this.p.productWeight != null) {
                 WeightUnitOfMeasure measure = WeightUnitOfMeasure.fromValue(this.unitOfWeight);
                 WeightDimension weightDimension = new WeightDimension();
                 weightDimension.setUnitOfMeasure(measure);
