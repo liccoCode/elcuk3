@@ -614,6 +614,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean isReturn;
 
     /**
+     * 是否专用渠道，默认为否
+     */
+    public boolean isDedicated = false;
+
+    /**
      * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)
      * <p>
      * 1. 由于历史原因部分采购计划需要挪市场(DE=>UK),但是此时采购计划已经不允许修改了,采购就再创建一条新的采购计划
@@ -1227,6 +1232,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
         logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
+        logs.addAll(Reflects.logFieldFade(this, "isDedicated", unit.isDedicated));
         return logs;
     }
 
