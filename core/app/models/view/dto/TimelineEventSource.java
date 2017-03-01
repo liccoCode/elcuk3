@@ -258,7 +258,7 @@ public class TimelineEventSource {
                         this.lastDays);
             }
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
-            this.link = "/procureunits?p.search=id:" + this.unit.id;
+            this.link = "/procureunits?p.search=" + this.unit.id;
             return this;
         }
 

@@ -63,7 +63,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         sql.append(" IFNULL(u.qty, u.planQty)  AS qty, ");
         sql.append(" round(sum(IFNULL(u.qty,  u.planQty) * u.price), 2) AS 'totalPurchases',");
         sql.append(" (SELECT IFNULL(round(sum(p.amount + p.fixValue),2), 0) FROM PaymentUnit p ");
-        sql.append(" p .procureUnit_id = u.id AND p.state IN  ('APPROVAL', 'APPLY')) AS 'notPayAmount',");
+        sql.append(" WHERE p.procureUnit_id = u.id AND p.state IN  ('APPROVAL', 'APPLY')) AS 'notPayAmount',");
         sql.append(" (SELECT IFNULL(round(sum(pu.amount + pu.fixValue),2), 0) FROM PaymentUnit pu ");
         sql.append(" WHERE pu.procureUnit_id = u.id AND pu.state = 'PAID' AND pu.remove=0) AS 'paidAmount' ");
         sql.append(" FROM  ProcureUnit u ");
@@ -122,4 +122,25 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         }
         return "";
     }
+
+    public void payablesReport() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT t1.id, t1.name, t1.currency,t1.a1 AS 'total', t2.a2 AS 'rtotal', t3.a3 AS 'nopayment', ");
+        sql.append(" t4.a4 AS 'payment' FROM (SELECT m.id, c.name, p.currency, ");
+        sql.append(" round(sum(p.price * IFNULL(p.qty, p.planQty)),2) AS 'a1'");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+        sql.append("");
+
+    }
+
 }
