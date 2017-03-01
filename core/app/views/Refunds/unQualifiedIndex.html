@@ -24,8 +24,9 @@
 
       <select name="p.projectName" class="inline">
         <option value="">项目名称</option>
-        <option value="EASYACC" ${p.projectName=='EASYACC'?'selected':''}>EASYACC</option>
-        <option value="B2B" ${p.projectName=='B2B'?'selected':''}>B2B</option>
+      #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
+        <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
+      #{/list}
       </select>
 
       <div class="input-prepend input-append inline">

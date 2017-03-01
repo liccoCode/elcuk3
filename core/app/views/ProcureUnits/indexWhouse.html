@@ -101,15 +101,15 @@
           <a href="javascript:void(0)" data-url="@{Refunds.blank()}" class="btn btn-warning inline"
              id="createRefundBtn"><i class="icon-retweet"> </i>创建退货单</a>
           <input type="hidden" name="p.unitIds" id="unitIds"/>
-          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
-            <i class="icon-download-alt"></i>下载ZIP</a>
+          <a target="_blank" class="btn btn-primary inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 "
+             id="downloadFBAZIP"><i class="icon-download-alt"></i>下载ZIP</a>
           <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
-            <i class="icon-list-alt"> </i>导出修改日志</a>
+            <i class="icon-list-alt"></i>导出修改日志</a>
         #{power.ck "procures.downloadreports"}
           <a href="javascript:void(0)" id="download_excel" class="btn btn-info">
             <i class="icon-download-alt"></i>导出采购计划</a>
         #{/power.ck}
-
+        #{include 'Deliveryments/_box_number_model.html'/}
         </div>
       </div>
     </div>
