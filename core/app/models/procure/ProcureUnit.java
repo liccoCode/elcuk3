@@ -2472,7 +2472,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
                 this.availableQty : this.outQty;
         return total_main + total_last == real_qty;
-    }
+    }                                                                          
 
     /**
      * 对应运输单是否 计划中 状态
@@ -2488,7 +2488,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public Date qcDate() {
-        InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id ", this.id).first();
+        InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id DESC", this.id).first();
         return unit != null ? unit.qcDate : null;
     }
 
