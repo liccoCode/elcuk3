@@ -426,7 +426,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
-        Deliveryments.show(unit.deliveryment.id);
+            Deliveryments.show(unit.deliveryment.id);
     }
 
     /**

@@ -745,6 +745,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.attrs.planQty = unit.attrs.planQty;
         newUnit.comment = unit.comment;
+        newUnit.isDedicated = unit.isDedicated;
         if(type)
             newUnit.validate();
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
@@ -831,6 +832,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.result = this.result;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        newUnit.isDedicated = unit.isDedicated;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
