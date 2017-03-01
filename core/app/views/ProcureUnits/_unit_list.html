@@ -160,14 +160,13 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank">
+          <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank">
             <i class="icon-download-alt"></i> 下载
           </a>
         #{/if}
         #{elseif unit.selling != null}
           <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
             补全 FnSku
-
           </a>
         #{/elseif}
     </td>

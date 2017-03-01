@@ -206,7 +206,7 @@
           </td>
           <td>
               #{if unit.selling?.fnSku}
-                <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank">
+                <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank">
                   <i class="icon-download-alt"></i>${unit.selling.fnSku}
                 </a>
               #{/if}
