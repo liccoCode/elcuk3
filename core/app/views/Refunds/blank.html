@@ -103,7 +103,7 @@
         <th style="width:80px;">项目名称</th>
       </tr>
         #{list items:units, as:'unit'}
-          <tr class="text-center">
+          <tr class="text-center" id="tr_${unit.id}">
             <td>
               <input type="checkbox" name="ck" value="${unit.id}">
               <input type="hidden" name="dtos[${unit_index-1}].unit.id" value="${unit.id}">
@@ -141,7 +141,16 @@
   </div>
 </div>
 #{/form}
-<input type="button" class="btn btn-danger" id="deleteBtnByCreate" value="解除"/>
+
+<input type="hidden" id="cooperId" value="${refund.cooperator?.id}"/>
+
+<div class="input-append">
+  <input type="button" class="btn btn-danger" id="deleteBtnByCreate" value="解除"/>
+</div>
+<div class="input-append">
+  <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId">
+  <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+</div>
 
 <div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
   <div class="modal-body">

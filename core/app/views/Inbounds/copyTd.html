@@ -1,3 +1,4 @@
+#{if type=='Inbound'}
 <tr class="text-center" id="tr_${unit.id}">
   <td>
     <input type="checkbox" name="dtos[${index}].unitId" value="${unit.id}">
@@ -17,3 +18,29 @@
   <td>${unit.projectName}</td>
   <td style="background-color:${unit.stage?.rgb()}">${unit.stage?.label()}</td>
 </tr>
+#{/if}
+#{else }
+<tr class="text-center" id="tr_${unit.id}">
+  <td>
+    <input type="checkbox" name="dtos[${index}].unitId" value="${unit.id}">
+    <input type="hidden" name="dtos[${index}].unitId" value="${unit.id}">
+  </td>
+  <td>${unit.id}</td>
+  <td>${unit.deliveryment.id}</td>
+  <td>${unit.selling?.sellingId}</td>
+  <td>${unit.product.sku}</td>
+  <td>${unit.product.abbreviation}</td>
+  <td>${unit.fba?.shipmentId}</td>
+  <td>${unit.selling?.fnSku}</td>
+  <td>${unit.availableQty}</td>
+  <td>
+    <input type="text" style="width:40px;" name="dtos[${index}].qty" value="${unit.availableQty}"
+           data-origin="${unit.availableQty}">
+    <input type="hidden" name="dtos[${index}].planQty" value="${unit.availableQty}">
+  </td>
+  <td>${unit.whouse?.name()}</td>
+  <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
+  <td style="background-color:${unit.stage?.rgb()}">${unit.stage?.label()}</td>
+  <td>${unit.projectName}</td>
+</tr>
+#{/else}
