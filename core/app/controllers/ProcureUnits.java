@@ -424,7 +424,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
-            Deliveryments.show(unit.deliveryment.id);
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     /**
@@ -777,13 +777,16 @@ public class ProcureUnits extends Controller {
 
     public static void detail(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        List<ProcureUnit> child_units = new ArrayList<>();
+        List<ProcureUnit> child_units;
+        List<ElcukRecord> logs;
         if(unit.parent == null) {
             child_units = ProcureUnit.find("parent.id = ? ", id).fetch();
+            logs = ElcukRecord.records(id.toString());
         } else {
             Long parentId = unit.parent.id;
             child_units = ProcureUnit.find("parent.id = ? ", parentId).fetch();
             unit = ProcureUnit.findById(parentId);
+            logs = ElcukRecord.records(parentId.toString());
         }
         int totalPlanQty = unit.attrs.planQty == null ? 0 : unit.attrs.planQty;
         int totalQty = unit.attrs.qty == null ? 0 : unit.attrs.qty;
@@ -810,13 +813,13 @@ public class ProcureUnits extends Controller {
                 }
             }
         }
-        renderArgs.put("logs", ElcukRecord.records(id.toString(), Arrays.asList("procureunit.split"), 50));
+        renderArgs.put("logs", logs);
         render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
     }
 
-    public static void findProcureById(Long id, int index) {
+    public static void findProcureById(Long id, int index, String type) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("/Inbounds/copyTd.html", unit, index);
+        render("/Inbounds/copyTd.html", unit, index, type);
     }
 
     public static void validProcureId(Long id, Long cooperId) {
