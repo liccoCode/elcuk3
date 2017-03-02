@@ -73,7 +73,10 @@ public class StockPost extends Post<ProcureUnit> {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
         String sql = params._1 + " ORDER BY currWhouse.id DESC, createDate DESC";
-        return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
+        if(this.pagination)
+            return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
+        else
+            return ProcureUnit.find(sql, params._2.toArray()).fetch();
     }
 
 

@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.DBUtils;
 import helper.Dates;
+import models.OperatorConfig;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -30,6 +31,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     private static final Pattern ID = Pattern.compile("^[0-9]*$");
     private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
+    public static final List<String> projectNames = new ArrayList<>();
 
     static {
         DATE_TYPES = new ArrayList<>();
@@ -99,24 +101,6 @@ public class ProcurePost extends Post<ProcureUnit> {
         public abstract String label();
     }
 
-    public enum P {
-        EASYACC {
-            @Override
-            public String label() {
-                return "EASYACC";
-            }
-        },
-        B2B {
-            @Override
-            public String label() {
-                return "B2B";
-            }
-
-        };
-
-        public abstract String label();
-    }
-
     public String projectName;
     public ProcureUnit.OST isOut;
     public C isConfirm;
@@ -126,8 +110,13 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
         this.stages.add(ProcureUnit.STAGE.DONE);
+        this.stages.add(ProcureUnit.STAGE.DELIVERY);
+        this.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         this.dateType = "createDate";
         this.perSize = 70;
+        projectNames.clear();
+        projectNames.add(OperatorConfig.getVal("brandname"));
+        projectNames.add("B2B");
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {

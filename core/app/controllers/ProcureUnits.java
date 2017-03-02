@@ -90,7 +90,7 @@ public class ProcureUnits extends Controller {
         if(p == null) {
             p = new ProcurePost();
             p.stages.add(ProcureUnit.STAGE.PLAN);
-            p.stages.add(ProcureUnit.STAGE.DELIVERY);
+            p.stages.add(ProcureUnit.STAGE.OUTBOUND);
         }
         render(p);
     }
@@ -99,8 +99,6 @@ public class ProcureUnits extends Controller {
     public static void indexWhouse(ProcurePost p) {
         if(p == null) {
             p = new ProcurePost();
-            p.stages.add(ProcureUnit.STAGE.DELIVERY);
-            p.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         }
         p.pagination = false;
         render(p);
@@ -269,7 +267,7 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(false, "可正常走采购流程，不需要审批"));
     }
 
-    public static void create(ProcureUnit unit, String shipmentId, String isNeedApply, int totalFive, int day) {
+    public static void create(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
 
@@ -281,13 +279,10 @@ public class ProcureUnits extends Controller {
 
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-            render("ProcureUnits/blank.html", unit, whouses, totalFive, day);
+            render("ProcureUnits/blank.html", unit, whouses);
         }
 
         if(unit.isCheck != 1) unit.isCheck = 0;
-        if(isNeedApply != null && isNeedApply.equals("need")) {
-            unit.stage = ProcureUnit.STAGE.APPROVE;
-        }
         unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         unit.save();
         //生成质检任务
@@ -305,14 +300,7 @@ public class ProcureUnits extends Controller {
         }
         new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
                 .save();
-
-        if(StringUtils.equals(isNeedApply, "need")) {
-            unit.startActiviti(unit.handler.username);
-            flash.success("提交审批成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-            ProcureUnits.showactiviti(unit.id);
-        } else {
-            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-        }
+        flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
         Analyzes.index();
     }
 
@@ -436,7 +424,7 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
-        Deliveryments.show(unit.deliveryment.id);
+            Deliveryments.show(unit.deliveryment.id);
     }
 
     /**

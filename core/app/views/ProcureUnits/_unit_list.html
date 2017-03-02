@@ -73,8 +73,7 @@
       #{/if}
       #{if relationPage}
         <td>
-          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}"
-                 cooper="${unit.cooperator?.id}">
+          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}" cooper="${unit.cooperator?.id}">
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
@@ -161,18 +160,19 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" target="_blank">
+          <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank">
             <i class="icon-download-alt"></i> 下载
           </a>
         #{/if}
         #{elseif unit.selling != null}
           <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
             补全 FnSku
-
           </a>
         #{/elseif}
     </td>
-    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
+    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}<br>
+      <span style="color:red">${unit.isDedicated?'(专线)':''}</span>
+    </td>
     <td>${unit.currWhouse?.name}</td>
     <td>
       预计交货:#{time_tooltip time:unit.attrs.planDeliveryDate/}<br>

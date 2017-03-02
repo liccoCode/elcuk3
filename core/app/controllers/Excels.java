@@ -664,6 +664,36 @@ public class Excels extends Controller {
         render(dtos, dateFormat);
     }
 
+    /**
+     * 采购应付未付报表
+     *
+     * @param p
+     */
+    public static void purchaseReport(PurchaseOrderPost p) {
+        List<PurchasePaymentDTO> dtos = p.payablesReport();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("采购应付未付报表%s至%s.xls",
+                        new SimpleDateFormat("yyyy/MM").format(p.from), new SimpleDateFormat("yyyy/MM").format(p.to)));
+        render(dtos, dateFormat);
+    }
+
+    /**
+     * 物流应付未付
+     *
+     * @param p
+     */
+    public static void shipmentReport(PurchaseOrderPost p) {
+        List<PurchasePaymentDTO> dtos = p.shipmentReport();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("物流应付未付报表%s至%s.xls",
+                        new SimpleDateFormat("yyyy/MM").format(p.from), new SimpleDateFormat("yyyy/MM").format(p.to)));
+        render(dtos);
+    }
+
+
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
         //最多只允许导出 2000 个订单的数据,超过了请重新给定搜索范围

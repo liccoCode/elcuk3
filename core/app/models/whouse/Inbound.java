@@ -304,6 +304,7 @@ public class Inbound extends GenericModel {
 
     private void createStockRecord(InboundUnit unit) {
         StockRecord record = new StockRecord();
+        record.creator = Login.current();
         record.whouse = unit.target;
         record.unit = unit.unit;
         record.qty = unit.inboundQty;

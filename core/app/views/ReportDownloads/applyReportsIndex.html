@@ -169,3 +169,42 @@
   </div>
 </div>
 
+<div class="row-fluid">
+  <div class="span12">
+    <div class="bs-docs-form">
+      <form class="search_form" action="@{Excels.purchaseReport()}" target="_blank" method="post">
+        <div class="inline" style="margin-top:4px;">
+          <span class="label label-info">采购应付未付款报表:</span>
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${new org.joda.time.DateTime()}">
+        </div>
+        <button class="btn">导出</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <div class="bs-docs-form">
+      <form class="search_form" action="@{Excels.shipmentReport()}" target="_blank" method="post">
+        <div class="inline" style="margin-top:4px;">
+          <span class="label label-info">物流应付未付款报表:</span>
+        </div>
+
+        <div class="input-prepend input-append inline" style="margin-left:10px;">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${new org.joda.time.DateTime()}">
+        </div>
+        <button class="btn">导出</button>
+      </form>
+    </div>
+  </div>
+</div>
