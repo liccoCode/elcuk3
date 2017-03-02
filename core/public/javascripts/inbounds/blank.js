@@ -49,7 +49,8 @@ $(() => {
         if (r.flag) {
           $.get("/procureunits/findProcureById", {
             id: id,
-            index: index
+            index: index,
+            type: 'Inbound'
           }, function (r) {
             index++;
             $("#data_table").append(r);

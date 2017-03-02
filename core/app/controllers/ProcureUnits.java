@@ -786,7 +786,7 @@ public class ProcureUnits extends Controller {
             Long parentId = unit.parent.id;
             child_units = ProcureUnit.find("parent.id = ? ", parentId).fetch();
             unit = ProcureUnit.findById(parentId);
-            logs = ElcukRecord.records(unit.parent.id.toString());
+            logs = ElcukRecord.records(parentId.toString());
         }
         int totalPlanQty = unit.attrs.planQty == null ? 0 : unit.attrs.planQty;
         int totalQty = unit.attrs.qty == null ? 0 : unit.attrs.qty;
@@ -817,9 +817,9 @@ public class ProcureUnits extends Controller {
         render(child_units, unit, totalPlanQty, totalQty, totalInboundQty, map);
     }
 
-    public static void findProcureById(Long id, int index) {
+    public static void findProcureById(Long id, int index, String type) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("/Inbounds/copyTd.html", unit, index);
+        render("/Inbounds/copyTd.html", unit, index, type);
     }
 
     public static void validProcureId(Long id, Long cooperId) {

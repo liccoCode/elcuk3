@@ -156,11 +156,53 @@ $(() => {
     }
   });
 
+  let index = $("#unit_table input[type='checkbox']").length - 1;
+  
+  $("#quickAdd").click(function (e) {
+    e.preventDefault();
+    let id = $("#procureId").val();
+    let cooperId = $("#cooperId").val();
+    if ($("#tr_" + id).html() == undefined) {
+      $.get("/refunds/validateAddRefund", {
+        id: id,
+        cooperId: cooperId
+      }, function (r) {
+        if (r.flag) {
+          $.get("/procureunits/findProcureById", {
+            id: id,
+            index: index
+          }, function (r) {
+            index++;
+            $("#unit_table").append(r);
+            slippingTr(id);
+          });
+          $("#procureId").val("");
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    } else {
+      noty({
+        text: "采购计划已经存在该单据中!",
+        type: 'error'
+      });
+      slippingTr(id);
+    }
+  });
+
   let unitId = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unitId);
   if (targetTr.size() > 0) {
     EF.scoll(targetTr)
     EF.colorAnimate(targetTr)
+  }
+
+  function slippingTr (id) {
+    EF.scoll($("#tr_" + id));
+    EF.colorAnimate($("#tr_" + id));
   }
 
 });

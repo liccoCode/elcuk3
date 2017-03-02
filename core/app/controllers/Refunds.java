@@ -15,6 +15,7 @@ import models.whouse.Refund;
 import models.whouse.RefundUnit;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
@@ -26,6 +27,7 @@ import play.mvc.With;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -159,6 +161,26 @@ public class Refunds extends Controller {
         Refund.unQualifiedHandle(units, batchMemo);
         flash.success("不良品退货成功!");
         unQualifiedIndex(null);
+    }
+
+    public static void validateAddRefund(Long id, Long cooperId) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        if(unit.stage != ProcureUnit.STAGE.IN_STORAGE) {
+            renderJSON(new Ret(false, "该采购计划状态不是已入仓！"));
+        }
+        if(unit.parent != null && ProcureUnit.T.StockSplit == unit.type) {
+            renderJSON(new Ret(false, "库存分拆的子采购计划【" + unit.id + "】无法进行退货！"));
+        }
+        if(unit.outbound != null) {
+            renderJSON(new Ret(false, "采购计划【" + unit.id + "】已经在出库单 【" + unit.outbound.id + "】中,请先解除！"));
+        }
+        if(unit.cooperator != null && !Objects.equals(unit.cooperator.id, cooperId)) {
+            renderJSON(new Ret(false, "请输入同供应商下的采购计划！"));
+        }
+        if(StringUtils.isNotEmpty(Refund.isAllReufund(id))) {
+            renderJSON(new Ret(false, "采购计划【" + id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(id) + "】"));
+        }
+        renderJSON(new Ret(true));
     }
 
 }
