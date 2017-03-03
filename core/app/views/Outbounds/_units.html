@@ -16,6 +16,7 @@
     <th>运输方式</th>
     <th>FBA-ShipmentId</th>
     <th>预计运输时间</th>
+    <th>可用库存</th>
     <th>计划出库数量</th>
     <th>实际出库数量</th>
     <th>包装信息</th>
@@ -41,14 +42,8 @@
     <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
     <td>${unit.fba?.shipmentId}</td>
     <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
-    <td>
-        #{if Arrays.asList('OUTBOUND','SHIPPING','SHIP_OVER','INBOUND','CLOSE').contains(unit.stage.name())}
-          ${unit.outQty}
-        #{/if}
-        #{else }
-          ${unit.availableQty}
-        #{/else}
-    </td>
+    <td>${unit.availableQty}</td>
+    <td>${unit.totalOutBoundQty()}</td>
     <td>${unit.outQty}</td>
     <td>
       <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">

@@ -293,8 +293,10 @@ public class Outbound extends GenericModel {
             out.save();
             out.units.forEach(p -> {
                 p.stage = ProcureUnit.STAGE.OUTBOUND;
-                p.outQty = p.availableQty;
-                p.availableQty = 0;
+                int total_main = p.mainBox.num * p.mainBox.boxNum;
+                int total_last = p.lastBox.num * p.lastBox.boxNum;
+                p.outQty = total_main + total_last;
+                p.availableQty = p.availableQty - p.outQty;
                 p.save();
                 createStockRecord(p);
             });

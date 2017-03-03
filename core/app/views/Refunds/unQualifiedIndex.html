@@ -67,7 +67,7 @@
           <td>${u.id}</td>
           <td>${u.selling?.sellingId}</td>
           <td>${u.sku}</td>
-          <td title="${u.product?.abbreviation}">${u.product?.abbreviation}</td>
+          <td rel="tooltip" title="${u.product?.abbreviation}">${u.product?.abbreviation?.xxLong()}</td>
           <td>${u.cooperator?.name}</td>
           <td>${u.fba?.shipmentId}</td>
           <td>${u.projectName}</td>
@@ -87,7 +87,7 @@
         </tr>
       #{/list}
         <tr>
-          <td colspan="11">
+          <td colspan="12">
           #{if units.size() == 0}
             暂时还没有库存记录
           #{/if}

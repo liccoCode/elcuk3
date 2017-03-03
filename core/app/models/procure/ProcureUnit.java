@@ -2464,15 +2464,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean validBoxInfoIsComplete() {
-        if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
-                this.mainBox.height == 0)
-            return false;
-        int total_main = this.mainBox.num * this.mainBox.boxNum;
-        int total_last = this.lastBox.num * this.lastBox.boxNum;
-        int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
-                this.availableQty : this.outQty;
-        return total_main + total_last == real_qty;
-    }                                                                          
+        return !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
+                this.mainBox.height == 0);
+    }
+
+    public int totalOutBoundQty() {
+        int total_main = 0, total_last = 0;
+        if(this.mainBox != null)
+            total_main = this.mainBox.num * this.mainBox.boxNum;
+        if(this.lastBox != null)
+            total_last = this.lastBox.num * this.lastBox.boxNum;
+        return total_main + total_last;
+    }
 
     /**
      * 对应运输单是否 计划中 状态
