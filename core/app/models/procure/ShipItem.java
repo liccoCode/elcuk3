@@ -114,6 +114,7 @@ public class ShipItem extends GenericModel {
     @Expose
     @Temporal(TemporalType.DATE)
     public Date shipDate;
+    
     /**
      * 实际到库时间
      */

@@ -45,9 +45,7 @@ $ ->
   $('#adjust_ship_items').on('click', '.btn.adjust', ->
     shipmentId = $("input[name='shipmentId']").val()
     if shipmentId
-      $('#adjust_ship_items').attr('action', (i, v) ->
-        "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
-      ).submit()
+      $('#adjust_ship_items').submit()
     false
   ).on('click', '.btn.preview', (e) ->
     shipment = $("[name='shipmentId']")
