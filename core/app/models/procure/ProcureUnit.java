@@ -2469,8 +2469,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int totalOutBoundQty() {
-        int total_main = this.mainBox.num * this.mainBox.boxNum;
-        int total_last = this.lastBox.num * this.lastBox.boxNum;
+        int total_main = 0, total_last = 0;
+        if(this.mainBox != null)
+            total_main = this.mainBox.num * this.mainBox.boxNum;
+        if(this.lastBox != null)
+            total_last = this.lastBox.num * this.lastBox.boxNum;
         return total_main + total_last;
     }
 
