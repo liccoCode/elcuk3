@@ -748,8 +748,10 @@ public class ProcureUnits extends Controller {
     public static void updateBoxInfo(List<ProcureUnit> units) {
         units.forEach(unit -> {
             ProcureUnit old = ProcureUnit.findById(unit.id);
-            unit.marshalBoxs(old);
-            old.save();
+            if(Arrays.asList("DELIVERY", "DONE", "IN_STORAGE").contains(old.stage.name())) {
+                unit.marshalBoxs(old);
+                old.save();
+            }
         });
         renderJSON(new Ret(true));
     }

@@ -163,7 +163,6 @@
       <td>#{time_tooltip time:u.attrs.deliveryDate/}</td>
       <td>#{time_tooltip time:u.createDate/}</td>
       <td>
-      <td>
           #{if u.outbound?.status?.name()=='Outbound'}
            #{time_tooltip time:u.outbound?.outboundDate/}
           #{/if}

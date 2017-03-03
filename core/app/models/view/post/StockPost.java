@@ -33,8 +33,7 @@ public class StockPost extends Post<ProcureUnit> {
         if(this.flag) {
             sbd.append(" AND unqualifiedQty > 0 ");
         } else {
-            sbd.append(" AND stage = ? AND availableQty > 0 ");
-            params.add(ProcureUnit.STAGE.IN_STORAGE);
+            sbd.append(" AND availableQty > 0 ");
         }
 
         Long unit_id = isSearchForId();

@@ -226,7 +226,6 @@ public class Inbound extends GenericModel {
                 u.qualifiedQty = u.qty;
                 u.unqualifiedQty = 0;
                 u.inboundQty = u.qty;
-
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
@@ -234,6 +233,8 @@ public class Inbound extends GenericModel {
                     punit.attrs.deliveryDate = new Date();
                     punit.stage = ProcureUnit.STAGE.DONE;
                 }
+                punit.mainBoxInfo = u.mainBoxInfo;
+                punit.lastBoxInfo = u.lastBoxInfo;
                 punit.result = InboundUnit.R.UnCheck;
                 punit.save();
             }

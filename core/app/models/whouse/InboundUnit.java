@@ -231,10 +231,18 @@ public class InboundUnit extends Model {
             case "qualifiedQty":
                 this.unqualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                if(this.status == S.Inbound) {
+                    this.unit.availableQty = NumberUtils.toInt(value);
+                    this.unit.unqualifiedQty = this.unqualifiedQty;
+                }
                 break;
             case "unqualifiedQty":
                 this.qualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                if(this.status == S.Inbound) {
+                    this.unit.unqualifiedQty = NumberUtils.toInt(value);
+                    this.unit.availableQty = this.qualifiedQty;
+                }
                 break;
             case "inboundQty":
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
@@ -257,6 +265,7 @@ public class InboundUnit extends Model {
         new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br/>"))
                 .fid(this.inbound.id).save();
         this.save();
+        this.unit.save();
     }
 
     @PostLoad

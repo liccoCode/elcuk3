@@ -110,16 +110,13 @@
               #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
-          <select name="target" style="max-width: 80px;"
-              #{if unit.status.name() != "Receive"}
-                  disabled
-              #{/if}>
-            <option value="">仓库</option>
-              #{list items:whouses, as:'whouse'}
-                <option ${whouse.id == unit.target?.id ? 'selected' : ''} value="${whouse.id}">
-                ${whouse.name}
-                </option>
-              #{/list}
+          <select name="target" style="max-width: 80px;" ${unit.status.name() != "Receive" ? 'disabled':''}>
+          <option value="">仓库</option>
+            #{list items:whouses, as:'whouse'}
+              <option ${whouse.id == unit.target?.id ? 'selected' : ''} value="${whouse.id}">
+              ${whouse.name}
+              </option>
+            #{/list}
           </select>
         </td>
         <td>${unit.unit.projectName}</td>
