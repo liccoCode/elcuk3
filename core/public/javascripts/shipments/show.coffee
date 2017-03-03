@@ -42,10 +42,10 @@ $ ->
     .modal('show');
   )
 
-  $('#adjust_shipitems').on('click', '.btn.adjust', ->
+  $('#adjust_ship_items').on('click', '.btn.adjust', ->
     shipmentId = $("input[name='shipmentId']").val()
     if shipmentId
-      $('#adjust_shipitems').attr('action', (i, v) ->
+      $('#adjust_ship_items').attr('action', (i, v) ->
         "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
       ).submit()
     false
@@ -130,7 +130,7 @@ $ ->
     )
   )
 
-  $("#adjust_shipitems").on("click", "#unitbutton", () ->
+  $("#adjust_ship_items").on("click", "#unitbutton", () ->
     $td = $(@)
     sid = $td.text().trim()
     paintProcureUnitInTimeline('sid', sid)
