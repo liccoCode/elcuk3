@@ -98,14 +98,14 @@
         </td>
         <td>
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
-              #{if unit.status.name() != "Receive" || unit.result.name()=='Unqualified'}
+              #{if unit.status.name()=="Create" || unit.unit.stage.name()=='OUTBOUND'}
                  readonly
               #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
                  value="${unit.unqualifiedQty}"
-              #{if unit.status.name()!="Receive" || unit.result.name()=='Unqualified'}
+              #{if unit.status.name()=="Create" || unit.unit.stage.name()=='OUTBOUND'}
                  readonly
               #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
