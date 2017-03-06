@@ -271,7 +271,7 @@ public class Outbound extends GenericModel {
         for(String id : ids) {
             Outbound out = Outbound.findById(id);
             for(ProcureUnit p : out.units) {
-                if(p.stage != ProcureUnit.STAGE.IN_STORAGE) {
+                if(Arrays.asList("DELIVERY", "DONE").contains(p.stage.name())) {
                     Validation.addError("", "出库单【" + id + "】下的采购计划" + p.id + "不是已入仓状态，请查证");
                     return;
                 }
@@ -292,7 +292,9 @@ public class Outbound extends GenericModel {
             out.outboundDate = new Date();
             out.save();
             out.units.forEach(p -> {
-                p.stage = ProcureUnit.STAGE.OUTBOUND;
+                if(Arrays.asList("IN_STORAGE").contains(p.stage.name())) {
+                    p.stage = ProcureUnit.STAGE.OUTBOUND;
+                }
                 int total_main = p.mainBox.num * p.mainBox.boxNum;
                 int total_last = p.lastBox.num * p.lastBox.boxNum;
                 p.outQty = total_main + total_last;

@@ -3,6 +3,7 @@ package models.qc;
 import play.data.validation.Validation;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * Created by IntelliJ IDEA.
@@ -56,7 +57,8 @@ public class CheckTaskDTO implements Serializable {
     }
 
     public double totalVolume() {
-        return this.length * this.width * this.height;
+        return new BigDecimal(this.length * this.width * this.height)
+                .divide(new BigDecimal(1000000)).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public boolean validedQtys(int shipedQty) {
