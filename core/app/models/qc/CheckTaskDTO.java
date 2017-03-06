@@ -57,8 +57,8 @@ public class CheckTaskDTO implements Serializable {
     }
 
     public double totalVolume() {
-        return new BigDecimal(this.length * this.width * this.height).setScale(2, BigDecimal.ROUND_HALF_UP)
-                .doubleValue();
+        return new BigDecimal(this.length * this.width * this.height)
+                .divide(new BigDecimal(1000000)).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public boolean validedQtys(int shipedQty) {

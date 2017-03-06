@@ -11,7 +11,7 @@
 <body style="margin:0 0 0 0;">
 #{list items:ten.keySet().iterator(), as:'p'}
     #{set first_o:ten.get(p).get(0) /}
-<div style="margin:0 0 0 0; height:275mm;width:100%;">
+<div style="margin:0 0 0 0; height:188mm;width:100%;">
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
       <td colspan="3" style="font-size:20px;font-weight:900;"><b>深圳品拓科技有限公司</b></td>
@@ -44,7 +44,7 @@
       <th rowspan="2" width="8mm;">数量</th>
       <th rowspan="2" width="8mm;">件数</th>
       <th rowspan="2" width="15mm">重量</th>
-      <th rowspan="2" width="15mm">体积</th>
+      <th rowspan="2" width="15mm">体积(m³)</th>
       <th rowspan="2" width="12mm;">目的地</th>
       <th rowspan="2" width="8mm;">分组</th>
     </tr>
@@ -64,18 +64,18 @@
           #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
           #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
           #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
-        <tr style="height:7mm;">
+        <tr style="height:${(2/rowNum)*6}mm;">
           <td rowspan="${rowNum}">${i.id}</td>
           <td rowspan="${rowNum}">${i.fba?.shipmentId}</td>
           <td rowspan="${rowNum}">${i.sku}</td>
           <td rowspan="${rowNum}">${i.cooperator?.name}</td>
-          <td style="font-size:9px;" height="3.5mm;">
+          <td style="font-size:9px;">
             <div style="height:${6/rowNum}mm;">${i.mainBox?.num}</div>
           </td>
           <td style="font-size:9px;">
             <div style="height:${6/rowNum}mm;">${i.mainBox?.boxNum}</div>
           </td>
-          <td style="font-size:${fontSize}px;">
+          <td style="font-size:9px;">
             <div style="height:${6/rowNum}mm;">${i.mainBox?.singleBoxWeight}</div>
           </td>
           <td style="font-size:9px;">
@@ -89,7 +89,7 @@
           </td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainNum + lastNum}</td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${mainW + lastW}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${(mainW + lastW).format('#.##')}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainV + lastV}</td>
           <td rowspan="${rowNum}">${i.fba?.centerId}</td>
           <td rowspan="${rowNum}">${i.groupNum}</td>
