@@ -91,7 +91,7 @@ public class Outbounds extends Controller {
         final PDF.Options options = new PDF.Options();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         options.filename = "PTC" + formatter.format(new Date()) + ".pdf";
-        options.pageSize = IHtmlToPdfTransformer.A4P;
+        options.pageSize = IHtmlToPdfTransformer.A4L;
         List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
         Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
         renderPDF(options, ten);
