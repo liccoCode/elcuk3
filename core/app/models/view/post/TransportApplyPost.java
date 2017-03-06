@@ -113,6 +113,10 @@ public class TransportApplyPost extends Post<TransportApply> {
 
     @Override
     public Long getTotalCount() {
-        return TransportApply.count();
+        return this.count();
     }
+
+
+    
+
 }

@@ -760,4 +760,14 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(units);
     }
+
+    public static void shipmentDetailCost(TransportApplyPost p) {
+        if(p == null) p = new TransportApplyPost();
+
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+
+        
+    }
 }
