@@ -2379,9 +2379,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
             int max = iu.size();
-            for(int i = 0; i < iu.size(); i += 25) {
+            for(int i = 0; i < iu.size(); i += 10) {
                 int num = max - i;
-                ten.put(k, iu.subList(i, num > 25 ? i + 25 : i + num));
+                ten.put(k, iu.subList(i, num > 10 ? i + 10 : i + num));
                 k++;
             }
         }

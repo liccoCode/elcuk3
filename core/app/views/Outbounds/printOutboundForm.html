@@ -12,7 +12,7 @@
 #{list items:ten.keySet().iterator(), as:'p'}
     #{set first_o:ten.get(p).get(0) /}
 <div style="margin:0 0 0 0; height:275mm;width:100%;">
-  <table border="0" style="width:188mm;margin:0 0 0 0;">
+  <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
       <td colspan="3" style="font-size:20px;font-weight:900;"><b>深圳品拓科技有限公司</b></td>
     </tr>
@@ -30,42 +30,99 @@
       <td>货代公司：${first_o.outbound?.showCompany()}</td>
     </tr>
   </table>
-  <table border="1" style="width:290mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
-         class="table table-condensed table-bordered" cellpadding="0" cellspacing="0">
+  <table border="1" style="border-top:1px black solid; border-left: 1px black solid;width:290mm;word-wrap:break-word;
+     table-layout: fixed;margin:0 0 0 0;" class="table table-condensed table-bordered" cellpadding="0" cellspacing="0">
     <tr style="vertical-align:middle;">
-      <th width="22mm;">shipment ID</th>
-      <th width="40mm">SKU</th>
-      <th>供应商</th>
-      <th width="8mm;">数量</th>
-      <th width="8mm;">件数</th>
-      <th width="15mm">重量</th>
-      <th width="15mm">体积</th>
-      <th width="12mm;">目的地</th>
-      <th width="8mm;">分组</th>
+      <th rowspan="2" width="22mm;">shipment ID</th>
+      <th rowspan="2" width="40mm">SKU</th>
+      <th rowspan="2">供应商</th>
+      <td rowspan="2" style="width:7mm;">每箱<br>数量</td>
+      <td rowspan="2" style="width:7mm;">箱数</td>
+      <td rowspan="2" style="width:7mm;">每箱<br>重量</td>
+      <td colspan="3" style="width:8mm;">箱子规格</td>
+      <th rowspan="2" width="8mm;">数量</th>
+      <th rowspan="2" width="8mm;">件数</th>
+      <th rowspan="2" width="15mm">重量</th>
+      <th rowspan="2" width="15mm">体积</th>
+      <th rowspan="2" width="12mm;">目的地</th>
+      <th rowspan="2" width="8mm;">分组</th>
+    </tr>
+    <tr>
+      <td style="width: 8mm;">长</td>
+      <td style="width: 8mm;">宽</td>
+      <td style="width: 8mm;">高</td>
     </tr>
       #{list items:ten.get(p), as:'i'}
-          #{set mainBoxNum: i.mainBox?.boxNum==null ? 0 : i.mainBox?.boxNum /}
-          #{set lastBoxNum: i.lastBox?.boxNum==null ? 0 : i.lastBox?.boxNum /}
-          #{set mainNum: i.mainBox?.num==null ? 0 : i.mainBox?.num /}
-          #{set lastNum: i.lastBox?.num==null ? 0 : i.lastBox?.num /}
-          #{set mainW: i.mainBox?.singleBoxWeight==null ? 0 : i.mainBox?.singleBoxWeight /}
-          #{set lastW: i.lastBox?.singleBoxWeight==null ? 0 : i.lastBox?.singleBoxWeight /}
+          #{set mainBoxNum: i.mainBox?.boxNum ? i.mainBox?.boxNum : 0 /}
+          #{set lastBoxNum: i.lastBox?.boxNum ? i.lastBox?.boxNum : 0/}
+          #{set mainNum: i.mainBox?.num ? i.mainBox?.num : 0/}
+          #{set lastNum: i.lastBox?.num ? i.lastBox?.num : 0/}
+          #{set mainW: i.mainBox?.singleBoxWeight ? i.mainBox?.singleBoxWeight : 0/}
+          #{set lastW: i.lastBox?.singleBoxWeight ? i.lastBox?.singleBoxWeight : 0/}
           #{set mainV: i.mainBox?.totalVolume()==null ? 0 : i.mainBox?.totalVolume()/}
           #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
+          #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
+          #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
         <tr style="height:7mm;">
-          <td style="font-size:11px;">${i.fba?.shipmentId}</td>
-          <td>${i.sku}</td>
-          <td>${i.cooperator?.name}</td>
-          <td>${mainBoxNum + lastBoxNum}</td>
-          <td>${mainNum + lastNum}</td>
-          <td>${mainW + lastW}</td>
-          <td>${mainV + lastV}</td>
-          <td>${i.fba?.centerId}</td>
-          <td>${i.groupNum}</td>
+          <td rowspan="${rowNum}" style="font-size:11px;">${i.fba?.shipmentId}</td>
+          <td rowspan="${rowNum}">${i.sku}</td>
+          <td rowspan="${rowNum}">${i.cooperator?.name}</td>
+          <td style="font-size:${fontSize}px;" height="3.5mm;">
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.num}</div>
+          </td>
+          <td style="font-size:${fontSize}px;">
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.boxNum}</div>
+          </td>
+          <td style="font-size:${fontSize}px;">
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.singleBoxWeight}</div>
+          </td>
+          <td style="font-size:${fontSize}px;">
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.length}</div>
+          </td>
+          <td style="font-size:${fontSize}px;">
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.width}</div>
+          </td>
+          <td style="font-size:${fontSize}px;">
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
+          </td>
+          <td rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
+          <td rowspan="${rowNum}">${mainNum + lastNum}</td>
+          <td rowspan="${rowNum}">${mainW + lastW}</td>
+          <td rowspan="${rowNum}">${mainV + lastV}</td>
+          <td rowspan="${rowNum}">${i.fba?.centerId}</td>
+          <td rowspan="${rowNum}">${i.groupNum}</td>
         </tr>
+          #{if rowNum == 2}
+            <tr>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.num}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.length}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.width}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.height}</div>
+              </td>
+            </tr>
+          #{/if}
       #{/list}
     <tr style="height:9mm;">
       <td>合计：</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
