@@ -2,6 +2,7 @@
 #{set title:"请款单列表" /}
 #{set 'moreScripts'}
   #{script 'component/pagination.coffee'/}
+  #{script 'applys/index.es6'/}
 #{/set}
 
 #{form @Applys.transports(), class:'search_form', id:'transports_form', method:'POST'}
@@ -37,7 +38,8 @@
     </div>
 
     <div class="inline">
-      <a href="" target="_blank" class="btn btn-info">物流费用报表</a>
+      <a href="javascript:void(0)" data-url="@{Excels.shipmentDetailCost(p)}" target="_blank" id="exportBtn"
+         class="btn btn-info">物流费用报表</a>
     </div>
 
   </div>

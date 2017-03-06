@@ -3,6 +3,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.finance.TransportApply;
+import models.procure.ShipItem;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -102,8 +103,11 @@ public class TransportApplyPost extends Post<TransportApply> {
     public List<TransportApply> query() {
         F.T2<String, List<Object>> params = params();
         this.count = count(params);
-        return TransportApply.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray())
-                .fetch(this.page, this.perSize);
+        if(this.pagination)
+            return TransportApply.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray())
+                    .fetch(this.page, this.perSize);
+        else
+            return TransportApply.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch();
     }
 
     @Override
@@ -115,8 +119,5 @@ public class TransportApplyPost extends Post<TransportApply> {
     public Long getTotalCount() {
         return this.count();
     }
-
-
-    
 
 }
