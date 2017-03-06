@@ -114,7 +114,7 @@ public class ShipItem extends GenericModel {
     @Expose
     @Temporal(TemporalType.DATE)
     public Date shipDate;
-    
+
     /**
      * 实际到库时间
      */
@@ -250,8 +250,10 @@ public class ShipItem extends GenericModel {
         if(Validation.hasErrors()) return;
         items.forEach(itm -> {
             itm.shipment = shipment;
-            if(shipment.out != null && shipment.out.status == Outbound.S.Create)
+            if(shipment.out != null && shipment.out.status == Outbound.S.Create) {
                 itm.unit.outbound = shipment.out;
+                itm.unit.save();
+            }
             itm.save();
         });
     }
