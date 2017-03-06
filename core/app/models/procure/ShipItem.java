@@ -253,6 +253,9 @@ public class ShipItem extends GenericModel {
             if(shipment.out != null && shipment.out.status == Outbound.S.Create) {
                 itm.unit.outbound = shipment.out;
                 itm.unit.save();
+            } else if(shipment.out == null) {
+                itm.unit.outbound = null;
+                itm.unit.save();
             }
             itm.save();
         });
