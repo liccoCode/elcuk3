@@ -33,9 +33,10 @@
   <table border="1" style="border-top:1px black solid; border-left: 1px black solid;width:290mm;word-wrap:break-word;
      table-layout: fixed;margin:0 0 0 0;" class="table table-condensed table-bordered" cellpadding="0" cellspacing="0">
     <tr style="vertical-align:middle;">
+      <th rowspan="2" width="10mm">采购计划ID</th>
       <th rowspan="2" width="22mm;">shipment ID</th>
       <th rowspan="2" width="40mm">SKU</th>
-      <th rowspan="2">供应商</th>
+      <th rowspan="2" width="20mm">供应商</th>
       <td rowspan="2" style="width:7mm;">每箱<br>数量</td>
       <td rowspan="2" style="width:7mm;">箱数</td>
       <td rowspan="2" style="width:7mm;">每箱<br>重量</td>
@@ -64,7 +65,8 @@
           #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
           #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
         <tr style="height:7mm;">
-          <td rowspan="${rowNum}" style="font-size:11px;">${i.fba?.shipmentId}</td>
+          <td rowspan="${rowNum}">${i.id}</td>
+          <td rowspan="${rowNum}">${i.fba?.shipmentId}</td>
           <td rowspan="${rowNum}">${i.sku}</td>
           <td rowspan="${rowNum}">${i.cooperator?.name}</td>
           <td style="font-size:9px;" height="3.5mm;">
@@ -85,10 +87,10 @@
           <td style="font-size:9px;">
             <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
           </td>
-          <td rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
-          <td rowspan="${rowNum}">${mainNum + lastNum}</td>
-          <td rowspan="${rowNum}">${mainW + lastW}</td>
-          <td rowspan="${rowNum}">${mainV + lastV}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${mainNum + lastNum}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${mainW + lastW}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${mainV + lastV}</td>
           <td rowspan="${rowNum}">${i.fba?.centerId}</td>
           <td rowspan="${rowNum}">${i.groupNum}</td>
         </tr>
@@ -117,6 +119,7 @@
       #{/list}
     <tr style="height:9mm;">
       <td>合计：</td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
