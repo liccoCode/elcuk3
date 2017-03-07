@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"请款单列表" /}
 #{set 'moreScripts'}
-  #{script 'component/pagination.coffee'/}
+    #{script 'component/pagination.coffee'/}
 #{/set}
 
 #{form @Applys.transports(), class:'search_form', id:'transports_form', method:'POST'}
@@ -20,14 +20,14 @@
         #{select_enum name:'p.dateType', items:models.view.post.TransportApplyPost.DateType.values() , value: p.dateType /}
     </div>
     <div class="inline">
-      #{select 'p.cooperId', items:suppliers, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
-          #{option ''}合作伙伴#{/option}
-      #{/select}
+        #{select 'p.cooperId', items:suppliers, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
+            #{option ''}合作伙伴#{/option}
+        #{/select}
     </div>
     <div class="inline">
-      #{select 'p.userId', items:users, labelProperty:'username', valueProperty:'id' ,value: p.userId }
-          #{option ''}请款人#{/option}
-      #{/select}
+        #{select 'p.userId', items:users, labelProperty:'username', valueProperty:'id' ,value: p.userId }
+            #{option ''}请款人#{/option}
+        #{/select}
     </div>
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
@@ -35,7 +35,6 @@
       <input type="text" style="width:120px;" name="p.search" placeholder="请款单编号" value="${p.search}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
-
   </div>
 </div>
 
@@ -73,7 +72,7 @@
                 <a href="#" rel='tooltip' title="CNY: ${new java.math.BigDecimal(apply.totalActualPaid()._2).setScale(2,
                 4).floatValue().format('#,###.##')}">
                 ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(apply.totalActualPaid()._1).setScale(2,
-                                4).floatValue().format('#,###.##')}
+                4).floatValue().format('#,###.##')}
                 </a>
               </td>
               <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
