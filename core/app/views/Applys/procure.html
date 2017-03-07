@@ -85,7 +85,7 @@
     <table class="table table-bordered table-condensed">
       <tr>
         <th width="15px;">
-          <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key}checkall">
+          <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="checkall">
         </th>
         <th>#</th>
         <th>SKU</th>
@@ -144,7 +144,8 @@
               #{/else}
           </td>
           <td>
-            <a href="@{ProcureUnits.detail(procureUnit.id)}#${procureUnit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
+            <a href="@{ProcureUnits.detail(procureUnit.id)}#${procureUnit?.id}" target="_blank"
+               class="btn btn-mini btn-info">变更详情</a>
           </td>
         </tr>
           <tr id="unit_${pid}" style="display:none">
