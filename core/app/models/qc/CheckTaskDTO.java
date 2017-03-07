@@ -56,6 +56,10 @@ public class CheckTaskDTO implements Serializable {
 
     }
 
+    /**
+     * 单位为 m³
+     * @return
+     */
     public double totalVolume() {
         return new BigDecimal(this.length * this.width * this.height)
                 .divide(new BigDecimal(1000000)).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
