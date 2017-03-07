@@ -6,6 +6,7 @@ import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.view.Ret;
 import models.view.post.OutboundPost;
 import models.view.post.ProcurePost;
 import models.whouse.Inbound;
@@ -23,10 +24,8 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -103,15 +102,28 @@ public class Outbounds extends Controller {
         render("/Outbounds/_units.html", units);
     }
 
-    public static void addUnits(String outId, List<Long> pids){
+    public static void addUnits(String outId, List<Long> pids) {
         Outbound out = Outbound.findById(outId);
-        if(pids ==null || pids.size()==0){
+        if(pids == null || pids.size() == 0) {
             flash.error("请先勾选需要添加的采购计划");
             edit(outId);
         }
         out.addUnits(pids);
         flash.success("成功将 %s 采购计划添加到当前出库单.", StringUtils.join(pids, ","));
         edit(outId);
+    }
+
+    public static void validOutboundQty(String[] ids) {
+        List<Outbound> list = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        List<Long> temp = new ArrayList<>();
+        for(Outbound out : list) {
+            temp.addAll(out.units.stream().filter(unit -> unit.totalOutBoundQty() < unit.availableQty)
+                    .map(unit -> unit.id).collect(Collectors.toList()));
+        }
+        if(temp.size() > 0) {
+            renderJSON(new Ret(false, SqlSelect.inlineParam(temp)));
+        }
+        renderJSON(new Ret(true));
     }
 
 }
