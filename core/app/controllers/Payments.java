@@ -45,10 +45,8 @@ public class Payments extends Controller {
 
     @Check("payments.index")
     public static void index(PaymentsPost p) {
-        List<Payment> payments = null;
         if(p == null) p = new PaymentsPost();
-        payments = p.query();
-
+        List<Payment> payments = p.query();
         render(payments, p);
     }
 

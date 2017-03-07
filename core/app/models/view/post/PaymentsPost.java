@@ -78,8 +78,6 @@ public class PaymentsPost extends Post<Payment> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-
-
         StringBuffer sql = new StringBuffer(" 1=1 ");
         List<Object> params = new ArrayList<>();
 
@@ -118,15 +116,18 @@ public class PaymentsPost extends Post<Payment> {
             sql.append(" AND target.name LIKE ?");
             params.add(this.word());
         }
-
-
         return new F.T2<>(sql.toString(), params);
     }
 
     public List<Payment> query() {
         F.T2<String, List<Object>> params = params();
         this.count = count(params);
-        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page, this.perSize);
+        if(pagination)
+            return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray())
+                    .fetch(this.page, this.perSize);
+        else
+            return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch();
+
     }
 
     @Override
@@ -136,6 +137,12 @@ public class PaymentsPost extends Post<Payment> {
 
     @Override
     public Long getTotalCount() {
-        return Payment.count();
+        return this.count();
     }
+
+    public List<Payment> exportShipmentCost() {
+        F.T2<String, List<Object>> params = params();
+        return Payment.find(params._1 + " AND tApply IS NOT NULL ORDER BY createdAt DESC", params._2.toArray()).fetch();
+    }
+
 }

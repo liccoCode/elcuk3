@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
 import models.RevenueAndCostDetail;
+import models.finance.Payment;
 import models.finance.TransportApply;
 import models.market.BtbOrder;
 import models.market.M;
@@ -762,14 +763,14 @@ public class Excels extends Controller {
         render(units);
     }
 
-    public static void shipmentDetailCost(TransportApplyPost p) {
-        if(p == null) p = new TransportApplyPost();
-        List<TransportApply> applies = p.query();
+    public static void shipmentDetailCost(PaymentsPost p) {
+        if(p == null) p = new PaymentsPost();
+        List<Payment> payments = p.exportShipmentCost();
         p.pagination = false;
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(applies);
+        render(payments);
     }
     
 }

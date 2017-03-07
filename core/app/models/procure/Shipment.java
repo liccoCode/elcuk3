@@ -1505,13 +1505,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(shipments == null || shipments.size() == 0) return null;
 
         //开始排序 从小到大
-        Collections.sort(shipments, new Comparator<Shipment>() {
-            @Override
-            public int compare(Shipment o1, Shipment o2) {
-                Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
-                Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
-                return invoiceNo1.compareTo(invoiceNo2);
-            }
+        Collections.sort(shipments, (o1, o2) -> {
+            Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
+            Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
+            return invoiceNo1.compareTo(invoiceNo2);
         });
         return shipments.get(shipments.size() - 1).invoiceNo;
     }
@@ -1625,6 +1622,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             return day + "";
         }
         return "";
+    }
+
+    public float totalCNYCost() {
+        Float totalCost = 0f;
+        for(PaymentUnit unit : fees) {
+            totalCost += unit.currency.toCNY(unit.amount());
+        }
+        return totalCost;
     }
 
 }
