@@ -10,8 +10,9 @@ $(() => {
         text: '请选择需要出库的数据!',
         type: 'error'
       });
-    } else if (confirm("确认出库 " + num + " 条出库单吗?")) {
+    } else {
       let i = 0;
+      let ids = [];
       $("input[name='ids']:checked").each(function () {
         if ($(this).attr("status") != "Create") {
           i++;
@@ -21,9 +22,18 @@ $(() => {
           });
           return false;
         }
+        ids.push($(this).val());
       });
       if (i == 0) {
-        $("#submit_form").submit();
+        $.post('/Outbounds/validOutboundQty', {ids: ids}, function (re) {
+          if (re.flag) {
+            $("#submit_form").submit();
+          } else {
+            if (confirm(re.message + "的可用库存与计划出库数量不一致，确认出库吗？")) {
+              $("#submit_form").submit();
+            }
+          }
+        });
       }
     }
   });

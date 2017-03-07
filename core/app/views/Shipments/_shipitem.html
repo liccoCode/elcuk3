@@ -86,7 +86,7 @@
         <td>${itm.unit.fba?.centerId}</td>
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
-      ${itm.unit.attrs.planQty}/${itm.unit.attrs.qty}/${itm.unit.availableQty == 0 ? itm.unit.outQty : itm.unit.availableQty}
+      ${itm.unit.attrs.planQty}/${itm.unit.attrs.qty}/${itm.unit.shipmentQty()}
     </td>
       #{if itmRecord}
         <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"

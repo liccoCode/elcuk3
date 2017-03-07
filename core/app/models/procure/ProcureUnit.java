@@ -1781,6 +1781,38 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 包装信息总重量 由仓库部门填写
+     *
+     * @return
+     */
+    public double totalBoxWeight() {
+        double mainWeight = 0, lastWeight = 0;
+        if(this.mainBox != null)
+            mainWeight = this.mainBox.singleBoxWeight * this.mainBox.boxNum;
+        if(this.lastBox != null)
+            lastWeight = this.lastBox.singleBoxWeight * this.lastBox.boxNum;
+        return mainWeight + lastWeight;
+    }
+
+    public double totalBoxVolume() {
+        double mainVolume = 0, lastVolume = 0;
+        if(this.mainBox != null)
+            mainVolume = this.mainBox.totalVolume();
+        if(this.lastBox != null)
+            lastVolume = this.lastBox.totalVolume();
+        return mainVolume + lastVolume;
+    }
+
+    public int totalBoxNum() {
+        int total = 0;
+        if(this.mainBox != null)
+            total += this.mainBox.boxNum;
+        if(this.lastBox != null)
+            total += this.lastBox.boxNum;
+        return total;
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return

@@ -284,6 +284,10 @@ public class Outbound extends GenericModel {
                     Validation.addError("", "采购计划【" + p.id + "】的包装信息没填，请先填写！");
                     return;
                 }
+                if(p.availableQty < p.totalOutBoundQty()) {
+                    Validation.addError("", "采购计划【" + p.id + "】的包装信息的总数量大于可用库存量，请先检查！");
+                    return;
+                }
             }
             if(Validation.hasErrors()) {
                 return;
