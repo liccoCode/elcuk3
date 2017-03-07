@@ -140,9 +140,4 @@ public class PaymentsPost extends Post<Payment> {
         return this.count();
     }
 
-    public List<Payment> exportShipmentCost() {
-        F.T2<String, List<Object>> params = params();
-        return Payment.find(params._1 + " AND tApply IS NOT NULL ORDER BY createdAt DESC", params._2.toArray()).fetch();
-    }
-
 }

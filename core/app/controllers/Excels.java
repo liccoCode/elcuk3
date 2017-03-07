@@ -763,9 +763,9 @@ public class Excels extends Controller {
         render(units);
     }
 
-    public static void shipmentDetailCost(PaymentsPost p) {
-        if(p == null) p = new PaymentsPost();
-        List<Payment> payments = p.exportShipmentCost();
+    public static void shipmentDetailCost(ShipmentPost p) {
+        if(p == null) p = new ShipmentPost();
+        List<Shipment> payments = p.query();
         p.pagination = false;
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");

@@ -386,31 +386,20 @@ public class ShipItem extends GenericModel {
         return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
     }
 
+    /**
+     * 计算运输单件数
+     * @return
+     */
     public Integer caluTotalUnitByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalBoxNum();
-        } else {
-            return 0;
-        }
+       return this.unit.totalBoxNum();
     }
 
     public Double caluTotalVolumeByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalVolume();
-        } else {
-            return 0d;
-        }
+        return this.unit.totalBoxVolume();
     }
 
     public Double caluTotalWeightByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalWeight();
-        } else {
-            return 0d;
-        }
+        return this.unit.totalBoxWeight();
     }
 
     public String showDeliverymentId() {

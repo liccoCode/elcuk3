@@ -100,14 +100,15 @@
         创建运输请款单
       </button>
     #{/power.ck}
-      <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary">
-        <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
-
     #{power.ck 'outbounds.index'}
       <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-primary" id="outboundBtn">
         创建出库单
       </a>
     #{/power.ck}
+      <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-primary">
+        <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
+      <a href="javascript:void(0)" data-url="@{Excels.shipmentDetailCost()}" target="_blank" id="exportBtn" class="btn btn-info">
+        <i class="icon-download-alt"></i>物流费用报表</a>
     </div>
   </div>
 </form>
