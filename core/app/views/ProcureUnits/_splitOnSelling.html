@@ -13,8 +13,11 @@
   #{if unit.stage.name()=='IN_STORAGE'} 库存分拆 #{/if}
   #{else } 采购分拆 #{/else}
   </td>
-  <th></th>
-  <td width="320px;"></td>
+  <th>供应商</th>
+  <td>${unit.cooperator.name}
+    <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
+    <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
+  </td>
 </tr>
 <tr>
   <th>Selling</th>
@@ -28,27 +31,26 @@
 <tr>
 #{if unit.stage.name()=='IN_STORAGE'}
   <th><i class="icon-asterisk" style="color:red"></i>库存数量</th>
-  <td>
+  <td colspan="3">
     <input type="text" class="input-mini" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}"
            data-max="${unit.availableQty}" required autocomplete="off">
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
     <span class="add-on">箱</span>
+    <input type="hidden" id="size_of_box" value="${unit.mainBox?.num}">
+    <input type="hidden" id="lastBoxNum" value="${unit.lastBox?.num}">
+    <span id="boxInfo"></span>
+    <span id="warningText" style="display:none;color:red;">分拆个数不符合包装箱规格，请联系仓库部门确认分拆信息</span>
   </td>
 #{/if}
 #{else }
   <th><i class="icon-asterisk" style="color:red"></i>采购数量</th>
-  <td>
+  <td colspan="3">
     <input type="text" class="input-mini" name="newUnit.attrs.planQty" id="planQty" required placeholder="小于${unit.attrs.planQty}">
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
     <span class="add-on">箱</span>
-  </td>
-#{/else}
-  <th>供应商</th>
-  <td>${unit.cooperator.name}
-    <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
-    <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
     <input type="hidden" id="size_of_box" value="${unit.boxSize}">
   </td>
+#{/else}
   <th>单价</th>
   <td>
     <input type="text" class="span3" id="price_input" name="newUnit.attrs.price" value="${unit.attrs.price}">
@@ -85,7 +87,9 @@
     </select>
   </td>
   <th>阶段</th>
-  <td style="color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+  <td>
+    <input type="text" id="stage" style="color:${unit.stage.rgb()}" value="${unit.stage?.label()}" readonly>
+  </td>
   <th>采购单</th>
   <td>
     <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">${unit.deliveryment.id}</a>

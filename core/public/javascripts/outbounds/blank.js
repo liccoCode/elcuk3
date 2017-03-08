@@ -99,6 +99,7 @@ $(() => {
           text: '更新包装信息成功!',
           type: 'success'
         });
+        window.location.reload();
       } else {
         noty({
           text: r.message,

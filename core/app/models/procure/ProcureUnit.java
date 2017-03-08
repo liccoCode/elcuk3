@@ -723,7 +723,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
         newUnit.deliveryment = this.deliveryment;
-        newUnit.deliverplan = this.deliverplan;
         newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.DELIVERY;
         newUnit.planstage = PLANSTAGE.PLAN;
@@ -2498,6 +2497,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean validBoxInfoIsComplete() {
         return !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
                 this.mainBox.height == 0);
+    }
+
+    public boolean validBoxInfoIsCorrect() {
+        return this.availableQty == this.totalOutBoundQty();
     }
 
     public int totalOutBoundQty() {

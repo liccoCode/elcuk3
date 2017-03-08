@@ -75,7 +75,9 @@ $(() => {
       $("#price_input").val(r['price']);
       $("#unit_currency").prop("value", r['currency']);
       $("#unit_period").html("(生产周期：" + r['period'] + "天)");
-      $("#size_of_box").val(r['boxSize']);
+      if ($("#stage").val() != 'IN_STORAGE') {
+        $("#size_of_box").val(r['boxSize']);
+      }
     });
   }
 
@@ -162,6 +164,15 @@ $(() => {
         $(this).show();
       });
     }
+  });
+
+  $("input[name='newUnit.availableQty']").change(function () {
+    let qty = $(this).val();
+    let size = $("#size_of_box").val();
+    let lastNum = $("#lastBoxNum").val();
+    $("#boxInfo").text("(主箱数:" + parseInt(qty / size) + " 每箱个数:" + size + " 尾箱数:1 每箱个数:" + qty % size + ")");
+    qty % size > lastNum ? $("#warningText").show() : $("#warningText").hide();
+
   });
 
 });
