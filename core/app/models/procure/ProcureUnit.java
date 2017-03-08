@@ -723,7 +723,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
         newUnit.deliveryment = this.deliveryment;
-        newUnit.deliverplan = this.deliverplan;
         newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.DELIVERY;
         newUnit.planstage = PLANSTAGE.PLAN;
@@ -843,7 +842,32 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
-
+        /**库存分拆需要分析包装信息**/
+        if(this.lastBox != null && this.mainBox != null && this.lastBox.boxNum == 0
+                && newUnit.availableQty % this.mainBox.num == 0) {
+            newUnit.mainBox.boxNum = newUnit.availableQty / this.mainBox.num;
+            newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.length = this.mainBox.length;
+            newUnit.mainBox.width = this.mainBox.width;
+            newUnit.mainBox.height = this.mainBox.height;
+            this.mainBox.boxNum -= newUnit.mainBox.boxNum;
+        } else if(unit.lastBox != null && unit.mainBox != null && unit.lastBox.boxNum == 0
+                && this.availableQty % unit.mainBox.num <= unit.lastBox.num) {
+            newUnit.mainBox.boxNum = (int) Math.floor(newUnit.availableQty / this.mainBox.num);
+            newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.length = this.mainBox.length;
+            newUnit.mainBox.width = this.mainBox.width;
+            newUnit.mainBox.height = this.mainBox.height;
+            newUnit.lastBox.boxNum = newUnit.availableQty % this.mainBox.num;
+            newUnit.lastBox.num = this.lastBox.num;
+            newUnit.lastBox.length = this.lastBox.length;
+            newUnit.lastBox.width = this.lastBox.width;
+            newUnit.lastBox.height = this.lastBox.height;
+            this.mainBox.boxNum -= newUnit.mainBox.boxNum;
+            this.lastBox.num -= newUnit.lastBox.num;
+        }
+        newUnit.marshalBoxs();
+        this.marshalBoxs();
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate, newUnit.whouse,
                 newUnit.shipType);
         //无selling的手动单不做处理
@@ -2498,6 +2522,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean validBoxInfoIsComplete() {
         return !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
                 this.mainBox.height == 0);
+    }
+
+    public boolean validBoxInfoIsCorrect() {
+        return this.availableQty == this.totalOutBoundQty();
     }
 
     public int totalOutBoundQty() {

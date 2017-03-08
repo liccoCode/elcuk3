@@ -143,5 +143,35 @@ $(() => {
     });
   });
 
+  $("#unit_table").on("click", "input[name='editBoxInfo']", function (e) {
+    e.stopPropagation();
+    let ids = $(this).data("id");
+    $("#fba_carton_contents_modal").modal('show');
+    $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: ids}, function () {
+      $.getScript('/public/javascripts/inbounds/boxInfo.js');
+    });
+  });
+
+  $("#submitBoxInfoBtn").click(function (e) {
+    e.stopPropagation();
+    let form = $("<form method='post'></form>");
+    form = form.append($("#box_info_table").clone());
+    $.post('/ProcureUnits/updateBoxInfo', form.serialize(), function (re) {
+      if (re) {
+        $("#fba_carton_contents_modal").modal('hide');
+        noty({
+          text: '更新包装信息成功!',
+          type: 'success'
+        });
+        window.location.reload();
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
+  });
+
 });
 
