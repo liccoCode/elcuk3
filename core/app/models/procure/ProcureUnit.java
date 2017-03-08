@@ -851,8 +851,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.mainBox.width = this.mainBox.width;
             newUnit.mainBox.height = this.mainBox.height;
             this.mainBox.boxNum -= newUnit.mainBox.boxNum;
-        } else if(unit.lastBox != null && unit.mainBox != null && unit.lastBox.boxNum == 0
-                && this.availableQty % unit.mainBox.num <= unit.lastBox.num) {
+        } else if(this.lastBox != null && this.mainBox != null && this.lastBox.boxNum == 0
+                && newUnit.availableQty % this.mainBox.num <= this.lastBox.num) {
             newUnit.mainBox.boxNum = (int) Math.floor(newUnit.availableQty / this.mainBox.num);
             newUnit.mainBox.num = this.mainBox.num;
             newUnit.mainBox.length = this.mainBox.length;
