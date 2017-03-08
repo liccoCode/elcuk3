@@ -36,6 +36,7 @@ $(() => {
   });
 
   getSelling($sku.val());
+  showDay();
 
   $("#warehouse_select").change(function () {
     if ($(this).val()) {
@@ -131,6 +132,7 @@ $(() => {
     let boxSize = $("#size_of_box").val();
     let boxNum = $("#box_num").val();
     $("#planQty").val(boxSize * boxNum);
+    showBoxInfo();
   });
 
   $("#planQty").change(function () {
@@ -167,12 +169,46 @@ $(() => {
   });
 
   $("input[name='newUnit.availableQty']").change(function () {
-    let qty = $(this).val();
+    showBoxInfo();
+  });
+
+  //快递同步预计到达时间
+  $("[name='newUnit.attrs.planShipDate']").change(() => {
+    let shipType = $("[name='newUnit.shipType']:checked").val();
+    if (shipType != 'EXPRESS') {
+      return;
+    }
+    let planShipDate = $("[name='newUnit.attrs.planShipDate']").val();
+    let warehouseid = $("[name='newUnit.whouse.id']").val()
+    $.get('/shipments/planArriveDate', {
+      planShipDate: planShipDate,
+      shipType: shipType,
+      warehouseid
+    }, function (r) {
+      $("[name='newUnit.attrs.planArrivDate']").val(r['arrivedate']);
+      showDay();
+    });
+  });
+
+  function showBoxInfo () {
+    let qty = $("input[name='newUnit.availableQty']").val();
     let size = $("#size_of_box").val();
     let lastNum = $("#lastBoxNum").val();
-    $("#boxInfo").text("(主箱数:" + parseInt(qty / size) + " 每箱个数:" + size + " 尾箱数:1 每箱个数:" + qty % size + ")");
+    let lastBoxNum = qty % size == 0 ? 0 : 1;
+    $("#boxInfo").text("(主箱数:" + parseInt(qty / size) + " 每箱个数:" + size + " 尾箱数:" + lastBoxNum + " 每箱个数:" + qty % size + ")");
     qty % size > lastNum ? $("#warningText").show() : $("#warningText").hide();
+  }
 
+  $("[name='newUnit.attrs.planArrivDate']").change(() => {
+    showDay();
   });
+
+  function showDay () {
+    let planShipDate = $("[name='newUnit.attrs.planShipDate']");
+    let planArriveDate = $("[name='newUnit.attrs.planArrivDate']");
+    if (planArriveDate.val() && planShipDate.val()) {
+      planArriveDate.next().text((new Date(planArriveDate.val()) - new Date(planShipDate.val())) / (24 * 3600 * 1000) + "天");
+    }
+  }
 
 });
