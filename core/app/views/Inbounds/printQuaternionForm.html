@@ -11,6 +11,8 @@
 <body style="margin:0 0 0 10px;">
 #{list items:ten.keySet().iterator(), as:'p'}
     #{set first_o:ten.get(p).get(0) /}
+    #{set totalQty: 0/}
+    #{set totalBoxNum: 0/}
 <div style="margin:0 0 0 0; height:188mm;width:100%;">
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
@@ -25,7 +27,7 @@
     </tr>
     <tr style="height:5mm;">
       <td>供应商名称：${first_o.inbound?.cooperator?.name}</td>
-      <td>交货时间：${first_o.inbound?.receiveDate.date()}</td>
+      <td>交货时间：${first_o.inbound?.receiveDate?.date()}</td>
     </tr>
   </table>
   <table border="1" style="border-top:1px black solid; border-left: 1px black solid;width:290mm;word-wrap:break-word;
