@@ -61,7 +61,7 @@ public class CheckTaskDTO implements Serializable {
      * @return
      */
     public double totalVolume() {
-        return new BigDecimal(this.length * this.width * this.height)
+        return new BigDecimal(this.length * this.width * this.height * this.boxNum)
                 .divide(new BigDecimal(1000000)).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
