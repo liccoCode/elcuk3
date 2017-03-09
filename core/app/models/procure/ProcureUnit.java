@@ -866,6 +866,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.lastBox.height = this.lastBox.height;
             this.mainBox.boxNum -= newUnit.mainBox.boxNum;
             this.lastBox.num -= newUnit.lastBox.num;
+            this.lastBox.boxNum = this.lastBox.num == 0 ? 0 : 1;
         }
         newUnit.marshalBoxs();
         this.marshalBoxs();

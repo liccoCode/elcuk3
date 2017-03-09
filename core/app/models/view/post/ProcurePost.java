@@ -161,6 +161,12 @@ public class ProcurePost extends Post<ProcureUnit> {
             return new F.T2<>(sbd.toString(), params);
         }
 
+        if(StringUtils.isNotEmpty(isSearchForFBA())) {
+            sbd.append(" AND p.fba.shipmentId=?");
+            params.add(this.search);
+            return new F.T2<>(sbd.toString(), params);
+        }
+
         if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
         sbd.append(" AND p.").append(this.dateType).append(">=?").append(" AND p.").append(this.dateType)
                 .append("<=?");
@@ -251,10 +257,9 @@ public class ProcurePost extends Post<ProcureUnit> {
      *
      * @return
      */
-    private String isSearchFBA() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = FBA.matcher(this.search);
-            if(matcher.find()) return matcher.group(1);
+    private String isSearchForFBA() {
+        if(StringUtils.isNotBlank(this.search) && this.search.substring(0, 3).equals("FBA")) {
+            return this.search;
         }
         return null;
     }
