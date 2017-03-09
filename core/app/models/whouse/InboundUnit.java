@@ -330,7 +330,7 @@ public class InboundUnit extends Model {
             return false;
         int total_main = this.mainBox.num * this.mainBox.boxNum;
         int total_last = this.lastBox.num * this.lastBox.boxNum;
-        return total_main + total_last == this.qty;
+        return total_main + total_last == this.unit.availableQty;
     }
 
 }
