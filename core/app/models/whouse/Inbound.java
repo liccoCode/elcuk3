@@ -258,6 +258,10 @@ public class Inbound extends GenericModel {
                 Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
                 return;
             }
+            if(u.qualifiedQty + u.unqualifiedQty > u.qty) {
+                Validation.addError("", "采购计划【" + u.unit.id + "】入库数大于收货数量，请查证");
+                return;
+            }
             if(u.status == InboundUnit.S.Receive && u.result == InboundUnit.R.Unqualified) {
                 u.status = InboundUnit.S.Abort;
                 u.qcUser = Login.current();
