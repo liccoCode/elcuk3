@@ -99,7 +99,7 @@
             <th>可用库存</th>
             <td>
             ${unit.availableQty}
-            (主箱数:${unit.mainBox.boxNum} 每箱个数:${unit.mainBox.num} 尾箱数:${unit.lastBox.boxNum} 每箱个数:${unit.lastBox.num})
+            (主箱数:${unit.mainBox?.boxNum} 每箱个数:${unit.mainBox?.num} 尾箱数:${unit.lastBox?.boxNum} 每箱个数:${unit.lastBox?.num})
             </td>
           </tr>
         #{/if}

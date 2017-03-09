@@ -64,7 +64,7 @@ public class StockRecords extends Controller {
         record.save();
         flash.success("调整库存成功");
         new ERecordBuilder("procureunit.adjuststock")
-                .msgArgs(record.qty, unit.availableQty -= record.qty, unit.availableQty)
+                .msgArgs(record.qty, unit.availableQty - record.qty, unit.availableQty, record.memo)
                 .fid(unit.id, ProcureUnit.class)
                 .save();
         stockIndex(new StockPost());
