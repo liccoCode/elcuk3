@@ -843,10 +843,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
         /**库存分拆需要分析包装信息**/
-        if(this.lastBox != null && this.mainBox != null && this.lastBox.boxNum == 0
-                && newUnit.availableQty % this.mainBox.num == 0) {
+        if(this.lastBox != null && this.mainBox != null && newUnit.availableQty % this.mainBox.num == 0) {
             newUnit.mainBox.boxNum = newUnit.availableQty / this.mainBox.num;
             newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
             newUnit.mainBox.length = this.mainBox.length;
             newUnit.mainBox.width = this.mainBox.width;
             newUnit.mainBox.height = this.mainBox.height;
@@ -855,11 +855,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 && newUnit.availableQty % this.mainBox.num <= this.lastBox.num) {
             newUnit.mainBox.boxNum = (int) Math.floor(newUnit.availableQty / this.mainBox.num);
             newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
             newUnit.mainBox.length = this.mainBox.length;
             newUnit.mainBox.width = this.mainBox.width;
             newUnit.mainBox.height = this.mainBox.height;
-            newUnit.lastBox.boxNum = newUnit.availableQty % this.mainBox.num;
-            newUnit.lastBox.num = this.lastBox.num;
+            newUnit.lastBox.boxNum = this.lastBox.boxNum;
+            newUnit.lastBox.num = newUnit.availableQty % this.mainBox.num;
             newUnit.lastBox.length = this.lastBox.length;
             newUnit.lastBox.width = this.lastBox.width;
             newUnit.lastBox.height = this.lastBox.height;
