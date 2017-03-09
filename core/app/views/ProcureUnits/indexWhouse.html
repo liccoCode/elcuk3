@@ -144,6 +144,7 @@
           <th width="80px;">实际交货时间</th>
           <th width="30px;">质检状态</th>
           <th width="30px;">质检结果</th>
+          <th>包装信息</th>
           <th>项目名称</th>
           <th width="80px;">创建人<br>创建时间</th>
         </tr>
@@ -237,16 +238,31 @@
                 <i style="color:red" class="icon-remove"></i>
               #{/elseif}
           </td>
+          <td>
+              #{if unit.stage.name()=='IN_STORAGE'}
+                <input type="button" data-id="${unit.id}" name="editBoxInfo" value="填写"
+                       class="btn btn-mini ${unit.validBoxInfoIsCorrect() ? 'btn-success' : 'btn-danger'}">
+
+              #{/if}
+          </td>
           <td>${unit.projectName}</td>
           <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate/}</td>
         </tr>
         #{/list}
         </tbody>
-
       </table>
     </div>
   </div>
-
 </form>
 
 #{records records:logs/}
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left:40%;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="submitBoxInfoBtn">提交</a>
+  </div>
+</div>

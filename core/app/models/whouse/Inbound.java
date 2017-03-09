@@ -369,12 +369,8 @@ public class Inbound extends GenericModel {
     public static void updateBoxInfo(List<InboundUnit> units) {
         units.forEach(unit -> {
             InboundUnit old = InboundUnit.findById(unit.id);
-            if(Arrays.asList("Create", "Receive").contains(old.status.name())) {
+            if(old.status.name().equals("Create")) {
                 old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
-                if(old.status.name().equals("Receive")) {
-                    old.unit.attrs.qty = old.qty;
-                    old.unit.save();
-                }
             }
             unit.marshalBoxs(old);
             old.save();
