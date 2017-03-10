@@ -607,7 +607,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "没有运输项目可以运输.");
         }
         for(ShipItem itm : this.items) {
-            if(itm.unit.stage!= ProcureUnit.STAGE.OUTBOUND) {
+            if(itm.unit.stage != ProcureUnit.STAGE.OUTBOUND) {
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有出仓.请联系仓库部门");
             }
         }
@@ -1081,6 +1081,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         }
         return totalWeight;
+    }
+
+    public float totalVolume() {
+        float totalVolume = 0f;
+        for(ShipItem itm : this.items) {
+            if(itm.unit == null) continue;
+            Float volume = itm.unit.product.lengths * itm.unit.product.width * itm.unit.product.heigh;
+            if(volume != null) {
+                totalVolume += itm.qty * volume / 1000000;
+            }
+        }
+        return totalVolume;
     }
 
     /**
@@ -1604,7 +1616,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public boolean isPaid() {
         if(this.fees.size() > 0) {
-            return this.fees.get(0).payment.paymentDate!=null;
+            return this.fees.get(0).payment.paymentDate != null;
         }
         return false;
     }
