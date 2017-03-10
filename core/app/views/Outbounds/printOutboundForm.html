@@ -66,7 +66,7 @@
           #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
           #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
           #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
-          #{set totalQty: mainNum + lastNum + totalQty /}
+          #{set totalQty: mainNum * mainBoxNum + lastNum + totalQty /}
           #{set totalBoxNum: mainBoxNum + lastBoxNum + totalBoxNum /}
         <tr style="height:${(2/rowNum)*6}mm;">
           <td rowspan="${rowNum}">${i.id}</td>
@@ -91,7 +91,7 @@
           <td style="font-size:9px;">
             <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
           </td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${mainNum + lastNum}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${mainNum * mainBoxNum + lastNum}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${(mainW + lastW).format('#.##')}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainV + lastV}</td>

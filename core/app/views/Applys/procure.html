@@ -90,9 +90,9 @@
         <th>#</th>
         <th>SKU</th>
         <th>Selling</th>
-        <th>数量(计划/交货)</th>
+        <th>数量(计划/交货/入库)</th>
         <th>单价</th>
-        <th>单价*数量</th>
+        <th>单价*入库数量</th>
         <th>阶段</th>
         <th>抵达货代</th>
         <th>FBA</th>
@@ -128,7 +128,7 @@
               #{/list}
           </td>
           <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}">
-          ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
+          ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}/${procureUnit.inboundQty}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
           <td class="price" amount="${procureUnit.totalAmount()}">

@@ -1711,7 +1711,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         return new BigDecimal(this.attrs.price.toString())
-                .multiply(new BigDecimal(this.qty()))
+                .multiply(new BigDecimal(this.inboundQty))
                 .setScale(2, 4)
                 .floatValue();
     }
