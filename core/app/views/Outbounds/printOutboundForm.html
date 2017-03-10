@@ -11,6 +11,8 @@
 <body style="margin:0 0 0 0;">
 #{list items:ten.keySet().iterator(), as:'p'}
     #{set first_o:ten.get(p).get(0) /}
+    #{set totalQty: 0/}
+    #{set totalBoxNum: 0/}
 <div style="margin:0 0 0 0; height:188mm;width:100%;">
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
@@ -64,6 +66,8 @@
           #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
           #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
           #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
+          #{set totalQty: mainNum + lastNum + totalQty /}
+          #{set totalBoxNum: mainBoxNum + lastBoxNum + totalBoxNum /}
         <tr style="height:${(2/rowNum)*6}mm;">
           <td rowspan="${rowNum}">${i.id}</td>
           <td rowspan="${rowNum}">${i.fba?.shipmentId}</td>
@@ -87,8 +91,8 @@
           <td style="font-size:9px;">
             <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
           </td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainNum + lastNum}</td>
+          <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${(mainW + lastW).format('#.##')}</td>
           <td style="font-size:10px;" rowspan="${rowNum}">${mainV + lastV}</td>
           <td rowspan="${rowNum}">${i.fba?.centerId}</td>
@@ -128,8 +132,8 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>${totalQty}</td>
+      <td>${totalBoxNum}</td>
       <td></td>
       <td></td>
       <td></td>

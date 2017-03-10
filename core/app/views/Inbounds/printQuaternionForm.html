@@ -56,10 +56,9 @@
       <td style="width: 8mm;">高</td>
     </tr>
       #{list items:ten.get(p), as:'i'}
-          #{set totalQty: i.qty + (totalQty==null ? 0 : totalQty) /}
+          #{set totalQty: i.qty + totalQty /}
           #{set totalBoxNum: (i.mainBox?.boxNum==null ? 0 : i.mainBox?.boxNum) +
-          (i.lastBox?.boxNum==null ? 0 : i.lastBox?.boxNum) +
-          (totalBoxNum==null ? 0 : totalBoxNum) /}
+          (i.lastBox?.boxNum==null ? 0 : i.lastBox?.boxNum) + totalBoxNum /}
           #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
           #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
         <tr style="height:7mm;">
