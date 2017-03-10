@@ -852,7 +852,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else if(this.lastBox != null && this.mainBox != null && this.lastBox.boxNum > 0
                 && newUnit.availableQty % this.mainBox.num <= this.lastBox.num) {
             newUnit.mainBox.boxNum = (int) Math.floor(newUnit.availableQty / this.mainBox.num);
-            newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.num = newUnit.mainBox.boxNum == 0 ? 0 : this.mainBox.num;
             newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
             newUnit.mainBox.length = this.mainBox.length;
             newUnit.mainBox.width = this.mainBox.width;
@@ -1711,7 +1711,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         return new BigDecimal(this.attrs.price.toString())
-                .multiply(new BigDecimal(this.qty()))
+                .multiply(new BigDecimal(this.inboundQty))
                 .setScale(2, 4)
                 .floatValue();
     }
