@@ -85,6 +85,7 @@ $ ->
   calculateSumery = ->
     total_plan_qty = 0
     total_qty = 0
+    total_inbound_qty = 0
     total_cny_summery = 0
     total_usd_summery = 0
     total_unknown_summery = 0
@@ -95,9 +96,11 @@ $ ->
       unknown_summery = 0
       planQty = 0
       qty = 0
+      inboundQty = 0
       table_summary.parent().find("td.qty").each ->
         planQty += parseInt($(@).attr('planQty'))
         qty += parseInt($(@).attr('qty'))
+        inboundQty += parseInt($(@).attr('inboundQty'))
       table_summary.parents('table').find('td.price').each ->
         text = @innerText
         $td = $(@)
@@ -108,18 +111,19 @@ $ ->
         else
           unknown_summery += parseFloat($td.attr("amount"))
 
-      table_summary.find('.totalNum').text("#{planQty} / #{qty}").end()
+      table_summary.find('.totalNum').text("#{planQty} / #{qty} / #{inboundQty}").end()
         .find('.usd').text("$ #{format_Num(usd_summery)}").end()
         .find('.cny').text("¥ #{format_Num(cny_summery)}").end()
         .find('.unknow').text("? #{format_Num(unknown_summery)}")
 
       total_plan_qty += planQty
       total_qty += qty
+      total_inbound_qty += inboundQty
       total_cny_summery += cny_summery
       total_usd_summery += usd_summery
       total_unknown_summery += unknown_summery
 
-    $('.totalQty').text("#{total_plan_qty} / #{total_qty}")
+    $('.totalQty').text("#{total_plan_qty} / #{total_qty} / #{total_inbound_qty}")
     $('.totalCost').text("¥ #{format_Num(total_cny_summery)} | $ #{format_Num(total_usd_summery)} | ? #{format_Num(total_unknown_summery)}")
 
     pay_cny = 0
