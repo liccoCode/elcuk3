@@ -229,17 +229,21 @@ public class InboundUnit extends Model {
                 logs.addAll(Reflects.logFieldFade(this, "result", R.valueOf(value)));
                 break;
             case "qualifiedQty":
+                int diff = this.qualifiedQty -  NumberUtils.toInt(value);
                 this.unqualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 if(this.status == S.Inbound) {
+                    this.unit.inboundQty -= diff;
                     this.unit.availableQty = NumberUtils.toInt(value);
                     this.unit.unqualifiedQty = this.unqualifiedQty;
                 }
                 break;
             case "unqualifiedQty":
+                int diffQty = this.unqualifiedQty -  NumberUtils.toInt(value);
                 this.qualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 if(this.status == S.Inbound) {
+                    this.unit.inboundQty += diffQty;
                     this.unit.unqualifiedQty = NumberUtils.toInt(value);
                     this.unit.availableQty = this.qualifiedQty;
                 }
