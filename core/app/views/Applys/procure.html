@@ -127,7 +127,8 @@
                 <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
               #{/list}
           </td>
-          <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}">
+          <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}"
+              inboundQty="${procureUnit.inboundQty}">
           ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}/${procureUnit.inboundQty}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>

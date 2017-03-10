@@ -1554,6 +1554,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    public int paidQty() {
+        if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
+                .contains(this.stage.name()))
+            return inboundQty;
+        else
+            return this.qty();
+    }
+
     /**
      * 入库中的数量
      *
@@ -1711,7 +1719,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         return new BigDecimal(this.attrs.price.toString())
-                .multiply(new BigDecimal(this.inboundQty))
+                .multiply(new BigDecimal(this.paidQty()))
                 .setScale(2, 4)
                 .floatValue();
     }
