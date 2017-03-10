@@ -379,9 +379,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Outbound out;
 
-    @Transient
-    public String outId;
-
     /**
      * 多个traceno
      */
@@ -389,38 +386,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public List<String> tracknolist = new ArrayList<>();
 
     /**
-     * 运输商名称
-     */
-    @Transient
-    public String cname;
-
-    /**
-     * 仓库名称
-     */
-    @Transient
-    public String wname;
-
-    /**
-     * 创建人
-     */
-    @Transient
-    public String uname;
-
-    @Transient
-    public int itemsNum;
-
-    @Transient
-    public String iExpressName;
-
-    /**
      * 完成天数
      * 完成时间 - 开始运输时间
      */
     @Transient
     public Integer realDay;
-
-    @Transient
-    public String applyId;
 
     public enum FLAG {
         ARRAY_TO_STR,
@@ -1045,7 +1015,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         FeeType duty = FeeType.dutyAndVAT();
         if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
         this.fees.stream().filter(fee -> fee.feeType.equals(duty) && !fee.currency.equals(crcy))
-                .forEach(fee -> Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息."));
+                .forEach(fee -> Validation.addError("", "关税费用应该为统一币种, 请核实关税请款信息."));
 
         if(Validation.hasErrors()) return null;
 
@@ -1097,11 +1067,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 通过产品数据计算出来的这份运输单的总重量
+     * 总重量, 需要根据体积/重量的运输算法来计算
      *
      * @return
      */
     public float totalWeight() {
-        //TODO 总重量, 需要根据体积/重量的运输算法来计算
         float totalWeight = 0f;
         for(ShipItem itm : this.items) {
             if(itm.unit == null) continue;
@@ -1630,6 +1600,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             totalCost += unit.currency.toCNY(unit.amount());
         }
         return totalCost;
+    }
+
+    public boolean isPaid() {
+        if(this.fees.size() > 0) {
+            return this.fees.get(0).payment.paymentDate!=null;
+        }
+        return false;
+    }
+
+    public Date getPaidDate() {
+        if(this.fees.size() > 0) {
+            return this.fees.get(0).payment.paymentDate;
+        }
+        return null;
     }
 
 }
