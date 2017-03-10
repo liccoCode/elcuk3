@@ -25,7 +25,7 @@ public class ShipmentPost extends Post<Shipment> {
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
-    private static final Pattern UNITID = Pattern.compile("^DL(\\|\\d{6}\\|\\d+)$");
+    private static final Pattern DELIVER_ID = Pattern.compile("^DL(\\|\\d{6}\\|\\d+)$");
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -62,90 +62,57 @@ public class ShipmentPost extends Post<Shipment> {
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
-        List<Map<String, Object>> rows = DBUtils.rows(params._1, params._2.toArray());
-        List<Shipment> list = new ArrayList<>();
-
-        for(Map<String, Object> row : rows) {
-            Shipment shipment = new Shipment();
-            shipment.id = row.get("id").toString();
-            shipment.itemsNum = Integer.parseInt(this.returnStringOrNull(row.get("itemsNum")));
-            shipment.trackNo = this.returnStringOrNull(row.get("trackNo"));
-            shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
-
-            shipment.iExpressName = this.returnStringOrNull(row.get("internationExpress"));
-            shipment.cname = this.returnStringOrNull(row.get("cname"));
-
-            shipment.type = Shipment.T.valueOf(row.get("type").toString());
-            shipment.wname = this.returnStringOrNull(row.get("wname"));
-            shipment.target = this.returnStringOrNull(row.get("target"));
-            shipment.state = Shipment.S.valueOf(row.get("state").toString());
-            shipment.dates.planBeginDate = (Date) row.get("planBeginDate");
-            shipment.createDate = (Date) row.get("createDate");
-            shipment.dates.planArrivDate = (Date) row.get("planArrivDate");
-            shipment.uname = this.returnStringOrNull(row.get("username"));
-            shipment.memo = this.returnStringOrNull(row.get("memo"));
-            shipment.applyId = this.returnStringOrNull(row.get("applyId"));
-            shipment.outId = this.returnStringOrNull(row.get("outId"));
-            shipment.realDay = row.get("realDay") == null ? null : Integer.parseInt(row.get("realDay").toString());
-            list.add(shipment);
-        }
-        return list;
-    }
-
-
-    public String returnStringOrNull(Object o) {
-        return o == null ? "" : o.toString();
+        this.count = this.count();
+        if(this.pagination)
+            return Shipment.find(params._1 + " GROUP BY s ORDER BY s.createDate DESC", params._2.toArray())
+                    .fetch(this.page, this.perSize);
+        else
+            return Shipment.find(params._1 + " GROUP BY s ORDER BY s.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        SqlSelect sql = new SqlSelect().select("s.id, s.internationExpress, s.memo, s.apply_id as applyId, s.trackNo, " +
-                "(SELECT count(1) FROM ShipItem si WHERE si.shipment_id=s.id) as itemsNum, c.name as cname, s.type," +
-                " w.name AS wname, s.target, s.state, s.planBeginDate, s.createDate, s.planArrivDate, u.username, " +
-                " TO_DAYS(s.arriveDate) - TO_DAYS(s.beginDate) as realDay,s.out_id as outId "
-        ).from(" Shipment s ").leftJoin(" ShipItem i ON i.shipment_id = s.id "
-        ).leftJoin(" Cooperator c ON c.id = s.cooper_id "
-        ).leftJoin(" ProcureUnit pu ON pu.id = i.unit_id "
-        ).leftJoin(" FBAShipment f ON f.id = pu.fba_id "
-        ).leftJoin(" Whouse w ON w.id = s.whouse_id "
-        ).leftJoin(" User u ON u.id = s.creater_id ");
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT s FROM Shipment s LEFT JOIN s.items i ");
+        sql.append(" LEFT JOIN i.unit.fba f WHERE 1=1 ");
 
         /**如果传入进来的是shipmentId或者采购单Id**/
         if(StringUtils.isNotBlank(this.search)) {
             this.search = this.search.trim();
-
-            Matcher unitmatcher = UNITID.matcher(this.search);
-            if(unitmatcher.matches()) {
-                String unitmentId = unitmatcher.group();
-                sql.where("pu.deliveryment_id = ?").params(unitmentId);
-                sql.groupBy(" s.id");
-                sql.orderBy(" s.createDate DESC");
-                return new F.T2<>(sql.toString(), sql.getParams());
+            Matcher deliver_matcher = DELIVER_ID.matcher(this.search);
+            if(deliver_matcher.matches()) {
+                String deliver_mentId = deliver_matcher.group();
+                sql.append(" AND pu.deliveryment_id = ? ");
+                params.add(deliver_mentId);
+                return new F.T2<>(sql.toString(), params);
             }
 
             Matcher matcher = ID.matcher(this.search);
             if(matcher.matches()) {
                 String shipmentId = matcher.group(1);
-                sql.where("s.id = ?").params(shipmentId);
-                sql.groupBy(" s.id");
-                sql.orderBy(" s.createDate DESC");
-                return new F.T2<>(sql.toString(), sql.getParams());
+                sql.append(" AND s.id = ?");
+                params.add(shipmentId);
+                return new F.T2<>(sql.toString(), params);
             }
             Matcher num_matcher = NUM.matcher(this.search);
             if(num_matcher.matches()) {
                 ProcureUnit unit = ProcureUnit.findById(Long.parseLong(this.search.trim()));
                 if(unit != null) {
-                    sql.where("pu.id =? ").params(this.search.trim());
-                    return new F.T2<>(sql.toString(), sql.getParams());
+                    sql.append(" i.unit.id =? ");
+                    params.add(this.search.trim());
+                    return new F.T2<>(sql.toString(), params);
                 }
             }
         }
 
-        sql.where(" s." + this.dateType + ">=?").params(Dates.morning(this.from));
-        sql.where(" s." + this.dateType + "<=?").params(Dates.night(this.to));
+        sql.append(" AND s.dates." + this.dateType + ">=?");
+        sql.append(" AND s.dates." + this.dateType + "<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.morning(this.to));
 
         if(this.type != null) {
-            sql.andWhere(" s.type=?").params(this.type.name());
+            sql.append(" AND s.type=?");
+            params.add(this.type.name());
         }
 
         if(this.states != null && this.states.size() > 0) {
@@ -154,31 +121,35 @@ public class ShipmentPost extends Post<Shipment> {
                 if(state == null) continue;
                 states.add(state.name());
             }
-            if(states.size() > 0) sql.andWhere(sql.whereIn("s.state", states));
+            if(states.size() > 0) sql.append(" AND s.state IN " + SqlSelect.inlineParam(states));
         }
 
         if(this.iExpress != null) {
-            sql.andWhere(" s.internationExpress=?").params(this.iExpress.name());
+            sql.append(" AND s.internationExpress=?");
+            params.add(this.iExpress.name());
         }
 
         if(this.whouseId > 0) {
-            sql.andWhere(" s.whouse_id=?").params(this.whouseId);
+            sql.append(" AND s.whouse_id=?");
+            params.add(this.whouseId);
         }
 
         if(this.cooperId != null) {
-            sql.andWhere(" s.cooper_id=?").params(this.cooperId);
+            sql.append(" AND s.cooper_id=?");
+            params.add(this.cooperId);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-
-            sql.andWhere("( s.trackNo LIKE ? ").param(word)
-                    .orWhere("s.jobNumber LIKE ? ").params(word)
-                    .orWhere("pu.sku LIKE ? ").params(word)
-                    .orWhere("f.shipmentId LIKE ? ) ").params(word);
+            sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? ");
+            for(int i = 0; i < 4; i++) params.add(word);
         }
-        sql.groupBy(" s.id");
-        sql.orderBy(" s.createDate DESC");
-        return new F.T2<>(sql.toString(), sql.getParams());
+
+        return new F.T2<>(sql.toString(), params);
     }
+
+    public Long count(F.T2<String, List<Object>> params) {
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
+    }
+
 }

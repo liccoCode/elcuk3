@@ -765,12 +765,12 @@ public class Excels extends Controller {
 
     public static void shipmentDetailCost(ShipmentPost p) {
         if(p == null) p = new ShipmentPost();
-        List<Shipment> payments = p.query();
         p.pagination = false;
+        List<Shipment> shipments = p.query();
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(payments);
+        render(shipments);
     }
     
 }

@@ -45,7 +45,8 @@
 #{else }
   <th><i class="icon-asterisk" style="color:red"></i>采购数量</th>
   <td colspan="3">
-    <input type="text" class="input-mini" name="newUnit.attrs.planQty" id="planQty" required placeholder="小于${unit.attrs.planQty}">
+    <input type="text" class="input-mini" name="newUnit.attrs.planQty" id="planQty" required placeholder="小于${unit.attrs.planQty}"
+           data-max="${unit.attrs.planQty}" autocomplete="off">
     <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
     <span class="add-on">箱</span>
     <input type="hidden" id="size_of_box" value="${unit.boxSize}">

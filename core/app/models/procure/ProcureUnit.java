@@ -3,7 +3,6 @@ package models.procure;
 import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import com.sun.xml.xsom.impl.UName;
 import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
@@ -47,7 +46,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -854,7 +852,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else if(this.lastBox != null && this.mainBox != null && this.lastBox.boxNum > 0
                 && newUnit.availableQty % this.mainBox.num <= this.lastBox.num) {
             newUnit.mainBox.boxNum = (int) Math.floor(newUnit.availableQty / this.mainBox.num);
-            newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.num = newUnit.mainBox.boxNum == 0 ? 0 : this.mainBox.num;
             newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
             newUnit.mainBox.length = this.mainBox.length;
             newUnit.mainBox.width = this.mainBox.width;
@@ -1556,6 +1554,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    public int paidQty() {
+        if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
+                .contains(this.stage.name()))
+            return inboundQty;
+        else
+            return this.qty();
+    }
+
     /**
      * 入库中的数量
      *
@@ -1713,7 +1719,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         return new BigDecimal(this.attrs.price.toString())
-                .multiply(new BigDecimal(this.qty()))
+                .multiply(new BigDecimal(this.paidQty()))
                 .setScale(2, 4)
                 .floatValue();
     }
