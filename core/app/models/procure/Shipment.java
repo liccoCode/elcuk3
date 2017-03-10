@@ -1087,7 +1087,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         float totalVolume = 0f;
         for(ShipItem itm : this.items) {
             if(itm.unit == null) continue;
-            Float volume = itm.unit.product.lengths * itm.unit.product.width * itm.unit.product.heigh;
+            Float volume = (itm.unit.product.lengths == null ? 0 : itm.unit.product.lengths)
+                    * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
+                    * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
             if(volume != null) {
                 totalVolume += itm.qty * volume / 1000000;
             }
