@@ -1091,7 +1091,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
                     * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
             if(volume != null) {
-                totalVolume += itm.qty * volume / 1000000;
+                totalVolume += itm.qty * volume / 1000000000;
             }
         }
         return totalVolume;
