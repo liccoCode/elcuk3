@@ -2,7 +2,7 @@
  * Created by licco on 2016/12/6.
  */
 $(() => {
-  $('#createApplyBtn').click(function() {
+  $('#createApplyBtn').click(function () {
     /*过滤掉apply为空的数据*/
     let $ck = $("#shipmentTable [type='checkbox']:checked");
     let size = $ck.length;
@@ -23,7 +23,7 @@ $(() => {
     });
   });
 
-  $("#download_excel").click(function(e) {
+  $("#download_excel").click(function (e) {
     e.preventDefault();
     let $form = $("#search_form");
     let express_size = 0;
@@ -47,7 +47,7 @@ $(() => {
     window.open('/Excels/shipmentDetails?' + $form.serialize() + "&" + form.serialize(), "_blank");
   });
 
-  $("#outboundBtn").click(function(e) {
+  $("#outboundBtn").click(function (e) {
     e.stopPropagation();
     let $btn = $(this);
     let checkboxs = $btn.parents('form').find("input:checkbox[name='shipmentId']:checked");
@@ -60,7 +60,7 @@ $(() => {
     } else {
       let flag = 0;
       let shipmentIds = [];
-      checkboxs.each(function() {
+      checkboxs.each(function () {
         let ck = $(this);
         if (ck.attr("coop") == "") {
           noty({
@@ -81,7 +81,7 @@ $(() => {
         shipmentIds.push(ck.val())
       });
       if (flag == 0) {
-        $.get('/shipments/validCreateOutbound', {shipmentIds: shipmentIds}, function(r) {
+        $.get('/shipments/validCreateOutbound', {shipmentIds: shipmentIds}, function (r) {
           if (r.flag) {
             let $form = $('<form method="post" action=""></form>');
             $form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
@@ -100,12 +100,12 @@ $(() => {
     }
   });
 
-  $(':checkbox[class=checkbox_all]').change(function(e) {
+  $(':checkbox[class=checkbox_all]').change(function (e) {
     $ck = $(this);
     $ck.parents('table').find(':checkbox').not(':first').prop("checked", $ck.prop('checked'));
   });
 
-  $("td[name='clickTd']").click(function() {
+  $("td[name='clickTd']").click(function () {
     let tr = $(this).parent("tr");
     let shipment_id = $(this).attr("shipment_id");
     let format_id = shipment_id.replace(/\|/gi, '_');
@@ -120,7 +120,7 @@ $(() => {
     }
   });
 
-  $("#shipmentTable").on("click", "input[name='editBoxInfo']", function(e) {
+  $("#shipmentTable").on("click", "input[name='editBoxInfo']", function (e) {
     e.stopPropagation();
     $("#fba_carton_contents_modal").modal('show');
     let ids = $(this).data("id");
@@ -139,6 +139,15 @@ $(() => {
     nonSelectedText: '运往仓库',
     maxHeight: 200,
     includeSelectAllOption: true
+  });
+
+  $("#exportBtn").click(function (e) {
+    e.preventDefault();
+    let $btn = $(this);
+    let form = $('<form method="post" action=""></form>');
+    form.attr('action', $btn.data('url')).attr('target', $btn.data('target'));
+    form.hide().append($btn.parents('form').find(":input").clone()).appendTo('body');
+    form.submit().remove();
   });
 
 });

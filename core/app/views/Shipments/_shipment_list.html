@@ -18,8 +18,8 @@
 #{list items:shipments, as:'ship'}
   <tr>
     <td>
-      <input type="checkbox" name="shipmentId" value="${ship.id}" coop="${ship.cname}" apply="${ship.applyId}"
-             way="${ship.type}" country="${ship.wname}" company="${ship.cname}" outId="${ship.outId}">
+      <input type="checkbox" name="shipmentId" value="${ship.id}" coop="${ship.cooper?.name}" apply="${ship.apply?.id}"
+             way="${ship.type}" country="${ship.whouse?.name}" company="${ship.cooper?.name}" outId="${ship.out?.id}">
     </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
@@ -29,19 +29,19 @@
         #{list items:ship.tracknolist, as:'trackno'}
         ${trackno+" "}
         #{/list}
-      <span class="badge badge-info">${ship.itemsNum}</span>
+      <span class="badge badge-info">${ship.items.size()}</span>
     </td>
-    <td>${ship.cname}</td>
-    <td>${ship.iExpressName}</td>
+    <td>${ship.cooper?.name}</td>
+    <td>${ship.internationExpress}</td>
     <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
-    <td>${ship.wname}</td>
+    <td>${ship.whouse?.name}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
-    <td>${ship.realDay}</td>
+    <td>${ship.showRealDay()}</td>
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
-    <td>${ship.uname}</td>
-    <td><a target="_blank" href="@{Outbounds.edit(ship.outId)}">${ship.outId}</a></td>
+    <td>${ship.creater?.username}</td>
+    <td><a target="_blank" href="@{Outbounds.edit(ship.out?.id)}">${ship.out?.id}</a></td>
   </tr>
 #{/list}
 </table>
