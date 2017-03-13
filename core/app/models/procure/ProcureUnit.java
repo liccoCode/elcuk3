@@ -605,6 +605,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public boolean isb2b;
 
+    @Transient
+    public int currQty;
+
     /**
      * 差数是否退回
      */
