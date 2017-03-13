@@ -43,7 +43,7 @@
       <select name="p.type" style="width: 100px;" class="inline">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
-        <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t}</option>
+        <option value="${t.name()}" ${t == p.type ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 

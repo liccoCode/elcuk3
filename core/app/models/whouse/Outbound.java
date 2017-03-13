@@ -304,12 +304,12 @@ public class Outbound extends GenericModel {
                 p.outQty = total_main + total_last;
                 p.availableQty = p.availableQty - p.outQty;
                 p.save();
-                createStockRecord(p);
+                createStockRecord(p, p.availableQty);
             });
         }
     }
 
-    public static void createStockRecord(ProcureUnit unit) {
+    public static void createStockRecord(ProcureUnit unit, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.whouse;
@@ -317,6 +317,7 @@ public class Outbound extends GenericModel {
         record.qty = unit.outQty;
         record.type = StockRecord.T.Outbound;
         record.recordId = unit.id;
+        record.currQty = currQty;
         record.save();
     }
 

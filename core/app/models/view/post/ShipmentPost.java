@@ -112,7 +112,7 @@ public class ShipmentPost extends Post<Shipment> {
 
         if(this.type != null) {
             sql.append(" AND s.type=?");
-            params.add(this.type.name());
+            params.add(this.type);
         }
 
         if(this.states != null && this.states.size() > 0) {
@@ -126,7 +126,7 @@ public class ShipmentPost extends Post<Shipment> {
 
         if(this.iExpress != null) {
             sql.append(" AND s.internationExpress=?");
-            params.add(this.iExpress.name());
+            params.add(this.iExpress);
         }
 
         if(this.whouseId > 0) {

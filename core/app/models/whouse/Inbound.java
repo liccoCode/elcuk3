@@ -302,12 +302,12 @@ public class Inbound extends GenericModel {
                 punit.lastBoxInfo = u.lastBoxInfo;
                 punit.currWhouse = u.target;
                 punit.save();
-                this.createStockRecord(u);
+                this.createStockRecord(u, punit.availableQty);
             }
         }
     }
 
-    private void createStockRecord(InboundUnit unit) {
+    private void createStockRecord(InboundUnit unit, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.target;
@@ -315,6 +315,7 @@ public class Inbound extends GenericModel {
         record.qty = unit.inboundQty;
         record.type = StockRecord.T.Inbound;
         record.recordId = unit.id;
+        record.currQty = currQty;
         record.save();
     }
 
