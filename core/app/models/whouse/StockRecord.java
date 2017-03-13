@@ -1,18 +1,12 @@
 package models.whouse;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
-import controllers.Login;
 import models.User;
 import models.procure.ProcureUnit;
 import play.data.validation.Required;
-import play.data.validation.Validation;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.Date;
 
 /**
