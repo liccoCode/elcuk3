@@ -82,7 +82,7 @@ public class ShipmentPost extends Post<Shipment> {
             Matcher deliver_matcher = DELIVER_ID.matcher(this.search);
             if(deliver_matcher.matches()) {
                 String deliver_mentId = deliver_matcher.group();
-                sql.append(" AND pu.deliveryment_id = ? ");
+                sql.append(" AND i.unit.deliveryment.id = ? ");
                 params.add(deliver_mentId);
                 return new F.T2<>(sql.toString(), params);
             }
@@ -99,7 +99,7 @@ public class ShipmentPost extends Post<Shipment> {
                 ProcureUnit unit = ProcureUnit.findById(Long.parseLong(this.search.trim()));
                 if(unit != null) {
                     sql.append(" AND i.unit.id =? ");
-                    params.add(this.search.trim());
+                    params.add(Long.parseLong(this.search.trim()));
                     return new F.T2<>(sql.toString(), params);
                 }
             }

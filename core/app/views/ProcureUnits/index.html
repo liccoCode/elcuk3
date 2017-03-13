@@ -63,6 +63,13 @@
         #{/list}
         </select>
 
+        <select name="p.category" class="inline">
+          <option value="">品线</option>
+        #{list items:categoryIds, as:'c'}
+          <option value="${c}" ${p.category==c?'selected':''}>${c}</option>
+        #{/list}
+        </select>
+
         <div class="input-prepend inline">
           <select name="p.stages" multiple="multiple" id="stage">
           #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
@@ -82,9 +89,9 @@
 
         <select name="p.projectName" class="inline">
           <option value="">项目名称</option>
-          #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
-            <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
-          #{/list}
+        #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
+          <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
+        #{/list}
         </select>
 
         <div class="input-prepend input-append inline">
