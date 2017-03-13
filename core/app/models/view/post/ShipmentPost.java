@@ -98,7 +98,7 @@ public class ShipmentPost extends Post<Shipment> {
             if(num_matcher.matches()) {
                 ProcureUnit unit = ProcureUnit.findById(Long.parseLong(this.search.trim()));
                 if(unit != null) {
-                    sql.append(" i.unit.id =? ");
+                    sql.append(" AND i.unit.id =? ");
                     params.add(this.search.trim());
                     return new F.T2<>(sql.toString(), params);
                 }
@@ -141,7 +141,7 @@ public class ShipmentPost extends Post<Shipment> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? ");
+            sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? )");
             for(int i = 0; i < 4; i++) params.add(word);
         }
         return new F.T2<>(sql.toString(), params);
