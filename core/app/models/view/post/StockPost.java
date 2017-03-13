@@ -4,7 +4,6 @@ import helper.DBUtils;
 import helper.Dates;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
@@ -120,12 +119,19 @@ public class StockPost extends Post<ProcureUnit> {
         sql.append(" IFNULL((SELECT s.currQty FROM StockRecord s WHERE s.unit_id = p.id AND s.createDate <= ? ");
         params.add(Dates.night(this.to));
         sql.append(" ORDER BY s.id DESC LIMIT 1), 0) AS currQty");
-        sql.append(" FROM ProcureUnit p LEFT JOIN Product d ON d.`sku` = p.product_sku ");
+        sql.append(" FROM ProcureUnit p LEFT JOIN Product d ON d.sku = p.product_sku ");
         sql.append(" WHERE  p.createDate >= ? AND p.createDate <= ? ");
-        sql.append(" ORDER BY p.id DESC ");
         params.add(Dates.morning(Dates.aMonthAgo()));
         params.add(Dates.night(this.to));
-
+        Long unit_id = isSearchForId();
+        if(unit_id != null) {
+            sql.append(" AND p.id=?");
+            params.add(unit_id);
+        }
+        if(this.whouses != null && this.whouses.length > 0) {
+            sql.append(" AND p.currWhouse_id IN  " + SqlSelect.inlineParam(whouses));
+        }
+        sql.append(" ORDER BY p.id DESC ");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
         List<ProcureUnit> units = rows.stream().map(row -> {
             ProcureUnit unit = ProcureUnit.findById(Long.parseLong(row.get("id").toString()));

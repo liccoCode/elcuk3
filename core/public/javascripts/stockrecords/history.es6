@@ -26,9 +26,7 @@ $(() => {
       "sDom": "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
       "sPaginationType": "full_numbers",
       "iDisplayLength": 50,
-      "aoColumnDefs":[
-        {"bSortable": false, "aTargets": [0]}
-      ]
+      "aaSorting" :[[0,'desc']]
     });
   });
 

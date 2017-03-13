@@ -25,7 +25,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class StockRecords extends Controller {
 
-    @Before(only = {"index", "stockIndex"})
+    @Before(only = {"index", "stockIndex", "indexHistoryStock"})
     public static void setWhouses() {
         renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("whouses", Whouse.exceptAMZWhoses());
