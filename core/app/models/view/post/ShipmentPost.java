@@ -130,12 +130,12 @@ public class ShipmentPost extends Post<Shipment> {
         }
 
         if(this.whouseId > 0) {
-            sql.append(" AND s.whouse_id=?");
+            sql.append(" AND s.whouse.id=?");
             params.add(this.whouseId);
         }
 
         if(this.cooperId != null) {
-            sql.append(" AND s.cooper_id=?");
+            sql.append(" AND s.cooper.id=?");
             params.add(this.cooperId);
         }
 
@@ -144,7 +144,6 @@ public class ShipmentPost extends Post<Shipment> {
             sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? ");
             for(int i = 0; i < 4; i++) params.add(word);
         }
-
         return new F.T2<>(sql.toString(), params);
     }
 
