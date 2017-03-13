@@ -44,6 +44,12 @@ public class StockRecords extends Controller {
         render(p, units);
     }
 
+    public static void indexHistoryStock(StockPost p) {
+        if(p == null) p = new StockPost();
+        List<ProcureUnit> units = p.queryHistoryStock();
+        render(p, units);
+    }
+
     public static void adjustStock(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         StockRecord record = new StockRecord();

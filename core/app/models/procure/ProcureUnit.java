@@ -605,6 +605,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public boolean isb2b;
 
+    @Transient
+    public int currQty;
+
     /**
      * 差数是否退回
      */
@@ -892,7 +895,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
         new ERecordBuilder("procureunit.split").msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class).save();
-        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split);
+        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, this.availableQty, this.availableQty);
         return newUnit;
     }
 
@@ -903,12 +906,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param qty
      * @param type
      */
-    public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type) {
+    public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type, int childCurrQty, int parentCurrQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.currWhouse;
         record.unit = unit;
         record.qty = qty;
+        record.currQty = childCurrQty;
         record.type = type;
         record.recordId = unit.id;
         record.save();
@@ -920,6 +924,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             parent.type = type;
             parent.recordId = unit.parent.id;
             parent.creator = Login.current();
+            parent.currQty = parentCurrQty;
             parent.save();
         }
     }
@@ -1113,7 +1118,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && unit.shipType.name() != "EXPRESS") {
+                && !unit.shipType.name().equals("EXPRESS")) {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1130,12 +1135,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         if(Validation.hasErrors()) return;
         //仓库加工修改
+        int parentCurrQty = 0;
         if(this.parent != null && unit.isReturn) {
             ProcureUnit it = ProcureUnit.findById(this.parent.id);
             if(it.stage == STAGE.IN_STORAGE) {
                 it.availableQty += (this.availableQty - unit.availableQty);
                 it.save();
             }
+            parentCurrQty = it.availableQty;
         }
         logs.addAll(this.changeStageUpdate(unit));
         if(STAGE.IN_STORAGE == this.stage) {
@@ -1167,7 +1174,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.shipItemQty(this.qty());
         this.save();
         if(diffQty != 0) {
-            this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock);
+            this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock, this.availableQty, parentCurrQty);
         }
     }
 
@@ -1212,7 +1219,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     this.parent.availableQty += diff;
                     this.parent.save();
                 }
-                this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
+                this.createStockRecord(this, -diff, StockRecord.T.Split_Stock, this.availableQty,
+                        this.parent.availableQty);
             }
             this.currWhouse = Whouse.autoMatching(this.shipType, this.projectName.equals("B2B") ? "B2B" : "", this.fba);
         } else if(diff != 0) {

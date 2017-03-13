@@ -98,7 +98,7 @@ public class ShipmentPost extends Post<Shipment> {
             if(num_matcher.matches()) {
                 ProcureUnit unit = ProcureUnit.findById(Long.parseLong(this.search.trim()));
                 if(unit != null) {
-                    sql.append(" i.unit.id =? ");
+                    sql.append(" AND i.unit.id =? ");
                     params.add(this.search.trim());
                     return new F.T2<>(sql.toString(), params);
                 }
@@ -112,7 +112,7 @@ public class ShipmentPost extends Post<Shipment> {
 
         if(this.type != null) {
             sql.append(" AND s.type=?");
-            params.add(this.type.name());
+            params.add(this.type);
         }
 
         if(this.states != null && this.states.size() > 0) {
@@ -126,25 +126,24 @@ public class ShipmentPost extends Post<Shipment> {
 
         if(this.iExpress != null) {
             sql.append(" AND s.internationExpress=?");
-            params.add(this.iExpress.name());
+            params.add(this.iExpress);
         }
 
         if(this.whouseId > 0) {
-            sql.append(" AND s.whouse_id=?");
+            sql.append(" AND s.whouse.id=?");
             params.add(this.whouseId);
         }
 
         if(this.cooperId != null) {
-            sql.append(" AND s.cooper_id=?");
+            sql.append(" AND s.cooper.id=?");
             params.add(this.cooperId);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? ");
+            sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? )");
             for(int i = 0; i < 4; i++) params.add(word);
         }
-
         return new F.T2<>(sql.toString(), params);
     }
 
