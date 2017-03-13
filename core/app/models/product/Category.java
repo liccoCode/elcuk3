@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 产品分层中第一级别的 Category 类别
@@ -157,10 +158,7 @@ public class Category extends GenericModel {
     public static List<String> categoryIds() {
         List<Map<String, Object>> rows = DBUtils
                 .rows("SELECT categoryId FROM Category ORDER BY categoryId");
-        List<String> categoryIds = new ArrayList<>();
-        for(Map<String, Object> row : rows) {
-            categoryIds.add(row.get("categoryId").toString());
-        }
+        List<String> categoryIds = rows.stream().map(row -> row.get("categoryId").toString()).collect(Collectors.toList());
         return categoryIds;
     }
 

@@ -16,6 +16,7 @@ import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Category;
 import models.product.Product;
 import models.qc.CheckTask;
 import models.view.Ret;
@@ -61,6 +62,8 @@ public class ProcureUnits extends Controller {
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
         renderArgs.put("cooperators", cooperators);
+        List<String> categoryIds = Category.categoryIds();
+        renderArgs.put("categoryIds", categoryIds);
 
         //为视图提供日期
         DateTime dateTime = new DateTime();
