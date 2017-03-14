@@ -114,6 +114,7 @@ $(() => {
       tr.next("tr").toggle();
     } else {
       let html = "<tr style='background-color:#F2F2F2'><td colspan='14'>";
+      html += "<div><h4 class='text-info'>Comment</h4>" + memo + "</div><hr>"
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + format_id).load("/Shipments/showProcureUnitList", {id: shipment_id});

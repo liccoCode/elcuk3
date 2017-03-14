@@ -34,7 +34,9 @@ import java.util.regex.Pattern;
  */
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-public class SaleFee extends Model {
+public class SaleFee extends Model{
+
+    private static final long serialVersionUID = -8565064073185613540L;
 
     public SaleFee() {
     }

@@ -92,6 +92,31 @@ $ ->
       })
     else
       $("#updateDeliverymentForm").submit()
+  ).on('click', '#confirmBtn', (e) ->
+    e.preventDefault()
+    $.post("/Deliveryments/validDmtIsNeedApply", {id: $("input[name='dmt.id']").val()}, (r)->
+      if r.flag
+        return false if !confirm(r.message)
+        $("#confirmForm").submit()
+      else
+        $("#confirmForm").submit()
+    )
+  ).on('click', '#generate_excel_btn', (e) ->
+    e.preventDefault()
+    $.post("/Deliveryments/validDmtIsNeedApply", {id: $("input[name='dmt.id']").val()}, (r)->
+      if r.flag
+        return false if !confirm(r.message)
+        $("#confirmForm").submit()
+      else
+        $("#generate_excel").submit()
+    )
+  )
+
+  $("select[name='result']").change(->
+    if $(@).val() == 'false'
+      $("#apply_input").show()
+    else
+      $("#apply_input").hide()
   )
 
   $("#fba_carton_contents_modal").on('change', "input[name='chooseType']", (e) ->
