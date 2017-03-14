@@ -83,7 +83,13 @@ public class Deliveryments extends Controller {
                 .collect(Collectors.toList());
         String expressid = StringUtils.join(expressUnitIds, ",");
         double total = dmt.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
-        render(dmt, expressid, total);
+        String applyMsg = "";
+        List<Deliveryment> deliveryments = new ArrayList<>();
+        if(dmt.state == Deliveryment.S.PENDING_REVIEW) {
+            applyMsg = dmt.validDmtIsNeedApply().message;
+            deliveryments = dmt.getRelateDelivery();
+        }
+        render(dmt, expressid, total, applyMsg, deliveryments);
     }
 
     public static void update(Deliveryment dmt) {
@@ -171,11 +177,7 @@ public class Deliveryments extends Controller {
             renderJSON(new Ret(false));
         if(dmt.state == Deliveryment.S.PENDING_REVIEW)
             renderJSON(new Ret(true, "采购单正在审核中！"));
-        double totalSeven = dmt.totalAmountForSevenDay();
-        boolean isNeedApply =
-                totalSeven + dmt.totalPerDeliveryment() > Double.parseDouble(OperatorConfig.getVal("checklimit"));
-        renderJSON(new Ret(isNeedApply, "供应商在本周内下单金额已为:" +
-                (totalSeven + dmt.totalPerDeliveryment()) + "，需要审核，是否提交审核？"));
+        renderJSON(dmt.validDmtIsNeedApply());
     }
 
     /**
@@ -212,7 +214,6 @@ public class Deliveryments extends Controller {
         dmt.review(result, msg);
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt, msg);
-
         show(id);
     }
 

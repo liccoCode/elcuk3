@@ -1,0 +1,62 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th width="20px;"></th>
+    <th>#</th>
+    <th>请款单</th>
+    <th>Name</th>
+    <th>State</th>
+    <th>单据类型</th>
+    <th>供应商</th>
+    <th>最先交货时间</th>
+    <th>最后交货时间</th>
+    <th>交货进度</th>
+    <th>User</th>
+    <th>Create</th>
+  </tr>
+#{list items:deliveryments, as:'dmt'}
+    #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+    #{set procress: dmt.deliveryProcress()/}
+  <tr>
+    <td>
+        #{if dmt.apply == null}
+          <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
+                 name="deliverymentIds" value="${dmt.id}">
+        #{/if}
+    </td>
+    <td>
+      <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
+    </td>
+    <td>
+        #{if dmt.apply}
+          <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
+          <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
+        #{/if}
+        #{else }没有请款单#{/else}
+    </td>
+    <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+      <span><i class="icon-reorder"></i></span>
+      <span>${dmt.name}</span>
+      <span class="badge badge-info">${dmt.units.size()}</span>
+    </td>
+    <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
+    <td>${dmt.deliveryType?.label()}</td>
+    <td>${dmt.supplier()?.name}</td>
+    <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
+    <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
+    <td>
+      <div class="progress ${procress.bgcolor()} progress-striped" style="margin-bottom:0;">
+        <div class="bar" style="width: ${(procress._1 / procress._2).format('#%')};">
+          <p style="color:black;">${procress._1} / ${procress._2}</p>
+        </div>
+      </div>
+    </td>
+    <td>${dmt.handler.username}</td>
+    <td>#{time_tooltip time:dmt.createDate/}</td>
+  </tr>
+  <tr id="dmt_${dmt_index}" style="display:none;">
+    <td colspan="12" style="padding:0;border:none">
+        #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
+    </td>
+  </tr>
+#{/list}
+</table>

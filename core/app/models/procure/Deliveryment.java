@@ -9,6 +9,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -63,7 +64,7 @@ public class Deliveryment extends GenericModel {
         PENDING_REVIEW {
             @Override
             public String label() {
-                return "确认并待审核";
+                return "待审核";
             }
         },
         /**
@@ -278,19 +279,33 @@ public class Deliveryment extends GenericModel {
     public void confirm() {
         if(!Arrays.asList(S.APPROVE, S.PENDING, S.REJECT).contains(this.state))
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
-        if(this.deliveryTime == null)
-            Validation.addError("", "交货时间必须填写");
-        if(this.orderTime == null)
-            Validation.addError("", "下单时间必须填写");
-        if(Validation.hasErrors()) return;
-        if((this.totalAmountForSevenDay() + this.totalPerDeliveryment()) >
-                Double.parseDouble(OperatorConfig.getVal("checklimit")) && this.state != S.APPROVE) {
+        Ret ret = this.validDmtIsNeedApply();
+        if(ret.flag && this.state != S.APPROVE) {
             this.state = S.PENDING_REVIEW;
         } else {
+            if(this.deliveryTime == null)
+                Validation.addError("", "交货时间必须填写");
+            if(this.orderTime == null)
+                Validation.addError("", "下单时间必须填写");
+            if(Validation.hasErrors()) return;
             this.confirmDate = new Date();
             this.state = S.CONFIRM;
         }
         this.save();
+    }
+
+    public Ret validDmtIsNeedApply() {
+        double totalDmt = this.totalPerDeliveryment();
+        double totalSeven = this.totalAmountForSevenDay();
+        double checkLimit = Double.parseDouble(OperatorConfig.getVal("checklimit"));
+        double checkLimitPerWeek = Double.parseDouble(OperatorConfig.getVal("checklimitperweek"));
+        boolean isNeedApply = (totalDmt > checkLimit);
+        if(isNeedApply)
+            return new Ret(true, "单笔金额超过 ¥ " + checkLimit + ",需要审核，是否提交审核？");
+        else if((totalSeven + totalDmt) > checkLimitPerWeek)
+            return new Ret(true, "该供应商本周金额超过 ¥ " + checkLimitPerWeek + ",需要审核，是否提交审核？");
+        else
+            return new Ret(false);
     }
 
     /**
@@ -304,6 +319,7 @@ public class Deliveryment extends GenericModel {
         if(Validation.hasErrors()) return;
         this.state = result ? S.APPROVE : S.REJECT;
         this.save();
+        new ERecordBuilder("deliveryment.review").msgArgs(this.id, this.state.label(), msg).fid(this.id).save();
     }
 
     /**
@@ -530,10 +546,7 @@ public class Deliveryment extends GenericModel {
 
 
     public double totalAmountForSevenDay() {
-        Long cooperId = this.cooperator.id;
-        String sql = "cooperator.id=? AND createDate >=? AND createDate<=? AND state <>?";
-        List<Deliveryment> deliveryments = Deliveryment.find(sql, cooperId,
-                Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
+        List<Deliveryment> deliveryments = this.getRelateDelivery();
         return deliveryments.stream().mapToDouble(Deliveryment::totalPerDeliveryment).sum();
     }
 
@@ -541,5 +554,10 @@ public class Deliveryment extends GenericModel {
         return this.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
     }
 
+    public List<Deliveryment> getRelateDelivery() {
+        String sql = "cooperator.id=? AND createDate >=? AND createDate<=? AND state <>?";
+        return Deliveryment.find(sql, this.cooperator.id,
+                Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
+    }
 
 }
