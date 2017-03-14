@@ -12,6 +12,7 @@ import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
+import models.view.Ret;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
@@ -72,7 +73,6 @@ public class Deliveryments extends Controller {
         render(deliveryments, p, deliverymentIds);
     }
 
-    //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         notFoundIfNull(dmt);
@@ -81,7 +81,8 @@ public class Deliveryments extends Controller {
                 .map(unit -> unit.id)
                 .collect(Collectors.toList());
         String expressid = StringUtils.join(expressUnitIds, ",");
-        render(dmt, expressid);
+        double total = dmt.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+        render(dmt, expressid, total);
     }
 
     public static void update(Deliveryment dmt) {
@@ -106,7 +107,6 @@ public class Deliveryments extends Controller {
 
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
-     * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
     public static void create(List<Long> pids, String name) {
@@ -164,17 +164,27 @@ public class Deliveryments extends Controller {
         show(dmt.id);
     }
 
+    public static void validDmtIsNeedApply(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        if(dmt.state == Deliveryment.S.APPROVE)
+            renderJSON(new Ret(false));
+        double totalSeven = dmt.totalAmountForSevenDay();
+        boolean isNeedApply =
+                totalSeven + dmt.totalPerDeliveryment() > Double.parseDouble(OperatorConfig.getVal("checklimit"));
+        renderJSON(new Ret(isNeedApply, "供应商在本周内下单金额已为:" + totalSeven + "，需要审核，是否提交审核？"));
+    }
+
     /**
      * 确认采购单, 这样才能进入运输单进行挑选
      */
     public static void confirm(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         dmt.confirm();
-        if(Validation.hasErrors())
-            render("Deliveryments/show.html", dmt);
-
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
-                .save();
+        if(Validation.hasErrors()) {
+            double total = dmt.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+            render("Deliveryments/show.html", dmt, total);
+        }
+        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
         show(id);
     }
 
@@ -190,6 +200,16 @@ public class Deliveryments extends Controller {
             render("Deliveryments/show.html", dmt, msg);
 
         show(dmt.id);
+    }
+
+    public static void review(String id, String msg, Boolean result) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        Validation.required("deliveryments.review", result);
+        dmt.review(result, msg);
+        if(Validation.hasErrors())
+            render("Deliveryments/show.html", dmt, msg);
+
+        show(id);
     }
 
 
@@ -274,4 +294,5 @@ public class Deliveryments extends Controller {
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
     }
+
 }

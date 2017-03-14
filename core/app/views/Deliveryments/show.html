@@ -12,20 +12,21 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-#{set isPending: dmt.state == models.procure.Deliveryment.S.PENDING/}
+#{set isPending: Arrays.asList('PENDING','APPROVE','REJECT').contains(dmt.state.name()) /}
+#{info_row title:'采购单信息'/}
 <div class="row-fluid">
   <div class="span12">
     <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
       <table class="table table-condensed table-bordered">
         <tr>
-          <th>Id</th>
+          <th width="120px;">Id</th>
           <td>
             <span id="deliverymentId">${dmt.id}</span>
             <input type="hidden" name="dmt.id" value="${dmt.id}">
           </td>
 
           <th>State</th>
-          <td style="color:${dmt.state.rgb()}">${dmt.state}</td>
+          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <th>CreateDate</th>
           <td>
             <input type="text" readonly="" disabled="" class="input-medium" name="dmt.createDate" value="${dmt.createDate.datetime()}">
@@ -37,10 +38,10 @@
           <td colspan="2">
             <input type="text" class="span10" name="dmt.name" value="${dmt.name}">
           </td>
-
+          <td>总额￥ ${total.format('#,###.##')}</td>
           <th>User</th>
           <td>${dmt.handler.username}</td>
-          <td></td>
+
         </tr>
         <tr>
           <th>供应商</th>
@@ -58,14 +59,18 @@
         </tr>
 
         <tr>
-          <td colspan="6">
-            <h4>Memo:</h4>
+          <th><h4>Memo:</h4></th>
+          <td colspan="5">
             <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
-          #{power.ck "products.edit"}
-            <button class="btn btn-primary">更新</button>
-          #{/power.ck}
           </td>
         </tr>
+      #{power.ck "products.edit"}
+        <tr>
+          <td colspan="6">
+            <button class="btn btn-primary">更新</button>
+          </td>
+        </tr>
+      #{/power.ck}
       </table>
     </form>
   </div>
@@ -74,14 +79,12 @@
 <div class="row-fluid">
   <div class="span12">
   #{if isPending}
-    <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;">
+    <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;" id="confirmForm">
       <div class="input-prepend input-append" style="float:left;">
         <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
         <input type="hidden" name="id" value="${dmt.id}">
           #{power.ck "products.edit"}
-            <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
-              确认
-            </button>
+            <input type="button" class="btn btn-primary" id="confirmBtn" value="确认">
           #{/power.ck}
       </div>
     </form>
@@ -89,12 +92,29 @@
   #{power.ck 'deliveryments.cancel'}
     <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;">
       <input type="hidden" name="id" value="${dmt.id}">
-
       <div class="input-append" style="float:left;margin-left:10px;">
         <input type="text" name="msg" value="${msg}" placeHolder="简要填写关闭的原因">
         <button class="btn btn-danger">取消采购单</button>
       </div>
     </form>
+  #{/power.ck}
+
+  #{power.ck 'deliveryments.review'}
+      #{if dmt.state.name().equals("PENDING_REVIEW")}
+        <form action="@{Deliveryments.review()}" method="post" style="display:inline-block;">
+          <input type="hidden" name="id" value="${dmt.id}">
+          <div class="input-append" style="float:left;margin-left:10px;">
+            <select style="width:80px;" name="result">
+              <option value="">请选择</option>
+              <option value="true">通过</option>
+              <option value="false">驳回</option>
+            </select>
+            <input type="text" name="msg" value="${msg}" id="apply_input" style="display:none;"
+                   placeHolder="如果驳回，简要填写驳回的原因">
+            <button class="btn btn-warning">提交审核</button>
+          </div>
+        </form>
+      #{/if}
   #{/power.ck}
   #{if dmt.apply}
     <div style="float:left;display:inline-block">
@@ -114,7 +134,7 @@
   <div id="tl" class="span12" style="height:350px;"></div>
 </div>
 
-#{success_row title:"已经添加进入[采购单]的[采购单元] "/}
+#{success_row title:"已经添加进入[采购单]的[采购单元]"/}
 <form action="#" id="bulkpost" method="POST">
   <input type="hidden" name="expressid" id="expressid" value="${expressid}">
   <div class="row-fluid">
@@ -145,7 +165,7 @@
       </a>
     #{/power.ck}
       <a href="javascript:void(0);" data-url="@{FBAs.downloadZip("Deliveryments", dmt.id)}" data-method="POST"
-         id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
+         id="downloadFBAZIP" class="btn btn-info" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
         <i class="icon-download-alt"></i>下载FBA ZIP 包
       </a>
     </div>
@@ -169,7 +189,6 @@
 #{else }
 <div id="excel" class="row-fluid" style="display:none;">
   <div class="span12">
-
     <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
       <table class="table table-bordered table-condensed">
         <tr>
@@ -286,7 +305,7 @@
         <tr>
           <td colspan="4">
             <input type="hidden" name="id" value="${dmt.id}">
-            <button class="btn btn-success">生成采购单 Excel</button>
+            <input type="button" id="generate_excel_btn" class="btn btn-success" value="生成采购单 Excel">
           </td>
         </tr>
       </table>
@@ -337,4 +356,6 @@
 </div>
 
 
+<input type="hidden" id="isNeedApply" value="${isNeedApply}">
+<input type="hidden" id="totalSeven" value="${totalSeven}">
 
