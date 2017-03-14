@@ -14,65 +14,84 @@
 
 #{set isPending: Arrays.asList('PENDING','APPROVE','REJECT').contains(dmt.state.name()) /}
 #{info_row title:'采购单信息'/}
+
 <div class="row-fluid">
-  <div class="span12">
-    <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th width="120px;">Id</th>
-          <td>
-            <span id="deliverymentId">${dmt.id}</span>
-            <input type="hidden" name="dmt.id" value="${dmt.id}">
-          </td>
+#{if dmt.state.name().equals("PENDING_REVIEW")}
+  <ul class="nav nav-tabs">
+    <li class="active" id="below_tab">
+      <a href="#currentPage" data-toggle='tab'>待审采购单</a>
+    </li>
+    <li>
+      <a href="#relateDelivery" data-toggle='tab'>相关采购单</a>
+    </li>
+  </ul>
+#{/if}
+  <div class="tab-content">
+    <div class="tab-pane fade active in" id='currentPage'>
+      <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th width="120px;">Id</th>
+            <td>
+              <span id="deliverymentId">${dmt.id}</span>
+              <input type="hidden" name="dmt.id" value="${dmt.id}">
+            </td>
 
-          <th>State</th>
-          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
-          <th>CreateDate</th>
-          <td>
-            <input type="text" readonly="" disabled="" class="input-medium" name="dmt.createDate" value="${dmt.createDate.datetime()}">
-          </td>
-        </tr>
+            <th>State</th>
+            <td style="color:${dmt.state.rgb()}" width="400px;">
+            ${dmt.state.label()}
+            #{if dmt.state.name().equals("PENDING_REVIEW")}
+              (${applyMsg?.split(",")[0]})
+            #{/if}
+            </td>
+            <th>CreateDate</th>
+            <td>
+              <input type="text" readonly="" disabled="" class="input-medium" name="dmt.createDate" value="${dmt.createDate.datetime()}">
+            </td>
+          </tr>
 
-        <tr>
-          <th>Name</th>
-          <td colspan="2">
-            <input type="text" class="span10" name="dmt.name" value="${dmt.name}">
-          </td>
-          <td>总额￥ ${total.format('#,###.##')}</td>
-          <th>User</th>
-          <td>${dmt.handler.username}</td>
+          <tr>
+            <th>Name</th>
+            <td colspan="2">
+              <input type="text" class="span10" name="dmt.name" value="${dmt.name}">
+            </td>
+            <td>总额￥ ${total.format('#,###.##')}</td>
+            <th>User</th>
+            <td>${dmt.handler.username}</td>
+          </tr>
+          <tr>
+            <th>供应商</th>
+            <td>${dmt.cooperator?.name}</td>
+            <th>下单时间</th>
+            <td>
+              <input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}">
+            </td>
+            <th>交货时间</th>
+            <td>
+              <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}">
+            </td>
+          </tr>
 
-        </tr>
-        <tr>
-          <th>供应商</th>
-          <td>${dmt.cooperator?.name}</td>
+          <tr>
+            <th><h4>Memo:</h4></th>
+            <td colspan="5">
+              <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
+            </td>
+          </tr>
+        #{power.ck "products.edit"}
+          <tr>
+            <td colspan="6">
+              <button class="btn btn-primary">更新</button>
+            </td>
+          </tr>
+        #{/power.ck}
+        </table>
+      </form>
+    </div>
 
-          <th>下单时间</th>
-          <td>
-            <input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}">
-          </td>
-
-          <th>交货时间</th>
-          <td>
-            <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}">
-          </td>
-        </tr>
-
-        <tr>
-          <th><h4>Memo:</h4></th>
-          <td colspan="5">
-            <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
-          </td>
-        </tr>
-      #{power.ck "products.edit"}
-        <tr>
-          <td colspan="6">
-            <button class="btn btn-primary">更新</button>
-          </td>
-        </tr>
-      #{/power.ck}
-      </table>
-    </form>
+    <div class="tab-pane fade" id='relateDelivery'>
+    #{include 'Deliveryments/_relate_index.html'/}
+    </div>
   </div>
 </div>
 
