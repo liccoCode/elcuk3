@@ -1,7 +1,9 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
@@ -56,6 +58,33 @@ public class Deliveryment extends GenericModel {
             }
         },
         /**
+         * 待审核
+         */
+        PENDING_REVIEW {
+            @Override
+            public String label() {
+                return "确认并待审核";
+            }
+        },
+        /**
+         * 审核通过
+         */
+        APPROVE {
+            @Override
+            public String label() {
+                return "审核通过";
+            }
+        },
+        /**
+         * 审核不通过
+         */
+        REJECT {
+            @Override
+            public String label() {
+                return "审核不通过";
+            }
+        },
+        /**
          * 完成交货.
          */
         DONE {
@@ -103,6 +132,8 @@ public class Deliveryment extends GenericModel {
      * 交货时间
      */
     public Date deliveryTime;
+
+    public Date confirmDate;
 
     /**
      * 此采购单的状态
@@ -245,15 +276,33 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
-        if(this.state != S.PENDING)
+        if(!Arrays.asList(S.APPROVE, S.PENDING, S.REJECT).contains(this.state))
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
         if(this.deliveryTime == null)
             Validation.addError("", "交货时间必须填写");
         if(this.orderTime == null)
             Validation.addError("", "下单时间必须填写");
         if(Validation.hasErrors()) return;
+        if(this.totalAmountForSevenDay() > Double.parseDouble(OperatorConfig.getVal("checklimit"))
+                && this.state != S.APPROVE) {
+            this.state = S.PENDING_REVIEW;
+        } else {
+            this.confirmDate = new Date();
+            this.state = S.CONFIRM;
+        }
+        this.save();
+    }
 
-        this.state = Deliveryment.S.CONFIRM;
+    /**
+     * 审核采购单
+     */
+    public void review(Boolean result, String msg) {
+        if(this.state != S.PENDING_REVIEW)
+            Validation.addError("", "采购单状态非 " + S.PENDING_REVIEW.label() + " 不可以确认");
+        if(!result && StringUtils.isBlank(msg))
+            Validation.addError("", "请填写审核不通过的原因！");
+        if(Validation.hasErrors()) return;
+        this.state = result ? S.APPROVE : S.REJECT;
         this.save();
     }
 
@@ -478,4 +527,19 @@ public class Deliveryment extends GenericModel {
         return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?)",
                 this.id, ProcureUnit.T.ProcureSplit).fetch();
     }
+
+
+    public double totalAmountForSevenDay() {
+        Long cooperId = this.cooperator.id;
+        String sql = "cooperator.id=? AND createDate >=? AND createDate<=? AND state <>?";
+        List<Deliveryment> deliveryments = Deliveryment.find(sql, cooperId,
+                Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
+        return deliveryments.stream().mapToDouble(Deliveryment::totalPerDeliveryment).sum();
+    }
+
+    public double totalPerDeliveryment() {
+        return this.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+    }
+
+
 }
