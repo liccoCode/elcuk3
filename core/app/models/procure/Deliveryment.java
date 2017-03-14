@@ -283,8 +283,8 @@ public class Deliveryment extends GenericModel {
         if(this.orderTime == null)
             Validation.addError("", "下单时间必须填写");
         if(Validation.hasErrors()) return;
-        if(this.totalAmountForSevenDay() > Double.parseDouble(OperatorConfig.getVal("checklimit"))
-                && this.state != S.APPROVE) {
+        if((this.totalAmountForSevenDay() + this.totalPerDeliveryment()) >
+                Double.parseDouble(OperatorConfig.getVal("checklimit")) && this.state != S.APPROVE) {
             this.state = S.PENDING_REVIEW;
         } else {
             this.confirmDate = new Date();

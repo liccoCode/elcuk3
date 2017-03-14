@@ -25,6 +25,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -166,12 +167,15 @@ public class Deliveryments extends Controller {
 
     public static void validDmtIsNeedApply(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        if(dmt.state == Deliveryment.S.APPROVE)
+        if(Arrays.asList("CONFIRM", "APPROVE", "DONE").contains(dmt.state.name()))
             renderJSON(new Ret(false));
+        if(dmt.state == Deliveryment.S.PENDING_REVIEW)
+            renderJSON(new Ret(true, "采购单正在审核中！"));
         double totalSeven = dmt.totalAmountForSevenDay();
         boolean isNeedApply =
                 totalSeven + dmt.totalPerDeliveryment() > Double.parseDouble(OperatorConfig.getVal("checklimit"));
-        renderJSON(new Ret(isNeedApply, "供应商在本周内下单金额已为:" + totalSeven + "，需要审核，是否提交审核？"));
+        renderJSON(new Ret(isNeedApply, "供应商在本周内下单金额已为:" +
+                (totalSeven + dmt.totalPerDeliveryment()) + "，需要审核，是否提交审核？"));
     }
 
     /**
