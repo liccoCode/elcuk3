@@ -55,6 +55,8 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Shipment.T shipType;
     public String unitIds;
     public InboundUnit.R result;
+    public String category;
+
     /**
      * 选择过滤的日期类型
      */
@@ -153,7 +155,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<>();
         sbd.append("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.fba f LEFT JOIN p.selling s ");
-        sbd.append("LEFT JOIN p.deliverplan d WHERE 1=1 ");
+        sbd.append("LEFT JOIN p.deliverplan d LEFT JOIN p.product o WHERE 1=1 ");
         Long procrueId = isSearchForId();
         if(procrueId != null) {
             sbd.append(" AND p.id=?");
@@ -195,6 +197,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.isConfirm != null) {
             sbd.append(" AND p.isConfirm=? ");
             params.add(this.isConfirm == C.YES);
+        }
+
+        if(StringUtils.isNotBlank(this.category)) {
+            sbd.append(" AND p.product.category.id = ? ");
+            params.add(this.category);
         }
 
         if(StringUtils.isNotEmpty(this.projectName)) {
