@@ -12,7 +12,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -28,6 +27,8 @@ import java.util.Optional;
 @DynamicUpdate
 public class Refund extends GenericModel {
 
+    private static final long serialVersionUID = 1504355529353731906L;
+    
     @Id
     @Column(length = 30)
     @Expose
@@ -222,7 +223,7 @@ public class Refund extends GenericModel {
                     }
                 }
                 unit.save();
-                createStockRecord(u, StockRecord.T.Refund, "");
+                createStockRecord(u, StockRecord.T.Refund, "", unit.availableQty);
             }
         }
     }
@@ -247,7 +248,7 @@ public class Refund extends GenericModel {
         }
     }
 
-    public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo) {
+    public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.unit.whouse;
@@ -255,6 +256,7 @@ public class Refund extends GenericModel {
         record.qty = unit.qty;
         record.type = type;
         record.recordId = unit.id;
+        record.currQty = currQty;
         record.memo = memo;
         record.save();
     }
@@ -303,7 +305,7 @@ public class Refund extends GenericModel {
             u.planQty = unit.attrs.qty;
             u.qty = unit.attrs.qty;
             u.save();
-            createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
+            createStockRecord(u, StockRecord.T.Unqualified_Refund, memo, pro.availableQty);
             new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unit.id).save();
         });
         refund.save();

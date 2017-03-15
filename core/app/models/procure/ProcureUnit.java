@@ -895,7 +895,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
         new ERecordBuilder("procureunit.split").msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class).save();
-        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, this.availableQty, this.availableQty);
+        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, newUnit.availableQty, this.availableQty);
         return newUnit;
     }
 
