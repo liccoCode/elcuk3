@@ -9,10 +9,7 @@ import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.OutboundPost;
 import models.view.post.ProcurePost;
-import models.whouse.Inbound;
-import models.whouse.InboundUnit;
-import models.whouse.Outbound;
-import models.whouse.Whouse;
+import models.whouse.*;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -35,7 +32,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Outbounds extends Controller {
 
-    @Before(only = {"index", "edit", "blank"})
+    @Before(only = {"index", "edit", "blank", "otherBlank"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
@@ -49,7 +46,9 @@ public class Outbounds extends Controller {
     public static void index(OutboundPost p) {
         if(p == null) p = new OutboundPost();
         List<Outbound> outbounds = p.query();
-        render(p, outbounds);
+        p.flag = true;
+        List<Outbound> others = p.query();
+        render(p, outbounds, others);
     }
 
     public static void edit(String id) {
@@ -64,8 +63,23 @@ public class Outbounds extends Controller {
         render(units, proUnit, outbound);
     }
 
+    public static void otherBlank() {
+        render();
+    }
+
     public static void create(Outbound outbound, List<Long> pids) {
         outbound.create(pids);
+        index(new OutboundPost());
+    }
+
+    /**
+     * 其它出库
+     *
+     * @param outbound
+     * @param dtos
+     */
+    public static void otherCreate(Outbound outbound, List<StockRecord> dtos) {
+        outbound.createOther(dtos);
         index(new OutboundPost());
     }
 
@@ -100,6 +114,12 @@ public class Outbounds extends Controller {
         Outbound outbound = Outbound.findById(id);
         List<ProcureUnit> units = outbound.units;
         render("/Outbounds/_units.html", units);
+    }
+
+    public static void showStockRecordList(String id) {
+        Outbound outbound = Outbound.findById(id);
+        List<StockRecord> records = outbound.records;
+        render("/Outbounds/_records.html", records);
     }
 
     public static void addUnits(String outId, List<Long> pids) {

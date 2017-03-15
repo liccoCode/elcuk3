@@ -169,4 +169,35 @@ $(() => {
     EF.colorAnimate(targetTr)
   }
 
+  let index = $("#data_table input[type='checkbox']").length - 1;
+
+  $("#quickAdd").click(function (e) {
+    e.preventDefault();
+    let id = $("#procureId").val();
+    let cooperId = $("#cooperId").val();
+    if ($("#tr_" + id).html() == undefined) {
+      $.get("/procureunits/findProcureById", {
+        id: id,
+        index: index,
+        type: 'Outbound'
+      }, function (r) {
+        index++;
+        $("#data_table").append(r);
+        slippingTr(id);
+      });
+      $("#procureId").val("");
+    } else {
+      noty({
+        text: "采购计划已经存在该单据中!",
+        type: 'error'
+      });
+      slippingTr(id);
+    }
+  });
+
+  function slippingTr (id) {
+    EF.scoll($("#tr_" + id));
+    EF.colorAnimate($("#tr_" + id));
+  }
+
 });

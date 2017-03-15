@@ -44,6 +44,12 @@ public class Outbound extends GenericModel {
     public List<ProcureUnit> units = new ArrayList<>();
 
     /**
+     * 异动记录
+     */
+    @OneToMany(mappedBy = "out", cascade = {CascadeType.PERSIST})
+    public List<StockRecord> records = new ArrayList<>();
+
+    /**
      * 名称
      */
     @Required
@@ -55,48 +61,7 @@ public class Outbound extends GenericModel {
     @Enumerated(EnumType.STRING)
     @Required
     @Expose
-    public T type;
-
-    public enum T {
-        Normal {
-            @Override
-            public String label() {
-                return "Amazon 出库";
-            }
-        },
-        B2B {
-            @Override
-            public String label() {
-                return "B2B 出库";
-            }
-        },
-        Refund {
-            @Override
-            public String label() {
-                return "退回工厂";
-            }
-        },
-        Process {
-            @Override
-            public String label() {
-                return "品拓生产";
-            }
-        },
-        Sample {
-            @Override
-            public String label() {
-                return "取样";
-            }
-        },
-        Other {
-            @Override
-            public String label() {
-                return "其他出库";
-            }
-        };
-
-        public abstract String label();
-    }
+    public StockRecord.C type;
 
     public String targetId;
 
@@ -224,6 +189,23 @@ public class Outbound extends GenericModel {
         });
     }
 
+    public void createOther(List<StockRecord> records) {
+        this.init();
+        this.save();
+        records.stream().filter(record -> record.unitId != null).forEach(record -> {
+            ProcureUnit unit = ProcureUnit.findById(record.unitId);
+            StockRecord stock = new StockRecord();
+            stock.unit = unit;
+            stock.out = this;
+            stock.whouse = unit.currWhouse;
+            stock.creator = Login.current();
+            stock.currQty = unit.availableQty - record.qty;
+            stock.type = StockRecord.T.OtherOutbound;
+            stock.category = this.type;
+            stock.save();
+        });
+    }
+
     public static void initCreateByShipItem(List<String> shipmentId) {
         List<Shipment> shipments = Shipment.find("id IN " + SqlSelect.inlineParam(shipmentId)).fetch();
         Map<String, List<Shipment>> map = new HashMap<>();
@@ -247,7 +229,7 @@ public class Outbound extends GenericModel {
             out.name = key;
             out.projectName = first.projectName;
             out.shipType = shipment.type;
-            out.type = T.Normal;
+            out.type = StockRecord.C.Normal;
             out.whouse = shipment.whouse;
             out.targetId = shipment.cooper.id.toString();
             out.shipmentId = SqlSelect
