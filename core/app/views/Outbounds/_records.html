@@ -1,0 +1,39 @@
+<table class="table table-condensed table-bordered" id="data_table">
+  <tr>
+    <th>采购计划ID</th>
+    <th>采购单</th>
+    <th>Selling</th>
+    <th>SKU</th>
+    <th>产品名称</th>
+    <th>供应商</th>
+    <th>可用库存</th>
+    <th>实际出库数量</th>
+    <th>仓库名称</th>
+    <th>收货入库记录ID</th>
+    <th>阶段</th>
+    <th>项目名称</th>
+    <th>备注</th>
+  </tr>
+#{list items:records, as:'r'}
+  <tr class="text-center">
+    <td>${r.unit.id}</td>
+    <td>${r.unit.deliveryment.id}</td>
+    <td>${r.unit.selling?.sellingId}</td>
+    <td>${r.unit.product.abbreviation}</td>
+    <td>${r.unit.cooperator?.name}</td>
+    <td>${r.unit.whouse?.name}</td>
+    <td style="color:${r.unit.shipType?.rgb()}">${r.unit.shipType?.label()}</td>
+    <td>${r.unit.fba?.shipmentId}</td>
+    <td>#{time_tooltip time:r.unit.attrs.planShipDate /}</td>
+    <td>${r.unit.availableQty}</td>
+    <td>${r.unit.outQty}</td>
+    <td>
+      <input type="button" class="btn btn-mini btn-success" data-id="${r.unit.id}" name="editBoxInfo" value="填写">
+    </td>
+    <td>${r.unit.currWhouse?.name}</td>
+    <td>${r.unit.showInboundIds()}</td>
+    <td style="background-color:${r.unit.stage.rgb()}">${r.unit.stage?.label()}</td>
+    <td rel="tooltip" title="${r.unit.comment}"><a>${r.unit.comment.xxLong()}</a></td>
+  </tr>
+#{/list}
+</table>

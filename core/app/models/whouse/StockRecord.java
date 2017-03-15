@@ -31,6 +31,10 @@ public class StockRecord extends Model {
     @ManyToOne
     public ProcureUnit unit;
 
+    @Expose
+    @ManyToOne
+    public Outbound out;
+
     /**
      * 数量
      */
@@ -39,7 +43,7 @@ public class StockRecord extends Model {
     public Integer qty;
 
     /**
-     * 调整前库存
+     * 调整后采购计划对应的库存
      */
     @Required
     @Expose
@@ -64,6 +68,12 @@ public class StockRecord extends Model {
             @Override
             public String label() {
                 return "出库";
+            }
+        },
+        OtherOutbound {
+            @Override
+            public String label() {
+                return "其它出库";
             }
         },
         Split {
@@ -174,6 +184,9 @@ public class StockRecord extends Model {
     public User creator;
 
     public String memo;
+
+    @Transient
+    public Long unitId;
 
 
     public StockRecord() {

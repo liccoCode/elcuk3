@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:'新建出库单' /}
+#{set title:'其它出库单' /}
 #{set 'moreScripts'}
     #{script 'outbounds/blank.js'/}
 #{/set}
@@ -12,7 +12,7 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @Outbounds.create(), method:'POST', id: 'new_outbound'}
+#{form @Outbounds.otherCreate(), method:'POST', id: 'new_outbound'}
     #{info_row title:'出库单'/}
 <div class="row-fluid">
   <div class="span12">
@@ -20,37 +20,17 @@
       <tr>
         <th>出库单ID</th>
         <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
-        <th>状态</th>
-        <td><input type="text" value="${outbound?.status?.label()}" readonly></td>
-        <th>B2B选项</th>
-        <td>
-          <label class="checkbox">
-            <input type="checkbox" name="outbound.isb2b" value="true" ${proUnit.projectName=='B2B'?'checked':''}> B2B
-          </label>
-        </td>
-      </tr>
-      <tr>
-        <th>目的国家</th>
-        <td>
-          <input type="text" value="${outbound?.whouse?.name}" readonly>
-          <input type="hidden" name="outbound.whouse.id" value="${outbound?.whouse?.id}">
-        </td>
-        <th>运输方式</th>
-        <td>
-          <input type="text" value="${outbound?.shipType?.label()}" readonly/>
-          <input type="hidden" name="outbound.shipType" value="${outbound.shipType?.name()}">
-        </td>
-        <th>运输单号</th>
-        <td><input type="text" value="" readonly/></td>
-      </tr>
-      <tr>
         <th>出库单名称<span style="color:red">*</span></th>
         <td><input type="text" class="span8" name="outbound.name" required></td>
+        <th>出库日期<span style="color:red">*</span></th>
+        <td><input type="date" name="outbound.outboundDate" required></td>
+      </tr>
+      <tr>
         <th>出库类型</th>
         <td>
           <select name="outbound.type">
               #{list items:models.whouse.StockRecord.C, as:'t'}
-                  #{if t.name().equals("Normal")}
+                  #{if !t.name().equals("Normal")}
                     <option value="${t.name()}">${t.label()}</option>
                   #{/if}
               #{/list}
@@ -89,10 +69,6 @@
           <select name="outbound.targetId" style="width: 230px;">
           </select>
         </td>
-      </tr>
-      <tr>
-        <th>出库日期<span style="color:red">*</span></th>
-        <td><input type="date" name="outbound.outboundDate" required></td>
         <th>发货人</th>
         <td>
           <select name="outbound.consignor.id" class="inline selectize" style="width:120px;">
@@ -102,8 +78,6 @@
               #{/list}
           </select>
         </td>
-        <th>创建人</th>
-        <td><input type="text" value="" readonly="true"></td>
       </tr>
       <tr>
         <th>备注</th>
@@ -129,18 +103,15 @@
         <th>采购计划ID</th>
         <th>采购单</th>
         <th>Selling</th>
+        <th>SKU</th>
         <th>产品名称</th>
         <th>供应商</th>
-        <th>去往仓库</th>
-        <th>运输方式</th>
-        <th>FBA-ShipmentId</th>
-        <th>预计运输时间</th>
-        <th>计划出库数量</th>
+        <th>可用库存</th>
         <th>实际出库数量</th>
-        <th>包装信息</th>
         <th>仓库名称</th>
         <th>收货入库记录ID</th>
         <th>阶段</th>
+        <th>项目名称</th>
         <th>备注</th>
       </tr>
         #{list items:units, as:'unit'}
@@ -170,11 +141,14 @@
           </tr>
         #{/list}
     </table>
-    <button class="btn btn-danger" id="deleteByCreateBtn">解除</button>
   </div>
 </div>
-
 #{/form}
+
+<div class="input-append">
+  <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId">
+  <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+</div>
 
 <div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">
   <div class="modal-body">
