@@ -88,7 +88,6 @@ public class Sellings extends Controller {
             if(!sellings.isEmpty()) {
                 sids.addAll(sellings.stream().map(s -> s.sellingId).collect(Collectors.toList()));
             }
-
         }
         renderJSON(J.json(sids));
     }
@@ -100,8 +99,7 @@ public class Sellings extends Controller {
      * @param sid
      */
     public static void sameSidSellings(String sid) {
-        List<Selling> sellings = Selling
-                .find("sellingId like '" + sid + "%'").fetch();
+        List<Selling> sellings = Selling.find("sellingId like '" + sid + "%'").fetch();
         List<String> sids = sellings.stream().map(s -> s.sellingId).collect(Collectors.toList());
         renderJSON(J.json(sids));
     }
