@@ -21,6 +21,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,8 @@ public class Outbounds extends Controller {
     }
 
     public static void otherBlank() {
-        render();
+        String name = String.format("%s_其它出库", LocalDate.now());
+        render(name);
     }
 
     public static void create(Outbound outbound, List<Long> pids) {
@@ -106,8 +108,13 @@ public class Outbounds extends Controller {
         options.filename = "PTC" + formatter.format(new Date()) + ".pdf";
         options.pageSize = IHtmlToPdfTransformer.A4L;
         List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
-        Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
-        renderPDF(options, ten);
+        if(outbounds.get(0).type.name().equals("Normal")) {
+            Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
+            renderPDF(options, ten);
+        } else {
+            Map<Integer, List<StockRecord>> ten = StockRecord.pageNumForTen(outbounds);
+            renderPDF(options, ten);
+        }
     }
 
     public static void showProcureUnitList(String id) {

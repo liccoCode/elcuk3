@@ -8,6 +8,9 @@ import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 库存异动记录
@@ -33,7 +36,7 @@ public class StockRecord extends Model {
 
     @Expose
     @ManyToOne
-    public Outbound out;
+    public Outbound outbound;
 
     /**
      * 数量
@@ -191,6 +194,20 @@ public class StockRecord extends Model {
 
     public StockRecord() {
         this.createDate = new Date();
+    }
+
+    public static Map<Integer, List<StockRecord>> pageNumForTen(List<Outbound> outbounds) {
+        Map<Integer, List<StockRecord>> ten = new HashMap<>();
+        int k = 0;
+        for(Outbound outbound : outbounds) {
+            int max = outbound.records.size();
+            for(int i = 0; i < max; i += 10) {
+                int num = max - i;
+                ten.put(k, outbound.records.subList(i, num > 10 ? i + 10 : i + num));
+                k++;
+            }
+        }
+        return ten;
     }
 
 }

@@ -98,25 +98,27 @@
         </td>
         <td>
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
-              #{if unit.status.name()=="Create" || unit.unit.stage.name()=='OUTBOUND'}
+              #{if  Arrays.asList("OUTBOUND","SHIPPING","SHIP_OVER","INBOUND","CLOSE").contains(unit.unit.stage.name())
+              || unit.status.name()=="Create" }
                  readonly
               #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
                  value="${unit.unqualifiedQty}"
-              #{if unit.status.name()=="Create" || unit.unit.stage.name()=='OUTBOUND'}
+              #{if  Arrays.asList("OUTBOUND","SHIPPING","SHIP_OVER","INBOUND","CLOSE").contains(unit.unit.stage.name())
+              || unit.status.name()=="Create" }
                  readonly
               #{/if} style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <select name="target" style="max-width: 80px;" ${unit.status.name() != "Receive" ? 'disabled':''}>
-          <option value="">仓库</option>
-            #{list items:whouses, as:'whouse'}
-              <option ${whouse.id == unit.target?.id ? 'selected' : ''} value="${whouse.id}">
-              ${whouse.name}
-              </option>
-            #{/list}
+            <option value="">仓库</option>
+              #{list items:whouses, as:'whouse'}
+                <option ${whouse.id == unit.target?.id ? 'selected' : ''} value="${whouse.id}">
+                ${whouse.name}
+                </option>
+              #{/list}
           </select>
         </td>
         <td>${unit.unit.projectName}</td>
