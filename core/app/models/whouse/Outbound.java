@@ -197,6 +197,7 @@ public class Outbound extends GenericModel {
         }
         if(Validation.hasErrors()) return;
         this.init();
+        this.status = S.Outbound;
         this.save();
         records.stream().filter(record -> record.unitId != null).forEach(record -> {
             ProcureUnit unit = ProcureUnit.findById(record.unitId);

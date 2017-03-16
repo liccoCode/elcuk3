@@ -39,7 +39,11 @@ public class OutboundPost extends Post<Outbound> {
     }
 
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o LEFT JOIN o.units u WHERE 1=1");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o ");
+        if(flag)
+            sbd.append(" LEFT JOIN o.records u WHERE 1=1");
+        else
+            sbd.append(" LEFT JOIN o.units u WHERE 1=1");
         List<Object> params = new ArrayList<>();
         sbd.append(" AND o.createDate >= ? AND o.createDate <= ? ");
         params.add(Dates.morning(this.from));
@@ -52,7 +56,10 @@ public class OutboundPost extends Post<Outbound> {
                 return new F.T2<>(sbd.toString(), params);
             }
             if(isNumForSearch() != null) {
-                sbd.append(" AND u.id = ? ");
+                if(flag)
+                    sbd.append(" AND u.unit.id = ? ");
+                else
+                    sbd.append(" AND u.id = ? ");
                 params.add(isNumForSearch());
                 return new F.T2<>(sbd.toString(), params);
             }

@@ -63,12 +63,13 @@
         #{/list}
         </select>
 
-        <select name="p.category" class="inline">
-          <option value="">品线</option>
-        #{list items:categoryIds, as:'c'}
-          <option value="${c}" ${p.category==c?'selected':''}>${c}</option>
-        #{/list}
-        </select>
+        <div class="input-prepend inline">
+          <select name="p.categories" multiple="multiple" id="categories">
+          #{list items:categoryIds, as:'c'}
+            <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+          #{/list}
+          </select>
+        </div>
 
         <div class="input-prepend inline">
           <select name="p.stages" multiple="multiple" id="stage">

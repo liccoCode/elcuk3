@@ -895,7 +895,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
         new ERecordBuilder("procureunit.split").msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class).save();
-        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, newUnit.availableQty, this.availableQty);
+        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, newUnit.availableQty,
+                this.availableQty);
         return newUnit;
     }
 
@@ -1874,8 +1875,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
                         "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay",
-                        "procureunit.adjuststock", "refund.confirm", "refund.transfer"),
-                50);
+                        "procureunit.adjuststock", "refund.confirm", "refund.transfer", "paymentunit.fixValue"), 50);
     }
 
     /**

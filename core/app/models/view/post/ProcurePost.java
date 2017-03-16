@@ -55,7 +55,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Shipment.T shipType;
     public String unitIds;
     public InboundUnit.R result;
-    public String category;
+    public List<String> categories = new ArrayList<>();
 
     /**
      * 选择过滤的日期类型
@@ -199,9 +199,8 @@ public class ProcurePost extends Post<ProcureUnit> {
             params.add(this.isConfirm == C.YES);
         }
 
-        if(StringUtils.isNotBlank(this.category)) {
-            sbd.append(" AND p.product.category.id = ? ");
-            params.add(this.category);
+        if(categories.size() > 0) {
+            sbd.append(" AND p.product.category.id IN " + SqlSelect.inlineParam(categories));
         }
 
         if(StringUtils.isNotEmpty(this.projectName)) {
