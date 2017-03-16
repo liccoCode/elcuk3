@@ -55,72 +55,109 @@
       <td style="width: 8mm;">宽</td>
       <td style="width: 8mm;">高</td>
     </tr>
-      #{list items:ten.get(p), as:'i'}
-          #{set mainBoxNum: i.mainBox?.boxNum ? i.mainBox?.boxNum : 0 /}
-          #{set lastBoxNum: i.lastBox?.boxNum ? i.lastBox?.boxNum : 0/}
-          #{set mainNum: i.mainBox?.num ? i.mainBox?.num : 0/}
-          #{set lastNum: i.lastBox?.num ? i.lastBox?.num : 0/}
-          #{set mainW: i.mainBox?.singleBoxWeight ? i.mainBox?.singleBoxWeight : 0/}
-          #{set lastW: i.lastBox?.singleBoxWeight ? i.lastBox?.singleBoxWeight : 0/}
-          #{set mainV: i.mainBox?.totalVolume()==null ? 0 : i.mainBox?.totalVolume()/}
-          #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
-          #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
-          #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
-          #{set totalQty: mainNum * mainBoxNum + lastNum + totalQty /}
-          #{set totalBoxNum: mainBoxNum + lastBoxNum + totalBoxNum /}
-        <tr style="height:${(2/rowNum)*6}mm;">
-          <td rowspan="${rowNum}">${i.id}</td>
-          <td rowspan="${rowNum}">${i.fba?.shipmentId}</td>
-          <td rowspan="${rowNum}">${i.sku}</td>
-          <td rowspan="${rowNum}">${i.cooperator?.name}</td>
-          <td style="font-size:9px;">
-            <div style="height:${6/rowNum}mm;">${i.mainBox?.num}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:${6/rowNum}mm;">${i.mainBox?.boxNum}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:${6/rowNum}mm;">${i.mainBox?.singleBoxWeight}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:${6/rowNum}mm;">${i.mainBox?.length}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:${6/rowNum}mm;">${i.mainBox?.width}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
-          </td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${mainNum * mainBoxNum + lastNum}</td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${(mainW + lastW).format('#.##')}</td>
-          <td style="font-size:10px;" rowspan="${rowNum}">${mainV + lastV}</td>
-          <td rowspan="${rowNum}">${i.fba?.centerId}</td>
-          <td rowspan="${rowNum}">${i.groupNum}</td>
-        </tr>
-          #{if rowNum == 2}
-            <tr>
+      #{if first_o.outbound.type?.name()=="Normal"}
+          #{list items:ten.get(p), as:'i'}
+              #{set mainBoxNum: i.mainBox?.boxNum ? i.mainBox?.boxNum : 0 /}
+              #{set lastBoxNum: i.lastBox?.boxNum ? i.lastBox?.boxNum : 0/}
+              #{set mainNum: i.mainBox?.num ? i.mainBox?.num : 0/}
+              #{set lastNum: i.lastBox?.num ? i.lastBox?.num : 0/}
+              #{set mainW: i.mainBox?.singleBoxWeight ? i.mainBox?.singleBoxWeight : 0/}
+              #{set lastW: i.lastBox?.singleBoxWeight ? i.lastBox?.singleBoxWeight : 0/}
+              #{set mainV: i.mainBox?.totalVolume()==null ? 0 : i.mainBox?.totalVolume()/}
+              #{set lastV: i.lastBox?.totalVolume()==null ? 0 : i.lastBox?.totalVolume()/}
+              #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
+              #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
+              #{set totalQty: mainNum * mainBoxNum + lastNum + totalQty /}
+              #{set totalBoxNum: mainBoxNum + lastBoxNum + totalBoxNum /}
+            <tr style="height:${(2/rowNum)*6}mm;">
+              <td rowspan="${rowNum}">${i.id}</td>
+              <td rowspan="${rowNum}">${i.fba?.shipmentId}</td>
+              <td rowspan="${rowNum}">${i.sku}</td>
+              <td rowspan="${rowNum}">${i.cooperator?.name}</td>
               <td style="font-size:9px;">
-                <div style="height:3mm;">${i.lastBox?.num}</div>
+                <div style="height:${6/rowNum}mm;">${i.mainBox?.num}</div>
               </td>
               <td style="font-size:9px;">
-                <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+                <div style="height:${6/rowNum}mm;">${i.mainBox?.boxNum}</div>
               </td>
               <td style="font-size:9px;">
-                <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+                <div style="height:${6/rowNum}mm;">${i.mainBox?.singleBoxWeight}</div>
               </td>
               <td style="font-size:9px;">
-                <div style="height:3mm;">${i.lastBox?.length}</div>
+                <div style="height:${6/rowNum}mm;">${i.mainBox?.length}</div>
               </td>
               <td style="font-size:9px;">
-                <div style="height:3mm;">${i.lastBox?.width}</div>
+                <div style="height:${6/rowNum}mm;">${i.mainBox?.width}</div>
               </td>
               <td style="font-size:9px;">
-                <div style="height:3mm;">${i.lastBox?.height}</div>
+                <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
               </td>
+              <td style="font-size:10px;" rowspan="${rowNum}">${mainNum * mainBoxNum + lastNum}</td>
+              <td style="font-size:10px;" rowspan="${rowNum}">${mainBoxNum + lastBoxNum}</td>
+              <td style="font-size:10px;" rowspan="${rowNum}">${(mainW + lastW).format('#.##')}</td>
+              <td style="font-size:10px;" rowspan="${rowNum}">${mainV + lastV}</td>
+              <td rowspan="${rowNum}">${i.fba?.centerId}</td>
+              <td rowspan="${rowNum}">${i.groupNum}</td>
             </tr>
-          #{/if}
-      #{/list}
+              #{if rowNum == 2}
+                <tr>
+                  <td style="font-size:9px;">
+                    <div style="height:3mm;">${i.lastBox?.num}</div>
+                  </td>
+                  <td style="font-size:9px;">
+                    <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+                  </td>
+                  <td style="font-size:9px;">
+                    <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+                  </td>
+                  <td style="font-size:9px;">
+                    <div style="height:3mm;">${i.lastBox?.length}</div>
+                  </td>
+                  <td style="font-size:9px;">
+                    <div style="height:3mm;">${i.lastBox?.width}</div>
+                  </td>
+                  <td style="font-size:9px;">
+                    <div style="height:3mm;">${i.lastBox?.height}</div>
+                  </td>
+                </tr>
+              #{/if}
+          #{/list}
+      #{/if}
+      #{else }
+          #{list items:ten.get(p), as:'i'}
+            <tr style="height:6mm;">
+              <td>${i.unit.id}</td>
+              <td>${i.unit.fba?.shipmentId}</td>
+              <td>${i.unit.sku}</td>
+              <td>${i.unit.cooperator?.name}</td>
+              <td style="font-size:9px;">
+                <div style="height:6mm;"></div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:6mm;"></div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:6mm;"></div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:6mm;"></div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:6mm;"></div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:6mm;"></div>
+              </td>
+              <td style="font-size:10px;"></td>
+              <td style="font-size:10px;"></td>
+              <td style="font-size:10px;"></td>
+              <td style="font-size:10px;"></td>
+              <td></td>
+              <td></td>
+            </tr>
+          #{/list}
+      #{/else}
+
     <tr style="height:9mm;">
       <td>合计：</td>
       <td></td>

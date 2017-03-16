@@ -120,6 +120,13 @@ $(() => {
     includeSelectAllOption: true
   });
 
+  $("#categories").multiselect({
+    buttonWidth: '120px',
+    nonSelectedText: '品线',
+    maxHeight: 200,
+    includeSelectAllOption: true
+  });
+
   $(".btn:contains(搜索)").click(function (e) {
     e.preventDefault();
     $("#type").val("");
@@ -137,8 +144,11 @@ $(() => {
       "sDom": "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
       "sPaginationType": "full_numbers",
       "iDisplayLength": 50,
-      "aoColumnDefs":[
-        {"bSortable": false, "aTargets": [0]}
+      "aoColumnDefs": [
+        {
+          "bSortable": false,
+          "aTargets": [0]
+        }
       ]
     });
   });
