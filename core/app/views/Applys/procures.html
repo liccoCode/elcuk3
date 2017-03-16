@@ -18,10 +18,14 @@
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.ProcreApplyPost.DateType.values(), value:p.dateType/}
     </div>
+
     <div class="inline">
-      #{select 'p.supplierId', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.supplierId}
-          #{option ''}供应商#{/option}
-      #{/select}
+      <select name="p.supplierId" class="selectize" style="width:150px;">
+        <option value="">供应商</option>
+          #{list items:suppliers, as:'s'}
+            <option value="${s.id}" ${s.id == p.supplierId?'selected':''}>${s.name}</option>
+          #{/list}
+      </select>
     </div>
 
     <div class="inline">
@@ -34,7 +38,7 @@
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <input type="hidden" name="p.page" value="${p.page}">
-      <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="请款单编号">
+      <input type="text" name="p.search" style="widows: 180px;" value="${p.search}" placeHolder="请款单编号或采购计划ID">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
   </div>
@@ -63,11 +67,11 @@
           <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.appliedAmount()).setScale(2,
           4).floatValue().format('#,###.##')}</td>
           <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.leftAmount()).setScale(2,
-                    4).floatValue().format('#,###.##')}</td>
+          4).floatValue().format('#,###.##')}</td>
           <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()).setScale(2,
-                              4).floatValue().format('#,###.##')}</td>
+          4).floatValue().format('#,###.##')}</td>
           <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmount()).setScale(2,
-                                        4).floatValue().format('#,###.##')}</td>
+          4).floatValue().format('#,###.##')}</td>
           <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
           <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
         </tr>
