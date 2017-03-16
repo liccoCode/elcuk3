@@ -46,7 +46,7 @@ public class Outbound extends GenericModel {
     /**
      * 异动记录
      */
-    @OneToMany(mappedBy = "out", cascade = {CascadeType.PERSIST})
+    @OneToMany(mappedBy = "outbound", cascade = {CascadeType.PERSIST})
     public List<StockRecord> records = new ArrayList<>();
 
     /**
@@ -190,19 +190,28 @@ public class Outbound extends GenericModel {
     }
 
     public void createOther(List<StockRecord> records) {
+        for(StockRecord s : records) {
+            ProcureUnit unit = ProcureUnit.findById(s.unitId);
+            if(unit.availableQty < s.qty)
+                Validation.addError("", "采购计划" + unit.id + "出库数量超过可用库存。");
+        }
+        if(Validation.hasErrors()) return;
         this.init();
         this.save();
         records.stream().filter(record -> record.unitId != null).forEach(record -> {
             ProcureUnit unit = ProcureUnit.findById(record.unitId);
             StockRecord stock = new StockRecord();
             stock.unit = unit;
-            stock.out = this;
+            stock.outbound = this;
             stock.whouse = unit.currWhouse;
             stock.creator = Login.current();
+            stock.qty = record.qty;
             stock.currQty = unit.availableQty - record.qty;
             stock.type = StockRecord.T.OtherOutbound;
             stock.category = this.type;
             stock.save();
+            unit.availableQty = stock.currQty;
+            unit.save();
         });
     }
 

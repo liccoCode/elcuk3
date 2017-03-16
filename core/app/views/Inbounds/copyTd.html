@@ -32,7 +32,7 @@
   <td>${unit.product.abbreviation}</td>
   <td>${unit.cooperator?.name}</td>
   <td>${unit.availableQty}</td>
-  <td><input type="text" name="dtos[${index}].qty" style="width:35px;"></td>
+  <td><input type="text" name="dtos[${index}].qty" style="width:35px;" value="${unit.availableQty}"></td>
   <td>${unit.currWhouse?.name}</td>
   <td>${unit.showInboundIds()}</td>
   <td style="background-color:${unit.stage?.rgb()}">${unit.stage?.label()}</td>

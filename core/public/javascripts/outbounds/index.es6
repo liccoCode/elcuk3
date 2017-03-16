@@ -10,15 +10,25 @@ $(() => {
     } else {
       let html = "<tr style='background-color:#F2F2F2'><td colspan='13'><div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
-      if(type == 'Normal')
+      if (type == 'Normal') {
         $("#div" + format_id).load("/Outbounds/showProcureUnitList", {id: id});
-      else
+      } else {
         $("#div" + format_id).load("/Outbounds/showStockRecordList", {id: id});
+      }
     }
   });
 
   $("a[name='checkPage']").click(function () {
     $("#whichPage").val($(this).attr("page"));
+    if ($(this).attr("page") == 'otherBtn') {
+      $("#data_table input[type='checkbox']").each(function () {
+        $(this).prop("checked", false);
+      });
+    } else {
+      $("#other_table input[type='checkbox']").each(function () {
+        $(this).prop("checked", false);
+      });
+    }
   });
 
   $("#" + $("#whichPage").val()).click();
