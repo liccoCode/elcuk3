@@ -11,6 +11,7 @@ import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.TrafficRatePost;
 import models.view.report.TrafficRate;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
@@ -99,6 +100,8 @@ public class Analyzes extends Controller {
                     return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
                 }
             }.now());
+            String countryName = p.countryName(false);
+            chart.series.forEach(se -> se.visible = se.name.contains(countryName));
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -129,8 +132,11 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    return J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
-                            Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to));
+                    HighChart chart = SellingRecord
+                            .ajaxHighChartPVAndSS(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
+                    String sortName = p.countryName(false);
+                    chart.series.forEach(se -> se.visible = se.name.contains(sortName));
+                    return J.json(chart);
                 }
             }.now());
             renderJSON(json);
@@ -148,8 +154,11 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    return J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
-                            Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to));
+                    HighChart chart = SellingRecord.ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong
+                            (p.aid)), p.from, p.to);
+                    String sortName = p.countryName(false);
+                    chart.series.forEach(se -> se.visible = se.name.contains(sortName));
+                    return J.json(chart);
                 }
             }.now());
             renderJSON(json);
