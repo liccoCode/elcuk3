@@ -134,7 +134,7 @@ public class Analyzes extends Controller {
                 public String doJobWithResult() throws Exception {
                     HighChart chart = SellingRecord
                             .ajaxHighChartPVAndSS(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
-                    String sortName = p.countryName(false);
+                    String sortName = p.countryName(true);
                     chart.series.forEach(se -> se.visible = se.name.contains(sortName));
                     return J.json(chart);
                 }
@@ -156,7 +156,7 @@ public class Analyzes extends Controller {
                 public String doJobWithResult() throws Exception {
                     HighChart chart = SellingRecord.ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong
                             (p.aid)), p.from, p.to);
-                    String sortName = p.countryName(false);
+                    String sortName = p.countryName(true);
                     chart.series.forEach(se -> se.visible = se.name.contains(sortName));
                     return J.json(chart);
                 }
