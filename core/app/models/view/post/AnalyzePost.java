@@ -8,6 +8,7 @@ import helper.HTTP;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.OperatorConfig;
 import models.market.M;
+import models.market.Selling;
 import models.procure.ProcureUnit;
 import models.view.dto.AnalyzeDTO;
 import models.view.dto.TimelineEventSource;
@@ -20,10 +21,7 @@ import play.utils.FastRuntimeException;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 分析页面的 Post 请求
@@ -62,9 +60,16 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      */
     public String val;
 
+    /**
+     * val 会通过setVal方法截取成msku
+     * 所以需要保存sellingId
+     */
+    public String sellingId;
+
     public String market;
 
     public String state = "Active";
+
 
     public int ismoveing;
 
@@ -298,11 +303,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
 
         DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit.find(
-                String.format(
-                        "createDate>=? AND createDate<=? AND %s=? AND planQty>0 AND (projectName IS NULL OR projectName!='B2B')",
-                        type),
-                Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
+        List<ProcureUnit> units = ProcureUnit.find(String.format(
+                "createDate>=? AND createDate<=? AND %s=? AND planQty>0 AND (projectName IS NULL OR projectName!='B2B')",
+                type), Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
 
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
         TimelineEventSource eventSource = new TimelineEventSource();
@@ -321,8 +324,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     }
 
     public void setVal(String val) {
-        if(StringUtils.isNotBlank(val))
+        if(StringUtils.isNotBlank(val)) {
+            this.sellingId = val;
             val = StringUtils.split(val, "|")[0];
+        }
         this.val = val;
     }
 
@@ -330,4 +335,13 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public AnalyzePost clone() throws CloneNotSupportedException {
         return (AnalyzePost) super.clone();
     }
+
+    public String countryName(boolean sortName) {
+        Selling selling = null;
+        if(StringUtils.isNotBlank(this.sellingId)) {
+            selling = Selling.findById(this.sellingId);
+        }
+        return selling != null ? sortName ? selling.market.sortName() : selling.market.countryName() : "";
+    }
+
 }
