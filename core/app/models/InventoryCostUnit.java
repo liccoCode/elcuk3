@@ -4,6 +4,8 @@ import models.market.M;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.util.Date;
 
@@ -28,6 +30,7 @@ public class InventoryCostUnit extends GenericModel {
     /**
      * 市场
      */
+    @Enumerated(EnumType.STRING)
     private M market;
 
     /**
