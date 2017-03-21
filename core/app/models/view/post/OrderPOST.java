@@ -101,7 +101,7 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public List<OrderReportDTO> queryForExcel() {
         JSONObject result;
-        if(StringUtils.isEmpty(this.sku)) {
+        if(StringUtils.isEmpty(this.sku) && StringUtils.isEmpty(this.category)) {
             result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
         } else {
             result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
@@ -116,7 +116,7 @@ public class OrderPOST extends ESPost<Orderr> {
                         .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
                 );
         if(orderIds.size() <= 0) throw new FastRuntimeException("没有结果");
-        return OrderReportDTO.query(orderIds);
+        return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
     }
 
     @Override
