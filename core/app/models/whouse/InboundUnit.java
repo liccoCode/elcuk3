@@ -222,7 +222,7 @@ public class InboundUnit extends Model {
                 logs.addAll(Reflects.logFieldFade(this, "handType", H.valueOf(value)));
                 break;
             case "result":
-                if(this.qualifiedQty == 0) {
+                if(this.qualifiedQty == 0 || this.result == R.UnCheck) {
                     this.qualifiedQty = this.qty;
                     this.unqualifiedQty = 0;
                 }
