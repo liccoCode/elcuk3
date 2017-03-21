@@ -68,9 +68,11 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public String invoiceState;
 
+    public String category;
+
     public List<Orderr> query() {
         JSONObject result;
-        if(StringUtils.isEmpty(this.sku)) {
+        if(StringUtils.isEmpty(this.sku) && StringUtils.isEmpty(this.category)) {
             result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
         } else {
             result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
@@ -154,6 +156,7 @@ public class OrderPOST extends ESPost<Orderr> {
         if(this.accountId != null) {
             boolQuery.must(QueryBuilders.termQuery("account_id", this.accountId));
         }
+
         return new SearchSourceBuilder()
                 .field("selling_ids")
                 .field("buyer")
@@ -190,8 +193,11 @@ public class OrderPOST extends ESPost<Orderr> {
         if(this.state != null) {
             boolQuery.must(QueryBuilders.termQuery("state", this.state.name().toLowerCase()));
         }
-        if(this.sku != null) {
+        if(StringUtils.isNotBlank(this.sku)) {
             boolQuery.must(QueryBuilders.termQuery("sku", ES.parseEsString(sku).toLowerCase()));
+        }
+        if(StringUtils.isNotBlank(this.category)) {
+            boolQuery.must(QueryBuilders.prefixQuery("sku", this.category));
         }
         return new SearchSourceBuilder()
                 .query(QueryBuilders.queryStringQuery(this.search()))

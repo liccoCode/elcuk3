@@ -26,7 +26,7 @@
       </select>
       <select id="o_acc" name="p.accountId" class="inline">
         <option value="">Account</option>
-      #{list items:accs}
+      #{list items:accounts}
         <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
       #{/list}
       </select>
@@ -80,6 +80,15 @@
         <input type="text" style="width:40px;" name="p.percent" placeholder="百分比" autocomplete="off" value="${p.percent}">
       </div>}
       -->
+
+      <div class="input-prepend inline">
+        <select name="p.category" id="categories">
+          <option value="">品线</option>
+        #{list items:categoryIds, as:'c'}
+          <option value="${c}" ${c.equals(p.category) ? 'selected':''}>${c}</option>
+        #{/list}
+        </select>
+      </div>
 
       <div class="inline input-append" id="search_btn">
         <input type="hidden" name="p.page" value="${p.page}">
