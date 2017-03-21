@@ -423,7 +423,6 @@ public class ProcureUnits extends Controller {
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
             boolean showNotice = new Date().getTime() >= unit.attrs.planDeliveryDate.getTime();
-            render(unit, newUnit, showNotice, type);
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
