@@ -20,7 +20,7 @@
     <th>项目名称</th>
   </tr>
 #{list items:units, as:'unit'}
-  <tr class="text-center" id="unit_${unit.id}">
+  <tr class="text-center" id="unit_${unit.unit.id}">
       #{if is_check}
         <td>
           <input type="checkbox" name="ck" value="${unit.id}">

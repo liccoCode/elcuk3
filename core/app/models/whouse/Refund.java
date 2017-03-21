@@ -366,4 +366,14 @@ public class Refund extends GenericModel {
         });
     }
 
+    public void quickAddByEdit(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        RefundUnit refundUnit = new RefundUnit();
+        refundUnit.refund = this;
+        refundUnit.unit = unit;
+        refundUnit.planQty = unit.availableQty;
+        refundUnit.qty = unit.availableQty;
+        refundUnit.save();
+    }
+
 }

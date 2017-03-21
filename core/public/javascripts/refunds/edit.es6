@@ -157,12 +157,12 @@ $(() => {
   });
 
   let index = $("#unit_table input[type='checkbox']").length - 1;
-  
+
   $("#quickAdd").click(function (e) {
     e.preventDefault();
     let id = $("#procureId").val();
     let cooperId = $("#cooperId").val();
-    if ($("#tr_" + id).html() == undefined) {
+    if ($("#unit_" + id).html() == undefined) {
       $.get("/refunds/validateAddRefund", {
         id: id,
         cooperId: cooperId
@@ -193,6 +193,31 @@ $(() => {
     }
   });
 
+  $("#quickAddByEdit").click(function (e) {
+    e.preventDefault();
+    let id = $("#procureId").val();
+    let cooperId = $("#cooperId").val();
+    if ($("#unit_" + id).html() == undefined) {
+      $.get("/refunds/validateAddRefund", {
+        id: id,
+        cooperId: cooperId
+      }, function (r) {
+        if (r.flag) {
+          let form = $('<form method="post" action=""></form>');
+          form.attr('action', $("#procureId").data('url'));
+          form.hide().append($('#procureId').parent('div').clone()).appendTo("body");
+          form.submit().remove();
+        }
+      });
+    } else {
+      noty({
+        text: "采购计划已经存在该单据中!",
+        type: 'error'
+      });
+      slippingTr(id);
+    }
+  });
+
   let unitId = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unitId);
   if (targetTr.size() > 0) {
@@ -201,8 +226,8 @@ $(() => {
   }
 
   function slippingTr (id) {
-    EF.scoll($("#tr_" + id));
-    EF.colorAnimate($("#tr_" + id));
+    EF.scoll($("#unit_" + id));
+    EF.colorAnimate($("#unit_" + id));
   }
 
 });
