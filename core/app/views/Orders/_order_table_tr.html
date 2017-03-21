@@ -11,7 +11,6 @@
     <th>SKU</th>
     <th style="width:100px;">PromotionIDs</th>
     <th>DiscountPrice</th>
-    <th>Phone</th>
     <th>Email</th>
     <th name="createDate" class="sortable">Create <i class="icon-sort"></i></th>
     <th name="shipDate" class="sortable">ShipDate <i class="icon-sort"></i></th>
@@ -34,7 +33,7 @@
         #{/else}
         (${ord.totalMarketFee().format('#.#')} / ${ord.totalUSDSales().format('#.#')})
     </td>
-    <td>${ord.address1}</td>
+    <td rel="tooltip" title="${ord.address1}">${ord.address1.xxLong()}</td>
     <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
     <td>
         <a target="_blank" href="@{Orders.show(ord.orderId)}">
@@ -46,7 +45,6 @@
     <td>${ord.showItemSku()}</td>
     <td>${ord.showPromotionIDs()}</td>
     <td>${ord.showDiscountPrice()}</td>
-    <td>${ord.phone}</td>
     <td>
         <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
     </td>

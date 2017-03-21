@@ -11,6 +11,8 @@
 <body style="margin:0 0 0 0;">
 #{list items:ten.keySet().iterator(), as:'p'}
     #{set first_o:ten.get(p).get(0) /}
+    #{set totalQty: 0/}
+    #{set totalPlanQty: 0/}
 <div style="margin:0 0 0 0; height:188mm;width:100%;">
   <table border="0" style="width:290mm;margin:0 0 0 0;">
     <tr style="text-align:center;height:8mm;">
@@ -28,8 +30,8 @@
       <td>退货时间：${first_o.refund?.refundDate.date()}</td>
     </tr>
   </table>
-  <table border="1" style="width:290mm;height:13mm;word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;"
-         class="table table-condensed table-bordered">
+  <table border="1" style="border-top:1px black solid; border-left: 1px black solid; width:290mm;height:13mm;
+    word-wrap:break-word;table-layout: fixed;margin:0 0 0 0;" class="table table-condensed table-bordered">
     <tr style="vertical-align:middle;">
       <td rowspan="2" style="width:12mm;height:9mm;">采购计划ID</td>
       <td rowspan="2" style="width:15mm;">采购单编号</td>
@@ -52,58 +54,64 @@
       <td style="width: 8mm;">高</td>
     </tr>
       #{list items:ten.get(p), as:'i'}
+          #{set totalQty: i.qty + totalQty /}
+          #{set totalPlanQty: i.planQty + totalPlanQty/}
+          #{set rowNum: i.lastBox?.num > 0 ? 2 : 1 /}
+          #{set fontSize: i.lastBox?.num > 0 ? 9 : 13 /}
         <tr>
-          <td rowspan="2" style="height:9mm;">${i.unit?.id}</td>
-          <td rowspan="2">${i.unit?.deliveryment?.id}</td>
-          <td rowspan="2">
+          <td rowspan="${rowNum}" style="height:9mm;">${i.unit?.id}</td>
+          <td rowspan="${rowNum}">${i.unit?.deliveryment?.id}</td>
+          <td rowspan="${rowNum}">
             <div style="height:10mm;overflow:hidden;">${i.unit?.product?.abbreviation}</div>
           </td>
-          <td rowspan="2">${i.unit?.sku}</td>
-          <td rowspan="2">${i.unit?.fba?.shipmentId}</td>
-          <td rowspan="2">${i.unit?.selling?.fnSku}</td>
-          <td rowspan="2">${i.planQty}</td>
-          <td rowspan="2">${i.qty}</td>
+          <td rowspan="${rowNum}">${i.unit?.sku}</td>
+          <td rowspan="${rowNum}">${i.unit?.fba?.shipmentId}</td>
+          <td rowspan="${rowNum}">${i.unit?.selling?.fnSku}</td>
+          <td rowspan="${rowNum}">${i.planQty}</td>
+          <td rowspan="${rowNum}">${i.qty}</td>
           <td style="font-size:9px;">
-            <div style="height:3mm;">${i.mainBox?.num}</div>
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.num}</div>
           </td>
           <td style="font-size:9px;">
-            <div style="height:3mm;">${i.mainBox?.boxNum}</div>
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.boxNum}</div>
           </td>
           <td style="font-size:9px;">
-            <div style="height:3mm;">${i.mainBox?.singleBoxWeight}</div>
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.singleBoxWeight}</div>
           </td>
           <td style="font-size:9px;">
-            <div style="height:3mm;">${i.mainBox?.length}</div>
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.length}</div>
           </td>
           <td style="font-size:9px;">
-            <div style="height:3mm;">${i.mainBox?.width}</div>
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.width}</div>
           </td>
           <td style="font-size:9px;">
-            <div style="height:3mm;">${i.mainBox?.height}</div>
+            <div style="height:${6/rowNum}mm;">${i.mainBox?.height}</div>
           </td>
-          <td rowspan="2">${i.unit?.whouse?.name}</td>
-          <td rowspan="2">${i.unit?.shipType?.label()}</td>
+          <td rowspan="${rowNum}">${i.unit?.whouse?.name}</td>
+          <td rowspan="${rowNum}">${i.unit?.shipType?.label()}</td>
         </tr>
-        <tr>
-          <td style="font-size:9px;">
-            <div style="height:3mm;">${i.lastBox?.num}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:3mm;">${i.lastBox?.boxNum}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:3mm;">${i.lastBox?.length}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:3mm;">${i.lastBox?.width}</div>
-          </td>
-          <td style="font-size:9px;">
-            <div style="height:3mm;">${i.lastBox?.height}</div>
-          </td>
-        </tr>
+          #{if rowNum == 2}
+            <tr>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.num}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.boxNum}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.singleBoxWeight}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.length}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.width}</div>
+              </td>
+              <td style="font-size:9px;">
+                <div style="height:3mm;">${i.lastBox?.height}</div>
+              </td>
+            </tr>
+          #{/if}
       #{/list}
     <tr style="height:10mm;">
       <td colspan="16">物流信息：  ${first_o.refund?.info}</td>
@@ -114,8 +122,8 @@
       <td></td>
       <td></td>
       <td></td>
-      <td>100</td>
-      <td>100</td>
+      <td>${totalPlanQty}</td>
+      <td>${totalQty}</td>
       <td></td>
       <td></td>
       <td></td>

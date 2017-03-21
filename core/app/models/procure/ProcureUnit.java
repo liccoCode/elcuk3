@@ -1175,7 +1175,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.shipItemQty(this.qty());
         this.save();
         if(diffQty != 0) {
-            this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock, this.availableQty, parentCurrQty);
+            this.createStockRecord(this, -diffQty, StockRecord.T.Split_Stock, this.availableQty, parentCurrQty);
         }
     }
 

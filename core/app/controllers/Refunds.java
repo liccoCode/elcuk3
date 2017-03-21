@@ -24,6 +24,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ public class Refunds extends Controller {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         ProcureUnit proUnit = units.get(0);
         Refund refund = new Refund(proUnit);
+        refund.name = String.format("%s_%s_退货", proUnit.cooperator.name, LocalDate.now());
         render(proUnit, refund, units);
     }
 
@@ -75,6 +77,14 @@ public class Refunds extends Controller {
         old.saveAndLog(refund);
         flash.success("退货单【" + rid + "】更新成功!");
         edit(rid);
+    }
+
+    public static void quickAddByEdit(Long procureId, String refundId) {
+        Refund refund = Refund.findById(refundId);
+        refund.quickAddByEdit(procureId);
+        if(!Validation.hasErrors())
+            flash.success("采购计划【" + procureId + "】添加成功!");
+        render("/Refunds/edit.html", refund);
     }
 
     public static void updateUnit(String id, String value, String attr) {
