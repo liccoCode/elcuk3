@@ -82,7 +82,8 @@ public class Refunds extends Controller {
     public static void quickAddByEdit(Long procureId, String refundId) {
         Refund refund = Refund.findById(refundId);
         refund.quickAddByEdit(procureId);
-        flash.success("采购计划【" + procureId + "】添加成功!");
+        if(!Validation.hasErrors())
+            flash.success("采购计划【" + procureId + "】添加成功!");
         render("/Refunds/edit.html", refund);
     }
 

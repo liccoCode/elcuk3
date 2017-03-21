@@ -342,6 +342,7 @@ public class Refund extends GenericModel {
         record.type = StockRecord.T.Unqualified_Transfer;
         record.recordId = unit.id;
         record.memo = memo;
+        record.currQty = unit.availableQty;
         record.save();
         new ERecordBuilder("refund.transfer").msgArgs(record.qty, record.memo).fid(unitId).save();
     }
@@ -371,6 +372,10 @@ public class Refund extends GenericModel {
     }
 
     public void quickAddByEdit(Long unitId) {
+        if(RefundUnit.count("refund.id=? AND unit.id=?", this.id, unitId) > 0) {
+            Validation.addError("", "采购计划" + unitId + "已经存在当前退货单中");
+        }
+        if(Validation.hasErrors()) return;
         ProcureUnit unit = ProcureUnit.findById(unitId);
         RefundUnit refundUnit = new RefundUnit();
         refundUnit.refund = this;

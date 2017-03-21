@@ -59,6 +59,8 @@ public class LinkHelper extends JavaExtensions {
             case Split_Stock:
             case Unqualified_Transfer:
                 return fullUrl("ProcureUnits.detail", idMatch.toString(), idMatch.toString());
+            case OtherOutbound:
+                return fullUrl("Outbounds.edit", stockRecord.outbound.id, stockRecord.unit.id.toString());
             default:
                 return "#";
         }
