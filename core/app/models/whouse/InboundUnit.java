@@ -212,6 +212,10 @@ public class InboundUnit extends Model {
                 if(this.unit.attrs.planQty - NumberUtils.toInt(value) != 0 && this.handType == null) {
                     this.handType = H.Actual;
                 }
+                if(this.status == S.Receive) {
+                    this.unit.attrs.qty = NumberUtils.toInt(value);
+                    this.unit.save();
+                }
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "handType":
@@ -229,7 +233,7 @@ public class InboundUnit extends Model {
                 logs.addAll(Reflects.logFieldFade(this, "result", R.valueOf(value)));
                 break;
             case "qualifiedQty":
-                int diff = this.qualifiedQty -  NumberUtils.toInt(value);
+                int diff = this.qualifiedQty - NumberUtils.toInt(value);
                 this.unqualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 if(this.status == S.Inbound) {
@@ -239,7 +243,7 @@ public class InboundUnit extends Model {
                 }
                 break;
             case "unqualifiedQty":
-                int diffQty = this.unqualifiedQty -  NumberUtils.toInt(value);
+                int diffQty = this.unqualifiedQty - NumberUtils.toInt(value);
                 this.qualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 if(this.status == S.Inbound) {
