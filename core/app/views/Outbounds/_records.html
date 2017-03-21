@@ -16,7 +16,7 @@
     <th>备注</th>
   </tr>
 #{list items:records, as:'r'}
-  <tr class="text-center">
+  <tr class="text-center" id="unit_${r.unit.id}">
     <td>${r.unit.id}</td>
     <td>${r.unit.deliveryment.id}</td>
     <td>${r.unit.selling?.sellingId}</td>
