@@ -342,6 +342,7 @@ public class Refund extends GenericModel {
         record.type = StockRecord.T.Unqualified_Transfer;
         record.recordId = unit.id;
         record.memo = memo;
+        record.currQty = unit.availableQty;
         record.save();
         new ERecordBuilder("refund.transfer").msgArgs(record.qty, record.memo).fid(unitId).save();
     }
