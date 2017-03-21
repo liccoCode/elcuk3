@@ -10,6 +10,7 @@ import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
@@ -28,7 +29,7 @@ import java.util.Optional;
 public class Refund extends GenericModel {
 
     private static final long serialVersionUID = 1504355529353731906L;
-    
+
     @Id
     @Column(length = 30)
     @Expose
@@ -218,9 +219,9 @@ public class Refund extends GenericModel {
                         unit.stage = ProcureUnit.STAGE.DELIVERY;
                     }
                 } else {
-                    if(unit.attrs.qty == 0) {
-                        unit.stage = ProcureUnit.STAGE.DELIVERY;
-                    }
+                    unit.unqualifiedQty -= u.qty;
+                    createStockRecord(u, StockRecord.T.Unqualified_Refund, refund.memo, unit.availableQty);
+                    new ERecordBuilder("refund.confirm").msgArgs(u.qty, refund.memo).fid(unit.id).save();
                 }
                 unit.save();
                 createStockRecord(u, StockRecord.T.Refund, "", unit.availableQty);
@@ -240,9 +241,15 @@ public class Refund extends GenericModel {
             }
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
-                if(unit.outbound != null) {
-                    Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
-                            "【" + unit.outbound.id + "】中，请先处理！");
+                if(refund.type == T.After_Inbound) {
+                    if(unit.outbound != null) {
+                        Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
+                                "【" + unit.outbound.id + "】中，请先处理！");
+                    }
+                } else {
+                    if(u.qty > unit.unqualifiedQty) {
+                        Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】的退货数量大于不良品数量，请先修改！");
+                    }
                 }
             }
         }
@@ -288,7 +295,7 @@ public class Refund extends GenericModel {
         refund.id = id();
         refund.memo = memo;
         refund.whouseUser = Login.current();
-        refund.status = S.Refund;
+        refund.status = S.Create;
         refund.type = T.After_Receive;
         refund.creator = Login.current();
         refund.createDate = new Date();
@@ -296,17 +303,14 @@ public class Refund extends GenericModel {
         refund.save();
         units.stream().filter(unit -> Optional.ofNullable(unit.id).isPresent()).forEach(unit -> {
             ProcureUnit pro = ProcureUnit.findById(unit.id);
-            pro.unqualifiedQty -= unit.attrs.qty;
-            pro.save();
             refund.cooperator = pro.cooperator;
+            refund.name = String.format("%s_%s_不良品退货", pro.cooperator.name, LocalDate.now());
             RefundUnit u = new RefundUnit();
             u.unit = unit;
             u.refund = refund;
             u.planQty = unit.attrs.qty;
             u.qty = unit.attrs.qty;
             u.save();
-            createStockRecord(u, StockRecord.T.Unqualified_Refund, memo, pro.availableQty);
-            new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unit.id).save();
         });
         refund.save();
     }
@@ -364,6 +368,16 @@ public class Refund extends GenericModel {
             unit.marshalBoxs(old);
             old.save();
         });
+    }
+
+    public void quickAddByEdit(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        RefundUnit refundUnit = new RefundUnit();
+        refundUnit.refund = this;
+        refundUnit.unit = unit;
+        refundUnit.planQty = unit.availableQty;
+        refundUnit.qty = unit.availableQty;
+        refundUnit.save();
     }
 
 }
