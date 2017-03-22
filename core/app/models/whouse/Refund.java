@@ -211,20 +211,21 @@ public class Refund extends GenericModel {
             refund.save();
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
-                unit.attrs.qty -= u.qty;
                 if(refund.type == T.After_Inbound) {
+                    unit.attrs.qty -= u.qty;
                     unit.inboundQty -= u.qty;
                     unit.availableQty -= u.qty;
                     if(unit.inboundQty == 0) {
                         unit.stage = ProcureUnit.STAGE.DELIVERY;
                     }
+                    unit.save();
+                    createStockRecord(u, StockRecord.T.Refund, "", unit.availableQty);
                 } else {
                     unit.unqualifiedQty -= u.qty;
                     createStockRecord(u, StockRecord.T.Unqualified_Refund, refund.memo, unit.availableQty);
                     new ERecordBuilder("refund.confirm").msgArgs(u.qty, refund.memo).fid(unit.id).save();
+                    unit.save();
                 }
-                unit.save();
-                createStockRecord(u, StockRecord.T.Refund, "", unit.availableQty);
             }
         }
     }
