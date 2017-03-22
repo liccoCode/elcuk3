@@ -123,6 +123,7 @@ public class Sellings extends Controller {
                 .put("price", Arrays.asList(s.aps.standerPrice.toString()))
                 .put("type", Arrays.asList(s.aps.itemType))
                 .put("title", Arrays.asList(s.aps.title))
+                .put("rbn", Arrays.asList(s.aps.RBN))
                 .build()));
     }
 

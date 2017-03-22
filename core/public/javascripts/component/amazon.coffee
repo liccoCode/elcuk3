@@ -66,8 +66,9 @@ $ ->
       noty({text: '还没有数据, 请先预览!', type: 'warning', timeout: 3000})
       return false
     # product Desc
-    $("[name='s.aps.productDesc']").val(json['p'][0]).blur()
+    KindEditor.instances[0].html(json['p'][0]).blur()
 
+    $("[name='s.aps.rbns[0]']").val(json['rbn'][0]).blur()
     $("[name='s.aps.manufacturer']").val(json['man'][0]).blur()
     $("[name='s.aps.brand']").val(json['brand'][0]).blur()
     $("[name='s.aps.standerPrice']").val(json['price'][0]).blur()

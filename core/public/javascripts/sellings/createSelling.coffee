@@ -33,7 +33,7 @@ $ ->
           LoadMask.unmask()
           $("#amzDiv").fadeIn()
           $.getScript('../public/javascripts/editor/kindeditor-min.js', ->
-            KindEditor.create('#productDesc', {
+            editor = KindEditor.create('#productDesc', {
               resizeType: 1
               allowPreviewEmoticons: false
               allowImageUpload: false
