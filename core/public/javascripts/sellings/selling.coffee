@@ -41,7 +41,7 @@ $ ->
     )
 
   # 初始化图片
-  # imageInit()
+  imageInit()
 
   # Update 按钮
   $('#amz-update').click ->
