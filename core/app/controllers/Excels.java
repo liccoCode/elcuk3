@@ -698,8 +698,8 @@ public class Excels extends Controller {
 
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
-        //最多只允许导出 2000 个订单的数据,超过了请重新给定搜索范围
-        p.perSize = 2000;
+        //最多只允许导出 10000 个订单的数据,超过了请重新给定搜索范围
+        p.perSize = 10000;
         List<OrderReportDTO> orders = p.queryForExcel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         request.format = "xls";
@@ -710,7 +710,7 @@ public class Excels extends Controller {
 
     public static void orderSaleFeeReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
-        p.perSize = 0;
+        p.perSize = 10000;
         List<OrderReportDTO> orders = p.queryForExcel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         request.format = "xls";

@@ -46,10 +46,11 @@ import static play.modules.pdf.PDF.renderPDF;
 public class Orders extends Controller {
 
     public static void index(OrderPOST p) {
-        List<Account> accs = Account.openedSaleAcc();
+        List<Account> accounts = Account.openedSaleAcc();
+        List<String> categoryIds = Category.categoryIds();
         if(p == null) p = new OrderPOST();
         List<Orderr> orders = p.query();
-        render(p, orders, accs);
+        render(p, orders, accounts, categoryIds);
     }
 
     public static void show(String id) {

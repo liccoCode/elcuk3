@@ -26,7 +26,7 @@
       </select>
       <select id="o_acc" name="p.accountId" class="inline">
         <option value="">Account</option>
-      #{list items:accs}
+      #{list items:accounts}
         <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
       #{/list}
       </select>
@@ -81,6 +81,15 @@
       </div>}
       -->
 
+      <div class="input-prepend inline">
+        <select name="p.category" id="categories">
+          <option value="">品线</option>
+        #{list items:categoryIds, as:'c'}
+          <option value="${c}" ${c.equals(p.category) ? 'selected':''}>${c}</option>
+        #{/list}
+        </select>
+      </div>
+
       <div class="inline input-append" id="search_btn">
         <input type="hidden" name="p.page" value="${p.page}">
         <!-- TODO  +2 销售数量大于 2 暂时不支持 -->
@@ -93,7 +102,7 @@
       </div>
 
       <div class="inline input-append">
-        <input type="button" class="btn btn-warning" id="downExcel" value="导出订单费用Excel">
+        <input type="button" class="btn btn-warning" id="downSaleFeeExcel" value="导出订单费用Excel">
       </div>
 
     </div>

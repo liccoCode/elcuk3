@@ -34,11 +34,21 @@ $ ->
     e.preventDefault()
     from = new Date($("#p_from").val())
     to = new Date($("#p_to").val())
-    if (to - from)/ 1000 / 60 / 60 / 24 != 0
-      alert "只能导出一天之内的数据！"
+    if ((to - from)/ 1000 / 60 / 60 / 24) > 31
+      alert "暂时只能导出一个月之内的数据！"
     else
       $form = $("#search_form")
       window.open('/Excels/orderReports?' + $form.serialize(), "_blank")
+  )
 
+  $('#downSaleFeeExcel').click((e)->
+    e.preventDefault()
+    from = new Date($("#p_from").val())
+    to = new Date($("#p_to").val())
+    if ((to - from)/ 1000 / 60 / 60 / 24) > 31
+      alert "暂时只能导出一个月之内的数据！"
+    else
+      $form = $("#search_form")
+      window.open('/Excels/orderSaleFeeReports?' + $form.serialize(), "_blank")
   )
 
