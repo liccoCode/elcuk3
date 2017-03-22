@@ -160,8 +160,11 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank">
+          <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank" rel="tooltip" title="AMAZON 后台样式">
             <i class="icon-download-alt"></i> 下载
+          </a>
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 国家 信息">
+            <i class="icon-download-alt"></i> New
           </a>
         #{/if}
         #{elseif unit.selling != null}

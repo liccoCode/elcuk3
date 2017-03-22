@@ -33,22 +33,15 @@
       <span class="small"> ${selling.fnSku}</span>
     </td>
   </tr>
-  <tr style="height:18mm; vertical-align:top;">
+  <tr style="height:17mm; vertical-align:top;">
       #{set title: selling.aps?.title/}
       #{set length: title?.length()/}
-      #{list items:1..3}
+      #{list items:1..3, as:'num'}
         <td style="padding-left: 18px;">
         ${selling.aps?.sortTitle()}
           <br>
-          <b>NEW</b><br>
-            #{if includeSku}
-                #{if models.OperatorConfig.getVal("brandname")=='EASYACC'}
-                  EA${selling.listing?.product?.sku?.substring(2)}
-                #{/if}
-                #{else }
-                ${selling.listing?.product?.sku}
-                #{/else}
-            #{/if}
+          <div style="float:left;"><b>NEW</b></div>
+          <div style="float:right;padding-right:10px;"><b>${selling.market?.shortHand()}</b></div><br>
         </td>
       #{/list}
   </tr>
