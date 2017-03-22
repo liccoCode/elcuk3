@@ -723,7 +723,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id)
                 .first();
-        if(item == null || !Objects.equals(this.cooperator.id, item.id)) {
+        if(item == null || !Objects.equals(this.cooperator.id, item.cooperator.id)) {
             Validation.addError("", "该供应商下无此SKU产品，请确认！");
         }
         ProcureUnit newUnit = new ProcureUnit();
