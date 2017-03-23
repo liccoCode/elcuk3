@@ -841,7 +841,10 @@ public class ProcureUnits extends Controller {
             renderJSON(new Ret(false, "采购计划【" + id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(id) + "】"));
         }
         renderJSON(new Ret(true));
+    }
 
+    public static void dataPanel() {
+        render();
     }
 
 }

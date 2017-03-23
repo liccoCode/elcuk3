@@ -10,6 +10,8 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.product.Attach;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -29,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -612,5 +616,28 @@ public class Payment extends Model {
         int result = super.hashCode();
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
+    }
+
+    public static HighChart queryPerDayAmount() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DATE_FORMAT(p.paymentDate,'%Y-%m-%d') AS per, count(1), sum(u.amount + u.fixValue) as total");
+        sql.append(" ,p.currency FROM Payment p LEFT JOIN PaymentUnit u ON p.id = u.payment_id ");
+        sql.append(" WHERE p.paymentDate IS NOT NULL ");
+        sql.append(" GROUP BY DATE_FORMAT(p.paymentDate,'%Y-%m-%d') ");
+        sql.append(" ORDER BY DATE_FORMAT(p.paymentDate,'%Y-%m-%d') DESC");
+        HighChart lineChart = new HighChart(Series.LINE);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Series.Line line = new Series.Line("支付单");
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            try {
+                line.add(formatter.parse(row.get("per").toString()),
+                        Currency.valueOf(row.get("currency").toString()).toCNY(Float.parseFloat(row.get("total")
+                                .toString())));
+            } catch(ParseException e) {
+                e.printStackTrace();
+            }
+        });
+        lineChart.series(line.sort());
+        return lineChart;
     }
 }
