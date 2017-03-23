@@ -15,6 +15,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.InboundUnit;
 import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
@@ -782,6 +783,16 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(shipments);
+    }
+
+    public static void exportInboundUnitReport(InboundPost p) {
+        if(p == null) p = new InboundPost();
+        p.pagination = false;
+        List<InboundUnit> units = p.queryDetail();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "收货入库明细.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(units);
     }
 
 }

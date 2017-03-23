@@ -3,11 +3,8 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.Webs;
 import models.ElcukRecord;
-import models.OperatorConfig;
 import models.procure.Cooperator;
-import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
-import models.qc.CheckTaskDTO;
 import models.view.Ret;
 import models.view.post.DeliverPlanPost;
 import models.view.post.InboundPost;
@@ -25,7 +22,10 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -51,6 +51,12 @@ public class Inbounds extends Controller {
             inbound.showTime();
         }
         render(p, inbounds);
+    }
+
+    public static void indexDetail(InboundPost p) {
+        if(p == null) p = new InboundPost();
+        List<InboundUnit> units = p.queryDetail();
+        render(p, units);
     }
 
     public static void createValidate(List<Long> pids, String type) {
