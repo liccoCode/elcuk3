@@ -1,12 +1,16 @@
 package models.view.post;
 
+import helper.DBUtils;
 import helper.Dates;
 import models.procure.Deliveryment;
+import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -183,6 +187,46 @@ public class DeliveryPost extends Post<Deliveryment> {
             }
         }
         return new F.T3<>(false, null, null);
+    }
+
+    public static Series.Line queryProcureNumPerDay() {
+        StringBuilder sql = new StringBuilder("SELECT DATE_FORMAT(u.createDate,'%Y-%m-%d') AS per, sum(1) AS perNum");
+        sql.append(" FROM ProcureUnit u ");
+        //sql.append(" WHERE u.createDate >= '2016-12-01' ");
+        sql.append(" GROUP BY DATE_FORMAT(u.createDate,'%Y-%m-%d') ");
+        sql.append(" ORDER BY DATE_FORMAT(u.createDate,'%Y-%m-%d') DESC");
+        Series.Line line = new Series.Line("采购计划");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            try {
+                line.add(formatter.parse(row.get("per").toString()),
+                        Float.parseFloat(row.get("perNum").toString()));
+            } catch(ParseException e) {
+                e.printStackTrace();
+            }
+        });
+        return line.sort();
+    }
+
+    public static Series.Line queryDeliveryNumPerDay() {
+        StringBuilder sql = new StringBuilder("SELECT DATE_FORMAT(u.createDate,'%Y-%m-%d') AS per, sum(1) AS perNum");
+        sql.append(" FROM Deliveryment u ");
+        //sql.append(" WHERE u.createDate >= '2016-12-01' ");
+        sql.append(" GROUP BY DATE_FORMAT(u.createDate,'%Y-%m-%d') ");
+        sql.append(" ORDER BY DATE_FORMAT(u.createDate,'%Y-%m-%d') DESC");
+        Series.Line line = new Series.Line("采购单");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            try {
+                line.add(formatter.parse(row.get("per").toString()),
+                        Float.parseFloat(row.get("perNum").toString()));
+            } catch(ParseException e) {
+                e.printStackTrace();
+            }
+        });
+        return line.sort();
     }
 
 }

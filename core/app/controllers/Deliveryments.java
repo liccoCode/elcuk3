@@ -12,6 +12,8 @@ import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
@@ -296,6 +298,18 @@ public class Deliveryments extends Controller {
         dmt.save();
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
+    }
+
+    public static void indexPer() {
+        HighChart lineChart = new HighChart(Series.LINE);
+        lineChart.series(DeliveryPost.queryProcureNumPerDay());
+        lineChart.series(DeliveryPost.queryDeliveryNumPerDay());
+        renderJSON(J.json(lineChart));
+    }
+
+    public static void perCreateTotalNum() {
+        HighChart lineChart = ProcurePost.perCreateTotalNum();
+        renderJSON(J.json(lineChart));
     }
 
 }

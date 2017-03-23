@@ -1,0 +1,21 @@
+#{extends 'main_full.html'/}
+#{set title:'Analyze'/}
+#{set 'moreScripts'}
+    #{script 'highstock.js'/}
+    #{script 'procureunits/dataPanel.es6'/}
+#{/set}
+
+
+<div class="tabbable tabs-left">
+  <div id="top_tabContent" class="tab-content">
+    <div class="tab-pane fade in active" id="basic">
+      <div class="row-fluid">
+        <div id="a_units" data-method="ajaxUnit" class="span6" style="height:350px"></div>
+        <div id="a_turn" data-method="ajaxSellingTurn" style="min-height:350px;" class="span6"></div>
+      </div>
+      <div class="row-fluid">
+        <div id="payment_div" data-method="ajaxUnit" class="span6" style="height:350px"></div>
+      </div>
+    </div>
+  </div>
+</div>
