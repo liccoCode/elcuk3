@@ -7,6 +7,8 @@ import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import models.whouse.InboundUnit;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
@@ -355,4 +357,17 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.shipType == null) return "运输方式";
         return this.shipType.label();
     }
+
+    public static HighChart perCreateTotalNum() {
+        StringBuilder sql = new StringBuilder("SELECT u.username, count(1) as perNum FROM ProcureUnit p ");
+        sql.append(" LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ");
+        HighChart columnChart = new HighChart(Series.COLUMN);
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            Series.Column column = new Series.Column(row.get("username").toString());
+            column.add(row.get("username").toString(), Float.parseFloat(row.get("perNum").toString()));
+            columnChart.series(column);
+        });
+        return columnChart;
+    }
+
 }

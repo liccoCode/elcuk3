@@ -9,6 +9,7 @@ import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.Ret;
+import models.view.highchart.HighChart;
 import models.view.post.PaymentUnitPost;
 import models.view.post.PaymentsPost;
 import org.apache.commons.lang.math.NumberUtils;
@@ -185,6 +186,11 @@ public class Payments extends Controller {
         PDF.Options options = new PDF.Options();
         options.filename = "Invoice_" + id + ".pdf";
         PDF.renderPDF(payment, options);
+    }
+
+    public static void queryPerDayAmount() {
+        HighChart lineChart = Payment.queryPerDayAmount();
+        renderJSON(J.json(lineChart));
     }
 
 }

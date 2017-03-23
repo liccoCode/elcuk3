@@ -119,7 +119,9 @@
                 #{power.ck "procures.btborderindex"}
                   <li><a href="@{Orders.btbOrderIndex()}">B2B销售订单信息</a></li>
                 #{/power.ck}
-
+                #{power.ck "procures.datapanel"}
+                  <li><a href="@{ProcureUnits.dataPanel()}">日均采购计划</a></li>
+                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -212,6 +214,9 @@
                 #{/power.ck}
                 #{power.ck 'inbounds.index'}
                   <li><a href="@{Inbounds.index()}">质检入库</a></li>
+                #{/power.ck}
+                #{power.ck 'inbounds.indexdetail'}
+                  <li><a href="@{Inbounds.indexDetail()}">收货入库明细</a></li>
                 #{/power.ck}
                 #{power.ck "refunds.unqualifiedindex"}
                   <li><a href="@{Refunds.unQualifiedIndex()}">不良品处理</a></li>
