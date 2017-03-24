@@ -720,12 +720,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "分拆的子采购计划必须要有selling！");
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
-
-        CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id)
-                .first();
-        if(item == null || !Objects.equals(this.cooperator.id, item.cooperator.id)) {
+        if(CooperItem.count("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id) == 0)
             Validation.addError("", "该供应商下无此SKU产品，请确认！");
-        }
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
@@ -814,11 +810,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(type && unit.selling == null) {
             Validation.addError("", "分拆的子采购计划必须要有selling！");
         }
-        CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id)
-                .first();
-        if(item == null || !Objects.equals(this.cooperator.id, item.id)) {
+        if(CooperItem.count("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id) == 0) 
             Validation.addError("", "该供应商下无此SKU产品，请确认！");
-        }
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
