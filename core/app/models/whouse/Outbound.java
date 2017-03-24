@@ -44,6 +44,12 @@ public class Outbound extends GenericModel {
     public List<ProcureUnit> units = new ArrayList<>();
 
     /**
+     * 异动记录
+     */
+    @OneToMany(mappedBy = "outbound", cascade = {CascadeType.PERSIST})
+    public List<StockRecord> records = new ArrayList<>();
+
+    /**
      * 名称
      */
     @Required
@@ -55,48 +61,7 @@ public class Outbound extends GenericModel {
     @Enumerated(EnumType.STRING)
     @Required
     @Expose
-    public T type;
-
-    public enum T {
-        Normal {
-            @Override
-            public String label() {
-                return "Amazon 出库";
-            }
-        },
-        B2B {
-            @Override
-            public String label() {
-                return "B2B 出库";
-            }
-        },
-        Refund {
-            @Override
-            public String label() {
-                return "退回工厂";
-            }
-        },
-        Process {
-            @Override
-            public String label() {
-                return "品拓生产";
-            }
-        },
-        Sample {
-            @Override
-            public String label() {
-                return "取样";
-            }
-        },
-        Other {
-            @Override
-            public String label() {
-                return "其他出库";
-            }
-        };
-
-        public abstract String label();
-    }
+    public StockRecord.C type;
 
     public String targetId;
 
@@ -224,6 +189,33 @@ public class Outbound extends GenericModel {
         });
     }
 
+    public void createOther(List<StockRecord> records) {
+        for(StockRecord s : records) {
+            ProcureUnit unit = ProcureUnit.findById(s.unitId);
+            if(unit.availableQty < s.qty)
+                Validation.addError("", "采购计划" + unit.id + "出库数量超过可用库存。");
+        }
+        if(Validation.hasErrors()) return;
+        this.init();
+        this.status = S.Outbound;
+        this.save();
+        records.stream().filter(record -> record.unitId != null).forEach(record -> {
+            ProcureUnit unit = ProcureUnit.findById(record.unitId);
+            StockRecord stock = new StockRecord();
+            stock.unit = unit;
+            stock.outbound = this;
+            stock.whouse = unit.currWhouse;
+            stock.creator = Login.current();
+            stock.qty = record.qty;
+            stock.currQty = unit.availableQty - record.qty;
+            stock.type = StockRecord.T.OtherOutbound;
+            stock.category = this.type;
+            stock.save();
+            unit.availableQty = stock.currQty;
+            unit.save();
+        });
+    }
+
     public static void initCreateByShipItem(List<String> shipmentId) {
         List<Shipment> shipments = Shipment.find("id IN " + SqlSelect.inlineParam(shipmentId)).fetch();
         Map<String, List<Shipment>> map = new HashMap<>();
@@ -247,7 +239,7 @@ public class Outbound extends GenericModel {
             out.name = key;
             out.projectName = first.projectName;
             out.shipType = shipment.type;
-            out.type = T.Normal;
+            out.type = StockRecord.C.Normal;
             out.whouse = shipment.whouse;
             out.targetId = shipment.cooper.id.toString();
             out.shipmentId = SqlSelect
@@ -271,7 +263,7 @@ public class Outbound extends GenericModel {
         for(String id : ids) {
             Outbound out = Outbound.findById(id);
             for(ProcureUnit p : out.units) {
-                if(p.stage != ProcureUnit.STAGE.IN_STORAGE) {
+                if(Arrays.asList("DELIVERY", "DONE").contains(p.stage.name())) {
                     Validation.addError("", "出库单【" + id + "】下的采购计划" + p.id + "不是已入仓状态，请查证");
                     return;
                 }
@@ -284,6 +276,10 @@ public class Outbound extends GenericModel {
                     Validation.addError("", "采购计划【" + p.id + "】的包装信息没填，请先填写！");
                     return;
                 }
+                if(p.availableQty < p.totalOutBoundQty()) {
+                    Validation.addError("", "采购计划【" + p.id + "】的包装信息的总数量大于可用库存量，请先检查！");
+                    return;
+                }
             }
             if(Validation.hasErrors()) {
                 return;
@@ -292,16 +288,20 @@ public class Outbound extends GenericModel {
             out.outboundDate = new Date();
             out.save();
             out.units.forEach(p -> {
-                p.stage = ProcureUnit.STAGE.OUTBOUND;
-                p.outQty = p.availableQty;
-                p.availableQty = 0;
+                if(Arrays.asList("IN_STORAGE").contains(p.stage.name())) {
+                    p.stage = ProcureUnit.STAGE.OUTBOUND;
+                }
+                int total_main = p.mainBox.num * p.mainBox.boxNum;
+                int total_last = p.lastBox.num * p.lastBox.boxNum;
+                p.outQty = total_main + total_last;
+                p.availableQty = p.availableQty - p.outQty;
                 p.save();
-                createStockRecord(p);
+                createStockRecord(p, p.availableQty);
             });
         }
     }
 
-    public static void createStockRecord(ProcureUnit unit) {
+    public static void createStockRecord(ProcureUnit unit, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.whouse;
@@ -309,6 +309,7 @@ public class Outbound extends GenericModel {
         record.qty = unit.outQty;
         record.type = StockRecord.T.Outbound;
         record.recordId = unit.id;
+        record.currQty = currQty;
         record.save();
     }
 

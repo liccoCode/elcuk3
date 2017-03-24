@@ -47,7 +47,7 @@
         <th>出库类型</th>
         <td>
           <select name="outbound.type">
-              #{list items:models.whouse.Outbound.T, as:'t'}
+              #{list items:models.whouse.StockRecord.C, as:'t'}
                 <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
               #{/list}
           </select>
@@ -125,7 +125,13 @@
 #{info_row title:'已添加进入【出库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-  #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
+    #{if outbound.type.name().equals("Normal")}
+      #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
+    #{/if}
+    #{else }
+      #{render 'Outbounds/_records.html', records:outbound.records/}
+    #{/else}
+
   #{if outbound.status.name()=='Create'}
       #{power.ck 'outbounds.delete'}
         <button class="btn btn-danger" id="deleteBtn">解除</button>
@@ -135,7 +141,7 @@
 </div>
 <br>
 
-#{if outbound.status.name()=='Create'}
+#{if outbound.status.name().equals('Create') && outbound.type.name().equals("Normal")}
     #{warning_row title:'可添加进入[出库单]的[采购单元]'/}
 <form action="@{Outbounds.addUnits()}" method="post">
   <div class="row-fluid">
@@ -151,7 +157,7 @@
   </div>
 </form>
 
-<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;">
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">
   <div class="modal-body">
     <div id="refresh_div"></div>
   </div>
@@ -160,4 +166,5 @@
     <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
   </div>
 </div>
+
 #{/if}

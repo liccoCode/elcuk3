@@ -37,7 +37,7 @@
         </td>
         <th>运输方式</th>
         <td>
-          <input type="text" value="${outbound?.shipType?.label()}"  readonly/>
+          <input type="text" value="${outbound?.shipType?.label()}" readonly/>
           <input type="hidden" name="outbound.shipType" value="${outbound.shipType?.name()}">
         </td>
         <th>运输单号</th>
@@ -49,8 +49,10 @@
         <th>出库类型</th>
         <td>
           <select name="outbound.type">
-              #{list items:models.whouse.Outbound.T, as:'t'}
-                <option value="${t.name()}">${t.label()}</option>
+              #{list items:models.whouse.StockRecord.C, as:'t'}
+                  #{if t.name().equals("Normal")}
+                    <option value="${t.name()}">${t.label()}</option>
+                  #{/if}
               #{/list}
           </select>
         </td>
@@ -174,7 +176,7 @@
 
 #{/form}
 
-<div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">
   <div class="modal-body">
     <div id="refresh_div"></div>
   </div>

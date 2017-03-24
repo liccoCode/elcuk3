@@ -6,12 +6,10 @@ import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.view.Ret;
 import models.view.post.OutboundPost;
 import models.view.post.ProcurePost;
-import models.whouse.Inbound;
-import models.whouse.InboundUnit;
-import models.whouse.Outbound;
-import models.whouse.Whouse;
+import models.whouse.*;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -23,10 +21,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -36,7 +33,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Outbounds extends Controller {
 
-    @Before(only = {"index", "edit", "blank"})
+    @Before(only = {"index", "edit", "blank", "otherBlank"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
@@ -50,7 +47,9 @@ public class Outbounds extends Controller {
     public static void index(OutboundPost p) {
         if(p == null) p = new OutboundPost();
         List<Outbound> outbounds = p.query();
-        render(p, outbounds);
+        p.flag = true;
+        List<Outbound> others = p.query();
+        render(p, outbounds, others);
     }
 
     public static void edit(String id) {
@@ -65,8 +64,24 @@ public class Outbounds extends Controller {
         render(units, proUnit, outbound);
     }
 
+    public static void otherBlank() {
+        String name = String.format("%s_其它出库", LocalDate.now());
+        render(name);
+    }
+
     public static void create(Outbound outbound, List<Long> pids) {
         outbound.create(pids);
+        index(new OutboundPost());
+    }
+
+    /**
+     * 其它出库
+     *
+     * @param outbound
+     * @param dtos
+     */
+    public static void otherCreate(Outbound outbound, List<StockRecord> dtos) {
+        outbound.createOther(dtos);
         index(new OutboundPost());
     }
 
@@ -91,10 +106,15 @@ public class Outbounds extends Controller {
         final PDF.Options options = new PDF.Options();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         options.filename = "PTC" + formatter.format(new Date()) + ".pdf";
-        options.pageSize = IHtmlToPdfTransformer.A4P;
+        options.pageSize = IHtmlToPdfTransformer.A4L;
         List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
-        Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
-        renderPDF(options, ten);
+        if(outbounds.get(0).type.name().equals("Normal")) {
+            Map<Integer, List<ProcureUnit>> ten = ProcureUnit.pageNumForTen(outbounds);
+            renderPDF(options, ten);
+        } else {
+            Map<Integer, List<StockRecord>> ten = StockRecord.pageNumForTen(outbounds);
+            renderPDF(options, ten);
+        }
     }
 
     public static void showProcureUnitList(String id) {
@@ -103,15 +123,34 @@ public class Outbounds extends Controller {
         render("/Outbounds/_units.html", units);
     }
 
-    public static void addUnits(String outId, List<Long> pids){
+    public static void showStockRecordList(String id) {
+        Outbound outbound = Outbound.findById(id);
+        List<StockRecord> records = outbound.records;
+        render("/Outbounds/_records.html", records);
+    }
+
+    public static void addUnits(String outId, List<Long> pids) {
         Outbound out = Outbound.findById(outId);
-        if(pids ==null || pids.size()==0){
+        if(pids == null || pids.size() == 0) {
             flash.error("请先勾选需要添加的采购计划");
             edit(outId);
         }
         out.addUnits(pids);
         flash.success("成功将 %s 采购计划添加到当前出库单.", StringUtils.join(pids, ","));
         edit(outId);
+    }
+
+    public static void validOutboundQty(String[] ids) {
+        List<Outbound> list = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        List<Long> temp = new ArrayList<>();
+        for(Outbound out : list) {
+            temp.addAll(out.units.stream().filter(unit -> unit.totalOutBoundQty() < unit.availableQty)
+                    .map(unit -> unit.id).collect(Collectors.toList()));
+        }
+        if(temp.size() > 0) {
+            renderJSON(new Ret(false, SqlSelect.inlineParam(temp)));
+        }
+        renderJSON(new Ret(true));
     }
 
 }

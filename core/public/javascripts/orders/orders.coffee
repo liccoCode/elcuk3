@@ -4,11 +4,10 @@ $ ->
     source: (query, process) ->
       sku = $sku.val()
       $.get('/products/sameSku', {sku: sku})
-      .done((c) ->
+        .done((c) ->
         process(c)
       )
   })
-
 
   # 订单列表页面
   $('#order_list .sortable').click ->
@@ -18,13 +17,20 @@ $ ->
   # 订单详细页面的功能条
   $('#funcs').on('click', 'button:contains(重新抓取费用)', (e) ->
     LoadMask.mask()
-    $.ajax($(@).data('url'), {dataType: 'json', type: 'POST'})
-    .done((r) ->
+    $.ajax($(@).data('url'), {
+      dataType: 'json',
+      type: 'POST'
+    })
+      .done((r) ->
       type = if r.flag
         "success"
       else
         "error"
-      noty({text: r.message, type: type, timeout: 3000})
+      noty({
+        text: r.message,
+        type: type,
+        timeout: 3000
+      })
       LoadMask.unmask()
     )
     false
@@ -34,11 +40,24 @@ $ ->
     e.preventDefault()
     from = new Date($("#p_from").val())
     to = new Date($("#p_to").val())
-    if (to - from)/ 1000 / 60 / 60 / 24 != 0
-      alert "只能导出一天之内的数据！"
+    if ((to - from) / 1000 / 60 / 60 / 24) > 31
+      alert "暂时只能导出一个月之内的数据！"
     else
       $form = $("#search_form")
       window.open('/Excels/orderReports?' + $form.serialize(), "_blank")
+  )
 
+  $('#downSaleFeeExcel').click((e)->
+    e.preventDefault()
+    from = new Date($("#p_from").val())
+    to = new Date($("#p_to").val())
+    if $("selec[name='p.category']").val()
+      if ((to - from) / 1000 / 60 / 60 / 24) > 31
+        alert "暂时只能导出一个月之内的数据！"
+      else
+        $form = $("#search_form")
+        window.open('/Excels/orderSaleFeeReports?' + $form.serialize(), "_blank")
+    else
+      alert "请先输入品线"
   )
 

@@ -1,19 +1,16 @@
 package models.whouse;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
-import controllers.Login;
 import models.User;
 import models.procure.ProcureUnit;
 import play.data.validation.Required;
-import play.data.validation.Validation;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 库存异动记录
@@ -37,6 +34,10 @@ public class StockRecord extends Model {
     @ManyToOne
     public ProcureUnit unit;
 
+    @Expose
+    @ManyToOne
+    public Outbound outbound;
+
     /**
      * 数量
      */
@@ -45,7 +46,7 @@ public class StockRecord extends Model {
     public Integer qty;
 
     /**
-     * 调整前库存
+     * 调整后采购计划对应的库存
      */
     @Required
     @Expose
@@ -70,6 +71,12 @@ public class StockRecord extends Model {
             @Override
             public String label() {
                 return "出库";
+            }
+        },
+        OtherOutbound {
+            @Override
+            public String label() {
+                return "其它出库";
             }
         },
         Split {
@@ -181,9 +188,26 @@ public class StockRecord extends Model {
 
     public String memo;
 
+    @Transient
+    public Long unitId;
+
 
     public StockRecord() {
         this.createDate = new Date();
+    }
+
+    public static Map<Integer, List<StockRecord>> pageNumForTen(List<Outbound> outbounds) {
+        Map<Integer, List<StockRecord>> ten = new HashMap<>();
+        int k = 0;
+        for(Outbound outbound : outbounds) {
+            int max = outbound.records.size();
+            for(int i = 0; i < max; i += 10) {
+                int num = max - i;
+                ten.put(k, outbound.records.subList(i, num > 10 ? i + 10 : i + num));
+                k++;
+            }
+        }
+        return ten;
     }
 
 }

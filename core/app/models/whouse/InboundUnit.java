@@ -212,13 +212,17 @@ public class InboundUnit extends Model {
                 if(this.unit.attrs.planQty - NumberUtils.toInt(value) != 0 && this.handType == null) {
                     this.handType = H.Actual;
                 }
+                if(this.status == S.Receive) {
+                    this.unit.attrs.qty = NumberUtils.toInt(value);
+                    this.unit.save();
+                }
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "handType":
                 logs.addAll(Reflects.logFieldFade(this, "handType", H.valueOf(value)));
                 break;
             case "result":
-                if(this.qualifiedQty == 0) {
+                if(this.qualifiedQty == 0 || this.result == R.UnCheck) {
                     this.qualifiedQty = this.qty;
                     this.unqualifiedQty = 0;
                 }
@@ -229,12 +233,24 @@ public class InboundUnit extends Model {
                 logs.addAll(Reflects.logFieldFade(this, "result", R.valueOf(value)));
                 break;
             case "qualifiedQty":
+                int diff = this.qualifiedQty - NumberUtils.toInt(value);
                 this.unqualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                if(this.status == S.Inbound) {
+                    this.unit.inboundQty -= diff;
+                    this.unit.availableQty = NumberUtils.toInt(value);
+                    this.unit.unqualifiedQty = this.unqualifiedQty;
+                }
                 break;
             case "unqualifiedQty":
+                int diffQty = this.unqualifiedQty - NumberUtils.toInt(value);
                 this.qualifiedQty = this.qty - NumberUtils.toInt(value);
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
+                if(this.status == S.Inbound) {
+                    this.unit.inboundQty += diffQty;
+                    this.unit.unqualifiedQty = NumberUtils.toInt(value);
+                    this.unit.availableQty = this.qualifiedQty;
+                }
                 break;
             case "inboundQty":
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
@@ -257,6 +273,7 @@ public class InboundUnit extends Model {
         new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br/>"))
                 .fid(this.inbound.id).save();
         this.save();
+        this.unit.save();
     }
 
     @PostLoad
@@ -321,7 +338,7 @@ public class InboundUnit extends Model {
             return false;
         int total_main = this.mainBox.num * this.mainBox.boxNum;
         int total_last = this.lastBox.num * this.lastBox.boxNum;
-        return total_main + total_last == this.qty;
+        return total_main + total_last == this.unit.availableQty;
     }
 
 }

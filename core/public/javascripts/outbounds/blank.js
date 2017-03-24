@@ -10,8 +10,9 @@ $(() => {
         text: '请选择需要出库的数据!',
         type: 'error'
       });
-    } else if (confirm("确认出库 " + num + " 条出库单吗?")) {
+    } else {
       let i = 0;
+      let ids = [];
       $("input[name='ids']:checked").each(function () {
         if ($(this).attr("status") != "Create") {
           i++;
@@ -21,9 +22,18 @@ $(() => {
           });
           return false;
         }
+        ids.push($(this).val());
       });
       if (i == 0) {
-        $("#submit_form").submit();
+        $.post('/Outbounds/validOutboundQty', {ids: ids}, function (re) {
+          if (re.flag) {
+            $("#submit_form").submit();
+          } else {
+            if (confirm(re.message + "的可用库存与计划出库数量不一致，确认出库吗？")) {
+              $("#submit_form").submit();
+            }
+          }
+        });
       }
     }
   });
@@ -71,8 +81,8 @@ $(() => {
 
   $("#data_table").on("click", "input[name='editBoxInfo']", function (e) {
     e.stopPropagation();
-    $("#fba_carton_contents_modal").modal('show');
     let ids = $(this).data("id");
+    $("#fba_carton_contents_modal").modal('show');
     $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: ids}, function () {
       $.getScript('/public/javascripts/inbounds/boxInfo.js');
     });
@@ -89,6 +99,7 @@ $(() => {
           text: '更新包装信息成功!',
           type: 'success'
         });
+        window.location.reload();
       } else {
         noty({
           text: r.message,
@@ -156,6 +167,37 @@ $(() => {
   if (targetTr.size() > 0) {
     EF.scoll(targetTr)
     EF.colorAnimate(targetTr)
+  }
+
+  let index = $("#data_table input[type='checkbox']").length - 1;
+
+  $("#quickAdd").click(function (e) {
+    e.preventDefault();
+    let id = $("#procureId").val();
+    let cooperId = $("#cooperId").val();
+    if ($("#tr_" + id).html() == undefined) {
+      $.get("/procureunits/findProcureById", {
+        id: id,
+        index: index,
+        type: 'Outbound'
+      }, function (r) {
+        index++;
+        $("#data_table").append(r);
+        slippingTr(id);
+      });
+      $("#procureId").val("");
+    } else {
+      noty({
+        text: "采购计划已经存在该单据中!",
+        type: 'error'
+      });
+      slippingTr(id);
+    }
+  });
+
+  function slippingTr (id) {
+    EF.scoll($("#tr_" + id));
+    EF.colorAnimate($("#tr_" + id));
   }
 
 });

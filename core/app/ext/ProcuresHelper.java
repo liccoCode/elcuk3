@@ -136,13 +136,19 @@ public class ProcuresHelper extends JavaExtensions {
         switch(state) {
             case PENDING:
                 return "#5CB85C";
+            case PENDING_REVIEW:
+                return "#FF0000";
+            case APPROVE:
+                return "#00FF00";
+            case REJECT:
+                return "#48D1CC";
             case CONFIRM:
                 return "#FAA52C";
             case DONE:
                 return "#4DB2D0";
             case CANCEL:
             default:
-                return "#D14741";
+                return "#708090";
         }
     }
 
@@ -308,7 +314,7 @@ public class ProcuresHelper extends JavaExtensions {
     }
 
     public static String bgcolor(F.T2<Integer, Integer> process) {
-        double num = (double) process._1 / process._2 ;
+        double num = (double) process._1 / process._2;
         if(num == 1) {
             return "progress-success";
         } else if(num >= 0.66 && num < 1) {

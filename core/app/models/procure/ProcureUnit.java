@@ -3,7 +3,6 @@ package models.procure;
 import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import com.sun.xml.xsom.impl.UName;
 import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
@@ -47,7 +46,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -607,6 +605,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public boolean isb2b;
 
+    @Transient
+    public int currQty;
+
     /**
      * 差数是否退回
      */
@@ -719,11 +720,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "分拆的子采购计划必须要有selling！");
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
+
+        CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id)
+                .first();
+        if(item == null || !Objects.equals(this.cooperator.id, item.cooperator.id)) {
+            Validation.addError("", "该供应商下无此SKU产品，请确认！");
+        }
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
         newUnit.deliveryment = this.deliveryment;
-        newUnit.deliverplan = this.deliverplan;
         newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.DELIVERY;
         newUnit.planstage = PLANSTAGE.PLAN;
@@ -748,8 +754,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.isDedicated = unit.isDedicated;
         if(type)
             newUnit.validate();
-        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
-                newUnit.whouse, newUnit.shipType);
+        List<Shipment> shipments = Shipment
+                .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
         if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
@@ -808,6 +814,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(type && unit.selling == null) {
             Validation.addError("", "分拆的子采购计划必须要有selling！");
         }
+        CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id)
+                .first();
+        if(item == null || !Objects.equals(this.cooperator.id, item.id)) {
+            Validation.addError("", "该供应商下无此SKU产品，请确认！");
+        }
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
@@ -843,7 +854,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
-
+        /**库存分拆需要分析包装信息**/
+        if(this.lastBox != null && this.mainBox != null && newUnit.availableQty % this.mainBox.num == 0) {
+            newUnit.mainBox.boxNum = newUnit.availableQty / this.mainBox.num;
+            newUnit.mainBox.num = this.mainBox.num;
+            newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
+            newUnit.mainBox.length = this.mainBox.length;
+            newUnit.mainBox.width = this.mainBox.width;
+            newUnit.mainBox.height = this.mainBox.height;
+            this.mainBox.boxNum -= newUnit.mainBox.boxNum;
+        } else if(this.lastBox != null && this.mainBox != null && this.lastBox.boxNum > 0
+                && newUnit.availableQty % this.mainBox.num <= this.lastBox.num) {
+            newUnit.mainBox.boxNum = (int) Math.floor(newUnit.availableQty / this.mainBox.num);
+            newUnit.mainBox.num = newUnit.mainBox.boxNum == 0 ? 0 : this.mainBox.num;
+            newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
+            newUnit.mainBox.length = this.mainBox.length;
+            newUnit.mainBox.width = this.mainBox.width;
+            newUnit.mainBox.height = this.mainBox.height;
+            newUnit.lastBox.boxNum = this.lastBox.boxNum;
+            newUnit.lastBox.num = newUnit.availableQty % this.mainBox.num;
+            newUnit.lastBox.length = this.lastBox.length;
+            newUnit.lastBox.width = this.lastBox.width;
+            newUnit.lastBox.height = this.lastBox.height;
+            this.mainBox.boxNum -= newUnit.mainBox.boxNum;
+            this.lastBox.num -= newUnit.lastBox.num;
+            this.lastBox.boxNum = this.lastBox.num == 0 ? 0 : 1;
+        }
+        newUnit.marshalBoxs();
+        this.marshalBoxs();
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate, newUnit.whouse,
                 newUnit.shipType);
         //无selling的手动单不做处理
@@ -868,7 +906,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
         new ERecordBuilder("procureunit.split").msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class).save();
-        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split);
+        this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, newUnit.availableQty,
+                this.availableQty);
         return newUnit;
     }
 
@@ -879,12 +918,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param qty
      * @param type
      */
-    public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type) {
+    public void createStockRecord(ProcureUnit unit, int qty, StockRecord.T type, int childCurrQty, int parentCurrQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.currWhouse;
         record.unit = unit;
         record.qty = qty;
+        record.currQty = childCurrQty;
         record.type = type;
         record.recordId = unit.id;
         record.save();
@@ -896,6 +936,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             parent.type = type;
             parent.recordId = unit.parent.id;
             parent.creator = Login.current();
+            parent.currQty = parentCurrQty;
             parent.save();
         }
     }
@@ -1089,7 +1130,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && unit.shipType.name() != "EXPRESS") {
+                && !unit.shipType.name().equals("EXPRESS")) {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1106,12 +1147,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         if(Validation.hasErrors()) return;
         //仓库加工修改
+        int parentCurrQty = 0;
         if(this.parent != null && unit.isReturn) {
             ProcureUnit it = ProcureUnit.findById(this.parent.id);
             if(it.stage == STAGE.IN_STORAGE) {
                 it.availableQty += (this.availableQty - unit.availableQty);
                 it.save();
             }
+            parentCurrQty = it.availableQty;
         }
         logs.addAll(this.changeStageUpdate(unit));
         if(STAGE.IN_STORAGE == this.stage) {
@@ -1143,7 +1186,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.shipItemQty(this.qty());
         this.save();
         if(diffQty != 0) {
-            this.createStockRecord(this, diffQty, StockRecord.T.Split_Stock);
+            this.createStockRecord(this, -diffQty, StockRecord.T.Split_Stock, this.availableQty, parentCurrQty);
         }
     }
 
@@ -1188,7 +1231,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     this.parent.availableQty += diff;
                     this.parent.save();
                 }
-                this.createStockRecord(this, -diff, StockRecord.T.Split_Stock);
+                this.createStockRecord(this, -diff, StockRecord.T.Split_Stock, this.availableQty,
+                        this.parent.availableQty);
             }
             this.currWhouse = Whouse.autoMatching(this.shipType, this.projectName.equals("B2B") ? "B2B" : "", this.fba);
         } else if(diff != 0) {
@@ -1530,6 +1574,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    public int paidQty() {
+        if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
+                .contains(this.stage.name()))
+            return inboundQty;
+        else
+            return this.qty();
+    }
+
     /**
      * 入库中的数量
      *
@@ -1687,9 +1739,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         return new BigDecimal(this.attrs.price.toString())
-                .multiply(new BigDecimal(this.qty()))
+                .multiply(new BigDecimal(this.paidQty()))
                 .setScale(2, 4)
                 .floatValue();
+    }
+
+    public float totalAmountToCNY() {
+        return this.attrs.currency.toCNY(new BigDecimal(this.attrs.price.toString())
+                .multiply(new BigDecimal(this.paidQty())).setScale(2, 4).floatValue());
+
     }
 
 
@@ -1781,6 +1839,38 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 包装信息总重量 由仓库部门填写
+     *
+     * @return
+     */
+    public double totalBoxWeight() {
+        double mainWeight = 0, lastWeight = 0;
+        if(this.mainBox != null)
+            mainWeight = this.mainBox.singleBoxWeight * this.mainBox.boxNum;
+        if(this.lastBox != null)
+            lastWeight = this.lastBox.singleBoxWeight * this.lastBox.boxNum;
+        return mainWeight + lastWeight;
+    }
+
+    public double totalBoxVolume() {
+        double mainVolume = 0, lastVolume = 0;
+        if(this.mainBox != null)
+            mainVolume = this.mainBox.totalVolume();
+        if(this.lastBox != null)
+            lastVolume = this.lastBox.totalVolume();
+        return mainVolume + lastVolume;
+    }
+
+    public int totalBoxNum() {
+        int total = 0;
+        if(this.mainBox != null)
+            total += this.mainBox.boxNum;
+        if(this.lastBox != null)
+            total += this.lastBox.boxNum;
+        return total;
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return
@@ -1796,8 +1886,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ElcukRecord.records(this.id + "",
                 Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
                         "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay",
-                        "procureunit.adjuststock", "refund.confirm", "refund.transfer"),
-                50);
+                        "procureunit.adjuststock", "refund.confirm", "refund.transfer", "paymentunit.fixValue"), 50);
     }
 
     /**
@@ -2379,9 +2468,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
             int max = iu.size();
-            for(int i = 0; i < iu.size(); i += 25) {
+            for(int i = 0; i < iu.size(); i += 10) {
                 int num = max - i;
-                ten.put(k, iu.subList(i, num > 25 ? i + 25 : i + num));
+                ten.put(k, iu.subList(i, num > 10 ? i + 10 : i + num));
                 k++;
             }
         }
@@ -2464,15 +2553,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean validBoxInfoIsComplete() {
-        if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
-                this.mainBox.height == 0)
-            return false;
-        int total_main = this.mainBox.num * this.mainBox.boxNum;
-        int total_last = this.lastBox.num * this.lastBox.boxNum;
-        int real_qty = Arrays.asList("IN_STORAGE", "DONE", "DELIVERY").contains(this.stage.name()) ?
-                this.availableQty : this.outQty;
-        return total_main + total_last == real_qty;
-    }                                                                          
+        return !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
+                this.mainBox.height == 0);
+    }
+
+    public boolean validBoxInfoIsCorrect() {
+        return this.availableQty == this.totalOutBoundQty();
+    }
+
+    public int totalOutBoundQty() {
+        int total_main = 0, total_last = 0;
+        if(this.mainBox != null)
+            total_main = this.mainBox.num * this.mainBox.boxNum;
+        if(this.lastBox != null)
+            total_last = this.lastBox.num * this.lastBox.boxNum;
+        return total_main + total_last;
+    }
 
     /**
      * 对应运输单是否 计划中 状态

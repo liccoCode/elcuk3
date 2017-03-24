@@ -54,6 +54,7 @@ public class Shipments extends Controller {
     @Check("shipments.index")
     public static void index(ShipmentPost p) {
         if(p == null) p = new ShipmentPost();
+        p.pagination = false;
         List<Shipment> shipments = p.query();
 
         for(int i = 0; i < shipments.size(); i++) {
@@ -61,7 +62,7 @@ public class Shipments extends Controller {
             ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
             shipments.set(i, ship);
         }
-        Shipment.handleQty1(shipments, null);
+        //Shipment.handleQty1(shipments, null);
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
     }

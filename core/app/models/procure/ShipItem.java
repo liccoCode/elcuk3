@@ -12,6 +12,7 @@ import models.market.Selling;
 import models.product.Template;
 import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Validation;
@@ -113,6 +114,7 @@ public class ShipItem extends GenericModel {
     @Expose
     @Temporal(TemporalType.DATE)
     public Date shipDate;
+
     /**
      * 实际到库时间
      */
@@ -235,28 +237,28 @@ public class ShipItem extends GenericModel {
      */
     public static void adjustShipment(List<Long> ids, Shipment shipment) {
         List<ShipItem> items = ShipItem.find(SqlSelect.whereIn("id", ids)).fetch();
-
         if(ids.size() != items.size())
             Validation.addError("", "提交的属于与系统中的数据不一致.");
-
         if(shipment.state != Shipment.S.PLAN)
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
-
         for(ShipItem itm : items) {
             if(itm.shipment.equals(shipment))
                 Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
             if(itm.shipment.state != Shipment.S.PLAN)
                 Validation.addError("", "当前运输单物流已经确认, 如需调整请联系物流");
         }
-
         if(Validation.hasErrors()) return;
-
-        //TODO 日志
-        for(ShipItem itm : items) {
+        items.forEach(itm -> {
             itm.shipment = shipment;
+            if(shipment.out != null && shipment.out.status == Outbound.S.Create) {
+                itm.unit.outbound = shipment.out;
+                itm.unit.save();
+            } else if(shipment.out == null) {
+                itm.unit.outbound = null;
+                itm.unit.save();
+            }
             itm.save();
-            itm.unit.flushTask();
-        }
+        });
     }
 
     public void adjustShipment(Shipment shipment) {
@@ -384,31 +386,20 @@ public class ShipItem extends GenericModel {
         return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
     }
 
+    /**
+     * 计算运输单件数
+     * @return
+     */
     public Integer caluTotalUnitByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalBoxNum();
-        } else {
-            return 0;
-        }
+       return this.unit.totalBoxNum();
     }
 
     public Double caluTotalVolumeByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalVolume();
-        } else {
-            return 0d;
-        }
+        return this.unit.totalBoxVolume();
     }
 
     public Double caluTotalWeightByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalWeight();
-        } else {
-            return 0d;
-        }
+        return this.unit.totalBoxWeight();
     }
 
     public String showDeliverymentId() {

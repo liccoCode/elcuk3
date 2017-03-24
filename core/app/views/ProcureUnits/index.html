@@ -64,6 +64,14 @@
         </select>
 
         <div class="input-prepend inline">
+          <select name="p.categories" multiple="multiple" id="categories">
+          #{list items:categoryIds, as:'c'}
+            <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+          #{/list}
+          </select>
+        </div>
+
+        <div class="input-prepend inline">
           <select name="p.stages" multiple="multiple" id="stage">
           #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
               #{if stage.label() != '审批中'}
@@ -82,9 +90,9 @@
 
         <select name="p.projectName" class="inline">
           <option value="">项目名称</option>
-          #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
-            <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
-          #{/list}
+        #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
+          <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
+        #{/list}
         </select>
 
         <div class="input-prepend input-append inline">

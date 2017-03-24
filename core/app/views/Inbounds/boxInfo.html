@@ -1,12 +1,13 @@
 <table class="table table-bordered table-condensed" id="box_info_table" width="1000px;">
   <tr>
-    <th colspan="2"></th>
+    <th colspan="3"></th>
     <th colspan="6" style="text-align:center">主箱</th>
     <th colspan="6" style="text-align:center">尾箱</th>
   </tr>
   <tr>
     <td width="70px;">采购计划ID</td>
     <td width="40px;">总数</td>
+    <td width="40px;">输入</td>
     <td>每箱数量</td>
     <td>箱数</td>
     <td>每箱重量(kg)</td>
@@ -23,7 +24,8 @@
 #{list items:units, as:'unit'}
   <tr>
     <td>#{if flag}${unit.id}#{/if}#{else }${unit.unit.id}#{/else}</td>
-    <td>#{if flag}${unit.shipmentQty()}#{/if}#{else }${unit.planQty}#{/else}</td>
+    <td>#{if flag}${unit.shipmentQty()}#{/if}#{else }${unit.unit.shipmentQty()}#{/else}</td>
+    <td><span id="cal"></span></td>
     <td>
       <input type='text' style='width: 30px;' name='units[${unit_index-1}].mainBox.num' value='${unit.mainBox?.num}'
              data-real="${flag ? unit.shipmentQty() : unit.unit.shipmentQty()}"/>

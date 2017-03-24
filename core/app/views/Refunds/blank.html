@@ -103,7 +103,7 @@
         <th style="width:80px;">项目名称</th>
       </tr>
         #{list items:units, as:'unit'}
-          <tr class="text-center" id="tr_${unit.id}">
+          <tr class="text-center" id="unit_${unit.id}">
             <td>
               <input type="checkbox" name="ck" value="${unit.id}">
               <input type="hidden" name="dtos[${unit_index-1}].unit.id" value="${unit.id}">

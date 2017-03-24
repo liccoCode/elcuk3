@@ -11,19 +11,21 @@ import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
-import models.product.Product;
+import models.view.Ret;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +74,6 @@ public class Deliveryments extends Controller {
         render(deliveryments, p, deliverymentIds);
     }
 
-    //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         notFoundIfNull(dmt);
@@ -81,7 +82,14 @@ public class Deliveryments extends Controller {
                 .map(unit -> unit.id)
                 .collect(Collectors.toList());
         String expressid = StringUtils.join(expressUnitIds, ",");
-        render(dmt, expressid);
+        double total = dmt.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+        String applyMsg = "";
+        List<Deliveryment> deliveryments = new ArrayList<>();
+        if(dmt.state == Deliveryment.S.PENDING_REVIEW) {
+            applyMsg = dmt.validDmtIsNeedApply().message;
+            deliveryments = dmt.getRelateDelivery();
+        }
+        render(dmt, expressid, total, applyMsg, deliveryments);
     }
 
     public static void update(Deliveryment dmt) {
@@ -106,7 +114,6 @@ public class Deliveryments extends Controller {
 
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
-     * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
     public static void create(List<Long> pids, String name) {
@@ -164,17 +171,26 @@ public class Deliveryments extends Controller {
         show(dmt.id);
     }
 
+    public static void validDmtIsNeedApply(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        if(Arrays.asList("CONFIRM", "APPROVE", "DONE").contains(dmt.state.name()))
+            renderJSON(new Ret(false));
+        if(dmt.state == Deliveryment.S.PENDING_REVIEW)
+            renderJSON(new Ret(true, "采购单正在审核中！"));
+        renderJSON(dmt.validDmtIsNeedApply());
+    }
+
     /**
      * 确认采购单, 这样才能进入运输单进行挑选
      */
     public static void confirm(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         dmt.confirm();
-        if(Validation.hasErrors())
-            render("Deliveryments/show.html", dmt);
-
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
-                .save();
+        if(Validation.hasErrors()) {
+            double total = dmt.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+            render("Deliveryments/show.html", dmt, total);
+        }
+        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
         show(id);
     }
 
@@ -190,6 +206,15 @@ public class Deliveryments extends Controller {
             render("Deliveryments/show.html", dmt, msg);
 
         show(dmt.id);
+    }
+
+    public static void review(String id, String msg, Boolean result) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        Validation.required("deliveryments.review", result);
+        dmt.review(result, msg);
+        if(Validation.hasErrors())
+            render("Deliveryments/show.html", dmt, msg);
+        show(id);
     }
 
 
@@ -274,4 +299,17 @@ public class Deliveryments extends Controller {
         flash.success("Deliveryment %s 创建成功.", dmt.id);
         Deliveryments.show(dmt.id);
     }
+
+    public static void indexPer() {
+        HighChart lineChart = new HighChart(Series.LINE);
+        lineChart.series(DeliveryPost.queryProcureNumPerDay());
+        lineChart.series(DeliveryPost.queryDeliveryNumPerDay());
+        renderJSON(J.json(lineChart));
+    }
+
+    public static void perCreateTotalNum() {
+        HighChart lineChart = ProcurePost.perCreateTotalNum();
+        renderJSON(J.json(lineChart));
+    }
+
 }

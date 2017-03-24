@@ -3,6 +3,7 @@ package models.view.post;
 import helper.Dates;
 import models.procure.Shipment;
 import models.whouse.Outbound;
+import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
@@ -20,12 +21,13 @@ public class OutboundPost extends Post<Outbound> {
     private static final Pattern ID = Pattern.compile("^PTC(\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     public Outbound.S status;
-    public Outbound.T type;
+    public StockRecord.C type;
 
     public String projectName;
     public Shipment.T shipType;
-
     public String search;
+    public boolean flag = false;
+    public String whichPage;
 
     public OutboundPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -36,9 +38,12 @@ public class OutboundPost extends Post<Outbound> {
         this.page = 1;
     }
 
-    @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o LEFT JOIN o.units u WHERE 1=1");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o ");
+        if(flag)
+            sbd.append(" LEFT JOIN o.records u WHERE 1=1");
+        else
+            sbd.append(" LEFT JOIN o.units u WHERE 1=1");
         List<Object> params = new ArrayList<>();
         sbd.append(" AND o.createDate >= ? AND o.createDate <= ? ");
         params.add(Dates.morning(this.from));
@@ -51,7 +56,10 @@ public class OutboundPost extends Post<Outbound> {
                 return new F.T2<>(sbd.toString(), params);
             }
             if(isNumForSearch() != null) {
-                sbd.append(" AND u.id = ? ");
+                if(flag)
+                    sbd.append(" AND u.unit.id = ? ");
+                else
+                    sbd.append(" AND u.id = ? ");
                 params.add(isNumForSearch());
                 return new F.T2<>(sbd.toString(), params);
             }
@@ -74,12 +82,18 @@ public class OutboundPost extends Post<Outbound> {
             sbd.append(" AND o.shipType=? ");
             params.add(this.shipType);
         }
+        if(flag) {
+            sbd.append(" AND o.type <> ? ");
+            params.add(StockRecord.C.Normal);
+        } else {
+            sbd.append(" AND o.type = ? ");
+            params.add(StockRecord.C.Normal);
+        }
 
         sbd.append(" ORDER BY o.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
 
-    @Override
     public List<Outbound> query() {
         this.count = this.count();
         F.T2<String, List<Object>> params = params();
@@ -90,7 +104,6 @@ public class OutboundPost extends Post<Outbound> {
     public Long getTotalCount() {
         return this.count();
     }
-
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {

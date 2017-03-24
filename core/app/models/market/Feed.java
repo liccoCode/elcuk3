@@ -259,9 +259,7 @@ public class Feed extends Model {
         return Feed.find(
                 String.format("fid=? AND (type=? OR memo=?) %s ORDER BY createdAt DESC",
                         Play.mode.isProd() ? "AND feedId IS NULL" : ""),
-                selling.sellingId,
-                type,
-                type.label()).first();
+                selling.sellingId, type, type.label()).first();
     }
 
     public boolean sameHours(Feed other) {

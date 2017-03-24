@@ -25,7 +25,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class StockRecords extends Controller {
 
-    @Before(only = {"index", "stockIndex"})
+    @Before(only = {"index", "stockIndex", "indexHistoryStock"})
     public static void setWhouses() {
         renderArgs.put("cooperators", Cooperator.suppliers());
         renderArgs.put("whouses", Whouse.exceptAMZWhoses());
@@ -44,6 +44,12 @@ public class StockRecords extends Controller {
         render(p, units);
     }
 
+    public static void indexHistoryStock(StockPost p) {
+        if(p == null) p = new StockPost();
+        List<ProcureUnit> units = p.queryHistoryStock();
+        render(p, units);
+    }
+
     public static void adjustStock(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         StockRecord record = new StockRecord();
@@ -53,7 +59,7 @@ public class StockRecords extends Controller {
     public static void saveRecord(StockRecord record) {
         ProcureUnit unit = ProcureUnit.findById(record.unit.id);
         record.type = StockRecord.T.Stocktaking;
-        record.currQty = unit.availableQty;
+        record.currQty = unit.availableQty + record.qty;
         record.createDate = new Date();
         record.save();
         unit.availableQty += record.qty;
@@ -64,7 +70,7 @@ public class StockRecords extends Controller {
         record.save();
         flash.success("调整库存成功");
         new ERecordBuilder("procureunit.adjuststock")
-                .msgArgs(record.qty, unit.availableQty -= record.qty, unit.availableQty)
+                .msgArgs(record.qty, unit.availableQty - record.qty, unit.availableQty, record.memo)
                 .fid(unit.id, ProcureUnit.class)
                 .save();
         stockIndex(new StockPost());

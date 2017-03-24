@@ -30,14 +30,13 @@ $(() => {
   });
 
   //快递同步预计到达时间
-
   $("[name='unit.attrs.planShipDate']").change(() => {
     let shipType = $("[name='unit.shipType']:checked").val();
     if (shipType != 'EXPRESS') {
       return;
     }
     let planShipDate = $("[name='unit.attrs.planShipDate']").val();
-    let warehouseid = $("[name='unit.whouse.id']").val()
+    let warehouseid = $("[name='unit.whouse.id']").val();
     $.get('/shipments/planArriveDate', {
       planShipDate: planShipDate,
       shipType: shipType,

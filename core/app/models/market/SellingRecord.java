@@ -404,8 +404,7 @@ public class SellingRecord extends GenericModel {
 
         if(acc == null) {
             List<SellingRecord> dateMixRecords = SellingRecord
-                    .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from,
-                            to).fetch();
+                    .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
             // 需要将相同 Date 不同 Market 的全部累计
             Map<String, SellingRecord> groupByDate = new LinkedHashMap<>();
             for(SellingRecord rcd : dateMixRecords) {

@@ -1,12 +1,15 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -53,6 +56,33 @@ public class Deliveryment extends GenericModel {
             @Override
             public String label() {
                 return "确认并已下单";
+            }
+        },
+        /**
+         * 待审核
+         */
+        PENDING_REVIEW {
+            @Override
+            public String label() {
+                return "待审核";
+            }
+        },
+        /**
+         * 审核通过
+         */
+        APPROVE {
+            @Override
+            public String label() {
+                return "审核通过";
+            }
+        },
+        /**
+         * 审核不通过
+         */
+        REJECT {
+            @Override
+            public String label() {
+                return "审核不通过";
             }
         },
         /**
@@ -103,6 +133,8 @@ public class Deliveryment extends GenericModel {
      * 交货时间
      */
     public Date deliveryTime;
+
+    public Date confirmDate;
 
     /**
      * 此采购单的状态
@@ -245,16 +277,49 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
-        if(this.state != S.PENDING)
+        if(!Arrays.asList(S.APPROVE, S.PENDING, S.REJECT).contains(this.state))
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
-        if(this.deliveryTime == null)
-            Validation.addError("", "交货时间必须填写");
-        if(this.orderTime == null)
-            Validation.addError("", "下单时间必须填写");
-        if(Validation.hasErrors()) return;
-
-        this.state = Deliveryment.S.CONFIRM;
+        Ret ret = this.validDmtIsNeedApply();
+        if(ret.flag && this.state != S.APPROVE) {
+            this.state = S.PENDING_REVIEW;
+        } else {
+            if(this.deliveryTime == null)
+                Validation.addError("", "交货时间必须填写");
+            if(this.orderTime == null)
+                Validation.addError("", "下单时间必须填写");
+            if(Validation.hasErrors()) return;
+            this.confirmDate = new Date();
+            this.state = S.CONFIRM;
+        }
         this.save();
+    }
+
+    public Ret validDmtIsNeedApply() {
+        double totalDmt = this.totalPerDeliveryment();
+        double totalSeven = this.totalAmountForSevenDay();
+        double checkLimit = Double.parseDouble(OperatorConfig.getVal("checklimit"));
+        double checkLimitPerWeek = Double.parseDouble(OperatorConfig.getVal("checklimitperweek"));
+        boolean isNeedApply = (totalDmt > checkLimit);
+        if(isNeedApply)
+            return new Ret(true, "单笔金额超过 ¥ " + checkLimit + ",需要审核，是否提交审核？");
+        else if((totalSeven + totalDmt) > checkLimitPerWeek)
+            return new Ret(true, "该供应商本周金额超过 ¥ " + checkLimitPerWeek + ",需要审核，是否提交审核？");
+        else
+            return new Ret(false);
+    }
+
+    /**
+     * 审核采购单
+     */
+    public void review(Boolean result, String msg) {
+        if(this.state != S.PENDING_REVIEW)
+            Validation.addError("", "采购单状态非 " + S.PENDING_REVIEW.label() + " 不可以确认");
+        if(!result && StringUtils.isBlank(msg))
+            Validation.addError("", "请填写审核不通过的原因！");
+        if(Validation.hasErrors()) return;
+        this.state = result ? S.APPROVE : S.REJECT;
+        this.save();
+        new ERecordBuilder("deliveryment.review").msgArgs(this.id, this.state.label(), msg).fid(this.id).save();
     }
 
     /**
@@ -478,4 +543,21 @@ public class Deliveryment extends GenericModel {
         return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?)",
                 this.id, ProcureUnit.T.ProcureSplit).fetch();
     }
+
+
+    public double totalAmountForSevenDay() {
+        List<Deliveryment> deliveryments = this.getRelateDelivery();
+        return deliveryments.stream().mapToDouble(Deliveryment::totalPerDeliveryment).sum();
+    }
+
+    public double totalPerDeliveryment() {
+        return this.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+    }
+
+    public List<Deliveryment> getRelateDelivery() {
+        String sql = "cooperator.id=? AND createDate >=? AND createDate<=? AND state <>?";
+        return Deliveryment.find(sql, this.cooperator.id,
+                Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
+    }
+
 }

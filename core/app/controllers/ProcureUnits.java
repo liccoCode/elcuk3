@@ -16,6 +16,7 @@ import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Category;
 import models.product.Product;
 import models.qc.CheckTask;
 import models.view.Ret;
@@ -61,6 +62,8 @@ public class ProcureUnits extends Controller {
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
         renderArgs.put("cooperators", cooperators);
+        List<String> categoryIds = Category.categoryIds();
+        renderArgs.put("categoryIds", categoryIds);
 
         //为视图提供日期
         DateTime dateTime = new DateTime();
@@ -420,7 +423,6 @@ public class ProcureUnits extends Controller {
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
             boolean showNotice = new Date().getTime() >= unit.attrs.planDeliveryDate.getTime();
-            render(unit, newUnit, showNotice, type);
             render("ProcureUnits/splitUnit.html", unit, newUnit, whouses, type);
         }
         flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
@@ -748,8 +750,10 @@ public class ProcureUnits extends Controller {
     public static void updateBoxInfo(List<ProcureUnit> units) {
         units.forEach(unit -> {
             ProcureUnit old = ProcureUnit.findById(unit.id);
-            unit.marshalBoxs(old);
-            old.save();
+            if(Arrays.asList("DELIVERY", "DONE", "IN_STORAGE").contains(old.stage.name())) {
+                unit.marshalBoxs(old);
+                old.save();
+            }
         });
         renderJSON(new Ret(true));
     }
@@ -837,7 +841,10 @@ public class ProcureUnits extends Controller {
             renderJSON(new Ret(false, "采购计划【" + id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(id) + "】"));
         }
         renderJSON(new Ret(true));
+    }
 
+    public static void dataPanel() {
+        render();
     }
 
 }

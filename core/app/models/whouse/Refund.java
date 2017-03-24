@@ -10,9 +10,9 @@ import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -27,6 +27,8 @@ import java.util.Optional;
 @Entity
 @DynamicUpdate
 public class Refund extends GenericModel {
+
+    private static final long serialVersionUID = 1504355529353731906L;
 
     @Id
     @Column(length = 30)
@@ -209,20 +211,21 @@ public class Refund extends GenericModel {
             refund.save();
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
-                unit.attrs.qty -= u.qty;
                 if(refund.type == T.After_Inbound) {
+                    unit.attrs.qty -= u.qty;
                     unit.inboundQty -= u.qty;
                     unit.availableQty -= u.qty;
                     if(unit.inboundQty == 0) {
                         unit.stage = ProcureUnit.STAGE.DELIVERY;
                     }
+                    unit.save();
+                    createStockRecord(u, StockRecord.T.Refund, "", unit.availableQty);
                 } else {
-                    if(unit.attrs.qty == 0) {
-                        unit.stage = ProcureUnit.STAGE.DELIVERY;
-                    }
+                    unit.unqualifiedQty -= u.qty;
+                    createStockRecord(u, StockRecord.T.Unqualified_Refund, refund.memo, unit.availableQty);
+                    new ERecordBuilder("refund.confirm").msgArgs(u.qty, refund.memo).fid(unit.id).save();
+                    unit.save();
                 }
-                unit.save();
-                createStockRecord(u, StockRecord.T.Refund, "");
             }
         }
     }
@@ -239,15 +242,21 @@ public class Refund extends GenericModel {
             }
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
-                if(unit.outbound != null) {
-                    Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
-                            "【" + unit.outbound.id + "】中，请先处理！");
+                if(refund.type == T.After_Inbound) {
+                    if(unit.outbound != null) {
+                        Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
+                                "【" + unit.outbound.id + "】中，请先处理！");
+                    }
+                } else {
+                    if(u.qty > unit.unqualifiedQty) {
+                        Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】的退货数量大于不良品数量，请先修改！");
+                    }
                 }
             }
         }
     }
 
-    public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo) {
+    public static void createStockRecord(RefundUnit unit, StockRecord.T type, String memo, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.unit.whouse;
@@ -255,6 +264,7 @@ public class Refund extends GenericModel {
         record.qty = unit.qty;
         record.type = type;
         record.recordId = unit.id;
+        record.currQty = currQty;
         record.memo = memo;
         record.save();
     }
@@ -286,7 +296,7 @@ public class Refund extends GenericModel {
         refund.id = id();
         refund.memo = memo;
         refund.whouseUser = Login.current();
-        refund.status = S.Refund;
+        refund.status = S.Create;
         refund.type = T.After_Receive;
         refund.creator = Login.current();
         refund.createDate = new Date();
@@ -294,17 +304,14 @@ public class Refund extends GenericModel {
         refund.save();
         units.stream().filter(unit -> Optional.ofNullable(unit.id).isPresent()).forEach(unit -> {
             ProcureUnit pro = ProcureUnit.findById(unit.id);
-            pro.unqualifiedQty -= unit.attrs.qty;
-            pro.save();
             refund.cooperator = pro.cooperator;
+            refund.name = String.format("%s_%s_不良品退货", pro.cooperator.name, LocalDate.now());
             RefundUnit u = new RefundUnit();
             u.unit = unit;
             u.refund = refund;
             u.planQty = unit.attrs.qty;
             u.qty = unit.attrs.qty;
             u.save();
-            createStockRecord(u, StockRecord.T.Unqualified_Refund, memo);
-            new ERecordBuilder("refund.confirm").msgArgs(u.qty, memo).fid(unit.id).save();
         });
         refund.save();
     }
@@ -336,6 +343,7 @@ public class Refund extends GenericModel {
         record.type = StockRecord.T.Unqualified_Transfer;
         record.recordId = unit.id;
         record.memo = memo;
+        record.currQty = unit.availableQty;
         record.save();
         new ERecordBuilder("refund.transfer").msgArgs(record.qty, record.memo).fid(unitId).save();
     }
@@ -362,6 +370,20 @@ public class Refund extends GenericModel {
             unit.marshalBoxs(old);
             old.save();
         });
+    }
+
+    public void quickAddByEdit(Long unitId) {
+        if(RefundUnit.count("refund.id=? AND unit.id=?", this.id, unitId) > 0) {
+            Validation.addError("", "采购计划" + unitId + "已经存在当前退货单中");
+        }
+        if(Validation.hasErrors()) return;
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        RefundUnit refundUnit = new RefundUnit();
+        refundUnit.refund = this;
+        refundUnit.unit = unit;
+        refundUnit.planQty = unit.availableQty;
+        refundUnit.qty = unit.availableQty;
+        refundUnit.save();
     }
 
 }

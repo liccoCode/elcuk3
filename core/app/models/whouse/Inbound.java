@@ -226,7 +226,6 @@ public class Inbound extends GenericModel {
                 u.qualifiedQty = u.qty;
                 u.unqualifiedQty = 0;
                 u.inboundQty = u.qty;
-
                 u.save();
                 ProcureUnit punit = u.unit;
                 punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) + u.qty;
@@ -234,6 +233,8 @@ public class Inbound extends GenericModel {
                     punit.attrs.deliveryDate = new Date();
                     punit.stage = ProcureUnit.STAGE.DONE;
                 }
+                punit.mainBoxInfo = u.mainBoxInfo;
+                punit.lastBoxInfo = u.lastBoxInfo;
                 punit.result = InboundUnit.R.UnCheck;
                 punit.save();
             }
@@ -255,6 +256,10 @@ public class Inbound extends GenericModel {
             InboundUnit u = InboundUnit.findById(unit.id);
             if(u.result == InboundUnit.R.Qualified && u.target == null) {
                 Validation.addError("", "采购计划【" + u.unit.id + "】目标仓库未填写，请查证");
+                return;
+            }
+            if(u.qualifiedQty + u.unqualifiedQty > u.qty) {
+                Validation.addError("", "采购计划【" + u.unit.id + "】入库数大于收货数量，请查证");
                 return;
             }
             if(u.status == InboundUnit.S.Receive && u.result == InboundUnit.R.Unqualified) {
@@ -297,12 +302,12 @@ public class Inbound extends GenericModel {
                 punit.lastBoxInfo = u.lastBoxInfo;
                 punit.currWhouse = u.target;
                 punit.save();
-                this.createStockRecord(u);
+                this.createStockRecord(u, punit.availableQty);
             }
         }
     }
 
-    private void createStockRecord(InboundUnit unit) {
+    private void createStockRecord(InboundUnit unit, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.target;
@@ -310,6 +315,7 @@ public class Inbound extends GenericModel {
         record.qty = unit.inboundQty;
         record.type = StockRecord.T.Inbound;
         record.recordId = unit.id;
+        record.currQty = currQty;
         record.save();
     }
 
@@ -368,8 +374,9 @@ public class Inbound extends GenericModel {
     public static void updateBoxInfo(List<InboundUnit> units) {
         units.forEach(unit -> {
             InboundUnit old = InboundUnit.findById(unit.id);
-            if(old.status == InboundUnit.S.Create)
+            if(old.status.name().equals("Create")) {
                 old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            }
             unit.marshalBoxs(old);
             old.save();
         });

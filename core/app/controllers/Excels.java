@@ -4,6 +4,8 @@ import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
 import models.RevenueAndCostDetail;
+import models.finance.Payment;
+import models.finance.TransportApply;
 import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
@@ -13,6 +15,7 @@ import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.InboundUnit;
 import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
@@ -696,12 +699,23 @@ public class Excels extends Controller {
 
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
-        //最多只允许导出 2000 个订单的数据,超过了请重新给定搜索范围
-        p.perSize = 2000;
+        //最多只允许导出 10000 个订单的数据,超过了请重新给定搜索范围
+        p.perSize = 10000;
         List<OrderReportDTO> orders = p.queryForExcel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("订单汇总报表%s.xls", dateFormat.format(p.begin)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(orders, p.begin, p.end, dateFormat);
+    }
+
+    public static void orderSaleFeeReports(OrderPOST p) {
+        if(p == null) p = new OrderPOST();
+        p.perSize = 10000;
+        List<OrderReportDTO> orders = p.queryForExcel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("订单费用汇总报表%s.xls", dateFormat.format(p.begin)));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(orders, p.begin, p.end, dateFormat);
     }
@@ -760,4 +774,25 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(units);
     }
+
+    public static void shipmentDetailCost(ShipmentPost p) {
+        if(p == null) p = new ShipmentPost();
+        p.pagination = false;
+        List<Shipment> shipments = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(shipments);
+    }
+
+    public static void exportInboundUnitReport(InboundPost p) {
+        if(p == null) p = new InboundPost();
+        p.pagination = false;
+        List<InboundUnit> units = p.queryDetail();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "收货入库明细.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(units);
+    }
+
 }

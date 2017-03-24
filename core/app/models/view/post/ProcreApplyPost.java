@@ -3,6 +3,7 @@ package models.view.post;
 import helper.Dates;
 import models.finance.Apply;
 import models.finance.ProcureApply;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.libs.F;
@@ -10,6 +11,8 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,6 +21,8 @@ import java.util.List;
  * Time: 3:25 PM
  */
 public class ProcreApplyPost extends Post<Apply> {
+
+    private static final Pattern NUM = Pattern.compile("^[0-9]*$");
 
     public ProcreApplyPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -62,33 +67,40 @@ public class ProcreApplyPost extends Post<Apply> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sql = new StringBuilder(" 1=1 ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT p FROM ProcureApply p LEFT JOIN p.deliveryments d ");
+        sql.append(" LEFT JOIN d.units u WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
+
+        if(StringUtils.isNotEmpty(this.search)) {
+            if(isNumForSearch() != null) {
+                sql.append(" AND u.id = ? ");
+                params.add(isNumForSearch());
+                return new F.T2<>(sql.toString(), params);
+            }
+        }
 
         //查询不需要付款的请款单
         if(this.isneedPay == 1) {
-            sql = new StringBuilder(
-                    "SELECT DISTINCT p FROM ProcureApply p LEFT JOIN p.deliveryments d "
-                            + "  LEFT JOIN d.units u  WHERE 1=1 AND u.isNeedPay=false ");
+            sql.append(" AND u.isNeedPay=false");
         }
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
-                sql.append(" AND createdAt>=?  AND createdAt <=?");
+                sql.append(" AND p.createdAt>=?  AND p.createdAt <=?");
             } else {
-                sql.append(" AND updateAt>=? AND updateAt<=?");
+                sql.append(" AND p.updateAt>=? AND p.updateAt<=?");
             }
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));
         }
 
         if(this.supplierId != null) {
-            sql.append(" AND cooperator.id=? ");
+            sql.append(" AND p.cooperator.id=? ");
             params.add(this.supplierId);
         }
 
-        if(this.search != null && !"" .equals(this.search.trim())) {
-            sql.append(" AND serialNumber like ?");
+        if(this.search != null && !"".equals(this.search.trim())) {
+            sql.append(" AND p.serialNumber like ?");
             params.add(this.word());
         }
 
@@ -97,10 +109,18 @@ public class ProcreApplyPost extends Post<Apply> {
 
     public List<Apply> query() {
         F.T2<String, List<Object>> params = params();
-        JPAQuery query = ProcureApply.find(params._1 + "ORDER BY createdAt DESC",
+        JPAQuery query = ProcureApply.find(params._1 + "ORDER BY p.createdAt DESC",
                 params._2.toArray());
         this.count = query.fetch().size();
-        return query.fetch(this.page,this.perSize);
+        return query.fetch(this.page, this.perSize);
+    }
+
+    private Long isNumForSearch() {
+        if(StringUtils.isNotBlank(this.search)) {
+            Matcher matcher = NUM.matcher(this.search);
+            if(matcher.find()) return Long.parseLong(matcher.group(0));
+        }
+        return null;
     }
 
     @Override

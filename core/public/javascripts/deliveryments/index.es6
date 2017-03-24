@@ -9,7 +9,10 @@ $(() => {
   $("input[name='createInboundBtn']").click(function () {
     let ck = $("#dp_" + $(this).data("index") + " input[type='checkbox']:checked");
     if (ck.length > 0) {
-      $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+      let form = $('<form method="post" action=""></form>');
+      form.attr('action',$(this).attr("url"));
+      form.hide().append($("#dp_" + $(this).data("index")).find(":input").clone()).appendTo('body');
+      form.submit();
     } else {
       noty({
         text: '请先选择需要收货入库的采购计划！',

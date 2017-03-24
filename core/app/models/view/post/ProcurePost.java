@@ -7,6 +7,8 @@ import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import models.whouse.InboundUnit;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
@@ -55,6 +57,8 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Shipment.T shipType;
     public String unitIds;
     public InboundUnit.R result;
+    public List<String> categories = new ArrayList<>();
+
     /**
      * 选择过滤的日期类型
      */
@@ -153,11 +157,17 @@ public class ProcurePost extends Post<ProcureUnit> {
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<>();
         sbd.append("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.fba f LEFT JOIN p.selling s ");
-        sbd.append("LEFT JOIN p.deliverplan d WHERE 1=1 ");
+        sbd.append("LEFT JOIN p.deliverplan d LEFT JOIN p.product o WHERE 1=1 ");
         Long procrueId = isSearchForId();
         if(procrueId != null) {
             sbd.append(" AND p.id=?");
             params.add(procrueId);
+            return new F.T2<>(sbd.toString(), params);
+        }
+
+        if(StringUtils.isNotEmpty(isSearchForFBA())) {
+            sbd.append(" AND p.fba.shipmentId=?");
+            params.add(this.search);
             return new F.T2<>(sbd.toString(), params);
         }
 
@@ -189,6 +199,10 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.isConfirm != null) {
             sbd.append(" AND p.isConfirm=? ");
             params.add(this.isConfirm == C.YES);
+        }
+
+        if(categories.size() > 0) {
+            sbd.append(" AND p.product.category.id IN " + SqlSelect.inlineParam(categories));
         }
 
         if(StringUtils.isNotEmpty(this.projectName)) {
@@ -251,10 +265,9 @@ public class ProcurePost extends Post<ProcureUnit> {
      *
      * @return
      */
-    private String isSearchFBA() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = FBA.matcher(this.search);
-            if(matcher.find()) return matcher.group(1);
+    private String isSearchForFBA() {
+        if(StringUtils.isNotBlank(this.search) && this.search.substring(0, 3).equals("FBA")) {
+            return this.search;
         }
         return null;
     }
@@ -344,4 +357,17 @@ public class ProcurePost extends Post<ProcureUnit> {
         if(this.shipType == null) return "运输方式";
         return this.shipType.label();
     }
+
+    public static HighChart perCreateTotalNum() {
+        StringBuilder sql = new StringBuilder("SELECT u.username, count(1) as perNum FROM ProcureUnit p ");
+        sql.append(" LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ");
+        HighChart columnChart = new HighChart(Series.COLUMN);
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            Series.Column column = new Series.Column(row.get("username").toString());
+            column.add(row.get("username").toString(), Float.parseFloat(row.get("perNum").toString()));
+            columnChart.series(column);
+        });
+        return columnChart;
+    }
+
 }

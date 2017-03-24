@@ -197,6 +197,8 @@ public class Users extends Controller {
             if(StringUtils.isBlank(user.password)) Webs.error("密码不能为空");
             if(StringUtils.isBlank(user.confirm)) Webs.error("确认密码不能为空");
             if(!StringUtils.equals(user.password, user.confirm)) Webs.error("密码和确认密码填写不一致");
+            if(User.count("username=?", user.username) > 0) Webs.error("用户名已经存在，请重新输入！");
+            user.username = user.username.toLowerCase();
             user.save();
             flash.success("创建用户成功");
             redirect("/users/index");

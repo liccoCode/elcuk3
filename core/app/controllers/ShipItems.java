@@ -57,15 +57,12 @@ public class ShipItems extends Controller {
             Webs.errorToFlash(flash);
             Shipments.show(shipmentId);
         }
-
         ShipItem.adjustShipment(shipItemId, shipment);
-
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
             flash.success("成功调整 %s 个运输项目到 %s 运输单", shipItemId.size(), targetId);
         }
-
         Shipments.show(shipmentId);
     }
 
