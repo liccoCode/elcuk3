@@ -61,6 +61,7 @@ $ ->
     e.preventDefault()
 
   $("#prepaybtn").click (e) ->
+    e.preventDefault()
     data = ""
     checkObj = document.all("unitids")
     i = 0

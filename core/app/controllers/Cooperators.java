@@ -49,9 +49,9 @@ public class Cooperators extends Controller {
      */
     public static void edit(Cooperator cop) {
         validation.valid(cop);
-        if(Validation.hasErrors())
-            renderJSON(new Ret(validation.errorsMap()));
         cop.checkAndUpdate();
+        if(Validation.hasErrors())
+            renderJSON(new Ret(J.json(Validation.errors())));
         renderJSON(new Ret());
     }
 

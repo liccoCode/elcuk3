@@ -810,7 +810,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(type && unit.selling == null) {
             Validation.addError("", "分拆的子采购计划必须要有selling！");
         }
-        if(CooperItem.count("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id) == 0) 
+        if(CooperItem.count("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id) == 0)
             Validation.addError("", "该供应商下无此SKU产品，请确认！");
         ProcureUnit newUnit = new ProcureUnit();
         newUnit.cooperator = this.cooperator;
@@ -1607,13 +1607,38 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         PaymentUnit fee = new PaymentUnit(this);
         // 预付款的逻辑在这里实现, 总额的 30% 为预付款
         fee.feeType = FeeType.cashpledge();
-        fee.amount = (float) (fee.amount * 0.3);
+        float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
+        fee.amount = fee.amount * pre;
         fee.save();
         new ERecordBuilder("procureunit.prepay")
-                .msgArgs(this.product.sku,
-                        String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id, ProcureUnit.class)
-                .save();
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class).save();
+        return fee;
+    }
+
+    /**
+     * 申请中期付款
+     *
+     * @return
+     */
+    public PaymentUnit billingMediumPay() {
+        if(this.hasSecondPay())
+            Validation.addError("", "不允许重复申请中期付款.");
+        if(this.hasTailPay())
+            Validation.addError("", "已经申请了尾款, 不需要再申请预付款.");
+        if(Validation.hasErrors()) return null;
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.mediumPayment();
+        float second = (float) this.cooperator.second / 100;
+        fee.amount = fee.amount * second;
+        if(fee.amount + this.appliedAmount() >= this.totalAmount()) {
+            Validation.addError("", "中期请款已经超过采购计划总额，请验证或者直接申请尾款！");
+            return null;
+        }
+        fee.save();
+        new ERecordBuilder("procureunit.mediumpay")
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class).save();
         return fee;
     }
 
@@ -1750,11 +1775,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public boolean hasPrePay() {
-        for(PaymentUnit fee : this.fees()) {
-            if(fee.feeType == FeeType.cashpledge())
-                return true;
-        }
-        return false;
+        return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.cashpledge());
+    }
+
+    /**
+     * 是否拥有 中期付款
+     *
+     * @return
+     */
+    public boolean hasSecondPay() {
+        return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.mediumPayment());
     }
 
     /**
@@ -1766,9 +1796,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public static boolean hasProcureUnitBySellings(String sellingId) {
         List<ProcureUnit> units = ProcureUnit.find("selling.sellingId = ? and stage <> ? ",
                 sellingId, STAGE.APPROVE).fetch();
-        if(units != null && units.size() > 0)
-            return true;
-        return false;
+        return units != null && units.size() > 0;
     }
 
     /**

@@ -24,15 +24,15 @@
         <label class="label label-info">合作者信息</label>
         <table class="table table-condensed table-bordered">
           <tr>
-            <td>全称:</td>
+            <th>全称:</th>
             <td><input type="text" name="cop.fullName" class="required" value="${coper.fullName}"></td>
-            <td>简称:</td>
+            <th>简称:</th>
             <td><input type="text" name="cop.name" class="required" value="${coper.name}"></td>
           </tr>
           <tr>
-            <td>联系人:</td>
+            <th>联系人:</th>
             <td><input type="text" name="cop.contacter" class="required" value="${coper.contacter}"></td>
-            <td>手机:</td>
+            <th>手机:</th>
             <td><input type="text" name="cop.phone" class="required" value="${coper.phone}"></td>
           </tr>
 
@@ -51,20 +51,38 @@
           </tr>
 
           <tr>
-            <td>Type:</td>
+            <th>Type:</th>
             <td><input type="text" readonly="" class="required" value="${coper.type.to_s()}"></td>
-            <td>Id:</td>
+            <th>Id:</th>
             <td><input type="text" readonly="" name="cop.id" value="${coper.id}"></td>
           </tr>
 
-
           <tr>
-            <td>Address:</td>
+            <th>Address:</th>
             <td colspan="3">
               <input type="text" name="cop.address" class="span10" value="${coper.address}">
             </td>
           </tr>
-
+          <tr>
+            <th>付款方式:</th>
+            <td colspan="3">
+              <div class="input-append">
+                <input type="text" class="input-mini" name="cop.first" value="${coper.first}">
+                <span class="add-on">%</span>
+              </div>
+              首款，
+              <div class="input-append">
+                <input type="text" class="input-mini" name="cop.second" value="${coper.second}">
+                <span class="add-on">%</span>
+              </div>
+              中期付款，
+              <div class="input-append">
+                <input type="text" class="input-mini" name="cop.tail" value="${coper.tail}">
+                <span class="add-on">%</span>
+              </div>
+              尾款
+            </td>
+          </tr>
 
           <tr>
             <td colspan="4">
@@ -76,7 +94,7 @@
           <tr>
             <td colspan="4">
               交易条款
-              <textarea rows="8" class="span12" name="cop.tradingTerms">${coper.tradingTerms}</textarea>
+              <textarea rows="20" class="span12" name="cop.tradingTerms">${coper.tradingTerms}</textarea>
             </td>
           </tr>
 
@@ -120,7 +138,7 @@
           #{/list}
         <!-- 为此供应商关联新的产品 -->
         <tr>
-          <td colspan="6">
+          <td colspan="7">
             <a href="@{Cooperators.newCooperItem(null, coper.id)}" class="btn btn-primary">
               为[${coper.fullName}]添加新的生产的产品</a>
           </td>

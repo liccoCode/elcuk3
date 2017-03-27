@@ -514,6 +514,26 @@ public class ProcureUnits extends Controller {
         renderJSON(new Ret(true, "预付款请款成功"));
     }
 
+    /**
+     * 申请中期请款
+     *
+     * @param id
+     * @param applyId
+     */
+    public static void billingMediumPay(Long id, Long applyId) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        try {
+            unit.billingMediumPay();
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 请款成功", FeeType.mediumPayment().nickName);
+        Applys.procure(applyId);
+    }
+
 
     /**
      * 尾款申请
