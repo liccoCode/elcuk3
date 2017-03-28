@@ -301,20 +301,20 @@
   <div class="span9">
     <table class="table table-bordered table-condensed">
       <tr class="table_summary">
-        <td colspan="2">
+        <td class="col-sm-2">
         #{power.ck 'procureunits.billingprepay'}
-          <button id="prepaybtn" class="btn btn-primary">批量申请预付款</button>
+          <button name="applyBtn" data-url="@{ProcureUnits.batchPrePay()}" class="btn btn-primary">批量申请预付款</button>
         #{/power.ck}
         </td>
-        <td>
+        <td class="col-sm-2">
         #{if apply.cooperator.second > 0}
-          <button id="secondPayBtn" class="btn btn-inverse">批量申请中期请款</button>
+          <button name="applyBtn" data-url="@{ProcureUnits.batchMediumPay()}" class="btn btn-inverse">批量申请中期请款</button>
         #{/if}
         </td>
-        <td colspan="3">
+        <td class="col-sm-2">
           <input type="hidden" name="applyid" id="applyid" value="${apply.id}">
         #{power.ck 'procureunits.billingtailpay'}
-          <button id="tailpaybtn" class="btn btn-primary">批量申请尾款</button>
+          <button name="applyBtn" data-url="@{ProcureUnits.batchTailPay()}" class="btn btn-primary">批量申请尾款</button>
         #{/power.ck}
         </td>
       </tr>

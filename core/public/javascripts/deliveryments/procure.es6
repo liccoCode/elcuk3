@@ -1,15 +1,16 @@
 $(() => {
 
-  $("#secondPayBtn").click(function (e) {
+  $("button[name='applyBtn']").click(function (e) {
     e.preventDefault();
     let ids = [];
     $("input[name='unitids']:checked").each(function () {
       ids.push($(this).val());
     });
-    alert (ids);
-    $.post("/ProcureUnits/batchMediumPay", {unitIds: ids}, function (r) {
+    LoadMask.mask();
+    $.post($(this).data("url"), {unitIds: ids}, function (r) {
+      LoadMask.unmask();
       if (r.flag) {
-        alert('申请中期请款成功.');
+        alert(r.message);
         window.location.reload();
       } else {
         alert(r.message);
