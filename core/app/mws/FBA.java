@@ -331,7 +331,7 @@ public class FBA {
                 fixHistoryMSKU(unit.selling.merchantSKU),
                 null,
                 null,
-                unit.qty(),
+                unit.qtyForFba(),
                 null
         );//.withPrepDetailsList(new PrepDetailsList(Collections.singletonList(new PrepDetails("Labeling", "SELLER")))
     }
@@ -477,6 +477,12 @@ public class FBA {
             public String message() {
                 return "出现了一个未知错误，请向开发部报告.";
             }
+        },
+        QUANTITIES {
+            @Override
+            public String message() {
+                return "收货数量和出货数量不一致，请联系开发部";
+            }
         };
 
         public abstract String message();
@@ -493,6 +499,8 @@ public class FBA {
         if(errMsg.contains("Shipment is locked. No updates allowed") ||
                 errMsg.contains("Shipment is in locked status")) {
             return FBA_ERROR_TYPE.LOCKED;
+        } else if(errMsg.contains("items and quantities that have been previously planned ")) {
+            return FBA_ERROR_TYPE.QUANTITIES;
         } else if(errMsg.contains("FBA31004")) {
             return FBA_ERROR_TYPE.IN_TRANSIT;
         } else if(errMsg.contains("Invalid Status change")) {

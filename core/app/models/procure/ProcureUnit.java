@@ -1547,7 +1547,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public int qtyForFba() {
         if(this.availableQty != 0) return this.availableQty;
-        if(this.attrs.qty != null) return this.attrs.qty;
+        if(this.attrs.qty != null && this.attrs.qty != 0) return this.attrs.qty;
         return this.attrs.planQty;
     }
 
