@@ -22,6 +22,7 @@ public class InboundPost extends Post<Inbound> {
     public Inbound.S status;
     public Long cooperatorId;
     public Inbound.T type;
+    public InboundUnit.R result;
     public String search;
 
     public InboundPost() {
@@ -69,7 +70,7 @@ public class InboundPost extends Post<Inbound> {
         return new F.T2<>(sbd.toString(), params);
     }
 
-    public F.T2<String, List<Object>> detailParams() {
+    private F.T2<String, List<Object>> detailParams() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT i FROM InboundUnit i LEFT JOIN i.unit u WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
         if(StringUtils.isNotEmpty(this.search)) {
@@ -101,7 +102,11 @@ public class InboundPost extends Post<Inbound> {
             sbd.append(" AND i.inbound.type = ? ");
             params.add(type);
         }
-        sbd.append(" ORDER BY i.inbound.createDate DESC ");
+        if(result != null) {
+            sbd.append(" AND i.result = ? ");
+            params.add(result);
+        }
+        sbd.append(" ORDER BY u.id DESC ");
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -117,7 +122,10 @@ public class InboundPost extends Post<Inbound> {
     public List<InboundUnit> queryDetail() {
         this.count = this.count();
         F.T2<String, List<Object>> params = detailParams();
-        return InboundUnit.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        if(this.pagination)
+            return InboundUnit.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        else
+            return InboundUnit.find(params._1, params._2.toArray()).fetch();
     }
 
     @Override

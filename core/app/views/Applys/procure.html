@@ -2,6 +2,7 @@
 #{set title:"请款单 ${apply.serialNumber}" /}
 #{set 'moreScripts'}
     #{script 'deliveryments/procure.coffee'/}
+    #{script 'deliveryments/procure.es6'/}
 #{/set}
 #{flash_alert /}
 <div class="row-fluid">
@@ -157,14 +158,22 @@
                         #{power.ck 'procureunits.billingprepay'}
                             #{ifnot procureUnit.hasPrePay()}
                                 #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
-                                  <input type="submit" value="申请预付款" class="btn">
+                                  <input type="submit" value="申请预付款" class="btn btn-mini btn-success"
+                                         rel="tooltip" title="${apply.cooperator.first}%">
                                 #{/form}
                             #{/ifnot}
+                            #{if apply.cooperator.second>0 && !procureUnit.hasSecondPay()}
+                                #{form @ProcureUnits.billingMediumPay(pid, apply.id), method:'POST'}
+                                  <input type="submit" value="申请中期付款" class="btn btn-mini btn-inverse"
+                                         rel="tooltip" title="${apply.cooperator.second}%">
+                                #{/form}
+                            #{/if}
                         #{/power.ck}
                         #{power.ck 'procureunits.billingtailpay'}
                             #{ifnot procureUnit.hasTailPay()}
                                 #{form @ProcureUnits.billingTailPay(pid, apply.id), method:'POST'}
-                                  <input type="submit" value="申请尾款" class="btn">
+                                  <input type="submit" value="申请尾款" class="btn btn-mini btn-warning"
+                                         rel="tooltip" title="${apply.cooperator.tail}%">
                                 #{/form}
                             #{/ifnot}
                         #{/power.ck}
@@ -173,16 +182,13 @@
                             id: "billing_rework_pay_form"}
                               <input type="hidden" id="checktask_id_list" name="ids">
                               <a href="javascript:void(0)" id="billing_rework_pay_btn" data-pid="${pid}"
-                                 class="btn">申请返工费用</a>
+                                 class="btn btn btn-mini btn-danger">申请返工费用</a>
                             #{/form}
                         #{/power.ck}
                     #{/if}
-
                     #{power.ck 'procureunits.billingprepay'}
                       <input type="hidden" name="feesize" id="feesize" value="${procureUnit.fees().size()}">
-
                       <label>请款开关:</label>
-
                       <div class="switch" data-on="warning" data-off="danger">
                           #{if procureUnit.isNeedPay}
                             <input id="switch_pay" name="switch_pay" type="checkbox" checked url='@{ProcureUnits.editPaySatus(pid)}'/>
@@ -195,7 +201,7 @@
                 </div>
                 <div class="span10">
                     #{if procureUnit.fees().size() > 0}
-                      <table class="table table-condensed" style="margin-bottom:0">
+                      <table class="table table-bordered table-condensed" style="margin-bottom:0">
                         <tr>
                           <th></th>
                           <th>付款单</th>
@@ -210,9 +216,8 @@
                               <td>
                                   #{power.ck 'paymentunits.destroy'}
                                       #{ifnot fee.remove || fee.isApproval()}
-                                        <button class="paymentUnitCancel btn btn-danger"
-                                                url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>
-                                          取消
+                                        <button class="paymentUnitCancel btn btn-mini btn-danger"
+                                                url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>取消
                                         </button>
                                       #{/ifnot}
                                   #{/power.ck}
@@ -301,14 +306,17 @@
           <button id="prepaybtn" class="btn btn-primary">批量申请预付款</button>
         #{/power.ck}
         </td>
-
+        <td>
+        #{if apply.cooperator.second > 0}
+          <button id="secondPayBtn" class="btn btn-inverse">批量申请中期请款</button>
+        #{/if}
+        </td>
         <td colspan="3">
           <input type="hidden" name="applyid" id="applyid" value="${apply.id}">
         #{power.ck 'procureunits.billingtailpay'}
           <button id="tailpaybtn" class="btn btn-primary">批量申请尾款</button>
         #{/power.ck}
         </td>
-        <td colspan="4"></td>
       </tr>
     </table>
   </div>
