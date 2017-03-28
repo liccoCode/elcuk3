@@ -145,6 +145,10 @@ public class FeeType extends GenericModel {
         return FeeType.findById("cashpledge");
     }
 
+    public static FeeType mediumPayment() {
+        return FeeType.findById("mediumpayment");
+    }
+
     /**
      * 固定需要的 采购款
      *

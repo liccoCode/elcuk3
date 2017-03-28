@@ -38,50 +38,6 @@ $ ->
       $('#edit_pay').modal()
   )
 
-  # Form 搜索功能
-  $("#tailpaybtn").click (e) ->
-    data = ""
-    checkObj = document.all("unitids")
-    i = 0
-    while i < checkObj.length
-      if checkObj[i].checked == true
-        data = data + "&unitids=" + checkObj[i].value
-      i++
-
-    applyid = $('#applyid')
-    data = data + "&applyid=" + applyid.val()
-    $.get('/ProcureUnits/morebillingTailPay', data, (r) ->
-      if r.flag is false
-        alert(r.message)
-        window.location.reload()
-      else
-        alert('申请尾款成功.')
-        window.location.reload()
-    )
-    e.preventDefault()
-
-  $("#prepaybtn").click (e) ->
-    data = ""
-    checkObj = document.all("unitids")
-    i = 0
-    while i < checkObj.length
-      if checkObj[i].checked == true
-        data = data + "&unitids=" + checkObj[i].value
-      i++
-
-    applyid = $('#applyid')
-    data = data + "&applyid=" + applyid.val()
-
-    $.get('/ProcureUnits/morebillingPrePay', data, (r) ->
-      if r.flag is false
-        alert(r.message)
-        window.location.reload()
-      else
-        alert('申请预付款成功.')
-        window.location.reload()
-      form.unmask()
-    )
-
   calculateSumery = ->
     total_plan_qty = 0
     total_qty = 0

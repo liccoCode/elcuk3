@@ -66,9 +66,8 @@ public class ProcureApply extends Apply {
     public float totalAmount() {
         float totalAmount = 0;
         for(Deliveryment dmt : this.deliveryments) {
-            for(ProcureUnit unit : dmt.units) {
-                totalAmount += unit.totalAmount();
-            }
+            totalAmount += dmt.units.stream().filter(unit -> unit.type != ProcureUnit.T.StockSplit)
+                    .mapToDouble(ProcureUnit::totalAmount).sum();
         }
         return totalAmount;
     }
@@ -122,7 +121,7 @@ public class ProcureApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Arrays.asList("procureapply.save","procureunit.editPaySatus",
+        return ElcukRecord.records(this.id + "", Arrays.asList("procureapply.save", "procureunit.editPaySatus",
                 "deliveryment.departApply"), 50);
     }
 
