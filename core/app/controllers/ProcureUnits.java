@@ -534,6 +534,27 @@ public class ProcureUnits extends Controller {
         Applys.procure(applyId);
     }
 
+    /**
+     * 批量申请中期请款
+     *
+     * @param unitIds
+     */
+    public static void batchMediumPay(String[] unitIds) {
+        if(unitIds.length == 0) renderJSON(new Ret(false, "请选择请款明细!"));
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(unitIds)).fetch();
+        for(ProcureUnit unit : units) {
+            if(!unit.isNeedPay)
+                renderJSON(new Ret(false, "采购计划ID:" + unit.id + "不可以请款!"));
+            try {
+                unit.billingMediumPay();
+            } catch(PaymentException e) {
+                Validation.addError("", e.getMessage());
+            }
+            if(Validation.hasErrors())
+                renderJSON(new Ret(Validation.errors().get(0).message()));
+        }
+        renderJSON(new Ret(true, "中期请款成功"));
+    }
 
     /**
      * 尾款申请
