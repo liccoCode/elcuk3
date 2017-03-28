@@ -490,19 +490,18 @@ public class ProcureUnits extends Controller {
         Applys.procure(applyId);
     }
 
-
     /**
-     * 预付款申请
+     * 批量预付款申请
      *
-     * @param applyid
+     * @param unitIds
      */
     @Check("procureunits.billingprepay")
-    public static void morebillingPrePay(Long applyid, List<Long> unitids) {
-        if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
-        for(Long unitid : unitids) {
-            ProcureUnit unit = ProcureUnit.findById(unitid);
+    public static void batchPrePay(Long[] unitIds) {
+        if(unitIds.length == 0) renderJSON(new Ret(false, "请选择请款明细!"));
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(unitIds)).fetch();
+        for(ProcureUnit unit : units) {
             if(!unit.isNeedPay)
-                renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
+                renderJSON(new Ret(false, "采购计划ID:" + unit.id + "不可以请款!"));
             try {
                 unit.billingPrePay();
             } catch(PaymentException e) {
@@ -539,7 +538,7 @@ public class ProcureUnits extends Controller {
      *
      * @param unitIds
      */
-    public static void batchMediumPay(String[] unitIds) {
+    public static void batchMediumPay(Long[] unitIds) {
         if(unitIds.length == 0) renderJSON(new Ret(false, "请选择请款明细!"));
         List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(unitIds)).fetch();
         for(ProcureUnit unit : units) {
@@ -577,12 +576,12 @@ public class ProcureUnits extends Controller {
     }
 
 
-    public static void morebillingTailPay(Long applyid, List<Long> unitids) {
-        if(unitids == null || unitids.size() <= 0) renderJSON(new Ret("请选择请款明细!"));
-        for(Long unitid : unitids) {
-            ProcureUnit unit = ProcureUnit.findById(unitid);
+    public static void batchTailPay(Long[] unitIds) {
+        if(unitIds.length == 0) renderJSON(new Ret(false, "请选择请款明细!"));
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(unitIds)).fetch();
+        for(ProcureUnit unit : units) {
             if(!unit.isNeedPay)
-                renderJSON(new Ret(false, "采购计划ID:" + unitid + "不可以请款!"));
+                renderJSON(new Ret(false, "采购计划ID:" + unit.id + "不可以请款!"));
             try {
                 unit.billingTailPay();
             } catch(PaymentException e) {
