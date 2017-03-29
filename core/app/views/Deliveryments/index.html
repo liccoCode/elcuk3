@@ -142,11 +142,13 @@
       </table>
       <div class="btn-toolbar">
       #{power.ck 'deliveryments.deliverymenttoapply'}
-          #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber', class:'inline'}
-              #{option '0'}新请款单#{/option}
-          #{/select}
-        <input url='@{Deliveryments.deliverymentToApply()}'
-               type="submit" id="goToDeliverymentApply" class="btn btn-success" value="采购单请款">
+          <select name="procureApplyId" class="inline selectize" style="width:250px;">
+            <option value="0">新请款单</option>
+            #{list items:avaliableApplies, as:'a'}
+              <option value="${a.id}">${a.serialNumber}</option>
+            #{/list}
+          </select>
+        <input url='@{Deliveryments.deliverymentToApply()}' type="submit" id="goToDeliverymentApply" class="btn btn-success" value="采购单请款">
       #{/power.ck}
       </div>
     </div>

@@ -177,12 +177,11 @@ public class TimelineEventSource {
             relateShipments.forEach(Shipment::inboundingByComputor);
             relateShipments.forEach(Shipment::endShipByComputer);
 
-
-            if(predictShipFinishDate == null && relateShipments.size() > 0) {
+            if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
                 predictShipFinishDate = shipment.dates.planArrivDate;
-                if(predictShipFinishDate == null && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN,
-                        Shipment.S.CONFIRM).contains(shipment.state))
+                if(predictShipFinishDate == null &&
+                        !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
@@ -204,11 +203,8 @@ public class TimelineEventSource {
                 timeLineDays = 0f;
             }
             // 如果不够卖到第二天, 那么就省略
-            this.end = add8Hour(new DateTime(predictShipFinishDate)
-                    .plusDays(timeLineDays.intValue()).toDate());
+            this.end = add8Hour(new DateTime(predictShipFinishDate).plusDays(timeLineDays.intValue()).toDate());
             this.durationEvent = true;
-
-
             return this;
         }
 
@@ -247,15 +243,18 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-
+            String addTitle = "";
+            if(this.unit.lostQty() > 0)
+                addTitle = "(丢失 " + this.unit.lostQty() + ")";
+            if(this.unit.shipItems.size() > 0 && this.unit.shipItems.get(0).shipment.dates.beginDate != null
+                    && this.unit.attrs.planShipDate.before(this.unit.shipItems.get(0).shipment.dates.beginDate))
+                addTitle += "(超时) ";
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
-                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        this.unit.id, this.getunitstage().label(), 0,
-                        0);
+                this.title = String.format("%s#%s 计划 %s状态, 数量 %s 可销售 %s 天", addTitle, this.unit.id,
+                        this.getunitstage().label(), 0, 0);
             } else {
-                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        this.unit.id, this.getunitstage().label(), this.getUnitQty() - this.unit.inboundingQty(),
-                        this.lastDays);
+                this.title = String.format("%s#%s 计划 %s状态, 数量 %s 可销售 %s 天", addTitle, this.unit.id,
+                        this.getunitstage().label(), this.getUnitQty() - this.unit.inboundingQty(), this.lastDays);
             }
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=" + this.unit.id;
@@ -314,7 +313,7 @@ public class TimelineEventSource {
         }
 
         public Event color(ProcureUnit unitunit) {
-            String color = "999999";
+            String color;
             switch(getunitstage()) {
                 case PLAN:
                     color = "A5B600";
@@ -345,7 +344,11 @@ public class TimelineEventSource {
                     color = "B94A48";
             }
             color = fetchShipmentSate(unit, color);
-            this.color = String.format("#%s", color);
+            if(this.unit.lostQty() > 0) {
+                this.color = String.format("#%s", "9690BE");
+            } else {
+                this.color = String.format("#%s", color);
+            }
             return this;
         }
     }

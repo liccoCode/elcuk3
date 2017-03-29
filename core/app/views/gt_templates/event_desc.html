@@ -93,6 +93,17 @@
       </ul>
     </td>
   </tr>
+  #{if unit.lostQty() > 0}
+    <tr>
+      <td>丢失数量</td>
+      <td>${unit.lostQty()}</td>
+    </tr>
+    <tr>
+      <td>赔偿金额</td>
+      <td>${unit.showCompensation()}</td>
+    </tr>
+  #{/if}
+
 #{/if}
   <tr>
     <td colspan="2">
