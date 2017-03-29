@@ -21,9 +21,7 @@
       <th>预计运输时间</th>
       <td>
         <input type="date" name="ship.dates.planBeginDate" value="${ship.dates.planBeginDate.date()}">
-      #{ifnot ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CANCEL, models.procure.Shipment.S.CONFIRM]}
-        <span class="pull-right">运输时间 #{time_tooltip time:ship.dates.beginDate/}</span>
-      #{/ifnot}
+        实际运输时间: <input type="date" name="ship.dates.beginDate" value="${ship.dates.beginDate.date()}">
       </td>
       <th>预计到库时间</th>
       <td>
