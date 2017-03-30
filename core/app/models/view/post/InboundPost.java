@@ -75,6 +75,7 @@ public class InboundPost extends Post<Inbound> {
             sbd.append(" AND i.type = ? ");
             params.add(type);
         }
+        sbd.append(" ORDER BY i.createDate DESC ");
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -124,15 +125,15 @@ public class InboundPost extends Post<Inbound> {
 
     @Override
     public List<Inbound> query() {
-        this.count = this.count();
         F.T2<String, List<Object>> params = params();
+        this.count = Inbound.find(params._1, params._2.toArray()).fetch().size();
         String sql = params._1 + " ";
         return Inbound.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     public List<InboundUnit> queryDetail() {
         F.T2<String, List<Object>> params = detailParams();
-        this.count = (long) InboundUnit.find(params._1, params._2.toArray()).fetch().size();
+        this.count = InboundUnit.find(params._1, params._2.toArray()).fetch().size();
         if(this.pagination)
             return InboundUnit.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
         else

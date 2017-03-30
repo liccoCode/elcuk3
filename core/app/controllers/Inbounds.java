@@ -48,6 +48,7 @@ public class Inbounds extends Controller {
 
     public static void index(InboundPost p) {
         if(p == null) p = new InboundPost();
+        p.searchPage = "inbound";
         List<Inbound> inbounds = p.query();
         for(Inbound inbound : inbounds) {
             inbound.showTime();
