@@ -795,7 +795,14 @@ public class Excels extends Controller {
     }
 
     /**
-     * TODO:: http://koenserneels.blogspot.com/2013/03/bulk-fetching-with-hibernate.html
+     * TODO::
+     * 读取数据:
+     * http://koenserneels.blogspot.com/2013/03/bulk-fetching-with-hibernate.html
+     * https://helpezee.wordpress.com/2014/02/14/bulk-fetching-with-hibernateusing-statelesssession/
+     * <p>
+     * CSV
+     * https://examples.javacodegeeks.com/core-java/writeread-csv-files-in-java-example/
+     * http://www.mkyong.com/java/how-to-export-data-to-csv-file-java/
      *
      * @param year
      * @param month
