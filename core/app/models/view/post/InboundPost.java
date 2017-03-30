@@ -5,6 +5,7 @@ import models.whouse.Inbound;
 import models.whouse.InboundUnit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class InboundPost extends Post<Inbound> {
     public Inbound.T type;
     public InboundUnit.R result;
     public String search;
+    public List<String> categories = new ArrayList<>();
 
     public InboundPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -106,6 +108,9 @@ public class InboundPost extends Post<Inbound> {
             sbd.append(" AND i.result = ? ");
             params.add(result);
         }
+        if(this.categories.size() > 0) {
+            sbd.append(" AND u.product.category.id IN ").append(SqlSelect.inlineParam(this.categories));
+        }
         sbd.append(" ORDER BY u.id DESC ");
         return new F.T2<>(sbd.toString(), params);
     }
@@ -120,8 +125,8 @@ public class InboundPost extends Post<Inbound> {
     }
 
     public List<InboundUnit> queryDetail() {
-        this.count = this.count();
         F.T2<String, List<Object>> params = detailParams();
+        this.count = (long) Inbound.find(params._1, params._2.toArray()).fetch().size();
         if(this.pagination)
             return InboundUnit.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
         else

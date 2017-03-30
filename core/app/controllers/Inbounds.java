@@ -5,6 +5,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.product.Category;
 import models.view.Ret;
 import models.view.post.DeliverPlanPost;
 import models.view.post.InboundPost;
@@ -36,11 +37,12 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Inbounds extends Controller {
 
-    @Before(only = {"index", "edit", "showProcureUnitList"})
+    @Before(only = {"index", "edit", "showProcureUnitList", "indexDetail"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("whouses", Whouse.exceptAMZWhoses());
+        renderArgs.put("categoryIds", Category.categoryIds());
     }
 
 

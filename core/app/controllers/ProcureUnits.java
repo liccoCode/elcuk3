@@ -62,8 +62,7 @@ public class ProcureUnits extends Controller {
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
         renderArgs.put("cooperators", cooperators);
-        List<String> categoryIds = Category.categoryIds();
-        renderArgs.put("categoryIds", categoryIds);
+        renderArgs.put("categoryIds",  Category.categoryIds());
 
         //为视图提供日期
         DateTime dateTime = new DateTime();
