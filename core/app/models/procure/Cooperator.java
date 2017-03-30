@@ -8,10 +8,7 @@ import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import play.data.validation.Min;
-import play.data.validation.Phone;
-import play.data.validation.Required;
-import play.data.validation.Unique;
+import play.data.validation.*;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -173,6 +170,21 @@ public class Cooperator extends Model {
     @Expose
     public T type;
 
+    /**
+     * 首付款
+     */
+    public int first = 30;
+
+    /**
+     * 中期付款
+     */
+    public int second = 0;
+
+    /**
+     * 尾款
+     */
+    public int tail = 70;
+
     public enum L {
         MICRO {
             @Override
@@ -220,6 +232,7 @@ public class Cooperator extends Model {
 
     public Cooperator checkAndUpdate() {
         this.check();
+        if(Validation.hasErrors()) return null;
         return this.save();
     }
 
@@ -231,8 +244,10 @@ public class Cooperator extends Model {
     private void check() {
         // 基础的字段验证利用 Play 的验证方法处理了.
         if(this.type == T.SHIPPER && this.cooperItems.size() > 0)
-            throw new FastRuntimeException("货物运输商不允许拥有[可生产的商品项目]");
-
+            Validation.addError("", "货物运输商不允许拥有[可生产的商品项目]");
+        if(this.first + this.second + this.tail != 100) {
+            Validation.addError("", "付款方式总和必须等于100%，请重新填写。");
+        }
         this.name = this.name.toUpperCase();
     }
 
