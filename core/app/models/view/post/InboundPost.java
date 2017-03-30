@@ -14,7 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by licco on 2016/11/11.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 2016/11/11
+ * Time: 下午2:06
  */
 public class InboundPost extends Post<Inbound> {
 
@@ -129,7 +132,7 @@ public class InboundPost extends Post<Inbound> {
 
     public List<InboundUnit> queryDetail() {
         F.T2<String, List<Object>> params = detailParams();
-        this.count = (long) Inbound.find(params._1, params._2.toArray()).fetch().size();
+        this.count = (long) InboundUnit.find(params._1, params._2.toArray()).fetch().size();
         if(this.pagination)
             return InboundUnit.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
         else
@@ -138,15 +141,12 @@ public class InboundPost extends Post<Inbound> {
 
     @Override
     public Long getTotalCount() {
-        return this.count();
+        return this.count;
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        if(this.searchPage.equals("inbound"))
-            return (long) Inbound.find(params._1, params._2.toArray()).fetch().size();
-        else
-            return (long) InboundUnit.find(params._1, params._2.toArray()).fetch().size();
+        return this.count;
     }
 
     private String isSearchForId() {
