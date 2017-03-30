@@ -794,7 +794,12 @@ public class Excels extends Controller {
         render(units);
     }
 
-
+    /**
+     * TODO:: http://koenserneels.blogspot.com/2013/03/bulk-fetching-with-hibernate.html
+     *
+     * @param year
+     * @param month
+     */
     public static void exportInventoryCostsReport(Integer year, Integer month) {
         Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
         List<InventoryCostUnit> units = InventoryCostUnit
