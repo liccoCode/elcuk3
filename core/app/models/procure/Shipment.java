@@ -1556,7 +1556,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 }
             }
         }
-
     }
 
     /**
@@ -1595,6 +1594,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 this.reason = newShip.reason;
             }
             this.dates.planArrivDateForCountRate = newShip.dates.planArrivDateForCountRate;
+            this.dates.beginDate = newShip.dates.beginDate;
         }
         this.validate();
         Validation.current().valid(this);
