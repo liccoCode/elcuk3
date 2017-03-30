@@ -1,6 +1,10 @@
 #{extends 'main_full.html' /}
 #{set title:"收货入库明细列表"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
 #{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'inbounds/index.es6'/}
 #{/set}
@@ -44,6 +48,14 @@
         #{/list}
         </select>
 
+        <div class="input-prepend inline">
+          <select name="p.categories" multiple="multiple" id="categories">
+          #{list items:categoryIds, as:'c'}
+            <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+          #{/list}
+          </select>
+        </div>
+
         <select name="p.result" class="inline">
           <option value="">质检结果</option>
         #{list items:models.whouse.InboundUnit.R, as:'t'}
@@ -78,6 +90,7 @@
             <th width="70px;">采购计划ID</th>
             <th width="90px;">收货入库单ID</th>
             <th>名称</th>
+            <th>SKU</th>
             <th>收货类型</th>
             <th>供应商</th>
             <th>状态</th>
@@ -101,6 +114,7 @@
             <td>${i.unit.id}</td>
             <td><a href="@{Inbounds.edit(i.inbound.id)}">${i.inbound.id}</a></td>
             <td>${i.inbound.name}</td>
+            <td>${i.unit?.product.sku}</td>
             <td><i class="${i.inbound.type.flag()}"> </i>${i.inbound.type?.label()}</td>
             <td>${i.unit.cooperator?.name}</td>
             <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>

@@ -70,6 +70,13 @@ $(() => {
     window.open('/Excels/exportInboundUnitReport?' + $form.serialize(), "_blank")
   });
 
+  $("#categories").multiselect({
+    buttonWidth: '120px',
+    nonSelectedText: '品线',
+    maxHeight: 200,
+    includeSelectAllOption: true
+  });
+  
 });
 
 
