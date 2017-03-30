@@ -73,4 +73,24 @@ public class InventoryCostUnit extends GenericModel {
      * 日期(任务执行时月份的最后一天)
      */
     private Date date;
+
+
+    public static final String FILE_HEADER = "CategoryId,Sku,Market,制作中已交货,在途,在库,采购单价,运输单价,关税VAT单价";
+
+    /**
+     * 将当前对象映射成 CSV 文件中的一行
+     *
+     * @return
+     */
+    public String toCSV() {
+        return this.categoryId + "," +
+                this.sku + "," +
+                this.market + "," +
+                String.valueOf(productionQty) + "," +
+                String.valueOf(transitQty) + "," +
+                String.valueOf(stockQty) + "," +
+                String.valueOf(procurementPrice) + "," +
+                String.valueOf(transportPrice) + "," +
+                String.valueOf(taxPrice) + "\n";
+    }
 }
