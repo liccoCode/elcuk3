@@ -17,14 +17,17 @@ import java.util.regex.Pattern;
  * Created by licco on 2016/11/11.
  */
 public class InboundPost extends Post<Inbound> {
+
     private static final Pattern ID = Pattern.compile("^SR(\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
+    private static final long serialVersionUID = 3427714858616879761L;
 
     public Inbound.S status;
     public Long cooperatorId;
     public Inbound.T type;
     public InboundUnit.R result;
     public String search;
+    public String searchPage = "inbound";
     public List<String> categories = new ArrayList<>();
 
     public InboundPost() {
@@ -138,10 +141,12 @@ public class InboundPost extends Post<Inbound> {
         return this.count();
     }
 
-
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return (long) Inbound.find(params._1, params._2.toArray()).fetch().size();
+        if(this.searchPage.equals("inbound"))
+            return (long) Inbound.find(params._1, params._2.toArray()).fetch().size();
+        else
+            return (long) InboundUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     private String isSearchForId() {

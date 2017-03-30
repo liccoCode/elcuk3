@@ -57,6 +57,7 @@ public class Inbounds extends Controller {
 
     public static void indexDetail(InboundPost p) {
         if(p == null) p = new InboundPost();
+        p.searchPage = "detail";
         List<InboundUnit> units = p.queryDetail();
         render(p, units);
     }
