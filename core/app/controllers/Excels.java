@@ -3,9 +3,8 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
+import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
-import models.finance.Payment;
-import models.finance.TransportApply;
 import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
@@ -795,4 +794,19 @@ public class Excels extends Controller {
         render(units);
     }
 
+
+    public static void exportInventoryCostsReport(Integer year, Integer month) {
+        Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
+        List<InventoryCostUnit> units = InventoryCostUnit
+                .find("date BETWEEN ? AND ?", Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        if(units != null && units.size() > 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "库存占用资金报表(Amazon).xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(units, target, formatter);
+        } else {
+            renderText("未找到当前日期的数据.");
+        }
+    }
 }
