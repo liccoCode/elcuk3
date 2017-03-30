@@ -1589,6 +1589,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 丢失量
+     *
+     * @return
+     */
+    public int lostQty() {
+        return this.shipItems.stream().mapToInt(item -> item.lossqty).sum();
+    }
+
+    public String showCompensation() {
+        String temp = "";
+        if(this.shipItems.size() > 0) {
+            temp = this.shipItems.get(0).currency.symbol() + this.shipItems.get(0).compenamt.toString();
+        }
+        return temp;
+    }
+
+    /**
      * 预付款申请
      */
     public PaymentUnit billingPrePay() {

@@ -5,6 +5,7 @@ import models.whouse.Inbound;
 import models.whouse.InboundUnit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -13,17 +14,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by licco on 2016/11/11.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 2016/11/11
+ * Time: 下午2:06
  */
 public class InboundPost extends Post<Inbound> {
+
     private static final Pattern ID = Pattern.compile("^SR(\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
+    private static final long serialVersionUID = 3427714858616879761L;
 
     public Inbound.S status;
     public Long cooperatorId;
     public Inbound.T type;
     public InboundUnit.R result;
     public String search;
+    public String searchPage = "inbound";
+    public List<String> categories = new ArrayList<>();
 
     public InboundPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -67,6 +75,7 @@ public class InboundPost extends Post<Inbound> {
             sbd.append(" AND i.type = ? ");
             params.add(type);
         }
+        sbd.append(" ORDER BY i.createDate DESC ");
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -106,6 +115,9 @@ public class InboundPost extends Post<Inbound> {
             sbd.append(" AND i.result = ? ");
             params.add(result);
         }
+        if(this.categories.size() > 0) {
+            sbd.append(" AND u.product.category.id IN ").append(SqlSelect.inlineParam(this.categories));
+        }
         sbd.append(" ORDER BY u.id DESC ");
         return new F.T2<>(sbd.toString(), params);
     }
@@ -113,15 +125,15 @@ public class InboundPost extends Post<Inbound> {
 
     @Override
     public List<Inbound> query() {
-        this.count = this.count();
         F.T2<String, List<Object>> params = params();
+        this.count = Inbound.find(params._1, params._2.toArray()).fetch().size();
         String sql = params._1 + " ";
         return Inbound.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     public List<InboundUnit> queryDetail() {
-        this.count = this.count();
         F.T2<String, List<Object>> params = detailParams();
+        this.count = InboundUnit.find(params._1, params._2.toArray()).fetch().size();
         if(this.pagination)
             return InboundUnit.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
         else
@@ -130,13 +142,12 @@ public class InboundPost extends Post<Inbound> {
 
     @Override
     public Long getTotalCount() {
-        return this.count();
+        return this.count;
     }
-
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return (long) Inbound.find(params._1, params._2.toArray()).fetch().size();
+        return this.count;
     }
 
     private String isSearchForId() {

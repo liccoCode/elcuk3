@@ -77,8 +77,10 @@
         <td>
           <a href="@{StockRecords.changeRecords(u.id)}" class="btn btn-mini btn-info">
             <i class="icon-list-alt"></i>异动记录</a>
-          <a href="@{StockRecords.adjustStock(u.id)}" class="btn btn-mini btn-warning">
-            <i class="icon-share-alt"></i> 库存调整</a>
+            #{power.ck 'stockrecords.adjuststock'}
+              <a href="@{StockRecords.adjustStock(u.id)}" class="btn btn-mini btn-warning">
+                <i class="icon-share-alt"></i> 库存调整</a>
+            #{/power.ck}
         </td>
       </tr>
     #{/list}

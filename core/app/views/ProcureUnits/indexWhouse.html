@@ -60,6 +60,14 @@
           </select>
         </div>
 
+        <div class="input-prepend inline">
+          <select name="p.categories" multiple="multiple" id="categories">
+          #{list items:categoryIds, as:'c'}
+            <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+          #{/list}
+          </select>
+        </div>
+
         <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
         #{list items:cooperators, as:'cop'}
