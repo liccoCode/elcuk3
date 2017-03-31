@@ -2,6 +2,7 @@ package models.procure;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.*;
 import helper.Currency;
 import models.ElcukConfig;
@@ -242,7 +243,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Cooperator cooper;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.PERSIST)
     public Whouse whouse;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -457,7 +458,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
         if(procureUnits.size() != units.size())
             Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
-
         return procureUnits;
     }
 
@@ -467,18 +467,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param units
      */
     public Shipment buildFromProcureUnits(List<Long> units) {
-        /**
-         * 1. 检查采购计划数量是否一致
-         * 2. 检查运输方式是否一致
-         * 3. 检查快递仓库是否一致或者 海运/空运 国家是否一致
+        /*
+          1. 检查采购计划数量是否一致
+          2. 检查运输方式是否一致
+          3. 检查快递仓库是否一致或者 海运/空运 国家是否一致
          */
-
         List<ProcureUnit> procureUnits = multipleUnitValidate(units);
-
         ProcureUnit firstProcureUnit = procureUnits.get(0);
-        Shipment.T firstShipType = firstProcureUnit.shipType;
+        Shipment.T firstShipType = this.type != null ? this.type : firstProcureUnit.shipType;
         Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
-
         for(ProcureUnit unit : procureUnits) {
             if(unit.selling == null) {
                 Validation.addError("", "采购单的selling为空");
@@ -488,38 +485,28 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 Validation.addError("", "不同运输方式不可以创建到一个运输单.");
                 break;
             }
-            earlyPlanBeginDate = new Date(
-                    Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
+            earlyPlanBeginDate = new Date(Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
         }
-
         this.type = firstShipType;
-
+        if(this.whouse == null) 
+            this.whouse = firstProcureUnit.whouse;
         for(ProcureUnit unit : procureUnits) {
             if(unit.whouse == null) {
                 Validation.addError("", "采购单仓库为空");
                 break;
             }
-
-            if(this.type == T.EXPRESS) {
-                if(!firstProcureUnit.whouse.id.equals(unit.whouse.id)) {
-                    Validation.addError("", "快递运输, 仓库不一样不可以创建到一个运输单");
-                    break;
-                }
-            } else {
-                if(!firstProcureUnit.whouse.country.equals(unit.whouse.country)) {
-                    Validation.addError("", "海运/空运, 运往国家不一样不可以创建一个运输单");
-                    break;
-                }
+            if(!this.whouse.id.equals(unit.whouse.id)) {
+                Validation.addError("", "去往国家不一样不可以创建到一个运输单");
+                break;
             }
         }
-
         if(Validation.hasErrors()) return this;
-
-        this.id = Shipment.id();
+        if(StringUtils.isEmpty(this.id)) {
+            this.id = Shipment.id();
+        }
         this.dates.planBeginDate = earlyPlanBeginDate;
-        this.whouse = firstProcureUnit.whouse;
         this.calcuPlanArriveDate();
-        this.creater = User.current();
+        this.creater = Login.current();
         this.save();
         procureUnits.forEach(this::addToShip);
         return this;
@@ -1284,12 +1271,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public static List<Shipment> findByState(S... state) {
-        return Shipment.find(SqlSelect.whereIn("state", state) + " ORDER BY createDate").fetch();
+        return Shipment.find(SqlSelect.whereIn("state", state) + " ORDER BY createDate DESC").fetch();
     }
 
     public static List<Shipment> findByTypeAndStates(T type, S... state) {
-        return Shipment.find(SqlSelect.whereIn("state", state) + " AND type=? ORDER BY " +
-                "createDate", type).fetch();
+        return Shipment.find(SqlSelect.whereIn("state", state) + " AND type=? ORDER BY createDate", type)
+                .fetch();
     }
 
     /**
