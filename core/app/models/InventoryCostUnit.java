@@ -87,7 +87,7 @@ public class InventoryCostUnit extends GenericModel {
                 " SUM(stockQty) AS stockQty," +
                 " SUM(stockCost) AS stockCost " +
                 " FROM(" +
-                "  SELECT `date`, categoryId, sku," +
+                "  SELECT `date`, categoryId," +
                 "  productionQty AS productionQty," +
                 "  productionQty*procurementPrice AS productionCost," +
                 "  SUM(transitQty) AS transitQty," +
