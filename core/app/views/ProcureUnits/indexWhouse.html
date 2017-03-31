@@ -160,9 +160,11 @@
         <tbody>
         #{list items:p.query(), as:'unit'}
         <tr>
-          <td><input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
-                     value="${unit.id}" whouse="${unit.whouse?.name()}" stage="${unit.stage?.name()}"
-                     shipType="${unit.shipType?.name()}">
+            #{set dto: unit.fba?.dto/}
+          <td>
+            <input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
+                   value="${unit.id}" whouse="${unit.whouse?.name()}" stage="${unit.stage?.name()}"
+                   shipType="${unit.shipType?.name()}" data-boxnum="${dto?.boxNum}">
           </td>
           <td rel="tooltip" title="${unit.comment}">
               #{if unit.parent}
