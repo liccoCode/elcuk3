@@ -3,9 +3,8 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
+import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
-import models.finance.Payment;
-import models.finance.TransportApply;
 import models.market.BtbOrder;
 import models.market.M;
 import models.market.OrderItem;
@@ -795,4 +794,26 @@ public class Excels extends Controller {
         render(units);
     }
 
+    /**
+     * 库存占用资金报表
+     *
+     * @param year
+     * @param month
+     */
+    public static void exportInventoryCostsReport(Integer year, Integer month) {
+        Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
+        List<InventoryCostUnit> units = InventoryCostUnit.find(
+                "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
+                Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
+        if(units != null && units.size() > 0) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("库存占用资金报表%s.xls", dateFormat.format(target)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(units, summaries, dateFormat);
+        } else {
+            renderText("未找到当前日期的数据.");
+        }
+    }
 }
