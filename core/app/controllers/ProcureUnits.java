@@ -101,6 +101,7 @@ public class ProcureUnits extends Controller {
     public static void indexWhouse(ProcurePost p) {
         if(p == null) {
             p = new ProcurePost();
+            p.dateType = "attrs.planShipDate"; 
         }
         p.pagination = false;
         render(p);
