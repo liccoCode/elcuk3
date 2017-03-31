@@ -61,15 +61,6 @@ $(() => {
       } else {
         $(this).attr("style", "width:35px;");
       }
-      if ($(this).val() > $(this).data('qty')) {
-        noty({
-          text: '收货数超过计划数量!',
-          type: 'error'
-        });
-        $(this).val($(this).data('origin'));
-        $(this).focus();
-        return false;
-      }
       $(this).parent('td').next().find('select').show();
     }
 
