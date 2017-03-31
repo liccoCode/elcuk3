@@ -12,6 +12,12 @@
     vertical-align:middle;
   }
 </style>
+<script type="text/javascript">
+  $(document).on('click', '#today', function (e) {
+    $("input[name='p.from']").data('dateinput').setValue(new Date());
+    $("input[name='p.to']").data('dateinput').setValue(new Date());
+  });
+</script>
 #{info_row}
 <ul>
   <li>带有 <i style="color:#dc143c;" class="icon-warning-sign"></i> 符号表示此运输单没有创建者,没有确认负责人,需要进行确认</li>
@@ -24,6 +30,10 @@
 <form action="@{Shipments.index()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
     <div class="span12">
+      <div class="inline">
+        <button id="today" class="btn"><i class="icon-search"></i> Today</button>
+      </div>
+
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
         <input type="date" name="p.from" value="${p.from.date()}">
@@ -55,9 +65,9 @@
       </select>
 
       <div class="input-prepend inline">
-        <select name="p.whouseId" style="width:150px;" id="whouse_id" multiple="multiple">
+        <select name="p.whouseIds" style="width:150px;" id="whouse_id" multiple="multiple">
         #{list items:whouses, as:'wh'}
-          <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
+          <option ${p.whouseIds.contains(wh.id) ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
         #{/list}
         </select>
       </div>

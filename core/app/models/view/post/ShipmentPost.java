@@ -57,7 +57,7 @@ public class ShipmentPost extends Post<Shipment> {
 
     public Long cooperId;
 
-    public long whouseId;
+    public List<Long> whouseIds = new ArrayList<>();
 
     @Override
     public List<Shipment> query() {
@@ -129,9 +129,8 @@ public class ShipmentPost extends Post<Shipment> {
             params.add(this.iExpress);
         }
 
-        if(this.whouseId > 0) {
-            sql.append(" AND s.whouse.id=?");
-            params.add(this.whouseId);
+        if(this.whouseIds.size() > 0) {
+            sql.append(" AND s.whouse.id in ").append(SqlSelect.inlineParam(whouseIds));
         }
 
         if(this.cooperId != null) {
