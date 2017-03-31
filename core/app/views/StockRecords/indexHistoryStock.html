@@ -80,7 +80,11 @@
         <td>${u.currQty}</td>
         <td>#{time_tooltip time:u.attrs.planDeliveryDate/}</td>
         <td>#{time_tooltip time:u.attrs.deliveryDate/}</td>
-        <td>#{time_tooltip time:u.outbound?.outboundDate/}</td>
+        <td>
+            #{if u.outbound?.status?.name()=='Outbound'}
+              #{time_tooltip time:u.outbound?.outboundDate/}
+            #{/if}
+        </td>
         <td>${u.fba?.shipmentId}</td>
         <td>${u.projectName}</td>
       </tr>

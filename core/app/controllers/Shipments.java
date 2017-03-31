@@ -178,20 +178,20 @@ public class Shipments extends Controller {
 
     public static void update(Shipment ship, String shipid) {
         checkAuthenticity();
-        Shipment dbship = Shipment.findById(shipid);
-        dbship.update(ship);
+        Shipment old = Shipment.findById(shipid);
+        Date realPlanArrivDate = old.dates.planArrivDate;
+        old.update(ship);
         if(Validation.hasErrors()) {
-            dbship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
-            renderArgs.put("ship", dbship);
+            old.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            renderArgs.put("ship", old);
             render("Shipments/show.html");
         }
-        dbship.updateShipment();
+        old.updateShipment();
         //向采购计划负责人发送邮件
-        dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
+        old.sendMsgMail(realPlanArrivDate, Secure.Security.connected());
         flash.success("更新成功.");
-
-        new ElcukRecord(Messages.get("shipment.update"),
-                Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
+        new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.to_log()), old.id)
+                .save();
         Shipments.show(shipid);
     }
 
