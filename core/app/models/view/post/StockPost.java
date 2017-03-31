@@ -133,11 +133,12 @@ public class StockPost extends Post<ProcureUnit> {
         }
         sql.append(" ORDER BY p.id DESC ");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), params.toArray());
-        List<ProcureUnit> units = rows.stream().map(row -> {
-            ProcureUnit unit = ProcureUnit.findById(Long.parseLong(row.get("id").toString()));
-            unit.currQty = Integer.parseInt(row.get("currQty").toString());
-            return unit;
-        }).collect(Collectors.toList());
+        List<ProcureUnit> units = rows.stream().filter(row -> Integer.parseInt(row.get("currQty").toString()) > 0)
+                .map(row -> {
+                    ProcureUnit unit = ProcureUnit.findById(Long.parseLong(row.get("id").toString()));
+                    unit.currQty = Integer.parseInt(row.get("currQty").toString());
+                    return unit;
+                }).collect(Collectors.toList());
 
         return units;
     }
