@@ -1251,7 +1251,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         where.append(" AND type =?");
         params.add(shipType);
         where.append(" AND dates.planBeginDate >= ?");
-        params.add(planDeliveryDate);
+        params.add(new Date());
         where.append(" ORDER BY planBeginDate");
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
@@ -1352,8 +1352,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             List<ProcureUnit> punits = ProcureUnit.find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
                     "  LEFT JOIN " +
                     " si.shipment " +
-                    " sp " +
-                    " where sp.id=?", this.id).fetch();
+                    " sp where sp.id=?", this.id).fetch();
             for(ProcureUnit pu : punits) {
                 String email = pu.handler.email;
                 if(StringUtils.isNotBlank(email)) {
@@ -1365,9 +1364,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
             if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
         }
-
     }
-
 
     /**
      * 将产品定位属性转换成 String 存入DB
@@ -1568,8 +1565,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
 
         //日期发生改变则记录旧的日期
-        if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0)
-            this.dates.oldPlanArrivDate = newShip.dates.planArrivDate;
+        if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0 && this.dates.oldPlanArrivDate == null)
+            this.dates.oldPlanArrivDate = this.dates.planArrivDate;
         this.dates.planArrivDate = newShip.dates.planArrivDate;
 
         //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
