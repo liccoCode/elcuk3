@@ -98,16 +98,20 @@ public class Shipments extends Controller {
      * @param units
      */
     @Check("shipments.procureunittoshipment")
-    public static void procureUnitToShipment(List<Long> units) {
+    public static void procureUnitToShipment(List<Long> units, String shipmentId) {
         if(units == null || units.size() <= 0)
             Validation.addError("", "必须选择采购计划");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ShipItems.index(null);
         }
-
-        Shipment shipment = new Shipment().buildFromProcureUnits(units);
-
+        Shipment shipment;
+        if(StringUtils.isNotBlank(shipmentId)) {
+            shipment = Shipment.findById(shipmentId);
+        } else {
+            shipment = new Shipment();
+        }
+        shipment.buildFromProcureUnits(units);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ShipItems.index(null);

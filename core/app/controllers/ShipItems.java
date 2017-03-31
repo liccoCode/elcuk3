@@ -16,7 +16,7 @@ import play.mvc.With;
 
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipItems extends Controller {
 
     @Before(only = "index")
@@ -29,7 +29,8 @@ public class ShipItems extends Controller {
         if(p == null)
             p = new ProcureUnitShipPost();
         List<ProcureUnit> units = p.query();
-        render(p, units);
+        List<Shipment> shipments = Shipment.findByState(Shipment.S.PLAN);
+        render(p, units, shipments);
     }
 
     public static void showJson(Long id) {
