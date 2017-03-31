@@ -795,28 +795,23 @@ public class Excels extends Controller {
     }
 
     /**
-     * TODO::
-     * 读取数据:
-     * http://koenserneels.blogspot.com/2013/03/bulk-fetching-with-hibernate.html
-     * https://helpezee.wordpress.com/2014/02/14/bulk-fetching-with-hibernateusing-statelesssession/
-     * <p>
-     * CSV
-     * https://examples.javacodegeeks.com/core-java/writeread-csv-files-in-java-example/
-     * http://www.mkyong.com/java/how-to-export-data-to-csv-file-java/
+     * 库存占用资金报表
      *
      * @param year
      * @param month
      */
     public static void exportInventoryCostsReport(Integer year, Integer month) {
         Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
-        List<InventoryCostUnit> units = InventoryCostUnit
-                .find("date BETWEEN ? AND ?", Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        List<InventoryCostUnit> units = InventoryCostUnit.find(
+                "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
+                Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
         if(units != null && units.size() > 0) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME, "库存占用资金报表(Amazon).xls");
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("库存占用资金报表%s.xls", dateFormat.format(target)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            render(units, target, formatter);
+            render(units, summaries, dateFormat);
         } else {
             renderText("未找到当前日期的数据.");
         }

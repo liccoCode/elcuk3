@@ -1,5 +1,7 @@
 package models;
 
+import helper.DBUtils;
+import helper.Dates;
 import models.market.M;
 import play.db.jpa.GenericModel;
 
@@ -8,6 +10,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,77 +24,80 @@ public class InventoryCostUnit extends GenericModel {
     /**
      * 产品
      */
-    private String sku;
+    public String sku;
 
     /**
      * 产品线
      */
-    private String categoryId;
+    public String categoryId;
 
     /**
      * 市场
      */
     @Enumerated(EnumType.STRING)
-    private M market;
+    public M market;
 
     /**
      * 采购单价
      */
-    private Float procurementPrice;
+    public Float procurementPrice;
 
     /**
      * 运输单价
      */
-    private Float transportPrice;
+    public Float transportPrice;
 
     /**
      * 缴税单价(VAT、关税)
      */
-    private Float taxPrice;
+    public Float taxPrice;
 
     /**
      * 在途数量
      */
-    private Integer transitQty;
+    public Integer transitQty;
 
     /**
      * 在库数量(入库中+在库)
      */
-    private Integer stockQty;
+    public Integer stockQty;
 
     /**
      * 生产中的数量(制作中+已交货)
      */
-    private Integer productionQty;
+    public Integer productionQty;
 
     /**
      * 主键 ID
      */
     @Id
-    private String id;
+    public String id;
 
     /**
      * 日期(任务执行时月份的最后一天)
      */
-    private Date date;
+    public Date date;
 
-
-    public static final String FILE_HEADER = "CategoryId,Sku,Market,制作中已交货,在途,在库,采购单价,运输单价,关税VAT单价";
-
-    /**
-     * 将当前对象映射成 CSV 文件中的一行
-     *
-     * @return
-     */
-    public String toCSV() {
-        return this.categoryId + "," +
-                this.sku + "," +
-                this.market + "," +
-                String.valueOf(productionQty) + "," +
-                String.valueOf(transitQty) + "," +
-                String.valueOf(stockQty) + "," +
-                String.valueOf(procurementPrice) + "," +
-                String.valueOf(transportPrice) + "," +
-                String.valueOf(taxPrice) + "\n";
+    public static List<Map<String, Object>> countByCategory(Date target) {
+        String sql = "SELECT categoryId, `date`," +
+                " SUM(productionQty) AS productionQty," +
+                " SUM(productionCost) AS productionCost," +
+                " SUM(transitQty) AS transitQty," +
+                " SUM(transitCost) AS transitCost," +
+                " SUM(stockQty) AS stockQty," +
+                " SUM(stockCost) AS stockCost " +
+                " FROM(" +
+                "  SELECT `date`, categoryId, sku," +
+                "  productionQty AS productionQty," +
+                "  productionQty*procurementPrice AS productionCost," +
+                "  SUM(transitQty) AS transitQty," +
+                "  SUM(transitQty*procurementPrice+transitQty*transportPrice) AS transitCost," +
+                "  SUM(stockQty) AS stockQty," +
+                "  SUM(stockQty*procurementPrice+stockQty*transportPrice+stockQty*taxPrice) AS stockCost" +
+                "  FROM InventoryCostUnit" +
+                "  WHERE date BETWEEN ? AND ?" +
+                "  GROUP BY sku" +
+                ") AS TMP GROUP BY categoryId;";
+        return DBUtils.rows(sql, Dates.monthBegin(target), Dates.monthEnd(target));
     }
 }
