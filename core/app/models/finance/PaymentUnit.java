@@ -475,9 +475,6 @@ public class PaymentUnit extends Model {
             this.state = S.APPLY;
         this.save();
         new ERecordBuilder("paymentunit.fixValue").msgArgs(reason, oldFixValue, this.fixValue).fid(this.id).save();
-                                         /**财务想在采购单页面也能看到，添加两条日志**/
-        new ERecordBuilder("paymentunit.fixValue").msgArgs(reason, oldFixValue, this.fixValue)
-                .fid(this.procureUnit.id).save();
     }
 
     /**
