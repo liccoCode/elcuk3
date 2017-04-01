@@ -11,6 +11,7 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by licco on 16/3/7.
@@ -137,7 +138,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         sql.append("  (SELECT m.id,");
         sql.append("          c.name,");
         sql.append("          p.currency,");
-        sql.append("          round(sum(p.price * IFNULL(p.qty, p.planQty)),2) AS 'a1'");
+        sql.append("          IFNULL(round(sum(p.price * IFNULL(p.qty, p.planQty)),2),0) AS 'a1'");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN ProcureUnit p ON p.deliveryment_id = m.id");
         sql.append("   LEFT JOIN Cooperator c ON c.id = m.`cooperator_id`");
@@ -147,7 +148,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         params.add(to);
         sql.append("   GROUP BY m.id) t1 ,");
         sql.append("  (SELECT m.id,");
-        sql.append("          round(sum(p.amount+p.fixValue),2) AS 'a2'");
+        sql.append("          IFNULL(round(sum(p.amount+p.fixValue),2),0) AS 'a2'");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN PaymentUnit p ON p.deliveryment_id = m.id");
         sql.append("   AND p.remove= 0");
@@ -157,7 +158,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         params.add(to);
         sql.append("   GROUP BY m.id) t2,");
         sql.append("  (SELECT m.id,");
-        sql.append("          round(sum(t.amount+t.fixValue),2) AS 'a3'");
+        sql.append("          IFNULL(round(sum(t.amount+t.fixValue),2),0) AS 'a3'");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN PaymentUnit t ON t.deliveryment_id = m.id");
         sql.append("   AND t.state <> 'PAID'");
@@ -169,7 +170,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         params.add(to);
         sql.append("   GROUP BY m.id) t3,");
         sql.append("  (SELECT m.id,");
-        sql.append("          round(sum(pu.amount+pu.fixValue),2) AS 'a4'");
+        sql.append("          IFNULL(round(sum(pu.amount+pu.fixValue),2),0) AS 'a4'");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN PaymentUnit pu ON pu.deliveryment_id = m.id");
         sql.append("   AND pu.state = 'PAID'");
@@ -188,7 +189,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
             PurchasePaymentDTO dto = new PurchasePaymentDTO();
             dto.deliverymentId = row.get("id").toString();
             dto.cooperator = row.get("name").toString();
-            dto.currency = row.get("currency").toString();
+            dto.currency = row.get("currency") == null ? "" : row.get("currency").toString();
             dto.totalPurchases = Float.valueOf(row.get("totalPurchases").toString());
             dto.totalPayment = Float.valueOf(row.get("totalPayment").toString());
             dto.paidAmount = Float.valueOf(row.get("paidAmount").toString());
