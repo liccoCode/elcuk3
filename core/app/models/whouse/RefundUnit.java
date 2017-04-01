@@ -59,6 +59,9 @@ public class RefundUnit extends Model {
     @Transient
     public CheckTaskDTO lastBox = new CheckTaskDTO();
 
+    @Transient
+    public Long unitId;
+
 
     public static Map<Integer, List<RefundUnit>> pageNumForTen(List<Refund> list) {
         Map<Integer, List<RefundUnit>> ten = new HashMap<>();

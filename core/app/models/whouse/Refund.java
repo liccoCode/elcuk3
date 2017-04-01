@@ -189,6 +189,7 @@ public class Refund extends GenericModel {
         this.save();
         for(RefundUnit unit : list) {
             if(unit != null) {
+                unit.unit = ProcureUnit.findById(unit.unitId);
                 unit.refund = this;
                 unit.save();
             }
