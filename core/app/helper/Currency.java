@@ -333,30 +333,30 @@ public enum Currency {
     public abstract String label();
 
     //CNY
-    private static float CNY_USD = 0.162962f;
+    private static float CNY_USD = 0.15f;
 
     //EUR
-    private static float EUR_CNY = 7.99469721f;
-    private static float EUR_USD = 1.3072f;
+    private static float EUR_CNY = 7.37f;
+    private static float EUR_USD = 1.07f;
 
     //GBP
-    private static float GBP_CNY = 9.27394116f;
-    private static float GBP_USD = 1.5113f;
+    private static float GBP_CNY = 8.59f;
+    private static float GBP_USD = 1.25f;
 
     //HKD
-    private static float HKD_CNY = 0.790926719f;
-    private static float HKD_USD = 0.128891f;
+    private static float HKD_CNY = 0.89f;
+    private static float HKD_USD = 0.13f;
 
     //USD
-    private static float USD_CNY = 6.1363999f;
+    private static float USD_CNY = 6.89f;
 
     //JPY
-    private static float JPY_CNY = 0.0613f;
-    private static float JPY_USD = 0.0098f;
+    private static float JPY_CNY = 0.062f;
+    private static float JPY_USD = 0.0089f;
 
     //CAD
-    private static float CAD_CNY = 5.6276f;
-    private static float CAD_USD = 0.9137f;
+    private static float CAD_CNY = 5.17f;
+    private static float CAD_USD = 0.75f;
 
 
     public static void updateCRY() {
