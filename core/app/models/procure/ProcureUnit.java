@@ -1738,6 +1738,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float leftAmount() {
+        if(this.type == T.StockSplit)
+            return 0;
         return totalAmount() - appliedAmount();
     }
 

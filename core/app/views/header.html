@@ -56,9 +56,9 @@
                 #{power.ck "sellingrecords.index"}
                   <li><a href="@{SellingRecords.index()}">销售财务分析</a></li>
                 #{/power.ck}
-                #{power.ck "amazonoperations"}
+*{                #{power.ck "amazonoperations"}
                   <li><a href="@{AmazonOperations.index()}">Review 点击台</a></li>
-                #{/power.ck}
+                #{/power.ck}}*
                 #{power.ck "reportdownloads"}
                   <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
                 #{/power.ck}
@@ -185,7 +185,7 @@
           </li>
         #{/power.ck}
 
-        #{power.ck 'qccheck'}
+*{        #{power.ck 'qccheck'}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">质检管理<b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -200,7 +200,7 @@
                 #{/power.ck}
             </ul>
           </li>
-        #{/power.ck}
+        #{/power.ck}}*
 
         #{power.ck 'whouse'}
           <li class="dropdown">
@@ -281,9 +281,9 @@
                 #{power.ck "fbacenters.index"}
                   <li><a href="@{FBACenters.index()}">FBACenter 管理</a></li>
                 #{/power.ck}
-                #{power.ck "categoryinfos.categoryassign"}
+*{                #{power.ck "categoryinfos.categoryassign"}
                   <li><a href="@{CategoryInfos.categoryassign()}">部门品线负责人管理</a></li>
-                #{/power.ck}
+                #{/power.ck}}*
             </ul>
           </li>
         #{/power.ck}
