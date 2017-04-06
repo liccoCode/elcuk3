@@ -57,7 +57,7 @@ public class ShipmentReportESQuery {
             pieChart = new HighChart(Series.PIE);
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to), type);
-            pieChart.series(shipPie(from, to, type, "shipFee"));
+            pieChart.series(shipPie(from, to, type, "shipFee", false));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -77,6 +77,7 @@ public class ShipmentReportESQuery {
             for(Shipment.T t : Shipment.T.values()) {
                 columnChart.series(shipColum(from, to, t, "shipWeight"));
             }
+            columnChart.series(shipColum(from, to, Shipment.T.EXPRESS, "dedicated"));
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
         }
@@ -94,7 +95,27 @@ public class ShipmentReportESQuery {
             pieChart = new HighChart(Series.PIE);
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), type);
-            pieChart.series(shipPie(from, to, type, "shipWeight"));
+            pieChart.series(shipPie(from, to, type, "shipWeight", false));
+            Cache.delete(key);
+            Cache.add(key, pieChart, "4h");
+        }
+        return pieChart;
+    }
+
+    /**
+     * @param from
+     * @param to
+     * @return
+     */
+    public static HighChart shipWeightByMarketPieForDedicated(final Date from, final Date to) {
+        String key = Caches.Q.cacheKey(from, to, "DEDICATED", "shipWeightByMarket");
+        HighChart pieChart = Cache.get(key, HighChart.class);
+        if(pieChart != null) return pieChart;
+        synchronized(key.intern()) {
+            pieChart = new HighChart(Series.PIE);
+            pieChart.title = String
+                    .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), "专线");
+            pieChart.series(shipPie(from, to, Shipment.T.EXPRESS, "shipWeight", true));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -135,21 +156,31 @@ public class ShipmentReportESQuery {
     public static Series.Column shipColum(Date from, Date to, Shipment.T type, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
-        Series.Column column = new Series.Column(type.name());
-        column.color = ProcuresHelper.rgb(type);
-        float result = 0f;
-        MetricShipmentService mes = new MetricShipmentService(from, to, type);
-        if(StringUtils.equals(flag, "shipFee")) {
-            result = mes.countShipFee();
+        if(StringUtils.equals(flag, "dedicated")) {
+            Series.Column column = new Series.Column("专线");
+            column.color = "#A020F0";
+            float result = 0f;
+            MetricShipmentService mes = new MetricShipmentService(from, to, type);
+            result = mes.countShipWeight(true);
+            column.add(result, "dedicated");
+            return column;
         } else {
-            result = mes.countShipWeight();
+            Series.Column column = new Series.Column(type.name());
+            column.color = ProcuresHelper.rgb(type);
+            float result = 0f;
+            MetricShipmentService mes = new MetricShipmentService(from, to, type);
+            if(StringUtils.equals(flag, "shipFee")) {
+                result = mes.countShipFee();
+            } else {
+                result = mes.countShipWeight(false);
+            }
+            column.add(result, type.name());
+            return column;
         }
-        column.add(result, type.name());
-        return column;
     }
 
 
-    public static Series.Pie shipPie(Date from, Date to, Shipment.T type, String flag) {
+    public static Series.Pie shipPie(Date from, Date to, Shipment.T type, String flag, boolean isDedicated) {
         from = Dates.morning(from);
         to = Dates.night(to);
         Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, type));
@@ -159,7 +190,7 @@ public class ShipmentReportESQuery {
             if(StringUtils.equals(flag, "shipFee")) {
                 result = mes.countShipFee();
             } else {
-                result = mes.countShipWeight();
+                result = mes.countShipWeight(isDedicated);
             }
             if(result > 0) pie.add(result, m.name());
         }

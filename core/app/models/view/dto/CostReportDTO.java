@@ -71,7 +71,7 @@ public class CostReportDTO implements Serializable {
                 dto.market = m.label();
                 for(Shipment.T type : Shipment.T.values()) {
                     mes = new MetricShipmentService(from, to, type, m);
-                    Float weight = mes.countShipWeight();
+                    Float weight = mes.countShipWeight(false);
                     Float freight = mes.countShipFee();
                     Float vatPrice = vat.get(m.sortName().toUpperCase() + "_" + type.name()) == null ? 0f :
                             vat.get(m.sortName().toUpperCase() + "_" + type.name());
