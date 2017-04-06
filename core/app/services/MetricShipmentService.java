@@ -102,20 +102,20 @@ public class MetricShipmentService {
     /**
      * 统计运输重量(市场 或者 运输方式)
      */
-    public Float countShipWeight() {
+    public Float countShipWeight(boolean isDedicated) {
         //由于ES的 shippayunit 与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为 SUM 统计函数)
-        SqlSelect sql = new SqlSelect()
-                .select("SUM(CASE " +
-                        "WHEN pro.weight IS NULL THEN 0 * si.qty " +
-                        "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
-                        ") weight")
+        SqlSelect sql = new SqlSelect().select("SUM(CASE " +
+                "WHEN pro.weight IS NULL THEN 0 * si.qty " +
+                "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
+                ") weight")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")
                 .leftJoin("ProcureUnit pu ON si.unit_id=pu.id")
                 .leftJoin("Product pro on pu.product_sku = pro.sku")
                 .leftJoin("Whouse w ON w.id=s.whouse_id")
                 .where("s.planBeginDate>=?").param(this.from)
-                .andWhere("s.planBeginDate<=?").param(this.to);
+                .andWhere("s.planBeginDate<=?").param(this.to)
+                .andWhere("s.isDedicated=?").param(isDedicated);
         if(this.type != null) sql.andWhere("s.type=?").param(this.type.toString());
         if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
         Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("weight");
@@ -142,7 +142,7 @@ public class MetricShipmentService {
             String type = objectMap.get("type").toString();
             Currency currency = Currency.valueOf(objectMap.get("currency").toString());
             Float vatPrice = Float.valueOf(objectMap.get("vatPrice").toString());
-            String key = market+"_"+type;
+            String key = market + "_" + type;
             if(vat.containsKey(key)) {
                 Float existVatPrice = vat.get(key);
                 vat.put(key, currency.toUSD(vatPrice) + existVatPrice);

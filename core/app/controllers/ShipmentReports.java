@@ -17,6 +17,7 @@ import models.view.post.LossRatePost;
 import models.view.report.AreaGoodsAnalyze;
 import models.view.report.ArrivalRate;
 import models.view.report.LossRate;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 import play.libs.F;
@@ -57,7 +58,7 @@ public class ShipmentReports extends Controller {
     public static void cost() {
         Date now = new Date();
         String from = Dates.date2Date(Dates.monthBegin(now));
-        String to =   Dates.date2Date(now);
+        String to = Dates.date2Date(now);
         render(from, to);
     }
 
@@ -105,10 +106,16 @@ public class ShipmentReports extends Controller {
     /**
      * 根据市场统计运输重量
      */
-    public static void countShipWeightByMarket(Date from, Date to, Shipment.T type) {
+    public static void countShipWeightByMarket(Date from, Date to, String type) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, type);
-            renderJSON(J.json(chart));
+            if(StringUtils.equals(type, "专线")) {
+                HighChart chart = ShipmentReportESQuery.shipWeightByMarketPieForDedicated(from, to);
+                renderJSON(J.json(chart));
+            } else {
+                Shipment.T market = Shipment.T.valueOf(type);
+                HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, market);
+                renderJSON(J.json(chart));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -173,10 +180,10 @@ public class ShipmentReports extends Controller {
         render(analyzes, a);
     }
 
-    public static void queryCenterIdByCountryCode(AreaGoodsAnalyze a){
-        if(StringUtil.isBlank(a.countryCode)){
+    public static void queryCenterIdByCountryCode(AreaGoodsAnalyze a) {
+        if(StringUtil.isBlank(a.countryCode)) {
             renderJSON(new Ret());
-        }else{
+        } else {
             List<String> list = a.queryCenterIdByCountryCode(a.countryCode);
             renderJSON(J.json(list));
         }
