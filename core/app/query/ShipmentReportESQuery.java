@@ -37,8 +37,9 @@ public class ShipmentReportESQuery {
             columnChart.title = String
                     .format("From:[%s] To:[%s]运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to));
             for(Shipment.T t : Shipment.T.values()) {
-                columnChart.series(shipColum(from, to, t, "shipFee"));
+                columnChart.series(shipColum(from, to, t.name(), "shipFee"));
             }
+            columnChart.series(shipColum(from, to, "dedicated", "shipFee"));
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
         }
@@ -57,7 +58,7 @@ public class ShipmentReportESQuery {
             pieChart = new HighChart(Series.PIE);
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to), type);
-            pieChart.series(shipPie(from, to, type, "shipFee", false));
+            pieChart.series(shipPie(from, to, type.name(), "shipFee"));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -75,9 +76,9 @@ public class ShipmentReportESQuery {
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = String.format("From:[%s] To:[%s]运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to));
             for(Shipment.T t : Shipment.T.values()) {
-                columnChart.series(shipColum(from, to, t, "shipWeight"));
+                columnChart.series(shipColum(from, to, t.name(), "shipWeight"));
             }
-            columnChart.series(shipColum(from, to, Shipment.T.EXPRESS, "dedicated"));
+            columnChart.series(shipColum(from, to, "dedicated", "dedicated"));
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
         }
@@ -95,7 +96,7 @@ public class ShipmentReportESQuery {
             pieChart = new HighChart(Series.PIE);
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), type);
-            pieChart.series(shipPie(from, to, type, "shipWeight", false));
+            pieChart.series(shipPie(from, to, type.name(), "shipWeight"));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -115,7 +116,7 @@ public class ShipmentReportESQuery {
             pieChart = new HighChart(Series.PIE);
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), "专线");
-            pieChart.series(shipPie(from, to, Shipment.T.EXPRESS, "shipWeight", true));
+            pieChart.series(shipPie(from, to, "dedicated", "shipWeight"));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -153,26 +154,33 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Column shipColum(Date from, Date to, Shipment.T type, String flag) {
+    public static Series.Column shipColum(Date from, Date to, String string_type, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
-        if(StringUtils.equals(flag, "dedicated")) {
+        MetricShipmentService mes;
+        if(StringUtils.equals(string_type, "dedicated")) {
             Series.Column column = new Series.Column("专线");
             column.color = "#A020F0";
             float result = 0f;
-            MetricShipmentService mes = new MetricShipmentService(from, to, type);
-            result = mes.countShipWeight(true);
-            column.add(result, "dedicated");
-            return column;
-        } else {
-            Series.Column column = new Series.Column(type.name());
-            column.color = ProcuresHelper.rgb(type);
-            float result = 0f;
-            MetricShipmentService mes = new MetricShipmentService(from, to, type);
+            mes = new MetricShipmentService(from, to, Shipment.T.EXPRESS);
+            mes.isDedicated = true;
             if(StringUtils.equals(flag, "shipFee")) {
                 result = mes.countShipFee();
             } else {
-                result = mes.countShipWeight(false);
+                result = mes.countShipWeight();
+            }
+            column.add(result, "dedicated");
+            return column;
+        } else {
+            Shipment.T type = Shipment.T.valueOf(string_type);
+            Series.Column column = new Series.Column(type.name());
+            column.color = ProcuresHelper.rgb(type);
+            float result = 0f;
+            mes = new MetricShipmentService(from, to, type);
+            if(StringUtils.equals(flag, "shipFee")) {
+                result = mes.countShipFee();
+            } else {
+                result = mes.countShipWeight();
             }
             column.add(result, type.name());
             return column;
@@ -180,21 +188,38 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Pie shipPie(Date from, Date to, Shipment.T type, String flag, boolean isDedicated) {
+    public static Series.Pie shipPie(Date from, Date to, String string_type, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
-        Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, type));
-        float result = 0f;
-        for(M m : M.values()) {
-            MetricShipmentService mes = new MetricShipmentService(from, to, type, m);
-            if(StringUtils.equals(flag, "shipFee")) {
-                result = mes.countShipFee();
-            } else {
-                result = mes.countShipWeight(isDedicated);
+        if(StringUtils.equals(string_type, "dedicated")) {
+            Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, "专线"));
+            float result = 0f;
+            for(M m : M.values()) {
+                MetricShipmentService mes = new MetricShipmentService(from, to, Shipment.T.EXPRESS, m);
+                mes.isDedicated = true;
+                if(StringUtils.equals(flag, "shipFee")) {
+                    result = mes.countShipFee();
+                } else {
+                    result = mes.countShipWeight();
+                }
+                if(result > 0) pie.add(result, "dedicated");
             }
-            if(result > 0) pie.add(result, m.name());
+            return pie;
+        } else {
+            Shipment.T type = Shipment.T.valueOf(string_type);
+            Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, type));
+            float result = 0f;
+            for(M m : M.values()) {
+                MetricShipmentService mes = new MetricShipmentService(from, to, type, m);
+                if(StringUtils.equals(flag, "shipFee")) {
+                    result = mes.countShipFee();
+                } else {
+                    result = mes.countShipWeight();
+                }
+                if(result > 0) pie.add(result, m.name());
+            }
+            return pie;
         }
-        return pie;
     }
 
     public static Series.Line rateLine(int year, Shipment.T shipType, String countType) {
