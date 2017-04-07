@@ -220,7 +220,7 @@ public class ShipmentReportESQuery {
                 } else {
                     result = mes.countShipWeight();
                 }
-                if(result > 0) pie.add(result, "dedicated");
+                if(result > 0) pie.add(result, m.name());
             }
             return pie;
         } else {
