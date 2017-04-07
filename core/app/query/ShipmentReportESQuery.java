@@ -66,6 +66,24 @@ public class ShipmentReportESQuery {
     }
 
     /**
+     * 运输费用统计饼图(根据市场)
+     */
+    public static HighChart shipFeeByMarketPieForDedicated(final Date from, final Date to, String type) {
+        String key = Caches.Q.cacheKey(from, to, type, "shipFeeByMarket");
+        HighChart pieChart = Cache.get(key, HighChart.class);
+        if(pieChart != null) return pieChart;
+        synchronized(key.intern()) {
+            pieChart = new HighChart(Series.PIE);
+            pieChart.title = String
+                    .format("From:[%s] To:[%s] [%s]各市场运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to), type);
+            pieChart.series(shipPie(from, to, "dedicated", "shipFee"));
+            Cache.delete(key);
+            Cache.add(key, pieChart, "4h");
+        }
+        return pieChart;
+    }
+
+    /**
      * 运输重量统计柱状图(根据运输方式)
      */
     public static HighChart shipWeightByTypeColumn(final Date from, final Date to) {

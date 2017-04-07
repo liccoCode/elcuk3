@@ -84,8 +84,13 @@ public class ShipmentReports extends Controller {
      */
     public static void countShipFeeByMarket(Date from, Date to, String type) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipFeeByMarketPie(from, to, type);
-            renderJSON(J.json(chart));
+            if(StringUtils.equals(type, "专线")) {
+                HighChart chart = ShipmentReportESQuery.shipFeeByMarketPieForDedicated(from, to, type);
+                renderJSON(J.json(chart));
+            } else {
+                HighChart chart = ShipmentReportESQuery.shipFeeByMarketPie(from, to, type);
+                renderJSON(J.json(chart));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
