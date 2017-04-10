@@ -105,8 +105,13 @@ public class ShipmentPost extends Post<Shipment> {
             }
         }
 
-        sql.append(" AND s.dates." + this.dateType + ">=?");
-        sql.append(" AND s.dates." + this.dateType + "<=?");
+        if(this.dateType.equals("createDate")) {
+            sql.append(" AND s." + this.dateType + ">=?");
+            sql.append(" AND s." + this.dateType + "<=?");
+        } else {
+            sql.append(" AND s.dates." + this.dateType + ">=?");
+            sql.append(" AND s.dates." + this.dateType + "<=?");
+        }
         params.add(Dates.morning(this.from));
         params.add(Dates.morning(this.to));
 

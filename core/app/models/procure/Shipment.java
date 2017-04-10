@@ -393,6 +393,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Transient
     public Integer realDay;
 
+    /**
+     * 是否专线
+     */
+    public boolean isDedicated = false;
+
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
@@ -488,7 +493,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             earlyPlanBeginDate = new Date(Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
         }
         this.type = firstShipType;
-        if(this.whouse == null) 
+        if(this.whouse == null)
             this.whouse = firstProcureUnit.whouse;
         for(ProcureUnit unit : procureUnits) {
             if(unit.whouse == null) {
@@ -507,6 +512,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.dates.planBeginDate = earlyPlanBeginDate;
         this.calcuPlanArriveDate();
         this.creater = Login.current();
+        if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
+            this.isDedicated = true;
+        }
         this.save();
         procureUnits.forEach(this::addToShip);
         return this;

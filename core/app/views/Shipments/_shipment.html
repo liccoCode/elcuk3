@@ -129,13 +129,15 @@
 
     <tr>
       <th>运输方式</th>
-      <td style="color:${ship?.type?.rgb()}">${ship?.type?.label()}</td>
+      <td style="color:${ship?.type?.rgb()}">
+      ${ship?.type?.label()}<span style="color:red">${ship.isDedicated?'(专线)':''}</span>
+      </td>
       <th>总重量(kg)货代</th>
       <td>
         <input type="text" name="ship.totalWeightShipment" value="${ship.totalWeightShipment}" id="totalWeightShipment"/>
       </td>
     </tr>
-    
+
     <tr>
       <th>目的地</th>
       <td>${ship.target}</td>
