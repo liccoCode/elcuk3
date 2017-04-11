@@ -8,8 +8,9 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.OutboundPost;
-import models.view.post.ProcurePost;
-import models.whouse.*;
+import models.whouse.Outbound;
+import models.whouse.StockRecord;
+import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -22,13 +23,19 @@ import play.mvc.With;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static play.modules.pdf.PDF.renderPDF;
 
 /**
- * Created by licco on 2016/11/30.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 2016/11/30
+ * Time: 上午10:11
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Outbounds extends Controller {

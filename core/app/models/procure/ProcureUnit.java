@@ -229,6 +229,40 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public abstract String label();
     }
 
+    public enum REVOKE {
+        READY {
+            @Override
+            public String label() {
+                return "准备撤销";
+            }
+        },
+        CONFIRM {
+            @Override
+            public String label() {
+                return "确认撤销";
+            }
+        },
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消撤销";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 撤销出库状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public REVOKE revokeStatus;
+
+    /**
+     * 撤销出库原因
+     */
+    public String revokeMsg;
 
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<>();
@@ -244,7 +278,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Deliveryment deliveryment;
-
 
     /**
      * 出货单
@@ -2616,16 +2649,43 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public boolean isShipmentPlan() {
-        if(this.shipItems.size() > 0) {
-            return this.shipItems.get(0).shipment.state != Shipment.S.PLAN;
-        } else {
-            return false;
-        }
+        return this.shipItems.size() > 0 && this.shipItems.get(0).shipment.state != Shipment.S.PLAN;
     }
 
     public Date qcDate() {
         InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id DESC", this.id).first();
         return unit != null ? unit.qcDate : null;
+    }
+
+    public static void cancelAMZOutbound(String msg, Long[] ids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        units.forEach(unit -> {
+            unit.revokeStatus = REVOKE.READY;
+            unit.revokeMsg = msg;
+            unit.save();
+        });
+    }
+
+    public void confirmCancelAMZOutbound() {
+        this.availableQty += this.outQty;
+        this.outbound = null;
+        this.stage = STAGE.IN_STORAGE;
+        this.revokeStatus = REVOKE.CONFIRM;
+
+        StockRecord stockRecord = new StockRecord();
+        stockRecord.whouse = this.whouse;
+        stockRecord.unit = this;
+        stockRecord.qty = this.outQty;
+        stockRecord.currQty = this.availableQty;
+        stockRecord.type = StockRecord.T.CancelOutbound;
+        stockRecord.category = StockRecord.C.Normal;
+        stockRecord.memo = this.revokeMsg;
+        stockRecord.recordId = this.id;
+        stockRecord.save();
+        new ERecordBuilder("outbound.cancel").msgArgs(this.id, this.outQty, this.revokeMsg).fid(this.id).save();
+
+        this.outQty = 0;
+        this.save();
     }
 
 }

@@ -23,6 +23,7 @@
     <th>仓库名称</th>
     <th>收货入库ID</th>
     <th>阶段</th>
+    <th>撤销出库</th>
     <th>备注</th>
   </tr>
 #{list items:units, as:'unit'}
@@ -57,6 +58,7 @@
     <td>${unit.currWhouse?.name}</td>
     <td>${unit.showInboundUnitIds()}</td>
     <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+    <td rel="tooltip" title="${unit.revokeMsg}" style="color:red">${unit.revokeStatus?.label()}</td>
     <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
   </tr>
 #{/list}

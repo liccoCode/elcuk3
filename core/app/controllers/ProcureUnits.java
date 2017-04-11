@@ -62,7 +62,7 @@ public class ProcureUnits extends Controller {
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
         renderArgs.put("cooperators", cooperators);
-        renderArgs.put("categoryIds",  Category.categoryIds());
+        renderArgs.put("categoryIds", Category.categoryIds());
 
         //为视图提供日期
         DateTime dateTime = new DateTime();
@@ -101,7 +101,7 @@ public class ProcureUnits extends Controller {
     public static void indexWhouse(ProcurePost p) {
         if(p == null) {
             p = new ProcurePost();
-            p.dateType = "attrs.planShipDate"; 
+            p.dateType = "attrs.planShipDate";
         }
         p.pagination = false;
         render(p);
@@ -885,6 +885,13 @@ public class ProcureUnits extends Controller {
 
     public static void dataPanel() {
         render();
+    }
+
+    public static void confirmCancelAMZOutbound(Long unitId, String shipmentId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        unit.confirmCancelAMZOutbound();
+        flash.success("操作成功");
+        Shipments.show(shipmentId);
     }
 
 }
