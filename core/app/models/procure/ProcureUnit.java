@@ -239,7 +239,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         CONFIRM {
             @Override
             public String label() {
-                return "确认撤销";
+                return "已撤销";
             }
         },
         CANCEL {

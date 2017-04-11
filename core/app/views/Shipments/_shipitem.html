@@ -155,11 +155,12 @@
             </td>
           #{/if}
       #{/power.ck}
-    <td style="color:red">${itm.unit.revokeStatus?.label()}<br>
+    <td style="color:red" rel="tooltip" title="${itm.unit.revokeMsg}">
         #{if itm.unit.revokeStatus?.name()=='READY'}
           <a class="btn btn-mini btn-danger" rel="tooltip" title="${itm.unit.revokeMsg}"
-             href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意</a>
+             href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意撤销</a>
         #{/if}
+        #{else }${itm.unit.revokeStatus?.label()}#{/else}
     </td>
   </tr>
 #{/list}
