@@ -6,6 +6,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.post.StockPost;
 import models.view.post.StockRecordPost;
+import models.whouse.Outbound;
 import models.whouse.StockRecord;
 import models.whouse.Whouse;
 import play.mvc.Before;
@@ -83,6 +84,16 @@ public class StockRecords extends Controller {
 
     public static void changeRecords(Long id) {
         index(new StockRecordPost(id));
+    }
+
+    public static void cancelOutbound(String msg, Long[] ids, String outboundId) {
+        Outbound outbound = Outbound.findById(outboundId);
+        if(outbound.type == StockRecord.C.Other)
+            StockRecord.cancelOtherOutbound(ids, msg);
+        else
+            ProcureUnit.cancelAMZOutbound(msg, ids);
+        flash.success("操作成功");
+        Outbounds.edit(outboundId);
     }
 
 }

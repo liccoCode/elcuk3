@@ -50,7 +50,12 @@
         <td>
           <select name="outbound.type">
               #{list items:models.whouse.StockRecord.C, as:'t'}
-                <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
+                #{if outbound.type.name()=='Normal' && t.name() == 'Normal'}
+                  <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
+                #{/if}
+               #{elseif outbound.type.name()!='Normal' && t.name() != 'Normal'}
+                 <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
+               #{/elseif}
               #{/list}
           </select>
         </td>
@@ -184,4 +189,25 @@
     <ul class="thumbnails uploaded"></ul>
     <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
   </div>
+</div>
+
+<div id="cancel_outbound_modal" class="modal hide fade">
+  <form action="@{StockRecords.cancelOutbound()}" method="post">
+    <div class="modal-body">
+      <table>
+        <tr>
+          <th style="width:70px;">撤销原因:</th>
+          <td>
+            <textarea style="height:150px;width:430px;" name="msg" required></textarea>
+            <input type="hidden" id="recordIds" name="ids" value=""/>
+            <input type="hidden" name="outboundId" value="${outbound.id}"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+      <input type="submit" value="提交" class="btn btn-primary">
+    </div>
+  </form>
 </div>

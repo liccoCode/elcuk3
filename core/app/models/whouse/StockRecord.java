@@ -1,9 +1,12 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.ProcureUnit;
 import play.data.validation.Required;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -114,6 +117,12 @@ public class StockRecord extends Model {
             public String label() {
                 return "不良品转入";
             }
+        },
+        CancelOutbound {
+            @Override
+            public String label() {
+                return "撤销出库";
+            }
         };
 
 
@@ -193,6 +202,7 @@ public class StockRecord extends Model {
 
 
     public StockRecord() {
+        this.creator = Login.current();
         this.createDate = new Date();
     }
 
@@ -208,6 +218,28 @@ public class StockRecord extends Model {
             }
         }
         return ten;
+    }
+
+    public static void cancelOtherOutbound(Long[] ids, String msg) {
+        List<StockRecord> records = StockRecord.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        records.forEach(record -> {
+            ProcureUnit unit = record.unit;
+            unit.availableQty += record.qty;
+            unit.save();
+            record.outbound = null;
+            record.save();
+            StockRecord stockRecord = new StockRecord();
+            stockRecord.whouse = record.whouse;
+            stockRecord.unit = record.unit;
+            stockRecord.qty = record.qty;
+            stockRecord.currQty = unit.availableQty;
+            stockRecord.type = T.CancelOutbound;
+            stockRecord.category = C.Other;
+            stockRecord.memo = msg;
+            stockRecord.recordId = unit.id;
+            stockRecord.save();
+            new ERecordBuilder("outbound.cancel").msgArgs(unit.id, record.qty, msg).fid(unit.id).save();
+        });
     }
 
 }

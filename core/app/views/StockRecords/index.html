@@ -70,6 +70,7 @@
             <th>异动时间</th>
             <th>异动数量</th>
             <th>异动类型</th>
+            <th>异动类别</th>
             <th>来源记录ID</th>
             <th>操作人</th>
           </tr>
@@ -94,6 +95,7 @@
             <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
             <td>${r.qty}</td>
             <td>${r.type.label()}</td>
+            <td>${r.category?.label()}</td>
             <td>
               <a href="${r.showRecordLink()}" target="_blank">${r.type.label()}记录 ${r.recordId}</a>
             </td>

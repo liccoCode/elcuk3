@@ -169,28 +169,12 @@ $(() => {
       });
       return false;
     }
-    if (confirm("确认解除选中采购计划吗？")) {
-      let ids = [];
-      $("#data_table input[type='checkbox']:checked").each(function () {
-        ids.push($(this).val());
-      });
-      $.post("/ProcureUnits/deleteUnit", {ids: ids}, function (r) {
-        if (r) {
-          $("#data_table input[type='checkbox']:checked").each(function () {
-            $(this).parent("td").parent("tr").remove();
-          });
-          noty({
-            text: "解除计划成功!",
-            type: 'success'
-          });
-        } else {
-          noty({
-            text: "解除计划失败，请稍后再试，或者联系管理员!",
-            type: 'error'
-          });
-        }
-      });
-    }
+    let ids = [];
+    $("#data_table input[type='checkbox']:checked").each(function () {
+      ids.push($(this).val());
+    });
+    $("#recordIds").val(ids);
+    $("#cancel_outbound_modal").modal("show");
   });
 
   function fidCallBack () {
