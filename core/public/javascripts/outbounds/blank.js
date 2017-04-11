@@ -130,7 +130,6 @@ $(() => {
   });
 
   $("#deleteBtn").click(function (e) {
-    e.stopPropagation();
     if ($("#data_table input[type='checkbox']:checked").length == 0) {
       noty({
         text: "请选择需要解除的采购计划！",
@@ -161,6 +160,49 @@ $(() => {
       });
     }
   });
+
+  $("#cancelBtn").click(function (e) {
+    if ($("#data_table input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: "请选择需要撤销的采购计划！",
+        type: 'error'
+      });
+      return false;
+    }
+    if (confirm("确认解除选中采购计划吗？")) {
+      let ids = [];
+      $("#data_table input[type='checkbox']:checked").each(function () {
+        ids.push($(this).val());
+      });
+      $.post("/ProcureUnits/deleteUnit", {ids: ids}, function (r) {
+        if (r) {
+          $("#data_table input[type='checkbox']:checked").each(function () {
+            $(this).parent("td").parent("tr").remove();
+          });
+          noty({
+            text: "解除计划成功!",
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: "解除计划失败，请稍后再试，或者联系管理员!",
+            type: 'error'
+          });
+        }
+      });
+    }
+  });
+
+  function fidCallBack () {
+    return {
+      fid: $("input[name='outbound.id']").val(),
+      p: 'OUTBOUND'
+    }
+  }
+
+  let dropbox = $('#dropbox');
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
+  window.dropUpload.iniDropbox(fidCallBack, dropbox);
 
   let unit_id = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unit_id);

@@ -129,7 +129,8 @@
               #{/list}
           </td>
           <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}"
-              inboundQty="${procureUnit.inboundQty}">
+              inboundQty="${procureUnit.inboundQty}"
+              style="color:${procureUnit.attrs.planQty!=procureUnit.inboundQty && procureUnit.inboundQty>0 ? 'red':''}">
           ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}/${procureUnit.inboundQty}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
