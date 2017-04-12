@@ -1367,7 +1367,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param shipment
      */
     private void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
-        if(this.revokeStatus != null && this.revokeStatus != REVOKE.CONFIRM) {
+        if(this.revokeStatus != null && !Arrays.asList(REVOKE.CONFIRM, REVOKE.NONE).contains(this.revokeStatus)) {
             Validation.addError("", "当前采购计划正在等待物流确认撤销出库...");
             return;
         }
