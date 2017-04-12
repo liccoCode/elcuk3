@@ -394,7 +394,7 @@ public class Whouse extends Model {
         return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
     }
 
-    private static Whouse autoMatching(InboundUnit unit) {
+    public static Whouse autoMatching(InboundUnit unit) {
         String country = unit.unit.selling != null ? unit.unit.selling.market.shortHand() : "";
         country = unit.unit.projectName.equals("B2B") ? "B2B" : country;
         return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
