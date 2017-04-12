@@ -872,7 +872,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
         newUnit.comment = unit.comment;
-        newUnit.result = this.result;
+        newUnit.result = InboundUnit.R.Qualified;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         newUnit.isDedicated = unit.isDedicated;
