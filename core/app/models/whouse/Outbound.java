@@ -6,9 +6,7 @@ import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.procure.ShipItem;
 import models.procure.Shipment;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -31,6 +29,8 @@ import java.util.stream.Collectors;
 @DynamicUpdate
 public class Outbound extends GenericModel {
 
+    private static final long serialVersionUID = 163177419089864527L;
+    
     @Id
     @Column(length = 30)
     @Expose
@@ -182,7 +182,7 @@ public class Outbound extends GenericModel {
         this.init();
         this.projectName = this.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         this.save();
-        pids.stream().filter(id -> id != null).forEach(id -> {
+        pids.stream().filter(Objects::nonNull).forEach(id -> {
             ProcureUnit unit = ProcureUnit.findById(id);
             unit.outbound = this;
             unit.save();
@@ -292,7 +292,7 @@ public class Outbound extends GenericModel {
                     p.stage = ProcureUnit.STAGE.OUTBOUND;
                 }
                 int total_main = p.mainBox.num * p.mainBox.boxNum;
-                int total_last = p.lastBox.num * p.lastBox.boxNum;
+                int total_last = p.lastBox == null ? 0 : p.lastBox.num * p.lastBox.boxNum;
                 p.outQty = total_main + total_last;
                 p.availableQty = p.availableQty - p.outQty;
                 p.save();
