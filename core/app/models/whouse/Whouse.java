@@ -1,14 +1,13 @@
 package models.whouse;
 
 import com.google.gson.annotations.Expose;
-import models.OperatorConfig;
-import models.procure.FBAShipment;
-import org.apache.commons.lang.StringUtils;
 import helper.Dates;
+import models.OperatorConfig;
 import models.User;
 import models.market.Account;
 import models.market.M;
 import models.procure.Cooperator;
+import models.procure.FBAShipment;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -32,6 +31,7 @@ import java.util.*;
 @DynamicUpdate
 public class Whouse extends Model {
 
+    private static final long serialVersionUID = -1455733651309034277L;
     /**
      * 如果这个 Whouse 为 FBA 的, 那么则一定需要绑定一个 Account, 只有这样才能从 Account 获取必要的信息到 Amazon FBA 下载
      * FBA Inventory 库存信息
@@ -177,12 +177,12 @@ public class Whouse extends Model {
         }
     }
 
-    public StringBuilder buildStringHead() {
+    private StringBuilder buildStringHead() {
         StringBuilder sbd = new StringBuilder();
-        sbd.append("cooperator_id = " + this.cooperator.id + "");
+        sbd.append("cooperator_id = ").append(this.cooperator.id).append("");
         if(this.id != null) {
             //update 的时候查询是否存在时需要将当前对象排除掉
-            sbd.append(" AND id != " + this.id + "");
+            sbd.append(" AND id != ").append(this.id).append("");
         }
         return sbd;
     }
@@ -191,8 +191,6 @@ public class Whouse extends Model {
      * 判断当前货代该运输方式是否已经被使用
      * <p/>
      * 由于运输方式可以多选，所以需要单独去判断每一个被选择的运输方式是否已经被使用
-     *
-     * @return
      */
     public void exist() {
         StringBuilder sbd = buildStringHead();
@@ -244,12 +242,8 @@ public class Whouse extends Model {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         Whouse whouse = (Whouse) o;
-
-        if(name != null ? !name.equals(whouse.name) : whouse.name != null) return false;
-
-        return true;
+        return name != null ? name.equals(whouse.name) : whouse.name == null;
     }
 
     @Override
@@ -275,14 +269,14 @@ public class Whouse extends Model {
      * 根据星期判断shipmentType来处理运往某仓库的Shipment
      *
      * @param planShipments 用于判断的已经存在的运输单
-     * @return 暂时无返回
+     *                      暂时无返回
      */
     public void checkWhouseNewShipment(List<Shipment> planShipments) {
-        /**
-         * 1. 处理 60 天内的运输单;
-         * 2. 规则:
-         *  空运: 每周三;
-         *  海运: DE/US 周一, IT 周五, UK 周四
+        /*
+          1. 处理 60 天内的运输单;
+          2. 规则:
+           空运: 每周三;
+           海运: US 周一, IT 周五, DE/UK 周四
          */
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
@@ -351,7 +345,6 @@ public class Whouse extends Model {
     /**
      * 根据运输商与运输方式来查找仓库
      *
-     * @return
      */
     public static Whouse findByCooperatorAndShipType(Cooperator cooperator, Shipment.T shiptype) {
         StringBuilder sbd = new StringBuilder("cooperator=?");
@@ -374,7 +367,6 @@ public class Whouse extends Model {
     /**
      * 自有仓
      *
-     * @return
      */
     public static List<Whouse> selfWhouses() {
         return selfWhouses(true);
@@ -383,8 +375,6 @@ public class Whouse extends Model {
     /**
      * 自有仓
      *
-     * @param includeDefective
-     * @return
      */
     public static List<Whouse> selfWhouses(boolean includeDefective) {
         String sql = "type=?";
@@ -399,13 +389,12 @@ public class Whouse extends Model {
     /**
      * 不良品仓库
      *
-     * @return
      */
     public static Whouse defectiveWhouse() {
         return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
     }
 
-    public static Whouse autoMatching(InboundUnit unit) {
+    private static Whouse autoMatching(InboundUnit unit) {
         String country = unit.unit.selling != null ? unit.unit.selling.market.shortHand() : "";
         country = unit.unit.projectName.equals("B2B") ? "B2B" : country;
         return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
