@@ -247,6 +247,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             public String label() {
                 return "取消撤销";
             }
+        },
+        NONE {
+            @Override
+            public String label() {
+                return "";
+            }
         };
 
         public abstract String label();
@@ -1360,16 +1366,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param oldShipType
      * @param shipment
      */
-    public void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
-        if(this.shipItems.stream().anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
+    private void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
+        if(this.revokeStatus != null && this.revokeStatus != REVOKE.CONFIRM) {
+            Validation.addError("", "当前采购计划正在等待物流确认撤销出库...");
+            return;
+        }
+        if(this.shipItems.stream().anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN
+                && this.revokeStatus != REVOKE.CONFIRM)) {
             Validation.addError("", String.format("当前采购计划已经存在运输单, 且该运输单不是 %s 状态.", Shipment.S.PLAN.label()));
             return;
         }
         if(shipment != null && shipment.state != Shipment.S.PLAN) {
-            Validation.addError("", String.format(
-                    "需要关联的运输单 %s 为 %s 状态, 只有 %s 状态的运输单才可调整.", shipment.id, shipment.state.label(),
-                    Shipment.S.PLAN.label()));
+            Validation.addError("", String.format("需要关联的运输单 %s 为 %s 状态, 只有 %s 状态的运输单才可调整.",
+                    shipment.id, shipment.state.label(), Shipment.S.PLAN.label()));
             return;
+        }
+        if((this.shipItems.get(0) != null) && (this.shipItems.get(0).shipment != shipment)) {
+            this.revokeStatus = REVOKE.NONE;
         }
         if(shipment == null) {
             // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.

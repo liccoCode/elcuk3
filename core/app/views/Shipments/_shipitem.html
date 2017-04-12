@@ -44,7 +44,7 @@
         <th>记录运费</th>
       #{/if}
   #{/power.ck}
-    <th width="60px;">撤销出库</th>
+    <th width="70px;">撤销出库</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'
@@ -157,8 +157,7 @@
       #{/power.ck}
     <td style="color:red" rel="tooltip" title="${itm.unit.revokeMsg}">
         #{if itm.unit.revokeStatus?.name()=='READY'}
-          <a class="btn btn-mini btn-danger" rel="tooltip" title="${itm.unit.revokeMsg}"
-             href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意撤销</a>
+          <a class="btn btn-mini btn-danger" href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意撤销</a>
         #{/if}
         #{else }${itm.unit.revokeStatus?.label()}#{/else}
     </td>

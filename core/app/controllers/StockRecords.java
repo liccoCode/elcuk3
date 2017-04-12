@@ -88,7 +88,7 @@ public class StockRecords extends Controller {
 
     public static void cancelOutbound(String msg, Long[] ids, String outboundId) {
         Outbound outbound = Outbound.findById(outboundId);
-        if(outbound.type == StockRecord.C.Other)
+        if(outbound.type != StockRecord.C.Normal)
             StockRecord.cancelOtherOutbound(ids, msg);
         else
             ProcureUnit.cancelAMZOutbound(msg, ids);
