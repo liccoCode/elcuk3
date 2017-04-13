@@ -1381,9 +1381,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     shipment.id, shipment.state.label(), Shipment.S.PLAN.label()));
             return;
         }
-        if((this.shipItems.get(0) != null) && (this.shipItems.get(0).shipment != shipment)) {
-            this.revokeStatus = REVOKE.NONE;
-        }
+
         if(shipment == null) {
             // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
             // 2. 用户更改了运输方式但未选择运输单
