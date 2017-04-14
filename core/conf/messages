@@ -270,6 +270,8 @@ outboundrecord.update=\u66f4\u65b0[\u51fa\u5e93\u8bb0\u5f55]
 outboundrecord.update.msg=\u66f4\u65b0\u51fa\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
 outboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u51fa\u5e93
 outboundrecord.confirm.msg=ID[%s]
+outbound.cancel=\u64a4\u9500\u51fa\u5e93
+outbound.cancel.msg=\u91c7\u8d2d\u8ba1\u5212\u0020 [%s] \u64a4\u9500\u51fa\u5e93\u6570\u91cf [%s]，\u539f\u56e0:[%s] 
 
 refund.update=\u66f4\u65b0\u005b\u9000\u8d27\u4fe1\u606f\u005d
 refund.update.msg=\u66f4\u65b0\u5165\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]

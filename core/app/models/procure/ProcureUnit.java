@@ -229,6 +229,46 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public abstract String label();
     }
 
+    public enum REVOKE {
+        READY {
+            @Override
+            public String label() {
+                return "准备撤销";
+            }
+        },
+        CONFIRM {
+            @Override
+            public String label() {
+                return "已撤销";
+            }
+        },
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消撤销";
+            }
+        },
+        NONE {
+            @Override
+            public String label() {
+                return "";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 撤销出库状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public REVOKE revokeStatus;
+
+    /**
+     * 撤销出库原因
+     */
+    public String revokeMsg;
 
     @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<>();
@@ -244,7 +284,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Deliveryment deliveryment;
-
 
     /**
      * 出货单
@@ -833,7 +872,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
         newUnit.comment = unit.comment;
-        newUnit.result = this.result;
+        newUnit.result = InboundUnit.R.Qualified;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         newUnit.isDedicated = unit.isDedicated;
@@ -1327,17 +1366,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param oldShipType
      * @param shipment
      */
-    public void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
-        if(this.shipItems.stream().anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN)) {
+    private void changeShipItemShipment(Shipment shipment, Shipment.T oldShipType) {
+        if(this.revokeStatus != null && !Arrays.asList(REVOKE.CONFIRM, REVOKE.NONE).contains(this.revokeStatus)) {
+            Validation.addError("", "当前采购计划正在等待物流确认撤销出库...");
+            return;
+        }
+        if(this.shipItems.stream().anyMatch(item -> item.shipment != null && item.shipment.state != Shipment.S.PLAN
+                && this.revokeStatus != REVOKE.CONFIRM)) {
             Validation.addError("", String.format("当前采购计划已经存在运输单, 且该运输单不是 %s 状态.", Shipment.S.PLAN.label()));
             return;
         }
         if(shipment != null && shipment.state != Shipment.S.PLAN) {
-            Validation.addError("", String.format(
-                    "需要关联的运输单 %s 为 %s 状态, 只有 %s 状态的运输单才可调整.", shipment.id, shipment.state.label(),
-                    Shipment.S.PLAN.label()));
+            Validation.addError("", String.format("需要关联的运输单 %s 为 %s 状态, 只有 %s 状态的运输单才可调整.",
+                    shipment.id, shipment.state.label(), Shipment.S.PLAN.label()));
             return;
         }
+
         if(shipment == null) {
             // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
             // 2. 用户更改了运输方式但未选择运输单
@@ -2616,16 +2660,43 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public boolean isShipmentPlan() {
-        if(this.shipItems.size() > 0) {
-            return this.shipItems.get(0).shipment.state != Shipment.S.PLAN;
-        } else {
-            return false;
-        }
+        return this.shipItems.size() > 0 && this.shipItems.get(0).shipment.state != Shipment.S.PLAN;
     }
 
     public Date qcDate() {
         InboundUnit unit = InboundUnit.find("unit.id = ? ORDER BY id DESC", this.id).first();
         return unit != null ? unit.qcDate : null;
+    }
+
+    public static void cancelAMZOutbound(String msg, Long[] ids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        units.forEach(unit -> {
+            unit.revokeStatus = REVOKE.READY;
+            unit.revokeMsg = msg;
+            unit.save();
+        });
+    }
+
+    public void confirmCancelAMZOutbound() {
+        this.availableQty += this.outQty;
+        this.outbound = null;
+        this.stage = STAGE.IN_STORAGE;
+        this.revokeStatus = REVOKE.CONFIRM;
+
+        StockRecord stockRecord = new StockRecord();
+        stockRecord.whouse = this.whouse;
+        stockRecord.unit = this;
+        stockRecord.qty = this.outQty;
+        stockRecord.currQty = this.availableQty;
+        stockRecord.type = StockRecord.T.CancelOutbound;
+        stockRecord.category = StockRecord.C.Normal;
+        stockRecord.memo = this.revokeMsg;
+        stockRecord.recordId = this.id;
+        stockRecord.save();
+        new ERecordBuilder("outbound.cancel").msgArgs(this.id, this.outQty, this.revokeMsg).fid(this.id).save();
+
+        this.outQty = 0;
+        this.save();
     }
 
 }

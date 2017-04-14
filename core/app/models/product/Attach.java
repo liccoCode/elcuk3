@@ -102,7 +102,11 @@ public class Attach extends Model {
         /**
          * 仓库上传的和产品相关的图片
          */
-        PRODUCTWHOUSE;
+        PRODUCTWHOUSE,
+        /**
+         * 出库单上传附件
+         */
+        OUTBOUND;
 
         /**
          * 默认的附件删除方法.物理删除

@@ -109,18 +109,15 @@
     #{/list}
     </table>
 
-    <div class="btn-toolbar">
-      <select name="shipmentId" class="inline selectize" style="width:180px;">
-        <option value="">新运输单</option>
-      #{list items:shipments, as:'s'}
-        <option value="${s.id}">${s.id}</option>
-      #{/list}
-      </select>
-      <button class="btn btn-success" data-confirm='确认要创建吗?' data-disable-with='创建中...'>
+    <div class="inline">
+      <input type="text" placeholder="指定到运输单" name="shipmentId" style="width:180px;" class="inline" value="">
+    </div>
+    <div class="inline">
+      <button class="btn btn-success inline" data-confirm='确认要创建吗?' data-disable-with='创建中...'>
         创建运输单
       </button>
     </div>
-    
+
   </form>
 </div>
 

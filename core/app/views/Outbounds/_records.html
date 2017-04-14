@@ -1,5 +1,6 @@
 <table class="table table-condensed table-bordered" id="data_table">
   <tr>
+    <td><input type="checkbox"></td>
     <th>采购计划ID</th>
     <th>采购单</th>
     <th>Selling</th>
@@ -17,6 +18,7 @@
   </tr>
 #{list items:records, as:'r'}
   <tr class="text-center" id="unit_${r.unit.id}">
+    <td><input type="checkbox" value="${r.id}"></td>
     <td>${r.unit.id}</td>
     <td>${r.unit.deliveryment.id}</td>
     <td>${r.unit.selling?.sellingId}</td>

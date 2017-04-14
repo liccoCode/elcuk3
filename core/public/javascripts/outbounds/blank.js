@@ -130,7 +130,6 @@ $(() => {
   });
 
   $("#deleteBtn").click(function (e) {
-    e.stopPropagation();
     if ($("#data_table input[type='checkbox']:checked").length == 0) {
       noty({
         text: "请选择需要解除的采购计划！",
@@ -161,6 +160,33 @@ $(() => {
       });
     }
   });
+
+  $("#cancelBtn").click(function (e) {
+    if ($("#data_table input[type='checkbox']:checked").length == 0) {
+      noty({
+        text: "请选择需要撤销的采购计划！",
+        type: 'error'
+      });
+      return false;
+    }
+    let ids = [];
+    $("#data_table input[type='checkbox']:checked").each(function () {
+      ids.push($(this).val());
+    });
+    $("#recordIds").val(ids);
+    $("#cancel_outbound_modal").modal("show");
+  });
+
+  function fidCallBack () {
+    return {
+      fid: $("input[name='outbound.id']").val(),
+      p: 'OUTBOUND'
+    }
+  }
+
+  let dropbox = $('#dropbox');
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
+  window.dropUpload.iniDropbox(fidCallBack, dropbox);
 
   let unit_id = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unit_id);

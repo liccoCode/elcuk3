@@ -48,19 +48,24 @@ public class LinkHelper extends JavaExtensions {
                 InboundUnit unit = InboundUnit.findById(idMatch);
                 return fullUrl("Inbounds.edit", unit.inbound.id, idMatch.toString());
             case Outbound:
-                return fullUrl("Outbounds.edit", stockRecord.unit.outbound.id, idMatch.toString());
+                if(stockRecord.unit.outbound != null)
+                    return fullUrl("Outbounds.edit", stockRecord.unit.outbound.id, idMatch.toString());
+                else
+                    return fullUrl("ProcureUnits.detail", idMatch.toString(), idMatch.toString());
             case Stocktaking:
                 return Router.getFullUrl("StockRecords.show", GTs.newMap("id", idMatch).build());
             case Unqualified_Refund:
             case Refund:
                 RefundUnit refundUnit = RefundUnit.findById(idMatch);
                 return fullUrl("Refunds.edit", refundUnit.refund.id, idMatch.toString());
+            case OtherOutbound:
+                if(stockRecord.outbound != null)
+                    return fullUrl("Outbounds.edit", stockRecord.outbound.id, stockRecord.unit.id.toString());
             case Split:
             case Split_Stock:
+            case CancelOutbound:
             case Unqualified_Transfer:
                 return fullUrl("ProcureUnits.detail", idMatch.toString(), idMatch.toString());
-            case OtherOutbound:
-                return fullUrl("Outbounds.edit", stockRecord.outbound.id, stockRecord.unit.id.toString());
             default:
                 return "#";
         }
