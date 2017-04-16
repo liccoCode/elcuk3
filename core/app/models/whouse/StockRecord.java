@@ -24,6 +24,8 @@ import java.util.Map;
  */
 @Entity
 public class StockRecord extends Model {
+    
+    private static final long serialVersionUID = 8998389774247420866L;
     /**
      * 仓库
      */
@@ -202,7 +204,6 @@ public class StockRecord extends Model {
 
 
     public StockRecord() {
-        this.creator = Login.current();
         this.createDate = new Date();
     }
 
@@ -237,6 +238,7 @@ public class StockRecord extends Model {
             stockRecord.category = C.Other;
             stockRecord.memo = msg;
             stockRecord.recordId = unit.id;
+            stockRecord.creator = Login.current();
             stockRecord.save();
             new ERecordBuilder("outbound.cancel").msgArgs(unit.id, record.qty, msg).fid(unit.id).save();
         });
