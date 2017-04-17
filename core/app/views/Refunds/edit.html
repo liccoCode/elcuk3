@@ -91,15 +91,15 @@
   <div class="input-append">
   #{if refund.status.name() == "Create"}
     <button class="btn btn-danger" id="deleteBtn">解除</button>
+    <div class="input-append">
+      <input type="text" name="procureId" data-url="@{Refunds.quickAddByEdit()}" placeholder="采购计划ID" id="procureId">
+      <input type="hidden" name="refundId" value="${refund?.id}"/>
+      <input type="button" class="btn btn-warning" rel="tooltip" id="quickAddByEdit" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+    </div>
   #{/if}
   </div>
   <div class="input-append">
     <input type="button" class="btn btn-primary" id="batchUpdateBoxInfoBtn" value="批量更新包装信息">
-  </div>
-  <div class="input-append">
-    <input type="text" name="procureId" data-url="@{Refunds.quickAddByEdit()}" placeholder="采购计划ID" id="procureId">
-    <input type="hidden" name="refundId" value="${refund?.id}"/>
-    <input type="button" class="btn btn-warning" rel="tooltip" id="quickAddByEdit" title="输入采购ID，可以快速添加采购计划" value="快速添加">
   </div>
 </div>
 
