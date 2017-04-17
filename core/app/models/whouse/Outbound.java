@@ -203,6 +203,7 @@ public class Outbound extends GenericModel {
             ProcureUnit unit = ProcureUnit.findById(record.unitId);
             StockRecord stock = new StockRecord();
             stock.unit = unit;
+            stock.recordId = record.unitId;
             stock.outbound = this;
             stock.whouse = unit.currWhouse;
             stock.creator = Login.current();
