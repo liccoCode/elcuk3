@@ -2684,6 +2684,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.revokeStatus = REVOKE.CONFIRM;
 
         StockRecord stockRecord = new StockRecord();
+        stockRecord.creator = Login.current();
         stockRecord.whouse = this.whouse;
         stockRecord.unit = this;
         stockRecord.qty = this.outQty;
