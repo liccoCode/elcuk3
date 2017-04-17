@@ -202,9 +202,9 @@ public class Deliveryments extends Controller {
         Validation.required("deliveryments.cancel", msg);
         Deliveryment dmt = Deliveryment.findById(id);
         dmt.cancel(msg);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             render("Deliveryments/show.html", dmt, msg);
-
+        }
         show(dmt.id);
     }
 
