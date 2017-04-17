@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class Outbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
-    
+
     @Id
     @Column(length = 30)
     @Expose
