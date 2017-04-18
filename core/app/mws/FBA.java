@@ -133,7 +133,7 @@ public class FBA {
                 if(item.shipment == null) continue;
                 shipments.add(item.shipment);
             }
-            qty += unit.qty();
+            qty += unit.qtyForFba();
         }
         fbaTitle.append("总共运输数量为 ").append(qty);
         if(shipments.size() > 0) {
