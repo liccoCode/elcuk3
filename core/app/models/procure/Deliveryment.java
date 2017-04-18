@@ -324,8 +324,6 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 获取 Units 的产品类型
-     *
-     * @return
      */
     public Set<Category> unitsCategorys() {
         Set<Category> categories = new HashSet<>();
@@ -344,8 +342,8 @@ public class Deliveryment extends GenericModel {
             Validation.addError("", "采购计划必须全部都是采购中的才能取消采购单！");
             return;
         }
-        this.units.forEach(unit -> unit.toggleAssignTodeliveryment(null, false));
         if(Validation.hasErrors()) return;
+        this.units.forEach(unit -> unit.toggleAssignTodeliveryment(null, false));
         this.state = S.CANCEL;
         this.save();
         new ElcukRecord(Messages.get("deliveryment.cancel"),

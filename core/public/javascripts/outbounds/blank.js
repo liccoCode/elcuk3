@@ -171,7 +171,7 @@ $(() => {
     }
     let ids = [];
     $("#data_table input[type='checkbox']:checked").each(function () {
-      ids.push($(this).val());
+      if ($(this).val()) ids.push($(this).val());
     });
     $("#recordIds").val(ids);
     $("#cancel_outbound_modal").modal("show");
@@ -191,8 +191,8 @@ $(() => {
   let unit_id = window.location.hash.slice(1);
   let targetTr = $("#unit_" + unit_id);
   if (targetTr.size() > 0) {
-    EF.scoll(targetTr)
-    EF.colorAnimate(targetTr)
+    EF.scoll(targetTr);
+    EF.colorAnimate(targetTr);
   }
 
   let index = $("#data_table input[type='checkbox']").length - 1;

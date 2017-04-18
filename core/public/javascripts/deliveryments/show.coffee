@@ -12,7 +12,7 @@ $ ->
   ).on("blur", "input[name='boxNumbers']", (e) ->
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1") # 确保用户填写的是大于零的数字
-  ).on('click', '#sumbitDownloadFBAZIP', (e) ->
+  ).on('click', '#submitDownloadFBAZIP', (e) ->
     submitForm($("#downloadFBAZIP"))
     $('#box_number_modal').modal('hide')
   ).on('click', '#downloadFBAZIP', (e) ->
