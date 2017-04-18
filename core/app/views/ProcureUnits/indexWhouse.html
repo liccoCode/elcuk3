@@ -11,6 +11,12 @@
     #{script 'procureunits/index.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
+<script type="text/javascript">
+  $(document).on('click', '#today', function (e) {
+    $("input[name='p.from']").data('dateinput').setValue(new Date());
+    $("input[name='p.to']").data('dateinput').setValue(new Date());
+  });
+</script>
 <style>
   .table td{
     vertical-align:middle;
@@ -23,6 +29,15 @@
   <form action="@{ProcureUnits.indexWhouse()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
+        <div class="inline">
+          <button id="today" class="btn"><i class="icon-search"></i> Today</button>
+        </div>
+        
+        <div class="input-prepend input-append inline">
+          <button class="btn btn-warning" name="splitBtn" data-loading>库存分拆</button>
+          <input type="hidden" name="p.type" value="${p.type}" id="type">
+        </div>
+
         <div class="input-prepend input-append inline">
           <span class="add-on">From:</span>
           <input type="date" name="p.from" value="${p.from.date()}">
@@ -136,6 +151,7 @@
             </label>
           </th>
           <th width="60px;">采购计划ID</th>
+          <th>父ID</th>
           <th>阶段</th>
           <th width="150px;">Selling</th>
           <th width="155px;">Sku<br>产品名称</th>
@@ -173,6 +189,7 @@
               #{/if}
             <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank">${unit.id}</a>
           </td>
+          <td>${unit.parent?.id}</td>
           <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
           <td style="word-break:break-all;">
             <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>

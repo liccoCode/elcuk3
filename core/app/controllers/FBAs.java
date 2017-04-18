@@ -216,9 +216,6 @@ public class FBAs extends Controller {
             Validation.addError("", "最多只能够下载 50 个采购计划的 FBA!");
         if(boxNumbers == null || boxNumbers.size() == 0 || pids.size() != boxNumbers.size())
             Validation.addError("", "采购单元箱数填写错误");
-        List<ProcureUnit> units = ProcureUnit.find("id IN" + SqlSelect.inlineParam(pids)).fetch();
-        if(units == null || units.isEmpty())
-            Validation.addError("", "未找到采购计划!");
         if(Validation.hasErrors()) {
             redirect(LinkHelper.getRedirect(id, target));
         } else {
@@ -227,19 +224,23 @@ public class FBAs extends Controller {
             try {
                 Files.delete(dirfile);
                 dirfile.mkdir();
-                for(int i = 0; i < units.size(); i++) {
-                    ProcureUnit procureUnit = units.get(i);
-                    String name = procureUnit.cooperator.name;
-                    String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
-                    //生成工厂的文件夹. 格式：采购单ID-预计交货日期-工厂名称
-                    File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
-                    factoryDir.mkdir();
-                    //生成 PDF
-                    procureUnit.fbaAsPDF(factoryDir, boxNumbers.get(i));
+                for(int i = 0; i < pids.size(); i++) {
+                    ProcureUnit procureUnit = ProcureUnit.findById(pids.get(i));
+                    if(procureUnit == null) {
+                        Validation.addError("", "未找到采购计划!");
+                        redirect(LinkHelper.getRedirect(id, target));
+                    } else {
+                        String name = procureUnit.cooperator.name;
+                        String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
+                        //生成工厂的文件夹. 格式：采购单ID-预计交货日期-工厂名称
+                        File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
+                        factoryDir.mkdir();
+                        //生成 PDF
+                        procureUnit.fbaAsPDF(factoryDir, boxNumbers.get(i));
+                    }
                 }
                 FileUtils.writeStringToFile(new File(dirfile, "采购计划ID列表.txt"),
-                        java.net.URLDecoder.decode(StringUtils.join(pids, ","), "UTF-8"),
-                        "UTF-8");
+                        java.net.URLDecoder.decode(StringUtils.join(pids, ","), "UTF-8"), "UTF-8");
             } catch(Exception e) {
                 Logger.error(Webs.S(e));
             } finally {
