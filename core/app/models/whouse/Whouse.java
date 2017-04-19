@@ -281,7 +281,7 @@ public class Whouse extends Model {
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime nextBeginDate = now.plusDays(i);
-            M type = this.account.type;
+            M type = M.val(this.name);
 
             Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate(), type));
             if(exist != null) continue;
