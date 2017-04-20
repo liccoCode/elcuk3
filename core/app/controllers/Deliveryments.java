@@ -222,14 +222,13 @@ public class Deliveryments extends Controller {
      * 为采购单提交请款单申请
      */
     @Check("deliveryments.deliverymenttoapply")
-    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
-                                           Long procureApplyId) {
+    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p, Long procureApplyId) {
         if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");
             index(p, deliverymentIds);
         }
-
+        ProcureApply.initApplyStatus();
         ProcureApply apply = ProcureApply.findById(procureApplyId);
         if(apply == null)
             apply = ProcureApply.buildProcureApply(deliverymentIds);

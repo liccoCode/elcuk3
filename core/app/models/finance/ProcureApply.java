@@ -48,6 +48,37 @@ public class ProcureApply extends Apply {
 
     public boolean confirm = false;
 
+    public enum S {
+
+        /**
+         * 默认状态
+         */
+        OPEN {
+            @Override
+            public String label() {
+                return "入库中";
+            }
+        },
+        /**
+         * 关闭，请款金额为0
+         */
+        CLOSE {
+            @Override
+            public String label() {
+                return "结束";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) DEFAULT 'OPEN'")
+    public S status = S.OPEN;
+
     /**
      * 已经请款的金额(包含 fixValue)
      *
@@ -209,4 +240,18 @@ public class ProcureApply extends Apply {
             return ProcureApply.find("confirm=false AND cooperator.id=?", cooperatorId).fetch();
         }
     }
+
+    /**
+     * 当前时间前6个月的请款单，如果请款总额为0,则status变为close
+     */
+    public static void initApplyStatus() {
+        Date date = DateTime.now().minusMonths(6).toDate();
+        List<ProcureApply> applies = ProcureApply.find("createdAt>=?", date).fetch();
+        applies.stream().filter(apply -> apply.totalAmount() == 0).forEach(apply -> {
+            apply.status = S.CLOSE;
+            apply.save();
+        });
+    }
+
+
 }
