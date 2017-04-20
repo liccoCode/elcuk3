@@ -5,7 +5,8 @@
   <table class="table table-bordered table-condensed">
     <tr>
       <th></th>
-      <th class="span3">关联运输资料</th>
+      <th width="120px;">关联运输资料</th>
+      <th>实际到货时间</th>
       <th class="span2">费用类型</th>
       <th>币种</th>
       <th>单价</th>
@@ -29,6 +30,7 @@
             <a href="@{Shipments.show(fee.shipment.id)}" target="_blank">${fee.shipment.id}</a>
           #{/else}
       </td>
+      <td>#{time_tooltip time:fee.shipment.dates.receiptDate/}</td>
       <td>${fee.feeType.nickName}</td>
       <td>${fee.currency}</td>
       <td>${fee.unitPrice}</td>
@@ -47,7 +49,7 @@
     </tr>
   #{/list}
     <tr>
-      <td colspan="11">#{bootstrap_pager pi:post, url: "/Payments/show/" + payment.id/}</td>
+      <td colspan="12">#{bootstrap_pager pi:post, url: "/Payments/show/" + payment.id/}</td>
     </tr>
   </table>
 </div>
