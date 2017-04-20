@@ -19,6 +19,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,12 +74,17 @@ public class DeliverPlans extends Controller {
 
     public static void show(String id) {
         DeliverPlan dp = DeliverPlan.findById(id);
-        render(dp);
+        boolean showAdd = false;
+        if(dp.units.stream().anyMatch(unit -> Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY)
+                .contains(unit.stage) && unit.attrs.planQty != 0)) {
+            showAdd = true;
+        }
+        render(dp, showAdd);
     }
 
     @Check("deliverplans.index")
     public static void index(DeliverPlanPost p, List<String> deliverplanIds) {
-        List<DeliverPlan> deliverplans = null;
+        List<DeliverPlan> deliverplans;
         if(deliverplanIds == null) deliverplanIds = new ArrayList<>();
         if(p == null) p = new DeliverPlanPost();
         deliverplans = p.query();
