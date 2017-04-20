@@ -2708,4 +2708,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
     }
 
+    public int boxNum() {
+        if(this.fba != null && this.fba.dto != null)
+            return this.fba.dto.boxNum;
+        if(this.cooperator.cooperItem(this.sku) != null)
+            return this.cooperator.cooperItem(this.sku).boxNum(this.qty());
+        return 1;
+    }
+
 }

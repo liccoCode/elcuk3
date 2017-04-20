@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
  */
 public class ProcreApplyPost extends Post<Apply> {
 
+    private static final long serialVersionUID = -1524975991851751905L;
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
 
     public ProcreApplyPost() {
@@ -38,11 +39,8 @@ public class ProcreApplyPost extends Post<Apply> {
 
     public Date from;
     public Date to;
-
     public DateType dateType;
-
     public Long supplierId;
-
     public int isneedPay;
 
 
@@ -104,13 +102,14 @@ public class ProcreApplyPost extends Post<Apply> {
             params.add(this.word());
         }
 
+        sql.append(" AND p.status <> ? ");
+        params.add(ProcureApply.S.CLOSE);
         return new F.T2<>(sql.toString(), params);
     }
 
     public List<Apply> query() {
         F.T2<String, List<Object>> params = params();
-        JPAQuery query = ProcureApply.find(params._1 + "ORDER BY p.createdAt DESC",
-                params._2.toArray());
+        JPAQuery query = ProcureApply.find(params._1 + "ORDER BY p.createdAt DESC", params._2.toArray());
         this.count = query.fetch().size();
         return query.fetch(this.page, this.perSize);
     }
