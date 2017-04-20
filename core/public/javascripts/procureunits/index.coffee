@@ -21,7 +21,7 @@ $ ->
 # 确保用户填写的是大于零的数字
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
-  ).on("click", "#sumbitDownloadFBAZIP", (r) ->
+  ).on("click", "#submitDownloadFBAZIP", (r) ->
     LoadMask.mask()
     $('#unitIds').val(unitIds.join("_"))
     $form = $("form.search_form")
