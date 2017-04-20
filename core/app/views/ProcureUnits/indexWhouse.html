@@ -32,7 +32,7 @@
         <div class="inline">
           <button id="today" class="btn"><i class="icon-search"></i> Today</button>
         </div>
-        
+
         <div class="input-prepend input-append inline">
           <button class="btn btn-warning" name="splitBtn" data-loading>库存分拆</button>
           <input type="hidden" name="p.type" value="${p.type}" id="type">
@@ -180,7 +180,7 @@
           <td>
             <input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
                    value="${unit.id}" whouse="${unit.whouse?.name()}" stage="${unit.stage?.name()}"
-                   shipType="${unit.shipType?.name()}" data-boxnum="${dto?.boxNum}">
+                   shipType="${unit.shipType?.name()}" data-boxnum="${unit.boxNum()}">
           </td>
           <td rel="tooltip" title="${unit.comment}">
               #{if unit.parent}

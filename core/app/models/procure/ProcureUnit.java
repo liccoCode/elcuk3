@@ -60,6 +60,8 @@ import java.util.stream.Collectors;
 @DynamicUpdate
 public class ProcureUnit extends Model implements ElcukRecord.Log {
 
+    private static final long serialVersionUID = -4325210168069390776L;
+
     public ProcureUnit() {
     }
 
@@ -72,8 +74,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     /**
      * Copy 一个全新的 ProcureUnit, 用来将部分交货的 ProcureUnit 分单交货
-     *
-     * @param unit
      */
     public ProcureUnit(ProcureUnit unit) {
         this.cooperator = unit.cooperator;
@@ -1074,8 +1074,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.fba != null &&
                 (unit.shipType != this.shipType || !Objects.equals(unit.attrs.planQty, this.attrs.planQty)))
             Validation.required("procureunit.update.reason", reason);
-        if(this.stage == STAGE.CLOSE)
-            Validation.addError("", "已经结束, 无法再修改");
+
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
         if(this.parent != null && unit.isReturn
                 && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
@@ -1098,7 +1097,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
             }
         }
+        if(unit.isDedicated && !Objects.equals(unit.shipType, Shipment.T.EXPRESS)) {
+            Validation.addError("", "运输方式必须是快递，才能选择专线渠道！");
+        }
         if(Validation.hasErrors()) return;
+        if(this.stage == STAGE.CLOSE) {
+            this.comment = unit.comment;
+            this.save();
+            return;
+        }
         List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             if(this.parent != null && unit.isReturn) {
@@ -1153,8 +1160,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         if(this.fba != null && (unit.shipType != this.shipType || unit.availableQty != this.availableQty))
             Validation.required("procureunit.update.reason", reason);
-        if(this.stage == STAGE.CLOSE)
-            Validation.addError("", "已经结束, 无法再修改");
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
         if(this.parent != null && unit.isReturn && STAGE.IN_STORAGE == this.stage) {
             if(unit.availableQty - this.availableQty > this.parent.availableQty) {
@@ -1170,6 +1175,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(!shipment.type.name().equals(unit.shipType.name())) {
                 Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
             }
+        }
+        if(unit.isDedicated && !Objects.equals(unit.shipType, Shipment.T.EXPRESS)) {
+            Validation.addError("", "运输方式必须是快递，才能选择专线渠道！");
         }
         if(Validation.hasErrors()) return;
         List<String> logs = new ArrayList<>();
@@ -2698,6 +2706,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         this.outQty = 0;
         this.save();
+    }
+
+    public int boxNum() {
+        if(this.fba != null && this.fba.dto != null)
+            return this.fba.dto.boxNum;
+        if(this.cooperator.cooperItem(this.sku) != null)
+            return this.cooperator.cooperItem(this.sku).boxNum(this.qty());
+        return 1;
     }
 
 }

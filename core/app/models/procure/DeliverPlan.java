@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 @DynamicUpdate
 public class DeliverPlan extends GenericModel {
 
+    private static final long serialVersionUID = -5438540657539304801L;
+
     public DeliverPlan() {
     }
 
@@ -112,11 +114,8 @@ public class DeliverPlan extends GenericModel {
      * 通过 ProcureUnit 来创建采购单
      * <p/>
      * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
-     *
-     * @param pids
      */
-    public synchronized static DeliverPlan createFromProcures(List<Long> pids, String name,
-                                                              User user) {
+    public synchronized static DeliverPlan createFromProcures(List<Long> pids, String name, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         DeliverPlan deliverplan = new DeliverPlan(DeliverPlan.id());
         if(pids.size() != units.size()) {
@@ -138,13 +137,10 @@ public class DeliverPlan extends GenericModel {
         }
         deliverplan.state = P.CREATE;
         deliverplan.save();
-
         new ERecordBuilder("deliverplan.createFromProcures")
-                .msgArgs(StringUtils.join(pids, ","), deliverplan.id)
-                .fid(deliverplan.id).save();
+                .msgArgs(StringUtils.join(pids, ","), deliverplan.id).fid(deliverplan.id).save();
         return deliverplan;
     }
-
 
     public static String id() {
         DateTime dt = DateTime.now();
@@ -182,8 +178,6 @@ public class DeliverPlan extends GenericModel {
 
     /**
      * 将 PLAN 状态的 ProcureUnit 添加到这个出货单中, 用户制作出货单
-     *
-     * @return
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
@@ -195,17 +189,13 @@ public class DeliverPlan extends GenericModel {
             if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
-
-        new ElcukRecord(Messages.get("deliverplan.addunit"),
-                Messages.get("deliverplan.addunit.msg", pids, this.id), this.id).save();
-
+        new ElcukRecord(Messages.get("deliverplan.addunit"), Messages.get("deliverplan.addunit.msg", pids, this.id),
+                this.id).save();
         return units;
     }
 
     /**
      * 将指定 ProcureUnit 从 出货单 中删除
-     *
-     * @param pids
      */
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
@@ -227,24 +217,19 @@ public class DeliverPlan extends GenericModel {
 
     /**
      * 返回此 DeliverPlan 可以用来添加的 ProcureUnits
-     *
-     * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
         if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch(50);
+            return ProcureUnit.find("planstage=? AND attrs.planQty > 0", ProcureUnit.PLANSTAGE.DELIVERY).fetch(50);
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
-                    ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY)
-                    .fetch();
+            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=? AND attrs.planQty>0",
+                    cooperator, ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY).fetch();
         }
     }
 
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
-     *
-     * @return
      */
     public Cooperator supplier() {
         if(this.units.size() == 0) return null;
@@ -271,11 +256,11 @@ public class DeliverPlan extends GenericModel {
     public String showInbounds() {
         List<Inbound> list = Inbound.find("plan.id=? AND status<> ? ", this.id, Inbound.S.Cancel).fetch();
         if(list == null || list.size() == 0) return "";
-        String ids = "";
+        StringBuilder ids = new StringBuilder();
         for(Inbound inbound : list) {
-            ids += inbound.id + "; ";
+            ids.append(inbound.id).append("; ");
         }
-        return ids;
+        return ids.toString();
     }
 
     public long showNum(boolean showAll) {

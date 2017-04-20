@@ -57,7 +57,6 @@
       <th>最新更新时间</th>
       <th>创建时间</th>
     </tr>
-
       #{list items:applyes, as:'apply'}
         <tr>
           <td>${apply.id}</td>
@@ -76,7 +75,6 @@
           <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
         </tr>
       #{/list}
-
   </table>
 </div>
 #{/form}
