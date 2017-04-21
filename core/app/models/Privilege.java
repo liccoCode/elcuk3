@@ -194,13 +194,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
 
 
-        //销售目标控制器
-        privileges.add(new Privilege("saletarget", "目标模块"));
-        privileges.add(new Privilege("saletargets.index", "年度目标页面"));
-        privileges.add(new Privilege("saletargets.create", "创建年度目标"));
-        privileges.add(new Privilege("saletargets.split", "Category目标月度分解"));
-
-
         // ProcureUnits
         privileges.add(new Privilege("procureunits.billingprepay", "采购计划预付款申请"));
         privileges.add(new Privilege("procureunits.billingtailpay", "采购计划尾款申请"));

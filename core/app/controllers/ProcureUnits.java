@@ -18,7 +18,6 @@ import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
-import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
@@ -344,28 +343,6 @@ public class ProcureUnits extends Controller {
         edit(id);
     }
 
-    /**
-     * @param unitid
-     * @param checkid
-     * @param oldPlanQty
-     * @param unit
-     * @param shipmentId
-     * @param msg
-     */
-    public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
-                                     String shipmentId, String msg) {
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-        ProcureUnit managedUnit = ProcureUnit.findById(unitid);
-        managedUnit.update(unit, shipmentId, msg);
-        if(Validation.hasErrors()) {
-            flash.error(Validation.errors().toString());
-            unit.id = managedUnit.id;
-            CheckTasks.showactiviti(checkid);
-        }
-        flash.success("成功修改采购计划!!", unitid);
-        CheckTasks.showactiviti(checkid);
-    }
-
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         unit.remove();
@@ -610,10 +587,7 @@ public class ProcureUnits extends Controller {
             unitIds.add(Long.parseLong(row.get("id").toString()));
         }
         //使用查询出来的采购计划ID去查询 所有未申请返工费用的质检任务(费用需要大于0)
-        List<CheckTask> checks = CheckTask
-                .find("reworkPay = null AND workfee > 0 AND units_id IN " + SqlSelect.inlineParam(unitIds) + "")
-                .fetch();
-        render("ProcureUnits/_reworkpay_modal.html", checks);
+        render("ProcureUnits/_reworkpay_modal.html");
     }
 
     /**
@@ -625,15 +599,8 @@ public class ProcureUnits extends Controller {
     public static void billingReworkPay(Long id, Long applyId, String ids) {
         ProcureUnit unit = ProcureUnit.findById(id);
         try {
-            List<CheckTask> checks = CheckTask.find("id IN " + SqlSelect.inlineParam(ids.split("_")) + "").fetch();
             float amount = 0f;
             PaymentUnit reworkPay = unit.billingReworkPay(amount);
-            for(CheckTask check : checks) {
-                amount += check.workfee;
-                //将PaymentUnit对应到CheckTask
-                check.reworkPay = reworkPay;
-                check.save();
-            }
             //返工费用是需要向工厂收取的费用 所以这里转成负数
             reworkPay.amount = -amount;
             reworkPay.save();

@@ -239,8 +239,6 @@ procureapply.save.msg=\u6DFB\u52A0 %s \u5230\u91C7\u8D2D\u8BF7\u6B3E\u5355 %s
 transportapply.save=[\u8FD0\u8F93\u5355]\u8BF7\u6B3E
 transportapply.save.msg=\u6DFB\u52A0 %s \u5230\u8FD0\u8F93\u8BF7\u6B3E\u5355 %s
 
-saletarget.update=\u66f4\u65b0[\u9500\u552e\u76ee\u6807]
-saletarget.update.msg=%s%s\u76ee\u6807\u0020%s
 saleAmounts=\u9500\u552e\u989d
 profitMargin=\u5229\u6da6\u7387
 

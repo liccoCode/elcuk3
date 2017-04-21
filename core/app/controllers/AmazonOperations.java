@@ -31,6 +31,7 @@ import java.util.Set;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 @Check("amazonoperations")
+@Deprecated
 public class AmazonOperations extends Controller {
 
     public static void index() {
