@@ -667,9 +667,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 到港 (运输单抵达港口, 就开始进行清关状态
      */
     public void landPort(Date date) {
-        if(this.type == T.EXPRESS) {
-            Mails.shipment_clearance(this);
-        } else {
+        if(this.type != T.EXPRESS) {
             shouldSomeStateValidate(S.SHIPPING, "到港");
             if(Validation.hasErrors()) return;
             if(date == null) date = new Date();
