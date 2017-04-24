@@ -1,14 +1,10 @@
 package models.view.dto;
 
-import jobs.PmDashboard.AbnormalFetchJob;
 import jobs.categoryInfo.CategoryInfoFetchJob;
-import jobs.driver.GJob;
 import models.product.Product;
 import play.cache.Cache;
-import play.utils.FastRuntimeException;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
