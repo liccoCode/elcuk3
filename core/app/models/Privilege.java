@@ -94,7 +94,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("listings.index", "Listing 页面"));
         privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
-        privileges.add(new Privilege("amazonoperations", "Amazon 操作"));
         privileges.add(new Privilege("sellings.delete", "Selling 删除"));
         privileges.add(new Privilege("listings.delete", "Listing 删除"));
 
