@@ -36,18 +36,7 @@ require:
     # fastjson 运行时不需要依赖其他的
     - com.alibaba -> fastjson 1.1.46:
         transitive: false
-    - org.activiti -> activiti-engine 5.15.1:
-        exclude:
-          - javax.persistence -> *
-          - org.eclipse.jdt.core.compiler -> *
     - xml-apis -> xml-apis 1.4.01
-    - org.activiti -> activiti-spring 5.15.1:
-        exclude:
-          - javax.persistence -> *
-          - org.eclipse.jdt.core.compiler -> *
-    - org.activiti -> activiti-bpmn-model 5.15.1
-    # 暂时没有看到有代码使用到 org.activiti.rest 这个包, 但这个会引入一大堆的依赖.
-    # - org.activiti -> activiti-modeler 5.15.1
     - org.hibernate -> hibernate-ehcache 4.2.19.Final # 1.4.2
     - javax.activation  -> activation 1.1.1 # 1.4.2
     - net.sf.barcode4j -> barcode4j 2.1:

@@ -97,13 +97,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("sellings.delete", "Selling 删除"));
         privileges.add(new Privilege("listings.delete", "Listing 删除"));
 
-        /*
-         * TODO delete
-        privileges.add(new Privilege("support", "售后模块"));
-        privileges.add(new Privilege("tickets.index", "Tickets 工作台 页面"));
-        privileges.add(new Privilege("ticketanalyzes.index", "Ticket 分析 页面"));
-        */
-
         privileges.add(new Privilege("product", "产品模块"));
         privileges.add(new Privilege("products.index", "产品 页面"));
         privileges.add(new Privilege("products.delete", "产品 删除"));
@@ -133,10 +126,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("users.index", "用户管理 页面"));
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
         privileges.add(new Privilege("categoryinfos.show", "Category 信息"));
-
-        // 首页
-        // TODO delete
-        privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
 
         // Analyzes 页面
         privileges.add(new Privilege("analyzes.index", "销量分析 页面"));
