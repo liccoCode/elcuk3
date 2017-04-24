@@ -124,9 +124,6 @@
                 #{power.ck "shipmentreports.lossrate"}
                   <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
                 #{/power.ck}
-                #{power.ck "shipmentreports.areagoodsanalyze"}
-                  <li><a href="@{ShipmentReports.areaGoodsAnalyze()}">物流区域货量分析</a></li>
-                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -154,24 +151,6 @@
             </ul>
           </li>
         #{/power.ck}
-
-
-        *{        #{power.ck 'qccheck'}
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">质检管理<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                #{power.ck "skuchecks.checklist"}
-                  <li><a href="@{SkuChecks.checklist()}">CheckList列表</a></li>
-                #{/power.ck}
-                #{power.ck "checktasks.checklist"}
-                  <li><a href="@{CheckTasks.checklist()}">质检任务列表</a></li>
-                #{/power.ck}
-                #{power.ck "checktasks.checkerlist"}
-                  <li><a href="@{CheckTasks.checkerList()}">质检员任务列表</a></li>
-                #{/power.ck}
-            </ul>
-          </li>
-        #{/power.ck}}*
 
         #{power.ck 'whouse'}
           <li class="dropdown">

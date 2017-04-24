@@ -242,18 +242,12 @@ transportapply.save.msg=\u6DFB\u52A0 %s \u5230\u8FD0\u8F93\u8BF7\u6B3E\u5355 %s
 saleAmounts=\u9500\u552e\u989d
 profitMargin=\u5229\u6da6\u7387
 
-checktask.doPrints=[CheckTask]\u6253\u5370[CheckList]
-checktask.doPrints.msg=[\u8d28\u68c0\u4efb\u52a1ID:%s]
-
 startTime=\u8d28\u68c0\u5f00\u59cb\u65f6\u95f4
 endTime=\u8d28\u68c0\u5b8c\u6210\u65f6\u95f4
 isship=\u662f\u5426\u53d1\u8d27
 result=\u662f\u5426\u5408\u683c
 pickqty=\u5b9e\u9645\u62bd\u68c0\u6570\u91cf
 checknote=\u5907\u6ce8
-
-checktask.update=[CheckTask]\u66f4\u65b0
-checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1 ID:%s]:%s
 
 btbOrder.update=\u0042\u0032\u0042\u8ba2\u5355\u7ba1\u7406
 btbOrder.update.msg=\u8ba2\u5355\u7f16\u53f7[%s], \u66f4\u65b0\u5185\u5bb9[%s]
