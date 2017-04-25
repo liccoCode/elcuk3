@@ -314,9 +314,9 @@ public class Selling extends GenericModel {
         this.save();
         //4.通过AMAZON,API形式同步数据回数据库
         List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("acc_id", this.account.id.toString()));
+        params.add(new BasicNameValuePair("account_id", this.account.id.toString()));
         params.add(new BasicNameValuePair("asin", this.asin));
-        params.add(new BasicNameValuePair("market_id", this.market.name()));
+        params.add(new BasicNameValuePair("market", this.market.name()));
         params.add(new BasicNameValuePair("selling_id", this.sellingId));
         params.add(new BasicNameValuePair("user_name", Login.current().username));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_product_sync_back", params);
