@@ -46,7 +46,6 @@ $ ->
 
   $("#download_excel").click((e) ->
     e.preventDefault()
-    $btn = $(@)
     $form = $("#search_Form")
     window.open('/Excels/procureUnitSearchExcel?' + $form.serialize(), "_blank")
   )

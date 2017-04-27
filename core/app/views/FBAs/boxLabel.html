@@ -15,10 +15,10 @@
   <tr style="height: 98.6mm; vertical-align:middle;">
     <td width="49%" style="vertical-align:middle">
         #{if models.OperatorConfig.getVal("addressname")=='Brandworl'}
-            #{render './brandworlShipmentDetail.html', procureUnit: procureUnit/}
+            #{render './brandworlShipmentDetail.html', procureUnit: procureUnit, box_num:i/}
         #{/if}
             #{else}
-        #{render './shipmentDetail.html', procureUnit: procureUnit/}
+        #{render './shipmentDetail.html', procureUnit: procureUnit, box_num:i/}
     #{/else}
     </td>
     <td width="2%"></td>
