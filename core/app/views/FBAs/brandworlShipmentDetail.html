@@ -16,7 +16,7 @@
       <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
         <tr>
           <td width="8%">箱号</td>
-          <td width="8%" style="border:1px solid #000000; padding-left:6px;"></td>
+          <td width="8%" style="border:1px solid #000000; padding-left:6px;">${box_num}</td>
           <td width="8%" style="text-align:left;">目的地</td>
           <td width="12%" style="border:1px solid #000000; padding-left:6px;">
           ${procureUnit?.selling?.market?.countryName()}
@@ -26,11 +26,18 @@
             <span style="font-size:3pt">长×宽×高CM</span>
           </td>
           <td style="border:1px solid #000000; padding-left:6px;">
+          #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null}
+            <span style="font-size:5pt">${procureUnit.fba.dto?.length} x  ${procureUnit.fba.dto?.width}
+              x ${procureUnit.fba.dto?.height}</span> ${procureUnit.selling?.market.name()=='AMAZON_US'?'in.':'CM'}
+          #{/if}
           </td>
           <td width="8%">
             整箱重量
           </td>
           <td width="13%" style="border:1px solid #000000; padding-left:6px;">
+          #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null}
+            ${procureUnit.fba.dto.singleBoxWeight} ${procureUnit.selling?.market.name()=='AMAZON_US'?'lb.':'kg'}
+          #{/if}
           </td>
         </tr>
       </table>
@@ -77,24 +84,24 @@
   </tr>
 
   <tr valign="center" style="font-size: 7pt;font-weight: bold;">
-      <td>
-        <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
-          <tr>
-            <td width="10%" style="font-weight:bold; font-size:12pt">
-              供应商:
-            </td>
-            <td width="20%" style="border-bottom: 2px solid black">
-              <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
-            </td>
-            <td width="20%" style="font-weight:bold; font-size:12pt">
-              运输方式
-            </td>
-            <td style="border-bottom: 2px solid black">
-              <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
+    <td>
+      <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
+        <tr>
+          <td width="10%" style="font-weight:bold; font-size:12pt">
+            供应商:
+          </td>
+          <td width="20%" style="border-bottom: 2px solid black">
+            <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
+          </td>
+          <td width="20%" style="font-weight:bold; font-size:12pt">
+            运输方式
+          </td>
+          <td style="border-bottom: 2px solid black">
+            <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
 </table>
 

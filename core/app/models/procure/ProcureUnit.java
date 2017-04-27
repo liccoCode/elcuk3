@@ -1484,6 +1484,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void submitFBACartonContent(CheckTaskDTO dto) {
         if(this.fba != null && dto != null) {
             this.fba.dto = dto;
+            this.fba.save();
             this.fba.submitFbaInboundCartonContentsFeed();
         }
     }
