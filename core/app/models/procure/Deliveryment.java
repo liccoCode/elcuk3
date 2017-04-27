@@ -538,8 +538,8 @@ public class Deliveryment extends GenericModel {
     }
 
     public List<ProcureUnit> applyUnit() {
-        return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?)",
-                this.id, ProcureUnit.T.ProcureSplit).fetch();
+        return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?) AND noPayment=?",
+                this.id, ProcureUnit.T.ProcureSplit, false).fetch();
     }
 
 
