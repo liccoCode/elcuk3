@@ -32,6 +32,9 @@ import java.util.*;
 @Entity
 @DynamicUpdate
 public class Deliveryment extends GenericModel {
+    
+    private static final long serialVersionUID = -333313078948420021L;
+
     public Deliveryment() {
     }
 
