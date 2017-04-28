@@ -168,11 +168,11 @@ public class ProcureUnits extends Controller {
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         if(unit.selling == null) {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
         }
+        List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
         render(unit, whouses);
     }
 
@@ -297,7 +297,7 @@ public class ProcureUnits extends Controller {
         }
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+            List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
             unit.remove();
             render("ProcureUnits/blank.html", unit, whouses);
         }
