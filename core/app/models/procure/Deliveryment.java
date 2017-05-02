@@ -208,7 +208,6 @@ public class Deliveryment extends GenericModel {
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
      *
-     * @return
      */
     public Cooperator supplier() {
         if(this.units.size() == 0) return null;
