@@ -558,7 +558,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public synchronized void addToShip(ProcureUnit unit) {
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
-        if(!unit.whouse.equals(this.whouse))
+        if(!unit.whouse.market.equals(this.whouse.market))
             Validation.addError("", "运输目的地不一样, 无法添加");
         if(unit.shipType != this.type)
             Validation.addError("", "运输方式不一样, 无法添加.");
@@ -1245,14 +1245,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(Whouse whouse : whs) {
             whouse.checkWhouseNewShipment(planedShipments);
         }
-
-
         // 加载
         StringBuilder where = new StringBuilder("state IN (?,?)");
         List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
-            where.append("AND (whouse.id=? OR whouse.id IS NULL)");
-            params.add(whouseId);
+            Whouse whouse = Whouse.findById(whouseId);
+            where.append("AND (whouse.market=? OR whouse.id IS NULL)");
+            params.add(whouse.market);
         } else {
             where.append("AND whouse.id IS NULL");
         }
@@ -1274,8 +1273,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
-        return Shipment.find("planBeginDate>=? AND whouse=? AND type=? ORDER BY planBeginDate",
-                planBeginDate, whouse, shipType).fetch();
+        return Shipment.find("planBeginDate>=? AND whouse.market=? AND type=? ORDER BY planBeginDate",
+                planBeginDate, whouse.market, shipType).fetch();
     }
 
     public static List<Shipment> findByState(S... state) {

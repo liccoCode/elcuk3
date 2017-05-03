@@ -811,25 +811,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         /**
          * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
          */
-        // 原采购计划的运输量变更
-//        int average = (int) Math.ceil((float) this.attrs.planQty / this.shipItems.size());
-//        for(int i = 0; i < this.shipItems.size(); i++) {
-//            // 平均化, 包含除不尽的情况
-//            if(i == this.shipItems.size() - 1) {
-//                this.shipItems.get(i).qty = this.qty() - (average * this.shipItems.size() - 1);
-//            } else {
-//                this.shipItems.get(i).qty = average;
-//            }
-//        }
-
         newUnit.parent = this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
-        new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, planQty, newUnit.attrs.planQty, newUnit.id)
-                .fid(this.id, ProcureUnit.class)
-                .save();
+        new ERecordBuilder("procureunit.split").msgArgs(this.id, planQty, newUnit.attrs.planQty, newUnit.id)
+                .fid(this.id, ProcureUnit.class).save();
         return newUnit;
     }
 
