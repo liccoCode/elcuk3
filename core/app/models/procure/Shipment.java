@@ -1259,7 +1259,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         where.append(" AND type =?");
         params.add(shipType);
         where.append(" AND dates.planBeginDate >= ?");
-        params.add(new Date());
+        params.add(Dates.morning(new Date()));
         where.append(" ORDER BY planBeginDate");
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
