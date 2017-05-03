@@ -541,8 +541,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void updateShipment() {
         if(this.creater == null) this.creater = User.current();
         this.save();
-        //更新货代仓库
-        for(ShipItem item : this.items) item.unit.flushTask();
     }
 
     public void setTrackNo(String trackNo) {
@@ -568,8 +566,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
-        this.items.add(shipitem.<ShipItem>save());
-        unit.flushTask();//更新相关的质检任务
+        this.items.add(shipitem.save());
     }
 
 
@@ -670,9 +667,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 到港 (运输单抵达港口, 就开始进行清关状态
      */
     public void landPort(Date date) {
-        if(this.type == T.EXPRESS) {
-            Mails.shipment_clearance(this);
-        } else {
+        if(this.type != T.EXPRESS) {
             shouldSomeStateValidate(S.SHIPPING, "到港");
             if(Validation.hasErrors()) return;
             if(date == null) date = new Date();

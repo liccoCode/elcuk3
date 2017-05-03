@@ -10,7 +10,6 @@ import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Template;
-import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
 import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
@@ -271,7 +270,6 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;
-        this.unit.flushTask();
         this.save();
     }
 
@@ -381,10 +379,6 @@ public class ShipItem extends GenericModel {
                 .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
                 .fid(fee.shipment.id)
                 .save();
-    }
-
-    public List<CheckTask> checkTasks() {
-        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
     }
 
     /**

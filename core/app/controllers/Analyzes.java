@@ -78,6 +78,7 @@ public class Analyzes extends Controller {
      *
      * @param p
      */
+    @Deprecated
     public static void trafficRate(TrafficRatePost p) {
         try {
             if(p == null) p = new TrafficRatePost();

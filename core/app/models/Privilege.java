@@ -94,16 +94,8 @@ public class Privilege extends Model {
         privileges.add(new Privilege("listings.index", "Listing 页面"));
         privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
-        privileges.add(new Privilege("amazonoperations", "Amazon 操作"));
         privileges.add(new Privilege("sellings.delete", "Selling 删除"));
         privileges.add(new Privilege("listings.delete", "Listing 删除"));
-
-        /*
-         * TODO delete
-        privileges.add(new Privilege("support", "售后模块"));
-        privileges.add(new Privilege("tickets.index", "Tickets 工作台 页面"));
-        privileges.add(new Privilege("ticketanalyzes.index", "Ticket 分析 页面"));
-        */
 
         privileges.add(new Privilege("product", "产品模块"));
         privileges.add(new Privilege("products.index", "产品 页面"));
@@ -134,10 +126,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("users.index", "用户管理 页面"));
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
         privileges.add(new Privilege("categoryinfos.show", "Category 信息"));
-
-        // 首页
-        // TODO delete
-        privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
 
         // Analyzes 页面
         privileges.add(new Privilege("analyzes.index", "销量分析 页面"));
@@ -192,13 +180,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("payments.cancel", "取消付款单"));
 
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
-
-
-        //销售目标控制器
-        privileges.add(new Privilege("saletarget", "目标模块"));
-        privileges.add(new Privilege("saletargets.index", "年度目标页面"));
-        privileges.add(new Privilege("saletargets.create", "创建年度目标"));
-        privileges.add(new Privilege("saletargets.split", "Category目标月度分解"));
 
 
         // ProcureUnits
