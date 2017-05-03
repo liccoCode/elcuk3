@@ -18,7 +18,6 @@ import models.finance.PaymentUnit;
 import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
-import models.qc.CheckTask;
 import models.qc.CheckTaskDTO;
 import models.view.dto.CooperItemDTO;
 import models.whouse.*;
@@ -536,16 +535,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public List<CooperItemDTO> items = new ArrayList<>();
 
-    /**
-     * 相关联的质检任务
-     *
-     * @return
-     */
-    @Expose
-    @OneToMany(mappedBy = "units", fetch = FetchType.LAZY)
-    @OrderBy("creatat DESC")
-    public List<CheckTask> taskList;
-
     public enum T {
         ProcureSplit {
             @Override
@@ -697,7 +686,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.attrs != null) this.attrs.validate();
         if(this.selling != null && this.whouse != null &&
                 this.whouse.account != null && this.whouse.type == Whouse.T.FBA) {
-            if(!this.selling.account.uniqueName.equals(this.whouse.account.uniqueName)) {
+            if(!this.selling.market.equals(this.whouse.market)) {
                 Validation.addError("", "procureunit.validate.whouse");
             }
         }
@@ -811,25 +800,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         /**
          * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
          */
-        // 原采购计划的运输量变更
-//        int average = (int) Math.ceil((float) this.attrs.planQty / this.shipItems.size());
-//        for(int i = 0; i < this.shipItems.size(); i++) {
-//            // 平均化, 包含除不尽的情况
-//            if(i == this.shipItems.size() - 1) {
-//                this.shipItems.get(i).qty = this.qty() - (average * this.shipItems.size() - 1);
-//            } else {
-//                this.shipItems.get(i).qty = average;
-//            }
-//        }
-
         newUnit.parent = this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
-        new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, planQty, newUnit.attrs.planQty, newUnit.id)
-                .fid(this.id, ProcureUnit.class)
-                .save();
+        new ERecordBuilder("procureunit.split").msgArgs(this.id, planQty, newUnit.attrs.planQty, newUnit.id)
+                .fid(this.id, ProcureUnit.class).save();
         return newUnit;
     }
 
@@ -1556,9 +1532,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             // 删除运输相关
             this.shipItems.forEach(ShipItem::delete);
 
-            //删除 质检任务相关
-            List<CheckTask> tasks = this.taskList;
-            tasks.forEach(CheckTask::delete);
             //删除采购单关联
             Deliveryment deliveryment = this.deliveryment;
             if(deliveryment != null && deliveryment.units != null) {
@@ -1605,7 +1578,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public int realQty() {
-        int qty = this.qty() - this.fetchCheckTaskQcSample();
+        int qty = this.qty();
         if(purchaseSample != null) qty -= purchaseSample;
         return qty;
     }
@@ -2038,8 +2011,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param dtos
      * @return List<F.Promise<FBAShipment>>
      */
-    public static void postFbaShipments(final List<Long> unitIds,
-                                        final List<CheckTaskDTO> dtos) {
+    public static void postFbaShipments(final List<Long> unitIds, final List<CheckTaskDTO> dtos) {
         final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
         if(units.size() != unitIds.size() || units.size() != dtos.size()) {
             Validation.addError("", "加载的数量不一致");
@@ -2183,75 +2155,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
             FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
         }
-    }
-
-
-    /**
-     * 查看当前采购计划(对应的质检任务)的是否发货状态
-     *
-     * @return
-     */
-    public String isship() {
-        if(this.haveTask()) {
-            CheckTask task = this.taskList.get(0);
-            if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
-                return task.isship.label();
-            } else if(task != null && task.isship == null && this.taskList.size() > 1) {
-                CheckTask secondTask = this.taskList.get(1);
-                if(secondTask.isship != null)
-                    return secondTask.isship.label();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 查看当前采购计划(对应的质检任务)的是否合格状态
-     *
-     * @return
-     */
-    public String result() {
-        CheckTask task = this.lastCheckedTask();
-        if(task != null) return task.result.label();
-        return null;
-    }
-
-    /**
-     * 获取对应的质检任务查看链接
-     * 1. 存在1个已检的质检任务质检信息，则查看最新质检任务的质检信息
-     * 2. 存在1个以上的已检的质检任务，查看质检信息查看列表页面
-     *
-     * @return
-     */
-    public String fetchCheckTaskLink() {
-        if(this.haveTask()) {
-            List<CheckTask> tasks = (List) CollectionUtils.select(this.taskList, o -> {
-                CheckTask task = (CheckTask) o;
-                return task.checkstat != CheckTask.StatType.UNCHECK;
-            });
-            if(tasks != null) {
-                if(tasks.size() == 1) {
-                    return String.format("/checktasks/%s/show", tasks.get(0).id);
-                } else if(tasks.size() > 1) {
-                    return String.format("/checktasks/%s/showList", this.id);
-                }
-            }
-        }
-        return null;
-    }
-
-    public Integer fetchCheckTaskQcSample() {
-        if(this.haveTask()) {
-            CheckTask task = this.taskList.get(0);
-            if(task != null && task.qcSample != null) {
-                return task.qcSample;
-            }
-        }
-        return 0;
-    }
-
-    public boolean haveTask() {
-        return this.taskList != null && this.taskList.size() != 0;
     }
 
     public int returnPurchaseSample() {
@@ -2398,14 +2301,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.delete();
     }
 
-    public int fetchCheckTaskQty() {
-        if(this.haveTask()) {
-            CheckTask task = this.taskList.get(0);
-            if(task != null) return task.qty;
-        }
-        return 0;
-    }
-
     public String fetchShipItem(String type) {
         if(shipItems != null && shipItems.size() > 0) {
             ShipItem item = shipItems.get(0);
@@ -2420,17 +2315,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return item.currency.symbol() + " " + item.compenamt;
         } else {
             return String.valueOf(0);
-        }
-    }
-
-    /**
-     * 生成质检任务
-     */
-    public void triggerCheck() {
-        if(this.isPersistent() && this.shipType != null && this.isCheck == 0 && this.selling != null) {
-            new CheckTask(this).save();
-            this.isCheck = 1;
-            this.save();
         }
     }
 
@@ -2451,38 +2335,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 cooperator != null ? cooperator : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
                 shiptype != null ? shiptype : this.shipType
         );
-    }
-
-    public CheckTask lastCheckedTask() {
-        if(this.haveTask()) {
-            CheckTask task = this.taskList.get(0);
-            if(task != null && task.isship != null && task.checkstat != CheckTask.StatType.UNCHECK) {
-                return task;
-            }
-        }
-        return null;
-    }
-
-    public List<CheckTask> uncheckTaskList() {
-        return (List) CollectionUtils.select(this.taskList, o -> {
-            CheckTask task = (CheckTask) o;
-            return task.checkstat == CheckTask.StatType.UNCHECK;
-        });
-    }
-
-    /**
-     * 更新相关的质检任务的仓库
-     */
-    public void flushTask() {
-        if(this.haveTask()) {
-            List<CheckTask> tasks = this.uncheckTaskList();
-            if(tasks != null && !tasks.isEmpty()) {
-                Whouse wh = this.matchWhouse();
-                if(wh != null) {
-                    for(CheckTask task : tasks) task.shipwhouse = wh;
-                }
-            }
-        }
     }
 
     /**

@@ -14,12 +14,9 @@ import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
 import models.view.post.LossRatePost;
-import models.view.report.AreaGoodsAnalyze;
 import models.view.report.ArrivalRate;
 import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.jsoup.helper.StringUtil;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -172,26 +169,6 @@ public class ShipmentReports extends Controller {
             flash.error(Webs.E(e));
         }
         render(lossrates, losstotal, p, shipItems);
-    }
-
-    public static void areaGoodsAnalyze(AreaGoodsAnalyze a) {
-        if(a == null) {
-            a = new AreaGoodsAnalyze();
-            a.from = DateTime.now().minusMonths(1).plusDays(1).toDate();
-            a.to = DateTime.now().toDate();
-        }
-        List<AreaGoodsAnalyze> analyzes = a.query();
-        a.queryTotalShipmentAnalyze();
-        render(analyzes, a);
-    }
-
-    public static void queryCenterIdByCountryCode(AreaGoodsAnalyze a) {
-        if(StringUtil.isBlank(a.countryCode)) {
-            renderJSON(new Ret());
-        } else {
-            List<String> list = a.queryCenterIdByCountryCode(a.countryCode);
-            renderJSON(J.json(list));
-        }
     }
 
 }

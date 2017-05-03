@@ -41,7 +41,14 @@
   <td>
     <input type="text" name="wh.province" value="${wh.province}">
   </td>
-  <td colspan="2"></td>
+  <th>对应市场</th>
+  <td>
+    <select name="wh.market">
+    #{list items:models.market.M.values(), as:'m'}
+      <option value="${m.name()}">${m.name()}</option>
+    #{/list}
+    </select>
+  </td>
 </tr>
 <tr style="display:none" id="forward_shipment_tr">
   <th>货代</th>

@@ -31,51 +31,11 @@ public class Mails extends Mailer {
     public static final String REVIEW_WARN = "review_warnning";
     public static final String FNSKU_CHECK = "fnsku_check_warn";
 
-    // ------------------------------ Shipment 邮件  -----------------------
-
-    public static void shipment_clearance(Shipment shipment) {
-        String title = String.format("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
-        MailsRecord mr = null;
-        try {
-            setSubject(title);
-            mailBase();
-            addRecipient("p@easya.cc");
-            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, CLEARANCE);
-            send(shipment);
-            mr.success = true;
-        } catch(Exception e) {
-            Logger.warn(title + ":" + Webs.E(e));
-        } finally {
-            if(mr != null)
-                mr.save();
-        }
-    }
-
-    public static void shipment_isdone(Shipment shipment) {
-        String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,并且签收,需确认.", shipment.id);
-        MailsRecord mr = null;
-        try {
-            setSubject(title);
-            mailBase();
-            addRecipient("p@easya.cc");
-            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, IS_DONE);
-            send(shipment);
-            mr.success = true;
-        } catch(Exception e) {
-            Logger.warn(title + ":" + Webs.E(e));
-        } finally {
-            if(mr != null)
-                mr.save();
-        }
-    }
-
-
     /**
      * Listing 被人上架了的警告邮件
      */
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
-        String title = String
-                .format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
+        String title = String.format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
         MailsRecord mr = null;
         try {
             setSubject(title);
@@ -99,7 +59,6 @@ public class Mails extends Mailer {
      */
     public static void feedbackWarnning(Feedback f) {
         if(f.mailedTimes != null && f.mailedTimes >= 2) return;
-
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("service@easya.cc");
@@ -115,8 +74,6 @@ public class Mails extends Mailer {
             if(mr != null)
                 mr.save();
         }
-
-
     }
 
 
@@ -170,7 +127,6 @@ public class Mails extends Mailer {
         }
 
     }
-
 
     // ----------------------------------------------
     private static void mailBase() {

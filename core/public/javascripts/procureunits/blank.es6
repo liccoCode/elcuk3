@@ -95,7 +95,8 @@ $(() => {
       let sku = $("#unit_sku").val();
       $.get("/sellings/findSellingBySkuAndMarket", {
         sku: sku,
-        market: "AMAZON_" + country
+        market: "AMAZON_" + country,
+        id: $("#warehouse_select").val()
       }, function (c) {
         $("#sellingId").val(c);
         if (!$("#sellingId").val()) {

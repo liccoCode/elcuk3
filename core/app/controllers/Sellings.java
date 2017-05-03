@@ -10,6 +10,7 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.post.SellingAmzPost;
 import models.view.post.SellingPost;
+import models.whouse.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -421,9 +422,10 @@ public class Sellings extends Controller {
         selling(sellingId);
     }
 
-    public static void findSellingBySkuAndMarket(String sku, String market) {
-        List<Selling> list = Selling.find("listing.product.sku=? AND market=? AND state <>?",
-                sku, M.valueOf(market), Selling.S.DOWN).fetch();
+    public static void findSellingBySkuAndMarket(String sku, String market, Long id) {
+        Whouse whouse = Whouse.findById(id);
+        List<Selling> list = Selling.find("listing.product.sku=? AND market=? AND state <>? AND account.id = ? ",
+                sku, M.valueOf(market), Selling.S.DOWN, whouse.account.id).fetch();
         List<String> sids = new ArrayList<>();
         for(Selling s : list) sids.add(s.sellingId);
         renderJSON(J.json(sids));
