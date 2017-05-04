@@ -2717,4 +2717,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return 1;
     }
 
+    public float otherPrice() {
+        CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", this.cooperator.id, this.sku).first();
+        return cooperItem == null ? 0 : cooperItem.otherPrice;
+    }
+
 }
