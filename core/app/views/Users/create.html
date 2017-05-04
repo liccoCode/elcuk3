@@ -38,6 +38,16 @@
       <td><input type="password" name="user.confirm"></td>
     </tr>
     <tr>
+      <th>所属公司</th>
+      <td>
+        <select name="user.projectName">
+            #{list items:models.User.COR, as:'c'}
+              <option value="${c.name()}">${c.label()}</option>
+            #{/list}
+        </select>
+      </td>
+    </tr>
+    <tr>
       <td colspan="4">
         <button class="btn btn-success" data-disable-with='提交请求中...'>创建</button>
       </td>
