@@ -48,6 +48,14 @@ public class CooperItem extends Model {
     @Min(0)
     public Float price;
 
+    /***
+     * 其他价格（包含包材配件价格）
+     */
+    @Required
+    @Expose
+    @Min(0)
+    public Float otherPrice = 0f;
+
     @Required
     @Expose
     @Enumerated(EnumType.STRING)

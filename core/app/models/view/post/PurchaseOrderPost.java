@@ -141,9 +141,11 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         sql.append("          IFNULL(round(sum(p.price * IFNULL(p.qty, p.planQty)),2),0) AS 'a1'");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN ProcureUnit p ON p.deliveryment_id = m.id");
-        sql.append("   LEFT JOIN Cooperator c ON c.id = m.`cooperator_id`");
+        sql.append("   LEFT JOIN Cooperator c ON c.id = m.cooperator_id ");
         sql.append("   WHERE m.createDate>= ? ");
         sql.append("     AND m.createDate<= ? ");
+        sql.append("     AND (p.type IS NULL || p.type = 'ProcureSplit') ");
+        sql.append("     AND p.nopayment = 0 ");
         params.add(from);
         params.add(to);
         sql.append("   GROUP BY m.id) t1 ,");
