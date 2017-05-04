@@ -140,6 +140,31 @@ public class User extends Model {
     @OneToMany
     public List<Whouse> whouses;
 
+    /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public COR projectName;
+
+    public enum COR {
+        EASYACC {
+            @Override
+            public String label() {
+                return "EasyAcc";
+            }
+        },
+        B2B {
+            @Override
+            public String label() {
+                return "B2B";
+            }
+        };
+
+        public abstract String label();
+    }
+
+
     public User() {
     }
 
