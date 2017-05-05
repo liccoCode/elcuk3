@@ -15,6 +15,7 @@ $ ->
       checkboxList.each(->
         $tr = parseDom1("<tr><td>#{$(@).val()}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='#{$(@).data("boxnum")}' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
         $table.appendChild($tr)
+        unitIds.push($(@).val())
       )
       $('#box_number_modal').modal('show')
   ).on("blur", "input[name='boxNumbers']", (e) ->
