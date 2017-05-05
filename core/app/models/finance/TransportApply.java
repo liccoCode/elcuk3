@@ -117,6 +117,8 @@ public class TransportApply extends Apply {
             Validation.addError("", "请仅对同一个运输商.");
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的运输单.");
+        if(shipments.stream().anyMatch(shipment -> shipment.apply != null))
+            Validation.addError("", "请全部选择未创建请款单的运输单！");
         return new F.T2<>(shipments, coopers);
     }
 

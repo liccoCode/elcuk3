@@ -14,6 +14,7 @@
     <th style="width:120px;">预计到库时间</th>
     <th style="width:40px;">创建者</th>
     <th style="width:100px;">出库单ID</th>
+    <th style="width:150px;">请款单</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
@@ -44,6 +45,7 @@
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.creater?.username}</td>
     <td><a target="_blank" href="@{Outbounds.edit(ship.out?.id)}">${ship.out?.id}</a></td>
+    <td><a href="@{Applys.transport(ship.apply?.id)}">${ship.apply?.serialNumber}</a></td>
   </tr>
 #{/list}
 </table>
