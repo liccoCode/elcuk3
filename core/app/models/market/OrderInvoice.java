@@ -213,7 +213,7 @@ public class OrderInvoice extends GenericModel {
      * @param num
      * @param date
      */
-    public static void createInvoicePdf(int num, Date date, String market) {
+    public static void createInvoicePdf(int num, Date date, String market, String regex) {
         Date beginDate = Dates.monthBegin(date);
         Date endDate = Dates.monthEnd(date);
         DateTime dateTime = new DateTime(date);
@@ -237,7 +237,8 @@ public class OrderInvoice extends GenericModel {
         num = (num == 0) ? 10000 : num;
         for(M m : markets) {
             List<Orderr> list = Orderr.find("createDate >= ? and createDate <= ? and invoiceState='no' and market = ? " +
-                    "and state <> ? ", beginDate, endDate, m, Orderr.S.CANCEL).fetch(1, num);
+                    "and state <> ? and orderId LIKE '" + regex + "%' ", beginDate, endDate, m, Orderr.S.CANCEL)
+                    .fetch(1, num);
             if(list != null && list.size() > 0) {
                 for(Orderr ord : list) {
                     try {

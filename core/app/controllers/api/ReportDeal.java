@@ -181,11 +181,12 @@ public class ReportDeal extends Controller {
         String date = request.params.get("date");
         String num = request.params.get("num");
         String market = request.params.get("market");
+        String regex = request.params.get("regex");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date time = sdf.parse(date);
-            OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market);
+            OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market, regex);
             renderText("后台正在处理, 请稍后去服务器查看.");
         } catch(ParseException e) {
             Logger.error(Webs.S(e));

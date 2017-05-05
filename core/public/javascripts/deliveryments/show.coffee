@@ -36,7 +36,7 @@ $ ->
       # 尾箱箱内产品数量
       lastCartonNum = $checkbox.data('lastcartonnum')
       # 如果尾箱内有数量则表示箱数需要 + 1
-      boxNum += 1 if !_.isNil(lastCartonNum) && lastCartonNum != 0
+      boxNum += 1 if !_.isEmpty(lastCartonNum) && lastCartonNum != 0
 
       tr = "<tr>" +
         "<td>#{$checkbox.val()}</td>" +

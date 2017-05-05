@@ -16,6 +16,7 @@ import models.view.post.ShipmentPost;
 import models.view.post.TransApplyShipPost;
 import models.view.post.TransportApplyPost;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -126,11 +127,10 @@ public class Applys extends Controller {
     @Check("applys.shipmenttoapply")
     public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
         if(shipmentId == null || shipmentId.size() == 0)
-            Validation.addError("", "请选择需要创建请款单的运输单");
+            Validation.addError("", "请选择需要创建请款单的运输单！");
         TransportApply apply = null;
         if(!Validation.hasErrors())
             apply = TransportApply.buildTransportApply(shipmentId);
-
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             Shipments.index(p);

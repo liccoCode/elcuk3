@@ -4,6 +4,7 @@
 #{else }
 <table class="table table-condensed table-bordered">
   <tr>
+    <th width="60px;"></th>
     <th style="min-width:120px;">SKU</th>
     <th style="width:100px;">Family</th>
     <th>Name</th>
@@ -17,6 +18,9 @@
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
+        <td height="60px;">
+           <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg">
+        </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>
         <td class="span10">${prod.productName}</td>
@@ -58,7 +62,7 @@
     #{/list}
     #{if pi}
       <tr>
-        <td colspan="10">
+        <td colspan="11">
             #{bootstrap_pager pi:pi, url:'/products/index'/}
         </td>
       </tr>
