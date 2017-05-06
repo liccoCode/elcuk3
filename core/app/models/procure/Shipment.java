@@ -398,6 +398,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public boolean isDedicated = false;
 
+    /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
     public enum FLAG {
         ARRAY_TO_STR,
         STR_TO_ARRAY
