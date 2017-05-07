@@ -71,7 +71,7 @@ public class ShipItem extends GenericModel {
     public ShipItem(ProcureUnit unit) {
         this.unit = unit;
         this.qty = unit.realQty();
-        this.fulfillmentNetworkSKU = unit.selling.fnSku;
+        this.fulfillmentNetworkSKU = unit.selling != null ? unit.selling.fnSku : "";
     }
 
     @Id

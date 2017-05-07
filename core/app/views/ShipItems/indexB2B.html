@@ -40,7 +40,7 @@
 </div>
 
 <div class="row-fluid">
-  <form action="@{Shipments.procureUnitToShipment()}" method="POST" id="new_shipment" class="search_form">
+  <form action="@{Shipments.buildB2BFromProcureUnits()}" method="POST" id="new_shipment" class="search_form">
     <table class="table table-bordered table-condensed">
       <tr>
         <th><input type="checkbox" class="checkall"></th>
@@ -64,7 +64,7 @@
           #{set relateShipments: unit.relateShipment()/}
         <td>
             #{ifnot relateShipments.size() > 0}
-              <label><input type="checkbox" name="units" value="${unit.id}"></label>
+              <input type="checkbox" name="units" value="${unit.id}">
             #{/ifnot}
         </td>
         <td>

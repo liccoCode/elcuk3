@@ -30,16 +30,18 @@
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
   <div class="row-fluid">
     <div class="span12">
-    #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    #{if ship.projectName == models.User.COR.B2B}
+        #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    #{/if}
+      #{else }
+        #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    #{/else}
     </div>
   </div>
 
 #{flash_alert /}
-
 #{shipmentWorkflow state: ship.state/}
-
 #{render './_show_progress.html', ship: ship/}
-
 #{render './_show_items.html', ship: ship, cooperators: cooperators/}
 
   <!-- 运输单记录信息 -->

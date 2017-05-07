@@ -398,6 +398,30 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public boolean isDedicated = false;
 
+    public enum W {
+        PrePay {
+            @Override
+            public String label() {
+                return "预付";
+            }
+        },
+        ArrivePay {
+            @Override
+            public String label() {
+                return "到付";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 贸易方式
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public W tradeMode;
+
     /**
      * 所属公司
      */
@@ -438,8 +462,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
         int plusDay = shipDay();
-        this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
-                .toDate();
+        this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay).toDate();
         this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
         return true;
     }
@@ -471,6 +494,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(procureUnits.size() != units.size())
             Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
         return procureUnits;
+    }
+
+    /**
+     * 创建B2B运输单
+     *
+     * @param units
+     * @return
+     */
+    public Shipment buildB2BFromProcureUnits(List<Long> units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
+        ProcureUnit firstProcureUnit = procureUnits.get(0);
+        Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
+        this.id = Shipment.id();
+        this.dates.planBeginDate = earlyPlanBeginDate;
+        this.creater = Login.current();
+        this.projectName = User.COR.B2B;
+        if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
+            this.isDedicated = true;
+        }
+        this.save();
+        procureUnits.forEach(unit -> {
+            ShipItem shipitem = new ShipItem(unit);
+            shipitem.shipment = this;
+            this.items.add(shipitem.save());
+        });
+        return this;
     }
 
     /**
@@ -1600,7 +1649,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public String showRealDay() {
-        if(this.dates.beginDate != null && this.dates.arriveDate != null) {
+        if(this.dates != null && this.dates.beginDate != null && this.dates.arriveDate != null) {
             long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime()) / 1000 / 3600 / 24;
             return day + "";
         }

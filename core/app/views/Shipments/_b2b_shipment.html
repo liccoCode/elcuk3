@@ -1,0 +1,212 @@
+<form action="@{Shipments.update()}" method="post" id="shipment_form">
+#{authenticityToken /}
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <th width="200px;">Title (Create By ${ship.creater ? ship.creater.username : "System"})</th>
+      <td colspan="3">
+        <input type="text" name="ship.title" class="span10" value="${ship.title ? ship.title : ship.title()}">
+      </td>
+    </tr>
+
+    <tr>
+      <th>运输单号</th>
+      <td width="40%;">
+        <input type="text" id="shipmentId" name="shipid" value="${ship.id}" readonly>
+      </td>
+      <th width="200px;">创建时间</th>
+      <td><input type="date" value="${ship.createDate.datetime()}" readonly></td>
+    </tr>
+
+    <tr>
+      <th>预计运输时间</th>
+      <td>
+        <input type="date" name="ship.dates.planBeginDate" value="${ship.dates?.planBeginDate.date()}">
+        实际运输时间: <input type="date" name="ship.dates.beginDate" value="${ship.dates?.beginDate.date()}">
+      </td>
+      <th>预计到库时间</th>
+      <td>
+        <input type="date" name="ship.dates.planArrivDate" value="${ship.dates?.planArrivDate.date()}">
+      #{if ship.dates?.oldPlanArrivDate != null}
+        <span class="add-on">比原预计到库日期${ship.dates?.oldPlanArrivDate.date()}
+          差异${(ship.dates?.planArrivDate.getTime()-ship.dates?.oldPlanArrivDate.getTime())/(24*60*60*1000)}天</span>
+      #{/if}
+      </td>
+    </tr>
+
+    <tr>
+      <th>约定到货时间</th>
+      <td>
+        <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates?.planArrivDateForCountRate.date()}"
+               rel="popover" content="用于计算准时到货率(只有在 '计划' 与 '锁定准备运输' 状态下的运输单才允许修改该字段)" placement="right">
+      </td>
+      <th>晚到货原因</th>
+      <td>
+        <input name="ship.reason" class="span8" rel="popover" placement="right" value="${ship.reason}" id="reason"/>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Track No.</th>
+      <td>
+        <table class="table table-hover table-condensed table-bordered" id="trackno_table" style="max-width: 260px;">
+        #{if ship.tracknolist==null || ship.tracknolist.isEmpty()}
+          <tr>
+            <td>
+              <input type="text" class="input-medium" name="ship.tracknolist[${0}]" value="">
+            </td>
+          </tr>
+        #{/if}
+        #{else }
+            #{list items:ship.tracknolist, as:'trackno'}
+              <tr>
+                <td>
+                  <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
+                    #{if ship.internationExpress && trackno}
+                      <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                    #{/if}
+                  <a class="btn" name='delete_trackno_row'><i class="icon-remove"></i></a>
+                </td>
+              </tr>
+            #{/list}
+        #{/else}
+          <tr>
+            <td>
+              <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+                 id="more_trackno_btn" data-table="trackno_table">
+                <i class="icon-plus"></i>
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <th>工作号</th>
+      <td>
+        <input type="text" name="ship.jobNumber" value="${ship.jobNumber}" id="jobNumber"/>
+      </td>
+    </tr>
+
+    <tr>
+      <th>国际快递商</th>
+      <td>
+        <select name="ship.internationExpress">
+          <option value="">选择快递商</option>
+        #{list items:models.procure.Shipment.Express(), as:'i'}
+          <option value="${i.name()}" ${i.name()==ship.internationExpress?.name() ? 'selected' : ''}>${i.name()}</option>
+        #{/list}
+        </select>
+      </td>
+      <th>总质量(kg)质检</th>
+      <td>${ship.totalWeightQuaTest()}</td>
+    </tr>
+
+    <tr>
+      <th>运输商</th>
+      <td>
+        <select name="ship.cooper.id">
+          <option value="">选择运输商</option>
+        #{list items:shippers, as:'s'}
+          <option value="${s.id}" ${s.id==ship.cooper?.id ? 'selected' : ''}>${s.fullName}</option>
+        #{/list}
+        </select>
+      </td>
+      <th>总体积(m³)质检</th>
+      <td>${ship.totalVolumeQuaTest().format('#.##')}</td>
+    </tr>
+
+    <tr>
+      <th>贸易方式</th>
+      <td>
+        <select name="ship.tradeMode">
+          <option value="">选择贸易方式</option>
+        #{list items:models.procure.Shipment.W, as:'w'}
+          <option value="${w.name()}" ${w==ship.tradeMode ? 'selected' : ''}>${w.label()}</option>
+        #{/list}
+        </select>
+      </td>
+      <th>总箱数(件)质检</th>
+      <td>${ship.totalUnitQuaTest()}</td>
+    </tr>
+
+    <tr>
+      <th>运输方式</th>
+      <td>
+        <select name="ship.type">
+          <option value="">选择运输方式</option>
+        #{list items:models.procure.Shipment.T, as:'t'}
+          <option value="${t.name()}" ${t==ship.type ? 'selected' : ''}>${t.label()}</option>
+        #{/list}
+        </select>
+      </td>
+      <th>总重量(kg)货代</th>
+      <td>
+        <input type="text" name="ship.totalWeightShipment" value="${ship.totalWeightShipment}" id="totalWeightShipment"/>
+      </td>
+    </tr>
+
+    <tr>
+      <th>联系人/联系方式</th>
+      <td>
+        <input type="text" class="input-small" name="" value="">
+        <input type="text" class="input-xlarge" name="" value="">
+      </td>
+      <th>B2B客户</th>
+      <td>
+        <select name="">
+          #{list }
+            <option></option>
+          #{/list}
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <th>目的地</th>
+      <td><input type="text" class="input-xxlarge" value="${ship.target}"></td>
+      <th>总体积(m³)货代</th>
+      <td>
+        <input type="text" name="ship.totalVolumeShipment" value="${ship.totalVolumeShipment}" id="totalVolumeShipment"/>
+      </td>
+    </tr>
+
+    <tr>
+      <th>始发地</th>
+      <td><input type="text" value="${ship.source}"></td>
+      <th>货代计费方式</th>
+      <td>
+        <select name="ship.shipmentTpye">
+          <option value="">请选择</option>
+          <option value="weight" #{if 'weight'==ship.shipmentTpye}selected='selected'#{/if}>重量</option>
+          <option value="volume" #{if 'volume'==ship.shipmentTpye}selected='selected'#{/if}>体积</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <th>运输单总重量/总体积</th>
+      <td>${ship.totalWeight()} kg / ${ship.totalVolume()} m³</td>
+      <th>总托盘数(货代)</th>
+      <td>
+        <input type="text" name="ship.totalStockShipment" value="${ship.totalStockShipment}" id="totalStockShipment"/>
+      </td>
+    </tr>
+
+    <tr>
+      <th><h4>Comment</h4></th>
+      <td colspan="3">
+        <textarea rows="4" id="ship_memo" name="ship.memo" class="span12">${ship.memo}</textarea>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="4">
+      #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM || ship.state == models.procure.Shipment.S.SHIPPING|| ship.state == models.procure.Shipment.S.CLEARANCE|| ship.state == models.procure.Shipment.S.PACKAGE|| ship.state == models.procure.Shipment.S.BOOKED|| ship.state == models.procure.Shipment.S.DELIVERYING/}
+      #{if isPlanAndConfirm}
+        <button class="btn btn-primary">更新</button>
+      #{/if}
+      #{if !isPlanAndConfirm}
+        <button id="ship_comment" class="btn btn-primary">部分更新</button>
+      #{/if}
+      </td>
+    </tr>
+  </table>
+</form>
