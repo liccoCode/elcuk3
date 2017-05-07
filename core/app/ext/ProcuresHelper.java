@@ -269,7 +269,8 @@ public class ProcuresHelper extends JavaExtensions {
      * @return
      */
     public static String overdue(ShipItem itm) {
-        if(itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
+        if(itm.unit.attrs.planShipDate != null && itm.shipment.dates.planBeginDate != null &&
+                itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
             return "#F2DEDE";
         else
             return "#FFFFFF";

@@ -6,6 +6,7 @@ import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -120,6 +121,18 @@ public class Shipments extends Controller {
         show(shipment.id);
     }
 
+    public static void buildB2BFromProcureUnits(List<Long> units, String shipmentId) {
+        Shipment shipment;
+        if(StringUtils.isNotBlank(shipmentId)) {
+            shipment = Shipment.findById(shipmentId);
+        } else {
+            shipment = new Shipment();
+        }
+        shipment.buildB2BFromProcureUnits(units);
+        flash.success("成功为 %s 个采购计划创建B2B运输单 %s", units.size(), shipment.id);
+        show(shipment.id);
+    }
+
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
         //TODO 需要添加 FeeType 的数据
@@ -147,6 +160,7 @@ public class Shipments extends Controller {
 
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
+        ship.dates = ship.dates == null ? new ShipmentDates() : ship.dates;
         ship.endShipByComputer();
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
