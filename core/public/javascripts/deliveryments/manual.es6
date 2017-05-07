@@ -25,6 +25,18 @@ $(() => {
     }
   });
 
+  bind_b2b_checkbox();
+
+  function bind_b2b_checkbox () {
+    $('input[name$="isb2b"]').click(function () {
+      if ($(this).prop("checked")) {
+        $(this).parent().next().show();
+      } else {
+        $(this).parent().next().hide();
+      }
+    });
+  }
+
   function calu_box_size () {
     $("input[name='box_size']").change(function () {
       let cooper_id = $("select[name='dmt.cooperator.id']").val();
@@ -114,6 +126,7 @@ $(() => {
     window.$ui.dateinput();
     init();
     validQty();
+    bind_b2b_checkbox();
   });
 
   function validQty () {
