@@ -8,36 +8,34 @@
 <table class="table table-condensed table-bordered">
   <tr>
   #{if useCheckbox}
-    <th><input type="checkbox" class="checkbox_all"/></th>
+    <th width="10px;"><input type="checkbox" class="checkbox_all"/></th>
   #{/if}
     <th>采购计划</th>
     <th>阶段</th>
-    <th width="180px;">Sku</th>
+    <th width="130px;">Sku</th>
     <th width="150px;">Selling</th>
   #{if useCheckbox}
     <th>FBA</th>
     <th>CenterId</th>
   #{/if}
     <th><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
-    <th>Receive</th>
-    <th>Qty1</th>
-    <th>采购单</th>
-    <th width="140px;">预计发货时间<br>预计到库时间</th>
-    <th width="140px;">预计交货时间<br>实际交货时间</th>
-    <th>供应商</th>
-    <th>总重量(kg)</th>
+    <th width="50px;">Receive</th>
+    <th width="40px;">Qty1</th>
+    <th>采购单<br>供应商</th>
+    <th width="150px;">预计发货时间<br>预计到库时间</th>
+    <th width="150px;">预计交货时间<br>实际交货时间</th>
+    <th width="50px;">总重量(kg)</th>
     <th>包装信息</th>
     <th>抵达?</th>
-    <th>质检结果</th>
+    <th width="40px;">质检结果</th>
   #{if useCheckbox}
-    <th>运往仓库</th>
+    <th width="35px;">运往仓库</th>
   #{/if}
-    <th>运营创建人</th>
-    <th>采购创建人</th>
+    <th width="80px;">运营创建人<br>采购创建人</th>
     <th width="70px;">丢失量<br>/赔偿金额</th>
   #{power.ck 'paymentunits.postfromtransport'}
       #{if isExpress}
-        <th>记录运费</th>
+        <th width="30px;">记录运费</th>
       #{/if}
   #{/power.ck}
     <th width="70px;">撤销出库</th>
@@ -110,11 +108,9 @@
         ${itm.adjustQty}<i class="icon-wrench"></i>
         </td>
       #{/else}
-
     <td>
-      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
-      ${itm.unit.deliveryment?.id}
-      </a>
+      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.deliveryment?.id}</a><br>
+    ${itm.unit.cooperator?.name}
     </td>
     <td style="background:${itm.overdue()}">
       预计发货:#{time_tooltip time: itm.unit.attrs.planShipDate/}<br>
@@ -124,8 +120,7 @@
       预计交货:#{time_tooltip time: itm.unit.attrs.planDeliveryDate/}<br>
       实际交货:#{time_tooltip time: itm.unit.attrs.deliveryDate/}
     </td>
-    <td>${itm.unit.cooperator?.name}</td>
-    <td>${itm.totalWeight()}</td>
+    <td>${itm.totalWeight().format("#.##")}</td>
     <td>
       <input type="button" class="btn btn-mini btn-info" value="查看" name="editBoxInfo" data-id="${itm.unit.id}">
     </td>
@@ -141,8 +136,9 @@
       #{if useCheckbox}
         <td style="word-break:break-all;">${itm.unit.whouse.name}</td>
       #{/if}
-    <td>${itm.unit.handler.username}</td>
-    <td>${itm.unit.deliveryment?.handler?.username}</td>
+    <td>
+      运营:${itm.unit.handler.username}<br>
+      采购:${itm.unit.deliveryment?.handler?.username}</td>
     <td>${itm.lossqty}/${itm.compenamt}${itm.currency?.name()}</td>
       #{power.ck 'paymentunits.postfromtransport'}
           #{if isExpress}
