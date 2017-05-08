@@ -15,6 +15,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -183,6 +184,8 @@ public class Cooperators extends Controller {
             render("Cooperators/createB2BCustomInfoPage.html", b);
         }
         if(b.id == null) {
+            b.createDate = new Date();
+            b.creator = Login.current();
             b.save();
         } else {
             BtbCustom old = BtbCustom.findById(b.id);
@@ -190,6 +193,7 @@ public class Cooperators extends Controller {
             old.contactPhone = b.contactPhone;
             old.email = b.email;
             old.contacts = b.contacts;
+            old.updateDate = new Date();
             old.save();
         }
         b2bCustomInfoIndex(new BtbCustomPost());

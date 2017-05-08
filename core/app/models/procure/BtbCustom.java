@@ -1,10 +1,13 @@
 package models.procure;
 
+import models.User;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,7 +46,15 @@ public class BtbCustom extends Model {
 
     public String address;
 
+    /**
+     * 创建人
+     */
+    @OneToOne
+    public User creator;
 
+    public Date createDate;
+
+    public Date updateDate;
 
     public boolean vaildRepeatCustomName() {
         boolean flag = false;

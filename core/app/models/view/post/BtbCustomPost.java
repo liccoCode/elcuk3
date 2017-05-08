@@ -22,6 +22,7 @@ public class BtbCustomPost extends Post<BtbCustom>{
             sql.append(" AND s.customName like ? ");
             params.add("%"+keywords+"%");
         }
+        sql.append(" ORDER BY s.id DESC");
         return new F.T2<>(sql.toString(), params);
     }
 
