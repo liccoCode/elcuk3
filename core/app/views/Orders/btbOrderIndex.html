@@ -64,7 +64,7 @@
       <th>计重</th>
       <th>运输方式</th>
       <th>客户/公司名称</th>
-      <th>操作</th>
+      <th width="100px;">操作</th>
     </tr>
   #{list items:orderList, as:'b'}
     <tr>
@@ -77,7 +77,10 @@
       <td>${b.shipWeightUnit.label()} / ${b.shipWeight}</td>
       <td>${b.shipWay?.label()}</td>
       <td>${b.btbCustom?.customName}</td>
-      <td><a href="@{Orders.createBtbOrderPage(b.id)}" class="btn btn-mini btn-primary">编辑</a></td>
+      <td>
+        <a href="@{Orders.createBtbOrderPage(b.id)}" class="btn btn-mini btn-primary">编辑</a>
+        <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-mini btn-warning">下载PI</a>
+      </td>
     </tr>
   #{/list}
     <tr class="tb_footer">
