@@ -110,6 +110,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
+                #{power.ck "shipitems.indexb2b"}
+                  <li><a href="@{ShipItems.indexB2B()}">B2B运输</a></li>
+                #{/power.ck}
               <li><a href="@{ShipItems.index()}">快递运输</a></li>
                 #{power.ck "shipments.index"}
                   <li><a href="@{Shipments.index()}">运输单</a></li>
@@ -150,7 +153,7 @@
             </ul>
           </li>
         #{/power.ck}
-
+            
         #{power.ck 'whouse'}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">仓库模块<b class="caret"></b></a>

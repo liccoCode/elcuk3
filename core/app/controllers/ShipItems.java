@@ -33,6 +33,13 @@ public class ShipItems extends Controller {
         render(p, units, shipments);
     }
 
+    public static void indexB2B(ProcureUnitShipPost p) {
+        if(p == null)
+            p = new ProcureUnitShipPost();
+        List<ProcureUnit> units = p.queryB2B();
+        render(p, units);
+    }
+
     public static void showJson(Long id) {
         ShipItem itm = ShipItem.findById(id);
         render(itm);

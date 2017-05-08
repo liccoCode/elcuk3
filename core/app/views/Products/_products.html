@@ -8,18 +8,18 @@
     <th style="min-width:120px;">SKU</th>
     <th style="width:100px;">Family</th>
     <th>Name</th>
-    <th style="width:80px;">最近采购价格</th>
-    <th style="width:100px;">最近采购供应商</th>
-    <th style="width:80px;">产品状态</th>
-    <th style="width:80px;">销售级别</th>
-    <th>上市时间</th>
-    <th>退市时间</th>
+    <th style="width:90px;">最近采购价格</th>
+    <th style="width:120px;">最近采购供应商</th>
+    <th style="width:70px;">产品状态</th>
+    <th style="width:70px;">销售级别</th>
+    <th style="width:80px;">上市时间</th>
+    <th style="width:80px;">退市时间</th>
     <th style="width:100px;">Action</th>
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
         <td height="60px;">
-           <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg">
+          <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg">
         </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>

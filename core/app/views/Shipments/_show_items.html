@@ -12,7 +12,12 @@
 <form action="@{ShipItems.adjust()}" method="POST" id="adjust_ship_items">
   <div class="row-fluid">
     <div class="span12">
-    #{render './_shipitem.html', items: ship.items, itmRecord: true, isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
+    #{if ship.projectName == models.User.COR.B2B}
+      #{render './_b2b_shipitem.html', items: ship.items, itmRecord: true, isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
+    #{/if}
+      #{else }
+        #{render './_shipitem.html', items: ship.items, itmRecord: true, isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
+    #{/else}
     </div>
   </div>
 #{power.ck 'shipitems.adjust'}

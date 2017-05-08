@@ -2,19 +2,19 @@
   <tr>
     <th style="width:15px;"><input type="checkbox" class="checkbox_all" value="0"/></th>
     <th style="width:60px;">#</th>
-    <th style="width:150px;">Track No.</th>
+    <th style="width:200px;">Track No.</th>
     <th style="width:200px;">运输商</th>
     <th style="width:80px;">国际快递</th>
-    <th style="width:60px;">运输方式</th>
+    <th style="width:80px;">运输方式</th>
     <th style="width:80px;">去往仓库</th>
-    <th style="width:80px;">状态</th>
-    <th style="width:120px;">预计开始时间</th>
-    <th style="width:90px;">实际完成天数</th>
+    <th style="width:90px;">状态</th>
+    <th style="width:100px;">预计开始时间</th>
+    <th style="width:100px;">实际完成天数</th>
     <th style="width:120px;">创建时间</th>
     <th style="width:120px;">预计到库时间</th>
     <th style="width:40px;">创建者</th>
     <th style="width:100px;">出库单ID</th>
-    <th style="width:150px;">请款单</th>
+    <th style="width:80px;">项目名称</th>
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
@@ -35,17 +35,17 @@
     <td>${ship.cooper?.name}</td>
     <td>${ship.internationExpress}</td>
     <td style="color:${ship.type.rgb()}">
-    ${ship.type.label()}<span style="color:red">${ship.isDedicated?'(专线)':''}</span>
+    ${ship.type?.label()}<span style="color:red">${ship.isDedicated?'(专线)':''}</span>
     </td>
     <td>${ship.whouse?.name}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
-    <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
+    <td>#{time_tooltip time:ship.dates?.planBeginDate/}</td>
     <td>${ship.showRealDay()}</td>
     <td>#{time_tooltip time:ship.createDate/}</td>
-    <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
+    <td>#{time_tooltip time:ship.dates?.planArrivDate/}</td>
     <td>${ship.creater?.username}</td>
     <td><a target="_blank" href="@{Outbounds.edit(ship.out?.id)}">${ship.out?.id}</a></td>
-    <td><a href="@{Applys.transport(ship.apply?.id)}">${ship.apply?.serialNumber}</a></td>
+    <td>${ship.projectName?.name()}</td>
   </tr>
 #{/list}
 </table>

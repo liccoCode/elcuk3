@@ -1,41 +1,26 @@
-*{
-1. checkbox: [true]|false; 是否拥有 checkbox 框框
-2. shipmentId: [null]|<shipmentId>; 是否体现取消运输项目功能
-3. itmRecord: [false]|true; 是否加载 Record
-4. fbaRecord: [false]|true; 是否加载 FBA 的入库信息
-}*
-#{set useCheckbox: checkbox == null || checkbox /}
 <table class="table table-condensed table-bordered">
   <tr>
-  #{if useCheckbox}
-    <th width="10px;"><input type="checkbox" class="checkbox_all"/></th>
-  #{/if}
+    <th>
+      <input type="checkbox" class="checkbox_all"/>
+    </th>
     <th>采购计划</th>
     <th>阶段</th>
-    <th width="130px;">Sku</th>
-    <th width="150px;">Selling</th>
-  #{if useCheckbox}
-    <th>FBA</th>
-    <th>CenterId</th>
-  #{/if}
+    <th width="180px;">Sku</th>
     <th><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
-    <th width="50px;">Receive</th>
-    <th width="40px;">Qty1</th>
-    <th>采购单<br>供应商</th>
-    <th width="150px;">预计发货时间<br>预计到库时间</th>
-    <th width="150px;">预计交货时间<br>实际交货时间</th>
-    <th width="50px;">总重量(kg)</th>
+    <th>采购单</th>
+    <th width="140px;">预计发货时间<br>预计到库时间</th>
+    <th width="140px;">预计交货时间<br>实际交货时间</th>
+    <th>供应商</th>
+    <th>总重量(kg)</th>
     <th>包装信息</th>
     <th>抵达?</th>
-    <th width="40px;">质检结果</th>
-  #{if useCheckbox}
-    <th width="35px;">运往仓库</th>
-  #{/if}
-    <th width="80px;">运营创建人<br>采购创建人</th>
+    <th>质检结果</th>
+    <th>运营创建人</th>
+    <th>采购创建人</th>
     <th width="70px;">丢失量<br>/赔偿金额</th>
   #{power.ck 'paymentunits.postfromtransport'}
       #{if isExpress}
-        <th width="30px;">记录运费</th>
+        <th>记录运费</th>
       #{/if}
   #{/power.ck}
     <th width="70px;">撤销出库</th>
@@ -44,13 +29,11 @@
   <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'
       data-lossqty='${itm.lossqty}' data-compenamt='${itm.compenamt}'
       data-currency='${itm.currency?.name()}' data-compentype='${itm.compentype}'>
-      #{if useCheckbox}
         <td>
           <label class="checkbox">
             <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
           </label>
         </td>
-      #{/if}
     <td>
       <a href="@{Deliveryments.show(itm.unit?.deliveryment?.id)}#${itm.unit?.id}">${itm.unit?.id}</a>
     </td>
@@ -59,60 +42,13 @@
       <a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
     ${itm.unit.product?.chineseName}
     </td>
-    <td style="word-break:break-all;"><a id="unitbutton">${itm.unit.sid}</a></td>
-      #{if useCheckbox}
-          #{if itm.unit.fba}
-            <td>
-                #{if itm.unit.fba.records}
-                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">
-                  <span rel='popover' placement='bottom' full-width="true" content="${itm.unit.fba?.records()}">
-                  ${itm.unit.fba.shipmentId}
-                  </span>
-                  </a>
-                  <i class="icon-search"></i>
-                #{/if}
-                #{else }
-                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">${itm.unit.fba.shipmentId}</a>
-                #{/else}
-            </td>
-          #{/if}
-          #{else }
-            <td>&nbsp;</td>
-          #{/else}
-        <td>${itm.unit.fba?.centerId}</td>
-      #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.unit.attrs.planQty}/${itm.unit.attrs.qty}/${itm.unit.shipmentQty()}
     </td>
-      #{if itmRecord}
-        <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
-            name='recivedQty' placement='right' rel='popover'>
-        ${itm.recivedQty}
-        </td>
-      #{/if}
-      #{else }
-        <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}">
-        ${itm.recivedQty}
-        </td>
-      #{/else}
-
-      #{if itmRecord}
-        <td style="#{if itm.adjustQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
-            name='adjustQty' placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
-        ${itm.adjustQty}<i class="icon-wrench"></i>
-        </td>
-      #{/if}
-      #{else }
-        <td style="${itm.adjustQty != itm.qty ? 'background:#F2DEDE' : ''}" name="adjustQty"
-            content='#{records_ul records: itm.recivedLogs()/}'>
-        ${itm.adjustQty}<i class="icon-wrench"></i>
-        </td>
-      #{/else}
     <td>
-      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.deliveryment?.id}</a><br>
-    ${itm.unit.cooperator?.name}
+      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.deliveryment?.id}</a>
     </td>
-    <td style="background:${itm.overdue()}">
+    <td>
       预计发货:#{time_tooltip time: itm.unit.attrs.planShipDate/}<br>
       预计到库:#{time_tooltip time: itm.unit.attrs.planArrivDate/}
     </td>
@@ -120,7 +56,8 @@
       预计交货:#{time_tooltip time: itm.unit.attrs.planDeliveryDate/}<br>
       实际交货:#{time_tooltip time: itm.unit.attrs.deliveryDate/}
     </td>
-    <td>${itm.totalWeight().format("#.##")}</td>
+    <td>${itm.unit.cooperator?.name}</td>
+    <td>${itm.totalWeight()}</td>
     <td>
       <input type="button" class="btn btn-mini btn-info" value="查看" name="editBoxInfo" data-id="${itm.unit.id}">
     </td>
@@ -136,9 +73,8 @@
       #{if useCheckbox}
         <td style="word-break:break-all;">${itm.unit.whouse.name}</td>
       #{/if}
-    <td>
-      运营:${itm.unit.handler.username}<br>
-      采购:${itm.unit.deliveryment?.handler?.username}</td>
+    <td>${itm.unit.handler.username}</td>
+    <td>${itm.unit.deliveryment?.handler?.username}</td>
     <td>${itm.lossqty}/${itm.compenamt}${itm.currency?.name()}</td>
       #{power.ck 'paymentunits.postfromtransport'}
           #{if isExpress}

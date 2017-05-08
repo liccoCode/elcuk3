@@ -1,6 +1,7 @@
 package ext;
 
 import models.ElcukConfig;
+import models.User;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -56,6 +57,8 @@ public class ShipmentsHelper extends JavaExtensions {
     public static Date predictArriveDate(Shipment shipment) {
         if(shipment.state == Shipment.S.DONE)
             return shipment.dates.arriveDate;
+        if(shipment.projectName == User.COR.B2B)
+            return null;
 
         int totalDays = 0;
         for(String dayType : ElcukConfig.DAY_TYPES.keySet()) {

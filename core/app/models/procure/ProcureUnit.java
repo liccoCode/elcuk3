@@ -607,6 +607,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public Outbound outbound;
 
     /**
+     * 客户是否自提
+     * B2B 项目使用
+     */
+    public boolean isSelfPick = false;
+
+    /**
      * 主箱信息
      */
     @Lob

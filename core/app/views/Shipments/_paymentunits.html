@@ -102,14 +102,14 @@
         </label>
 
         <button type="submit" class="btn btn-success" data-url='@{PaymentUnits.fromShipment(ship.id)}'>添加费用</button>
-          #{if ship.whouse.country.contains('DE') }
+          #{if ship.whouse?.country.contains('DE') }
             <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'
                     style="display:none">
               计算剩余关税
             </button>
           #{/if}
       </form>
-        #{if ship.whouse.country.contains('DE') }
+        #{if ship.whouse?.country.contains('DE') }
           <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}' style="display: none">
             计算预交关税
           </a>
