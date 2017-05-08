@@ -159,6 +159,13 @@ public class Deliveryment extends GenericModel {
     @Lob
     public String memo = " ";
 
+    /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
     public enum T {
         /**
          * 普通单

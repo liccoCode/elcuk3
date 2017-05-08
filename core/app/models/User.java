@@ -157,7 +157,7 @@ public class User extends Model {
         B2B {
             @Override
             public String label() {
-                return "B2B";
+                return "MengTop";
             }
         };
 
