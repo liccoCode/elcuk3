@@ -176,17 +176,6 @@ POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
 
-# SKUCHECK
-POST    /skuchecks/{id}/update                               Skuchecks.update
-POST    /skuchecks/{id}/delete                               Skuchecks.remove
-
-# CheckTasks
-GET     /checktasks/{id}/prints                              checktasks.prints
-GET     /checktasks/{id}/prints                              checktasks.prints
-GET     /checktasks/{id}/doprints                            checktasks.doprints
-*       /checktasks/{id}/show                                checktasks.show
-GET     /checktasks/{id}/showList                            checktasks.showList
-
 # FBACenters
 POST    /fbacenters/{id}/enableAutoSync                      FBACenters.enableAutoSync
 POST    /fbacenters/{id}/disableAutoSync                     FBACenters.disableAutoSync

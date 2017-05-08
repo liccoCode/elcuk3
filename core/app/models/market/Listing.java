@@ -66,9 +66,8 @@ public class Listing extends GenericModel {
     /**
      * 不能级联删除, 并且删除 Listing 的时候需要保证 Selling 都已经处理了
      */
-    @OneToMany(mappedBy = "listing",
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-                    CascadeType.REFRESH})
+    @OneToMany(mappedBy = "listing", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH})
     public List<Selling> sellings;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
