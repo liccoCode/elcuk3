@@ -38,7 +38,7 @@
       <th>创建人</th>
       <th>创建时间</th>
       <th>最新修改时间</th>
-      <th>操作</th>
+      <th width="100px;">操作</th>
     </tr>
   #{list items:dots, as:'b'}
     <tr>
@@ -51,7 +51,8 @@
       <td>#{time_tooltip time:b.createDate/}</td>
       <td>#{time_tooltip time:b.updateDate/}</td>
       <td>
-        <a href="@{Cooperators.createB2BCustomInfoPage(b.id)}" class="btn btn-mini btn-success">编辑</a>
+        <a href="@{Cooperators.createB2BCustomInfoPage(b.id)}" class="btn btn-mini btn-success">Edit</a>
+        <a href="@{Cooperators.deleteB2BCustom(b.id)}" class="btn btn-mini btn-danger">Delete</a>
       </td>
     </tr>
   #{/list}

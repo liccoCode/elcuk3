@@ -56,6 +56,8 @@ public class BtbCustom extends Model {
 
     public Date updateDate;
 
+    public boolean isDel = false;
+
     public boolean vaildRepeatCustomName() {
         boolean flag = false;
         List<BtbCustom> c;

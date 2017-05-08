@@ -178,6 +178,14 @@ public class Cooperators extends Controller {
         render(b);
     }
 
+    public static void deleteB2BCustom(Long id) {
+        BtbCustom custom = BtbCustom.findById(id);
+        custom.isDel = true;
+        custom.save();
+        flash.success("删除客户成功~");
+        b2bCustomInfoIndex(new BtbCustomPost());
+    }
+
     public static void createB2BCustom(BtbCustom b) {
         if(b.vaildRepeatCustomName()) {
             flash.error("客户/公司名称重复了，请重新填写！");
