@@ -7,33 +7,31 @@
 
 #{flash_alert /}
 
-<form action="@{Orders.btbOrderIndex()}" method="POST" class="search_form" id='search_form'>
-  <div class="row-fluid">
+<div class="row-fluid">
+  <form action="@{Orders.btbOrderIndex()}" method="POST" class="search_form" id='search_form'>
     <div class="span12">
-      <div class="input-prepend inline">
+      <div class="input-prepend input-append inline">
         <span class="add-on">时间</span>
-        <input type="date" name="p.from" value="${p.from.date()}"> ~
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
-      <div class="input-prepend inline">
-        <span class="add-on">品线</span>
-        <select name="p.categoryId">
-          <option value="">请选择</option>
-        #{list items:categorys, as:'c'}
-          <option value="${c}" #{if c==p.categoryId} selected #{/if}>${c}</option>
-        #{/list}
-        </select>
-      </div>
-      <div class="input-prepend inline">
-        <span class="add-on">客户/公司名称</span>
-        <select name="p.btbCustomId" style="width:180px;">
-          <option value="">请选择</option>
-        #{list items:customList, as:'c'}
-          <option value="${c.id}" #{if c.id==p.btbCustomId} selected #{/if}>${c.customName}</option>
-        #{/list}
-        </select>
-      </div>
-      <div class="input-prepend inline">
+
+      <select name="p.categoryId" class="inline">
+        <option value="">品线</option>
+      #{list items:categorys, as:'c'}
+        <option value="${c}" #{if c==p.categoryId} selected #{/if}>${c}</option>
+      #{/list}
+      </select>
+
+      <select name="p.btbCustomId" style="width:220px;" class="inline selectize">
+        <option value="">客户/公司名称</option>
+      #{list items:customList, as:'c'}
+        <option value="${c.id}" #{if c.id==p.btbCustomId} selected #{/if}>${c.customName}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend input-append inline">
         <span class="add-on">关键字</span>
         <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="SKU/订单号"/>
       </div>
@@ -53,8 +51,8 @@
       </div>
 
     </div>
-  </div>
-</form>
+  </form>
+</div>
 
 <div class="row-fluid" style="overflow-x:auto;">
   <table class="table table-bordered table-condensed">
@@ -70,7 +68,9 @@
     </tr>
   #{list items:orderList, as:'b'}
     <tr>
-      <td><a name="orderNoBtn" order_id="${b.id}">${b.orderNo}</a></td>
+      <td style="cursor:pointer;" name="clickTd" data-id="${b.id}">
+        <i class="icon-reorder"></i><a name="orderNoBtn" order_id="${b.id}">${b.orderNo}</a>
+      </td>
       <td>#{time_tooltip time:b.saleDate/}</td>
       <td>${b.showTotalCost()}</td>
       <td>${b.shipCostUnit.symbol()} ${b.shipCost}</td>

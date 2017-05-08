@@ -1,5 +1,7 @@
 package models.procure;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;
@@ -9,7 +11,10 @@ import java.util.List;
  * Created by licco on 16/1/20.
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class BtbCustom extends Model {
+
+    private static final long serialVersionUID = -7229251820184285759L;
 
     public String customName;
 
@@ -18,6 +23,27 @@ public class BtbCustom extends Model {
     public String contactPhone;
 
     public String email;
+
+    /**
+     * 收货人
+     */
+    public String receiver;
+
+    /**
+     * 收货人电话
+     */
+    public String receiverPhone;
+
+
+    public String countryCode;
+
+    public String city;
+
+    public String postalCode;
+
+    public String address;
+
+
 
     public boolean vaildRepeatCustomName() {
         boolean flag = false;

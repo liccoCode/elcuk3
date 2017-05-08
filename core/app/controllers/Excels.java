@@ -6,6 +6,7 @@ import helper.Currency;
 import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
 import models.market.BtbOrder;
+import models.market.BtbOrderItem;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.*;
@@ -795,4 +796,19 @@ public class Excels extends Controller {
             renderText("未找到当前日期的数据.");
         }
     }
+
+    public static void downloadB2BPi(Long id) {
+        BtbOrder order = BtbOrder.findById(id);
+        int i = 1;
+        for(BtbOrderItem item : order.btbOrderItemList) {
+            item.index = i;
+            i++;
+        }
+        SimpleDateFormat df = new SimpleDateFormat("dd MMMMM, yyyy", Locale.ENGLISH);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s for customs.xls", order.orderNo));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(order, df);
+    }
+
 }
