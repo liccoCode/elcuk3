@@ -15,6 +15,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -177,12 +178,22 @@ public class Cooperators extends Controller {
         render(b);
     }
 
+    public static void deleteB2BCustom(Long id) {
+        BtbCustom custom = BtbCustom.findById(id);
+        custom.isDel = true;
+        custom.save();
+        flash.success("删除客户成功~");
+        b2bCustomInfoIndex(new BtbCustomPost());
+    }
+
     public static void createB2BCustom(BtbCustom b) {
         if(b.vaildRepeatCustomName()) {
             flash.error("客户/公司名称重复了，请重新填写！");
             render("Cooperators/createB2BCustomInfoPage.html", b);
         }
         if(b.id == null) {
+            b.createDate = new Date();
+            b.creator = Login.current();
             b.save();
         } else {
             BtbCustom old = BtbCustom.findById(b.id);
@@ -190,6 +201,7 @@ public class Cooperators extends Controller {
             old.contactPhone = b.contactPhone;
             old.email = b.email;
             old.contacts = b.contacts;
+            old.updateDate = new Date();
             old.save();
         }
         b2bCustomInfoIndex(new BtbCustomPost());

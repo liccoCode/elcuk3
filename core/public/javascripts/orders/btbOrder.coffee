@@ -44,9 +44,9 @@ $ ->
       $("#bankChargesOther").attr("readonly", true)
   )
 
-  $("a[name='orderNoBtn']").click(->
-    tr = $(@).parent().parent("tr")
-    order_id = $(@).attr("order_id")
+  $("td[name='clickTd']").click(->
+    tr = $(@).parent("tr")
+    order_id = $(@).data("id")
     if tr.next("tr").find("div[id='sku#{order_id}']").html()
       tr.next("tr").toggle()
     else

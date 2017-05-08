@@ -65,7 +65,8 @@
         </a>
       #{/power.ck}
 
-        <a href="@{Excels.deliveryments(p)}" class="btn btn-primary" target="_blank"><i class="icon-download-alt"></i>下载Excel</a>
+        <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank"><i
+            class="icon-download-alt"></i>下载Excel</a>
       </div>
     </div>
   </div>
@@ -142,12 +143,12 @@
       </table>
       <div class="btn-toolbar">
       #{power.ck 'deliveryments.deliverymenttoapply'}
-          <select name="procureApplyId" class="inline selectize" style="width:250px;">
-            <option value="0">新请款单</option>
+        <select name="procureApplyId" class="inline selectize" style="width:250px;">
+          <option value="0">新请款单</option>
             #{list items:avaliableApplies, as:'a'}
               <option value="${a.id}">${a.serialNumber}</option>
             #{/list}
-          </select>
+        </select>
         <input url='@{Deliveryments.deliverymentToApply()}' type="submit" id="goToDeliverymentApply" class="btn btn-success" value="采购单请款">
       #{/power.ck}
       </div>

@@ -187,6 +187,9 @@
     <div class="controls">
       <input type="submit" class="btn btn-success" value="保存">
       <a href="@{Orders.btbOrderIndex()}" class="btn">返回</a>
+      #{if b.id}
+        <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-primary">下载PI</a>
+      #{/if}
     </div>
   </div>
 </form>

@@ -106,6 +106,10 @@ public class Whouse extends Model {
     @Enumerated(EnumType.STRING)
     public T type;
 
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public M market;
+
     @Lob
     @Expose
     public String memo;

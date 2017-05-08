@@ -50,9 +50,7 @@ public class Whouses extends Controller {
 
     @Check("whouses.index")
     public static void index() {
-        List<Whouse> whs = Whouse.all().fetch();
-        whs = whs.stream().filter(wh -> !wh.del).collect(Collectors.toList());
-        render(whs);
+        render();
     }
 
     public static void blank() {

@@ -244,6 +244,24 @@
       </tr>
 
       <tr>
+        <th>B2B信息</th>
+        <td colspan="3">
+          <table class="table table-hover table-condensed table-bordered">
+            <tr>
+              <th>Description</th>
+              <th>Item Code</th>
+              <th>Color</th>
+            </tr>
+            <tr>
+              <td><input type="text" name="pro.b2bDescription" value="${pro.b2bDescription}"></td>
+              <td><input type="text" name="pro.b2bItemCode" value="${pro.b2bItemCode}"></td>
+              <td><input type="text" name="pro.b2bColor" value="${pro.b2bColor}"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
       <td colspan="10">
       #{power.ck "products.update"}
         <a class="btn btn-primary" id="save_basic_btn">保存</a>

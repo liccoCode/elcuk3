@@ -597,8 +597,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void updateShipment() {
         if(this.creater == null) this.creater = User.current();
         this.save();
-        //更新货代仓库
-        for(ShipItem item : this.items) item.unit.flushTask();
     }
 
     public void setTrackNo(String trackNo) {
@@ -614,7 +612,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public synchronized void addToShip(ProcureUnit unit) {
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
-        if(!unit.whouse.equals(this.whouse))
+        if(!unit.whouse.market.equals(this.whouse.market))
             Validation.addError("", "运输目的地不一样, 无法添加");
         if(unit.shipType != this.type)
             Validation.addError("", "运输方式不一样, 无法添加.");
@@ -624,8 +622,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
-        this.items.add(shipitem.<ShipItem>save());
-        unit.flushTask();//更新相关的质检任务
+        this.items.add(shipitem.save());
     }
 
 
@@ -726,9 +723,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 到港 (运输单抵达港口, 就开始进行清关状态
      */
     public void landPort(Date date) {
-        if(this.type == T.EXPRESS) {
-            Mails.shipment_clearance(this);
-        } else {
+        if(this.type != T.EXPRESS) {
             shouldSomeStateValidate(S.SHIPPING, "到港");
             if(Validation.hasErrors()) return;
             if(date == null) date = new Date();
@@ -1301,21 +1296,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(Whouse whouse : whs) {
             whouse.checkWhouseNewShipment(planedShipments);
         }
-
-
         // 加载
         StringBuilder where = new StringBuilder("state IN (?,?)");
         List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
-            where.append("AND (whouse.id=? OR whouse.id IS NULL)");
-            params.add(whouseId);
+            Whouse whouse = Whouse.findById(whouseId);
+            where.append("AND (whouse.market=? OR whouse.id IS NULL)");
+            params.add(whouse.market);
         } else {
             where.append("AND whouse.id IS NULL");
         }
         where.append(" AND type =?");
         params.add(shipType);
         where.append(" AND dates.planBeginDate >= ?");
-        params.add(new Date());
+        params.add(Dates.morning(new Date()));
         where.append(" ORDER BY planBeginDate");
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
@@ -1330,8 +1324,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
-        return Shipment.find("planBeginDate>=? AND whouse=? AND type=? ORDER BY planBeginDate",
-                planBeginDate, whouse, shipType).fetch();
+        return Shipment.find("planBeginDate>=? AND whouse.market=? AND type=? ORDER BY planBeginDate",
+                planBeginDate, whouse.market, shipType).fetch();
     }
 
     public static List<Shipment> findByState(S... state) {

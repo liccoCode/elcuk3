@@ -137,7 +137,7 @@ public class BtbOrder extends Model {
         Other {
             @Override
             public String label() {
-                return "其它";
+                return "Other";
             }
         };
 

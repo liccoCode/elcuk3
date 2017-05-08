@@ -32,6 +32,9 @@ import java.util.*;
 @Entity
 @DynamicUpdate
 public class Deliveryment extends GenericModel {
+    
+    private static final long serialVersionUID = -333313078948420021L;
+
     public Deliveryment() {
     }
 
@@ -205,7 +208,6 @@ public class Deliveryment extends GenericModel {
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
      *
-     * @return
      */
     public Cooperator supplier() {
         if(this.units.size() == 0) return null;
@@ -538,8 +540,8 @@ public class Deliveryment extends GenericModel {
     }
 
     public List<ProcureUnit> applyUnit() {
-        return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?)",
-                this.id, ProcureUnit.T.ProcureSplit).fetch();
+        return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?) AND noPayment=?",
+                this.id, ProcureUnit.T.ProcureSplit, false).fetch();
     }
 
 
