@@ -5,6 +5,7 @@ import helper.*;
 import helper.Currency;
 import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
+import models.User;
 import models.market.BtbOrder;
 import models.market.BtbOrderItem;
 import models.market.M;
@@ -60,7 +61,8 @@ public class Excels extends Controller {
         ProcureUnit unit = excel.dmt.units.get(0);
         String currency = unit.attrs.currency.symbol();
 
-        String brandname = models.OperatorConfig.getVal("brandname");
+        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop) ?
+                models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 

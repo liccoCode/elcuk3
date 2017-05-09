@@ -2,13 +2,13 @@
 #{set title:'B2B销售订单信息列表' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'orders/btbOrder.coffee'/}
+    #{script 'btbcustoms/btbOrder.coffee'/}
 #{/set}
 
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{Orders.btbOrderIndex()}" method="POST" class="search_form" id='search_form'>
+  <form action="@{BtbCustoms.btbOrderIndex()}" method="POST" class="search_form" id='search_form'>
     <div class="span12">
       <div class="input-prepend input-append inline">
         <span class="add-on">时间</span>
@@ -38,7 +38,7 @@
 
       <div class="input-append input-prepend inline">
         <input type="hidden" name="p.page" value="${p.page}">
-        <button data-url='@{Orders.btbOrderIndex()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
+        <button data-url='@{BtbCustoms.btbOrderIndex()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
         &nbsp;
       </div>
 
@@ -47,7 +47,7 @@
       </div>
 
       <div class="input-append input-prepend inline">
-        <a href="@{Orders.createBtbOrderPage()}" class="btn btn-success">添加订单</a>
+        <a href="@{BtbCustoms.createBtbOrderPage()}" class="btn btn-success">添加订单</a>
       </div>
 
     </div>
@@ -55,39 +55,6 @@
 </div>
 
 <div class="row-fluid" style="overflow-x:auto;">
-  <table class="table table-bordered table-condensed">
-    <tr>
-      <th>订单号</th>
-      <th>销售日期</th>
-      <th>订单总额</th>
-      <th>运输费用</th>
-      <th>计重</th>
-      <th>运输方式</th>
-      <th>客户/公司名称</th>
-      <th width="100px;">操作</th>
-    </tr>
-  #{list items:orderList, as:'b'}
-    <tr>
-      <td style="cursor:pointer;" name="clickTd" data-id="${b.id}">
-        <i class="icon-reorder"></i><a name="orderNoBtn" order_id="${b.id}">${b.orderNo}</a>
-      </td>
-      <td>#{time_tooltip time:b.saleDate/}</td>
-      <td>${b.showTotalCost()}</td>
-      <td>${b.shipCostUnit.symbol()} ${b.shipCost}</td>
-      <td>${b.shipWeightUnit.label()} / ${b.shipWeight}</td>
-      <td>${b.shipWay?.label()}</td>
-      <td>${b.btbCustom?.customName}</td>
-      <td>
-        <a href="@{Orders.createBtbOrderPage(b.id)}" class="btn btn-mini btn-primary">编辑</a>
-        <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-mini btn-warning">下载PI</a>
-      </td>
-    </tr>
-  #{/list}
-    <tr class="tb_footer">
-      <td colspan="14">
-      #{bootstrap_pager pi:p, url:'' /}
-      </td>
-    </tr>
-  </table>
+#{render 'BtbCustoms/_order_list.html', orderList:orderList, p:p/}
 </div>
 

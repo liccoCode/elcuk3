@@ -2,11 +2,12 @@
 #{set title:'B2B客户信息列表' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
+    #{script 'btbcustoms/b2bIndex.es6'/}
 #{/set}
 
 #{flash_alert /}
 
-<form action="@{Cooperators.b2bCustomInfoIndex()}" method="POST" class="search_form" id='search_form'>
+<form action="@{BtbCustoms.b2bCustomInfoIndex()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
     <div class="span12">
       <div class="input-prepend inline">
@@ -19,7 +20,7 @@
         &nbsp;
       </div>
       <div class="input-append input-prepend inline">
-        <a href="@{Cooperators.createB2BCustomInfoPage()}" class="btn btn-success">新增客户</a>
+        <a href="@{BtbCustoms.createB2BCustomInfoPage()}" class="btn btn-success">新增客户</a>
       </div>
 
       <input type="hidden" name="p.page" value="${p.page}">
@@ -30,7 +31,7 @@
 <div class="row-fluid" style="overflow-x:auto;">
   <table class="table table-bordered table-condensed">
     <tr>
-      <th>序号</th>
+      <th width="40px;">序号</th>
       <th width="380px;">客户/公司名称</th>
       <th>联系人</th>
       <th>联系电话</th>
@@ -43,7 +44,11 @@
   #{list items:dots, as:'b'}
     <tr>
       <td>${b_index}</td>
-      <td>${b.customName}</td>
+      <td style="cursor:pointer;" name="clickTd" data-id="${b.id}">
+        <span><i class="icon-reorder"></i></span>
+        <span>${b.customName}</span>
+        <span class="badge badge-info">${b.orders.size()}</span>
+      </td>
       <td>${b.contacts}</td>
       <td>${b.contactPhone}</td>
       <td>${b.email}</td>
@@ -51,8 +56,8 @@
       <td>#{time_tooltip time:b.createDate/}</td>
       <td>#{time_tooltip time:b.updateDate/}</td>
       <td>
-        <a href="@{Cooperators.createB2BCustomInfoPage(b.id)}" class="btn btn-mini btn-success">Edit</a>
-        <a href="@{Cooperators.deleteB2BCustom(b.id)}" class="btn btn-mini btn-danger">Delete</a>
+        <a href="@{BtbCustoms.createB2BCustomInfoPage(b.id)}" class="btn btn-mini btn-success">Edit</a>
+        <a href="@{BtbCustoms.deleteB2BCustom(b.id)}" class="btn btn-mini btn-danger">Delete</a>
       </td>
     </tr>
   #{/list}

@@ -194,8 +194,7 @@
 #{render 'Deliveryments/_box_number_model.html'/}
 #{render 'Deliveryments/_fba_carton_contents.html'/}
 </form>
-*{ TODO 这个对 http://e.easya.cc/deliveryment/DL%7C201310%7C01 有问题}*
-*{#{power.ck 'excels.deliveryment'}}*
+
 <div class="row-fluid">
   <div class="span12 alert">
     <h4 data-toggle="toggle" data-target="#excel">生成采购单信息 <i class="icon-reorder"></i></h4>
@@ -249,7 +248,7 @@
           <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
         </tr>
         <tr>
-          <th>供货方</th>
+          <th>供方</th>
           <td>
             <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
           </td>
@@ -260,11 +259,12 @@
 
           <th>买方</th>
           <td>
-            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="${models.OperatorConfig.getVal("buyercompany")}">
+            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany"
+                   value="${isB2b ? models.OperatorConfig.getVal("b2bbuyercompany"):models.OperatorConfig.getVal("buyercompany")}">
           </td>
           <th>经办人</th>
           <td>
-            <input type="text" name="excel.buyer" id="excel_buyer" value="${models.OperatorConfig.getVal("buyerconcat")}">
+            <input type="text" name="excel.buyer" id="excel_buyer" value="${dmt.handler?.username}">
           </td>
         </tr>
 
@@ -279,10 +279,10 @@
           </td>
 
           <th>移动电话</th>
-          <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
+          <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone" value="${dmt.handler?.phone}"></td>
           <th>固定电话</th>
           <td>
-            <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${models.OperatorConfig.getVal("buyertel")}">
+            <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="${isB2b ? '' : models.OperatorConfig.getVal("buyertel")}">
           </td>
         </tr>
 
@@ -319,7 +319,7 @@
           <th>地址</th>
           <td colspan="3">
             <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress"
-                   value="${models.OperatorConfig.getVal("buyeraddress")}">
+                   value="${isB2b ? models.OperatorConfig.getVal("b2bbuyeraddress") :models.OperatorConfig.getVal("buyeraddress")}">
           </td>
         </tr>
         <tr>
@@ -333,31 +333,28 @@
   </div>
 </div>
 #{/else}
-*{#{/power.ck}}*
 
-
-
-
-
-#{info_row title:'可添加进入[采购单]的[采购单元]'/}
-#{form @Deliveryments.addunits(dmt.id), method: 'POST'}
-<div class="row-fluid">
-  <div class="span12">
-    <input type="hidden" name="dmt.id" value="${dmt.id}">
-      #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan'/}
-  </div>
-</div>
-<div class="row-fluid">
-  <div class="span12">
-    <div class="pull-left input-prepend input-append">
-      <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
-        #{power.ck "products.edit"}
-          <button id="plan_form_submit" class="btn btn-primary">添加</button>
-        #{/power.ck}
+#{if  Arrays.asList('PENDING','CONFIRM').contains(dmt.state.name())}
+    #{info_row title:'可添加进入[采购单]的[采购单元]'/}
+    #{form @Deliveryments.addunits(dmt.id), method: 'POST'}
+    <div class="row-fluid">
+      <div class="span12">
+        <input type="hidden" name="dmt.id" value="${dmt.id}">
+          #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan'/}
+      </div>
     </div>
-  </div>
-</div>
-#{/form}
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="pull-left input-prepend input-append">
+          <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
+            #{power.ck "products.edit"}
+              <button id="plan_form_submit" class="btn btn-primary">添加</button>
+            #{/power.ck}
+        </div>
+      </div>
+    </div>
+    #{/form}
+#{/if}
 
 #{records records:records/}
 

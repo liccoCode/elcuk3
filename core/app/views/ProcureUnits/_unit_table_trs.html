@@ -139,11 +139,13 @@
     <span style="color:${unit.stage.rgb()}">${unit.stage.label()}</span>
     <input type="hidden" name="unit.stage" value="${unit.stage.name()}">
   </td>
-  <th>B2B选项</th>
+  <th>所属公司</th>
   <td>
-    <label class="checkbox inline">
-      <input type="checkbox" name="unit.isb2b" value="true" ${unit.projectName=='B2B' ? 'checked':''}> B2B
-    </label>
+    <select name="unit.projectName">
+    #{list items:models.User.COR, as:'c'}
+      <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
+    #{/list}
+    </select>
   </td>
 </tr>
 <tr>

@@ -773,7 +773,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.currency = unit.attrs.currency;
         newUnit.product = unit.product;
         newUnit.sku = unit.product.sku;
-        newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        newUnit.projectName = unit.projectName;
         newUnit.type = T.ProcureSplit;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
@@ -856,7 +856,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.comment = unit.comment;
         newUnit.result = InboundUnit.R.Qualified;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
-        newUnit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        newUnit.projectName = unit.projectName;
         newUnit.isDedicated = unit.isDedicated;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
@@ -1241,7 +1241,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
-        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        this.projectName = unit.projectName;
         if(this.stage.name().equals("IN_STORAGE")) {
             if(diff != 0) {
                 this.availableQty = unit.availableQty;

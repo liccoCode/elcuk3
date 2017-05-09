@@ -51,12 +51,13 @@
   <td>
     <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">${unit.deliveryment.id}</a>
   </td>
-  <th>B2B选项</th>
+  <th>所属公司</th>
   <td>
-    <label class="checkbox inline">
-      <input type="checkbox" name="newUnit.isb2b" value="true" #{if unit.projectName=='B2B'} checked #{/if}>
-      B2B
-    </label>
+    <select name="newUnit.projectName">
+    #{list items:models.User.COR, as:'c'}
+      <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
+    #{/list}
+    </select>
   </td>
 </tr>
 

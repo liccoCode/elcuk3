@@ -32,7 +32,7 @@ import java.util.*;
 @Entity
 @DynamicUpdate
 public class Deliveryment extends GenericModel {
-    
+
     private static final long serialVersionUID = -333313078948420021L;
 
     public Deliveryment() {
@@ -193,6 +193,13 @@ public class Deliveryment extends GenericModel {
     public T deliveryType;
 
     /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
+    /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
      *
      * @return CNY 币种下的总金额
@@ -207,7 +214,6 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
-     *
      */
     public Cooperator supplier() {
         if(this.units.size() == 0) return null;

@@ -172,6 +172,7 @@ public class ProcureUnits extends Controller {
             Analyzes.index();
         }
         List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
+        unit.projectName = Login.current().projectName.name();
         render(unit, whouses);
     }
 
@@ -284,7 +285,6 @@ public class ProcureUnits extends Controller {
         }
 
         if(unit.isCheck != 1) unit.isCheck = 0;
-        unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         unit.save();
         //生成质检任务
         //unit.triggerCheck();

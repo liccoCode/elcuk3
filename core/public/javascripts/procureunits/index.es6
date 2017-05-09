@@ -31,6 +31,9 @@ $(() => {
     let firstStage = $("input[name='pids']:checked").first().attr("stage");
     let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
     let firstShipType = $("input[name='pids']:checked").first().attr("shipType");
+    if (firstProjectName == 'MengTop') {
+      return true;
+    }
     let o = 0;
     let i = 0;
     let j = 0;
