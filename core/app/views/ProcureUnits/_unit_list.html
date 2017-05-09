@@ -204,7 +204,7 @@
                   #{list items:unit.relateShipment(), as:'sp'}
                     <li>
                       <a href="@{Shipments.show(sp.id)}">${sp}</a>
-                      预计 #{time_tooltip time: sp.dates.planBeginDate /} 开船
+                      预计 #{time_tooltip time: sp.dates?.planBeginDate /} 开船
                     </li>
                   #{/list}
               </ul>

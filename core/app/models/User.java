@@ -154,10 +154,10 @@ public class User extends Model {
                 return "EasyAcc";
             }
         },
-        B2B {
+        MengTop {
             @Override
             public String label() {
-                return "B2B";
+                return "MengTop";
             }
         };
 

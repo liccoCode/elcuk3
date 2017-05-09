@@ -206,7 +206,7 @@ public class BtbOrder extends Model {
             btbOrder.save();
         } else {
             logs.addAll(this.doneUpdate(btbOrder));
-            this.btbCustom.id = btbOrder.btbCustom.id;
+            this.btbCustom = BtbCustom.findById(btbOrder.btbCustom.id);
             this.saleDate = btbOrder.saleDate;
             this.memo = btbOrder.memo;
             this.customShipCost = btbOrder.customShipCost;

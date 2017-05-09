@@ -9,7 +9,7 @@
 <div class="row-fluid">
 #{form @ProcureUnits.create(), method: 'POST', id: 'new_procure_unit'}
   <table class="table table-bordered">
-      #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus/}
+      #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus, project:project/}
     <tr>
       <td colspan="6">
           #{if unit.selling}

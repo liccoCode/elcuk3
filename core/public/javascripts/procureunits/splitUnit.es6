@@ -154,22 +154,6 @@ $(() => {
     }
   });
 
-  $('input[name="newUnit.isb2b"]').click(function () {
-    if ($(this).prop("checked")) {
-      $('input[name="newUnit.shipType"]').each(function () {
-        if ($(this).val() == 'EXPRESS') {
-          $(this).trigger("click");
-        } else {
-          $(this).hide();
-        }
-      });
-    } else {
-      $('input[name="newUnit.shipType"]').each(function () {
-        $(this).show();
-      });
-    }
-  });
-
   $("input[name='newUnit.availableQty']").change(function () {
     showBoxInfo();
   });

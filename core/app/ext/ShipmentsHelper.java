@@ -57,7 +57,7 @@ public class ShipmentsHelper extends JavaExtensions {
     public static Date predictArriveDate(Shipment shipment) {
         if(shipment.state == Shipment.S.DONE)
             return shipment.dates.arriveDate;
-        if(shipment.projectName == User.COR.B2B)
+        if(shipment.projectName == User.COR.MengTop)
             return null;
 
         int totalDays = 0;

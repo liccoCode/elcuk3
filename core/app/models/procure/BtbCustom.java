@@ -1,12 +1,16 @@
 package models.procure;
 
 import models.User;
+import models.market.BtbOrder;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.Model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -57,6 +61,9 @@ public class BtbCustom extends Model {
     public Date updateDate;
 
     public boolean isDel = false;
+
+    @OneToMany(mappedBy = "btbCustom", cascade = {CascadeType.PERSIST})
+    public List<BtbOrder> orders = new ArrayList<>();
 
     public boolean vaildRepeatCustomName() {
         boolean flag = false;
