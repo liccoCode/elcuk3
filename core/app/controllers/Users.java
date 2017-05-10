@@ -3,10 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
-import models.Notification;
-import models.Privilege;
-import models.Role;
-import models.User;
+import models.*;
 import models.product.Team;
 import models.view.Ret;
 import models.view.post.UserPost;
@@ -181,7 +178,8 @@ public class Users extends Controller {
     }
 
     public static void create() {
-        render();
+        String brandName = OperatorConfig.getVal("brandname");
+        render(brandName);
     }
 
     /**

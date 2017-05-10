@@ -86,6 +86,7 @@
           <th>最先交货时间</th>
           <th>最后交货时间</th>
           <th>交货进度</th>
+          <th>所属公司</th>
           <th>User</th>
           <th>Create</th>
         </tr>
@@ -126,6 +127,7 @@
               </div>
             </div>
           </td>
+          <td>${dmt.projectName?.label()}</td>
           <td>${dmt.handler.username}</td>
           <td>#{time_tooltip time:dmt.createDate/}</td>
         </tr>
