@@ -30,7 +30,7 @@
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
   <div class="row-fluid">
     <div class="span12">
-    #{if ship.projectName == models.User.COR.B2B}
+    #{if ship.projectName == models.User.COR.MengTop}
         #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
     #{/if}
       #{else }
