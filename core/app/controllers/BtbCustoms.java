@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.GTs;
+import helper.J;
 import models.ElcukRecord;
 import models.market.BtbOrder;
 import models.procure.BtbCustom;
@@ -125,6 +127,16 @@ public class BtbCustoms extends Controller {
     public static void btbOrderItemList(Long id) {
         BtbOrder order = BtbOrder.findById(id);
         render(order);
+    }
+
+    public static void findInfoById(Long id) {
+        BtbCustom custom = BtbCustom.findById(id);
+        renderJSON(J.json(GTs.MapBuilder.map("receiver", custom.receiver)
+                .put("receiverPhone", custom.receiverPhone)
+                .put("countryCode", custom.countryCode)
+                .put("city", custom.city)
+                .put("address", custom.address)
+                .put("postalCode", custom.postalCode).build()));
     }
 
 
