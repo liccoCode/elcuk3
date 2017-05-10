@@ -52,9 +52,16 @@
         <td>
           <select name="outbound.type">
               #{list items:models.whouse.StockRecord.C, as:'t'}
-                  #{if t.name().equals("Normal")}
-                    <option value="${t.name()}">${t.label()}</option>
+                  #{if proUnit.projectName == 'EASYACC'}
+                      #{if t.name().equals("Normal")}
+                        <option value="${t.name()}">${t.label()}</option>
+                      #{/if}
                   #{/if}
+                  #{else }
+                      #{if t.name().equals("B2B")}
+                        <option value="${t.name()}">${t.label()}</option>
+                      #{/if}
+                  #{/else}
               #{/list}
           </select>
         </td>
@@ -62,6 +69,7 @@
         <td>
           <!-------------------------- targetId 备选项 ---------------------------------------------------------->
           <select style="display:none;" id="shipperOptions">
+            <option value="">客户自提</option>
               #{list items:shippers, as: 'ship'}
                 <option ${ship.id.toString() == outbound?.targetId ? 'selected' : ''} value="${ship.id}">
                 ${ship.name}

@@ -1,0 +1,79 @@
+#{extends 'main.html' /}
+#{set title:'新增客户' /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+
+  .table th{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert /}
+
+#{info_row title:'添加B2B客户信息' /}
+<div class="row-fluid">
+  <form action="@{BtbCustoms.createB2BCustom()}" method="post" id="update_product_form">
+    <table class="table table-bordered">
+      <tr>
+        <th>客户/公司名称<span style="color:red">*</span>：</th>
+        <td>
+          <input type="text" name="b.customName" value="${b.customName}" required>
+          <input type="hidden" name="b.id" value="${b.id}">
+        </td>
+        <th>收货联系人</th>
+        <td>
+          <input type="text" name="b.receiver" value="${b.receiver}">
+        </td>
+      </tr>
+      <tr>
+        <th>联系人<span style="color:red">*</span>：</th>
+        <td><input type="text" name="b.contacts" value="${b.contacts}" required></td>
+        <th>收货联系人电话</th>
+        <td><input type="text" name="b.receiverPhone" value="${b.receiverPhone}"></td>
+      </tr>
+      <tr>
+        <th>联系人电话<span style="color:red">*</span>：</th>
+        <td><input type="text" name="b.contactPhone" value="${b.contactPhone}" required></td>
+        <th rowspan="2">收货地址</th>
+        <td rowspan="2">
+          <div class="input-prepend input-append">
+            <span class="add-on">国家:</span>
+            <input type="text" name="b.countryCode" value="${b.countryCode}">
+          </div>
+          <div class="input-prepend input-append">
+            <span class="add-on">邮编:</span>
+            <input type="text" name="b.postalCode" value="${b.postalCode}"><br>
+          </div>
+          <br>
+          <div class="input-prepend input-append">
+            <span class="add-on">城市:</span>
+            <input type="text" name="b.city" value="${b.city}"><br>
+          </div>
+          <div class="input-prepend input-append">
+            <span class="add-on">街道:</span>
+            <input type="text" name="b.address" value="${b.address}"><br>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>邮箱：</th>
+        <td><input type="text" name="b.email" value="${b.email}"></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <input type="submit" class="btn btn-primary" value="保存">
+          <a href="@{BtbCustoms.b2bCustomInfoIndex()}" class="btn btn-danger">取消</a>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+  </form>
+</div>

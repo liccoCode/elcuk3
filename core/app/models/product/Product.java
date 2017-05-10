@@ -42,14 +42,17 @@ import java.util.stream.Collectors;
 @Entity
 @DynamicUpdate
 public class Product extends GenericModel implements ElcukRecord.Log {
+
+    private static final long serialVersionUID = 6155284260375111124L;
+
     public static final Pattern Nub = Pattern.compile("[0-9]*");
+
     /**
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
      */
-    @OneToMany(mappedBy = "product",
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-                    CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<Listing> listings = new ArrayList<>();
 
     @ManyToOne
@@ -404,6 +407,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public String partNumberJP;
 
     public String upcJP;
+
+    public String b2bColor;
+
+    public String b2bItemCode;
+
+    public String b2bDescription;
 
     @Expose
     public WhouseAttrs whouseAttrs = new WhouseAttrs();

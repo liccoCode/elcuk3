@@ -1,26 +1,32 @@
 #{extends 'main_full.html' /}
 #{set title: pageTitle/}
 #{set 'moreScripts'}
-    #{script 'orders/btbOrder.coffee'/}
+    #{script 'btbcustoms/btbOrder.coffee'/}
 #{/set}
+
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 
 #{errorMsgs /}
 #{flash_alert /}
 
-<form action="#{if !b.id}@{Orders.createBtbOrder()}#{/if} #{else }@{Orders.updateBtbOrder()}#{/else}" method="post"
+<form action="#{if !b.id}@{BtbCustoms.createBtbOrder()}#{/if} #{else }@{BtbCustoms.updateBtbOrder()}#{/else}" method="post"
       id="update_product_form">
   <div class="row-fluid">
   #{info_row title:'订单基本信息' /}
     <table class="table table-bordered">
       <tr>
         <td style="text-align:center">订单号<span style="color:red">*</span>:</td>
-        <td>
-          <input type="text" name="b.orderNo" value="${b.orderNo}" #{if b.id} readonly #{/if}>
+        <td width="240px;">
+          <input type="text" name="b.orderNo" value="${b.orderNo}">
           <input type="hidden" name="id" value="${b.id}">
         </td>
         <td style="text-align:center">客户/公司名称<span style="color:red">*</span>:</td>
-        <td>
-          <select name="b.btbCustom.id" required>
+        <td width="400px;">
+          <select name="b.btbCustom.id" required class="selectize">
             <option value="">请选择</option>
           #{list items:customList, as:'c'}
             <option value="${c.id}" #{if c.id==b.btbCustom?.id} selected #{/if}>${c.customName}</option>
@@ -186,7 +192,10 @@
   <div class="control-group">
     <div class="controls">
       <input type="submit" class="btn btn-success" value="保存">
-      <a href="@{Orders.btbOrderIndex()}" class="btn">返回</a>
+      <a href="@{BtbCustoms.btbOrderIndex()}" class="btn">返回</a>
+      #{if b.id}
+        <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-primary">下载PI</a>
+      #{/if}
     </div>
   </div>
 </form>

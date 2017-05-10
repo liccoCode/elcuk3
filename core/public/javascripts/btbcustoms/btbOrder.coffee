@@ -44,14 +44,14 @@ $ ->
       $("#bankChargesOther").attr("readonly", true)
   )
 
-  $("a[name='orderNoBtn']").click(->
-    tr = $(@).parent().parent("tr")
-    order_id = $(@).attr("order_id")
-    if tr.next("tr").find("div[id='sku#{order_id}']").html()
+  $("td[name='clickTd']").click(->
+    tr = $(@).parent("tr")
+    order_id = $(@).data("id")
+    if $("#div" + order_id).html() != undefined
       tr.next("tr").toggle()
     else
-      tr.after("<tr><td colspan='8'><div id='sku#{order_id}'></div></td></tr>")
-      $("#sku" + order_id).load("/Orders/btbOrderItemList", id: order_id)
+      tr.after("<tr style='background-color:#F2F2F2'><td colspan='8'><div id='div#{order_id}'></div></td></tr>")
+      $("#div" + order_id).load("/BtbCustoms/btbOrderItemList", id: order_id)
   )
 
   $("#download_excel").click((e) ->

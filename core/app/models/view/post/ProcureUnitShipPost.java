@@ -114,7 +114,7 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
         params.add(Dates.night(this.to));
 
         sql.append(" AND p.projectName = ? ");
-        params.add(User.COR.B2B.name());
+        params.add(User.COR.MengTop.name());
 
         this.sameSearch(sql, params);
 

@@ -4,11 +4,11 @@ import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import models.market.BtbOrder;
 import models.procure.BtbCustom;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
-import models.view.post.BtbCustomPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -161,38 +161,6 @@ public class Cooperators extends Controller {
 
         CooperItem copi = CooperItem.find("cooperator.id=? AND product.sku=?", coperId, sku).first();
         renderJSON(new Ret(true, copi.boxToSize(size) + ""));
-    }
-
-    public static void b2bCustomInfoIndex(BtbCustomPost p) {
-        if(p == null) p = new BtbCustomPost();
-        List<BtbCustom> dots = p.query();
-        render(p, dots);
-    }
-
-    public static void createB2BCustomInfoPage(Long id) {
-        BtbCustom b = new BtbCustom();
-        if(id != null) {
-            b = BtbCustom.findById(id);
-        }
-        render(b);
-    }
-
-    public static void createB2BCustom(BtbCustom b) {
-        if(b.vaildRepeatCustomName()) {
-            flash.error("客户/公司名称重复了，请重新填写！");
-            render("Cooperators/createB2BCustomInfoPage.html", b);
-        }
-        if(b.id == null) {
-            b.save();
-        } else {
-            BtbCustom old = BtbCustom.findById(b.id);
-            old.customName = b.customName;
-            old.contactPhone = b.contactPhone;
-            old.email = b.email;
-            old.contacts = b.contacts;
-            old.save();
-        }
-        b2bCustomInfoIndex(new BtbCustomPost());
     }
 
     /**

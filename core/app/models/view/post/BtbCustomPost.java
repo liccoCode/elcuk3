@@ -17,11 +17,12 @@ public class BtbCustomPost extends Post<BtbCustom>{
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbCustom s WHERE 1 = 1 ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbCustom s WHERE isDel = false ");
         if(StringUtils.isNotEmpty(keywords)) {
             sql.append(" AND s.customName like ? ");
             params.add("%"+keywords+"%");
         }
+        sql.append(" ORDER BY s.id DESC");
         return new F.T2<>(sql.toString(), params);
     }
 

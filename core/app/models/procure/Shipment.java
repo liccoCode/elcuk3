@@ -509,7 +509,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.id = Shipment.id();
         this.dates.planBeginDate = earlyPlanBeginDate;
         this.creater = Login.current();
-        this.projectName = User.COR.B2B;
+        this.projectName = User.COR.MengTop;
         if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
             this.isDedicated = true;
         }
@@ -1204,7 +1204,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @Override
     public String toString() {
-        return String.format("%s 开往 %s", this.id, this.whouse.name);
+        if(Objects.equals(this.projectName, User.COR.MengTop))
+            return String.format("%s 开往 %s", this.id, this.target);
+        else
+            return String.format("%s 开往 %s", this.id, this.whouse.name);
     }
 
     @Override
@@ -1324,8 +1327,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
-        return Shipment.find("planBeginDate>=? AND whouse.market=? AND type=? ORDER BY planBeginDate",
-                planBeginDate, whouse.market, shipType).fetch();
+        if(whouse == null)
+            return new ArrayList<>();
+        else
+            return Shipment.find("planBeginDate>=? AND whouse.market=? AND type=? ORDER BY planBeginDate",
+                    planBeginDate, whouse.market, shipType).fetch();
     }
 
     public static List<Shipment> findByState(S... state) {
