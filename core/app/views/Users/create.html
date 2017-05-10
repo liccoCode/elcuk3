@@ -42,10 +42,14 @@
       <td>
         <select name="user.projectName">
             #{list items:models.User.COR, as:'c'}
-              <option value="${c.name()}">${c.label()}</option>
+              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                <option value="${c.name()}">${c.label()}</option>
+              #{/if}
             #{/list}
         </select>
       </td>
+      <th></th>
+      <td></td>
     </tr>
     <tr>
       <td colspan="4">
