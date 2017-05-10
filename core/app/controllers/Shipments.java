@@ -8,10 +8,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ShipmentDates;
 import models.finance.FeeType;
-import models.procure.Cooperator;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import models.whouse.Outbound;
@@ -31,7 +28,6 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -71,7 +67,11 @@ public class Shipments extends Controller {
     public static void showProcureUnitList(String id) {
         Shipment shipment = Shipment.findById(id);
         List<ShipItem> items = shipment.items;
-        render("Shipments/_shipitem.html", items);
+        if(Objects.equals(shipment.projectName, User.COR.MengTop)) {
+            render("Shipments/_b2b_shipitem.html", items);
+        } else {
+            render("Shipments/_shipitem.html", items);
+        }
     }
 
     public static void blank() {
@@ -165,7 +165,8 @@ public class Shipments extends Controller {
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         Shipment.handleQty1(null, ship);
-        render(ship, cooperators);
+        List<BtbCustom> customs = BtbCustom.find(" isDel=?", false).fetch();
+        render(ship, cooperators, customs);
     }
 
     public static void preview(String id) {
@@ -193,7 +194,7 @@ public class Shipments extends Controller {
     public static void update(Shipment ship, String shipid) {
         checkAuthenticity();
         Shipment old = Shipment.findById(shipid);
-        Date realPlanArrivDate = old.dates.planArrivDate;
+        Date realPlanArrivDate = old.dates != null ? old.dates.planArrivDate : null;
         old.update(ship);
         if(Validation.hasErrors()) {
             old.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
