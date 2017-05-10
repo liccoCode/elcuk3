@@ -99,11 +99,12 @@
 
         <select name="p.projectName" class="inline">
           <option value="">项目名称</option>
-        #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
-          <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
+        #{list items:models.User.COR, as:'c'}
+            #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+              <option ${c.name() == p.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+            #{/if}
         #{/list}
         </select>
-
 
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>

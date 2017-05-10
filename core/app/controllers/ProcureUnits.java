@@ -57,6 +57,8 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
+        String brandName = OperatorConfig.getVal("brandname");
+        renderArgs.put("brandName", brandName);
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
@@ -83,7 +85,9 @@ public class ProcureUnits extends Controller {
                         "procureunit.delivery", "procureunit.revertdelivery", "procureunit.prepay",
                         "procureunit.tailpay", "procureunit.reworkpay", "procureunit.adjuststock",
                         "refund.confirm", "refund.transfer"), 50);
+        String brandName = OperatorConfig.getVal("brandname");
         renderArgs.put("logs", logs);
+        renderArgs.put("brandName", brandName);
     }
 
     @Check("procures.index")
@@ -173,7 +177,8 @@ public class ProcureUnits extends Controller {
         }
         List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
         unit.projectName = Login.current().projectName.name();
-        render(unit, whouses);
+        String brandName = OperatorConfig.getVal("brandname");
+        render(unit, whouses, brandName);
     }
 
     /**
@@ -376,7 +381,8 @@ public class ProcureUnits extends Controller {
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         boolean showNotice = new Date().getTime() >= unit.attrs.planDeliveryDate.getTime();
-        render(unit, newUnit, showNotice, type);
+        String brandName = OperatorConfig.getVal("brandname");
+        render(unit, newUnit, showNotice, type, brandName);
     }
 
     /**
@@ -616,7 +622,8 @@ public class ProcureUnits extends Controller {
 
     public static void editManual(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("ProcureUnits/editManualProcureUnit.html", unit);
+        String brandName = OperatorConfig.getVal("brandname");
+        render("ProcureUnits/editManualProcureUnit.html", unit, brandName);
     }
 
     /**
