@@ -2060,7 +2060,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
             CheckTaskDTO dto = dtos.get(i);
-            if(!dto.validedQtys(unit.qty())) return;
+            if(!dto.validedQtys(unit.qtyForFba())) return;
 
             try {
                 if(unit.fba == null) {
