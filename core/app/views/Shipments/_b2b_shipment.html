@@ -146,22 +146,29 @@
     <tr>
       <th>联系人/联系方式</th>
       <td>
-        <input type="text" class="input-small" name="" value="">
-        <input type="text" class="input-xlarge" name="" value="">
+        <input type="text" class="input-small" name="ship.receiver" value="${ship.receiver}">
+        <input type="text" class="input-xlarge" name="ship.receiverPhone" value="${ship.receiverPhone}">
       </td>
       <th>B2B客户</th>
       <td>
-        <select name="">
-          #{list }
-            <option></option>
-          #{/list}
+        <select id="b2b_select" class="selectize" style="width:300px;" data-url="@{BtbCustoms.findInfoById()}"
+                name="ship.customId">
+          <option value="">请选择</option>
+        #{list items:customs, as:'c'}
+          <option value="${c.id}" ${ship.btbCustom?.id==c.id ? 'selected':''}>${c.customName}</option>
+        #{/list}
         </select>
       </td>
     </tr>
 
     <tr>
       <th>目的地</th>
-      <td><input type="text" class="input-xxlarge" value="${ship.target}"></td>
+      <td>
+        <input type="text" class="input-mini" name="ship.countryCode" value="${ship.countryCode}" placeholder="国家">
+        <input type="text" class="input-mini" name="ship.postalCode" value="${ship.postalCode}" placeholder="邮编">
+        <input type="text" class="input-mini" name="ship.city" value="${ship.city}" placeholder="城市">
+        <input type="text" name="ship.address" class="input-xlarge" value="${ship.address}" placeholder="详细地址">
+      </td>
       <th>总体积(m³)货代</th>
       <td>
         <input type="text" name="ship.totalVolumeShipment" value="${ship.totalVolumeShipment}" id="totalVolumeShipment"/>

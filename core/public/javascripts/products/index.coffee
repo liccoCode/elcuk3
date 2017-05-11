@@ -1,7 +1,6 @@
 $ ->
   $(document).on('click', '#copyBtn', ->
-    $tr = $(@).parents('tr')
-    id = $tr.find('td:eq(0)').text().trim()
+    id = $(@).data('sku')
     $("#target_choseid").val(id)
     $('#copy_modal').modal('show')
   )
@@ -38,19 +37,16 @@ $ ->
     )
 
   $(document).on('click', '#backupBtn', ->
-    $self = $(@)
-    $tr = $(@).parents('tr')
-    id = $tr.find('td:eq(0)').text().trim()
-    family = $tr.find('td:eq(1)').text().trim()
-
+    id = $(@).data('sku')
+    family = $(@).data('family')
     $("#backup_choseid").val(id)
     $("#back_sku").val(id)
     $("#back_families").val(family)
     $('#backup_modal').modal('show')
   ).on("change", "select[name='pro.state'], select[name='pro.salesLevel']", (r) ->
     $select = $(@)
-    firstTd = $select.parents('tr').children('td')[0]
-    sku = $(firstTd).children('a')[0].innerHTML
+    firstTd = $select.parents('tr').children('td')[1]
+    sku = $(firstTd).children('a')[1].innerHTML
     LoadMask.mask()
     if $select.val() != "" and sku != ""
       if $select.attr('name') == 'pro.state'
@@ -67,7 +63,7 @@ $ ->
   ).on('click', '#deleteBtn', ->
     $deleteBtn = $(@)
     $logForm = $("#logForm")
-    firstTd = $deleteBtn.parents('tr').children('td')[0]
+    firstTd = $deleteBtn.parents('tr').children('td')[1]
     sku = $(firstTd).children('a')[0].innerHTML # 得到 SKU
     $($("#logForm input")[0]).val(sku) # 设置 SKU 到隐藏的 Modal 中
     $logForm.modal() # 展示 Modal
