@@ -10,6 +10,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.procure.*;
 import models.view.Ret;
+import models.view.post.ProcureUnitShipPost;
 import models.view.post.ShipmentPost;
 import models.whouse.Outbound;
 import models.whouse.Whouse;
@@ -125,6 +126,10 @@ public class Shipments extends Controller {
         Shipment shipment;
         if(StringUtils.isNotBlank(shipmentId)) {
             shipment = Shipment.findById(shipmentId);
+            if(!Objects.equals(shipment.projectName, User.COR.MengTop)) {
+                flash.error("非B2B的运输单，不能添加");
+                ShipItems.indexB2B(new ProcureUnitShipPost());
+            }
         } else {
             shipment = new Shipment();
         }

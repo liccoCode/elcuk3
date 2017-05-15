@@ -2500,8 +2500,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean validBoxInfoIsComplete() {
-        return !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
-                this.mainBox.height == 0);
+        return Objects.equals(this.projectName, User.COR.MengTop.name()) && this.mainBox != null &&
+                this.mainBox.num != 0 ||
+                !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
+                        this.mainBox.height == 0);
     }
 
     public boolean validBoxInfoIsCorrect() {
