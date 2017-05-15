@@ -2,7 +2,7 @@
 #{set title:"出货单列表 (${deliverplans.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'deliveryments/index.coffee'/}
+    #{script 'deliverplans/index.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
 
@@ -49,7 +49,7 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <table class="table table-condensed table-bordered">
+    <table class="table table-condensed table-bordered" id="data-table">
       <tr>
         <th>#</th>
         <th>Name</th>
@@ -63,7 +63,7 @@
             <td>
               <a href="@{DeliverPlans.show(dp.id)}" target="_blank">${dp.id}</a>
             </td>
-            <td style="cursor:pointer;" data-toggle="toggle" data-target="#dp_${dp_index}">
+            <td style="cursor:pointer;" data-url="@{DeliverPlans.showProcureUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
               <span><i class="icon-reorder"></i></span>
               <span>${dp.name}</span>
               <span class="badge badge-info">${dp.units.size()}</span>
@@ -72,11 +72,6 @@
             <td>${dp.state.label()}</td>
             <td>${dp.handler.username}</td>
             <td>#{time_tooltip time:dp.createDate/}</td>
-          </tr>
-          <tr id="dp_${dp_index}" style="display:none;">
-            <td colspan="12" style="padding:0;border:none">
-                #{render 'ProcureUnits/_unit_list.html', units:dp.units, norecord: true, deliveryplan:true/}
-            </td>
           </tr>
         #{/list}
     </table>

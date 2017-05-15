@@ -12,6 +12,7 @@ import models.view.Ret;
 import models.view.post.DeliverPlanPost;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
+import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -149,4 +150,13 @@ public class DeliverPlans extends Controller {
             show(dp.id);
         }
     }
+
+    public static void showProcureUnitList(String id) {
+        DeliverPlan plan = DeliverPlan.findById(id);
+        List<ProcureUnit> units = plan.units;
+        boolean deliveryplan = true;
+        boolean norecord = true;
+        render("/ProcureUnits/_unit_list.html", units, deliveryplan, norecord);
+    }
+
 }
