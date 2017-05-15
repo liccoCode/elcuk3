@@ -61,6 +61,8 @@ public class LinkHelper extends JavaExtensions {
             case OtherOutbound:
                 if(stockRecord.outbound != null)
                     return fullUrl("Outbounds.edit", stockRecord.outbound.id, stockRecord.unit.id.toString());
+                else
+                    return "";
             case Split:
             case Split_Stock:
             case CancelOutbound:
