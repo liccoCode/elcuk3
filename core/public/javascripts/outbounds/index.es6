@@ -10,7 +10,7 @@ $(() => {
     } else {
       let html = "<tr style='background-color:#F2F2F2'><td colspan='13'><div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
-      if (type == 'Normal') {
+      if (type == 'Normal' || type == 'B2B') {
         $("#div" + format_id).load("/Outbounds/showProcureUnitList", {id: id});
       } else {
         $("#div" + format_id).load("/Outbounds/showStockRecordList", {id: id});

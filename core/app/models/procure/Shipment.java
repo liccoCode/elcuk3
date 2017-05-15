@@ -1648,6 +1648,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             this.postalCode = newShip.postalCode;
             this.tradeMode = newShip.tradeMode;
             this.btbCustom = BtbCustom.findById(newShip.customId);
+            this.type = newShip.type;
         }
 
         this.cooper = newShip.cooper;
