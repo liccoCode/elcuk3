@@ -22,12 +22,15 @@
       <tr>
         <th>出库单ID</th>
         <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
-        <th>B2B选项</th>
+        <th>所属公司</th>
         <td>
-          <label class="checkbox">
-            <input type="checkbox" name="outbound.isb2b" value="true"
-                #{if outbound.projectName=='B2B'} checked #{/if}> B2B
-          </label>
+          <select name="outbound.projectName">
+              #{list items:models.User.COR, as:'c'}
+                  #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                    <option value="${c.name()}" ${c.name()==outbound.projectName?'selected':''}>${c.label()}</option>
+                  #{/if}
+              #{/list}
+          </select>
         </td>
         <th>状态</th>
         <td style="color:${outbound.status.rgb()}"><b>${outbound.status.label()}</b></td>
@@ -50,12 +53,12 @@
         <td>
           <select name="outbound.type">
               #{list items:models.whouse.StockRecord.C, as:'t'}
-                #{if outbound.type.name()=='Normal' && t.name() == 'Normal'}
-                  <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
-                #{/if}
-               #{elseif outbound.type.name()!='Normal' && t.name() != 'Normal'}
-                 <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
-               #{/elseif}
+                  #{if outbound.type.name()=='Normal' && t.name() == 'Normal'}
+                    <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
+                  #{/if}
+                  #{elseif outbound.type.name()!='Normal' && t.name() != 'Normal'}
+                    <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
+                  #{/elseif}
               #{/list}
           </select>
         </td>
@@ -132,7 +135,7 @@
 #{info_row title:'已添加进入【出库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-  #{if outbound.type.name().equals("Normal")}
+  #{if outbound.type.name().equals("Normal") || outbound.type.name().equals("B2B")}
       #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
   #{/if}
   #{else }
@@ -151,7 +154,7 @@
 </div>
 <br>
 
-#{if outbound.status.name().equals('Create') && outbound.type.name().equals("Normal")}
+#{if outbound.status.name().equals('Create') && Arrays.asList("Normal","B2B").contains(outbound.type.name())}
     #{warning_row title:'可添加进入[出库单]的[采购单元]'/}
 <form action="@{Outbounds.addUnits()}" method="post">
   <div class="row-fluid">

@@ -74,13 +74,14 @@
     #{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
 <div class="row-fluid">
   <div class="span12">
-      #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses/}
+      #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses,
+      is_b2b: inbound.projectName?.name() == "MengTop"/}
 
       #{if inbound.status?.name()!='End'}
           #{if inbound.status?.name()=='Create'}
             <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
           #{/if}
-          <input type="button" class="btn btn-primary" id="batchUpdateBoxInfoBtn" value="批量更新包装信息">
+        <input type="button" class="btn btn-primary" id="batchUpdateBoxInfoBtn" value="批量更新包装信息">
 
           #{power.ck 'inbounds.confirmreceivebtn'}
             <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">

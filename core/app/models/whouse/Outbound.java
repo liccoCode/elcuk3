@@ -346,9 +346,14 @@ public class Outbound extends GenericModel {
     }
 
     public List<ProcureUnit> availableUnits() {
-        return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? " +
-                        "AND outbound.id = null",
-                ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType, this.projectName).fetch();
+        if(Objects.isNull(this.whouse)) {
+            return ProcureUnit.find("stage=? AND shipType=? AND projectName =? AND outbound.id is null",
+                    ProcureUnit.STAGE.IN_STORAGE, this.shipType, this.projectName).fetch();
+        } else {
+            return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? " +
+                            "AND outbound.id = null",
+                    ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType, this.projectName).fetch();
+        }
     }
 
     public void addUnits(List<Long> pids) {

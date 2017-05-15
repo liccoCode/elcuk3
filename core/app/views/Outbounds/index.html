@@ -182,8 +182,37 @@
             <th>创建人</th>
             <th width="200px;">备注</th>
           </tr>
-
-
+        #{list items: b2bOutbounds, as: 'o'}
+          <tr>
+            <td><input type="checkbox" name="ids" value="${o.id}" status="${o.status.name()}"></td>
+            <td><a href="@{Outbounds.edit(o.id)}">${o.id}</a></td>
+            <td style="cursor:pointer;" name="clickTd" data-id="${o.id}" data-type="${o.type?.name()}">
+              <span><i class="icon-reorder"></i></span>
+              <span>${o.name}</span>
+              <span class="badge badge-info">${o.units.size()}</span>
+            </td>
+            <td>${o.whouse?.name}</td>
+            <td>${o.projectName}</td>
+            <td style="background-color:${o.status.rgb()}">${o.status?.label()}</td>
+            <td style="color:${o.shipType.rgb()}">${o.shipType?.label()}</td>
+            <td>${o.type?.label()}</td>
+            <td>${o.showCompany()}</td>
+            <td>#{time_tooltip time:o.outboundDate/}</td>
+            <td>${o.consignor?.username}</td>
+            <td>${o.creator?.username}</td>
+            <td title="${o.memo}">${o.memo.overLong()}</td>
+          </tr>
+        #{/list}
+          <tr>
+            <td colspan="14">
+            #{if outbounds.size() == 0}
+              暂时还没有入库记录
+            #{/if}
+            #{else }
+                #{bootstrap_pager pi:p, url:'' /}
+            #{/else}
+            </td>
+          </tr>
         </table>
       </div>
 

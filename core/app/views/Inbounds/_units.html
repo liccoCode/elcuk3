@@ -10,7 +10,9 @@
     <th width="30px;">#</th>
     <th width="40px;">采购计划ID</th>
     <th width="80px;">采购单</th>
+  #{if !is_b2b}
     <th width="160px;">Selling</th>
+  #{/if}
     <th width="250px;">SKU<br>产品名称</th>
     <th width="140px;">预计交货时间/<br>预计运输时间</th>
     <th style="width:45px;">计划交货数量</th>
@@ -38,9 +40,11 @@
         <td>${unit.id}</td>
         <td>${unit.unit?.id} </td>
         <td>${unit.unit?.deliveryment?.id}</td>
-        <td style="word-break:break-all;">
-          <a href="@{Sellings.selling(unit.unit?.selling?.sellingId)}" target="_blank">${unit.unit?.selling?.sellingId}</a>
-        </td>
+          #{if !is_b2b}
+            <td style="word-break:break-all;">
+              <a href="@{Sellings.selling(unit.unit?.selling?.sellingId)}" target="_blank">${unit.unit?.selling?.sellingId}</a>
+            </td>
+          #{/if}
         <td title="${unit.unit?.product.abbreviation}">
           <a href="@{Products.show(unit.unit?.product?.sku)}" target="_blank">${unit.unit?.product?.sku}</a><br>
           (${unit.unit?.product.abbreviation?.xxLong()})
