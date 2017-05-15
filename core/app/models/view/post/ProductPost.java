@@ -18,6 +18,8 @@ import java.util.List;
 public class ProductPost extends Post<Product> {
     public String state;
 
+    public boolean scope = false;
+
     public ProductPost() {
         this.perSize = 25;
     }
@@ -29,7 +31,7 @@ public class ProductPost extends Post<Product> {
 
     @Override
     public Long getTotalCount() {
-        return Product.count();
+        return this.count();
     }
 
     @Override
@@ -43,12 +45,15 @@ public class ProductPost extends Post<Product> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sbd.append("AND (")
-                    .append(" p.sku LIKE ?")
-                    .append(" OR a.value LIKE ?")
-                    .append(" OR s.fnSku LIKE ?")
-                    .append(")");
-            for(int i = 0; i < 3; i++) params.add(word);
+            sbd.append("AND (").append(" p.sku LIKE ?");
+            if(this.scope)
+                sbd.append(" OR p.abbreviation LIKE ?").append("OR p.locates LIKE ?")
+                        .append("OR p.sellingPoints LIKE ?").append(" OR s.asin LIKE ?");
+            sbd.append(" OR a.value LIKE ?").append(" OR s.fnSku LIKE ?").append(")");
+            if(this.scope)
+                for(int i = 0; i < 7; i++) params.add(word);
+            else
+                for(int i = 0; i < 3; i++) params.add(word);
         }
 
         if(StringUtils.isNotBlank(this.state)) {
