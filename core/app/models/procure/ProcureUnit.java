@@ -607,12 +607,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public Outbound outbound;
 
     /**
-     * 客户是否自提
-     * B2B 项目使用
-     */
-    public boolean isSelfPick = false;
-
-    /**
      * 主箱信息
      */
     @Lob
@@ -760,6 +754,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.cooperator = this.cooperator;
         newUnit.handler = Login.current();
         newUnit.deliveryment = this.deliveryment;
+        newUnit.noPayment = this.noPayment;
         newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.DELIVERY;
         newUnit.planstage = PLANSTAGE.PLAN;
@@ -838,6 +833,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.handler = Login.current();
         newUnit.deliveryment = this.deliveryment;
         newUnit.deliverplan = this.deliverplan;
+        newUnit.noPayment = this.noPayment;
         newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.IN_STORAGE;
         newUnit.planstage = PLANSTAGE.DONE;

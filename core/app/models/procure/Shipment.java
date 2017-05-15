@@ -7,6 +7,7 @@ import helper.*;
 import helper.Currency;
 import models.ElcukConfig;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.ShipmentDates;
@@ -1316,8 +1317,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
-                S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate()).fetch();
+        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=? " +
+                        "AND projectName = ? ", S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate(),
+                User.COR.valueOf(OperatorConfig.getVal("brandname"))).fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whs) {

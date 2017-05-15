@@ -165,7 +165,7 @@ public class DeliverPlan extends GenericModel {
             return false;
         }
         if(!cop.equals(unit.cooperator)) {
-            Validation.addError("", "添加一个出库单只能一个供应商!");
+            Validation.addError("", "添加一个出货单只能一个供应商!");
             return false;
         }
         if(unit.deliverplan != null) {
