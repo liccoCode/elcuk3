@@ -48,10 +48,12 @@ public class ProductPost extends Post<Product> {
             sbd.append("AND (").append(" p.sku LIKE ?");
             if(this.scope)
                 sbd.append(" OR p.abbreviation LIKE ?").append("OR p.locates LIKE ?")
-                        .append("OR p.sellingPoints LIKE ?").append(" OR s.asin LIKE ?");
+                        .append("OR p.sellingPoints LIKE ?").append(" OR s.asin LIKE ?")
+                        .append(" OR s.aps.title LIKE ? ").append(" OR s.aps.keyFetures LIKE ? ")
+                        .append(" OR s.aps.productDesc LIKE ? ").append(" OR s.aps.searchTerms LIKE ? ");
             sbd.append(" OR a.value LIKE ?").append(" OR s.fnSku LIKE ?").append(")");
             if(this.scope)
-                for(int i = 0; i < 7; i++) params.add(word);
+                for(int i = 0; i < 11; i++) params.add(word);
             else
                 for(int i = 0; i < 3; i++) params.add(word);
         }
