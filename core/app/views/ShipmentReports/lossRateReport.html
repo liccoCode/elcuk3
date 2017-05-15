@@ -76,10 +76,7 @@
             <td>${itm.unit.sid}</td>
             <td>${itm.unit.fba?.shipmentId}</td>
             <td>${itm.unit.fba?.centerId}</td>
-            <td>
-            ${itm.qty - itm.unit.returnPurchaseSample() - itm.unit.fetchCheckTaskQcSample()}
-              (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
-            </td>
+            <td>${itm.qty - itm.unit.returnPurchaseSample()}(${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})</td>
             <td>${itm.recivedQty}</td>
             <td>${itm.adjustQty}</td>
             <td>${itm.showDeliverymentId()}</td>

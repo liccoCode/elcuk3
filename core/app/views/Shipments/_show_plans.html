@@ -160,7 +160,7 @@
         <td><a href="${item.unit?.fba?.fbaLink()}" target="_blank">${item.unit?.fba?.shipmentId}</a></td>
         <td>${item.unit?.fba?.centerId}</td>
         <td>
-        ${item.qty - item.unit.returnPurchaseSample() - item.unit.fetchCheckTaskQcSample()}
+        ${item.qty - item.unit.returnPurchaseSample()}
           (${item.unit?.attrs?.planQty} | ${item.unit?.attrs?.qty})
         </td>
         <td style="#{if item.recivedQty != item.qty || item.changeFromZero()}background:#F2DEDE#{/if}"

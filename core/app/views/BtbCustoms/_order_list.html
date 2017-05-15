@@ -1,0 +1,37 @@
+<table class="table table-bordered table-condensed">
+  <tr>
+    <th>订单号</th>
+    <th>销售日期</th>
+    <th>订单总额</th>
+    <th>运输费用</th>
+    <th>计重</th>
+    <th>运输方式</th>
+    <th>客户/公司名称</th>
+    <th width="100px;">操作</th>
+  </tr>
+#{list items:orderList, as:'b'}
+  <tr>
+    <td style="cursor:pointer;" name="clickTd" data-id="${b.id}">
+      <i class="icon-reorder"></i><a name="orderNoBtn" order_id="${b.id}">${b.orderNo}</a>
+    </td>
+    <td>#{time_tooltip time:b.saleDate/}</td>
+    <td>${b.showTotalCost()}</td>
+    <td>${b.shipCostUnit.symbol()} ${b.shipCost}</td>
+    <td>${b.shipWeightUnit.label()} / ${b.shipWeight}</td>
+    <td>${b.shipWay?.label()}</td>
+    <td>${b.btbCustom?.customName}</td>
+    <td>
+      <a href="@{BtbCustoms.createBtbOrderPage(b.id)}" class="btn btn-mini btn-primary">编辑</a>
+      <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-mini btn-warning">下载PI</a>
+    </td>
+  </tr>
+#{/list}
+#{if p}
+  <tr class="tb_footer">
+    <td colspan="14">
+        #{bootstrap_pager pi:p, url:'' /}
+    </td>
+  </tr>
+#{/if}
+
+</table>

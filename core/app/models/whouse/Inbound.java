@@ -148,6 +148,13 @@ public class Inbound extends GenericModel {
     public String memo;
 
     /**
+     * 公司名称
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
+    /**
      * 是否B2B
      */
     @Transient
@@ -163,6 +170,7 @@ public class Inbound extends GenericModel {
         units.stream().filter(Objects::nonNull).filter(unit -> validIsNotExist(unit.unitId)).forEach(u -> {
             u.inbound = this;
             u.unit = ProcureUnit.findById(u.unitId);
+            this.projectName = User.COR.valueOf(u.unit.projectName);
             u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
             if(this.type == T.Machining) {
                 u.status = InboundUnit.S.Receive;
@@ -174,6 +182,7 @@ public class Inbound extends GenericModel {
             }
             u.save();
         });
+        this.save();
     }
 
     public static boolean validIsNotExist(Long unitId) {

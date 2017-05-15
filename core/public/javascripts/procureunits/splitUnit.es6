@@ -44,7 +44,8 @@ $(() => {
       let sku = $("#select_sku").val();
       $.get("/sellings/findSellingBySkuAndMarket", {
         sku: sku,
-        market: "AMAZON_" + country
+        market: "AMAZON_" + country,
+        id: $("#warehouse_select").val()
       }, function (c) {
         $("#sellingId").val(c);
         if ($("#sellingId").val()) {
@@ -87,7 +88,8 @@ $(() => {
       let country = $("#warehouse_select :selected").text().split('_')[1];
       $.get("/sellings/findSellingBySkuAndMarket", {
         sku: sku,
-        market: "AMAZON_" + country
+        market: "AMAZON_" + country,
+        id: $("#warehouse_select").val()
       }, function (r) {
         $("#sellingId").val(r);
         if (!$("#sellingId").val()) {
@@ -149,22 +151,6 @@ $(() => {
         type: 'error'
       });
       $(this).val(0);
-    }
-  });
-
-  $('input[name="newUnit.isb2b"]').click(function () {
-    if ($(this).prop("checked")) {
-      $('input[name="newUnit.shipType"]').each(function () {
-        if ($(this).val() == 'EXPRESS') {
-          $(this).trigger("click");
-        } else {
-          $(this).hide();
-        }
-      });
-    } else {
-      $('input[name="newUnit.shipType"]').each(function () {
-        $(this).show();
-      });
     }
   });
 

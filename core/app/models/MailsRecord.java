@@ -25,12 +25,12 @@ import java.util.*;
  * User: rose
  * Date: 13-4-2
  * Time: 下午3:16
- * @deprecated
  */
 @Entity
 @DynamicUpdate
 public class MailsRecord extends Model {
 
+    private static final long serialVersionUID = 922525941133922956L;
     /**
      * 邮件名称
      */
@@ -97,14 +97,11 @@ public class MailsRecord extends Model {
      * @return
      */
     @Cached("5mn")
-    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates,
-                                         boolean success, String group) {
+    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates, boolean success,
+                                         String group) {
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to));
-
-
-        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates,
-                success, group);
+        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates, success, group);
         HighChart lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
 
@@ -174,11 +171,8 @@ public class MailsRecord extends Model {
         String cacheKey = Caches.Q.cacheKey(from, to, type, success, group, templates);
         List<MailsRecord> records = Cache.get(cacheKey, List.class);
         if(records != null) return records;
-
         synchronized(MailsRecord.class) {
-
-            StringBuilder querystr = new StringBuilder(
-                    "type=? and createdAt between ? and ? and success=?");
+            StringBuilder querystr = new StringBuilder("type=? and createdAt between ? and ? and success=?");
             List<Object> paras = new ArrayList<>();
             paras.add(type);
             paras.add(from);
@@ -197,8 +191,6 @@ public class MailsRecord extends Model {
                 Cache.add(cacheKey, records);
             }
         }
-
-
         return records;
     }
 

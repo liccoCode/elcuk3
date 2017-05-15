@@ -56,15 +56,12 @@
   <tr>
     <th>B2B选项</th>
     <td colspan="3">
-      <label class="checkbox inline">
-        <input type="checkbox" name="units[0].isb2b" value="true">B2B
-      </label>
-
-      <label class="checkbox inline" style="display:none;">
-        <input type="checkbox" name="units[0].isSelfPick" value="true">客户自提
-      </label>
+      <select name="units[0].projectName">
+          #{list items:models.User.COR, as:'c'}
+            <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
+          #{/list}
+      </select>
     </td>
-
   </tr>
 
   <tr id="btn_tr">
@@ -108,13 +105,11 @@
   <tr>
     <th>B2B选项</th>
     <td colspan="3">
-      <label class="checkbox inline">
-        <input type="checkbox" name="units[<%= num %>].isb2b" value="true">B2B
-      </label>
-
-      <label class="checkbox inline" id="self_pick_label" style="display:none;">
-        <input type="checkbox" name="units[<%= num %>].isSelfPick" value="true">客户自提
-      </label>
+      <select name="units[<%= num %>].projectName">
+      #{list items:models.User.COR, as:'c'}
+        <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
+      #{/list}
+      </select>
     </td>
   </tr>
 </script>

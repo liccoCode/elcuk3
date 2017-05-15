@@ -154,7 +154,31 @@ public class User extends Model {
                 return "EasyAcc";
             }
         },
-        B2B {
+        Reapow {
+            @Override
+            public String label() {
+                return "Reapow";
+            }
+        },
+        Brandworl {
+            @Override
+            public String label() {
+                return "Brandworl";
+            }
+        },
+        OUTXE {
+            @Override
+            public String label() {
+                return "Outxe";
+            }
+        },
+        Redimp {
+            @Override
+            public String label() {
+                return "Redimp";
+            }
+        },
+        MengTop {
             @Override
             public String label() {
                 return "MengTop";

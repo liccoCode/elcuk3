@@ -18,7 +18,6 @@ import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Category;
 import models.product.Product;
-import models.qc.CheckTask;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
@@ -58,6 +57,8 @@ public class ProcureUnits extends Controller {
     @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
+        String brandName = OperatorConfig.getVal("brandname");
+        renderArgs.put("brandName", brandName);
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("logs",
                 ElcukRecord.records(Arrays.asList("procureunit.save", "procureunit.remove", "procureunit.split"), 50));
@@ -84,7 +85,9 @@ public class ProcureUnits extends Controller {
                         "procureunit.delivery", "procureunit.revertdelivery", "procureunit.prepay",
                         "procureunit.tailpay", "procureunit.reworkpay", "procureunit.adjuststock",
                         "refund.confirm", "refund.transfer"), 50);
+        String brandName = OperatorConfig.getVal("brandname");
         renderArgs.put("logs", logs);
+        renderArgs.put("brandName", brandName);
     }
 
     @Check("procures.index")
@@ -168,14 +171,15 @@ public class ProcureUnits extends Controller {
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         if(unit.selling == null) {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
         }
-        render(unit, whouses);
+        List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
+        unit.projectName = Login.current().projectName.name();
+        String brandName = OperatorConfig.getVal("brandname");
+        render(unit, whouses, brandName);
     }
-
 
     /**
      * 某一个 ProcureUnit 交货
@@ -286,7 +290,6 @@ public class ProcureUnits extends Controller {
         }
 
         if(unit.isCheck != 1) unit.isCheck = 0;
-        unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         unit.save();
         //生成质检任务
         //unit.triggerCheck();
@@ -297,7 +300,7 @@ public class ProcureUnits extends Controller {
         }
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
+            List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
             unit.remove();
             render("ProcureUnits/blank.html", unit, whouses);
         }
@@ -344,28 +347,6 @@ public class ProcureUnits extends Controller {
         edit(id);
     }
 
-    /**
-     * @param unitid
-     * @param checkid
-     * @param oldPlanQty
-     * @param unit
-     * @param shipmentId
-     * @param msg
-     */
-    public static void updateprocess(Long unitid, Long checkid, Integer oldPlanQty, ProcureUnit unit,
-                                     String shipmentId, String msg) {
-        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
-        ProcureUnit managedUnit = ProcureUnit.findById(unitid);
-        managedUnit.update(unit, shipmentId, msg);
-        if(Validation.hasErrors()) {
-            flash.error(Validation.errors().toString());
-            unit.id = managedUnit.id;
-            CheckTasks.showactiviti(checkid);
-        }
-        flash.success("成功修改采购计划!!", unitid);
-        CheckTasks.showactiviti(checkid);
-    }
-
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         unit.remove();
@@ -400,7 +381,8 @@ public class ProcureUnits extends Controller {
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         renderArgs.put("whouses", Whouse.findByType(Whouse.T.FBA));
         boolean showNotice = new Date().getTime() >= unit.attrs.planDeliveryDate.getTime();
-        render(unit, newUnit, showNotice, type);
+        String brandName = OperatorConfig.getVal("brandname");
+        render(unit, newUnit, showNotice, type, brandName);
     }
 
     /**
@@ -610,10 +592,7 @@ public class ProcureUnits extends Controller {
             unitIds.add(Long.parseLong(row.get("id").toString()));
         }
         //使用查询出来的采购计划ID去查询 所有未申请返工费用的质检任务(费用需要大于0)
-        List<CheckTask> checks = CheckTask
-                .find("reworkPay = null AND workfee > 0 AND units_id IN " + SqlSelect.inlineParam(unitIds) + "")
-                .fetch();
-        render("ProcureUnits/_reworkpay_modal.html", checks);
+        render("ProcureUnits/_reworkpay_modal.html");
     }
 
     /**
@@ -625,15 +604,8 @@ public class ProcureUnits extends Controller {
     public static void billingReworkPay(Long id, Long applyId, String ids) {
         ProcureUnit unit = ProcureUnit.findById(id);
         try {
-            List<CheckTask> checks = CheckTask.find("id IN " + SqlSelect.inlineParam(ids.split("_")) + "").fetch();
             float amount = 0f;
             PaymentUnit reworkPay = unit.billingReworkPay(amount);
-            for(CheckTask check : checks) {
-                amount += check.workfee;
-                //将PaymentUnit对应到CheckTask
-                check.reworkPay = reworkPay;
-                check.save();
-            }
             //返工费用是需要向工厂收取的费用 所以这里转成负数
             reworkPay.amount = -amount;
             reworkPay.save();
@@ -650,7 +622,8 @@ public class ProcureUnits extends Controller {
 
     public static void editManual(Long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render("ProcureUnits/editManualProcureUnit.html", unit);
+        String brandName = OperatorConfig.getVal("brandname");
+        render("ProcureUnits/editManualProcureUnit.html", unit, brandName);
     }
 
     /**

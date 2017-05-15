@@ -27,6 +27,7 @@ import play.mvc.With;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -89,7 +90,8 @@ public class Deliveryments extends Controller {
             applyMsg = dmt.validDmtIsNeedApply().message;
             deliveryments = dmt.getRelateDelivery();
         }
-        render(dmt, expressid, total, applyMsg, deliveryments);
+        boolean isB2b = Objects.equals(dmt.handler.projectName, User.COR.MengTop);
+        render(dmt, expressid, total, applyMsg, deliveryments, isB2b);
     }
 
     public static void update(Deliveryment dmt) {
@@ -263,7 +265,8 @@ public class Deliveryments extends Controller {
         Deliveryment dmt = new Deliveryment();
         ProcureUnit unit = new ProcureUnit();
         List<ProcureUnit> units = dmt.units;
-        render(dmt, unit, units);
+        String project = Login.current().projectName.name();
+        render(dmt, unit, units, project);
     }
 
     /**
@@ -281,12 +284,12 @@ public class Deliveryments extends Controller {
         dmt.state = Deliveryment.S.PENDING;
         dmt.name = dmt.name.trim();
         dmt.deliveryType = Deliveryment.T.MANUAL;
+        dmt.projectName = Login.current().projectName;
         units.stream().filter(unit -> unit.product != null).forEach(unit -> {
             unit.cooperator = dmt.cooperator;
             unit.handler = Login.current();
             unit.deliveryment = dmt;
             unit.stage = ProcureUnit.STAGE.DELIVERY;
-            unit.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
             unit.validateManual();
             if(Validation.hasErrors()) {
                 render("Deliveryments/manual.html", dmt, units);

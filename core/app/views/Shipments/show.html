@@ -7,6 +7,7 @@
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
     #{script 'shipments/show.coffee'/}
+    #{script 'shipments/show.es6'/}
     #{script 'shipments/paymentunits.coffee'/}
 #{/set}
 <style>
@@ -30,8 +31,8 @@
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
   <div class="row-fluid">
     <div class="span12">
-    #{if ship.projectName == models.User.COR.B2B}
-        #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    #{if ship.projectName == models.User.COR.MengTop}
+        #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers, customs:customs/}
     #{/if}
       #{else }
         #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}

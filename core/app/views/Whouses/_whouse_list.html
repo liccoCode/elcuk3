@@ -1,0 +1,51 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>#</th>
+    <th>Name</th>
+    <th>Market</th>
+    <th>City</th>
+    <th>Province</th>
+    <th>PostCode</th>
+    <th>Country</th>
+    <th>Type</th>
+    <th>Ship Type</th>
+    <th>Account</th>
+    <th width="120px;">Action</th>
+  </tr>
+#{list items:whs, as:'wh'}
+  <tr>
+    <td>${wh.id}</td>
+    <td data-toggle="toggle" data-target="#whouse_${wh.id}"><i class="icon-reorder"></i> ${wh.name}</td>
+    <td>${wh.market?.name()}</td>
+    <td>${wh.city}</td>
+    <td>${wh.province}</td>
+    <td>${wh.postalCode}</td>
+    <td>${wh.country}</td>
+    <td>${wh.type}</td>
+    <td>
+        #{if wh.isAIR}<span style="color:#49A4C6">空运</span>#{/if}
+        #{if wh.isSEA}<span style="color:#C09853">海运</span>#{/if}
+        #{if wh.isEXPRESS}<span style="color:#468847">快递</span>#{/if}
+    </td>
+    <td>${wh.account?.prettyName()}</td>
+    <td>
+      <a href="@{Whouses.edit()}/${wh.id}" class="btn btn-mini btn-warning">Update</a>
+      <a href="@{Whouses.del(wh.id)}" class="btn btn-mini btn-danger">DEL</a>
+    </td>
+  </tr>
+  <tr id="whouse_${wh.id}" style="display:none;">
+    <td colspan="10">
+      <div class="row-fluid">
+        <div class="span6" style="display:inline-block;">
+          <h4 class="text-info">Memo:</h4>
+        ${wh.memo}
+        </div>
+        <div class="span6" style="display:inline-block;">
+          <h4>Address</h4>
+        ${wh.address}
+        </div>
+      </div>
+    </td>
+  </tr>
+#{/list}
+</table>

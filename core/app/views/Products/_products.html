@@ -46,10 +46,12 @@
         <td>#{time_tooltip time:prod.marketTime/}</td>
         <td>#{time_tooltip time:prod.delistingTime/}</td>
         <td>
-          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-success" rel="tooltip" title="同步">
+          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-success" rel="tooltip" title="同步"
+             data-sku="${prod.sku}">
             <i class="icon-refresh"></i>
           </a>
-          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info" rel="tooltip" title="复制">
+          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info" rel="tooltip" title="复制"
+             data-sku="${prod.sku}" data-family="${prod.family?.family}">
             <i class="icon-copy"></i>
           </a>
             #{power.ck "products.destroy"}

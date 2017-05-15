@@ -5,7 +5,6 @@ import controllers.api.SystemOperation;
 import helper.Crawl;
 import helper.J;
 import helper.Webs;
-import models.Server;
 import models.market.Account;
 import models.market.Listing;
 import models.market.M;
@@ -75,8 +74,6 @@ public class Listings extends Controller {
         validation.required(market);
         validation.required(asin);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market,
-                asin));
         Listing tobeSave = null;
         try {
             tobeSave = Listing.crawl(asin, M.val(market));
@@ -90,7 +87,6 @@ public class Listings extends Controller {
                     new String[]{}));
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
-
         renderJSON(J.G(tobeSave));
     }
 

@@ -15,7 +15,6 @@ import models.finance.PaymentUnit;
 import models.finance.TransportApply;
 import models.whouse.Outbound;
 import models.whouse.Whouse;
-import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
@@ -441,6 +440,31 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String reason = " ";
 
     /**
+     * 收货人
+     */
+    public String receiver;
+
+    /**
+     * 收货人电话
+     */
+    public String receiverPhone;
+
+
+    public String countryCode;
+
+    public String city;
+
+    public String postalCode;
+
+    public String address;
+
+    @ManyToOne
+    public BtbCustom btbCustom;
+
+    @Transient
+    public Long customId;
+
+    /**
      * Shipment 的检查
      */
     public void validate() {
@@ -509,7 +533,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.id = Shipment.id();
         this.dates.planBeginDate = earlyPlanBeginDate;
         this.creater = Login.current();
-        this.projectName = User.COR.B2B;
+        this.projectName = User.COR.MengTop;
         if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
             this.isDedicated = true;
         }
@@ -597,8 +621,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void updateShipment() {
         if(this.creater == null) this.creater = User.current();
         this.save();
-        //更新货代仓库
-        for(ShipItem item : this.items) item.unit.flushTask();
     }
 
     public void setTrackNo(String trackNo) {
@@ -614,7 +636,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public synchronized void addToShip(ProcureUnit unit) {
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
-        if(!unit.whouse.equals(this.whouse))
+        if(!unit.whouse.market.equals(this.whouse.market))
             Validation.addError("", "运输目的地不一样, 无法添加");
         if(unit.shipType != this.type)
             Validation.addError("", "运输方式不一样, 无法添加.");
@@ -624,8 +646,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
-        this.items.add(shipitem.<ShipItem>save());
-        unit.flushTask();//更新相关的质检任务
+        this.items.add(shipitem.save());
     }
 
 
@@ -726,9 +747,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 到港 (运输单抵达港口, 就开始进行清关状态
      */
     public void landPort(Date date) {
-        if(this.type == T.EXPRESS) {
-            Mails.shipment_clearance(this);
-        } else {
+        if(this.type != T.EXPRESS) {
             shouldSomeStateValidate(S.SHIPPING, "到港");
             if(Validation.hasErrors()) return;
             if(date == null) date = new Date();
@@ -1209,7 +1228,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @Override
     public String toString() {
-        return String.format("%s 开往 %s", this.id, this.whouse.name);
+        if(Objects.equals(this.projectName, User.COR.MengTop))
+            return String.format("%s 开往 %s", this.id, this.target);
+        else
+            return String.format("%s 开往 %s", this.id, this.whouse.name);
     }
 
     @Override
@@ -1301,21 +1323,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(Whouse whouse : whs) {
             whouse.checkWhouseNewShipment(planedShipments);
         }
-
-
         // 加载
         StringBuilder where = new StringBuilder("state IN (?,?)");
         List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
-            where.append("AND (whouse.id=? OR whouse.id IS NULL)");
-            params.add(whouseId);
+            Whouse whouse = Whouse.findById(whouseId);
+            where.append("AND (whouse.market=? OR whouse.id IS NULL)");
+            params.add(whouse.market);
         } else {
             where.append("AND whouse.id IS NULL");
         }
         where.append(" AND type =?");
         params.add(shipType);
         where.append(" AND dates.planBeginDate >= ?");
-        params.add(new Date());
+        params.add(Dates.morning(new Date()));
         where.append(" ORDER BY planBeginDate");
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
@@ -1330,8 +1351,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
-        return Shipment.find("planBeginDate>=? AND whouse=? AND type=? ORDER BY planBeginDate",
-                planBeginDate, whouse, shipType).fetch();
+        if(whouse == null)
+            return new ArrayList<>();
+        else
+            return Shipment.find("planBeginDate>=? AND whouse.market=? AND type=? ORDER BY planBeginDate",
+                    planBeginDate, whouse.market, shipType).fetch();
     }
 
     public static List<Shipment> findByState(S... state) {
@@ -1404,29 +1428,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public void sendMsgMail(Date planArrivDate, String username) {
-        String subject = "";
-        String content = "";
-        List<String> mailaddress = new ArrayList<>();
+        if(planArrivDate != null) {
+            String subject = "";
+            String content = "";
+            List<String> mailaddress = new ArrayList<>();
 
-        if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
-            subject = String.format("更改运输单[%s]预计到库时间", this.id);
-            content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:%s/shipment/%s"
-                    , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate),
-                    username, System.getenv(Constant.ROOT_URL), this.id);
-            List<ProcureUnit> punits = ProcureUnit.find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
-                    "  LEFT JOIN " +
-                    " si.shipment " +
-                    " sp where sp.id=?", this.id).fetch();
-            for(ProcureUnit pu : punits) {
-                String email = pu.handler.email;
-                if(StringUtils.isNotBlank(email)) {
-                    if(!mailaddress.contains(email)) {
-                        mailaddress.add(email);
-                        LogUtils.JOBLOG.info("Email:::" + email);
+            if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
+                subject = String.format("更改运输单[%s]预计到库时间", this.id);
+                content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:%s/shipment/%s"
+                        , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate),
+                        username, System.getenv(Constant.ROOT_URL), this.id);
+                List<ProcureUnit> punits = ProcureUnit
+                        .find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
+                                "  LEFT JOIN " +
+                                " si.shipment " +
+                                " sp where sp.id=?", this.id).fetch();
+                for(ProcureUnit pu : punits) {
+                    String email = pu.handler.email;
+                    if(StringUtils.isNotBlank(email)) {
+                        if(!mailaddress.contains(email)) {
+                            mailaddress.add(email);
+                            LogUtils.JOBLOG.info("Email:::" + email);
+                        }
                     }
                 }
+                if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
             }
-            if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
         }
     }
 
@@ -1612,6 +1639,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param newShip
      */
     public void update(Shipment newShip) {
+        if(Objects.equals(this.projectName, User.COR.MengTop)) {
+            this.receiver = newShip.receiver;
+            this.receiverPhone = newShip.receiverPhone;
+            this.countryCode = newShip.countryCode;
+            this.city = newShip.city;
+            this.address = newShip.address;
+            this.postalCode = newShip.postalCode;
+            this.tradeMode = newShip.tradeMode;
+            this.btbCustom = BtbCustom.findById(newShip.customId);
+            this.type = newShip.type;
+        }
+
         this.cooper = newShip.cooper;
         this.whouse = newShip.whouse;
         this.title = newShip.title;
@@ -1619,7 +1658,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.tracknolist = newShip.tracknolist;
         this.trackNo = newShip.trackNo;
         this.memo = newShip.memo;
-        this.dates.planBeginDate = newShip.dates.planBeginDate;
+        if(newShip.dates != null && newShip.dates.planBeginDate != null) {
+            if(this.dates == null) {
+                this.dates = new ShipmentDates();
+            }
+            this.dates.planBeginDate = newShip.dates.planBeginDate;
+        }
         this.internationExpress = newShip.internationExpress;
         this.jobNumber = newShip.jobNumber;
         this.totalWeightShipment = newShip.totalWeightShipment;
@@ -1629,12 +1673,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
 
         //日期发生改变则记录旧的日期
-        if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0 && this.dates.oldPlanArrivDate == null)
-            this.dates.oldPlanArrivDate = this.dates.planArrivDate;
-        this.dates.planArrivDate = newShip.dates.planArrivDate;
+        if(this.dates != null && this.dates.planArrivDate != null) {
+            if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0
+                    && this.dates.oldPlanArrivDate == null)
+                this.dates.oldPlanArrivDate = this.dates.planArrivDate;
+            this.dates.planArrivDate = newShip.dates.planArrivDate;
+        }
 
         //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
-        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) &&
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) && this.dates != null &&
                 this.dates.planArrivDateForCountRate != newShip.dates.planArrivDateForCountRate) {
             if(StringUtils.isBlank(newShip.reason)) {
                 //Validation.addError("", "修改约定到货时间必须填写原因!");

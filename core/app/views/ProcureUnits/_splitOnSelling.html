@@ -114,12 +114,15 @@
       <input type="checkbox" name="newUnit.isDedicated" value="true" ${unit.isDedicated ? 'checked':''}> 专线
     </label>
   </td>
-  <th>B2B选项</th>
+  <th>所属公司</th>
   <td>
-    <label class="checkbox inline">
-      <input type="checkbox" name="newUnit.isb2b" value="true" #{if unit.projectName=='B2B'} checked #{/if}>
-      B2B
-    </label>
+    <select name="newUnit.projectName">
+    #{list items:models.User.COR, as:'c'}
+        #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+          <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
+        #{/if}
+    #{/list}
+    </select>
   </td>
 </tr>
 

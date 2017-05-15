@@ -255,7 +255,7 @@ public class AmazonListingReview extends GenericModel {
             Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
         else if(!this.isSelf()) {
             this.isSelf = false;
-            this.comment(String.format("这个 Review 对应的 Listing 非自建."));
+            this.comment("这个 Review 对应的 Listing 非自建.");
         }
         Logger.warn("AmazonListingReview %s save!", this.reviewId);
         return this.save();
