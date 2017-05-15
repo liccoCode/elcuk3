@@ -400,7 +400,7 @@ public class Whouse extends Model {
 
     public static Whouse autoMatching(InboundUnit unit) {
         String country = unit.unit.selling != null ? unit.unit.selling.market.shortHand() : "";
-        country = unit.unit.projectName.equals("B2B") ? "B2B" : country;
+        country = unit.unit.projectName.equals("MengTop") ? "B2B" : country;
         return Whouse.autoMatching(unit.unit.shipType, country, unit.unit.fba);
     }
 

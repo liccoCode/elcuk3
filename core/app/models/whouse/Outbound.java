@@ -223,8 +223,15 @@ public class Outbound extends GenericModel {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         shipments.forEach(shipment -> {
             ProcureUnit first = shipment.items.get(0).unit;
-            String key = String.format("%s_%s_%s_%s_%s", first.projectName, shipment.cooper.name, shipment.whouse.name,
-                    shipment.type.label(), formatter.format(shipment.dates.planBeginDate));
+            String key;
+            if(Objects.equals(shipment.projectName, User.COR.MengTop)) {
+                key = String.format("%s_%s_%s_%s_%s", first.projectName, shipment.cooper.name, shipment.countryCode
+                        , shipment.type.label(), formatter.format(shipment.dates.planBeginDate));
+            } else {
+                key = String.format("%s_%s_%s_%s_%s", first.projectName, shipment.cooper.name, shipment.whouse.name,
+                        shipment.type.label(), formatter.format(shipment.dates.planBeginDate));
+            }
+
             if(map.containsKey(key)) {
                 map.get(key).add(shipment);
             } else {
@@ -235,17 +242,26 @@ public class Outbound extends GenericModel {
         map.keySet().forEach(key -> {
             Outbound out = new Outbound();
             out.init();
-            Shipment shipment = map.get(key).get(0);
-            ProcureUnit first = shipment.items.get(0).unit;
             out.name = key;
-            out.projectName = first.projectName;
+            Shipment shipment = map.get(key).get(0);
             out.shipType = shipment.type;
-            out.type = StockRecord.C.Normal;
-            out.whouse = shipment.whouse;
-            out.targetId = shipment.cooper.id.toString();
-            out.shipmentId = SqlSelect
-                    .inlineParam(map.get(key).stream().map(ship -> ship.id).collect(Collectors.toList()));
-            out.save();
+
+            if(key.split("_")[0].equals(User.COR.MengTop.name())) {
+                out.projectName = User.COR.MengTop.name();
+                out.type = StockRecord.C.B2B;
+                out.shipmentId = SqlSelect
+                        .inlineParam(map.get(key).stream().map(ship -> ship.id).collect(Collectors.toList()));
+                out.save();
+            } else {
+                ProcureUnit first = shipment.items.get(0).unit;
+                out.projectName = first.projectName;
+                out.type = StockRecord.C.Normal;
+                out.whouse = shipment.whouse;
+                out.targetId = shipment.cooper.id.toString();
+                out.shipmentId = SqlSelect
+                        .inlineParam(map.get(key).stream().map(ship -> ship.id).collect(Collectors.toList()));
+                out.save();
+            }
             map.get(key).stream().peek(s -> {
                 s.out = out;
                 s.save();
@@ -330,9 +346,14 @@ public class Outbound extends GenericModel {
     }
 
     public List<ProcureUnit> availableUnits() {
-        return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? " +
-                        "AND outbound.id = null",
-                ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType, this.projectName).fetch();
+        if(Objects.isNull(this.whouse)) {
+            return ProcureUnit.find("stage=? AND shipType=? AND projectName =? AND outbound.id is null",
+                    ProcureUnit.STAGE.IN_STORAGE, this.shipType, this.projectName).fetch();
+        } else {
+            return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? " +
+                            "AND outbound.id = null",
+                    ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType, this.projectName).fetch();
+        }
     }
 
     public void addUnits(List<Long> pids) {

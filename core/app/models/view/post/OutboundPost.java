@@ -10,6 +10,7 @@ import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,13 +21,14 @@ public class OutboundPost extends Post<Outbound> {
 
     private static final Pattern ID = Pattern.compile("^PTC(\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
+    private static final long serialVersionUID = -6309634618116762879L;
     public Outbound.S status;
     public StockRecord.C type;
 
     public String projectName;
     public Shipment.T shipType;
     public String search;
-    public boolean flag = false;
+    public String flag = "Normal";
     public String whichPage;
 
     public OutboundPost() {
@@ -40,7 +42,7 @@ public class OutboundPost extends Post<Outbound> {
 
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o ");
-        if(flag)
+        if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name()))
             sbd.append(" LEFT JOIN o.records u WHERE 1=1");
         else
             sbd.append(" LEFT JOIN o.units u WHERE 1=1");
@@ -56,7 +58,7 @@ public class OutboundPost extends Post<Outbound> {
                 return new F.T2<>(sbd.toString(), params);
             }
             if(isNumForSearch() != null) {
-                if(flag)
+                if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name()))
                     sbd.append(" AND u.unit.id = ? ");
                 else
                     sbd.append(" AND u.id = ? ");
@@ -82,20 +84,28 @@ public class OutboundPost extends Post<Outbound> {
             sbd.append(" AND o.shipType=? ");
             params.add(this.shipType);
         }
-        if(flag) {
-            sbd.append(" AND o.type <> ? ");
-            params.add(StockRecord.C.Normal);
-        } else {
+        if(Objects.equals(flag, StockRecord.C.Normal.name())) {
             sbd.append(" AND o.type = ? ");
             params.add(StockRecord.C.Normal);
+        } else if(Objects.equals(flag, StockRecord.C.B2B.name())) {
+            sbd.append(" AND o.type = ? ");
+            params.add(StockRecord.C.B2B);
+        } else {
+            sbd.append(" AND o.type NOT IN (? , ?) ");
+            params.add(StockRecord.C.Normal);
+            params.add(StockRecord.C.B2B);
         }
-
         sbd.append(" ORDER BY o.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
 
     public List<Outbound> query() {
         this.count = this.count();
+        F.T2<String, List<Object>> params = params();
+        return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+    }
+
+    public List<Outbound> queryForB2B() {
         F.T2<String, List<Object>> params = params();
         return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }

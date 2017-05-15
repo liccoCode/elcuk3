@@ -54,14 +54,17 @@ public class Outbounds extends Controller {
     public static void index(OutboundPost p) {
         if(p == null) p = new OutboundPost();
         List<Outbound> outbounds = p.query();
-        p.flag = true;
+        p.flag = "Other";
         List<Outbound> others = p.query();
-        render(p, outbounds, others);
+        p.flag = "B2B";
+        List<Outbound> b2bOutbounds = p.queryForB2B();
+        render(p, outbounds, others, b2bOutbounds);
     }
 
     public static void edit(String id) {
         Outbound outbound = Outbound.findById(id);
-        render(outbound);
+        String brandName = OperatorConfig.getVal("brandname");
+        render(outbound, brandName);
     }
 
     public static void blank(List<Long> pids) {
@@ -93,7 +96,6 @@ public class Outbounds extends Controller {
     }
 
     public static void update(Outbound outbound) {
-        outbound.projectName = outbound.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
         outbound.save();
         flash.success("更新成功!");
         index(new OutboundPost());
