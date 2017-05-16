@@ -153,11 +153,21 @@ public class User extends Model {
             public String label() {
                 return "EasyAcc";
             }
+
+            @Override
+            public String url() {
+                return "https://e.easya.cc/";
+            }
         },
         Reapow {
             @Override
             public String label() {
                 return "Reapow";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.ecooe.com/";
             }
         },
         Brandworl {
@@ -165,11 +175,21 @@ public class User extends Model {
             public String label() {
                 return "Brandworl";
             }
+
+            @Override
+            public String url() {
+                return "https://e.brandworl.com/";
+            }
         },
         OUTXE {
             @Override
             public String label() {
                 return "Outxe";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.outxe.com/";
             }
         },
         Redimp {
@@ -177,15 +197,26 @@ public class User extends Model {
             public String label() {
                 return "Redimp";
             }
+
+            @Override
+            public String url() {
+                return "https://e.redimp.com/";
+            }
         },
         MengTop {
             @Override
             public String label() {
                 return "MengTop";
             }
+
+            @Override
+            public String url() {
+                return "https://e.easya.cc/";
+            }
         };
 
         public abstract String label();
+        public abstract String url();
     }
 
 
