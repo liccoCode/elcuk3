@@ -153,7 +153,7 @@
             </ul>
           </li>
         #{/power.ck}
-            
+
         #{power.ck 'whouse'}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">仓库模块<b class="caret"></b></a>
@@ -240,7 +240,20 @@
           <li>
             <a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
           </li>
-         *{ <li>
+
+        #{power.ck "project.change"}
+          <select class="inline" style="width:100px;margin-top:6px;" id="changeProject">
+              #{list items:models.User.COR.values(), as:'c'}
+                  #{if c.name() != 'MengTop'}
+                    <option value="${c.url()}" #{if c.name()==models.OperatorConfig.getVal("brandname") }
+                            selected#{/if}>${c.label()}</option>
+                  #{/if}
+              #{/list}
+          </select>
+        #{/power.ck}
+
+
+        *{ <li>
             <a href="@{Activitis.index()}" target="_blank">
               <b id="notifyimg"></b>
               流程(<b id="notifyNumber"></b>)
@@ -250,6 +263,7 @@
             <a class="small" href="javascript:;" id="notification_btn">Notify</a>
           </li>}*
         </ul>
+
       </div>
     </div>
   </div>
