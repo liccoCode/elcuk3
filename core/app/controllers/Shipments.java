@@ -10,6 +10,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.procure.*;
 import models.view.Ret;
+import models.view.post.ProcureUnitShipPost;
 import models.view.post.ShipmentPost;
 import models.whouse.Outbound;
 import models.whouse.Whouse;
@@ -51,6 +52,22 @@ public class Shipments extends Controller {
     @Check("shipments.index")
     public static void index(ShipmentPost p) {
         if(p == null) p = new ShipmentPost();
+        p.pagination = false;
+        List<Shipment> shipments = p.query();
+
+        for(int i = 0; i < shipments.size(); i++) {
+            Shipment ship = shipments.get(i);
+            ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            shipments.set(i, ship);
+        }
+        //Shipment.handleQty1(shipments, null);
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        render(shipments, p);
+    }
+
+    public static void indexB2B(ShipmentPost p) {
+        if(p == null) p = new ShipmentPost();
+        p.projectName = User.COR.MengTop;
         p.pagination = false;
         List<Shipment> shipments = p.query();
 
@@ -125,6 +142,10 @@ public class Shipments extends Controller {
         Shipment shipment;
         if(StringUtils.isNotBlank(shipmentId)) {
             shipment = Shipment.findById(shipmentId);
+            if(!Objects.equals(shipment.projectName, User.COR.MengTop)) {
+                flash.error("非B2B的运输单，不能添加");
+                ShipItems.indexB2B(new ProcureUnitShipPost());
+            }
         } else {
             shipment = new Shipment();
         }

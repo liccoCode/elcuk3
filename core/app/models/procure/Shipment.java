@@ -531,7 +531,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
         ProcureUnit firstProcureUnit = procureUnits.get(0);
         Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
-        this.id = Shipment.id();
+        if(StringUtils.isEmpty(this.id)) {
+            this.id = Shipment.id();
+        }
         this.dates.planBeginDate = earlyPlanBeginDate;
         this.creater = Login.current();
         this.projectName = User.COR.MengTop;
