@@ -16,7 +16,9 @@ import java.util.List;
  * Time: 5:56 PM
  */
 public class ProductPost extends Post<Product> {
-    public String state;
+
+    private static final long serialVersionUID = 9125924809280823169L;
+    public String state = "Active";
 
     public boolean scope = false;
 
