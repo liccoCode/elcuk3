@@ -146,6 +146,11 @@ public class ShipmentPost extends Post<Shipment> {
             params.add(this.cooperId);
         }
 
+        if(this.projectName != null) {
+            sql.append(" AND s.projectName = ?");
+            params.add(this.projectName);
+        }
+
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sql.append(" AND (s.trackNo LIKE ? OR s.jobNumber LIKE ? OR i.unit.sku LIKE ? OR f.shipmentId LIKE ? )");
