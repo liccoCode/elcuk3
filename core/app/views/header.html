@@ -93,12 +93,7 @@
                 #{power.ck "cooperators.index"}
                   <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
                 #{/power.ck}
-                #{power.ck "procures.b2bcustominfoindex"}
-                  <li><a href="@{BtbCustoms.b2bCustomInfoIndex()}">B2B客户基本信息</a></li>
-                #{/power.ck}
-                #{power.ck "procures.btborderindex"}
-                  <li><a href="@{BtbCustoms.btbOrderIndex()}">B2B销售订单信息</a></li>
-                #{/power.ck}
+
                 #{power.ck "procures.datapanel"}
                   <li><a href="@{ProcureUnits.dataPanel()}">日均采购计划</a></li>
                 #{/power.ck}
@@ -106,13 +101,31 @@
           </li>
         #{/power.ck}
 
+        #{power.ck 'b2b'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">B2B模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "procures.b2bcustominfoindex"}
+                  <li><a href="@{BtbCustoms.b2bCustomInfoIndex()}">B2B客户基本信息</a></li>
+                #{/power.ck}
+                #{power.ck "procures.btborderindex"}
+                  <li><a href="@{BtbCustoms.btbOrderIndex()}">B2B销售订单信息</a></li>
+                #{/power.ck}
+                #{power.ck "shipitems.indexb2b"}
+                  <li><a href="@{ShipItems.indexB2B()}">B2B运输</a></li>
+                #{/power.ck}
+                #{power.ck "shipments.indexb2b"}
+                  <li><a href="@{Shipments.index()}">运输单</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+
+        #{/power.ck}
+
         #{power.ck "shipment"}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">物流模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
-                #{power.ck "shipitems.indexb2b"}
-                  <li><a href="@{ShipItems.indexB2B()}">B2B运输</a></li>
-                #{/power.ck}
               <li><a href="@{ShipItems.index()}">快递运输</a></li>
                 #{power.ck "shipments.index"}
                   <li><a href="@{Shipments.index()}">运输单</a></li>

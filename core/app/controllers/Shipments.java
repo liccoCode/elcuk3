@@ -64,6 +64,22 @@ public class Shipments extends Controller {
         render(shipments, p);
     }
 
+    public static void indexB2B(ShipmentPost p) {
+        if(p == null) p = new ShipmentPost();
+        p.projectName = User.COR.MengTop;
+        p.pagination = false;
+        List<Shipment> shipments = p.query();
+
+        for(int i = 0; i < shipments.size(); i++) {
+            Shipment ship = shipments.get(i);
+            ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            shipments.set(i, ship);
+        }
+        //Shipment.handleQty1(shipments, null);
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        render(shipments, p);
+    }
+
     public static void showProcureUnitList(String id) {
         Shipment shipment = Shipment.findById(id);
         List<ShipItem> items = shipment.items;

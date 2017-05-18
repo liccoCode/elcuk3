@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.DBUtils;
 import helper.Dates;
+import models.User;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.procure.iExpress;
@@ -26,6 +27,8 @@ public class ShipmentPost extends Post<Shipment> {
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
     private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
     private static final Pattern DELIVER_ID = Pattern.compile("^DL(\\|\\d{6}\\|\\d+)$");
+
+    public User.COR projectName;
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
