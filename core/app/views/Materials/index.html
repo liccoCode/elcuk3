@@ -1,0 +1,86 @@
+#{extends 'main_full.html' /}
+#{set title:"收货入库列表"  /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{Materials.index()}" method="get" class="search_form" id="search_Form">
+    <div class="row-fluid">
+      <div class="span12">
+        <select name="p.type" class="inline">
+          <option value="">物料类别</option>
+        #{list items:models.material.Material.T, as:'t'}
+          <option #{if p.type==t} selected #{/if} value="${t.name()}">${t.label()}</option>
+        #{/list}
+        </select>
+
+        <div class="input-prepend input-append inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" style="width:220px;" name="p.search" placeholder="收货入库单ID or SKU or 采购计划ID" value="${p.search}">
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+
+        <a class="btn btn-success" href="@{controllers.Materials.blank()}" id="printBtn" target="_blank">
+          <i class="icon-shopping-cart"></i> 新增物料</a>
+      </div>
+    </div>
+  </form>
+
+  <form method="post" id="inboundForm">
+    <div class="row-fluid">
+      <div class="span12">
+        <table class="table table-condensed table-bordered" id="data-table">
+          <tr>
+            <th>物料编码</th>
+            <th>物料名称</th>
+            <th>物料类别</th>
+            <th>包装组编号</th>
+            <th>规格</th>
+            <th width="150px;">工艺</th>
+            <th width="150px;">图号/版本</th>
+            <th width="150px;">最近采购价</th>
+            <th width="150px;">供应商</th>
+            <th width="250px;">操作</th>
+          </tr>
+        #{list items:materials, as:'m'}
+          <tr>
+            <td>${m.code}</td>
+            <td>${m.name}</td>
+            <td>${m.type.label()}</td>
+            <td></td>
+            <td>${m.specification}</td>
+            <td>${m.technology}</td>
+            <td>${m.version}</td>
+            <td></td>
+            <td>${m.cooperator?.name}</td>
+            <td>
+
+            </td>
+          </tr>
+        #{/list}
+          <tr>
+            <td colspan="10">
+            #{if materials.size() == 0}
+              暂时还没有物料信息
+            #{/if}
+            #{else }
+                #{bootstrap_pager pi:p, url:'' /}
+            #{/else}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </form>
+</div>
+
+
