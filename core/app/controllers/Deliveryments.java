@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
@@ -17,6 +18,7 @@ import models.view.highchart.Series;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -73,6 +75,18 @@ public class Deliveryments extends Controller {
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
         render(deliveryments, p, deliverymentIds);
+    }
+
+    public static void indexByCooperId(Long id) {
+        DeliveryPost p = new DeliveryPost();
+        p.cooperId = id;
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        p.from = now.withYear(2011).toDate();
+        p.to = now.toDate();
+        p.dateType = DeliveryPost.DateType.CREATE;
+        List<Deliveryment> deliveryments = p.query();
+        List<Cooperator> suppliers = Cooperator.suppliers();
+        render("Deliveryments/index.html", suppliers, deliveryments, p);
     }
 
     public static void show(String id) {

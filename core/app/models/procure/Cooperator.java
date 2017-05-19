@@ -87,6 +87,10 @@ public class Cooperator extends Model {
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
     public List<Payment> payments = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
+    public List<Shipment> shipments = new ArrayList<>();
+
     /**
      * 全称
      */

@@ -1,5 +1,5 @@
 #{extends 'main_full.html'/}
-#{set title:"Cooperators(${coopers.size()})" /}
+#{set title:"Cooperators(${p.totalCount})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'cooperators/index.es6'/}
@@ -17,13 +17,6 @@
   <form action="@{Cooperators.index()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
-
-        <select name="p.type" class="inline">
-          <option value="">状态</option>
-        #{list items:models.procure.Cooperator.T, as:'t'}
-          <option #{if p.type==t} selected #{/if} value="${t.name()}">${t.to_s()}</option>
-        #{/list}
-        </select>
 
         <div class="input-prepend input-append inline">
           <span class="add-on"><i class="icon-search"></i></span>
@@ -43,6 +36,7 @@
           <th>供应商全称</th>
           <th>代码</th>
           <th>供应商类型</th>
+          <th>订单数</th>
           <th>固定电话</th>
           <th>联系人</th>
           <th>手机</th>
@@ -55,11 +49,22 @@
           <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showCooperItem()}">
             <span><i class="icon-reorder"></i></span>
             <span>${c.fullName}</span>
-            <span class="badge badge-info">${c.cooperItems?.size()}</span>
+            #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+              <span class="badge badge-info">${c.cooperItems?.size()}</span>
+            #{/if}
           </td>
           <td>${c.name}</td>
           <td>${c.type?.to_s()}</td>
-          <td></td>
+          <td>
+              #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+                <a href="@{Deliveryments.indexByCooperId(c.id)}" target="_blank">${c.deliveryments?.size()}</a>
+              #{/if}
+              #{else }
+                <a href="@{controllers.Shipments.indexByCooperId(c.id)}" target="_blank" rel="tooltip" title="涉及物流单">
+                ${c.shipments?.size()}</a>
+              #{/else}
+          </td>
+          <td>${c.tel}</td>
           <td>${c.contacter}</td>
           <td>${c.phone}</td>
           <td>${c.creator?.username}</td>
@@ -68,7 +73,7 @@
         </tr>
       #{/list}
         <tr>
-          <td colspan="7">
+          <td colspan="10">
           #{if coopers.size() == 0}
             暂时还没有入库记录
           #{/if}

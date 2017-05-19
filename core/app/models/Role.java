@@ -5,14 +5,12 @@ import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -160,4 +158,10 @@ public class Role extends GenericModel {
         Role role = Role.find("roleName = ? ", "跨部门查看数据权限").first();
         return role != null && role.existRole(user);
     }
+
+    public static boolean isShipmentRole(User user) {
+        List<Role> roles = Role.find("roleName in "+ SqlSelect.inlineParam(Arrays.asList("物流专员", "物流主管"))).fetch();
+        return roles != null && user.roles.stream().anyMatch(role -> roles.contains(role));
+    }
+    
 }

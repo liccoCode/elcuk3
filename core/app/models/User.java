@@ -657,5 +657,13 @@ public class User extends Model {
         return Role.isHaveCrossCop(this);
     }
 
+    /**
+     * 是否物流人员
+     *
+     * @return
+     */
+    public boolean isShipmentRole() {
+        return Role.isShipmentRole(this);
+    }
 
 }

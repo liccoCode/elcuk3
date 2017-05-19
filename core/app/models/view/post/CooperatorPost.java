@@ -1,6 +1,7 @@
 package models.view.post;
 
 import controllers.Login;
+import models.User;
 import models.procure.Cooperator;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
@@ -25,10 +26,6 @@ public class CooperatorPost extends Post<Cooperator> {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT DISTINCT c FROM Cooperator c LEFT JOIN c.cooperItems i ");
         sql.append("WHERE  1 = 1 ");
-        if(type != null) {
-            sql.append(" AND c.type = ? ");
-            params.add(type);
-        }
 
         if(StringUtils.isNotEmpty(search)) {
             sql.append(" AND (i.product.sku like ? OR c.fullName like ? OR c.name like ? )");
@@ -37,11 +34,21 @@ public class CooperatorPost extends Post<Cooperator> {
             params.add("%" + search + "%");
         }
 
-        if(!Login.current().isHaveCrossCop()) {
+        User user = Login.current();
+
+        if(!user.isHaveCrossCop()) {
+            if(user.isShipmentRole()) {
+                sql.append(" AND c.type = ? ");
+                params.add(Cooperator.T.SHIPPER);
+            } else {
+                sql.append(" AND c.type = ? ");
+                params.add(Cooperator.T.SUPPLIER);
+            }
             sql.append(" AND c.projectName = ? ");
-            params.add(Login.current().projectName);
-        }
-        sql.append(" ORDER BY c.id DESC ");
+            params.add(user.projectName);
+        } 
+
+        sql.append(" ORDER BY c.name ASC ");
         return new F.T2<>(sql.toString(), params);
     }
 
