@@ -1,6 +1,8 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
+import models.User;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
 import models.product.Product;
@@ -16,6 +18,7 @@ import javax.persistence.*;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -83,6 +86,10 @@ public class Cooperator extends Model {
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
     public List<Payment> payments = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
+    public List<Shipment> shipments = new ArrayList<>();
 
     /**
      * 全称
@@ -224,6 +231,16 @@ public class Cooperator extends Model {
     @Lob
     public String instructions = " ";
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
+    @OneToOne
+    public User creator;
+
+    public Date createDate;
+
+
     /**
      * 运输商的仓库
      */
@@ -233,6 +250,9 @@ public class Cooperator extends Model {
     public Cooperator checkAndUpdate() {
         this.check();
         if(Validation.hasErrors()) return null;
+        this.projectName = Login.current().projectName;
+        this.creator = Login.current();
+        this.createDate = new Date();
         return this.save();
     }
 

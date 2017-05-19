@@ -96,8 +96,7 @@
         <tr>
           <td>
               #{if dmt.apply == null}
-                <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''}
-                       name="deliverymentIds" value="${dmt.id}">
+                <input type="checkbox" ${dmt.id in deliverymentIds?'checked':''} name="deliverymentIds" value="${dmt.id}">
               #{/if}
           </td>
           <td>

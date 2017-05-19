@@ -48,6 +48,7 @@ public class Products extends Controller {
 
     @Before(only = {"index"})
     public static void setIndexLog() {
+        renderArgs.put("categoryIds", Category.categoryIds());
         renderArgs.put("records", ElcukRecord.fid("product.destroy").<ElcukRecord>fetch(50));
     }
 
