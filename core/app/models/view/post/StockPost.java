@@ -85,13 +85,13 @@ public class StockPost extends Post<ProcureUnit> {
     public List<ProcureUnit> queryUnQualifiedIndex() {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
-        String sql = params._1 + " ORDER BY id DESC";
+        String sql = params._1 + " ORDER BY p.id DESC";
         return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureUnit.count(params._1, params._2.toArray());
+        return this.count;
     }
 
     @Override
