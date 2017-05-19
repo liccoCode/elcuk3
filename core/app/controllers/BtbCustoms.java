@@ -27,7 +27,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class BtbCustoms extends Controller {
 
-    @Before(only = {"btbOrderIndex", "createBtbOrderPage"})
+    @Before(only = {"btbOrderIndex", "createBtbOrderPage", "createBtbOrderByCustom"})
     public static void setUpShowPage() {
         List<BtbCustom> customList = BtbCustom.findAll();
         renderArgs.put("customList", customList);
@@ -86,6 +86,13 @@ public class BtbCustoms extends Controller {
             b = BtbCustom.findById(id);
         }
         render(b);
+    }
+
+    public static void createBtbOrderByCustom(Long id) {
+        BtbCustom custom = BtbCustom.findById(id);
+        BtbOrder b = new BtbOrder();
+        b.btbCustom = custom;
+        render("BtbCustoms/createBtbOrderPage.html", b, custom);
     }
 
     public static void createBtbOrderPage(Long id) {

@@ -91,7 +91,7 @@ public class StockPost extends Post<ProcureUnit> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return this.count;
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
