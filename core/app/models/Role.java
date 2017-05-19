@@ -153,7 +153,11 @@ public class Role extends GenericModel {
 
     public static boolean isPm(User user) {
         Role role = Role.find("roleName=?", "PM角色").first();
-        if(role == null) return false;
-        return role.existRole(user);
+        return role != null && role.existRole(user);
+    }
+
+    public static boolean isHaveCrossCop(User user) {
+        Role role = Role.find("roleName = ? ", "跨部门查看数据权限").first();
+        return role != null && role.existRole(user);
     }
 }

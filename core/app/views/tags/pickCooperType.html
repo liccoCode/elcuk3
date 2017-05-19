@@ -3,7 +3,7 @@
 _name: form 表单提交的 name 属性
 _c : 选中的 Cooperator 的类型
 }*
-<select name="${_name}" size="1">
+<select name="${_name}">
 #{list items:models.procure.Cooperator.T.values(), as:'t'}
     <option ${t == _c ? 'selected' : ''} value="${t}">${t}</option>
 #{/list}
