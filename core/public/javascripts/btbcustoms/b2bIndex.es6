@@ -5,7 +5,7 @@ $(() => {
     if ($("#div" + id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      let html = "<tr style='background-color:#F2F2F2'><td colspan='11'><hr>";
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='9'>";
       html += "<div id='div" + id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + id).load("/BtbCustoms/showBtbOrderList", {id: id});
