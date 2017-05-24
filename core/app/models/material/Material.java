@@ -84,17 +84,8 @@ public class Material extends Model {
      */
     public String version;
 
-    /**
-     * 供应商
-     */
-    @ManyToOne
-    public Cooperator cooperator;
-
     @ManyToMany(mappedBy = "materials", cascade = CascadeType.PERSIST)
     public List<MaterialBom> boms = new ArrayList<>();
-
-    @Transient
-    public Long cooperatorId;
 
     /**
      * 创建人
@@ -108,6 +99,11 @@ public class Material extends Model {
      * 最近更新时间
      */
     public Date updateDate;
+
+    /**
+     * 是否删除
+     */
+    public boolean isDel = false;
 
 
 }

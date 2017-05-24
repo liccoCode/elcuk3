@@ -1,6 +1,7 @@
 package models.view.post;
 
 import models.material.Material;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -14,14 +15,26 @@ import java.util.List;
  */
 public class MaterialPost extends Post<Material> {
 
-
+    private static final long serialVersionUID = -7336544616312488827L;
     public Material.T type;
 
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT m FROM Material m ");
+        StringBuilder sbd = new StringBuilder("SELECT m FROM Material m WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
+        if(type != null) {
+            sbd.append(" AND m.type = ? ");
+            params.add(type);
+        }
+
+        if(StringUtils.isNotBlank(this.word())) {
+            sbd.append(" AND (m.code LIKE ? ");
+            sbd.append(" OR m.name LIKE ? OR m.specification LIKE ? ");
+            sbd.append(" OR m.texture LIKE ? OR m.technology LIKE ? OR m.version LIKE ? )");
+            for(int i = 0; i < 6; i++) params.add(this.word());
+
+        }
 
         return new F.T2<>(sbd.toString(), params);
     }

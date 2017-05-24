@@ -2,6 +2,7 @@
 #{set title:"包装组列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
+    #{script 'materials/indexBom.es6'/}
 #{/set}
 <style>
   .table td{
@@ -12,7 +13,7 @@
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{Materials.index()}" method="get" class="search_form" id="search_Form">
+  <form action="@{Materials.indexBom()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <select name="p.type" class="inline">
@@ -29,8 +30,7 @@
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
 
-        <a class="btn btn-success" href="@{controllers.Materials.blankBom()}" id="printBtn" target="_blank">
-          <i class="icon-shopping-cart"></i> 新增包装BOM</a>
+        <input type="button" class="btn btn-success" id="addBom" value="新增包装BOM">
       </div>
     </div>
   </form>
@@ -40,11 +40,11 @@
       <div class="span12">
         <table class="table table-condensed table-bordered" id="data-table">
           <tr>
-            <th>包装组编号</th>
-            <th>名称</th>
-            <th>PM</th>
-            <th>状态</th>
-            <th>更新时间</th>
+            <th width="15%;">包装组编号</th>
+            <th width="30%;">名称</th>
+            <th width="100px;">PM</th>
+            <th width="15%;">状态</th>
+            <th width="10%;">更新时间</th>
             <th>操作</th>
           </tr>
         #{list items:boms, as:'m'}
@@ -54,9 +54,9 @@
             <td>${m.creator?.username}</td>
             <td>
               <select>
-                #{list items:models.material.MaterialBom.S, as:'s'}
-                  <option value="${s.name()}">${s.label()}</option>
-                #{/list}
+                  #{list items:models.material.MaterialBom.S, as:'s'}
+                    <option value="${s.name()}">${s.label()}</option>
+                  #{/list}
               </select>
             </td>
             <td>#{time_tooltip time:m.updateDate/}</td>
@@ -81,4 +81,48 @@
   </form>
 </div>
 
+
+<div id="bom_modal" class="modal hide fade">
+  <div class="modal-header">
+    <h4>包装信息</h4>
+  </div>
+  <div class="modal-body" style="height:300px;">
+    <form action="@{Materials.createBom()}" method="post" id="create_form">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>包装组编号</th>
+          <td><input type="text" name="b.number" required></td>
+        </tr>
+        <tr>
+          <th>名称</th>
+          <td><input type="text" name="b.name" required></td>
+        </tr>
+        <tr>
+          <th>PM</th>
+          <td>
+            <select name="b.pm.id" class="selectize" style="width:220px;">
+            #{list items:users, as:'u'}
+              <option value="${u.id}" ${u.username==currUser.username?'selected':''}>${u.username}</option>
+            #{/list}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>状态</th>
+          <td>
+            <select name="b.status">
+            #{list items:models.material.MaterialBom.S, as:'s'}
+              <option value="${s.name()}">${s.label()}</option>
+            #{/list}
+            </select>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <button class="btn btn-primary" id="submitCreateBtn">提交</button>
+  </div>
+</div>
 

@@ -1,5 +1,6 @@
 package controllers;
 
+import models.User;
 import models.material.Material;
 import models.material.MaterialBom;
 import models.procure.Cooperator;
@@ -8,6 +9,7 @@ import models.view.post.MaterialPost;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,15 +39,43 @@ public class Materials extends Controller {
         index(new MaterialPost());
     }
 
+    public static void edit(Long id) {
+        Material material = Material.findById(id);
+        render();
+    }
+
+    public static void deleteMaterial(Long id) {
+        Material material = Material.findById(id);
+        material.isDel = true;
+        material.updateDate = new Date();
+        material.save();
+        flash.success(String.format("删除 %s 成功！", material.name));
+        index(new MaterialPost());
+    }
+
     public static void indexBom(MaterialBomPost p) {
         if(p == null) p = new MaterialBomPost();
         List<MaterialBom> boms = p.query();
-        render(p, boms);
+        List<User> users = User.find("closed=?", false).fetch();
+        User currUser = Login.current();
+        render(p, boms, users, currUser);
     }
 
-    public static void blankBom() {
+    public static void createBom(MaterialBom b) {
 
-       render();
+        b.creator = Login.current();
+        b.createDate = new Date();
+        b.updateDate = new Date();
+
+        b.save();
+
+        indexBom(new MaterialBomPost());
+    }
+
+    public static void showMaterials(String search) {
+
+        List<Material> materials = Material.find("").fetch();
+
     }
 
 

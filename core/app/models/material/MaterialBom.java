@@ -21,6 +21,8 @@ import java.util.List;
 @DynamicUpdate
 public class MaterialBom extends Model {
 
+    private static final long serialVersionUID = -4405409676464248103L;
+    
     public String number;
 
     public String name;
@@ -69,6 +71,10 @@ public class MaterialBom extends Model {
     @Enumerated(EnumType.STRING)
     public S status;
 
+    @OneToOne
+    public User pm;
+
+    @OneToOne
     public User creator;
 
     public Date createDate;
