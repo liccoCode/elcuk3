@@ -246,7 +246,9 @@ public class TimelineEventSource {
             String addTitle = "";
             if(this.unit.lostQty() > 0)
                 addTitle = "(丢失 " + this.unit.lostQty() + ")";
-            if(this.unit.shipItems.size() > 0 && this.unit.shipItems.get(0).shipment.dates.beginDate != null
+            if(this.unit.shipItems.size() > 0 && this.unit.shipItems.get(0) != null
+                    && this.unit.shipItems.get(0).shipment != null
+                    && this.unit.shipItems.get(0).shipment.dates.beginDate != null
                     && this.unit.attrs.planShipDate.before(this.unit.shipItems.get(0).shipment.dates.beginDate))
                 addTitle += "(超时) ";
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
