@@ -256,10 +256,8 @@
             <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
               #{power.ck "procures.dosplitunit"}
                   #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
-                      #{if !unit.selling}
                         <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-small" rel="tooltip"
-                           title="如样品，试用等操作">SKU分拆</a>
-                      #{/if}
+                           title="如B2B拆单，样品，试用等操作">SKU分拆</a>
                     <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
                     ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
                   #{/if}
