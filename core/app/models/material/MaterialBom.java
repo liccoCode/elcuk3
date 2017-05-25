@@ -80,6 +80,8 @@ public class MaterialBom extends Model {
     public Date createDate;
 
     public Date updateDate;
+    
+    public boolean isDel = false;
 
-
+    public String memo;
 }

@@ -2432,21 +2432,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public String showInboundIds() {
         List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
-        String ids = "";
+        StringBuilder ids = new StringBuilder();
         for(InboundUnit unit : list) {
-            ids += unit.inbound.id + ",";
+            ids.append(unit.inbound.id).append(",");
         }
-        return ids;
+        return ids.toString();
     }
 
 
     public String showInboundUnitIds() {
         List<InboundUnit> list = InboundUnit.find("unit.id=?", this.id).fetch();
-        String ids = "";
+        StringBuilder ids = new StringBuilder();
         for(InboundUnit unit : list) {
-            ids += unit.id + ",";
+            ids.append(unit.id).append(",");
         }
-        return ids;
+        return ids.toString();
     }
 
     /* 加载出 CheckTaskDTO 对象

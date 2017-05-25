@@ -41,7 +41,12 @@ public class Materials extends Controller {
 
     public static void edit(Long id) {
         Material material = Material.findById(id);
-        render();
+        render(material);
+    }
+
+    public static void update(Material m) {
+        m.save();
+        edit(m.id);
     }
 
     public static void deleteMaterial(Long id) {
@@ -51,6 +56,15 @@ public class Materials extends Controller {
         material.save();
         flash.success(String.format("删除 %s 成功！", material.name));
         index(new MaterialPost());
+    }
+
+    public static void deleteMaterialBom(Long id) {
+        MaterialBom bom = MaterialBom.findById(id);
+        bom.isDel = true;
+        bom.updateDate = new Date();
+        bom.save();
+        flash.success(String.format("删除 %s 成功！", bom.name));
+        indexBom(new MaterialBomPost());
     }
 
     public static void indexBom(MaterialBomPost p) {

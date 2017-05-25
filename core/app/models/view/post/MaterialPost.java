@@ -21,21 +21,19 @@ public class MaterialPost extends Post<Material> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT m FROM Material m WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
+        StringBuilder sbd = new StringBuilder("SELECT m FROM Material m WHERE isDel=? ");
+        params.add(false);
         if(type != null) {
             sbd.append(" AND m.type = ? ");
             params.add(type);
         }
-
-        if(StringUtils.isNotBlank(this.word())) {
+        if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND (m.code LIKE ? ");
             sbd.append(" OR m.name LIKE ? OR m.specification LIKE ? ");
             sbd.append(" OR m.texture LIKE ? OR m.technology LIKE ? OR m.version LIKE ? )");
             for(int i = 0; i < 6; i++) params.add(this.word());
-
         }
-
         return new F.T2<>(sbd.toString(), params);
     }
 

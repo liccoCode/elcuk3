@@ -105,5 +105,7 @@ public class Material extends Model {
      */
     public boolean isDel = false;
 
+    public String memo;
+
 
 }
