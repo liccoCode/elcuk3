@@ -16,7 +16,7 @@
     #{/error_row}
 #{/if}
 
-#{if unit.parent}
+#{if unit.parent && type}
     #{danger_row  title:'分拆注意事项'}
     <ul>
       <li>改采购计划已经是子采购计划，父节点为 <a href="@{ProcureUnits.detail(unit.parent.id)}#${unit.id}">${unit.parent.id}</a></li>

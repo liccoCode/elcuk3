@@ -801,7 +801,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         /**
          * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
          */
-        newUnit.parent = this;
+        newUnit.parent = this.parent != null ? this.parent : this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
@@ -912,7 +912,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.fba.updateFBAShipment(null);
         // 原采购计划数量变更
         this.save();
-        newUnit.parent = this;
+        newUnit.parent = this.parent != null ? this.parent : this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
