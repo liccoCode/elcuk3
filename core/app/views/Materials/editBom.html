@@ -1,0 +1,102 @@
+#{extends 'main.html' /}
+#{set title:'编辑物料' /}
+#{set 'moreScripts'}
+    #{script 'materials/editBom.es6'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Materials.updateBom(), method:'POST'}
+    #{info_row title: '编辑物料'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>包装组编号<span style="color:red">*</span></th>
+        <td>
+          <input type="text" name="bom.number" required autocomplete="off" value="${bom.number}">
+          <input type="hidden" name="bom.id" value="${bom.id}">
+        </td>
+        <th>名称<span style="color:red">*</span></th>
+        <td style="width: 40%;"><input type="text" name="bom.name" value="${bom.name}" required></td>
+      </tr>
+      <tr>
+        <th>状态<span style="color:red">*</span></th>
+        <td>
+          <select name="bom.status" required>
+              #{list items:models.material.MaterialBom.S, as:'s'}
+                <option value="${s.name()}" ${s==bom.status?'selected':''}>${s.label()}</option>
+              #{/list}
+          </select>
+        </td>
+        <th>PM</th>
+        <td>
+          <select name="bom.pm.id" class="selectize" style="width:220px;">
+              #{list items:users, as:'u'}
+                <option value="${u.id}" ${u.id==bom.pm?.id?'selected':''}>${u.username}</option>
+              #{/list}
+          </select>
+        </td>
+
+      </tr>
+
+      <tr>
+        <td colspan="4">
+          <input type="hidden" name="record.origin" value="">
+          <input type="hidden" name="record.state" value="">
+          <button class="btn btn-primary" name="create_record">保存</button>
+          <a href="@{Materials.indexBom()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+#{/form}
+
+<div class="row-fluid">
+  <div class="input-append">
+    <input type="text" name="quickSearch" data-url="@{Materials.sameMaterial()}" placeholder="采购计划ID"
+           id="quickSearchInput">
+    <input type="hidden" name="refundId" value="${bom.id}"/>
+    <input type="button" class="btn btn-warning" rel="tooltip" id="quickAddByEdit" title="输入采购ID，可以快速添加采购计划"
+           value="确定添加" data-url="@{Materials.quickAddByMaterialName()}" data-id="${bom.id}">
+  </div>
+</div>
+
+
+#{info_row title: '包含物料'/}
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>物料类别</th>
+    <th>规格</th>
+    <th width="150px;">工艺</th>
+    <th width="150px;">图号/版本</th>
+    <th width="150px;">最近采购价</th>
+    <th>备注</th>
+    <th width="100px;">操作</th>
+  </tr>
+#{list items:bom.materials, as:'m'}
+  <tr>
+    <td>${m.code}</td>
+    <td>${m.name}</td>
+    <td>${m.type.label()}</td>
+    <td>${m.specification}</td>
+    <td>${m.technology}</td>
+    <td>${m.version}</td>
+    <td></td>
+    <td>${m.memo}</td>
+    <td>
+      <a href="@{Materials.deleteRelationForBom(bom.id, m.id)}" class="btn btn-mini btn-danger">解除关系</a>
+    </td>
+  </tr>
+#{/list}
+</table>
+
