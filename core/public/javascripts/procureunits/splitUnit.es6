@@ -133,8 +133,16 @@ $(() => {
   $('#box_num').change(function () {
     let boxSize = $("#size_of_box").val();
     let boxNum = $("#box_num").val();
-    $("#planQty").val(boxSize * boxNum);
-    showBoxInfo();
+    if (boxSize * boxNum > $("#planQty").data('max')) {
+      noty({
+        text: "分拆数量不能大于" + $("#planQty").data('max'),
+        type: 'error'
+      });
+      $("#planQty").val(0);
+    } else {
+      $("#planQty").val(boxSize * boxNum);
+      showBoxInfo();
+    }
   });
 
   $("#planQty").change(function () {
