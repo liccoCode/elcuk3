@@ -133,7 +133,10 @@ public class Cooperators extends Controller {
         }
         copItem.checkAndUpdate();
         flash.success("CooperItem %s, %s 修改成功", copItem.id, copItem.sku);
-        redirect("/cooperators/index#" + copItem.cooperator.id);
+        CooperatorPost p = new CooperatorPost();
+        p.search = copItem.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        render("/Cooperators/index.html", p, coopers);
     }
 
     public static void removeCooperItem(CooperItem copItem) {
