@@ -50,6 +50,7 @@ import java.util.*;
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
+    private static final long serialVersionUID = -608639102102679863L;
 
     public Shipment() {
         this.createDate = new Date();
@@ -74,7 +75,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // FBA 不做处理
         this.type = shipment.type;
         this.whouse = shipment.whouse;
-        // TODO effect: source 与 target 可以删除.
         this.source = shipment.source;
         this.target = shipment.target;
     }
@@ -611,10 +611,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
 
-        this.items.forEach(itm -> {
-            itm.shipment = null;
-            itm.save();
-        });
+        this.items.forEach(GenericModel::delete);
         this.state = S.CANCEL;
         this.save();
     }
